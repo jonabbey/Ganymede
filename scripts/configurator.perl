@@ -1,10 +1,11 @@
 #!/opt/bin/perl5
 #
 # This script is designed to walk through the ganymede package
-# and make all the build scripts.
+# and make all the build scripts.  It is run by the configure
+# script in the root of the ganymede distribution.
 #
-# $Revision: 1.2 $
-# $Date: 1999/01/15 02:50:10 $
+# $Revision: 1.3 $
+# $Date: 1999/01/15 21:41:48 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -98,6 +99,7 @@ sub write_config {
 
 COMPNAME="$name"
 CLASSDIR=$rootdir/src/classes
+JAVADIR=$javadir
 JAVAC=$javadir/javac
 
 ENDCONFIG
@@ -166,6 +168,35 @@ ENDMAKEFILE
     close(MAKEFILE);
 }
 
+#########################################################################
+#
+#                                                           write_rebuild
+#
+# input: $dir - absolute pathname directory to write rebuild script into.
+#        $classdir - directory path to final location of classes.  Corresponds
+#        to package name of classes to be rebuilt.
+#
+#########################################################################
+
+sub write_rebuild {
+
+    my ($dir,$classtarget) = @_;
+
+    open(REBUILDIN, "<$rootdir/scripts/rebuild.in") || die ("Can't read $rootdir/scripts/rebuild.in");
+    open(REBUILDOUT, ">$dir/rebuild") || die("Can't create the $dir/rebuild");
+
+    while (<REBUILDIN>){
+	s/\/opt\/bin\/perl5/$perlname/;
+	s/MYTARGETCLASSDIR/$classtarget/;
+	print REBUILDOUT $_;
+    }
+
+    close(REBUILDOUT);
+    close(REBUILDIN);
+
+    chmod 0755, "$dir/rebuild";
+}
+
 #
 # Let's do it, then.
 #
@@ -176,38 +207,41 @@ $javadir = $ENV{GJAVA};
 
 print "Hi, I'm your perl friend.  My perl is $perlname, my root is $rootdir\n";
 
-write_config("$rootdir/src/Util", "Ganymede Utility Classes");
-write_config("$rootdir/src/JCalendar", "Ganymede Calendar Classes");
-write_config("$rootdir/src/JDialog", "Ganymede Dialog Classes");
-write_config("$rootdir/src/JTable", "Ganymede Table Classes");
-write_config("$rootdir/src/JTree", "Ganymede Tree Classes");
+@configs=("$rootdir/src/Util", "Ganymede Utility Classes",
+	  "$rootdir/src/JCalendar", "Ganymede Calendar Classes",
+	  "$rootdir/src/JDialog", "Ganymede Dialog Classes",
+	  "$rootdir/src/JTable", "Ganymede Table Classes",
+	  "$rootdir/src/JTree", "Ganymede Tree Classes",
+	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes",
+	  "$rootdir/src/server", "Ganymede Server Classes",
+	  "$rootdir/src/client", "Ganymede Client Classes",
+	  "$rootdir/src/schemas/bsd", "BSD Schema Classes",
+	  "$rootdir/src/schemas/gash", "GASH Schema Classes",
+	  "$rootdir/src/schemas/gasharl", "GASHARL Schema Classes",
+	  "$rootdir/src/schemas/linux", "Linux Schema Classes",
+	  "$rootdir/src/schemas/nisonly", "NIS Schema Classes",
+	  "$rootdir/src/schemas/ganymede.old", "Old Ganymede Schema Classes");
+
+while ($#configs) {
+    write_config(shift @configs, shift @configs);
+}
+
+@rebuilds=("$rootdir/src/server", "arlut/csd/ganymede",
+	   "$rootdir/src/client", "arlut/csd/ganymede/client",
+	   "$rootdir/src/schemas/bsd/custom_src", "arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/gash/custom_src", "arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/gasharl/custom_src", "arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/linux/custom_src", "arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/nisonly/custom_src", "arlut/csd/ganymede/custom",
+	   "$rootdir/src/schemas/ganymede.old/custom_src", "arlut/csd/ganymede/custom");
+
+while ($#rebuilds) {
+    write_rebuild(shift @rebuilds, shift @rebuilds);
+}
+
 
 print "Config file made.\n"; 
 
 write_makefile("$rootdir/src");
 
 exit;
-
-# @templates=("src/JCalendar/build.in",
-# 	    "src/JDataComponent/build.in",
-# 	    "src/JDialog/build.in",
-# 	    "src/JTable/build.in",
-# 	    "src/JTree/build.in",
-# 	    "src/Util/build.in",
-# 	    "src/client/build.in",
-# 	    "src/client/rebuild.in",
-# 	    "src/clientBase/build.in",
-# 	    "src/server/build.in",
-# 	    "src/server/rebuild.in");
-
-# @configfiles=("
-# 	"src/schemas/bsd/custom_src/build.in",
-# 	"src/schemas/bsd/loader/source/build.in",
-# 	"src/schemas/gash/custom_src/build.in",
-# 	"src/schemas/gash/loader/source/build.in",
-# 	"src/schemas/gasharl/custom_src/build.in",
-# 	"src/schemas/gasharl/loader/source/build.in",
-# 	"src/schemas/linux/custom_src/build.in",
-# 	"src/schemas/linux/loader/source/build.in",
-# 	"src/schemas/nisonly/custom_src/build.in",
-# 	"src/schemas/nisonly/loader/source/build.in",
