@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: ?
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,6 +20,8 @@ import arlut.csd.JDataComponent.*;
 import com.sun.java.swing.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.util.Vector;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -59,7 +61,15 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   private listHandle
     noneHandle = new listHandle("<none>", null);
 
-  public JInvidChooser(containerPanel parent, short objectType) {
+  public JInvidChooser(containerPanel parent, short objectType)
+  {
+    this(null, parent, objectType);
+  }
+
+  public JInvidChooser(Vector objects, containerPanel parent, short objectType)
+  {
+    super(objects);
+
     cp = parent;
     type = objectType;
 
@@ -71,26 +81,13 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
     menuBar.add(menu);
 
     view = new JMenuItem("View");
-    //view.setMargin(insets);
-    //view.setBorderPainted(false);
-    //view.setFocusPainted(false);
     view.addActionListener(this);
 
     menu.add(view);
 
-    //    JPanel panel = new JPanel(new BorderLayout());
-
-    //panel.add("Center", getCombo()); // getCombo comes from our super class, giving us the JComboBox
-    //panel.add("West", menu);
-    //panel.setBorder(BorderFactory.createEtchedBorder());
-
     if (objectType > -1) // If it is -1, then it doesn't have a target
       {
 	create = new JMenuItem("New");
-	//create.setMargin(insets);
-	//create.setBorderPainted(false);
-	//create.setFocusPainted(false);
-	//create.addActionListener(this);
 	menu.add(create);
       }
 
