@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.68 $ %D%
+   Version: $Revision: 1.69 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -917,9 +917,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * Factory method to create a new DBEditObject of this
    * type.  The created DBEditObject will be connected
    * to the editset, and will not be integrated into the
-   * DBStore until the editset is committed.
+   * DBStore until the editset is committed.<br><br>
    *
-   * IMPORTANT NOTE: This method *must not* be public!  All
+   * <b>IMPORTANT NOTE</b>: This method *must not* be public!  All
    * DBEditObject customization classes should go through 
    * DBSession.createDBObject() to create new objects.
    *
@@ -937,9 +937,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * Factory method to create a new DBEditObject of this
    * type.  The created DBEditObject will be connected
    * to the editset, and will not be integrated into the
-   * DBStore until the editset is committed.
+   * DBStore until the editset is committed.<br><br>
    *
-   * IMPORTANT NOTE: This method *must not* be public!  All
+   * <b>IMPORTANT NOTE</b>: This method *must not* be public!  All
    * DBEditObject customization classes should go through 
    * DBSession.createDBObject() to create new objects.
    *
