@@ -1,11 +1,11 @@
-Ganymede Release 1.0pre1 beta 5
-December 18, 2000
+Ganymede Release 1.0 prerelease 1
+January 30, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
-RELEASE DATE: January ??, 2001
+RELEASE DATE: January 30, 2001
 
 1. [SERVER] Reworked server synchronization logic
 
