@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1243,9 +1243,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Deletes an element of this field, if a vector.
+   * Deletes an element of this field, if a vector.<br><br>
    *
-   * Server-side method only
+   * Server-side method only<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -1260,9 +1260,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Deletes an element of this field, if a vector.
+   * Deletes an element of this field, if a vector.<br><br>
    *
-   * Server-side method only
+   * Server-side method only<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -1297,6 +1297,71 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       }
 
     return deleteElement(values.indexOf(value), local);	// *sync* DBNameSpace possible
+  }
+
+  /**
+   *
+   * This method returns true if this field is a vector
+   * field and value is contained in this field.<br><br>
+   *
+   * This method always checks for read privileges.
+   *
+   * @param value The value to look for in this field
+   *
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  public final boolean containsElement(Object value)
+  {
+    return containsElement(value, false);
+  }
+
+  /**
+   *
+   * This method returns true if this field is a vector
+   * field and value is contained in this field.<br><br>
+   *
+   * This method is server-side only, and never checks for read
+   * privileges.
+   *
+   * @param value The value to look for in this fieldu
+   * 
+   */
+
+
+  public final boolean containsElementLocal(Object value)
+  {
+    return containsElement(value, true);
+  }
+
+  /**
+   *
+   * This method returns true if this field is a vector
+   * field and value is contained in this field.<br><br>
+   *
+   * This method is server-side only.
+   *
+   * @param value The value to look for in this field
+   * @param local If false, read permissin is checked for this field
+   * 
+   */
+
+
+  public boolean containsElement(Object value, boolean local)
+  {
+    if (!local && !verifyReadPermission())
+      {
+	throw new IllegalArgumentException("permission denied to read this field " + getName());
+      }
+
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + 
+					   getName());
+      }
+
+    return values.contains(value);
   }
 
   /**
