@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.91 $ %D%
+   Version: $Revision: 1.92 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.91 $ %D%
+ * @version $Revision: 1.92 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -936,6 +936,13 @@ public final class InvidDBField extends DBField implements invid_field {
 	    if (anonymous || session.getGSession().getPerm(remobj).isEditable())
 	      {
 		oldRef = (DBEditObject) session.editDBObject(oldRemote);
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink old reference",
+						  "Your operation could not succeed because you don't " +
+						  "have permission to dissolve the link to the old object " +
+						  "held in field " + getName() + " in object " + owner.getLabel());
 	      }
 	  }
 
