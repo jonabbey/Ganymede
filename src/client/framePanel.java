@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,6 +41,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     EXPIRATION_DATE = -1,
     HISTORY = -1,
     OWNER = -1,
+    ADMIN_HISTORY = -1,
     NOTES = -1,
     OBJECTS_OWNED = -1,
     PERSONAE = -1;
@@ -67,6 +68,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     removal_date, 
     owner,       // Holds an ownerPanel
     notes,       // holds a notePanel
+    history,      // holds an historyPanel
+    admin_history, // holds an adminHistoryPanel (only for adminPersonae)
     objects_owned;  // Holds an ownershipPanel
 
   JPanel
@@ -79,6 +82,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     removal_date_created = false,
     owner_created = false,
     notes_created = false,
+    admin_history_created = false,
+    history_created = false,
     objects_owned_created = false,
     personae_created = false;;
   
@@ -212,6 +217,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	      pane.addTab("Personae", null, personae);
 	      PERSONAE = current++;
 	    }
+	  else if (id == SchemaConstants.PersonaBase)
+	    {
+	      admin_history = new JScrollPane();
+	      pane.addTab("Admin History", null, admin_history);
+	      ADMIN_HISTORY = current++;
+	    }
 	}
       catch (RemoteException rx)
 	{
@@ -231,6 +242,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       notes = new JScrollPane();
       addNotesPanel();
+
+      // Add the history tab
+      history = new JScrollPane();
+      pane.addTab("History", null, history);
+      HISTORY = current++;
 
       pane.addChangeListener(this);
 
@@ -375,6 +391,47 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       
       owner.invalidate();
       validate();
+    }
+
+  void create_history_panel()
+    {
+      setStatus("Creating history panel");
+      try
+	{
+	  history.setViewportView(new historyPanel(object.getInvid(), getgclient()));
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get the invid: " + rx);
+	}
+
+      history_created = true;
+      
+      history.invalidate();
+      validate();
+
+      setStatus("Done");
+    }
+
+
+  void create_admin_history_panel()
+    {
+      setStatus("Creating admin history panel");
+      try
+	{
+	  admin_history.setViewportView(new adminHistoryPanel(object.getInvid(), getgclient()));
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get the invid: " + rx);
+	}
+
+      admin_history_created = true;
+      
+      admin_history.invalidate();
+      validate();
+
+      setStatus("Done");
     }
 
   void create_notes_panel()
@@ -546,6 +603,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   // the whole thing should be overhauled.
   //
 
+  // I don't know if need these at all.  There could be one showTab(int).  Why use these
+  // anyway?
+
   public void showGeneralTab()
     {
       if (GENERAL == -1)
@@ -596,6 +656,26 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  return;
 	}
       pane.setSelectedIndex(REMOVAL_DATE);
+    }
+
+  public void showHistoryTab()
+    {
+      if (HISTORY == -1)
+	{
+	  System.out.println("History panel has not been created");
+	  return;
+	}
+      pane.setSelectedIndex(HISTORY);
+    }
+
+  public void showAdminHistoryTab()
+    {
+      if (ADMIN_HISTORY == -1)
+	{
+	  System.out.println("Admin History panel has not been created");
+	  return;
+	}
+      pane.setSelectedIndex(ADMIN_HISTORY);
     }
 
   public Color getVectorBG()
@@ -680,6 +760,20 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    {
 	      setStatus("Creating persona panel");
 	      create_personae_panel();
+	    }
+	}
+      else if (index == HISTORY)
+	{
+	  if (! history_created)
+	    {
+	      create_history_panel();
+	    }
+	}
+      else if (index == ADMIN_HISTORY)
+	{
+	  if (! admin_history_created)
+	    {
+	      create_admin_history_panel();
 	    }
 	}
       else
