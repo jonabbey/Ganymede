@@ -443,6 +443,48 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   /**
+   * <p>Customization method to verify overall consistency of
+   * a DBObject.  This method is intended to be overridden
+   * in DBEditObject subclasses, and will be called by
+   * {@link arlut.csd.ddroid.server.DBEditObject#commitPhase1() commitPhase1()}
+   * to verify the readiness of this object for commit.  The
+   * DBObject passed to this method will be a DBEditObject,
+   * complete with that object's GanymedeSession reference
+   * if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if
+   * the code needs to access the database.</p>
+   *
+   * <p>To be overridden in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal consistencyCheck(DBObject object)
+  {
+    DBEditObject checkObj = (DBEditObject) object;
+
+    // we want to return a failure if there is no role set and if the
+    // persona is not a member of the supergash owner set, which would
+    // make roles superfluous
+
+    Vector roles = checkObj.getFieldValuesLocal(SchemaConstants.PersonaPrivs);
+    Vector ownerSets = checkObj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
+
+    Invid supergashOwner = Invid.createInvid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
+
+    if ((roles != null && roles.size() != 0) || (ownerSets != null && ownerSets.contains(supergashOwner))) {
+      return null;
+    } else {
+      return Ganymede.createErrorDialog("Persona Incomplete",
+					"Personas should either have a role defined or be a member of the supergash owner set.");
+    }
+  }
+
+  /**
    *
    * Customization method to verify whether the user should be able to
    * see a specific field in a given object.  Instances of DBField will
