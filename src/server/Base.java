@@ -5,7 +5,7 @@
    Client side interface to the object type dictionary
    
    Created: 17 April 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,4 +43,6 @@ public interface Base extends Remote {
   public void setName(String newName) throws RemoteException;
   public void setClassName(String newName) throws RemoteException;
   public BaseField createNewField() throws RemoteException;
+  public boolean deleteField(BaseField bF) throws RemoteException;
+  public boolean fieldInUse(BaseField bF) throws RemoteException;
 }

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -728,6 +728,75 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
     return field;
   }
+
+  /**
+   *
+   * This method is used to remove a field definition from 
+   * the current schema.
+   *
+   * Of course, this removal will only take effect if
+   * the schema editor commits.
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public synchronized boolean deleteField(BaseField bF)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("can't call in a non-edit context");
+      }
+
+    try
+      {
+	fieldHash.remove(new Short(bF.getID()));
+
+	Ganymede.debug("field definition " + getName() + ":" + bF.getName() + " removed");
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't remove field due to remote error: " + ex);
+      }
+
+    return true;
+  }
+
+  /**
+   *
+   * This method is used by the SchemaEditor to detect whether any
+   * objects are using a field definition.
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public synchronized boolean fieldInUse(BaseField bF)
+  {
+    Enumeration enum;
+
+    /* -- */
+
+    try
+      {
+	enum = objectHash.elements();
+	
+	while (enum.hasMoreElements())
+	  {
+	    DBObject obj = (DBObject) enum.nextElement();
+
+	    if (obj.getField(bF.getID()) != null)
+	      {
+		return true;
+	      }
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("shouldn't happen: " + ex);
+      }
+
+    return false;
+  }
+
 
   /**
    *
