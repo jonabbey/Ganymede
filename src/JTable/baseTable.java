@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.30 $ %D%
+  Version: $Revision: 1.31 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.30 $ %D%
+ * @version $Revision: 1.31 $ %D%
  */
 
 public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
@@ -2416,6 +2416,15 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 	  }
 
 	backing = createImage(width, height);
+
+	if (backing == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("baseTable.render(): couldn't create backing store, returning");
+	      }
+	    return;
+	  }
 	bg = backing.getGraphics();
       }
     else if ((backing_rect.width != getBounds().width) ||
