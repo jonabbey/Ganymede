@@ -3,8 +3,8 @@
 
    Created: 15 March 2001
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2001/03/16 10:11:35 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2001/03/17 06:37:32 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,11 +75,23 @@ package arlut.csd.crypto;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                          smbdes
+                                                                      smbencrypt
 
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>This Java class implements the two cryptographic hash methods used
+ * by SMB clients.  In particular, the LANMANHash() and NTUNICODEHash()
+ * static methods in this class perform the two hashes required for Samba's
+ * encrypted password entries.  As such, this class and the other classes
+ * in the broadly named arlut.csd.crypto package provide all the support
+ * functions necessary to allow Ganymede to manage Samba's password file.</p>
+ *
+ * <p>The following notes are from the original Samba source code for the
+ * smbdes.c module, which this module is adapted from.</p>
+ *
+ * <hr>
+ *
  * <p>NOTES:</p>
  *
  * <p>This code makes no attempt to be fast! In fact, it is a very
