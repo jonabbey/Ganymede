@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -936,9 +936,12 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   /**
    *
-   * The schema editor edits built-in fields by editing the
-   * set of built-in fields associated with base SchemaConstants.UserBase
-   * (which is chosen randomly as a representative non-embedded object).<br><br>
+   * The schema editor edits built-in fields by editing the set of
+   * built-in fields associated with base SchemaConstants.UserBase
+   * (which is chosen randomly as a representative non-embedded
+   * object).  This method replicates the builtin fields from
+   * SchemaConstants.UserBase into the rest of the non-embedded object
+   * types defined in th server.<br><br>
    *
    * IMPORTANT NOTE: This is only to be used when the Schema Editing rig
    * is being used to alter the basic built-in fields that the Ganymede
@@ -948,7 +951,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * created object base types.  DBObjectBase.java should be edited
    * before any new bases are created after any editing of the built-in
    * fields.
-   *
+   * 
    */
 
   private boolean synchronizeBuiltInFields()
@@ -969,6 +972,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     /* -- */
 
+    // assemble a list of built-in fields specified in the user base
+
     userBase = (DBObjectBase) getBase(SchemaConstants.UserBase);
 
     fields = userBase.getFields();
@@ -983,7 +988,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	  }
       }
 
-    bases = getBases(false);
+    bases = getBases(false);	// only want to mess with the non-embedded types
     
     for (int i = 0; i < bases.length; i++)
       {
@@ -995,7 +1000,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	  }
 
 	// now we need to make sure that base has just those built-in
-	// field definitions that were in userBase
+	// field definitions that were in userBase.. delete the built-in
+	// fields currently registered for this base
 
 	fields = base.getFields();
 
@@ -1008,6 +1014,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 		base.deleteField(fieldDef);
 	      }
 	  }
+
+	// now add in copies of the built-in field definitions
 
 	for (int j = 0; j < builtInFields.size(); j++)
 	  {
@@ -1022,71 +1030,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	      }
 	    
 	    // copy it
-
-	    try
-	      {
-		newFieldDef = new DBObjectBaseField(fieldDef, this);
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("bizarre remote exception: " + ex);
-	      }
-
-	    newFieldDef.setBase(base);
-	    base.fieldTable.put(newFieldDef);
-	  }
-      }
-
-    // now put in the built-ins in the embedded types
-
-    bases = getBases(true);
-    
-    for (int i = 0; i < bases.length; i++)
-      {
-	base = (DBObjectBase) bases[i];
-
-	if (base == userBase)
-	  {
-	    continue;
-	  }
-
-	// now we need to make sure that base has just those built-in
-	// field definitions that were in userBase
-
-	fields = base.getFields();
-
-	for (int j = 0; j < fields.size(); j++)
-	  {
-	    fieldDef = (DBObjectBaseField) fields.elementAt(j);
-	    
-	    if (fieldDef.isBuiltIn())
-	      {
-		base.deleteField(fieldDef);
-	      }
-	  }
-
-	for (int j = 0; j < builtInFields.size(); j++)
-	  {
-	    fieldDef = (DBObjectBaseField) builtInFields.elementAt(j);
-
-	    // the only built-in field we want in embedded objects
-	    // is the backlink field.
-
-	    if (fieldDef.getID() != SchemaConstants.BackLinksField)
-	      {
-		continue;
-	      }
-
-	    // make sure that the base doesn't already have a field with
-	    // the same name
-
-	    if (base.getField(fieldDef.getName()) != null)
-	      {
-		return false;
-	      }
-	    
-	    // copy it.. this will refresh the field's fieldTemplate,
-	    // among other things.
 
 	    try
 	      {
