@@ -261,7 +261,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     // Title at top of dialog
     //
 
-    JLabel titleLabel = new JLabel(resource.title, SwingConstants.CENTER);
+    JLabel titleLabel = new JLabel(resource.title == null ? "": resource.title, SwingConstants.CENTER);
     titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
     mainPanel.add(titleLabel, "North");
 
