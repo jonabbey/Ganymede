@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.82 $ %D%
+    Version: $Revision: 1.83 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -2339,7 +2339,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (choices != null)
 	      {
-		choiceHandles = choices.getListHandles();
+		// the server may not automatically restrict inactive
+		// objects from the list, so we want to exclude inactive
+		// objects.  We don't want to exclude non-editable objects,
+		// however, because the server may include nominally
+		// non-editable objects that we are granted permission
+		// to link to by the DBEditObject.anonymousLinkOK()
+		// method.
+
+		choiceHandles = choices.getListHandles(false, true);
 	      }
 	    else
 	      { 
@@ -2365,7 +2373,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    println("It's in there, using cached list");
 		  }
 
-		choiceHandles = gc.cachedLists.getListHandles(key, false);
+		// when we are drawing a list of choices from the cache,
+		// we know that the server didn't filter that list for
+		// us so that the 'non-editables' are actually valid
+		// choices in this context, so we don't want either
+		// inactive nor non-editable choices.
+
+		choiceHandles = gc.cachedLists.getListHandles(key, false, false);
 	      }
 	    else
 	      {
@@ -2384,7 +2398,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    gc.cachedLists.putList(key, qr);
 		    list = gc.cachedLists.getList(key);
-		    choiceHandles = list.getListHandles(false);
+
+		    // when the server gives us a choice key, we know
+		    // that the server didn't filter that list for us
+		    // so that the 'non-editables' are actually valid
+		    // choices in this context, so we don't want
+		    // either inactive nor non-editable choices.
+
+		    choiceHandles = list.getListHandles(false, false);
 		  }
 
 		// debuging stuff
@@ -2971,9 +2992,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   /**
    *
-   * private helper method to instantiate an invid field in this
+   * private helper method to instantiate a scalar invid field in this
    * container panel
-   *
+   * 
    */
 
   private void addInvidField(invid_field field, 
@@ -2983,6 +3004,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     objectList list;
 
     /* -- */
+
+    if (debug)
+      {
+	println("addInvidField(" + fieldTemplate.getName() + ")");
+      }
     
     if (fieldTemplate.isEditInPlace())
       {
@@ -3002,204 +3028,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return;
       }
 
-    if (editable && fieldInfo.isEditable())
-      {
-
-	Object key = field.choicesKey();
-	
-	Vector choices = null;
-
-	if (key == null)
-	  {
-	    if (debug)
-	      {
-		println("key is null, not using cache");
-	      }
-
-	    list = new objectList(field.choices());
-	    choices = list.getListHandles(false);
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		println("key = " + key);
-	      }
-
-	    if (gc.cachedLists.containsList(key))
-	      {
-		if (debug)
-		  {
-		    println("Got it from the cachedLists");
-		  }
-
-		list = gc.cachedLists.getList(key);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println("It's not in there, downloading a new one.");
-		  }
-
-		gc.cachedLists.putList(key, field.choices());
-		list = gc.cachedLists.getList(key);
-	      }
-
-	    choices = list.getListHandles(false);
-	  }
-
-        Invid currentChoice = (Invid) fieldInfo.getValue();
-	String currentChoiceLabel = gc.getSession().viewObjectLabel(currentChoice);
-
-	if (debug)
-	  {
-	    println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
-	  }
-	
-	listHandle currentListHandle = null;
-	listHandle noneHandle = new listHandle("<none>", null);
-	boolean found = false;
-	JInvidChooser combo;
-	boolean mustChoose = false;
-	
-	/* -- */
-
-	try
-	  {
-	    mustChoose = field.mustChoose();
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get mustChoose: " + rx);
-	  }
-	
-	choices = gc.sortListHandleVector(choices);
-	combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
-
-	// Find currentListHandle
-
-	// Make sure the current choice is in the chooser, if there is
-	// a current choice.
-
- 	if (currentChoice != null)
-	  {
-	    for (int j = 0; j < choices.size(); j++)
-	      {
-		listHandle thisChoice = (listHandle) choices.elementAt(j);
-
-		if (thisChoice.getObject() == null)
-		  {
-		    println("Current object " + thisChoice + " is null.");
-		  }
-
-		if (currentChoice.equals(thisChoice.getObject()))
-		  {
-		    if (debug)
-		      {
-			println("Found the current object in the list!");
-		      }
-
-		    currentListHandle = thisChoice;
-		    found = true;
-		    //break;
-		  }
-	      }
- 	      
-
- 	    if (!found)
- 	      {
- 		currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
- 		combo.addItem(currentListHandle);
- 	      }
- 	  }
-
-	if (!mustChoose)
-	  {
-	    combo.addItem(noneHandle);
-	  }
-
-	 /*
-	  *
-	  *
-	  */
-
-	combo.setMaximumRowCount(12);
-	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-	combo.setEditable(false);
-	combo.setVisible(true);
-
-	if (currentChoice != null)
-	  {
-	    if (debug)
-	      {
-		println("setting current choice: " + currentChoiceLabel);
-	      }
-
-	    try
-	      {
-		combo.setSelectedItem(currentListHandle);
-	      }
-	    catch (IllegalArgumentException e)
-	      {
-		println("IllegalArgumentException: current handle not in the list, adding it now.");
-		combo.addItem(currentListHandle);
-		combo.setSelectedItem(currentListHandle);
-	      }
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		println("currentChoice is null");
-	      }
-
-	    // If the field is must choose, we wouldn't have added the
-	    // noneHandle earlier.
-
-	    if (mustChoose)
-	      {
-		if (debug)
-		  {
-		    println("Adding noneHandle, because the currentchoice is null.");
-		  }
-
-		combo.addItem(noneHandle);
-	      }
-
-	    combo.setSelectedItem(noneHandle);
-	  }	  
-
-	if (editable && fieldInfo.isEditable())
-	  {
-	    combo.addItemListener(this); // register callback
-	  }
-
-	combo.setAllowNone(!mustChoose);
-
-	// We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
-
-	invidChooserHash.put(combo.getCombo(), field); 
-
-	// The update method still need to be able to find this JInvidChooser.
-
-	objectHash.put(combo, field); 
-	
-	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
-
-	if (debug)
-	  {
-	    println("Adding to panel");
-	  }
-	
-	addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
-      }
-    else //It's not editable, so add a button
+    if (!editable || !fieldInfo.isEditable())
       {
 	if (fieldInfo.getValue() != null)
 	  {
 	    final Invid thisInvid = (Invid)fieldInfo.getValue();
-
+	    
 	    String label = (String)gc.getSession().viewObjectLabel(thisInvid);
 
 	    //JstringField sf = new JstringField(20, false);
@@ -3240,7 +3074,210 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    fieldTemplate.getName(), 
 		    fieldInfo.isVisible());
 	  }
+
+	return;
       }
+
+    // okay, we've got an editable field, we need to construct and install
+    // a JInvidChooser.
+
+    Object key = field.choicesKey();
+	
+    Vector choices = null;
+
+    if (key == null)
+      {
+	if (debug)
+	  {
+	    println("key is null, not using cache");
+	  }
+	
+	list = new objectList(field.choices());
+
+	// we have to include non-editables, because the server will
+	// include some that are non-editable, but for which
+	// DBEditObject.anonymousLinkOK() nonetheless give us rights
+	// to link.
+
+	choices = list.getListHandles(false, true);
+      }
+    else
+      {
+	if (debug)
+	  {
+	    println("key = " + key);
+	  }
+
+	if (gc.cachedLists.containsList(key))
+	  {
+	    if (debug)
+	      {
+		println("Got it from the cachedLists");
+	      }
+
+	    list = gc.cachedLists.getList(key);
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		println("It's not in there, downloading a new one.");
+	      }
+
+	    gc.cachedLists.putList(key, field.choices());
+	    list = gc.cachedLists.getList(key);
+	  }
+
+	// we have to include non-editables, because the server will
+	// include some that are non-editable, but for which
+	// DBEditObject.anonymousLinkOK() nonetheless give us rights
+	// to link.
+
+	choices = list.getListHandles(false, true);
+      }
+
+    Invid currentChoice = (Invid) fieldInfo.getValue();
+    String currentChoiceLabel = gc.getSession().viewObjectLabel(currentChoice);
+
+    if (debug)
+      {
+	println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
+      }
+	
+    listHandle currentListHandle = null;
+    listHandle noneHandle = new listHandle("<none>", null);
+    boolean found = false;
+    JInvidChooser combo;
+    boolean mustChoose = false;
+	
+    try
+      {
+	mustChoose = field.mustChoose();
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get mustChoose: " + rx);
+      }
+	
+    choices = gc.sortListHandleVector(choices);
+    combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
+
+    // Find currentListHandle
+    
+    // Make sure the current choice is in the chooser, if there is
+    // a current choice.
+    
+    if (currentChoice != null)
+      {
+	for (int j = 0; j < choices.size(); j++)
+	  {
+	    listHandle thisChoice = (listHandle) choices.elementAt(j);
+
+	    if (thisChoice.getObject() == null)
+	      {
+		println("Current object " + thisChoice + " is null.");
+	      }
+
+	    if (currentChoice.equals(thisChoice.getObject()))
+	      {
+		if (debug)
+		  {
+		    println("Found the current object in the list!");
+		  }
+
+		currentListHandle = thisChoice;
+		found = true;
+		//break;
+	      }
+	  }
+ 	      
+
+	if (!found)
+	  {
+	    currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
+	    combo.addItem(currentListHandle);
+	  }
+      }
+
+    if (!mustChoose)
+      {
+	combo.addItem(noneHandle);
+      }
+
+    /*
+     *
+     *
+     */
+
+    combo.setMaximumRowCount(12);
+    combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
+    combo.setEditable(false);
+    combo.setVisible(true);
+    
+    if (currentChoice != null)
+      {
+	if (debug)
+	  {
+	    println("setting current choice: " + currentChoiceLabel);
+	  }
+
+	try
+	  {
+	    combo.setSelectedItem(currentListHandle);
+	  }
+	catch (IllegalArgumentException e)
+	  {
+	    println("IllegalArgumentException: current handle not in the list, adding it now.");
+	    combo.addItem(currentListHandle);
+	    combo.setSelectedItem(currentListHandle);
+	  }
+      }
+    else
+      {
+	if (debug)
+	  {
+	    println("currentChoice is null");
+	  }
+
+	// If the field is must choose, we wouldn't have added the
+	// noneHandle earlier.
+
+	if (mustChoose)
+	  {
+	    if (debug)
+	      {
+		println("Adding noneHandle, because the currentchoice is null.");
+	      }
+
+	    combo.addItem(noneHandle);
+	  }
+
+	combo.setSelectedItem(noneHandle);
+      }	  
+
+    if (editable && fieldInfo.isEditable())
+      {
+	combo.addItemListener(this); // register callback
+      }
+    
+    combo.setAllowNone(!mustChoose);
+
+    // We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
+    
+    invidChooserHash.put(combo.getCombo(), field); 
+    
+    // The update method still need to be able to find this JInvidChooser.
+    
+    objectHash.put(combo, field); 
+    
+    shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
+    
+    if (debug)
+      {
+	println("Adding to panel");
+      }
+    
+    addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
