@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 2002/07/03 02:50:17 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 2002/10/05 05:38:25 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.57 $ $Date: 2002/07/03 02:50:17 $ $Name:  $
+ * @version $Revision: 1.58 $ $Date: 2002/10/05 05:38:25 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -492,7 +492,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 		    System.err.println("This password is new.");
 		  }
 
-		JpassField sf = new JpassField(null, true, 10,100,true);
+		JpassField sf = new JpassField(null,10,100,true);
 			
 		addRow(panel, sf, pt.getLabel(), i);
 			

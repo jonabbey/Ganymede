@@ -3,15 +3,16 @@
    
    Created: 22 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2001/05/25 07:23:21 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2002/10/05 05:38:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   The University of Texas at Austin.
 
    Contact information
 
@@ -39,7 +40,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.JDataComponent;
@@ -50,7 +53,6 @@ import java.util.*;
 import java.rmi.RemoteException;
 
 import javax.swing.*;
-import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
                                                                            class 
@@ -59,11 +61,11 @@ import arlut.csd.JDialog.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *  <p>JpassField serves as a base class for all Fields that use textfields.
- *  The subclasses of this class should be used.
+ * <p>JpassField is the composite two-field GUI component used for entering
+ * passwords in the Ganymede client.</p>
  */
 
-public class JpassField extends JPanel implements ActionListener, JsetValueCallback {
+public class JpassField extends JPanel implements JsetValueCallback {
 
   public static final boolean debug = false;
 
@@ -82,9 +84,6 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
     field1 = null,
     field2 = null;
 
-  boolean 
-    showChangeFields;
-
   private boolean changingPass = false;
 
   String
@@ -99,20 +98,14 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
    *
    * Constructor
    *
-   * @parameter showChangeFields if this is true, JpassField will immediately show
-   * a couple of non-echoing text fields, that can both be filled in to set the
-   * password.  If false, JpassField will just show a button that can be clicked
-   * to set the password.
-   *
    */
 
   public JpassField(Frame frame,
-		    boolean showChangeFields,
 		    int columns,
 		    int maxstrlen,
 		    boolean is_editable)
   {
-    this(frame, showChangeFields, columns, maxstrlen,
+    this(frame, columns, maxstrlen,
 	 is_editable,
 	 null,
 	 null);
@@ -122,15 +115,9 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
    *
    * Constructor
    *
-   * @parameter showChangeFields if this is true, JpassField will immediately show
-   * a couple of non-echoing text fields, that can both be filled in to set the
-   * password.  If false, JpassField will just show a button that can be clicked
-   * to set the password.
-   *
    */
 
   public JpassField(Frame frame,
-		    boolean showChangeFields, 
 		    int columns, 
 		    int maxstrlen, 
 		    boolean is_editable,
@@ -138,131 +125,44 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 		    String disallowed) 
   {
     this.frame = frame;
-    this.showChangeFields = showChangeFields;
 
-    if (showChangeFields)
-      {
-	field1 = new JpasswordField(columns, maxstrlen, 
-				    is_editable, true, allowed, disallowed);
-
-	field1.setCallback(this);
-	field1.setEditable(is_editable);
-
-	field2 = new JpasswordField(columns, maxstrlen,
-				    is_editable, true, allowed, disallowed);
-
-	field2.setCallback(this);
-	field2.setEditable(is_editable);
-
-	GridBagLayout gbl;
-	GridBagConstraints gbc;
-
-	gbl = new GridBagLayout();
-	gbc = new GridBagConstraints();
-	gbc.anchor = GridBagConstraints.WEST;
-	gbc.gridheight = 1;
-	gbc.fill = GridBagConstraints.HORIZONTAL;
-
-	setLayout(gbl);
-
-	gbc.gridx = 0;
-	gbc.gridy = 0;
-	gbc.gridwidth = GridBagConstraints.REMAINDER;
-	gbl.setConstraints(field1, gbc);
-	add(field1);
-
-	gbc.gridy = 1;
-	gbl.setConstraints(field1, gbc);
-	add(field2);
-      }
-    else
-      {
-	changePass = new JButton("Set Password");
-	changePass.addActionListener(this);
-	changePass.setEnabled(is_editable);
-
-	setLayout(new BorderLayout());
-	add("Center", changePass);
-      }
+    field1 = new JpasswordField(columns, maxstrlen, 
+				is_editable, true, allowed, disallowed);
+    
+    field1.setCallback(this);
+    field1.setEditable(is_editable);
+    
+    field2 = new JpasswordField(columns, maxstrlen,
+				is_editable, true, allowed, disallowed);
+    
+    field2.setCallback(this);
+    field2.setEditable(is_editable);
+    
+    GridBagLayout gbl;
+    GridBagConstraints gbc;
+    
+    gbl = new GridBagLayout();
+    gbc = new GridBagConstraints();
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    
+    setLayout(gbl);
+    
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbl.setConstraints(field1, gbc);
+    add(field1);
+    
+    gbc.gridy = 1;
+    gbl.setConstraints(field1, gbc);
+    add(field2);
   }
 
-  public void setText(String text)
-  {
-    field1.setText(text);
-    field2.setText(text);
-  }
-
-  public void actionPerformed(ActionEvent e)
-  {
-    DialogRsrc dr = new DialogRsrc(frame, "Set Password", "Enter your new password, twice");
-    dr.addPassword("Password:");
-    dr.addPassword("Confirm:");
-    StringDialog d = new StringDialog(dr);
-    Hashtable result = d.DialogShow();
-
-    if (!allowCallback)
-      {
-	return;
-      }
-
-    changed = (result != null);
-
-    if (changed)
-      {
-	String s1 = (String) result.get("Password:");
-	String s2 = (String) result.get("Confirm:");
-
-	if (s1 != null && s2 != null && s1.equals(s2))
-	  {
-	    try
-	      {
-		if (debug)
-		  {
-		    System.err.println("results are equals, calling back");
-		    System.err.println("s1 = " + s1);
-		    System.err.println("s2 = " + s2);
-		  }
-
-		if (!my_parent.setValuePerformed(new JValueObject(this, s1)))
-		  {
-		    if (debug)
-		      {
-			System.err.println("password not accepted");
-		      }
-
-		    StringDialog dErr = new StringDialog(frame, "Password not accepted by server",
-							 "No change to password made", false);
-		    dErr.DialogShow();
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		StringDialog dErr = new StringDialog(frame, "Could not communicate with server",
-						     "No change to password made", false);
-		dErr.DialogShow();
-	      }
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("Password not valid/confirmed");
-	      }
-	    StringDialog dErr = new StringDialog(frame, "Password not valid/confirmed",
-						 "Password not valid/confirmed\nNo change to password made", false);
-	    dErr.DialogShow();
-	  }
-      }
-    else
-      {
-	if (debug)
-	  {
-	    System.err.println("user hit cancel");
-	  }
-      }
-
-    return;
-  }
+  /**
+   * <p>The callback our contained components use to report to us.</p>
+   */
 
   public boolean setValuePerformed(JValueObject v)
   {
@@ -313,17 +213,11 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 
 		try
 		  {
+		    // if our callback rejects the password, it will
+		    // handle informing the user of what and why
+
 		    if (my_parent != null && !my_parent.setValuePerformed(new JValueObject(this, value1)))
 		      {
-			if (debug)
-			  {
-			    System.err.println("trying to complain about server not accept");
-			  }
-			
-			//		    StringDialog dErr = new StringDialog(frame, "Password not accepted by server",
-			//							 "No change to password made", false);
-			//		    dErr.DialogShow();
-			
 			value1 = null;
 			value2 = null;
 			field1.setText(null);
@@ -343,34 +237,29 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 	      }
 	    catch (RemoteException ex)
 	      {
-		//		StringDialog dErr = new StringDialog(frame, "Could not communicate with server",
-		//						     "No change to password made", false);
-		//		dErr.DialogShow();
+		reportError("Error communicating with server.. network or server problem?");
 
 		field1.setText(null);
 		field2.setText(null);
 		value1 = null;
 		value2 = null;
 
+		field1.requestFocus();
+
 		return false;
 	      }
 	  }
 	else if ((value1 != null) && (value2 != null) && (!value1.equals(value2)))
 	  {
-	    if (debug)
-	      {
-		System.err.println("trying to complain about mismatch");
-	      }
-
-	    // StringDialog dErr = new StringDialog(frame, "Passwords don't match",
-	    //						 "Passwords don't match\nNo change to password made", false);
-	    //	    dErr.DialogShow();
+	    reportError("Passwords do not match, please try again.");
 
 	    field1.setText(null);
 	    field2.setText(null);
 	    value1 = null;
 	    value2 = null;
 	    validatedPass = null;
+
+	    field1.requestFocus();
 
 	    return false;
 	  }
@@ -380,7 +269,6 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 	System.err.println("whatthe?");
 	return false;		// ??
       }
-
 
     return true;
   }
@@ -421,5 +309,25 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 
     allowCallback = true;
   }
-  
+
+
+  /**
+   * <p>This private helper method relays a descriptive error message to
+   * our callback interface.</p>
+   */
+
+  private void reportError(String errorString)
+  {
+    if (allowCallback)
+      {
+	try
+	  {
+	    my_parent.setValuePerformed(new JValueObject(this, errorString, JValueObject.ERROR));
+	  }
+	catch (java.rmi.RemoteException rx)
+	  {
+	    System.out.println("Could not send an error callback.");
+	  }
+      }
+  }
 }
