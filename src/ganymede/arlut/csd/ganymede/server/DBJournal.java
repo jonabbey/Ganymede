@@ -613,9 +613,9 @@ public class DBJournal implements ObjectStatus {
 
 		try
 		  {
-		    success == ((jFile.readUTF().compareTo(FINALIZE) == 0) &&
-				(jFile.readLong() == transaction_time) &&
-				(jFile.readInt() == nextTransactionNumber));
+		    success = ((jFile.readUTF().compareTo(FINALIZE) == 0) &&
+			       (jFile.readLong() == transaction_time) &&
+			       (jFile.readInt() == nextTransactionNumber));
 		  }
 		catch (IOException ex)
 		  {
@@ -705,16 +705,17 @@ public class DBJournal implements ObjectStatus {
    * completed.
    */
 
-  public synchronized DBJournalTransaction writeTransaction(DBEditObject[] objects) throws IOException
+  public synchronized DBJournalTransaction writeTransaction(DBEditSet transaction) throws IOException
   {
     DBEditObject eObj;
     DBJournalTransaction transRecord;
     Date now;
+    DBEditObject[] objects = transaction.getObjectList();
 
     /* - */
 
     now = new Date();
-    transRecord = new DBJournalTransaction(now.getTime(), Ganymede.db.getNextTransactionNumber());
+    transRecord = new DBJournalTransaction(now.getTime(), Ganymede.db.getNextTransactionNumber(), transaction.getUsername());
 
     if (debug)
       {

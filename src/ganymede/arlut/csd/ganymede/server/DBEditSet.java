@@ -302,6 +302,47 @@ public class DBEditSet {
   }
 
   /**
+   * <p>Returns the descriptive string passed to us when this
+   * transaction was opened.</p>
+   */
+
+  public final String getDescription()
+  {
+    return this.description;
+  }
+
+  /**
+   * <p>Returns the name of the GanymedeSession user who created this
+   * transaction.</p>
+   *
+   * <p>If this transaction was created by an admin persona, we will
+   * return that persona name, otherwise we'll return the user
+   * name.</p>
+   */
+
+  public final String getUsername()
+  {
+    GanymedeSession gSession = this.getGSession();
+
+    if (gSession == null)
+      {
+	return null;
+      }
+
+    if (gSession.personaName != null)
+      {
+	return gSession.personaName;
+      }
+
+    if (gSession.username != null)
+      {
+	return gSession.username;
+      }
+
+    return null;
+  }
+
+  /**
    * <p>Returns true if the GanymedeSession associated with this
    * transaction has oversight turned on.</p>
    */
@@ -1462,7 +1503,7 @@ public class DBEditSet {
   {
     try
       {
-	persistedTransaction = dbStore.journal.writeTransaction(getObjectList());
+	persistedTransaction = dbStore.journal.writeTransaction(this);
 
 	if (persistedTransaction == null)
 	  {
@@ -1489,17 +1530,41 @@ public class DBEditSet {
 
   private final void commit_writeSyncChannels() throws CommitFatalException
   {
-    /*
-    try
+    DBEditObject[] objectList = getObjectList();
+
+    synchronized (Ganymede.syncRunners)
       {
+	int i = 0;
+
+	try
+	  {
+	    for (i = 0; i < Ganymede.syncRunners.size(); i++)
+	      {
+		SyncRunner sync = (SyncRunner) Ganymede.syncRunners.elementAt(i);
+
+		sync.writeSync(persistedTransaction, objectList);
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	    for (int j = 0; j < i; j++)
+	      {
+		SyncRunner sync = (SyncRunner) Ganymede.syncRunners.elementAt(i);
+		
+		try
+		  {
+		    sync.unSync(persistedTransaction);
+		  }
+		catch (IOException inex)
+		  {
+		  }
+	      }
+
+	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+								      ts.l("commit_writeSyncChannels.exception_text",
+									   ex.getMessage())));
+	  }
       }
-    catch (IOException ex)
-      {
-	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
-								  ts.l("commit_writeSyncChannels.exception_text",
-								       ex.getMessage())));
-      }
-    */
   }
 
   /**

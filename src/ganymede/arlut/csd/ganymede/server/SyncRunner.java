@@ -63,10 +63,14 @@ import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.TranslationService;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import com.jclark.xml.output.UTF8XMLWriter;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -93,6 +97,18 @@ public class SyncRunner implements Runnable {
 
   private static Runtime runtime = null;
 
+  /**
+   * XML version major id
+   */
+
+  static final byte major_xml_sync_version = 1;
+
+  /**
+   * XML version minor id
+   */
+
+  static final byte minor_xml_sync_version = 0;
+
   // ---
 
   private Invid syncChannelInvid;
@@ -100,6 +116,7 @@ public class SyncRunner implements Runnable {
   private String directory;
   private String serviceProgram;
   private int transactionNumber;
+  private boolean includePlaintextPasswords;
   private Hashtable matrix;
 
   /* -- */
@@ -121,6 +138,7 @@ public class SyncRunner implements Runnable {
     this.name = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelName);
     this.directory = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelDirectory);
     this.serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
+    this.includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
     
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFields);
 
@@ -170,6 +188,102 @@ public class SyncRunner implements Runnable {
   public String getServiceProgram()
   {
     return serviceProgram;
+  }
+
+  public void writeSync(DBJournalTransaction transRecord, DBEditObject[] objectList) throws IOException
+  {
+    XMLDumpContext xmlOut = null;
+
+    /* -- */
+
+    for (int i = 0; i < objectList.length; i++)
+      {
+	DBEditObject syncObject = objectList[i];
+
+	if (shouldInclude(syncObject))
+	  {
+	    if (xmlOut == null)
+	      {
+		xmlOut = createXMLSync(transRecord);
+	      }
+
+	    switch (syncObject.getStatus())
+	      {
+	      case ObjectStatus.CREATING:
+		xmlOut.startElementIndent("delta");
+		xmlOut.attribute("state", "object created");
+		xmlOut.indentOut();
+		syncObject.emitXML(xmlOut);
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("delta");
+		break;
+
+	      case ObjectStatus.DELETING:
+		xmlOut.startElementIndent("delta");
+		xmlOut.attribute("state", "object deleted");
+		xmlOut.indentOut();
+		syncObject.getOriginal().emitXML(xmlOut);
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("delta");
+		break;
+
+	      case ObjectStatus.EDITING:
+		syncObject.emitXMLDelta(xmlOut);
+		break;
+	      }
+	  }
+      }
+
+    if (xmlOut != null)
+      {
+	xmlOut.indentIn();
+	xmlOut.endElementIndent("transaction");
+	xmlOut.close();
+      }
+  }
+
+  /**
+   * <p>If we go to commit a transaction and we find that we can't
+   * write a sync to its sync channel for some reason, we'll need to
+   * go back and erase the sync files that we did write out.  This method
+   * is responsible for wielding the axe.</p>
+   */
+
+  public void unSync(DBJournalTransaction transRecord) throws IOException
+  {
+    File syncFile = new File(this.getDirectory() + File.separator + String.valueOf(transRecord.getTransactionNumber()));
+    
+    syncFile.delete();
+  }
+
+  private XMLDumpContext createXMLSync(DBJournalTransaction transRecord) throws IOException
+  {
+    FileOutputStream outStream = null;
+    BufferedOutputStream bufStream = null;
+
+    outStream = new FileOutputStream(this.getDirectory() + File.separator + String.valueOf(transRecord.getTransactionNumber()));
+    bufStream = new BufferedOutputStream(outStream);
+
+    XMLDumpContext xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+					       includePlaintextPasswords, // whether we include plaintext passwords when we have alternate hashes
+					       false, // don't include creator/modifier data
+					       this);
+
+    xmlOut.startElement("transaction");
+    xmlOut.attribute("major_version", Byte.toString(major_xml_sync_version));
+    xmlOut.attribute("minor_version", Byte.toString(major_xml_sync_version));
+    xmlOut.attribute("channel", getName());
+
+    if (transRecord.getUsername() != null)
+      {
+	xmlOut.attribute("user", transRecord.getUsername());
+      }
+
+    xmlOut.attribute("number", String.valueOf(transRecord.getTransactionNumber()));
+    xmlOut.attribute("time", String.valueOf(transRecord.getTime()));
+    xmlOut.indentOut();
+
+    return xmlOut;
   }
 
   /**

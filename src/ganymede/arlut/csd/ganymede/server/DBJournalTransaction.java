@@ -68,13 +68,15 @@ class DBJournalTransaction {
 
   private long time;
   private int transactionNumber;
+  private String username;
 
   /* -- */
 
-  public DBJournalTransaction(long time, int transactionNumber)
+  public DBJournalTransaction(long time, int transactionNumber, String username)
   {
     this.time = time;
     this.transactionNumber = transactionNumber;
+    this.username = username;
   }
 
   public long getTime()
@@ -85,5 +87,10 @@ class DBJournalTransaction {
   public int getTransactionNumber()
   {
     return this.transactionNumber;
+  }
+
+  public String getUsername()
+  {
+    return this.username;
   }
 }
