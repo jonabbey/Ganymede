@@ -4,15 +4,19 @@
 
    This class provides some extra utility methods to apply to a
    StreamTokenizer to make parsing the GASH files easier.
+
+   The Parser code assumes that the tokenizer has been set up to
+   treat ':', ',', and '\n' as distinct tokens, with everything else
+   treated as word chars.
    
    Created: 6 August 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package arlut.csd.Utils;
+package arlut.csd.Util;
 
 import java.io.*;
 
@@ -21,6 +25,15 @@ import java.io.*;
                                                                           Parser
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * This class provides some extra utility methods to apply to a
+ * StreamTokenizer to make parsing the GASH files easier.<br><br>
+ *
+ * The Parser code assumes that the tokenizer has been set up to
+ * treat ':', ',', and '\n' as distinct tokens, with everything else
+ * treated as word chars.
+ */
 
 public class Parser {
 
@@ -110,24 +123,65 @@ public class Parser {
    *
    */
 
-  public int getNextInt() throws IOException
+  public int getNextInt() throws IOException, NumberFormatException
   {
     String nextBit = getNextBit();
 
-    return new Integer(nextBit).intValue();
+    try
+      {
+	return new Integer(nextBit).intValue();
+      }
+    catch (NumberFormatException ex)
+      {
+	System.err.println("Parser.getNextInt(): couldn't turn '" + nextBit + "' to an Integer");
+	throw ex;
+      }
   }
 
   /**
    *
    * getNextBit() returns the next String from the StreamTokenizer
    * that this Parser was initialized with, skipping a single leading
-   * :'s and ,'s along the way
+   * ':'s and ','s along the way, up to the next ',' or ':'.
    *
    */
   
   public String getNextBit() throws IOException
   {
-    return getNextBit(tokens, false);
+    return getNextBit(tokens, false, false);
+  }
+
+  /**
+   *
+   * getNextLongBit() returns the next String from the StreamTokenizer
+   * that this Parser was initialized with, skipping a single leading
+   * ':'s along the way, up to the next ':'.
+   *
+   */
+  
+  public String getNextLongBit() throws IOException
+  {
+    StringBuffer buffer = new StringBuffer();
+
+    /* -- */
+
+    if (checkNextToken() == ':')
+      {
+	tokens.nextToken();
+      }
+
+    while (checkNextToken() != ':')
+      {
+	if (checkNextToken() == ',')
+	  {
+	    tokens.nextToken();
+	    buffer.append(",");
+	  }
+
+	buffer.append(getNextBit(tokens, false, true));
+      }
+
+    return buffer.toString();
   }
 
   /**
@@ -143,7 +197,7 @@ public class Parser {
   
   public String getNextBit(boolean skipleading) throws IOException
   {
-    return getNextBit(tokens, skipleading);
+    return getNextBit(tokens, skipleading, false);
   }
   
   /**
@@ -157,7 +211,7 @@ public class Parser {
   
   public String getNextBit(StreamTokenizer tokens) throws IOException
   {
-    return getNextBit(tokens, true);
+    return getNextBit(tokens, true, false);
   }
 
   /**
@@ -169,69 +223,83 @@ public class Parser {
    * commas and colons until it gets to either a normal string or
    * eol/eof.
    *
+   * @param includeCommas if true, getNextBit will not treat commas as
+   * field separators
+   *
    */
   
-  public String getNextBit(StreamTokenizer tokens, boolean skipleading) throws IOException
+  public String getNextBit(StreamTokenizer tokens, boolean skipleading, boolean includeCommas) throws IOException
   {
     int token;
     String result;
 
+    /* -- */
+
     token = tokens.nextToken();
 
-    if (atEOF() || atEOL())
+    if (atEOL())
+      {
+	token = tokens.nextToken();
+      }
+
+    if (atEOF())
       {
 	return "";
       }
 
-    // eat any leading :'s or ,'s
-
-    if (!skipleading)
+    if (includeCommas)
       {
-	// skip only the single leading token
+	// make , just part of a word for parsing purposes
 
-	if (tokens.ttype == ':' || tokens.ttype == ',')
-	  {
-	    token = tokens.nextToken();
-	  }
-      }
-    else
-      {
-	// skip any leading colons and commas
-
-	while (tokens.ttype == ':' || tokens.ttype == ',')
-	  {
-	    //	System.err.println("*");
-	    token = tokens.nextToken();
-	  }
+	tokens.wordChars(',', ',');
       }
 
-    if (tokens.ttype == StreamTokenizer.TT_WORD)
+    try
       {
-	//	System.err.println("returning native word");
-	return tokens.sval;
-      }
+	// eat any leading :'s or ,'s
 
-    if (tokens.ttype == StreamTokenizer.TT_NUMBER)
-      {
-	// System.err.println("returning converted word");
-	result = Integer.toString(new Double(tokens.nval).intValue());
-
-	while (tokens.ttype != ':' && tokens.ttype != ',' && tokens.ttype != StreamTokenizer.TT_EOF &&
-	       tokens.ttype != StreamTokenizer.TT_EOL)
+	if (!skipleading)
 	  {
-	    token = tokens.nextToken();
-	    
-	    if (tokens.ttype == StreamTokenizer.TT_WORD)
+	    // skip only the single leading token
+
+	    if (tokens.ttype == ':' || tokens.ttype == ',')
 	      {
-		result += tokens.sval;
+		token = tokens.nextToken();
+	      }
+	  }
+	else
+	  {
+	    // skip any leading colons and commas
+
+	    while (tokens.ttype == ':' || tokens.ttype == ',')
+	      {
+		token = tokens.nextToken();
 	      }
 	  }
 
-	return result;
+	if (tokens.ttype == StreamTokenizer.TT_WORD)
+	  {
+	    return tokens.sval;
+	  }
+
+	if (tokens.ttype == StreamTokenizer.TT_NUMBER)
+	  {
+	    result = Integer.toString(new Double(tokens.nval).intValue());
+
+	    return result;
+	  }
+
+	return null;
       }
+    finally
+      {
+	// turn , back into a separate token
 
-
-    return null;
+	if (includeCommas)
+	  {
+	    tokens.ordinaryChar(',');
+	  }
+      }
   }
 
   /**
