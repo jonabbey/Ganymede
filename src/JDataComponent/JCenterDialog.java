@@ -5,7 +5,7 @@
    A subclass of JDialog that centers itself when pack() is called.
    
    Created: 17 September 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,13 +79,14 @@ public class JCenterDialog extends JDialog {
 	      {
 		System.out.println("Dialog is " + width + " wide and " + height + " tall.");
 	      }
+
+	    int loc = r.width/2 + r.x - width/2;
+	    int locy = r.height/2 + r.y - height/2;
 	    
-	    setLocation(r.width/2 + r.x - width/2, r.height/2 + r.y - height/2);
+	    setLocation(loc, locy);
 
 	    if (debug)
 	      {
-		int loc = r.width/2 + r.x - width/2;
-		int locy = r.height/2 + r.y - height/2;
 		System.out.println("Setting location to : " + loc + "," + locy);
 	      }
 	  }
