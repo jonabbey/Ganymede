@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -819,6 +819,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 
 	buf.append(getLabel((Invid) obj.getFieldValueLocal(volumeSchema.HOST))); // hostname
+	buf.append(dnsdomain);
+
 	buf.append(":");
 	buf.append((String) obj.getFieldValueLocal(volumeSchema.PATH)); // mount path
 
