@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.66 $ %D%
+   Version: $Revision: 1.67 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -76,9 +76,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   Session session;
   glogin _myglogin;
 
+  CategoryDump dump;
+
   long lastClick = 0;
 
   // This keeps track of the current persona
+
   String 
     currentPersonaString;
 
@@ -697,20 +700,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     
     setStatus("Ready.");
   }
-
+  
   /**
-   * Returns the templateHash.
+   * Returns a vector of FieldTemplates.
    *
-   * Template Hash is a hash of object type ID's (Short) -> Vector of FieldTemplates
-   * Use this instead of templateHash directly, because you never know where we will
-   * get it from(evil grin).
+   * The id number is the base id.
    */
 
-  public Hashtable getTemplateHash()
+  public Vector getTemplateVector(short id)
   {
-    return templateHash;
+    return getTemplateVector(new Short(id));
   }
-  
+
   /**
    * Returns a vector of FieldTemplates.
    *
@@ -726,10 +727,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	if (debug)
 	  {
-	    System.out.println("Found the template, using cache.");
+	    System.out.println("Found the template, using cache for base: " + id);
 	  }
-	result = (Vector)th.get(id);
-
+	result = (Vector) th.get(id);
       }
     else
       {
@@ -753,8 +753,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   }
 
   /**
+   * Returns the templateHash.
+   *
+   * Template Hash is a hash of object type ID's (Short) -> Vector of FieldTemplates
+   * Use this instead of templateHash directly, because you never know where we will
+   * get it from(evil grin).
+   *
+   */
+
+  private Hashtable getTemplateHash()
+  {
+    return templateHash;
+  }
+
+  /**
    * Clear out all the client side hashes.
    */
+
   public void clearCaches()
   {
     if (debug)
@@ -825,6 +840,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    * directly.</p>
    *
    */
+
   public final Hashtable getBaseNames()
   {
     if (baseNames == null)
@@ -843,11 +859,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    * directly.</p>
    *
    */
-  public final Vector getBaseList()
+
+  public synchronized final Vector getBaseList()
   {
     if (baseList == null)
       {
-	baseList = loader.getBaseList();
+	baseList = dump.getBases();
       }
 
     return baseList;
@@ -861,6 +878,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    * directly.</p>
    *
    */
+
   public Hashtable getBaseMap()
   {
     if (baseMap == null)
@@ -1203,11 +1221,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
 
     CategoryTransport transport = session.getCategoryTree();
-    Category firstCat = transport.getTree();
 
-    System.out.println("got root category: " + firstCat.getName());
+    // get the category dump, save it
 
-    CatTreeNode firstNode = new CatTreeNode(null, firstCat.getName(), firstCat,
+    dump = transport.getTree();
+
+    // remember that we'll want to refresh our base list
+
+    baseList = null;
+
+    System.out.println("got root category: " + dump.getName());
+
+    CatTreeNode firstNode = new CatTreeNode(null, dump.getName(), dump,
 					    null, true, 
 					    OPEN_CAT, CLOSED_CAT, null);
     tree.setRoot(firstNode);
@@ -3125,7 +3150,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else if (source == menubarQueryMI)
       {
-	querybox box = new querybox(getBaseHash(), getBaseMap(), this, "Query Panel");
+	querybox box = new querybox(this, this, "Query Panel");
 	Query q = box.myshow();
 
 	if (q != null)
@@ -3399,7 +3424,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    setWaitCursor();
 	    Base base = ((BaseNode) node).getBase();
 
-	    querybox box = new querybox(base, getBaseHash(), getBaseMap(),  this, "Query Panel");
+	    querybox box = new querybox(base, this,  this, "Query Panel");
 
 	    setNormalCursor();
 	    Query q = box.myshow();
