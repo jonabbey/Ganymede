@@ -5,7 +5,7 @@
    A wizard to manage user rename interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,9 +39,6 @@ import arlut.csd.JDialog.JDialogBuff;
  */
 
 public class userRenameWizard extends GanymediatorWizard {
-
-  // static field constants.. these should cohere with the field
-  // definitions for the user object type in the Ganymede schema
 
   /**
    * The user-level session context that this wizard is acting in.  This
