@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.14 $
-# $Date: 1999/01/18 22:19:04 $
+# $Revision: 1.15 $
+# $Date: 1999/01/18 22:25:32 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -253,26 +253,17 @@ $javadir = $ENV{GJAVA};
 
 # First we need to put out all the config.sh files that the build and
 # rebuild scripts depend on.  See the header for write_config() to
-# identify the four pieces.
+# identify the three pieces.
 
-@configs=("$rootdir/src/Qsmtp", "Qsmtp Mail Class",
-	  "$rootdir/src/classes",
-	  "$rootdir/src/jcrypt", "jcrypt Class",
-	  "$rootdir/src/classes",
-	  "$rootdir/src/jdj", "Image Resources Class",
-	  "$rootdir/src/classes",
-	  "$rootdir/src/Util", "Ganymede Utility Classes",
-	  "$rootdir/src/classes",
-	  "$rootdir/src/JTable", "Ganymede Table Classes",
-	  "$rootdir/src/classes",
-	  "$rootdir/src/JTree", "Ganymede Tree Classes",
-	  "$rootdir/src/classes",
-	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes",
-	  "$rootdir/src/classes",
-	  "$rootdir/src/server", "Ganymede Server Classes",
-	  "$rootdir/src/classes",
-	  "$rootdir/src/client", "Ganymede Client Classes",
-	  "$rootdir/src/classes");
+@configs=("$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$rootdir/src/classes",
+	  "$rootdir/src/jcrypt", "jcrypt Class", "$rootdir/src/classes",
+	  "$rootdir/src/jdj", "Image Resources Class", "$rootdir/src/classes",
+	  "$rootdir/src/Util", "Ganymede Utility Classes", "$rootdir/src/classes",
+	  "$rootdir/src/JTable", "Ganymede Table Classes", "$rootdir/src/classes",
+	  "$rootdir/src/JTree", "Ganymede Tree Classes", "$rootdir/src/classes",
+	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes", "$rootdir/src/classes",
+	  "$rootdir/src/server", "Ganymede Server Classes", "$rootdir/src/classes",
+	  "$rootdir/src/client", "Ganymede Client Classes", "$rootdir/src/classes");
 
 print "Generating config.sh files in source directories.\n\n";
 
@@ -280,7 +271,7 @@ while ($#configs > 0) {
     write_config(shift @configs, shift @configs, shift @configs);
 }
 
-@schemas=("$rootsir/src/schemas/bsd", "BSD",
+@schemas=("$rootdir/src/schemas/bsd", "BSD",
 	  "$rootdir/src/schemas/gash", "GASH",
 	  "$rootdir/src/schemas/gasharl", "ARL GASH",
 	  "$rootdir/src/schemas/linux", "LINUX",
