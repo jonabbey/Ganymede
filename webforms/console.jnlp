@@ -10,9 +10,10 @@
     <description>Ganymede Admin Console</description>
   </information>
   <resources>
+    <j2se version="1.3.1"/>
     <j2se version="1.3"/>
     <j2se version="1.2"/>
-    <jar href="ganymede.jar"/>
+    <jar href="ganymedeAdmin.jar"/>
   </resources>
   <applet-desc 
     documentBase="#WEBROOT"

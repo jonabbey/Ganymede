@@ -44,7 +44,8 @@
 	    <td>
 	      <font face="Arial, Helvetica">	    
 		<INPUT NAME="JVM" TYPE=radio VALUE="Java Plugin" CHECKED>Java Plugin<br>
-		<INPUT NAME="JVM" TYPE=radio VALUE="Native">Native
+		<INPUT NAME="JVM" TYPE=radio VALUE="Native">Native<br>
+		<INPUT NAME="JVM" TYPE=radio VALUE="WebStart">Java Web Start
 	      </font>
 	    </td>
 	  </tr>
@@ -67,9 +68,20 @@
 	      <font face = "Arial, Helvetica">
 		<b>Notes</b>
 	      <p>
-		Right now, almost all users will need to use the plug-in option to run the clients. If you are using a version of Mozilla with built-in Java 1.2 support, you can try selecting the native option.
-<br>&nbsp;
-	      </font>
+                Most users on Windows should use the 'Java Plugin'
+                option to run the Ganymede clients.  However, if you
+                have installed the <a
+                href="http://java.sun.com/products/javawebstart/">Java
+                Web Start</a> software on your machine, you should use
+                the 'Java Web Start' option, which will let you keep a
+                copy of the Ganymede clients on your local system for
+                fast start up time.</p>
+
+              <p>If you are on a Macintosh or OS/2 system, or if you
+		are running Mozilla on any platform, your browser may
+		support the 'Native' option, which lets the browser load
+		its own JDK 1.2 compatible JVM to handle the Ganymede clients.</p>
+	    </font>
 	    </td>
 	  </tr>
 	  <tr bgcolor ="#ffffff">
@@ -184,22 +196,31 @@
       
         if (jvmSel == "Java Plugin") { 
           URLtail = "_plugin";
+          URLsuffix = ".html";
         }
-        else {
-          if (jvmSel == "Native") { 
-            URLtail = "_native";
+        else if (jvmSel == "Native") { 
+            URLtail = "_native.html";
+            URLsuffix = ".html";
           }
+        else if (jvmSel == "WebStart") {
+            URLtail = "";
+            URLsuffix = ".jnlp";
         }
 
         // Build URL from client and jvm parts
-        URL = URLbase + URLhead + URLtail + ".html";
+        URL = URLbase + URLhead + URLtail + URLsuffix;
 
         // Open pop-up window
-        remote = window.open(URL, URLhead+URLtail, "width=320,height=350");
-        if (remote.opener == null) {
-          remote.opener = window;
+
+        if (URLsuffix == ".html") {
+          remote = window.open(URL, URLhead+URLtail, "width=320,height=350");
+          if (remote.opener == null) {
+            remote.opener = window;
+          }
+          remote.opener.name = "opener";
+        } else if (URLsuffix == ".jnlp") {
+          open(URL);
         }
-        remote.opener.name = "opener";
       }
       // end script hiding -->
     </SCRIPT>

@@ -8,8 +8,11 @@
     <vendor>Applied Research Laboratories</vendor>
     <homepage href="http://www.arlut.utexas.edu/gash2"/>
     <description>Ganymede Client</description>
+    <icon href="icon.gif"/>
   </information>
   <resources>
+    <j2se version="1.4"/>
+    <j2se version="1.3.1"/>
     <j2se version="1.3"/>
     <j2se version="1.2"/>
     <jar href="ganymede.jar"/>
