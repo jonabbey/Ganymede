@@ -190,6 +190,7 @@ refresh the jar files.
       <include name="arlut/csd/ganymede/server/PasswordDBField.class"/>
       <include name="arlut/csd/ganymede/server/IPDBField.class"/>
       <include name="arlut/csd/ganymede/server/FloatDBField.class"/>
+      <include name="arlut/csd/ganymede/server/FieldOptionDBField.class"/>
 
       <include name="arlut/csd/ganymede/server/GanymediatorWizard.class"/>
 
