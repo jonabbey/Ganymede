@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,29 +42,49 @@ public class Ganymede {
   public static CategoryTransport catTransport = null;
   public static BaseListTransport baseTransport = null;
   public static Vector builderTasks = new Vector();
-  
+
+  // properties from the ganymede.properties file
+
+  public static String serverHostProperty = null;
+  public static String rootname = null;
+  public static String defaultrootpassProperty = null;
+  public static String mailHostProperty = null;
+  public static String signatureFileProperty = null;
+
   /* -- */
 
   public static void main(String argv[]) 
   {
     File dataFile, logFile;
+    String propFilename = null;
 
     /* -- */
 
-    if (argv.length < 1)
+    if (argv.length < 2)
       {
 	System.out.println("Error: invalid command line parameters");
-	System.out.println("Usage: java Ganymede <dbfile> [<rmi debug file>]");
+	System.out.println("Usage: java Ganymede <dbfile> <property file> [<rmi debug file>]");
 	return;
       }
     else
       {
 	dbFilename = argv[0];
+	propFilename = argv[1];
 
-	if (argv.length >= 2)
+	if (argv.length >= 3)
 	  {
-	    debugFilename = argv[1];
+	    debugFilename = argv[2];
 	  }
+      }
+
+    if (!loadProperties(propFilename))
+      {
+	System.out.println("Error, couldn't successfully load properties from file " + propFilename + ".");
+	return;
+      }
+    else
+      {
+	System.out.println("Ganymede server: loaded properties successfully from " + propFilename);
       }
 
     boolean stop = true;
@@ -124,9 +144,9 @@ public class Ganymede {
 	    throw new RuntimeException("couldn't initialize journal");
 	  }
 
-	debug("Creating supergash object");
+	debug("Creating " + rootname + " object");
 	db.initializeObjects();
-	debug("supergash object created");
+	debug(rootname + " object created");
       }
 
     debug("Initializing Security Manager");
@@ -300,9 +320,9 @@ public class Ganymede {
 	    throw new RuntimeException("couldn't initialize journal");
 	  }
 
-	debug("Creating supergash object");
+	debug("Creating " + rootname + " object");
 	db.initializeObjects();
-	debug("supergash object created");
+	debug(rootname + " object created");
       }
 
     debug("Initializing Security Manager");
@@ -529,6 +549,7 @@ public class Ganymede {
   }
 
   /**
+   *
    * This method scans schedules all registered builder tasks for
    * execution.  This method will be called when a user commits a
    * transaction.
@@ -541,6 +562,68 @@ public class Ganymede {
       {
 	scheduler.demandTask((String) builderTasks.elementAt(i));
       }
+  }
+
+  /**
+   *
+   * This method loads properties from the ganymede.properties
+   * file.
+   * 
+   */
+
+  private static boolean loadProperties(String filename)
+  {
+    Properties props = new Properties();
+    boolean success = true;
+
+    /* -- */
+
+    try
+      {
+	props.load(new BufferedInputStream(new FileInputStream(filename)));
+      }
+    catch (IOException ex)
+      {
+	return false;
+      }
+
+    serverHostProperty = props.getProperty("ganymede.serverhost");
+    rootname = props.getProperty("ganymede.rootname");
+    defaultrootpassProperty = props.getProperty("ganymede.defaultrootpass");
+    mailHostProperty = props.getProperty("ganymede.mailhost");
+    signatureFileProperty = props.getProperty("ganymede.signaturefile");
+
+    if (serverHostProperty == null)
+      {
+	System.err.println("Couldn't get the server host property");
+	success = false;
+      }
+
+    if (rootname == null)
+      {
+	System.err.println("Couldn't get the root name property");
+	success = false;
+      }
+
+    if (defaultrootpassProperty == null)
+      {
+	System.err.println("Couldn't get the default rootname password property");
+	success = false;
+      }
+
+    if (mailHostProperty == null)
+      {
+	System.err.println("Couldn't get the mail host property");
+	success = false;
+      }
+
+    if (signatureFileProperty == null)
+      {
+	System.err.println("Couldn't get the signature file property");
+	success = false;
+      }
+
+    return success;
   }
 }
 
@@ -604,5 +687,4 @@ class gcTask implements Runnable {
      System.gc();
      Ganymede.debug("Garbage collection task finished");
    }
-
 }
