@@ -155,7 +155,6 @@ public class xmlfield implements FieldType {
   Vector delValues = null;	// if vector
   Vector addValues = null;	// if vector
   Vector addIfNotPresentValues = null; // if vector
-  boolean registered = false;
 
   /* -- */
 
