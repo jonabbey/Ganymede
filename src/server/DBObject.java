@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.33 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.34 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -670,6 +670,92 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   /**
    *
+   * <p>Get read-only list of DBFields contained in this object.</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  synchronized public Vector getFieldTemplateVector()
+  {
+    Vector results = new Vector();
+    Enumeration enum;
+    DBObjectBaseField fieldDef;
+
+    /* -- */
+
+    synchronized (objectBase)
+      {
+	enum = objectBase.sortedFields.elements();;
+	
+	while (enum.hasMoreElements())
+	  {
+	    fieldDef = (DBObjectBaseField) enum.nextElement();
+
+	    results.addElement(fieldDef.template);
+	  }
+      }
+
+    return results;
+  }
+
+
+  /**
+   *
+   * <p>Get read-only list of DBFields contained in this object.</p>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  synchronized public Vector getFieldInfoVector()
+  {
+    Vector results = new Vector();
+    Enumeration enum;
+    DBField field;
+
+    /* -- */
+
+    enum = fields.elements();
+    
+    while (enum.hasMoreElements())
+      {
+	field = (DBField) enum.nextElement();
+
+	results.addElement(new FieldInfo(field));
+      }
+
+    // sort by display order
+
+    (new VecQuickSort(results,  
+		      new arlut.csd.Util.Compare()
+		      {
+			public int compare(Object a, Object b) 
+			  {
+			    FieldInfo aF, bF;
+			    
+			    aF = (FieldInfo) a;
+			    bF = (FieldInfo) b;
+			 
+			    if (aF.displayOrder < bF.displayOrder)
+			      {
+				return -1;
+			      }
+			    else if (aF.displayOrder > bF.displayOrder)
+			      {
+				return 1;
+			      }
+			    else
+			      {
+				return 0;
+			      }
+		       }
+		   }
+		   )).sort();
+
+    return results;
+  }
+
+  /**
+   *
    * <p>Get read-only access to a field from this object.</p>
    *
    * @param id The field code for the desired field of this object.
@@ -821,6 +907,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     return results;
   }
+
 
   /**
    *

@@ -1,13 +1,14 @@
 package arlut.csd.ganymede;
 
 import java.util.Date;
+import java.util.Vector;
 import java.rmi.RemoteException;
 
 /**
  *
  * Base class for GANYMEDE client-visible objects.
  *
- * @version $Revision: 1.6 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.7 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -25,7 +26,7 @@ public interface db_object extends java.rmi.Remote {
 
   /**
    *
-   * Returns the numeric id of the object in the objectBase
+   * Returns the base id of the object's type
    *
    */
 
@@ -38,6 +39,28 @@ public interface db_object extends java.rmi.Remote {
    */
 
   public Invid getInvid() throws RemoteException;
+
+  /**
+   *
+   * Returns a vector of field definition templates, in display order.
+   *
+   * This vector may be cached, as it is static for this object type.
+   *
+   * @see arlut.csd.ganymede.FieldTemplate
+   *
+   */
+
+  public Vector getFieldTemplateVector() throws RemoteException;
+
+  /**
+   *
+   * Returns a vector of field information records, in display order.
+   *
+   * @see arlut.csd.ganymede.FieldInfo
+   *
+   */
+
+  public Vector getFieldInfoVector() throws RemoteException;
 
   /**
    *
