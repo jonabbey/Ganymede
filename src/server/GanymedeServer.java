@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 2001/06/01 01:35:01 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 2001/06/05 22:43:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1052,6 +1052,17 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	ex.printStackTrace();
 	throw new RuntimeException(ex.getMessage());
+      }
+
+    // if no one is logged in, right now, shut er down.
+
+    if (GanymedeServer.lSemaphore.getCount() == 0)
+      {
+	GanymedeAdmin.setState("No users logged in, shutting down.");
+
+	GanymedeServer.shutdown();
+
+	return;
       }
 
     shutdown = true;
