@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 1999/08/14 00:49:03 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 1999/10/08 01:56:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1036,6 +1036,16 @@ public class DBEditSet {
 
 			invids = new Vector();
 			invids.addElement(eObj.getInvid());
+
+			if (eObj.isEmbedded())
+			  {
+			    DBObject container = gSession.getContainingObj(eObj);
+			    
+			    if (container != null)
+			      {
+				invids.addElement(container.getInvid());
+			      }
+			  }
 		   
 			if (debug)
 			  {
