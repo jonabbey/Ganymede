@@ -59,6 +59,7 @@ import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.BigPipedInputStream;
 import arlut.csd.Util.TranslationService;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.rmi.RemoteException;
@@ -87,6 +88,15 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.XMLTransmitter");
 
+  /**
+   * <p>How big should the buffer between the XML dumping thread and
+   * the getNextChunk() method in this class?  This can be up to 64k,
+   * and the larger it is up to that limit, the fewer RMI calls will
+   * be required to pull a large XML dump from Ganymede.
+   */
+
+  static final int bufferSize = 65536;
+
   // ---
 
   private boolean eof;
@@ -95,15 +105,17 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
   private boolean doSendData;
   private boolean doSendSchema;
 
-  public XMLTransmitter(boolean sendData, boolean sendSchema) throws IOException
+  public XMLTransmitter(boolean sendData, boolean sendSchema) throws IOException, RemoteException
   {
+    super();			// UnicastRemoteObject initialization
+
     if (debug)
       {
 	System.err.println("XMLTransmitter constructed!");
       }
 
     outpipe = new PipedOutputStream();
-    inpipe = new BigPipedInputStream(outpipe);
+    inpipe = new BigPipedInputStream(outpipe, bufferSize);
     doSendData = sendData;
     doSendSchema = sendSchema;
 
@@ -139,7 +151,7 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
    * <p>This method returns null on end of file, and will throw an excepti.</p>
    */
 
-  public byte[] getNextChunk() throws RemoteException
+  public synchronized byte[] getNextChunk() throws RemoteException
   {
     try
       {
@@ -157,21 +169,26 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
 
 	int avail = 0;
 
-	inpipe.available();
+	avail = inpipe.available();
+
+	if (debug)
+	  {
+	    System.err.println("getNextChunk: avail was " + avail);
+	  }
 
 	// we don't want to try to send more than 64k at once, as it's
 	// hard (impossible?) to serialize an array longer than that.
 
 	// this used to be true, anyway...
 
-	if (avail > 65536 || avail == 0)
+	if (avail > bufferSize || avail == 0)
 	  {
-	    avail = 65536;
+	    avail = bufferSize;
 	  }
 
 	byte[] data = new byte[avail];
 
-	int count  = inpipe.read(data);	// we may block waiting for the schema dump thread here
+	int count = inpipe.read(data); // we may block waiting for the schema dump thread here
 
 	if (debug)
 	  {
@@ -226,7 +243,7 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
    * more of the file will be pulled.</p>
    */
   
-  public void end() throws RemoteException
+  public synchronized void end() throws RemoteException
   {
     eof = true;
 

@@ -227,7 +227,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     parser = new com.jclark.xml.sax.Driver();
     parser.setDocumentHandler(this);
 
-    BigPipedInputStream bpis = new BigPipedInputStream(sourcePipe);
+    BigPipedInputStream bpis = new BigPipedInputStream(sourcePipe, 65536); // 64k
     inputSource = new InputSource(bpis);
 
     this.bufferSize = bufferSize;

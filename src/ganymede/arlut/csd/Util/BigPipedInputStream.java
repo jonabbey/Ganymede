@@ -72,11 +72,14 @@ import java.io.PipedOutputStream;
 
 public class BigPipedInputStream extends PipedInputStream {
 
-  protected byte buffer[] = new byte[1048576]; // 16 * 64k
+  public BigPipedInputStream(int size) throws IOException {
+    super();
+    buffer = new byte[size];
+  }
 
-  /* -- */
-
-  public BigPipedInputStream(PipedOutputStream src) throws IOException {
+  public BigPipedInputStream(PipedOutputStream src, int size) throws IOException {
+    super();
+    buffer = new byte[size];
     connect(src);
   }
 }
