@@ -14,8 +14,8 @@
    
    Created: 12 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/03/24 03:29:48 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/02/11 07:16:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ import java.util.*;
  * remote access.  Thus, we are not extending UnicastRemoteObject
  * as we would if we were truly a remote object.</p>
  *
- * @version $Revision: 1.6 $ $Date: 1999/03/24 03:29:48 $ $Name:  $
+ * @version $Revision: 1.7 $ $Date: 2000/02/11 07:16:58 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -418,5 +418,14 @@ public class BaseDump implements Base, CategoryNode {
       }
 
     throw new RuntimeException("Ran out of chunk data: " + result.toString());
+  }
+
+  /**
+   * <p>as a convenience for using the standard VecQuickSort comparator.</p>
+   */
+
+  public String toString()
+  {
+    return getName();
   }
 }

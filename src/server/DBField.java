@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 2000/02/10 04:35:35 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 2000/02/11 07:16:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -19,6 +19,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -961,7 +962,7 @@ public abstract class DBField implements Remote, db_field {
 	throw new IllegalArgumentException("scalar method called on a vector field for field " + getName());
       }
 
-    if (this.value == submittedValue || this.value.equals(submittedValue))
+    if (this.value == submittedValue || (this.value != null && this.value.equals(submittedValue)))
       {
 	return retVal;		// no change (useful for null)
       }

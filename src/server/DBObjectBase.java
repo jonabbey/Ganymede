@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 2000/02/10 04:35:36 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 2000/02/11 07:16:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2473,7 +2473,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	result = readerList.removeElement(reader);
 
-	store.notifyAll();
+	store.lockSync.notifyAll();
 	return result;
       }
   }
@@ -2524,7 +2524,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	result = dumperList.removeElement(dumper);
 	
-	store.notifyAll();
+	store.lockSync.notifyAll();
 	return result;
       }
   }

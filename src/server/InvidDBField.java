@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.119 $
-   Last Mod Date: $Date: 2000/02/10 04:35:40 $
+   Version: $Revision: 1.120 $
+   Last Mod Date: $Date: 2000/02/11 07:17:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -86,7 +87,7 @@ import arlut.csd.Util.VectorUtils;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.119 $ %D%
+ * @version $Revision: 1.120 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -3771,7 +3772,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    return Ganymede.createErrorDialog("Invid Field Error",
 						      "invid value " + inv + 
-						      " is not a valid choice for field" +
+						      " is not a valid choice for field " +
 						      getName() + " in object " + owner.getLabel() +
 						      ".  Serious client error?");
 		  }
