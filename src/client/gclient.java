@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.79 $ %D%
+   Version: $Revision: 1.80 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2570,56 +2570,43 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	try
 	  {
-	    StringDialog d = new StringDialog(this, 
-					      "Verify invalidation", 
-					      "Are you sure you want to inactivate " + 
-					      session.viewObjectLabel(invid) + "?", "Yes", "No");
-	    Hashtable result = d.DialogShow();
-
-	    if (result == null)
+	    setStatus("inactivating " + invid);
+	    setWaitCursor();
+	    
+	    retVal = session.inactivate_db_object(invid);
+	    
+	    if (retVal != null)
 	      {
-		setStatus("Cancelled!");
-	      }
-	    else
-	      {
-		setStatus("inactivating " + invid);
-		setWaitCursor();
-
-		retVal = session.inactivate_db_object(invid);
-
-		if (retVal != null)
-		  {
-		    retVal = handleReturnVal(retVal);
-		    if (retVal == null)
-		      {
-			ok = true;
-		      }
-		    else
-		      {
-			ok = retVal.didSucceed();
-		      }
-		  }
-		else
+		retVal = handleReturnVal(retVal);
+		if (retVal == null)
 		  {
 		    ok = true;
 		  }
-
-		if (ok)
-		  {
-		    Short type = new Short(invid.getType());
-		    ObjectHandle handle = getObjectHandle(invid, type);
-
-		    inactivateHash.put(invid, new CacheInfo(type, session.viewObjectLabel(invid), null, handle));
-		    setIconForNode(invid);
-		    tree.refresh();
-		    setStatus("Object inactivated.");
-		    somethingChanged();
-
-		  }
 		else
 		  {
-		    setStatus("Could not inactivate object.");
+		    ok = retVal.didSucceed();
 		  }
+	      }
+	    else
+	      {
+		ok = true;
+	      }
+
+	    if (ok)
+	      {
+		Short type = new Short(invid.getType());
+		ObjectHandle handle = getObjectHandle(invid, type);
+
+		inactivateHash.put(invid, new CacheInfo(type, session.viewObjectLabel(invid), null, handle));
+		setIconForNode(invid);
+		tree.refresh();
+		setStatus("Object inactivated.");
+		somethingChanged();
+
+	      }
+	    else
+	      {
+		setStatus("Could not inactivate object.");
 	      }
 	  }
 	catch (RemoteException rx)
