@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.12 $
+   Version: $Revision$
    Last Mod Date: $Date$
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 

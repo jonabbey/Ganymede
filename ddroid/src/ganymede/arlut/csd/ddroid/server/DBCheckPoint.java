@@ -1,12 +1,12 @@
 /*
    GASH 2
 
-   DBCheckPointObj.java
+   DBCheckPoint.java
 
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.4 $
+   Version: $Revision$
    Last Mod Date: $Date$
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -14,7 +14,7 @@
 	    
    Directory Droid Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996-2004
    The University of Texas at Austin
 
    Contact information
@@ -50,39 +50,64 @@
 
 package arlut.csd.ddroid.server;
 
-import java.util.Hashtable;
-
-import arlut.csd.ddroid.common.Invid;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                 DBCheckPointObj
+                                                                    DBCheckPoint
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBCheckPointObj holds a snapshot of an object's state at a moment
- * in time.  It is used by the {@link arlut.csd.ddroid.server.DBCheckPoint DBCheckPoint}
- * class to record the state of the fields in an object.</p>
+ * <p>DBCheckPoint is a class designed to allow server-side code that
+ * needs to attempt a multi-step operation that might not successfully
+ * complete to be able to undo all changes made without having to
+ * abort the entire transaction.</p>
+ * 
+ * <p>In other words, a DBCheckPoint is basically a transaction within 
+ * a transaction.</p>
  */
 
-class DBCheckPointObj {
+class DBCheckPoint {
 
-  Invid invid;
-  byte status;
+  static final boolean debug = false;
 
-  /**
-   * <p>This field actually holds the object value state.</p>
-   */
+  // ---
 
-  Hashtable fields;
+  Vector
+    objects = null,
+    logEvents = null,
+    invidDeleteLocks = null;
 
   /* -- */
 
-  DBCheckPointObj(DBEditObject obj)
+  DBCheckPoint(Vector logEvents, DBEditObject[] transObjects, DBSession session)
   {
-    this.invid = obj.getInvid();
-    this.status = obj.status;
-    this.fields = obj.checkpoint();
+    DBEditObject obj;
+
+    /* -- */
+
+    // assume that log events are not going to change once recorded,
+    // so we can make do with a shallow copy.
+
+    this.logEvents = (Vector) logEvents.clone();
+
+    objects = new Vector(transObjects.length);
+
+    for (int i = 0; i < transObjects.length; i++)
+      {
+	obj = transObjects[i];
+
+	if (debug)
+	  {
+	    System.err.println("DBCheckPoint: add " + obj.getLabel() + 
+			       " (" + obj.getInvid().toString() + ")");
+	  }
+
+	objects.addElement(new DBCheckPointObj(obj));
+      }
+
+    invidDeleteLocks = DBDeletionManager.getSessionCheckpoint(session);
   }
 }
+

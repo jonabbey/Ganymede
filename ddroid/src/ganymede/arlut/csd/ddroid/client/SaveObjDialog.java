@@ -5,7 +5,7 @@
    Dialog for saving or mailing a table from dialog.
    
    Created: October 19, 1999
-   Version: $Revision: 1.4 $
+   Version: $Revision$
    Last Mod Date: $Date$
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$

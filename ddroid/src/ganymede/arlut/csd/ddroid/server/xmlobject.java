@@ -7,7 +7,7 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.8 $
+   Version: $Revision$
    Last Mod Date: $Date$
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
