@@ -5,7 +5,7 @@
    Hackified enumeration of defined field types
    
    Created: 15 April 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,5 +20,6 @@ public interface FieldType {
   static final short DATE = 2;
   static final short STRING = 3;
   static final short INVID = 4;
-  static final short LASTFIELD = 4;
+  static final short PERMISSIONMATRIX = 5;
+  static final short LASTFIELD = 5;
 }
