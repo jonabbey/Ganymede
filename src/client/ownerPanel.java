@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,7 @@ import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
 
-public class ownerPanel extends JPanel implements JsetValueCallback {
+public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
   private final static boolean debug = true;
 
@@ -37,29 +37,15 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
   framePanel
    fp;
 
+  JPanel
+    holdOnPanel;
+
   public ownerPanel(invid_field field, boolean editable, framePanel fp)
     {
       if (debug)
 	{
 	  System.out.println("Adding ownerPanel");
 	}
-
-      /*
-      if (field != null)
-	{
-	  try
-	    {
-	      if (field.getType() == SchemaConstants.OwnerListField)
-		{
-		  throw new RuntimeException("Non-ownerListField passed to ownerPanel constructor");
-		}
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new RuntimeException("Could not get type in ownerPanel constuctor: " + rx);
-	    }
-	}
-	*/
 
       this.editable = editable;
       this.field = field;
@@ -68,26 +54,45 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
       setLayout(new BorderLayout());
 
       setBorder(new EmptyBorder(new Insets(5,5,5,5)));
-      if (field == null)
-	{
-	  JLabel l = new JLabel("There is no owner for this object.");
-	  add("Center", l);
-	}
-      else
-	{
-	  try
-	    {
-	      tStringSelector ownerList = createInvidSelector(field);
-	      ownerList.setBorder(new LineBorder(Color.black));
-	      ownerList.setVisibleRowCount(-1);
-	      add("Center", ownerList);
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new RuntimeException("Could not addDateField: " + rx);
-	    }
-	}
+
+      holdOnPanel = new JPanel();
+      holdOnPanel.add(new JLabel("Loading ownerPanel, please wait.", new ImageIcon(fp.getWaitImage()), SwingConstants.CENTER));
+      
+      add("Center", holdOnPanel);
+      invalidate();
+      fp.validate();
+
+      Thread thread = new Thread(this);
+      thread.start();
+
     }
+
+  public void run()
+  {
+    System.out.println("Starting new thread");
+    if (field == null)
+      {
+	JLabel l = new JLabel("There is no owner for this object.");
+	add("Center", l);
+      }
+    else
+      {
+	try
+	  {
+	    tStringSelector ownerList = createInvidSelector(field);
+	    ownerList.setBorder(new LineBorder(Color.black));
+	    ownerList.setVisibleRowCount(-1);
+	    remove(holdOnPanel);
+	    add("Center", ownerList);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not addDateField: " + rx);
+	  }
+      }
+    invalidate();
+    fp.validate();
+  }
 
   private tStringSelector createInvidSelector(invid_field field) throws RemoteException
   {

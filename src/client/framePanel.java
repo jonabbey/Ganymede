@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,18 +33,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   // Indexes for the tabs in the JTabbedPane
   // These numbers have to correspond to the order they are added as tabs,
-  // so they are set to current++ when one is added.  -1 means not added yet.
-  int 
+  // so they are set to current++ when one is added.  -1 means not added yet.(to the pane)
+  // An index of > -1 does NOT mean the pane has been created.
+  public int 
     current = 0,
-    GENERAL = -1,
-    REMOVAL_DATE = -1,
-    EXPIRATION_DATE = -1,
-    HISTORY = -1,
-    OWNER = -1,
-    ADMIN_HISTORY = -1,
-    NOTES = -1,
-    OBJECTS_OWNED = -1,
-    PERSONAE = -1;
+    general_index = -1,
+    removal_date_index = -1,
+    expiration_date_index = -1,
+    history_index = -1,
+    owner_index = -1,
+    admin_history_index = -1,
+    notes_index = -1,
+    objects_owned_index = -1,
+    personae_index = -1;
 
   JProgressBar
     progressBar;
@@ -72,21 +73,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     admin_history, // holds an adminHistoryPanel (only for adminPersonae)
     objects_owned;  // Holds an ownershipPanel
 
+  Image
+    waitImage = null;
+
   JPanel
     personae;
 
-  boolean
-  // _created booleans are true after the corresponding panes are created
-    general_created = false,
-    expiration_date_created = false,
-    removal_date_created = false,
-    owner_created = false,
-    notes_created = false,
-    admin_history_created = false,
-    history_created = false,
-    objects_owned_created = false,
-    personae_created = false;;
-  
+  Vector
+    createdList = new Vector(); // contains the Integers that have been created
+
   date_field
     exp_field,
     rem_field,
@@ -132,6 +127,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   notesPanel
     my_notesPanel = null;
 
+  Invid
+    invid;
+
   public framePanel(db_object object, boolean editable, windowPanel winP, String title)
     {
       if (debug)
@@ -160,6 +158,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       progressPanel.add(progressBar);
 
       getContentPane().add("Center", progressPanel);
+
+      try
+	{
+	  invid = object.getInvid();
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get object's invid");
+	}
       
       Thread thread = new Thread(this);
       thread.start();
@@ -192,36 +199,31 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       pane = new JTabbedPane();
       
       // Add the panels to the tabbedPane
-      System.out.println("Adding GENERAL " + current);
+      System.out.println("Adding general_index " + current);
       general = new JScrollPane();
       pane.addTab("General", null, general);
-      GENERAL = current++;
-      System.out.println("GENERAL=" + GENERAL);
+      general_index = current++;
+      System.out.println("general_index=" + general_index);
       owner = new JScrollPane();
       pane.addTab("Owner", null, owner);
-      OWNER = current++;
+      owner_index = current++;
       
       // Check to see if this gets an objects_owned panel
+      short id = -1;
       try
 	{
-	  short id = object.getTypeID();
+	  id = object.getTypeID();
 	  if (id == SchemaConstants.OwnerBase)
 	    {
 	      objects_owned = new JScrollPane();
 	      pane.addTab("Objects Owned", null, objects_owned);
-	      OBJECTS_OWNED = current++;
+	      objects_owned_index = current++;
 	    }
 	  else if (id == SchemaConstants.UserBase)
 	    {
 	      personae = new JPanel(false);
 	      pane.addTab("Personae", null, personae);
-	      PERSONAE = current++;
-	    }
-	  else if (id == SchemaConstants.PersonaBase)
-	    {
-	      admin_history = new JScrollPane();
-	      pane.addTab("Admin History", null, admin_history);
-	      ADMIN_HISTORY = current++;
+	      personae_index = current++;
 	    }
 	}
       catch (RemoteException rx)
@@ -246,13 +248,22 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       // Add the history tab
       history = new JScrollPane();
       pane.addTab("History", null, history);
-      HISTORY = current++;
+      history_index = current++;
+
+      if (id == SchemaConstants.PersonaBase)
+	{
+	  admin_history = new JScrollPane();
+	  pane.addTab("Admin History", null, admin_history);
+	  admin_history_index = current++;
+	}
+
 
       pane.addChangeListener(this);
 
       // Create all the panes
 
-      showGeneralTab();
+      createPanel(general_index);
+      showTab(general_index);
       contentPane.remove(progressPanel);
       contentPane.add("Center", pane);
 
@@ -261,6 +272,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       validate();
       System.out.println("Done Calling validate in the fp");
     }
+
+  /**
+   * Return the invid of the object contained in this frame panel.
+   */
+
+  public Invid getObjectInvid()
+  {
+    return invid;
+  }
+
 
   /**
    * Note that this might be null.
@@ -315,6 +336,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   }
 
+  public Image getWaitImage()
+  {
+    if (waitImage == null)
+      {
+	waitImage = PackageResources.getImageResource(this, "atwork01.gif", getClass());
+      }
+    
+    return waitImage;
+
+  }
   //This need to be changed to show the progress bar
   void create_general_panel()
     {
@@ -329,17 +360,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       general.setViewportView(cp);
       //general.setViewportView(progressBar);
-      general_created = true;
+      createdList.addElement(new Integer(general_index));
       setStatus("Done");
       
-    }
-
-  // Don't use this
-  public void validate_general()
-    {
-      System.out.println("Crazy monkey!  Don't use validate_general!");
-      general.invalidate();
-      validate();
     }
 
   void create_expiration_date_panel()
@@ -350,7 +373,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
       expiration_date.setViewportView(new datePanel(exp_field, "Expiration date", editable, this));
 	  
-      expiration_date_created = true;
+      createdList.addElement(new Integer(expiration_date_index));
 
       setStatus("Done");
       
@@ -364,9 +387,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
       removal_date.setViewportView(new datePanel(rem_field, "Removal Date", editable, this));
 	  
-      removal_date_created = true;
+      createdList.addElement(new Integer(removal_date_index));
 
       setStatus("Done");
+
+      removal_date.invalidate();
+      validate();
       
     }
 
@@ -386,7 +412,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  throw new RuntimeException("Could not generate Owner field: " + rx);
 	}
 	
-      owner_created = true;
+      createdList.addElement(new Integer(owner_index));
+
       setStatus("Done");
       
       owner.invalidate();
@@ -396,16 +423,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   void create_history_panel()
     {
       setStatus("Creating history panel");
-      try
-	{
-	  history.setViewportView(new historyPanel(object.getInvid(), getgclient()));
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get the invid: " + rx);
-	}
-
-      history_created = true;
+      history.setViewportView(new historyPanel(invid, getgclient()));
+	
+      createdList.addElement(new Integer(history_index));
       
       history.invalidate();
       validate();
@@ -417,16 +437,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   void create_admin_history_panel()
     {
       setStatus("Creating admin history panel");
-      try
-	{
-	  admin_history.setViewportView(new adminHistoryPanel(object.getInvid(), getgclient()));
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get the invid: " + rx);
-	}
-
-      admin_history_created = true;
+      admin_history.setViewportView(new adminHistoryPanel(invid, getgclient()));
+	
+      createdList.addElement(new Integer(admin_history_index));
       
       admin_history.invalidate();
       validate();
@@ -461,7 +474,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       notes.setViewportView(my_notesPanel);
 
-      notes_created = true;
+      createdList.addElement(new Integer(notes_index));
       setStatus("Done");
 
       notes.invalidate();
@@ -486,7 +499,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
 
       objects_owned.setViewportView(new ownershipPanel(oo, editable, this));
-      objects_owned_created = true;
+      createdList.addElement(new Integer(objects_owned_index));
 
       objects_owned.invalidate();
       validate();
@@ -512,7 +525,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
       personae.setLayout(new BorderLayout());
       personae.add("Center", new personaPanel(p, editable, this));
-      personae_created = true;
+      createdList.addElement(new Integer(personae_index));
       
       personae.invalidate();
       validate();
@@ -528,7 +541,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    */
   public void addExpirationDatePanel()
     {
-      if (EXPIRATION_DATE == -1)
+      if (expiration_date_index == -1)
 	{
 	  if (debug)
 	    {
@@ -536,12 +549,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    }
 	  expiration_date = new JScrollPane();
 	  pane.addTab("Expiration", null, expiration_date);
-	  EXPIRATION_DATE = current++;
+	  expiration_date_index = current++;
 	}
     }
   public void addRemovalDatePanel()
     {
-      if (REMOVAL_DATE == -1)
+      if (removal_date_index == -1)
 	{
 	  if (debug)
 	    {
@@ -550,7 +563,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  
 	  removal_date = new JScrollPane();
 	  pane.addTab("Removal", null, removal_date);
-	  REMOVAL_DATE = current++;
+	  removal_date_index = current++;
 	}
     }
 
@@ -561,7 +574,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  System.out.println("Adding notes tab");
 	}
       pane.addTab("Notes", null, notes);
-      NOTES = current++;
+      notes_index = current++;
       
       try
 	{
@@ -578,7 +591,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 		  System.out.println("Adding the noteIcon");
 		  ImageIcon noteIcon = new ImageIcon((Image)PackageResources.getImageResource(this, "note02.gif", getClass()));
 		  
-		  pane.setIconAt(NOTES, noteIcon);
+		  pane.setIconAt(notes_index, noteIcon);
 		}
 	      else
 		{
@@ -606,92 +619,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   // I don't know if need these at all.  There could be one showTab(int).  Why use these
   // anyway?
 
-  public void showGeneralTab()
-    {
-      if (GENERAL == -1)
-	{
-	  System.out.println("General tab has not been created.");
-	  return;
-	}
-      System.out.println("Setting general as the selected index.");
-      pane.setSelectedIndex(GENERAL);
-      showPanel(GENERAL);
-    }
-
-  public void showOwnerTab()
-    {
-      if (OWNER == -1)
-	{
-	  System.out.println("Owner tab has not been created.");
-	  return;
-	}
-      pane.setSelectedIndex(OWNER);
-    }
-
-  public void showNotesTab()
-    {
-      if (NOTES == -1)
-	{
-	  System.out.println("Notes tab has not been created.");
-	  return;
-	}
-      pane.setSelectedIndex(NOTES);
-    }
-
-  public void showExpirationDateTab()
-    {
-      if (EXPIRATION_DATE == -1)
-	{
-	  System.out.println("Expiration date tab has not been created.");
-	  return;
-	}
-      pane.setSelectedIndex(EXPIRATION_DATE);
-    }
-
-  public void showRemovalDateTab()
-    {
-      if (REMOVAL_DATE == -1)
-	{
-	  System.out.println("Removal date tab has not been created.");
-	  return;
-	}
-      pane.setSelectedIndex(REMOVAL_DATE);
-    }
-
-  public void showHistoryTab()
-    {
-      if (HISTORY == -1)
-	{
-	  System.out.println("History panel has not been created");
-	  return;
-	}
-      pane.setSelectedIndex(HISTORY);
-    }
-
-  public void showAdminHistoryTab()
-    {
-      if (ADMIN_HISTORY == -1)
-	{
-	  System.out.println("Admin History panel has not been created");
-	  return;
-	}
-      pane.setSelectedIndex(ADMIN_HISTORY);
-    }
-
-  public Color getVectorBG()
+  public void showTab(int index)
   {
-    if (darkNow)
+    if (index == -1)
       {
-	vectorBG = vectorBG.brighter();
+	System.out.println("This tab has not been added to the pane yet.");
       }
-    else
-      {
-	vectorBG = vectorBG.darker();
-      }
-
-    darkNow = !darkNow;
-
-    return vectorBG;
+    pane.setSelectedIndex(index);
   }
 
   // For the ChangeListener
@@ -699,82 +633,65 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     {
       int index = pane.getSelectedIndex();
 
-      showPanel(index);
+      if (!createdList.contains(new Integer(index)))
+	{
+	  System.out.println("Creating a new pane.");
+	  createPanel(index);
+	}
     }
 
-  public void showPanel(int index)
+  /**
+   * This checks to see if the panel is created, and creates it if needed.
+   */
+
+  public void createPanel(int index)
     {
-      System.out.println("index = " + index + " GENERAL= " + GENERAL);
+      System.out.println("index = " + index + " general_index= " + general_index);
 	
-      if (index == GENERAL)
+      if (index == general_index)
 	{
-	  if (! general_created)
-	    {
-	      setStatus("Creating general panel");
-	      create_general_panel();
-	    }
+	  setStatus("Creating general panel");
+	  create_general_panel();
 	}
-      else if (index == EXPIRATION_DATE)
+      else if (index == expiration_date_index)
 	{
-	  if (! expiration_date_created)
-	    {
-	      setStatus("Creating dates panel");
-	      create_expiration_date_panel();
-	    }
+	  setStatus("Creating dates panel");
+	  create_expiration_date_panel();
 	}
-      else if (index == REMOVAL_DATE)
+      else if (index == removal_date_index)
 	{
-	  if (! removal_date_created)
-	    {
-	      setStatus("Creating dates panel");
-	      create_removal_date_panel();
-	    }
+	  setStatus("Creating dates panel");
+	  create_removal_date_panel();
 	}
-      else if (index == NOTES)
+      else if (index == notes_index)
 	{
-	  if (! notes_created)
-	    {
-	      setStatus("Creating notes panel");
-	      create_notes_panel();
-	    }
+	  setStatus("Creating notes panel");
+	  create_notes_panel();
 	}
-      else if (index == OWNER)
+      else if (index == owner_index)
 	{
-	  if (! owner_created)
-	    {
-	      setStatus("Creating owner panel");
-	      create_owner_panel();
-	    }
+	  setStatus("Creating owner panel");
+	  create_owner_panel();
 	}
-      else if (index == OBJECTS_OWNED)
+      else if (index == objects_owned_index)
 	{
-	  if (! objects_owned_created)
-	    {
-	      setStatus("Creating objects owned panel");
-	      create_objects_owned_panel();
-	    }
+	  setStatus("Creating objects owned panel");
+	  create_objects_owned_panel();
 	}
-      else if (index == PERSONAE)
+      else if (index == personae_index)
 	{
-	  if (! personae_created)
-	    {
-	      setStatus("Creating persona panel");
-	      create_personae_panel();
-	    }
+	  setStatus("Creating persona panel");
+	  create_personae_panel();
 	}
-      else if (index == HISTORY)
+      else if (index == history_index)
 	{
-	  if (! history_created)
-	    {
-	      create_history_panel();
-	    }
+	  setStatus("Creating history panel.");
+	  create_history_panel();
 	}
-      else if (index == ADMIN_HISTORY)
+      else if (index == admin_history_index)
 	{
-	  if (! admin_history_created)
-	    {
-	      create_admin_history_panel();
-	    }
+	  setStatus("Creating admin history");
+	  create_admin_history_panel();
 	}
       else
 	{
@@ -785,17 +702,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   // Convienence methods
 
-  gclient getgclient()
+  final gclient getgclient()
     {
       return getWindowPanel().getgclient();
     }
 
-  windowPanel getWindowPanel()
+  final windowPanel getWindowPanel()
     {
       return wp;
     }
 
-  private void setStatus(String status)
+  private final void setStatus(String status)
     {
       wp.gc.setStatus(status);
     }

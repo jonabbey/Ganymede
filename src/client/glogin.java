@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,6 @@ import java.rmi.server.*;
 import gjt.ImageCanvas;
 import jdj.*;
 
-import arlut.csd.DataComponent.*;
 import arlut.csd.JDialog.*;
 import arlut.csd.ganymede.*;
 
@@ -38,16 +37,18 @@ import arlut.csd.ganymede.*;
  *
  */
 
-public class glogin extends java.applet.Applet implements Runnable {
+public class glogin extends JApplet implements Runnable {
+
+  private GridBagLayout gbl;
+  private GridBagConstraints gbc;
 
   protected Image ganymede_logo;
-  protected TextField username;
-  protected TextField passwd;
+  protected JTextField username;
+  protected JPasswordField passwd;
   protected JButton connector;
   protected JButton _quitButton;
-  protected Label _connectStatus = new Label();
   protected JPanel bPanel;
-  protected static Frame my_frame = null;
+  protected static JFrame my_frame = null;
 
   protected static Server  my_server;
 
@@ -79,10 +80,10 @@ public class glogin extends java.applet.Applet implements Runnable {
 
     my_glogin.setLayout(new BorderLayout());
 
-    my_frame = new Frame("Ganymede Client");
-    my_frame.setLayout(new BorderLayout());
+    my_frame = new JFrame("Ganymede Client");
+    my_frame.getContentPane().setLayout(new BorderLayout());
    
-    my_frame.add(my_glogin,"Center");
+    my_frame.getContentPane().add(my_glogin,"Center");
 
     my_frame.pack();
     my_frame.setSize(265,380);    
@@ -117,7 +118,7 @@ public class glogin extends java.applet.Applet implements Runnable {
 	  {
 	    ganymede_logo = getImage(new URL(gConfig._GANYMEDE_LOGO_URL));
 
-	    my_frame = new Frame();
+	    my_frame = new JFrame();
 	  }
       }
     catch (java.net.MalformedURLException e) 
@@ -125,59 +126,97 @@ public class glogin extends java.applet.Applet implements Runnable {
 	System.out.println("The URL was malformed");
       }
    
-    setLayout(new BorderLayout());
+    gbl = new GridBagLayout();
+    gbc = new GridBagConstraints();
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.gridheight = 1;
+    gbc.insets = new Insets(1,1,0,0);
 
-    add(new ImageCanvas(ganymede_logo), "Center");
-    
-    Panel p = new Panel();
+    setLayout(gbl);
 
-    p.setLayout(new GridLayout(4,1));
+    //add(new ImageCanvas(ganymede_logo), "North");
+    ImageCanvas image = new ImageCanvas(ganymede_logo);
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 3;
+    gbl.setConstraints(image, gbc);
+    add(image);
 
-    p.add(new Label("Ganymede Network Management System"));
+    JLabel label = new JLabel("Ganymede Network Management System");
+    gbc.gridy = 1;
+    gbl.setConstraints(label, gbc);
+    add(label);
 
     // the username and passwd fields here won't have their
     // callback set with addTextListener().. instead, we'll
     // trap the login/quit buttons, and query these
     // fields when we process the buttons.
     
-    username = new TextField("",20);
 
-    p.add(new FieldWrapper("Username:",username));
+    JLabel userL = new JLabel("Username:");
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridy = 2;
+    gbc.gridwidth = 1;
+    gbl.setConstraints(userL, gbc);
+    add(userL);
 
-    passwd = new TextField("",20);
-    passwd.setEchoChar('*');
+    username = new JTextField(20);
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridx = 1;
+    gbl.setConstraints(username, gbc);
+    add(username);
+    
+    JLabel passL = new JLabel("Password:");
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+    gbc.gridwidth = 1;
+    gbl.setConstraints(passL, gbc);
+    add(passL);
 
-    p.add(new FieldWrapper("Password:",passwd));
+    passwd = new JPasswordField(20);
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridx = 1;
+    gbl.setConstraints(passwd, gbc);
+    add(passwd);
     
     username.setEnabled(false);
     username.setText("supergash");
     passwd.setEnabled(false);
 
-    bPanel = new JPanel();
-    bPanel.setLayout(new BorderLayout());
-
     _quitButton = new JButton("Quit");
     _quitButton.setBackground(ClientColor.buttonBG);
     _loginHandler = new LoginHandler(this);
 
-    connector = new JButton("Login to Server");
-    connector.setKeyAccelerator(KeyEvent.VK_ENTER);
+    connector = new JButton("Connecting...");
     connector.setOpaque(true);
     connector.setBackground(ClientColor.buttonBG);
     connector.addActionListener(_loginHandler);
-    
-    _quitButton.addActionListener(_loginHandler);
 
-    bPanel.add(_connectStatus,"Center");
+    JPanel buttonPanel = new JPanel(new BorderLayout());
+
+    buttonPanel.add("Center", connector);
+
     if (!WeAreApplet)
       {
-	//Don't let applets quit
-	bPanel.add(_quitButton,"East");
+	buttonPanel.add("East", _quitButton);
       }
 
-    p.add(bPanel);
+    gbc.gridx = 0;
+    gbc.gridy = 4;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbl.setConstraints(buttonPanel, gbc);
+    add(buttonPanel);
 
-    add(p,"South");
+
+    passwd.addActionListener(_loginHandler);
+    username.addActionListener(_loginHandler);
+
+
+    _quitButton.addActionListener(_loginHandler);
 
     // frames like to be packed
 
@@ -259,22 +298,22 @@ public class glogin extends java.applet.Applet implements Runnable {
       switch (state) 
 	{
         case 0: 
-	  _connectStatus.setText("Connecting... |");
+	  connector.setText("Connecting... |");
 	  state++;
 	  break;
 
 	case 1:
-	  _connectStatus.setText("Connecting...  /");
+	  connector.setText("Connecting...  /");
 	  state++;
 	  break;
 
 	case 2:
-	  _connectStatus.setText("Connecting...  -");
+	  connector.setText("Connecting...  -");
 	  state++;
 	  break;
 
 	case 3: 
-	  _connectStatus.setText("Connecting... \\");
+	  connector.setText("Connecting... \\");
 	  state = 0;
 	  break;
 	}
@@ -293,15 +332,14 @@ public class glogin extends java.applet.Applet implements Runnable {
     // At this point, a connection to the server has been established,
     // So we allow the "Login to Server" button to be visible.
 
-    bPanel.remove(_connectStatus);
-    bPanel.add(connector,"Center");
-    bPanel.doLayout();
 
+    connector.setText("Login to server");
     username.setEnabled(true);
     passwd.setEnabled(true);
     passwd.requestFocus();
 
-
+    invalidate();
+    validate();
   }
 
   public void stop() 
@@ -362,10 +400,19 @@ class LoginHandler implements ActionListener {
 
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == my_glogin.connector)
+    if (e.getSource() == my_glogin.username)
+      {
+	my_glogin.passwd.requestFocus();
+      }
+    else if (e.getSource() == my_glogin.passwd)
+      {
+	my_glogin.connector.doClick();
+      }
+    
+    else if (e.getSource() == my_glogin.connector)
       {
 	String uname = my_glogin.username.getText().trim();
-	String pword = my_glogin.passwd.getText().trim();
+	String pword = my_glogin.passwd.getText();
 
 	my_glogin.my_username = uname;
 	my_glogin.my_passwd = pword;
@@ -441,6 +488,7 @@ class LoginHandler implements ActionListener {
 
     gclient _client = new gclient(_session,my_glogin);
 
+    my_glogin.passwd.setText("");
     /* At this point, all the login matters have been handled and we have
        a Session object in our hands.  We now instantiate the main client
        that will be used to interact with the Ganymede server.*/

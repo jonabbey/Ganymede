@@ -158,7 +158,7 @@ public class personaPanel extends JPanel implements ActionListener{
 
 	try
 	  {
-	    Invid user = fp.object.getInvid();
+	    Invid user = fp.getObjectInvid();
 
 	    removed = fp.object.getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
 
@@ -279,7 +279,7 @@ class personaContainer extends JScrollPane implements Runnable{
 
 	    // First set up the back linking
 	    db_object newObject = pp.fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase);
-	    Invid user = pp.fp.object.getInvid();
+	    Invid user = pp.fp.getObjectInvid();
 	    
 	    pp.fp.object.getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
 	    newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);

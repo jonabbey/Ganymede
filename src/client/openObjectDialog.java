@@ -318,11 +318,6 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		
 		if (edit_invids.size() == 1)
 		  {
-		    // I don't know if this is enough.  It needs to be added to the changedHash
-		    // hash, but i don't know how to find the node right now.  Maybe that node
-		    // hasn't even been added yet.  Maybe there should be another hash, of created
-		    // nodes, or maybe there already is.
-		    //client.wp.addWindow(client.session.edit_db_object( (Invid)((listHandle)edit_invids.elementAt(0)).getObject()) , true);
 		    invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
 		    close(true);
 		  }

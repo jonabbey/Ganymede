@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,12 +31,14 @@ public class Loader extends Thread {
 
   private Hashtable 
     baseMap,
+    baseNames,
     baseHash;
 
   private Vector
     baseList;
  
   private boolean
+    baseNamesLoaded = false,
     baseListLoaded = false,
     baseMapLoaded = false,
     baseHashLoaded = false;
@@ -66,6 +68,7 @@ public class Loader extends Thread {
     try
       {
 	loadBaseList();
+	loadBaseNames();
 	loadBaseHash();
 	loadBaseMap();
       }
@@ -113,6 +116,40 @@ public class Loader extends Thread {
       }
 
     return baseList;
+    
+  }
+
+  public Hashtable getBaseNames()
+  {
+    while (! baseNamesLoaded)
+      {
+	synchronized (this)
+	  {
+	    System.out.println("Dang, have to wait to get the base names list");
+	    try
+	      {
+		this.wait();
+	      }
+	    catch (InterruptedException x)
+	      {
+		throw new RuntimeException("Interrupted while waiting for base names to load: " + x);
+	      }
+	  }
+      }
+
+    if (debug)
+      {
+	if (baseNames == null)
+	  {
+	    System.out.println("baseNames is null");
+	  }
+	else
+	  {
+	    System.out.println("returning baseNames");
+	  }
+      }
+
+    return baseNames;
     
   }
 
@@ -199,6 +236,29 @@ public class Loader extends Thread {
 
     baseListLoaded = true;
   }
+
+
+  private synchronized void loadBaseNames() throws RemoteException
+  {
+    baseNames = new Hashtable();
+    
+    Base b;
+    Vector list = getBaseList();
+
+    for (int i = 0; i < list.size(); i++)
+      {
+	b = (Base)list.elementAt(i);
+	baseNames.put(b, b.getName());
+      }
+      
+    if (debug)
+      {
+	System.out.println("Finished loading base list");
+      }
+
+    baseNamesLoaded = true;
+  }
+
   /**
    *
    * loadBaseHash is used to prepare a hash table mapping Bases to

@@ -5,7 +5,7 @@
    The tab that holds date information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,7 +26,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JCalendar.*;
 
-public class datePanel extends JPanel implements ActionListener, JsetValueCallback {
+public class datePanel extends JPanel implements ActionListener, JsetValueCallback, Runnable {
 
   boolean 
     editable;
@@ -63,13 +63,33 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
   String
     label;
 
+  JPanel
+    holder,
+    actual;
+
   public datePanel(date_field field, String label, boolean editable, framePanel fp)
   {
     this.editable = editable;
     this.field = field;
     this.label = label;
     this.fp = fp;
+
+    setLayout(new BorderLayout());
     
+    holder = new JPanel(false);
+    holder.add(new JLabel("Loading datePanel, please wait."));
+
+    invalidate();
+    fp.validate();
+
+    actual = new JPanel(new BorderLayout());
+
+    Thread thread = new Thread(this);
+    thread.start();
+  }
+
+  public void run()
+  {
     setBorder(new EmptyBorder(new Insets(5,5,5,5)));
 
     top_pane = new JPanel(false);
@@ -78,10 +98,10 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     bottom_pane = new JPanel(false);
     bottom_pane.setLayout(new BoxLayout(bottom_pane, BoxLayout.Y_AXIS));
 
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    add(top_pane);
-    add(bottom_pane);
-    add(Box.createVerticalGlue());
+    actual.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    actual.add(top_pane);
+    actual.add(bottom_pane);
+    actual.add(Box.createVerticalGlue());
 
     dateformat = new SimpleDateFormat("MMM dd, yyyy",Locale.getDefault());
     timeformat = new SimpleDateFormat("MMM dd, yyyy, at HH:mm a", Locale.getDefault());
@@ -94,6 +114,13 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       {
 	create_non_editable_panel();
       }
+
+    System.out.println("Done with thread in datePanel.");
+    remove(holder);
+    add(BorderLayout.CENTER, actual);
+
+    invalidate();
+    fp.validate();
   }
 
   void create_editable_panel()

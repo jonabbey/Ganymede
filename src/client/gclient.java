@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,8 +27,6 @@ import jdj.*;
 import arlut.csd.JDialog.*;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDataComponent.*;
-//import arlut.csd.DataComponent.*;
-import arlut.csd.ganymede.client.*;
 import arlut.csd.Util.*;
 import arlut.csd.JTree.*;
 
@@ -101,6 +99,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     baseList;            // List of base types.  Vector of Bases.
 
   private Hashtable
+    baseNames = null,                // used to map Base -> Base.getName(String)
     baseHash = null,	             // used to reduce the time required to get listings
                                      // of bases and fields.. keys are Bases, values
 		      	             // are vectors of fields
@@ -277,10 +276,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     _myglogin = g;
     my_username = g.getUserName();
 
-    System.out.println("Setting motif");
-    setMotif();
-    System.out.println("Done setting motif");
-
     mainPanel = new JPanel(true);
     mainPanel.setLayout(new BorderLayout());
 
@@ -362,22 +357,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     windowMenu = new JMenu("Windows");
 
     // Look and Feel menu
-    ButtonGroup group = new ButtonGroup();
-    LandFMenu = new JMenu("Look");
-    motifMI = new JCheckBoxMenuItem("Motif");
-    group.add(motifMI);
-    motifMI.setSelected(true);
-    motifMI.addActionListener(this);
-    win95MI = new JCheckBoxMenuItem("Basic");
-    group.add(win95MI);
-    win95MI.addActionListener(this);
-    javaLFMI = new JCheckBoxMenuItem("Java L&F");
-    group.add(javaLFMI);
-    javaLFMI.addActionListener(this);
-
-    LandFMenu.add(motifMI);
-    LandFMenu.add(javaLFMI);
-    LandFMenu.add(win95MI);
+    LandFMenu = new arlut.csd.JDataComponent.LAFMenu(this);
 
     // Personae menu
     boolean personasExist = false;
@@ -562,8 +542,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	rightTop.add("East", timerLabel);
 	
 	rightP.add("North", rightTop);
-
       }
+
     commit = new JButton("Commit");
     commit.setOpaque(true);
     commit.setBackground(Color.lightGray);
@@ -586,7 +566,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else
       {
-	rightP.add(bottomButtonP,"South");
+	//rightP.add(bottomButtonP,"South");
       }
 
     bottomButtonP.add(commit);
@@ -613,6 +593,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     bottomBar.add("West", lP);
     bottomBar.add("Center", statusLabel);
+    bottomBar.add("East", bottomButtonP);
     mainPanel.add("South", bottomBar);
 
     setStatus("Starting up");
@@ -629,8 +610,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     timer.start();
 
     loader = new Loader(session);
-    loader.start()
-;
+    loader.start();
+
     pack();
     setSize(800, 600);
     show();
@@ -735,6 +716,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     return baseHash;
   }
 
+  public final Hashtable getBaseNames()
+  {
+    if (baseNames == null)
+      {
+	baseNames = loader.getBaseNames();
+      }
+
+    return baseNames;
+  }
   public final Vector getBaseList()
   {
     if (baseList == null)
@@ -782,63 +772,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     return statusLabel.getText();
   }
   
-  public void setLAF(String look)
-  {
-    try 
-      {
-	UIManager.setLookAndFeel(look);
-	SwingUtilities.updateComponentTreeUI(this);
-	leftP.invalidate();
-	invalidate();
-	validate();
-      } 
-    catch (com.sun.java.swing.UnsupportedLookAndFeelException e)
-      {
-	showErrorMessage("Change unsucessful", "That Look and Feel is unsupported on this platform.");
-      }
-    catch (Exception e) 
-      {
-	System.out.println(e);
-      }
-  }
-  
-  public void setMotif()
-  {
-    setLAF("com.sun.java.swing.motif.MotifLookAndFeel");
-  }
-
-  public void setBasic() 
-  {
-    try
-      {
-	UIManager.setLookAndFeel("com.sun.java.swing.basic.BasicLookAndFeel");
-	SwingUtilities.updateComponentTreeUI(this);
-	leftP.invalidate();
-	invalidate();
-	validate();
-      } 
-    catch (Exception e) 
-      {
-	System.out.println(e);
-      }
-  }
-
-  public void setJavaLF()
-  {
-    try
-      {
-	UIManager.setLookAndFeel("com.sun.java.swing.jlf.JLFLookAndFeel");
-	SwingUtilities.updateComponentTreeUI(this);
-	leftP.invalidate();
-	invalidate();
-	validate();
-      } 
-    catch (Exception e) 
-      {
-	System.out.println(e);
-      }
-  }
-
   /**
    * Show the help window.
    *
@@ -1944,65 +1877,69 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	
 	wp.closeEditables();
 	somethingChanged = false;
-	session.commitTransaction();
-
-	if (somethingChanged)
+	if (session.commitTransaction())
 	  {
-	    // Might need to fix the tree nodes
-	    // Now go through changed list and revert any names that may be needed
-	    Enumeration changed = changedHash.keys();
-	    while (changed.hasMoreElements())
+	    if (somethingChanged)
 	      {
-		Invid invid = (Invid)changed.nextElement();
-		CacheInfo info = (CacheInfo)changedHash.get(invid);
-		String label = null;
+		// Might need to fix the tree nodes
+		// Now go through changed list and revert any names that may be needed
+		Enumeration changed = changedHash.keys();
+		while (changed.hasMoreElements())
+		  {
+		    Invid invid = (Invid)changed.nextElement();
+		    CacheInfo info = (CacheInfo)changedHash.get(invid);
+		    String label = null;
 
-		try
-		  {
-		    label = session.viewObjectLabel(invid);
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not get label: " + rx);
-		  }
-		
-		InvidNode node = (InvidNode)invidNodeHash.get(invid);
-		if (node != null)
-		  {
-		    node.setText(label);
-		  }
-
-		if (cachedLists.containsKey(info.getBaseID()))
-		  {
-		    System.out.println("This changed base is cached, fixing it back.");
-		    Vector list = (Vector)cachedLists.get(info.getBaseID());
-		    for (int i = 0; i < list.size(); i++)
+		    try
 		      {
-			if (invid == (Invid)((listHandle)list.elementAt(i)).getObject())
+			label = session.viewObjectLabel(invid);
+		      }
+		    catch (RemoteException rx)
+		      {
+			throw new RuntimeException("Could not get label: " + rx);
+		      }
+		
+		    InvidNode node = (InvidNode)invidNodeHash.get(invid);
+		    if (node != null)
+		      {
+			node.setText(label);
+		      }
+
+		    if (cachedLists.containsKey(info.getBaseID()))
+		      {
+			System.out.println("This changed base is cached, fixing it back.");
+			Vector list = (Vector)cachedLists.get(info.getBaseID());
+			for (int i = 0; i < list.size(); i++)
 			  {
-			    System.out.println("Found it! removing it.");
-			    list.removeElementAt(i);
-			    list.addElement(new listHandle(label, invid));
-			    break;
+			    if (invid == (Invid)((listHandle)list.elementAt(i)).getObject())
+			      {
+				System.out.println("Found it! removing it.");
+				list.removeElementAt(i);
+				list.addElement(new listHandle(label, invid));
+				break;
+			      }
 			  }
 		      }
-		  }
-	      }	    
+		  }	    
 
+	      }
+	
+	    wp.refreshTableWindows();
+	    session.openTransaction("gclient");
+
+	    System.out.println("Done committing");
+	    this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+	    refreshTree(true);
+
+	    cachedLists.clear();
+	
+	    wp.resetWindowCount();
 	  }
-	
-	wp.refreshTableWindows();
-	session.openTransaction("gclient");
-
-	System.out.println("Done committing");
-	this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-
-	refreshTree(true);
-
-	cachedLists.clear();
-	
-	wp.resetWindowCount();
-
+	else
+	  {
+	    showErrorMessage("Error: commit failed", "Could not commit your changes: " + session.getLastError());
+	  }
 	
       }
     catch (RemoteException rx)
@@ -2168,18 +2105,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    {
 	      logout();
 	    }
-	}
-      else if (source == motifMI)
-	{
-	  setMotif();
-	}
-      else if (source == win95MI)
-	{
-	  setBasic();
-	}
-      else if (source == javaLFMI)
-	{
-	  setJavaLF();
 	}
       else if (command.equals("open object for editing"))
 	{

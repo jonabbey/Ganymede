@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -874,13 +874,15 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	  }
 	else if (e.getActionCommand().equals("Set Expiration Date"))
 	  {
-	    ((framePanel)Windows.get(MI)).addExpirationDatePanel();
-	    ((framePanel)Windows.get(MI)).showExpirationDateTab();
+	    framePanel fp = (framePanel)Windows.get(MI);
+	    fp.addExpirationDatePanel();
+	    fp.showTab(fp.expiration_date_index);
 	  }
 	else if (e.getActionCommand().equals("Set Removal Date"))
 	  {
-	    ((framePanel)Windows.get(MI)).addRemovalDatePanel();
-	    ((framePanel)Windows.get(MI)).showRemovalDateTab();
+	    framePanel fp = (framePanel)Windows.get(MI);
+	    fp.addRemovalDatePanel();
+	    fp.showTab(fp.removal_date_index);
 	  }
       }
     else

@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.31 $ %D%
+    Version: $Revision: 1.32 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,7 +35,7 @@ import arlut.csd.JDataComponent.*;
 
 public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // -- 
   
@@ -139,6 +139,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     super(false);
     /* -- */
 
+    this.gc = gc;
+
     if (object == null)
       {
 	System.err.println("null object passed to containerPanel");
@@ -146,7 +148,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return;
       }
 
-    this.gc = gc;
     this.winP = window;
     this.object = object;
     this.editable = editable;
@@ -181,7 +182,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.insets = new Insets(4,4,4,4);
     
-
     if (progressBar != null)
       {
 	progressBar.setMinimum(0);
@@ -335,11 +335,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.out.println("Updating container panel");
       }
 
+    gc.setWaitCursor();
+
     Enumeration enum = objectHash.keys();
 
     while (enum.hasMoreElements())
       {
 	Component comp = (Component)enum.nextElement();
+
+	System.out.println("Updating: " + comp);
 
 	try
 	  {
@@ -356,7 +360,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	    else if (comp instanceof JnumberField)
 	      {
-		((JnumberField)comp).setText((String)field.getValue());
+		((JnumberField)comp).setText(((Integer)field.getValue()).toString());
 	      }
 	    else if (comp instanceof JcheckboxField)
 	      {
@@ -368,7 +372,22 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	    else if (comp instanceof JComboBox)
 	      {
-		// arg...
+		Object o = field.getValue();
+		if (o instanceof String)
+		  {
+		    ((JComboBox)comp).setSelectedItem((String)o);
+		  }
+		else if (o instanceof Invid)
+		  {
+		    listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid)o), o);
+		    ((JComboBox)comp).setSelectedItem(lh);
+		  }
+		else
+		  {
+		    // This might be null.  Which means we should choose <none>.  But do
+		    // we choose (string)<none> or (listHandle)<none>?
+		    System.out.println("I am not expecting this type in JComboBox: " + o);
+		  }
 	      }
 	    else if (comp instanceof JLabel)
 	      {
@@ -377,6 +396,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    else if (comp instanceof JpassField)
 	      {
 		System.out.println("Passfield, ingnoring");
+	      }
+	    else if (comp instanceof tStringSelector)
+	      {
+		System.out.println("Skipping over tStringSelector.");
 	      }
 	    else 
 	      {
@@ -393,6 +416,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	System.out.println("Done updating container panel");
       }
+
+    gc.setNormalCursor();
   }
 
   /**
@@ -860,7 +885,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     comp.setVisible(b);
     c.setVisible(b);
 
-    invalidateRight();
+    //invalidateRight();
   }
 
   /**

@@ -42,9 +42,6 @@ public class ownershipPanel extends JPanel implements ItemListener {
   JComboBox
     bases;
 
-  Enumeration
-    baseList;
-
   Hashtable
     objects_owned,   // (Short)Base type -> (Vector)list of objects [all objects]
     paneHash;        // (String) base name -> objectPane holding base objects
@@ -53,7 +50,14 @@ public class ownershipPanel extends JPanel implements ItemListener {
     cards;
 
   Vector
+    owners = null,
     result = null;
+
+  JPanel
+    holder;
+
+  QueryDataNode
+    node;
 
   public ownershipPanel(invid_field field, boolean editable, framePanel parent)
   {
@@ -63,58 +67,26 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
     setLayout(new BorderLayout());
 
+    holder = new JPanel();
+    holder.add(new JLabel("Loading ownershipPanel."));
+    add("Center", holder);
+
     cards = new CardLayout();
     center = new JPanel(false);
     center.setLayout(cards);
-    add("Center", center);
 
-    try
-      {
-	result = field.encodedValues().getListHandles();
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Can't get encoded Values: " + rx);
-      }
-
-    // Get the objects owned, and sort by type
-    objects_owned = new Hashtable();
-    for (int i = 0; i< result.size(); i++)
-      {
-	listHandle lh = (listHandle)result.elementAt(i);
-       
-	Invid invid = (Invid)lh.getObject();
-	Short type = new Short(invid.getType());
-
-	if (objects_owned.containsKey(type))
-	  {
-	    ((Vector)objects_owned.get(type)).addElement(lh);
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.out.println("Creating new vector!");
-	      }
-	    Vector v = new Vector();
-	    v.addElement(lh);
-	    objects_owned.put(type, v);
-	  }
-      }
-	
-  
-    // Build the combo box from the baseHash keys
+    // Build the combo box from the baseList
     JPanel bp = new JPanel(false);
     bases = new JComboBox();
     bp.add(bases);
-    baseList = parent.getgclient().getBaseHash().keys();
+    Vector baseList = parent.getgclient().getBaseList();
     paneHash = new Hashtable();
     try
       {
-	while (baseList.hasMoreElements())
+	for (int i = 0; i < baseList.size(); i++)
 	  {
 	   
-	    Base b = (Base)baseList.nextElement();
+	    Base b = (Base)baseList.elementAt(i);
 	    if (b.isEmbedded())
 	      {
 		if (debug)
@@ -127,7 +99,6 @@ public class ownershipPanel extends JPanel implements ItemListener {
 		String name = b.getName();
 		bases.addItem (name);
 		objectPane p = new objectPane(editable, 
-					      (Vector)objects_owned.get(new Short(b.getTypeID())),
 					      this,
 					      b.getTypeID(),
 					      field);
@@ -142,33 +113,54 @@ public class ownershipPanel extends JPanel implements ItemListener {
       }
     bases.addItemListener(this);
 
+
+    remove(holder);
     add("North", bp);
+    add("Center", center);
+
+    invalidate();
+    parent.validate();
+    System.out.println("Done in thread, she's loaded!");
+
     cards.first(center);
   }
 
 
   public void itemStateChanged(ItemEvent event)
   {
-
-    String item = (String)event.getItem();
-
-    if (debug)
+    if (event.getStateChange() == ItemEvent.DESELECTED)
       {
-	System.out.println("Item changed: " + item);
+	System.out.println("I DON'T CARE IF YOU ARE DESELECTED!");
       }
-
-    objectPane op = (objectPane)paneHash.get(item);
-    if (! op.isCreated())
+    else if (event.getStateChange() == ItemEvent.SELECTED)
       {
-	parent.getgclient().setStatus("Downloading objects for thi sbase");
-	op.create();
-      }
-    cards.show(center, item);
 
+	String item = (String)event.getItem();
+	
+	if (debug)
+	  {
+	    System.out.println("Item selected: " + item);
+	  }
+	
+	objectPane op = (objectPane)paneHash.get(item);
+	
+	if (! op.isStarted())
+	  {
+	    parent.getgclient().setStatus("Downloading objects for thi sbase");
+	    Thread thread = new Thread(op);
+	    thread.start();
+	  }
+	
+	cards.show(center, item);
+      }
+    else
+      {
+	System.out.println("What the hell kind of item event is this? " + event);
+      }
   }
 }
 
-class objectPane extends JPanel implements JsetValueCallback{
+class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
   private final static boolean debug = true;
 
@@ -182,7 +174,7 @@ class objectPane extends JPanel implements JsetValueCallback{
     editable;
 
   Vector
-    owned,
+    owned = null,
     possible;
 
   short
@@ -197,20 +189,67 @@ class objectPane extends JPanel implements JsetValueCallback{
   invid_field
     field;
 
+  JPanel
+    filler;
+
+  boolean
+    isStarted = false;
+
   // Most of the work is in the create() method, only called after this panel is shown
-  public objectPane(boolean editable, Vector owned, ownershipPanel parent, short type, invid_field field)
+  public objectPane(boolean editable, ownershipPanel parent, short type, invid_field field)
   {
     this.field = field;
     this.editable = editable;
-    this.owned = owned;
     this.type = type;
     this.parent = parent;
+    
+    setLayout(new BorderLayout());
+    filler = new JPanel();
+    filler.add(new JLabel("Creating panel, please wait."));
+    add("Center", filler);
+
+	
+
   }
 
-  public void create()
-  {
-    setLayout(new BorderLayout());
+  public boolean isStarted()
+    {
+      return isStarted;
+    }
 
+  public void run()
+  {
+    isStarted = true;
+
+    System.out.println("Loading one of the panels");
+
+    // Get the list of selected choices
+    try
+      {
+	QueryResult qResult;
+	db_object object = parent.parent.object;
+	// go back to the framePanel to get the invid
+	QueryDataNode node = new QueryDataNode(SchemaConstants.OwnerListField, QueryDataNode.EQUALS, QueryDataNode.CONTAINSANY, parent.parent.getObjectInvid());
+	qResult = parent.parent.getgclient().getSession().query(new Query(type, node));
+
+	if (debug)
+	  {
+	    if (qResult == null)
+	      {
+		System.out.println("Hey, the qResult is null.");
+	      }
+	    else
+	      {
+		System.out.println("Found " + qResult.size() + " matching items.");
+	      }
+	  }
+	
+	owned = qResult.getListHandles();
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get Query: " + rx);
+      }
 
 
     // Get the list of possible objects
@@ -269,10 +308,15 @@ class objectPane extends JPanel implements JsetValueCallback{
       }
     ss = new tStringSelector(possible, owned, this, editable,100);
     ss.setCallback(this);
+    remove(filler);
     add("Center", ss);
 
+    
+    invalidate();
+    parent.validate();
     stringSelector_loaded = true;
 
+    System.out.println("Done with thread, panel is loaded.");
     parent.parent.getgclient().setStatus("Done.");
   }
 
