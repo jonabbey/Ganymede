@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.143 $
-   Last Mod Date: $Date: 2001/01/11 13:54:04 $
+   Version: $Revision: 1.144 $
+   Last Mod Date: $Date: 2001/01/25 07:25:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.143 $ $Date: 2001/01/11 13:54:04 $ $Name:  $
+ * @version $Revision: 1.144 $ $Date: 2001/01/25 07:25:56 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1586,6 +1586,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    // objects.
 
 	    if (newField.isEditInPlace())
+	      {
+		continue;
+	      }
+
+	    // if the field is a password field, don't try to clone it
+
+	    if (newField instanceof PasswordDBField)
 	      {
 		continue;
 	      }
