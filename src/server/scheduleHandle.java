@@ -6,7 +6,7 @@
    Ganymede Server.  It is also used to pass data to the admin console.
    
    Created: 3 February 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,6 +21,17 @@ import java.util.*;
                                                                   scheduleHandle
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This class is used to keep track of background tasks running on the
+ * Ganymede Server.  It is also used to pass data to the admin console.
+ *
+ * This class works hand in glove with the GanymedeScheduler class.
+ *
+ * @see arlut.csd.ganymede.GanymedeScheduler
+ *
+ */
 
 public class scheduleHandle implements java.io.Serializable {
 
@@ -38,7 +49,7 @@ public class scheduleHandle implements java.io.Serializable {
 
   transient Runnable task;
   transient Thread thread, monitor;
-  transient GanymedeScheduler scheduler;
+  transient GanymedeScheduler scheduler = null;
 
   /* -- */
 
@@ -51,6 +62,11 @@ public class scheduleHandle implements java.io.Serializable {
 	throw new IllegalArgumentException("can't schedule a task without a start time");
       }
 
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't create schedule handle without scheduler reference");
+      }
+
     this.scheduler = scheduler;
     this.startTime = time;
     this.interval = interval;
@@ -58,9 +74,23 @@ public class scheduleHandle implements java.io.Serializable {
     this.name = name;
   }
 
+  /**
+   *
+   * This server-side method causes the task represented by this scheduleHandle to
+   * be spawned into a new thread.
+   *
+   * This method is invalid on the server.
+   *
+   */
+
   synchronized void runTask()
   {
     // start our task
+
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
 
     if (debug)
       {
@@ -87,19 +117,37 @@ public class scheduleHandle implements java.io.Serializable {
   /**
    *
    * This method is called by our task monitor when our task
-   * completes
-   *
+   * completes.  This method has no meaning outside of the context of
+   * the taskMonitor spawned by this handle, and should not be called
+   * from any other code.
+   * 
    */
 
   synchronized void notifyCompletion()
   {
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
+
     monitor = null;
     isRunning = false;
     scheduler.notifyCompletion(this);
   }
 
+  /**
+   *
+   * Server-side method to determine whether this task should be rescheduled
+   *
+   */
+
   synchronized boolean reschedule()
   {
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
+
     if (interval == 0)
       {
 	return false;
@@ -111,19 +159,52 @@ public class scheduleHandle implements java.io.Serializable {
       }
   }
 
+  /**
+   *
+   * Server-side method to bring this task to an abrupt halt.
+   *
+   */
+
   synchronized void stop()
   {
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
+
     monitor.stop();
     thread.stop();
   }
 
+  /**
+   *
+   * Server-side method to disable future invocations of this task
+   *
+   */
+
   synchronized void disable()
   {
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
+
     suspend = true;
   }
 
+  /**
+   *
+   * Server-side method to enable future invocations of this task
+   *
+   */
+
   synchronized void enable()
   {
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
+
     suspend = false;
   }
 }
