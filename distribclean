@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# Ganymede distribution cleaner
+#
+# Release: $Name:  $
+# Version: $Revision: 1.1 $
+# Date: $Date: 1999/01/22 01:29:58 $
+#
+############################################################
+
+echo "Ganymede distribution cleaner"
+echo
+
+prog=$0
+
+GROOTDIR=`echo $prog|sed 's%/[^/][^/]*$%%'`
+# if the program name is the same as the srcdir name, we have no path
+# set.. must be .
+test "x$GROOTDIR" = "x$prog" && GROOTDIR=.
+if test ! -d $GROOTDIR/src/classes; then
+  echo "configure: error: can not find sources in $rootdir" 1>&2; exit 1;
+fi
+export GROOTDIR
+
+# Okay, GROOTDIR is where we're at.
+
+cd $GROOTDIR
+
+# Remove the configured install scripts
+
+echo "Removing custom install scripts"
+
+rm -f installClient*
+rm -f installServer
+
+# Clean up the src tree.. remove the configured makefile,
+# config.sh and rebuild files
+
+echo "Cleaning source tree"
+
+cd src
+
+rm -f Makefile
+
+find . -name config.sh -exec rm {} \;
+
+find . -name rebuild -exec rm {} \;
+
+# Clean up the classes tree.. we've got the jars, so we don't
+# need the classes in the classes tree.
+
+cd classes
+
+rm -f *.class
+
+# Remove all the class files from under arlut.. note that
+# we're deliberately leaving the gnu classes in place,
+# since we don't have the gnu stuff integrated into our
+# build process
+
+find arlut -name \*.class -exec rm {} \;
+
+# Remove the configured sync_tree files.
+
+find classes/arlut -name sync_tree\* -exec rm {} \;
+
+cd $GROOTDIR
+
+echo "Configured files and redundant classes removed."
+echo "Distribution is ready for packaging."
