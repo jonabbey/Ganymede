@@ -77,20 +77,20 @@
 
     <h3>Threads and Exceptions</h3>
 
-    <p>Beyond simple Dumb Code, that does the wrong thing but does it
-    successfully, there is that class of errors where the code
-    encounters a condition that just <b>can't</b> be right.  A null
-    pointer.  An attempt to cast an object pointer to an incompatible
-    type.  An attempt to loop one element past the end of an array.
-    These sorts of things are handled in a far more robust way in Java
-    than in C or C++.  In Java, the thread that encounters such a
-    condition throws an exception.  What that means is that the thread
-    that encountered the fault goes and looks for someone to report
-    the fault to.  If function A calls function B which calls function
-    C, a fault that occurs inside function C might be handled by error
-    checking code in function C, then in function B, then in function
-    A.  If none of these functions catch the error, a general error
-    reporting facility handles the problem.</p>
+    <p>Beyond simple Dumb Code, which does the wrong thing but does it
+    more or less successfully, there is that class of errors where the
+    code encounters a condition that just <b>can't</b> be right.  A
+    null pointer.  An attempt to cast an object pointer to an
+    incompatible type.  An attempt to loop one element past the end of
+    an array.  These sorts of things are handled in a far more robust
+    way in Java than in C or C++.  In Java, the thread that encounters
+    such a condition throws an exception.  What that means is that the
+    thread that encountered the fault goes and looks for someone to
+    report the fault to.  If function A calls function B which calls
+    function C, a fault that occurs inside function C might be handled
+    by error checking code in function C, then in function B, then in
+    function A.  If none of these functions catch the error, a general
+    error reporting facility handles the problem.</p>
 
     <p>What this means is that it is fairly unlikely that the Ganymede
     server will ever just roll over and die.  The sorts of errors that
@@ -292,7 +292,7 @@
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
     <!-- hhmts start -->
-Last modified: Wed Jan 31 02:43:08 CST 2001
+Last modified: Wed Jan 31 02:43:49 CST 2001
 <!-- hhmts end -->
   </body>
 </html>
