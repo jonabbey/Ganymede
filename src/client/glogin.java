@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,6 +40,8 @@ public class glogin extends JApplet implements Runnable {
 
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
+
+  protected gclient g_client;
 
   protected Image ganymede_logo;
   protected JTextField username;
@@ -485,7 +487,7 @@ class LoginHandler implements ActionListener {
 
     Session _session = s;
 
-    gclient _client = new gclient(_session,my_glogin);
+    my_glogin.g_client = new gclient(_session,my_glogin);
 
     my_glogin.passwd.setText("");
     /* At this point, all the login matters have been handled and we have
@@ -496,7 +498,7 @@ class LoginHandler implements ActionListener {
       {
 	// This will get the ball rolling.
 
-	_client.start();
+	my_glogin.g_client.start();
 
       }
     catch (Exception e)
