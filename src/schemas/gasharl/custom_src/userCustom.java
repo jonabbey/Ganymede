@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1083,8 +1083,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	personaeInvids = inv.getValues();
 
-	String tempString;
-	
 	for (int i = 0; i < personaeInvids.size(); i++)
 	  {
 	    adminPersonaCustom adminObj = (adminPersonaCustom) session.editDBObject((Invid) personaeInvids.elementAt(i));
