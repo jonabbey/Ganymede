@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -191,7 +191,22 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
   
   synchronized public String getLastError()
   {
-    return lastError;
+    String result = null;
+
+    /* -- */
+
+    if (lastError != null)
+      {
+	result = lastError;
+	lastError = null;
+      }
+    else if (session != null)
+      {
+	result = session.lastError;
+	session.lastError = null;
+      }
+
+    return result;
   }
 
   public boolean set_admin_info()
