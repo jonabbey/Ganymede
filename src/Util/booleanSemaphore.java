@@ -4,8 +4,8 @@
    Handy, simple synchronized flag class
 
    Created: 29 March 2001
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2002/02/27 23:30:22 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2002/02/27 23:31:35 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
