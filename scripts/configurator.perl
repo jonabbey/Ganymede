@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.28 $
-# $Date: 1999/01/21 22:56:40 $
+# $Revision: 1.29 $
+# $Date: 1999/01/21 23:07:36 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -129,31 +129,31 @@ kits:
 	\@cd $rootdir/src/schemas/bsd/custom_src; \\
 	build; \\
 	buildCustomJar
-	\@cd $rootdir/src/schemas/bsd/loader/souce; \\
+	\@cd $rootdir/src/schemas/bsd/loader/source; \\
 	build
 	\@echo "Compiling GASH schema kit"
 	\@cd $rootdir/src/schemas/gash/custom_src; \\
 	build; \\
 	buildCustomJar
-	\@cd $rootdir/src/schemas/gash/loader/souce; \\
+	\@cd $rootdir/src/schemas/gash/loader/source; \\
 	build
 	\@echo "Compiling GASHARL schema kit"
 	\@cd $rootdir/src/schemas/gasharl/custom_src; \\
 	build; \\
 	buildCustomJar
-	\@cd $rootdir/src/schemas/gasharl/loader/souce; \\
+	\@cd $rootdir/src/schemas/gasharl/loader/source; \\
 	build
 	\@echo "Compiling LINUX schema kit"
 	\@cd $rootdir/src/schemas/linux/custom_src; \\
 	build; \\
 	buildCustomJar
-	\@cd $rootdir/src/schemas/linux/loader/souce; \\
+	\@cd $rootdir/src/schemas/linux/loader/source; \\
 	build
 	\@echo "Compiling Solaris NIS schema kit"
 	\@cd $rootdir/src/schemas/nisonly/custom_src; \\
 	build; \\
 	buildCustomJar
-	\@cd $rootdir/src/schemas/nisonly/loader/souce; \\
+	\@cd $rootdir/src/schemas/nisonly/loader/source; \\
 	build
 
 clean:
