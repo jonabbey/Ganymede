@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.64 $ %D%
+   Version: $Revision: 1.65 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1381,8 +1381,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    if (!node.isShowAll() && !handle.isEditable())
 	      {
-		i++;		// skip this one
-		System.out.println("Skipping this one");
+		i++;		// skip this one, we're not showing non-editables
 		continue;
 	      }
 
