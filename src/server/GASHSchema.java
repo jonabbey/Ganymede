@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,7 +41,7 @@ import arlut.csd.Tree.*;
 
 ------------------------------------------------------------------------------*/
 
-public class GASHSchema extends Frame implements treeCallback, ActionListener, Compare {
+public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
   SchemaEdit 
     editor;
@@ -63,6 +63,10 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     createFieldMI = null,
     deleteFieldMI = null;
 
+  PopupMenu
+    baseMenu = null,
+    fieldMenu = null;
+
   CardLayout
     card;
 
@@ -71,6 +75,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     buttonPane,
     attribPane,
     attribCardPane,
+    emptyPane,
     baseEditPane,
     fieldEditPane,
     namespaceEditPane,
@@ -81,6 +86,10 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 
   BaseFieldEditor
     fe;
+  
+  boolean
+    showingBase,
+    showingField;
 
   Button
     okButton, cancelButton, attribOkButton;
@@ -143,9 +152,13 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     namespaceEditPane.setBackground(Color.white);
     namespaceEditPane.setLayout(new BorderLayout());
 
+    emptyPane = new Panel();
+    emptyPane.setBackground(Color.white);
+
     attribCardPane.add("base", baseEditPane);
     attribCardPane.add("field", fieldEditPane);
     attribCardPane.add("name", namespaceEditPane);
+    attribCardPane.add("empty", emptyPane);
 
     attribButtonPane = new Panel();
     attribButtonPane.setBackground(Color.white);
@@ -237,6 +250,13 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     createFieldMI = new MenuItem("Create Field");
     deleteFieldMI = new MenuItem("Delete Field");
 
+    baseMenu = new PopupMenu("Base Menu");
+    baseMenu.add(createFieldMI);
+    baseMenu.add(deleteObjectMI);
+
+    fieldMenu = new PopupMenu("Field Menu");
+    fieldMenu.add(deleteFieldMI);
+
     fieldHash = new Hashtable();
     baseHash = new Hashtable();
 
@@ -247,40 +267,6 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     show();
   }
 
-  /**
-   *
-   * Base ID comparator for the Quicksort used in objectsRefresh.
-   *
-   * @see arlut.csd.Util.Compare
-   */
-
-  public int compare(Object a, Object b) 
-  {
-    Base aB, bB;
-      
-    aB = (Base) a;
-    bB = (Base) b;
-
-    try
-      {
-	if (aB.getTypeID() < bB.getTypeID())
-	  {
-	    return -1;
-	  }
-	else if (aB.getTypeID() > bB.getTypeID())
-	  {
-	    return 1;
-	  }
-	else
-	  {
-	    return 0;
-	  }
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't compare bases " + ex);
-      }
-  }
 
   /**
    *
@@ -309,14 +295,9 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     BaseNode bNode, oldNode, newNode;
     treeNode parentNode;
     String baseName = null;
-    PopupMenu menu;
     int i;
     
     /* -- */
-
-    menu = new PopupMenu("Base Menu");
-    menu.add(createFieldMI);
-    menu.add(deleteObjectMI);
 
     try
       {
@@ -333,7 +314,38 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     // editor.getBases() returns items in hash order.. sort
     // them by baseID before adding them to tree
 
-    (new QuickSort(bases,  this)).sort();
+    (new QuickSort(bases,  
+		   new arlut.csd.Util.Compare()
+		   {
+		     public int compare(Object a, Object b) 
+		       {
+			 Base aB, bB;
+      
+			 aB = (Base) a;
+			 bB = (Base) b;
+
+			 try
+			   {
+			     if (aB.getTypeID() < bB.getTypeID())
+			       {
+				 return -1;
+			       }
+			     else if (aB.getTypeID() > bB.getTypeID())
+			       {
+				 return 1;
+			       }
+			     else
+			       {
+				 return 0;
+			       }
+			   }
+			 catch (RemoteException ex)
+			   {
+			     throw new RuntimeException("couldn't compare bases " + ex);
+			   }
+		       }
+		   }
+		   )).sort();
 
     // now that we've got our bases in order, we need to go
     // through our basenodes in the tree in order, inserting
@@ -347,17 +359,25 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     bNode = (BaseNode) parentNode.getChild();
     i = 0;
 
-    while (i < bases.length)
+    while ((i < bases.length) || (bNode != null))
       {
-	base = bases[i];
+	if (i < bases.length)
+	  {
+	    base = bases[i];
+	  }
+	else
+	  {
+	    base = null;
+	  }
 
 	if ((bNode == null) ||
-	    (base.getTypeID() > bNode.getBase().getTypeID()))
+	    ((base != null) &&
+	     (base.getTypeID() < bNode.getBase().getTypeID())))
 	  {
 	    // insert a new base node 
 
 	    newNode = new BaseNode(parentNode, base.getName(), base,
-				   oldNode, true, 0, 1, menu);
+				   oldNode, true, 0, 1, baseMenu);
 
 	    tree.insertNode(newNode, false);
 	    baseHash.put(base, newNode);
@@ -366,26 +386,38 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 
 	    oldNode = newNode;
 	    bNode = (BaseNode) oldNode.getNextSibling();
+
+	    i++;
 	  }
-	else if (base.getTypeID() < bNode.getBase().getTypeID())
+	else if ((base == null) || 
+		 (base.getTypeID() > bNode.getBase().getTypeID()))
 	  {
 	    // delete a base node
 
-	    bNode = (BaseNode) bNode.getNextSibling();
+	    if (showingBase && (be.base == bNode.getBase()))
+	      {
+		card.show(attribCardPane, "empty");
+	      }
+
 	    baseHash.remove(bNode.getBase());
 
-	    tree.deleteNode(bNode.getPrevSibling(), false);
+	    // System.err.println("Deleting: " + bNode.getText());
+	    newNode = (BaseNode) bNode.getNextSibling();
+	    tree.deleteNode(bNode, false);
+
+	    bNode = newNode;
 	  }
 	else
 	  {
 	    bNode.setText(base.getName());
+	    //	    System.err.println("Setting: " + base.getName());
 	    refreshFields(bNode, false);
 
 	    oldNode = bNode;
 	    bNode = (BaseNode) oldNode.getNextSibling();
+	    
+	    i++;
 	  }
-	
-	i++;
       }
   }
 
@@ -396,7 +428,6 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     Vector vect;
     BaseNode parentNode;
     FieldNode oldNode, newNode, fNode;
-    PopupMenu menu;
     int i;
 
     /* -- */
@@ -405,9 +436,6 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 
     vect = base.getFields();
 
-    menu = new PopupMenu(base.getName() + " Field Menu");
-    menu.add(deleteFieldMI);
-    
     fields = new BaseField[vect.size()];
     
     for (i = 0; i < fields.length; i++)
@@ -456,42 +484,67 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     fNode = (FieldNode) node.getChild();
     i = 0;
 	
-    while (i < fields.length)
+    while ((i < fields.length) || (fNode != null))
       {
-	field = fields[i];
+	if (i < fields.length)
+	  {
+	    field = fields[i];
+	  }
+	else
+	  {
+	    field = null;
+	  }
 
 	if ((fNode == null) ||
-	    (field.getID() > fNode.getField().getID()))
+	    ((field != null) && 
+	     (field.getID() < fNode.getField().getID())))
 	  {
 	    // insert a new field node
 
 	    newNode = new FieldNode(parentNode, field.getName(), field,
-				    oldNode, false, 2, 2, menu);
+				    oldNode, false, 2, 2, fieldMenu);
 
 	    tree.insertNode(newNode, false);
 	    fieldHash.put(field, newNode);
 
 	    oldNode = newNode;
 	    fNode = (FieldNode) oldNode.getNextSibling();
+
+	    i++;
 	  }
-	else if (field.getID() < fNode.getField().getID())
+	else if ((field == null) ||
+		 (field.getID() > fNode.getField().getID()))
 	  {
 	    // delete a field node
 
-	    fNode = (FieldNode) fNode.getNextSibling();
-	    baseHash.remove(fNode.getField());
+	    if (showingField && (fe.fieldDef == fNode.getField()))
+	      {
+		card.show(attribCardPane, "empty");
+	      }
 
-	    tree.deleteNode(fNode.getPrevSibling(), false);
+	    fieldHash.remove(fNode.getField());
+
+	    // System.err.println("Deleting: " + fNode.getText());
+	    newNode = (FieldNode) fNode.getNextSibling();
+	    tree.deleteNode(fNode, false);
+
+	    fNode = newNode;
 	  }
 	else
 	  {
 	    fNode.setText(field.getName());
+	    // System.err.println("Setting: " + field.getName());
 
 	    oldNode = fNode;
 	    fNode = (FieldNode) oldNode.getNextSibling();
-	  }
 
-	i++;
+	    i++;
+	  }
+      }
+
+    if (doRefresh)
+      {
+	tree.refresh();
       }
   }
 
@@ -509,6 +562,8 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
   {
     be.editBase(base);
     card.show(attribCardPane,"base");
+    showingBase = true;
+    showingField = false;
 
     // attach the button pane to the base editor
     
@@ -524,6 +579,8 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     System.err.println("in GASHSchema.editField");
     fe.editField(field);
     card.show(attribCardPane, "field");
+    showingBase = false;
+    showingField = true;
 
     // attach the button pane to the field editor
     
@@ -596,35 +653,105 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     else if (event.getSource() == createNameMI)
       {
       }
+    else if (event.getSource() == deleteObjectMI)
+      {
+	BaseNode bNode = (BaseNode) node;
+	Base b = bNode.getBase();
+
+	try
+	  {
+	    System.err.println("Deleting base " + b.getName());
+	    editor.deleteBase(b);
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Couldn't delete base: remote exception " + ex);
+	  }
+
+	objectsRefresh();
+      }
     else if (event.getSource() == createFieldMI)
       {
 	// find the base that asked for the field
 
-	Base editbase = null;
-	String tmp;
-	
 	try
 	  {
-	    for (int i = 0; i < bases.length; i++)
+	    BaseNode bNode = (BaseNode) node;
+	    System.err.println("Calling editField");
+
+	    // create a name for the new field
+
+	    BaseField bF, bF2;
+	    Base b;
+
+	    String newname = "New Field";
+	    int j;
+	    boolean done;
+
+	    b = bNode.getBase();
+	    Vector fieldVect = b.getFields();
+
+	    done = false;
+
+	    j = 0;
+
+	    while (!done)
 	      {
-		tmp = bases[i].getName();
-		if (tmp.equals(nodeText))
+		if (j > 0)
 		  {
-		    editbase = bases[i];
-		    break;
+		    newname = "New Field " + (j + 1);
 		  }
+
+		done = true;
+
+		for (int i = 0; done && i < fieldVect.size(); i++)
+		  {
+		    bF2 = (BaseField) fieldVect.elementAt(i);
+		    
+		    if (bF2.getName().equals(newname))
+		      {
+			done = false;
+		      }
+		  }
+
+		j++;
 	      }
 
-	    if (editbase != null)
-	      {
-		System.err.println("Calling editField");
-		editField(editbase.createNewField());
-		System.err.println("Called editField");
-	      }
+	    bF = b.createNewField();
+	    bF.setName(newname);
+	    objectsRefresh();
+	    editField(bF);
+	    System.err.println("Called editField");
 	  }
 	catch (RemoteException ex)
 	  {
 	    System.err.println("couldn't create new field" + ex);
+	  }
+      }
+    else if (event.getSource() == deleteFieldMI)
+      {
+	System.err.println("deleting field node");
+
+	try
+	  {
+	    FieldNode fNode = (FieldNode) node;
+	    BaseNode bNode = (BaseNode) node.getParent();
+
+	    if (!bNode.getBase().fieldInUse(fNode.getField()))
+	      {
+		bNode.getBase().deleteField(fNode.getField());
+		refreshFields(bNode.getBase(), true);
+	      }
+	    else
+	      {
+		// field in use
+
+		System.err.println("Couldn't delete field.. field in use");
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    System.err.println("couldn't delete field" + ex);
 	  }
       }
   }
@@ -801,11 +928,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   Panel 
     mainPanel,
     editPanel;
-    //    cardPanel,
-    // emptyPanel,
-    //stringPanel,
-    //booleanPanel,
-    //invidPanel;
 
   GASHSchema 
     owner;
@@ -903,7 +1025,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     //choose the one that is the default
     changeTypeChoice("Boolean");
-
    
     addRow(editPanel, typeC, "Field Type:", 6);
 
@@ -917,7 +1038,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
    
     OKCharS = new stringField(20, 100, ca, true, false, null, null);
     OKCharS.setCallback(this);
-    addRow(editPanel, OKCharS, " Allowed Chars:", 9);
+    addRow(editPanel, OKCharS, "Allowed Chars:", 9);
 
     BadCharS = new stringField(20, 100, ca, true, false, null, null);
     BadCharS.setCallback(this);
@@ -997,6 +1118,24 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     add(editPanel);
   }
 
+  void clearFields()
+  {
+    commentT.setText("");
+
+    nameS.setText("");
+    classS.setText("");
+
+    trueLabelS.setText("");
+    falseLabelS.setText("");
+    OKCharS.setText("");
+    BadCharS.setText("");
+
+    idN.setText("");
+    maxArrayN.setText("");
+    minLengthN.setText("");
+    maxLengthN.setText("");
+  }
+
   void addRow(Panel parent, Component comp,  String label, int row)
   {
     addRow(parent, comp, label, row, true);
@@ -1008,10 +1147,15 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     rowHash.put(comp, l);
     parent.add("0 " + row + " lhwHW", l);
     parent.add("1 " + row + " lhH", comp);
+
     if (visible)
-      setRowVisible(comp, true);
+      {
+	setRowVisible(comp, true);
+      }
     else
-      setRowVisible(comp, false);
+      {
+	setRowVisible(comp, false);
+      }
   }
   
 
@@ -1027,8 +1171,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     c.setVisible(b);
   }
 
+  // This goes through all the components, and sets the visibilities
+
   void checkVisibility()
-  //This goes through all the components, and sets the visibilities
   {
     setRowVisible(maxArrayN, vectorCF.getState());
 
@@ -1037,8 +1182,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     
     setRowVisible(fieldC, symmetryCF.getState());
 
-    //Now check the nameC choice stuff
+    // Now check the nameC choice stuff
     setRowVisible(labeledCF, booleanShowing);
+
     if (booleanShowing)
       {
 	setRowVisible(trueLabelS, labeledCF.getState());
@@ -1062,18 +1208,21 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	setRowVisible(targetC, referenceShowing);
 	
 	setRowVisible(symmetryCF, referenceShowing);
+
 	if (symmetryCF.getState())
-	  setRowVisible(fieldC, referenceShowing);
+	  {
+	    setRowVisible(fieldC, referenceShowing);
+	  }
 	else
-	  setRowVisible(fieldC, false);
+	  {
+	    setRowVisible(fieldC, false);
+	  }
       }
     else
       {
 	setRowVisible(targetC, false);
-	
 	setRowVisible(symmetryCF, false);
-	
-	
+	setRowVisible(fieldC, false);
       }
     editPanel.doLayout();
     mainPanel.invalidate();
@@ -1087,25 +1236,64 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     dateShowing = false;
     stringShowing = false;
     referenceShowing = false;
-    if (selectedItem == "Boolean")
-      booleanShowing = true;
-    else if (selectedItem == "Numeric")
-      numericShowing = true;
-    else if (selectedItem == "Date")
-      dateShowing = true;
-    else if (selectedItem == "String")
-      stringShowing = true;
-    else if (selectedItem == "Object Reference")
-      referenceShowing = true;
-      
 
+    try
+      {
+	if (selectedItem == "Boolean")
+	  {
+	    booleanShowing = true;
+	    fieldDef.setType(FieldType.BOOLEAN);
+	  }
+	else if (selectedItem == "Numeric")
+	  {
+	    numericShowing = true;
+	    fieldDef.setType(FieldType.NUMERIC);
+	  }
+	else if (selectedItem == "Date")
+	  {
+	    dateShowing = true;
+	    fieldDef.setType(FieldType.DATE);
+	  }
+	else if (selectedItem == "String")
+	  {
+	    stringShowing = true;
+	    fieldDef.setType(FieldType.STRING);
+	  }
+	else if (selectedItem == "Object Reference")
+	  {
+	    referenceShowing = true;
+	    fieldDef.setType(FieldType.INVID);
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("changeTypeChoice: got RemoteException: " + ex);
+      }
+    catch (NullPointerException ex)
+      {
+	// we don't have fieldDef set yet.  Just ignore.
+      }
   }
+
   // edit the given field
 
   public void editField(BaseField fieldDef)
   {
     System.err.println("in FieldEditor.editField()");
+
+    if (fieldDef == this.fieldDef)
+      {
+	return;
+      }
+
+    clearFields();
     this.fieldDef = fieldDef;
+
+    booleanShowing = false;
+    numericShowing = false;
+    dateShowing = false;
+    stringShowing = false;
+    referenceShowing = false;
 
     try
       {
@@ -1113,17 +1301,16 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	nameS.setText(fieldDef.getName());
 	classS.setText(fieldDef.getClassName());
 	commentT.setText(fieldDef.getComment());
+
         if (fieldDef.isArray())
 	  {
 	    vectorCF.setState(true);
-	    //maxArrayN.setEnabled(true);
 	  }
-    
 	else
 	  {
 	    vectorCF.setState(false);
-	    //maxArrayN.setEnabled(false);
 	  }
+
 	if (fieldDef.isString())
 	  {
 	    minLengthN.setValue(fieldDef.getMinLength());
@@ -1132,7 +1319,12 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    BadCharS.setText(fieldDef.getBadChars());
 	    namespaceC.removeAll();
 	    namespaceC.add("<None>");
+
+	    typeC.select("String");
+	    stringShowing = true;
+
 	    // add all defined namespaces here
+
 	  }
 	else if (fieldDef.isBoolean())
 	  {
@@ -1140,64 +1332,58 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	      {
 		labeledCF.setState(true);
 		trueLabelS.setText(fieldDef.getTrueLabel());
-		//trueLabelS.setEnabled(true);
 		falseLabelS.setText(fieldDef.getFalseLabel());
-		//falseLabelS.setEnabled(true);
 	      }
-
 	    else
 	      {
 		labeledCF.setState(false);
 		trueLabelS.setText("");
-		//trueLabelS.setEnabled(false);
 		falseLabelS.setText("");
-		//falseLabelS.setEnabled(false);
 	      }
 
-	    
-	    //card.show(cardPanel, "boolean");
+	    typeC.select("Boolean");
+	    booleanShowing = true;
 	  }
 	else if (fieldDef.isInvid())
 	  {
 	    if (fieldDef.isTargetRestricted())
 	      {
 		targetLimitCF.setState(true);
-		//targetC.setEnabled(true);
 		targetC.removeAll();
-		// add object types
-
-		//symmetryCF.setEnabled(true);
 
 		if (fieldDef.isSymmetric())
 		  {
 		    symmetryCF.setState(true);
-		    //fieldC.setEnabled(true);
 		    fieldC.removeAll();
-		    // add field types
 		  }
 		else
 		  {
 		    symmetryCF.setState(false);
-		    //fieldC.setEnabled(false);
 		    fieldC.removeAll();
 		  }
 	      }
 	    else
 	      {
 		targetLimitCF.setState(false);
-		//targetC.setEnabled(false);
 		targetC.removeAll();
-		//symmetryCF.setEnabled(false);
-		//fieldC.setEnabled(false);
 		fieldC.removeAll();
 	      }
 
-	    //card.show(cardPanel,"invid");
+	    typeC.select("Object Reference");
+	    referenceShowing = true;
 	  }
-	else
+	else if (fieldDef.isDate())
 	  {
-	    //card.show(cardPanel,"empty");
+	    typeC.select("Date");
+	    dateShowing = true;
 	  }
+	else if (fieldDef.isNumeric())
+	  {
+	    typeC.select("Numeric");
+	    numericShowing = true;
+	  }
+
+	checkVisibility();
       }
     catch (RemoteException ex)
       {
@@ -1239,33 +1425,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    System.out.println("vectorCF");
 	    fieldDef.setArray(vectorCF.getState());
 	    checkVisibility();
-	  }
-	else if (comp == typeC)
-	  {
-	    System.out.println("typeC");
-
-	    String typename = (String) v.getValue();
-
-	    if (typename.equals("Boolean"))
-	      {
-		fieldDef.setType(FieldType.BOOLEAN);
-	      }
-	    else if (typename.equals("Numeric"))
-	      {
-		fieldDef.setType(FieldType.NUMERIC);
-	      }
-	    else if (typename.equals("Date"))
-	      {
-		fieldDef.setType(FieldType.DATE);
-	      }
-	    else if (typename.equals("String"))
-	      {
-		fieldDef.setType(FieldType.STRING);
-	      }
-	    else if (typename.equals("Object Reference"))
-	      {
-		fieldDef.setType(FieldType.INVID);
-	      }
 	  }
 	else if (comp == OKCharS)
 	  {
@@ -1338,14 +1497,23 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   {
     //System.out.println("itemStateChanged");
     //System.out.println(e.getItem());
+
     if (e.getItemSelectable() == typeC)
-      changeTypeChoice((String)e.getItem());
+      {
+	changeTypeChoice((String)e.getItem());
+      }
     else if (e.getItemSelectable() == namespaceC)
-      System.out.println("Namespace: " + e.getItem());
+      {
+	System.out.println("Namespace: " + e.getItem());
+      }
     else if (e.getItemSelectable() == targetC)
-      System.out.println("target: " + e.getItem());
+      {
+	System.out.println("target: " + e.getItem());
+      }
     else if (e.getItemSelectable() == fieldC)
-      System.out.println("field: " + e.getItem());
+      {
+	System.out.println("field: " + e.getItem());
+      }
     checkVisibility();
   }
 
