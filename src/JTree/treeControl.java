@@ -11,7 +11,8 @@
   and can have a pop-up menu attached.  Nodes can be dragged, with
   both 'drag-tween' and 'drag on' drag supported.
 
-  Copyright (C) 1997  The University of Texas at Austin.
+  Copyright (C) 1997, 1998, 1999, 2000, 2001
+  The University of Texas at Austin.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -28,7 +29,10 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.20 $ %D%
+  Version: $Revision: 1.21 $
+  Last Mod Date: $Date: 2001/05/23 03:53:42 $
+  Release: $Name:  $
+
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -56,7 +60,7 @@ import javax.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.20 $ %D%
+ * @version $Revision: 1.21 $ %D%
  *
  * @see arlut.csd.JTree.treeCallback
  * @see arlut.csd.JTree.treeNode
@@ -1990,9 +1994,20 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	bg.setColor(fgColor);
 
 	bg.fillRect(x1,
-		    horizLine - rowAscent/2,
+		    (horizLine - rowAscent/2),
 		    x2-x1+1,
-		    rowAscent + rowDescent + rowLeading);
+		    rowAscent + rowDescent + rowLeading + 1);
+
+	bg.setColor(bgColor);
+      }
+    else if (spriteVisible && node == ctrl.dragNode)
+      {
+	bg.setColor(java.awt.Color.blue);
+
+	bg.fillRect(x1,
+		    (horizLine - rowAscent/2),
+		    x2-x1+1,
+		    rowAscent + rowDescent + rowLeading + 1);
 
 	bg.setColor(bgColor);
       }
@@ -2150,18 +2165,6 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
 	    return;
 	  }
-	else
-	  {
-	    if (!node.selected)
-	      {
-		ctrl.unselectAllNodes(true); // another node is being selected
-		ctrl.selectNode(node);
-	      }
-	    
-	    render();
-	    repaint();
-	    return;
-	  }
       }
   }
 
@@ -2205,6 +2208,28 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	return;
       }
 
+    // we don't want to take a right or middle mouse button click as anything
+    // but a pop-up driver
+
+    if (((e.getModifiers() & InputEvent.BUTTON2_MASK) != 0) ||
+	((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0))
+      {
+	if (!spriteVisible)
+	  {
+	    ctrl.unselectAllNodes(true); // another node is being selected
+	    ctrl.selectNode(node);
+	    render();
+	    repaint();
+	    
+	    if (e.isPopupTrigger())
+	      {
+		popupHandler(e, node);
+	      }
+	  }
+
+	return;
+      }
+
     if ((node.expandable || node.child != null) &&
 	(x >= node.boxX1 && y >= node.boxY1 && x <= node.boxX2 && y <= node.boxY2))
       {
@@ -2221,7 +2246,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
       }
 
     // remember that the mouse was last pressed on this node if
-    // we subsequently receive mouseDragged events
+    // we subsequently receive mouseDragged events.
 
     if (ctrl.dragNode == null)
       {
@@ -2250,7 +2275,21 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	throw new RuntimeException("null node");
       }
 
-    if (e.isPopupTrigger())
+    // we'll do the selection/popup logic here as well, just in case
+    // we run on some weird system where the popup trigger is on
+    // the main button without the CTRL or META modifiers (which
+    // are equivalent to middle and right mouse buttons on AWT)
+
+    if (!node.selected && !spriteVisible)
+      {
+	ctrl.unselectAllNodes(true); // another node is being selected
+	ctrl.selectNode(node);
+
+	render();
+	repaint();
+      }
+
+    if (e.isPopupTrigger() && !spriteVisible)
       {
 	popupHandler(e, node);
 	return;
@@ -2310,7 +2349,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     // Win32 does popup trigger on mouse release
 
-    if (e.isPopupTrigger())
+    if (e.isPopupTrigger() && !spriteVisible)
       {
 	popupHandler(e, node);
 	return;
@@ -2325,7 +2364,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     /* -- */
 
-    if (dontdrag)
+    if (dontdrag || ctrl.dragNode == null)
       {
 	return;
       }
@@ -2621,21 +2660,32 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
   void popupHandler(MouseEvent e, treeNode node)
   {
-//    System.err.println("popupHandler");
+    if (debug2)
+      {
+	System.err.println("popupHandler");
+      }
+
     ctrl.menuedNode = node;
+
     if (node.menu != null)
       {
-//	System.err.println("node popup");
+	if (debug2)
+	  {
+	    System.err.println("node popup");
+	  }
+
 	node.menu.show(this, e.getX(), e.getY());
       }
     else if (ctrl.menu != null)
       {
-//	System.err.println("ctrl popup");
+	if (debug2)
+	  {
+	    System.err.println("ctrl popup");
+	  }
+
 	ctrl.menu.show(this, e.getX(), e.getY());
       }
   }
-
-
 }
 
 /**
