@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.2 $ %D%
+  Version: $Revision: 1.3 $ %D%
   Module By: Jonathan Abbey              jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,13 +45,13 @@ import java.util.*;
  * by the treeCanvas.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.2 $ %D%
+ * @version $Revision: 1.3 $ %D%
  *
  * @see arlut.csd.Tree.treeCanvas
  *
  */
 
-public class treeNode {
+public class treeNode implements Cloneable {
 
   String text;
   boolean expandable;
@@ -138,6 +138,51 @@ public class treeNode {
   public treeNode(treeNode parent, String text, treeNode insertAfter, boolean expandable)
   {
     this(parent, text, insertAfter, expandable, -1, -1, null);
+  }
+
+  /**
+   *
+   * This method does a full clone of this object.  Code that clones a
+   * treeNode may want to call resetNode() on the result to prepare
+   * the node for re-insertion into the tree.
+   *
+   * @see arlut.csd.JTree.treeControl.moveNode
+   *
+   */
+
+  public Object clone()
+  {
+    try
+      {
+	return super.clone();
+      }
+    catch (CloneNotSupportedException ex)
+      {
+	throw new RuntimeException("What the hey?  treeNode superclass not clonable.");
+      }
+  }
+
+  /**
+   *
+   * This clears this node's fields relating to the node's state and
+   * position in the tree.
+   *
+   * @see arlut.csd.JTree.treeControl.moveNode
+   *
+   */
+
+  public void resetNode()
+  {
+    parent = null;
+    prevSibling = null;
+    child = null;
+    nextSibling = null;
+    childStack = null;
+
+    expanded = false;
+    selected = false;
+
+    row = -1;			// undetermined
   }
 
   public String getText()
