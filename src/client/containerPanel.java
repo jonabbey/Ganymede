@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.69 $ %D%
+    Version: $Revision: 1.70 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -607,6 +607,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   public void update(Vector fields)
   {
     if (! editable)
+      {
+	return;
+      }
+
+    if (fields == null)
       {
 	return;
       }
@@ -2279,7 +2284,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 						   editable && fieldInfo.isEditable(),
 						   false,  // canChoose
 						   false,  // mustChoose
-						   160);
+						   230);// This is double wide because there is no available list
 
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
@@ -2290,13 +2295,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else
 	  {
-	    StringSelector ss = new StringSelector(list.getLabels(false),
+	    Vector available = list.getLabels(false);
+	    StringSelector ss = new StringSelector(available,
 						   (Vector)fieldInfo.getValue(), 
 						   this,
 						   editable && fieldInfo.isEditable(),
 						   true,   // canChoose
 						   false,  // mustChoose
-						   160);
+						   ((editable && fieldInfo.isEditable()) && (available != null)) ? 115 : 230);
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
@@ -2313,7 +2319,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 					       editable && fieldInfo.isEditable(),
 					       false,   // canChoose
 					       false,  // mustChoose
-					       160);
+					       230); // no availble list, so it is wider
 	objectHash.put(ss, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 	addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
@@ -2474,9 +2480,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	System.out.println("Creating StringSelector");
       }
-
     StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, editable && fieldInfo.isEditable(), 
-					   true, true, 160, "Selected", "Available",
+					   true, true, 
+					   ((choiceHandles != null) && (editable && fieldInfo.isEditable())) ? 115 : 230, //twice as wide if not editable 
+					   "Selected", "Available",
 					   invidTablePopup, invidTablePopup2);
     if (choiceHandles == null)
       {
