@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -621,6 +621,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
    *   static final short INVID = 4;
    *   static final short PERMISSIONMATRIX = 5;
    *   static final short PASSWORD = 6;
+   *   static final short IP = 7;
    *
    * @see arlut.csd.ganymede.DBStore
    * @see arlut.csd.ganymede.BaseField
@@ -783,6 +784,11 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
+      }
+
+    if (b && !(isString() || isInvid() || isIP()))
+      {
+	throw new IllegalArgumentException("can't set this field type to vector");
       }
 
     array = b;
