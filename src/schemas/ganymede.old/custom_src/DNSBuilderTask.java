@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to DNS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,6 +14,7 @@
 package arlut.csd.ganymede.custom;
 
 import arlut.csd.ganymede.*;
+import arlut.csd.Util.PathComplete;
 
 import java.util.*;
 
@@ -67,10 +68,7 @@ public class DNSBuilderTask extends GanymedeBuilderTask {
 	    throw new RuntimeException("DNSBuilder not able to determine output directory.");
 	  }
 
-	if (!path.endsWith("/"))
-	  {
-	    path = path + "/";
-	  }
+	path = PathComplete.completePath(path);
       }
 
     if (baseChanged((short) 263) ||
