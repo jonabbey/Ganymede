@@ -99,9 +99,14 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     typeN;
 
   JstringField 
-    nameS, 
-    classS,
-    classOptionS;
+    nameS;
+
+  JLabel
+    classL,
+    classOptionL;
+
+  JButton
+    classEditButton;
 
   JComboBox
     labelC;
@@ -154,17 +159,19 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     nameS.setCallback(this);
     addRow(editPanel, nameS, "Object Type:", 1);
 
-    classS = new JstringField(50, 100, true, false, null, null);
-    classS.setCallback(this);
-    addRow(editPanel, classS, "Class name:", 2);
+    addRow(editPanel, new JSeparator(), "", 2);
 
-    classOptionS = new JstringField(50, 100, true, false, null, null);
-    classOptionS.setCallback(this);
-    addRow(editPanel, classOptionS, "Class Option String:", 3);
+    classL = new JLabel();
+    addRow(editPanel, classL, "Class name:", 3);
+
+    classOptionL = new JLabel();
+    addRow(editPanel, classOptionL, "Class Option String:", 4);
+
+    addRow(editPanel, new JSeparator(), "", 5);
 
     labelC = new JComboBox();
     labelC.addItemListener(this);
-    addRow(editPanel, labelC, "Label:", 4);
+    addRow(editPanel, labelC, "Label:", 6);
 
     add(editPanel);
   }
@@ -187,8 +194,8 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
       {
 	typeN.setValue(base.getTypeID());
 	nameS.setText(base.getName());
-	classS.setText(base.getClassName());
-	classOptionS.setText(base.getClassOptionString());
+	classL.setText(base.getClassName());
+	classOptionL.setText(base.getClassOptionString());
 	refreshLabelChoice();
       }
     catch (RemoteException ex)
@@ -421,14 +428,6 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 		return false;
 	      }
 	  }
-	else if (source == classS)
-	  {
-	    owner.handleReturnVal(base.setClassName(val));
-	  }
-	else if (source == classOptionS)
-	  {
-	    owner.handleReturnVal(base.setClassOptionString(val));
-	  }
       }
     catch (RemoteException ex)
       {
@@ -470,8 +469,9 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     this.base = null;	// remote reference
     this.typeN = null;
     this.nameS = null;
-    this.classS = null;
-    this.classOptionS = null;
+    this.classL = null;
+    this.classOptionL = null;
+    this.classEditButton = null;
     this.labelC = null;
     this.editPanel = null;
     this.owner = null;

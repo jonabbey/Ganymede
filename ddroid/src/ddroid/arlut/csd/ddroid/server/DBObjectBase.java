@@ -1973,7 +1973,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // information.. if we can't, no big deal, it'll just have to be
     // done after the server is restarted.
 
-    objectHook = this.createHook();
+    try
+      {
+	objectHook = this.createHook();
+      }
+    catch (RemoteException ex)
+      {
+	return Ganymede.createErrorDialog("setClassInfo Failure",
+					  "Internal RemoteException in setClassInfo: " + Ganymede.stackTrace(ex));
+      }
 
     if (objectHook.getClass().getName().equals("arlut.csd.ddroid.server.DBEditObject") &&
 	!classname.equals("arlut.csd.ddroid.server.DBEditObject"))
