@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -322,6 +322,20 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       }
 
     return true;
+  }
+
+
+  /**
+   *
+   * Returns true if this field is a built-in field, common
+   * to all non-embedded objects.
+   *
+   * @see arlut.csd.ganymede.db_field
+   */
+
+  public boolean isBuiltIn()
+  {
+    return definition.isBuiltIn();
   }
 
   /**
