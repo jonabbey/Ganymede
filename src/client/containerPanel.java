@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.65 $ %D%
+    Version: $Revision: 1.66 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -97,6 +97,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   JProgressBar
     progressBar;
+
+  int
+    vectorElementsAdded = 0;
 
   boolean
     isEmbedded,
@@ -256,7 +259,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	if (progressBar != null)
 	  {
 	    progressBar.setMinimum(0);
-	    progressBar.setMaximum(10);
+	    progressBar.setMaximum(20);
 	    progressBar.setValue(0);
 	  }
 
@@ -302,12 +305,29 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 
 	// now we know how many fields are actually present in this
-	// object, we can set the max size of the progress bar
+	// object, we can set the max size of the progress bar (plus
+	// how many elements in each vector panel.)
 
+	infoSize = infoVector.size();
+			
 	if (progressBar != null)
 	  {
-	    progressBar.setMaximum(infoVector.size());
-	    progressBar.setValue(3);
+	    int totalSize = infoVector.size() + 2;
+	    for (int i = 0; i < infoSize; i++)
+	      {
+		FieldInfo info = (FieldInfo)infoVector.elementAt(i);
+		FieldTemplate template = findtemplate(info.getID());
+		if (template.isArray())
+		  {
+		    if ((template.getType() == FieldType.INVID) && template.isEditInPlace())
+		      {
+			totalSize += ((Vector)info.getValue()).size();
+		      }
+		  }
+	      }
+
+	    progressBar.setMaximum(totalSize);
+	    progressBar.setValue(3);	   
 	  }
 
 	if (debug)
@@ -315,19 +335,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Entering big loop");
 	  }
       
-	infoSize = infoVector.size();
-			
 	for (int i = 0; i < infoSize; i++)
 	  {
 	    // let the gclient interrupt us
 
-	    if (!keepLoading)
+	    if (!keepLoading())
 	      {
 		gc.containerPanelFinished(this);
 		break;
 	      }
 
-	    setProgressBar(i + 4);
+	    setProgressBar(i + 3 + vectorElementsAdded);
 		
 	    try
 	      {
@@ -509,6 +527,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * This method returns false when the containerPanel loading has
+   * been interupted.  The vectorPanel checks this.  
+   */
+  public boolean keepLoading()
+  {
+    return keepLoading;
+  }
+
+  /**
    *
    * Goes through all the components and checks to see if they should be visible,
    * and updates their contents.
@@ -592,16 +619,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (c == null)
 	  {
-	    System.out.println("Could not find this component: ID = " + (Short)fields.elementAt(i));
-	    System.out.println("There are " + infoVector.size() + " things in the info vector.");
-	    System.out.println("There are " + rowHash.size() + " things in the row hash.");
-	    System.out.println("Valid ids: ");
-
-	    Enumeration k = shortToComponentHash.keys();
-
-	    while (k.hasMoreElements())
+	    //if (debug)
 	      {
-		System.out.println("   " + k.nextElement());
+		System.out.println("Could not find this component: ID = " + (Short)fields.elementAt(i));
+		System.out.println("There are " + infoVector.size() + " things in the info vector.");
+		System.out.println("There are " + rowHash.size() + " things in the row hash.");
+		System.out.println("Working on number " + i + " in the fields vector.");
+		System.out.println("Valid ids: ");
+		
+		Enumeration k = shortToComponentHash.keys();
+		
+		while (k.hasMoreElements())
+		  {
+		    Object next = k.nextElement();
+		    System.out.println("   " + next);
+		  }
 	      }
 	  }
 	else
@@ -2003,7 +2035,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	System.out.println(" Name: " + fieldTemplate.getName() + " Field type desc: " + fieldType);
       }
-    
+
     if (isVector)
       {
 	if (fieldType == FieldType.STRING)
@@ -2142,9 +2174,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
     
-	if (!keepLoading)
+	if (!keepLoading())
 	  {
-	    System.out.println("Stopping containerPanel in the midst of loading a StringSelector");
+	    if (debug)
+	      {
+		System.out.println("Stopping containerPanel in the midst of loading a StringSelector");
+	      }
+
 	    gc.containerPanelFinished(this);
 	    return;
 	  }
@@ -2233,9 +2269,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	valueHandles = qres.getListHandles();
       }
 
-    if (! keepLoading)
+    if (! keepLoading())
       {
-	System.out.println("Stopping containerPanel in the midst of loading a StringSelector");
+	if (debug)
+	  {
+	    System.out.println("Stopping containerPanel in the midst of loading a StringSelector");
+	  }
+
 	gc.containerPanelFinished(this);
 	return;
       }
@@ -2409,13 +2449,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   /**
    *
-   * This private helper method is used to insert an entry in a vector panel.
+   * This private helper method is used to insert a vectorPanel into the containerPanel
    *
    */
 
   private void addVectorRow(Component comp, int row, String label, boolean visible)
   {
-    JLabel l = new JLabel("");
+    JLabel l = new JLabel(label);
     rowHash.put(comp, l);
     
     gbc.gridwidth = 2;
@@ -2428,6 +2468,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     add(comp);
 
     setRowVisible(comp, visible);
+  }
+
+  public void vectorElementAdded()
+  {
+    if (progressBar != null)
+      {
+	progressBar.setValue(progressBar.getValue() + 1);
+      }
+    
+    ++vectorElementsAdded;
   }
 
   /**
