@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/03/15 22:54:16 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/03/17 05:30:52 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -470,7 +470,10 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 	    System.err.println("JpanelCalendar.setDate(): calling writeDates()");
 	  }
 
-	// and re-draw
+	// set the year and re-draw.. note that setYear calls writeDates()
+	// for us so we don't have to do that here.
+
+	setYear(current_year);
 
 	writeDates();
 
@@ -486,7 +489,7 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
   public void setYear(int year)
   {
     current_year = year;
-    this.year.setYear(year);  //tihs.year is a JYearChooser
+    this.year.setYear(year);  // this.year is a JYearChooser
     writeDates();
   }
 
@@ -721,15 +724,11 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
       {
 	if (parent != null)
 	  {
+	    // we're going to count on our parent doing an error dialog display if
+	    // needed.
+
 	    if (!parent.setValuePerformed(new JValueObject(this, my_calendar.getTime())))
 	      {
-		// constructing a JErrorDialog causes it to be shown, and our thread
-		// to be suspended
-
-		new JErrorDialog(new JFrame(),
-				 "Date Out Of Range",
-				 "The date you have chosen is out of the acceptable range.");
-
 		if (debug)
 		  {
 		    System.err.println("JpanelCalendar.buttonPressed(): oops, unacceptable date.. reverting to " + 
