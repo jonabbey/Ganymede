@@ -6,7 +6,7 @@
    Linux passwd, master.passwd, and group files.
    
    Created: 8 September 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -173,7 +173,7 @@ public class LinuxBuilderTask extends GanymedeBuilderTask {
 
     if (buildScript == null)
       {
-	buildScript = path + "nisbuilder";
+	buildScript = path + "linux_builder";
       }
 
     file = new File(buildScript);
