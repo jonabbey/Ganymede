@@ -223,10 +223,12 @@ public class Qsmtp implements Runnable {
 	      {
 		return;
 	      }
-
-	    if (debug)
+	    finally
 	      {
-		System.err.println("Qstmp.stopThreaded() - background thread completed");
+		if (debug)
+		  {
+		    System.err.println("Qstmp.stopThreaded() - background thread completed");
+		  }
 	      }
 	  }
 	catch (InterruptedException ex)
