@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -92,7 +92,7 @@ public class QueryResult implements java.io.Serializable {
    *
    */
 
-  public synchronized void addRow(DBObject object)
+  public synchronized void addRow(DBObject object, boolean editable)
   {
     if (debug)
       {
@@ -102,7 +102,8 @@ public class QueryResult implements java.io.Serializable {
     addRow(object.getInvid(), object.getLabel(),
 	   object.isInactivated(),
 	   object.willExpire(),
-	   object.willBeRemoved());
+	   object.willBeRemoved(),
+	   editable);
 
     if (!forTransport)
       {
@@ -118,9 +119,9 @@ public class QueryResult implements java.io.Serializable {
    *
    */
 
-  public void addRow(Invid invid, String label)
+  public void addRow(Invid invid, String label, boolean editable)
   {
-    addRow(invid, label, false, false, false);
+    addRow(invid, label, false, false, false, editable);
   }
 
   /**
@@ -134,7 +135,8 @@ public class QueryResult implements java.io.Serializable {
   public synchronized void addRow(Invid invid, String label,
 				  boolean inactive,
 				  boolean expirationSet,
-				  boolean removalSet)
+				  boolean removalSet,
+				  boolean editable)
   {
     if (debug)
       {
@@ -163,6 +165,11 @@ public class QueryResult implements java.io.Serializable {
 	if (removalSet)
 	  {
 	    buffer.append("C");
+	  }
+
+	if (editable)
+	  {
+	    buffer.append("D");
 	  }
 
 	buffer.append("|");
@@ -392,7 +399,7 @@ public class QueryResult implements java.io.Serializable {
 
     String label;
     Invid invid;
-    boolean inactive, expirationSet, removalSet;
+    boolean inactive, expirationSet, removalSet, editable;
 
     /* -- */
 
@@ -417,6 +424,7 @@ public class QueryResult implements java.io.Serializable {
 	inactive = false;
 	expirationSet = false;
 	removalSet = false;
+	editable = false;
 
 	// first read in the bits
 
@@ -433,6 +441,10 @@ public class QueryResult implements java.io.Serializable {
 	    else if (chars[index] == 'C')
 	      {
 		removalSet = true;
+	      }
+	    else if (chars[index] == 'D')
+	      {
+		editable = true;
 	      }
 
 	    index++;
@@ -485,7 +497,8 @@ public class QueryResult implements java.io.Serializable {
 	label = tempString.toString();
 
 	handles.addElement(new ObjectHandle(label, invid, 
-					    inactive, expirationSet, removalSet));
+					    inactive, expirationSet, 
+					    removalSet, editable));
 
 	rows++;
 	index++; // skip newline
