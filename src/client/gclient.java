@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   // Status tracking
   //
 
-  boolean
+  private boolean
     showToolbar = false,       // Show the toolbar
     somethingChanged = false;  // This will be set to true if the user changes anything
   
@@ -231,7 +231,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   JMenuItem 
     logoutMI,
-    getLastErrorMI,
     removeAllMI,
     rebuildTreeMI,
     filterQueryMI,
@@ -328,8 +327,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     logoutMI = new JMenuItem("Logout", new MenuShortcut(KeyEvent.VK_L));
     logoutMI.addActionListener(this);
 
-    getLastErrorMI = new JMenuItem("Get Last Error");
-    getLastErrorMI.addActionListener(this);
     removeAllMI = new JMenuItem("Remove All Windows");
     removeAllMI.addActionListener(this);
     rebuildTreeMI = new JMenuItem("Rebuild Tree", new MenuShortcut(KeyEvent.VK_R));
@@ -345,7 +342,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     fileMenu.add(filterQueryMI);
     fileMenu.add(defaultOwnerMI);
     fileMenu.addSeparator();
-    fileMenu.add(getLastErrorMI);
     fileMenu.add(logoutMI);
 
     // Action menu
@@ -866,34 +862,66 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   }
 
   /**
+   * This indeicates that something in the database was changed, so canceling this transaction will have consequences.
+   *
+   * This should be called whenever the client makes any changes to the database.
+   */
+  public final void somethingChanged()
+  {
+      somethingChanged = true;
+  }
+
+  public boolean getSomethingChanged()
+  {
+    return somethingChanged;
+
+  }
+  /**
    *
    * This method takes a ReturnVal object from the server and, if necessary,
    * displays a dialog to the user based on the server's feedback.
    *
    */
 
-  public void handleReturnVal(ReturnVal retVal)
+  public ReturnVal handleReturnVal(ReturnVal retVal)
   {
     System.err.println("** gclient: Entering handleReturnVal");
 
-    if (retVal == null)
+    while ((retVal != null) && (retVal.getDialog() != null))
       {
-	return;
+	JDialogBuff jdialog = retVal.getDialog();
+
+	StringDialog dialog = new StringDialog(jdialog.extractDialogRsrc(this));
+
+	Hashtable result = dialog.DialogShow();
+
+	if (retVal.getCallback() != null)
+	  {
+	    try
+	      {
+		System.out.println("Sending result to callback: " + result);
+		retVal = retVal.getCallback().respond(result);
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("Caught remote exception: " + ex.getMessage());
+	      }
+	  }
+	else
+	  {
+	    System.out.println("No callback, breaking");
+	    break;		// we're done
+	  }
       }
 
-    JDialogBuff jdialog = retVal.getDialog();
-
-    if (jdialog == null)
+    if ((retVal == null) || retVal.didSucceed()) 
       {
-	System.err.println("** gclient: Exiting handleReturnVal with no showing");
-	return;
+	somethingChanged(); 
       }
-
-    StringDialog dialog = new StringDialog(jdialog.extractDialogRsrc(this));
-
-    Hashtable result = dialog.DialogShow();
 
     System.err.println("** gclient: Exiting handleReturnVal");
+
+    return retVal;
   }
 
   // Private methods
@@ -1636,9 +1664,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
 	else
 	  {
-	    String error = session.getLastError();
-	    System.out.println("Could not delete object: " + error);
-	    setStatus("Delete Failed: " + error);
+	    setStatus("Delete Failed.");
 	  }
       }
     catch(RemoteException rx)
@@ -2088,7 +2114,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
 	else
 	  {
-	    showErrorMessage("Error: commit failed", "Could not commit your changes: " + session.getLastError());
+	    showErrorMessage("Error: commit failed", "Could not commit your changes.");
 	  }
       }
     catch (RemoteException rx)
@@ -2296,17 +2322,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	if (OKToProceed())
 	  {
 	    logout();
-	  }
-      }
-    else if (source == getLastErrorMI)
-      {
-	try
-	  {
-	    System.out.println("Last error: " + getSession().getLastError());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get last error: " +rx);
 	  }
       }
     else if (command.equals("open object for editing"))
@@ -2832,7 +2847,7 @@ class PersonaListener implements ActionListener{
 	System.out.println("Persona Listener doesn't understand that action.");
       }
     
-    if (gc.somethingChanged)
+    if (gc.getSomethingChanged())
       {
 	// need to ask: commit, cancel, abort?
 	StringDialog d = new StringDialog(gc,
@@ -2905,7 +2920,7 @@ class PersonaListener implements ActionListener{
 		{
 		  gc.setStatus("Danger Danger!");
 		  (new StringDialog(gc, "Error: persona no changie", 
-				    "Could not change persona:\n" + gc.getSession().getLastError(),
+				    "Could not change persona.",
 				    false)).DialogShow();
 
 		  gc.setStatus("Persona change failed");
