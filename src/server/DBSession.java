@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 1999/07/06 21:20:34 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 1999/07/14 21:52:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.69 $ %D%
+ * @version $Revision: 1.70 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -149,7 +149,20 @@ final public class DBSession {
    */
 
   String lastError;
+
+  /**
+   * <P>Optional string identifying this session in logging, etc.</P>
+   *
+   * <P>Used by {@link arlut.csd.ganymede.DBSession#getID() getID()}.
+   */
+
   String id = null;
+
+  /**
+   * <P>Identifying key used in the lock system to identify owner of
+   * locks.</P>
+   */
+
   Object key;
 
   /* -- */
@@ -1009,11 +1022,34 @@ final public class DBSession {
 
     /* -- */
 
+    // we'll never be able to establish a read lock if we have to
+    // wait for this thread to release an existing write lock..
+
+    if (lockVect.size() != 0)
+      {
+	boolean lockOK;
+
+	for (int i = 0; i < lockVect.size(); i++)
+	  {
+	    DBLock oldLock = (DBLock) lockVect.elementAt(i);
+
+	    if (oldLock instanceof DBWriteLock)
+	      {
+		if (oldLock.overlaps(bases))
+		  {
+		    throw new InterruptedException("Can't establish read lock, session " + getID() +
+						   " already has overlapping write lock:\n" +
+						   oldLock.toString());
+		  }
+	      }
+	  }
+      }
+
     lock = new DBReadLock(store, bases);
 
     lockVect.addElement(lock);
 
-    lock.establish(this);
+    lock.establish(key);
 
     return lock;
   }
@@ -1039,10 +1075,78 @@ final public class DBSession {
 
     /* -- */
 
+    // we'll never be able to establish a read lock if we have to
+    // wait for this thread to release an existing write lock..
+
+    if (lockVect.size() != 0)
+      {
+	for (int i = 0; i < lockVect.size(); i++)
+	  {
+	    DBLock oldLock = (DBLock) lockVect.elementAt(i);
+
+	    if (oldLock instanceof DBWriteLock)
+	      {
+		throw new InterruptedException("Can't establish global read lock, session " + getID() +
+					       " already has write lock:\n" +
+					       oldLock.toString());
+	      }
+	  }
+      }
+
     lock = new DBReadLock(store);
     lockVect.addElement(lock);
 
-    lock.establish(this);
+    lock.establish(key);
+
+    return lock;
+  }
+
+  /**
+   * <p>Establishes a write lock for the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}s
+   * in bases.</p>
+   *
+   * <p>The thread calling this method will block until the write lock
+   * can be established.  If this DBSession already possesses a write lock,
+   * read lock, or dump lock, the openWriteLock() call will fail with
+   * an InterruptedException.</p>
+   *
+   * <p>If one or more different DBSessions (besides this) have locks in
+   * place that would block acquisition of the write lock, this method
+   * will block until the lock can be acquired.</p>
+   */
+
+  public synchronized DBWriteLock openWriteLock(Vector bases) throws InterruptedException
+  {
+    DBWriteLock lock;
+
+    /* -- */
+
+    // we'll never be able to establish a write lock if we have to
+    // wait for this thread to release read, write, or dump locks..
+    // and we must not have pre-existing locks on bases not
+    // overlapping with our bases parameter either, or else we risk
+    // dead-lock later on..
+
+    if (lockVect.size() != 0)
+      {
+	StringBuffer resultBuffer = new StringBuffer();
+
+	for (int i = 0; i < lockVect.size(); i++)
+	  {
+	    resultBuffer.append(lockVect.elementAt(i).toString());
+	    resultBuffer.append("\n");
+	  }
+
+	throw new InterruptedException("Can't establish write lock, session " + getID() + 
+				       " already has locks:\n" +
+				       resultBuffer.toString());
+      }
+
+    lock = new DBWriteLock(store, bases);
+
+    lockVect.addElement(lock);
+
+    lock.establish(key);
 
     return lock;
   }
@@ -1058,10 +1162,28 @@ final public class DBSession {
 
     /* -- */
 
+    // we'll never be able to establish a dump lock if we have to
+    // wait for this thread to release an existing write lock..
+
+    if (lockVect.size() != 0)
+      {
+	for (int i = 0; i < lockVect.size(); i++)
+	  {
+	    DBLock oldLock = (DBLock) lockVect.elementAt(i);
+
+	    if (oldLock instanceof DBWriteLock)
+	      {
+		throw new InterruptedException("Can't establish global dump lock, session " + getID() +
+					       " already has write lock:\n" +
+					       oldLock.toString());
+	      }
+	  }
+      }
+
     lock = new DBDumpLock(store);
     lockVect.addElement(lock);
 
-    lock.establish(this);
+    lock.establish(key);
 
     return lock;
   }

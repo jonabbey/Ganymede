@@ -6,8 +6,8 @@
 
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/01/22 18:05:09 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/07/14 21:51:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -169,6 +169,35 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
   /**
    *
+   * This method starts off the wizard process
+   *
+   */
+
+  public ReturnVal processDialog0()
+  {
+    StringBuffer buffer = new StringBuffer();
+    ReturnVal retVal = null;
+
+    /* -- */
+
+    System.err.println("userReactivateWizard: creating reactivation wizard");
+
+    buffer.append("Reactivating ");
+    buffer.append(userObject.getLabel());
+    buffer.append("\n\nIn order to reactivate this account, you need to provide a password, ");
+    buffer.append("a login shell, and a new address to send email for this account to.");
+	
+    retVal = continueOn("User Reactivation Dialog",
+			buffer.toString(),
+			"Next",
+			"Cancel",
+			"question.gif");
+    
+    return retVal;
+  }
+
+  /**
+   *
    * If we have gotten here, the user clicked Ok when asked
    * if he really wanted to reactivate this user.
    *
@@ -274,32 +303,5 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
   }
 
 
-  /**
-   *
-   * This method starts off the wizard process
-   *
-   */
 
-  public ReturnVal getStartDialog()
-  {
-    StringBuffer buffer = new StringBuffer();
-    ReturnVal retVal = null;
-
-    /* -- */
-
-    System.err.println("userReactivateWizard: creating reactivation wizard");
-
-    buffer.append("Reactivating ");
-    buffer.append(userObject.getLabel());
-    buffer.append("\n\nIn order to reactivate this account, you need to provide a password, ");
-    buffer.append("a login shell, and a new address to send email for this account to.");
-	
-    retVal = continueOn("User Reactivation Dialog",
-			buffer.toString(),
-			"Next",
-			"Cancel",
-			"question.gif");
-    
-    return retVal;
-  }
 }

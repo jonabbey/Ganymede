@@ -6,8 +6,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/01/22 18:05:23 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/07/14 21:51:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -157,106 +157,20 @@ public class userRenameWizard extends GanymediatorWizard {
 
   /**
    *
-   * This method is used to provide feedback to the server from a client
-   * in response to a specific request. 
-   *
-   * @param returnHash a hashtable mapping strings to values.  The strings
-   * are titles of fields specified in a dialog that was provided to the
-   * client.  If returnHash is null, this corresponds to the user hitting
-   * cancel on such a dialog.
-   *
-   * @see arlut.csd.ganymede.Ganymediator
-   * @see arlut.csd.ganymede.ReturnVal
+   * This method provides a default response if a user
+   * hits cancel on a wizard dialog.  This should be
+   * subclassed if a wizard wants to provide a more
+   * detailed cancel response.
    *
    */
 
-  public ReturnVal respond(Hashtable returnHash)
+  public ReturnVal cancel()
   {
-    JDialogBuff dialog;
-    ReturnVal retVal = null;
-    boolean aborted;
-
-    /* -- */
-
-    if (state == 1)
-      {
-	System.err.println("userRenameWizard: USER_RENAME state 1 processing return vals from dialog");
-
-	if (returnHash != null)
-	  {
-	    Boolean answer = (Boolean) returnHash.get("Yes, I'm sure I want to do this");
-	    aborted = (answer == null) || !answer.booleanValue();
-	  }
-	else
-	  {
-	    aborted = true;
-	  }
-
-	if (aborted)
-	  {
-	    retVal = new ReturnVal(false);
-	    dialog = new JDialogBuff("User Rename Cancelled",
-				     "OK, good decision.",
-				     "Yeah, I guess",
-				     null,
-				     "ok.gif");
-	    retVal.setDialog(dialog);
-
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
-
-	    return retVal;
-	  }
-
-	Enumeration enum = returnHash.keys();
-	int i = 0;
-
-	while (enum.hasMoreElements())
-	  {
-	    Object key = enum.nextElement();
-	    Object value = returnHash.get(key);
-	    
-	    System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
-	  }
-	
-	System.err.println("userRenameWizard: Calling field.setValue()");
-
-	state = DONE;		// let the userCustom wizardHook know to go 
-				// ahead and pass this operation through now
-
-	// note that this setValue() operation will pass
-	// through userObject.wizardHook().  wizardHook will see that we are
-	// an active userRenameWizard, and are at state DONE, so it
-	// will go ahead and unregister us and let the name change
-	// go through to completion.
-
-	retVal = field.setValue(newname);
-	System.err.println("userRenameWizard: Returned from field.setValue()");
-
-	if (retVal == null)
-	  {
-	    retVal = new ReturnVal(true); // should cause DBField.setValue() to proceed
-	    dialog = new JDialogBuff("User Rename Performed",
-				     "OK, User renamed.",
-				     "Thanks",
-				     null,
-				     "ok.gif");
-	    
-	    retVal.setDialog(dialog);
-	  }
-	
-	// just in case the setValue didn't go through
-
-	this.unregister(); // we're stopping here, so we'll unregister ourselves
-
-	System.err.println("Returning confirmation dialog");
-	
-	return retVal;
-      }
-
-    // are we in an unexpected state?
-
-    return Ganymede.createErrorDialog("userRenameWizard: Error",
-				      "No idea what you're talking about");	
+    return fail("User Rename Cancelled",
+		"OK, good decision.",
+		"Yeah, I guess",
+		null,
+		"ok.gif");
   }
 
   /**
@@ -265,29 +179,74 @@ public class userRenameWizard extends GanymediatorWizard {
    *
    */
 
-  public ReturnVal getStartDialog()
+  public ReturnVal processDialog0()
   {
-    JDialogBuff dialog;
-    StringBuffer buffer = new StringBuffer();
     ReturnVal retVal = null;
 
     /* -- */
 
-    retVal = new ReturnVal(false);
-    dialog = new JDialogBuff("User Rename Dialog",
-			     "Warning.\n\n" + 
-			     "Renaming a user is a serious operation, with serious potential consequences.\n\n"+
-			     "If you rename this user, the user's directory and mail file will need to be renamed.\n\n"+
-			     "Any scripts or programs that refer to this user's name will need to be changed.",
-			     "OK",
-			     "Never Mind",
-			     "question.gif");
-    dialog.addBoolean("Yes, I'm sure I want to do this");
+    retVal = continueOn("User Rename Dialog",
+			"Warning.\n\n" + 
+			"Renaming a user is a serious operation, with serious potential consequences.\n\n"+
+			"If you rename this user, the user's directory and mail file will need to be renamed.\n\n"+
+			"Any scripts or programs that refer to this user's name will need to be changed.",
+			"OK",
+			"Never Mind",
+			"question.gif");
 
-    retVal.setDialog(dialog);
-    retVal.setCallback(this);
+    retVal.getDialog().addBoolean("Yes, I'm sure I want to do this");
 
-    state = 1;
+    return retVal;
+  }
+
+  /**
+   *
+   * The client will call us in this state with a Boolean
+   * param for key "Keep old name as an email alias?"
+   *
+   */
+
+  public ReturnVal processDialog1()
+  {
+    ReturnVal retVal = null;
+
+    /* -- */
+
+    System.err.println("userRenameWizard: USER_RENAME state 1 processing return vals from dialog");
+
+    Boolean answer = (Boolean) getParam("Yes, I'm sure I want to do this");
+
+    if (answer == null || !answer.booleanValue())
+      {
+	return cancel();
+      }
+
+    System.err.println("userRenameWizard: Calling field.setValue()");
+
+    state = DONE;		// let the userCustom wizardHook know to go 
+				// ahead and pass this operation through now
+
+    // note that this setValue() operation will pass
+    // through userObject.wizardHook().  wizardHook will see that we are
+    // an active userRenameWizard, and are at state DONE, so it
+    // will go ahead and unregister us and let the name change
+    // go through to completion.
+
+    retVal = field.setValue(newname);
+    System.err.println("userRenameWizard: Returned from field.setValue()");
+
+    if (retVal == null)
+      {
+	retVal = success("User Rename Performed",
+			 "OK, User renamed.",
+			 "Thanks",
+			 null,
+			 "ok.gif");
+	
+	retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
+      }
+    
+    System.err.println("Returning confirmation dialog");
     
     return retVal;
   }

@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 1999/07/14 04:45:05 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 1999/07/14 21:51:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -649,7 +649,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    System.err.println("userCustom: returning inactivation wizard");
 	  }
 
-	return theWiz.getStartDialog();
+	return theWiz.respond(null);
       }
   }
 
@@ -712,7 +712,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	System.err.println("userCustom: returning reactivation wizard");
       }
     
-    return theWiz.getStartDialog();
+    return theWiz.respond(null);
   }
 
   /**
@@ -1517,7 +1517,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// set to false, so whatever triggered us will prematurely exit,
 		// returning the wizard's dialog.
 	    
-		return groupWizard.getStartDialog();
+		return groupWizard.respond(null);
 	      }
 	  }
 
@@ -1546,7 +1546,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		  {
 		    return new userCategoryWizard(getGSession(), this, 
 						  (Invid) getFieldValueLocal(userSchema.CATEGORY),
-						  (Invid) param1).getStartDialog();
+						  (Invid) param1).respond(null);
 		  }
 		else
 		  {
@@ -1686,11 +1686,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	    // if we get here, the wizard was able to register itself.. go ahead
 	    // and return the initial dialog for the wizard.  The ReturnVal code
-	    // that wizard.getStartDialog() returns will have the success code
+	    // that wizard.respond() returns will have the success code
 	    // set to false, so whatever triggered us will prematurely exit,
 	    // returning the wizard's dialog.
 
-	    return renameWizard.getStartDialog();
+	    return renameWizard.respond(null);
 	  }
       }
     finally

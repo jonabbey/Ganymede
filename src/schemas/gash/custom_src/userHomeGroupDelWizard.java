@@ -7,8 +7,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/01/22 18:04:52 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/07/14 21:51:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -181,6 +181,51 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 		"OK",
 		null,
 		"ok.gif");
+  }
+
+
+  /**
+   *
+   * This method starts off the wizard process
+   *
+   */
+
+  public ReturnVal processDialog0()
+  {
+    StringBuffer buffer = new StringBuffer();
+    ReturnVal retVal;
+
+    /* -- */
+
+    System.err.println("userHomeGroupDelWizard: creating home group deletion wizard");
+    
+    userObject.updateGroupChoiceList();
+    
+    if (userObject.groupChoices.size() == 1)
+      {
+	buffer.append("Can't delete lone group for user ");
+	buffer.append(userObject.getLabel());
+	buffer.append("\n\nYou may not delete the last group from a user's account.  All active users in UNIX need ");
+	buffer.append("to be a member of at least a single account group.");
+
+	return fail("User Home Group Change Dialog",
+		    buffer.toString(),
+		    "OK",
+		    null,
+		    "error.gif");
+      }
+
+    buffer.append("Changing home group for user ");
+    buffer.append(userObject.getLabel());
+    buffer.append("\n\nThe group you are attempting to remove this user from is the user's default group. ");
+    buffer.append("In order to remove the user from this group, you are going to need to select another group ");
+    buffer.append("to be the default group for this user at login time.");
+
+    return continueOn("User Home Group Change Dialog",
+		      buffer.toString(),
+		      "Next",
+		      "Cancel",
+		      "question.gif");
   }
 
   public ReturnVal processDialog1()
@@ -364,47 +409,4 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
       }
   }
 
-  /**
-   *
-   * This method starts off the wizard process
-   *
-   */
-
-  public ReturnVal getStartDialog()
-  {
-    StringBuffer buffer = new StringBuffer();
-    ReturnVal retVal;
-
-    /* -- */
-
-    System.err.println("userHomeGroupDelWizard: creating home group deletion wizard");
-    
-    userObject.updateGroupChoiceList();
-    
-    if (userObject.groupChoices.size() == 1)
-      {
-	buffer.append("Can't delete lone group for user ");
-	buffer.append(userObject.getLabel());
-	buffer.append("\n\nYou may not delete the last group from a user's account.  All active users in UNIX need ");
-	buffer.append("to be a member of at least a single account group.");
-
-	return fail("User Home Group Change Dialog",
-		    buffer.toString(),
-		    "OK",
-		    null,
-		    "error.gif");
-      }
-
-    buffer.append("Changing home group for user ");
-    buffer.append(userObject.getLabel());
-    buffer.append("\n\nThe group you are attempting to remove this user from is the user's default group. ");
-    buffer.append("In order to remove the user from this group, you are going to need to select another group ");
-    buffer.append("to be the default group for this user at login time.");
-
-    return continueOn("User Home Group Change Dialog",
-		      buffer.toString(),
-		      "Next",
-		      "Cancel",
-		      "question.gif");
-  }
 }

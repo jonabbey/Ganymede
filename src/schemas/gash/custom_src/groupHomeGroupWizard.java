@@ -5,7 +5,7 @@
   A wizard to allow deletion of a user's home group from the group edit window.
 
   Created: 8 April 1998
-  Version: $Revision: 1.5 $ %D%
+  Version: $Revision: 1.6 $ %D%
   Module by: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -114,6 +114,56 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 		"OK",
 		null,
 		"ok.gif");
+  }
+
+  public ReturnVal processDialog0()
+  {
+    JDialogBuff dialog;
+    ReturnVal retVal = null;
+
+    print("Starting new dialog");
+    
+    user = (userCustom) (session.edit_db_object(userInvid).getObject());
+
+    if (user == null)
+      {
+	return Ganymede.createErrorDialog("groupHomeGroupWizard error",
+					  "Could not get the user.");
+      }
+
+    if (debug)
+      {
+	System.err.println("groupHomeGroupWizard: creating start dialog.");
+      }
+
+    int size = 0;
+
+    try
+      {
+	size = user.getField(userSchema.GROUPLIST).size();
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("could not get the size. " + rx);
+      }
+
+    // If size is less than one, then there won't be any other groups to change to.
+
+    if (size > 1)  
+      {
+	return continueOn("Home Group Change", 
+			  "In order to remove a user's home group, you must choose another home group for that user.",
+			  "Next", "Cancel", "question.gif");
+	
+      }
+    else
+      {
+	// no groups to choose from
+
+	return fail("Home Group Change",
+		    "Each user must have a home group.  For that user, this is it.  So don't.",
+		    "Sorry", null, "ok.gif");
+      }
   }
 
   public ReturnVal processDialog1()
@@ -260,56 +310,6 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
       }
 
     return retVal;
-  }
-
-  public ReturnVal getStartDialog()
-  {
-    JDialogBuff dialog;
-    ReturnVal retVal = null;
-
-    print("Starting new dialog");
-    
-    user = (userCustom) (session.edit_db_object(userInvid).getObject());
-
-    if (user == null)
-      {
-	return Ganymede.createErrorDialog("groupHomeGroupWizard error",
-					  "Could not get the user.");
-      }
-
-    if (debug)
-      {
-	System.err.println("groupHomeGroupWizard: creating start dialog.");
-      }
-
-    int size = 0;
-
-    try
-      {
-	size = user.getField(userSchema.GROUPLIST).size();
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("could not get the size. " + rx);
-      }
-
-    // If size is less than one, then there won't be any other groups to change to.
-
-    if (size > 1)  
-      {
-	return continueOn("Home Group Change", 
-			  "In order to remove a user's home group, you must choose another home group for that user.",
-			  "Next", "Cancel", "question.gif");
-	
-      }
-    else
-      {
-	// no groups to choose from
-
-	return fail("Home Group Change",
-		    "Each user must have a home group.  For that user, this is it.  So don't.",
-		    "Sorry", null, "ok.gif");
-      }
   }
 
   private void print(String s)

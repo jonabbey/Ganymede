@@ -18,8 +18,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/07/14 04:46:01 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/07/14 21:52:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,41 +75,89 @@ import arlut.csd.JDialog.JDialogBuff;
 
 ------------------------------------------------------------------------------*/
 
-/**
- * <p>This class is a template for all Wizards implemented on the server.
- * Custom plug-in GanymediatorWizards may be authored to handle
- * step-by-step interactions with a user.  GanymediatorWizards are
- * typically created on the server when a client attempts an operation
- * that requires a bit of hand-holding on the part of the server.  A
- * remote handle to the newly instantiated GanymediatorWizard is returned to
- * the client, which presents a matching dialog to the user, retrieves input,
- * and calls the respond() method.  The respond() method takes the input from
- * the user and considers whether it has enough information to perform the
- * initially requested action.  If not, it will update its internal state
- * to keep track of where it is with respect to the user, and will return
- * another ReturnVal which requests the client present another dialog and
- * call back this GanymediatorWizard to continue along the process.</p>
- *
- * <p>The {@link
- * arlut.csd.ganymede.GanymediatorWizard#getStartDialog()
- * getStartDialog()} method is the starting place for the user's
- * interaction with Ganymede wizards.  Server-side code will construct
- * a GanymediatorWizard and return the wizard's getStartDialog()
- * return value to start the process rolling.  It is critical that
- * getStartDialog() call {@link
- * arlut.csd.ganymede.GanymediatorWizard#unregister() unregister()} if
- * no further interaction is desired.  The processDialogXX methods are
- * called by the {@link
+/** 
+ * <p>This class is a template for all Wizards implemented on the
+ * server.  Custom plug-in GanymediatorWizards may be authored to
+ * handle step-by-step interactions with a user.  GanymediatorWizards
+ * are typically created on the server when a client attempts an
+ * operation that requires a bit of hand-holding on the part of the
+ * server.  A remote handle to the newly instantiated
+ * GanymediatorWizard is returned to the client, which presents a
+ * matching dialog to the user, retrieves input, and calls the {@link
  * arlut.csd.ganymede.GanymediatorWizard#respond(java.util.Hashtable)
- * respond()} method, which handles unregistering the wizard if needed,
- * but getStartDialog() is responsible for handling its own de-linking
- * if no interaction needs to take place.</p>
+ * respond()} method.  The respond() method takes the input from the
+ * user and considers whether it has enough information to perform the
+ * initially requested action.  If not, it will update its internal
+ * state to keep track of where it is with respect to the user, and
+ * will return another {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+ * which requests the client present another dialog and call back this
+ * GanymediatorWizard to continue along the process.</p>
+ *
+ * <p>After a GanymediatorWizard is constructed, the respond() method
+ * will first call processDialog0().  processDialog0() can generate a
+ * return value using the {@link
+ * arlut.csd.ganymede.GanymediatorWizard#continueOn(java.lang.String,
+ * java.lang.String, java.lang.String, java.lang.String,
+ * java.lang.String) continueOn()} method to return a dialog that will
+ * ask the user for more information, or it can use the {@link
+ * arlut.csd.ganymede.GanymediatorWizard#fail(java.lang.String,
+ * java.lang.String, java.lang.String, java.lang.String,
+ * java.lang.String) fail()} or {@link
+ * arlut.csd.ganymede.GanymediatorWizard#success(java.lang.String,
+ * java.lang.String, java.lang.String, java.lang.String,
+ * java.lang.String) success()} to return a dialog with an encoded
+ * success or failure indication, or it can return null to indicate
+ * success with no dialog.  If the return result from processDialog0()
+ * was generated using continueOn(), the client's response to that
+ * dialog will be forwarded to processDialog1().</p>
+ *
+ * <p>For processDialog1() and after, the wizard can use the
+ * {@link arlut.csd.ganymede.GanymediatorWizard#getKeys() getKeys()}
+ * method to get an enumeration of labeled values passed back from
+ * the client, and {@link arlut.csd.ganymede.GanymediatorWizard#getParam(java.lang.Object) getParam()}
+ * to get the value for a specific key.  Based on values passed back from
+ * the client, processDialog1() can decide to continue the interaction,
+ * or to return a dialog indicating success or failure, or a silent
+ * success result.</p>
+ *
+ * <p>Typically, a continueOn() will cause the wizard system to
+ * proceed to the next highest processDialogXX() method.  If a wizard
+ * needs to skip to a specific step, it can use the {@link
+ * arlut.csd.ganymede.GanymediatorWizard#setNextState()
+ * setNextState()} method to set the number for the next processDialog
+ * method before returning a continueOn() result.</p>
+ *
+ * <p>If at any time after processDialog0() the user hits cancel on
+ * a dialog, the GanymediatorWizard respond() mechanism will call
+ * the wizard's {@link arlut.csd.ganymede.GanymediatorWizard#cancel() cancel()}
+ * method to retrieve a final dialog for the user.</p>
+ *
+ * <p>A wizard may only have 99 steps, from processDialog0() to
+ * processDialog98().</p>
+ *
+ * <p>The {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+ * class keeps track of the client's active wizard.  It is an error
+ * for there to be more than one wizard active at a time for a given
+ * client.  respond() is responsible for calling {@link
+ * arlut.csd.ganymede.GanymediatorWizard#unregister unregister()} when
+ * a wizard is through talking to the client.</p>
+ *
+ * <p>Server-side code that is meant to return a ReturnVal object
+ * will pass control to a wizard by constructing a new wizard subclass
+ * and doing a</p>
+ *
+ * <p><code>return wizard.respond(null);</code></p>
+ *
+ * <p>to return the results of processDialog0() to the client.  From that
+ * point on, the client will communicate back to the wizard as
+ * required to iterate through the processDialog steps.</p>
  *
  * @see arlut.csd.ganymede.ReturnVal
  * @see arlut.csd.ganymede.Ganymediator
  *
- * @version $Revision: 1.12 $ $Date: 1999/07/14 04:46:01 $ $Name:  $
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
+ * @version $Revision: 1.13 $ $Date: 1999/07/14 21:52:02 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
+ */
 
 public abstract class GanymediatorWizard extends UnicastRemoteObject implements Ganymediator {
 
@@ -119,7 +167,7 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
   // ---
 
   protected boolean active = false;
-  public int state = 1;
+  public int state = 0;
   protected GanymedeSession session = null;
 
   protected Hashtable returnHash;
@@ -152,7 +200,7 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
 	throw new RuntimeException("error, couldn't register wizard with session");
       }
 
-    state = 1;
+    state = 0;
   }
 
   /**
@@ -192,9 +240,19 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
 
     stateSet = false;
 
-    if (returnHash != null)
+    if (state == 0 || returnHash != null)
       {
-	result = callDialog(state);
+	try
+	  {
+	    result = callDialog(state);
+	  }
+	catch (Throwable x)
+	  {
+	    this.unregister();
+	    return Ganymede.createErrorDialog("Wizard Error",
+					      "The wizard handling this sequence has thrown an exception: \n" +
+					      x.getMessage());
+	  }
 
 	if (result == null || 
 	    (!result.didSucceed() &&
@@ -398,12 +456,15 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
 	StringWriter stringTarget = new StringWriter();
 	
 	original.printStackTrace(new PrintWriter(stringTarget));
+
+	unregister();
 	return Ganymede.createErrorDialog("Ganymede Wizard Error",
 					  "GanymediatorWizard.callDialog(): Invocation error in state " + 
 					  state + "\n\n" + stringTarget.toString());
       }
     catch (IllegalAccessException ex)
       {
+	unregister();
 	return Ganymede.createErrorDialog("Ganymede Wizard Error",
 					  "GanymediatorWizard.callDialog(): Illegal Access error in state " + state +
 					  "\n" + ex.getMessage());
@@ -462,7 +523,14 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
    * (indicating that the wizard doesn't need to interact with
    * the client), that this method calls unregister() to clear the
    * wizard from the GanymedeSession.</P>
+   *
+   * @deprecated getStartDialog() has been deprecated.. use
+   * processDialog0() in your GanymediatorWizard subclasses instead.
    */
 
-  public abstract ReturnVal getStartDialog();
+  public final ReturnVal getStartDialog()
+  {
+    return Ganymede.createErrorDialog("error, getStartDialog has been deprecated",
+				      "error, getStartDialog has been deprecated");
+  }
 }

@@ -6,8 +6,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/01/22 18:05:09 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/07/14 21:51:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -183,6 +183,32 @@ public class userRenameWizard extends GanymediatorWizard {
 
   /**
    *
+   * This method starts off the wizard process
+   *
+   */
+
+  public ReturnVal processDialog0()
+  {
+    ReturnVal retVal = null;
+
+    /* -- */
+
+    retVal = continueOn("User Rename Dialog",
+			"Warning.\n\n" + 
+			"Renaming a user is a serious operation, with serious potential consequences.\n\n"+
+			"If you rename this user, the user's directory and mail file will need to be renamed.\n\n"+
+			"Any scripts or programs that refer to this user's name will need to be changed.",
+			"OK",
+			"Never Mind",
+			"question.gif");
+
+    retVal.getDialog().addBoolean("Keep old name as an email alias?");
+
+    return retVal;
+  }
+
+  /**
+   *
    * The client will call us in this state with a Boolean
    * param for key "Keep old name as an email alias?"
    *
@@ -253,29 +279,5 @@ public class userRenameWizard extends GanymediatorWizard {
     return retVal;
   }
 
-  /**
-   *
-   * This method starts off the wizard process
-   *
-   */
 
-  public ReturnVal getStartDialog()
-  {
-    ReturnVal retVal = null;
-
-    /* -- */
-
-    retVal = continueOn("User Rename Dialog",
-			"Warning.\n\n" + 
-			"Renaming a user is a serious operation, with serious potential consequences.\n\n"+
-			"If you rename this user, the user's directory and mail file will need to be renamed.\n\n"+
-			"Any scripts or programs that refer to this user's name will need to be changed.",
-			"OK",
-			"Never Mind",
-			"question.gif");
-
-    retVal.getDialog().addBoolean("Keep old name as an email alias?");
-
-    return retVal;
-  }
 }

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.141 $
-   Last Mod Date: $Date: 1999/07/14 04:46:00 $
+   Version: $Revision: 1.142 $
+   Last Mod Date: $Date: 1999/07/14 21:52:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.141 $ %D%
+ * @version $Revision: 1.142 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1734,6 +1734,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (retVal == null || retVal.didSucceed())
       {
+	if (isWizardActive())
+	  {
+	    getWizard().unregister();
+	    
+	    // and just in case unregister() was overridden
+
+	    if (this.wizard != null)
+	      {
+		this.wizard = null;
+	      }
+	  }
+
 	Ganymede.runBuilderTasks();
       }
     else
@@ -1790,7 +1802,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * This method causes all changes made by the client to be thrown out
    * by the database, and the transaction is closed.
    *
-   * @return a ReturnVal object if the transaction could not be committed,
+   * @return a ReturnVal object if the transaction could not be aborted,
    *         or null if there were no problems
    *
    * @see arlut.csd.ganymede.Session
@@ -1809,6 +1821,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     this.status = "";
     setLastEvent("abortTransaction");
+
+    if (isWizardActive())
+      {
+	getWizard().unregister();
+	    
+	// and just in case unregister() was overridden
+
+	if (this.wizard != null)
+	  {
+	    this.wizard = null;
+	  }
+      }
 
     return session.abortTransaction(); // *sync* DBSession 
   }

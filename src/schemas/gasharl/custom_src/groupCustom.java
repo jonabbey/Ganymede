@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/04/28 08:19:54 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/07/14 21:51:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -324,7 +324,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
 	    wiz = new groupInactivateWizard(this.gSession, this);
 	    
-	    return wiz.getStartDialog();
+	    return wiz.respond(null);
 	  }
 	catch (RemoteException rx)
 	  {
@@ -541,7 +541,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		
 		homeWizard = new groupHomeGroupWizard(this.gSession, this, userInvid);
 		
-		return homeWizard.getStartDialog();
+		return homeWizard.respond(null);
 	      }
 	    catch (RemoteException rx)
 	      {

@@ -6,8 +6,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/22 18:04:53 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/07/14 21:51:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -153,6 +153,39 @@ public class userInactivateWizard extends GanymediatorWizard {
 
   /**
    *
+   * This method starts off the wizard process
+   *
+   */
+
+  public ReturnVal processDialog0()
+  {
+    JDialogBuff dialog;
+    StringBuffer buffer = new StringBuffer();
+    ReturnVal retVal = null;
+
+    /* -- */
+
+    System.err.println("userInactivateWizard: creating inactivation wizard");
+
+    buffer.append("Inactivating ");
+    buffer.append(userObject.getLabel());
+    buffer.append("\n\nThis user account will be rendered unusable, but will be ");
+    buffer.append("kept in the database for 3 months to preserve accounting information.\n\n");
+    buffer.append("It is recommended that you provide a forwarding email address for this user.");
+	
+    retVal = continueOn("User Inactivation Dialog",
+			buffer.toString(),
+			"OK",
+			"Cancel",
+			"question.gif");
+
+    retVal.getDialog().addString("Forwarding Address");
+    
+    return retVal;
+  }
+
+  /**
+   *
    * This method expects a dialog with a forwarding
    * address stored on key "Forwarding Address"
    *
@@ -192,39 +225,6 @@ public class userInactivateWizard extends GanymediatorWizard {
 					      "Ran into a problem during user inactivation, and rollback failed");
 	  }
       }
-    
-    return retVal;
-  }
-
-  /**
-   *
-   * This method starts off the wizard process
-   *
-   */
-
-  public ReturnVal getStartDialog()
-  {
-    JDialogBuff dialog;
-    StringBuffer buffer = new StringBuffer();
-    ReturnVal retVal = null;
-
-    /* -- */
-
-    System.err.println("userInactivateWizard: creating inactivation wizard");
-
-    buffer.append("Inactivating ");
-    buffer.append(userObject.getLabel());
-    buffer.append("\n\nThis user account will be rendered unusable, but will be ");
-    buffer.append("kept in the database for 3 months to preserve accounting information.\n\n");
-    buffer.append("It is recommended that you provide a forwarding email address for this user.");
-	
-    retVal = continueOn("User Inactivation Dialog",
-			buffer.toString(),
-			"OK",
-			"Cancel",
-			"question.gif");
-
-    retVal.getDialog().addString("Forwarding Address");
     
     return retVal;
   }

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 1999/06/18 22:43:18 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 1999/07/14 21:51:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -756,28 +756,25 @@ public class DBEditSet {
 			" commit already has writeLock established!");
       }
 
-    // Create the lock on the bases changed
-
-    wLock = new DBWriteLock(dbStore, baseSet);
-    
-    if (debug)
-      {
-	System.err.println(session.key + ": DBEditSet.commit(): created write lock");
-      }
-
-    // and establish.  This establish() call will cause our thread to block
-    // until we can get all the bases we need locked.
+    // Create the lock on the bases changed and establish.  This
+    // openWriteLock() call will cause our thread to block until we
+    // can get all the bases we need locked.
 
     try
       {
-	wLock.establish(session.key);	// wait for write lock
+	wLock = session.openWriteLock(baseSet);	// wait for write lock
+	wLock.establish(session.key);	
       }
     catch (InterruptedException ex)
       {
 	Ganymede.debug("DBEditSet.commit(): lock aborted, commit failed, releasing transaction for " + 
 		       session.key);
-	release();
-	wLock = null;
+
+	if (wLock != null)
+	  {
+	    session.releaseLock(wLock);
+	    wLock = null;
+	  }
 
 	return Ganymede.createErrorDialog("Commit failure",
 					  "Couldn't commit transaction, our write lock was denied.. server going down?");
@@ -1453,7 +1450,7 @@ public class DBEditSet {
   {
     if (wLock != null)
       {
-	wLock.release();
+	session.releaseLock(wLock);
 	wLock = null;
 	
 	if (debug)

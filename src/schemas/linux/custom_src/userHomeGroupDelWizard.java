@@ -7,8 +7,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/01/22 18:05:18 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/07/14 21:51:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
    * </pre>
    */
 
-  int state;
+  //  int state; // we don't want to shadow GanymediatorWizard's state variable
 
   /**
    * The actual user object that this wizard is acting on.
@@ -164,201 +164,23 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     this.index = ((Integer) param).intValue();
   }
 
+
   /**
    *
-   * This method is used to provide feedback to the server from a client
-   * in response to a specific request. 
-   *
-   * @param returnHash a hashtable mapping strings to values.  The strings
-   * are titles of fields specified in a dialog that was provided to the
-   * client.  If returnHash is null, this corresponds to the user hitting
-   * cancel on such a dialog.
-   *
-   * @see arlut.csd.ganymede.Ganymediator
-   * @see arlut.csd.ganymede.ReturnVal
+   * This method provides a default response if a user
+   * hits cancel on a wizard dialog.  This should be
+   * subclassed if a wizard wants to provide a more
+   * detailed cancel response.
    *
    */
 
-  public ReturnVal respond(Hashtable returnHash)
+  public ReturnVal cancel()
   {
-    JDialogBuff dialog;
-    ReturnVal retVal = null;
-
-    /* -- */
-
-
-    if (returnHash == null)
-      {
-	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("Home Group Removal Cancelled",
-				 "Home Group Removal Cancelled",
-				 "OK",
-				 null,
-				 "ok.gif");
-	retVal.setDialog(dialog);
-	
-	this.unregister(); // we're stopping here, so we'll unregister ourselves
-	
-	return retVal;
-      }
-
-    if (state == 1)
-      {
-	System.err.println("userHomeGroupDelWizard.respond(): state == 1");
-
-	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("Home Group Change",
-				 "What group do you want to set as the new default for this user?",
-				 "OK",
-				 "Cancel",
-				 "question.gif");
-
-	// get the list of choices, synthesize a list that contains every choice but
-	// the one being deleted
-
-	userObject.updateGroupChoiceList();
-
-	QueryResult groupChoice = userObject.groupChoices;
-
-	// Which group is being deleted?
-
-	Invid val = (Invid) userObject.getFieldValuesLocal(GROUPLIST).elementAt(index);
-
-	// Make a list of all choices except the one being deleted
-
-	Vector choices = new Vector();
-
-	for (int i = 0; i < groupChoice.size(); i++)
-	  {
-	    if (!groupChoice.getInvid(i).equals(val))
-	      {
-		choices.addElement(groupChoice.getLabel(i));
-	      }
-	  }
-
-	dialog.addChoice("New Home Group", 
-			 choices,
-			 (String) choices.elementAt(0));
-
-	retVal.setDialog(dialog);
-	retVal.setCallback(this);
-	
-	state = 2;
-
-	System.err.println("userHomeGroupDelWizard.respond(): state == 2, returning dialog");
-
-	return retVal;
-      }
-    else if (state == 2)
-      {
-	System.err.println("userHomeGroupDelWizard.respond(): state == 2");
-
-	String group = (String) returnHash.get("New Home Group");
-
-	// get the list of groups
-
-	userObject.updateGroupChoiceList();
-
-	QueryResult groupChoice = userObject.groupChoices;
-
-	// find the group we're changing to, find the id, change it
-
-	boolean found = false;
-	session.checkpoint("homegroupdel" + userObject.getLabel());
-
-	for (int i = 0; i < groupChoice.size(); i++)
-	  {
-	    if (groupChoice.getLabel(i).equals(group))
-	      {
-		found = true;
-
-		// right now, this might fail if the user is in a group that the
-		// current admin doesn't have permission to edit.  Unlinking for
-		// groups is free (see groupCustom), but adding, even adding to
-		// the home users field for users that are already in the superset
-		// users list is not automatically permitted.  This may change.
-
-		retVal = userObject.setFieldValue(HOMEGROUP, groupChoice.getInvid(i));
-		break;
-	      }
-	  }
-
-	if (!found)
-	  {
-	    retVal = new ReturnVal(false);
-	    dialog = new JDialogBuff("Home Group Removal Cancelled",
-				     "Home Group Removal Cancelled\n\nError, couldn't deal with the group selected",
-				     "OK",
-				     null,
-				     "ok.gif");
-	    retVal.setDialog(dialog);
-
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
-
-	    return retVal;
-	  }
-
-	if (retVal == null || retVal.didSucceed())
-	  {
-	    // we're all systems go, go ahead and do the group
-	    // deletion that started this whole thing
-
-	    state = DONE;	// let the wizardHook know to go ahead and pass
-				// this operation through now
-
-	    InvidDBField invF = (InvidDBField) userObject.getField(GROUPLIST);
-
-	    // note that this deleteElement() operation will pass
-	    // through userObject.wizardHook().  wizardHook will see that we are
-	    // an active userHomeGroupDelWizard, and are at state DONE, so it
-	    // will go ahead and unregister us and let the GROUPLIST modification
-	    // go through to completion.
-
-	    retVal = invF.deleteElement(index);
-
-	    if (retVal == null || retVal.didSucceed())
-	      {
-		retVal = new ReturnVal(true);
-		dialog = new JDialogBuff("Home Group Change Performed",
-					 "The user's old home group has been successfully removed, and a new default set.",
-					 "OK",
-					 null,
-					 "ok.gif");
-
-		retVal.addRescanField(userObject.getInvid(), HOMEGROUP);
-		retVal.setDialog(dialog);
-	      }
-	    else
-	      {
-		if (!session.rollback("homegroupdel" + userObject.getLabel()))
-		  {
-		    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
-							"Ran into a problem during home group deletion, and rollback failed");
-		  }
-
-		this.unregister(); // we're stopping here, so we'll unregister ourselves
-	      }
-	  }
-	else if (retVal.getDialog() == null)
-	  {
-	    // argh, failure..
-
-	    if (!session.rollback("homegroupdel" + userObject.getLabel()))
-	      {
-		retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
-						    "Ran into a problem during home group change, and rollback failed");
-	      }
-
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
-	  }
-
-	return retVal;
-      }
-
-    // are we in an unexpected state?
-	
-    return Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
-				      "No idea what you're talking about");
+    return fail("Home Group Removal Canceled",
+		"Home Group Removal Canceled",
+		"OK",
+		null,
+		"ok.gif");
   }
 
   /**
@@ -367,9 +189,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
    *
    */
 
-  public ReturnVal getStartDialog()
+  public ReturnVal processDialog0()
   {
-    JDialogBuff dialog;
     StringBuffer buffer = new StringBuffer();
     ReturnVal retVal;
 
@@ -386,16 +207,11 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 	buffer.append("\n\nYou may not delete the last group from a user's account.  All active users in UNIX need ");
 	buffer.append("to be a member of at least a single account group.");
 
-	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("User Home Group Change Dialog",
-				 buffer.toString(),
-				 "OK",
-				 null,
-				 "error.gif");
-
-	retVal.setDialog(dialog);
-
-	return retVal;
+	return fail("User Home Group Change Dialog",
+		    buffer.toString(),
+		    "OK",
+		    null,
+		    "error.gif");
       }
 
     buffer.append("Changing home group for user ");
@@ -404,18 +220,191 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     buffer.append("In order to remove the user from this group, you are going to need to select another group ");
     buffer.append("to be the default group for this user at login time.");
 
-    retVal = new ReturnVal(false);
-    dialog = new JDialogBuff("User Home Group Change Dialog",
-			     buffer.toString(),
-			     "Next",
-			     "Cancel",
-			     "question.gif");
+    return continueOn("User Home Group Change Dialog",
+		      buffer.toString(),
+		      "Next",
+		      "Cancel",
+		      "question.gif");
+  }
+
+  public ReturnVal processDialog1()
+  {
+    ReturnVal retVal = null;
+
+    /* -- */
+
+    System.err.println("userHomeGroupDelWizard.respond(): state == 1");
+
+    retVal = continueOn("Home Group Change",
+			"What group do you want to set as the new default for this user?",
+			"OK",
+			"Cancel",
+			"question.gif");
     
-    retVal.setDialog(dialog);
-    retVal.setCallback(this);
+    // get the list of choices, synthesize a list that contains every choice but
+    // the one being deleted
+
+    userObject.updateGroupChoiceList();
+
+    QueryResult groupChoice = userObject.groupChoices;
+
+    // Which group is being deleted?
+
+    Invid val = (Invid) userObject.getFieldValuesLocal(GROUPLIST).elementAt(index);
+
+    // Make a list of all choices except the one being deleted
     
-    state = 1;
+    Vector choices = new Vector();
     
+    for (int i = 0; i < groupChoice.size(); i++)
+      {
+	if (!groupChoice.getInvid(i).equals(val))
+	  {
+	    choices.addElement(groupChoice.getLabel(i));
+	  }
+      }
+    
+    retVal.getDialog().addChoice("New Home Group", 
+				 choices,
+				 (String) choices.elementAt(0));
+
+    System.err.println("userHomeGroupDelWizard.respond(): state == 2, returning dialog");
+
     return retVal;
+  }
+
+  /**
+   *
+   * This method will be called if the client progressed from the second
+   * dialog.<br><br>
+   *
+   * <pre>
+   * Keys:
+   *
+   * "New Home Group"
+   * </pre>
+   *
+   */
+
+  public ReturnVal processDialog2()
+  {
+    ReturnVal retVal = null;
+    String checkPointKey = "homegroupdel" + userObject.getLabel();
+
+    /* -- */
+
+    System.err.println("userHomeGroupDelWizard.respond(): state == 2");
+
+    String group = (String) getParam("New Home Group");
+
+    // get the list of groups
+
+    userObject.updateGroupChoiceList();
+
+    QueryResult groupChoice = userObject.groupChoices;
+
+    // find the group we're changing to, find the id, change it
+    
+    boolean found = false;
+
+    // we're going to check point here, so that we can undo things if
+    // we can't complete all parts of this operation.  This is needed
+    // because we are doing two separate operations together.. the
+    // InvidDBField logic does its own checkpointing, but we need
+    // one that includes the two operations <<ensemble>>.
+
+    session.checkpoint(checkPointKey);
+    
+    for (int i = 0; i < groupChoice.size(); i++)
+      {
+	if (groupChoice.getLabel(i).equals(group))
+	  {
+	    found = true;
+
+	    // right now, this might fail if the user is in a group
+	    // that the current admin doesn't have permission to edit.
+	    // Unlinking for groups is free (see groupCustom), but
+	    // adding, even adding to the home users field for users
+	    // that are already in the superset users list is not
+	    // automatically permitted.  This may change.
+
+	    retVal = userObject.setFieldValue(HOMEGROUP, groupChoice.getInvid(i));
+	    break;
+	  }
+      }
+
+    if (!found)
+      {
+	return fail("Home Group Removal Cancelled",
+		    "Home Group Removal Cancelled\n\nError, couldn't deal with the group selected",
+		    "OK",
+		    null,
+		    "ok.gif");
+      }
+
+    if (retVal == null || retVal.didSucceed())
+      {
+	// we're all systems go, go ahead and do the group
+	// deletion that started this whole thing
+
+	state = DONE;	// let the wizardHook know to go ahead and pass
+				// this operation through now
+
+	InvidDBField invF = (InvidDBField) userObject.getField(GROUPLIST);
+
+	// note that this deleteElement() operation will pass
+	// through userObject.wizardHook().  wizardHook will see that we are
+	// an active userHomeGroupDelWizard, and are at state DONE, so it
+	// will go ahead and unregister us and let the GROUPLIST modification
+	// go through to completion.
+
+	retVal = invF.deleteElement(index);
+
+	if (retVal == null || retVal.didSucceed())
+	  {
+	    retVal = success("Home Group Change Performed",
+			     "The user's old home group has been successfully removed, and a new default set.",
+			     "OK",
+			     null,
+			     "ok.gif");
+
+	    retVal.addRescanField(userObject.getInvid(), HOMEGROUP);
+
+	    // we succeeded, so pop off our checkpoint
+
+	    session.getSession().popCheckpoint(checkPointKey);
+	    
+	    return retVal;
+	  }
+	else
+	  {
+	    // try to undo everything.. if we can, we'll go ahead
+	    // and return the failure report from invF.deleteElement()
+
+	    if (!session.rollback(checkPointKey))
+	      {
+		retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
+						    "Ran into a problem during home group deletion, and rollback failed");
+	      }
+
+	    return retVal;
+	  }
+      }
+    else if (retVal.getDialog() == null)
+      {
+	// argh, failure with no explanation..
+
+	if (!session.rollback(checkPointKey))
+	  {
+	    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
+						"Ran into a problem during home group change, and rollback failed");
+	  }
+
+	return retVal;
+      }
+    else
+      {
+	return retVal;
+      }
   }
 }

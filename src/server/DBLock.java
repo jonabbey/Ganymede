@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/06/18 22:43:19 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/07/14 21:52:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -210,6 +210,20 @@ public abstract class DBLock {
   }
 
   /**
+   * Returns true if the lock has any of the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+   * objects in the provided Vector locked.
+   */
+
+  boolean overlaps(Vector bases)
+  {
+    synchronized (lockManager)
+      {
+	return arlut.csd.Util.VectorUtils.intersection(bases, baseSet).size() != 0;
+      }
+  }
+
+  /**
    * <P>This method waits until the lock can be established.  The
    * {@link arlut.csd.ganymede.DBObjectBase DBObjectBases} locked
    * are specified in the constructor of the implementation subclass
@@ -266,4 +280,50 @@ public abstract class DBLock {
       }
   }
 
+  /**
+   * <p>Returns a string describing this lock for use in debug messages</p>
+   */
+
+  public String toString()
+  {
+    StringBuffer returnString = new StringBuffer();
+
+    // get the object's type and ID
+
+    returnString.append(super.toString());
+
+    returnString.append(", key = ");
+    returnString.append(key.toString());
+
+    if (inEstablish)
+      {
+	returnString.append(", establishing");
+      }
+
+    if (abort)
+      {
+	returnString.append(", aborted");
+      }
+
+    if (locked)
+      {
+	returnString.append(", locked on: ");
+      }
+    else
+      {
+	returnString.append(", currently unlocked on: ");
+      }
+
+    for (int i = 0; i < baseSet.size(); i++)
+      {
+	if (i>0)
+	  {
+	    returnString.append(", ");
+	  }
+
+	returnString.append(baseSet.elementAt(i).toString());
+      }
+
+    return returnString.toString();
+  }
 }

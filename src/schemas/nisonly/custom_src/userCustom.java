@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/01/22 18:05:21 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/07/14 21:51:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -391,7 +391,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	System.err.println("userCustom: returning inactivation wizard");
 
-	return theWiz.getStartDialog();
+	return theWiz.respond(null);
       }
   }
 
@@ -448,7 +448,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     System.err.println("userCustom: returning reactivation wizard");
     
-    return theWiz.getStartDialog();
+    return theWiz.respond(null);
   }
 
   /**
@@ -889,11 +889,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    // if we get here, the wizard was able to register itself.. go ahead
 	    // and return the initial dialog for the wizard.  The ReturnVal code
-	    // that wizard.getStartDialog() returns will have the success code
+	    // that wizard.respond() returns will have the success code
 	    // set to false, so whatever triggered us will prematurely exit,
 	    // returning the wizard's dialog.
 	    
-	    return groupWizard.getStartDialog();
+	    return groupWizard.respond(null);
 	  }
       }
 
@@ -1004,11 +1004,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	// if we get here, the wizard was able to register itself.. go ahead
 	// and return the initial dialog for the wizard.  The ReturnVal code
-	// that wizard.getStartDialog() returns will have the success code
+	// that wizard.respond() returns will have the success code
 	// set to false, so whatever triggered us will prematurely exit,
 	// returning the wizard's dialog.
 
-	return renameWizard.getStartDialog();
+	return renameWizard.respond(null);
       }
   }
 }

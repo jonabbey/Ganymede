@@ -7,8 +7,8 @@
    
    Created: 13 October 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/07/14 04:45:05 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/07/14 21:51:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -345,6 +345,87 @@ public class userCategoryWizard extends GanymediatorWizard {
 		"ok.gif");
   }
 
+
+  /**
+   * <P>This method starts off the wizard process.</P>
+   */
+
+  public ReturnVal processDialog0()
+  {
+    ReturnVal retVal = null;
+    StringBuffer tempBuffer = new StringBuffer();
+
+    /* -- */
+
+    if ((oldCatInvid == null) && !notificationRequired &&
+	(notifyList == null) && !needExpireDate)
+      {
+	// don't need to ask the user anything, let things go on.
+
+	return null;
+      }
+    
+    if (oldCatInvid == null)
+      {
+	tempBuffer.append("In order to put user ");
+	tempBuffer.append(userObject.getLabel());
+	tempBuffer.append(" in category ");
+	tempBuffer.append(newCategory.getLabel());
+	tempBuffer.append(", ");
+
+	if (needExpireDate)
+	  {
+	    tempBuffer.append("you need to set an expiration date for this user");
+
+	    if (notificationRequired)
+	      {
+		tempBuffer.append(" and enter a short justification for this classification.");
+	      }
+	  }
+	else if (notificationRequired)
+	  {
+	    tempBuffer.append(" you must enter a short justification for this classification.");
+	  }
+      }
+    else
+      {
+	tempBuffer.append("In order to move user ");
+	tempBuffer.append(userObject.getLabel());
+	tempBuffer.append(" from category ");
+	tempBuffer.append(oldCategory.getLabel());
+	tempBuffer.append(" to category ");
+	tempBuffer.append(newCategory.getLabel());
+	tempBuffer.append(", ");
+
+	if (needExpireDate)
+	  {
+	    tempBuffer.append("you need to set an expiration date for this user");
+
+	    if (notificationRequired)
+	      {
+		tempBuffer.append(" and enter a short justification for the new classification.");
+	      }
+	  }
+	else if (notificationRequired)
+	  {
+	    tempBuffer.append(" you must enter a short justification for the new classification.");
+	  }
+      }
+
+    retVal = continueOn("User Category Change Dialog",
+			tempBuffer.toString(),
+			"Next",
+			"Cancel",
+			"question.gif");
+
+    if (!needExpireDate)
+      {
+	setNextState(2);	// from GanymediatorWizard
+      }
+
+    return retVal;
+  }
+
   /**
    *
    * The client will call us here with no params.. this step
@@ -598,90 +679,4 @@ public class userCategoryWizard extends GanymediatorWizard {
     return retVal;
   }
 
-  /**
-   * <P>This method starts off the wizard process.</P>
-   *
-   * <P>This method will always be overridden in GanymediatorWizard
-   * subclasses.  It is critical that if this method returns null
-   * (indicating that the wizard doesn't need to interact with
-   * the client), that this method calls unregister() to clear the
-   * wizard from the GanymedeSession.</P>
-   */
-
-  public ReturnVal getStartDialog()
-  {
-    ReturnVal retVal = null;
-    StringBuffer tempBuffer = new StringBuffer();
-
-    /* -- */
-
-    if ((oldCatInvid == null) && !notificationRequired &&
-	(notifyList == null) && !needExpireDate)
-      {
-	// don't need to ask the user anything, let things go on.
-
-	unregister();
-	return null;
-      }
-    
-    if (oldCatInvid == null)
-      {
-	tempBuffer.append("In order to put user ");
-	tempBuffer.append(userObject.getLabel());
-	tempBuffer.append(" in category ");
-	tempBuffer.append(newCategory.getLabel());
-	tempBuffer.append(", ");
-
-	if (needExpireDate)
-	  {
-	    tempBuffer.append("you need to set an expiration date for this user");
-
-	    if (notificationRequired)
-	      {
-		tempBuffer.append(" and enter a short justification for this classification.");
-	      }
-	  }
-	else if (notificationRequired)
-	  {
-	    tempBuffer.append(" you must enter a short justification for this classification.");
-	  }
-      }
-    else
-      {
-	tempBuffer.append("In order to move user ");
-	tempBuffer.append(userObject.getLabel());
-	tempBuffer.append(" from category ");
-	tempBuffer.append(oldCategory.getLabel());
-	tempBuffer.append(" to category ");
-	tempBuffer.append(newCategory.getLabel());
-	tempBuffer.append(", ");
-
-	if (needExpireDate)
-	  {
-	    tempBuffer.append("you need to set an expiration date for this user");
-
-	    if (notificationRequired)
-	      {
-		tempBuffer.append(" and enter a short justification for the new classification.");
-	      }
-	  }
-	else if (notificationRequired)
-	  {
-	    tempBuffer.append(" you must enter a short justification for the new classification.");
-	  }
-      }
-
-    retVal = continueOn("User Category Change Dialog",
-			tempBuffer.toString(),
-			"Next",
-			"Cancel",
-			"question.gif");
-
-    if (!needExpireDate)
-      {
-	setNextState(2);	// from GanymediatorWizard
-      }
-
-    return retVal;
-  }
 }
