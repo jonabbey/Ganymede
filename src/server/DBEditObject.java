@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -92,7 +92,6 @@ public class DBEditObject extends DBObject {
   {
     DBNameSpace namespace;
     short type;
-    DBNameSpaceHandle handle;
     DBObjectBaseField fieldDef;
     DBField oldField;
     Short key;
@@ -219,7 +218,7 @@ public class DBEditObject extends DBObject {
 
 	    if (!oldField.unmark(editset, namespace))
 	      {
-		throw new RuntimeException("Argh, namespace/editset corruption");
+		throw new RuntimeException(editset.session.key + ": Argh, namespace/editset corruption");
 	      }
          }
       }
@@ -230,7 +229,7 @@ public class DBEditObject extends DBObject {
       {
 	if (debug)
 	  {
-	    System.err.println("DBEditObject.setField(): doing namespace check on " + 
+	    System.err.println(editset.session.key + ": DBEditObject.setField(): doing namespace check on " + 
 			       namespace.name + " for field " + fieldDef.field_name);
 	  }
 
@@ -241,7 +240,7 @@ public class DBEditObject extends DBObject {
 	  }
 	else if (debug)
 	  {
-	    System.err.println("DBEditObject.setField(): passed namespace check");
+	    System.err.println(editset.session.key + ": DBEditObject.setField(): passed namespace check");
 	  }
       }  
 
