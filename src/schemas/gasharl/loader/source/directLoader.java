@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1494,14 +1494,20 @@ public class directLoader {
 	    System.err.println("Failure setting category description for " + category.name);
 	  }
 
-	if (category.maillist != null && !category.maillist.equals(""))
+	if (category.mailvec != null && category.mailvec.size() != 0)
 	  {
 	    obj.setFieldValueLocal(userCategorySchema.APPROVALREQ, new Boolean(true));
-	    result = obj.setFieldValueLocal(userCategorySchema.APPROVALLIST, category.maillist);
 
-	    if (result != null && !result.didSucceed())
+	    DBField temp = (DBField) obj.getField(userCategorySchema.APPROVALLIST);
+
+	    for (int i = 0; i < category.mailvec.size(); i++)
 	      {
-		System.err.println("Failure setting category maillist for " + category.name);
+		result = temp.addElementLocal(category.mailvec.elementAt(i));
+
+		if (result != null && !result.didSucceed())
+		  {
+		    System.err.println("Failure adding mail address to category maillist for " + category.name);
+		  }
 	      }
 	  }
 	
