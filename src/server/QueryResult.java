@@ -1,0 +1,245 @@
+/*
+
+   DumpResult.java
+
+   This class is a serializable dump result object, which conveys
+   results from a dump operation along with methods that can be
+   used to extract the results  out of the dump.
+   
+   Created: 1 October 1997
+   Version: $Revision: 1.1 $ %D%
+   Module By: Jonathan Abbey
+   Applied Research Laboratories, The University of Texas at Austin
+
+*/
+
+package arlut.csd.ganymede;
+
+import java.util.*;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                     QueryResult
+
+------------------------------------------------------------------------------*/
+
+public class QueryResult implements java.io.Serializable {
+
+  static final boolean debug = true;
+
+  // --
+
+  StringBuffer buffer;
+  private boolean unpacked = false;
+
+  // for use post-serialized
+
+  transient Vector invids = null;
+  transient Vector labels = null;
+
+  /* -- */
+
+  public QueryResult()
+  {
+    buffer = new StringBuffer();
+  }
+
+  /**
+   *
+   * This method is used to add an object's information to
+   * the dumpResult's serializable buffer.  It is intended
+   * to be called on the server.  
+   *
+   */
+
+  public synchronized void addRow(DBObject object)
+  {
+    if (debug)
+      {
+	System.err.println("QueryResult: addRow(" + object.getLabel() + ")");
+      }
+
+    buffer.append(object.resultDump());
+  }
+
+  /**
+   *
+   * This method is used to add an object's information to
+   * the dumpResult's serializable buffer.  It is intended
+   * to be called on the server.  
+   *
+   */
+
+  public synchronized void addRow(Invid invid, String label)
+  {
+    if (debug)
+      {
+	System.err.println("QueryResult: addRow(" + invid + "," + label + ")");
+      }
+
+    buffer.append(invid.toString());
+    buffer.append("|");
+    char[] chars = label.toCharArray();
+    
+    for (int j = 0; j < chars.length; j++)
+      {
+	if (chars[j] == '|')
+	  {
+	    buffer.append("\\|");
+	  }
+	else if (chars[j] == '\n')
+	  {
+	    buffer.append("\\\n");
+	  }
+	else if (chars[j] == '\\')
+	  {
+	    buffer.append("\\\\");
+	  }
+	else
+	  {
+	    buffer.append(chars[j]);
+	  }
+      }
+
+    buffer.append("\n");
+  }
+
+  //
+  //
+  // The following methods are intended to be called on a QueryResult
+  // after it has been serialized and passed from the server to the
+  // client.
+  //
+  //
+
+  public Vector getInvids()
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+
+    return invids;
+  }
+
+  public Invid getInvid(int row)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+
+    return (Invid) invids.elementAt(row);
+  }
+
+  public Vector getLabels()
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+
+    return labels;
+  }
+  
+  public String getLabel(int row)
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+
+    return (String) labels.elementAt(row);
+  }
+
+  public int size()
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+
+    return labels.size();
+  }
+
+  public void append(QueryResult result)
+  {
+    buffer.append(result.buffer.toString());
+  }
+
+  private synchronized void unpackBuffer()
+  {
+    char[] chars;
+    String results = buffer.toString();
+    StringBuffer tempString = new StringBuffer();
+    int index = 0;
+
+    /* -- */
+
+    invids = new Vector();
+    labels = new Vector();
+
+    chars = results.toCharArray();
+
+    // read in the header definition line
+
+    if (debug)
+      {
+	System.err.println("*** unpacking buffer");
+      }
+
+    // now read in all the result lines
+
+    while (index < chars.length)
+      {
+	// first read in the Invid
+
+	tempString.setLength(0); // truncate the buffer
+
+	if (debug)
+	  {
+	    System.err.println("*** Unpacking row " + labels.size());
+	  }
+
+	while (chars[index] != '|')
+	  {
+	    if (chars[index] == '\n')
+	      {
+		throw new RuntimeException("parse error in row" + labels.size());
+	      }
+	    
+	    tempString.append(chars[index++]);
+	  }
+
+	invids.addElement(new Invid(tempString.toString()));
+
+	index++;		// skip over |
+
+	// now read in the label for this invid
+
+	while (chars[index] != '\n')
+	  {
+	    tempString.setLength(0); // truncate the buffer
+
+	    while (chars[index] != '\n')
+	      {
+		// if we have a backslashed character, take the backslashed char
+		// as a literal
+
+		if (chars[index] == '\\')
+		  {
+		    index++;
+		  }
+
+		tempString.append(chars[index++]);
+	      }
+
+	    labels.addElement(tempString.toString());
+	  }
+
+	index++; // skip newline
+      }
+
+    unpacked = true;
+  }
+}
