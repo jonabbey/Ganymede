@@ -79,7 +79,6 @@ import javax.swing.table.AbstractTableModel;
                                                                            class
                                                                   JPropertyPanel
 
-
 ------------------------------------------------------------------------------*/
 
 /**
