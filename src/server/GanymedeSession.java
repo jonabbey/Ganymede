@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.70 $ %D%
+   Version: $Revision: 1.71 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2291,7 +2291,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	setLastError("Permission to view invid " + invid + " denied.");
+	setLastError("Permission to view object [" + viewObjectLabel(invid)
+		     + " - " + invid + "] denied.");
 	return null;
       }
   }
@@ -2319,7 +2320,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	setLastError("Permission to edit invid " + invid + " denied.");
+	setLastError("Permission to edit object [" + viewObjectLabel(invid)
+		     + " - " + invid + "] denied.");
 	return null;
       }
   }
@@ -2389,7 +2391,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	setLastError("Permission to create object of type " + type + " denied.");
+	DBObjectBase base = Ganymede.db.getObjectBase(type);
+
+	if (base == null)
+	  {
+	    setLastError("Permission to create object of *invalid* type " + type + " denied.");
+	  }
+	else
+	  {
+	    setLastError("Permission to create object of type " + base.getName() + " denied.");
+	  }
+
 	return null;
       }
 
