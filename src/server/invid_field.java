@@ -5,7 +5,7 @@
    Remote interface definition.
 
    Created: 14 November 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,4 +50,19 @@ public interface invid_field extends db_field {
   // the following methods apply if this is an edit-in-place vector
 
   Invid createNewEmbedded() throws RemoteException;
+
+  /**
+   *
+   * <p>Return the object type that this invid field is constrained to point to, if set</p>
+   *
+   * <p>A negative value means there is no one type of object that this field is constrained
+   * to point to.</p>
+   *
+   * <p>-1 means there is no restriction on target type.</p>
+   *
+   * <p>-2 means there is no restriction on target type, but there is a specified symmetric field.</p>
+   *
+   */
+
+  short getTargetBase() throws RemoteException;
 }
