@@ -479,7 +479,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     // if reader is not done, we're ok to continue
 
-    return getReturnVal(null, !reader.isDone());
+    return getReturnVal(null, (reader != null && !reader.isDone()));
   }
 
   /**
