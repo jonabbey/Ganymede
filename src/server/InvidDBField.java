@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.154 $
-   Last Mod Date: $Date: 2001/04/16 04:54:27 $
+   Version: $Revision: 1.155 $
+   Last Mod Date: $Date: 2001/05/12 22:05:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.154 $ %D%
+ * @version $Revision: 1.155 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1591,19 +1591,57 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (anonymous || session.getGSession().getPerm(remobj).isEditable())
 	  {
 	    oldRef = (DBEditObject) session.editDBObject(remote);
-	  }
-      }
 
-    if (oldRef == null)
-      {
-	// it's there, but we can't unlink it
+	    // if we couldn't checkout the old object for editing, despite
+	    // having permissions, we need to see why.
+
+	    if (oldRef == null)
+	      {
+		// this check is not truly thread safe, as the
+		// shadowObject might be cleared by another thread while
+		// we're working..  this isn't a grave risk, but we'll
+		// wrap all of this in a NullPointerException catch just
+		// in case.  this check is just for informative purposes,
+		// so we don't mind throwing a null pointer exception in
+		// here, it's not worth doing all of the careful sync work
+		// to lock down this stuff without risk of deadlock
+
+		try
+		  {
+		    String edit_username, edit_hostname;
+		    DBEditObject editing = remobj.shadowObject;
+
+		    edit_username = editing.gSession.getMyUserName();
+		    edit_hostname = editing.gSession.getClientHostName();
+		    
+		    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink from old reference",
+						      "Field " + this.toString() +
+						      " could not be unlinked from the " + remobj.toString() + 
+						      " " + remobj.getTypeName() + " object, which is busy " +
+						      "being edited by " + edit_username + " on system " +
+						      edit_hostname);
+		  }
+		catch (NullPointerException ex)
+		  {
+		    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink from old reference",
+						      "Field " + this.toString() +
+						      " could not be unlinked from the " + remobj.toString() + 
+						      " " + remobj.getTypeName() + " object.  This is probably a temporary "+
+						      "condition due to other user activity on the Ganymede server.");
+		  }
+	      }
+	  }
+	else
+	  {
+	    // it's there, but we don't have permission to unlink it
 	    
-	return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
-					  "We couldn't unlink field " + getName() +
-					  " in object " + getOwner().getLabel() +
-					  " from field " + targetField + " in object " +
-					  getRemoteLabel(session.getGSession(), remote) +
-					  " due to a permissions problem.");
+	    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
+					      "We couldn't unlink field " + getName() +
+					      " in object " + getOwner().getLabel() +
+					      " from field " + targetField + " in object " +
+					      getRemoteLabel(session.getGSession(), remote) +
+					      " due to a permissions problem.");
+	  }
       }
 
     try
