@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,7 +39,7 @@ import java.rmi.*;
 
 public class DBEditSet {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   Vector
     objects = null,
