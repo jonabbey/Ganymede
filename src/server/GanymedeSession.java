@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.94 $ %D%
+   Version: $Revision: 1.95 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2877,24 +2877,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    edit_hostname = editing.gSession.clienthost;
 
 		    return Ganymede.createErrorDialog("Error, object already being edited",
-						      "Object [" + viewObjectLabel(invid) +
-						      " - " + invid + 
+						      obj.getTypeName() + " [" + 
+						      viewObjectLabel(invid) + " - " + invid + 
 						      "] is already being edited by user " +
 						      edit_username + " on host " + edit_hostname);
 		  }
 	      }
 
 	    return Ganymede.createErrorDialog("Error checking object out for editing",
-					      "Error checking out object [" + 
-					      viewObjectLabel(invid) +
-					      " - " + invid + 
+					      "Error checking out " + obj.getTypeName() + " [" + 
+					      viewObjectLabel(invid) + " - " + invid + 
 					      "] for editing.\nPerhaps someone else was editing it?");
 	  }
       }
     else
       {
 	return Ganymede.createErrorDialog("Permissions Error",
-					  "Permission to edit object [" + 
+					  "Permission to edit " + obj.getTypeName() + " [" + 
 					  viewObjectLabel(invid) +
 					  " - " + invid + "] denied.");
       }
@@ -3064,6 +3063,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Error.. can't inactivate non-existent object");
       }
 
+    if (vObj.isInactivated())
+      {
+	return Ganymede.createErrorDialog("Server: Can't inactivate an inactive object",
+					  "Error.. can't inactivate " + vObj.getTypeName() + " " + 
+					  vObj.getLabel() + ", object is already inactivated.");
+      }
+
     if (!getPerm(vObj).isDeletable())
       {
 	setLastError("Don't have permission to inactivate " + 
@@ -3128,21 +3134,24 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (vObj == null)
       {
-	setLastError("Can't reactivate non-existent object");
-
 	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
 					  "Error.. can't inactivate non-existent object");
+      }
+
+    if (!vObj.isInactivated())
+      {
+	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
+					  vObj.getTypeName() + " " + vObj.getLabel() +
+					  " is not inactivated");
       }
 
     // we'll treat the object's deletion bit as the power-over-life-and-death bit
 
     if (!getPerm(vObj).isDeletable())
       {
-	setLastError("Don't have permission to reactivate object" + vObj.getLabel());
-
 	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
-					  "Don't have permission to reactivate object" +
-					  vObj.getLabel());
+					  "Don't have permission to reactivate " + 
+					  vObj.getTypeName() + " " + vObj.getLabel());
       }
 
     ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
@@ -3153,13 +3162,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
 					  "Couldn't check out this object for reactivation");
-      }
-
-    if (!eObj.isInactivated())
-      {
-	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
-					  "Object " + eObj.getLabel() +
-					  " is not inactivated");
       }
 
     setLastEvent("reactivate_db_object: " + eObj.getLabel());
