@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.148 $
-   Last Mod Date: $Date: 2001/03/25 10:47:44 $
+   Version: $Revision: 1.149 $
+   Last Mod Date: $Date: 2001/04/11 05:53:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -44,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -112,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.148 $ $Date: 2001/03/25 10:47:44 $ $Name:  $
+ * @version $Revision: 1.149 $ $Date: 2001/04/11 05:53:06 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -538,6 +539,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final byte getStatus()
   {
     return status;
+  }
+
+  /**
+   * <p>This method returns true if this DBEditObject is in the middle
+   * of handling clean up during object deletion.</p>
+   */
+
+  public final boolean isDeleting()
+  {
+    return deleting;
   }
 
   /**

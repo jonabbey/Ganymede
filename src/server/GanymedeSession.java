@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.234 $
-   Last Mod Date: $Date: 2001/03/30 22:05:36 $
+   Version: $Revision: 1.235 $
+   Last Mod Date: $Date: 2001/04/11 05:53:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -53,7 +53,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -127,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.234 $ $Date: 2001/03/30 22:05:36 $
+ * @version $Revision: 1.235 $ $Date: 2001/04/11 05:53:07 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2881,9 +2882,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * <p>Server-side method for doing object listing with support for DBObject's
    * {@link arlut.csd.ganymede.DBObject#lookupLabel(arlut.csd.ganymede.DBObject) lookupLabel}
    * method.</p>
-   *
-   * <p>This method may not be called from a DBEditObject's
-   * commitPhase1/2() methods without risking deadlock.</p>
    *
    * @param query The query to be performed
    * @param perspectiveObject There are occasions when the server will want to do internal
