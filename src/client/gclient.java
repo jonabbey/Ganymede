@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.85 $ %D%
+   Version: $Revision: 1.86 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3385,6 +3385,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
 	if (retVal == null)
 	  {
+	    setStatus("Transaction cancelled.");
+
 	    if (debug)
 	      {
 		System.out.println("Cancel succeeded");
