@@ -6,8 +6,8 @@
    
    Created: 17 September 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/03/17 03:42:26 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/03/17 20:12:24 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -121,21 +121,14 @@ public class JCenterDialog extends JDialog {
 	    // make sure that we don't put the dialog off screen if
 	    // the dialog is bigger than the frame it's attached to..
 
-	    if (loc < 0)
+	    if ((loc >= 0) && (locy >= 0))
 	      {
-		loc = width/2;
-	      }
+		setLocation(loc, locy);
 
-	    if (locy < 0)
-	      {
-		locy = height/2;
-	      }
-	    
-	    setLocation(loc, locy);
-
-	    if (debug)
-	      {
-		System.out.println("Setting location to : " + loc + "," + locy);
+		if (debug)
+		  {
+		    System.out.println("Setting location to : " + loc + "," + locy);
+		  }
 	      }
 	  }
 	else if (debug)
