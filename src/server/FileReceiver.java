@@ -6,8 +6,8 @@
 
    Created: 16 September 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/09/17 07:52:29 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/09/17 10:04:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,7 +73,16 @@ public interface FileReceiver extends Remote {
    */
   
   public ReturnVal sendBytes(byte[] bytes) throws RemoteException;
+
+  /**
+   * <p>This method is used to send chunks of a file, in order, to the
+   * FileReceiver.  The FileReceiver can return a non-successful ReturnVal
+   * if it doesn't want to stop receiving the file.  A null return value
+   * indicates success, keep sending.</p>
+   */
   
+  public ReturnVal sendBytes(byte[] bytes, int offset, int len) throws RemoteException;
+
   /**
    * <p>This method is called to notify the FileReceiver that no more
    * of the file will be transmitted.  The boolean parameter will

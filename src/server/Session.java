@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2000/08/25 21:54:16 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2000/09/17 10:04:37 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.45 $ %D%
+ * @version $Revision: 1.46 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -717,4 +717,18 @@ public interface Session extends Remote {
    */
 
   ReturnVal     remove_db_object(Invid invid) throws RemoteException;
+
+  /**
+   * <p>This method is called by the XML client to initiate a dump
+   * of the server's schema definition in XML format.  The
+   * FileReceiver referenced passed as a parameter to this method
+   * will be used to send the data to the client.</p>
+   *
+   * <p>This method will not return until the complete schema
+   * definition in XML form has been sent to the receiver, or until
+   * an exception is caught from the receiver.  The returned ReturnVal
+   * indicates the success of the file transmission.</p>
+   */
+
+  ReturnVal getSchemaXML(FileReceiver receiver) throws RemoteException;
 }

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.199 $
-   Last Mod Date: $Date: 2000/09/13 06:06:54 $
+   Version: $Revision: 1.200 $
+   Last Mod Date: $Date: 2000/09/17 10:04:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.199 $ $Date: 2000/09/13 06:06:54 $
+ * @version $Revision: 1.200 $ $Date: 2000/09/17 10:04:35 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4678,6 +4678,148 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // the transaction commits
     
     return session.deleteDBObject(invid);
+  }
+
+  /**
+   * <p>This method is called by the XML client to initiate a dump
+   * of the server's schema definition in XML format.  The
+   * FileReceiver referenced passed as a parameter to this method
+   * will be used to send the data to the client.</p>
+   *
+   * <p>This method will not return until the complete schema
+   * definition in XML form has been sent to the receiver, or until
+   * an exception is caught from the receiver.  The returned ReturnVal
+   * indicates the success of the file transmission.</p>
+   */
+
+  public ReturnVal getSchemaXML(FileReceiver receiver)
+  {
+    checklogin();
+
+    /* -- */
+
+    try
+      {
+	final PipedOutputStream outpipe = new PipedOutputStream();
+	final BigPipedInputStream inpipe = new BigPipedInputStream(outpipe);
+
+	/* -- */
+
+	// we need to get a thread to dump the XML schema in the
+	// background to our pipe
+
+	Thread dumpThread = new Thread(new Runnable() {
+	  public void run() {
+	    try
+	      {
+		Ganymede.db.dumpXML(outpipe, false);
+	      }
+	    catch (IOException ex)
+	      {
+		// dumpXML will close outpipe on any exception,
+		// nothing we can productively do here, go
+		// ahead and show it for debug purposes
+
+		ex.printStackTrace();
+	      }
+	  }}, "XMLSession Schema Dump Thread");
+
+	// and set it running
+
+	dumpThread.start();
+
+	// okay, now we can spin on our input thread, reading
+	// from our pipe and sending the xml file down to the
+	// xmlclient's FileReceiver.
+
+	ReturnVal retVal = null;
+	byte[] data = null;
+	int oldavail = 0;
+	int avail;
+	boolean eof = false;
+
+	while (!eof)
+	  {
+	    avail = inpipe.available();
+
+	    if (avail > 65536)
+	      {
+		avail = 65536;
+	      }
+
+	    if (avail == 0)
+	      {
+		avail = 1024;
+	      }
+
+	    if (oldavail != avail)
+	      {
+		data = new byte[avail];
+	      }
+
+	    int count  = inpipe.read(data);	// we may block waiting for the schema dump thread here
+
+	    if (count == -1)
+	      {
+		eof = true;
+		continue;
+	      }
+
+	    //	    System.err.println("Read " + count + " bytes from xml schema dump pipe");
+
+	    try
+	      {
+		retVal = receiver.sendBytes(data, 0, count);
+
+		if (retVal != null)
+		  {
+		    if (!retVal.didSucceed())
+		      {
+			receiver.end(false);
+			return Ganymede.createErrorDialog("xml transmission error",
+							  "Error, couldn't successfully send XML schema to xmlclient");
+		      }
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		ex.printStackTrace();
+		return Ganymede.createErrorDialog("xml transmission error",
+						  "Error, couldn't successfully send XML schema to xmlclient due to RemoteException:" +
+						  ex.getMessage());
+	      }
+	  }
+
+	//	System.err.println("Finished sending XML schema dump.. avail == 0");
+
+	inpipe.close();
+
+	try
+	  {
+	    return receiver.end(true);
+	  }
+	catch (RemoteException ex)
+	  {
+	    ex.printStackTrace();
+
+	    return Ganymede.createErrorDialog("xml transmission error",
+					      "Error, couldn't successfully send XML schema to xmlclient due to RemoteException:" +
+					      ex.getMessage());
+	  }
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+
+	return Ganymede.createErrorDialog("xml transmission error",
+					  "Error, couldn't successfully send XML schema to xmlclient due to IOException:" +
+					  ex.getMessage());
+      }
+    finally
+      {
+	session.logout();
+	session = null;
+      }
   }
 
   /****************************************************************************

@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/09/17 07:52:30 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/09/17 10:04:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -97,18 +97,4 @@ public interface XMLSession extends java.rmi.Remote {
    */
 
   void abort() throws RemoteException;
-
-  /**
-   * <p>This method is called by the XML client to initiate a dump
-   * of the server's schema definition in XML format.  The
-   * FileReceiver referenced passed as a parameter to this method
-   * will be used to send the data to the client.</p>
-   *
-   * <p>This method will not return until the complete schema
-   * definition in XML form has been sent to the receiver, or until
-   * an exception is caught from the receiver.  The returned ReturnVal
-   * indicates the success of the file transmission.</p>
-   */
-
-  ReturnVal getSchema(FileReceiver receiver) throws RemoteException;
 }

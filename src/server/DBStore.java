@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 2000/09/15 23:32:16 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 2000/09/17 10:04:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.126 $ %D%
+ * @version $Revision: 1.127 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1006,14 +1006,23 @@ public final class DBStore {
     catch (InterruptedException ex)
       {
       }
-    
-    // Move the old version of the file to a backup
-    
+
+    if (debug)
+      {
+	System.err.println("DBStore.dumpXML(): got dump lock");
+      }
+
     try
       {
 	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
 				    false, // don't dump plaintext passwords needlessly
 				    false); // don't include creator/modifier data
+
+	if (debug)
+	  {
+	    System.err.println("DBStore.dumpXML(): created XMLDumpContext");
+	  }
+
 	// start writing
     
 	xmlOut.startElement("ganymede");
@@ -1090,6 +1099,11 @@ public final class DBStore {
       }
     finally
       {
+	if (debug)
+	  {
+	    System.err.println("DBStore.dumpXML(): finally!");
+	  }
+
 	if (lock != null)
 	  {
 	    lock.release();

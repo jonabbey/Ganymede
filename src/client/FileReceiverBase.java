@@ -9,8 +9,8 @@
 
    Created: 17 September 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/09/17 08:15:15 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/09/17 10:04:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -96,6 +96,18 @@ public class FileReceiverBase extends UnicastRemoteObject implements FileReceive
   {
     return localReceiver.sendBytes(bytes);
   }
+
+  /**
+   * <p>This method is used to send chunks of a file, in order, to the
+   * FileReceiver.  The FileReceiver can return a non-successful ReturnVal
+   * if it doesn't want to stop receiving the file.  A null return value
+   * indicates success, keep sending.</p>
+   */
+  
+  public ReturnVal sendBytes(byte[] bytes, int offset, int len) throws RemoteException
+  {
+    return localReceiver.sendBytes(bytes, offset, len);
+  }
   
   /**
    * <p>This method is called to notify the FileReceiver that no more
@@ -118,6 +130,8 @@ public class FileReceiverBase extends UnicastRemoteObject implements FileReceive
 
   public void unreferenced()
   {
+    System.err.println("FileReceiverBase: unreferenced()");
+
     try
       {
 	localReceiver.end(false);

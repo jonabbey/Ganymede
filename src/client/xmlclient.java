@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/09/17 08:14:52 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/09/17 10:04:27 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.24 $ $Date: 2000/09/17 08:14:52 $ $Name:  $
+ * @version $Revision: 1.25 $ $Date: 2000/09/17 10:04:27 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -161,6 +161,10 @@ public final class xmlclient implements ClientListener {
 	    if (xc.doSchemaDump(true))
 	      {
 		System.exit(0);
+	      }
+	    else
+	      {
+		System.exit(1);
 	      }
 	  }
 
@@ -302,9 +306,9 @@ public final class xmlclient implements ClientListener {
 
     ClientBase client = new ClientBase(server_url, this);
 
-    XMLSession xSession = client.xmlLogin(username, password);
+    Session session = client.login(username, password);
 
-    if (xSession == null)
+    if (session == null)
       {
 	System.err.println("Error, couldn't log in to server.. bad username or password?");
 	return false;
@@ -312,7 +316,9 @@ public final class xmlclient implements ClientListener {
 
     // now do what we came for
 
-    ReturnVal retVal = xSession.getSchema(new FileReceiverBase(new xmlclientPrintReceiver()));
+    ReturnVal retVal = session.getSchemaXML(new FileReceiverBase(new xmlclientPrintReceiver()));
+
+    session.logout();
 
     return (retVal == null || retVal.didSucceed());
   }
@@ -722,7 +728,28 @@ class xmlclientPrintReceiver implements FileReceiver {
   
   public ReturnVal sendBytes(byte[] bytes)
   {
-    System.out.print(bytes);
+    try
+      {
+	System.out.write(bytes);
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method is used to send chunks of a file, in order, to the
+   * FileReceiver.  The FileReceiver can return a non-successful ReturnVal
+   * if it doesn't want to stop receiving the file.  A null return value
+   * indicates success, keep sending.</p>
+   */
+  
+  public ReturnVal sendBytes(byte[] bytes, int offset, int len)
+  {
+    System.out.write(bytes, offset, len); // yup, we don't need to catch IOException
 
     return null;
   }
@@ -739,8 +766,6 @@ class xmlclientPrintReceiver implements FileReceiver {
   
   public ReturnVal end(boolean completed)
   {
-    System.out.println();
-
     return null;
   }
 }

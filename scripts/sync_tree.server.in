@@ -31,6 +31,14 @@ print "Linking client stub class\n\n";
 mkdir("client", 0770);
 symlink("$sourcedir/client/ClientBase_Stub.class", "client/ClientBase_Stub.class");
 
+# Ditto for the FileReceiverBase class and both its stub and skel
+# classes. We have to do this because either the client or server can
+# instantiate or talk to a FileReceiverBase.
+
+symlink("$sourcedir/client/FileReceiverBase.class", "client/FileReceiverBase.class");
+symlink("$sourcedir/client/FileReceiverBase_Stub.class", "client/FileReceiverBase_Stub.class");
+symlink("$sourcedir/client/FileReceiverBase_Skel.class", "client/FileReceiverBase_Skel.class");
+
 # We want to link in all classes from the ganymede class directory, not including
 # custom, client, loader, and other subordinate package directories
 
