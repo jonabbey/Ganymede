@@ -346,12 +346,12 @@ unlinking, the checkpoint stack will properly be cleared.
 
 This is in response to a bug report by Gil Kloepfer.
 
-17. [CLIENT] Fixed the client's failure to terminate on window closure
+17. [CLIENT] Fixed the clients' failure to terminate on window closure
 
-The client was not properly terminating the JVM when the client was
-run as an application rather than an applet, and the user closed the
-window using the operating system controls rather than the 'quit'
-button.
+The gui client and admin console were not properly terminating the JVM
+when the clients were run as applications rather than applets, and the
+user closed the window using the operating system controls rather than
+the 'quit' button.
 
 The login box will now properly terminate the JVM if the close window
 button is used.

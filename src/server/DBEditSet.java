@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 2002/03/13 05:27:28 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 2002/03/13 06:39:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -193,7 +193,7 @@ public class DBEditSet {
   /**
    * The writelock acquired during the course of a commit attempt.  We keep
    * this around as a DBEditSet field so that we can use the handy
-   * {@link arlut.csd.ganymede.DBEditSet#releaseWriteLock(java.lang.String) releaseWriteLock()}
+   * {@link arlut.csd.ganymede.DBEditSet#releaseWriteLock() releaseWriteLock()}
    * method, but wLock should really never be non-null outside of the
    * context of the commit() call.  */
 
@@ -1073,13 +1073,7 @@ public class DBEditSet {
 	Ganymede.debug("DBEditSet.commit(): lock aborted, commit failed, releasing transaction for " + 
 		       session.key);
 
-	// the following test shouldn't be necessary, but just in case
-
-	if (wLock != null)
-	  {
-	    session.releaseLock(wLock);
-	    wLock = null;
-	  }
+	releaseWriteLock();
 
 	ReturnVal retVal = Ganymede.createErrorDialog("Commit failure",
 						      "Couldn't commit transaction, our write lock was " +
