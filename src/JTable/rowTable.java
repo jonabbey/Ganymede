@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.17 $ %D%
+  Version: $Revision: 1.18 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.17 $ %D% 
+ * @version $Revision: 1.18 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -410,6 +410,26 @@ public class rowTable extends baseTable implements ActionListener {
   }
 
   /**
+   * Sets the contents of a cell in the table.
+   *
+   * @param key key to the row of the cell to be changed
+   * @param col column of the cell to be changed
+   * @param cellText the text to place into cell
+   * @param data A piece of data to be held with this cell, will be used for sorting
+   * @param repaint true if the table should be redrawn after changing cell
+   *
+   */
+
+  public final void setCellText(Object key, int col, String cellText, Object data, boolean repaint)
+  {
+    tableCell cell;
+
+    cell = getCell(key, col);
+    cell.setData(data);
+    setCellText(cell, cellText, repaint);
+  }
+
+  /**
    * Gets the contents of a cell in the table.
    *
    * @param key key to the row of the cell
@@ -669,14 +689,100 @@ class rowSorter {
 
   int compare(mergeRec a, mergeRec b)
   {
-    if (forward)
+    Object Adata, Bdata;
+
+    Adata = a.element.elementAt(column).getData();
+    Bdata = b.element.elementAt(column).getData();
+
+    if (Adata == null || Bdata == null)
       {
-	return a.element.elementAt(column).text.compareTo(b.element.elementAt(column).text);
+	if (forward)
+	  {
+	    return a.element.elementAt(column).text.compareTo(b.element.elementAt(column).text);
+	  }
+	else
+	  {
+	    return b.element.elementAt(column).text.compareTo(a.element.elementAt(column).text);
+	  }
       }
-    else
+
+    if (Adata instanceof Date)
       {
-	return b.element.elementAt(column).text.compareTo(a.element.elementAt(column).text);
+	Date Adate = (Date) Adata;
+	Date Bdate = (Date) Bdata;
+
+	if (forward)
+	  {
+	    if (Adate.before(Bdate))
+	      {
+		return -1;
+	      }
+	    else if (Bdate.before(Adate))
+	      {
+		return 1;
+	      }
+	    else
+	      {
+		return 0;
+	      }
+	  }
+	else
+	  {
+	    if (Bdate.before(Adate))
+	      {
+		return -1;
+	      }
+	    else if (Adate.before(Bdate))
+	      {
+		return 1;
+	      }
+	    else
+	      {
+		return 0;
+	      }
+	  }
       }
+
+    if (Adata instanceof Integer)
+      {
+	int ia = ((Integer) Adata).intValue();
+	int ib = ((Integer) Bdata).intValue();
+
+	if (forward)
+	  {
+	    if (ia < ib)
+	      {
+		return -1;
+	      }
+	    else if (ia > ib)
+	      {
+		return 1;
+	      }
+	    else
+	      {
+		return 0;
+	      }
+	  }
+	else
+	  {
+	    if (ib < ia)
+	      {
+		return -1;
+	      }
+	    else if (ib > ia)
+	      {
+		return 1;
+	      }
+	    else
+	      {
+		return 0;
+	      }
+	  }
+      }
+
+    // unrecognized data type.. can't compare
+
+    return 0;
   }
 
   mergeRec rmsort(int l, int u)
