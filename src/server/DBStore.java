@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -471,6 +471,7 @@ public class DBStore {
     DBDumpLock lock = null;
     DBNameSpace ns;
     DBBaseCategory bc;
+    DBObjectBase base;
 
     /* -- */
 
@@ -531,7 +532,17 @@ public class DBStore {
 
 	while (basesEnum.hasMoreElements())
 	  {
-	    ((DBObjectBase) basesEnum.nextElement()).emit(out, false);
+	    base = (DBObjectBase) basesEnum.nextElement();
+
+	    if (base.type_code == SchemaConstants.AdminBase ||
+		 base.type_code == SchemaConstants.PermBase)
+	      {
+		base.emit(out, true); // gotta retain admin login ability
+	      }
+	    else
+	      {
+		base.emit(out, false);
+	      }
 	  } 
 
 	// and dump the schema out in a human readable form
