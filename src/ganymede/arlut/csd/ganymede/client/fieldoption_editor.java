@@ -143,8 +143,9 @@ class fieldoption_editor extends JDialog
     treeTable.setDefaultEditor(Integer.class, 
         new DelegateEditor((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
 
-    /* Expand all visible base nodes on startup */
-    expandAllNodes();
+    /* Expand only nodes with non-default values */
+    collapseAllNodes();
+    smartExpandNodes();
     
     edit_pane = new JScrollPane(treeTable);
     edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -361,6 +362,27 @@ class fieldoption_editor extends JDialog
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
         TreePath path = new TreePath(node.getPath());
         tree.collapsePath(path);
+      } 
+  }
+
+
+
+  /**
+   * Expands the nodes for object bases that contain fields with non-default
+   * options.
+   */
+  private void smartExpandNodes()
+  {
+    for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
+      {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
+        FieldOptionRow row = (FieldOptionRow)node.getUserObject();
+
+        if (row.isBase() && (row.getOptionValue() != 0))
+        {
+          TreePath path = new TreePath(node.getPath());
+          tree.expandPath(path);
+        }
       } 
   }
 
