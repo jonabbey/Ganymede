@@ -18,14 +18,31 @@ public class DialogRsrc {
 
   String title;
   String text;
-  String OKText;
-  String CancelText;
+  public String OKText;
+  public String CancelText;
 
+  /**
+   * Constructor for DialogRsrc
+   *
+   * @param frame Parent frame.
+   * @param Title String for title of Dialog box.
+   * @param Text String for message at top of dialog box.
+   *
+   */
   public DialogRsrc(Frame frame, String Title, String Text)
     {
       this(frame, Title, Text, "Ok", "Cancel");
     }
 
+  /** 
+   * Constructor with special "Ok" and "Cancel" strings
+   *
+   * @param frame Parent frame.
+   * @param Title String for title of Dialog box.
+   * @param Text String for message at top of dialog box.
+   * @param OK String for Ok button 
+   * @param Cancel String for Cancel button
+   */
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel)
     {
       
