@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 2001/05/25 07:23:48 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 2001/05/29 22:53:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2218,6 +2218,21 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// up their mail spool, etc., etc.
 
 	createUserExternals();
+
+	// remember the user's initial password for our password history support
+
+	PasswordDBField pField = (PasswordDBField) getField(userSchema.PASSWORD);
+
+	if (pField != null)
+	  {
+	    String pass = pField.getPlainText();
+
+	    if (pass != null)
+	      {
+		savePasswordChoice(pass);
+	      }
+	  }
+
 	break;
 
       case DELETING:
