@@ -48,6 +48,7 @@ localization resource files:
 	DBStore                dumpTask
 	Ganymede               gcTask
 	GanymedeServer         memoryStatusTask
+        DBEditObject
 
 The default, American English versions of these localization files are
 simply called <classname>.properties.  When the Ganymede server is run
@@ -421,6 +422,39 @@ and a dedicated queue runner will be launched on an asynchronous basis
 to sweep up the XML records for the queue, up to a fixed transaction
 number, for integration into directory services oriented around change
 requests rather than complete dump and reloads.
+
+24. [SERVER] Made DBEditObject.deleting private
+
+I've made the deleting boolean in DBEditObject private rather than
+protected, so that use of it can be controlled better.  If your custom
+plugins consult deleting directly, they will need to be tweaked to use
+"isDeleting()" rather than "deleting".
+
+25. [SERVER, XML] Corrected xmlclient behavior for namespace swaps
+
+The xmlclient is intended to allow just about any legal change to the
+Ganymede server's data to be made by submitting a declarative xml
+file.  Unfortunately, it turned out that one thing the Ganymede server
+could not do when handed an xml file was to swap two namespace values
+around.
+
+That is, suppose you wanted to rename two user accounts
+simultaneously, giving account A the name previously associated with
+account B, and account B the name previously associated with account
+A.  If you try to do this in the GUI client, you'll find that you need
+to make up some transient name to act as a placeholder for account A,
+then give A's name to B, then go back and give B's name to A, erasing
+the placeholder in the A account.
+
+This kind of fine grained control over the order of operations isn't
+possible when using the xmlclient, so I have tweaked the server's
+namespace management logic so that it will allow non-interactive
+sessions to have two namespace linkages 'in flight' at a time.  Giving
+name 'A' to account B will be allowed, even though it means that for a
+brief window, both account A and the old account B will be associated
+with the 'A' name.  If the name 'A' is not unlinked from the old
+account A by the time the xmlclient's transaction commits, however, an
+exception will be reported and the transaction will be canceled.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
