@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -101,6 +101,17 @@ public class directLoader {
       {
 	System.err.println("Error: Unrecognized exception " + ex);
 	return;
+      }
+
+    try
+      {
+	FileOutputStream textOutStream = new FileOutputStream("schema.list");
+	PrintWriter textOut = new PrintWriter(textOutStream);
+	Ganymede.db.printBases(textOut);
+      }
+    catch (IOException ex)
+      {
+	System.err.println("heck.");
       }
 
     scanOwnerGroups();
@@ -564,8 +575,6 @@ public class directLoader {
 
     SystemType.initTokenizer(tokens);
 
-    System.out.println("Scanning netgroup for user entries");
-
     SystemType st;
 
     while (!done)
@@ -575,12 +584,10 @@ public class directLoader {
 	    st = new SystemType();
 	    done = st.loadLine(tokens);
 
-	    st.display();
-
 	    if (!done)
 	      {
-		System.out.print(".");
-		systemTypeInvids.put(st.name, st);
+		st.display();
+		systemTypes.put(st.name, st);
 	      }
 	  }
 	catch (EOFException ex)
@@ -1085,7 +1092,7 @@ public class directLoader {
     while (enum.hasMoreElements())
       {
 	key = (String) enum.nextElement();
-	st = (SystemType) groups.get(key);
+	st = (SystemType) systemTypes.get(key);
 	
 	System.out.print("Creating " + key);
 	
@@ -1190,6 +1197,11 @@ public class directLoader {
 	// set the type
 
 	Invid typeInvid = (Invid) systemTypeInvids.get(sysObj.type);
+
+	if (typeInvid == null)
+	  {
+	    System.err.println("\n\n***** No such type found: " + sysObj.type + "\n\n");
+	  }
 
 	current_obj.setFieldValue((short) 266, typeInvid);
 
