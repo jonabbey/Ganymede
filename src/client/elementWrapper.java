@@ -114,6 +114,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	title.addMouseListener(this);
 
 	expand = new JButton(vp.wp.closeIcon);
+	expand.setPressedIcon(vp.wp.closeIcon);
 	expand.setToolTipText("Expand this element");
 	expand.setOpaque(false);
 	expand.setBorderPainted(false);
