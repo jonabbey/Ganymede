@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -603,6 +603,44 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
       }
 
     transpoints.put(name, new DBNameSpaceCkPoint(this, editSet));
+  }
+
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                 popCheckpoint()
+
+  ----------------------------------------------------------------------------*/
+
+  /**
+   *
+   * <p>Method to remove a checkpoint from this namespace's DBNameSpaceCkPoint
+   * hash.</p>
+   *
+   * <p>This method really isn't very important, because when the transaction
+   * is committed or aborted, the checkpoints hashtable will be cleared of
+   * editSet anyway.</p>
+   *
+   * @param editSet The transaction that is requesting the checkpoint pop.
+   * @param name The name of the checkpoint to be popped.
+   *
+   */
+
+  public synchronized void popCheckpoint(DBEditSet editSet, String name)
+  {
+    Hashtable transpoints;
+
+    /* -- */
+
+    transpoints = (Hashtable) checkpoints.get(editSet);
+
+    if (transpoints == null)
+      {
+	return;
+      }
+
+    // take out the DBNameSpaceCkPoint.
+
+    transpoints.remove(name);
   }
 
   /*----------------------------------------------------------------------------
