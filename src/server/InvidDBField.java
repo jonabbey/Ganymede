@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.81 $ %D%
+   Version: $Revision: 1.82 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -210,8 +210,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (values.contains(superOwner))
 		  {
-		    //		    System.err.println("InvidDBField.emit(fixup): omitting supergash owner link: " + 
-		    //				       owner.getTypeName() + ": " + owner.getLabel() + " " + getName());
+		    System.err.println("InvidDBField.emit(fixup): omitting supergash owner link: " + 
+				       owner.getTypeName() + ": " + owner.getLabel() + " " + getName());
 		  }
 
 		for (int i = 0; i < values.size(); i++)
@@ -224,8 +224,8 @@ public final class InvidDBField extends DBField implements invid_field {
 		      }
 		  }
 
-		//		System.err.println("InvidDBField.emit(): values.size() == " + values.size() +
-		//				   ", size == " + size);
+		System.err.println("InvidDBField.emit(): values.size() == " + values.size() +
+				   ", size == " + size);
 
 		out.writeShort(size);
 
@@ -235,7 +235,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		    if (!temp.equals(superOwner))
 		      {
-			//			System.err.print("*");
+			System.err.print("*");/
 
 			out.writeShort(temp.getType());
 			out.writeInt(temp.getNum());
@@ -253,7 +253,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		// we want to omit any objects owned by Supergash
 		out.writeShort(0);
 
-		// System.err.println("InvidDBField.emit(fixup): omitting " + values.size() + " objects owned by supergash");
+		 System.err.println("InvidDBField.emit(fixup): omitting " + values.size() + " objects owned by supergash");
 	      }
 	    else
 	      {
