@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -899,6 +899,12 @@ class dumpTask implements Runnable {
 	if (Ganymede.server.activeUsers.size() > 0)
 	  {
 	    Ganymede.debug("Deferring dump task - users logged in");
+	    return;
+	  }
+
+	if (Ganymede.db.schemaEditInProgress)
+	  {
+	    Ganymede.debug("Deferring dump task - schema being edited");
 	    return;
 	  }
 
