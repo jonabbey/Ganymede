@@ -57,6 +57,7 @@
 package arlut.csd.ganymede.server;
 
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.SchemaConstants;
 
 import arlut.csd.Util.FileOps;
@@ -65,6 +66,7 @@ import arlut.csd.Util.TranslationService;
 import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -194,6 +196,11 @@ public class SyncRunner implements Runnable {
     return (x != null && x.equals("1"));
   }
 
+  /**
+   * <p>Returns true if the DBEditObject passed in needs to be synced
+   * to this channel.</p>
+   */
+
   public boolean shouldInclude(DBEditObject object)
   {
     if (!mayInclude(object))
@@ -201,9 +208,55 @@ public class SyncRunner implements Runnable {
 	return false;
       }
 
-    return false;		// XXX
-  }
+    if (object.getStatus() == ObjectStatus.DROPPING)
+      {
+	return false;
+      }
 
+    String fieldOption;
+    DBObject origObj = object.getOriginal();
+
+    Vector fieldCopies = object.getFieldVect();
+
+    for (int i = 0; i < fieldCopies.size(); i++)
+      {
+	DBField memberField = (DBField) fieldCopies.elementAt(i);
+
+	switch (memberField.getID())
+	  {
+	  case SchemaConstants.CreationDateField:
+	  case SchemaConstants.CreatorField:
+	  case SchemaConstants.ModificationDateField:
+	  case SchemaConstants.ModifierField:
+	    continue;
+	  }
+
+	fieldOption = getOption(memberField);
+
+	if (fieldOption == null || fieldOption.equals("0"))
+	  {
+	    continue;
+	  }
+	else if (fieldOption.equals("2"))
+	  {
+	    return true;
+	  }
+	else if (fieldOption.equals("1"))
+	  {
+	    if (origObj == null)
+	      {
+		return true;
+	      }
+
+	    if (memberField.hasChanged((DBField) origObj.getField(memberField.getID())))
+	      {
+		return true;
+	      }
+	  }
+      }
+
+    return false;
+  }
 
   /**
    * <p>Returns true if the given object type (baseID) and field
@@ -225,6 +278,43 @@ public class SyncRunner implements Runnable {
       {
 	return (x != null && x.equals("2"));
       }
+  }
+
+  /**
+   * <p>Returns the option string, if any, for the given base and field.
+   * This option string should be one of three values:</p>
+   *
+   * <p>"0", meaning the field is never included in this sync channel, nor
+   * should it be examined to make a decision about whether a given
+   * object is written to this sync channel.</p>
+   *
+   * <p>"1", meaning that the field is included in this sync channel if
+   * it has changed, and that the object that includes the field
+   * should be written to the sync channel if this field was changed
+   * in the object.  If a field has an option string of "1" but has
+   * not changed in a given transaction, that field won't trigger the
+   * object to be written to the sync channel.</p>
+   *
+   * <p>"2", meaning that the field is always included in this sync
+   * channel if the object that it is contained in is sent to this
+   * sync channel, even if it wasn't changed in the transaction.  If
+   * this field was changed in a given transaction, that will suffice
+   * to cause an object that is changed in any fashion during a
+   * transaction to be sent to this sync channel.  In this sense, it
+   * is like "1", but with the added feature that it will "ride along"
+   * with its object to the sync channel, even if it wasn't changed
+   * during the transaction.</p>
+   *
+   * <p>If "1" or "2" is true for a field in a given object type, the
+   * corresponding option string for the object's type should be 1,
+   * signaling that at least some fields in the object should be sent
+   * to this sync channel when the object is involved in a
+   * transaction.</p>
+   */
+
+  private String getOption(DBField field)
+  {
+    return (String) matrix.get(FieldOptionDBField.matrixEntry(field.getOwner().getTypeID(), field.getID()));
   }
 
   /**

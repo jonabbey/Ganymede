@@ -628,6 +628,11 @@ public abstract class DBField implements Remote, db_field {
 
   public boolean hasChanged(DBField orig)
   {
+    if (orig == null)
+      {
+	return true;
+      }
+
     if (!(orig.getClass().equals(this.getClass())))
       {
 	throw new IllegalArgumentException("bad field comparison");
@@ -635,7 +640,6 @@ public abstract class DBField implements Remote, db_field {
 
     return (!this.equals(orig));
   }
-
 
   /**
    *
