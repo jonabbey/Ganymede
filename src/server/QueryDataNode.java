@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,7 +32,8 @@ public class QueryDataNode extends QueryNode {
   static public final byte STARTSWITH = 7;
   static public final byte ENDSWITH = 8;
   static public final byte DEFINED = 9;
-  static public final byte LAST = 9;
+  static public final byte MATCHES = 10;
+  static public final byte LAST = 10;
 
   static public final byte FIRSTVECOP = 0;
   
@@ -53,6 +54,8 @@ public class QueryDataNode extends QueryNode {
   byte comparator;
   byte arrayOp;
   Object value;
+
+  transient Object regularExpression = null;
 
   /* -- */
 
@@ -263,6 +266,10 @@ public class QueryDataNode extends QueryNode {
 
 	  case DEFINED:
 	    result.append("DEFINED");
+	    break;
+
+	  case MATCHES:
+	    result.append("MATCHES");
 	    break;
 	  }
       }
