@@ -172,6 +172,20 @@ being dragged.
 This of course, made the schema editor amazingly frustrating to try
 and use if conditions allowed this bug to be expressed.
 
+14. [SERVER] Fixed transient logic errors in permission editing
+
+There were a few places in the Ganymede server where the Ganymede
+logic was invalidly depending on the post-serialization initialization
+of transient fields in objects passed over RMI.  This is not in
+keeping with the way that Java serialization actually works, and in
+one instance this logic flaw resulted in changes made to permission
+matrices by editing Role objects not taking effect until the server
+was stopped and restarted.
+
+I've audited all of the server code to insure that there are no
+remaining attempted dependencies on post-serialization initialization
+of transient fields.
+
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
 RELEASE DATE: January 30, 2001
