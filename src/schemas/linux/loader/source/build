@@ -3,8 +3,8 @@
 # Ganymede build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.3 $
-# Date: $Date: 1999/01/21 23:42:58 $
+# Version: $Revision: 1.4 $
+# Date: $Date: 1999/01/22 00:06:51 $
 #
 ############################################################
 
@@ -32,7 +32,7 @@ $JAVAC -deprecation -d $TARGETDIR *.java
 
 echo "Building rmi stubs and skeletons"
 
-$RMIC -d $TARGETDIR arlut.csd.ganymede.loader.directLoaderClient
+$JAVADIR/rmic -d $TARGETDIR arlut.csd.ganymede.loader.directLoaderClient
 
 echo "Done"
 
