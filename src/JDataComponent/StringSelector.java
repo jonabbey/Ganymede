@@ -312,6 +312,18 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   // Public methods ------------------------------------------------------------
 
   /**
+   * True if StringSelector is editable.
+   *
+   * Non-editable StringSelector's only have the chosen list.
+   * Editable StringSelector's have both the chosen and available
+   * lists.  
+   */
+  public boolean isEditable()
+    {
+      return editable;
+    }
+
+  /**
    * Update the StringSelector.
    */
   public void update(Vector available, Vector chosen)
