@@ -9,15 +9,16 @@
 
    Created: 28 Feb 1997
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2000/02/11 07:07:04 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2001/06/29 07:31:05 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -70,7 +71,7 @@ import java.awt.*;
  * <p>Note that we came up with this message type before Sun introduced
  * the 1.1 AWT event model.  Great minds... ;-)</p>
  *   
- * @version $Revision: 1.12 $ $Date: 2000/02/11 07:07:04 $ $Name:  $
+ * @version $Revision: 1.13 $ $Date: 2001/06/29 07:31:05 $ $Name:  $
  * @author Navin Manohar 
  */
 
@@ -146,6 +147,12 @@ public class JValueObject {
   public static final int PARAMETER = -1008;
 
   /**
+   * Used to signal an item being moved in a list.
+   */
+
+  public static final int MOVE = -1011;
+
+  /**
    * Boundary guard for acceptable operation types.
    */
 
@@ -208,7 +215,7 @@ public class JValueObject {
    * @param source arlut.csd.JDataComponent GUI component originating message
    * @param value Value being set by the originating GUI component
    * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
-   * ERROR, SPECIAL, PARAMETER.
+   * ERROR, SPECIAL, PARAMETER, MOVE.
    *
    */
 
@@ -221,12 +228,12 @@ public class JValueObject {
 
   /**
    *
-   * Constructor for a simple vector chaange message.
+   * Constructor for a simple vector change message.
    *
    * @param source arlut.csd.JDataComponent GUI component originating message
    * @param index index of vector connected to arlut.csd.JDataComponent GUI component being changed.
    * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
-   * ERROR, SPECIAL, PARAMETER.
+   * ERROR, SPECIAL, PARAMETER, MOVE.
    *
    */
   
@@ -245,19 +252,36 @@ public class JValueObject {
 
   /**
    *
-   * Constructor for a simple vector chaange message.
+   * Constructor for a simple vector change message.
    *
    * @param source arlut.csd.JDataComponent GUI component originating message
    * @param index index of vector connected to arlut.csd.JDataComponent GUI component being changed.
    * @param value Value being set by the originating GUI component
    * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
-   * ERROR, SPECIAL, PARAMETER.
+   * ERROR, SPECIAL, PARAMETER, MOVE.
    *
    */
 
   public JValueObject(Component source, int index, int operation, Object value)
   {
     this(source, index, operation, value, null);
+  }
+
+  /**
+   *
+   * Constructor for a vector move message.
+   *
+   * @param source arlut.csd.JDataComponent GUI component originating message
+   * @param index index of vector connected to arlut.csd.JDataComponent GUI component being changed.
+   * @param value Value being set by the originating GUI component
+   * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
+   * ERROR, SPECIAL, PARAMETER, MOVE.
+   *
+   */
+
+  public JValueObject(Component source, int index, int operation, int targetIndex)
+  {
+    this(source, index, operation, new Integer(targetIndex), null);
   }
 
   /**

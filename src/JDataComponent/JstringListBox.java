@@ -6,15 +6,16 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2001/06/27 20:21:44 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2001/06/29 07:31:05 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -81,12 +82,12 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.29 $ $Date: 2001/06/27 20:21:44 $ $Name:  $
+ * @version $Revision: 1.30 $ $Date: 2001/06/29 07:31:05 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
 
-public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener {
+public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener, MouseMotionListener {
 
   static final boolean debug = false;
 
@@ -94,14 +95,14 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   int 
     width,
-    popUpIndex = -1,
-    numberOfStrings = 0;
+    popUpIndex = -1;
 
   DefaultListModel 
     model = new DefaultListModel();
 
-  boolean
-    presorted,
+  private boolean
+    dragOk = false,
+    presorted = false,
     allowCallback = false;
 
   JsetValueCallback 
@@ -109,6 +110,13 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   JPopupMenu
     popup = null;
+
+  private int
+    startDragIndex = -1,
+    dragNode = -1;
+
+  private int
+    selectedNode = -1;
 
   /* -- */
 
@@ -120,319 +128,140 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public JstringListBox()
   {
-    this(null, false, null);
-  }
-
-  /**
-   *
-   * Constructor
-   *
-   * @param items Vector of items (Strings or listHandles) to show in the list
-   *
-   */
-
-  public JstringListBox(Vector items)
-  {
-    this(items, false, null);
-  }
-
-  /**
-   *
-   * Constructor 
-   *
-   * @param items Vector of items (Strings or listHandles) to show in the list
-   * @param presorted If true, JstringListBox will not sort the vector(it is already sorted)
-   *
-   */
-
-  public JstringListBox(Vector items, boolean presorted)
-  {
-    this(items, presorted, null);
-  }
-
-  /**
-   *
-   * Constructor 
-   *
-   * @param items Vector of items (Strings or listHandles) to show in the list
-   * @param presorted If true, JstringListBox will not sort the vector(it is already sorted)
-   * @param popup JPopupMenu that will be shown on right click.  Callback is of type PARAMETER
-   *
-   */
-
-  public JstringListBox(Vector items, boolean presorted, JPopupMenu popup)
-  {
-    this(items, presorted, popup, 0);
-  }
-
-  /**
-   *
-   * Constructor 
-   *
-   * @param items Vector of items (Strings or listHandles) to show in the list
-   * @param presorted If true, JstringListBox will not sort the vector(it is already sorted)
-   * @param popup JPopupMenu that will be shown on right click.  Callback is of type PARAMETER
-   * @param width Width in pixels of the string list box.  If <= 0, the list box will be
-   * auto-sized, with a 20 char minimum width
-   *
-   */
-
-  public JstringListBox(Vector items, boolean presorted, JPopupMenu popup, int width)
-  {
-    this.presorted = presorted;
-    this.popup = popup;
-    this.width = width;
-
-    /* - */
-
-    // longString is used to calculate the minimum width of
-    // a JstringListBox in the absence of a defined width.
-
-    String longString = "this is the minimum!";
-
-    /* -- */
-
-    if (popup != null)
-      {
-	Component[] c = popup.getComponents();
-
-	for (int i = 0; i < c.length; i++)
-	  {
-	    if (c[i] instanceof JMenuItem)
-	      {
-		JMenuItem pm = (JMenuItem)c[i];
-		pm.addActionListener(this);
-	      }
-	    else
-	      {
-		throw new IllegalArgumentException("Hey, you are supposed to use JMenuItems in JPopupMenus, buddy.");
-	      }
-	  }
-      }
-	
-    //model setSize(items.size());
-    //System.out.println("Setting size to " + items.size());
-
-    if ((items != null) && (items.size() > 0))
-      {	
-	if (items.elementAt(0) instanceof String)
-	  {
-	    if (!presorted)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Sorting...");
-		  }
-
-		(new VecQuickSort(items,
-				  new arlut.csd.Util.Compare() 
-				  {
-				    public int compare(Object a, Object b) 
-				      {
-					String aF, bF;
-					
-					aF = (String) a;
-					bF = (String) b;
-					int comp = 0;
-					
-					comp =  aF.compareTo(bF);
-					
-					if (comp < 0)
-					  {
-					    return -1;
-					  }
-					else if (comp > 0)
-					  {
-					    return 1;
-					  }
-					else
-					  {
-					    return 0;
-					  }
-				      }
-				  }
-				  )
-		  ).sort();
-
-		if (debug)
-		  {
-		    System.out.println("Done sorting strings");
-		  }
-	      } 
-
-	    String string;
-
-	    for (int i=0 ; i<items.size() ; i++)
-	      {
-		string = (String)items.elementAt(i);
-
-		if (width <= 0)
-		  {
-		    if (longString == null)
-		      {
-			longString = string;
-		      }
-		    else
-		      {
-			if (string.length() > longString.length())
-			  {
-			    longString = string;
-			  }
-		      }
-		  }
-
-		if (debug)
-		  {
-		    System.err.println("JstringListBox: adding string " + string);
-		  }
-		
-		insertHandleAt(new listHandle(string, string), i);
-	      }
-	  }
-	else if (items.elementAt(0) instanceof listHandle)
-	  {
-	    if (!presorted)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Sorting...");
-		  }
-
-		(new VecQuickSort(items,
-				  new arlut.csd.Util.Compare() 
-				  {
-				    public int compare(Object a, Object b) 
-				      {
-					listHandle aF, bF;
-					
-					aF = (listHandle) a;
-					bF = (listHandle) b;
-					int comp = 0;
-					
-					comp =  aF.getLabel().compareTo(bF.getLabel());
-					
-					if (comp < 0)
-					  {
-					    return -1;
-					  }
-					else if (comp > 0)
-					  { 
-					    return 1;
-					  } 
-					else
-					  { 
-					    return 0;
-					  }
-				      }
-				  }
-				  )	      
-		 ).sort();
-
-		if (debug)
-		  {
-		    System.out.println("Done sorting.");
-		  }
-	      }
-	    
-	    for (int i=0 ; i<items.size() ; i++)
-	      {
-		listHandle x = (listHandle) items.elementAt(i);
-
-		if (width <= 0)
-		  {
-		    if (longString == null)
-		      {
-			longString = x.label;
-		      }
-		    else
-		      {
-			if (x.label.length() > longString.length())
-			  {
-			    longString = x.label;
-			  }
-		      }
-		  }
-
-		if (debug)
-		  {
-		    System.err.println("JstringListBox: adding listhandle " + x.getLabel() + ">>" + x.getObject());
-		  }
-		
-		insertHandleAt(x, i);
-	      }
-	  }
-	else
-	  {
-	    System.out.println("Unsupported item type passed to JstringListBox " +
-			       "in a vector(needs to be String or ListHandle)");
-	  }
-      
-      }
-
-    setModel(model);
     addMouseListener(this);
-
-    if (width > 0)
-      {
-	setFixedCellWidth(width);
-      }
-    else
-      {
-	setPrototypeCellValue(longString);
-      }
-
+    addMouseMotionListener(this);
     setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
   }
 
   /**
-   *
-   * Reload the list box.
-   *
+   * <p>This method associates a node-linked popup menu to this
+   * listbox.</p>
    */
 
-  public void reload(Vector items, boolean presorted)
+  public void registerPopupMenu(JPopupMenu popup)
   {
-    //model.removeAllElements();
+    this.popup = popup;
+
+    if (popup == null)
+      {
+	return;
+      }
+
+    Component[] c = popup.getComponents();
+
+    for (int i = 0; i < c.length; i++)
+      {
+	if (c[i] instanceof JMenuItem)
+	  {
+	    JMenuItem pm = (JMenuItem)c[i];
+	    pm.addActionListener(this);
+	  }
+	else
+	  {
+	    throw new IllegalArgumentException("Hey, you are supposed to use JMenuItems in JPopupMenus, buddy.");
+	  }
+      }
+  }
+
+  /**
+   * <p>This method loads a Vector of items into this
+   * list box.  Elements of the items Vector may
+   * be Strings or {@link arlut.csd.JDataComponent.listHandle listHandle}
+   * objects.</p>
+   *
+   * <p>If presorted is false, the items will be sorted in
+   * display order before being loaded into this list box.</p>
+   *
+   * <p>Any values previously in the list box will be removed.</p>
+   *
+   * @param items A Vector of Strings or listHandles
+   * @param width If less than zero, the listbox's cell width will
+   * be left unchanged.  If set to zero, the listbox's cell width will
+   * be calculated based on the longest string in the items Vector.  If
+   * greater than zero, the cell width will be set to &lt;width&gt; columns
+   * wide.
+   * @param sort  If true, the items Vector will be sorted in place before
+   * being set into the listbox.
+   * @param comparator Typically an instance of an inner class that implements
+   * the arlut.csd.Util.Compare interface, used to guide the sort process.  If this
+   * is null, the sort will be performed using a normal string ordering sort.
+   */
+
+  public void load(Vector items, int width, boolean sort, arlut.csd.Util.Compare comparator)
+  {
+    String maxWidthString = "this is the minimum!";
 
     model = new DefaultListModel();
 
-    if ((items != null) && (items.size() > 0))
+    try
       {
+	if (items == null || items.size() == 0)
+	  {
+	    return;
+	  }
+
+	if (sort)
+	  {
+	    new VecQuickSort(items, comparator).sort();
+	  }
+	
 	if (items.elementAt(0) instanceof listHandle)
 	  {
-	    if (!presorted)
-	      {
-		items = sortListHandleVector(items);
-	      }
-
 	    for (int i = 0; i < items.size(); i++)
 	      {
-		insertHandleAt((listHandle)items.elementAt(i), i);
+		listHandle handle = (listHandle) items.elementAt(i);
+		
+		insertHandleAt(handle, i);
+		
+		if (handle.toString().length() > maxWidthString.length())
+		  {
+		    maxWidthString = handle.toString();
+		  }
 	      }
 	  }
 	else  //It must be a string, or it will throw a ClassCastException
 	  {
-	    if (!presorted)
-	      {
-		items = sortStringVector(items);
-	      }
-
 	    for (int i = 0; i < items.size(); i++)
 	      {
 		String s = (String)items.elementAt(i);
+		
+		if (s.length() > maxWidthString.length())
+		  {
+		    maxWidthString = s;
+		  }
+		
 		insertHandleAt(new listHandle(s,s), i);
 	      }
 	  }
       }
-    else 
+    finally
       {
-	if (debug)
+	setModel(model);
+	
+	if (width > 0)
 	  {
-	    System.out.println("no items to add");
+	    setFixedCellWidth(width);
+	  }
+	else if (width == 0)
+	  {
+	    setPrototypeCellValue(maxWidthString);
 	  }
       }
+  }
 
-    setModel(model);
+  /**
+   * <p>This method enables and disables item dragging in this list.</p>
+   */
+
+  public void setDragEnabled(boolean dragOk)
+  {
+    this.dragOk = dragOk;
+
+    if (!dragOk)
+      {
+	dragNode = -1;
+	startDragIndex = -1;
+      }
   }
 
   /**
@@ -524,6 +353,27 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       
     insertHandleAt(lh, i);
     setSelectedValue(lh, true);
+  }
+
+  /**
+   * <p>This method moves an item around in the list.</p>
+   */
+
+  public void moveItem(int sourceRow, int targetRow)
+  {
+    if (sourceRow == targetRow)
+      {
+	return;
+      }
+
+    listHandle h = (listHandle) model.remove(sourceRow);
+
+    if (h == null)
+      {
+	return;
+      }
+
+    model.insertElementAt(h, targetRow);
   }
 
   /**
@@ -790,11 +640,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public void valueChanged(ListSelectionEvent e)
   {
-    if (getSelectedIndex() == -1)
-      {
-	// don't notify our container on deselect
+    int selectedIndex = getSelectedIndex();
 
-	return;
+    if (selectedIndex == -1 || dragNode != -1)
+      {
+	return;			// don't notify our container on deselect
       }
 
     if (allowCallback)
@@ -804,7 +654,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	try 
 	  {
 	    ok = my_parent.setValuePerformed(new JValueObject(this, 
-							      getSelectedIndex(),
+							      selectedIndex,
 							      JValueObject.ADD));
 	  }
 	catch (java.rmi.RemoteException rx)
@@ -832,7 +682,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   /**
    *
-   * For the mouseListener interface
+   * For the MouseListener interface
    *
    */
 
@@ -842,6 +692,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
 	if (SwingUtilities.isLeftMouseButton(e))
 	  {
+	    // we only want to respond to a double-click.  mouseDown with no modifier
+	    // will be treated as a drag initiation
+
 	    if (e.getClickCount() == 2)
 	      {
 		boolean ok = false;
@@ -910,7 +763,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   /**
    *
-   * For the mouseListener interface
+   * For the MouseListener interface
    *
    */
 
@@ -920,7 +773,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   /**
    *
-   * For the mouseListener interface
+   * For the MouseListener interface
    *
    */
 
@@ -936,15 +789,91 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public void mousePressed(MouseEvent e)
   {
+    if (e.isShiftDown() || e.isControlDown() || !dragOk)
+      {
+	dragNode = -1;
+	startDragIndex = -1;
+
+	return;
+      }
+
+    dragNode = locationToIndex(e.getPoint());
+    startDragIndex = dragNode;
   }
 
   /**
    *
-   * For the mouseListener interface
+   * For the MouseListener interface
    *
    */
 
   public void mouseReleased(MouseEvent e)
+  {
+    if (startDragIndex != -1)
+      {
+	if (allowCallback && my_parent != null)
+	  {
+	    boolean ok = false;
+
+	    try 
+	      {
+		ok = my_parent.setValuePerformed(new JValueObject(this, 
+								  startDragIndex,
+								  JValueObject.MOVE,
+								  dragNode));
+	      }
+	    catch (java.rmi.RemoteException rx)
+	      {
+		throw new RuntimeException("Could not setValuePerformed: " + rx);
+	      }
+
+	    if (!ok)
+	      {
+		moveItem(dragNode, startDragIndex);
+	      }
+	  }
+      }
+
+    dragNode = -1;
+    startDragIndex = -1;
+  }
+
+  /**
+   *
+   * For the MouseMotionListener interface
+   *
+   */
+
+  public void mouseDragged(MouseEvent e)
+  {
+    if (dragNode == -1)
+      {
+	return;
+      }
+
+    int overIndex = locationToIndex(e.getPoint());
+
+    if (overIndex >= (model.getSize() - 1))
+      {
+	overIndex = model.getSize() - 1;
+      }
+    
+    if (overIndex != -1 && overIndex != dragNode)
+      {
+	moveItem(dragNode, overIndex);
+	
+	dragNode = overIndex;
+	setSelectedIndex(overIndex);
+      }
+  }
+
+  /**
+   *
+   * For the MouseMotionListener interface
+   *
+   */
+
+  public void mouseMoved(MouseEvent e)
   {
   }
 
@@ -994,82 +923,4 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  }
       }
   }
-  
-  /**
-   * sort a vector of listHandles
-   *
-   * @param v Vector to be sorted
-   * @return Vector of sorted listHandles(sorted by label)
-   */
-
-  private Vector sortListHandleVector(Vector v)
-  {
-    (new VecQuickSort(v, 
-		      new arlut.csd.Util.Compare() {
-      public int compare(Object a, Object b) 
-	{
-	  listHandle aF, bF;
-	  
-	  aF = (listHandle) a;
-	  bF = (listHandle) b;
-	  int comp = 0;
-	  
-	  comp =  aF.toString().compareTo(bF.toString());
-	  
-	  if (comp < 0)
-	    {
-	      return -1;
-	    }
-	  else if (comp > 0)
-	    { 
-	      return 1;
-	    } 
-	  else
-	    { 
-	      return 0;
-	    }
-	}
-    })).sort();
-    
-    return v;
-  }
-
-  /**
-   * Sort a vector of Strings
-   *
-   * @return Vector of sorted Strings.
-   */
-
-  public Vector sortStringVector(Vector v)
-  {
-    (new VecQuickSort(v, 
-		      new arlut.csd.Util.Compare() {
-      public int compare(Object a, Object b) 
-	{
-	  String aF, bF;
-	  
-	  aF = (String) a;
-	  bF = (String) b;
-	  int comp = 0;
-	  
-	  comp =  aF.compareTo(bF);
-	  
-	  if (comp < 0)
-	    {
-	      return -1;
-	    }
-	  else if (comp > 0)
-	    { 
-	      return 1;
-	    } 
-	  else
-	    { 
-	      return 0;
-	    }
-	}
-    })).sort();
-    
-    return v;
-  }
-
 }

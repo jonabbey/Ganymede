@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2001/06/27 20:21:44 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2001/06/29 07:31:05 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -93,7 +93,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.35 $ $Date: 2001/06/27 20:21:44 $ $Name:  $
+ * @version $Revision: 1.36 $ $Date: 2001/06/29 07:31:05 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -154,6 +154,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   
   int rowWidth;
 
+  private boolean presorted;
+
   /* -- */
 
   /**
@@ -163,8 +165,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * @param chosen Vector of listHandles for available choices
    * @param parent AWT container that the StringSelector will be contained in.
    * @param editable If false, this string selector is for display only
-   * @param canChoose Choice must be made from vector of choices
-   * @param mustChoose Vector of choices is available
+   * @param canChoose Vector of choices is available
+   * @param mustChoose Choice must be made from vector of choices
    * @param rowWidth How many columns wide should each box be?  If <= 0, the
    * StringSelector will auto-size the columns
    */
@@ -182,8 +184,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * @param chosen Vector of listHandles for available choices
    * @param parent AWT container that the StringSelector will be contained in.
    * @param editable If false, this string selector is for display only
-   * @param canChoose Choice must be made from vector of choices
-   * @param mustChoose Vector of choices is available
+   * @param canChoose Vector of choices is available
+   * @param mustChoose Choice must be made from vector of choices
    */
 
   public StringSelector(Vector available, Vector chosen, Container parent, 
@@ -207,7 +209,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   public StringSelector(Vector available, Vector chosen, Container parent, 
 			boolean editable, int rowWidth,
-			 String inLabel, String outLabel)
+			String inLabel, String outLabel)
   {
     this(available, chosen, parent, editable, true, false, rowWidth, 
 	 inLabel, outLabel, null, null);
@@ -293,6 +295,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     this.canChoose = canChoose;
     this.mustChoose = mustChoose;
     this.rowWidth = rowWidth;
+    this.presorted = false;
     
     setLayout(new BorderLayout());
 
@@ -349,7 +352,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     // JstringListBox does the sorting
 
-    in = new JstringListBox(inVector, false, inPopup, rowWidth);
+    in = new JstringListBox();
+    in.registerPopupMenu(inPopup);
+    in.load(inVector, rowWidth, !presorted, null);
     in.setCallback(this);
 
     inPanel.setBorder(bborder);
@@ -444,7 +449,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	add.setActionCommand("Add");
 	add.addActionListener(this);
 
-	out = new JstringListBox(outVector, true, outPopup, rowWidth); // our list of choices is presorted
+	out = new JstringListBox();
+	out.registerPopupMenu(outPopup);
+	out.load(outVector, rowWidth, !presorted, null);
 	out.setCallback(this);
 	
 	outPanel.setBorder(bborder);
@@ -606,6 +613,16 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   // Public methods ------------------------------------------------------------
 
   /**
+   * This method is used to turn on or off the StringSelector's sorting
+   * of its list boxes.
+   */
+
+  public void setSort(boolean doSort)
+  {
+    this.presorted = !doSort;
+  }
+
+  /**
    * <P>Returns true if this StringSelector is editable.</P>
    *
    * <P>Non-editable StringSelector's only have the chosen list.
@@ -622,7 +639,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * Update the StringSelector.
    */
 
-  public void update(Vector available, Vector chosen)
+  public void update(Vector available, boolean sortAvailable, Vector chosen, boolean sortChosen)
   {
     if (available == null)
       {
@@ -656,7 +673,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	try
 	  {
-	    out.reload(available, true); // choice lists are always pre-sorted.
+	    out.load(available, -1, sortAvailable, null);
 	  }
 	catch (Exception e)
 	  {
@@ -666,7 +683,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     try
       {
-	in.reload(chosen, false);
+	in.load(chosen, -1, sortChosen, null);
       }
     catch (Exception e)
       {
