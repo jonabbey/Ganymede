@@ -5,7 +5,7 @@
    This file is a management class for automounter map objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -82,6 +82,60 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
   public boolean fieldRequired(DBObject object, short fieldid)
   {
     if (fieldid == mapSchema.MAPNAME)
+      {
+	return true;
+      }
+
+    return false;
+  }
+
+  /**
+   *
+   * This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this DBObject type when the
+   * user only has editing access for the source InvidDBField and not
+   * the target.
+   *
+   */
+
+  public boolean anonymousLinkOK(short fieldID)
+  {
+    // we want anyone to be able to link into the auto.home.default
+    // map.
+
+    if (!getLabel().equals("auto.home.default"))
+      {
+	return false;
+      }
+
+    if (fieldID == mapSchema.ENTRIES)
+      {
+	return true;
+      }
+
+    return false;
+  }
+
+  /**
+   *
+   * This method is used to control whether or not it is acceptable to
+   * rescind a link to the given field in this DBObject type when the
+   * user only has editing access for the source InvidDBField and not
+   * the target.
+   *
+   */
+
+  public boolean anonymousUnlinkOK(short fieldID)
+  {
+    // we want anyone to be able to unlink from the auto.home.default
+    // map.
+
+    if (!getLabel().equals("auto.home.default"))
+      {
+	return false;
+      }
+
+    if (fieldID == mapSchema.ENTRIES)
       {
 	return true;
       }
