@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -59,6 +59,13 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     menuItems = new Hashtable(),
     Windows = new Hashtable(),
     windowList = new Hashtable();
+  
+  // This is used as the wait image in other classes.  Currently, it
+  // returns the men at work animated gif.  Keep it here so each
+  // subsequent pane doesn't have to load it.
+
+  Image
+    waitImage = null;
 
   JMenu
     windowMenu;
@@ -118,6 +125,23 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   {
     return gc;
   }
+
+  /**
+   * Returns an image used as a generic "wait" image.
+   *
+   * Currently returns the men-at-work image.
+   */
+
+  public Image getWaitImage()
+  {
+    if (waitImage == null)
+      {
+	waitImage = PackageResources.getImageResource(this, "atwork01.gif", getClass());
+      }
+    
+    return waitImage;
+  }
+
 
   /**
    *
@@ -196,18 +220,30 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	  {
 	    title = objectType + " - " + object.getLabel();
 	  }
-	if (title == null)
-	  {
-	    title = new String("Null string");
-	  }
 
-	if (editable)
+	// If we can't get a label, assume this is a newly created
+	// object.  Is that a safe assumption?
+	if ((title == null) || (title.equals("null")) || (title.equals("")))
 	  {
-	    title = "Edit: " + title;
+	    if (objectType == null)
+	      {
+		title = "Create: New Object";
+	      }
+	    else
+	      {
+		title = "Create: " + objectType + " - " + "New Object";
+	      }
 	  }
 	else
 	  {
-	    title = "View: " + title;
+	    if (editable)
+	      {
+		title = "Edit: " + title;
+	      }
+	    else
+	      {
+		title = "View: " + title;
+	      }
 	  }
 
 	if (debug)
@@ -405,13 +441,10 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     iconifyMI.addActionListener(this);
 
     JMenuItem closeMI = null;
-    if (!editable)
-      {
-	closeMI = new JMenuItem("Close");
-	menuItems.put(closeMI , object);
-	Windows.put(closeMI, w);
-	closeMI.addActionListener(this);
-      }
+    closeMI = new JMenuItem("Close");
+    menuItems.put(closeMI , object);
+    Windows.put(closeMI, w);
+    closeMI.addActionListener(this);
 
     JMenu deleteM = new JMenu("Delete");
     JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
@@ -425,6 +458,11 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     Windows.put(inactivateMI, w);
     menuItems.put(inactivateMI, object);
     inactivateMI.addActionListener(this);
+
+    JMenuItem refreshMI = new JMenuItem("Refresh");
+    Windows.put(refreshMI, w);
+    menuItems.put(refreshMI, object);
+    refreshMI.addActionListener(this);
 
     JMenuItem setExpirationMI = null;
     JMenuItem setRemovalMI = null;
@@ -450,17 +488,16 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     fileM.add(iconifyMI);
     fileM.add(deleteM);
     fileM.add(printMI);
+    fileM.add(refreshMI);
     if (editable)
       {
 	fileM.addSeparator();
 	fileM.add(setExpirationMI);
 	fileM.add(setRemovalMI);
       }
-    else
-      {
-	fileM.addSeparator();
-	fileM.add(closeMI);
-      }
+
+    fileM.addSeparator();
+    fileM.add(closeMI);
 
     JMenuItem queryMI = new JMenuItem("Query");
     Windows.put(queryMI, w);
@@ -858,6 +895,18 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	else if (e.getActionCommand().equals("Print"))
 	  {
 	    ((framePanel)Windows.get(MI)).printObject();
+	  }
+	else if (e.getActionCommand().equals("Refresh"))
+	  {
+	    framePanel fp = (framePanel)Windows.get(MI);
+	    if (fp != null)
+	      {
+		fp.refresh();
+	      }
+	    else
+	      {
+		System.out.println("-!- Could not find the window for this menuitem.");
+	      }
 	  }
       	else if (e.getActionCommand().equals("Inactivate"))
 	  {

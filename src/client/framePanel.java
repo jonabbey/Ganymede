@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,7 +22,6 @@ import com.sun.java.swing.border.*;
 import com.sun.java.swing.event.*;
 
 import jdj.PackageResources;
-//import tablelayout.*;
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
@@ -35,12 +34,14 @@ import arlut.csd.JDataComponent.*;
 
 public class framePanel extends JInternalFrame implements ChangeListener, Runnable {
   
-  boolean debug = true;
+  // This will be loaded from gclient anyway.
+  private boolean debug = true;
 
-  // Indexes for the tabs in the JTabbedPane
-  // These numbers have to correspond to the order they are added as tabs,
-  // so they are set to current++ when one is added.  -1 means not added yet.(to the pane)
-  // An index of > -1 does NOT mean the pane has been created.
+  // Indexes for the tabs in the JTabbedPane These numbers have to
+  // correspond to the order they are added as tabs, so they are set
+  // to current++ when one is added.  -1 means not added yet.(to the
+  // pane) An index of > -1 does NOT mean the pane has been created.
+
   public int 
     current = 0,
     general_index = -1,
@@ -53,6 +54,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     objects_owned_index = -1,
     personae_index = -1;
 
+  // We'll show a progressBar while the general panel is loading.  The
+  // progressBar is contained in the progressPanel, which will be
+  // removed when the general panel is finished loading.
+  
   JProgressBar
     progressBar;
 
@@ -62,13 +67,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   JTabbedPane 
     pane;
 
-  Color
-    vectorBG = Color.lightGray;
+  // Each of these panes is one of the tabs in the tabbedPane.  Some
+  // objects don't use every scrollpane.
 
-  boolean
-    darkNow = true;
-
-  // Each of these panes is one of the tabs in the tabbedPane
   JScrollPane 
     general,     // Holds a containerPanel in the ViewportView
     expiration_date,       // Holds a datePanel
@@ -79,15 +80,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     admin_history, // holds an adminHistoryPanel (only for adminPersonae)
     objects_owned;  // Holds an ownershipPanel
 
-  Image
-    waitImage = null;
-
   JPanel
     personae;
 
   Vector
-    containerPanels = new Vector(), // contains all of the containerPanels
-    createdList = new Vector(); // contains the Integers that have been created
+    // contains all of the containerPanels.  This is used to tell the
+    // containerPanels to stop loading.
+    containerPanels = new Vector(), 
+
+    // contains the Integers that have been created.  These Integers
+    // are the index number of the panes.
+    createdList = new Vector(); 
 
   date_field
     exp_field,
@@ -103,41 +106,29 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   invid_field 
     objects_owned_field;
 
-  Container
-    contentPane;
-
-  db_field[]
-    fields;
-
-  int
-    row = 0;
-
   boolean 
     editable;
 
+  //There can be only one.
   db_object
     object;
 
   windowPanel
     wp;
 
-  String 
-    title,
-    last_modified_by;
-
-  Date
-    last_modification_date;
-
   notesPanel
     my_notesPanel = null;
 
-  Invid
-    invid;
+  // Invid of the object edited.  DO NOT access invid directly; use
+  // getObjectInvid().  invid will be null until the first time
+  // getObjectInvid() is called.
+
+  private Invid
+    invid = null;
 
   public framePanel(db_object object, boolean editable, windowPanel winP, String title)
     {
       this.wp = winP;
-      this.title = title;
       this.object = object;
       this.editable = editable;
 
@@ -150,6 +141,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       setResizable(true);
       setClosable(true);
       setIconifiable(true);
+      setTitle(title);
 
       //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
 
@@ -158,23 +150,30 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       progressPanel.add(new JLabel("Loading..."));
       progressPanel.add(progressBar);
 
-      //getContentPane().add("Center", progressPanel);
       setContentPane(progressPanel);
 
-      try
-	{
-	  invid = object.getInvid();
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get object's invid");
-	}
-      
       Thread thread = new Thread(this);
       thread.start();
 
     }
 
+  /**
+   * Always called in the constructor, as a separate thread
+   *
+   * It is important to note that adding a panel is not the same as
+   * creating the panel.  Adding a panel simply means adding the tab
+   * to the tab pane, and is accomplished through addXXXTab().  Those
+   * methods are all called here, in the run method, with the
+   * exception of the expiration date and removal date tabs, which can
+   * be added later if one of those dates is set.
+   *
+   * The createTab(int) method actually fills out the tab.  This
+   * method is called when a tab is clicked on for the first time, to
+   * avoid creating unessesary panels. 
+   *
+   * The only panel created in run() is the general panel.
+   *
+   */
   public void run()
     {
       if (debug)
@@ -183,17 +182,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
 
 
-      //contentPane = new JPanel();
-
       // windowPanel wants to know if framePanel is changed
-
+      // Maybe this should be replaced with InternalFrameListener?
       addPropertyChangeListener(getWindowPanel());
       
-      setBackground(ClientColor.WindowBG);
+      // This probably isn't a good idea, so I am commenting it out.
+      //setBackground(ClientColor.WindowBG);
       
-      setTitle(title);
-      
-
       JMenuBar mb = wp.createMenuBar(editable, object, this);
       setMenuBar(mb);
 
@@ -287,14 +282,22 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       createPanel(general_index);
       showTab(general_index);
-      //contentPane.remove(progressPanel);
-      //contentPane.add("Center", pane);
-
       setContentPane(pane);
-      //contentPane.invalidate();
+
       pane.invalidate();
       validate();
     }
+
+  /**
+   * Stop loading all the container panels in this framePanel.
+   *
+   * This will not make the window go away, it simply tells all the
+   * containerPanels inside to stop loading.
+   *
+   * windowPanel(the porpertyChangeListener/InternalFrameListener)
+   * calls this when a frame is closed.
+   * 
+   */
 
   public void stopLoading()
   {
@@ -318,10 +321,27 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   /**
    * Return the invid of the object contained in this frame panel.
+   *
+   * If the invid has not been loaded, this method will load it first.
+   *
+   * @return The invid of the object in this frame panel.  
    */
 
   public Invid getObjectInvid()
   {
+    if (invid == null)
+      {
+	try
+	  {
+	    invid = object.getInvid();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get object's invid");
+	  }
+      }
+      
+
     return invid;
   }
 
@@ -336,21 +356,37 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       return my_notesPanel;
     }
 
-  /*
-  public void invalidate()
+  /**
+   * Refresh the tab that is showing.
+   *
+   * Currently, this only refreshes the general panel.  Other panels
+   * will generate a nice dialog.
+   */
+  public void refresh()
   {
-    System.out.println("--Invalidate framePanel");
-    super.invalidate();
+    Component c = pane.getSelectedComponent();
+    
+    if (c instanceof JScrollPane)
+      {
+	Component comp = ((JScrollPane)c).getViewport().getView();
+	if (comp instanceof containerPanel)
+	  {
+	    ((containerPanel)comp).updateAll();
+	  }
+	else
+	  {
+	    getgclient().showErrorMessage("Not implemented yet", "Sorry, you can only refresh the panel containing the general panel at this time.");
+	  }
+      }
+    
   }
-
-  public void validate()
-  {
-    System.out.println("--validate framePanel");
-    super.validate();
-  }
-  */
     
 
+  /**
+   * Print a nasty-looking image of the frame.
+   *
+   * This hardly works.
+   */
   public void printObject()
   {
     PrintJob j = Toolkit.getDefaultToolkit().getPrintJob(getgclient(), "Print window", new Properties());
@@ -381,14 +417,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public Image getWaitImage()
   {
-    if (waitImage == null)
-      {
-	waitImage = PackageResources.getImageResource(this, "atwork01.gif", getClass());
-      }
-    
-    return waitImage;
-
+    return wp.getWaitImage();
   }
+
   //This need to be changed to show the progress bar
   void create_general_panel()
     {
@@ -402,6 +433,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       cp.load();
       cp.setBorder(wp.emptyBorder10);
 
+      general.getVerticalScrollBar().setUnitIncrement(15);
       general.setViewportView(cp);
       //general.setViewportView(progressBar);
       createdList.addElement(new Integer(general_index));
@@ -428,6 +460,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    }
 	}
 
+      expiration_date.getVerticalScrollBar().setUnitIncrement(15);
       expiration_date.setViewportView(new datePanel(exp_field, "Expiration date", editable, this));
 	  
       createdList.addElement(new Integer(expiration_date_index));
@@ -455,6 +488,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    }
 	}
 
+      removal_date.getVerticalScrollBar().setUnitIncrement(15);
       removal_date.setViewportView(new datePanel(rem_field, "Removal Date", editable, this));
 	  
       createdList.addElement(new Integer(removal_date_index));
@@ -475,6 +509,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       try
 	{
+	  owner.getVerticalScrollBar().setUnitIncrement(15);
 	  owner.setViewportView(new ownerPanel((invid_field)object.getField(SchemaConstants.OwnerListField), editable, this));
 	}
       catch (RemoteException rx)
@@ -493,7 +528,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   void create_history_panel()
     {
       setStatus("Creating history panel");
-      history.setViewportView(new historyPanel(invid, getgclient()));
+      history.getVerticalScrollBar().setUnitIncrement(15);
+      history.setViewportView(new historyPanel(getObjectInvid(), getgclient()));
 	
       createdList.addElement(new Integer(history_index));
       
@@ -507,7 +543,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   void create_admin_history_panel()
     {
       setStatus("Creating admin history panel");
-      admin_history.setViewportView(new adminHistoryPanel(invid, getgclient()));
+      admin_history.getVerticalScrollBar().setUnitIncrement(15);
+      admin_history.setViewportView(new adminHistoryPanel(getObjectInvid(), getgclient()));
 	
       createdList.addElement(new Integer(admin_history_index));
       
@@ -540,6 +577,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 				     modifier_field,
 				     modification_date_field, editable, this);
 
+      notes.getVerticalScrollBar().setUnitIncrement(15);
       notes.setViewportView(my_notesPanel);
 
       createdList.addElement(new Integer(notes_index));
@@ -570,10 +608,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  JPanel null_oo = new JPanel();
 	  null_oo.add(new JLabel("There are no objects owned here."));
+	  objects_owned.getVerticalScrollBar().setUnitIncrement(15);
 	  objects_owned.setViewportView(null_oo);
 	}
       else
 	{
+	  objects_owned.getVerticalScrollBar().setUnitIncrement(15);
 	  objects_owned.setViewportView(new ownershipPanel(oo, editable, this));
 	  createdList.addElement(new Integer(objects_owned_index));
 	}
