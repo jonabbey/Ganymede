@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 2004/01/29 03:03:13 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 2004/01/31 05:47:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -284,6 +284,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	Ganymede.debug("Need to build netgroup map");
 
 	if (writeNetgroupFile())
+	  {
+	    success = true;
+	  }
+
+	if (writeUserNetgroupFile())
 	  {
 	    success = true;
 	  }
@@ -1112,6 +1117,109 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     writer.println(buffer.toString());
+  }
+
+  /**
+   *
+   * This method generates a simplified user netgroup file, which maps
+   * user netgroups to user names without including any system
+   * netgroups or sub-groups.  effectively, this maps netgroup names
+   * to the transitive closure of members.
+   *
+   */
+
+  private boolean writeUserNetgroupFile()
+  {
+    PrintWriter writer = null;
+    DBObject netgroup;
+    Enumeration netgroups;
+
+    String name;
+
+    Hashtable members = new Hashtable();
+    Enumeration users;
+
+    /* -- */
+
+    try
+      {
+	writer = openOutFile(path + "netgroup.users", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeUserNetgroup(): couldn't open netgroup file: " + ex);
+      }
+
+    try
+      {
+	// first the user netgroups
+
+	netgroups = enumerateObjects((short) 270);
+
+	while (netgroups.hasMoreElements())
+	  {
+	    netgroup = (DBObject) netgroups.nextElement();
+
+	    name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+
+	    members.clear();
+	    unionizeMembers(netgroup, members);
+	    users = members.elements();
+
+	    writer.print(name);
+
+	    while (users.hasMoreElements())
+	      {
+		name = (String) users.nextElement();
+
+		writer.print(" ");
+		writer.print(name);
+	      }
+
+	    writer.println();
+	  }
+      }
+    finally
+      {
+	writer.close();
+      }
+
+    return true;
+  }
+
+  /**
+   *
+   * Recursive helper method for writeUserNetgroupFile().. takes
+   * a netgroup object and a hashtable, inserts all user members
+   * in the netgroup object into the hash, then calls itself
+   * on all member groups in the netgroup.
+   *
+   */
+
+  private void unionizeMembers(DBObject netgroup, Hashtable hash)
+  {
+    Vector users;
+    Vector memberNetgroups;
+
+    String member;
+    DBObject subNetgroup;
+
+    /* -- */
+
+    users = netgroup.getFieldValuesLocal(userNetgroupSchema.USERS);
+    memberNetgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+
+    for (int i = 0; i < users.size(); i++)
+      {
+	member = (String) users.elementAt(i);
+	hash.put(member, member);
+      }
+
+    for (int i = 0; i < memberNetgroups.size(); i++)
+      {
+	subNetgroup = getObject((Invid)memberNetgroups.elementAt(i));
+	unionizeMembers(subNetgroup, hash);
+      }
   }
 
   /**
