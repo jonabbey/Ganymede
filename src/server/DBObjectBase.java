@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,10 +21,14 @@ import java.util.*;
                                                                            class
                                                                     DBObjectBase
 
-This class is the data dictionary and object store for a particular kind of
-object in the DBObjectStore.
-
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This class is the data dictionary and object store for a particular kind of
+ * object in the DBObjectStore.
+ *
+ */
 
 public class DBObjectBase {
 
@@ -134,22 +138,27 @@ public class DBObjectBase {
       }
   }
 
-  // allocate a new object id 
+  /**
+   *
+   * allocate a new object id 
+   *
+   */
 
   synchronized int getNextId()
   {
     return maxid++;
   }
 
-
-  // release an id if an object initially
-  // created by createDBObject is rejected
-  // due to its transaction being aborted
-
-  // note that we aren't being real fancy
-  // here.. if this doesn't work, it doesn't
-  // work.. we have 2 billion slots in this
-  // object base after all..
+  /** release an id if an object initially
+   * created by createDBObject is rejected
+   * due to its transaction being aborted
+   *
+   * note that we aren't being real fancy
+   * here.. if this doesn't work, it doesn't
+   * work.. we have 2 billion slots in this
+   * object base after all..
+   *
+   */
 
   synchronized void releaseId(int id)
   {
@@ -159,9 +168,11 @@ public class DBObjectBase {
       }
   }
 
-  // return an enumeration of the current objects
-  // in this DBObjectBase.. we need to make this
-  // dependent on a DBReadLock in some fashion.
+  /**
+   * return an enumeration of the current objects
+   * in this DBObjectBase.. we need to make this
+   * dependent on a DBReadLock in some fashion.
+   */
 
   public DBEnum elements()
   {
