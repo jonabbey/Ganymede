@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -136,12 +136,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   private Invid
     invid = null;
 
-  public framePanel(db_object object, boolean editable, windowPanel winP, String title)
+  boolean isCreating;
+
+  public framePanel(db_object object, boolean editable, windowPanel winP, String title, boolean isCreating)
     {
       this.wp = winP;
       this.object = object;
       this.editable = editable;
       this.gc = winP.gc;
+      this.isCreating = isCreating;
 
       debug = wp.gc.debug;
 
@@ -160,6 +163,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       progressBar = new JProgressBar();
       progressPanel.add(new JLabel("Loading..."));
       progressPanel.add(progressBar);
+      progressPanel.setForeground(Color.black);
+      progressPanel.setForeground(Color.gray);
 
       setContentPane(progressPanel);
 
@@ -290,6 +295,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       createPanel(general_index);
       showTab(general_index);
+      pane.setForeground(Color.black);
+      pane.setForeground(Color.white);
       setContentPane(pane);
 
 
@@ -775,7 +782,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  println("Creating general panel");
 	}
       
-      containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar, false);
+      containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar, false, isCreating);
       containerPanels.addElement(cp);
       cp.load();
       cp.setBorder(wp.emptyBorder10);
