@@ -9,8 +9,8 @@
 # more quickly than if the server had to filter out all the
 # irrelevant history details itself with the current server code.
 #
-# $Revision: 1.1 $
-# $Date: 2000/07/13 20:17:58 $
+# $Revision: 1.2 $
+# $Date: 2000/07/13 21:08:53 $
 # $Name:  $
 #
 # Robbie Sternenberg
@@ -21,7 +21,7 @@
 #
 ############################################################
 
-$file = "/var/ganymede/db/log";
+$file = "<<LOGFILE>>";		# this will be replaced on install
 
 if (@ARGV == 0) {
   die "Usage: logscan.pl (invid number) (-a for admin invid search)\n";
@@ -97,3 +97,5 @@ while (<FILE>) {
   }
 }
 
+close FILE;
+exit 0;

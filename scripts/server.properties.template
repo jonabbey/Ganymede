@@ -228,6 +228,21 @@ ganymede.timeoutIdleWithObjs=20
 ganymede.helpbase=http://www.arlut.utexas.edu/~mulvaney/ganymede/
 
 
+# ganymede.loghelper
+#
+# The location for an executable script or program that
+# will search through the Ganymede log file for a specified
+# invid.
+#
+# This is an optional item.  If it is specified, the server
+# will attempt to use this external helper program to
+# accelerate the process of searching through the log file.
+#
+# Used by server
+
+ganymede.loghelper=/var/ganymede/bin/logscan.pl
+
+
 # ganymede.schemaDirectory
 #
 # The directory where the schema's schema.properties and

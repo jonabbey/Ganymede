@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.14 $
-# $Date: 1999/11/23 04:03:55 $
+# $Revision: 1.15 $
+# $Date: 2000/07/13 21:08:52 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -338,6 +338,7 @@ if ($schemainstalled) {
 
 %propconvert = ("ganymede.database" => "$installdir/db/ganymede.db",
 		"ganymede.log" => "$installdir/db/log",
+		"ganymede.loghelper" => "$installdir/bin/logscan.pl",
 		"ganymede.journal" => "$installdir/db/journal",
 		"ganymede.schemadump" => "$installdir/db/ganymede.schema",
 		"ganymede.htmldump" => "$installdir/html/schemadump.html",
@@ -474,6 +475,25 @@ close INPUT;
 close OUTPUT;
 
 chmod 0750, "$installdir/bin/stopServer";
+
+# Copy and process the logscan.pl script into place
+
+open INPUT, "scripts/logscan.pl.template" or die "Couldn't open logscan template!";
+open OUTPUT, ">$installdir/bin/logscan.pl" or die "Couldn't write logscan";
+
+# logscan.pl is a perl script.. write out the name of our interpreter
+
+while (<INPUT>) {
+  s/\/opt\/bin\/perl5/$EXECUTABLE_NAME/g;
+  s/<<LOGFILE>>/$installdir\/db\/log/g;
+
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/logscan.pl";
 
 # Configure the schema build scripts
 
