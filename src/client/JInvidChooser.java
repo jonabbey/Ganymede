@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: ?
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -130,6 +130,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	      {
 		getCombo().removeItem(noneHandle);
 		removedNone = true;
+
 		if (debug)
 		  {
 		    System.out.println("+setting removedNone to true");
