@@ -9,8 +9,8 @@
 
    Created: 28 Feb 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/03/22 22:37:52 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/03/23 06:19:43 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -70,7 +70,7 @@ import java.awt.*;
  * <p>Note that we came up with this message type before Sun introduced
  * the 1.1 AWT event model.  Great minds... ;-)</p>
  *   
- * @version $Revision: 1.10 $ $Date: 1999/03/22 22:37:52 $ $Name:  $
+ * @version $Revision: 1.11 $ $Date: 1999/03/23 06:19:43 $ $Name:  $
  * @author Navin Manohar 
  */
 
@@ -257,7 +257,7 @@ public class JValueObject {
    * @param value Value being set by the originating GUI component
    * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
    * ERROR, SPECIAL, PARAMETER.
-   * @param parameter Auxilary object value, used when passing pop-up menu information.
+   * @param parameter Auxiliary object value, used when passing pop-up menu information.
    *
    */
 
@@ -287,7 +287,7 @@ public class JValueObject {
   }
 
   /**
-   * Returns an auxilary value.  Used for passing information about pop-up menu items, but may
+   * Returns an auxiliary value.  Used for passing information about pop-up menu items, but may
    * be used for different purposes if needed.
    */
 

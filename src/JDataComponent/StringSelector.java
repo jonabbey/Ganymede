@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/03/22 22:37:55 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/03/23 06:19:43 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -92,7 +92,7 @@ import arlut.csd.Util.PackageResources;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.17 $ $Date: 1999/03/22 22:37:55 $ $Name:  $
+ * @version $Revision: 1.18 $ $Date: 1999/03/23 06:19:43 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -658,12 +658,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * the callback.
    *
    * <ul>
-   * <li><b>PARAMETER</B>Action from a PopupMenu.  The Parameter is the ActionCommand
+   * <li><b>PARAMETER</B> Action from a PopupMenu.  The Parameter is the ActionCommand
    * string for the pop-up menu item selected, and the value is the object
    * (or string if no object defined) associated with the item selected when the pop-up menu was fired.</li>
-   * <li><b>ADD</b>Object has been added to the selected list.  Value is the object (or string) added.</li>
-   * <li><b>DELETE</b>Object has been removed from chosen list.  Value is the object (or string) removed.</li>
-   * <li><b>ERROR</b>Something went wrong.  Value is the error message to be displayed to the user in whatever
+   * <li><b>ADD</b> Object has been added to the selected list.  Value is the object (or string) added.</li>
+   * <li><b>DELETE</b> Object has been removed from chosen list.  Value is the object (or string) removed.</li>
+   * <li><b>ERROR</b> Something went wrong.  Value is the error message to be displayed to the user in whatever
    * fashion is appropriate.</li>
    * </ul>
    * </p>
