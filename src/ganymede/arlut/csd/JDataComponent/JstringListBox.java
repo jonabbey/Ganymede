@@ -490,7 +490,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (o instanceof listHandle)
       {
-	model.removeElement((listHandle)o);
+	boolean result = model.removeElement((listHandle)o);
+
+	if (debug)
+	  {
+	    System.out.println("Removing listHandle " + String.valueOf(o) + ", returned " + String.valueOf(result));
+	  }
       }
     else if (o instanceof String)
       {
@@ -505,7 +510,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
 	if (debug)
 	  {
-	    System.out.println("Ok, i will look for this object in the listHnaldes.");
+	    System.out.println("Ok, i will look for this object in the listHandles.");
 	  }
 
 	for (int i = 0; i < model.getSize(); i++)
