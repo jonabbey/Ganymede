@@ -5,7 +5,7 @@
    An interface defining constants to be used by the user code.
    
    Created: 12 March 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,15 +33,17 @@ public interface userSchema {
   // this file to match.
 
   final static short USERNAME=100;
-  final static short PASSWORD=101;
   final static short UID=256;
-  final static short HOMEGROUP=265;
-  final static short GROUPLIST=264;
-  final static short DIVISION=258;
-  final static short OFFICEPHONE=260;
+  final static short PASSWORD=101;
+  final static short CATEGORY=273;
   final static short FULLNAME=257;
+  final static short SOCIALSECURITY=274;
+  final static short DIVISION=258;
   final static short ROOM=259;
+  final static short OFFICEPHONE=260;
   final static short HOMEPHONE=261;
+  final static short GROUPLIST=264;
+  final static short HOMEGROUP=265;
   final static short LOGINSHELL=263;
   final static short HOMEDIR=262;
   final static short PERSONAE=102;
