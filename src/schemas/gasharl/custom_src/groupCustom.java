@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,17 +28,7 @@ import java.rmi.*;
 
 public class groupCustom extends DBEditObject implements SchemaConstants, groupSchema {
   
-  static final boolean debug = false;
-
-  /**
-   *
-   * This method provides a hook that can be used to indicate that a
-   * particular field's value should be filtered by a particular
-   * subclass of DBEditObject.  This is intended to allow, for instance,
-   * that the Admin object's name field, if null, can have the owning
-   * group's name interposed.
-   *
-   */
+  static final boolean debug = true;
 
   /**
    *
@@ -210,6 +200,11 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
       {
 	if (suceeded)
 	  {
+	    if (debug)
+	      {
+		System.err.println("groupCustom.inactivate: setting removal date.");
+	      }
+
 	    DateDBField date;
 	    Calendar cal = Calendar.getInstance();
 	    Date time;
@@ -233,12 +228,25 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	    cal.add(Calendar.MONTH, 3);
 	    
 	    // and set the removal date
-	    
+	    if (debug)
+	      {
+		System.err.println("groupCustom.inactivate: setting removal date to: " + cal.getTime());
+	      }
+
 	    date = (DateDBField) getField(SchemaConstants.RemovalField);
 	    retVal = date.setValueLocal(cal.getTime());
-	    
-	    finalizeInactivate(true);
-	    return retVal;
+
+	    if ((retVal == null) || (retVal.didSucceed()))
+	      {
+		if (debug)
+		  {
+		    System.err.println("groupCustom.inactivate: retVal returns true, I am finalizing.");
+		  }
+
+		finalizeInactivate(true);
+	      }
+
+		return retVal;
 	  }
 	else
 	  {
@@ -250,6 +258,11 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
       {
 	try
 	  {
+	    if (debug)
+	      {
+		System.err.println("groupCustom.inactivate: Starting new groupInactivateWizard");
+	      }
+
 	    wiz = new groupInactivateWizard(this.gSession, this);
 	    
 	    return wiz.getStartDialog();
@@ -289,6 +302,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
     groupHomeGroupWizard homeWizard;
+    ReturnVal retVal = null;
 
     /* -- */
 
@@ -372,7 +386,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 				  }
 			      
 				db_field homeGroup = user.getField(userSchema.HOMEGROUP);
-				homeGroup.setValue(groupList.elementAt(i));
+				retVal = homeGroup.setValue(groupList.elementAt(i));
 				
 				break;
 			      }
@@ -415,6 +429,13 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		  {
 		    // Ok, the home wizard has done its deed, so get rid of it
 		    homeWizard.unregister();
+
+		    // I don't think it is a good idea to return null here.
+		    if (debug)
+		      {
+			print("Returning null, because I am in groupCustom.wizardHook with an active wizard that is done.");
+		      }
+
 		    return null;
 		  }
 		else
@@ -473,7 +494,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     // otherwise, we don't care, at least not yet
 
-    return null;
+    return retVal;
   }
 
   private void print(String s)

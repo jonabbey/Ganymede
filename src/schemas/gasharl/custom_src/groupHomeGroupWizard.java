@@ -5,7 +5,7 @@
   A wizard to allow deletion of a user's home group from the group edit window.
 
   Created: 8 April 1998
-  Version: $Revision: 1.3 $ %D%
+  Version: $Revision: 1.4 $ %D%
   Module by: Mike Mulvaney
   Applied Research Laboratories, The University of Texas at Austin
   
@@ -176,6 +176,11 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 
 	try
 	  {
+	    if (debug)
+	      {
+		print("Setting user home group field to " + newGroup);
+	      }
+
 	    retVal = userHomeGroupField.setValue(newGroup);
 	  }
 	catch (RemoteException rx)
@@ -185,9 +190,27 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 	    
 	if ((retVal == null) || (retVal.didSucceed()))
 	  {
-	    return success("Home group changed",
-			   "User's home group successfully changed.",
-			   "OK", null, "ok.gif");
+	    ReturnVal ret = success("Home group changed",
+				    "User's home group successfully changed.",
+				    "OK", null, "ok.gif");
+
+	    if (debug)
+	      {
+		print("Before union: setValue return: " + retVal.dumpRescanInfo());
+		print("Before union: success: " + ret.dumpRescanInfo());
+	      }
+
+
+	    ReturnVal rv = ret.unionRescan(retVal);
+
+
+
+	    if (debug)
+	      {
+		print(rv.dumpRescanInfo());
+	      }
+
+	    return(rv);
 	  }
 	else if (retVal.getDialog() == null)
 	  {
@@ -210,6 +233,8 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
   {
     JDialogBuff dialog;
     ReturnVal retVal = null;
+
+    print("Starting new dialog");
     
     user = (userCustom) (session.edit_db_object(userInvid).getObject());
 

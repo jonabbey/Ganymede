@@ -4,7 +4,7 @@
    A wizard to facilitate the inactivation of a group.
 
    Created: 23 June 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,6 +24,25 @@ import arlut.csd.JDialog.JDialogBuff;
                                                            groupInactivateWizard
 
 ------------------------------------------------------------------------------*/
+/**
+ * <p>This class handles the inactivation of a group.  If any users have
+ * this group as the home group, then those users will need a new
+ * group designated as the home group.  The dialog will prompt with a
+ * choice list containing the groups that the user is a member of.  If
+ * the user doesn't have any other groups, the wizard will cancel the
+ * inactivation and provide a list of the users who need new groups.</p>
+ *
+ * <p>If the group doesn't have any home users, then a simple
+ * confirmation dialog will be presented.</p>
+ *
+ * States:
+ * <table>
+ * <tr><td>Start</td><td>Explanation.  If group has no home users, then the dialog is just a confirmation, and next state is 50.</td></tr>
+ * <tr><td>1</td><td>List of home users, along with choice of new group.  If a user has no other groups, this will instead be a list of those users and a cancel message.</td></tr>
+ * <tr><td>2</td><td>Confirmation of inactivation..</td></tr>
+ * <tr><td>50</td><td>Confirmaion of inactivation.</td></tr>
+ * </table>
+ */
 
 public class groupInactivateWizard extends GanymediatorWizard {
 
@@ -62,6 +81,13 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
   Hashtable
     groupNameHash = new Hashtable();
+
+  /**
+   * Vector field of all the home users for this group.  If there are no
+   * home users, getStartDialog chooses a different path for the dialog.
+   */
+  InvidDBField 
+    homeField;
 
   // From superclass.
   // int state;
@@ -125,7 +151,6 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
     // First get a list of the home users
 
-    InvidDBField homeField = (InvidDBField) groupObject.getField(groupSchema.HOMEUSERS);
     QueryResult qr = homeField.encodedValues();
 
     Vector homeUsers = qr.getHandles();
@@ -254,6 +279,8 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
   public ReturnVal processDialog2()
   {
+    ReturnVal finalReturnVal = new ReturnVal(true);
+
     if (debug)
       {
 	System.err.println("groupInactivateWizard: state = 2");
@@ -279,7 +306,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 	    System.err.println("Setting home group for " + userName + " to " + newHomeGroup);
 	  }
 
-	InvidDBField ugField = (InvidDBField) usr.getField(userSchema.GROUPLIST);
+	InvidDBField ugField = (InvidDBField) usr.getField(userSchema.HOMEGROUP);
 	ReturnVal retv = ugField.setValue(newHomeGroup);
 
 	if ((retv != null) && (! retv.didSucceed()))
@@ -287,6 +314,11 @@ public class groupInactivateWizard extends GanymediatorWizard {
 	    groupObject.inactivate(false, true);
 	    return retv;
 	  }
+	else
+	  {
+	    finalReturnVal.unionRescan(retv);
+	  }
+	
       }
 
     groupObject.inactivate(true, true);
@@ -296,39 +328,91 @@ public class groupInactivateWizard extends GanymediatorWizard {
 	System.err.println("groupInactivateWizard: all done.");
       }
     
+    ReturnVal result = success("Group Inactivation performed",
+			       "The Group has been inactivated, and all " +
+			       "the users have new home groups.",
+			       "OK", null, "ok.gif").unionRescan(finalReturnVal);
+
+    System.err.println(result.dumpRescanInfo());
+
+    return result;
+  }
+
+  /**
+   * This is the state where there are no home users, and the first
+   * "are you sure?" dialog has been shown.  From here, we just inactivate
+   * the group and go about our merry ways.
+   */
+  public ReturnVal processDialog50()
+  {
+    groupObject.inactivate(true, true);
+    if (debug)
+      {
+	System.err.println("groupInactivateWizard: all done, no home groups.");
+      }
+
     return success("Group Inactivation performed",
-		   "The Group has been inactivated, and all " +
-		   "the users have new home groups.",
-		   "OK", null, "ok.gif");
+		   "The group has been inactivated.", "OK", null, "ok.gif");
   }
 
   /**
    *
    * This method starts off the wizard process
    *
+   * If the home users field is empty, then we don't have to worry
+   * about cleaning up any of the users.  So we just ask the user if
+   * they really want to inactivate, and set the state to 50 so the
+   * next dialog will just be a confirmation if everything worked.
+   *
+   * Otherwise, follow the normal 1,2 state procession.
    */
 
   public ReturnVal getStartDialog()
   {
+    homeField = (InvidDBField) groupObject.getField(groupSchema.HOMEUSERS);
+
     StringBuffer buffer = new StringBuffer();
 
-    if (debug)
+    if (homeField.size() == 0)
       {
-	System.err.println("groupInactivateWizard: creating inactivation wizard");
+	if (debug)
+	  {
+	    System.err.println("groupInactivateWizard: there are no home users.");
+	  }
+	buffer.append("Inactivating " + groupObject.getLabel());
+	buffer.append("\n\nAre you sure you want to inactivate " + groupObject.getLabel() + "?");
+
+	setNextState(50);
+
+	return continueOn("Group Inactivate Dialog", 
+			  buffer.toString(),
+			  "Inactivate",
+			  "Cancel",
+			  "question.gif");
+	
+
       }
+    else
+      {
 
-    buffer.append("Inactivating ");
-    buffer.append(groupObject.getLabel());
-
-    buffer.append("\n\nThis group will be rendered unusable, but will be kept ");
-    buffer.append("in the database for 3 months to preserve accounting information.\n\n");
-    buffer.append("If any users have this group as their home group, you will ");
-    buffer.append("have to provide a new home group for them.");
-
-    return continueOn("Group Inactivate Dialog",
-		      buffer.toString(),
-		      "Ok",
-		      "Cancel",
-		      "question.gif");
+	if (debug)
+	  {
+	    System.err.println("groupInactivateWizard: creating inactivation wizard, there are " + homeField.size() + " home users.");
+	  }
+	
+	buffer.append("Inactivating ");
+	buffer.append(groupObject.getLabel());
+	
+	buffer.append("\n\nThis group will be rendered unusable, but will be kept ");
+	buffer.append("in the database for 3 months to preserve accounting information.\n\n");
+	buffer.append("If any users have this group as their home group, you will ");
+	buffer.append("have to provide a new home group for them.");
+	
+	return continueOn("Group Inactivate Dialog",
+			  buffer.toString(),
+			  "Ok",
+			  "Cancel",
+			  "question.gif");
+      }
   }
 }
