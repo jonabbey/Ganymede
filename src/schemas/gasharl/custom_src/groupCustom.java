@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/03/10 21:47:20 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/03/16 22:13:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,10 +66,6 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
   
   static final boolean debug = true;
   static final boolean debug2 = false;
-
-  static QueryResult contractChoices = new QueryResult();
-  static Date contractChoiceStamp = null;
-
 
   /**
    *
@@ -558,106 +554,6 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
     // otherwise, we don't care, at least not yet
 
     return retVal;
-  }
-
-  /**
-   *
-   * This method provides a hook that can be used to generate
-   * choice lists for invid and string fields that provide
-   * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
-   *
-   * Notice that fields 263 (login shell) and 268 (signature alias)
-   * do not have their choice lists cached on the client, because
-   * they are custom generated without any kind of accompanying
-   * cache key.
-   * 
-   */
-
-  public QueryResult obtainChoiceList(DBField field)
-  {
-    switch (field.getID())
-      {
-      case CONTRACT:			// login shell
-
-	updateContractChoices();
-
-	if (debug2)
-	  {
-	    System.err.println("groupCustom: obtainChoice returning " + contractChoices + " for contract field.");
-
-	    System.err.println(contractChoices.getBuffer());
-	  }
-
-	return contractChoices;
-      }
-
-    return super.obtainChoiceList(field);
-  }
-
-  void updateContractChoices()
-  {
-    synchronized (contractChoices)
-      {
-	DBObjectBase base = Ganymede.db.getObjectBase((short) 280);
-
-	// just go ahead and throw the null pointer if we didn't get our base.
-
-	if (contractChoiceStamp == null || contractChoiceStamp.before(base.getTimeStamp()))
-	  {
-	    if (debug)
-	      {
-		System.err.println("groupCustom - updateContractChoices()");
-	      }
-
-	    contractChoices = new QueryResult();
-
-	    Query query = new Query((short) 280, null, false);
-
-	    // internalQuery doesn't care if the query has its filtered bit set
-	    
-	    if (debug)
-	      {
-		System.err.println("groupCustom - issuing query");
-	      }
-
-	    Vector results = internalSession().internalQuery(query);
-
-	    (new VecQuickSort(results,
-			      new arlut.csd.Util.Compare()
-			      {
-				public int compare(Object a, Object b)
-				  {
-				    Result aF, bF;
-				    
-				    aF = (Result) a;
-				    bF = (Result) b;
-				    
-				    return aF.toString().compareTo(bF.toString());
-				  }
-			      }
-			      )).sort();
-			      
-	    if (debug)
-	      {
-		System.err.println("groupCustom - processing query results");
-	      }
-	
-	    for (int i = 0; i < results.size(); i++)
-	      {
-		contractChoices.addRow(null, results.elementAt(i).toString(), false); // no invid
-	      }
-
-	    if (contractChoiceStamp == null)
-	      {
-		contractChoiceStamp = new Date();
-	      }
-	    else
-	      {
-		contractChoiceStamp.setTime(System.currentTimeMillis());
-	      }
-	  }
-      }
   }
 
   private void print(String s)

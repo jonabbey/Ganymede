@@ -6,8 +6,8 @@
    
    Created: 6 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/01/22 18:05:10 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/03/16 22:13:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -110,6 +110,31 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
       case volumeSchema.LABEL:
       case volumeSchema.HOST:
       case volumeSchema.PATH:
+	return true;
+      }
+
+    return false;
+  }
+
+  /**
+   *
+   * Hook to allow subclasses to grant ownership privileges to a given
+   * object.  If this method returns true on a given object, the Ganymede
+   * Permissions system will provide access to the object as owned with
+   * whatever permissions apply to objects owned by the persona active
+   * in gSession.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   */
+
+  public boolean grantOwnership(GanymedeSession gSession, DBObject object)
+  {
+    Invid hostInvid = (Invid) object.getFieldValueLocal(volumeSchema.HOST);
+
+    if (hostInvid != null &&
+	gSession.personaMatch(gSession.getSession().viewDBObject(hostInvid)))
+      {
 	return true;
       }
 
