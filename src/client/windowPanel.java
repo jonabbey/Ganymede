@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 1999/03/10 22:51:26 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 1999/03/10 23:04:11 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -594,7 +594,17 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	System.out.println("Removing wait window");
       }
 
-    remove(frame);
+    frame.setClosable(true);
+    
+    try
+      {
+	frame.setClosed(true);
+      }
+    catch (java.beans.PropertyVetoException ex)
+      {
+	throw new RuntimeException("beans? " + ex);
+      }
+
     waitWindowHash.remove(frame);
   }
 
