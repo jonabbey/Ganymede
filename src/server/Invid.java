@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,11 +67,18 @@ public class Invid {
 
   // pull the values
 
-  public short getType() {
+  public short getType() 
+  {
     return type;
   }
 
-  public int getNum() {
+  public int getNum() 
+  {
     return num;
+  }
+
+  public String toString()
+  {
+    return type + ":" + num;
   }
 }
