@@ -5,7 +5,7 @@
    This file is a management class for owner-group records in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -81,6 +81,31 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
   /**
    *
+   * This method returns a key that can be used by the client
+   * to cache the value returned by choices().  If the client
+   * already has the key cached on the client side, it
+   * can provide the choice list from its cache rather than
+   * calling choices() on this object again.<br><br>
+   *
+   * If there is no caching key, this method will return null.
+   *
+   */
+
+  public Object obtainChoicesKey(DBField field)
+  {
+    // We want to force the client to check the field choices here,
+    // since the choices will never include itself as a valid choice.
+
+    if (field.getID() == SchemaConstants.OwnerListField)
+      {
+	return null;
+      }
+
+    return super.obtainChoicesKey(field);
+  }
+
+  /**
+   *
    * This method provides a hook that can be used to check any values
    * to be set in any field in this object.  Subclasses of
    * DBEditObject should override this method, implementing basically
@@ -96,13 +121,30 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
   public boolean verifyNewValue(DBField field, Object value)
   {
-    // We really don't want the supergash owner group from ever
+    // We really don't want the supergash owner group ever
     // having any explicit ownership links.
 
     if (field.getOwner().getInvid().getNum() == SchemaConstants.OwnerSupergash &&
 	getID() == SchemaConstants.OwnerObjectsOwned)
       {
+	field.setLastError("Can't modify supergash objects owned field");
+	Ganymede.debug("Can't modify supergash objects owned field");
 	return false;
+      }
+
+    // we don't want owner groups to ever explicitly list themselves
+    // as owners.
+
+    if ((field.getID() == SchemaConstants.OwnerObjectsOwned) ||
+	(field.getID() == SchemaConstants.OwnerListField))
+      {
+	Invid testInvid = (Invid) value;
+
+	if (testInvid != null && testInvid.equals(field.getOwner().getInvid()))
+	  {
+	    field.setLastError("Can't make an owner group own itself.. this is implicitly true");
+	    return false;
+	  }
       }
 
     return super.verifyNewValue(field, value);
@@ -111,41 +153,26 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   /**
    *
    * This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this DBObject type when the
+   * rescind a link to the given field in this DBObject type when the
    * user only has editing access for the source InvidDBField and not
    * the target.
    *
+   * @param object The object that the link is to be removed from
+   * @param fieldID The field that the linkk is to be removed from
+   *
    */
 
-  public boolean anonymousLinkOK(DBObject object, short fieldID, GanymedeSession gsession)
+  public boolean anonymousUnlinkOK(DBObject object, short fieldID)
   {
-    // If an admin is a member of our group, we'll let them link
-    // in objects to us, otherwise, forget it.
+    // In order to take an admin out of an owner group, you have
+    // to have permission to edit that owner group, as well as
+    // the admin.
 
-    if (fieldID == SchemaConstants.OwnerObjectsOwned)
+    if (fieldID == SchemaConstants.OwnerMembersField)
       {
-	if (object.getInvid().getNum() == SchemaConstants.OwnerSupergash)
-	  {
-	    // we don't ever want to explicitly list objects under
-	    // the supergash owner group.
-
-	    return false;
-	  }
-
-	if (gsession.isSuperGash())
-	  {
-	    return true;
-	  }
-
-	Vector tmpInvidList = new Vector();
-	tmpInvidList.addElement(object.getInvid());
-
-	if (gsession.isMemberAll(tmpInvidList))
-	  {
-	    return true;
-	  }
+	return false;
       }
     
-    return false;
+    return super.anonymousUnlinkOK(object, fieldID);
   }
 }
