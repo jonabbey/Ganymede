@@ -779,15 +779,28 @@ an HTML file, and various support files.  These files are customized
 during installation to point to the proper location for your Ganymede
 server.</p>
 
-<p>The Ganymede 2.0 applets are signed, so you are not required to run
-a web server on the same machine as your Ganymede server, as you were
-for the Ganymede 1.0 series.  You will have to put your Ganymede
-support web files on some web server, however.  If you are using
-Apache, you should probably set up an alias in your httpd.conf file
-that maps a URL path like "/ganymede" to your web client directory.
-This directory should be configured to allow running CGI scripts with
-the extension '.pl', to support the password change CGI script that is
-installed in that directory.  If you want to support the <A
+<p>With Java RMI-using applets, it is generally required to set up a
+web server on the same machine as the RMI server, so that the default
+restrictions on an unprivileged applet suffice to allow a network
+connection to be made to the RMI server.  The Ganymede 2.0 applets are
+signed, however so you are not absolutely required to run a web server
+on the same machine as your Ganymede server, as you were for the
+Ganymede 1.0 series.  If you want, you can provision your client files
+from some other web server, but if you do this you will have to grant
+the Ganymede clients extended privileges when your Java execution
+environment asks you.  If you don't trust the Ganymede clients not to
+mess with your local disk or random hosts on the network, you may be
+best off running a web server on the machine running your Ganymede
+server and just running the applets in their default sandbox.</p>
+
+<p>Wherever you decided to serve the Ganymede clients from, you'll
+probably want to set up an appropriate path or alias.  If you are
+using Apache, you might set up an alias in your httpd.conf file that
+maps a URL path like "/ganymede" to your web client directory.
+Whatever directory you are serving Ganymede files from should be
+configured to allow running CGI scripts with the extension '.pl', to
+support the password change CGI script that is installed in that
+directory, if you want that.  If you want to support the <A
 href="http://java.sun.com/products/javawebstart/">Java Web Start</A>
 launch option, you will also need to configure your web server to
 recognize .jnlp files as being of MIME type
@@ -808,7 +821,6 @@ requires both JavaScript and Java support.</p>
 client, you will need to be sure that their web browsers are
 configured properly, either with support for running Java 1.4 applets
 directly, or for passing a JNLP file to Java Web Start.</p>
-
 
 <p><b>IMPORTANT NOTE</b>: whenever you run applets using the Native or
 Java Plug In mode, the applets can only run as long as the log-in
