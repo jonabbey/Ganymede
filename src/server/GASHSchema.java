@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -749,17 +749,17 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     
     mainPanel = new Panel();
     mainPanel.setLayout(new BorderLayout());
-
+    
     editPanel = new Panel();
     editPanel.setLayout(new TableLayout(false));
-
+    
     ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, Color.white);
-
+    
     idN = new numberField(20, ca, false, false, 0, 0);
     idN.setCallback(this);
     addRow(editPanel, idN, "Field ID:", 0);
-
+    
     nameS = new stringField(20, 100, ca, true, false, null, null);
     nameS.setCallback(this);
     addRow(editPanel, nameS, "Field Name:", 1);
@@ -798,7 +798,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     minLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     minLengthN.setCallback(this);
     addRow(editPanel, minLengthN, "Minimum String Size:", 7);
-
+    
     maxLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     maxLengthN.setCallback(this);
     addRow(editPanel, maxLengthN, "Maximum String Size:", 8);
@@ -813,16 +813,38 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     namespaceC = new Choice();
     namespaceC.addItemListener(this);
-    /***********  Can;t access editor from here
-    //NameSpace[] nameSpaces = editor.getNameSpaces();
-    //if (nameSpaces.length == 0)
-    //  namespaceC.addItem("<none>");
-    ///else
-    //  for (int i=0 ; i < nameSpaces.length ; i++)
-    //	namespaceC.addItem(nameSpaces[i].getName());
-	**************/
+/***************************************************
+ *  NameSpaces don't work yet, so can't add anything.
+    NameSpace[] nameSpaces = null;
+    try
+      {
+	nameSpaces = owner.editor.getNameSpaces();
+      }
+    catch (RemoteException rx)
+      {
+	System.err.println("RemoteException getting namespaces: " + rx);
+      }
+      
+    if ( (nameSpaces.length == 0) || (nameSpaces == null) )
+      namespaceC.addItem("<none>");
+    else
+      for (int i=0 ; i < nameSpaces.length ; i++)
+	{
+	  try
+	    {
+	      namespaceC.addItem(nameSpaces[i].getName());
+	    }
+	  catch (RemoteException rx)
+	    {
+	      System.err.println("RemoteException getting namespaces: " + rx);
+	      
+	      
+	    }    
+	}
+**********************************************/
+    namespaceC.addItem("<none>");
     addRow(editPanel, namespaceC, "Namespace:", 11);
-
+    
     labeledCF = new checkboxField(null, false, ca, true);
     labeledCF.setCallback(this);
     addRow(editPanel, labeledCF, "Labeled:", 12);
@@ -849,9 +871,10 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     fieldC = new Choice();
     fieldC.addItemListener(this);
+    fieldC.addItem("<none>");
     addRow(editPanel, fieldC, "Target Field:", 18);
 
-    booleanShowing = false;
+    booleanShowing = true;
     numericShowing = false;
     dateShowing = false;
     stringShowing = false;
@@ -1168,26 +1191,16 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
   public void itemStateChanged(ItemEvent e)
   {
-    System.out.println("itemStateChanged");
-    System.out.println(e.getItem());
-    /*    booleanShowing = false;
-    numericShowing = false;
-    dateShowing = false;
-    stringShowing = false;
-    referenceShowing = false;
-    if (e.getItem() == "Boolean")
-      booleanShowing = true;
-    else if (e.getItem() == "Numeric")
-      numericShowing = true;
-    else if (e.getItem() == "Date")
-      dateShowing = true;
-    else if (e.getItem() == "String")
-      stringShowing = true;
-    else if (e.getItem() == "Object Reference")
-      referenceShowing = true;
-      */
-
-    changeTypeChoice((String)e.getItem());
+    //System.out.println("itemStateChanged");
+    //System.out.println(e.getItem());
+    if (e.getItemSelectable() == typeC)
+      changeTypeChoice((String)e.getItem());
+    else if (e.getItemSelectable() == namespaceC)
+      System.out.println("Namespace: " + e.getItem());
+    else if (e.getItemSelectable() == targetC)
+      System.out.println("target: " + e.getItem());
+    else if (e.getItemSelectable() == fieldC)
+      System.out.println("field: " + e.getItem());
     checkVisibility();
   }
 
