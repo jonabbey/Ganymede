@@ -11,8 +11,8 @@
    
    Created: 16 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2001/03/01 03:10:55 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2002/08/03 00:20:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,10 +77,16 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientEvent
  *
- * @version $Revision: 1.3 $ $Date: 2001/03/01 03:10:55 $
+ * @version $Revision: 1.4 $ $Date: 2002/08/03 00:20:27 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
 
 public class serverClientProxy implements Runnable {
+
+  /**
+   * <p>Our remote reference to the Client</p>
+   */
+
+  private Client client;
 
   /**
    * <p>Our background communications thread, which is responsible for
@@ -93,20 +99,32 @@ public class serverClientProxy implements Runnable {
    * <p>Our queue of {@link arlut.csd.ganymede.clientEvent clientEvent} objects.</p>
    */
 
-  private Vector eventBuffer;
+  private final clientEvent[] eventBuffer;
+
+  /**
+   * <p>Index pointer to the slot for the next item to be place in</p>
+   */
+
+  private int enqueuePtr = 0;
+
+  /**
+   * <p>Index pointer to the slot for the next item to be pulled from</p>
+   */
+
+  private int dequeuePtr = 0;
+
+  /**
+   * <p>Current counter for how many events we have queued</p>
+   */
+
+  private int ebSz = 0;
 
   /**
    * <p>How many events we'll queue up before deciding that the
    * Client isn't responding.</p>
    */
 
-  private int maxBufferSize = 15; // we shouldn't even need this many
-
-  /**
-   * <p>Our remote reference to the Client</p>
-   */
-
-  private Client client;
+  private final int maxBufferSize = 15; // we shouldn't even need this many
 
   /**
    * <p>If true, we have been told to shut down, and our
@@ -114,7 +132,7 @@ public class serverClientProxy implements Runnable {
    * clear its event queue.</p>.</p>
    */
 
-  private boolean done = false;
+  private volatile boolean done = false;
 
   /**
    * <p>If our commThread receives a remote exception when communicating
@@ -135,7 +153,7 @@ public class serverClientProxy implements Runnable {
   public serverClientProxy(Client client)
   {
     this.client = client;
-    eventBuffer = new Vector();
+    eventBuffer = new clientEvent[maxBufferSize];
     lookUp = new clientEvent[clientEvent.LAST - clientEvent.FIRST + 1];
 
     commThread = new Thread(this, "client console proxy");
@@ -201,11 +219,11 @@ public class serverClientProxy implements Runnable {
 
     try
       {
-	while (!done || (eventBuffer.size() != 0))
+	while (true)
 	  {
 	    synchronized (eventBuffer)
 	      {
-		if (eventBuffer.size() == 0)
+		while (!done && ebSz == 0)
 		  {
 		    try
 		      {
@@ -214,15 +232,14 @@ public class serverClientProxy implements Runnable {
 		    catch (InterruptedException ex)
 		      {
 		      }
-
-		    // loop back to check for done or
-		    // non-empty eventBuffer
-		
-		    continue;
 		  }
 
-		event = (clientEvent) eventBuffer.elementAt(0);
-		eventBuffer.removeElementAt(0);
+		if (done && ebSz == 0)
+		  {
+		    return;	// but see finally, below
+		  }
+
+		event = dequeue();
 
 		// clear the direct pointer to this event so that
 		// changeStatus() and replaceEvent() will know that we
@@ -260,11 +277,21 @@ public class serverClientProxy implements Runnable {
       }
     finally
       {
+	// normally, we won't get here unless done is set, but if we
+	// hit an exception or error above, we might get kicked down
+	// here, so we'll go ahead and set it true.
+
 	done = true;	
 
-	// now we need to aid garbage collection
+	// let's aid garbage collection
 
-	eventBuffer.setSize(0);
+	synchronized (eventBuffer)
+	  {
+	    for (int i = 0; i < maxBufferSize; i++)
+	      {
+		eventBuffer[i] = null;
+	      }
+	  }
 
 	// we may get a thread that missed the done check adding to
 	// eventBuffer after the above, but that's not fatal.. it'll
@@ -293,12 +320,12 @@ public class serverClientProxy implements Runnable {
 
     synchronized (eventBuffer)
       {
-	if (eventBuffer.size() >= maxBufferSize)
+	if (ebSz >= maxBufferSize)
 	  {
 	    throwOverflow();
 	  }
 
-	eventBuffer.addElement(newEvent);
+	enqueue(newEvent);
 	
 	eventBuffer.notify();	// wake up commThread
       }
@@ -333,12 +360,12 @@ public class serverClientProxy implements Runnable {
 	// okay, we don't have an event of matching type on our eventBuffer
 	// queue.  Check for overflow and add the element ourselves.
 
-	if (eventBuffer.size() >= maxBufferSize)
+	if (ebSz >= maxBufferSize)
 	  {
 	    throwOverflow();
 	  }
 
-	eventBuffer.addElement(newEvent);
+	enqueue(newEvent);
 
 	// remember that we have an event of this type on our eventBuffer
 	// for direct lookup by later replaceEvent calls.
@@ -358,16 +385,72 @@ public class serverClientProxy implements Runnable {
   private void throwOverflow() throws RemoteException
   {
     StringBuffer buffer = new StringBuffer();
-    
-    for (int i = 0; i < eventBuffer.size(); i++)
+
+    synchronized (eventBuffer)
       {
-	buffer.append(i);
-	buffer.append(": ");
-	buffer.append(eventBuffer.elementAt(i));
-	buffer.append("\n");
+	int i = dequeuePtr;
+	int count = 0;
+
+	while (count < ebSz)
+	  {
+	    buffer.append(i);
+	    buffer.append(": ");
+	    buffer.append(eventBuffer[i]);
+	    buffer.append("\n");
+
+	    count++;
+	    i++;
+
+	    if (i >= maxBufferSize)
+	      {
+		i = 0;
+	      }
+	  }
       }
     
     throw new RemoteException("serverClientProxy buffer overflow:" + buffer.toString());
+  }
+
+  /**
+   * private enqueue method.
+   */
+
+  private void enqueue(clientEvent item)
+  {
+    synchronized (eventBuffer)
+      {
+	eventBuffer[enqueuePtr] = item;
+
+	if (++enqueuePtr >= maxBufferSize)
+	  {
+	    enqueuePtr = 0;
+	  }
+
+	ebSz++;
+      }
+  }
+
+  /**
+   * private dequeue method.  assumes that the calling code will check
+   * bounds.
+   */
+
+  private clientEvent dequeue()
+  {
+    synchronized (eventBuffer)
+      {
+	clientEvent result = eventBuffer[dequeuePtr];
+	eventBuffer[dequeuePtr] = null;
+
+	if (++dequeuePtr >= maxBufferSize)
+	  {
+	    dequeuePtr = 0;
+	  }
+
+	ebSz--;
+	
+	return result;
+      }
   }
 }
 
