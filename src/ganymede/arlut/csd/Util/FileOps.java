@@ -235,10 +235,14 @@ public class FileOps {
 
 	    try
 	      {
+		System.err.println("Calling subprocess exitValue()");
 		return p.exitValue();
+		System.err.println("Returned from calling subprocess exitValue()");
 	      }
 	    catch (IllegalThreadStateException ex)
 	      {
+		System.err.println("Processing IllegalThreadStateException from exitValue() call");
+
 		try
 		  {
 		    iStream.skip(iStream.available());
@@ -266,6 +270,8 @@ public class FileOps {
 	      {
 		// screw you, copper
 	      }
+
+	    System.err.println("Completed processing IllegalThreadStateException from exitValue() call");
 	  }
       }
     finally
