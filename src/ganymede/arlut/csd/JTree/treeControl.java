@@ -228,6 +228,18 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
+   * <p>Call this on the GUI thread to break apart and destroy this
+   * tree.</p>
+   */
+
+  public synchronized void destroyTree()
+  {
+    this.callback = null;
+    this.clearTree();
+    this.removeAll();
+  }
+
+  /**
    *
    * Clear out the tree.
    *

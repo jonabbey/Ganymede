@@ -888,6 +888,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
 	catch (RemoteException ex)
 	  {
+	    schemaMI.setEnabled(true);
 	    exceptionHandler(ex);
 	  }
       }
