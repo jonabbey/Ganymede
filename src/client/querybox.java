@@ -146,7 +146,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
       this.baseHash = baseHash;  
       this.defaultBase = defaultBase;
-
+ 
       // - Define the main window
 
       optionsFrame.setVisible(false); // do not display return options window yet
@@ -203,6 +203,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 		System.out.println("We have an embedded object,");
 		System.out.println("And it's name is: " + key.getName());
+		
+		// get a base that works...
+		
+		continue;
 	      }
 	    else
 	      {
@@ -222,6 +226,11 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      // no default given. pick the one that's there.
 	    
 	      currentBase = baseChoice.getSelectedItem();
+	     
+	      if (currentBase == null){
+		System.out.println("THUNDERCLOUD SUBS!!!");
+
+	      }
 	      this.defaultBase = (Base) myHash.get(currentBase);
 	      defaultBase = this.defaultBase;
 	      this.baseName = defaultBase.getName();
@@ -416,6 +425,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		  myName = tempField.getName();
 		  myName = basePrefix + "/" + myName;  // slap on the prefix
 		  Embedded.addElement(myName);
+		  System.out.println("From Embedded: " + myName);
 		}
 	      else
 		{
