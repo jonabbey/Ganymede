@@ -5,7 +5,7 @@
    A wizard to manage user reactivation interactions for the userCustom object.
 
    Created: 29 January 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -116,137 +116,128 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
   /**
    *
-   * This method is used to provide feedback to the server from a client
-   * in response to a specific request. 
-   *
-   * @param returnHash a hashtable mapping strings to values.  The strings
-   * are titles of fields specified in a dialog that was provided to the
-   * client.  If returnHash is null, this corresponds to the user hitting
-   * cancel on such a dialog.
-   *
-   * @see arlut.csd.ganymede.Ganymediator
-   * @see arlut.csd.ganymede.ReturnVal
+   * This method provides a default response if a user
+   * hits cancel on a wizard dialog.  This should be
+   * subclassed if a wizard wants to provide a more
+   * detailed cancel response.
    *
    */
 
-  public ReturnVal respond(Hashtable returnHash)
+  public ReturnVal cancel()
   {
-    JDialogBuff dialog;
+    return fail("User Reactivation Canceled",
+		"User Reactivation Canceled",
+		"OK",
+		null,
+		"ok.gif");
+  }
+
+  /**
+   *
+   * If we have gotten here, the user clicked Ok when asked
+   * if he really wanted to reactivate this user.
+   *
+   */
+
+  public ReturnVal processDialog1()
+  {
+    ReturnVal retVal;
+
+    /* -- */
+
+    System.err.println("userReactivateWizard.respond(): state == 1");
+
+    retVal = continueOn("Reactivate User",
+			"",
+			"OK",
+			"Cancel",
+			"question.gif");
+    
+    retVal.getDialog().addPassword("New Password", true);
+    
+    StringDBField stringfield = (StringDBField) userObject.getField(LOGINSHELL);
+    
+    userObject.updateShellChoiceList();
+    retVal.getDialog().addChoice("Shell", 
+				 userObject.shellChoices.getLabels(),
+				 (String) stringfield.getValueLocal());
+    
+    retVal.getDialog().addString("Forwarding Address");
+    
+    System.err.println("userReactivateWizard.respond(): state == 1, returning dialog");
+    
+    return retVal;
+  }
+
+  /**
+   *
+   * The user will have provided us with all the reactivation information
+   * if processDialog2() is called..<br><br>
+   *
+   * <pre>
+   * Keys:
+   *
+   * "Forwarding Address"
+   * "Shell"
+   * "New Password"
+   * </pre>
+   *
+   */
+
+  public ReturnVal processDialog2()
+  {
     ReturnVal retVal = null;
 
     /* -- */
 
-    if (returnHash == null)
+    if (debug)
       {
-	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("User Reactivation Cancelled",
-				 "User Reactivation Cancelled",
-				 "OK",
-				 null,
-				 "ok.gif");
-	retVal.setDialog(dialog);
+	System.err.println("userReactivateWizard.respond(): state == 2");
 
-	// note that we don't set the callback on the ReturnVal.. this
-	// terminates the wizard process
-	
-	this.unregister(); // we're stopping here, so we'll unregister ourselves
-	
-	return retVal;
-      }
+	Enumeration enum = getKeys();
+	int i = 0;
 
-    if (state == 1)
-      {
-	System.err.println("userReactivateWizard.respond(): state == 1");
-
-	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("Reactivate User",
-				 "",
-				 "OK",
-				 "Cancel",
-				 "question.gif");
-
-	dialog.addPassword("New Password", true);
-
-	StringDBField stringfield = (StringDBField) userObject.getField(LOGINSHELL);
-
-	userObject.updateShellChoiceList();
-	dialog.addChoice("Shell", 
-			 userObject.shellChoices.getLabels(),
-			 (String) stringfield.getValueLocal());
-
-	dialog.addString("Forwarding Address");
-	    
-	retVal.setDialog(dialog);
-	retVal.setCallback(this); // have the client get back to us
-	
-	state = 2;
-
-	System.err.println("userReactivateWizard.respond(): state == 1, returning dialog");
-
-	return retVal;
-      }
-    else if (state == 2)
-      {
-	if (debug)
+	while (enum.hasMoreElements())
 	  {
-	    System.err.println("userReactivateWizard.respond(): state == 2");
-
-	    Enumeration enum = returnHash.keys();
-	    int i = 0;
-
-	    while (enum.hasMoreElements())
-	      {
-		Object key = enum.nextElement();
-		Object value = returnHash.get(key);
+	    Object key = enum.nextElement();
+	    Object value = getParam(key);
 		
-		System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
-	      }
-	  } 
+	    System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
+	  }
+      } 
 
-	forward = (String) returnHash.get("Forwarding Address");
-	shell = (String) returnHash.get("Shell");
-	password = (String) returnHash.get("New Password");
+    forward = (String) getParam("Forwarding Address");
+    shell = (String) getParam("Shell");
+    password = (String) getParam("New Password");
 
-	// and do the inactivation.. userObject will consult us for
-	// forward, shell, and password
+    // and do the inactivation.. userObject will consult us for
+    // forward, shell, and password
 	    
-	retVal = userObject.reactivate(this);
+    retVal = userObject.reactivate(this);
 
-	if (retVal == null || retVal.didSucceed())
-	  {
-	    retVal = new ReturnVal(true);
-	    dialog = new JDialogBuff("User Reactivation Performed",
-				     "User has been reactivated",
-				     "OK",
-				     null,
-				     "ok.gif");
-		    
-	    retVal.setDialog(dialog);
-	  }
-	else if (retVal.getDialog() == null)
-	  {
-	    // failure.. need to do the rollback that would have originally
-	    // been done for us if we hadn't gone through the wizard process
-
-	    if (!session.rollback("reactivate" + userObject.getLabel()))
-	      {
-		retVal = Ganymede.createErrorDialog("userReactivateWizard: Error",
-						    "Ran into a problem during user reactivation, and rollback failed");
-	      }
-	  }
-	else
-	  {
-	    return retVal;
-	  }
-
-	this.unregister(); // we're stopping here, so we'll unregister ourselves
-
-	return retVal;
+    if (retVal == null || retVal.didSucceed())
+      {
+	retVal = success("User Reactivation Performed",
+			 "User has been reactivated",
+			 "OK",
+			 null,
+			 "ok.gif");
       }
+    else if (retVal.getDialog() == null)
+      {
+	// failure.. need to do the rollback that would have originally
+	// been done for us if we hadn't gone through the wizard process
 	
-    return Ganymede.createErrorDialog("userReactivateWizard: Error",
-				      "No idea what you're talking about");
+	if (!session.rollback("reactivate" + userObject.getLabel()))
+	  {
+	    retVal = Ganymede.createErrorDialog("userReactivateWizard: Error",
+						"Ran into a problem during user reactivation, and rollback failed");
+	  }
+      }
+
+    return retVal;
   }
+
 
   /**
    *
@@ -256,7 +247,6 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
   public ReturnVal getStartDialog()
   {
-    JDialogBuff dialog;
     StringBuffer buffer = new StringBuffer();
     ReturnVal retVal = null;
 
@@ -269,17 +259,11 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
     buffer.append("\n\nIn order to reactivate this account, you need to provide a password, ");
     buffer.append("a login shell, and a new address to send email for this account to.");
 	
-    retVal = new ReturnVal(false);
-    dialog = new JDialogBuff("User Reactivation Dialog",
-			     buffer.toString(),
-			     "Next",
-			     "Cancel",
-			     "question.gif");
-    
-    retVal.setDialog(dialog);
-    retVal.setCallback(this);
-    
-    state = 1;
+    retVal = continueOn("User Reactivation Dialog",
+			buffer.toString(),
+			"Next",
+			"Cancel",
+			"question.gif");
     
     return retVal;
   }

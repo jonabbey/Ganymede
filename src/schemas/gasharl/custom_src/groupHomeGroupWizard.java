@@ -5,7 +5,7 @@
   A wizard to allow deletion of a user's home group from the group edit window.
 
   Created: 8 April 1998
-  Version: $Revision: 1.2 $ %D%
+  Version: $Revision: 1.3 $ %D%
   Module by: Mike Mulvaney
   Applied Research Laboratories, The University of Texas at Austin
   
@@ -65,157 +65,145 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 
   }
 
-  public ReturnVal respond(Hashtable returnHash)
+  /**
+   *
+   * This method provides a default response if a user
+   * hits cancel on a wizard dialog.  This should be
+   * subclassed if a wizard wants to provide a more
+   * detailed cancel response.
+   *
+   */
+
+  public ReturnVal cancel()
   {
-    JDialogBuff dialog;
+    return fail("User removal Canceled",
+		"User removal Canceled",
+		"OK",
+		null,
+		"ok.gif");
+  }
+
+  public ReturnVal processDialog1()
+  {
     ReturnVal retVal = null;
 
-    /*  -- Here we go --  */
+    /* -- */
 
-    if ((returnHash == null) || (state == ERROR))
+    // We have already shown the first info dialog, so now it is time to show
+    // the dialog with the choices
+
+    if (debug)
       {
-	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("User removal cancelled",
-				 "User removal cancelled.",
-				 "OK", null, "ok.gif");
-
-	this.unregister();
-
-	retVal.setDialog(dialog);
-
-	return retVal;
+	System.err.println("groupHomeGroupWizard.respond(): state == 1");
       }
     
-    if (state == 1)
+    retVal = continueOn("Change Home Group", "",
+			"OK", "Cancel", "question.gif");
+    
+    try
       {
-	// We have already shown the first info dialog, so now it is time to show
-	// the dialog with the choices
-
-	if (debug)
+	print("Getting values.");
+	
+	QueryResult values = ((invid_field)user.getField(userSchema.GROUPLIST)).encodedValues();
+	
+	print("Adding choices to dialog.");
+	
+	Vector labels = values.getLabels();
+	String currentGroup = groupObject.getLabel();
+	
+	for (int i = 0; i < labels.size(); i++)
 	  {
-	    System.err.println("groupHomeGroupWizard.respond(): state == 1");
+	    if (currentGroup.equals((String)labels.elementAt(i)))
+	      {
+		labels.removeElementAt(i);
+		break;
+	      }
 	  }
+	
+	retVal.getDialog().addChoice("Home Group:" , labels, null);
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get the groups.");
+      }
+    
+    if (debug)
+      {
+	System.err.println("groupHomeGroupWizard.respond(): state == 1, returning dialog");
+      }
 
-	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("Change Home Group", "",
-				 "OK", "Cancel", "question.gif");
+    return retVal;
+  }
+
+  public ReturnVal processDialog2()
+  {
+    ReturnVal retVal = null;
+
+    db_field userHomeGroupField;
+    Invid newGroup;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("groupHomeGroupWizard.respond: state == 2");
+	
+	Enumeration enum = getKeys();
+	int i = 0;
+
+	while (enum.hasMoreElements())
+	  {
+	    Object key = enum.nextElement();
+	    Object value = getParam(key);
+	    System.err.println("Item: (" + i++ + ") " + key + ":" + value);
+	  } 
+      }
+	
+    String gString = (String) getParam("Home Group:");
+
+    // Now we have to do a query to find which group has this name.
+    
+    QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, gString);
+    Query query = new Query(groupObject.getTypeID(), node);
+    QueryResult qr = session.query(query);
+    
+    if (qr.size() == 1)
+      {
+	// this is what we want.
+	newGroup = qr.getInvid(0);
+
+	userHomeGroupField = user.getField(userSchema.HOMEGROUP);
 
 	try
 	  {
-	    print("Getting values.");
-
-	    QueryResult values = ((invid_field)user.getField(userSchema.GROUPLIST)).encodedValues();
-
-	    print("Adding choices to dialog.");
-
-	    Vector labels = values.getLabels();
-	    String currentGroup = groupObject.getLabel();
-
-	    for (int i = 0; i < labels.size(); i++)
-	      {
-		if (currentGroup.equals((String)labels.elementAt(i)))
-		  {
-		    labels.removeElementAt(i);
-		    break;
-		  }
-	      }
-
-	    dialog.addChoice("Home Group:" , labels, null);
+	    retVal = userHomeGroupField.setValue(newGroup);
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Could not get the groups.");
+	    throw new RuntimeException("Could not set the value: " + rx);
 	  }
-
-	retVal.setDialog(dialog);
-	retVal.setCallback(this);
-
-	state = 2;
-	
-	if (debug)
-	  {
-	    System.err.println("groupHomeGroupWizard.respond(): state == 1, returning dialog");
-	  }
-
-	return retVal;
-      }
-    else if (state == 2)
-      {
-	db_field userHomeGroupField;
-	Invid newGroup;
-
-	/* -- */
-
-	if (debug)
-	  {
-	    System.err.println("groupHomeGroupWizard.respond: state == 2");
 	    
-	    Enumeration enum = returnHash.keys();
-	    int i = 0;
-
-	    while (enum.hasMoreElements())
-	      {
-		Object key = enum.nextElement();
-		Object value = returnHash.get(key);
-		System.err.println("Item: (" + i++ + ") " + key + ":" + value);
-	      } 
-	  }
-	
-	String gString = (String) returnHash.get("Home Group:");
-
-	// Now we have to do a query to find which group has this name.
-
-	QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, gString);
-	Query query = new Query(groupObject.getTypeID(), node);
-	QueryResult qr = session.query(query);
-
-	if (qr.size() == 1)
+	if ((retVal == null) || (retVal.didSucceed()))
 	  {
-	    // this is what we want.
-	    newGroup = qr.getInvid(0);
-
-	    userHomeGroupField = user.getField(userSchema.HOMEGROUP);
-
-	    try
-	      {
-		retVal = userHomeGroupField.setValue(newGroup);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not set the value: " + rx);
-	      }
-	    
-	    if ((retVal == null) || (retVal.didSucceed()))
-	      {
-		retVal = new ReturnVal(true);
-		dialog = new JDialogBuff("Home group changed",
-					 "User's home group successfully changed.",
-					 "OK", null, "ok.gif");
-		retVal.setDialog(dialog);
-	      }
-	    else if (retVal.getDialog() == null)
-	      {
-		// we failed :(
-		retVal = Ganymede.createErrorDialog("groupHomeGroupWizard: error",
-						    "Ran into trouble during user interaction.");
-	      }
+	    return success("Home group changed",
+			   "User's home group successfully changed.",
+			   "OK", null, "ok.gif");
 	  }
-	else // could not find the group
+	else if (retVal.getDialog() == null)
 	  {
+	    // we failed :(
 	    retVal = Ganymede.createErrorDialog("groupHomeGroupWizard: error",
-						"Could not find the group you wanted, Sorry.");
-
+						"Ran into trouble during user interaction.");
 	  }
-
-	this.unregister();
-	return retVal;
       }
-    else if (state == DONE)
+    else // could not find the group
       {
-	System.err.println("groupHomeGroupWizard.respond: got to the DONE part.  That shouldn't happen.");
+	retVal = Ganymede.createErrorDialog("groupHomeGroupWizard: error",
+					    "Could not find the group you wanted, Sorry.");
+
       }
-    
-    return Ganymede.createErrorDialog("groupHomeGroupWizard: Error", "No idea what is going on, I got lost somewhere.");
+
+    return retVal;
   }
 
   public ReturnVal getStartDialog()
@@ -227,8 +215,6 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 
     if (user == null)
       {
-	System.err.println("Could not get the user.");
-	state = ERROR;
 	return Ganymede.createErrorDialog("groupHomeGroupWizard error",
 					  "Could not get the user.");
       }
@@ -253,31 +239,18 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 
     if (size > 1)  
       {
-	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("Home Group Change", 
-				 "In order to remove a user's home group, you must choose another home group for that user.",
-				 "Next", "Cancel", "question.gif");
+	return continueOn("Home Group Change", 
+			  "In order to remove a user's home group, you must choose another home group for that user.",
+			  "Next", "Cancel", "question.gif");
 	
-	retVal.setDialog(dialog);
-	retVal.setCallback(this);
-	
-	state = 1;
-
-	return retVal;
       }
     else
       {
 	// no groups to choose from
-	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("Home Group Change",
-				 "Each user must have a home group.  For that user, this is it.  So don't.",
-				 "Sorry", null, "ok.gif");
 
-	retVal.setDialog(dialog);
-	retVal.setCallback(this);
-	
-	state = ERROR;
-	return retVal;
+	return fail("Home Group Change",
+		    "Each user must have a home group.  For that user, this is it.  So don't.",
+		    "Sorry", null, "ok.gif");
       }
   }
 

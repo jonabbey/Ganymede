@@ -5,7 +5,7 @@
    A wizard to manage step-by-step interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -100,83 +100,64 @@ public class userInactivateWizard extends GanymediatorWizard {
 
   /**
    *
-   * This method is used to provide feedback to the server from a client
-   * in response to a specific request. 
-   *
-   * @param returnHash a hashtable mapping strings to values.  The strings
-   * are titles of fields specified in a dialog that was provided to the
-   * client.  If returnHash is null, this corresponds to the user hitting
-   * cancel on such a dialog.
-   *
-   * @see arlut.csd.ganymede.Ganymediator
-   * @see arlut.csd.ganymede.ReturnVal
+   * This method provides a default response if a user
+   * hits cancel on a wizard dialog.  This should be
+   * subclassed if a wizard wants to provide a more
+   * detailed cancel response.
    *
    */
 
-  public ReturnVal respond(Hashtable returnHash)
+  public ReturnVal cancel()
   {
-    JDialogBuff dialog;
+    return fail("User Inactivation Canceled",
+		"User Inactivation Canceled",
+		"OK",
+		null,
+		"ok.gif");
+  }
+
+  /**
+   *
+   * This method expects a dialog with a forwarding
+   * address stored on key "Forwarding Address"
+   *
+   */
+
+  public ReturnVal processDialog1()
+  {
     ReturnVal retVal = null;
 
     /* -- */
 
-    if (state == 1)
-      {
-	System.err.println("userInactivateWizard: state 1 processing return vals from dialog");
+    String forward = (String) getParam("Forwarding Address");
 
-	if (returnHash == null)
-	  {
-	    retVal = new ReturnVal(false);
-	    dialog = new JDialogBuff("User Inactivation Canceled",
-				     "User Inactivation Canceled",
-				     "OK",
-				     null,
-				     "ok.gif");
-	    retVal.setDialog(dialog);
-
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
-
-	    return retVal;
-	  }
-
-	String forward = (String) returnHash.get("Forwarding Address");
-
-	// and do the inactivation
+    // and do the inactivation
 	    
-	retVal = userObject.inactivate(forward, true);
+    retVal = userObject.inactivate(forward, true);
 
-	if (retVal == null || retVal.didSucceed())
-	  {
-	    retVal = new ReturnVal(true);
-	    dialog = new JDialogBuff("User Inactivation Performed",
-				     "User has been inactivated",
-				     "OK",
-				     null,
-				     "ok.gif");
-		    
-	    retVal.setDialog(dialog);
-	  }
-	else
-	  {
-	    // failure.. need to do the rollback that would have
-	    // originally been done for us if we hadn't gone through
-	    // the wizard process.  Look at DBEditObject.inactivate()
-	    // method for documentation on this.
-
-	    if (!session.rollback("inactivate" + userObject.getLabel()))
-	      {
-		retVal = Ganymede.createErrorDialog("userInactivateWizard: Error",
-						    "Ran into a problem during user inactivation, and rollback failed");
-	      }
-	  }
-
-	this.unregister(); // we're stopping here, so we'll unregister ourselves
-
-	return retVal;
+    if (retVal == null || retVal.didSucceed())
+      {
+	return success("User Inactivation Performed",
+		       "User has been inactivated",
+		       "OK",
+		       null,
+		       "ok.gif");
       }
-
-    return Ganymede.createErrorDialog("userInactivateWizard: Error",
-				      "No idea what you're talking about");	
+    else
+      {
+	// failure.. need to do the rollback that would have
+	// originally been done for us if we hadn't gone through
+	// the wizard process.  Look at DBEditObject.inactivate()
+	// method for documentation on this.
+	
+	if (!session.rollback("inactivate" + userObject.getLabel()))
+	  {
+	    return Ganymede.createErrorDialog("userInactivateWizard: Error",
+					      "Ran into a problem during user inactivation, and rollback failed");
+	  }
+      }
+    
+    return retVal;
   }
 
   /**
@@ -201,18 +182,13 @@ public class userInactivateWizard extends GanymediatorWizard {
     buffer.append("kept in the database for 3 months to preserve accounting information.\n\n");
     buffer.append("It is recommended that you provide a forwarding email address for this user.");
 	
-    retVal = new ReturnVal(false);
-    dialog = new JDialogBuff("User Inactivation Dialog",
-			     buffer.toString(),
-			     "OK",
-			     "Cancel",
-			     "question.gif");
-    dialog.addString("Forwarding Address");
+    retVal = continueOn("User Inactivation Dialog",
+			buffer.toString(),
+			"OK",
+			"Cancel",
+			"question.gif");
 
-    retVal.setDialog(dialog);
-    retVal.setCallback(this);
-    
-    state = 1;
+    retVal.getDialog().addString("Forwarding Address");
     
     return retVal;
   }
