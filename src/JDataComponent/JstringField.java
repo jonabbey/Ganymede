@@ -231,43 +231,34 @@ public class JstringField extends JentryField {
 
   public void setAllowedChars(String s)
   {
+     if (s != null)
+       {
+ 	this.allowedChars = new String(s);
+       }
+     else 
+       {
+ 	this.allowedChars = null;
+       }
 
-    return;
+     if (s == null || s.equals(""))
+       {
+ 	return;
+       }
+     else
+       {
+	 Keymap map = getKeymap();
+	
+	 Action insert = new DefaultAction(JTextComponent.insertContentAction);
 
-//     if (s != null)
-//       {
-// 	this.allowedChars = new String(s);
-//       }
-//     else 
-//       {
-// 	this.allowedChars = null;
-//       }
+	 KeyStroke[] strokes = map.getKeyStrokesForAction(insert);
 
-//     if (s == null || s.equals(""))
-//       {
-// 	return;
-//       }
-//     else
-//       {
-// 	Keymap map = getKeymap();
-
-// 	Action insert = new JAction(JTextComponent.insertContentAction);
-
-// 	JKeyStroke[] strokes = map.getKeyStrokesForAction(insert);
-
-// 	for (int i = 0; i < strokes.length; i++)
-// 	  {
-// 	    map.removeKeyStrokeBinding(strokes[i]);
-// 	  }
-
-// 	for (int i = 0; i < s.length(); i++)
-// 	  {
-// 	    map.addActionForKeyStroke(JKeyStroke.getKeyStroke(s.charAt(i), 0), insert);
-// 	  }
-
-// 	setKeymap(map);
-//       }
-    
+	 map.removeBindings();
+	 
+	 for (int i = 0; i < s.length(); i++)
+	   {
+	     map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i), 0), insert);
+	   }
+       }
   }
  
   /**
@@ -279,35 +270,28 @@ public class JstringField extends JentryField {
   {
     Keymap map;
 
-    return;
+    /* -- */
 
-//     if (allowedChars != null && !allowedChars.equals(""))
-//       {
-// 	map = getKeymap();
-//       }
-//     else
-//       {
-// 	map = getKeymap().getResolveParent();
-//       }
+    map = getKeymap();
 
-//     if (s != null && !s.equals(""))
-//       {
-// 	for (int i = 0; i < s.length(); i++)
-// 	  {
-// 	    map.removeKeyStrokeBinding(JKeyStroke.getKeyStroke(s.charAt(i), 0));
-// 	  }
-//       }
+    if (s != null && !s.equals(""))
+      {
+ 	for (int i = 0; i < s.length(); i++)
+ 	  {
+	    //	    map.removeKeyStrokeBinding(KeyStroke.getKeyStroke(s.charAt(i), 0));
+	    map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i)),
+				      new DefaultAction("null action"));
+ 	  }
+      }
 
-//     setKeymap(map);
-
-//     if (s!= null)
-//       {
-// 	this.disallowedChars = s;
-//       }
-//     else 
-//       {
-// 	this.disallowedChars = null;
-//       }
+    if (s!= null)
+      {
+ 	this.disallowedChars = s;
+      }
+    else 
+      {
+ 	this.disallowedChars = null;
+      }
   }
 
   /**
