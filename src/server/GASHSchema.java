@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.66 $ %D%
+   Version: $Revision: 1.67 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -250,7 +250,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     treeImages[4] = PackageResources.getImageResource(this, "transredlist.gif", getClass());
 
     tree = new treeControl(new java.awt.Font("SansSerif",java.awt.Font.BOLD, 12),
-			   java.awt.Color.black, java.awt.SystemColor.window, this, treeImages,
+			   java.awt.Color.black, java.awt.Color.white, this, treeImages,
 			   null);
     tree.setMinimumWidth(200);
     tree.setDrag(this, tree.DRAG_LINE | tree.DRAG_ICON);
