@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1410,8 +1410,12 @@ class QueryRow implements ItemListener {
 
   public Base getBase()
   {
-    System.err.println("querybox: getBase(): fieldName = " + fieldName);
-    System.err.println("Id = " + parent.getIdFromName(fieldName));
+    if (debug)
+      {
+	System.err.println("querybox: getBase(): fieldName = " + fieldName);
+	System.err.println("Id = " + parent.getIdFromName(fieldName));
+      }
+
     return parent.getBaseFromShort(parent.getIdFromName(fieldName));
   }
 
