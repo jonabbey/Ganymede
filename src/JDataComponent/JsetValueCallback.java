@@ -4,8 +4,8 @@
 
    Created: 18 June 1996
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:04:00 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/03/22 22:37:53 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -51,23 +51,29 @@ package arlut.csd.JDataComponent;
 
 ------------------------------------------------------------------------------*/
 
-/**
- *  This interface is used to allow callback to be done from the
- *  components in the package to the container which contains them.
- *  The conatiner that is to contain the components needs to provide
- *  implementations for the methods defined in this interface.
+/** 
+ * Client-side interface used to allow callback to be done from GUI
+ * components in the arlut.csd.JDataComponent package to the container
+ * which contains them.
+ *
+ * @version $Revision: 1.5 $ $Date: 1999/03/22 22:37:53 $ $Name:  $
+ * @author Navin Manohar 
  */
 
 public interface JsetValueCallback
 {
+  /**
+   *
+   * Accept a status update from a GUI component in the arlut.csd.JDataComponent
+   * package.  This method throws an RMI remote exception to allow the client
+   * to call the server for value verification from within a setValuePerformed()
+   * method.  GUI components that call setValuePerformed() should treate an RMI
+   * RemoteException as a failure and not display the proposed value change.
+   *
+   * @return true if the callback accepted the change and the GUI component should
+   * go ahead and display the change made by the user.
+   *
+   */
+
   public boolean setValuePerformed(JValueObject v) throws java.rmi.RemoteException;
 }
-
-
-
-
-
-
-
-
-

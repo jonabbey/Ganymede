@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/03/19 05:10:55 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/03/22 22:37:55 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -71,8 +71,29 @@ import arlut.csd.Util.PackageResources;
 
 /**
  *
- * A two list box for adding strings to lists.
+ * <p>A two-paneled GUI component for adding or removing strings and/or labeled objects
+ * from a list, with an optional list of available strings and/or objects to choose
+ * from.</p>
  *
+ * <p>StringSelector consists of one or (optionally) two
+ * {@link arlut.csd.JDataComponent.JstringListBox JstringListBox} panels and allows
+ * the user to move values back and forth between the two panels.  Pop-up menus can
+ * be attached to each panel, allowing the user to command the client to view or
+ * edit objects referenced in either panel.  Objects in both panels are sorted alphabetically
+ * by label.</p>
+ *
+ * <p>The setCallback() method takes an object implementing the 
+ * {@link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback} interface
+ * in order to provide live notification of changes performed by the user.  The
+ * JsetValueCallback implementation is given the opportunity to approve any change
+ * made by the user before the GUI is updated to show the change.  The JsetValueCallback
+ * interface is also used to pass pop-up menu commands to the client.</p>
+ *
+ * @see JstringListBox
+ * @see JsetValueCallback
+ *
+ * @version $Revision: 1.17 $ $Date: 1999/03/22 22:37:55 $ $Name:  $
+ * @author Mike Mulvaney, Jonathan Abbey
  */
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
@@ -587,10 +608,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * Add a new item to the StringSelector.
+   * <p>Add a new item to the StringSelector.</p>
    *
-   * This is for adding an item that is not in either list, not selecting
-   * an item from the out list.
+   * <p>This is for adding an item that is not in either list, not selecting
+   * an item from the out list.</p>
    *
    * @param item Item to be added.  Can be listHandle or String
    * @param ShouldBeIn If true, object will be placed in in list.  Otherwise, it goes in out list.
@@ -625,15 +646,31 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   *  sets the parent of this component for callback purposes
+   * <p>Connects this StringSelector to an implementaton of the
+   * {@link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback} interface
+   * in order to provide live notification of changes performed by the user.  The
+   * JsetValueCallback implementation is given the opportunity to approve any change
+   * made by the user before the GUI is updated to show the change.  The JsetValueCallback
+   * interface is also used to pass pop-up menu commands to the client.</p>
    *
-   *  Return types:  (Note that the index is always 0, so ignore it.)
-   *  <ul>
-   *  <li><b>PARAMETER</B>  Action from a PopupMenu.  The Paramter is the ActionCommand string.
-   *  <li><b>ADD</b>  Object has been chosen
-   *  <li><b>DELETE</b>  Object has been removed from chosen list.
-   *  <li><b>ERROR</b>  Something went wrong.  Check the error message.
-   *  </ul>
+   * <p>StringSelector uses the following value type constants from
+   * {@link arlut.csd.JDataComponent.JValueObject JValueObject} to pass status updates to
+   * the callback.
+   *
+   * <ul>
+   * <li><b>PARAMETER</B>Action from a PopupMenu.  The Parameter is the ActionCommand
+   * string for the pop-up menu item selected, and the value is the object
+   * (or string if no object defined) associated with the item selected when the pop-up menu was fired.</li>
+   * <li><b>ADD</b>Object has been added to the selected list.  Value is the object (or string) added.</li>
+   * <li><b>DELETE</b>Object has been removed from chosen list.  Value is the object (or string) removed.</li>
+   * <li><b>ERROR</b>Something went wrong.  Value is the error message to be displayed to the user in whatever
+   * fashion is appropriate.</li>
+   * </ul>
+   * </p>
+   *
+   * @see JsetValueCallback
+   * @see JValueObject
+   *
    */
 
   public void setCallback(JsetValueCallback parent)
@@ -880,7 +917,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  }
       }
   }
-
 
   /**
    *

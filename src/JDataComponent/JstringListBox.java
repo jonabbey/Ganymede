@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/03/19 21:31:45 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 1999/03/22 22:37:54 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -61,6 +61,31 @@ import arlut.csd.Util.VecQuickSort;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ *
+ * <p>A sorted listbox that handles {@link arlut.csd.JDataComponent.listHandle listHandle}'s.
+ * JstringListBox supports pop-up menus and uses the
+ * @link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}
+ * interface to report selection and pop-up menu activity to the registered
+ * callback.</p>
+ *
+ * <p>listHandles are wrappers that can hold both a String and (optionally) a related
+ * object, such as an Invid.  The JstringListBox uses them to allow the client to
+ * manipulate labeled object pointers.</p>
+ *
+ * <p>The {@link arlut.csd.JDataComponent.StringSelector StringSelector} class uses
+ * JstringListBoxes to support adding or removing Strings and Objects from String
+ * and Invid vector fields.</p>
+ *
+ * @see arlut.csd.ganymede.Invid
+ * @see arlut.csd.JDataComponent.listHandle
+ * @see arlut.csd.JDataComponent.StringSelector
+ * @see arlut.csd.JDataComponent.JsetValueCallback
+ * @version $Revision: 1.26 $ $Date: 1999/03/22 22:37:54 $ $Name:  $
+ * @author Mike Mulvaney
+ *
+ */
+
 public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener {
 
   static final boolean debug = false;
@@ -76,7 +101,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     model = new DefaultListModel();
 
   boolean
-    sorted,
+    presorted,
     allowCallback = false;
 
   JsetValueCallback 
@@ -116,13 +141,13 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * Constructor 
    *
    * @param items Vector of items (Strings or listHandles) to show in the list
-   * @param sorted If true, JstringListBox will not sort the vector(it is already sorted)
+   * @param presorted If true, JstringListBox will not sort the vector(it is already sorted)
    *
    */
 
-  public JstringListBox(Vector items, boolean sorted)
+  public JstringListBox(Vector items, boolean presorted)
   {
-    this(items, sorted, null);
+    this(items, presorted, null);
   }
 
   /**
@@ -130,14 +155,14 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * Constructor 
    *
    * @param items Vector of items (Strings or listHandles) to show in the list
-   * @param sorted If true, JstringListBox will not sort the vector(it is already sorted)
+   * @param presorted If true, JstringListBox will not sort the vector(it is already sorted)
    * @param popup JPopupMenu that will be shown on right click.  Callback is of type PARAMETER
    *
    */
 
-  public JstringListBox(Vector items, boolean sorted, JPopupMenu popup)
+  public JstringListBox(Vector items, boolean presorted, JPopupMenu popup)
   {
-    this(items, sorted, popup, 0);
+    this(items, presorted, popup, 0);
   }
 
   /**
@@ -145,16 +170,16 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * Constructor 
    *
    * @param items Vector of items (Strings or listHandles) to show in the list
-   * @param sorted If true, JstringListBox will not sort the vector(it is already sorted)
+   * @param presorted If true, JstringListBox will not sort the vector(it is already sorted)
    * @param popup JPopupMenu that will be shown on right click.  Callback is of type PARAMETER
    * @param width Width in pixels of the string list box.  If <= 0, the list box will be
    * auto-sized, with a 20 char minimum width
    *
    */
 
-  public JstringListBox(Vector items, boolean sorted, JPopupMenu popup, int width)
+  public JstringListBox(Vector items, boolean presorted, JPopupMenu popup, int width)
   {
-    this.sorted = sorted;
+    this.presorted = presorted;
     this.popup = popup;
     this.width = width;
 
@@ -192,7 +217,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {	
 	if (items.elementAt(0) instanceof String)
 	  {
-	    if (!sorted)
+	    if (!presorted)
 	      {
 		if (debug)
 		  {
@@ -266,7 +291,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  }
 	else if (items.elementAt(0) instanceof listHandle)
 	  {
-	    if (!sorted)
+	    if (!presorted)
 	      {
 		if (debug)
 		  {
@@ -365,7 +390,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    *
    */
 
-  public void reload(Vector items, boolean sorted)
+  public void reload(Vector items, boolean presorted)
   {
     //model.removeAllElements();
 
@@ -375,7 +400,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
 	if (items.elementAt(0) instanceof listHandle)
 	  {
-	    if (!sorted)
+	    if (!presorted)
 	      {
 		items = sortListHandleVector(items);
 	      }
@@ -387,7 +412,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  }
 	else  //It must be a string, or it will throw a ClassCastException
 	  {
-	    if (!sorted)
+	    if (!presorted)
 	      {
 		items = sortStringVector(items);
 	      }
@@ -422,14 +447,29 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   * Register a parent to receive callbacks.
+   * <p>Connects this JstringListBox to an implementaton of the
+   * {@link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback} interface
+   * in order to provide live notification of changes performed by the user.  The
+   * JsetValueCallback implementation is given the opportunity to approve any change
+   * made by the user before the GUI is updated to show the change.  The JsetValueCallback
+   * interface is also used to pass pop-up menu commands to the client.</p>
    *
-   * There are several kinds of type you might get back:
+   * <p>JstringListBox uses the following value type constants from
+   * {@link arlut.csd.JDataComponent.JValueObject JValueObject} to pass status updates to
+   * the callback.
+   *
    * <ul>
-   * <li><b>ADD</b> This is really a selection event
-   * <li><b>INSERT</b> This is a double click
-   * <li><b>PARAMETER</b> This is a PopupMenu event.  The parameter will be the ActionCommand from the JMenuItem.
+   * <li><b>PARAMETER</B>Action from a PopupMenu.  The Parameter is the ActionCommand
+   * string for the pop-up menu item selected, and the value is the object
+   * (or string if no object defined) associated with the item selected when the pop-up menu was fired.</li>
+   * <li><b>ADD</b>Object has been selected.  Value is the object (or string) selected.</li>
+   * <li><b>INSERT</b>Object has been double-clicked.  Value is the object (or string) double-clicked.</li>
    * </ul>
+   * </p>
+   *
+   * @see JsetValueCallback
+   * @see JValueObject
+   *
    */
 
   public void setCallback(JsetValueCallback parent)

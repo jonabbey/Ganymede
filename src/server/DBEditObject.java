@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 1999/03/17 05:32:47 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 1999/03/22 22:38:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -85,7 +85,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.102 $ %D%
+ * @version $Revision: 1.103 $ $Date: 1999/03/22 22:38:25 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */

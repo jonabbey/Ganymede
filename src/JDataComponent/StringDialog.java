@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 1999/01/22 18:04:01 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 1999/03/22 22:37:55 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -64,15 +64,22 @@ import javax.swing.border.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class represents a customizable dialog.  
  *
- * <p>For simple dialogs, use the included
- * constructors.  For more complicated dialogs, including check boxes, choice lists, and text
- * fields, use a DialogRsrc. </p>
+ * <p>A simple customizable dialog with support for a variety of data
+ * field components.</p>
  *
- * <p>The ShowDialog method shows the current dialog, and returns a Hashtable of results.</p>
+ * <p>For simple dialogs, use the included constructors.  For more
+ * complicated dialogs, including check boxes, choice lists, and text
+ * fields, use a {@link arlut.csd.JDialog.DialogRsrc DialogRsrc} object
+ * to pass in a pre-defined dialog definition.</p>
  *
- * @see DialogRsrc
+ * <p>The ShowDialog method shows the current dialog, and returns a
+ * Hashtable of results, which map the label used in the dialog for
+ * individual data fields with the value entered into that field.</p>
+ *
+ * @see DialogRsrc 
+ * @version $Revision: 1.51 $ $Date: 1999/03/22 22:37:55 $ $Name:  $
+ * @author Mike Mulvaney 
  */
 
 public class StringDialog extends JCenterDialog implements ActionListener, WindowListener {
@@ -591,7 +598,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
    *
    */
 
-  public void registerCallbacks()
+  protected void registerCallbacks()
   {
     for (int i = 0; i < components.size(); i++)
       {
@@ -679,11 +686,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
   }
 
   /**
-   * Display the dialog box.
+   * <p>Display the dialog box, locks this thread while the dialog is being
+   * displayed, and returns a hashtable of data field values when the
+   * user closes the dialog box.</p>
    *
-   * Use this instead of Dialog.show().  If Hashtable returned is null,
+   * <p>Use this instead of Dialog.show().  If Hashtable returned is null,
    * then the cancel button was clicked.  Otherwise, it will contain a 
-   * hash of labels(String) to results (Object).
+   * hash of labels(String) to results (Object).</p>
    *
    * @return HashTable of labels to values
    */
@@ -792,6 +801,12 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	  }
       }    
   }
+
+  /**
+   *
+   * Convenience method to add a GUI component to this dialog.
+   *
+   */
 
   private final void addRow(JPanel parent, JComponent comp,  String label, int row)
   {

@@ -6,8 +6,8 @@
    
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/01/22 18:05:37 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/03/22 22:38:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,9 +57,39 @@ import gnu.regexp.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ *
+ * This class is the query processing engine for the Ganymede database.  Static
+ * methods in this class are used to test a query tree against an individual object
+ * in the database.<br><br>
+ *
+ * The GanymedeSession.queryDispatch() method contains most of the query engine's
+ * logic (including namespace-indexed query optimization).  This class is just
+ * responsible for applying a recursive QueryNode tree to a particular object.
+ *
+ * @see QueryNode
+ * @see Query
+ *
+ * @version $Revision: 1.20 $ $Date: 1999/03/22 22:38:26 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
+ */
+
 public class DBQueryHandler {
 
   static final boolean debug = false;
+
+  /**
+   *
+   * This method compares an object with a submitted query, returning true if
+   * the object matches the query.
+   *
+   * @param session The GanymedeSession performing the query.  This parameter is
+   * used to access the database to find the object's label if the query contains
+   * any clauses matching against the object's label.
+   * @param q The Query being compared to this object.
+   * @param obj The object being tested.
+   *
+   */
 
   public static final boolean matches(GanymedeSession session, Query q, DBObject obj)
   {
@@ -77,6 +107,18 @@ public class DBQueryHandler {
 	return nodeMatch(session, q.root, obj);
       }
   }
+
+  /**
+   *
+   * Recursive static method to compare a Query tree against an object in the database.
+   *
+   * @param session The GanymedeSession performing the query.  This parameter is
+   * used to access the database to find the object's label if the query contains
+   * any clauses matching against the object's label.
+   * @param qN The QueryNode being compared to this object.
+   * @param obj The object being tested.
+   *
+   */
 
   public static final boolean nodeMatch(GanymedeSession session, QueryNode qN, DBObject obj)
   {
@@ -696,6 +738,13 @@ public class DBQueryHandler {
 
   // helpers
 
+  /**
+   *
+   * IP address values are encoded as byte arrays in the Ganymede server.. this 
+   * method is used to compare two IP address values for equality.
+   *
+   */
+
   private static boolean compareIPs(Byte[] param1, Byte[] param2)
   {
     if (param1.length != param2.length)
@@ -718,7 +767,10 @@ public class DBQueryHandler {
 
   /**
    *
-   * Returns true if param1 begins with param2.
+   * IP address values are encoded as byte arrays in the Ganymede server.. this 
+   * method is used to compare two IP address values for a prefix relationship.
+   *
+   * @return Returns true if param1 begins with param2.
    *
    */
 
@@ -748,7 +800,10 @@ public class DBQueryHandler {
 
   /**
    *
-   * Returns true if param1 ends with param2.
+   * IP address values are encoded as byte arrays in the Ganymede server.. this 
+   * method is used to compare two IP address values for a suffix relationship.
+   *   
+   * @return Returns true if param1 ends with param2.
    *
    */
 

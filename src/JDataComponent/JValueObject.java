@@ -2,7 +2,6 @@
 /*
    JValueObject.java
 
-
    This class is primary a holder object that is used to
    pass scalar and vector values and vector operation
    instructions using a callback method to the Object designated
@@ -10,8 +9,8 @@
 
    Created: 28 Feb 1997
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/01/22 18:03:56 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/03/22 22:37:52 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -62,42 +61,126 @@ import java.awt.*;
 
 /**
  *
- *  JValueObject.java<br><br>
+ * <p>A client-side message object used to pass status updates from
+ * GUI components in the arlut.csd.JDataComponent package to their
+ * containers.  JValueObject supports passing information about
+ * scalar and vector value change operations, as well as pop-up
+ * menus and error messages.</p>
  *
- *  This class is primary a holder object that is used to
- *  pass scalar and vector values and vector operation
- *  instructions using a callback method to the Object designated
- *  as an appropriate callback handler.<br><br>
+ * <p>Note that we came up with this message type before Sun introduced
+ * the 1.1 AWT event model.  Great minds... ;-)</p>
  *   
- *  Created: 28 Feb 1997<br>
- *  Version: $Revision: 1.9 $ %D%<br>
- *  Module By: Navin Manohar<br>
- *  Applied Research Laboratories, The University of Texas at Austin
- *
+ * @version $Revision: 1.10 $ $Date: 1999/03/22 22:37:52 $ $Name:  $
+ * @author Navin Manohar 
  */
 
 public class JValueObject {
 
+  /**
+   * Boundary guard for acceptable operation types.
+   */
+
   public static final int FIRST = -1009;
+
+  /**
+   * Vector add operation.  Also used to indicate item selection in JstringListBox.
+   */
+
   public static final int ADD = -1001;
+
+  /**
+   * Vector insert operation, requires both value and index
+   * to be set.  Also used to indicate item double-click in JstringListBox.
+   */
+
   public static final int INSERT = -1002;
+
+  /**
+   * Vector delete operation, requires index to be set.
+   */
+
   public static final int DELETE = -1003;
+
+  /**
+   * Scalar value set operation.  Requires value to be set.
+   */
+
   public static final int SET = -1004;
+
+  /**
+   * The operation value to use when you're not using a JValueObject.
+   */
+
   public static final int NONE = -1005;
+
+  /**
+   * Error message return operation.  Requires value to be
+   * set to a string describing the error.
+   */
+
   public static final int ERROR = -1006;
-  public static final int SPECIAL = -1007;  //Use this for those hacks
+
+  /**
+   * Use this for those hacks
+   */
+
+  public static final int SPECIAL = -1007;  
+
+  /**
+   * Used to pass action commands (as from pop-up menu activity) from GUI
+   * components.
+   */
+
   public static final int PARAMETER = -1008;
+
+  /**
+   * Boundary guard for acceptable operation types.
+   */
+
   public static final int LAST = -1000;
 
+  /**
+   * The arlut.csd.JDataComponent GUI component that originated this message.
+   */
+
   private Component source;
-  private Object value;
-  private Object parameter;  // for JValueObjects with PARAMETER
-  private int index;
+
+  /**
+   * An enumerated operation type indicator.  Should be one of ADD, INSERT,
+   * DELETE, SET, ERROR, SPECIAL, and PARAMETER.
+   */
+
   private int operationValue = NONE;
 
-  private boolean Operation = false;  // true if the value object is asking for a field to be added
-                                      // to a vectorContainer.
+  /**
+   * A multi-purpose value object.  Interpreted differently for different operation types.
+   */
+
+  private Object value;
+
+  /**
+   * An auxiliary value used for some kinds of operation types.  Often used to indicate
+   * ActionCommands for pop-up menus attached to arlut.csd.JDataComponent GUI components.
+   */
+
+  private Object parameter;
+
+  /**
+   * Index used to indicate what value of a vector is being modified by this message.
+   */
+
+  private int index;
+
   /* -- */
+
+  /**
+   *
+   * Constructor for a simple value-set message.
+   *
+   * @param source arlut.csd.JDataComponent GUI component originating message
+   * @param value Value being set by the originating GUI component
+   *
+   */
 
   public JValueObject(Component source, Object value)
   {
@@ -106,12 +189,34 @@ public class JValueObject {
     operationValue = SET;
   }
 
+  /**
+   *
+   * Constructor for a simple single-value message.
+   *
+   * @param source arlut.csd.JDataComponent GUI component originating message
+   * @param value Value being set by the originating GUI component
+   * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
+   * ERROR, SPECIAL, PARAMETER.
+   *
+   */
+
   public JValueObject(Component source, Object value, int operation)
   {
     this.source = source;
     this.value = value;
     operationValue = operation;
   }
+
+  /**
+   *
+   * Constructor for a simple vector chaange message.
+   *
+   * @param source arlut.csd.JDataComponent GUI component originating message
+   * @param index index of vector connected to arlut.csd.JDataComponent GUI component being changed.
+   * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
+   * ERROR, SPECIAL, PARAMETER.
+   *
+   */
   
   public JValueObject(Component source, int index, int operation)
   {
@@ -124,14 +229,37 @@ public class JValueObject {
       }
     
     this.operationValue = operation;
-    
-    Operation = true;
   }
+
+  /**
+   *
+   * Constructor for a simple vector chaange message.
+   *
+   * @param source arlut.csd.JDataComponent GUI component originating message
+   * @param index index of vector connected to arlut.csd.JDataComponent GUI component being changed.
+   * @param value Value being set by the originating GUI component
+   * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
+   * ERROR, SPECIAL, PARAMETER.
+   *
+   */
 
   public JValueObject(Component source, int index, int operation, Object value)
   {
     this(source, index, operation, value, null);
   }
+
+  /**
+   *
+   * Generic constructor
+   *
+   * @param source arlut.csd.JDataComponent GUI component originating message
+   * @param index index of vector connected to arlut.csd.JDataComponent GUI component being changed.
+   * @param value Value being set by the originating GUI component
+   * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
+   * ERROR, SPECIAL, PARAMETER.
+   * @param parameter Auxilary object value, used when passing pop-up menu information.
+   *
+   */
 
   public JValueObject(Component source, int index, int operation, Object value, Object parameter)
   {
@@ -146,40 +274,51 @@ public class JValueObject {
     
     this.operationValue = operation;
     
-    Operation = true;
-    
     this.value = value;
   }
+
+  /**
+   * Returns the arlut.csd.JDataComponent GUI component that originated this message.
+   */
 
   public Component getSource()
   {
     return source;
   }
 
+  /**
+   * Returns an auxilary value.  Used for passing information about pop-up menu items, but may
+   * be used for different purposes if needed.
+   */
+
   public Object getParameter() 
   {
     return parameter;
   }
 
-  public boolean isOperation() 
-  {
-    return Operation;
-  }
+  /**
+   * Returns the index of an item operated on in a vector component.
+   */
 
   public int getIndex() 
   {
     return index;
   }
 
+  /**
+   * Returns the value of the object being affected by this message.
+   */
+
   public Object getValue() 
   {
     return value;
   }
 
-  public int operationType() 
-  {
-    return operationValue;
-  }
+  /**
+   *
+   * Returns the type of operation encoded by this message.
+   *
+   */
 
   public int getOperationType() 
   {
