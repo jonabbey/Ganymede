@@ -54,7 +54,12 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   Hashtable 
   
-    baseHash;
+    baseHash,
+    shortHash;
+  
+  Hashtable myHash = new Hashtable(); // allows you to look up a base with its
+                                      // name as the key
+  
 
    // - Buttons
   
@@ -115,9 +120,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   Base defaultBase;
   Component[] myAry = new Component[MAXCOMPONENTS]; // stores a single row
  
-  Hashtable myHash = new Hashtable(); // allows you to look up a base with its
-                                      // name as the key
- 
   // - Strings
 
   String
@@ -132,7 +134,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   // Constructors //
   //////////////////
 
-  public querybox (Base defaultBase, Hashtable baseHash, Hashtable ShortHash,
+  public querybox (Base defaultBase, Hashtable baseHash, Hashtable shortHash,
                     Frame parent, String DialogTitle)
     {
       super(parent, DialogTitle, true); // the boolean value is to make the dialog modal
@@ -146,7 +148,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
       this.baseHash = baseHash;  
       this.defaultBase = defaultBase;
- 
+      this.shortHash = shortHash;
+
       // - Define the main window
 
       optionsFrame.setVisible(false); // do not display return options window yet
@@ -226,11 +229,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      // no default given. pick the one that's there.
 	    
 	      currentBase = baseChoice.getSelectedItem();
-	     
-	      if (currentBase == null){
-		System.out.println("THUNDERCLOUD SUBS!!!");
-
-	      }
 	      this.defaultBase = (Base) myHash.get(currentBase);
 	      defaultBase = this.defaultBase;
 	      this.baseName = defaultBase.getName();
@@ -417,30 +415,43 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      // Examine each field and if it's not referring to an embedded,
 	      // then add it's name + basePrefix to the string vector
      
+	      System.out.println("We're in getembedded");
+
 	      tempField = (BaseField) fields.elementAt(j);
-	      tempID = tempField.getTargetBase();
+	      
+	      System.out.println("Weve got the field");
+	   
+	     
 	  
-	      if (tempField.isEditInPlace())
-		{
+	      System.out.println("Weve got the field and its ID");
+
+	      if (! tempField.isEditInPlace())
+		{	 
 		  myName = tempField.getName();
 		  myName = basePrefix + "/" + myName;  // slap on the prefix
 		  Embedded.addElement(myName);
-		  System.out.println("From Embedded: " + myName);
+		  System.out.println("ADDING Embedded: " + myName);
 		}
 	      else
 		{
 		  // since it does refer to an embedded, call getEmbedded again,
 		  // with tempBase.getFields(), basePrefix/tempBase, 
 
+		  System.out.println("We've got a nested Edit in Place");
+		  
+		  tempID = tempField.getTargetBase();
+
 		  tempIDobj = new Short(tempID);
 
 		  // get the base from the ShortHash
-
-		  tempBase = null;
-
-
-		  myName = basePrefix + "/" + tempBase.getName();
-		  getEmbedded(tempBase.getFields(), myName);
+		  
+		  tempIDobj = new Short(tempID);
+		  tempBase = (Base) shortHash.get(tempIDobj);
+		  
+	
+		  
+		  System.out.println("RECURSING!!");
+		  getEmbedded(tempBase.getFields(), basePrefix);
 
 		}
 	 
@@ -472,11 +483,35 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       try
 	{
 	  Vector fields = base.getFields();
+	  Vector EIPfields = new Vector();
+		  
 	  for (int j=0; fields != null && (j < fields.size()); j++) 
 	    {
 	      basefield = (BaseField) fields.elementAt(j);
-	      String Name = basefield.getName();
-	      myChoice.add(Name);
+	    
+	      if (basefield.isEditInPlace() == true)
+		{
+		  // add it to EIPfields
+		  EIPfields.addElement(basefield);
+		  String fieldName = basefield.getName();
+		  getEmbedded(EIPfields, fieldName);
+		  EIPfields.removeElement(basefield);
+		}
+	      else
+		{
+		  String Name = basefield.getName();
+		  myChoice.add(Name);
+		}
+	    }
+	  
+	  if (! Embedded.isEmpty())
+	    {
+	      for (int k = 0; Embedded != null && (k < Embedded.size()); k ++)
+		{
+		  String embedName = (String) Embedded.elementAt(k);
+		  Embedded.removeElementAt(k);
+		  myChoice.add(embedName); // make it so #1
+		}
 	    }
 	}
       catch (RemoteException ex)
