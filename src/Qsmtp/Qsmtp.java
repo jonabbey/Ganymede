@@ -190,6 +190,15 @@ public class Qsmtp implements Runnable {
 	queuedMessages.notifyAll();
 
 	// the background thread will kill itself off cleanly
+
+	try
+	  {
+	    backgroundThread.join(); // wait for our email sending thread to drain
+	  }
+	catch (InterruptedException ex)
+	  {
+	    return;		// oh, well.
+	  }
       }
   }
 
