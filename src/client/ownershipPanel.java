@@ -31,7 +31,7 @@ import arlut.csd.JDataComponent.*;
 
 public class ownershipPanel extends JPanel implements ItemListener {
 
-  private final static boolean debug = true;
+  boolean debug = true;
 
   invid_field
     field;
@@ -75,6 +75,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
     this.parent = parent;
 
     gc = parent.wp.gc;
+    debug = gc.debug;
 
     setLayout(new BorderLayout());
 
@@ -147,7 +148,10 @@ public class ownershipPanel extends JPanel implements ItemListener {
   {
     if (event.getStateChange() == ItemEvent.DESELECTED)
       {
-	System.out.println("I DON'T CARE IF YOU ARE DESELECTED!");
+	if (debug)
+	  {
+	    System.out.println("I DON'T CARE IF YOU ARE DESELECTED!");
+	  }
       }
     else if (event.getStateChange() == ItemEvent.SELECTED)
       {
@@ -171,7 +175,10 @@ public class ownershipPanel extends JPanel implements ItemListener {
       }
     else
       {
-	System.out.println("What the hell kind of item event is this? " + event);
+	if (debug)
+	  {
+	    System.out.println("What the hell kind of item event is this? " + event);
+	  }
       }
   }
 }
@@ -184,7 +191,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
 class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
-  private final static boolean debug = true;
+  boolean debug = true;
 
   boolean
     stringSelector_loaded = false;
@@ -232,7 +239,8 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
     this.parent = parent;
 
     gc = parent.gc;
-    
+    debug = gc.debug;
+
     setLayout(new BorderLayout());
     filler = new JPanel();
     filler.add(new JLabel("Creating panel, please wait."));
@@ -394,12 +402,12 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	  {
 	    retVal = field.addElement((Invid)e.getValue());
 
-	    succeeded = (retVal == null) ? true : retVal.didSucceed();
-
 	    if (retVal != null)
 	      {
 		gc.handleReturnVal(retVal);
 	      }
+
+	    succeeded = (retVal == null) ? true : retVal.didSucceed();
 	  }
 	catch (RemoteException rx)
 	  {
@@ -417,12 +425,12 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	  {
 	    retVal = field.deleteElement(e.getValue());
 
-	    succeeded = (retVal == null) ? true : retVal.didSucceed();
-
 	    if (retVal != null)
 	      {
 		gc.handleReturnVal(retVal);
 	      }
+
+	    succeeded = (retVal == null) ? true : retVal.didSucceed();
 	  }
 	catch (RemoteException rx)
 	  {
@@ -435,6 +443,11 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	System.out.println("returnValue = " + succeeded);
       }
     
+    if (succeeded)
+      {
+	gc.somethingChanged();
+      }
+
     return succeeded;
   }
 
