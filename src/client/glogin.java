@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -58,8 +58,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   protected gclient g_client;
 
   protected Image ganymede_logo;
-  protected TextField username;
-  protected TextField passwd;
+  protected JTextField username;
+  protected JPasswordField passwd;
   protected JButton connector;
   protected JButton _quitButton;
   protected JPanel bPanel;
@@ -225,6 +225,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // trap the login/quit buttons, and query these
     // fields when we process the buttons.
 
+    //gbc.insets = new Insets(2,2,2,2);
+    gbc.ipady = 4;
+
     JLabel userL = new JLabel("Username:");
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridy = 2;
@@ -232,7 +235,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbl.setConstraints(userL, gbc);
     appletContentPane.add(userL);
 
-    username = new TextField(20);
+    username = new JTextField(20);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
@@ -247,13 +250,15 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbl.setConstraints(passL, gbc);
     appletContentPane.add(passL);
 
-    passwd = new TextField(20);
-    passwd.setEchoChar('*');
+    passwd = new JPasswordField(20);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
     gbl.setConstraints(passwd, gbc);
     appletContentPane.add(passwd);
+
+    //gbc.insets = new Insets(0,0,0,0);
+    gbc.ipady = 0;
     
     _quitButton = new JButton("Quit");
     _quitButton.setBackground(ClientColor.buttonBG);
