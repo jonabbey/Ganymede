@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,7 +46,7 @@ public class DBStore {
   public static final short LAST = 4;
 
   static final String id_string = "Gstore";
-  static final byte major_version = 0;
+  static final byte major_version = 1;
   static final byte minor_version = 0;
 
   static final boolean debug = true;
@@ -98,7 +98,9 @@ public class DBStore {
     DataInputStream in;
 
     DBObjectBase tempBase;
-    short baseCount;
+    short baseCount, namespaceCount;
+    String namespaceID;
+    boolean caseInsensitive;
     String file_id;
     byte file_major, file_minor;
 
@@ -133,6 +135,15 @@ public class DBStore {
 	  {
 	    System.err.println("DBStore initialization error: major version mismatch");
 	    throw new Error("DBStore initialization error (" + filename + ")");
+	  }
+
+	// read in the namespace definitions
+
+	namespaceCount = in.readShort();
+
+	for (int i = 0; i < namespaceCount; i++)
+	  {
+	    nameSpaces.addElement(new DBNameSpace(in));
 	  }
 	
 	baseCount = in.readShort();
@@ -239,8 +250,9 @@ public class DBStore {
     FileOutputStream outStream = null;
     DataOutputStream out = null;
     Enumeration basesEnum;
-    short baseCount;
+    short baseCount, namespaceCount;
     DBDumpLock lock = null;
+    DBNameSpace ns;
 
     /* -- */
 
@@ -270,6 +282,16 @@ public class DBStore {
 	out.writeUTF(id_string);
 	out.writeByte(major_version);
 	out.writeByte(minor_version);
+
+	namespaceCount = (short) nameSpaces.size();
+
+	out.writeShort(namespaceCount);
+
+	for (int i = 0; i < namespaceCount; i++)
+	  {
+	    ns = (DBNameSpace) nameSpaces.elementAt(i);
+	    ns.emit(out);
+	  }
 
 	baseCount = (short) objectBases.size();
 
