@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/06/25 22:02:12 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2000/10/14 01:47:15 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -81,7 +81,7 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.27 $ $Date: 1999/06/25 22:02:12 $ $Name:  $
+ * @version $Revision: 1.28 $ $Date: 2000/10/14 01:47:15 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
@@ -674,6 +674,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     for (int i = 0; i < size; i++)
       {
 	lh = (listHandle)model.getElementAt(i);
+
 	if (lh.getLabel().equals(s))
 	  {
 	    setSelected(lh);
@@ -853,6 +854,41 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 		  }
 	      }
 	  }
+	else if (SwingUtilities.isRightMouseButton(e))
+	  {
+	    if (debug)
+	      {
+		System.out.println("Its a popup trigger!");
+	      }
+
+	    popUpIndex = locationToIndex(e.getPoint());
+
+	    boolean found = false;
+
+	    try
+	      {
+		if (model.elementAt(popUpIndex) != null)
+		  {
+		    found = true;
+		  }
+	      }
+	    catch (ArrayIndexOutOfBoundsException ex)
+	      {
+	      }
+
+	    if (found)
+	      {
+		clearSelection();
+		setSelectedIndex(popUpIndex);
+
+		if (popup != null)
+		  {
+		    popup.setVisible(false);
+
+		    popup.show(e.getComponent(), e.getX(), e.getY());
+		  }
+	      }
+	  }
       }
   }
 
@@ -884,22 +920,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public void mousePressed(MouseEvent e)
   {
-    if (SwingUtilities.isRightMouseButton(e))
-      {
-	if (debug)
-	  {
-	    System.out.println("Its a popup trigger!");
-	  }
-
-	popUpIndex = locationToIndex(e.getPoint());
-
-	if (popup != null)
-	  {
-	    popup.show(e.getComponent(), e.getX(), e.getY());
-	  }
-
-	e.consume();
-      }
   }
 
   /**

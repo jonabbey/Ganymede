@@ -977,6 +977,14 @@ I cleaned up the gasharl schema kit's ganymede.schema file to take
 care of some inconsistencies that have been in that file for a long
 while.
 
+67. [CLIENT] Tweaked right-menu clicks in StringSelector to select and popup
+
+Mike Mulvaney (ex-Ganymede GUI guy) filed a bug report indicating that
+clicking the right mouse button should select the item that the pop-up
+menu is being applied to.
+
+He was right, and I so fixed it.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
