@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.146 $
-   Last Mod Date: $Date: 2003/09/04 00:27:49 $
+   Version: $Revision: 1.147 $
+   Last Mod Date: $Date: 2003/09/04 00:32:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -334,7 +334,18 @@ public class Ganymede {
     //
     // to 5 seconds, as it happens.
 
-    RMISocketFactory.setSocketFactory(new RMITimeOutFactory(5));
+    try
+      {
+	RMISocketFactory.setSocketFactory(new RMITimeOutFactory(5));
+      }
+    catch (java.io.IOException ex)
+      {
+	System.err.println("");
+	System.err.println("Error, couldn't set the RMITimeOutFactory");
+	System.err.println("");
+	Ganymede.printStackTrace(ex);
+	System.exit(1);
+      }
 
     try
       {
