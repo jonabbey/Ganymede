@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,7 +46,7 @@ public class glogin extends java.applet.Applet implements Runnable {
   protected JButton connector;
   protected JButton _quitButton;
   protected Label _connectStatus = new Label();
-  protected JBufferedPane bPanel;
+  protected JPanel bPanel;
   protected static Frame my_frame = null;
 
   protected static Server  my_server;
@@ -155,7 +155,7 @@ public class glogin extends java.applet.Applet implements Runnable {
     username.setText("supergash");
     passwd.setEnabled(false);
 
-    bPanel = new JBufferedPane();
+    bPanel = new JPanel();
     bPanel.setLayout(new BorderLayout());
 
     _quitButton = new JButton("Quit");
