@@ -1,12 +1,12 @@
-/*
+ /*
 
    framePanel.java
 
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 1999/03/19 05:11:45 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 1999/03/19 05:52:27 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -90,18 +90,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * used with vetoableChange() to work around Swing 1.1 bug preventing
    * setDefaultCloseOperation(DO_NOTHING_ON_CLOSE) from doing anything
    * useful.
+   *
+   * This variable needs to be set to true in order for setClosed() calls
+   * in windowPanel to avoid bringing up the dialogs.
    */
 
   boolean closingApproved = false;
-
-  /**
-   * helpfully, the vetoableChange() method will be called twice from
-   * one close window attempt on the part of the user.  I am so happy
-   * about this.  Really.  I hope to god this gets fixed in Swing 1.1.1,
-   * but then of course this 'vetoCount' code will be broken.  Grrrr.
-   */
-
-  private int vetoCount = 0;
 
   // Indexes for the tabs in the JTabbedPane These numbers have to
   // correspond to the order they are added as tabs, so they are set
@@ -1625,14 +1619,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public void vetoableChange(PropertyChangeEvent pce) throws PropertyVetoException
   {
-    if (pce.getPropertyName().equals(IS_CLOSED_PROPERTY))
+    if (pce.getPropertyName().equals(IS_CLOSED_PROPERTY) &&
+	pce.getOldValue().equals(Boolean.FALSE) &&
+	pce.getNewValue().equals(Boolean.TRUE))
       {
-	vetoCount++;
-
-	if (!closingApproved && ((vetoCount % 2) == 1))
+	if (!closingApproved)
 	  {
 	    StringDialog okToKill;
-
+	    
 	    if (isCreating)
 	      {
 		okToKill = new StringDialog(gclient.client, 
@@ -1673,9 +1667,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	      {
 		gclient.client.deleteObject(getObjectInvid());
 	      }
-	  }
 
-	closingApproved = true;
+	    closingApproved = true;
+	  }
       }
   }
 }

@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 1999/03/19 05:11:46 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 1999/03/19 05:52:28 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -702,7 +702,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 		  }
 		catch (java.beans.PropertyVetoException ex)
 		  {
-		    throw new RuntimeException("beans? " + ex);
+		    // shouldn't happen here
 		  }
 	      }
 	  }
@@ -713,9 +713,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    *
    * Closes all internal frames, editable or no.
    *
+   * @param askNoQuestions if true, closeAll() will inhibit the normal
+   * dialogs brought up when create/editable windows are closed.
+   *
    */
 
-  public void closeAll()
+  public void closeAll(boolean askNoQuestions)
   {
     JInternalFrame w;
     Enumeration windows;
@@ -740,16 +743,19 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	try
 	  {
-	    if (w instanceof framePanel)
+	    if (askNoQuestions)
 	      {
-		((framePanel) w).closingApproved = true;
+		if (w instanceof framePanel)
+		  {
+		    ((framePanel) w).closingApproved = true;
+		  }
 	      }
 
 	    w.setClosed(true);
 	  }
 	catch (java.beans.PropertyVetoException ex)
 	  {
-	    throw new RuntimeException("beans? " + ex);
+	    // user decided against this one..
 	  }
       }
   }
@@ -797,7 +803,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 		  }
 		catch (java.beans.PropertyVetoException ex)
 		  {
-		    throw new RuntimeException("beans? " + ex);
+		    // okay, so the user decided against it.
 		  }
 	      }
 	    else
@@ -913,7 +919,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       {
 	if (e.getSource() == removeAllMI)
 	  {
-	    closeAll();
+	    closeAll(false);
 	  }
 	else
 	  {

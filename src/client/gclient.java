@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.140 $
-   Last Mod Date: $Date: 1999/03/19 05:11:45 $
+   Version: $Revision: 1.141 $
+   Last Mod Date: $Date: 1999/03/19 05:52:27 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -3869,7 +3869,7 @@ PersonaDialog getPersonaDialog()
     // windows on a cancel, we encourage the user to do more within a
     // transaction, which is more resource efficient for the server.
     
-    wp.closeAll();
+    wp.closeAll(true);
 
     Enumeration dels = deleteHash.keys();
     
