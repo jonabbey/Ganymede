@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 2000/05/04 04:19:23 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 2000/07/12 04:41:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -3352,6 +3352,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 		    catch (RemoteException ex)
 		      {
 			throw new RuntimeException("caught remote: " + ex);
+		      }
+		    catch (NullPointerException ex)
+		      {
+			System.err.println("Error, " + this.toString() + " couldn't lookup targetField (" + targetField + ")");
+			System.err.println("In base " + base.toString());
+			System.err.println(ex.getMessage());
 		      }
 		  }
 	      }

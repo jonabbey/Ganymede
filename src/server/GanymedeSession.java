@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.187 $
-   Last Mod Date: $Date: 2000/07/07 01:23:36 $
+   Version: $Revision: 1.188 $
+   Last Mod Date: $Date: 2000/07/12 04:41:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.187 $ $Date: 2000/07/07 01:23:36 $
+ * @version $Revision: 1.188 $ $Date: 2000/07/12 04:41:02 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4928,6 +4928,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
+    if (permsdebug)
+      {
+	System.err.println("Entering GanymedeSession.getPerm(" + object + "," + fieldId + ")");
+      }
+
     if (supergashMode)
       {
 	return PermEntry.fullPerms;
@@ -4966,10 +4971,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	objectHook.grantOwnership(this, containingObj) ||
 	personaMatch(containingObj))
       {
+	if (permsdebug)
+	  {
+	    System.err.println("GanymedeSession.getPerm(" + object + "," + fieldId + ") choosing persona perms");
+	  }
+
 	applicablePerms = personaPerms;	// superset of defaultPerms
       }
     else
       {
+	if (permsdebug)
+	  {
+	    System.err.println("GanymedeSession.getPerm(" + object + "," + fieldId + ") choosing default perms");
+	  }
+
 	applicablePerms = defaultPerms;
       }
 
@@ -4983,6 +4998,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (objectPerm == null)
 	  {
+	    if (permsdebug)
+	      {
+		System.err.println("GanymedeSession.getPerm(" + object + "," + fieldId + ") found no object perm");
+	      }
+
 	    objectPerm = PermEntry.noPerms;
 	  }
 	
@@ -4991,6 +5011,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     if (overrideFieldPerm != null)
       {
+	if (permsdebug)
+	  {
+	    System.err.println("GanymedeSession.getPerm(" + object + "," + fieldId + ") returning override perm");
+	  }
+
 	return overrideFieldPerm.intersection(objectPerm);	
       }
     
@@ -5004,12 +5029,26 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     if (fieldPerm == null)
       {
+	if (permsdebug)
+	  {
+	    System.err.println("GanymedeSession.getPerm(" + object + "," + fieldId + ") returning object perms");
+	  }
+
 	return objectPerm;
       }
 
     // we want to return the more restrictive permissions of the
     // object's permissions and the field's permissions.. we can never
     // look at a field in an object we can't look at.
+
+    if (permsdebug)
+      {
+	System.err.println("GanymedeSession.getPerm(" + object + "," + fieldId + ") returning field perms");
+
+	System.err.println("fieldPerm = " + fieldPerm);
+	System.err.println("objectPerm = " + objectPerm);
+	System.err.println("expandFieldPerm = " + expandFieldPerm);
+      }
     
     return fieldPerm.union(expandFieldPerm).intersection(objectPerm);
   }

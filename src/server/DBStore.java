@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.123 $
-   Last Mod Date: $Date: 2000/06/24 18:36:41 $
+   Version: $Revision: 1.124 $
+   Last Mod Date: $Date: 2000/07/12 04:41:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.123 $ %D%
+ * @version $Revision: 1.124 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -434,11 +434,6 @@ public final class DBStore {
 		  {
 		    System.err.println("loaded base " + tempBase.getTypeID());
 		  }
-
-		if (tempBase.getTypeID() > maxBaseId)
-		  {
-		    maxBaseId = tempBase.getTypeID();
-		  }
 	      }
 
 	    // we're only using the resort() method because we're
@@ -585,12 +580,22 @@ public final class DBStore {
 
     lock = new DBDumpLock(this);
 
+    if (debug)
+      {
+	System.err.println("DBStore: establishing dump lock");
+      }
+
     try
       {
 	lock.establish("System");	// wait until we get our lock 
       }
     catch (InterruptedException ex)
       {
+      }
+
+    if (debug)
+      {
+	System.err.println("DBStore: dump lock established");
       }
     
     // Move the old version of the file to a backup
@@ -606,6 +611,11 @@ public final class DBStore {
 	  {
 	    if (archiveIt)
 	      {
+		if (debug)
+		  {
+		    System.err.println("DBStore: ziping old db");
+		  }
+
 		String directoryName = dbFile.getParent();
 
 		File directory = new File(directoryName);
@@ -639,6 +649,11 @@ public final class DBStore {
 
 	// and dump the whole thing to ganymede.db.new
 
+	if (debug)
+	  {
+	    System.err.println("DBStore: writing new db");
+	  }
+
 	outStream = new FileOutputStream(filename + ".new");
 	bufStream = new BufferedOutputStream(outStream);
 	out = new DataOutputStream(bufStream);
@@ -664,6 +679,11 @@ public final class DBStore {
 
 	// ok, we've successfully dumped to ganymede.db.new.. move
 	// the old file to ganymede.db.bak
+
+	if (debug)
+	  {
+	    System.err.println("DBStore: renaming new db");
+	  }
 
 	dbFile.renameTo(new File(filename + ".bak"));
 
@@ -703,6 +723,11 @@ public final class DBStore {
 	  {
 	    if (lock != null)
 	      {
+		if (debug)
+		  {
+		    System.err.println("DBStore: releasing dump lock");
+		  }
+
 		lock.release();
 	      }
 	  }
@@ -1453,6 +1478,11 @@ public final class DBStore {
   public synchronized void setBase(DBObjectBase base)
   {
     objectBases.put(base.getKey(), base);
+
+    if (base.getTypeID() > maxBaseId)
+      {
+	maxBaseId = base.getTypeID();
+      }
   }
 
   /**

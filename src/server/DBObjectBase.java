@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 2000/03/27 21:54:41 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 2000/07/12 04:40:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2355,6 +2355,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     this.editor = null;
     this.templateVector = null;
 
+    // we need to make sure any objectHook for this class knows that
+    // we are now its objectBase and not the pre-edit DBObjectBase.
+
+    if (objectHook != null)
+      {
+	objectHook.objectBase = this;
+      }
+
     this.updateBaseRefs();
 
     synchronized (fieldTable)
@@ -2365,8 +2373,23 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    fieldDef = (DBObjectBaseField) enum.nextElement();
 	    fieldDef.editor = null;
-	    
 	    fieldDef.template = new FieldTemplate(fieldDef);
+	  }
+      }
+
+    if (debug2)
+      {
+	if (customFields == null)
+	  {
+	    System.err.println("DBObjectBase.clearEditor(): customFields (" + this.toString() + "== null!!!");
+	  }
+	else
+	  {
+	    for (int i = 0; i <customFields.size(); i++)
+	      {
+		System.err.println("DBObjectBase.clearEditor(): customFields[" + i + "(" + 
+				   this.toString() + ")] = " + customFields.elementAt(i));
+	      }
 	  }
       }
   }

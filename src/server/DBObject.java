@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 2000/05/12 21:31:43 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 2000/07/12 04:40:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.97 $ $Date: 2000/05/12 21:31:43 $
+ * @version $Revision: 1.98 $ $Date: 2000/07/12 04:40:58 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1331,10 +1331,17 @@ public class DBObject implements db_object, FieldType, Remote {
     DBField field;
 
     /* -- */
-    
+
+    if (false)
+      {
+	System.err.println("DBObject.getFieldInfoVector(): " + this.toString());
+      }
+
     for (int i = 0; i < objectBase.customFields.size(); i++)
       {
 	DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
+
+	System.err.println("fieldDef: " + fieldDef);
 
 	field = fields.get(fieldDef.getID());
 	
@@ -1346,10 +1353,25 @@ public class DBObject implements db_object, FieldType, Remote {
 	      }
 	    catch (IllegalArgumentException ex)
 	      {
+		if (false)
+		  {
+		    System.err.println("Caught IllegalArgumentException building FieldInfo for " + field.toString());
+		    ex.printStackTrace();
+		  }
+
 		// we had a permissions failure reading this
 		// field.. skip it.
 	      }
 	  }
+	else
+	  {
+	    System.err.println("Couldn't get field for fieldDef id " + fieldDef.getID());
+	  }
+      }
+
+    if (false)
+      {
+	System.err.println("Returning a result vector with " + results.size() + " elements");
       }
 
     return results;

@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 2000/06/26 20:38:51 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 2000/07/12 04:41:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -104,7 +104,7 @@ import java.io.*;
 
 public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, SchemaEdit {
 
-  private final static boolean debug = true;
+  private final static boolean debug = false;
 
   // ---
 
@@ -197,6 +197,9 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// bases
 
 	maxId = store.maxBaseId;
+
+	System.err.println("Creating schema editor.. maxBaseId/maxId = " + maxId);
+
 	newBases = new Hashtable();
 
 	// this DBBaseCategory constructor recursively copies the
@@ -539,6 +542,12 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     else
       {
 	id = ++maxId;
+      }
+
+    if (store.getObjectBase(id) != null)
+      {
+	throw new RuntimeException("Error, DBSchemaEdit.createNewBase() tried to create a new base " +
+				   "with a pre-allocated id: " + id);
       }
 
     try
@@ -901,21 +910,17 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       {
 	// first the object bases
 
-	if (debug)
-	  {
-	    Ganymede.debug("DBSchemaEdit: entered synchronized block");
-	  }
-
 	enum = newBases.elements();
-
-	if (debug)
-	  {
-	    Ganymede.debug("DBSchemaEdit: established enum");
-	  }
 
 	while (enum.hasMoreElements())
 	  {
 	    base = (DBObjectBase) enum.nextElement();
+
+	    if (debug)
+	      {
+		System.err.println("Checking in " + base);
+	      }
+
 	    base.clearEditor();
 	  }
 
@@ -949,6 +954,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     GanymedeAdmin.setState("Dumping Database");
 
+    Ganymede.debug("DBSchemaEdit: Dumping Database.");
+
     try
       {
 	Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
@@ -961,6 +968,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     // and unlock the server
 
     GanymedeAdmin.setState("Normal Operation");
+
+    Ganymede.debug("DBSchemaEdit: Re-enabling logins.");
 
     GanymedeServer.lSemaphore.enable("schema edit");
 

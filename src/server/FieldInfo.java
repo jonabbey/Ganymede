@@ -7,8 +7,8 @@
    
    Created: 4 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/02/29 09:35:15 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/07/12 04:41:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ package arlut.csd.ganymede;
  * the invariant (during the client's connection) type information associated
  * with the field generically across all objects of the type containing this field.</p>
  *
- * @version $Revision: 1.9 $ $Date: 2000/02/29 09:35:15 $ $Name:  $
+ * @version $Revision: 1.10 $ $Date: 2000/07/12 04:41:02 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -100,11 +100,11 @@ public class FieldInfo implements java.io.Serializable {
 
     if (!field.isVector())
       {
-	value = field.getValue();
+	value = field.getValue(); // can throw IllegalArgumentException on perms failure
       }
     else
       {
-	value = field.getValues();
+	value = field.getValues();// can throw IllegalArgumentException on perms failure
       }
 
     defined = field.isDefined();
