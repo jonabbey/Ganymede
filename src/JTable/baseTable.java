@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.41 $ %D%
+  Version: $Revision: 1.42 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import javax.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.41 $ %D%
+ * @version $Revision: 1.42 $ %D%
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -2034,17 +2034,21 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     if (vbar_visible && (canvas.getBounds().height != 0))
       {
-	if (vbar.getValue() > calcVSize() - (canvas.getBounds().height - displayRegionFirstLine()))
+	int my_scrollbar_height = canvas.getBounds().height - displayRegionFirstLine();
+
+	int max_acceptable_value = calcVSize() - my_scrollbar_height;
+
+	if (vbar.getValue() > max_acceptable_value)
 	  {
-	    vbar.setValues(calcVSize() - (canvas.getBounds().height - displayRegionFirstLine()),
-			   canvas.getBounds().height - displayRegionFirstLine(),
+	    vbar.setValues(max_acceptable_value,
+			   my_scrollbar_height,
 			   0,
 			   calcVSize());
 	  }
 	else
 	  {
 	    vbar.setValues(vbar.getValue(),
-			   canvas.getBounds().height - displayRegionFirstLine(),
+			   my_scrollbar_height,
 			   0,
 			   calcVSize());
 	  }
@@ -2060,9 +2064,11 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
 	int my_current_width = origTotalWidth  + (cols.size() + 1) * vLineThickness;
 
-	if (hbar.getValue() > my_current_width - canvas.getBounds().width)
+	int max_acceptable_value = my_current_width - canvas.getBounds().width;
+
+	if (hbar.getValue() > max_acceptable_value)
 	  {
-	    hbar.setValues(my_current_width - canvas.getBounds().width,
+	    hbar.setValues(max_acceptable_value,
 			   canvas.getBounds().width,
 			   0,
 			   my_current_width);
