@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/07/07 01:21:00 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/07/11 04:57:36 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.16 $ $Date: 2000/07/07 01:21:00 $ $Name:  $
+ * @version $Revision: 1.17 $ $Date: 2000/07/11 04:57:36 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -86,8 +86,7 @@ public class xmlfield implements FieldType {
    * <p>Formatter that we use for generating and parsing date fields</p>
    */
 
-  static DateFormat formatterWithZone = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-  static DateFormat formatterDefaultZone = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
+  static DateFormat[] formatters = null;
 
   /**
    * <p>Definition record for this field type</p>
@@ -593,6 +592,25 @@ public class xmlfield implements FieldType {
 
     /* -- */
 
+    if (formatters == null)
+      {
+	formatters = new DateFormat[6];
+
+	// 0 = mail-style date with timezone
+	// 1 = mail-style date no timezone
+	// 2 = UNIX date output, with timezone
+	// 3 = UNIX date output, without timezone
+	// 4 = no-comma style 0
+	// 4 = no-comma style 1
+
+	formatters[0] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+	formatters[1] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
+	formatters[2] = new SimpleDateFormat("EEE dd MMM HH:mm:ss z yyyy");
+	formatters[3] = new SimpleDateFormat("EEE dd MMM HH:mm:ss yyyy");
+	formatters[4] = new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss z");
+	formatters[5] = new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss");
+      }
+
     if (!item.matches("date"))
       {
 	System.err.println("\nUnrecognized XML item found when date expected: " + item);
@@ -608,21 +626,20 @@ public class xmlfield implements FieldType {
 
     if (formattedDate != null)
       {
-	try
-	  {
-	    result1 = formatterWithZone.parse(formattedDate);
-	  }
-	catch (ParseException ex)
+	for (int i = 0; i < formatters.length && result1 == null; i++)
 	  {
 	    try
 	      {
-		result1 = formatterDefaultZone.parse(formattedDate);
+		result1 = formatters[i].parse(formattedDate);
 	      }
-	    catch (ParseException ex2)
+	    catch (ParseException ex)
 	      {
-		System.err.println("\nError, could not parse date entity val " + formattedDate + " in element " + item);
-		System.err.println(ex2.getMessage());
 	      }
+	  }
+
+	if (result1 == null)
+	  {
+	    System.err.println("\nError, could not parse date entity val " + formattedDate + " in element " + item);
 	  }
       }
 
@@ -647,7 +664,7 @@ public class xmlfield implements FieldType {
       {
 	System.err.println("\nWarning, date element " + item + " is not internally consistent.");
 	System.err.println("Ignoring date string \"" + formattedDate + "\".");
-	System.err.println("Using timecode data string \"" + formatterWithZone.format(result2) + "\".");
+	System.err.println("Using timecode data string \"" + formatters[0].format(result2) + "\".");
 
 	return result2;
       }
@@ -662,7 +679,7 @@ public class xmlfield implements FieldType {
 	return result1;
       }
 
-    return null;
+    throw new RuntimeException("Couldn't get valid date value from " + item.toString());
   }
 
   public String parseStringVecItem(XMLItem item) throws SAXException
