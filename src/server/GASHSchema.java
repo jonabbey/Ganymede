@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -806,6 +806,14 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     namespaceC = new Choice();
     namespaceC.addItemListener(this);
+    /***********  Can;t access editor from here
+    //NameSpace[] nameSpaces = editor.getNameSpaces();
+    //if (nameSpaces.length == 0)
+    //  namespaceC.addItem("<none>");
+    ///else
+    //  for (int i=0 ; i < nameSpaces.length ; i++)
+    //	namespaceC.addItem(nameSpaces[i].getName());
+	**************/
     addRow(editPanel, namespaceC, "Namespace:", 11);
 
     labeledCF = new checkboxField(null, false, ca, true);
@@ -963,17 +971,17 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	nameS.setText(fieldDef.getName());
 	classS.setText(fieldDef.getClassName());
 	commentT.setText(fieldDef.getComment());
-	if (fieldDef.isArray())
+        if (fieldDef.isArray())
 	  {
 	    vectorCF.setState(true);
-	    maxArrayN.setEnabled(true);
+	    //maxArrayN.setEnabled(true);
 	  }
+    
 	else
 	  {
 	    vectorCF.setState(false);
-	    maxArrayN.setEnabled(false);
+	    //maxArrayN.setEnabled(false);
 	  }
-
 	if (fieldDef.isString())
 	  {
 	    minLengthN.setValue(fieldDef.getMinLength());
@@ -983,7 +991,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    namespaceC.removeAll();
 	    namespaceC.add("<None>");
 	    // add all defined namespaces here
-	    //	    card.show(cardPanel, "string");
 	  }
 	else if (fieldDef.isBoolean())
 	  {
@@ -991,18 +998,20 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	      {
 		labeledCF.setState(true);
 		trueLabelS.setText(fieldDef.getTrueLabel());
-		trueLabelS.setEnabled(true);
+		//trueLabelS.setEnabled(true);
 		falseLabelS.setText(fieldDef.getFalseLabel());
-		falseLabelS.setEnabled(true);
+		//falseLabelS.setEnabled(true);
 	      }
+
 	    else
 	      {
 		labeledCF.setState(false);
 		trueLabelS.setText("");
-		trueLabelS.setEnabled(false);
+		//trueLabelS.setEnabled(false);
 		falseLabelS.setText("");
-		falseLabelS.setEnabled(false);
+		//falseLabelS.setEnabled(false);
 	      }
+
 	    
 	    //card.show(cardPanel, "boolean");
 	  }
@@ -1011,33 +1020,33 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    if (fieldDef.isTargetRestricted())
 	      {
 		targetLimitCF.setState(true);
-		targetC.setEnabled(true);
+		//targetC.setEnabled(true);
 		targetC.removeAll();
 		// add object types
 
-		symmetryCF.setEnabled(true);
+		//symmetryCF.setEnabled(true);
 
 		if (fieldDef.isSymmetric())
 		  {
 		    symmetryCF.setState(true);
-		    fieldC.setEnabled(true);
+		    //fieldC.setEnabled(true);
 		    fieldC.removeAll();
 		    // add field types
 		  }
 		else
 		  {
 		    symmetryCF.setState(false);
-		    fieldC.setEnabled(false);
+		    //fieldC.setEnabled(false);
 		    fieldC.removeAll();
 		  }
 	      }
 	    else
 	      {
 		targetLimitCF.setState(false);
-		targetC.setEnabled(false);
+		//targetC.setEnabled(false);
 		targetC.removeAll();
-		symmetryCF.setEnabled(false);
-		fieldC.setEnabled(false);
+		//symmetryCF.setEnabled(false);
+		//fieldC.setEnabled(false);
 		fieldC.removeAll();
 	      }
 
@@ -1079,6 +1088,14 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       {
 	//setRowVisible(maxArrayN, vectorCF.getState());
 	System.out.println("vectorCF");
+	try
+	  {
+	    fieldDef.setArray(vectorCF.getState());
+	  }
+	catch (RemoteException ex)
+	  {
+	    System.err.println("remote exception in FieldEditor.setValuePerformed: " + ex);
+	  }
 	checkVisibility();
       }
     else if (comp == typeC)
