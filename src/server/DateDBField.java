@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2000/08/25 21:54:11 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2001/01/01 18:05:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -237,11 +237,6 @@ public class DateDBField extends DBField implements date_field {
 
   public synchronized String getEncodingString()
   {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
-
     if (value == null)
       {
 	return "null";

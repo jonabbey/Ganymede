@@ -8,8 +8,8 @@
    
    Created: 25 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/10/11 19:59:48 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/01/01 18:05:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -165,6 +165,7 @@ public class DumpResult implements java.io.Serializable {
 
   public void addRow(DBObject object, GanymedeSession owner)
   {
+    StringBuffer localBuffer = new StringBuffer();
     DBObjectBaseField fieldDef;
     DBField field;
     char[] chars;
@@ -176,8 +177,8 @@ public class DumpResult implements java.io.Serializable {
 	System.err.println("DumpResult: addRow(" + object.getLabel() + ")");
       }
 
-    buffer.append(object.getInvid().toString());
-    buffer.append("|");
+    localBuffer.append(object.getInvid().toString());
+    localBuffer.append("|");
 
     for (int i = 0; i < fieldDefs.size(); i++)
       {
@@ -195,7 +196,7 @@ public class DumpResult implements java.io.Serializable {
 	    // nope, no permission, just terminate this field and
 	    // continue
 
-	    buffer.append("|");
+	    localBuffer.append("|");
 
 	    if (debug)
 	      {
@@ -214,7 +215,7 @@ public class DumpResult implements java.io.Serializable {
 
 	if (field == null)
 	  {
-	    buffer.append("|");
+	    localBuffer.append("|");
 
 	    if (debug)
 	      {
@@ -234,7 +235,18 @@ public class DumpResult implements java.io.Serializable {
 	    System.err.println("+");
 	  }
 
-	chars = field.getEncodingString().toCharArray();
+	String valString = field.getEncodingString();
+
+	// I got a null pointer exception here 
+
+	if (valString == null)
+	  {
+	    Ganymede.debug("Error, DumpResult.addRow found null encoding string in field " + field);
+	    Ganymede.debug("Skipping data for object " + object);
+	    return;
+	  }
+
+	chars = valString.toCharArray();
 
 	if (debug)
 	  {
@@ -245,26 +257,28 @@ public class DumpResult implements java.io.Serializable {
 	  {
 	    if (chars[j] == '|')
 	      {
-		buffer.append("\\|");
+		localBuffer.append("\\|");
 	      }
 	    else if (chars[j] == '\n')
 	      {
-		buffer.append("\\\n");
+		localBuffer.append("\\\n");
 	      }
 	    else if (chars[j] == '\\')
 	      {
-		buffer.append("\\\\");
+		localBuffer.append("\\\\");
 	      }
 	    else
 	      {
-		buffer.append(chars[j]);
+		localBuffer.append(chars[j]);
 	      }
 	  }
 	
-	buffer.append("|");
+	localBuffer.append("|");
       }
 
-    buffer.append("\n");
+    localBuffer.append("\n");
+
+    buffer.append(localBuffer.toString());
   }
 
   //
