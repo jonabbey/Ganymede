@@ -3,8 +3,8 @@
 # Ganymede javadoc build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.1 $
-# Date: $Date: 1999/01/23 01:01:37 $
+# Version: $Revision: 1.2 $
+# Date: $Date: 1999/10/04 18:09:50 $
 #
 ############################################################
 
@@ -35,6 +35,7 @@ find ../src/Qsmtp -name \*.java -print >> sourcelist
 find ../src/Util -name \*.java -print >> sourcelist
 find ../src/client -name \*.java -print >> sourcelist
 find ../src/jcrypt -name \*.java -print >> sourcelist
+find ../src/md5 -name \*.java -print >> sourcelist
 find ../src/server -name \*.java -print >> sourcelist
 
 $JAVADIR/javadoc -private -J-mx128m -d javadoc @sourcelist
