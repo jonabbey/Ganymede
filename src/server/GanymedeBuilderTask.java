@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2000/12/03 05:38:30 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/12/03 11:11:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,8 +106,14 @@ public abstract class GanymedeBuilderTask implements Runnable {
   protected Date oldLastRunTime;
   GanymedeSession session = null;
   DBDumpLock lock;
-  Invid taskDefObjInvid = null;
   Vector optionsCache = null;
+
+  /**
+   * <p>Must be protected so subclasses in a different package can
+   * set this.</p>
+   */
+
+  protected Invid taskDefObjInvid = null;
 
   /* -- */
 
