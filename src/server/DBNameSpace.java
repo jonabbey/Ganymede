@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2001/05/21 07:27:00 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2001/05/21 07:30:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -99,11 +99,6 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
    */
 
   static final int TRANSCOUNT = 30;
-
-  public static void setDebug(boolean val)
-  {
-    //    debug = val;
-  }
 
   /**
    * <p>treat differently-cased Strings as the same for key?</p>
