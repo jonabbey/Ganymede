@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.32 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.33 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -302,6 +302,19 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
       {
 	return result;
       }
+  }
+
+  /**
+   *
+   * Returns true if this object is an embedded type.
+   *
+   * @see arlut.csd.ganymede.db_object
+   *
+   */
+
+  public boolean isEmbedded()
+  {
+    return objectBase.isEmbedded();
   }
 
   /**

@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
  *
  * Base class for GANYMEDE client-visible objects.
  *
- * @version $Revision: 1.5 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.6 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -76,6 +76,14 @@ public interface db_object extends java.rmi.Remote {
    */
 
   public String getLabel() throws RemoteException;
+
+  /**
+   *
+   * Returns true if this object is an embedded type
+   *
+   */
+
+  public boolean isEmbedded() throws RemoteException;
 
   /**
    *
