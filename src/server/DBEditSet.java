@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -262,63 +262,104 @@ public class DBEditSet {
 
     try
       {
+	boolean done = false;
+
+	// we need to loop over the objects in our transaction until
+	// we don't have any objects in the transaction that need to
+	// be processed.  The act of handling the remove logic for an
+	// object may cause other objects to be pulled into this transaction's
+	// list of touched objects, in which case we'll need to keep looping
+	// until things settle out.
+
+	while (!done)
+	  {
+	    // clone the object list so that we don't loop
+	    // over a list of objects that is going to change on us
+
+	    Vector objList = (Vector) objects.clone();
+
+	    // assume we're done, until we find out otherwise
+
+	    done = true;
+
+	    for (int i = 0; i < objList.size(); i++)
+	      {
+		eObj = (DBEditObject) objList.elementAt(i);
+
+		if (!eObj.finalized)
+		  {
+		    done = false; // we'll need to loop through again
+		  }
+		else
+		  {
+		    continue;	// skip this object, we've already processed it
+		  }
+
+		switch (eObj.getStatus())
+		  {
+		  case DBEditObject.CREATING:
+		    
+		    if (!eObj.getBase().isEmbedded())
+		      {
+			df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+			df.setValue(modDate);
+			
+			sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+			
+			result = session.getID();
+			
+			if (description != null)
+			  {
+			    result += ": " + description;
+			  }
+
+			sf.setValue(result);
+		      }
+
+		  case DBEditObject.EDITING:
+		    
+		    if (!eObj.getBase().isEmbedded())
+		      {
+			df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+			df.setValue(modDate);
+
+			sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+
+			result = session.getID();
+
+			if (description != null)
+			  {
+			    result += ": " + description;
+			  }
+
+			sf.setValue(result);
+		      }
+
+		    eObj.finalized = true;
+		    break;
+
+		  case DBEditObject.DELETING:
+		  case DBEditObject.DROPPING:
+
+		    if (!eObj.remove() || !eObj.finalizeRemove())
+		      {
+			releaseWriteLock("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
+			release();
+			Ganymede.debug("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
+			return false;
+		      }
+
+		    eObj.finalized = true;
+		    break;
+		  }
+	      }
+	  }
+
+	// now do the commit logic for the objects
+
 	for (int i = 0; i < objects.size(); i++)
 	  {
 	    eObj = (DBEditObject) objects.elementAt(i);
-
-	    switch (eObj.getStatus())
-	      {
-	      case DBEditObject.CREATING:
-	    
-		if (!eObj.getBase().isEmbedded())
-		  {
-		    df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
-		    df.setValue(modDate);
-		
-		    sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
-		
-		    result = session.getID();
-		
-		    if (description != null)
-		      {
-			result += ": " + description;
-		      }
-
-		    sf.setValue(result);
-		  }
-
-	      case DBEditObject.EDITING:
-
-		if (!eObj.getBase().isEmbedded())
-		  {
-		    df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
-		    df.setValue(modDate);
-
-		    sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
-
-		    result = session.getID();
-
-		    if (description != null)
-		      {
-			result += ": " + description;
-		      }
-
-		    sf.setValue(result);
-		  }
-		break;
-
-	      case DBEditObject.DELETING:
-	      case DBEditObject.DROPPING:
-
-		if (!eObj.remove())
-		  {
-		    releaseWriteLock("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
-		    release();
-		    Ganymede.debug("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
-		    return false;
-		  }
-		break;
-	      }
 
 	    if (!eObj.commitPhase1())
 	      {
@@ -338,7 +379,15 @@ public class DBEditSet {
 	for (int i = 0; i < objects.size(); i++)
 	  {
 	    eObj = (DBEditObject) objects.elementAt(i);
-	    eObj.clearTransientFields();
+
+	    // anything that's going back into the DBStore needs
+	    // to have the transient fields cleared away
+
+	    if (eObj.getStatus() == DBEditObject.EDITING ||
+		eObj.getStatus() == DBEditObject.CREATING)
+	      {
+		eObj.clearTransientFields();
+	      }
 
 	    // we'll want to log the before/after state of any objects
 	    // edited by this transaction
