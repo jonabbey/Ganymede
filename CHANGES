@@ -82,6 +82,25 @@ of the profiler.
 Anyway, I don't yet know how stable Ganymede's memory usage will be
 now, but it should be significantly improved.
 
+7. [SERVER] File descriptor leak fixed
+
+The arlut.csd.ganymede.util.zipIt class was neglecting to close files
+that were being read in for adding to a zip file.  This caused the
+Ganymede server to run out of file descriptors.  Apparently this
+problem was masked on earlier versions of the JVM by the
+FileInputStream's finalize() method doing clean-up.  Since finalize()
+is not guaranteed to ever be called, moving the Ganymede server to
+a new JVM made file descriptor starvation start appearing.
+
+8. [SERVER] Added cryptographic hash support for Samba
+
+The server now includes classes to support both forms of password
+hashing used in Samba's encrypted password file.  This will simplify
+support of Samba in userKit 1.0, as the NTSambaBuilderTask will now be
+able to emit a file with all of the plaintext passwords pre-hashed,
+rather than depending on a hard-to-install Expect script to drive
+smbpasswd to insert updates into the Samba password file.
+
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
 RELEASE DATE: January 30, 2001

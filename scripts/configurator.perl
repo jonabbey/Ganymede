@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.55 $
-# $Date: 2000/12/05 23:52:24 $
+# $Revision: 1.56 $
+# $Date: 2001/03/16 10:04:15 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -126,11 +126,13 @@ classfiles:
 	\@cd $rootdir/src/Util; \\
 	./build
 	\@cd $rootdir/src/Qsmtp; \\
-	./build		
+	./build
 	\@cd $rootdir/src/jcrypt; \\
-	./build		
+	./build
+	\@cd $rootdir/src/crypto; \\
+	./build
 	\@cd $rootdir/src/md5; \\
-	./build		
+	./build
 	\@cd $rootdir/src/JDataComponent; \\
 	./build
 	\@cd $rootdir/src/JTree; \\
@@ -418,6 +420,7 @@ removelastslash($swingdir);
 	  "$rootdir/src/xml/xp/xml/sax", "James Clark XP XML Parser SAX Driver Classes", "$classdir",
 	  "$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$classdir",
 	  "$rootdir/src/jcrypt", "jcrypt Class", "$classdir",
+	  "$rootdir/src/crypto", "SMB Cryptographic Hash Classes", "$classdir",
 	  "$rootdir/src/md5", "md5 Classes", "$classdir",
 	  "$rootdir/src/Util", "Ganymede Utility Classes", "$classdir",
 	  "$rootdir/src/JTable", "Ganymede Table Classes", "$classdir",
