@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.106 $ %D%
+   Version: $Revision: 1.107 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3332,6 +3332,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    * This must be called before Session.create_db_object is called.
    * @see defaultOwnerChosen.
    */
+
   public void chooseDefaultOwner(boolean forcePopup)
   {
     ReturnVal retVal = null;
@@ -3403,6 +3404,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   /**
    * True if a default owner has already been chosen.
    */
+
   public boolean defaultOwnerChosen()
   {
     return defaultOwnerChosen;
@@ -3415,6 +3417,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    * so it can tell them all to stop if the cancel button is clicked.  This
    * method should be called by any container panel before it starts the big loop.</p>
    */
+
   public synchronized void registerNewContainerPanel(containerPanel cp)
   {
     containerPanels.addElement(cp);
@@ -3425,6 +3428,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    *
    * @see registerNewContainerPanel
    */
+
   public synchronized void containerPanelFinished(containerPanel cp)
   {
     containerPanels.removeElement(cp);
@@ -3456,19 +3460,22 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	StringDialog dialog = new StringDialog(this, 
 					       "Warning: changes have been made",
-					       "You have made changes in objects without commiting those changes.  If you continue, those changes will be lost",
+					       "You have made changes in objects without commiting " +
+					       "those changes.  If you continue, those changes will be lost",
 					       "Discard Changes",
 					       "Cancel");
-	// if DialogShow is null, cancel was clicked
-	// So return will be false if cancel was clicked
+
+	// if DialogShow is null, cancel was clicked So return will be
+	// false if cancel was clicked
+
 	return (dialog.DialogShow() != null);
-	  
       }
     else
       {
 	return true;
       }
   }
+
   /**
    * Update the note panels in the open windows.
    *
@@ -3477,6 +3484,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    *
    * <p>This basically does a field.setValue(notesArea.getValue()) on each notesPanel.</p>
    */
+
   void updateNotePanels()
   {
     Vector windows = wp.getEditables();
@@ -3500,6 +3508,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	else
 	  {
 	    notesPanel np = fp.getNotesPanel();
+
 	    if (np == null)
 	      {
 		if (debug)
