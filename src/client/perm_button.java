@@ -5,7 +5,7 @@
    Description.
    
    Created: 20 January 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -37,6 +37,7 @@ class perm_button extends JButton implements ActionListener {
   boolean enabled;
   Hashtable basehash;
   gclient gc;
+  boolean justShowUser;
 
   /* -- */
 
@@ -44,22 +45,23 @@ class perm_button extends JButton implements ActionListener {
    *
    * perm_button constructor
    *
-   * @param client
-   * @param field
-   * @param enabled
-   * @param basehash
+   * @param field What field are we going to edit permissions for?
+   * @param enabled If true, will allow editing of the permission matrix
+   * @param basehash Map of Bases to field vectors
+   * @param justShowUser Should be false when editing the self-permissions object
    *
    */
 
-  public perm_button (gclient client, perm_field field, 
-		      boolean enabled, Hashtable basehash)
+  public perm_button (perm_field field, 
+		      boolean enabled, Hashtable basehash,
+		      boolean justShowUser)
   {
     super("Edit Permissions");
     
-    this.gc = client;
     this.field = field;
     this.enabled = enabled;
     this.basehash = basehash;
+    this.justShowUser = justShowUser;
     
     addActionListener(this);
   }
@@ -76,9 +78,10 @@ class perm_button extends JButton implements ActionListener {
 	System.out.println("Edit Button was pushed");
 	
 	Frame parent = new Frame();
-	perm_editor editor = new perm_editor(gc, field, 
+	perm_editor editor = new perm_editor(field, 
 					     enabled, basehash, 
-					     parent, "Permissions Editor");
+					     parent, "Permissions Editor",
+					     justShowUser);
 
 	System.out.println("Editor Created by perm button");
       }
