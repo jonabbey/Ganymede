@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1033,14 +1033,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    invid = (Invid) enum.nextElement();
 
-	    // unfortunately, we do need to use view_db_object here.. this
-	    // involves a copy of each object being made for our benefit,
-	    // but this is necessary so that we don't see fields in a particular
-	    // object that we shouldn't.
+	    // it's okay to use session.viewDBObject because
+	    // DumpResult.addRow() uses the GanymedeSession reference
+	    // we pass in to handle per-field permissions
 	    //
-	    // let's hope that JVM's get real good about garbage collection.
+	    // using view_db_object() here would be disastrous, because
+	    // it would entail making duplicates of all objects matching
+	    // our query
 
-	    result.addRow((DBObject) view_db_object(invid, false), this);
+	    result.addRow(session.viewDBObject(invid), this);
 	  }
       }
 
