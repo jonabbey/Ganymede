@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -123,7 +123,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
    *
    */
 
-  public static void updateTransCount(Admin console)
+  public static synchronized void updateTransCount(Admin console)
   {
     try
       {
@@ -147,7 +147,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
    *
    */
 
-  public static void updateLastDump(Date date)
+  public static synchronized void updateLastDump(Date date)
   {
     GanymedeAdmin.lastDumpDate = date;
     updateLastDump();
@@ -209,7 +209,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
    *
    */
 
-  public static void updateCheckedOut()
+  public static synchronized void updateCheckedOut()
   {
     Admin temp;
 
@@ -235,7 +235,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
    *
    */
 
-  public static void updateCheckedOut(Admin console)
+  public static synchronized void updateCheckedOut(Admin console)
   {
     try
       {
@@ -278,7 +278,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
    *
    */
 
-  public static void updateLocksHeld(Admin console)
+  public static synchronized void updateLocksHeld(Admin console)
   {
     try
       {
