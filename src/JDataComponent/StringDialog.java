@@ -285,7 +285,11 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		    passwordThing pt = (passwordThing)element;
 		    if (pt.isNew())
 		      {
-			System.out.println("This password is new.");
+			if (debug)
+			  {
+			    System.out.println("This password is new.");
+			  }
+
 			JpassField sf = new JpassField(null, true, 10,100,true);
 			
 			sf.setCallback(this); 
@@ -295,7 +299,11 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		      }
 		    else
 		      {
-			System.out.println("This password is not new.");
+			if (debug)
+			  {
+			    System.out.println("This password is not new.");
+			  }
+
 			JpasswordField sf = new JpasswordField();
 			sf.setEditable(true);
 
@@ -365,7 +373,10 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 
 		    if (items == null)
 		      {
-			System.out.println("Nothing to add to Choice, empty vector");
+			if (debug)
+			  {
+			    System.out.println("Nothing to add to Choice, empty vector");
+			  }
 		      }
 		    else
 		      {
@@ -373,8 +384,8 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 
 			for (int j = 0; j < total ; ++j)
 			  {
-			    String str = (String)items.elementAt(j);
-			    ch.addItem(str);
+			    //String str = (String)items.elementAt(j);
+			    ch.addItem(items.elementAt(j));
 			  }
 
 			if (ct.getSelectedItem() != null)
@@ -386,7 +397,10 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 			addRow(panel, ch, ct.getLabel(), i);
 
 			componentHash.put(ch, ct.getLabel());
-			valueHash.put(ct.getLabel(), (String)items.elementAt(0));
+			if (ch.getSelectedItem() != null)
+			  {
+			    valueHash.put(ct.getLabel(), ch.getSelectedItem());
+			  }
 		      }
 		  }
 		//		else if (element instanceof Separator)
@@ -501,20 +515,45 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     
     //Having problems with setting the prefered size of the 
     // table layout
-    
-    Rectangle r = Resource.frame.getBounds();
 
-    if (debug)
+    if (Resource.frame != null)
       {
-	System.out.println("Bounds: " + r);
+	Rectangle r = Resource.frame.getBounds();
+	
+	if (debug)
+	  {
+	    System.out.println("Bounds: " + r);
+	  }
+	
+	if ((r != null) && ((r.width != 0) && (r.height != 0)))
+	  {
+	    // Sometimes a new JFrame() is passed in, and it won't have anything interesting for bounds
+	    // I don't think they are null, but they are all 0 or something.  Might as well make sure they are not
+	    // null anyway.
+	    int width = getPreferredSize().width;
+	    int height = getPreferredSize().height;
+	    
+	    setLocation(r.width/2 - r.x - width/2, r.height/2 - r.y - height/2);
+	    if (debug)
+	      {
+		int loc = r.width/2 - r.x - width/2;
+		int locy = r.height/2 - r.y - height/2;
+		System.out.println("Setting location to : " + loc + "," + locy);
+	      }
+	  }
+	else if (debug)
+	  {
+	    System.out.println("getBounds() returned null.");
+	  }
+      }
+    else if (debug)
+      {
+	System.out.println("Parent frame is null.");
       }
 
-    int width = getPreferredSize().width;
-    int height = getPreferredSize().height;
+    
+    addSpace(panel, 10, components.size() + 1);
 
-    setLocation(r.width/2 - r.x - width/2, r.height/2 - r.y - height/2);
-    // I pack in DialogShow, so I don't think it is needed here.
-    //pack();
   }
 
 
@@ -545,10 +584,13 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     repaint();
     //    show();
 
-    //setVisible(true);		// thread will halt here
-    show();
+    setVisible(true);		// thread will halt here
+    //show();
 
-    System.out.println("Done invoking.");
+    if (debug)
+      {
+	System.out.println("Done invoking.");
+      }
 
     return valueHash;
   }
@@ -637,7 +679,10 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	String label = (String)componentHash.get(comp);
 	JpasswordField sf = (JpasswordField)comp;
 
-	System.out.println("label is " + label);
+	if (debug)
+	  {
+	    System.out.println("label is " + label);
+	  }
 	
 	if (valueHash != null)
 	  {
@@ -654,7 +699,10 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	String label = (String)componentHash.get(comp);
 	JpassField sf = (JpassField)comp;
 
-	System.out.println("label is " + label);
+	if (debug)
+	  {
+	    System.out.println("label is " + label);
+	  }
 	
 	if (valueHash != null)
 	  {
@@ -678,6 +726,14 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     parent.add("0 " + row + " rhwHW", l);
     parent.add("1 " + row + " lhH", comp);
     parent.invalidate();
+  }
+
+  /**
+   * Activator cuts off the bottom 10 pixels or so, so add some space to make up for it.
+   */
+  private final void addSpace(JPanel parent, int space, int row)
+  {
+    parent.add("0 " + row + " rhH", Box.createVerticalStrut(space));
   }
 
   private final void addSeparator(JPanel parent, Component comp, int row)
