@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,7 +32,8 @@ public class Loader extends Thread {
   private Hashtable 
     baseMap,
     baseNames,
-    baseHash;
+    baseHash,
+    baseToShort;
 
   private Vector
     baseList;
@@ -212,6 +213,37 @@ public class Loader extends Thread {
     return baseMap;
     
   }
+  public synchronized Hashtable getBaseToShort()
+  {
+    // baseToShort is loaded in the loadBaseMap function, so we can just
+    // check to see if the baseMapLoaded is true.
+    while (! baseMapLoaded)
+      {
+	try
+	  {
+	    this.wait();
+	  }
+	catch (InterruptedException x)
+	  {
+	    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+	  }
+      }
+
+    if (debug)
+      {
+	if (baseToShort == null)
+	  {
+	    System.out.println("baseToShort is null");
+	  }
+	else
+	  {
+	    System.out.println("returning baseToShort");
+	  }
+      }
+
+    return baseToShort;
+    
+  }
 
   /* -- Private methods  --  */
 
@@ -316,14 +348,17 @@ public class Loader extends Thread {
     /* -- */
 
     baseMap = new Hashtable(baseHash.size());
+    baseToShort = new Hashtable(baseHash.size());
 
     enum = baseHash.keys();
 
     while (enum.hasMoreElements())
       {
 	base = (Base) enum.nextElement();
+	Short id = new Short(base.getTypeID());
 
-	baseMap.put(new Short(base.getTypeID()), base);
+	baseMap.put(id, base);
+	baseToShort.put(base, id);
       }
 
     baseMapLoaded = true;
