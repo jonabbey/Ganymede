@@ -2,8 +2,8 @@
 #
 # Incremental rebuild script
 #
-# $Revision: 1.2 $
-# $Date: 1999/01/15 22:41:19 $
+# $Revision: 1.3 $
+# $Date: 1999/01/15 23:25:26 $
 #
 # Jonathan Abbey, jonabbey@arlut.utexas.edu
 #
@@ -121,7 +121,7 @@ if ($file_list eq "") {
   print "There is nothing to compile.\n";
 } else {
   print "Compiling $file_list\n";
-  system "$javac -d $mydir/classes $file_list\n" || print "Could not finish compiling.\n";
+  system "$javac -d $targetdir $file_list\n" || print "Could not finish compiling.\n";
   print "Done.\n";
 }
 
@@ -136,6 +136,10 @@ sub get_vars {
 
   while (<CONFIG>){
 
+    if (/^COMPNAME=(.*)/){
+	$compname = $1;
+    }
+
     if (/^JAVAC=(.*)/){
 	$javac = $1;
     }
@@ -148,12 +152,14 @@ sub get_vars {
 	$classdir = $1;
     }
 
-    if (/^COMPNAME=(.*)/){
-	$compname = $1;
+    if (/^TARGETDIR=(.*)/){
+	$targetdir = $1;
+    }
+
+    if (/^PACKAGETARGET=(.*)/){
+	$customclassdir = $1;
     }
   } 
-
-  $customclassdir = "MYTARGETCLASSDIR";
 
   close(CONFIG);
 }  
