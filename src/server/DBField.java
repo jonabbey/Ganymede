@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -920,42 +920,4 @@ public abstract class DBField implements Cloneable, db_field {
   {
     return true;
   }
-
-  // ****
-  //
-  // these methods should not be public.. should only be called by DBEditSet
-  // methods
-  //
-  // ****
-  
-  void addElement(Object value)
-  {
-    if (!isVector())
-      {
-	throw new IllegalArgumentException("vector method called on scalar field");
-      }
-
-    values.addElement(value);
-  } 
-
-  void removeElement(Object value)
-  {
-    if (!isVector())
-      {
-	throw new IllegalArgumentException("vector method called on scalar field");
-      }
-
-    values.removeElement(value);
-  }
-
-  void removeElementAt(int index)
-  {
-    if (!isVector())
-      {
-	throw new IllegalArgumentException("vector method called on scalar field");
-      }
-
-    values.removeElementAt(index);
-  }
-
 }
