@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.33 $ %D%
+  Version: $Revision: 1.34 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.33 $ %D%
+ * @version $Revision: 1.34 $ %D%
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -1660,6 +1660,41 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     reShape();
     refreshTable();
+  }
+
+  /**
+   *
+   * This method returns a Vector of Strings containing the
+   * titles of columns currently in the table.
+   *
+   */
+
+  public synchronized Vector getTableHeaders()
+  {
+    Vector result = new Vector();
+    tableCol col;
+
+    /* -- */
+
+    for (int i = 0; i < cols.size(); i++)
+      {
+	col = (tableCol) cols.elementAt(i);
+
+	result.addElement(col.header);
+      }
+
+    return result;
+  }
+
+  /**
+   *
+   * This method returns the number of rows in the table.
+   *
+   */
+
+  public synchronized int getRowCount()
+  {
+    return rows.size();
   }
 
   /**
