@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 2002/01/28 21:27:09 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 2002/01/28 21:28:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1190,7 +1190,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	// forceOff modifies GanymedeServer.sessions, so we need to
 	// copy our list before we iterate over it.
 
-	Ganymede.debug("Server going down.. database locked, disconnecting clients");
+	Ganymede.debug("Server going down.. database locked");
+	Ganymede.debug("Server going down.. disconnecting clients");
 
 	tempList = new Vector();
 
