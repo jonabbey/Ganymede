@@ -18,26 +18,43 @@ if test ! -d $GROOTDIR/src/classes; then
 fi
 export GROOTDIR
 
-# Find perl
+# Find perl (GPERL)
 
-GPERL=`which perl5`
-#echo "perl one $GPERL"
-if test ! -r $GPERL; then
-  GPERL=`which perl`
+guessperl=`which perl5`
+
+ if test ! -r "$guessperl"; then
+  guessperl=`which perl`
+ fi
+
+echo "Where is perl installed? [$guessperl] \c" 
+
+read userperl
+
+
+if  test ! -z "$userperl"; then
+	GPERL=$userperl
+    else
+	GPERL=$guessperl
 fi
+
 export GPERL
 
 # Find java
 
-GJAVA=`which java`
-GJAVA=`dirname ${GJAVA}`
-#echo "Found java dir $GJAVA"
+guessjava=`which java`
+guessjava=`dirname ${guessjava}`
+
+echo "What is the location of the directory where java is installed? [$guessjava] \c"
+
+read userjava
+
+if  [ ! -z $userjava ] 
+    then
+	GJAVA=$userjava
+    else
+	GJAVA=$guessjava
+fi
+
 export GJAVA
-
-#echo "My env is"
-#
-#env
-
-# echo "perl at $perlplace"
 
 $GPERL $GROOTDIR/scripts/configurator.perl
