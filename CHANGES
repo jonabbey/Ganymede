@@ -76,6 +76,13 @@ logic present.
 
 6. [SCHEMA] Lots of refinements to gasharl schema
 
+Modified the loader code to use BufferedReader, and to take care
+of a few deprecation warnings.
+
+The GASHARL schema now includes fields in the admin persona and owner
+group objects to track information used for more complete GASH
+compatibility.
+
 7. [CLIENT] Reworked the persona select handling
 
 The client now prompts users with multiple admin personae with a
