@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 2003/03/12 03:48:41 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 2003/07/16 23:00:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -763,10 +763,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
-    // Whether or not the social security field is required depends on
+    // Whether or not the Badge number field is required depends on
     // the user category.
 
-    if (fieldid == userSchema.SOCIALSECURITY)
+    if (fieldid == userSchema.BADGE)
       {
 	try
 	  {
@@ -777,9 +777,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    
 	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
 
-	    Boolean ssRequired = (Boolean) category.getFieldValueLocal(userCategorySchema.SSREQUIRED);
-
-	    return ssRequired.booleanValue();
+	    return category.isSet(userCategorySchema.SSREQUIRED);
 	  }
 	catch (NullPointerException ex)
 	  {

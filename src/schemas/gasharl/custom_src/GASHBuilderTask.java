@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 2003/06/17 02:54:47 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 2003/07/16 23:00:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -191,6 +191,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 
 	writeMailDirect();
+	writeMailDirect2();
 	writeSambafileVersion1();
 	writeNTfile();
 	writeUserSyncFile();
@@ -660,6 +661,116 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 		map.put(socBuffer.toString(), user);
 		results.put(socBuffer.toString(), result.toString());
+	      }
+	  }
+
+	Enumeration lines = results.elements();
+
+	while (lines.hasMoreElements())
+	  {
+	    out.println((String) lines.nextElement());
+	  }
+      }
+    finally
+      {
+	out.close();
+      }
+  }
+
+  /**
+   * we write out a file that maps badge numbers to a
+   * user's primary email address and user name for the
+   * personnel office's phonebook database to use
+   *
+   * This method writes lines to the maildirect2 GASH output file.
+   *
+   * The lines in this file look like the following.
+   *
+   * 4297 jonabbey@arlut.utexas.edu broccol
+   *
+   */
+
+  private void writeMailDirect2()
+  {
+    PrintWriter out;
+    Hashtable map = new Hashtable(); // map badge numbers to DBObject
+    Hashtable results = new Hashtable(); // map badge numbers to strings
+
+    /* -- */
+
+    try
+      {
+	out = openOutFile(path + "maildirect2", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open maildirect2 file: " + ex);
+	return;
+      }
+	
+    try
+      {
+	DBObject user;
+	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+		
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+
+	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
+	    String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
+	    String badgeNum = (String) user.getFieldValueLocal(userSchema.BADGE);
+	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
+
+	    StringBuffer socBuffer = new StringBuffer();
+		
+	    if (normalCategory == null)
+	      {
+		if (category != null)
+		  {
+		    String label;
+
+		    label = getLabel(category);
+
+		    if (label != null && label.equals("normal"))
+		      {
+			normalCategory = category;
+		      }
+		  }
+	      }
+    
+	    if (username != null && signature != null && badgeNum != null && 
+		category != null && category.equals(normalCategory) && !user.isInactivated())
+	      {
+		if (map.containsKey(badgeNum))
+		  {
+		    // we've got more than one entry with the same
+		    // badge number.. that should only
+		    // happen if one of the users is an GASH admin, or
+		    // if one is inactivated.
+
+		    DBObject oldUser = (DBObject) map.get(badgeNum);
+
+		    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+
+		    if (field != null && field.isDefined())
+		      {
+			continue; // we've already got an admin record for this badge number
+		      }
+		  }
+
+		result.setLength(0);
+
+		result.append(badgeNum);
+		result.append(" ");
+		result.append(signature);
+		result.append("@");
+		result.append(dnsdomain.substring(1)); // skip leading .
+		result.append(" ");
+		result.append(username);
+
+		map.put(badgeNum, user);
+		results.put(badgeNum, result.toString());
 	      }
 	  }
 
