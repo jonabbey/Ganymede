@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,12 @@ public class directLoader {
 
   static Hashtable users = new Hashtable();
   static Hashtable userInvid = new Hashtable();
+
+  static Vector externalAliases = new Vector();
+  static Vector mailGroups = new Vector();
+  static Hashtable userMail = new Hashtable();
+  static Hashtable mailInvids = new Hashtable();
+
   static Hashtable groups = new Hashtable();
   static Hashtable groupID = new Hashtable();
   static Hashtable groupInvid = new Hashtable();
@@ -116,6 +122,7 @@ public class directLoader {
 
     scanOwnerGroups();
     scanUsers();
+    scanEmail();
     scanGroups();
     scanUserNetgroups();
     scanSystemTypes();
@@ -123,8 +130,7 @@ public class directLoader {
     scanSystemNetgroups();
 
     // Okay.. at this point we've scanned the files we need to scan..
-    // now we connect to the server and create the objects
-    //
+    // now we initialize the database module and create the objects
 
     try
       {
@@ -204,6 +210,10 @@ public class directLoader {
 	System.out.println("\nRegistering users\n");
 
 	registerUsers();
+	my_client.session.commitTransaction();
+
+	my_client.session.openTransaction("GASH directLoader");
+	registerEmail();
 	my_client.session.commitTransaction();
 
 	System.out.println("\nRegistering groups\n");
@@ -357,7 +367,6 @@ public class directLoader {
       {
 	System.err.println(ownerGroups.elementAt(i));
       }
-
   }
 
   /**
@@ -414,6 +423,91 @@ public class directLoader {
     try
       {
 	inStream.close();
+      }
+    catch (IOException ex)
+      {
+	System.err.println("unknown IO exception caught: " + ex);
+      }
+  }
+
+  private static void scanEmail()
+  {
+    // now process the aliases_info file
+    
+    BufferedReader in = null;
+    String line;
+
+    try
+      {
+	in = new BufferedReader(new FileReader("input/aliases_info"));
+	done = false;
+      }
+    catch (FileNotFoundException ex)
+      {
+	System.err.println("Couldn't find aliases_info");
+	done = true;
+      }
+
+    System.out.println("Scanning aliases_info");
+
+    while (!done)
+      {
+	try
+	  {
+	    line = in.readLine();
+
+	    if (line == null)
+	      {
+		done = true;
+	      }
+	    else
+	      {
+		System.err.println("x");
+
+		switch (line.charAt(0))
+		  {
+		  case '<':
+		    ExternMail z = new ExternMail(line);
+		    
+		    externalAliases.addElement(z);
+		    
+		    System.err.println(z);
+		    break;
+		    
+		  case ':':
+		    MailGroup y = new MailGroup(line);
+		    
+		    mailGroups.addElement(y);
+		    
+		    System.err.println(y);
+		    break;
+		    
+		  default:
+		    UserMail x = new UserMail(line);
+		    
+		    userMail.put(x.userName, x);
+		    
+		    System.err.println(x);
+		    break;
+		  }
+	      }
+	  }
+	catch (EOFException ex)
+	  {
+	    done = true;
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("unknown IO exception caught: " + ex);
+	  }
+      }
+
+    System.out.println();
+    System.out.println("Done scanning aliases_info");
+
+    try
+      {
+	in.close();
       }
     catch (IOException ex)
       {
@@ -919,6 +1013,40 @@ public class directLoader {
 
 	current_obj.setFieldValue((short) 263, userObj.shell);
 
+	// register email aliases for this user
+
+	UserMail aliasInfo = (UserMail) userMail.get(key);
+
+	if (aliasInfo != null)
+	  {
+	    db_field sf = current_obj.getField((short) 267);
+
+	    String tmpStr;
+
+	    for (int i = 0; i < aliasInfo.aliases.size(); i++)
+	      {
+		tmpStr = (String) aliasInfo.aliases.elementAt(i);
+
+		if (!tmpStr.equals(key))
+		  {
+		    sf.addElement(aliasInfo.aliases.elementAt(i));
+		  }
+	      }
+
+	    // set the signature alias
+
+	    current_obj.setFieldValue((short) 268, aliasInfo.aliases.elementAt(0));
+
+	    // set the email targets
+
+	    sf = current_obj.getField((short) 269);
+
+	    for (int i = 0; i < aliasInfo.targets.size(); i++)
+	      {
+		sf.addElement(aliasInfo.targets.elementAt(i));
+	      }
+	  }
+
 	// loop through our owner groups, add this user to the appropriate owner groups
 
 	for (int i = 0; i < ownerGroups.size(); i++)
@@ -969,6 +1097,180 @@ public class directLoader {
 	    personaField.addElement(permMatrix);
 	  }
       }
+  }
+
+  /**
+   *
+   */
+
+  private static void registerEmail() throws RemoteException
+  {
+    
+    ExternMail mailRec;
+    MailGroup mailGroup;
+    db_object current_obj;
+    db_field current_field;
+    Invid objInvid, targetInvid;
+    OwnerGroup ogRec;
+    String temp;
+
+    /* -- */
+
+    System.err.println("Registering email objects");
+
+    // register external email references
+
+    System.err.println("External References");
+
+    for (int i = 0; i < externalAliases.size(); i++)
+      {
+	mailRec = (ExternMail) externalAliases.elementAt(i);
+
+	current_obj = my_client.session.create_db_object((short) 275);	// base 275 is for Email Redirect objects
+	objInvid = current_obj.getInvid();
+
+	// remember that we have this external record as a possible target for
+	// other things
+
+	mailInvids.put(mailRec.externalName.toLowerCase(), objInvid);
+
+	current_obj.setFieldValue((short) 256, mailRec.externalName);
+
+	// set targets
+
+	current_field = current_obj.getField((short) 257);
+
+	for (int j = 0; j < mailRec.targets.size(); j++)
+	  {
+	    current_field.addElement(mailRec.targets.elementAt(j));
+	  }
+
+	// set aliases
+
+	current_field = current_obj.getField((short) 258);
+
+	for (int j = 0; j < mailRec.aliases.size(); j++)
+	  {
+	    String tmp = (String) mailRec.aliases.elementAt(j);
+
+	    // we don't care about signature aliases for
+	    // external references, so just leave out the
+	    // label for the user in the aliases list
+	    
+	    if (!tmp.equals(mailRec.externalName))
+	      {
+		current_field.addElement(tmp);
+	      }
+	  }
+
+	// loop through our owner groups, add this external mail rec to the appropriate owner groups
+
+	for (int j = 0; j < ownerGroups.size(); j++)
+	  {
+	    ogRec = (OwnerGroup) ownerGroups.elementAt(j);
+
+	    if (ogRec.matchMask(mailRec.ownerCode))
+	      {
+		db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
+		    
+		f.addElement(objInvid); // add this group
+		System.out.print(" " + ogRec.prefix);
+	      }
+	  }
+      }
+
+    // register email groups
+
+    // step 1.. create all the groups, hash the names to invids
+
+    System.err.println("Mail Lists.. step 1");
+
+    for (int i = 0; i < mailGroups.size(); i++)
+      {
+	mailGroup = (MailGroup) mailGroups.elementAt(i);
+
+	current_obj = my_client.session.create_db_object((short) 274);	// base 274 is for Email List objects
+	objInvid = current_obj.getInvid();
+
+	mailInvids.put(mailGroup.listName.toLowerCase(), objInvid);
+
+	current_obj.setFieldValue((short) 256, mailGroup.listName);
+
+	// set external targets
+
+	current_field = current_obj.getField((short) 258);
+
+	for (int j = 0; j < mailGroup.targets.size(); j++)
+	  {
+	    temp = (String) mailGroup.targets.elementAt(j);
+
+	    if (temp.indexOf('@') != -1)
+	      {
+		current_field.addElement(mailGroup.targets.elementAt(j));
+	      }
+	  }
+
+	// loop through our owner groups, add this mail list to the appropriate owner groups
+
+	for (int j = 0; j < ownerGroups.size(); j++)
+	  {
+	    ogRec = (OwnerGroup) ownerGroups.elementAt(j);
+
+	    if (ogRec.matchMask(mailGroup.ownerCode))
+	      {
+		db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
+		    
+		f.addElement(objInvid); // add this group
+		System.out.print(" " + ogRec.prefix);
+	      }
+	  }
+      }
+
+    // okay, now we can loop through and set the internal targets
+
+    System.err.println("Mail Lists.. step 2");
+
+    for (int i = 0; i < mailGroups.size(); i++)
+      {
+	mailGroup = (MailGroup) mailGroups.elementAt(i);
+
+	current_obj = my_client.session.edit_db_object((Invid) mailInvids.get(mailGroup.listName.toLowerCase()));
+
+	// set internal targets
+
+	current_field = current_obj.getField((short) 257);
+
+	for (int j = 0; j < mailGroup.targets.size(); j++)
+	  {
+	    temp = (String) mailGroup.targets.elementAt(j);
+
+	    if (temp.indexOf('@') == -1)
+	      {
+		targetInvid = (Invid) mailInvids.get(temp.toLowerCase());
+
+		if (targetInvid != null)
+		  {
+		    current_field.addElement(targetInvid);
+		  }
+		else
+		  {
+		    targetInvid = (Invid) userInvid.get(temp.toLowerCase());
+
+		    if (targetInvid != null)
+		      {
+			current_field.addElement(targetInvid);
+		      }
+		    else
+		      {
+			System.err.println("Can't find email target reference for " + temp);
+		      }
+		  }
+	      }
+	  }
+      }
+
   }
 
   /**
@@ -1541,6 +1843,11 @@ class directLoaderClient extends UnicastRemoteObject implements Client {
 
     this.server = server;
 
+    if (server == null)
+      {
+	System.err.println("Error, null server in directLoaderClient constructor");
+      }
+
     System.err.println("Initializing directLoaderClient object");
 
     try
@@ -1558,13 +1865,17 @@ class directLoaderClient extends UnicastRemoteObject implements Client {
       }
     catch (RemoteException ex)
       {
-	System.err.println("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
+	System.err.println("RMI Error: Couldn't log in to server.\n");
+
+	ex.printStackTrace();
 
 	System.exit(0);
       }
     catch (NullPointerException ex)
       {
 	System.err.println("Error: Didn't get server reference.  Exiting now.");
+
+	ex.printStackTrace();
 
 	System.exit(0);
       }
