@@ -6,8 +6,8 @@
 
     Created:  11 August 1997
     Release: $Name:  $
-    Version: $Revision: 1.92 $
-    Last Mod Date: $Date: 1999/03/19 05:11:44 $
+    Version: $Revision: 1.93 $
+    Last Mod Date: $Date: 1999/03/19 21:33:41 $
     Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -2324,7 +2324,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 						   editable && fieldInfo.isEditable(),
 						   false,  // canChoose
 						   false,  // mustChoose
-						   0);
+						   300); // this is double wide because there is no available list
 
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
@@ -2342,7 +2342,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 						   editable && fieldInfo.isEditable(),
 						   true,   // canChoose
 						   false,  // mustChoose
-						   0);
+						   ((editable && fieldInfo.isEditable()) && (available != null)) ? 150 : 300);
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
@@ -2359,7 +2359,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 					       editable && fieldInfo.isEditable(),
 					       false,   // canChoose
 					       false,  // mustChoose
-					       0); // no availble list, so it is wider
+					       300); // no availble list, so it is wider
 	objectHash.put(ss, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 	addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
@@ -2546,7 +2546,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, 
 					   editable && fieldInfo.isEditable(), 
 					   true, true, 
-					   0,
+					   ((choiceHandles != null) && 
+					    (editable && fieldInfo.isEditable())) ? 150 : 300,
 					   "Selected", "Available",
 					   invidTablePopup, invidTablePopup2);
     if (choiceHandles == null)
