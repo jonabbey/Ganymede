@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 2001/07/03 18:17:14 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 2001/07/03 22:14:51 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -2150,6 +2150,8 @@ class OptionsPanel extends JPanel {
 
     numBuiltInChoices = builtInItems_Vect.size();
     numCustomChoices = customItems_Vect.size();
+
+    // create and load the StringSelector for the built in fields
       
     builtInSelector = new StringSelector( builtInItems_Vect, 
 					  new Vector(), 
@@ -2157,11 +2159,22 @@ class OptionsPanel extends JPanel {
 					  true, true, true, 0,
 					  "Members",
 					  "Available", null, null );
+    
+    Vector builtInHandles = new Vector(builtInItems_Vect.size());
 
-    FixedListCompare builtInComparator = new FixedListCompare(builtInItems_Vect, null);
+    for (int i = 0; i < builtInItems_Vect.size(); i++)
+      {
+	String x = (String) builtInItems_Vect.elementAt(i);
+
+	builtInHandles.addElement(new listHandle(x, x));
+      }
+
+    FixedListCompare builtInComparator = new FixedListCompare(builtInHandles, null);
 
     builtInSelector.update(builtInItems_Vect, true, builtInComparator, 
 			   new Vector(), true, builtInComparator);
+
+    // create and load the StringSelector for the custom fields
 
     customSelector = new StringSelector( new Vector(),
 					 customItems_Vect, 
@@ -2170,7 +2183,16 @@ class OptionsPanel extends JPanel {
 					 "Members",
 					 "Available", null, null );
 
-    FixedListCompare customComparator = new FixedListCompare(customItems_Vect, null);
+    Vector customHandles = new Vector(customItems_Vect.size());
+
+    for (int i = 0; i < customItems_Vect.size(); i++)
+      {
+	String x = (String) customItems_Vect.elementAt(i);
+
+	customHandles.addElement(new listHandle(x, x));
+      }
+
+    FixedListCompare customComparator = new FixedListCompare(customHandles, null);
 
     customSelector.update(new Vector(), true, customComparator, 
 			  customItems_Vect, true, customComparator);
