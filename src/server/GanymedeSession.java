@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.204 $
-   Last Mod Date: $Date: 2000/09/30 22:50:11 $
+   Version: $Revision: 1.205 $
+   Last Mod Date: $Date: 2000/10/05 18:52:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.204 $ $Date: 2000/09/30 22:50:11 $
+ * @version $Revision: 1.205 $ $Date: 2000/10/05 18:52:28 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -725,6 +725,48 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public boolean isSuperGash()
   {
     return supergashMode;
+  }
+
+  /**
+   * <p>Pass-through method for schema kit code.  This method is not
+   * intended to be available to the client over RMI anymore, as
+   * {@link arlut.csd.ganymede.DBSession#checkpoint(java.lang.String)
+   * DBSession.checkpoint()} now does a thread comparison to make sure
+   * that nothing is attempting to do interleaved checkpoint
+   * operations, and RMI doesn't guarantee that successive remote
+   * method calls from a client will be issued from the same server
+   * thread.</p>
+   */
+
+  public void checkpoint(String key)
+  {
+    if (session.editSet == null)
+      {
+	throw new RuntimeException("checkpoint called in the absence of a transaction");
+      }
+
+    session.checkpoint(key);
+  }
+
+  /**
+   * <p>Pass-through method for schema kit code.  This method is not
+   * intended to be available to the client over RMI anymore, as
+   * {@link arlut.csd.ganymede.DBSession#checkpoint(java.lang.String)
+   * DBSession.checkpoint()} now does a thread comparison to make sure
+   * that nothing is attempting to do interleaved checkpoint
+   * operations, and RMI doesn't guarantee that successive remote
+   * method calls from a client will be issued from the same server
+   * thread.</p>
+   */
+
+  public boolean rollback(String key)
+  {
+    if (session.editSet == null)
+      {
+	throw new RuntimeException("rollback called in the absence of a transaction");
+      }
+
+    return session.rollback(key);
   }
 
   /**

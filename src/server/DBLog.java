@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2000/10/04 08:49:10 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2000/10/05 18:52:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1487,174 +1487,7 @@ public class DBLog {
 
   public Vector calculateOwnerAddresses(Vector objects)
   {
-    Enumeration objectsEnum, ownersEnum;
-    Invid invid, ownerInvid;
-    InvidDBField ownersField, invidField2;
-    DBObject object, object2;
-    Vector vect;
-    Vector results = new Vector();
-    Hashtable seenOwners = new Hashtable();
-
-    /* -- */
-
-    if (debug)
-      {
-	System.err.println("DBLog.java: calculateOwnerAddresses");
-      }
-
-    objectsEnum = objects.elements();
-
-    while (objectsEnum.hasMoreElements())
-      {
-	invid = (Invid) objectsEnum.nextElement();
-	object = gSession.getSession().viewDBObject(invid);
-
-	if (object == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("calculateOwnerAddresses(): Couldn't find invid " + 
-				   invid.toString());
-	      }
-
-	    continue;
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("DBLog.calculateOwnerAddresses(): processing " + object.getLabel());
-	  }
-
-	// first off, does the object itself have anyone it wants to notify?
-
-	if (object.hasEmailTarget())
-	  {
-	    results = VectorUtils.union(results, object.getEmailTargets());
-	  }
-
-	// okay, now we've got to see about notifying the owners..
-
-	if (object.isEmbedded())
-	  {
-	    if (debug)
-	      {
-		System.err.println("calculateOwnerAddresses(): Looking up owner for Embeded invid " + 
-				   invid.toString());
-	      }
-
-	    DBObject refObj = object;
-
-	    // if we have are getting rid of an embedded object, we'll need to look
-	    // at the original version of the object to get its parent.
-
-	    if (refObj instanceof DBEditObject)
-	      {
-		DBEditObject refEObj = (DBEditObject) refObj;
-
-		if (refEObj.getStatus()== ObjectStatus.DELETING)
-		  {
-		    refObj = refEObj.getOriginal();
-		  }
-	      }
-
-	    refObj = gSession.getContainingObj(refObj);
-	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
-	  }
-	else
-	  {
-	    // get a list of owners invid's for this object
-
-	    DBObject refObj = object;
-	    
-	    // if we are deleting an object, we'll need to look at the
-	    // original to get the list of owners for it
-	    
-	    if (refObj instanceof DBEditObject)
-	      {
-		DBEditObject refEObj = (DBEditObject) refObj;
-
-		if (refEObj.getStatus()== ObjectStatus.DELETING)
-		  {
-		    refObj = refEObj.getOriginal();
-		  }
-	      }
-
-	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
-	  }
-	
-	if (ownersField == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("calculateOwnerAddresses(): disregarding supergash-owned invid " + 
-				   invid.toString());
-	      }
-
-	    continue;
-	  }
-
-	vect = ownersField.getValuesLocal();
-
-	// *** Caution!  getValuesLocal() does not clone the field's contents..
-	// 
-	// DO NOT modify vect here!
-
-	if (vect == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("calculateOwnerAddresses(): Empty owner list for invid " + 
-				   invid.toString());
-	      }
-
-	    continue;
-	  }
-
-	// okay, we have the list of owner invid's for this object.  For each
-	// of these owners, we need to see what email lists and addresses are 
-	// to receive notification
-
-	ownersEnum = vect.elements(); // this object's owner list
-
-	while (ownersEnum.hasMoreElements())
-	  {
-	    ownerInvid = (Invid) ownersEnum.nextElement();
-
-	    if (!seenOwners.containsKey(ownerInvid))
-	      {
-		if (debug)
-		  {
-		    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " + 
-				       gSession.viewObjectLabel(ownerInvid));
-		  }
-
-		results = VectorUtils.union(results, ownerCustom.getAddresses(ownerInvid, 
-									      gSession.getSession()));
-		
-		seenOwners.put(ownerInvid, ownerInvid);
-	      }
-	  }
-      }
-
-    if (debug)
-      {
-	System.err.print("DBLog.calculateOwnerAddresses(): returning ");
-
-	for (int i = 0; i < results.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		System.err.print(", ");
-	      }
-
-	    System.err.print(results.elementAt(i));
-	  }
-
-	System.err.println();
-      }
-
-
-    return results;
+    return DBLog.calculateOwnerAddresses(objects, gSession.getSession());
   }
 
   /**
@@ -1743,6 +1576,193 @@ public class DBLog {
 	System.err.println(signature);
 	System.err.println("----");
       }
+  }
+
+  //
+  //
+  //
+  // STATIC methods
+  //
+  //
+  //
+
+  /**
+   * <P>This method takes a vector of {@link arlut.csd.ganymede.Invid Invid}'s
+   * representing objects touched
+   * during a transaction, and returns a Vector of email addresses that
+   * should be notified of operations affecting the objects in the
+   * &lt;objects&gt; list.</P>
+   */
+
+  static public Vector calculateOwnerAddresses(Vector objects, DBSession session)
+  {
+    Enumeration objectsEnum, ownersEnum;
+    Invid invid, ownerInvid;
+    InvidDBField ownersField, invidField2;
+    DBObject object, object2;
+    Vector vect;
+    Vector results = new Vector();
+    Hashtable seenOwners = new Hashtable();
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("DBLog.java: calculateOwnerAddresses");
+      }
+
+    objectsEnum = objects.elements();
+
+    while (objectsEnum.hasMoreElements())
+      {
+	invid = (Invid) objectsEnum.nextElement();
+	object = session.viewDBObject(invid);
+
+	if (object == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("calculateOwnerAddresses(): Couldn't find invid " + 
+				   invid.toString());
+	      }
+
+	    continue;
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("DBLog.calculateOwnerAddresses(): processing " + object.getLabel());
+	  }
+
+	// first off, does the object itself have anyone it wants to notify?
+
+	if (object.hasEmailTarget())
+	  {
+	    results = VectorUtils.union(results, object.getEmailTargets());
+	  }
+
+	// okay, now we've got to see about notifying the owners..
+
+	if (object.isEmbedded())
+	  {
+	    if (debug)
+	      {
+		System.err.println("calculateOwnerAddresses(): Looking up owner for Embeded invid " + 
+				   invid.toString());
+	      }
+
+	    DBObject refObj = object;
+
+	    // if we have are getting rid of an embedded object, we'll need to look
+	    // at the original version of the object to get its parent.
+
+	    if (refObj instanceof DBEditObject)
+	      {
+		DBEditObject refEObj = (DBEditObject) refObj;
+
+		if (refEObj.getStatus()== ObjectStatus.DELETING)
+		  {
+		    refObj = refEObj.getOriginal();
+		  }
+	      }
+
+	    refObj = session.getGSession().getContainingObj(refObj);
+	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
+	  }
+	else
+	  {
+	    // get a list of owners invid's for this object
+
+	    DBObject refObj = object;
+	    
+	    // if we are deleting an object, we'll need to look at the
+	    // original to get the list of owners for it
+	    
+	    if (refObj instanceof DBEditObject)
+	      {
+		DBEditObject refEObj = (DBEditObject) refObj;
+
+		if (refEObj.getStatus()== ObjectStatus.DELETING)
+		  {
+		    refObj = refEObj.getOriginal();
+		  }
+	      }
+
+	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
+	  }
+	
+	if (ownersField == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("calculateOwnerAddresses(): disregarding supergash-owned invid " + 
+				   invid.toString());
+	      }
+
+	    continue;
+	  }
+
+	vect = ownersField.getValuesLocal();
+
+	// *** Caution!  getValuesLocal() does not clone the field's contents..
+	// 
+	// DO NOT modify vect here!
+
+	if (vect == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("calculateOwnerAddresses(): Empty owner list for invid " + 
+				   invid.toString());
+	      }
+
+	    continue;
+	  }
+
+	// okay, we have the list of owner invid's for this object.  For each
+	// of these owners, we need to see what email lists and addresses are 
+	// to receive notification
+
+	ownersEnum = vect.elements(); // this object's owner list
+
+	while (ownersEnum.hasMoreElements())
+	  {
+	    ownerInvid = (Invid) ownersEnum.nextElement();
+
+	    if (!seenOwners.containsKey(ownerInvid))
+	      {
+		if (debug)
+		  {
+		    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " + 
+				       session.getGSession().viewObjectLabel(ownerInvid));
+		  }
+
+		results = VectorUtils.union(results, ownerCustom.getAddresses(ownerInvid, 
+									      session));
+		
+		seenOwners.put(ownerInvid, ownerInvid);
+	      }
+	  }
+      }
+
+    if (debug)
+      {
+	System.err.print("DBLog.calculateOwnerAddresses(): returning ");
+
+	for (int i = 0; i < results.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		System.err.print(", ");
+	      }
+
+	    System.err.print(results.elementAt(i));
+	  }
+
+	System.err.println();
+      }
+
+    return results;
   }
 }
 
