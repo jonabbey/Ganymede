@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -71,6 +71,8 @@ public class ReturnVal implements java.io.Serializable {
   public static final byte EXPIRATIONSET = 1;
   public static final byte DELETED = 2;
   public static final byte LAST = 2;
+
+  static final boolean debug = false;
 
   // ---
 
@@ -312,10 +314,21 @@ public class ReturnVal implements java.io.Serializable {
 	
 	if (retVal.rescanList.toString().equals("all"))
 	  {
+	    if (debug)
+	      {
+		System.err.println("ReturnVal.unionRescan(): setting full rescan");
+	      }
+
 	    setRescanAll();
 	  }
 	else
 	  {
+	    if (debug)
+	      {
+		System.err.println("ReturnVal.unionRescan(): adding field rescan buf:" +
+				   retVal.rescanList.toString());
+	      }
+
 	    rescanList.append(retVal.rescanList.toString());
 	  }
       }
@@ -333,6 +346,11 @@ public class ReturnVal implements java.io.Serializable {
 	  {
 	    objid = (Invid) enum.nextElement();
 	    otherobj = (ReturnVal) retVal.objRescanHash.get(objid);
+
+	    if (debug)
+	      {
+		System.err.println("ReturnVal.unionRescan(): adding rescan object " + objid);
+	      }
 
 	    addRescanObject(objid, otherobj);
 	  }
