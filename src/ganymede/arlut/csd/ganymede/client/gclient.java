@@ -968,16 +968,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     commit = new JButton("Commit");
     commit.setEnabled(false);
     commit.setOpaque(true);
-    //    commit.setBackground(Color.lightGray);
-    //    commit.setForeground(Color.black);
     commit.setToolTipText("Click this to commit all changes to database");
     commit.addActionListener(this);
 
     cancel = new JButton("Cancel");
     cancel.setEnabled(false);
     cancel.setOpaque(true);
-    //    cancel.setBackground(Color.lightGray);
-    //    cancel.setForeground(Color.black);
     cancel.setToolTipText("Click this to cancel all changes");
     cancel.addActionListener(this);
 
