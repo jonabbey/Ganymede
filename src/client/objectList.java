@@ -9,8 +9,8 @@
    
    Created: 6 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/03/25 08:17:07 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/11/02 23:42:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -72,7 +72,7 @@ import arlut.csd.Util.*;
  * objects, including their expiration/removal/inactive status,
  * their current label, and more.</p>
  *
- * @version $Revision: 1.11 $ $Date: 1999/03/25 08:17:07 $ $Name:  $
+ * @version $Revision: 1.12 $ $Date: 1999/11/02 23:42:14 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -125,9 +125,13 @@ public class objectList {
     /* -- */
 
     invids = new Hashtable();
-    handles = result.getHandles();
+    handles = result.getHandles(); // pre-sorted
+
+    sorted = true;
 
     activeHandles = (Vector) handles.clone(); // quickly dup the vector of handles
+
+    activeSorted = true;
 
     // now, count down from top of activeHandles vector, removing
     // any inactive objects
@@ -252,7 +256,7 @@ public class objectList {
 
     /* -- */
 
-    sortHandles();
+    //    sortHandles();
 
     if (includeInactives)
       {
@@ -324,7 +328,7 @@ public class objectList {
 
     /* -- */
 
-    sortHandles();
+    //    sortHandles();
 
     if (includeInactives)
       {
@@ -386,7 +390,7 @@ public class objectList {
   public synchronized Vector getObjectHandles(boolean includeInactives,
 					      boolean includeNonEditables)
   {
-    sortHandles();
+    //    sortHandles();
 
     if (includeNonEditables || !containsNonEditable)
       {
@@ -468,7 +472,7 @@ public class objectList {
 
   public synchronized void addObjectHandle(ObjectHandle handle)
   {
-    sortHandles();
+    //    sortHandles();
 
     if (inserter == null)
       {

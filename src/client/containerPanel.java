@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 1999/10/29 21:44:45 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 1999/11/02 23:42:13 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -62,7 +62,7 @@ import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.*;
-import arlut.csd.Util.VecQuickSort;
+import arlut.csd.Util.VecSortInsert;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.111 $ $Date: 1999/10/29 21:44:45 $ $Name:  $
+ * @version $Revision: 1.112 $ $Date: 1999/11/02 23:42:13 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1216,7 +1216,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		if (qr != null)
 		  {
-		    choiceHandles = qr.getListHandles();
+		    choiceHandles = qr.getListHandles(); // pre-sorted
 		  }
 	      }
 	    else
@@ -1233,7 +1233,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			println("key in there, using cached list");
 		      }
 		      
-		    choiceHandles = gc.cachedLists.getListHandles(key, false);
+		    choiceHandles = gc.cachedLists.getListHandles(key, false); // pre-sorted
 		  }
 		else
 		  {
@@ -1254,7 +1254,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    else
 		      {
 			gc.cachedLists.putList(key, choicesV);
-			choiceHandles = choicesV.getListHandles();
+			choiceHandles = choicesV.getListHandles(); // sorted
 		      }
 		  }
 	      }
@@ -1292,7 +1292,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (currentHandle == null && currentValue != null)
 	      {
-		choiceHandles.addElement(currentValueHandle);
+		VecSortInsert inserter = new VecSortInsert(QueryResult.comparator);
+		inserter.insert(choiceHandles, currentValueHandle);
 		currentHandle = currentValueHandle;
 	      }
 
@@ -1303,7 +1304,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (!mustChoose || (currentHandle == null))
 	      {
-		choiceHandles.addElement(noneHandle);
+		choiceHandles.insertElementAt(noneHandle, 0);
 	      }
 
 	    if (debug)
@@ -1313,7 +1314,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    // aaaand resort
 
-	    choiceHandles = gc.sortListHandleVector(choiceHandles);
+	    //	    choiceHandles = gc.sortListHandleVector(choiceHandles);
 
 	    if (currentHandle == null)
 	      {
@@ -3253,10 +3254,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	if (debug)
 	  {
-	    println("key is null, not using cache");
+	    println("key is null, not using cache.  Downloading choice list.");
 	  }
 	
 	list = new objectList(field.choices());
+
+	if (debug)
+	  {
+	    println("Choice list downloaded.");
+	  }
 
 	// we have to include non-editables, because the server will
 	// include some that are non-editable, but for which
@@ -3289,6 +3295,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 
 	    gc.cachedLists.putList(key, field.choices());
+
+	    if (debug)
+	      {
+		println("Choice list downloaded.");
+	      }
+
 	    list = gc.cachedLists.getList(key);
 	  }
 
@@ -3322,10 +3334,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	throw new RuntimeException("Could not get mustChoose: " + rx);
       }
-	
-    choices = gc.sortListHandleVector(choices);
-
-    combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
 
     // Find currentListHandle
     
@@ -3352,25 +3360,36 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		currentListHandle = thisChoice;
 		found = true;
-		//break;
+		break;
 	      }
 	  }
 
 	if (!found)
 	  {
 	    currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
-	    combo.addItem(currentListHandle);
+	    choices.addElement(currentListHandle);
 	  }
       }
 
-    if (!mustChoose)
+    if (!mustChoose || (currentChoice == null))
       {
-	combo.addItem(noneHandle);
+	if (debug)
+	  {
+	    println("inserting null handle");
+	  }
+
+	choices.insertElementAt(noneHandle, 0);
       }
+
+    if (debug)
+      {
+	println("creating JInvidChooser");
+      }
+
+    combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
 
     combo.setMaximumRowCount(12);
     combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-    //    combo.setEditable(false);
     combo.setVisible(true);
     
     if (currentChoice != null)
@@ -3396,19 +3415,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	if (debug)
 	  {
 	    println("currentChoice is null");
-	  }
-
-	// If the field is must choose, we wouldn't have added the
-	// noneHandle earlier.
-
-	if (mustChoose)
-	  {
-	    if (debug)
-	      {
-		println("Adding noneHandle, because the currentchoice is null.");
-	      }
-
-	    combo.addItem(noneHandle);
 	  }
 
 	combo.setSelectedItem(noneHandle);

@@ -6,8 +6,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 1999/04/14 19:04:40 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 1999/11/02 23:42:14 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -247,12 +247,6 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	    listHandles.addElement(lh);
 	  }
       }
-
-    //
-    //
-    // We do need to sort the list handles, but gclient doesn't have this method
-    //
-    //
 
     listHandles = client.sortListHandleVector(listHandles);
 
