@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 2001/03/27 07:30:29 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 2001/03/28 05:16:30 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -2140,7 +2140,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void forceBuild() throws RemoteException
   {
-    aSession.forceBuild();
+    handleReturnVal(aSession.forceBuild());
   }
 
   public void disconnect() throws RemoteException

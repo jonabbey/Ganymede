@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 2001/03/27 07:30:30 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2001/03/28 05:16:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.51 $ $Date: 2001/03/27 07:30:30 $
+ * @version $Revision: 1.52 $ $Date: 2001/03/28 05:16:31 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -722,9 +722,20 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * execution.</p>
    */
 
-  public void forceBuild()
+  public ReturnVal forceBuild()
   {
+    if (!fullprivs)
+      {
+	return Ganymede.createErrorDialog("Permissions Denied",
+					  "You do not have permissions to force a full rebuild");
+      }
+
+    Ganymede.debug("Admin console forcing full network build...");
+
     Ganymede.forceBuilderTasks();
+
+    return Ganymede.createInfoDialog("Forced Rebuild Scheduled",
+				     "A full rebuild of all external data files has been scheduled.");
   }
 
   /**

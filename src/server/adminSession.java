@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2001/03/27 07:30:32 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2001/03/28 05:16:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ import java.util.Date;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Revision: 1.18 $ %D%
+ * @version $Revision: 1.19 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -99,7 +99,7 @@ public interface adminSession extends Remote {
    * execution.</p>
    */
 
-  void        forceBuild() throws RemoteException;
+  ReturnVal     forceBuild() throws RemoteException;
 
   /**
    * Kick a user off of the Ganymede server on behalf of this admin console
