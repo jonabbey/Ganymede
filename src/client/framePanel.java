@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 1999/01/22 18:04:13 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 1999/02/16 23:05:46 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -207,7 +207,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     setMaximizable(true);
     setResizable(true);
-    setClosable(true);
+
+    if (!isCreating)
+      {
+	setClosable(true);
+      }
+
     setIconifiable(true);
     setTitle(title);
 
@@ -1278,7 +1283,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    try
 	      {
 		setClosed(true);
-		
 	      }
 	    catch (PropertyVetoException ex)
 	      {
@@ -1295,7 +1299,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	try
 	  {
 	    setClosed(true);
-	    
 	  }
 	catch (PropertyVetoException ex)
 	  {

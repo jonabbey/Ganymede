@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 1999/02/12 20:41:10 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 1999/02/16 23:05:46 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -677,6 +677,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
   
   /**
+   *
    * Closes all internal frames, editable or no.
    *
    */
@@ -694,19 +695,29 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       {
 	w = (JInternalFrame)windowList.get(windows.nextElement());
 
-	if (w.isClosable())
+	if (!w.isClosable())
 	  {
-	    try
-	      {
-		w.setClosed(true);
-	      }
-	    catch (java.beans.PropertyVetoException ex)
-	      {
-		throw new RuntimeException("beans? " + ex);
-	      }
+	    w.setClosable(true);
+	  }
+	
+	try
+	  {
+	    w.setClosed(true);
+	  }
+	catch (java.beans.PropertyVetoException ex)
+	  {
+	    throw new RuntimeException("beans? " + ex);
 	  }
       }
   }
+
+  /**
+   *
+   * This method attempts to close an internal window in the client.  This
+   * method will not close windows (as for newly created objects) that are
+   * not set to be closeable.
+   *
+   */
 
   public void closeWindow(String title)
   {
