@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.79 $ %D%
+   Version: $Revision: 1.80 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1288,18 +1288,33 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * clients.<br><br>
    *
    * If the transaction cannot be committed for some reason,
-   * commitTransaction() will instead abort the transaction.  In any
-   * case, calling commitTransaction() will close the transaction.<br><br>
+   * commitTransaction() will abort the transaction if abortOnFail is
+   * true.  In any case, commitTransaction() will return a ReturnVal
+   * indicating whether or not the transaction could be committed, and
+   * whether or not the transaction remains open for further attempts
+   * at commit.  If ReturnVal.doNormalProcessing is set to true, the
+   * transaction remains open and it is up to the client to decide
+   * whether to abort the transaction by calling abortTransaction(),
+   * or to attempt to fix the reported problem and try another call
+   * to commitTransaction().<br><br>
    *
    * This method is synchronized to avoid nested-monitor deadlock in
    * DBSession.commitTransaction().
    *
+   * @param abortOnFail If true, the transaction will be aborted if it
+   * could not be committed successfully.
+   *
    * @return a ReturnVal object if the transaction could not be committed,
-   *            or null if there were no problems
-   * 
-   * @see arlut.csd.ganymede.Session */
+   *         or null if there were no problems.  If the transaction was
+   *         forcibly terminated due to a major error, the 
+   *         doNormalProcessing flag in the returned ReturnVal will be
+   *         set to false.
+   *
+   * @see arlut.csd.ganymede.Session 
+   *
+   */
 
-  public synchronized ReturnVal commitTransaction()
+  public synchronized ReturnVal commitTransaction(boolean abortOnFail)
   {
     ReturnVal retVal;
 
@@ -1325,8 +1340,45 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	Ganymede.runBuilderTasks();
       }
+    else
+      {
+	if (abortOnFail && retVal.doNormalProcessing)
+	  {
+	    abortTransaction();
+	  }
+      }
 
     return retVal;
+  }
+
+  /**
+   *
+   * This method causes all changes made by the client to be 'locked in'
+   * to the database.  When commitTransaction() is called, the changes
+   * made by the client during this transaction is logged to a journal
+   * file on the server, and the changes will become visible to other
+   * clients.<br><br>
+   *
+   * Committransaction() will return a ReturnVal indicating whether or
+   * not the transaction could be committed, and whether or not the
+   * transaction remains open for further attempts at commit.  If
+   * ReturnVal.doNormalProcessing is set to true, the transaction
+   * remains open and it is up to the client to decide whether to
+   * abort the transaction by calling abortTransaction(), or to
+   * attempt to fix the reported problem and try another call to
+   * commitTransaction().
+   *
+   * @return a ReturnVal object if the transaction could not be committed,
+   *         or null if there were no problems.  If the transaction was
+   *         forcibly terminated due to a major error, the 
+   *         doNormalProcessing flag in the returned ReturnVal will be
+   *         set to false.
+   * 
+   */
+
+  public ReturnVal commitTransaction()
+  {
+    return commitTransaction(false);
   }
 
   /**
