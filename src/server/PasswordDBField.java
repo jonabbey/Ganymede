@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2001/01/12 01:12:35 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2001/01/23 06:37:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -445,7 +445,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	
     if (md5CryptPass != null)
       {
-	dump.attribute("md5crypt", cryptedPass);
+	dump.attribute("md5crypt", md5CryptPass);
       }
 
     dump.endElement("password");
@@ -697,8 +697,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if (cryptedPass.equals(cryptedText))
 	  {
-	    // If we're set up to keep plaintext copies or our
-	    // encrypted passwords, we're going to go ahead and make a
+	    // We're going to go ahead and make a
 	    // note of the plaintext password we just matched to the
 	    // crypt text.  This is really pretty funky, because this
 	    // is being done outside of any transactional context, but
@@ -707,13 +706,9 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // about the password we already are keeping.. to wit, the
 	    // actual plain text.  By doing this, Ganymede can accumulate
 	    // plaintext copies of the passwords whenever anyone logs in
-	    // to it (assuming that the schema is set up to have the user's
-	    // password field keep a plaintext copy.)
+	    // to it, at least in memory during its execution.
 
-	    if (getFieldDef().isPlainText())
-	      {
-		uncryptedPass = text;
-	      }
+	    uncryptedPass = text;
 
 	    // likewise, remember the MD5 version in case someone is going
 	    // to want it
@@ -746,8 +741,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if (md5CryptPass.equals(cryptedText))
 	  {
-	    // If we're set up to keep plaintext copies or our
-	    // encrypted passwords, we're going to go ahead and make a
+	    // We're going to go ahead and make a
 	    // note of the plaintext password we just matched to the
 	    // crypt text.  This is really pretty funky, because this
 	    // is being done outside of any transactional context, but
@@ -756,13 +750,9 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // about the password we already are keeping.. to wit, the
 	    // actual plain text.  By doing this, Ganymede can accumulate
 	    // plaintext copies of the passwords whenever anyone logs in
-	    // to it (assuming that the schema is set up to have the user's
-	    // password field keep a plaintext copy.)
+	    // to it, at least in memory during its execution.
 
-	    if (getFieldDef().isPlainText())
-	      {
-		uncryptedPass = text;
-	      }
+	    uncryptedPass = text;
 
 	    // likewise, remember the crypt() version in case someone
 	    // is going to want it.
