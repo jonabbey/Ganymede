@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,6 +67,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   DBObject original;
   boolean committing;
+
+  protected boolean deleting = false;	// true if the object is in the middle of carrying
+				        // out deletion logic.. consulted by subclasses
+				        // to determine whether they should object to fields
+				        // being set to null
+
   boolean finalized = false;	// true if this object has been processed
 				// by a DBEditSet's commit logic
 
@@ -1311,65 +1317,81 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     // we want to delete / null out all fields.. this will take care
     // of invid links, embedded objects, and namespace allocations.
 
-    enum = fields.elements();
+    // set the deleting flag to true so that our subclasses won't
+    // freak about values being set to null.
 
-    while (enum.hasMoreElements())
+    this.deleting = true;
+
+    try
       {
-	field = (DBField) enum.nextElement();
+	enum = fields.elements();
 
-	if (field.isVector())
+	while (enum.hasMoreElements())
 	  {
-	    while (field.size() > 0)
+	    field = (DBField) enum.nextElement();
+
+	    if (field.isVector())
 	      {
-		retVal = field.deleteElement(0);
-
-		if (retVal != null && !retVal.didSucceed())
+		while (field.size() > 0)
 		  {
-		    session = editset.getSession();
-		    
-		    if (session != null)
+		    retVal = field.deleteElement(0);
+
+		    if (retVal != null && !retVal.didSucceed())
 		      {
-			session.setLastError("DBEditObject disapproved of deleting element from field " + field.getName());
-		      }
-
-		    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-						      "DBEditObject disapproved of deleting element from field " + 
-						      field.getName());
-		  }
-	      }
-	  }
-	else
-	  {
-	    // permission matrices and passwords don't
-	    // allow us to call set value directly.
-
-	    if (field.getType() != PERMISSIONMATRIX &&
-		field.getType() != PASSWORD)
-	      {
-		retVal = field.setValue(null);
-
-		if (retVal != null && !retVal.didSucceed())
-		  {
-		    session = editset.getSession();
+			session = editset.getSession();
 		    
-		    if (session != null)
-		      {
-			session.setLastError("DBEditObject could not clear field " + field.getName());
-		      }
+			if (session != null)
+			  {
+			    session.setLastError("DBEditObject disapproved of deleting element from field " + 
+						 field.getName());
+			  }
 
-		    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-						      "DBEditObject could not clear field " + 
-						      field.getName());
+			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							  "DBEditObject disapproved of deleting element from field " + 
+							  field.getName());
+		      }
 		  }
 	      }
 	    else
 	      {
-		field.defined = false;
+		// permission matrices and passwords don't
+		// allow us to call set value directly.
+
+		if (field.getType() != PERMISSIONMATRIX &&
+		    field.getType() != PASSWORD)
+		  {
+		    retVal = field.setValue(null);
+
+		    if (retVal != null && !retVal.didSucceed())
+		      {
+			session = editset.getSession();
+		    
+			if (session != null)
+			  {
+			    session.setLastError("DBEditObject could not clear field " + 
+						 field.getName());
+			  }
+
+			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							  "DBEditObject could not clear field " + 
+							  field.getName());
+		      }
+		  }
+		else
+		  {
+		    field.defined = false;
+		  }
 	      }
 	  }
-      }
 
-    return retVal;
+	return retVal;
+      }
+    finally
+      {
+	// make sure we clear deleting before we return
+
+	deleting = false;
+      }
   }
 
   /**
