@@ -4,13 +4,15 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
 package arlut.csd.ganymede.client;
+
+import arlut.csd.ganymede.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -94,12 +96,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   TextField
     statusLabel;
 
+  JSplitPane
+    sPane;
+
   treeControl tree;
 
   windowPanel
     wp;
 
-  PopupMenu objectPM;
+  treeMenu objectPM;
   MenuItem
     objViewMI,
     objEditMI,
@@ -107,8 +112,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     objInactivateMI,
     objDeleteMI;
 
-  PopupMenu 
-    pMenu = new PopupMenu();
+  treeMenu 
+    pMenu = new treeMenu();
   
   MenuItem 
     createMI = null,
@@ -151,6 +156,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   static public Vector parseDump(StringBuffer buffer)
   {
+    if (buffer == null)
+      {
+	return new Vector();	// empty vector
+      }
+
     StringBuffer tempString = new StringBuffer();
     char[] chars = buffer.toString().toCharArray();
     int index = 0;
@@ -314,7 +324,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     pMenu.add(createMI);
     pMenu.add(queryMI);
 
-
     Image openFolder = PackageResources.getImageResource(this, "openfolder.gif", getClass());
     Image closedFolder = PackageResources.getImageResource(this, "folder.gif", getClass());
     Image list = PackageResources.getImageResource(this, "list.gif", getClass());
@@ -347,7 +356,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     images[OPEN_CAT] = redOpenFolder;
     images[CLOSED_CAT] = redClosedFolder;
     
-
     for (int j = 0; j < 3; j++)
       {
 	if (images[j] == null)
@@ -362,15 +370,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     tree.setMinimumWidth(200);
 
-    Box leftBox = new Box(tree, "Objects");
+    //    Box leftBox = new Box(tree, "Objects");
 
     InsetPanel leftP = new InsetPanel();
     leftP.setLayout(new BorderLayout());
-    leftP.add("Center", leftBox);
+    leftP.add("Center", tree);
     
-    add("West", leftP);
-
-    objectPM = new PopupMenu();
+    objectPM = new treeMenu();
     objViewMI = new MenuItem("View Object");
     objEditMI = new MenuItem("Edit Object");
     objCloneMI = new MenuItem("Clone Object");
@@ -436,8 +442,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     leftButtonP.add(commit);
     leftButtonP.add(cancel);
     //rightButtonP.add(windowBar);
+
+    sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftP, rightP);
    
-    add("Center",rightP);
+    add("Center",sPane);
 
     JBufferedPane statusBar = new JBufferedPane();
     statusBar.setLayout(new BorderLayout());
@@ -1417,7 +1425,7 @@ class InvidNode extends arlut.csd.Tree.treeNode {
   private Invid invid;
 
   public InvidNode(treeNode parent, String text, Invid invid, treeNode insertAfter,
-		    boolean expandable, int openImage, int closedImage, PopupMenu menu)
+		    boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.invid = invid;
@@ -1452,7 +1460,7 @@ class BaseNode extends arlut.csd.Tree.treeNode {
   /* -- */
 
   BaseNode(treeNode parent, String text, Base base, treeNode insertAfter,
-	   boolean expandable, int openImage, int closedImage, PopupMenu menu)
+	   boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.base = base;
