@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.95 $
-   Last Mod Date: $Date: 2000/03/24 21:27:24 $
+   Version: $Revision: 1.96 $
+   Last Mod Date: $Date: 2000/04/01 01:15:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1438,7 +1438,8 @@ class dumpTask implements Runnable {
 	  }
 
 	started = true;
-	Ganymede.debug("Running dump task");
+	Ganymede.debug("Running dump task - dumping " + 
+		       Ganymede.db.journal.transactionsInJournal + " transactions");
 
 	try
 	  {
