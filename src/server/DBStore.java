@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 1999/06/24 00:56:24 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 1999/07/15 01:47:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.83 $ %D%
+ * @version $Revision: 1.84 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -527,9 +527,6 @@ public class DBStore {
 	DBNameSpace ns;
 	DBBaseCategory bc;
 
-	boolean movedFile = false;
-	boolean completed = false;
-
 	/* -- */
 
 	if (debug)
@@ -552,6 +549,9 @@ public class DBStore {
 	try
 	  {
 	    dbFile = new File(filename);
+
+	    // first thing we do is zip up the old ganymede.db file if
+	    // archiveIt is true.
 
 	    if (dbFile.exists())
 	      {
@@ -584,17 +584,11 @@ public class DBStore {
 
 		    zipIt.createZipFile(zipFileName, fileNameVect);
 		  }
-		else
-		  {
-		    dbFile.renameTo(new File(filename + ".bak"));
-		  }
 	      }
 
-	    movedFile = true;
+	    // and dump the whole thing to ganymede.db.new
 
-	    // and dump the whole thing
-
-	    outStream = new FileOutputStream(filename);
+	    outStream = new FileOutputStream(filename + ".new");
 	    bufStream = new BufferedOutputStream(outStream);
 	    out = new DataOutputStream(bufStream);
 
@@ -628,9 +622,24 @@ public class DBStore {
 		((DBObjectBase) basesEnum.nextElement()).emit(out, true);
 	      } 
 
-	    completed = true;	// we don't care as much about our schema dump
+	    out.close();
+	    out = null;
 
-	    // and dump the schema out in a human readable form
+	    // ok, we've successfully dumped to ganymede.db.new.. move
+	    // the old file to ganymede.db.bak
+
+	    dbFile.renameTo(new File(filename + ".bak"));
+
+	    // and move ganymede.db.new to ganymede.db.. note that we
+	    // do have a very slight vulnerability here if we are
+	    // interrupted between the above rename and this one.
+
+	    new File(filename + ".new").renameTo(dbFile);
+
+	    // and dump the schema out in a human readable form.. note
+	    // that this is far less critical than all of the above,
+	    // so if we get an exception above we won't worry about
+	    // completing this part.
 	
 	    if (Ganymede.htmlProperty != null)
 	      {
@@ -679,20 +688,6 @@ public class DBStore {
 	    if (textOutStream != null)
 	      {
 		textOutStream.close();
-	      }
-
-	    // in case of thread dump
-
-	    if (movedFile && !completed)
-	      {
-		dbFile = new File(filename + ".bak");
-	    
-		if (dbFile.isFile())
-		  {
-		    dbFile.renameTo(new File(filename));
-		  }
-
-		Ganymede.debug("dump aborted, undoing dump.");
 	      }
 	  }
 
