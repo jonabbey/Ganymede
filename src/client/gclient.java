@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.133 $
-   Last Mod Date: $Date: 1999/02/26 21:41:42 $
+   Version: $Revision: 1.134 $
+   Last Mod Date: $Date: 1999/03/04 19:08:40 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -66,7 +66,7 @@ import arlut.csd.JTree.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
-
+import javax.swing.plaf.basic.BasicToolBarUI;
 /*------------------------------------------------------------------------------
                                                                            class
                                                                          gclient
@@ -247,6 +247,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     queryIcon,
     pencil,
     personaIcon,
+    inactivateIcon,
     treepencil,
     trash,
     treetrash,
@@ -610,6 +611,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     creation = PackageResources.getImageResource(this, "creation.gif", getClass());
     newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
     pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
+    inactivateIcon = PackageResources.getImageResource(this, "inactivate.gif", getClass());
     personaIcon = PackageResources.getImageResource(this, "persona.gif", getClass());
     setIconImage(pencil);
     createDialogImage = PackageResources.getImageResource(this, "wiz3b.gif", getClass());
@@ -721,10 +723,74 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     
     toolBar = createToolbar();
 
+    // Below is testing "listening" to toolbar events.
+
+//     toolBar.addComponentListener(new ComponentAdapter() {
+
+//     public void componentHidden(ComponentEvent e) {
+//         System.out.println("componentHidden event from "
+//                        + e.getComponent().getClass().getName());
+//     }
+
+//     public void componentMoved(ComponentEvent e) {
+//         System.out.println("componentMoved event from "
+//                        + e.getComponent().getClass().getName());
+//     }
+
+//     public void componentResized(ComponentEvent e) {
+//         System.out.println("componentResized event from "
+//                        + e.getComponent().getClass().getName());
+//     }
+
+//     public void componentShown(ComponentEvent e) {
+//         System.out.println("componentShown event from "
+//                        + e.getComponent().getClass().getName());
+//     }
+ 
+//     });
+
     if (showToolbar)
       {
 	getContentPane().add("North", toolBar);
       }
+
+//     /////////////////////////
+//    boolean sameSize = true;
+
+//    if (sameSize) { // Not sure about status of this so use
+//      // toggle to save having to comment out and in.
+
+//      int width=0;
+//      int height=0;
+    
+//      for (int i = 0; i<toolBar.getComponentCount(); i++) {
+
+//        JButton b = (JButton)toolBar.getComponent(i);
+
+//        int temp = b.getWidth();
+//        System.out.println(b.getActionCommand() + "  Width: " + temp);
+//        if (temp > width) {
+// 	 width = temp;
+//        }
+
+//        int temp2 = b.getHeight();
+//        System.out.println(b.getActionCommand() + " Height: " + temp2);
+//        if (temp2 > height) {
+// 	 height = temp2;
+//        }
+//      }
+
+//      Dimension buttonSize = new Dimension(width,height);    
+
+//      for (int j = 0; j<toolBar.getComponentCount(); j++) {
+//        JButton b = (JButton)toolBar.getComponent(j);
+//        b.setMaximumSize(buttonSize);
+//        b.setMinimumSize(buttonSize);
+//        b.setPreferredSize(buttonSize);
+//      }
+//    }
+
+
     
     commit = new JButton("Commit");
     commit.setEnabled(false);
@@ -803,6 +869,42 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     pack();
     setSize(800, 600);
     show();
+
+    // Adjust size of toolbar buttons to that of largest button
+    boolean sameSize = true;
+
+    if (sameSize) { // Not sure about status of this so use
+      // toggle to save having to comment out and in.
+
+      int width=0;
+      int height=0;
+      
+      for (int i = 0; i<toolBar.getComponentCount(); i++) {
+	
+	JButton b = (JButton)toolBar.getComponent(i);
+	
+	int temp = b.getWidth();
+	if (temp > width) {
+	  width = temp;
+	}
+	
+	int temp2 = b.getHeight();
+	if (temp2 > height) {
+	  height = temp2;
+	}
+      }
+      
+      Dimension buttonSize = new Dimension(width,height);    
+      
+      for (int j = 0; j<toolBar.getComponentCount(); j++) {
+	JButton b = (JButton)toolBar.getComponent(j);
+       	b.setMaximumSize(buttonSize);
+       	b.setMinimumSize(buttonSize);
+	b.setPreferredSize(buttonSize);
+      }
+    }
+
+
 
     // If user has multiple personas, ask which to start with.
 
@@ -1028,6 +1130,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 //    * Update the persona menu so it shows the correct persona as chosen.
 //    *
 //    */
+
+  // Has been moved to PersonaDialog class
+
 
 //   public void updatePersonaMenu()
 //   {
@@ -1799,12 +1904,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     JToolBar toolBarTemp = new JToolBar();
 
     toolBarTemp.setBorderPainted(true);
-    toolBarTemp.setFloatable(false);
+    toolBarTemp.setFloatable(true);
     toolBarTemp.setMargin(insets);
-    
+
+
     JButton b = new JButton("Create", new ImageIcon(newToolbarIcon));
     //JButton b = new JButton(new ImageIcon(newToolbarIcon));
-    int origButtonWidth = b.getWidth();
     b.setMargin(insets);
     b.setActionCommand("create new object");
     b.setVerticalTextPosition(b.BOTTOM);
@@ -1853,9 +1958,21 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.addActionListener(this);
     toolBarTemp.add(b);
 
-    if ((personae != null)  && personae.size() > 1)
+
+    // If we decide to have an inactivate-type button on toolbar...
+//     b = new JButton("Inactivate", new ImageIcon(inactivateIcon));
+//     //b = new JButton(new ImageIcon(inactivateIcon));
+//     b.setMargin(insets);
+//     b.setActionCommand("inactivate an object");
+//     b.setVerticalTextPosition(b.BOTTOM);
+//     b.setHorizontalTextPosition(b.CENTER);
+//     b.setToolTipText("Inactivate an object");
+//     b.addActionListener(this);
+//     toolBarTemp.add(b);
+
+   if ((personae != null)  && personae.size() > 1)
       {
-	b = new JButton("Personae", new ImageIcon(personaIcon));
+	b = new JButton("Persona", new ImageIcon(personaIcon));  
 	//b = new JButton(new ImageIcon(personaIcon));
 	b.setMargin(insets);
 	b.setActionCommand("change persona");
@@ -3898,12 +4015,19 @@ PersonaDialog getPersonaDialog()
     // Does weird stuff to detached toolbar...
 
     if (toolToggle == true) {
-      getContentPane().remove(toolBar);
+      if (((BasicToolBarUI)toolBar.getUI()).isFloating()) {
+	((BasicToolBarUI)toolBar.getUI()).setFloating(false, new Point(0,0));
+      }
+
+
+      toolBar.setVisible(false);
+      //      getContentPane().remove(toolBar);
       toolToggle = false;
     } 
     else if (toolToggle == false)
       { 
-	getContentPane().add("North", toolBar);
+	toolBar.setVisible(true);
+	//	getContentPane().add("North", toolBar);
 	toolToggle = true;
       }
     getContentPane().validate();
@@ -3923,6 +4047,12 @@ PersonaDialog getPersonaDialog()
 	System.out.println("Action: " + command);
       }
     
+    //  if (source == toolBar) {
+    //System.out.println("Action from toolbar\n");
+    //}
+
+
+    //    else 
     if (source == cancel)
       {
 	if (debug)
