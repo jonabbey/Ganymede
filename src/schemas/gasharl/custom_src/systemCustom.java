@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -976,8 +976,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == systemSchema.ROOM)
       {
-	// we need to generate a returnval that will cause all our interfaces' ipnet
-	// fields to be rescanned.
+	// we need to generate a returnval that will cause all our
+	// interfaces' ipnet fields to be rescanned.
+
+	// Note that we are here taking advantage of the fact that
+	// wizardHook can interject rescan information without needing
+	// to actually go through a wizard.
 
 	Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
 
@@ -986,8 +990,18 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    return null;
 	  }
 
+	// create the ReturnVal that will signify rescan for
+	// the interface fields that we care about under this
+	// system object
+
 	ReturnVal interfaceRescan = new ReturnVal(true, true);
 	interfaceRescan.addRescanField(interfaceSchema.IPNET);
+
+	// create the ReturnVal that we are actually going to
+	// return.. the second true tells the code that called us to
+	// go ahead and proceed normally, but to include the ReturnVal
+	// information that we are returning when the results finally
+	// go back to the client.
 
 	ReturnVal result = new ReturnVal(true, true);
 
@@ -1009,10 +1023,20 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	      {
 		return null;
 	      }
+
+	    // create the ReturnVal that will signify rescan for
+	    // the interface fields that we care about under this
+	    // system object
 	    
 	    ReturnVal interfaceRescan = new ReturnVal(true, true);
 	    interfaceRescan.addRescanField(interfaceSchema.NAME);
 	    interfaceRescan.addRescanField(interfaceSchema.ALIASES);
+
+	    // create the ReturnVal that we are actually going to
+	    // return.. the second true tells the code that called us to
+	    // go ahead and proceed normally, but to include the ReturnVal
+	    // information that we are returning when the results finally
+	    // go back to the client.
 	    
 	    ReturnVal result = new ReturnVal(true, true);
 	    
@@ -1036,9 +1060,13 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		return null;
 	      }
 	    
+	    // see notes above
+
 	    ReturnVal interfaceRescan = new ReturnVal(true, true);
 	    interfaceRescan.addRescanField(interfaceSchema.NAME);
 	    interfaceRescan.addRescanField(interfaceSchema.ALIASES);
+
+	    // see notes above
 	    
 	    ReturnVal result = new ReturnVal(true, true);
 
