@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 2002/03/13 05:58:13 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 2002/06/14 00:50:56 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -90,7 +90,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.70 $ $Date: 2002/03/13 05:58:13 $ $Name:  $
+ * @version $Revision: 1.71 $ $Date: 2002/06/14 00:50:56 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -374,12 +374,23 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbl.setConstraints(image, gbc);
     loginBox.add(image);
 
-    JLabel label = new JLabel("Ganymede Network Management System");
+    JPanel labelPanel = new JPanel();
+    labelPanel.setLayout(new BorderLayout());
+
+    JLabel label = new JLabel("Ganymede Server on: ");
+    labelPanel.add("West", label);
+
+    JLabel hostLabel = new JLabel(serverhost + ":" + registryPortProperty);
+    Font x = new Font("Courier", Font.ITALIC, 12);
+    hostLabel.setFont(x);
+
+    labelPanel.add("East", hostLabel);
+
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weighty = 0.0;
     gbc.gridy = 1;
-    gbl.setConstraints(label, gbc);
-    loginBox.add(label);
+    gbl.setConstraints(labelPanel, gbc);
+    loginBox.add(labelPanel);
 
     // the username and passwd fields here won't have their
     // callback set with addTextListener().. instead, we'll
@@ -391,6 +402,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     JLabel userL = new JLabel("Username:");
     gbc.fill = GridBagConstraints.NONE;
+    gbc.gridx = 0;
     gbc.gridy = 2;
     gbc.gridwidth = 1;
     gbc.weightx = 0.0;
@@ -903,7 +915,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.70 $ $Date: 2002/03/13 05:58:13 $ $Name:  $
+ * @version $Revision: 1.71 $ $Date: 2002/06/14 00:50:56 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -997,7 +1009,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.70 $ $Date: 2002/03/13 05:58:13 $ $Name:  $
+ * @version $Revision: 1.71 $ $Date: 2002/06/14 00:50:56 $ $Name:  $
  * @author Jonathan Abbey
  */
 
