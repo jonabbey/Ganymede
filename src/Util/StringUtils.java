@@ -4,8 +4,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2001/04/04 22:31:39 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2001/04/04 22:38:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -157,7 +157,8 @@ public class StringUtils {
 
   public static void main(String argv[])
   {
-    String test = "10.8.[100-21].[1-253]\n10.3.[4-8].[1-253]\n129.116.[224-227].[1-253]";
+    //    String test = "10.8.[100-21].[1-253]\n10.3.[4-8].[1-253]\n129.116.[224-227].[1-253]";
+    String test = "10.8.[100-21].[1-253]";
 
     String results[] = StringUtils.split(test, "\n");
 
