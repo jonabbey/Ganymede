@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 2002/10/05 07:45:39 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 2002/10/05 07:51:47 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -1500,6 +1500,7 @@ class QueryRow implements ItemListener {
 	    removeOperand();
 
 	    operand = new JnumberField();
+	    ((JnumberField) operand).setEnterHandler(parent);
 	    addOperand = true;
 	  }
       }
@@ -1577,7 +1578,7 @@ class QueryRow implements ItemListener {
 		removeOperand();
 
 		operand= new JstringField();
-		((JstringField) operand).addActionListener(parent);
+		((JstringField) operand).setEnterHandler(parent);
 		addOperand = true;
 	      }
 	  }
@@ -1618,7 +1619,7 @@ class QueryRow implements ItemListener {
 	    removeOperand();
 	    
 	    operand = new JstringField();
-	    ((JstringField) operand).addActionListener(parent);
+	    ((JstringField) operand).setEnterHandler(parent);
 	    addOperand = true;
 	  }
       }
