@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -272,7 +272,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public void unreferenced()
   {
-    forceOff("dead client");
+    if (logged_in)
+      {
+	forceOff("dead client");
+      }
   }
 
   //************************************************************
@@ -1842,6 +1845,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   final PermEntry getPerm(DBObject object)
   {
     PermEntry result;
+    DBObject localObj;
 
     /* -- */
 
@@ -1855,14 +1859,40 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return PermEntry.fullPerms;
       }
 
+    localObj = object;
+
+    while (localObj != null && localObj.isEmbedded())
+      {
+	InvidDBField inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField); // container
+
+	if (inf == null)
+	  {
+	    setLastError("getPerm() error.. couldn't find owner of embedded object " + object.getLabel());
+	  }
+
+	Invid inv = (Invid) inf.getValueLocal();
+
+	if (inv == null)
+	  {
+	    setLastError("getPerm() error <2>.. couldn't find owner of embedded object " + object.getLabel());
+	  }
+
+	localObj = session.viewDBObject(inv);
+      }
+
+    if (localObj == null)
+      {
+	setLastError("getPerm() error <3>.. couldn't find owner of embedded object" + object.getLabel());
+      }
+
     // is our current persona an owner of this object in some
     // fashion?
 
-    if (!personaMatch(object))
+    if (!personaMatch(localObj))
       {
 	// Ganymede.debug("getPerm for object " + object.getLabel() + " failed.. no persona match");
 
-	result = defaultPerms.getPerm(object.getTypeID());
+	result = defaultPerms.getPerm(localObj.getTypeID());
 
 	if (result == null)
 	  {
@@ -1877,7 +1907,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // ok, we know our persona has ownership.. return the
     // permission entry for this object
 
-    result = personaPerms.getPerm(object.getTypeID());
+    result = personaPerms.getPerm(localObj.getTypeID());
 
     if (result == null)
       {
@@ -2201,11 +2231,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return false;
       }
     
-    if (obj.isEmbedded())
-      {
-	return personaMatch((DBObject) view_db_object((Invid) inf.getValueLocal()));
-      }
-
     return recursePersonaMatch(inf.getValuesLocal());
   }
 
