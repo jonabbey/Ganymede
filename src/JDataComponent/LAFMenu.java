@@ -6,8 +6,8 @@
    
    Created: 4 April 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2003/05/01 21:01:45 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/05/01 21:15:23 $
    Module By: Mike Mulvaney, mulvaney@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -119,6 +119,13 @@ public class LAFMenu extends JMenu implements ActionListener
     updateMenu();
   }
 
+  /**
+   * <p>This method is used to register a severely old-school
+   * Ganymede-style pre-JDK 1.1 callback so that this code can cause
+   * the Ganymede code base to throw up an error dialog if an attempt
+   * to change the look and feel using this menu fails.</p>
+   */
+
   public void setCallback(JsetValueCallback parent)
   {
     if (parent == null)
@@ -156,25 +163,26 @@ public class LAFMenu extends JMenu implements ActionListener
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
-		System.out.println("Caught a remote exception; " + rx);
 	      }
 	  }
-	System.out.println("That look and feel is not supported on this platform.");
+
+	if (debug)
+	  {
+	    System.out.println("That look and feel is not supported on this platform.");
+	  }
+
 	updateMenu();
       }
     catch ( java.lang.InstantiationException e)
       {
-	System.out.println("Exception: " + e);
 	updateMenu();
       }
     catch (java.lang.ClassNotFoundException e)
       {
-	System.out.println("Exception: " + e);
 	updateMenu();
       }
     catch (java.lang.IllegalAccessException e)
       {
-	System.out.println("Exception: " + e);
 	updateMenu();
       }
   }
