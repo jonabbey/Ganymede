@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.32 $ %D%
+  Version: $Revision: 1.33 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,10 +69,10 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.32 $ %D%
+ * @version $Revision: 1.33 $ %D%
  */
 
-public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
+public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
   
   static final boolean debug = false;
 
@@ -1778,6 +1778,14 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	System.err.println("canvas.getBounds().height = " + canvas.getBounds().height);
       }
 
+    if ((canvas.getBounds().width < 1) ||
+	(canvas.getBounds().height < 1))
+      {
+	// we haven't appeared yet.. return
+
+	return;
+      }
+
     // calculate how wide our table is total, not counting any scroll
     // bars.  That is, how narrow can we be before we need to have a
     // horizontal scrollbar?
@@ -2215,16 +2223,25 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
     currentVbar = vbar.getValue();
     currenty = row.getTopEdge() - currentVbar;
 
-    System.err.println("scrollRowTo: row " + row + " is currently at " + currenty);
+    if (debug)
+      {
+	System.err.println("scrollRowTo: row " + row + " is currently at " + currenty);
+      }
     
     // ok, currenty is where the row's top edge is now.
     // we want it to be at y, so we adjust the vbar's value.
 
-    System.err.println("vbar is currently at " + currentVbar);
+    if (debug)
+      {
+	System.err.println("vbar is currently at " + currentVbar);
+      }
 
     int newval = currentVbar + currenty - y;
 
-    System.err.println("setting vbar to " + newval);
+    if (debug)
+      {
+	System.err.println("setting vbar to " + newval);
+      }
 
     vbar.setValue(newval);
   }
@@ -2243,7 +2260,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
  *
  */
 
-class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
+class tableCanvas extends JComponent implements MouseListener, MouseMotionListener {
 
   static final boolean debug = false;
   static final int colgrab = 4;
@@ -2293,7 +2310,7 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
   {
     if (debug)
       {
-	System.err.println("paint called");
+	System.err.println("tableCanvas: paint called");
       }
 
     if ((backing == null) ||
@@ -2307,14 +2324,14 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     if (debug)
       { 
-	System.err.println("copying image");
+	System.err.println("tableCanvas: copying image");
       }
 
     g.drawImage(backing, 0, 0, this);
 
     if (debug)
       {
-	System.err.println("image copied");
+	System.err.println("tableCanvas: image copied");
       }
   }
 
@@ -3090,7 +3107,7 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     if (debug)
       {
-	System.err.println("mouseDown x = " + x + ", y = " + y);
+	System.err.println("tableCanvas: mouseDown x = " + x + ", y = " + y);
       }
 
     colDrag = 0;
@@ -3127,8 +3144,11 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 		    dragRowSaveY = ((tableRow) rt.rows.elementAt(dragRowSave)).getTopEdge() - v_offset;
 		  }
 
-		System.err.println("Remembering drag row.. row: " + dragRowSave +
-				   ", topEdge " + dragRowSaveY);
+		if (debug)
+		  {
+		    System.err.println("Remembering drag row.. row: " + dragRowSave +
+				       ", topEdge " + dragRowSaveY);
+		  }
 	      }
 	    else if ((vx >= (colLoc + colgrab)) &&
 		     (vx <= (((Integer) rt.colPos.elementAt(col+1)).intValue() - colgrab)))
@@ -3210,6 +3230,11 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     x = e.getX();
     y = e.getY();
+
+    if (debug)
+      {
+	System.err.println("tableCanvas: mouseUp x = " + x + ", y = " + y);
+      }
 
     if (rt.hbar_visible)
       {
@@ -3408,7 +3433,7 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
     if (debug)
       {
-	System.err.println("popup x = " + x + ", y = " + y);
+	System.err.println("baseTable: popupHandler(" + x + "," + y + ")");
       }
 
     // What column were we triggered on?
@@ -3430,6 +3455,11 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
 	return;
       }
 
+    if (debug)
+      {
+	System.err.println("baseTable: popupHandler(): column = " + clickCol);
+      }
+
     // What row were we triggered on?
 
     if (y > rt.displayRegionFirstLine())
@@ -3446,6 +3476,11 @@ class tableCanvas extends JPanel implements MouseListener, MouseMotionListener {
     else
       {
 	// we've got a header column..
+
+	if (debug)
+	  {
+	    System.err.println("baseTable: popupHandler(): header row");
+	  }
 
 	clickRow = -1;
 	rt.menuRow = -1;
