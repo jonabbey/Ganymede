@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -184,6 +184,21 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
     invidTablePopup2.add(editO2);
     invidTablePopup2.add(viewO2);
     invidTablePopup2.add(createO2);
+
+    // We don't want the supergash owner group to show up anywhere,
+    // because everything is owned by supergash.
+
+    Invid supergash = new Invid((short)0, 1); // This is supergash
+    for (int i = 0; i < availableOwners.size(); i++)
+      {
+	listHandle l = (listHandle)availableOwners.elementAt(i);
+	if (supergash.equals(l.getObject()))
+	  {
+	    availableOwners.removeElementAt(i);
+	    break;
+	  }
+
+      }
 
     StringSelector ss = new StringSelector(availableOwners, 
 					   currentOwners, 
