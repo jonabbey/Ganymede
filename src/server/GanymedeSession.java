@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.56 $ %D%
+   Version: $Revision: 1.57 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -862,7 +862,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public BaseListTransport getBaseList()
   {
-    return Ganymede.baseTransport;
+    if (supergashMode)
+      {
+	return Ganymede.baseTransport;
+      }
+    else
+      {
+	return new BaseListTransport(this);
+      }
   }
 
   /**
