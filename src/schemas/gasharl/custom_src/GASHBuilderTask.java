@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,6 +43,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   // ---
 
   private Date now = null;
+  private StringBuffer result = new StringBuffer();
 
   /* -- */
 
@@ -61,7 +62,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   public boolean builderPhase1()
   {
     PrintWriter out;
-    boolean result = false;
+    boolean success = false;
 
     /* -- */
 
@@ -111,7 +112,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    out.close();
 	  }
 
-	result = true;
+	success = true;
       }
 
     // group
@@ -146,7 +147,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    out.close();
 	  }
 
-	result = true;
+	success = true;
       }
 
     if (baseChanged(SchemaConstants.UserBase) || // users
@@ -157,7 +158,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	if (writeAliasesFile())
 	  {
-	    result = true;
+	    success = true;
 	  }
       }
 
@@ -168,7 +169,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	if (writeNetgroupFile())
 	  {
-	    result = true;
+	    success = true;
 	  }
       }
 
@@ -180,7 +181,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	if (writeAutoMounterFiles())
 	  {
-	    result = true;
+	    success = true;
 	  }
       }
 
@@ -191,10 +192,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	Ganymede.debug("Need to build DNS tables");
 	writeSysFile();
-	result = true;
+	success = true;
       }
 
-    return result;
+    return success;
   }
 
   /**
@@ -338,9 +339,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Invid groupInvid;
     DBObject group;
 
-    StringBuffer result = new StringBuffer();
-
     /* -- */
+
+    result.setLength(0);
 
     username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
 
@@ -444,9 +445,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Invid userInvid;
     String userName;
 
-    StringBuffer result = new StringBuffer();
-
     /* -- */
+
+    result.setLength(0);
 
     groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
 
@@ -976,9 +977,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector addresses;
     String target;
 
-    StringBuffer result = new StringBuffer();
-
     /* -- */
+
+    result.setLength(0);
 
     username = (String) object.getFieldValueLocal(userSchema.USERNAME);
     signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
@@ -1055,9 +1056,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Invid userInvid;
     String target;
 
-    StringBuffer result = new StringBuffer();
-
     /* -- */
+
+    result.setLength(0);
 
     groupname = (String) object.getFieldValueLocal(emailListSchema.LISTNAME);
     group_targets = object.getFieldValuesLocal(emailListSchema.MEMBERS);
@@ -1130,9 +1131,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector targets;
     String target;
 
-    StringBuffer result = new StringBuffer();
-
     /* -- */
+
+    result.setLength(0);
 
     name = (String) object.getFieldValueLocal(emailRedirectSchema.NAME);
     targets = object.getFieldValuesLocal(emailRedirectSchema.TARGETS);
@@ -1142,30 +1143,40 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(name);
     result.append(":");
 
-    for (int i = 0; i < aliases.size(); i++)
+    if (aliases != null)
       {
-	if (i > 0)
+	for (int i = 0; i < aliases.size(); i++)
 	  {
-	    result.append(", ");
+	    if (i > 0)
+	      {
+		result.append(", ");
+	      }
+	    
+	    alias = (String) aliases.elementAt(i);
+	    
+	    result.append(alias);
 	  }
-
-	alias = (String) aliases.elementAt(i);
-
-	result.append(alias);
       }
 
     result.append(":");
 
-    for (int i = 0; i < targets.size(); i++)
+    // targets shouldn't ever be null, but i'm tired of having
+    // NullPointerExceptions pop up then having to recompile to
+    // fix.
+
+    if (targets != null)
       {
-	if (i > 0)
+	for (int i = 0; i < targets.size(); i++)
 	  {
-	    result.append(", ");
+	    if (i > 0)
+	      {
+		result.append(", ");
+	      }
+	    
+	    target = (String) targets.elementAt(i);
+	    
+	    result.append(target);
 	  }
-
-	target = (String) targets.elementAt(i);
-
-	result.append(target);
       }
 
     writer.println(result.toString());
@@ -1260,9 +1271,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Invid primaryUserInvid;
     String primaryUser = null;
 
-    StringBuffer result = new StringBuffer();
-
     /* -- */
+
+    result.setLength(0);
 
     sysname = (String) object.getFieldValueLocal(systemSchema.SYSTEMNAME);
 
@@ -1405,9 +1416,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     IPDBField ipField;
 
-    StringBuffer result = new StringBuffer();
-
     /* -- */
+
+    result.setLength(0);
 
     // we need to assemble the information that gash uses for our output
 
