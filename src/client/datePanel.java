@@ -5,7 +5,7 @@
    The tab that holds date information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
+import java.text.*;
 
 import com.sun.java.swing.*;
 import tablelayout.*;
@@ -30,57 +31,69 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
   boolean 
     editable;
 
-  int
-    row = 0;
+  framePanel
+    parent;
 
   date_field
-    expiration,
-    removal;
+    field;
 
   JBufferedPane
-    expirationPane,
-    removalPane;
+    top_pane,
+    bottom_pane;
 
   JBorderedPane
-    expirationBorder,
-    removalBorder;
+    top_border;
 
-  JpopUpCalendar 
-    pCal = null;
+  JpanelCalendar
+    cal;
 
+  JButton
+    clear;
+
+  JLabel
+    topLabel;
+    
   protected GregorianCalendar 
-    _myCalendar;
+    my_Calendar;
 
   protected SimpleTimeZone
     _myTimeZone = (SimpleTimeZone)(SimpleTimeZone.getDefault());
 
-  public datePanel(date_field expiration, date_field removal, boolean editable)
+  SimpleDateFormat
+    dateformat;
+
+  String
+    label;
+
+  public datePanel(date_field field, String label, boolean editable, framePanel parent)
   {
     this.editable = editable;
-    this.expiration = expiration;
-    this.removal = removal;
+    this.field = field;
+    this.label = label;
+    this.parent = parent;
+    
+    setBuffered(false);
 
     setInsets(new Insets(5,5,5,5));
 
-    expirationPane = new JBufferedPane();
+    top_pane = new JBufferedPane(false);
+    top_pane.setLayout(new BorderLayout());
+    top_pane.setMaximumSize(top_pane.getPreferredSize());
+    bottom_pane = new JBufferedPane(false);
+    bottom_pane.setLayout(new BoxLayout(bottom_pane, BoxLayout.Y_AXIS));
 
-    //expirationPane.setLayout(new BorderLayout());
-    expirationBorder = new JBorderedPane();
-    expirationBorder.setLayout(new BorderLayout());
-    expirationBorder.setBorder(BorderFactory.createTitledBorder(expirationPane, "Expiration Date"));
-    expirationBorder.add("Center", expirationPane);
-
-    removalPane = new JBufferedPane(); 
-
-    removalBorder = new JBorderedPane();
-    removalBorder.setLayout(new BorderLayout());
-    removalBorder.setBorder(BorderFactory.createTitledBorder(removalPane, "Removal Date"));
-    removalBorder.add("Center", removalPane);
+    top_border = new JBorderedPane();
+    top_border.setLayout(new BorderLayout());
+    top_border.setBorder(BorderFactory.createTitledBorder(top_pane, label + " Date"));
+    top_border.add("Center", top_pane);
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    add(expirationBorder);
-    add(removalBorder);
+    add(top_border);
+    add(bottom_pane);
     add(Box.createVerticalGlue());
+
+    dateformat = new SimpleDateFormat("MMM dd, yyyy",Locale.getDefault());
+    
 
     if (editable)
       {
@@ -94,97 +107,70 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
 
   void create_editable_panel()
   {
-    JdateField rem_df = new JdateField();
-    JdateField exp_df = new JdateField();
-    
-    //objectHash.put(df, field);
-    exp_df.setEditable(editable);
-    rem_df.setEditable(editable);
+    JdateField df = new JdateField();
+  
+    df.setEditable(editable);
 
-    _myCalendar = new GregorianCalendar(_myTimeZone,Locale.getDefault());
+    my_Calendar = new GregorianCalendar(_myTimeZone,Locale.getDefault());
     
     try
       {
-	//
-	// First expiration stuff
-	//
+	topLabel = new JLabel();
+	topLabel.setInsets(new Insets(5,1,5,1));
 
-	if ((expiration != null) && (expiration.getValue() != null))
+	if ((field != null) && (field.getValue() != null))
 	  {
-	    Date exp_date = ((Date)expiration.getValue());
-	    
-	    if (exp_date != null)
-	      {
-		exp_df.setDate(exp_date);
-	      }
-	    
-	    expirationPane.add("Center", exp_df);
+	    Date date = ((Date)field.getValue());
+	    my_Calendar.setTime(date);
+
+	    topLabel.setText(label + ": " + dateformat.format(date));
 	  }
 	else
 	  {
-	    JButton new_exp = new JButton("Set expiration date");
-	    new_exp.addActionListener(this);
-	    new_exp.setActionCommand("set_expiration");
-	    expirationPane.add("South", new_exp);
-	    JpanelCalendar cal = new JpanelCalendar(_myCalendar, this);
-	    expirationPane.add("Center", cal);
-
+	    topLabel.setText(label + " has not been set.");
 	  }
-
-	//
-	//  Now Removal stuff
-	//
 	
-	if ((removal != null) && (removal.getValue() != null))
-	  {
-	    Date rem_date = ((Date)removal.getValue());
-	    
-	    if (rem_date != null)
-	      {
-		rem_df.setDate(rem_date);
-	      }
-	    
-	    removalPane.add(rem_df);
-	  }
-	else
-	  {
-	    JButton new_rem = new JButton("Set removal date");
-	    new_rem.setActionCommand("set_removal");
-	    new_rem.addActionListener(this);
-	    removalPane.add(new_rem);
-	  }
+	cal = new JpanelCalendar(my_Calendar, this, false, true);
+	JBorderedPane cal_border = new JBorderedPane();
+	cal_border.setBorder(BorderFactory.createGroovedBorder());
+	cal_border.setLayout(new BorderLayout());
+	cal_border.add("Center", cal);
+	bottom_pane.add(cal_border);
+	bottom_pane.add(Box.createGlue());
+
+	top_pane.add("Center", topLabel);
+	clear = new JButton("Clear date");
+	clear.setActionCommand("Clear");
+	clear.addActionListener(this);
+	top_pane.add("East", clear);
       }
+
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not get date: " + rx);
       }
     
-    // note that we set the callback after we initially set the
-    // date, to avoid having the callback triggered on a listing
-
-    //df.setCallback(this);
-
   }
 
   void create_non_editable_panel()
   {
     try
       {
-	if (expiration != null)
+	if (field != null)
 	  {
-	    expirationPane.add("Center", new JLabel(((Date)expiration.getValue()).toString()));
+	    Date d = (Date)field.getValue();
+	    if (d != null)
+	      {
+		top_pane.add("Center", new JLabel(d.toString()));
+	      }
+	    else
+	      {
+		top_pane.add("North", new JLabel("No expiration date is set"));
+	      }
 	  }
 	else
 	  {
-	    expirationPane.add("North", new JLabel("No expiration date is set"));
-	  }
-	if (removal != null)
-	  {
-	    removalPane.add(new JLabel(((Date)removal.getValue()).toString()));
-	  }
-	else
-	  {
-	    removalPane.add(new JLabel("No removal date is set"));
+	    top_pane.add("North", new JLabel("No expiration date is set"));
 	  }
       }
     catch (RemoteException rx)
@@ -197,43 +183,59 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
   public void actionPerformed(ActionEvent e)
     {
       System.out.println("Action performed in datePanel");
-      if (pCal == null)
+      if (e.getActionCommand().equals("Clear"))
 	{
-	  pCal = new JpopUpCalendar(_myCalendar,this);
+	  boolean ok = false;
+	  try
+	    {
+	      ok = field.setValue(null);
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not clear date field: " + rx);
+	    }
+	  if (ok)
+	    {
+	      cal.clear();
+	      topLabel.setText(label + " will be cleared after commit.");
+	    }
+	  else
+	    {
+	      parent.parent.parent.setStatus("Server says:  Could not clear date field.");
+	      try
+		{
+		  System.err.println("last error: " + parent.parent.parent.getSession().getLastError());
+		}
+	      catch (RemoteException rx)
+		{
+		  throw new RuntimeException("Could not get last error: " + rx);
+		}
+	    }
 	}
-      
-      if (pCal.isVisible())
-	{
-	  pCal.setVisible(false);
-	}
-          
-      if (e.getActionCommand().equals("set_expiration"))
-	{
-	  System.out.println("Set expiration date clicked");
-
-	  pCal.show();
-
-	}
-      else if (e.getActionCommand().equals("set_removal"))
-	{
-	  System.out.println("Set removal date clicked");
-
-	  pCal.show();
-	}
-      else
-	{
-	  System.out.println("Unknown action command in datePanel");
-	}
-
     }
 
   public boolean setValuePerformed(JValueObject o)
     {
-      if (o.getSource() == pCal)
+      boolean ok = false;
+      if (o.getSource() == cal)
 	{
-	  System.out.println("Calendar says: " + ((Date)o.getValue()).toString());
+	  Date d = (Date)o.getValue();
+	  System.out.println("Removal Calendar says: " + d.toString());
+	  try
+	    {
+	      ok = field.setValue(d);
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not set Value in removal field: " + rx);
+	    }
+	
+	  if (ok)
+	    {
+	      topLabel.setText(label + ": " + dateformat.format(d));
+	    }
 	}
-      return true;
+      return ok;
     }
 
 
