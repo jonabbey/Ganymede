@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -194,5 +194,111 @@ public class QueryDataNode extends QueryNode {
     this.value = value;
 
     this.arrayOp = NONE;
+  }
+
+  /**
+   *
+   * Diagnostic aid.
+   *
+   */
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    if (fieldname != null)
+      {
+	result.append(fieldname);
+      }
+    else
+      {
+	result.append("<");
+	result.append(Short.toString(fieldId));
+	result.append(">");
+      }
+
+    result.append(" ");
+
+    if (arrayOp == NONE)
+      {
+	switch (comparator)
+	  {
+	  case EQUALS:
+	    result.append("EQUALS");
+	    break;
+
+	  case LESS:
+	    result.append("LESS");
+	    break;
+
+	  case LESSEQ:
+	    result.append("LESSEQ");
+	    break;
+
+	  case GREAT:
+	    result.append("GREAT");
+	    break;
+
+	  case GREATEQ:
+	    result.append("GREATEQ");
+	    break;
+
+	  case NOCASEEQ:
+	    result.append("NOCASEEQ");
+	    break;
+
+	  case STARTSWITH:
+	    result.append("STARTSWITH");
+	    break;
+
+	  case ENDSWITH:
+	    result.append("ENDSWITH");
+	    break;
+
+	  case DEFINED:
+	    result.append("DEFINED");
+	    break;
+	  }
+      }
+    else
+      {
+	switch (arrayOp)
+	  {
+	  case CONTAINS:
+	    result.append("CONTAINS");
+
+	    switch (comparator)
+	      {
+	      case EQUALS:
+		result.append("/EQUALS");
+		break;
+
+	      default:
+		result.append("/?");
+	      }
+
+	    break;
+
+	  case LENGTHEQ:
+	    result.append("LENGTHEQ");
+	    break;
+
+	  case LENGTHGR:
+	    result.append("LENGTHGR");
+	    break;
+
+	  case LENGTHLE:
+	    result.append("LENGTHLE");
+	    break;
+	  }
+      }
+
+    result.append(" ");
+
+    result.append(value.toString());
+
+    return result.toString();
   }
 }
