@@ -45,4 +45,8 @@ $RMIREGISTRY $RMIPORT &
 # cause the server to record all RMI calls made to it, and will let you examine
 # exception traces that occur while the server is servicing a client request.
 
+# If you want to edit the Ganymede server's essential schema (to do things like enable
+# md5 passwords for Linux/FreeBSD/OpenBSD), you need to add -developschema to the
+# line below.
+
 $JAVA -noasyncgc -ms32m -mx128m arlut.csd.ganymede.Ganymede -resetadmin properties=$PROPERTIES
