@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.111 $ %D%
+   Version: $Revision: 1.112 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -220,16 +220,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   public JLabel
     leftL,
-    rightL,
-    timerLabel;
-
-  //
-  // Another background thread, to maintain a display of
-  // time connected
-  //
-
-  connectedTimer
-    timer;
+    rightL;
 
   windowPanel
     wp;
@@ -692,19 +683,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	getContentPane().add("North", createToolbar());
       }
-    else
-      {
-	rightL = new JLabel("Open objects");
-	
-	rightTop.add("West", rightL);
-	//timerLabel = new JLabel("                                       ", JLabel.RIGHT);
-	timerLabel = new JLabel("00:00:00", JLabel.RIGHT);
-	timer = new connectedTimer(timerLabel, 5000, true);
-	timerLabel.setMinimumSize(new Dimension(200, timerLabel.getPreferredSize().height));
-	rightTop.add("East", timerLabel);
-
-	rightP.add("North", rightTop);	
-      }
 
     commit = new JButton("Commit");
     commit.setEnabled(false);
@@ -769,11 +747,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not open transaction: " + rx);
-      }
-
-    if (timer != null)
-      {
-	timer.start();
       }
 
     loader = new Loader(session, debug);
@@ -1080,25 +1053,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     
     return errorImage;
-  }
-  
-  /**
-   * Returns the base hash.
-   *
-   * <p>Checks to see if the baseHash was loaded, and if not, it loads it.
-   * Always use this instead of trying to access the baseHash
-   * directly.</p>
-   *
-   */
-
-  public final Hashtable getBaseHash()
-  {
-    if (baseHash == null)
-      {
-	baseHash = loader.getBaseHash();
-      }
-
-    return baseHash;
   }
 
   /**
@@ -1814,12 +1768,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	System.out.println("No personas.");
       }
-
-//     // Now the connected timer.
-//     timerLabel = new JLabel("00:00:00", JLabel.RIGHT);
-//     timer = new connectedTimer(timerLabel, 5000, true);
-//     timerLabel.setMinimumSize(new Dimension(200,timerLabel.getPreferredSize().height));
-//     panel.add("East", timerLabel);
 
     return panel;
   }
@@ -3300,11 +3248,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   {
     try
       {
-	if (timer != null)
-	  {
-	    timer.stop();
-	  }
-
 	_myglogin.logout();
 	this.dispose();
       }
