@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -144,35 +144,38 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     this(original.store);
     this.editor = editor;
 
-    object_name = original.object_name;
-    classname = original.classname;
-    classdef = original.classdef;
-    type_code = original.type_code;
-    
-    // make copies of all the old field definitions
-    // for this object type, and save them into our
-    // own field hash.
-    
-    Enumeration enum;
-    DBObjectBaseField field;
-    
-    enum = original.fieldHash.elements();
-
-    while (enum.hasMoreElements())
+    synchronized (original)
       {
-	field = (DBObjectBaseField) enum.nextElement();
-	fieldHash.put(field.getKey(),
-		      new DBObjectBaseField(field, editor));
-      }
-
-    // remember the objects
-
-    objectHash = original.objectHash;
-
-    maxid = original.maxid;
+	object_name = original.object_name;
+	classname = original.classname;
+	classdef = original.classdef;
+	type_code = original.type_code;
     
-    changed = false;
-    this.original = original;
+	// make copies of all the old field definitions
+	// for this object type, and save them into our
+	// own field hash.
+    
+	Enumeration enum;
+	DBObjectBaseField field;
+    
+	enum = original.fieldHash.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    field = (DBObjectBaseField) enum.nextElement();
+	    fieldHash.put(field.getKey(),
+			  new DBObjectBaseField(field, editor));
+	  }
+
+	// remember the objects
+
+	objectHash = original.objectHash;
+
+	maxid = original.maxid;
+    
+	changed = false;
+	this.original = original;
+      }
   }
 
   synchronized void emit(DataOutput out) throws IOException
