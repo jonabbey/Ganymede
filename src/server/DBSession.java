@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -708,11 +708,8 @@ final public class DBSession {
       {
 	Ganymede.debug(key + ": commitTransaction(): editset failed to commit: transaction aborted");
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Error.. transaction could not commit: transaction canceled",
-					 "OK",
-					 null));
+	retVal = Ganymede.createErrorDialog("Server: Error in DBSession.commitTransaction()",
+					    "Error.. transaction could not commit: transaction canceled");
       }
 
     editSet = null;
@@ -740,10 +737,6 @@ final public class DBSession {
 
   public synchronized ReturnVal abortTransaction()
   {
-    ReturnVal retVal = null;
-
-    /* -- */
-
     if (editSet == null)
       {
 	throw new RuntimeException("abortTransaction called outside of a transaction");
@@ -764,12 +757,8 @@ final public class DBSession {
 	  {
 	    Ganymede.debug("abortTransaction() for " + key + ", can't safely dump writeLock.. can't kill it off");
 
-	    retVal = new ReturnVal(false);
-	    retVal.setDialog(new JDialogBuff("Error",
-					     "Error.. transaction could not abort: can't safely dump writeLock",
-					     "OK",
-					     null));
-	    return retVal;
+	    return Ganymede.createErrorDialog("Server: Error in DBSession.abortTransaction()",
+					      "Error.. transaction could not abort: can't safely dump writeLock");
 	  }
       }
 
@@ -792,7 +781,7 @@ final public class DBSession {
     editSet.release();
     editSet = null;
 
-    return retVal;
+    return null;
   }
 
   /**

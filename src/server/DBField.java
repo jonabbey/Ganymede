@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -523,7 +523,6 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public ReturnVal setValue(Object value)
   {
-    ReturnVal retVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -544,12 +543,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	// we need a better way of getting the information up from verifyNewValue, since
 	// conceivably another thread could intercede before we read the error?
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
+					  getLastError());
       }
 
     eObj = (DBEditObject) owner;
@@ -577,12 +572,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 		
 		setLastError("value " + value + " already taken in namespace");
 
-		retVal = new ReturnVal(false);
-		retVal.setDialog(new JDialogBuff("Error",
-						 "value " + value + " already taken in namespace",
-						 "OK",
-						 null));
-		return retVal;
+		return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
+						  "value " + value + " already taken in namespace");
 	      }
 	  }
       }
@@ -618,13 +609,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	    mark(this.value);
 	  }
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Custom code rejected operation",
-					 "OK",
-					 null));
-
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
+					 "Custom code rejected set operation for value " + value);
       }
   }
 
@@ -700,7 +686,6 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   
   public ReturnVal setElement(int index, Object value)
   {
-    ReturnVal retVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -723,13 +708,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (!verifyNewValue(value))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 getLastError(),
-					 "OK",
-					 null));
-	
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
+					  getLastError());
       }
 
     eObj = (DBEditObject) owner;
@@ -749,12 +729,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
 	    setLastError("value " + value + " already taken in namespace");
 
-	    retVal = new ReturnVal(false);
-	    retVal.setDialog(new JDialogBuff("Error",
-					     "value " + value + " already taken in namespace",
-					     "OK",
-					     null));
-	    return retVal;
+	    return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
+					      "value " + value + " already taken in namespace");
 	  }
       }
 
@@ -782,13 +758,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	    mark(values.elementAt(index));
 	  }
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Custom code rejected operation",
-					 "OK",
-					 null));
-
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
+					  "Custom code rejected set operatin for value " + value);
       }
   }
 
@@ -807,7 +778,6 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public ReturnVal addElement(Object value)
   {
-    ReturnVal retVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -827,26 +797,16 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (!verifyNewValue(value))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 getLastError(),
-					 "OK",
-					 null));
-	
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
+					  getLastError());
       }
 
     if (size() >= getMaxArraySize())
       {
 	setLastError("Field " + getName() + " already at or beyond array size limit");
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 getLastError(),
-					 "OK",
-					 null));
-	
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
+					  "Field " + getName() + " already at or beyond array size limit");
       }
 
     eObj = (DBEditObject) owner;
@@ -859,13 +819,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	  {
 	    setLastError("value " + value + " already taken in namespace");
 
-	    retVal = new ReturnVal(false);
-	    retVal.setDialog(new JDialogBuff("Error",
-					     getLastError(),
-					     "OK",
-					     null));
-	    
-	    return retVal;
+	    return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
+					      "value " + value + " already taken in namespace");
 	  }
       }
 
@@ -882,13 +837,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	    unmark(value);
 	  }
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Custom code rejected operation",
-					 "OK",
-					 null));
-
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
+					  "Custom code rejected add operation for value " + 
+					  value + "\n" + getLastError());
       }
   }
 
@@ -907,7 +858,6 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public ReturnVal deleteElement(int index)
   {
-    ReturnVal retVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -952,13 +902,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	    mark(values.elementAt(index));
 	  }
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Custom code rejected element deletion",
-					 "OK",
-					 null));
-	
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
+					  "Custom code rejected deletion operation for value " + 
+					  value + "\n" + getLastError());
       }
   }
 
@@ -977,7 +923,6 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public ReturnVal deleteElement(Object value)
   {
-    ReturnVal retVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -995,13 +940,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (values.indexOf(value) == -1)
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Could not delete value " + value.toString() + ", not present in field",
-					 "OK",
-					 null));
-	
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
+					  "Could not delete value " + value + ", not present in field");
       }
 
     return deleteElement(values.indexOf(value));
