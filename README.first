@@ -1,26 +1,22 @@
-Ganymede Release 1.0 prerelease 1
-January 30, 2001
+Ganymede Release 1.0
+May 31, 2001
 README.first
 ---------------------------------------------
 
-This release includes just about everything that I hope to achieve for
-Ganymede 1.0, with the exception of about 6 weeks of testing by other
-folks out in the wide world, and yet still more work on the
-documentation by yours truly.
+Welcome.  This thing that you just downloaded is version 1.0 of the
+Ganymede network directory management system.
 
-There have been a number of fairly deep changes in this distribution,
-relative to 1.0p1b4, and all others prior.  The manner in which schema
-kits are distributed and installed has been revised, to make it
-possible to maintain and distribute schema kits separate from the main
-Ganymede distribution.  The old linux, bsd, and nisonly schema kits
-have been wiped out, in favor of a new 'userKit' which is distributed
-as a separate archive (at ftp://ftp.arlut.utexas.edu/pub/ganymede) and
-which uses the xmlclient for all schema and data loading.
+You should read the following documents to get oriented with Ganymede,
+in roughly this order:
 
-The older gash and gasharl schema kits are still included in the
-src/schemas directory, but you play with them at your own initiative,
-at this point.  See the README file in those directories for
-instructions on how to build and install those schemas.
+1. README
+2. FAQ
+3. INSTALL
+
+Don't just rush to run 'configure' and expect to be able to do
+something intelligent.  
+
+Thank you, please drive through.
 
 Jonathan Abbey
 jonabbey@arlut.utexas.edu

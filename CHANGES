@@ -1,11 +1,11 @@
 Ganymede Release 1.0
-May ??, 2001
+May 31, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.0pre1 to 1.0 -------------------
 
-RELEASE DATE: May ??, 2001
+RELEASE DATE: May 31, 2001
 
 1.[SERVER] Made server do better server-side cleanup for stuck clients
 
