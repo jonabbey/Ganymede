@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 1999/09/22 22:27:55 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 1999/09/22 23:15:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -449,7 +449,14 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if ((base.store.major_version >= 1) || (base.store.minor_version >= 14))
 	  {
-	    out.writeUTF(regexpPat); // added at file version 1.14
+	    if (regexpPat == null)
+	      {
+		out.writeUTF("");
+	      }
+	    else
+	      {
+		out.writeUTF(regexpPat); // added at file version 1.14
+	      }
 	  }
 
       }

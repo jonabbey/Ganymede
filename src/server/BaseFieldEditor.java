@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 1999/09/22 22:27:54 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 1999/09/22 23:15:21 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -1366,7 +1366,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	    if (!fieldDef.setRegexpPat((String) v.getValue()))
 	      {
-		regexpS.setText("");
+		regexpS.setText(fieldDef.getRegexpPat());
 	      }
 	  }
 	else if (comp == OKCharS)

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/09/22 22:27:57 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/09/22 23:15:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -815,12 +815,12 @@ public class StringDBField extends DBField implements string_field {
 	if (match == null)
 	  {
 	    return Ganymede.createErrorDialog("String Field Error",
-					      "String value " + s +
+					      "String value " + s + " " +
 					      "does not conform to the regular expression pattern established " +
 					      "for this string field.\n\n" +
 					      "This string field only accepts strings matching the " +
-					      "following regular expression:\n\n" +
-					      definition.getRegexpPat());
+					      "following regular expression:\n\n\"" +
+					      definition.getRegexpPat() + "\"");
 	  }
       }
 
