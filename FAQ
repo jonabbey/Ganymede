@@ -104,6 +104,11 @@ administrative separation rather than to prevent hacking, although
 everything possible short of transport-layer encryption has been
 done to keep everything as safe as possible.
 
+   We have had luck running Ganymede clients through both the Nortel
+and Cisco VPN products, so if you are using a VPN system today, you
+should be able to leverage that to at least be able to access
+Ganymede safely from outside your trusted network.
+
      ------------------------------------------------------------
 
 6) Any hope of a secure Ganymede for use in insecure networks?
@@ -126,12 +131,12 @@ their free implementation at
 
 http://www.rtfm.com/puretls/
 
-It looks as though they have a good bit of work left to do for a
+  It looks as though they have a good bit of work left to do for a
 turn-key SSL socket implementation on Java, but when this work is
 further along is should be fairly straight-forward to implement a
 secure Ganymede.
 
-   People interested in spending some cash can get working SSL on Java
+  People interested in spending some cash can get working SSL on Java
 today.  Here are some links to SSL implementors for Java.. note that
 some of these links include explicit details on how to support RMI
 over SSL.
@@ -139,6 +144,9 @@ over SSL.
 http://vonnieda.org/jSSL/        - Another free work.. still in progress?
 http://www.ixworld.com/javassl/  - Not portable, requires binary NT SSLeay libs
 http://www.phaos.com/            - Commercial, their SSLava stuff mentions RMI
+
+  I am hoping to look at running Ganymede over SSL sockets in the
+Ganymede 1.1 timeframe.
 
      ------------------------------------------------------------
 
@@ -202,23 +210,22 @@ resident.  That data comprises:
 or about 1.5 megs of data in the binary ganymede.db file, using the
 'gasharl' schema definition.
 
-   This is an interesting data point, but not a reliable guide.  Most
+   This is an interesting data point, but not a reliable guide.  Many
 JVM's will grow their heap until they reach the maximum defined heap
 size before commencing garbage collection.  To the extent that the
 Ganymede server creates a lot of temporary objects during runtime, the
 memory usage will increase possibly a good deal more quickly than the
-heap fills up with actual database objects.  
+heap fills up with actual database objects.
 
-Further, the memory usage patterns may be significantly different on
-different VM's.  On an Athlon box running Linux, the server with no
-data loaded takes up 11 megabytes, and only 23 megabytes with
-all of the above data loaded.
+   Further, the memory usage patterns may be significantly different on
+different VM's.  On an Athlon box running Linux and Sun's HotSpot VM,
+the server with no data loaded takes up 11 megabytes, and only 23
+megabytes with all of the above data loaded.
 
-   The only realistic way of testing the Ganymede server's data
-scalability is to set a particular heap limit and then to load a large
-quantity of objects into the server and test the server with multiple
-concurrent clients to see if the server will persist without hitting
-an OutOfMemory Error condition.
+   Because of this variability, and because of the effects of delayed
+garbage collection, really testing Ganymede's scalability will require
+direct testing under the necessary load, rather than attempting to
+scale up the memory usage seen before GC is taken into account.
 
    We can, however, perhaps take the Athlon/Linux case as a minimum
 bound, where data in the ganymede.db file grows by slightly less than
@@ -256,14 +263,18 @@ continuously brought back in-process during the build phase after a
 transaction was committed.  Garbage collection should keep everything
 viable, but the i/o overhead would be very much greater.
 
-   With the current design, at least, an OutOfMemoryError would not
-cause precipitous data loss.  At the worst, the server would have to
-be shut down, the amount of heap dedicated to the jvm increased, and
-the server re-started.  If the heap size is bumping up against the
-maximum supported by a server-oriented JVM like Sun's HotSpot server
-VM, it would be necessary to export the server's data to XML, split
-the data, and create separate Ganymede servers for separate subdomains
-or separate object types.
+     If the JVM's heap size is set too small, garbage collection
+activity will increase significantly.  If there is simply too much
+data to fit into the set heap size, an OutOfMemoryError will
+eventually be thrown and the server will be unable to handle new
+logins, new object creation, and such.  With the current design an
+OutOfMemoryError would not cause precipitous data loss.  At the worst,
+the server would have to be shut down, the amount of heap dedicated to
+the jvm increased, and the server re-started.  If the heap size is
+bumping up against the maximum supported by a server-oriented JVM like
+Sun's HotSpot server VM, it would be necessary to export the server's
+data to XML, split the data, and create separate Ganymede servers for
+separate subdomains or separate object types.
 
    The final word on scalability right now is that you should be sure
 and test with a representative dataset before committing to Ganymede,
@@ -426,6 +437,6 @@ http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.ht
 Ganymede FAQ
 Author: Jonathan Abbey
 Release: $name:  $
-Version: $Revision: 1.12 $
-Last Mod Date: $Date: 2001/01/31 00:41:19 $
+Version: $Revision: 1.13 $
+Last Mod Date: $Date: 2001/01/31 00:51:31 $
 -------------------------------------------------------------------------------
