@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -68,7 +68,7 @@ public class Invid implements java.io.Serializable {
 
   // equals
 
-  public boolean equals(Object obj)
+  public final boolean equals(Object obj)
   {
     if (obj instanceof Invid)
       {
@@ -80,7 +80,7 @@ public class Invid implements java.io.Serializable {
       }
   }
 
-  public boolean equals(Invid invid)
+  public final boolean equals(Invid invid)
   {
     if ((invid.type == type) &&
 	(invid.num == num))
