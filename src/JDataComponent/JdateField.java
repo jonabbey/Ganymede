@@ -5,7 +5,7 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -265,11 +265,11 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
    */
 
   public JdateField(Date date,
-		   boolean iseditable,
-		   boolean islimited,
-		   Date minDate,
-		   Date maxDate,
-		   JsetValueCallback parent)
+		    boolean iseditable,
+		    boolean islimited,
+		    Date minDate,
+		    Date maxDate,
+		    JsetValueCallback parent)
   {
     this(date,iseditable,islimited,minDate,maxDate);
 
