@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/07/11 05:04:02 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/07/11 06:15:48 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.18 $ $Date: 2000/07/11 05:04:02 $ $Name:  $
+ * @version $Revision: 1.19 $ $Date: 2000/07/11 06:15:48 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -604,15 +604,15 @@ public class xmlfield implements FieldType {
 
 	// 0 = mail-style date with timezone
 	// 1 = mail-style date no timezone
-	// 2 = UNIX date output, with timezone
+	// 2 = UNIX date output, with timezone "Tue Jul 11 01:04:55 CDT 2000"
 	// 3 = UNIX date output, without timezone
 	// 4 = no-comma style 0
 	// 5 = no-comma style 1
 
 	formatters[0] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 	formatters[1] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
-	formatters[2] = new SimpleDateFormat("EEE dd MMM HH:mm:ss z yyyy");
-	formatters[3] = new SimpleDateFormat("EEE dd MMM HH:mm:ss yyyy");
+	formatters[2] = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+	formatters[3] = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy");
 	formatters[4] = new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss z");
 	formatters[5] = new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss");
       }
