@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.130 $
-   Last Mod Date: $Date: 1999/02/23 00:21:30 $
+   Version: $Revision: 1.131 $
+   Last Mod Date: $Date: 1999/02/25 02:24:26 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -768,6 +768,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     rightTop.setLayout(new BorderLayout());
     
     toolBar = createToolbar();
+
     if (showToolbar)
       {
 	getContentPane().add("North", toolBar);
@@ -1862,7 +1863,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.addActionListener(this);
     toolBarTemp.add(b);
 
-
     b = new JButton("Edit", new ImageIcon(pencil));
     //b = new JButton(new ImageIcon(pencil));
     b.setMargin(insets);
@@ -1872,7 +1872,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.setToolTipText("Edit an object");
     b.addActionListener(this);
     toolBarTemp.add(b);
-
 
     b = new JButton("Delete", new ImageIcon(trash));
     //b = new JButton(new ImageIcon(trash));
@@ -1884,7 +1883,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.addActionListener(this);
     toolBarTemp.add(b);
 
-
     b = new JButton("View", new ImageIcon(search));
     //b = new JButton(new ImageIcon(search));
     b.setMargin(insets);
@@ -1894,7 +1892,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.setToolTipText("View an object");
     b.addActionListener(this);
     toolBarTemp.add(b);
-
 
     b = new JButton("Query", new ImageIcon(queryIcon));
     //b = new JButton(new ImageIcon(queryIcon));
