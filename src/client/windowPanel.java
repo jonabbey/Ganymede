@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 1999/03/19 05:52:28 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 1999/03/27 12:27:42 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -125,6 +125,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   
   CompoundBorder
     eWrapperBorder = new CompoundBorder(emptyBorder3, new LineBorder(ClientColor.vectorTitles, 2)),
+    eWrapperBorderInvalid = new CompoundBorder(emptyBorder3, new LineBorder(ClientColor.vectorTitlesInvalid, 2)),
     lineEmptyBorder = new CompoundBorder(blackLineB, emptyBorder15);
 
   JMenuItem

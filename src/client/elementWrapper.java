@@ -9,8 +9,8 @@
    
    Created: 16 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/03/25 08:17:05 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/03/27 12:27:41 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -55,6 +55,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
+
+import java.rmi.*;
 
 import arlut.csd.JDataComponent.*;
 import arlut.csd.ganymede.*;
@@ -119,6 +121,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     this.titleText = titleText;
     this.vp = parent;
     this.editable = editable;
+    this.my_component = comp;
 
     debug = vp.gc.debug;
 
@@ -128,13 +131,23 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       }
     
     setLayout(new BorderLayout());
-    setBorder(vp.wp.eWrapperBorder);
+
       
     buttonPanel = new JPanel();
     buttonPanel.setOpaque(true);
-    buttonPanel.setBackground(ClientColor.vectorTitles);
-    buttonPanel.setForeground(ClientColor.vectorFore);
 
+    /*
+      // set the border/button panel color based on the
+      // object's validity
+
+      checkValidation();
+
+      */
+
+    buttonPanel.setBackground(ClientColor.vectorTitles);
+    setBorder(vp.wp.eWrapperBorder);
+
+    buttonPanel.setForeground(ClientColor.vectorFore);
     buttonPanel.setLayout(new BorderLayout());
 
     if (editable)
@@ -195,8 +208,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	  }
       }
 
-    my_component = comp;
-
     add("North",buttonPanel);
   }
   
@@ -221,11 +232,42 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     return ((containerPanel)my_component).getObjectInvid();
   }
 
+  public Object getValue()
+  {
+    if (my_component instanceof containerPanel)
+      {
+	return getObjectInvid();
+      }
+    
+    if (my_component instanceof JIPField)
+      {
+	return ((JIPField) my_component).getValue();
+      }
+
+    throw new RuntimeException("Unrecognized value wrapped in elementWrapper");
+  }
+
+  /**
+   * <p>Checks to see if the object on the server wrapped by this elementWrapper
+   * is complete and correct, and sets the color of the elementWrapper based
+   * on this.</p>
+   *
+   * <p>THIS IS CURRENTLY NOT BEING USED.. NOT SURE IF THIS IS A DESIRABLE UI
+   * FEATURE IN ANY CASE.</p>
+   */
+
   public void checkValidation()
   {
     if (my_component instanceof containerPanel)
       {
-	//setValidated(( (containerPanel)my_component ).getObject().isValid());
+	try
+	  {
+	    setValidated(((containerPanel)my_component).getObject().isValid());
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("couldn't check object validation " + ex.getMessage());
+	  }
       }
   }
 
@@ -234,10 +276,12 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     if (valid)
       {
 	buttonPanel.setBackground(ClientColor.vectorTitles);
+	setBorder(vp.wp.eWrapperBorder);
       }
     else
       {
 	buttonPanel.setBackground(ClientColor.vectorTitlesInvalid);
+	setBorder(vp.wp.eWrapperBorderInvalid);
       }
   }
 
@@ -387,7 +431,3 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     vp.wp.getgclient().setStatus(status);
   }
 }
-
-
-
-

@@ -1,8 +1,8 @@
-/*
- 
-  Color definitions for the ganymede client.
-
-  */
+/**
+ * 
+ *  Color definitions for the ganymede client.
+ *
+ */
 
 package arlut.csd.ganymede.client;
 
@@ -43,6 +43,4 @@ public class ClientColor {
   public final static Color window = SystemColor.window;
   public final static Color windowBorder = SystemColor.windowBorder;
   public final static Color windowText = SystemColor.windowText;
-
-
 }

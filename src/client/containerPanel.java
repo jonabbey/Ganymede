@@ -1,14 +1,14 @@
 /*
 
-    containerPanel.java
+   containerPanel.java
 
-    This is the container for all the information in a field.  Used in window Panels.
+   This is the container for all the information in a field.  Used in window Panels.
 
-    Created:  11 August 1997
-    Release: $Name:  $
-    Version: $Revision: 1.96 $
-    Last Mod Date: $Date: 1999/03/25 08:17:04 $
-    Module By: Michael Mulvaney
+   Created:  11 August 1997
+   Release: $Name:  $
+   Version: $Revision: 1.97 $
+   Last Mod Date: $Date: 1999/03/27 12:27:40 $
+   Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
@@ -274,6 +274,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     this.progressBar = progressBar;
     this.isCreating = isCreating;
     this.context = context;
+
+    frame.containerPanels.addElement(this);
 
     if (context != null && (context instanceof personaContainer))
       {
@@ -2566,8 +2568,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     objectHash.put(vp, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), vp);
 
-    addVectorRow( vp, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
-    
+    addVectorRow(vp, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
@@ -2915,12 +2916,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       
     JnumberField nf = new JnumberField();
 
-			      
     objectHash.put(nf, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), nf);
-	
 		      
     Integer value = (Integer)fieldInfo.getValue();
+
     if (value != null)
       {
 	nf.setValue(value.intValue());
@@ -2947,8 +2947,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     
     addRow( nf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
-  
-    
   }
 
   /**
