@@ -302,6 +302,36 @@ than depending on an external rmiregistry support process.  This
 simplifies the startup and shutdown of the Ganymede server, as well as
 operational usage generally.
 
+18. [XML] The namespace element now requires a mandatory case-sensitive attribute
+
+In some testing we were doing, we got surprised at the case
+sensitivity of namespaces that we were creating with the xmlclient.
+The surprise was that by default, namespaces created are
+case-insensitive.  To be fair, our documentation said this, but it was
+just too easy to forget this when crafting xml test data.  To address
+this, we have made the system force the presence of the case-sensitive
+attribute on <namespace> elements in the <ganyschema> section of the
+xmlclient input.
+
+Also, the Ganymede server now properly handles switching a namespace
+from case-sensitive to insensitive, or vice-vera, as needed, so long
+as collisions do not occur.  The admin console's schema editor still
+does not allow changing the case sensitivity of a namespace, but the
+xmlclient may be used to do this.
+
+19. [SERVER] Fixed a bug that made newly define object types inaccessible
+
+Oops!  We weren't properly updating the baseTransport cache after
+schema editing.  This resulted in a failure whenever we tried to use
+the Ganymede client to access an object of a type that did not exist
+before the schema edit immediately after the schema edit took place.
+
+The only reason this didn't bite us before was that we haven't added a
+lot of object types through the schema editor without subsequently
+shutting down and restarting the server.
+
+Gotta love really exercising old code paths in relatively new ways.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
