@@ -225,14 +225,17 @@ Each of these topics is discussed in its own section below.
 	          arlut.csd.ganymede.custom.NISBuilderTask
 
   In addition, each schema by default will look for a script
-  to run to the <installdir>/db/out directory.
+  to run in the <installdir>/db directory.  If you like, you
+  can edit the server's properties file to change
+  ganymede.builder.scriptlocation, which specifies where the
+  build scripts are to be found.
 
   gasharl - gashbuilder
   bsd - bsd_builder
   linux - linux_builder
   nisonly - nisbuilder
   gash - gashbuilder
-  ganymede.only
+  ganymede.only - nisbuilder,dnsbuilder (not maintained currently)
 
   These scripts should be executable by the user under which the
   Ganymede server is run.  The appropriate script will be run
