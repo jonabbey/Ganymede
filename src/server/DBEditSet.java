@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -180,6 +180,78 @@ public class DBEditSet {
 
   /**
    *
+   * This method is used to pop a checkpoint off the checkpoint
+   * stack.  This method is equivalent to a rollback where the
+   * checkpoint information is taken off the stack, but this
+   * DBEditSet's state is not reverted.<br><br>
+   *
+   * Any checkpoints that were placed on the stack after
+   * the checkpoint matching &lt;name&gt; will also be
+   * removed from the checkpoint stack.
+   *
+   * @param name An identifier for the checkpoint to take off
+   * the checkpoint stack.
+   *
+   * @return null if the checkpoint could not be found on the
+   * stack, or the DBCheckPoint object representing the state
+   * of the transaction at the checkpoint time if the checkpoint
+   * could be found.
+   *
+   */
+
+  public synchronized DBCheckPoint popCheckpoint(String name)
+  {
+    DBCheckPoint point = null;
+    boolean found;
+
+    /* -- */
+
+    found = false;
+
+    for (int i = 0; i < checkpoints.size(); i++)
+      {
+	point = (DBCheckPoint) checkpoints.elementAt(i);
+
+	if (point.name.equals(name))
+	  {
+	    found = true;
+	  }
+      }
+
+    if (!found)
+      {
+	System.err.println("DBEditSet.popCheckpoint: couldn't find checkpoint for " + name);
+	return null;
+      }
+
+    found = false;
+
+    while (!found && !checkpoints.empty())
+      {
+	point = (DBCheckPoint) checkpoints.pop();
+
+	if (point.name.equals(name))
+	  {
+	    found = true;
+	  }
+	else
+	  {
+	    System.err.println("DBEditSet.popCheckpoint(): popping checkpoint " + point.name);
+	  }
+      }
+
+    if (found)
+      {
+	return point;
+      }
+    else
+      {
+	return null;
+      }
+  }
+
+  /**
+   *
    * This brings this transaction back to the state it was
    * at at the time of the matching checkPoint() call.  Any
    * objects that were checked out in care of this transaction
@@ -204,47 +276,10 @@ public class DBEditSet {
 
     System.err.println("DBEditSet.rollback(): rollback key " + name);
 
-    found = false;
+    point = popCheckpoint(name);
 
-    for (int i = 0; i < checkpoints.size(); i++)
+    if (point == null)
       {
-	point = (DBCheckPoint) checkpoints.elementAt(i);
-
-	if (point.name.equals(name))
-	  {
-	    found = true;
-	  }
-      }
-
-    if (!found)
-      {
-	System.err.println("DBEditSet.rollback: couldn't find rollback for " + name);
-	return false;
-      }
-
-    // ok, we know it's in there.. now pop down the stack til we find it.
-
-    found = false;
-
-    while (!found && !checkpoints.empty())
-      {
-	point = (DBCheckPoint) checkpoints.pop();
-
-	if (point.name.equals(name))
-	  {
-	    found = true;
-	  }
-	else
-	  {
-	    System.err.println("DBEditSet.rollback(): popping checkpoint " + point.name);
-	  }
-      }
-
-    // this really never will happen, but it costs us little to check
-
-    if (!found)
-      {
-	System.err.println("DBEditSet.rollback: couldn't find rollback for " + name);
 	return false;
       }
 
@@ -432,7 +467,8 @@ public class DBEditSet {
 	  }
 	else
 	  {
-	    System.err.println(session.key + ": DBEditSet.commit(): dead (?) write lock already established.. can't commit");
+	    System.err.println(session.key +
+			       ": DBEditSet.commit(): dead (?) write lock already established.. can't commit");
 	    release();
 	    return false;
 	  }
@@ -451,7 +487,8 @@ public class DBEditSet {
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug("DBEditSet.commit(): lock aborted, commit failed, releasing transaction for " + session.key);
+	Ganymede.debug("DBEditSet.commit(): lock aborted, commit failed, releasing transaction for " + 
+		       session.key);
 	release();
 	wLock = null;
 	return false;
@@ -464,7 +501,8 @@ public class DBEditSet {
 
     if (debug)
       {
-	System.err.println(session.key + ": DBEditSet.commit(): established write lock");
+	System.err.println(session.key +
+			   ": DBEditSet.commit(): established write lock");
       }
 
     // write the creation and / or modification info into the object and 
@@ -474,15 +512,16 @@ public class DBEditSet {
     StringDBField sf;
     String result;
 
-    // this is the mother of all try clauses.. its purpose is to help us recover from
-    // any unforeseen exceptions in this area.  The code that writes transactions
-    // to the journal could cause the journal to be slightly corrupted, but otherwise
-    // nothing in this try does anything that aborting the transaction can't undo.
+    // this is the mother of all try clauses.. its purpose is to help
+    // us recover from any unforeseen exceptions in this area.  The
+    // code that writes transactions to the journal could cause the
+    // journal to be slightly corrupted, but otherwise nothing in this
+    // try does anything that aborting the transaction can't undo.
     //
-    // well, that's not quite true.  the phase 2 commit code by definition may do
-    // something that would cause exterior databases to be updated, but if we
-    // get an exception thrown in that part of the code, we still have to try
-    // to do something.
+    // well, that's not quite true.  the phase 2 commit code by
+    // definition may do something that would cause exterior databases
+    // to be updated, but if we get an exception thrown in that part
+    // of the code, we still have to try to do something.
 
     try
       {
@@ -525,7 +564,7 @@ public class DBEditSet {
 		  {
 		  case DBEditObject.CREATING:
 		    
-		    if (!eObj.getBase().isEmbedded())
+		    if (!eObj.isEmbedded())
 		      {
 			df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
 			df.setValueLocal(modDate);
@@ -540,6 +579,22 @@ public class DBEditSet {
 			  }
 
 			sf.setValueLocal(result);
+		      }
+		    else if (false) // XXX debug
+		      {
+			System.err.println("XX committing embedded object:" + eObj.getLabel());
+
+			InvidDBField invf = (InvidDBField) eObj.getField(SchemaConstants.ContainerField);
+			
+			if (invf == null)
+			  {
+			    System.err.println("XX embedded object's container link is undefined (?!)");
+			  }
+			else
+			  {
+			    System.err.println("XX embedded object's container link value is: " + 
+					       invf.getValueString());
+			  }
 		      }
 
 		  case DBEditObject.EDITING:
