@@ -1,0 +1,13 @@
+These scripts can be used in an editor to give you that IDE flavor without
+the calories of an IDE.
+
+I envision these for use with vim, my editor of choice. I'd ideally map the
+launching of these individual scripts to a few shortcut keys, and then that way
+I can do a ":make" followed by a ":runServer" and have everything running the
+way I need it to to test whatever functionality I've just been working on.
+
+Another way to think about this is that these scripts are a Eclipse-free
+replacement for the launch configurations contained in the 'eclipse-helpers'
+directory. Those are nice, but they (obviously) don't work outside of eclipse.
+
+deepak
