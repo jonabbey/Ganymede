@@ -8,8 +8,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2002/08/07 18:39:22 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2002/11/01 02:24:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -123,6 +123,7 @@ public class QueryResult implements java.io.Serializable {
 
   transient Vector handles = null;
   transient Vector labelList = null;
+  transient Vector invidList = null;
 
   transient VecSortInsert inserter;
 
@@ -280,14 +281,14 @@ public class QueryResult implements java.io.Serializable {
 
     if (invid != null)
       {
-	// Remember that we have this invid already added
-
 	invidHash.put(invid, label);
+	invidList.addElement(invid);
       }
 
     if (label != null)
       {
 	labelHash.put(label, label);
+	labelList.addElement(label);
       }
 
     unpacked = false;
@@ -331,6 +332,26 @@ public class QueryResult implements java.io.Serializable {
       }
 
     return ((ObjectHandle) handles.elementAt(row)).getInvid();
+  }
+
+  public Vector getInvids()
+  {
+    if (forTransport && !unpacked)
+      {
+	unpackBuffer();
+      }
+
+    if (invidList == null)
+      {
+	invidList = new Vector();
+
+	for (int i = 0; i < handles.size(); i++)
+	  {
+	    invidList.addElement(((ObjectHandle) handles.elementAt(i)).getInvid());
+	  }
+      }
+
+    return invidList;
   }
 
   public Vector getLabels()
