@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2000/11/07 09:30:09 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2001/04/10 21:29:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -129,12 +129,9 @@ public class VectorUtils {
 	return;
       }
 
-    for (int i = 0; i < vect.size(); i++)
+    if (vect.contains(obj))
       {
-	if (obj.equals(vect.elementAt(i)))
-	  {
-	    return;
-	  }
+	return;
       }
 
     vect.addElement(obj);
