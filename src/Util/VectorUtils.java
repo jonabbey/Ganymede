@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2002/08/02 09:14:25 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2002/08/07 03:56:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,9 +90,9 @@ public class VectorUtils {
 	threshold += vectB.size();
       }
 
-    if (threshold < 6)		// I pulled 6 out of my ass
+    if (threshold < 10)		// I pulled 10 out of my ass
       {
-	Vector result = new Vector();
+	Vector result = new Vector(threshold);
 
 	if (vectA != null)
 	  {
@@ -129,7 +129,7 @@ public class VectorUtils {
 	// item lookup.
 
 	Hashtable workSet = new Hashtable();
-	Vector result = new Vector();
+	Vector result = new Vector(threshold);
 	Enumeration enum;
 	Object item;
 
@@ -163,6 +163,11 @@ public class VectorUtils {
 	  {
 	    result.addElement(enum.nextElement());
 	  }
+
+	// we're big enough to be over threshold, so lets go ahead and
+	// take the time to trim to size
+
+	result.trimToSize();
 
 	return result;
       }
@@ -200,7 +205,7 @@ public class VectorUtils {
 	return false;
       }
 
-    if ((vectA.size() + vectB.size()) > 10)		// ass, again
+    if ((vectA.size() + vectB.size()) > 20)		// ass, again
       {
 	Hashtable workSet = new Hashtable(vectA.size());
 	
