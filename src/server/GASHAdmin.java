@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -44,7 +44,7 @@ import jdj.PackageResources;
                                                                            class
                                                                           iAdmin
 
-iClient does all the heavy lifting to connect the server with the client, and
+iAdmin does all the heavy lifting to connect the server with the client, and
 provides callbacks that the server can use to notify the client when something
 happens.
 
@@ -1371,7 +1371,7 @@ public class GASHAdmin extends JApplet {
     c.setLayout(new BorderLayout());
     c.add("Center", applet.createLoginPanel());
 
-    /* RMI initialization stuff. We do this for our iClient object. */
+    /* RMI initialization stuff. We do this for our iAdmin object. */
 
     if (false)			// this makes 1.2b4 throw a rod.
       {
