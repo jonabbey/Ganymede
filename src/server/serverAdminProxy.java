@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2000/02/02 19:43:05 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/02/02 19:54:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.12 $ $Date: 2000/02/02 19:43:05 $
+ * @version $Revision: 1.13 $ $Date: 2000/02/02 19:54:39 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -391,56 +391,78 @@ public class serverAdminProxy implements Admin, Runnable {
 
     /* -- */
 
-    while (!done || (eventBuffer.size() != 0))
+    try
       {
-	synchronized (eventBuffer)
+	while (!done || (eventBuffer.size() != 0))
 	  {
-	    if (eventBuffer.size() == 0)
+	    synchronized (eventBuffer)
 	      {
-		try
+		if (eventBuffer.size() == 0)
 		  {
-		    eventBuffer.wait();
-		  }
-		catch (InterruptedException ex)
-		  {
-		  }
+		    try
+		      {
+			eventBuffer.wait();
+		      }
+		    catch (InterruptedException ex)
+		      {
+		      }
 		
-		continue;
+		    continue;
+		  }
+
+		event = (adminEvent) eventBuffer.elementAt(0);
+		eventBuffer.removeElementAt(0);
+
+		// clear the direct pointer to this event so that
+		// changeStatus() and replaceEvent() will know that we
+		// don't have an event of this kind in our buffer anymore.
+
+		lookUp[event.method] = null;
 	      }
 
-	    event = (adminEvent) eventBuffer.elementAt(0);
-	    eventBuffer.removeElementAt(0);
-
-	    // clear the direct pointer to this event so that
-	    // changeStatus() and replaceEvent() will know that we
-	    // don't have an event of this kind in our buffer anymore.
-
-	    lookUp[event.method] = null;
-	  }
-
-	try
-	  {
-	    event.dispatch(remoteConsole);
-
-	    // if we didn't get an exception above, clear the
-	    // errorCondition variable to indicate a successful RMI
-	    // call.
-
-	    errorCondition = null; 
-	  }
-	catch (RemoteException ex)
-	  {
-	    if (errorCondition != null)
+	    try
 	      {
-		done = true;	// two remote exceptions in a row, prevent any further events
-		return;		// exit the commThread
+		event.dispatch(remoteConsole);
+
+		// if we didn't get an exception above, clear the
+		// errorCondition variable to indicate a successful RMI
+		// call.
+
+		errorCondition = null; 
 	      }
-	    else
+	    catch (RemoteException ex)
 	      {
-		errorCondition = Ganymede.stackTrace(ex);
-		System.err.println(errorCondition);
+		// if we get two RemoteExceptions in a row from
+		// dispatch, throw in the towel, we're done.
+
+		if (errorCondition != null)
+		  {
+		    return;	// but see finally, below
+		  }
+		else
+		  {
+		    errorCondition = Ganymede.stackTrace(ex);
+		    System.err.println(errorCondition);
+		  }
 	      }
 	  }
+      }
+    finally
+      {
+	done = true;	
+
+	// now we need to aid garbage collection
+
+	eventBuffer.setSize(0);
+
+	// setSize() syncs on eventBuffer, so after this, done
+	// will prevent any new events from coming in.
+
+	eventBuffer = null;
+	remoteConsole = null;
+	lookUp = null;
+	commThread = null;
+	errorCondition = null;
       }
   }
 
