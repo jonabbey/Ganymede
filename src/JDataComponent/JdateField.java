@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,7 +29,7 @@ import jdj.PackageResources;
 import arlut.csd.JCalendar.*;
 import arlut.csd.JDataComponent.*;
 
-import oreilly.Dialog.*;
+//import oreilly.Dialog.*;
 
 /*******************************************************************
                                                       JdateField()
@@ -237,9 +237,8 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	  {
 	    // throw up an information dialog here
 	    
-	    InfoDialog _infoD = new InfoDialog(new JFrame(),true,"Date Field Error","There was an error communicating with the server!\n"+re.getMessage());
-	    
-	    _infoD.show();
+	    JErrorDialog _infoD = new JErrorDialog(new JFrame(),"Date Field Error","There was an error communicating with the server!\n"+re.getMessage());
+
 	  }
 
 	if (retval == true)
@@ -520,9 +519,8 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	      {
 		// throw up an information dialog here
 	    
-		InfoDialog _infoD = new InfoDialog(new JFrame(),true,"Date Field Error","The date you have typed is invalid!\n\nProper format:  MM/DD/YYYY   10/01/1997");
+	       JErrorDialog _infoD = new JErrorDialog(new JFrame(),"Date Field Error","The date you have typed is invalid!\n\nProper format:  MM/DD/YYYY   10/01/1997");
 	    
-		_infoD.show();
 	    
 		return retval;
 	      }
@@ -538,7 +536,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 			// constructor.  Therefore, we just reset the selected Components of the chooser
 			// to what they were before they were changed.
 		    
-			InfoDialog _infoD = new InfoDialog(new JFrame(),true,
+			JErrorDialog _infoD = new JErrorDialog(new JFrame(),
 							   "Date Field Error",
 							   "The date you have typed is out of range!\n\nValid Range: " + 
 							   _dateformat.format(minDate) + 
@@ -582,11 +580,10 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	      {
 		// throw up an information dialog here
 		
-		InfoDialog _infoD = new InfoDialog(new JFrame(),true,
+		JErrorDialog _infoD = new JErrorDialog(new JFrame(),
 						   "Date Field Error",
 						   "There was an error communicating with the server!\n" +
 						   e.getMessage());
-		_infoD.show();
 	      }
 	  }
       }
@@ -619,9 +616,8 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	      {
 		// throw up an information dialog here
 		
-		InfoDialog _infoD = new InfoDialog(new JFrame(),true,"Date Field Error","There was an error communicating with the server!\n"+re.getMessage());
+		JErrorDialog _infoD = new JErrorDialog(new JFrame(),"Date Field Error","There was an error communicating with the server!\n"+re.getMessage());
 		
-		_infoD.show();
 	      }
 	  }
 
@@ -676,9 +672,8 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 		
 		  // throw up an information dialog here
 		
-		  InfoDialog _infoD = new InfoDialog(new JFrame(),true,"Date Field Error","There was an error communicating with the server!\n"+re.getMessage());
-		
-		  _infoD.show();
+		  JErrorDialog _infoD = new JErrorDialog(new JFrame(),"Date Field Error","There was an error communicating with the server!\n"+re.getMessage());
+
 		}
 	    }
     
