@@ -17,7 +17,7 @@ import com.sun.java.swing.border.*;
 
 import arlut.csd.JDataComponent.*;
 
-class elementWrapper extends JPanel implements ActionListener {
+class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
   final static boolean debug = true;
 
@@ -41,13 +41,21 @@ class elementWrapper extends JPanel implements ActionListener {
   vectorPanel
     parent;
 
-  boolean expanded = false;
+  boolean 
+    expanded = false,
+    loaded = false;
+
+  long
+    lastClick = 0;  //Used to determine double clicks
 
   // class methods
 
   public elementWrapper(String titleText, Component comp, vectorPanel parent)
   {
-    System.out.println("Adding new elementWrapper");
+    if (debug)
+      {
+	System.out.println("Adding new elementWrapper");
+      }
 
     if (comp == null) 
       {
@@ -71,19 +79,43 @@ class elementWrapper extends JPanel implements ActionListener {
     remove.setBorderPainted(false);
     remove.setFocusPainted(false);
     remove.setMargin(new Insets(0,0,0,0));
+    remove.setToolTipText("Delete this element");
     remove.addActionListener(this);
-      
-    title = new JLabel(titleText);
 
-    expand = new JButton(parent.parent.closeIcon);
-    expand.setBorderPainted(false);
-    expand.setFocusPainted(false);
-    expand.addActionListener(this);
+    if (comp instanceof containerPanel)
+      {
+	if (titleText != null)
+	  {
+	    title = new JLabel(titleText);
+	  }
+	else
+	  {
+	    title = new JLabel("Component");
+	  }
+	System.out.println("Adding mouse listener.");
+	title.addMouseListener(this);
 
-    buttonPanel.add("West", expand);
-    buttonPanel.add("Center", title);
-    buttonPanel.add("East",remove);
-      
+	expand = new JButton(parent.parent.closeIcon);
+	expand.setToolTipText("Expand this element");
+	expand.setBorderPainted(false);
+	expand.setFocusPainted(false);
+	expand.addActionListener(this);
+	
+	buttonPanel.add("West", expand);
+	buttonPanel.add("Center", title);
+	buttonPanel.add("East",remove);
+      }
+    else
+      {
+	if (titleText != null)
+	  {
+	    buttonPanel.add("West", new JLabel(titleText));
+	  }
+	buttonPanel.add("Center", comp);
+	buttonPanel.add("East", remove);
+      }
+
+
     my_component = comp;
     //my_component.setBackground(parent.container.frame.getVectorBG());
       
@@ -103,17 +135,29 @@ class elementWrapper extends JPanel implements ActionListener {
       {
 	remove(my_component);
 	expand.setIcon(parent.parent.closeIcon);
+	expand.setToolTipText("Collapse this element");
 	expanded = false;
       }
     else
       {
+	if (! loaded)
+	  {
+	    parent.parent.getgclient().setStatus("Loading container panel, you are just gonna have to wait.");
+	    ((containerPanel)my_component).load();
+	    loaded = true;
+	  }
+
 	add("Center", my_component);
 	expand.setIcon(parent.parent.openIcon);
+	expand.setToolTipText("Expand this element");
 	expanded = true;
       }
 
-    invalidate();
+    parent.parent.getgclient().setStatus("Invalidating everything.");
+    //invalidate();
     invalidateRight();
+    parent.parent.getgclient().setStatus("Ok, there you go.");
+    
   }
 
 
@@ -130,14 +174,14 @@ class elementWrapper extends JPanel implements ActionListener {
   {
     Component c;
 
-    c = my_component;
+    //c = my_component;
+    c = this;
 
     while ((c!= null) && !(c instanceof JViewport))
       {
-	//System.out.println("doLayout on " + c);
-
 	c.doLayout();
 	c = c.getParent();
+	//System.out.println("Next c = " + c);
       }
   }
 
@@ -161,6 +205,21 @@ class elementWrapper extends JPanel implements ActionListener {
 	throw new RuntimeException("actionPerformed invoked by ActionEvent from invalid source");
       }
   }
+
+  public void mouseClicked(MouseEvent e)
+  {
+    if (e.getWhen() - lastClick < 500)
+      {
+	expand();
+      }
+    lastClick = e.getWhen();
+  }
+
+  public void mouseEntered(MouseEvent e) {}
+  public void mouseExited(MouseEvent e) {}
+  public void mousePressed(MouseEvent e) {}
+  public void mouseReleased(MouseEvent e) {}
+
 }
 
 
