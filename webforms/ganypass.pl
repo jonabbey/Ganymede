@@ -1,4 +1,4 @@
-#!/opt/bin/perl5
+#!<#PERLEXE#>
 #####################################################################
 #
 # Ganymede Password Changer
@@ -18,8 +18,13 @@ use CGI;
 
 $query = new CGI;
 $xml_path = "<#XMLPATH#>";
-$xmlclient = $xml_path . "xmlclient";
-$web_loc = ".";
+$xmlclient = $xml_path . "/xmlclient";
+
+#If this script is run from a different location from where the
+#image files for the HTML result pages are located, the variable
+#$web_loc must be changed to an HTTP path to the image files
+
+$web_loc = "."; 
 
 if ($query->param) {
 
