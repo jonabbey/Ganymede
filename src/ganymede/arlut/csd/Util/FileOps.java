@@ -224,6 +224,8 @@ public class FileOps {
       {
 	while (true)
 	  {
+	    System.err.println("Looping waiting for subprocess to exit");
+
 	    // this bletcherousness is so that we can consume anything
 	    // the sub process writes to its stdout or stderr, rather
 	    // than allowing the subprocess to block waiting in vain
