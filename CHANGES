@@ -711,6 +711,32 @@ Removal date that would set either date to a time earlier than the
 Ganymede server's notion of current time, as a safeguard against this
 sort of mishap.
 
+46. [SERVER/CLIENT] Server now has soft timeout option
+
+The Ganymede server has always had the ability to time out users that
+were idle in the Ganymede client.  Tom Embleton
+(embleton@arlut.utexas.edu) expressed dissatisfaction with this, for
+the reason that having to login again from scratch forced him to
+readjust his windows and was a pain in general.
+
+In response, I implemented a soft timeout option that can be turned on
+by activating the 'ganymede.softtimeout' property in the server's
+ganymede.properties file.  If this option is chosen, the server will
+send a time out message to the client, which will respond by
+downshifting from any admin persona to the base user login and
+presenting a mandatory persona selection dialog which will insist on
+being given a proper password in order to let the user continue work.
+
+A soft timeout will still close any transactions open at the time of
+the server timeout, but it will be faster to enter the user's password
+into the persona dialog and get back to work than to login from
+scratch again.
+
+In addition, the server's two time limits (for idle sessions with no
+objects checked out and for idle sessions with objects checked out for
+editing) are now configurable in the server's ganymede.properties
+file.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
