@@ -221,20 +221,11 @@ close OUTPUT;
 
 print "\nCustomizing ddroid script\n";
 
-if ($version == 1) {
-  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
-		 "PROPERTIES" => $installdir."/client.properties",
-		 "CLASSPATH" => $vars{"SWINGJARS"}."$installdir/jars/ddroid.jar");
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "PROPERTIES" => $installdir."/client.properties",
+	       "CLASSPATH" => $installdir."/jars/ddroid.jar");
 
-  $template = "scripts/ddroid.template";
-
-} else {
-  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
-		 "PROPERTIES" => $installdir."/client.properties",
-		 "CLASSPATH" => $installdir."/jars/ddroid.jar");
-
-  $template = "scripts/ddroid.template2";
-}
+$template = "scripts/ddroid.template";
 
 open INPUT, "$template" or die "Couldn't open $template!";
 open OUTPUT, ">".$installdir."/bin/ddroid" or die "Couldn't write ddroid";
@@ -288,19 +279,11 @@ chmod 0755, "$installdir/bin/xmlclient";
 
 print "\nCustomizing ddroidAdmin script\n";
 
-if ($version == 1) {
-  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
-		 "PROPERTIES" => "$installdir/client.properties",
-		 "CLASSPATH" => "$installdir/jars/ddroidAdmin.jar");
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "PROPERTIES" => "$installdir/client.properties",
+	       "CLASSPATH" => "$installdir/jars/ddroidAdmin.jar");
 
-  $template = "scripts/ddroidAdmin.template";
-} else {
-  %runconvert = ("JAVA" => $vars{"JVM"}."/java",
-		 "PROPERTIES" => "$installdir/client.properties",
-		 "CLASSPATH" => "$installdir/jars/ddroidAdmin.jar");
-
-  $template = "scripts/ddroidAdmin.template2";
-}
+$template = "scripts/ddroidAdmin.template";
 
 open INPUT, "$template" or die "Couldn't open $template!";
 open OUTPUT, ">$installdir/bin/ddroidAdmin" or die "Couldn't write ddroidAdmin";
