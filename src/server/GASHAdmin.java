@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,6 +19,7 @@ import java.awt.*;
 import java.applet.*;
 import java.util.*;
 import ReportTable;
+import ReportTableAttr;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -88,7 +89,7 @@ class iAdmin extends UnicastRemoteServer implements Admin {
 	applet.table.setCellText(1, i, (String)status.elementAt(i), false);
       }
 
-    applet.table.repaint();
+    applet.table.refreshTable();
   }
 
 }
@@ -106,16 +107,11 @@ public class GASHAdmin extends Applet {
 
   Panel p1 = null;
   Button quitButton = null;
-  TextArea displayArea = null;
   TextField statusField = null;
   ReportTable table = null;
 
   String headers[] = {"User", "Status"};
   int colWidths[] = {100,100};
-  int colJust[] = {ReportTable.JUST_LEFT,ReportTable.JUST_CENTER};
-
-  Font headerFont = null;
-  Font tableFont = null;
 
   /* -- */
   
@@ -125,16 +121,6 @@ public class GASHAdmin extends Applet {
     Server server = null;
 
     /* -- */
-
-    /* get name and password from command line for now */
-
-    /* 
-       if (argv.length != 2)
-       {
-       System.out.println("Usage: java GASHClient <name> <password>");
-       return;
-       }
-     */
 
     /* RMI initialization stuff. We do this for our iClient object. */
 
@@ -196,15 +182,6 @@ public class GASHAdmin extends Applet {
     resize(600,300);
   }
 
-  public void paint(Graphics g) 
-  {
-  }
-
-  public void setStatus(String status)
-  {
-
-  }
-
   public boolean action(Event event, Object obj)
   {
     if (event.target instanceof Button)
@@ -231,23 +208,17 @@ public class GASHAdmin extends Applet {
     return false;
   }
 
+  // Our primary constructor.  This will always be called, either
+  // from main(), below, or by the environment building our applet.
+
   public GASHAdmin() 
   {
     setLayout(new BorderLayout());
 
-    displayArea = new TextArea(6, 40);
-    displayArea.setEditable(false);
-    displayArea.setBackground(Color.blue);
-    displayArea.setForeground(Color.white);
-//     add("Center", displayArea);
-
-    headerFont = new Font("Helvetica", Font.BOLD, 14);
-    tableFont = new Font("Helvetica", Font.PLAIN, 12);
-    table = new ReportTable(headers, colWidths, colJust,
-			    headerFont, tableFont);
+    table = new ReportTable(colWidths, headers);
     add("Center", table);
 
-    statusField = new TextField(40);
+    statusField = new TextField("Admin Console Testing", 40);
     statusField.setEditable(false);
     statusField.setBackground(Color.red);
     statusField.setForeground(Color.white);
