@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.118 $
-   Last Mod Date: $Date: 2001/03/27 07:30:30 $
+   Version: $Revision: 1.119 $
+   Last Mod Date: $Date: 2001/05/12 23:04:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1563,7 +1563,7 @@ class memoryStatusTask implements Runnable, silentTask {
 	    Ganymede.debug(">> quarter-hourly memory status dump: " +
 			   "in use = " + (rt.totalMemory() - rt.freeMemory()) +
 			   ", free = " + rt.freeMemory() +
-			   ", total = " + rt.totalMemory());
+			   ", total = " + rt.totalMemory() + "[" + new Date() + "]");
 	  }
       }
 
