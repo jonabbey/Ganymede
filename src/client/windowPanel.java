@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -84,7 +84,7 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
 
     this.setBuffered(false);
 
-    setBackground(ClientColor.BG);
+    setBackground(ClientColor.background);
 
     setLayout(new BorderLayout());
     lc = new JDesktopPane();
@@ -150,6 +150,14 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
       }
 
     parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    if (editable)
+      {
+	parent.setStatus("Opening object for edit");
+      }
+    else
+      {
+	parent.setStatus("Opening object for viewing");
+      }
 
     // First figure out the title, and put it in the hash
     
@@ -213,7 +221,6 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
     updateMenu();
     
     parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-    parent.setStatus("Done.");
   }
 
   public void addTableWindow(Session session, Query query, String results, String title)
