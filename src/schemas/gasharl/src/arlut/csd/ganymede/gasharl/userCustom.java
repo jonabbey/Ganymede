@@ -1819,7 +1819,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if ((field.getID() == SchemaConstants.ExpirationField) && value == null)
       {
-	if (deleting)
+	if (isDeleting())
 	  {
 	    // approve it, everything's being cleaned out.
 
@@ -1884,7 +1884,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // do it.. we assume this is being done by user removal logic,
 	    // so we won't press the issue.
 
-	    if (deleting && (value == null))
+	    if (isDeleting() && (value == null))
 	      {
 		return null;
 	      }
@@ -2108,7 +2108,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	      case DELELEMENT:
 
-		if (deleting)
+		if (isDeleting())
 		  {
 		    return null;
 		  }
@@ -2252,7 +2252,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    try
 	      {
-		if (param1 != null || !deleting)
+		if (param1 != null || !isDeleting())
 		  {
 		    return new userCategoryWizard(getGSession(), this, 
 						  (Invid) getFieldValueLocal(userSchema.CATEGORY),
@@ -2373,7 +2373,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // if we're setting the field to null, don't need to pass it through
 	    // a wizard.. we're probably just deleting this user.
 
-	    if (deleting && (param1 == null))
+	    if (isDeleting() && (param1 == null))
 	      {
 		return null;
 	      }
@@ -2426,7 +2426,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (password == null || password.equals(""))
       {
-	if (deleting)
+	if (isDeleting())
 	  {
 	    return null;	// okay
 	  }

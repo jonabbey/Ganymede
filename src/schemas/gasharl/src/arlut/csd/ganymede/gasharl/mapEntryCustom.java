@@ -292,7 +292,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     // if we aren't deleting this entry, reject any attempt to unlink
     // us from auto.home.default, if we are linked there.
 
-    if (!deleting &&invf.getValueString().equals("auto.home.default"))
+    if (!isDeleting() && invf.getValueString().equals("auto.home.default"))
       {
 	return Ganymede.createErrorDialog("Error, auto.home.default is required",
 					  "Sorry, it is mandatory to have a directory entry on the auto.home.default map.");
