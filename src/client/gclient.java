@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.205 $
-   Last Mod Date: $Date: 2002/02/27 22:47:17 $
+   Version: $Revision: 1.206 $
+   Last Mod Date: $Date: 2002/03/01 22:35:28 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.205 $ $Date: 2002/02/27 22:47:17 $ $Name:  $
+ * @version $Revision: 1.206 $ $Date: 2002/03/01 22:35:28 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -936,6 +936,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // Create the pane splitter
 
     JSplitPane sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftP, rightP);
+    sPane.setOneTouchExpandable(true);
    
     mainPanel.add("Center",sPane);
 

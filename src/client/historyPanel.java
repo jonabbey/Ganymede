@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2001/01/12 22:43:53 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2002/03/01 22:35:28 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -184,8 +184,9 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     p.add("Center", historyTextPanel);
 
     JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, p);
-    topPanel.setMinimumSize(new Dimension(1,1));
-    split.setDividerLocation(100);
+    split.setOneTouchExpandable(true);
+    //    topPanel.setMinimumSize(new Dimension(1,1));
+    //    split.setDividerLocation(100);
     add("Center", split);
   }
   

@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.131 $
-   Last Mod Date: $Date: 2002/02/28 00:20:41 $
+   Version: $Revision: 1.132 $
+   Last Mod Date: $Date: 2002/03/01 22:35:28 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.131 $ $Date: 2002/02/28 00:20:41 $ $Name:  $
+ * @version $Revision: 1.132 $ $Date: 2002/03/01 22:35:28 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -2096,7 +2096,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   private synchronized void addRow(Component comp, int row, String label, boolean visible)
   {
     JLabel l = new JLabel(label);
-    rowHash.put(comp, l);
 
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
@@ -2106,10 +2105,20 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     gbc.gridy = row;
     gbl.setConstraints(l, gbc);
     add(l);
-    
+
+    // Password fields have labels, but no fields, so we need to be able
+    // to cope reasonably well with a null component
+
+    if (comp == null)
+      {
+	return;
+      }
+
+    rowHash.put(comp, l);
+
     gbc.gridx = 1;
     gbc.weightx = 1.0;
-    
+   
     if (comp instanceof JstringArea)
       {
 	JScrollPane sp = new JScrollPane(comp);
@@ -2930,31 +2939,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     else
       {
-	int maxLength = fieldTemplate.getMaxLength();
-	sf = new JstringField(FIELDWIDTH > maxLength ? maxLength + 1 : FIELDWIDTH,
-			      maxLength,
-			      true,
-			      false,
-			      null,
-			      null);
-
-	objectHash.put(sf, field);
-	shortToComponentHash.put(new Short(fieldInfo.getID()), sf);
-			  
-	// the server won't give us an unencrypted password, we're clear here
-			  
-	sf.setText((String)fieldInfo.getValue());
-		      
-	sf.setEditable(false);
-
-	String comment = fieldTemplate.getComment();
-
-	if (comment != null && !comment.equals(""))
-	  {
-	    sf.setToolTipText(comment);
-	  }
-	
-	addRow(sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+	addRow(null, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
       }
   }
 
