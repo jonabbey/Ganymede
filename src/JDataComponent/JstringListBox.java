@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.17 $ %D%
+ Version: $Revision: 1.18 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,7 +23,7 @@ import arlut.csd.Util.VecQuickSort;
 
 public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // -- 
 
@@ -250,11 +250,16 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public void reload(Vector items, boolean sorted)
   {
-    model.removeAllElements();
+    System.out.println("In reload.");
+    //model.removeAllElements();
+    model = new DefaultListModel();
+    System.out.println("Removed everything.");
     if ((items != null) && (items.size() > 0))
       {
+	System.out.println("Items is not null, and size is bigger than 0");
 	if (items.elementAt(0) instanceof listHandle)
 	  {
+	    System.out.println("It's a listHandle");
 	    if (!sorted)
 	      {
 		items = sortListHandleVector(items);
@@ -262,11 +267,14 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	    for (int i = 0; i < items.size(); i++)
 	      {
+		//System.out.println("Adding element: " + (listHandle)items.elementAt(i) + " i = " + i);
 		insertHandleAt((listHandle)items.elementAt(i), i);
+		//System.out.println("Ok, added it.");
 	      }
 	  }
 	else  //It must be a string, or it will throw a ClassCastException
 	  {
+	    System.out.println("IT's a string");
 	    if (!sorted)
 	      {
 		items = sortStringVector(items);
@@ -287,6 +295,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	    System.out.println("no items to add");
 	  }
       }
+
+    setModel(model);
   }
 
 
