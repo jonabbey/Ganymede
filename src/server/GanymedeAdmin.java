@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -780,15 +780,10 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	    while (enum.hasMoreElements())
 	      {
 		base = (DBObjectBase) enum.nextElement();
-		
-		try
-		  {
-		    base.createHook();
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("argh, weird exception: " + ex);
-		  }
+
+		// force reload of class
+
+		base.reloadCustomClass();
 	      }
 	  }
 
