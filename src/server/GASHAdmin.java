@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 2001/05/25 07:22:08 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 2001/05/30 22:56:19 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -632,7 +632,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   static String debugFilename = null;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/05/25 07:22:08 $";
+  static String release_date = "$Date: 2001/05/30 22:56:19 $";
   static String release_number = null;
 
   // ---
@@ -1123,7 +1123,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     killUserMI = new JMenuItem("Kill User");
     popMenu.add(killUserMI);
 
-    table = new rowTable(colWidths, headers, this, false, popMenu);
+    table = new rowTable(colWidths, headers, this, false, popMenu, false);
     JPanel tableBox = new JPanel(new BorderLayout());
     tableBox.add("Center", table);
     tableBox.setBorder(new TitledBorder("Users Connected"));
@@ -1142,7 +1142,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     taskPopMenu.add(disableTaskMI);
     taskPopMenu.add(enableTaskMI);
 
-    taskTable = new rowTable(taskColWidths, taskHeaders, this, false, taskPopMenu);
+    taskTable = new rowTable(taskColWidths, taskHeaders, this, false, taskPopMenu, false);
     taskTable.setHeadBackColor(Color.red, false);
 
     JPanel taskBox = new JPanel(new java.awt.BorderLayout());
