@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -805,7 +805,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // rescan the choice list for the home group field
 
 	    result = new ReturnVal(true, true);
-	    result.addRescanField(HOMEGROUP);
+	    result.addRescanField(this.getInvid(), HOMEGROUP);
 	    groupChoices = null;
 	    return result;
 
@@ -832,7 +832,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 				   " is the home group");
 
 		result = new ReturnVal(true, true);
-		result.addRescanField(HOMEGROUP);
+		result.addRescanField(this.getInvid(), HOMEGROUP);
 		groupChoices = null;
 		return result;
 	      }
@@ -917,7 +917,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	result = new ReturnVal(true, true); // have setValue() do the right thing
 
-	result.addRescanField(userSchema.HOMEDIR);
+	result.addRescanField(this.getInvid(), userSchema.HOMEDIR);
 
 	return result;
       }
