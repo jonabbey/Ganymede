@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.135 $
-   Last Mod Date: $Date: 1999/03/04 19:17:59 $
+   Version: $Revision: 1.136 $
+   Last Mod Date: $Date: 1999/03/04 19:30:01 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -1104,7 +1104,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 //    *
 //    */
 
-  // Has been moved to PersonaDialog class
+  // Has been moved to PersonaDialog class- will remove below when sure other
+  // stuff works!
 
 
 //   public void updatePersonaMenu()
@@ -3984,27 +3985,23 @@ PersonaDialog getPersonaDialog()
 
   void toggleToolBar() {
     // toggle the toolbar on and off
-    // This needs work if want to use draggable toolbar.
-    // Does weird stuff to detached toolbar...
 
     if (toolToggle == true) {
       if (((BasicToolBarUI)toolBar.getUI()).isFloating()) {
 	((BasicToolBarUI)toolBar.getUI()).setFloating(false, new Point(0,0));
       }
 
-
       toolBar.setVisible(false);
-      //      getContentPane().remove(toolBar);
       toolToggle = false;
     } 
     else if (toolToggle == false)
       { 
 	toolBar.setVisible(true);
-	//	getContentPane().add("North", toolBar);
 	toolToggle = true;
       }
     getContentPane().validate();
   }
+
   
   // ActionListener Methods
   
@@ -4020,12 +4017,7 @@ PersonaDialog getPersonaDialog()
 	System.out.println("Action: " + command);
       }
     
-    //  if (source == toolBar) {
-    //System.out.println("Action from toolbar\n");
-    //}
 
-
-    //    else 
     if (source == cancel)
       {
 	if (debug)
