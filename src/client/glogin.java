@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,7 +25,6 @@ import java.net.*;
 import java.rmi.*;
 import java.rmi.server.*;
 
-import gjt.ImageCanvas;
 import jdj.*;
 
 import arlut.csd.JDialog.*;
@@ -141,8 +140,8 @@ public class glogin extends JApplet implements Runnable {
 
     appletContentPane.setLayout(gbl);
 
-    //add(new ImageCanvas(ganymede_logo), "North");
-    ImageCanvas image = new ImageCanvas(ganymede_logo);
+    JLabel image = new JLabel(new ImageIcon(ganymede_logo));
+
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridx = 0;
     gbc.gridy = 0;
