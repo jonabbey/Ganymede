@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1487,6 +1487,10 @@ class QueryRow implements ItemListener {
 	JInvidChooser invidChooser = (JInvidChooser) operand;
 	value = invidChooser.getSelectedInvid();
       }
+    else
+      {
+	System.err.println("Couldn't get a value.. unknown operand type! " + operand.getClass().toString());
+      }
 
     String operator = (String) compareChoice.getSelectedItem();
     byte opValue = QueryDataNode.NONE;
@@ -1521,6 +1525,11 @@ class QueryRow implements ItemListener {
 	  }
 	    
 	myNode = new QueryDataNode(localFieldName, opValue, value);
+
+	if (debug)
+	  {
+	    System.err.println("QueryDataNode: " + myNode.toString());
+	  }
 	    
 	// -- if not is true then add a not node
 	    
@@ -1579,6 +1588,11 @@ class QueryRow implements ItemListener {
 	  }
 	    
 	myNode = new QueryDataNode(localFieldName, opValue, value);
+
+	if (debug)
+	  {
+	    System.err.println("QueryDataNode: " + myNode.toString());
+	  }
 	    
 	// -- if not is true then add a not node
 	    
