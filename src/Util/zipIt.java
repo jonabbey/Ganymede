@@ -8,8 +8,8 @@
    
    Created: 3 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/12/02 10:11:45 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/03/07 07:52:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -276,6 +276,7 @@ public class zipIt {
       }
     finally
       {
+	inStream.close();
 	zipOut.closeEntry();
       }
   }
