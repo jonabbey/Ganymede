@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.62 $ %D%
+   Version: $Revision: 1.63 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -327,7 +327,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     supergashMode = true;
     beforeversupergash = true;
 
-    updatePerms();
+    updatePerms(true);
   }
 
   /**
@@ -401,7 +401,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     status = "logged in";
     lastEvent = "logged in";
     GanymedeAdmin.refreshUsers();
-    updatePerms();
+    updatePerms(true);
 
     Ganymede.debug("User " + username + " is " + (supergashMode ? "" : "not ") + 
 		   "active with " + Ganymede.rootname + " privs");
@@ -709,8 +709,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaObject = null;
 	personaInvid = null;
 	personaName = null;
-	personaTimeStamp = null; // very important.. this forces updatePerms() to recalc
-	updatePerms();
+	updatePerms(true);
 	ownerList = null;
 	setLastEvent("selectPersona: " + persona);
 	return true;
@@ -750,8 +749,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	Ganymede.debug("Found persona " + persona + " for user:" + user.getLabel());
 	personaInvid = personaObject.getInvid();
-	personaTimeStamp = null; // very important.. this forces updatePerms() to recalc
-	updatePerms();
+	updatePerms(true);
 	ownerList = null;
 	setLastEvent("selectPersona: " + persona);
 	return true;
@@ -1836,26 +1834,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // the ultimate container of the embedded object to the
 	    // result list
 
-	    if (embedded)
-	      {
-		while ((obj != null) && 
-		       obj.isEmbedded() && 
-		       (obj.getTypeID() != containingBase.getTypeID()))
-		  {
-		    dbf = (DBField) obj.getField(SchemaConstants.ContainerField);
-		    
-		    // okay to use session.viewDBObject() here because
-		    // addResultRow does its own permissions checking
-		    // if necessary
-		    
-		    obj = session.viewDBObject((Invid) dbf.getValue());
-		  }
+	    obj = getContainingObj(obj);
 
-		if (obj == null)
-		  {
-		    Ganymede.debug("Error, no containing object for embedded query");
-		    continue;	// try next match
-		  }
+	    if (obj == null)
+	      {
+		Ganymede.debug("Error, no containing object for embedded query");
+		continue;	// try next match
 	      }
 
 	    addResultRow(obj, query, result, internal);
@@ -1906,27 +1890,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		  {
 		    if (DBQueryHandler.matches(query, x))
 		      {
-			obj = x;
+			obj = getContainingObj(x);
 
-			if (embedded)
+			if (obj == null)
 			  {
-			    while ((obj != null) && 
-				   obj.isEmbedded() && 
-				   (obj.getTypeID() != containingBase.getTypeID()))
-			      {
-				dbf = (DBField) obj.getField(SchemaConstants.ContainerField);
-
-				// it's okay to use session.viewDBObject() here because
-				// addResultRow() does its own permissions checking
-
-				obj = session.viewDBObject((Invid) dbf.getValue());
-			      }
-			
-			    if (obj == null)
-			      {
-				Ganymede.debug("Error, couldn't find a containing object for an embedded query");
-				continue;	// try next match
-			      }
+			    Ganymede.debug("Error, couldn't find a containing object for an embedded query");
+			    continue;	// try next match
 			  }
 
 			// make sure we've found an object of the
@@ -2414,7 +2383,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public synchronized ReturnVal inactivate_db_object(Invid invid) 
   {
     DBEditObject eObj;
-    DBLogEvent event;		// ****** NEED TO DO LOGGING HERE
 
     /* -- */
 
@@ -2434,6 +2402,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
 
     setLastEvent("inactivate_db_object: " + eObj.getLabel());
+
+    // note!  DBEditObject's finalizeInactivate() method does the event logging
 
     return session.inactivateDBObject(eObj);
   }
@@ -2457,7 +2427,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public synchronized ReturnVal reactivate_db_object(Invid invid)
   {
     DBEditObject eObj;
-    DBLogEvent event;
 
     /* -- */
 
@@ -2477,6 +2446,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
 
     setLastEvent("reactivate_db_object: " + eObj.getLabel());
+
+    // note!  DBEditObject's finalizeReactivate() method does the event logging
 
     return session.reactivateDBObject(eObj);
   }
@@ -2552,6 +2523,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
 
     setLastEvent("remove_db_object: " + vObj.getLabel());
+
+    // note!  DBEditObject's finalizeRemove() method does the event logging
     
     return session.deleteDBObject(invid);
   }
@@ -2580,7 +2553,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   // **
   // the following are the non-exported permissions management
   // **
-
 
   /**
    *
@@ -2666,7 +2638,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // make sure we have personaPerms up to date
 
-    updatePerms();
+    updatePerms(false);
 
     // find the top-level object if we were passed an embedded object
     
@@ -2726,7 +2698,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // make sure we have personaPerms up to date
 
-    updatePerms(); 
+    updatePerms(false); 
 
     // find the top-level object if we were passed an embedded object
     
@@ -2803,7 +2775,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return PermEntry.fullPerms;
       }
 
-    updatePerms(); // make sure we have personaPerms up to date
+    updatePerms(false); // make sure we have personaPerms up to date
 
     // note that we can use personaPerms, since the persona's
     // base type privileges apply generically to objects of the
@@ -2860,7 +2832,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // make sure we have defaultPerms and personaPerms up to date
 
-    updatePerms();
+    updatePerms(false);
 
     // remember that personaPerms is a permissive superset of
     // defaultPerms
@@ -2936,12 +2908,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  final synchronized void updatePerms()
+  final synchronized void updatePerms(boolean forceUpdate)
   { 
     PermissionMatrixDBField permField;
 
-
     /* -- */
+
+    if (forceUpdate)
+      {
+	personaTimeStamp = null;
+      }
 
     if (permBase == null)
       {
