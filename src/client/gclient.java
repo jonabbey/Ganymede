@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.117 $ %D%
+   Version: $Revision: 1.118 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -205,8 +205,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     search,
     queryIcon,
     pencil,
+    treepencil,
     trash,
+    treetrash,
     creation,
+    treecreation,
     newToolbarIcon,
     ganymede_logo,
     createDialogImage;
@@ -320,8 +323,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	throw new RuntimeException("Could not talk to server: " + rx);
       }
-
-    setIconImage(pencil);
 
     client = this;
 
@@ -577,7 +578,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     creation = PackageResources.getImageResource(this, "creation.gif", getClass());
     newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
     pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
+    setIconImage(pencil);
     createDialogImage = PackageResources.getImageResource(this, "wiz3b.gif", getClass());
+
+    treepencil = PackageResources.getImageResource(this, "treepencil.gif", getClass());
+    treetrash = PackageResources.getImageResource(this, "treetrash.gif", getClass());
+    treecreation = PackageResources.getImageResource(this, "treenewicon.gif", getClass());
 
     Image remove = PackageResources.getImageResource(this, "remove.gif", getClass());
     Image expire = PackageResources.getImageResource(this, "expire.gif", getClass());
@@ -587,15 +593,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     images[CLOSED_BASE ] = closedFolder;
     
     images[OPEN_FIELD] = list;
-    images[OPEN_FIELD_DELETE] = trash;
-    images[OPEN_FIELD_CREATE] = creation;
-    images[OPEN_FIELD_CHANGED] = pencil;
+    images[OPEN_FIELD_DELETE] = treetrash;
+    images[OPEN_FIELD_CREATE] = treecreation;
+    images[OPEN_FIELD_CHANGED] = treepencil;
     images[OPEN_FIELD_EXPIRESET] = expire;
     images[OPEN_FIELD_REMOVESET] = remove;
     images[CLOSED_FIELD] = list;
-    images[CLOSED_FIELD_DELETE] = trash;
-    images[CLOSED_FIELD_CREATE] = creation;
-    images[CLOSED_FIELD_CHANGED] = pencil;
+    images[CLOSED_FIELD_DELETE] = treetrash;
+    images[CLOSED_FIELD_CREATE] = treecreation;
+    images[CLOSED_FIELD_CHANGED] = treepencil;
     images[CLOSED_FIELD_EXPIRESET] = expire;
     images[CLOSED_FIELD_REMOVESET] = remove;
     
