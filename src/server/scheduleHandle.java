@@ -6,7 +6,7 @@
    Ganymede Server.  It is also used to pass data to the admin console.
    
    Created: 3 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,6 +41,8 @@ public class scheduleHandle implements java.io.Serializable {
 
   boolean isRunning;
   boolean suspend;
+  boolean rerun;		// if we are doing a on-demand and we get a request while running it,
+				// we'll want to immediately re-run it
   Date startTime;
   Date incepDate;		// when was this task first registered?  used to present a
 				// consistent list on the client
@@ -54,6 +56,7 @@ public class scheduleHandle implements java.io.Serializable {
   transient Runnable task;
   transient Thread thread, monitor;
   transient GanymedeScheduler scheduler = null;
+  
 
   /* -- */
 
@@ -61,11 +64,6 @@ public class scheduleHandle implements java.io.Serializable {
 			Date time, int interval, 
 			Runnable task, String name)
   {
-    if (time == null)
-      {
-	throw new IllegalArgumentException("can't schedule a task without a start time");
-      }
-
     if (scheduler == null)
       {
 	throw new IllegalArgumentException("can't create schedule handle without scheduler reference");
@@ -75,6 +73,7 @@ public class scheduleHandle implements java.io.Serializable {
     this.startTime = time;
     this.task = task;
     this.name = name;
+    this.rerun = false;
 
     setInterval(interval);
 
@@ -109,6 +108,8 @@ public class scheduleHandle implements java.io.Serializable {
 	System.err.println("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
 	return;
       }
+
+    rerun = false;
 
     thread = new Thread(task, name);
     thread.start();
@@ -155,7 +156,7 @@ public class scheduleHandle implements java.io.Serializable {
 	throw new IllegalArgumentException("can't run this method on the client");
       }
 
-    if (interval == 0)
+    if (startTime == null || interval == 0)
       {
 	return false;
       }
@@ -164,6 +165,35 @@ public class scheduleHandle implements java.io.Serializable {
 	startTime.setTime(startTime.getTime() + (long) (60000 * interval));
 	return true;
       }
+  }
+
+  /**
+   *
+   * This method lets the GanymedeScheduler check to see whether this task
+   * should be re-run when it terminates
+   *
+   */
+
+  synchronized boolean runAgain()
+  {
+    return rerun;
+  }
+
+  /**
+   *
+   * Server-side method to request that this task be re-run after
+   * its current completion.  Intended for on-demand tasks.
+   *
+   */
+
+  synchronized void runOnCompletion()
+  {
+    if (scheduler == null)
+      {
+	throw new IllegalArgumentException("can't run this method on the client");
+      }
+
+    rerun = true;
   }
 
   /**

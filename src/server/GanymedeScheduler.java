@@ -6,7 +6,7 @@
    to register tasks to be run on a periodic basis.
    
    Created: 26 January 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -86,6 +86,7 @@ public class GanymedeScheduler extends Thread {
   Date nextAction = null;
   private Hashtable currentlyScheduled = new Hashtable();
   private Hashtable currentlyRunning = new Hashtable();
+  private Hashtable onDemand = new Hashtable();
   private Vector taskList = new Vector();	// for reporting to admin consoles
   private boolean taskListInitialized = false;
   private boolean reportTasks;
@@ -107,6 +108,38 @@ public class GanymedeScheduler extends Thread {
 
   /**
    *
+   * This method is used to add a task to the scheduler that will not
+   * be scheduled until specifically requested. 
+   *
+   *
+   */
+
+  public synchronized void addActionOnDemand(Runnable task,
+					     String name)
+  {
+    scheduleHandle handle;
+
+    /* -- */
+
+    if (task == null || name == null)
+      {
+	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
+      }
+
+    if (currentlyRunning.containsKey(name) || 
+	currentlyScheduled.containsKey(name) ||
+	onDemand.containsKey(name))
+      {
+	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
+      }
+
+    handle = new scheduleHandle(this, null, 0, task, name);
+
+    onDemand.put(handle.name, handle);
+  }
+
+  /**
+   *
    * This method is used to add an action to be run once, at a specific time.
    *
    */
@@ -124,7 +157,8 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
       }
 
-    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name))
+    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name) ||
+	onDemand.containsKey(name))
       {
 	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
       }
@@ -156,7 +190,8 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
       }
 
-    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name))
+    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name) ||
+	onDemand.containsKey(name))
       {
 	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
       }
@@ -208,7 +243,8 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
       }
 
-    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name))
+    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name) ||
+	onDemand.containsKey(name))
       {
 	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
       }
@@ -260,7 +296,57 @@ public class GanymedeScheduler extends Thread {
 
 	if (handle == null)
 	  {
-	    return false;	// couldn't find task
+	    handle = (scheduleHandle) onDemand.get(name);
+	  }
+
+	if (handle == null)
+	  {
+	    return false;
+	  }
+
+	runTask(handle);
+
+	return true;
+      }
+  }
+
+  /**
+   *
+   * This method is provided to allow the server to request that a task
+   * listed as being registered 'on-demand' be run as soon as possible.
+   *
+   * If the task is currently running, it will be flagged to run again
+   * as soon as the current run completes.  This is intended to support
+   * the need for the server to be able to do back-to-back nis/dns builds.
+   *
+   * @return false if the task name could not be found on the on-demand
+   *         or currently running lists.
+   *
+   */
+
+  public synchronized boolean demandTask(String name)
+  {
+    if (!currentlyRunning.containsKey(name) &&
+	!onDemand.containsKey(name))
+      {
+	return false;
+      }
+    else
+      {
+	scheduleHandle handle = (scheduleHandle) currentlyRunning.get(name);
+
+	if (handle != null)
+	  {
+	    handle.rerun = true;
+	    updateTaskInfo(true);
+	    return true;
+	  }
+
+	handle = (scheduleHandle) onDemand.get(name);
+
+	if (handle == null)
+	  {
+	    return false;
 	  }
 
 	runTask(handle);
@@ -596,7 +682,8 @@ public class GanymedeScheduler extends Thread {
 
   private synchronized void runTask(scheduleHandle handle)
   {
-    if (currentlyScheduled.remove(handle.name) != null)
+    if ((currentlyScheduled.remove(handle.name) != null) ||
+	(onDemand.remove(handle.name) != null))
       {
 	System.err.println("Ganymede Scheduler: running " + handle.name);
 
@@ -627,7 +714,7 @@ public class GanymedeScheduler extends Thread {
 	// yet due to run, we don't want to make it skip its normally
 	// scheduled next run
 
-	if (handle.startTime.after(new Date()))
+	if (handle.startTime != null && handle.startTime.after(new Date()))
 	  {
 	    scheduleTask(handle);
 	  }
@@ -638,6 +725,17 @@ public class GanymedeScheduler extends Thread {
 		System.err.println("Ganymede Scheduler: rescheduling task " + handle.name + " for " + handle.startTime);
 		
 		scheduleTask(handle);
+	      }
+	    else if (handle.startTime == null)
+	      {
+		if (handle.runAgain())
+		  {
+		    runTask(handle);
+		  }
+		else
+		  {
+		    onDemand.put(handle.name, handle); // put it back on the onDemand track
+		  }
 	      }
 	  }
 
@@ -725,14 +823,18 @@ public class GanymedeScheduler extends Thread {
 	taskList.setSize(0);
 
 	enum = currentlyScheduled.elements();
-    
 	while (enum.hasMoreElements())
 	  {
 	    taskList.addElement(enum.nextElement());
 	  }
     
 	enum = currentlyRunning.elements();
-    
+	while (enum.hasMoreElements())
+	  {
+	    taskList.addElement(enum.nextElement());
+	  }
+
+	enum = onDemand.elements();
 	while (enum.hasMoreElements())
 	  {
 	    taskList.addElement(enum.nextElement());
