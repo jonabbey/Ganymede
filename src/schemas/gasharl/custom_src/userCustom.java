@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 2001/06/25 21:56:27 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 2001/06/26 05:18:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1432,7 +1432,21 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return super.maxDate(field);
 	  }
 
-	return getMaxPasswordExtension();
+	Date maxDate = getMaxPasswordExtension();
+
+	DateDBField passDateField = (DateDBField) getField(userSchema.PASSWORDCHANGETIME);
+
+	if (passDateField != null)
+	  {
+	    Date currentDate = passDateField.value();
+
+	    if (currentDate != null && currentDate.after(maxDate))
+	      {
+		maxDate = currentDate;
+	      }
+	  }
+
+	return maxDate;
       }
 
     return super.maxDate(field);
