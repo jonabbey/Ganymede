@@ -936,10 +936,13 @@ that does not have an open transaction asssociated with it will not
 incur a synchronization penalty/deadlock opportunity merely to
 retrieve a reference to an object from the database.
 
-62. [SERVER, CLIENT] Added -dumpschema to the xmlclient
+62. [SERVER, CLIENT] Added -dump{schema|data} to the xmlclient, removed decodeDB
 
 The xmlclient is now able to emit a copy of the server's schema
-definition in xml format.
+definition in xml format, using xmlclient -dumpschema, and to dump the
+server's database in its entirety in xml format, using xmlclient
+-dumpdata..  Due to this, I have removed the old hackish decodeDB and
+permdecodeDB front ends to the Ganymede server.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 

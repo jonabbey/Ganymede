@@ -7,8 +7,8 @@ In this code drop, installClient will install an xmlclient, which is
 capable of transmitting data in bulk into an installed Ganymede
 server.  The xml file format used is documented in doc/xml.html.
 
-The xmlclient itself has a command line option which is not
-yet documented elsewhere.  This is the following:
+The xmlclient itself has a couple ofcommand line option which are not
+yet documented elsewhere.  This includes the following:
 
   xmlclient -dumpschema
 
@@ -17,8 +17,20 @@ yet documented elsewhere.  This is the following:
 	<ganyschema> section defining the current schema definition in
 	the Ganymede server.
 
+  xmlclient -dumpdata
+
+	This will cause the xmlclient to connect to the Ganymede server
+	and to generate a complete dump to stdout in xml format
+	of the Ganymede server's database, both schema and data.
+
+  Both of these options require a supergash-level account name and
+  password in order to work, and both cause the server to lock out
+  new transactions from commiting for as long as they run.  It is not
+  a good idea to do 'xmlclient -dumpdata | more' and walk away from
+  it, as the server will block indefinitely in that situation.
+
 Otherwise, if you run xmlclient by itself on the command line, it will
-present the command line options that it supports.
+present the command line options that it supports for xml bulk edits.
 
 In this distribution there is a sample perl script packaged with the
 Linux schema kit which can process the Linux password, group, and
