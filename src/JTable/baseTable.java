@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.38 $ %D%
+  Version: $Revision: 1.39 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import javax.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.38 $ %D%
+ * @version $Revision: 1.39 $ %D%
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -853,7 +853,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
 	row = (tableRow) rows.elementAt(i);
 
-	for (int j = 0; j < rows.size(); j++)
+	for (int j = 0; j < cols.size(); j++)
 	  {
 	    row.elementAt(j).refresh();
 	  }
@@ -894,7 +894,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
 	row = (tableRow) rows.elementAt(i);
 
-	for (int j = 0; j < rows.size(); j++)
+	for (int j = 0; j < cols.size(); j++)
 	  {
 	    row.elementAt(j).refresh();
 	  }
@@ -1107,7 +1107,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
 	int newWidth = origTotalWidth / cols.size();
 
-	for (int i=0; i<cols.size(); i++)
+	for (int i=0; i < cols.size(); i++)
 	  {
 	    col = (tableCol) cols.elementAt(i);
 	    col.origWidth = newWidth; 
@@ -1148,7 +1148,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    * @param y row to select
    */
 
-  public final void selectRow(int y)
+  public final synchronized void selectRow(int y)
   {
     for (int i = 0; i < cols.size(); i++)
       {
@@ -1163,16 +1163,16 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    * @param y row to unselect
    */
 
-  public final void unSelectRow(int y)
+  public final synchronized void unSelectRow(int y)
   {
-    for (int i = 0; i < cols.size(); i++)
-      {
-	unSelectCell(i, y);
-      }
-
     if (selectedRow == y)
       {
 	selectedRow = -1;
+
+	for (int i = 0; i < cols.size(); i++)
+	  {
+	    unSelectCell(i, y);
+	  }
       }
   }
 
@@ -1252,6 +1252,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	    return false;
 	  }
       }
+
     return true;
   }
 
@@ -1269,6 +1270,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	    return false;
 	  }
       }
+
     return true;
   }
 
@@ -1337,6 +1339,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	  {
 	    System.err.println("Setting topEdge for row " + rows.size() + " to " + newVal);
 	  }
+
 	newRow.setTopEdge(newVal);
       }
 
@@ -1637,7 +1640,18 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       }
 
     this.canvas.render();
+
+    if (debug)
+      {
+	System.err.println("refreshTable(): render complete");
+      }
+
     this.canvas.repaint();
+
+    if (debug)
+      {
+	System.err.println("refreshTable(): repaint complete");
+      }
   }
 
   /**
@@ -2723,16 +2737,33 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
 	int i;
 
-	for (i = first_row; i < rt.rows.size(); i++)
+	if (last_row <= rt.rows.size())
 	  {
-	    row = (tableRow) rt.rows.elementAt(i);
-	    
-	    topLine = row.getTopEdge() - v_offset;
+	    for (i = first_row; i <= last_row; i++)
+	      {
+		row = (tableRow) rt.rows.elementAt(i);
 		
-	    cellRect.setBounds(leftEdge, topLine, column.width, row.getHeight() + 1);
-	    bg.setClip(cellRect);
+		topLine = row.getTopEdge() - v_offset;
 		
-	    renderBlitCell(cellRect, bg, j, i, column);
+		cellRect.setBounds(leftEdge, topLine, column.width, row.getHeight() + 1);
+		bg.setClip(cellRect);
+		
+		renderBlitCell(cellRect, bg, j, i, column);
+	      }
+	  }
+	else
+	  {
+	    for (i = first_row; i < rt.rows.size(); i++)
+	      {
+		row = (tableRow) rt.rows.elementAt(i);
+		
+		topLine = row.getTopEdge() - v_offset;
+		
+		cellRect.setBounds(leftEdge, topLine, column.width, row.getHeight() + 1);
+		bg.setClip(cellRect);
+		
+		renderBlitCell(cellRect, bg, j, i, column);
+	      }
 	  }
 
 	// we need to blank out the rest of this column.. this will
@@ -3551,6 +3582,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
     for (int i = 0; i < rt.cols.size(); i++)
       {
 	// nice wide grab range
+
 	if ((vx >= (((Integer) rt.colPos.elementAt(i)).intValue())) &&
 	    (vx <= (((Integer) rt.colPos.elementAt(i+1)).intValue())))
 	  {
