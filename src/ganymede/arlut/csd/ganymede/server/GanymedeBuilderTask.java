@@ -404,6 +404,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * determine whether a particular base has had any modifications
    * made to it since the last time this builder task was run.</P>
    *
+   * <P>See also the {@link
+   * arlut.csd.ganymede.server.GanymedeBuilderTask#baseChanged(short,
+   * java.util.List)} version of this method, which allows you to
+   * specify a list of fields that you are interested in testing.</P>
+   *
    * @param baseid The id number of the base to be checked
    */
 

@@ -292,6 +292,20 @@
     be run as soon as possible each time a transaction is
     committed.</p>
 
+    <p>Naturally, not every transaction or sequence of transactions
+    committed will necessarily be of interest to any given builder
+    task.  Nonetheless, every task registered to be "Run On
+    Transaction Commit" will be scheduled as soon as possible after
+    each commit.  If you subclass <a
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
+    to implement your builder tasks, your <a
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1</a>
+    method can take advantage of the GanymedeBuilderTask base class'
+    <a
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#baseChanged(short)">baseChanged()</a>
+    method to decide whether or not any data that you are interested
+    in has changed since the last time your builder task has run.</p>
+
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
     <p class="address">$Date$, $Rev$, $Author$</p>
