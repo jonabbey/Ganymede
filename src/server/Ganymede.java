@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -588,7 +588,7 @@ public class Ganymede {
 	internalSession.openTransaction("Ganymede startupHook");
 
 	defaultInv = new Invid(SchemaConstants.RoleBase,
-				SchemaConstants.RoleDefaultObj);
+			       SchemaConstants.RoleDefaultObj);
 
 	if (internalSession.session.viewDBObject(defaultInv) == null)
 	  {
@@ -603,7 +603,7 @@ public class Ganymede {
 									     null);
 	    
 	    s = (StringDBField) e_object.getField(SchemaConstants.RoleName);
-	    s.setValue("Default Permissions");
+	    s.setValueLocal("Default Permissions");
 	
 	    // By default, users will be able to view themselves and all their fields, anything
 	    // else will have to be manually configured by the supergash administrator.
