@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.4 $ %D%
+ Version: $Revision: 1.5 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -49,10 +49,7 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 
   public JstringListBox()
   {
-    super(); 
-    setModel(model);
-    
-    setCellRenderer(this);
+    this(null);
   }
 
   /**
@@ -63,7 +60,10 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 
   public JstringListBox(Vector items)
   {
-    this();
+    
+    label.setBackground(Color.white);
+    //model.setSize(items.size());
+    //System.out.println("Setting size to " + items.size());
 
     if ((items != null) && (items.size() > 0))
       {	
@@ -78,6 +78,7 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 		  }
 		
 		addString((String)items.elementAt(i));
+		
 	      }
 	  }
 	else if (items.elementAt(0) instanceof listHandle)
@@ -97,7 +98,16 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 	    System.out.println("Unsupported item type");
 	  }
       
+
       }
+    setModel(model);
+    
+    setCellRenderer(this);
+  }
+
+  public void setSize(int size)
+  {
+    model.setSize(size);
   }
 
   public void setCallback(JsetValueCallback parent)
@@ -124,11 +134,6 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
   public void addString(String label, boolean redraw)
   {
     model.addElement(new listHandle(label));
-    if (redraw)
-      {
-	invalidate();
-	validate();
-      }
   }
 
   public void addHandle(listHandle handle)
@@ -139,10 +144,6 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
   public void addHandle(listHandle handle, boolean redraw)
   {
     model.addElement(handle);
-    if (redraw)
-      {
-	invalidate();
-      }
   }
 
   public void removeString(String item)
@@ -221,14 +222,25 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
   {
     if (label == null)
       {
-	System.out.println("label is null!");
+	if (debug)
+	  {
+	    System.out.println("label is null!");
+	  }
 	return;
       }
     if ((listHandle)model.elementAt(index) == null)
       {
-	System.out.println("element at " + index + " is null");
+	if (debug)
+	  {
+	    System.out.println("element at " + index + " is null");
+	  }
 	return;
       }
+    if (debug)
+      {
+	System.out.println("element at" + index + " is " + ((listHandle)model.elementAt(index)).getLabel());
+      }
+    label.setText("");
     label.setText(((listHandle)model.elementAt(index)).getLabel());
   }
 
