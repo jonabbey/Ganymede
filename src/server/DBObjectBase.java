@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,7 +32,14 @@ import java.util.*;
 
 public class DBObjectBase {
 
-  static final boolean debug = true;
+  static boolean debug = false;
+
+  static void setDebug(boolean val)
+  {
+    debug = val;
+  }
+
+  /* - */
 
   DBStore store;
   String object_name;
