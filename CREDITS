@@ -34,7 +34,7 @@ Subversion and build script work.  Answers e-mail.
 Deepak has made extensive contributions to the development of Ganymede
 2.0, including transitioning Ganymede's build system from old Perl
 scripts to using Ant.  Deepak also developed the Jython integration,
-and worked on the nwe Sync Channel software, both in the Ganymede
+and worked on the new Sync Channel software, both in the Ganymede
 client and in the Python Sync Channel servicing code.
 
 --
