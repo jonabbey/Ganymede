@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.57 $ %D%
+    Version: $Revision: 1.58 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -71,6 +71,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     frame;
 
   Vector
+    updatesWhileLoading = new Vector(),
     vectorPanelList = new Vector();
 
   Hashtable
@@ -99,6 +100,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   boolean
     isEmbedded,
+    loading = false,
     loaded = false;
 
   short 
@@ -215,6 +217,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   
   public void load() 
   {
+    loading = true;
+
     int infoSize;
 
     FieldInfo 
@@ -372,7 +376,23 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     finally
       {
 	loaded = true;
-	gc.containerPanelFinished(this);// Is this twice?
+	loading = false;
+	
+	// If update(Vector) was called during the load, then any
+	// fields to be updated were added to the updatesWhileLoading
+	// vector.  So call update with that vector now, if it has any
+	// size.
+
+	if (updatesWhileLoading.size() > 0)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Calling update with the updatesWhileLoading vector.");
+	      }
+
+	    update(updatesWhileLoading);
+	  }
+	gc.containerPanelFinished(this);
       }
   }
 
@@ -544,9 +564,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.out.println("Updating a few fields...");
       }
 
+    // If the containerPanel is not loaded, then we need to keep track
+    // of all the fields that need to be updated, and call update on
+    // them after the load is finished.
     if (!loaded)
       {
-	load();
+	for (int i = 0; i < fields.size(); i++)
+	  {
+	    updatesWhileLoading.addElement(fields.elementAt(i));
+	  }
+
+	if (!loading)
+	  {
+	    load();
+	  }
+
 	return;
       }
 
@@ -1529,6 +1561,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    return false;
 	  }
       }
+    catch (NullPointerException ne)
+      {
+	System.out.println("NullPointerException in containerPanel.setValuePerformed:\n " + ne);
+	return false;
+      }
     catch (IllegalArgumentException e)
       {
 	System.out.println("IllegalArgumentException in containerPanel.setValuePerformed:\n " + e);
@@ -1566,15 +1603,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     /* -- */
 
     field = (db_field) objectHash.get(cb);
-
     if (field == null)
       {
 	throw new RuntimeException("Whoa, null field for a JCheckBox: " + e);
       }
-    else
+
+    try
       {
 	newValue = cb.isSelected();
-
+	
 	try
 	  {
 	    returnValue = field.setValue(new Boolean(newValue));
@@ -1583,41 +1620,58 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    throw new IllegalArgumentException("Could not set field value: " + rx);
 	  }
+      
+	
+	// Handle any wizards or error dialogs resulting from the
+	// field.setValue()
+
+	returnValue = gc.handleReturnVal(returnValue);
+
+	if (returnValue == null)
+	  {
+	    gc.somethingChanged();
+	  }
+	else if (returnValue.didSucceed())
+	  {
+	    gc.somethingChanged();
+
+	    // That checkbox may have triggered value changes elsewhere in
+	    // this object.. rescan them as needed.
+
+	    checkReturnValForRescan(returnValue);
+	  }
+	else
+	  {
+	    // we need to undo things
+
+	    // We need to turn off ourselves as an action listener
+	    // while we flip this back, so we don't go through this
+	    // method again.
+	
+	    cb.removeActionListener(this);
+	
+	    cb.setSelected(!newValue);
+	
+	    // and we re-enable event notification
+	
+	    cb.addActionListener(this);
+	  }
       }
-    
-    // Handle any wizards or error dialogs resulting from the
-    // field.setValue()
-
-    returnValue = gc.handleReturnVal(returnValue);
-
-    if (returnValue == null)
+    catch (Exception ex)
       {
-	gc.somethingChanged();
-      }
-    else if (returnValue.didSucceed())
-      {
-	gc.somethingChanged();
+	// An exception was thrown, most likely from the server.  We need to revert the check box.
+	System.out.println("Exception occured in containerPanel.actionPerformed: " + ex);
 
-	// That checkbox may have triggered value changes elsewhere in
-	// this object.. rescan them as needed.
+	try
+	  {
+	    Boolean b = (Boolean)field.getValue();
+	    cb.setSelected((b == null) ? false : b.booleanValue());
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not talk to server: " + rx);
+	  }
 
-	checkReturnValForRescan(returnValue);
-      }
-    else
-      {
-	// we need to undo things
-
-	// We need to turn off ourselves as an action listener
-	// while we flip this back, so we don't go through this
-	// method again.
-	
-	cb.removeActionListener(this);
-	
-	cb.setSelected(!newValue);
-	
-	// and we re-enable event notification
-	
-	cb.addActionListener(this);
       }
   }
 
@@ -2886,7 +2940,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	invidChooserHash.put(combo.getCombo(), field); // We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
 	objectHash.put(combo, field); // The update method still need to be able to find this JInvidChooser.
 	
-	System.out.println("** Adding new JInvidChooser: field ID: " + fieldInfo.getID());
 	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
 
 
