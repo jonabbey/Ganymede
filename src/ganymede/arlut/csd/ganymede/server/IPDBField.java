@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -62,8 +62,12 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.ip_field;
+import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.TranslationService;
+import arlut.csd.Util.VectorUtils;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -90,6 +94,13 @@ import arlut.csd.ganymede.rmi.ip_field;
  */
 
 public class IPDBField extends DBField implements ip_field {
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.IPDBField");
 
   static final boolean debug = false;
   private static String IPv4allowedChars = "1234567890.";
@@ -333,19 +344,112 @@ public class IPDBField extends DBField implements ip_field {
     xmlOut.endElement(this.getXMLName());
   }
 
-  public void emitIPXML(XMLDumpContext xmlOut, Byte[] value) throws IOException
-  {
-    xmlOut.startElement("ip");
+  /**
+   * <p>This method is used when this field has changed, and its
+   * changes need to be written to a Sync Channel.</p>
+   *
+   * <p>The assumptions of this method are that both this field and
+   * the orig field are defined (i.e., non-null, non-empty), and that
+   * orig is of the same class as this field.  It is an error to call
+   * this method with null dump or orig parameters.</p>
+   *
+   * <p>It is the responsibility of the code that calls this method to
+   * determine that this field differs from orig.  If this field and
+   * orig have no changes between them, the output is undefined.</p>
+   */
 
-    if (value.length==16)
+  synchronized void emitXMLDelta(XMLDumpContext xmlOut, DBField orig) throws IOException
+  {
+    xmlOut.startElementIndent(this.getXMLName());
+
+    if (!isVector())
       {
-	xmlOut.attribute("val", genIPV6string(value));
+	xmlOut.indentOut();
+
+	xmlOut.indent();
+	xmlOut.startElement("delta");
+	xmlOut.attribute("state", "before");
+	emitIPXML(xmlOut, ((IPDBField) orig).value());
+	xmlOut.endElement("delta");
+
+	xmlOut.indent();
+	xmlOut.startElement("delta");
+	xmlOut.attribute("state", "after");
+	emitIPXML(xmlOut, this.value());
+	xmlOut.endElement("delta");
+
+	xmlOut.indentIn();
       }
     else
       {
-	xmlOut.attribute("val", genIPV4string(value));
+	Vector wrappedValues = getWrappedVector(this.getVectVal());
+	Vector oldWrappedValues = getWrappedVector(orig.getVectVal());
+	Vector addedValues = VectorUtils.difference(wrappedValues, oldWrappedValues);
+	Vector deletedValues = VectorUtils.difference(oldWrappedValues, wrappedValues);
+	Vector unchangedValues = VectorUtils.difference(wrappedValues, VectorUtils.union(addedValues, deletedValues));
+
+	xmlOut.indentOut();
+
+	for (int i = 0; i < unchangedValues.size(); i++)
+	  {
+	    xmlOut.indent();
+	    emitIPXML(xmlOut, (IPwrap) unchangedValues.elementAt(i));
+	  }
+
+	if (addedValues.size() > 0)
+	  {
+	    xmlOut.startElement("delta");
+	    xmlOut.attribute("state", "add");
+	    xmlOut.indentOut();
+
+	    for (int i = 0; i < addedValues.size(); i++)
+	      {
+		xmlOut.indent();
+		emitIPXML(xmlOut, (IPwrap) addedValues.elementAt(i));
+	      }
+
+	    xmlOut.indentIn();
+	    xmlOut.indent();
+
+	    xmlOut.endElement("delta");
+	  }
+
+	if (deletedValues.size() > 0)
+	  {
+	    xmlOut.startElement("delta");
+	    xmlOut.attribute("state", "remove");
+	    xmlOut.indentOut();
+
+	    for (int i = 0; i < deletedValues.size(); i++)
+	      {
+		xmlOut.indent();
+		emitIPXML(xmlOut, (IPwrap) deletedValues.elementAt(i));
+	      }
+
+	    xmlOut.indentIn();
+	    xmlOut.indent();
+
+	    xmlOut.endElement("delta");
+	  }
+	
+	xmlOut.indentIn();
+	xmlOut.indent();
       }
 
+    xmlOut.endElement(this.getXMLName());
+  }
+
+  public void emitIPXML(XMLDumpContext xmlOut, Byte[] value) throws IOException
+  {
+    xmlOut.startElement("ip");
+    xmlOut.attribute("val", genIPString(value));
+    xmlOut.endElement("ip");
+  }
+
+  public void emitIPXML(XMLDumpContext xmlOut, IPwrap value) throws IOException
+  {
+    xmlOut.startElement("ip");
+    xmlOut.attribute("val", value.toString());
     xmlOut.endElement("ip");
   }
 
@@ -426,6 +530,7 @@ public class IPDBField extends DBField implements ip_field {
     return true;
   }
 
+
   // ****
   //
   // type-specific accessor methods
@@ -458,12 +563,14 @@ public class IPDBField extends DBField implements ip_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+	// "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", owner.getLabel(), getName()));
       }
 
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar method called on a vector field");
+	// "Scalar method called on a vector field: {1} in object {0}"
+	throw new IllegalArgumentException(ts.l("global.oops_vector", owner.getLabel(), getName()));
       }
 
     if (value == null)
@@ -472,27 +579,7 @@ public class IPDBField extends DBField implements ip_field {
       }
     else
       {
-	if (value instanceof String)
-	  {
-	    String input = (String) value;
-
-	    if (input.indexOf(':') == -1)
-	      {
-		bytes = genIPV4bytes(input);
-	      }
-	    else
-	      {
-		bytes = genIPV6bytes(input);
-	      }
-	  }
-	else if (!(value instanceof Byte[]))
-	  {
-	    throw new IllegalArgumentException("invalid type argument");
-	  }
-	else
-	  {
-	    bytes = (Byte[]) value;
-	  }
+	bytes = genIPbytes(value);
       }
 
     retVal = verifyNewValue(bytes);
@@ -521,32 +608,21 @@ public class IPDBField extends DBField implements ip_field {
     // check to see if we can do the namespace manipulations implied by this
     // operation
 
-    ns = getNameSpace();
+    unmark(this.value);	// our old value
 
-    if (ns != null)
+    if (bytes != null)
       {
-	unmark(this.value);	// our old value
-
-	if (bytes != null)
+	if (!mark(bytes))
 	  {
-	    if (!mark(bytes))
+	    if (this.value != null)
 	      {
-		if (this.value != null)
-		  {
-		    mark(this.value); // we aren't clearing the old value after all
-		  }
-
-		if (bytes.length > 4)
-		  {
-		    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-						      "IP address already in use : " + genIPV6string(bytes));
-		  }
-		else
-		  {
-		    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-						      "IP address already in use : " + genIPV4string(bytes));
-		  }
+		mark(this.value); // we aren't clearing the old value after all
 	      }
+
+	    // "Server: Error in IPDBField.setValue()"
+	    // "IP address {0} already in use in the server"
+	    return Ganymede.createErrorDialog(ts.l("setValue.oops"),
+					      ts.l("global.already_in_use", genIPString(bytes)));
 	  }
       }
 
@@ -587,11 +663,8 @@ public class IPDBField extends DBField implements ip_field {
 	// undo the namespace manipulations, if any,
 	// and finish up.
 
-	if (ns != null)
-	  {
-	    unmark(bytes);
-	    mark(this.value);
-	  }
+	unmark(bytes);
+	mark(this.value);
 
 	return newRetVal;
       }
@@ -604,6 +677,9 @@ public class IPDBField extends DBField implements ip_field {
    * <P>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.</P>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
    *
    * <P>Note that IPDBField needs its own setElement() method
    * (rather than using {@link arlut.csd.ganymede.server.DBField#setElement(int, java.lang.Object, boolean)
@@ -624,41 +700,44 @@ public class IPDBField extends DBField implements ip_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+	// "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", owner.getLabel(), getName()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field");
+	// "Vector method called on a scalar field: {1} in object {0}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
+      }
+
+    if (value == null)
+      {
+	// "Server: Error in IPDBField.setElement()"
+	// "Null value passed to {0}:{1}.setElement()"
+	return Ganymede.createErrorDialog(ts.l("setElement.oops"),
+					  ts.l("setElement.null_value", owner.getLabel(), getName()));
       }
 
     Vector values = getVectVal();
 
     if ((index < 0) || (index > values.size()))
       {
-	throw new IllegalArgumentException("invalid index " + index);
+	throw new ArrayIndexOutOfBoundsException(index);
       }
 
-    if (value instanceof String)
-      {
-	String input = (String) value;
+    bytes = genIPbytes(value);
 
-	if (input.indexOf(':') == -1)
-	  {
-	    bytes = genIPV4bytes(input);
-	  }
-	else
-	  {
-	    bytes = genIPV6bytes(input);
-	  }
-      }
-    else if (!(value instanceof Byte[]))
+    // make sure we're not adding a duplicate item
+
+    int oldIndex = this.indexOfValue(bytes);
+
+    if (oldIndex == index)
       {
-	throw new IllegalArgumentException("invalid type argument");
+	return null;		// no-op
       }
-    else
+    else if (oldIndex != -1)
       {
-	bytes = (Byte[]) value;
+	return getDuplicateValueDialog("setElement", genIPString(bytes)); // duplicate
       }
 
     retVal = verifyNewValue(bytes);
@@ -687,29 +766,18 @@ public class IPDBField extends DBField implements ip_field {
     // check to see if we can do the namespace manipulations implied by this
     // operation
 
-    ns = getNameSpace();
+    unmark(values.elementAt(index));
 
-    if (ns != null)
+    if (bytes != null)
       {
-	unmark(values.elementAt(index));
-
-	if (bytes != null)
+	if (!mark(bytes))
 	  {
-	    if (!mark(bytes))
-	      {
-		mark(values.elementAt(index)); // we aren't clearing the old value after all
-		
-		if (bytes.length > 4)
-		  {
-		    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-						      "IP address already in use : " + genIPV6string(bytes));
-		  }
-		else
-		  {
-		    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-						      "IP address already in use : " + genIPV4string(bytes));
-		  }
-	      }
+	    mark(values.elementAt(index)); // we aren't clearing the old value after all
+	    
+	    // "Server: Error in IPDBField.setElement()"
+	    // "IP address {0} already in use in the server"
+	    return Ganymede.createErrorDialog(ts.l("setElement.oops"),
+					      ts.l("global.already_in_use", genIPString(bytes)));
 	  }
       }
 
@@ -743,11 +811,8 @@ public class IPDBField extends DBField implements ip_field {
 	// undo the namespace manipulations, if any,
 	// and finish up.
 
-	if (ns != null)
-	  {
-	    unmark(bytes);
-	    mark(values.elementAt(index));
-	  }
+	unmark(bytes);
+	mark(values.elementAt(index));
 
 	return newRetVal;
       }
@@ -760,6 +825,9 @@ public class IPDBField extends DBField implements ip_field {
    * success or failure, and may optionally
    * pass back a dialog.</P>
    *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
+   *
    * <P>Note that IPDBField needs its own addElement() method
    * (rather than using {@link arlut.csd.ganymede.server.DBField#addElement(java.lang.Object, boolean)
    * DBField.addElement()}
@@ -767,7 +835,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
 
-  public ReturnVal addElement(Object value, boolean local, boolean noWizards)
+  public ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -779,51 +847,44 @@ public class IPDBField extends DBField implements ip_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+	// "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", owner.getLabel(), getName()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field");
+	// "Vector method called on a scalar field: {1} in object {0}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
       }
 
-    Vector values = getVectVal();
-
-    if (value instanceof String)
+    if (submittedValue == null)
       {
-	String input = (String) value;
-
-	if (input.indexOf(':') == -1)
-	  {
-	    bytes = genIPV4bytes(input);
-	  }
-	else
-	  {
-	    bytes = genIPV6bytes(input);
-	  }
-      }
-    else if (!(value instanceof Byte[]))
-      {
-	throw new IllegalArgumentException("invalid type argument");
-      }
-    else
-      {
-	bytes = (Byte[]) value;
+	// "Null value passed to {0}:{1}.addElement()"
+	throw new IllegalArgumentException(ts.l("addElement.null_value", owner.getLabel(), getName()));
       }
 
-    // verifyNewValue should setLastError for us.
+    bytes = genIPbytes(submittedValue);
 
     retVal = verifyNewValue(bytes);
-      
+
     if (retVal != null && !retVal.didSucceed())
       {
 	return retVal;
       }
 
+    // make sure we're not duplicating an item
+
+    if (indexOfValue(bytes) != -1)
+      {
+	return getDuplicateValueDialog("addElement", genIPString(bytes)); // duplicate
+      }
+
     if (size() >= getMaxArraySize())
       {
-	return Ganymede.createErrorDialog("Server: Error in IPDBField.addElement()",
-					  "Field " + getName() + " already at or beyond array size limit");
+	// "Server: Error in IPDBField.addElement()"
+	// "Error in IPDBField.addElement(): Field {1} already at or beyond array size limit in object {0}"
+	return Ganymede.createErrorDialog(ts.l("addElement.oops"),
+					  ts.l("addElement.too_big", owner.getLabel(), getName()));
       }
 
     eObj = (DBEditObject) owner;
@@ -842,22 +903,19 @@ public class IPDBField extends DBField implements ip_field {
 	  }
       }
 
-    ns = getNameSpace();
-
-    if (ns != null)
+    if (!mark(bytes))
       {
-	if (!mark(bytes))
-	  {
-	    return Ganymede.createErrorDialog("Server: Error in IPDBField.addElement()",
-					     "IP address already in use\n");
-	  }
+	// "Server: Error in IPDBField.addElement()"
+	// "IP address {0} already in use in the server"
+	return Ganymede.createErrorDialog(ts.l("addElement.oops"),
+					  ts.l("global.already_in_use", genIPString(bytes)));
       }
 
     newRetVal = eObj.finalizeAddElement(this, bytes);
 
     if (newRetVal == null || newRetVal.didSucceed())
       {
-	values.addElement(bytes);
+	getVectVal().addElement(bytes);
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
@@ -875,10 +933,285 @@ public class IPDBField extends DBField implements ip_field {
       } 
     else
       {
+	unmark(bytes);
+
+	return newRetVal;
+      }
+  }
+
+  /**
+   * <p>Adds a set of elements to the end of this field, if a
+   * vector.  Using addElements() to add a sequence of items
+   * to a field may be many times more efficient than calling
+   * addElement() repeatedly, as addElements() can do a single
+   * server checkpoint before attempting to add all the values.</p>
+   *
+   * <P>Server-side method only</P>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog. If a success code is returned,
+   * all values were added.  If failure is returned, no values
+   * were added.</p>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
+   *
+   * @param submittedValues Values to be added
+   * @param local If true, permissions checking will be skipped
+   * @param noWizards If true, wizards will be skipped
+   * @param copyFieldMode If true, addElements will add any values
+   * that it can, even if some values are refused by the server logic.
+   * Any values that are skipped will be reported in a dialog passed
+   * back in the returned ReturnVal.  This is intended to support
+   * vector field cloning, in which we add what values may be cloned,
+   * and skip the rest.
+   */
+
+  public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
+					    boolean noWizards, boolean copyFieldMode) throws GanyPermissionsException
+  {
+    ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
+    DBNameSpace ns;
+    DBEditObject eObj;
+    DBEditSet editset;
+    Vector approvedValues = new Vector();
+
+    /* -- */
+
+    if (!isEditable(local))	// *sync* on GanymedeSession possible
+      {
+	// "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", owner.getLabel(), getName()));
+      }
+
+    if (!isVector())
+      {
+	// "Vector method called on a scalar field: {1} in object {0}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
+      }
+
+    if (submittedValues == null || submittedValues.size() == 0)
+      {
+	// "Server: Error in IPDBField.addElements()"
+	// "IPDBField.addElements(): Can''t add a null or empty vector to field {1} in object {0}"
+	return Ganymede.createErrorDialog(ts.l("addElements.oops"),
+					  ts.l("addElements.null_value", owner.getLabel(), getName()));
+      }
+
+    if (submittedValues == getVectVal())
+      {
+	// "Error, IPDBField.addElements(): attempt to add our own contents back to us"
+	throw new IllegalArgumentException(ts.l("addElements.self_error"));
+      }
+
+    // can we add this many values?  if not, just go ahead and reject,
+    // even if copyFieldMode is set to false.  we shouldn't have
+    // too many things to stuff into this field since we *should* just
+    // be copying from a field with the same limits defined
+
+    if (size() + submittedValues.size() > getMaxArraySize())
+      {
+	// "Server: Error in IPDBField.addElements()"
+	// "Error in IPDBField.addElements(): Field {1} in object {0} is limited to {2} items.  Can't add the {3} additional items requested."
+	return Ganymede.createErrorDialog(ts.l("addElements.oops"),
+					  ts.l("addElements.too_big", owner.getLabel(), getName(), new Integer(getMaxArraySize()),
+					       new Integer(submittedValues.size())));
+      }
+
+    // check for duplicate values.. if we're not in copyFieldMode, we
+    // simply won't allow duplicates to be added.  If we are in
+    // copyFieldMode, we'll filter out any duplicates and proceed
+
+    Vector wrappedCurrValues = getWrappedVector(getVectVal());
+    Vector wrappedAddValues = getWrappedVector(submittedValues);
+
+    Vector duplicateValues = VectorUtils.intersection(wrappedCurrValues, wrappedAddValues);
+
+    if (duplicateValues.size() > 0)
+      {
+	if (!copyFieldMode)
+	  {
+	    return getDuplicateValuesDialog("addElements", VectorUtils.vectorString(duplicateValues));
+	  }
+	else
+	  {
+	    Vector wrappedNonDuplicates = VectorUtils.difference(wrappedAddValues, wrappedCurrValues);
+
+	    submittedValues = new Vector(wrappedNonDuplicates.size());
+
+	    for (int i = 0; i < wrappedNonDuplicates.size(); i++)
+	      {
+		IPwrap wrapper = (IPwrap) wrappedNonDuplicates.elementAt(i);
+		submittedValues.addElement(wrapper.address);
+	      }
+	  }
+      }
+
+    // check to see if all of the submitted values are acceptable in
+    // type and in identity.  if copyFieldMode, we won't complain
+    // unless none of the submitted values are acceptable.
+
+    StringBuffer errorBuf = new StringBuffer();
+
+    for (int i = 0; i < submittedValues.size(); i++)
+      {
+	Byte[] bytes = genIPbytes(submittedValues.elementAt(i));
+	retVal = verifyNewValue(bytes);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    if (!copyFieldMode)
+	      {
+		return retVal;
+	      }
+	    else
+	      {
+		if (retVal.getDialog() != null)
+		  {
+		    if (errorBuf.length() != 0)
+		      {
+			errorBuf.append("\n\n");
+		      }
+
+		    errorBuf.append(retVal.getDialog().getText());
+		  }
+	      }
+	  }
+	else
+	  {
+	    approvedValues.addElement(bytes);
+	  }
+      }
+
+    if (approvedValues.size() == 0)
+      {
+	return Ganymede.createErrorDialog("AddElements Error",
+					  errorBuf.toString());
+      }
+
+    // see if our container wants to intercede in the adding operation
+
+    eObj = (DBEditObject) owner;
+    editset = eObj.getEditSet();
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, approvedValues, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
+    // check to see if the all of the values being added are
+    // acceptable to a namespace constraint
+
+    ns = getNameSpace();
+
+    if (ns != null)
+      {
+	synchronized (ns)
+	  {
+	    for (int i = 0; i < approvedValues.size(); i++)
+	      {
+		if (!ns.testmark(editset, approvedValues.elementAt(i)))
+		  {
+		    return getConflictDialog("DBField.addElements()", approvedValues.elementAt(i));
+		  }
+	      }
+	
+	    for (int i = 0; i < approvedValues.size(); i++)
+	      {
+		if (!ns.mark(editset, approvedValues.elementAt(i), this))
+		  {
+		    throw new RuntimeException("error: testmark / mark inconsistency");
+		  }
+	      }
+	  }
+      }
+
+    // okay, see if the DBEditObject is willing to allow all of these
+    // elements to be added
+
+    newRetVal = eObj.finalizeAddElements(this, approvedValues);
+
+    if (newRetVal == null || newRetVal.didSucceed()) 
+      {
+	// okay, we're allowed to do it, so go go go!
+
+	for (int i = 0; i < approvedValues.size(); i++)
+	  {
+	    getVectVal().addElement(approvedValues.elementAt(i));
+	  }
+
+	// if the return value from the wizard was not null,
+	// it might have included rescan information, which
+	// we'll want to combine with that from our 
+	// finalizeAddElement() call.
+
+	if (retVal != null)
+	  {
+	    newRetVal = retVal.unionRescan(newRetVal);
+	  }
+
+	if (newRetVal == null)
+	  {
+	    newRetVal = new ReturnVal(true, true);
+	  }
+
+	// if we were not able to copy some of the values (and we
+	// had copyFieldMode set), encode a description of what
+	// happened along with the success code
+	
+	if (errorBuf.length() != 0)
+	  {
+	    newRetVal.setDialog(new JDialogBuff("Warning",
+						errorBuf.toString(),
+						"Ok",
+						null,
+						"ok.gif"));
+	  }
+
+	return newRetVal;
+      } 
+    else
+      {
 	if (ns != null)
 	  {
-	    unmark(bytes);
+	    // go back through and unmark everything.  we have a duty
+	    // to try and unmark everything to keep things consistent,
+	    // but if we get any error along the way, we'll want to
+	    // throw an example up to let someone know.  we won't try
+	    // and capture and transmit multiple errors, because this
+	    // kind of error really shouldn't happen
+
+	    RuntimeException badBoy = null;
+
+	    for (int i = 0; i < approvedValues.size(); i++)
+	      {
+		if (!ns.unmark(editset, approvedValues.elementAt(i), this))
+		  {
+		    if (badBoy == null)
+		      {
+			// "Error encountered attempting to dissociate reserved value {0} from field {1}.  This should not have happened, and must be due to a server error."
+			throw new RuntimeException(ts.l("global.really_bad_unmark", approvedValues.elementAt(i), this));
+		      }
+		  }
+	      }
+
+	    if (badBoy != null)
+	      {
+		throw badBoy;
+	      }
 	  }
+
+	// return the error dialog created by finalizeAddElements
 
 	return newRetVal;
       }
@@ -888,7 +1221,8 @@ public class IPDBField extends DBField implements ip_field {
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector");
+	// "Scalar method called on a vector field: {1} in object {0}"
+	throw new IllegalArgumentException(ts.l("global.oops_vector", owner.getLabel(), getName()));
       }
 
     return (Byte[]) value;
@@ -898,7 +1232,8 @@ public class IPDBField extends DBField implements ip_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar");
+	// "Vector method called on a scalar field: {1} in object {0}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
       }
 
     return (Byte[]) getVectVal().elementAt(index);
@@ -917,18 +1252,7 @@ public class IPDBField extends DBField implements ip_field {
 	    return "null";
 	  }
 
-	if (isIPV6())
-	  {
-	    Byte[] element = (Byte[]) value;
-	    
-	    return genIPV6string(element);
-	  }
-	else
-	  {
-	    Byte[] element = (Byte[]) value;
-	    
-	    return genIPV4string(element);
-	  }
+	return genIPString((Byte []) value);
       }
 
     Vector values = getVectVal();
@@ -944,14 +1268,7 @@ public class IPDBField extends DBField implements ip_field {
 	    result = result + ",";
 	  }
 
-	if (isIPV6())
-	  {
-	    result = result + genIPV6string(element);
-	  }
-	else
-	  {
-	    result = result + genIPV4string(element);
-	  }
+	result = result + genIPString(element);
       }
 
     return result;
@@ -994,88 +1311,10 @@ public class IPDBField extends DBField implements ip_field {
 
     if (isVector())
       {
-	Vector 
-	  added = new Vector(),
-	  deleted = new Vector();
-
-	Vector values = getVectVal();
-	Vector origValues = origI.getVectVal();
-
-	Enumeration en;
-
-	Byte[] elementA, elementB;
-
-	boolean found = false;
-
-	/* -- */
-
-	// find elements in the orig field that aren't in our present field
-
-	en = origValues.elements();
-
-	while (en.hasMoreElements())
-	  {
-	    elementA = (Byte[]) en.nextElement();
-
-	    found = false;
-
-	    for (int i = 0; !found && i < values.size(); i++)
-	      {
-		elementB = (Byte[]) values.elementAt(i);
-
-		if (elementA.length == elementB.length)
-		  {
-		    found = true;
-
-		    for (int j = 0; j < elementA.length; j++)
-		      {
-			if (elementA[j] != elementB[j])
-			  {
-			    found = false;
-			  }
-		      }
-		  }
-	      }
-
-	    if (!found)
-	      {
-		deleted.addElement(elementA);
-	      }
-	  }
-
-	// find elements in present our field that aren't in the orig field
-
-	en = values.elements();
-
-	while (en.hasMoreElements())
-	  {
-	    elementA = (Byte[]) en.nextElement();
-
-	    found = false;
-
-	    for (int i = 0; !found && i < origValues.size(); i++)
-	      {
-		elementB = (Byte[]) origValues.elementAt(i);
-
-		if (elementA.length == elementB.length)
-		  {
-		    found = true;
-
-		    for (int j = 0; j < elementA.length; j++)
-		      {
-			if (elementA[j] != elementB[j])
-			  {
-			    found = false;
-			  }
-		      }
-		  }
-	      }
-
-	    if (!found)
-	      {
-		added.addElement(elementA);
-	      }
-	  }
+	Vector wrappedValues = getWrappedVector(getVectVal());
+	Vector wrappedOrigValues = getWrappedVector(origI.getVectVal());
+	Vector added = VectorUtils.difference(wrappedValues, wrappedOrigValues);
+	Vector deleted = VectorUtils.difference(wrappedOrigValues, wrappedValues);
 
 	// were there any changes at all?
 
@@ -1085,57 +1324,17 @@ public class IPDBField extends DBField implements ip_field {
 	  }
 	else
 	  {
-	    Byte[] x;
-
 	    if (deleted.size() != 0)
 	      {
 		result.append("\tDeleted: ");
-	    
-		for (int i = 0; i < deleted.size(); i++)
-		  {
-		    if (i > 0)
-		      {
-			result.append(", ");
-		      }
-		    
-		    x = (Byte[]) deleted.elementAt(i);
-
-		    if (x.length == 4)
-		      {
-			result.append(genIPV4string(x));
-		      }
-		    else 
-		      {
-			result.append(genIPV6string(x));
-		      }
-		  }
-
+		result.append(VectorUtils.vectorString(deleted));
 		result.append("\n");
 	      }
 
 	    if (added.size() != 0)
 	      {
 		result.append("\tAdded: ");
-	    
-		for (int i = 0; i < added.size(); i++)
-		  {
-		    if (i > 0)
-		      {
-			result.append(", ");
-		      }
-
-		    x = (Byte[]) added.elementAt(i);
-
-		    if (x.length == 4)
-		      {
-			result.append(genIPV4string(x));
-		      }
-		    else 
-		      {
-			result.append(genIPV6string(x));
-		      }
-		  }
-
+		result.append(VectorUtils.vectorString(added));
 		result.append("\n");
 	      }
 
@@ -1166,27 +1365,9 @@ public class IPDBField extends DBField implements ip_field {
 	  }
 
 	result.append("\tOld: ");
-	
-	if (x.length == 4)
-	  {
-	    result.append(genIPV4string(x));
-	  }
-	else 
-	  {
-	    result.append(genIPV6string(x));
-	  }
-
+	result.append(genIPString(x));
 	result.append("\n\tNew: ");
-
-	if (y.length == 4)
-	  {
-	    result.append(genIPV4string(y));
-	  }
-	else 
-	  {
-	    result.append(genIPV6string(y));
-	  }
-	
+	result.append(genIPString(y));
 	result.append("\n");
 	
 	return result.toString();
@@ -1373,6 +1554,47 @@ public class IPDBField extends DBField implements ip_field {
     return eObj.verifyNewValue(this, o);
   }
 
+
+  /**
+   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec fieldDeltaRec} 
+   * object listing the changes between this field's state and that
+   * of the prior oldField state.
+   */
+
+  public fieldDeltaRec getVectorDiff(DBField oldField)
+  {
+    if (!isVector())
+      {
+	// "Vector method called on a scalar field: {1} in object {0}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
+      }
+
+    if (oldField == null)
+      {
+	// "Can''t compare fields.. oldField is null"
+	throw new IllegalArgumentException(ts.l("getVectorDiff.null_old"));
+      }
+
+    if ((oldField.getID() != getID()) ||
+	(oldField.getObjTypeID() != getObjTypeID()))
+      {
+	// "Can''t compare fields.. incompatible field ids"
+	throw new IllegalArgumentException(ts.l("getVectorDiff.bad_type"));
+      }
+
+    /* - */
+
+    fieldDeltaRec deltaRec = new fieldDeltaRec(getID());
+    Vector oldValues = getWrappedVector(oldField.getVectVal());
+    Vector newValues = getWrappedVector(getVectVal());
+    Vector addedValues = VectorUtils.difference(newValues, oldValues);
+    Vector deletedValues = VectorUtils.difference(oldValues, newValues);
+
+    deltaRec.addValues = getUnwrappedVector(addedValues);
+    deltaRec.delValues = getUnwrappedVector(deletedValues);
+    return deltaRec;
+  }
+
   // 
   // helper methods for the encoding/decoding methods
   // to follow.
@@ -1442,6 +1664,102 @@ public class IPDBField extends DBField implements ip_field {
       }
     
     return genIPV6string(octets);
+  }
+
+  /**
+   * <p>This method is used take either a String or Byte array
+   * representing an IP address and converts it to a Byte array
+   * if conversion is necessary.</p>
+   *
+   * <p>If the input parameter's type is wrong, a ClassCastException
+   * will be thrown.</p>
+   */
+
+  public static Byte[] genIPbytes(Object input)
+  {
+    if (input instanceof Byte[])
+      {
+	return (Byte[]) input;
+      }
+    else if (input instanceof String)
+      {
+	String ipStr = (String) input;
+
+	if (ipStr.indexOf(':') == -1)
+	  {
+	    return genIPV4bytes(ipStr);
+	  }
+	else
+	  {
+	    return genIPV6bytes(ipStr);
+	  }
+      }
+    else
+      {
+	throw new ClassCastException(ts.l("genIPbytes.class_error", input.getClass()));
+      }
+  }
+
+  /**
+   * <p>This method wraps an entire Vector of Byte[] arrays so that
+   * proper equality testing can be done using the VectorUtils
+   * methods.</p>
+   */
+
+  public static Vector getWrappedVector(Vector input)
+  {
+    if (input == null)
+      {
+	return null;
+      }
+
+    Vector results = new Vector(input.size());
+
+    for (int i = 0; i < input.size(); i++)
+      {
+	try
+	  {
+	    results.addElement(genIPbytes(input.elementAt(i)));
+	  }
+	catch (ClassCastException ex)
+	  {
+	    // "{0}\nCan't wrap elements in getWrappedVector()."
+	    throw new IllegalArgumentException(ts.l("getWrappedVector.type_error", ex.getMessage()));
+	  }
+      }
+
+    return results;
+  }
+
+  /**
+   * <p>This method unwraps an entire Vector of {@link
+   * arlut.csd.ganymede.server.IPwrap} objects and returns a Vector
+   * of compact Byte arrays.</p>
+   */
+
+  public static Vector getUnwrappedVector(Vector input)
+  {
+    if (input == null)
+      {
+	return null;
+      }
+
+    Vector results = new Vector(input.size());
+
+    for (int i = 0; i < input.size(); i++)
+      {
+	try
+	  {
+	    results.addElement(((IPwrap) input.elementAt(i)).address);
+	  }
+	catch (ClassCastException ex)
+	  {
+	    // "{0}\nCan't wrap elements in getUnwrappedVector()."
+	    throw new IllegalArgumentException(ts.l("getUnwrappedVector.type_error", ex.getMessage()));
+	  }
+      }
+
+    return results;
   }
 
   /**
@@ -2127,6 +2445,5 @@ public class IPDBField extends DBField implements ip_field {
       }
 
     System.out.println("IPv4 compatible string (B): " + genIPV6string(octets));
-    
   }
 }
