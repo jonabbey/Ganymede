@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,6 +53,7 @@ public interface SchemaConstants {
   final static short OwnerNameField = 100; // name of this owner set
   final static short OwnerMembersField = 101; // what admin:role entities have privileges in this OwnerBase?
   final static short OwnerObjectsOwned = 102; // what objects does this owner set own?
+  final static short OwnerMailList = 103; // what email addresses should be notified if objects owned change?
 
   // the following are fixed object id's
 
@@ -112,7 +113,7 @@ public interface SchemaConstants {
   final static short EventMailBoolean = 103; 
 
 				// list of email addresses to send this to, in addition to any specifically
-				// requested by the code (String vector field)
+				// requested by the code (Invid vector field)
 
   final static short EventMailList = 104;
 
