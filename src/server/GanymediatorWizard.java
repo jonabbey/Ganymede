@@ -18,8 +18,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2001/06/01 01:35:01 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2001/10/01 18:30:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -155,7 +155,7 @@ import arlut.csd.JDialog.JDialogBuff;
  * @see arlut.csd.ganymede.ReturnVal
  * @see arlut.csd.ganymede.Ganymediator
  *
- * @version $Revision: 1.15 $ $Date: 2001/06/01 01:35:01 $ $Name:  $
+ * @version $Revision: 1.16 $ $Date: 2001/10/01 18:30:50 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -485,7 +485,7 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
 
   public void unregister()
   {
-    if (state != DONE && session.isWizardActive(this))
+    if (session.isWizardActive(this))
       {
 	active = false;
 	session.unregisterWizard(this);
