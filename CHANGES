@@ -3,43 +3,9 @@ March 10, 2003
 CHANGES
 ---------------------------------------------
 
--------------------- Changes from 1.0.11 to 1.0.13 -------------------
-
-RELEASE DATE: ?, 2003
-
-1. [CLIENT/CONSOLE/SERVER] Reworked RMI API to be system firewall transparent
-
-This is an extension of the 1.0.12#7 work.  It used to be that the
-server used RMI calls to the client and admin console to send
-notification for build status and force off (on the client) and all of
-the data displays on the admin console.  The problem with this is that
-it required the client/console to open a socket and wait for an RMI
-call from the server to send update information.
-
-I have now reworked the server, client, and admin console so that all
-transmission of data from the server to the client is done by having
-the client/console run a polling thread which repeatedly calls an
-asynchronous message port on the server.  Since the data is flowing
-through the result of a forward RMI call, no socket needs to be opened
-up for listening on the client/console system, and full functionality
-is achieved even in the presence of a client-side system/personal
-firewall.
-
-This change also speeds up login and noticeably reduces the memory
-loading on the server.  A win/win/win deal.
-
-2. [CLIENT] Fixed gclient.getObjectHandle()
-
-The getObjectHandle() method in the client's gclient class didn't
-properly deal with an empty list back from the GanymedeSession's
-queryInvids() method.  This could result in an exception being thrown
-rather than a dialog being shown in certain circumstances in the
-client in which a user tries to edit an object reference that he
-doesn't have permission to edit or view.
-
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
-RELEASE DATE: March 10, 2003
+RELEASE DATE: ?, 2003
 
 1. [CLIENT] Properly update StringSelector count display on manual item entry
 
@@ -140,6 +106,49 @@ The common composite dialog class used in the Ganymede client and
 admin console has been improved to support adaptive word wrapping and
 scrollbars.  This change was motivated by the client's new ability to
 report remote exception traces in a dialog.
+
+9. [CLIENT/CONSOLE/SERVER] Reworked RMI API to be system firewall transparent
+
+This is an extension of the 1.0.12#7 work.  It used to be that the
+server used RMI calls to the client and admin console to send
+notification for build status and force off (on the client) and all of
+the data displays on the admin console.  The problem with this is that
+it required the client/console to open a socket and wait for an RMI
+call from the server to send update information.
+
+I have now reworked the server, client, and admin console so that all
+transmission of data from the server to the client is done by having
+the client/console run a polling thread which repeatedly calls an
+asynchronous message port on the server.  Since the data is flowing
+through the result of a forward RMI call, no socket needs to be opened
+up for listening on the client/console system, and full functionality
+is achieved even in the presence of a client-side system/personal
+firewall.
+
+This change also speeds up login and noticeably reduces the memory
+loading on the server.  A win/win/win deal.
+
+10. [CLIENT] Fixed gclient.getObjectHandle()
+
+The getObjectHandle() method in the client's gclient class didn't
+properly deal with an empty list back from the GanymedeSession's
+queryInvids() method.  This could result in an exception being thrown
+rather than a dialog being shown in certain circumstances in the
+client in which a user tries to edit an object reference that he
+doesn't have permission to edit or view.
+
+11. [SERVER] Improved namespace conflict message
+
+The DBField class in several places had code to report namespace
+conflicts.  Created a common method to generate a more detailed error
+dialog which informs the user what object/field is conflicting.
+
+12. [SERVER] Cleaned up DBObject.getTypeName()/getTypeDesc()
+
+The DBObject class had two methods, getTypeName() and getTypeDesc()
+which did exactly the same thing.  Embarassing.  I went through and
+changed all instances of DBObject.getTypeDesc() to
+DBObject.getTypeName() calls, in keeping with the db_object interface.
 
 -------------------- Changes from 1.0.10 to 1.0.11 -------------------
 
