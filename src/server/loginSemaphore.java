@@ -8,15 +8,15 @@
 
    Created: 26 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2002/01/26 19:36:33 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2002/01/28 21:54:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information

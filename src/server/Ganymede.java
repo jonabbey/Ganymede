@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.130 $
-   Last Mod Date: $Date: 2002/01/11 23:01:15 $
+   Version: $Revision: 1.131 $
+   Last Mod Date: $Date: 2002/01/28 21:54:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -730,7 +730,7 @@ public class Ganymede {
   /**
    *
    * This is a convenience method used by server-side code to send
-   * debug output to stdout and to any attached admin consoles.
+   * debug output to stderr and to any attached admin consoles.
    *
    */
 

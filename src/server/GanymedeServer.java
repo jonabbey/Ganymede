@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 2002/01/28 21:28:59 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 2002/01/28 21:54:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1164,33 +1164,34 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     Ganymede.debug("Server going down.. performing final dump");
 
-    // dump, then shut down.  Our second dump parameter is false, so
-    // that we are guaranteed that no internal client can get a
-    // writelock and maybe get a transaction off that would cause us
-    // confusion.
-
-    try
-      {
-	Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive last
-      }
-    catch (IOException ex)
-      {
-	return Ganymede.createErrorDialog("Shutdown Error",
-					  "shutdown error: couldn't successfully dump db:" + ex);
-      }
-
-    // ok, we now are left holding a dump lock.  it should be safe to kick
-    // everybody off and shut down the server
-
     try
       {
 	// from this point on, we will go down, no matter what
 	// exceptions might percolate up to this point
 
+	// dump, then shut down.  Our second dump parameter is false, so
+	// that we are guaranteed that no internal client can get a
+	// writelock and maybe get a transaction off that would cause us
+	// confusion.
+
+	try
+	  {
+	    Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive last
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("shutdown error: couldn't successfully consolidate db.");
+	    throw ex;		// maybe didn't lock, so go down hard
+	  }
+
+	// ok, we now are left holding a dump lock.  it should be safe to kick
+	// everybody off and shut down the server
+
+	Ganymede.debug("Server going down.. database locked");
+
 	// forceOff modifies GanymedeServer.sessions, so we need to
 	// copy our list before we iterate over it.
 
-	Ganymede.debug("Server going down.. database locked");
 	Ganymede.debug("Server going down.. disconnecting clients");
 
 	tempList = new Vector();

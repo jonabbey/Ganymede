@@ -146,9 +146,9 @@ information all the time.
 In the process of doing work for #8, above, I introduced a class cast
 exception into some of the admin console code that resulted in the
 server getting stuck during shutdown.  In fixing this, I revised the
-shutdown sequence some to be more verbose and so that arbitrary
-exceptions that might be thrown after the database dump cannot prevent
-the server from successfully completing shutdown and termination.
+shutdown sequence some to be more verbose and so arbitrary exceptions
+thrown during server shutdown won't prevent the server from
+terminating.
 
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
