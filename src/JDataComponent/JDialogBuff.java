@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -348,7 +348,6 @@ public class JDialogBuff implements java.io.Serializable {
 
   public void addPassword(String label, boolean isNew)
   {
-    System.out.println("*******Adding passowrd: " + isNew);
     addChunk("@pass", label, new Boolean(isNew).toString());
   }
 
