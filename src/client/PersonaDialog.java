@@ -6,8 +6,8 @@
    
    Created: 17 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/03/04 19:52:44 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/03/16 23:04:11 $
    Module By: Brian O'Mara
 
    -----------------------------------------------------------------------
@@ -150,9 +150,13 @@ public class PersonaDialog extends JCenterDialog implements ActionListener{
       {
 	String p = (String)personae.elementAt(i);
 	JRadioButton rb = new JRadioButton(p);
-	if (p.equals(currentPersonaString))
+
+	// Note that all strings (incl actionCommand) should be _compared_ as 
+	// lowercase. Since there is a need for caps to be displayed (title, etc), 
+	// I didn't just convert to lowercase.
+	if ((p.toLowerCase()).equals(currentPersonaString.toLowerCase()))
 	  {
-	    rb.doClick(); 
+	    rb.doClick();
 	    // No actionListener yet, so just selects current username
 	  }
 	
@@ -212,7 +216,9 @@ public class PersonaDialog extends JCenterDialog implements ActionListener{
   void updatePassField(String newPersona) {
     this.newPersona = newPersona;
 
-    if (newPersona.equals(my_username)) {
+    // If still same persona or base user (no ":" in name) then disable password field
+    if ((newPersona.toLowerCase()).equals(currentPersonaString.toLowerCase()) || 
+	(newPersona.indexOf(":") < 0)) {
       password.setText("");
       password.setEditable(false);
       password.setBackground(Color.lightGray);
@@ -243,7 +249,8 @@ public class PersonaDialog extends JCenterDialog implements ActionListener{
 	    }
 	    else {
 	      JRadioButton rb = (JRadioButton)next;
-	      if (rb.getActionCommand().equals(currentPersonaString))
+	      // Again, compare lowercase... 
+	      if ((rb.getActionCommand().toLowerCase()).equals(currentPersonaString.toLowerCase()))
 		{
 		  if (debug) { System.out.println("Calling setState(true)"); }
 		  
