@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.93 $ %D%
+   Version: $Revision: 1.94 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2494,11 +2494,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		if (perspectiveObject == null)
 		  {
-		    result.addRow(obj.getInvid(), obj.getLabel(), perm.isEditable());
+		    result.addRow(obj.getInvid(), obj.getLabel(), obj.isInactivated(),
+				  obj.willExpire(), obj.willBeRemoved(), perm.isEditable());
 		  }
 		else
 		  {
-		    result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), perm.isEditable());
+		    result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), 
+				  obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
+				  perm.isEditable());
 		  }
 	      }
 	    else
@@ -2516,11 +2519,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		      {
 			if (perspectiveObject == null)
 			  {
-			    result.addRow(x.getInvid(), x.getLabel(), true);
+			    result.addRow(x.getInvid(), x.getLabel(), 
+					  x.isInactivated(), x.willExpire(), x.willBeRemoved(),
+					  true);
 			  }
 			else
 			  {
-			    result.addRow(x.getInvid(), perspectiveObject.lookupLabel(x), true);
+			    result.addRow(x.getInvid(), perspectiveObject.lookupLabel(x), 
+					  x.isInactivated(), x.willExpire(), x.willBeRemoved(),
+					  true);
 			  }
 			// we must be able to edit it, since it's checked out
 		      }
@@ -2535,11 +2542,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    
 	    if (perspectiveObject == null)
 	      {
-		result.addRow(obj.getInvid(), obj.getLabel(), perm.isEditable());
+		result.addRow(obj.getInvid(), obj.getLabel(), 
+			      obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
+			      perm.isEditable());
 	      }
 	    else
 	      {
-		result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), perm.isEditable());
+		result.addRow(obj.getInvid(), perspectiveObject.lookupLabel(obj), 
+			      obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
+			      perm.isEditable());
 	      }
 	  }
       }
