@@ -108,7 +108,17 @@ optional logging facility.
 Now, if the Ganymede server's ganymede.properties file defines a
 ganymede.maillog property, the file named in that property will have
 all mailout events logged to it.  If the ganymede.maillog property is
-not set, no mail events will be logged on disk.
+not set, no mail events will be logged on disk.  By default,
+the server's ganymede.properties file is installed with no ganymede.maillog
+property defined.
+
+If you are using a schema kit that sends out a lot of mailout events,
+you may only want to enable mail event logging for short periods as a
+diagnostic.
+
+As with all properties defined in the ganymede.properties file, the
+server must be stopped and restarted for any changes in the properties
+file to take effect.
 
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
