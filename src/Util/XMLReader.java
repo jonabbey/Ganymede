@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2000/08/25 01:50:50 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/08/31 02:02:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,6 +93,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private XMLItem pushback;
   private XMLElement halfElement;
   private boolean skipWhiteSpace;
+  private PrintWriter err;
 
   /* -- */
 
@@ -107,6 +108,21 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public XMLReader(String xmlFilename, int bufferSize, boolean skipWhiteSpace) throws IOException
   {
+    this(xmlFilename, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
+  }
+
+  /**
+   * @param xmlFilename Name of the file to read
+   * @param bufferSize How many items the XMLReader will buffer in its
+   * data structures at one time
+   * @param skipWhiteSpace If true, the no-param getNextItem() and peekNextItem()
+   * methods will jump over any all-whitespace character data between other
+   * elements.
+   * @param err A PrintWriter object to send debugging/error output to
+   */
+
+  public XMLReader(String xmlFilename, int bufferSize, boolean skipWhiteSpace, PrintWriter err) throws IOException
+  {
     parser = new com.jclark.xml.sax.Driver();
     parser.setDocumentHandler(this);
 
@@ -116,9 +132,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     buffer = new Vector();
     this.bufferSize = bufferSize;
     this.skipWhiteSpace = skipWhiteSpace;
+    this.err = err;
 
     inputThread = new Thread(this);
-
     inputThread.start();
   }
 
@@ -126,9 +142,37 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    * This constructor takes a PipeOutputStream as a parameter, creates a large
    * matching input pipe to read from, and spins off the XMLReader's parsing
    * thread to process data that is fed into the PipeOutputStream.
+   *
+   * @param sourcePipe the PipeOutputStream object that XML characters are
+   * @param bufferSize How many items the XMLReader will buffer in its
+   * data structures at one time
+   * @param skipWhiteSpace If true, the no-param getNextItem() and peekNextItem()
+   * methods will jump over any all-whitespace character data between other
+   * elements.
    */
 
-  public XMLReader(PipedOutputStream sourcePipe, int bufferSize, boolean skipWhiteSpace) throws IOException
+  public XMLReader(PipedOutputStream sourcePipe, int bufferSize, 
+		   boolean skipWhiteSpace) throws IOException
+  {
+    this(sourcePipe, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
+  }
+
+  /**
+   * This constructor takes a PipeOutputStream as a parameter, creates a large
+   * matching input pipe to read from, and spins off the XMLReader's parsing
+   * thread to process data that is fed into the PipeOutputStream.
+   *
+   * @param sourcePipe the PipeOutputStream object that XML characters are
+   * @param bufferSize How many items the XMLReader will buffer in its
+   * data structures at one time
+   * @param skipWhiteSpace If true, the no-param getNextItem() and peekNextItem()
+   * methods will jump over any all-whitespace character data between other
+   * elements.
+   * @param err A PrintWriter object to send debugging/error output to
+   */
+
+  public XMLReader(PipedOutputStream sourcePipe, int bufferSize, 
+		   boolean skipWhiteSpace, PrintWriter err) throws IOException
   {
     parser = new com.jclark.xml.sax.Driver();
     parser.setDocumentHandler(this);
@@ -139,6 +183,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     buffer = new Vector();
     this.bufferSize = bufferSize;
     this.skipWhiteSpace = skipWhiteSpace;
+    this.err = err;
 
     inputThread = new Thread(this);
 
@@ -214,7 +259,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (debug)
 	  {
-	    System.err.println("XMLReader.getNextItem() returning " + value);
+	    err.println("XMLReader.getNextItem() returning " + value);
 	  }
 
 	return value;
@@ -310,7 +355,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (debug)
 	  {
-	    System.err.println("XMLReader.peekNextItem() returning " + value);
+	    err.println("XMLReader.peekNextItem() returning " + value);
 	  }
 
 	return value;
@@ -416,13 +461,14 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
     while (nextItem != null && !nextItem.matchesClose(tagName))
       {
-	//System.err.println(">>> " + tagName + " seeking: " + nextItem);
+	//err.println(">>> " + tagName + " seeking: " + nextItem);
 	nextItem = getNextItem(skipWhiteSpace);
       }
     
     if (nextItem == null)
       {
-	throw new IllegalArgumentException("unexpected end of stream");
+	IllegalArgumentException ex = new IllegalArgumentException("unexpected end of stream");
+	err.println(ex.getMessage());
       }
 
     return result;
@@ -466,6 +512,11 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
   }
 
+  public boolean isDone()
+  {
+    return done;
+  }
+
   public void run()
   {
     try
@@ -476,12 +527,14 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       {
 	close();
 	ex.printStackTrace();
+	err.println("XMLReader parse error: " + ex.getMessage());
 	throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
       }
     catch (IOException ex)
       {
 	close();
 	ex.printStackTrace();
+	err.println("XMLReader io error: " + ex.getMessage());
 	throw new RuntimeException("XMLReader io error: " + ex.getMessage());
       }
   }
@@ -552,6 +605,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    catch (InterruptedException ex)
 	      {
+		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+			    ex.getMessage());
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
@@ -560,7 +615,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (done)
 	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    err.println(ex.getMessage());
+	    throw ex;
 	  }
 	
 	buffer.addElement(new XMLStartDocument());
@@ -596,6 +653,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    catch (InterruptedException ex)
 	      {
+		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+			    ex.getMessage());
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
@@ -604,7 +663,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (done)
 	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    err.println(ex.getMessage());
+	    throw ex;
 	  }
 	
 	buffer.addElement(new XMLEndDocument());
@@ -648,6 +709,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    catch (InterruptedException ex)
 	      {
+		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+			    ex.getMessage());
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
@@ -656,7 +719,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (done)
 	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    err.println(ex.getMessage());
+	    throw ex;
 	  }
 	
 	halfElement = new XMLElement(name, atts);
@@ -693,6 +758,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    catch (InterruptedException ex)
 	      {
+		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+			    ex.getMessage());
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
@@ -708,7 +775,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	
 	if (done)
 	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    err.println(ex.getMessage());
+	    throw ex;
 	  }
 	
 	buffer.addElement(new XMLCloseElement(name));
@@ -754,6 +823,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    catch (InterruptedException ex)
 	      {
+		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+			    ex.getMessage());
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
@@ -762,7 +833,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (done)
 	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    err.println(ex.getMessage());
+	    throw ex;
 	  }
 	
 	buffer.addElement(new XMLCharData(ch, start, length));
@@ -807,6 +880,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    catch (InterruptedException ex)
 	      {
+		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+			    ex.getMessage());
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
@@ -815,7 +890,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (done)
 	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    err.println(ex.getMessage());
+	    throw ex;
 	  }
 	
 	buffer.addElement(new XMLCharData(ch, start, length));
@@ -875,6 +952,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    catch (InterruptedException ex)
 	      {
+		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+			    ex.getMessage());
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
@@ -883,7 +962,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (done)
 	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    err.println(ex.getMessage());
+	    throw ex;
 	  }
 	
 	buffer.addElement(new XMLWarning(exception, locator));
@@ -926,6 +1007,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    catch (InterruptedException ex)
 	      {
+		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+			    ex.getMessage());
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
@@ -934,9 +1017,12 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (done)
 	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    err.println(ex.getMessage());
+	    throw ex;
 	  }
-	
+
+	err.println("XML parsing error: " + exception.getMessage());
 	buffer.addElement(new XMLError(exception, locator, false));
 	buffer.notifyAll();
       }
@@ -975,6 +1061,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	    catch (InterruptedException ex)
 	      {
+		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+			    ex.getMessage());
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
@@ -983,10 +1071,13 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (done)
 	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	    err.println(ex.getMessage());
+	    throw ex;
 	  }
 	
 	buffer.addElement(new XMLError(exception, locator, true));
+	err.println(exception.getMessage());
 	done = true;
 	buffer.notifyAll();
       }
