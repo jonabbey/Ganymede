@@ -624,6 +624,63 @@ The external helper program is an optional acceleration.. if the
 ganymede.properties file, then log scanning will be performed in the
 old-fashioned style.
 
+41. [CLIENT] Fixed persona creation in user object panel
+
+The Ganymede client allows new admin personae to be created in two
+different ways.  In 0.99.9, however, creating a new admin persona from
+within the user editing window threw an exception.
+
+It is now possible to create new admin personae either directly
+through the client's tree by creating a new 'Admin Persona' object, or
+by editing a user object and using the Personae tab to create a new
+persona.
+
+42. [SERVER] Optimized critical database lookup code.
+
+This one's embarassing.  A long time ago I heavily tuned and optimized
+the Ganymede server's database hash structures.  A job well done, I
+said to myself.  Unfortunately, the DBSession.viewDBObject() method
+which everything in the server actually uses to pull objects out of
+the server was doing some extremely dumb things.  
+
+In particular, before ever looking in the highly optimized database
+structures, viewDBObject() looked to see if the object being sought
+was already checked out for editing by the session's transaction.
+
+Unfortunately, the DBEditSet transaction class tracked objects checked
+out for editing in a linear Vector rather than a hashing structure, so
+as more and more objects got checked out by a session, *all* database
+access operations on behalf of that session got slower and slower and
+slower.  This turns out to be the reason why the Ganymede server's
+bulk loading was so very slow.
+
+Now this transactional data structure has been converted to a
+Hashtable, and viewDBObject() has been extensively optimized so that
+it will only attempt to find an object in the transaction's hashtable
+if an object has not yet been committed into the main database
+structures.  All transactional object view, edit, delete, inactivate,
+and clone operations will involve *much* less work as transactions get
+bigger.
+
+I knew there was a reason I hadn't called it 1.0 yet..
+
+43. [SERVER] Schema Editor dumps database after making schema changes
+
+A number of people, including Christoph Litauer
+(litauer@uni-koblenz.de), reported problems resulting from the server
+not consolidating its on-disk database after schema changes were
+committed.  The problems arose whenever changes were made to the
+server's schema in the schema editor after which transactions were
+committed to the journal file before the server was abnormally
+terminated, leaving a mix of object data in the journal file from
+after the schema change, which is not itself recorded in the journal
+file.
+
+The server will now dump its database to disk and consolidate the
+journal file when schema changes are committed, so there is no
+opportunity for a mismatch between the schema in the ganymede.db file
+and the object change records recorded in the server's journal file.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
