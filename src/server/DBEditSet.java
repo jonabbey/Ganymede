@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2001/02/14 06:55:44 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2001/02/16 05:51:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -847,8 +847,14 @@ public class DBEditSet {
    * A true doNormalProcessing value indicates that the client can try
    * the commit again at a later time, or manually cancel.</p>
    *
+   * <p>This method is synchronized and calls a synchronized method on
+   * the DBSession which contains this DBEditSet.  Because of this,
+   * this method should really only be called by way of the
+   * DBSession.commitTransaction() method, to avoid the possibility of
+   * nested monitor deadlock.</p>
+   *
    * @return a ReturnVal indicating success or failure, or null on success
-   * without comment.  
+   * without comment.
    */
 
   public synchronized ReturnVal commit()
@@ -912,7 +918,7 @@ public class DBEditSet {
 
     try
       {
-	wLock = session.openWriteLock(baseSet);	// wait for write lock
+	wLock = session.openWriteLock(baseSet);	// wait for write lock *synchronized*
       }
     catch (InterruptedException ex)
       {
