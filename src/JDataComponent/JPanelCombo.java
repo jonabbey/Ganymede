@@ -9,7 +9,7 @@
    But you should extend this, or it doesn't make much sense.
    
    Created: ? April 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,7 +67,7 @@ public class JPanelCombo extends JPanel {
 	  }
       }
 
-    add("Center", combo);
+    add("West", combo);
   }
 
   public JComboBox getCombo()
