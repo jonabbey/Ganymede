@@ -11,7 +11,7 @@
 # script
 
 JAVA=/opt/bin/java
-CLASSPATH=/v/site/packages/ganymede/etc/ganymedeAdmin.jar:/v/site/packages/swing-1.0/swingall.jar
+CLASSPATH=/v/site/packages/ganymede/etc/ganymedeAdmin.jar
 PROPERTIES=/opt/depot/ganymede/etc/ganymede.properties
 
 ############################################### 

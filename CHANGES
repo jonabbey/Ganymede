@@ -331,6 +331,33 @@ bar added between the log panel and the bottom status tables panel,
 and the 'clear log' button removed and put in the Control menu, where
 it won't take up screen real estate.
 
+16. [SERVER] Better exception handling in checkpointed code
+
+The object linking code was not properly catching exceptions that
+might be thrown by plug-in code, and so certain object linking and
+unlinking operations could leave checkpoints on the server's
+checkpoint stack.  Due to the thread identity checking logic in the
+DBEditSet checkpointing routines, this could cause a session on the
+server to refuse any further checkpointing, causing the user to have
+to cancel the transaction.
+
+Now, if any user-level code throws exceptions during object linking or
+unlinking, the checkpoint stack will properly be cleared.
+
+This is in response to a bug report by Gil Kloepfer.
+
+17. [CLIENT] Fixed the client's failure to terminate on window closure
+
+The client was not properly terminating the JVM when the client was
+run as an application rather than an applet, and the user closed the
+window using the operating system controls rather than the 'quit'
+button.
+
+The login box will now properly terminate the JVM if the close window
+button is used.
+
+This is in response to a bug report by Gil Kloepfer.
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001
