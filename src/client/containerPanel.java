@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.76 $ %D%
+    Version: $Revision: 1.77 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -1696,11 +1696,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		println("didSucceed: Returning true.");
 	      }
 	    
-	    // whatever happened, it may have caused other fields in this object
-	    // to need to be updated.  We take care of that here.
-	    
-	    checkReturnValForRescan(returnValue);
-
 	    gc.somethingChanged();
 	    currentlyChangingComponent = null;
 	    return true;
@@ -1792,11 +1787,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	else if (returnValue.didSucceed())
 	  {
 	    gc.somethingChanged();
-
-	    // That checkbox may have triggered value changes elsewhere in
-	    // this object.. rescan them as needed.
-
-	    checkReturnValForRescan(returnValue);
 	  }
 	else
 	  {
@@ -1934,7 +1924,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 
 	    gc.somethingChanged();
-	    checkReturnValForRescan(returnValue);
 	  }
 	else
 	  {
@@ -1962,53 +1951,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not set combo box value: " + rx);
-      }
-  }
-
-  /**
-   *
-   * This private method is used to handle updating any fields that
-   * may have changed as a result of a succesful value change
-   * operation on the server.  ReturnVal can encode a list of field
-   * id's that we need to update.
-   *  
-   */
-
-  public void checkReturnValForRescan(ReturnVal rv)
-  {
-    if (debug)
-      {
-	println("=checking return val for rescan");
-      }
-
-    if (rv == null)
-      {
-	return;
-      }
-
-    if (!rv.doRescan())
-      {
-	return;
-      }
-
-    if (debug)
-      {
-	println("=doRescan is true");
-      }
-    
-    // getRescanList returns null if we asre supposed to rescan all
-    if (rv.rescanAll(getObjectInvid()))
-      {
-	if (debug)
-	  {
-	    println("=rescanAll is true");
-	  }
-	
-	updateAll();
-      }
-    else 
-      {
-	update(rv.getRescanList(getObjectInvid()));
       }
   }
 
