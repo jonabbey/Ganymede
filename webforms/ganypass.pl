@@ -326,6 +326,9 @@ ENDSUCCESS
 sub print_failure {
 my ($failure) = @_;
 
+$failure =~ s/</&lt;/g;
+$failure =~ s/>/&gt;/g;
+
     print <<ENDFAILURE;
  <HTML>
   <HEAD>
