@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,15 +20,18 @@ package csd.DBStore;
 
 public class Invid {
 
-  private int type;
+  static final int FIRST = 1;
+  static final int LAST = 9;
+
+  private short type;
   private int num;
 
   // constructors
 
-  public Invid(int type, int num) 
+  public Invid(short type, int num) 
   {
-    if ((type < db_types.FIRST) ||
-	(type > db_types.LAST))
+    if ((type < FIRST) ||
+	(type > LAST))
       {
 	throw new IndexOutOfBoundsException();
       }
@@ -64,7 +67,7 @@ public class Invid {
 
   // pull the values
 
-  public int getType() {
+  public short getType() {
     return type;
   }
 

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,7 +14,6 @@
 
 package csd.DBStore;
 
-import csd.DBStore.*;
 import java.io.*;
 import java.util.*;
 
@@ -50,7 +49,13 @@ public class DBObject {
   int id;			// 32 bit id - the object's invariant id
   short fieldcount;
   Hashtable fields;
-  DBEditObject shadowObject;	// if this object is being edited
+  DBEditObject shadowObject;	// if this object is being edited, this points
+				// to the shadow
+
+  boolean markedAsDeleted;	// for when the object is deleted in a transaction.
+				// i.e., can't check this out even though there
+				// is no shadow checked out
+  DBEditSet editset;
 
   /* -- */
 
@@ -61,12 +66,22 @@ public class DBObject {
     fieldcount = 0;
     fields = null;
     shadowObject = null;
+    editset = null;
+    markedAsDeleted = false;
+  }
+
+  DBObject(DBObjectBase objectBase, int id)
+  {
+    this(objectBase);
+    this.id = id;
   }
 
   DBObject(DBObjectBase objectBase, DataInputStream in) throws IOException
   {
     this.objectBase = objectBase;
     shadowObject = null;
+    editset = null;
+    markedAsDeleted = false;
     receive(in);
   }
 
@@ -79,12 +94,12 @@ public class DBObject {
 
     out.writeInt(id);
     out.writeShort(fieldcount);
-
+   
     enum = fields.keys();
 
     while (enum.hasMoreElements())
       {
-	key = (Integer) enum.nextElement();
+	key = (short) ((Integer) enum.nextElement()).intValue();
 	out.writeShort((short) key);
 	((DBField) fields.get(new Integer(key))).emit(out);
       }
@@ -109,7 +124,7 @@ public class DBObject {
 
     fieldcount = in.readShort();
 
-    fields =  new Hashtable(fieldcount * 1.5);
+    fields =  new Hashtable(fieldcount);
 
     for (int i = 0; i < fieldcount; i++)
       {
@@ -119,7 +134,7 @@ public class DBObject {
 	fieldcode = in.readShort();
 	fieldINT = new Integer(fieldcode);
 
-	definition = (DBObjectBaseField) base.fieldHash.get(fieldINT);
+	definition = (DBObjectBaseField) objectBase.fieldHash.get(fieldINT);
 
 	type = definition.field_type;
 
@@ -182,14 +197,14 @@ public class DBObject {
 		// because we are just setting up the namespace, not
 		// manipulating it in the context of an editset
 
-		for (int i = 0; i < tmp2.size(); i++)
+		for (int j = 0; j < tmp2.size(); i++)
 		  {
-		    if (definition.namespace.uniqueHash.containsKey(tmp2.key(i)))
+		    if (definition.namespace.uniqueHash.containsKey(tmp2.key(j)))
 		      {
-			throw new RuntimeException("Duplicate unique value detected: " + tmp2.key(i));
+			throw new RuntimeException("Duplicate unique value detected: " + tmp2.key(j));
 		      } 
 
-		    definition.namespace.uniqueHash.put(tmp2.key(i), new DBNameSpaceHandle(null, true, tmp2));
+		    definition.namespace.uniqueHash.put(tmp2.key(j), new DBNameSpaceHandle(null, true, tmp2));
 		  }
 	      }
 	    else
@@ -204,32 +219,127 @@ public class DBObject {
 		definition.namespace.uniqueHash.put(tmp.key(), new DBNameSpaceHandle(null, true, tmp));
 	      }
 	  }
+	
+	// let the field know who daddy is
+	tmp.owner = this;
 	    
 	// now add the field to our fields hash
-	
 	fields.put(fieldINT, tmp);
       }
   }
 
-  // If this object is being edited, we say that it has a shadow
-  // object;  a thread gets a copy of this object.. the copy
-  // is actually a DBEditObject, which has the intelligence to
-  // allow the client to modify the (copies of the) data fields.
+  /**
+   *
+   * Check this object out from the datastore for editing.  This
+   * method is intended to be called by the editDBObject method
+   * in DBSession.. createShadow should not be called on an
+   * arbitrary viewed object in other contexts.. probably should
+   * do something to guarantee this?
+   *
+   * If this object is being edited, we say that it has a shadow
+   * object;  a session gets a copy of this object.. the copy
+   * is actually a DBEditObject, which has the intelligence to
+   * allow the client to modify the (copies of the) data fields.
+   *
+   * note: this is only used for editing pre-existing objects..
+   * the code for creating new objects is in DBSession.. 
+   * this method might be better incorporated into DBSession
+   * as well.
+   *
+   */
 
-  synchronized public DBEditObject createShadow(DBEditSet editset)
+  synchronized DBEditObject createShadow(DBEditSet editset)
   {
-    if (shadowObject != null)
+    if ((shadowObject != null) || markedAsDeleted)
       {
+	// this object has already been checked out
+	// for editing or has been marked as deleted
+
 	return null;
       }
 
     shadowObject = new DBEditObject(this, editset);
 
     editset.addChangedObject(shadowObject);
+    this.editset = editset;
     
     return shadowObject;
   }
+
+  synchronized boolean clearShadow(DBEditSet editset)
+  {
+    if (markedAsDeleted || editset != this.editset)
+      {
+	// couldn't clear the shadow.. either this
+	// object was marked as deleted or this editset
+	// wasn't the one to create the shadow
+
+	return false;
+      }
+
+    this.editset = null;
+    shadowObject = null;
+
+    return true;
+  }
+
+  /**
+   *
+   * Mark this object as deleted by the given editset.
+   *
+   * An object that is marked for deletion cannot be
+   * checked out for editing or marked for deletion
+   * by another editset.  When the editset that has marked
+   * this object has committed, this object will be unlinked
+   * from the objectBase.
+   *
+   */
+
+  synchronized boolean markAsDeleted(DBEditSet editset)
+  {
+    if ((shadowObject != null) || markedAsDeleted)
+      {
+	// this object has already been checked out
+	// for editing or has been marked as deleted
+
+	return false;
+      }
+
+    markedAsDeleted = true;
+    this.editset = editset;
+
+    return true;
+  }
+
+  /**
+   *
+   * Clear out a deletion mark.  Used for editset abort.
+   *
+   */
+
+  synchronized boolean clearDeletionMark(DBEditSet editset)
+  {
+    if (!markedAsDeleted || editset != this.editset)
+      {
+	// couldn't clear the deletion mark.. either this
+	// object wasn't marked as deleted or this editset
+	// wasn't the one to mark us.
+
+	return false;
+      }
+
+    markedAsDeleted = false;
+    this.editset = null;
+
+    return true;
+  }
   
+  /**
+   *
+   * Get read-only access to a field from this object
+   *
+   */
+
   public DBField viewField(short id)
   {
     return (DBField) fields.get(new Integer(id));

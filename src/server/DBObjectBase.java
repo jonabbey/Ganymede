@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,7 +14,6 @@
 
 package csd.DBStore;
 
-import csd.DBStore.*;
 import java.io.*;
 import java.util.*;
 
@@ -32,9 +31,13 @@ public class DBObjectBase {
   DBStore store;
   String object_name;
   short type_code;
-  Hashtable fieldHash;		//  field dictionary
-  Hashtable objectHash;		//  objects in our objectBase
+  Hashtable fieldHash;		// field dictionary
+  Hashtable objectHash;		// objects in our objectBase
   int object_count;
+  int maxid;			// highest invid to date
+
+  // Used by the DBLock Classes
+
   DBLock currentLock;
   Vector writerList, readerList, dumperList;
   boolean writeInProgress;
@@ -44,15 +47,22 @@ public class DBObjectBase {
 
   public DBObjectBase(DBStore store)
   {
+    writerList = new Vector();
+    readerList = new Vector();
+    dumperList = new Vector();
     this.store = store;
     object_name = null;
     type_code = 0;
     fieldHash = null;
     objectHash = null;
+    maxid = 0;
   }
 
   public DBObjectBase(DataInputStream in, DBStore store) throws IOException
   {
+    writerList = new Vector();
+    readerList = new Vector();
+    dumperList = new Vector();
     this.store = store;
     receive(in);
   }
@@ -100,7 +110,7 @@ public class DBObjectBase {
     type_code = in.readShort();
 
     size = in.readShort();
-    fieldHash = new Hashtable(size * 1.5);
+    fieldHash = new Hashtable(size);
 
     for (int i = 0; i < size; i++)
       {
@@ -109,18 +119,49 @@ public class DBObjectBase {
 
     object_count = in.readInt();
 
-    objectHash = new Hashtable(object_count);
+    objectHash = new Hashtable(object_count, (float) 0.5);
 
     for (int i = 0; i < object_count; i++)
       {
 	tempObject = new DBObject(this, in);
 
+	if (tempObject.id > maxid)
+	  {
+	    maxid = tempObject.id;
+	  }
+
 	objectHash.put(new Integer(tempObject.id), tempObject);
       }
   }
 
+  // allocate a new object id 
+
+  synchronized int getNextId()
+  {
+    return maxid++;
+  }
+
+
+  // release an id if an object initially
+  // created by createDBObject is rejected
+  // due to its transaction being aborted
+
+  // note that we aren't being real fancy
+  // here.. if this doesn't work, it doesn't
+  // work.. we have 2 billion slots in this
+  // object base after all..
+
+  synchronized void releaseId(int id)
+  {
+    if (id==maxid)
+      {
+	maxid--;
+      }
+  }
+
   // return an enumeration of the current objects
-  // in this DBObjectBase
+  // in this DBObjectBase.. we need to make this
+  // dependent on a DBReadLock in some fashion.
 
   public DBEnum elements()
   {
@@ -128,97 +169,3 @@ public class DBObjectBase {
   }
 }
 
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                               DBObjectBaseField
-
-An entry in the DBObjectBase dictionary.  This class defines the type of
-an object field, along with any namespace information pertaining to the field.
-
-------------------------------------------------------------------------------*/
-
-class DBObjectBaseField {
-
-  DBObjectBase base;  
-  String field_name;
-  short field_code;
-  short field_type;
-  DBNameSpace namespace;
-
-  /* -- */
-
-  DBObjectBaseField(DBObjectBase base)
-  {
-    this.base = base;
-    field_name = null;
-    field_code = 0;
-    field_type = 0;
-    namespace = null;
-  }
-
-  DBObjectBaseField(DataInputStream in, DBObjectBase base) throws IOException
-  {
-    this.base = base;
-    receive(in);
-  }
-
-  void emit(DataOutputStream out) throws IOException
-  {
-    int index;
-
-    /* -- */
-
-    out.writeUTF(field_name);
-    out.writeShort(field_code);
-    out.writeShort(field_type);
-    if (namespace == null)
-      {
-	out.writeShort(-1);
-      }
-    else
-      {
-	index = base.nameSpaces.indexOf(namespace, 0);
-	out.writeShort((short) index);
-      }
-  }
-
-  void receive(DataInputStream in) throws IOException
-  {
-    int index;
-
-    /* -- */
-
-    field_name = in.readUTF();
-    field_code = in.readShort();
-    field_type = in.readShort();
-
-    // read in our namespace index.  We use this to associate this field
-    // with a (potentially preexisting) namespace.
-
-    index = in.readShort();
-
-    if (index == -1)
-      {
-	namespace = null;
-      }
-    else
-      {
-	// this field is associated with a namespace.
-
-	if (index + 1 > base.nameSpaces.size())
-	  {
-	    base.nameSpaces.setSize(index + 1); 
-	  }
-
-	if (base.nameSpaces.elementAt(index) == null)
-	  {
-	    namespace = new DBNameSpace();
-	    base.nameSpaces.setElement(namespace, index);
-	  }
-	else
-	  {
-	    namespace = (DBNameSpace) base.nameSpaces.elementAt(index);
-	  }
-      }
-  }
-}

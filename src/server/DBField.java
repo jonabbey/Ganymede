@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,7 +14,6 @@
 
 package csd.DBStore;
 
-import csd.DBStore.*;
 import java.io.*;
 import java.util.*;
 
@@ -25,13 +24,16 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 public abstract class DBField implements Cloneable {
   
-  // -- abstract parent
-
+  DBObject owner;
   DBObjectBaseField definition;		    // used for fields registered in the
 					    // object bases
 
-  Object key();			// key used to represent value in a hash of the
+  /* -- */
+
+  abstract Object key();	// key used to represent value in a hash of the
 				// values in a given set of fields
+
+  abstract void emit(DataOutputStream out) throws IOException;
 
   boolean unmark(DBEditSet editset, DBNameSpace namespace)
   {

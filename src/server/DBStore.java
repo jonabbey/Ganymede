@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,7 +14,6 @@
 
 package csd.DBStore;
 
-import csd.DBStore.*;
 import java.io.*;
 import java.util.*;
 
@@ -24,10 +23,21 @@ import java.util.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>DBStore is the main data store class.  Any code that intends to make use
+ * of the csd.DBStore package needs to instantiate an object of type DBStore.
+ *
+ * A user can have any number of DBStore objects active, but there is probably
+ * no good reason for doing so since a single DBStore can store and cross reference
+ * up to 32k different kinds of objects.</p>
+ *
+ */
+
 public class DBStore {
 
   // type identifiers used in the object store
 
+  static final short FIRST = 0;
   static final short BOOLEAN = 0;
   static final short NUMERIC = 1;
   static final short DATE = 2;
@@ -38,6 +48,7 @@ public class DBStore {
   static final short DATEARRAY = 7;
   static final short STRINGARRAY = 8;
   static final short INVIDARRAY = 9;
+  static final short FINAL =9;
 
   static final String id_string = "Gstore";
   static final byte major_version = 0;
@@ -51,6 +62,17 @@ public class DBStore {
 
   /* -- */
 
+  /**
+   *
+   * This is the constructor for DBStore.
+   *
+   * Currently, once you construct a DBStore object, all you can do to
+   * initialize it is call load().  This API needs to be extended to
+   * provide for programmatic bootstrapping, or another tool needs
+   * to be produced for the purpose.
+   *
+   */
+
   public DBStore()
   {
     objectBases = null;
@@ -58,9 +80,21 @@ public class DBStore {
     nameSpaces = new Vector();
   }
 
-  public load(String filename)
+  /**
+   *
+   * Load the database from disk.
+   *
+   * Currently, this method is the only way to peform intialization
+   * of the database.  This method loads both the database type
+   * definition and database contents from a single disk file.
+   *
+   * @param filename Name of the database file
+   *
+   */
+
+  public void load(String filename)
   {
-    FileInputStream inStream;
+    FileInputStream inStream = null;
     DataInputStream in;
 
     DBObjectBase tempBase;
@@ -103,7 +137,9 @@ public class DBStore {
 	
 	baseCount = in.readShort();
 	
-	objectBases = new Hashtable(baseCount * 1.5);
+	objectBases = new Hashtable(baseCount);
+
+	// Actually read in the object bases
 	
 	for (short i = 0; i < baseCount; i++)
 	  {
@@ -120,38 +156,57 @@ public class DBStore {
       }
     finally
       {
-	try
+	if (inStream != null)
 	  {
-	    inStream.close();
-	  }
-	catch (IOException ex)
-	  {
+	    try
+	      {
+		inStream.close();
+	      }
+	    catch (IOException ex)
+	      {
+	      }
 	  }
       }
 
-    lockHash = new Hashtable(baseCount * 1.5);
-
+    lockHash = new Hashtable(baseCount);
   }
+
+  /**
+   *
+   * Dump the database to disk
+   *
+   * This method dumps the entire database to disk.  The thread that calls the
+   * dump method will be suspended until there are no threads performing update
+   * writes to the in-memory database.  In practice this will likely never be
+   * a long interval.
+   *
+   * The dump is guaranteed to be transaction consistent.
+   *
+   * @param filename Name of the database file to emit
+   *
+   * @see csd.DBStore.DBEditSet
+   *
+   */
 
   public void dump(String filename) throws IOException
   {
-    FileOutputStream outStream;
-    DataOutputStream out;
+    FileOutputStream outStream = null;
+    DataOutputStream out = null;
     Enumeration basesEnum;
     short baseCount;
-    DBDumpLock lock;
+    DBDumpLock lock = null;
 
     /* -- */
 
     try
       {
 	lock = new DBDumpLock(this);
-	lock.establish();	// wait until we get our lock 
+	lock.establish("System");	// wait until we get our lock 
 
 	outStream = new FileOutputStream(filename);
 	out = new DataOutputStream(outStream);
 
-	out.writeUTF("GStore");
+	out.writeUTF(id_string);
 	out.writeByte(major_version);
 	out.writeByte(minor_version);
 
@@ -173,604 +228,40 @@ public class DBStore {
       }
     finally
       {
-	lock.release();
+	if (lock != null)
+	  {
+	    lock.release();
+	  }
+
+	if (out != null)
+	  {
+	    out.close();
+	  }
+	   
 	if (outStream != null)
 	  {
 	    outStream.close();
-	  }
+	  }	      
       }
   }
 
-  public DBEditObject editDBObject(DBLock lock, DBEditSet editSet, Invid invid)
+  /**
+   *
+   * <p>Get a session handle on this database</p>
+   *
+   * <p>The key parameter is intended to provide a handle for
+   * whatever code integrates a DBStore to use to keep track of
+   * things.  This may be superfluous with the mere presence of 
+   * a DBSession.. I will probably change this, possibly to use
+   * a logging interface instance, possibly not.</p>
+   *
+   * @param key Identifying key
+   *
+   */
+
+  public DBSession login(Object key)
   {
-    return editDBObject(lock, editSet, invid.getType(), invid.getNum());
-  }
-
-  public DBEditObject editDBObject(DBLock lock, DBEditSet editSet, short baseID, int objectID)
-  {
-    DBObject obj;
-
-    /* -- */
-
-    obj = viewDBObject(lock, baseID, objectID);
-
-    return obj.createShadow(editSet);
-  }
-
-  public DBEditObject editDBObject(DBEditSet editSet, DBObject obj)
-  {
-    return obj.createShadow(editSet);
-  }
-
-  public DBObject viewDBObject(DBLock lock, Invid invid)
-  {
-    return viewDBObject(lock, invid.getType(), invid.getNum());
-  }
-
-  public DBObject viewDBObject(DBLock lock, short baseID, int objectID)
-  {
-    DBObjectBase base;
-    DBObject     obj;
-    Integer      baseKey;
-    Integer      objKey;
-
-    /* -- */
-
-    baseKey = new Integer(baseID);
-    objKey = new Integer(objectID);
-
-    base = objectBases.get(baseKey);
-
-    if (base == null)
-      {
-	return null;
-      }
-
-    // we don't check to see if the lock is a
-    // DBReadLock.. viewDBOBject is acceptably atomic relative to any
-    // possible write activity that might be occurring if we are
-    // trying to read on a DBWriteLock, we won't worry about the
-    // DBWriteLock possessor changing things on us.
-
-    // we couldn't be so trusting on an enum establish request, though.
-
-    if (!lock.isLocked(base))
-      {
-	throw new RuntimeException("viewDBObject: viewDBObject called without lock");
-      }
-
-    obj = base.objectHash.get(objKey);
-
-    // do we want to do any kind of logging here?
-
-    return obj;
+    return new DBSession(this, key);
   }
 }
 
-
-/*------------------------------------------------------------------------------
-                                                                  abstract class
-                                                                          DBLock
-
-DBLocks arbitrate access to a DBStore object.  Threads wishing to read from,
-dump, or update the DBStore must be in possession of an established DBLock.
-
-The general scheme is that any number of readers and/or dumpers can read
-from the database simultaneously.  If a number of readers are processing when
-a thread attempts to establish a write lock, those readers are allowed to
-complete their reading, but no new read lock may be established until the
-writer has a chance to get in and make its update.
-
-If there are a number of writer locks queued up for update access to the
-DBStore when a thread attempts to establish a dump lock, those writers are
-allowed to complete their updates, but no new writer is queued until the
-dump thread finishes dumping the database.
-
-There is currently no support for handling timeouts, and locks can persist
-indefinitely.
-
-------------------------------------------------------------------------------*/
-
-abstract class DBLock {
-
-  // type parent
-
-}
-
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                     DBWriteLock
-
-------------------------------------------------------------------------------*/
-
-class DBWriteLock extends DBLock {
-
-  Enumeration enum;
-  boolean done, okay;
-  DBStore lockManager;
-  DBObjectBase base;
-  Vector baseSet;
-  Object key;
-  
-  private boolean locked;
-
-  /* -- */
-
-  // constructor to get a write lock on all the object
-  // bases.
-
-  public DBWriteLock(DBStore lockManager)
-  {
-    this.key = null;
-    this.lockManager = lockManager;
-    baseSet = new Vector();
-
-    enum = lockManager.objectBases.elements();
-	    
-    while (enum.hasMoreElements())
-      {
-	base = (DBObjectBase) enum.nextElement();
-	baseSet.addElement(base);
-      }
-
-    locked = false;
-  }
-
-  // constructor to get a write lock on a subset of the
-  // object bases.
-
-  public DBWriteLock(DBStore lockManager, Vector baseSet)
-  {
-    this.key = null;
-    this.lockManager = lockManager;
-    this.baseSet = baseSet;
-    locked = false;
-  }
-
-  // establish the lock
-
-  public void establish(Object key)
-  {
-    done = false;
-
-    if (lockManager.lockHash.containsKey(key))
-      {
-	throw new RuntimeException("Error: lock sought by owner of existing lockset.");
-      }
-
-    lockManager.lockHash.put(key, this);
-    this.key = key;
-
-    synchronized (lockManager)
-      {
-	// wait until there are no dumpers 
-
-	do
-	  {
-	    okay = true;
-
-	    for (int i = 0; okay && (i < baseSet.size()); i++)
-	      {
-		base = (DBObjectBase) baseSet.elementAt(i);
-		if (base.dumperList.size() > 0)
-		  {
- 		    okay = false;
-		  }
-	      }
-
-	    if (!okay)
-	      {
-		try
-		  {
-		    lockManager.wait();
-		  }
-		catch (InterruptedException ex)
-		  {
-
-		  }
-	      }
-
-	  } while (!okay);
-
-	// add our selves to the ObjectBase write queues
-
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
- 	    base.writerList.addElement(this);
-	  }
-
-	// spinwait until we can get into all of the ObjectBases
-	// note that since we added ourselves to the writer
-	// queues, we know the dumpers are waiting until we
-	// finish. 
-
-	while (!done)
-	  {
-	    okay = true;
-	    enum = lockManager.objectBases.elements();
-
-	    for (int i = 0; okay && (i < baseSet.size()); i++)
-	      {
-		base = (DBObjectBase) baseSet.elementAt(i);
-		if (base.writeInProgress || base.readerList.size() > 0)
-		  {
-		    okay = false;
-		  }
-	      }
-
-	    if (okay)
-	      {
-		for (int i = 0; i < baseSet.size(); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-		    base.writeInProgress = true;
-		    base.currentLock = this;
-		  }
-		
-		done = true;
-	      }
-	    else
-	      {
-		try
-		  {
-		    lockManager.wait();
-		  }
-		catch (InterruptedException ex)
-		  {
-		  }
-	      }
-	  }
-      }
-
-    locked = true;
-  }
-
-  public void release()
-  {
-    if (!locked)
-      {
-	return;
-      }
-
-    synchronized (lockManager)
-      {
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.writerList.removeElement(this);
-	    base.writeInProgress = false;
-	    base.currentLock = null;
-	  }
-      }
-
-    locked = false;
-    lockManager.lockHash.remove(key);
-    key = null;
-
-    lockManager.notifyAll();	// many readers may want in
-  }
-
-  boolean isLocked(DBObjectBase base)
-  {
-    if (!locked)
-      {
-	return false;
-      }
-
-    for (int i=0; i < baseSet.size(); i++)
-      {
-	if (baseSet.elementAt(i) == base)
-	  {
-	    return true;
-	  }
-      }
-    return false;
-  }
-  
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                      DBReadLock
-
-------------------------------------------------------------------------------*/
-
-class DBReadLock extends DBLock {
-
-  Enumeration enum;
-  boolean okay, done;
-  DBStore lockManager;
-  DBObjectBase base;
-  Vector baseSet;
-  Object key;
-  
-  private boolean locked;
-
-  /* -- */
-
-  public DBReadLock(DBStore lockManager)
-  {
-    key = null;
-    this.lockManager = lockManager;
-    baseSet = new Vector();
-
-    enum = lockManager.objectBases.elements();
-	    
-    while (enum.hasMoreElements())
-      {
-	base = (DBObjectBase) enum.nextElement();
-	baseSet.addElement(base);
-      }
-
-    locked = false;
-  }
-
-  // constructor to get a read lock on a subset of the
-  // object bases.
-
-  public DBReadLock(DBStore lockManager, Vector baseSet)
-  {
-    key = null;
-    this.lockManager = lockManager;
-    this.baseSet = baseSet;
-    locked = false;
-  }
-
-  public void establish(Object key)
-  {
-    done = false;
-
-    if (lockManager.lockHash.containsKey(key))
-      {
-	throw new RuntimeException("Error: lock sought by owner of existing lockset.");
-      }
-
-    lockManager.lockHash.put(key, this);
-    this.key = key;
-
-    synchronized (lockManager)
-      {
-	// wait until there are no writers blocking our access
-
-	while (!done)
-	  {
-	    okay = true;
-	    for (int i = 0; okay && (i < baseSet.size()); i++)
-	      {
-		base = (DBObjectBase) baseSet.elementAt(i);
-
-		if (base.writerList.size() > 0)
-		  {
-		    okay = false;
-		  }
-	      }
-
-	    if (okay)
-	      {
-		for (int i = 0; i < baseSet.size(); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-		    base.readerList.addElement(this);
-		    // we don't need to set currentLock
-		    // since readers are shared
-		  }
-
-		done = true;
-	      }
-	    else
-	      {
-		try
-		  {
-		    lockManager.wait();
-		  }
-		catch (InterruptedException ex)
-		  {
-		  }
-	      }
-	  }
-      }
-
-    locked = true;
-  }
-
-  public void release()
-  {
-    if (!locked)
-      {
-	return;
-      }
-
-    synchronized (lockManager)
-      {
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.readerList.removeElement(this);
-	    // we don't need to clear currentLock
-	    // since readers are shared
-	  }
-      }
-
-    locked = false;
-    lockManager.lockHash.remove(key);
-    key = null;
-
-    lockManager.notify();
-  }
-
-  boolean isLocked(DBObjectBase base)
-  {
-    if (!locked)
-      {
-	return false;
-      }
-
-    for (int i=0; i < baseSet.size(); i++)
-      {
-	if (baseSet.elementAt(i) == base)
-	  {
-	    return true;
-	  }
-      }
-    return false;
-  }
-
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                      DBDumpLock
-
-------------------------------------------------------------------------------*/
-
-class DBDumpLock extends DBLock {
-
-  DBStore lockManager;
-  Enumeration enum;
-  boolean done, okay;
-  DBObjectBase base;
-  Vector baseSet;
-  Object key;
-  
-  private boolean locked;
-
-  /* -- */
-
-  public DBDumpLock(DBStore lockManager)
-  {
-    this.lockManager = lockManager;
-    baseSet = new Vector();
-
-    enum = lockManager.objectBases.elements();
-	    
-    while (enum.hasMoreElements())
-      {
-	base = (DBObjectBase) enum.nextElement();
-	baseSet.addElement(base);
-      }    
-
-    locked = false;
-  }
-
-  // constructor to get a dump lock on a subset of the
-  // object bases.
-
-  public DBDumpLock(DBStore lockManager, Vector baseSet)
-  {
-    this.lockManager = lockManager;
-    this.baseSet = baseSet;
-
-    locked = false;
-  }
-
-  public void establish(Object key)
-  {
-    done = false;
-
-    if (lockManager.lockHash.containsKey(key))
-      {
-	throw new RuntimeException("Error: lock sought by owner of existing lockset.");
-      }
-
-    lockManager.lockHash.put(key, this);
-    this.key = key;
-
-    synchronized (lockManager)
-      {
-	// add our selves to the ObjectBase dump queues
-
-	enum = lockManager.objectBases.elements();
-
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.dumperList.addElement(this);
-	  }
-
-	while (!done)
-	  {
-	    okay = true;
-	    enum = lockManager.objectBases.elements();
-
-	    for (int i = 0; okay && (i < baseSet.size()); i++)
-	      {
-		base = (DBObjectBase) baseSet.elementAt(i);
-
-		if (base.writerList.size() > 0 || base.dumpInProgress)
-		  {
-		    okay = false;
-		  }
-	      }
-
-	    if (okay)
-	      {
-		for (int i = 0; i < baseSet.size(); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-		    base.dumpInProgress = true;
-		    base.currentLock = this;
-		  }
-
-		done = true;
-	      }
-	    else
-	      {
-		try
-		  {
-		    lockManager.wait();
-		  }
-		catch (InterruptedException ex)
-		  {
-		  } 
-	      }
-	  }
-      }
-
-    locked = true;
-  }
-
-  public void release()
-  {
-    if (!locked)
-      {
-	return;
-      }
-
-    synchronized (lockManager)
-      {
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.dumperList.addElement(this);
-	    base.dumpInProgress = false;
-	    base.currentLock = null;
-	  }
-      }
-
-    locked = false;
-    lockManager.lockHash.remove(key);
-    key = null;
-
-    lockManager.notify();
-  }
-
-  boolean isLocked(DBObjectBase base)
-  {
-    if (!locked)
-      {
-	return false;
-      }
-
-    for (int i=0; i < baseSet.size(); i++)
-      {
-	if (baseSet.elementAt(i) == base)
-	  {
-	    return true;
-	  }
-      }
-    return false;
-  }
-
-}
