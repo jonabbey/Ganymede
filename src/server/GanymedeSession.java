@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.131 $
-   Last Mod Date: $Date: 1999/04/16 22:52:46 $
+   Version: $Revision: 1.132 $
+   Last Mod Date: $Date: 1999/04/20 18:21:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.JDialog.*;
  *
  * @see arlut.csd.ganymede.DBSession
  * 
- * @version $Revision: 1.131 $ %D%
+ * @version $Revision: 1.132 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -3711,7 +3711,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * however.</p>
    *
    * <p>The client should check the returned ReturnVal's
-   * {@link arlut.csd.ganymede.ReturnVal.getObjectStatus() getObjectStatus()}
+   * {@link arlut.csd.ganymede.ReturnVal#getObjectStatus() getObjectStatus()}
    * method to see whether the re-activated object has an expiration date set.</p>
    *
    * <p>This method must be called within a transactional context.  The object's

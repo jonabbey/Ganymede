@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 1999/04/16 23:19:05 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 1999/04/20 18:21:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.Util.zipIt;
  * use DBStore as their synchronization object.  If any do not, then the server
  * can deadlock.</p>
  *
- * @version $Revision: 1.79 $ %D%
+ * @version $Revision: 1.80 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -921,13 +921,14 @@ public class DBStore {
    * {@link arlut.csd.ganymede.DBBaseCategory DBBaseCategory}.</p>
    *
    * @param out PrintStream to print to 
+   * @param showBuiltIns If false, don't display built-in field definitions
    */
 
-  public synchronized void printCategoryTree(PrintWriter out)
+  public synchronized void printCategoryTree(PrintWriter out, boolean showBuiltIns)
   {
     try
       {
-	rootCategory.print(out, "");
+	rootCategory.print(out, "", showBuiltIns);
       }
     finally
       {
@@ -953,7 +954,7 @@ public class DBStore {
 
 	while (enum.hasMoreElements())
 	  {
-	    ((DBObjectBase) enum.nextElement()).print(out, "");
+	    ((DBObjectBase) enum.nextElement()).print(out, "", true);
 	  }
       }
     finally

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 1999/04/16 23:19:04 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 1999/04/20 18:21:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -403,7 +403,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // need to recreate objectHook now that we have loaded our classdef info
     // from disk.
 
-    objectHook = this.createHook();
+    if (reallyLoad)
+      {
+	objectHook = this.createHook();
+      }
   }
 
   /**
@@ -1262,19 +1265,25 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @param out PrintWriter to print to.
    */
 
-  public synchronized void print(PrintWriter out, String indent)
+  public synchronized void print(PrintWriter out, String indent, boolean showAll)
   {
     Enumeration enum;
+    DBObjectBaseField fieldDef;
 
     /* -- */
 
     out.println(indent + object_name + "(" + type_code + ")");
     
-    enum = fieldTable.elements();
+    enum = sortedFields.elements();
 
     while (enum.hasMoreElements())
       {
-	((DBObjectBaseField) enum.nextElement()).print(out, indent + "\t");
+	fieldDef = (DBObjectBaseField) enum.nextElement();
+
+	if (showAll || !fieldDef.isBuiltIn())
+	  {
+	    fieldDef.print(out, indent + "\t");
+	  }
       }
   }
 

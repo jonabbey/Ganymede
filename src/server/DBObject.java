@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 1999/04/01 22:21:20 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 1999/04/20 18:21:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.69 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.70 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -285,7 +285,6 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>This constructor is used to create a non-editable DBObject from a
    * DBEditObject that we have finished editing.  Whenever a
    * transaction checks a created or edited shadow back into the
@@ -296,7 +295,6 @@ public class DBObject implements db_object, FieldType, Remote {
    *
    * @see arlut.csd.ganymede.DBEditSet#commit()
    * @see arlut.csd.ganymede.DBEditSet#release()
-   * 
    */
   
   DBObject(DBEditObject eObj)
@@ -806,13 +804,12 @@ public class DBObject implements db_object, FieldType, Remote {
   }
   
   /**
-   *
-   * The emit() method is part of the process of dumping the DBStore
+   * <p>The emit() method is part of the process of dumping the DBStore
    * to disk.  emit() dumps an object in its entirety to the
-   * given out stream.
+   * given out stream.</p>
    *
-   * @param out A journal or DBStore writing stream.
-   *
+   * @param out A {@link arlut.csd.ganymede.DBjournal DBjournal} or
+   * {@link arlut.csd.ganymede.DBStore DBStore} writing stream.
    */
 
   synchronized void emit(DataOutput out) throws IOException
@@ -869,11 +866,10 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * The receive() method is part of the process of loading the DBStore
+   * <p>The receive() method is part of the process of loading the
+   * {@link arlut.csd.ganymede.DBStore DBStore}
    * from disk.  receive() reads an object from the given in stream and
-   * instantiates it into the DBStore.
-   *
+   * instantiates it into the DBStore.</p>
    */
 
   synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
@@ -932,7 +928,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
 	else
 	  {
-	    //	    System.err.println("Reading " + definition.getName() + " " + definition.getTypeDesc());
+	    //  System.err.println("Reading " + definition.getName() + " " + definition.getTypeDesc());
 	  }
 
 	type = definition.getType();
@@ -990,10 +986,12 @@ public class DBObject implements db_object, FieldType, Remote {
 		  {
 		    if (definition.namespace.uniqueHash.containsKey(tmp.key(j)))
 		      {
-			throw new RuntimeException("Duplicate unique value detected in vector field: " + tmp.key(j));
+			throw new RuntimeException("Duplicate unique value detected in vector field: " + 
+						   tmp.key(j));
 		      } 
 
-		    definition.namespace.uniqueHash.put(tmp.key(j), new DBNameSpaceHandle(null, true, tmp));
+		    definition.namespace.uniqueHash.put(tmp.key(j), 
+							new DBNameSpaceHandle(null, true, tmp));
 		  }
 	      }
 	    else
@@ -1002,10 +1000,12 @@ public class DBObject implements db_object, FieldType, Remote {
 		
 		if (definition.namespace.uniqueHash.containsKey(tmp.key()))
 		  {
-		    throw new RuntimeException("Duplicate unique value detected in scalar field: " + tmp.key());
+		    throw new RuntimeException("Duplicate unique value detected in scalar field: " + 
+					       tmp.key());
 		  }
 
-		definition.namespace.uniqueHash.put(tmp.key(), new DBNameSpaceHandle(null, true, tmp));
+		definition.namespace.uniqueHash.put(tmp.key(), 
+						    new DBNameSpaceHandle(null, true, tmp));
 	      }
 	  }
 	
@@ -1017,7 +1017,8 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
 	else
 	  {
-	    System.err.println("%%% Loader skipping " + definition.getName());
+	    System.err.println("%%% Loader skipping empty field " + 
+			       definition.getName());
 	  }
       }
   }
@@ -1174,13 +1175,11 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
+   * <p>Returns the transaction object owning this object, or
+   * null if an unowned data object.</p>
    *
-   * Returns the transaction object owning this object, or
-   * null if an unowned data object.
-   *
-   * Note that this is public, but not made available
-   * to the client via a remote interface.
-   *
+   * <p>Note that this is public, but not made available
+   * to the client via a remote interface.</p>
    */
 
   public DBEditSet getEditSet()
@@ -1189,7 +1188,6 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Get read-only list of DBFields contained in this object.</p>
    *
    * @see arlut.csd.ganymede.db_object
@@ -1255,13 +1253,12 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Get read-only access to a field from this object.</p>
    *
    * @param id The field code for the desired field of this object.
    *
-   *
    * @see arlut.csd.ganymede.db_object
+   *
    */
 
   public final db_field getField(short id)
@@ -1270,11 +1267,10 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Get read-only access to a field from this object, by name.</p>
    *
-   * This method needs to be synchronized to avoid conflict with 
-   * DBEditObject.clearTransientFields().
+   * <p>This method needs to be synchronized to avoid conflict with 
+   * {@link arlut.csd.ganymede.DBEditObject#clearTransientFields() DBEditObject.clearTransientFields()}.</p>
    *
    * @param fieldname The fieldname for the desired field of this object
    *
@@ -1304,11 +1300,10 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Get read-only list of DBFields contained in this object.</p>
    *
-   * This method needs to be synchronized to avoid conflict with 
-   * DBEditObject.clearTransientFields().
+   * This method needs to be synchronized to avoid conflict with
+   * {@link arlut.csd.ganymede.DBEditObject#clearTransientFields() DBEditObject.clearTransientFields()}.</p>
    *
    * @see arlut.csd.ganymede.db_object
    */
@@ -1407,7 +1402,6 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Returns true if inactivate() is a valid operation on
    * checked-out objects of this type.</p>
    *
@@ -1420,7 +1414,6 @@ public class DBObject implements db_object, FieldType, Remote {
   }
   
   /**
-   *
    * <p>Returns true if this object has been inactivated and is
    * pending deletion.</p>
    *
@@ -1448,7 +1441,8 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   * <p>This method scans through all fields defined in the DBObjectBase
+   * <p>This method scans through all fields defined in the 
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
    * for this object type and determines if all required fields have
    * been filled in.  If everything is ok, this method will return
    * null.  If any required fields are found not to have been filled
@@ -1457,8 +1451,8 @@ public class DBObject implements db_object, FieldType, Remote {
    *
    * <p>This method is used by the transaction commit logic to ensure a
    * consistent transaction. If server-local code has called
-   * GanymedeSession.enableOversight(false), this method will not be
-   * called at transaction commit time.</p>
+   * {@link arlut.csd.ganymede.GanymedeSession#enableOversight(boolean) GanymedeSession.enableOversight(false)}
+   * this method will not be called at transaction commit time.</p>
    */
 
   public final synchronized Vector checkRequiredFields()
@@ -1526,7 +1520,6 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Returns the date that this object is to go through final removal
    * if it has been inactivated.</p>
    *
@@ -1546,7 +1539,6 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Returns true if this object has an expiration date set.</p>
    *
    * @see arlut.csd.ganymede.db_object
@@ -1558,7 +1550,6 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Returns true if this object has a removal date set.</p>
    *
    * @see arlut.csd.ganymede.db_object
@@ -1570,7 +1561,6 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <p>Returns the date that this object is to be automatically
    * inactivated if it has an expiration date set.</p>
    *
@@ -1590,10 +1580,9 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * Shortcut method to set a field's value.  Using this
+   * <p>Shortcut method to set a field's value.  Using this
    * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.
+   * particularly useful in database loading.</p>
    *
    * @see arlut.csd.ganymede.db_object
    */
@@ -1607,10 +1596,9 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * Shortcut method to get a field's value.  Using this
+   * <p>Shortcut method to get a field's value.  Using this
    * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.
+   * particularly useful in database loading.</p>
    *
    * @see arlut.csd.ganymede.db_object
    */
@@ -1640,10 +1628,8 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * Shortcut method to get a field's value.  Used only
-   * on the server, as permissions are not checked.
-   *
+   * <p>Shortcut method to get a field's value.  Used only
+   * on the server, as permissions are not checked.</p>
    */
 
   public Object getFieldValueLocal(short fieldID)
@@ -1671,12 +1657,10 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
    * <P>This method is for use on the server, so that custom code can call a simple
    * method to test to see if a boolean field is defined and has a true value.</P>
    *
    * <P>An exception will be thrown if the field is not a boolean.</P>
-   *
    */
 
   public boolean isSet(short fieldID)
@@ -1701,10 +1685,9 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * Shortcut method to set a field's value.  Using this
+   * <p>Shortcut method to set a field's value.  Using this
    * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.
+   * particularly useful in database loading.</p>
    *
    * @see arlut.csd.ganymede.db_object
    */
@@ -1734,10 +1717,9 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * Shortcut method to set a field's value.  Using this
+   * <p>Shortcut method to set a field's value.  Using this
    * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.
+   * particularly useful in database loading.</p>
    *
    * @see arlut.csd.ganymede.db_object
    */
@@ -1767,10 +1749,8 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * Generate a complete printed representation of the object,
-   * suitable for printing to a debug or log stream.
-   *
+   * <p>Generate a complete printed representation of the object,
+   * suitable for printing to a debug or log stream.</p>
    */
 
   public synchronized void print(PrintStream out)
@@ -1815,17 +1795,15 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * This method is used to provide a hook to allow different
+   * <p>This method is used to provide a hook to allow different
    * objects to generate different labels for a given object
    * based on their perspective.  This is used to sort
    * of hackishly simulate a relational-type capability for
-   * the purposes of viewing backlinks.<br><br>
+   * the purposes of viewing backlinks.</p>
    *
-   * See the automounter map and NFS volume DBEditObject
+   * <p>See the automounter map and NFS volume DBEditObject
    * subclasses for how this is to be used, if you have
-   * them.
-   *
+   * them.</p>
    */
   
   public String lookupLabel(DBObject object)
@@ -1834,16 +1812,16 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * This method is used to correct this object's base and basefield
+   * <p>This method is used to correct this object's base and basefield
    * pointers when the base changes.  This happens when the schema is
    * edited.. this method is called on all objects under a
-   * DBObjectBase to make the object point and its fields point to the
-   * new version of the DBObjectBase and DBObjectBaseFields.  This
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} to make the
+   * object point and its fields point to the
+   * new version of the DBObjectBase and
+   * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseFields}.  This
    * method also takes care of cleaning out any fields that have become
    * undefined due to a change in the schema for the field, as in a
-   * change from a vector to a scalar field, or vice-versa.
-   *
+   * change from a vector to a scalar field, or vice-versa.</p>
    */
 
   synchronized void updateBaseRefs(DBObjectBase newBase)
@@ -1876,13 +1854,11 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * This method is a convenience for server-side code.  If
+   * <p>This method is a convenience for server-side code.  If
    * this object is an embedded object, this method will
    * return the label of the containing object.  If this
    * object is not embedded, or the containing object's
-   * label cannot be determined, null will be returned.
-   *
+   * label cannot be determined, null will be returned.</p>
    */
   
   public String getContainingLabel()

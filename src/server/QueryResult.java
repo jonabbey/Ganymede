@@ -8,8 +8,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/01/22 18:05:53 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/04/20 18:21:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -341,12 +341,8 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
-   * Returns a complete listHandle Vector representation of the
-   * results included in this QueryResult.
-   *
-   * @see arlut.csd.JDataComponen.listHandle
-   *
+   * Returns a complete {@link arlut.csd.JDataComponent.listHandle listHandle}
+   * Vector representation of the results included in this QueryResult.
    */
 
   public Vector getListHandles()
@@ -355,17 +351,13 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
-   * Returns a (possibly filtered) listHandle Vector representation of the
-   * results included in this QueryResult.
+   * Returns a (possibly filtered) {@link arlut.csd.JDataComponent.listHandle listHandle}
+   * Vector representation of the results included in this QueryResult.
    *
    * @param includeInactives if false, inactive objects' handles won't be included
    * in the returned vector
    * @param includeNonEditables if false, non-editable objects' handles won't be included
    * in the returned vector
-   *
-   * @see arlut.csd.JDataComponen.listHandle
-   *
    */
 
   public synchronized Vector getListHandles(boolean includeInactives,

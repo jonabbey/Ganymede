@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 1999/04/16 22:52:46 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 1999/04/20 18:21:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -189,7 +189,7 @@ public class Ganymede {
 	  }
 	else
 	  {
-	    databaseReport(dbFilename);
+	    databaseReport(dbFilename, ParseArgs.switchExists("showall", argv));
 	    System.exit(0);
 	  }
       }
@@ -199,7 +199,7 @@ public class Ganymede {
     if (propFilename == null)
       {
 	System.err.println("Error: invalid command line parameters");
- 	System.err.print("Usage: java Ganymede [-decode dbfile=<dbfilename>] [-resetadmin] ");
+ 	System.err.print("Usage: java Ganymede [-decode dbfile=<dbfilename> [-showall]] [-resetadmin] ");
 	System.err.print("[-developschema] ");
 	System.err.println("properties=<property file> [debug=<rmi debug file>]");
 	return;
@@ -408,7 +408,7 @@ public class Ganymede {
    * purposes of doing a schema report on it.</p>
    */
 
-  public static void databaseReport(String dbFilename)
+  public static void databaseReport(String dbFilename, boolean showBuiltins)
   {
     File dataFile;
 
@@ -431,7 +431,7 @@ public class Ganymede {
 	StringWriter outString = new StringWriter();
 	PrintWriter out = new PrintWriter(outString);
 	
-	db.printCategoryTree(out);
+	db.printCategoryTree(out, showBuiltins);
 	
 	System.out.println(outString);
 

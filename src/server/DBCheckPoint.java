@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:30 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/04/20 18:21:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,13 +59,13 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * DBCheckPoint is a class designed to allow server-side code that
+ * <p>DBCheckPoint is a class designed to allow server-side code that
  * needs to attempt a multi-step operation that might not successfully
  * complete to be able to undo all changes made without having to
- * abort the entire transaction.
+ * abort the entire transaction.</p>
  * 
- * In other words, a DBCheckPoint is basically a transaction within a transaction.
- *
+ * <p>In other words, a DBCheckPoint is basically a transaction within 
+ * a transaction.</p>
  */
 
 class DBCheckPoint {

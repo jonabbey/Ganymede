@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/04/16 22:52:44 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/04/20 18:21:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -340,9 +340,13 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
    * <p>Recursively prints a portion of a text
    * representation of this category
    * to &lt;out&gt;, with leading indent.</p>
+   *
+   * @param out
+   * @param indent leading indent for this category and below
+   * @param showAll if true, show built-in field types
    */
 
-  public synchronized void print(PrintWriter out, String indent)
+  public synchronized void print(PrintWriter out, String indent, boolean showAll)
   {
     out.println(indent + getName());
 
@@ -350,11 +354,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       {
 	if (contents.elementAt(i) instanceof DBBaseCategory)
 	  {
-	    ((DBBaseCategory) contents.elementAt(i)).print(out, indent + "  ");
+	    ((DBBaseCategory) contents.elementAt(i)).print(out, indent + "  ", showAll);
 	  }
 	else if (contents.elementAt(i) instanceof DBObjectBase)
 	  {
-	    ((DBObjectBase) contents.elementAt(i)).print(out, indent + "  ");
+	    ((DBObjectBase) contents.elementAt(i)).print(out, indent + "  ", showAll);
 	  }
       }
   }

@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 1999/03/09 20:15:55 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 1999/04/20 18:21:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   String okChars = null;
   String badChars = null;
   DBNameSpace namespace = null;
-  boolean caseInsensitive = false;
   boolean multiLine = false;
 
   // invid attributes
@@ -224,7 +223,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     okChars = original.okChars;
     badChars = original.badChars;
     namespace = original.namespace; // we point to the original namespace.. not a problem, since they are immutable
-    caseInsensitive = original.caseInsensitive;
     multiLine = original.multiLine;
 
     editInPlace = original.editInPlace;
@@ -2033,15 +2031,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    result += ", namespace: " + namespace.getName();
 	  }
 
-	if (caseInsensitive)
-	  {
-	    result += ", case insensitive"; 
-	  }
-	else
-	  {
-	    result += ", case sensitive"; 
-	  }
-
 	break;
 
       case INVID:
@@ -2240,15 +2229,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    result += " badChars: '" + badChars + "'";
 	  }
 	
-	if (caseInsensitive)
-	  {
-	    result += " case insensitive"; 
-	  }
-	else
-	  {
-	    result += " case sensitive"; 
-	  }
-
 	break;
 	
       case INVID:
