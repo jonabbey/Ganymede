@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.256 $
-   Last Mod Date: $Date: 2002/03/16 02:13:13 $
+   Version: $Revision: 1.257 $
+   Last Mod Date: $Date: 2002/06/19 23:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.256 $ $Date: 2002/03/16 02:13:13 $
+ * @version $Revision: 1.257 $ $Date: 2002/06/19 23:16:27 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2952,9 +2952,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * <p>This method provides the hook for doing all
-   * manner of internal object listing for the Ganymede
-   * database.  Unfiltered.</p>
+   * <p>This method provides the hook for doing all manner of internal
+   * object listing for the Ganymede database.  This method will not
+   * take into account any optional owner filtering, but it will honor
+   * the editableOnly flag in the Query.</p>
    *
    * @return A Vector of {@link arlut.csd.ganymede.Result Result} objects
    */
@@ -3671,7 +3672,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * the label of obj from its perspective.  This is used to simulate
    * a sort of relational effect for objects linked from the object
    * being added, by letting different fields in the object take on the
-   * role of the label when seen from different objects.
+   * role of the label when seen from different objects.  Yes, it is a big ugly mess.
    */
 
   private void addResultRow(DBObject obj, Query query, 
@@ -3682,22 +3683,30 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
-    if (!supergashMode && !internal)
-      {
-	perm = getPerm(obj);
-
-	if (perm == null ||
-	    (query.editableOnly || !perm.isVisible()) &&
-	    (!query.editableOnly || !perm.isEditable()))
-	  {
-	    return;		// permissions prohibit us from adding this result
-	  }
-      }
-    else
+    if (supergashMode)
       {
 	// we'll report it as editable
 
 	perm = PermEntry.fullPerms;
+      }
+    else
+      {
+	perm = getPerm(obj);
+	
+	if (perm == null)
+	  {
+	    return;		// permissions prohibit us from adding this result
+	  }
+
+	if (query.editableOnly && !perm.isEditable())
+	  {
+	    return;		// permissions prohibit us from adding this result
+	  }
+
+	if (!perm.isVisible())
+	  {
+	    return;		// permissions prohibit us from adding this result
+	  }
       }
 
     if (debug)

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2002/03/15 03:14:59 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2002/06/19 23:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -175,7 +175,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	throw new RemoteException("Error: attempted to start a second server");
       }
 
-    loginSession = new GanymedeSession();
+    loginSession = new GanymedeSession(); // supergash
     loginSession.enableWizards(false);
     loginSession.enableOversight(false);
   } 

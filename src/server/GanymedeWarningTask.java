@@ -8,8 +8,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2002/03/21 21:46:13 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2002/06/19 23:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -133,7 +133,7 @@ public class GanymedeWarningTask implements Runnable {
       {
 	try
 	  {
-	    mySession = new GanymedeSession("warning");
+	    mySession = new GanymedeSession("warning");	// supergash
 	  }
 	catch (RemoteException ex)
 	  {
