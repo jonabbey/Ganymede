@@ -5,7 +5,7 @@
    perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -66,6 +66,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
   // Layout Stuff 
   JPanel 
     Base_Panel,
+    Bordered_Panel,
     Choice_Buttons,
     Expansion_Buttons,
     All_Buttons,
@@ -111,9 +112,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
       }
 
 
-    addWindowListener(new WindowAdapter()
+    this.addWindowListener(new WindowAdapter()
 					  {
-					    public void WindowClosing(WindowEvent e)
+					    public void windowClosing(WindowEvent e)
 					      {
 						myshow(false);
 					      }
@@ -337,20 +338,27 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     edit_pane = new JScrollPane(treeTable);
     edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-    getContentPane().setBackground(Color.white);
-
-    TitledBorder border = new TitledBorder(new EtchedBorder(), this.DialogTitle);
-    border.setTitlePosition(TitledBorder.TOP);
-    border.setTitleJustification(TitledBorder.LEFT);
-
     Base_Panel = new JPanel(); 
-    Base_Panel.setBorder(border);
     Base_Panel.setLayout(new BorderLayout());
     Base_Panel.setBackground(Color.white);
     Base_Panel.add("Center", edit_pane);
     Base_Panel.add("South", All_Buttons);
 
-    getContentPane().add("Center", Base_Panel);
+
+    // Bordered_Panel is necessary for consistency between the 
+    // white background of the main part and the gray of the surrounding
+    // elements.
+
+    TitledBorder border = new TitledBorder(new EtchedBorder(), this.DialogTitle);
+    border.setTitlePosition(TitledBorder.TOP);
+    border.setTitleJustification(TitledBorder.LEFT);
+
+    Bordered_Panel = new JPanel();
+    Bordered_Panel.setBorder(border);
+    Bordered_Panel.setLayout(new BorderLayout());
+    Bordered_Panel.add("Center", Base_Panel);
+
+    getContentPane().add("Center", Bordered_Panel);
     gc.setWaitCursor();
     
     progressDialog.setVisible(false);    
