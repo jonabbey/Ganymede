@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/03/09 05:13:12 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/03/09 05:16:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -837,7 +837,7 @@ class XMLError extends XMLItem {
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                        XMLWarning
+                                                                      XMLWarning
 
 ------------------------------------------------------------------------------*/
 
