@@ -4,8 +4,8 @@
    IPv4Range.java
 
    Created: 4 April 2001
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2001/04/09 05:12:03 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/04/10 21:46:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -580,6 +580,12 @@ public class IPv4Range {
     return found;
   }
 
+  /**
+   * <p>This method compares a given 4 signed byte address against
+   * a specific stanza and returns true if the address could be generated
+   * by the stanza array passed in as _range.</p>
+   */
+
   private boolean stanzaMatch(byte _range[][], byte address[])
   {
     for (int i = 0; i < 4; i++)
@@ -593,6 +599,14 @@ public class IPv4Range {
 
     return true;
   }
+
+  /**
+   * <p>This method compares a set of stanzas of a multi-line
+   * IPv4Range speficiation, and returns true if any of the
+   * ranges overlap at all.  We want to avoid stanza overlap
+   * so that we don't generate a single address at more than one
+   * point in the getElements() enumeration.</p>
+   */
 
   private boolean sanityCheck(byte _range[][][])
   {
@@ -612,6 +626,12 @@ public class IPv4Range {
     
     return true;
   }
+
+  /**
+   * <p>This method returns true if there is any overlap between
+   * the range of values specified in pair1 and the range of
+   * values specified in pair2.</p>
+   */
 
   private boolean byteOverlap(byte pair1[], byte pair2[])
   {
