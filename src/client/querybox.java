@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -35,16 +35,25 @@ import gjt.Box;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ *
+ * This class implements a modal dialog that is popped up to generate
+ * a Query object that will be used by the rest of the ganymede.client
+ * package to submit the query to the server for handling.
+ *
+ * Once an instance of querybox is constructed, the client code will
+ * call myShow() to pop up the dialog and retrieve the Query object.
+ * 
+ * If the user chooses not to submit a Query after all, myShow() will
+ * return null.
+ *  
+ */
+
 class querybox extends Dialog implements ActionListener, ItemListener {
   
-  /////////////////////
-  // Class Variables //
-  /////////////////////
-
   static final boolean debug = false;
   static final int MAXCOMPONENTS = 8; // the number of components that
                                       // can appear in a query choice
-
   // --
 
   Frame optionsFrame = null;	// to hold the frame that we popup to get a list of
@@ -140,9 +149,24 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   /* -- */
 
-  //////////////////
-  // Constructors //
-  //////////////////
+  /**
+   *
+   * Primary constructor.
+   *
+   * @param defaultBase The object base that will be initially selected.
+   *                    May be null.
+   *
+   * @param baseHash A hash mapping bases to a vector of field definitions,
+   *                 to save a bunch of redundant calls to the server.
+   *
+   * @param shortHash A hash mapping short ID's to Base objects, used to
+   *                  resolve base linking in embedded object hierarchies.
+   *
+   * @param parent The frame that this querybox is to be connected to.
+   *
+   * @param DialogTitle The title for this dialog.
+   *
+   */
 
   public querybox (Base defaultBase, Hashtable baseHash, Hashtable shortHash,
 		   Frame parent, String DialogTitle)
@@ -262,13 +286,23 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     query_panel.add("Center", choiceBox);
       
     addChoiceRow(defaultBase); // adds the initial row   
-           
-    // - Define the frame that will contain the return options
-      
-    
   }
 
-  // - Alternate Constructor. Used when no default query is provided
+  /**
+   *
+   * Alternate Constructor. Used when no default query is provided 
+   *
+   * @param baseHash A hash mapping bases to a vector of field definitions,
+   *                 to save a bunch of redundant calls to the server.
+   *
+   * @param shortHash A hash mapping short ID's to Base objects, used to
+   *                  resolve base linking in embedded object hierarchies.
+   *
+   * @param parent The frame that this querybox is to be connected to.
+   *
+   * @param DialogTitle The title for this dialog.
+   *
+   */
 
   public querybox (Hashtable baseHash, Hashtable shortHash, 
                    Frame parent, String myTitle) 
