@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.179 $
-   Last Mod Date: $Date: 2000/03/22 06:24:11 $
+   Version: $Revision: 1.180 $
+   Last Mod Date: $Date: 2000/04/12 05:21:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.179 $ $Date: 2000/03/22 06:24:11 $
+ * @version $Revision: 1.180 $ $Date: 2000/04/12 05:21:53 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -238,8 +238,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   Date lastActionTime = new Date();
 
   /**
-   * <p>The name that the user is connected to the server under.. this
-   * may be &lt;username&gt;2, &lt;username&gt;3, etc., if the user is
+   * <p>The unique name that the user is connected to the server under.. this
+   * may be &lt;username&gt;[2], &lt;username&gt;[3], etc., if the user is
    * connected to the server multiple times.  The username will be
    * unique on the server at any given time.</p>
    *
@@ -1384,7 +1384,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (personaObject == null)
       {
-	Ganymede.debug("Couldn't find persona " + persona + " for user:" + user.getLabel());
+	Ganymede.debug("Couldn't find persona " + persona + " for user:" + username);
 	return false;
       }
 
@@ -1392,7 +1392,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     if (pdbf != null && pdbf.matchPlainText(password))
       {
-	Ganymede.debug("User " + user.getLabel() + " switched to persona " + persona);
+	Ganymede.debug("User " + username + " switched to persona " + persona);
 	personaInvid = personaObject.getInvid();
 	updatePerms(true);
 	ownerList = null;
