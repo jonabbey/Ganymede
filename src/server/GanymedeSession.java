@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.71 $ %D%
+   Version: $Revision: 1.72 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -418,7 +418,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     return supergashMode;
   }
 
-  synchronized void setLastError(String status)
+  void setLastError(String status)
   {
     lastError = status;
     Ganymede.debug("GanymedeSession [" + username + "]: setLastError (" + lastError + ")");
@@ -509,7 +509,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
   
-  synchronized public String getLastError()
+  public String getLastError()
   {
     String result = null;
 
@@ -530,72 +530,90 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * 
-   * Log out this session.
+   *
+   * Log out this session.  After this method is called, no other
+   * methods may be called on this session object.
    *
    * @see arlut.csd.ganymede.Session
+   * 
    */
 
-  synchronized public void logout()
+  public void logout()
   {
-    if (client == null)
+    // This method is not synchronized to help stave off threads
+    // piling up trying to kill off a user which is deadlocked.
+    //
+    // Obviously we want to prevent the deadlock in the first place,
+    // but this will help keep hapless admins on the console from
+    // locking their console trying to kill deadlocked users.
+    
+    if (!logged_in)
       {
-	// We don't need to update GanymedeServer's lists for internal sessions
-
-	logged_in = false;
-	session.logout();
-	ownerList = null;
 	return;
       }
 
-    Ganymede.debug("User " + username + " logging off");
     logged_in = false;
-    this.client = null;
 
-    // logout the client, abort any DBSession transaction going
-
-    session.logout();
-
-    // if we weren't forced off, do normal logout logging
-
-    if (!forced_off)
+    synchronized (this)
       {
-	// Construct a vector of invid's to place in the log entry we
-	// are about to create.  This lets us search the log easily.
-
-	Vector objects = new Vector();
-
-	if (userInvid != null)
+	if (client == null)
 	  {
-	    objects.addElement(userInvid);
+	    // We don't need to update GanymedeServer's lists for internal sessions
+
+	    session.logout();	// *sync* DBSession
+	    ownerList = null;
+	    return;
 	  }
 
-	if (personaInvid != null)
+	Ganymede.debug("User " + username + " logging off");
+
+	this.client = null;
+
+	// logout the client, abort any DBSession transaction going
+
+	session.logout();	// *synci DBSession
+
+	// if we weren't forced off, do normal logout logging
+
+	if (!forced_off)
 	  {
-	    objects.addElement(personaInvid);
+	    // Construct a vector of invid's to place in the log entry we
+	    // are about to create.  This lets us search the log easily.
+
+	    Vector objects = new Vector();
+
+	    if (userInvid != null)
+	      {
+		objects.addElement(userInvid);
+	      }
+
+	    if (personaInvid != null)
+	      {
+		objects.addElement(personaInvid);
+	      }
+
+	    if (Ganymede.log != null)
+	      {
+		Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
+							   "OK logout for username: " + username,
+							   userInvid,
+							   username,
+							   objects,
+							   null));
+	      }
 	  }
 
-	if (Ganymede.log != null)
-	  {
-	    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
-						       "OK logout for username: " + username,
-						       userInvid,
-						       username,
-						       objects,
-						       null));
-	  }
+	GanymedeServer.sessions.removeElement(this);
+	GanymedeServer.clearActiveUser(username);
+	GanymedeAdmin.refreshUsers();
+
+	ownerList = null;		// make GC happier
+
+	Ganymede.debug("User " + username + " logged off");
+
+	this.username = null;
+	this.lastError = null;
       }
-
-    GanymedeServer.sessions.removeElement(this);
-    GanymedeServer.clearActiveUser(username);
-    GanymedeAdmin.refreshUsers();
-
-    ownerList = null;		// make GC happier
-
-    Ganymede.debug("User " + username + " logged off");
-
-    this.username = null;
-    this.lastError = null;
   }
 
   /**
@@ -643,13 +661,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public synchronized Vector getPersonae()
+  public Vector getPersonae()
   {
     DBObject user;
     Vector results;
     InvidDBField inv;
 
     /* -- */
+
+    checklogin();
 
     user = getUser();
 
@@ -693,6 +713,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     PasswordDBField pdbf;
 
     /* -- */
+
+    checklogin();
 
     user = getUser();
 
@@ -781,6 +803,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     DBObject owner;
 
     /* -- */
+
+    checklogin();
 
     if (ownerList != null)
       {
@@ -883,8 +907,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public ReturnVal setDefaultOwner(Vector ownerInvids)
+  public synchronized ReturnVal setDefaultOwner(Vector ownerInvids)
   {
+    checklogin();
+
     if (ownerInvids == null)
       {
 	newObjectOwnerInvids = null;
@@ -923,8 +949,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public ReturnVal filterQueries(Vector ownerInvids)
+  public synchronized ReturnVal filterQueries(Vector ownerInvids)
   {
+    checklogin();
+
     if (ownerInvids == null)
       {
 	visibilityFilterInvids = ownerInvids;
@@ -964,6 +992,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     Vector result = new Vector();
 
     /* -- */
+
+    checklogin();
 
     synchronized (Ganymede.db)
       {
@@ -1007,6 +1037,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public Category getRootCategory()
   {
+    checklogin();
+
     return Ganymede.db.rootCategory;
   }
 
@@ -1021,6 +1053,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public CategoryTransport getCategoryTree()
   {
+    checklogin();
+
     if (supergashMode)
       {
 	if (Ganymede.catTransport == null)
@@ -1068,6 +1102,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public BaseListTransport getBaseList()
   {
+    checklogin();
+
     if (supergashMode)
       {
 	return Ganymede.baseTransport;
@@ -1097,6 +1133,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     DBObjectBase base;
 
     /* -- */
+
+    checklogin();
 
     base = Ganymede.db.getObjectBase(baseId);
 
@@ -1133,15 +1171,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public ReturnVal openTransaction(String describe)
+  public synchronized ReturnVal openTransaction(String describe)
   {
+    checklogin();
+
     if (session.editSet != null)
       {
 	return Ganymede.createErrorDialog("Server: Error in openTransaction()",
 					  "Error.. transaction already opened");
       }
 
-    session.openTransaction(describe);
+    session.openTransaction(describe); // *sync* DBSession
 
     this.status = "Transaction: " + describe;
     setLastEvent("openTransaction");
@@ -1165,8 +1205,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public void checkpoint(String key)
+  public synchronized void checkpoint(String key)
   {
+    checklogin();
+
     if (session.editSet == null)
       {
 	throw new RuntimeException("checkpoint called in the absence of a transaction");
@@ -1210,8 +1252,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public boolean rollback(String key)
+  public synchronized boolean rollback(String key)
   {
+    checklogin();
+
     if (session.editSet == null)
       {
 	throw new RuntimeException("rollback called in the absence of a transaction");
@@ -1246,6 +1290,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
+    checklogin();
+
     if (session.editSet == null)
       {
 	return Ganymede.createErrorDialog("Server: Error in commitTransaction()",
@@ -1279,8 +1325,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public ReturnVal abortTransaction()
+  public synchronized ReturnVal abortTransaction()
   {
+    checklogin();
+
     if (session.editSet == null)
       {
 	throw new IllegalArgumentException("no transaction in progress");
@@ -1334,6 +1382,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     boolean embedded;
 
     /* -- */
+
+    checklogin();
 
     if (query == null)
       {
@@ -1528,7 +1578,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * 
    */
 
-  public synchronized Vector getObjects(short baseid)
+  public Vector getObjects(short baseid)
   {
     Vector bases = new Vector();
     Vector results = new Vector();
@@ -1537,6 +1587,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     Enumeration enum;
 
     /* -- */
+
+    checklogin();
 
     base = Ganymede.db.getObjectBase(baseid);
     bases.addElement(base);
@@ -1578,8 +1630,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized QueryResult query(Query query)
+  public QueryResult query(Query query)
   {
+    checklogin();
     return queryDispatch(query, false, true, null);
   }
 
@@ -1595,7 +1648,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Result
    */
 
-  public synchronized Vector internalQuery(Query query)
+  public Vector internalQuery(Query query)
   {
     Vector result = new Vector();
     QueryResult internalResult = queryDispatch(query, true, false, null);
@@ -1624,7 +1677,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   /**
    *
    * This method is the primary Query engine for the Ganymede
-   * databases
+   * databases.<br><br>
+   *
+   * This method is partially synchronized to prevent deadlock problems when
+   * extantLock is null.
    *
    * @param query The query to be handled
    * @param internal If true, the query filter setting will not be honored
@@ -1671,7 +1727,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else if (query.objectName != null)
       {
-	base = Ganymede.db.getObjectBase(query.objectName);
+	base = Ganymede.db.getObjectBase(query.objectName); // *sync* DBStore
       }
 
     if (query.returnType != -1)
@@ -1680,7 +1736,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else if (query.returnName != null)
       {
-	containingBase = Ganymede.db.getObjectBase(query.returnName);
+	containingBase = Ganymede.db.getObjectBase(query.returnName); // *sync* DBStore
       }
 
     if (base == null)
@@ -1748,7 +1804,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 	else if (node.fieldname != null)
 	  {
-	    fieldDef = (DBObjectBaseField) base.getField(node.fieldname);
+	    fieldDef = (DBObjectBaseField) base.getField(node.fieldname); // *sync* DBObjectBase
 	  }
 	else if (node.fieldId == -1)
 	  {
@@ -1785,7 +1841,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    synchronized (ns)
 	      {
-		DBField resultfield = ns.lookup(node.value);
+		DBField resultfield = ns.lookup(node.value); // *sync* DBNameSpace
 
 		// note that DBNameSpace.lookup() will always point us
 		// to a field that is currently in the main database,
@@ -1853,7 +1909,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	try
 	  {
-	    rLock = session.openReadLock(baseLock);	// wait for it
+	    rLock = session.openReadLock(baseLock);	// *sync* DBSession
 	  }
 	catch (InterruptedException ex)
 	  {
@@ -1897,7 +1953,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (extantLock == null)
       {
-	session.releaseLock(rLock);
+	session.releaseLock(rLock); // *sync* DBSession
       }
 
     if (debug)
@@ -2028,7 +2084,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    // Do we have a version of this object checked out?
 
-	    x = session.editSet.findObject(obj.getInvid());
+	    x = session.editSet.findObject(obj.getInvid()); // *sync* DBEditSet
 
 	    if (x == null)
 	      {
@@ -2079,6 +2135,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public String viewObjectLabel(Invid invid)
   {
+    checklogin();
+
     // We don't check permissions here, as we use session.viewDBObject().
 
     // We have made the command decision that finding the label for an
@@ -2113,6 +2171,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
+    checklogin();
+
     if (invid == null)
       {
 	setLastError("Null invid passed into viewObjectHistory");
@@ -2142,7 +2202,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
 
-    return Ganymede.log.retrieveHistory(invid, since, false);
+    return Ganymede.log.retrieveHistory(invid, since, false); // *sync* DBLog 
   }
 
   /**
@@ -2165,6 +2225,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     DBObject obj;
 
     /* -- */
+
+    checklogin();
 
     if (invid == null)
       {
@@ -2200,7 +2262,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
 
-    return Ganymede.log.retrieveHistory(invid, since, true);
+    return Ganymede.log.retrieveHistory(invid, since, true); // *sync* DBLog
   }
 
   /**
@@ -2259,12 +2321,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public synchronized db_object view_db_object(Invid invid, boolean checkPerms)
+  public db_object view_db_object(Invid invid, boolean checkPerms)
   {
     DBObject obj;
     PermEntry perm;
 
     /* -- */
+
+    checklogin();
 
     obj = (DBObject) session.viewDBObject(invid);
 
@@ -2311,12 +2375,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
+    checklogin();
+
     obj = (DBObject) session.viewDBObject(invid);
 
     if (getPerm(obj).isEditable())
       {
 	setLastEvent("edit_db_object: " + obj.getLabel());
-	return session.editDBObject(invid);
+	return session.editDBObject(invid); // *sync* DBSession DBObject
       }
     else
       {
@@ -2335,11 +2401,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized db_object create_db_object(short type) 
+  public db_object create_db_object(short type) 
   {
     DBObject newObj;
 
     /* -- */
+
+    checklogin();
     
     if (getPerm(type, true).isCreatable())
       {
@@ -2347,7 +2415,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    if (ownerList == null)
 	      {
-		getOwnerGroups();
+		getOwnerGroups(); // *sync*
 	      }
 
 	    // if we have only one group possible, we'll assume we're
@@ -2382,7 +2450,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    ownerInvids.addElement(ownerList.getInvid(0));
 	  }
 
-	newObj = session.createDBObject(type, ownerInvids);
+	newObj = session.createDBObject(type, ownerInvids); // *sync* DBSession
 
 	if (newObj == null)
 	  {
@@ -2426,8 +2494,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized db_object clone_db_object(Invid invid)
+  public db_object clone_db_object(Invid invid)
   {
+    checklogin();
     setLastError("clone_db_object is not yet implemented.");
     return null;
   }
@@ -2455,7 +2524,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
-    eObj = (DBEditObject) edit_db_object(invid);
+    checklogin();
+
+    eObj = (DBEditObject) edit_db_object(invid); // *sync* DBSession DBObject
 
     if (eObj == null)
       {
@@ -2475,7 +2546,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // note!  DBEditObject's finalizeInactivate() method does the
     // event logging
 
-    return session.inactivateDBObject(eObj);
+    return session.inactivateDBObject(eObj); // *sync* DBSession 
   }
 
   /**
@@ -2500,7 +2571,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
-    eObj = (DBEditObject) edit_db_object(invid);
+    checklogin();
+
+    eObj = (DBEditObject) edit_db_object(invid); // *sync* DBSession DBObject
 
     if (eObj == null)
       {
@@ -2520,7 +2593,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // note!  DBEditObject's finalizeReactivate() method does the
     // event logging
 
-    return session.reactivateDBObject(eObj);
+    return session.reactivateDBObject(eObj); // *sync* DBSession, DBObject possible
   }
 
   /**
@@ -2540,6 +2613,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public synchronized ReturnVal remove_db_object(Invid invid) 
   {
+    checklogin();
+
     if (debug)
       {
 	Ganymede.debug("Attempting to delete object: " + invid);
@@ -2599,6 +2674,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     return session.deleteDBObject(invid);
   }
+
+  /*******************************************************************************
+   *                                                                             *
+   * From here on down, the methods are not remotely accessible to the client,   *
+   * but are instead for server-side use only.                                   *
+   *                                                                             *
+   *******************************************************************************/
 
   /**
    *
@@ -2702,7 +2784,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  final public PermEntry getPerm(DBObject object)
+  public final PermEntry getPerm(DBObject object)
   {
     boolean useSelfPerm = false;
     PermEntry result;
@@ -2738,7 +2820,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // make sure we have personaPerms up to date
 
-    updatePerms(false);
+    updatePerms(false);		// *sync*
 
     // if we are operating on behalf of an end user and the object in
     // question happens to be that user's record, we'll act as if we
@@ -2845,7 +2927,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // make sure we have personaPerms up to date
 
-    updatePerms(false); 
+    updatePerms(false);		// *sync*
 
     // if we are operating on behalf of an end user and the object in
     // question happens to be that user's record, we may gain some
@@ -2967,7 +3049,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return PermEntry.fullPerms;
       }
 
-    updatePerms(false); // make sure we have personaPerms up to date
+    updatePerms(false); // *sync* make sure we have personaPerms up to date
 
     // note that we can use personaPerms, since the persona's
     // base type privileges apply generically to objects of the
@@ -3024,7 +3106,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // make sure we have defaultPerms and personaPerms up to date
 
-    updatePerms(false);
+    updatePerms(false);		// *sync*
 
     // remember that personaPerms is a permissive superset of
     // defaultPerms
@@ -3745,5 +3827,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     this.lastEvent = text;
     GanymedeAdmin.refreshUsers();
+  }
+
+  /**
+   *
+   * This private method is called by all methods in
+   * GanymedeSession that require the client to be logged
+   * in to operate.
+   *
+   */
+
+  private void checklogin()
+  {
+    if (!logged_in)
+      {
+	throw new IllegalArgumentException("not logged in");
+      }
   }
 }
