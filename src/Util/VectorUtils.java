@@ -2,11 +2,11 @@
 
    VectorUtils.java
 
-   Convenience methods for working with Vectors.. provides efficient Union
-   and Intersection and Difference methods.
+   Convenience methods for working with Vectors.. provides efficient Union,
+   Intersection, and Difference methods.
    
    Created: 21 July 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -87,7 +87,7 @@ public class VectorUtils {
   /**
    *
    * This method returns a Vector containing the intersection of the
-   * objects contained in vectA and vectB.
+   * objects contained in vectA and vectB.<br><br>
    *
    * This method will always return a new, non-null Vector, even if
    * vectA and/or vectB are null.
@@ -166,7 +166,7 @@ public class VectorUtils {
   /**
    *
    * This method returns a Vector containing the set of objects
-   * contained in vectA that are not contained in vectB.
+   * contained in vectA that are not contained in vectB.<br><br>
    *
    * This method will always return a new, non-null Vector, even if
    * vectA and/or vectB are null.
