@@ -7,7 +7,7 @@
    used to extract the results  out of the dump.
    
    Created: 25 September 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -108,6 +108,19 @@ public class DumpResult implements java.io.Serializable {
    *
    */
 
+  public void addRow(DBObject object)
+  {
+    addRow(object, null);
+  }
+
+  /**
+   *
+   * This method is used to add an object's information to
+   * the dumpResult's serializable buffer.  It is intended
+   * to be called on the server.  
+   *
+   */
+
   public void addRow(DBObject object, GanymedeSession owner)
   {
     DBObjectBaseField fieldDef;
@@ -130,7 +143,7 @@ public class DumpResult implements java.io.Serializable {
 
 	// make sure we have permission to see this field
 
-	if (!owner.getPerm(object, fieldDef.getID()).isVisible())
+	if (owner != null && !owner.getPerm(object, fieldDef.getID()).isVisible())
 	  {
 	    buffer.append("|");
 	    continue;
