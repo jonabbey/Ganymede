@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -834,6 +834,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// and unlock the server
 
 	store.schemaEditInProgress = false;
+
+	// and update the serialized representation of the category/base structure
+
+	Ganymede.catTransport = new CategoryTransport(store.rootCategory);
 
 	GanymedeAdmin.setState("Normal Operation");
       }
