@@ -4,8 +4,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2001/04/05 06:18:58 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2001/08/15 01:53:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -200,6 +200,29 @@ public class StringUtils {
     // we should never get here
 
     return results;
+  }
+
+  /**
+   * <p>This method behaves like String.replace(), but replaces substrings rather than
+   * chars.</p>
+   */
+
+  public static String replaceStr(String inputString, String splitString, String joinString)
+  {
+    StringBuffer buffer = new StringBuffer();
+    String[] elems = split(inputString, splitString);
+
+    for (int i = 0; i < elems.length; i++)
+      {
+	if (i != 0)
+	  {
+	    buffer.append(joinString);
+	  }
+
+	buffer.append(elems[i]);
+      }
+
+    return buffer.toString();
   }
 
   /**
