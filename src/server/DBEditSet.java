@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.96 $
-   Last Mod Date: $Date: 2001/03/03 07:19:33 $
+   Version: $Revision: 1.97 $
+   Last Mod Date: $Date: 2001/03/03 07:36:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1568,6 +1568,8 @@ public class DBEditSet {
 	objects.clear();
 	objects = null;
 
+	// committedObjects is actually a method-local var
+
 	committedObjects.removeAllElements();
 
 	session = null;
@@ -1575,6 +1577,7 @@ public class DBEditSet {
 	// clear out any checkpoints that may be lingering
 
 	checkpoints.removeAllElements();
+	checkpoints = null;
 
 	// and wake up any threads sleeping to checkpoint
 
