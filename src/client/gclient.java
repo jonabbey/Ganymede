@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.81 $ %D%
+   Version: $Revision: 1.82 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -285,6 +285,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   querybox
     my_querybox = null;
 
+
+  // this is true during the handleReturnVal method, while a wizard is
+  // active.  If a wizard is active, don't allow the window to close.
+  private boolean
+    wizardActive = false;
+
   /* -- */
 
   /**
@@ -297,7 +303,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   public gclient(Session s, glogin g)
   {
-    super("Ganymede Client: "+g.my_client.getName()+" logged in");
+    //super("Ganymede Client: "+g.my_client.getName() +" logged in");
+
+    try
+      {
+	setTitle("Ganymede Client: " + s.getMyUserName() + " logged in");
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not talk to server: " + rx);
+      }
 
     setIconImage(pencil);
 
@@ -318,7 +333,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     session = s;
     _myglogin = g;
-    my_username = g.getUserName();
+    my_username = g.getUserName().toLowerCase();
 
     mainPanel = new JPanel(true);
     mainPanel.setLayout(new BorderLayout());
@@ -1235,6 +1250,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	System.err.println("** gclient: Entering handleReturnVal");
       }
 
+    wizardActive = true;
     while ((retVal != null) && (retVal.getDialog() != null))
       {
 	if (debug)
@@ -1306,6 +1322,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
       }
 
+    wizardActive = false;
+    
     if (debug)
       {
 	System.out.println("Done with wizards, checking retVal for rescan.");
@@ -1365,13 +1383,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 			// Loop over each containerPanel in the window
 			for (int i = 0; i < fp.containerPanels.size(); i++)
 			  {
+			    containerPanel cp = (containerPanel)fp.containerPanels.elementAt(i);
+
 			    if (debug)
 			      {
 				System.out.println("Checking containerPanel number " + i);
+				System.out.println("  cp.invid= " + cp.getObjectInvid() + " lookng for: " + invid);
 			      }
 
-
-			    containerPanel cp = (containerPanel)fp.containerPanels.elementAt(i);
 			    if (cp.getObjectInvid().equals(invid))
 			      {
 				if (debug)
@@ -3115,6 +3134,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   boolean OKToProceed()
   {
+    if (wizardActive)
+      {
+	if (debug)
+	  {
+	    System.out.println("gclient: wizard is active, not ok to logout.");
+	  }
+
+	return false;
+      }
+
     if (getSomethingChanged())
       {
 	StringDialog dialog = new StringDialog(this, 
