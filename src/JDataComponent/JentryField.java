@@ -124,7 +124,8 @@ abstract public class JentryField extends JTextField {
 
   public void setBackground(Color color)
   {
-    setValueBackColor(color,true);
+    //setValueBackColor(color,true);
+    super.setBackground(color);
   }
 
   
@@ -178,7 +179,8 @@ abstract public class JentryField extends JTextField {
 
   public void setFont(Font f)
   {
-    setValueFont(f,true);
+    //setValueFont(f,true);
+    super.setFont(f);
   }
   
   /**
@@ -209,7 +211,8 @@ abstract public class JentryField extends JTextField {
 
   public void setForeground(Color color)
   {
-    setValueForeColor(color,true);    
+    //setValueForeColor(color,true);    
+    super.setForeground(color);
   }
 
   /**
