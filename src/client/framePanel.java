@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,7 @@ import arlut.csd.JDataComponent.*;
 public class framePanel extends JInternalFrame implements ChangeListener, Runnable, ActionListener {
   
   // This will be loaded from gclient anyway.
-  private boolean debug = true;
+  boolean debug = true;
 
   // Indexes for the tabs in the JTabbedPane These numbers have to
   // correspond to the order they are added as tabs, so they are set
@@ -118,7 +118,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   windowPanel
     wp;
 
-  private gclient
+  gclient
     gc;
 
   notesPanel
@@ -993,7 +993,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       if (!createdList.contains(new Integer(index)))
 	{
-	  println("Creating a new pane. in stateChanged");
 	  createPanel(index);
 	}
     }
