@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.20 $
-# Date: $Date: 2002/03/16 03:01:41 $
+# Version: $Revision: 1.21 $
+# Date: $Date: 2002/03/16 03:09:34 $
 #
 ############################################################
 
@@ -98,7 +98,7 @@ ln -s ../com .
 rm -f org
 ln -s ../org .
 
-$JAVADIR/jar -cf ../ganymedeServer.jar arlut gnu jcrypt.class Qsmtp.class messageObject.class MD5*.class com org
+$JAVADIR/jar -cf ../ganymedeServer.jar arlut gnu jcrypt Qsmtp md5 com org
 
 cd ..
 
