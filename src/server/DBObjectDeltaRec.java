@@ -5,14 +5,11 @@
    This class is used to represent a record of changes that need to be
    made to a DBObject in the DBStore.
  
-   This class will be used in two separate contexts in the Ganymede
-   server.  In the first case, this class will be used to handle writing
-   and reading records of changes made to objects in the Ganymede journal
-   file.  In the second case, this class will be used to keep track of
-   changes made to vector fields in a non-exclusive check-out context.
+   This class will be used in to handle writing and reading records of
+   changes made to objects in the Ganymede journal file.
    
    Created: 11 June 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,11 +32,8 @@ import java.rmi.RemoteException;
  * This class is used to represent a record of changes that need to be
  * made to a DBObject in the DBStore.<br><br>
  *
- * This class will be used in two separate contexts in the Ganymede
- * server.  In the first case, this class will be used to handle writing
- * and reading records of changes made to objects in the Ganymede journal
- * file.  In the second case, this class will be used to keep track of
- * changes made to vector fields in a non-exclusive check-out context.
+ * This class will be used in to handle writing and reading records of
+ * changes made to objects in the Ganymede journal file.
  *
  */
 
@@ -48,8 +42,6 @@ public class DBObjectDeltaRec implements FieldType {
   static final boolean debug = true;
 
   // ---
-
-  DBSession owner = null;	// will be null if this is a journal rec
 
   Invid invid = null;
   Vector fieldRecs = new Vector(); // changes
@@ -385,92 +377,6 @@ public class DBObjectDeltaRec implements FieldType {
 
   /**
    *
-   * This DBObjectDeltaRec constructor is used to initialize a delta record
-   * for a non-exclusive vector field edit.
-   *
-   */
-
-  public DBObjectDeltaRec(DBSession owner, DBObject original)
-  {
-    this.owner = owner;
-    this.invid = original.getInvid();
-  }
-
-  /**
-   *
-   * This method is used to add a value to a field vector
-   * when this DBObjectDeltaRec was created for a non-exclusive
-   * vector field edit.
-   *
-   */
-
-  public void addVecValue(short fieldcode, Object value)
-  {
-    if (owner == null)
-      {
-	throw new IllegalArgumentException("This DBObjectDeltaRec wasn't created for a vector edit");
-      }
-
-    /* - */
-
-    fieldDeltaRec fieldRec;
-
-    /* -- */
-
-    fieldRec = getFieldRec(fieldcode);
-    fieldRec.addValue(value);
-  }
-
-  /**
-   *
-   * This method is used to remove a value from a field vector
-   * when this DBObjectDeltaRec was created for a non-exclusive
-   * vector field edit.
-   *
-   */
-
-  public void delVecValue(short fieldcode, Object value)
-  {
-    if (owner == null)
-      {
-	throw new IllegalArgumentException("This DBObjectDeltaRec wasn't created for a vector edit");
-      }
-
-    /* - */
-
-    fieldDeltaRec fieldRec;
-
-    /* -- */
-
-    fieldRec = getFieldRec(fieldcode);
-    fieldRec.delValue(value);
-  }
-
-  private fieldDeltaRec getFieldRec(short fieldcode)
-  {
-    fieldDeltaRec result;
-
-    /* -- */
-
-    for (int i = 0; i < fieldRecs.size(); i++)
-      {
-	result = (fieldDeltaRec) fieldRecs.elementAt(i);
-
-	if (result.fieldcode == fieldcode)
-	  {
-	    return result;
-	  }
-      }
-
-    result = new fieldDeltaRec(fieldcode);
-
-    fieldRecs.addElement(result);
-
-    return result;
-  }
-
-  /**
-   *
    * This method emits this delta rec to a file
    *
    */
@@ -658,57 +564,6 @@ public class DBObjectDeltaRec implements FieldType {
       }
 
     return copy;
-  }
-
-  /**
-   *
-   * This method is used when an object that was checked out for
-   * shared editing is being converted to an exclusive edit.
-   *
-   * Note that this method is only intended to do vector ops.
-   *
-   */
-
-  public void updateObject(DBEditObject eObj)
-  {
-    fieldDeltaRec fieldRec = null;
-
-    /* -- */
-
-    for (int i = 0; i < fieldRecs.size(); i++)
-      {
-	fieldRec = (fieldDeltaRec) fieldRecs.elementAt(i);
-	
-	// are we clearing this field?
-	
-	if (!fieldRec.vector && fieldRec.scalarValue == null)
-	  {
-	    throw new RuntimeException("Error, field clearing record updating object");
-	  }
-
-	// are we doing a replace?
-
-	if (!fieldRec.vector)
-	  {
-	    throw new RuntimeException("Error, field replace record updating object");
-	  }
-
-	// ok, good, we're doing a vector mod.. note that if we've
-	// gotten to this point, we're assuming that we've already
-	// been ok'ed for this
-
-	DBField field = (DBField) eObj.getField(fieldRec.fieldcode);
-
-	for (int j = 0; j < fieldRec.addValues.size(); j++)
-	  {
-	    field.values.addElement(fieldRec.addValues.elementAt(j));
-	  }
-
-	for (int j = 0; j < fieldRec.delValues.size(); j++)
-	  {
-	    field.values.removeElement(fieldRec.delValues.elementAt(j));
-	  }
-      }
   }
 }
 
