@@ -5,7 +5,7 @@
    A wizard to manage user reactivation interactions for the userCustom object.
 
    Created: 29 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -165,7 +165,7 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 				 "Cancel",
 				 "question.gif");
 
-	dialog.addPassword("New Password");
+	dialog.addPassword("New Password", true);
 
 	StringDBField stringfield = (StringDBField) userObject.getField(LOGINSHELL);
 
