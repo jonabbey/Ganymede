@@ -90,7 +90,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
     fieldNode;
 
   BaseField 
-    fieldDef;
+    fieldDef;			// remote reference
 
   //  java.awt.CardLayout
   // card;

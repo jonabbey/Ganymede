@@ -65,7 +65,7 @@ import java.awt.*;
 
 class BaseNode extends arlut.csd.JTree.treeNode {
 
-  private Base base;
+  private Base base;		// remote reference
 
   /* -- */
 
@@ -84,5 +84,12 @@ class BaseNode extends arlut.csd.JTree.treeNode {
   public void setBase(Base base)
   {
     this.base = base;
+  }
+
+  public void cleanup()
+  {
+    super.cleanup();
+
+    this.base = null;
   }
 }

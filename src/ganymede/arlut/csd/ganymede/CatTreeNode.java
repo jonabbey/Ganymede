@@ -66,7 +66,7 @@ import java.awt.*;
 
 public class CatTreeNode extends arlut.csd.JTree.treeNode {
 
-  private Category category;
+  private Category category;	// remote reference
 
   /* -- */
 
@@ -85,5 +85,12 @@ public class CatTreeNode extends arlut.csd.JTree.treeNode {
   public void setCategory(Category category)
   {
     this.category = category;
+  }
+
+  public void cleanup()
+  {
+    super.cleanup();
+
+    this.category = null;
   }
 }

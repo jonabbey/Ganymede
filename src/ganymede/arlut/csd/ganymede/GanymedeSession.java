@@ -132,7 +132,7 @@ import arlut.csd.JDialog.*;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
-final public class GanymedeSession extends UnicastRemoteObject implements Session, Unreferenced {
+final public class GanymedeSession implements Session, Unreferenced {
 
   static final boolean debug = false;
   static final boolean permsdebug = false;
@@ -502,8 +502,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public GanymedeSession(String sessionLabel) throws RemoteException
   {
-    super();			// UnicastRemoteObject initialization
-
     // handle the server login semaphore for this session
 
     // if we are attempting to start a builder session, we'll proceed
@@ -599,8 +597,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 			 DBObject personaObject, boolean exportObjects,
 			 boolean clientIsRemote) throws RemoteException
   {
-    super();			// UnicastRemoteObject initialization
-
     // --
 
     // GanymedeServer will have already incremented our semaphore in
@@ -616,7 +612,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     this.remotelyAccessible = exportObjects;
 
-    asyncPort = new serverClientAsyncResponder();
+    if (this.remotelyAccessible)
+      {
+	asyncPort = new serverClientAsyncResponder();
+
+	UnicastRemoteObject.exportObject(this);	// may throw RemoteException
+      }
 
     if (userObject != null)
       {
@@ -645,7 +646,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     try
       {
-	String ipAddress = getClientHost();
+	String ipAddress = java.rmi.server.RemoteServer.getClientHost();
 
 	try
 	  {
