@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -462,43 +462,141 @@ final public class DBSession {
    * Remove an object from the database<br><br>
    *
    * This method method can only be called in the context of an open
-   * transaction. Because the object must be checked out (which is the only
-   * way to obtain a DBEditObject), no other locking is required. This method
-   * will take an object out of the DBStore and mark it as
-   * deleted in the transaction.  When the transaction is committed, the
-   * object will have its remove() method called to do cleanup, and the
-   * editSet nulls the object's slot in the DBStore.  If the
-   * transaction is aborted, the object remains in the database
-   * unchanged.
+   * transaction. Because the object must be checked out (which is the
+   * only way to obtain a DBEditObject), no other locking is
+   * required. This method will take an object out of the DBStore, do
+   * whatever immediate removal logic is required, and mark it as
+   * deleted in the transaction.  When the transaction is committed,
+   * the object will be expunged from the database.
    *
    * Note that this method does not check to see whether permission
    * has been obtained to delete the object.. that's done in
    * GanymedeSession.delete_db_object().
    *
    * @param eObj An object checked out in the current transaction to be deleted
-   *  
+   *   
    */
 
   public synchronized ReturnVal deleteDBObject(DBEditObject eObj)
   {
+    ReturnVal retVal, retVal2;
+    String key;
+
+    /* -- */
+
+    key = "del" + eObj.getLabel();
+
     switch (eObj.getStatus())
       {
       case DBEditObject.CREATING:
+	editSet.checkpoint(key);
 	eObj.setStatus(DBEditObject.DROPPING);
 	break;
 
       case DBEditObject.EDITING:
+	editSet.checkpoint(key);
 	eObj.setStatus(DBEditObject.DELETING);
 	break;
 
       case DBEditObject.DELETING:
-	return null;
-
       case DBEditObject.DROPPING:
+
+	// already to be deleted
+
 	return null;
       }
 
-    return null;
+    retVal = eObj.remove();
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	if (retVal.getCallback() == null)
+	  {
+	    // oops, irredeemable failure.  rollback.
+
+	    editSet.rollback(key);
+	    return retVal;
+	  }
+	else
+	  {
+	    // the remove() logic is presenting a wizard
+	    // to the user.. turn the client over to
+	    // the wizard
+
+	    return retVal;
+	  }
+      }
+    else
+      {
+	// ok, go ahead and finalize
+
+	retVal2 = eObj.finalizeRemove();
+
+	if (retVal2 != null && !retVal2.didSucceed())
+	  {
+	    // oops, irredeemable failure.  rollback.
+		
+	    editSet.rollback(key);
+	    return retVal2;
+	  }
+      }
+
+    return retVal;
+  }
+
+  /**
+   *
+   * Inactivate an object in the database<br><br>
+   *
+   * This method method can only be called in the context of an open
+   * transaction. Because the object must be checked out (which is the only
+   * way to obtain a DBEditObject), no other locking is required. This method
+   * will take an object out of the DBStore and proceed to do whatever is
+   * necessary to cause that object to be 'inactivated'.
+   *
+   * Note that this method does not check to see whether permission
+   * has been obtained to inactivate the object.. that's done in
+   * GanymedeSession.inactivate_db_object().
+   *
+   * @param eObj An object checked out in the current transaction to be inactivated
+   *  
+   */
+
+  public synchronized ReturnVal inactivateDBObject(DBEditObject eObj)
+  {
+    ReturnVal retVal;
+    String key;
+
+    /* -- */
+
+    key = "inactivate" + eObj.getLabel();
+
+    switch (eObj.getStatus())
+      {
+      case DBEditObject.EDITING:
+      case DBEditObject.CREATING:
+	break;
+
+      default:
+	return Ganymede.createErrorDialog("Server: Error in DBSession.inactivateDBObject()",
+					  "Error.. can't inactivate an object that has already been inactivated or deleted");
+      }
+
+    editSet.checkpoint(key);
+
+    retVal = eObj.inactivate();
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	if (retVal.getCallback() == null)
+	  {
+	    // oops, irredeemable failure.  rollback.
+
+	    editSet.rollback(key);
+	  }
+      }
+
+    return retVal;
   }
 
   /**
@@ -698,7 +796,8 @@ final public class DBSession {
 	  }
 	catch (InterruptedException ex)
 	  {
-	    Ganymede.debug("DBSession: commitTransaction got an interrupted exception waiting for read locks to be released." + ex);
+	    Ganymede.debug("DBSession: commitTransaction got an interrupted exception " + 
+			   "waiting for read locks to be released." + ex);
 	  }
 
 	//	throw new IllegalArgumentException(key + ": commitTransaction(): holding a lock");
@@ -747,7 +846,8 @@ final public class DBSession {
       {
 	throw new RuntimeException("abortTransaction called outside of a transaction");
       }
-    else if (editSet.wLock != null)
+
+    if (editSet.wLock != null)
       {
 	if (editSet.wLock.inEstablish)
 	  {
@@ -780,7 +880,8 @@ final public class DBSession {
 	  }
 	catch (InterruptedException ex)
 	  {
-	    Ganymede.debug("DBSession: abortTransaction got an interrupted exception waiting for read locks to be released." + ex);
+	    Ganymede.debug("DBSession: abortTransaction got an interrupted exception " +
+			   "waiting for read locks to be released." + ex);
 	  }
       }
 
