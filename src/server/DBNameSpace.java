@@ -6,15 +6,15 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2001/07/09 07:15:50 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2004/02/05 22:01:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -109,7 +109,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   /**
    * <p>The number of simultaneous transactions in progress
-   * that we will size the transactions hash for.</p>
+   * that we will size the transactions hash for initially.</p>
    */
 
   static final int TRANSCOUNT = 30;
@@ -1195,6 +1195,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
                                                                    dumpNameSpace
 
   ----------------------------------------------------------------------------*/
+
+  /**
+   * <p>This method is just a debug instrument, it prints to stderr a list of
+   * the contents of this namespace's unique value hash.</p>
+   */
 
   private void dumpNameSpace()
   {
