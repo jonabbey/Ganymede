@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -87,7 +87,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       
 
   public CompoundBorder
-    statusBorder = new CompoundBorder(loweredBorder, emptyBorder5);
+    statusBorder = new CompoundBorder(loweredBorder, emptyBorder5),
+    statusBorderRaised = new CompoundBorder(raisedBorder, emptyBorder5);
 
 
   private Hashtable
@@ -377,8 +378,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     leftP.add("Center", tree);
 
     leftTop = new JPanel(false);
-    leftTop.setBorder(new EmptyBorder(new Insets(4,4,4,4)));
-    leftTop.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.RAISED), new EmptyBorder(new Insets(4,4,4,4))));
+    leftTop.setBorder(statusBorderRaised);
     
     leftL = new JLabel("Objects");
     leftTop.setLayout(new BorderLayout());
@@ -430,7 +430,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rightTop = new JPanel(false);
     rightTop.setBackground(ClientColor.menu);
     rightTop.setForeground(ClientColor.menuText);
-    rightTop.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.RAISED), new EmptyBorder(new Insets(4,4,4,4))));
+    rightTop.setBorder(statusBorderRaised);
     rightTop.setLayout(new BorderLayout());
     rightTop.add("West", rightL);
 
