@@ -156,9 +156,9 @@ class JythonServerProtocol {
     interp.exec("import sys");
     interp.exec("sys.path.append( sys.prefix + '" + System.getProperty("file.separator") + "' + 'jython-lib.jar' )");
     
-    /* Seed the interpreter with a pointer to Ganymede */
-    interp.exec("from arlut.csd.ddroid.server import Ganymede");
-    
+    /* Seed the interpreter with a pointer to important Ganymede classes */
+    interp.exec("from arlut.csd.ddroid.server import *");
+    interp.exec("from arlut.csd.ddroid.common import *");
   }
 
   public void createSession(String personaName)
