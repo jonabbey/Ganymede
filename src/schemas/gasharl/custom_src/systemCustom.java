@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 2001/08/01 18:51:10 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2002/08/20 02:37:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -447,6 +447,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	if (s.size() == 0)
 	  {
+	    // remove the empty stack so we won't try to pop from it
+
 	    ipAddresses.remove(netInvid);
 	  }
 
