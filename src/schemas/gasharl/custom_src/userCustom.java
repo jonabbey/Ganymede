@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 2002/06/19 23:19:25 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 2002/07/26 22:15:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -743,6 +743,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  case userSchema.VOLUMES:
 	  case userSchema.CATEGORY:
 	  case userSchema.HOMEGROUP:
+	  case userSchema.PASSWORDCHANGETIME:
 	    return true;
 	  }
       }
