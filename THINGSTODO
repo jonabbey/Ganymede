@@ -1,0 +1,71 @@
+Ganymede Developer Release 0.96
+January 29, 1999
+THINGSTODO
+---------------------------------------------
+
+1) DNS Support
+
+The biggest point to make about Ganymede right now is that it is as
+much a framework for you to build management software with as it is a
+finished product.  In particular, while the gasharl, linux, and bsd
+schemas are in decent shape, you have to either already be using GASH
+or be willing to settle for simple user/group management if you aren't
+willing to do some work to develop a schema that is useful for you.
+
+What is really needed is for someone to develop a generic DNS schema
+kit that includes a good general parser for DNS files.  The gasharl
+schema is designed to support a single comprehensive NIS domain and a
+single DNS domain broken into Class-C sized subnets, but it is
+designed to work with files generated/maintained by GASH.
+
+Bootstrapping a DNS management system from zone files needs to be
+supported, but Ganymede's objects and links model makes this process
+of doing this a bit unobvious.  The gasharl schema uses system
+information where all the interfaces and system information for
+individual systems is grouped together in objects.  For our network,
+this information was collated and assembled by hand.  Hopefully
+there's a good way of avoiding that work.
+
+Right now the gasharl schema kit is the most fully developed and
+tested schema, but the gasharl schema kit does not include a full
+and working NIS/DNS build system.  We're looking to have the gasharl
+schema in production in the lab by the end of February, 1999.  
+
+Shortly therafter we should have a ganymede 1.0 release with
+everything required to use the gasharl schema for those sites
+currently running GASH.
+
+2) Scalability issues
+
+Right now, the Ganymede server loads all data managed into memory.
+This is reasonably efficient with a good generational garbage
+collector, but it's possible that using a random access binary file
+for the database, when combined with an in-memory cache system using
+the JDK 1.2 weak references API could give better scalability.  Memory
+is cheap these days, so the Ganymede design isn't too bad for our
+purposes and size, but it might be good to experiment with the basic
+engine to see whether things can be made more scalable with 1.2.
+
+In addition, the client has some scalability issues.  In particular,
+there are places where the client will generate pop-up choice lists
+with hundreds if not thousands of choices in them.  This is not
+workable from a user interface perspective, and may be a real burden
+on the client's memory.  For real scalability it might be better to
+require the user to manually type in items when the lists get too big.
+
+3) Documentation/Help
+
+The Ganymede client includes support for a basic HTML help system, but
+we don't have the HTML help web written.  Given our resources and
+priorities, it isn't clear that we'll be able to do this ourselves
+anytime soon, but it really should be done.
+
+4) Schema kit code
+
+All of the loader code for the included shema kits is pretty
+unpleasant.  We recently incorporated GNU regexp into the server, and
+the NIS/GASH loader code should probably take advantage of it.
+
+---
+
+Jonathan Abbey, jonabbey@arlut.utexas.edu

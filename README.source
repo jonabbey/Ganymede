@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.95
-January 22, 1999
+Ganymede Developer Release 0.96
+January 29, 1999
 README.source
 ---------------------------------------------
 
@@ -19,8 +19,9 @@ want to build the jars from scratch, here's what you do.
    can set your CLASSPATH to <install>/src/classes and run
    the ganymede tools.
 
-   You shouldn't see any errors or warnings when you do the initial
-   make of the source tree.
+   You will see some deprecation errors if you are compiling with
+   JDK 1.2.  If you are compiling with 1.1.7, you shouldn't see any
+   errors or warnings when you do the initial make of the source tree 
 
 4. Run 'make kits'.  This will compile all of the customization
    code in src/schemas, as well as build the jar files required if

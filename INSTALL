@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.95
-January 22, 1999
+Ganymede Developer Release 0.96
+January 29, 1999
 INSTALL notes
 ---------------------------------------------
 
@@ -186,7 +186,8 @@ Each of these topics is discussed in its own section below.
   object types and custom code from whichever of the schemas you
   chose.  If you did not choose a schema, but rather just hit return
   when prompted, the Ganymede server will create you a bare-bones
-  ganymede.db file when you run the server for the first time.
+  ganymede.db file when you run the server for the first time.  See
+  src/schemas/README for a description of the various schema kits.
 
   In order to edit the server's schema, start the Ganymede server on
   your server machine.  The server will load its database, come up,
@@ -215,20 +216,23 @@ Each of these topics is discussed in its own section below.
   The sample schemas each specify a builder task to
   be run when a transaction is committed.
 
+  gasharl - arlut.csd.ganymede.custom.GASHBuilderTask
+  linux - arlut.csd.ganymede.custom.LinuxBuilderTask
+  bsd - arlut.csd.ganymede.custom.BSDBuilderTask
   nisonly - arlut.csd.ganymede.custom.NISBuilderTask
   gash - arlut.csd.ganymede.custom.GASHBuilderTask
-  bsd - arlut.csd.ganymede.custom.BSDBuilderTask
-  linux - arlut.csd.ganymede.custom.LinuxBuilderTask
-  gasharl - arlut.csd.ganymede.custom.GASHBuilderTask
+  ganymede.only - arlut.csd.ganymede.custom.DNSBuilderTask and
+	          arlut.csd.ganymede.custom.NISBuilderTask
 
   In addition, each schema by default will look for a script
   to run to the <installdir>/db/out directory.
 
-  nisonly - nisbuilder
-  gash - gashbuilder
+  gasharl - gashbuilder
   bsd - bsd_builder
   linux - linux_builder
-  gasharl - gashbuilder
+  nisonly - nisbuilder
+  gash - gashbuilder
+  ganymede.only
 
   These scripts should be executable by the user under which the
   Ganymede server is run.  The appropriate script will be run
