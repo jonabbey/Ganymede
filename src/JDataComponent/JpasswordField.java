@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -81,7 +81,6 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 
     setEditable(is_editable);  // will this JpasswordField be editable or not?
 
-    setEnabled(true);
     setEchoChar('*');
 
     // This will take care of masking the characters
