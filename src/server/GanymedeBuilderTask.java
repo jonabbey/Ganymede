@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/12/03 11:11:31 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/12/06 09:59:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -99,6 +99,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   private static String currentBackUpDirectory = null;
   private static String basePath = null;
+  private static int id = 0;
 
   /* --- */
 
@@ -125,10 +126,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   public final void run()
   {
+    String label = null;
+    Thread currentThread = java.lang.Thread.currentThread();
     boolean
       success1 = false,
       success2 = false;
-    Thread currentThread = java.lang.Thread.currentThread();
 
     /* -- */
 
@@ -143,9 +145,19 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	Ganymede.buildOn(1);
 
+	// we need a unique label for our session so that multiple
+	// builder tasks can have their own lock keys.. our label will
+	// start at builder:0 and work our way up as we go along
+	// during the server's lifetime
+
+	synchronized (GanymedeBuilderTask.class) 
+	  {
+	    label = "builder:" + id++;
+	  }
+
 	try
 	  {
-	    session = new GanymedeSession("builder");
+	    session = new GanymedeSession(label);
 	  }
 	catch (java.rmi.RemoteException ex)
 	  {

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.128 $
-   Last Mod Date: $Date: 2000/11/23 02:35:50 $
+   Version: $Revision: 1.129 $
+   Last Mod Date: $Date: 2000/12/06 09:59:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -255,9 +255,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /**
    * <P>If this DBObjectBase is locked with an exclusive lock
-   * (either a {@link arlut.csd.ganymede.DBWriteLock DBWriteLock} or
-   * a {@link arlut.csd.ganymede.DBDumpLock DBDumpLock}), this field
-   * will point to it.</P>
+   * (a {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}),
+   * this field will point to it.</P>
    *
    * <P>This field is not currently used for anything in particular
    * in the lock logic, it is here strictly for informational/debugging
@@ -267,13 +266,19 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   DBLock currentLock;
 
   /**
-   * <P>"Queue" of {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}s pending
-   * on this DBObjectBase.  DBWriteLocks will add themselves to the writerList
-   * upon entering establish().  If writerList is not empty, no new
-   * {@link arlut.csd.ganymede.DBReadLock DBReadLock}s will be allowed to
-   * add themselves to the
-   * {@link arlut.csd.ganymede.DBObjectBase#readerList readerList} in this
-   * DBObjectBase.</P>
+   * <P>Set of {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}s
+   * pending on this DBObjectBase.  DBWriteLocks will add themselves
+   * to the writerList upon entering establish().  If writerList is
+   * not empty, no new {@link arlut.csd.ganymede.DBReadLock
+   * DBReadLock}s will be allowed to add to add themselve to the readerList
+   * in this DBObjectBase.  {@link arlut.csd.ganymede.DBDumpLock DBDumpLock}s
+   * don't check the writerList, and will add themselves to the dumperList
+   * as needed, which will block any further writers from queuing up
+   * in the list.</P>
+   *
+   * <P>When a DBWriteLock is locked onto this base, it is taken out
+   * of writerList, writeInProgress is set to true, and currentLock 
+   * is set to point to the DBWriteLock that has exclusive access.</P>
    *
    * <P>Note that there is no guarantee that DBWriteLocks will be granted
    * access to any given DBObjectBase in the order that their threads
@@ -295,12 +300,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   private Vector readerList;
 
   /**
-   * <P>"Queue" of {@link arlut.csd.ganymede.DBDumpLock DBDumpLock}s pending
-   * on this DBObjectBase.  DBDumpLocks will add themselves to the dumperList
-   * upon entering establish().  If dumperList is not empty, no new
-   * {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}s will be allowed to
-   * add themselves to the
-   * {@link arlut.csd.ganymede.DBObjectBase#writerList writerList} in this
+   * <P>Set of {@link arlut.csd.ganymede.DBDumpLock DBDumpLock}s
+   * pending on this DBObjectBase.  DBDumpLocks will add themselves to
+   * the dumperList upon entering establish().  If dumperList is not
+   * empty, no new {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}s
+   * will be allowed to add themselves to the {@link
+   * arlut.csd.ganymede.DBObjectBase#writerList writerList} in this
    * DBObjectBase.</P>
    *
    * <P>Note that there is no guarantee that DBDumpLocks will be granted
@@ -316,18 +321,18 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   private Vector dumperList;
 
   /**
+   * <P>Collection of {@link arlut.csd.ganymede.DBDumpLock DBDumpLock}s
+   * that are locked on this DBObjectBase.</P>
+   */
+
+  private Vector dumpLockList;
+
+  /**
    * <P>Boolean flag monitoring whether or not this DBObjectBase is
    * currently locked for writing.</P>
    */
 
   boolean writeInProgress;
-
-  /**
-   * <P>Boolean flag monitoring whether or not this DBObjectBase is
-   * currently locked for dumping.</P>
-   */
-
-  boolean dumpInProgress;
 
   /**
    * Used to keep track of schema editing
@@ -403,6 +408,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     writerList = new Vector();
     readerList = new Vector();
     dumperList = new Vector();
+    dumpLockList = new Vector();
 
     object_name = "";
     classname = "";
@@ -2673,12 +2679,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     synchronized (store.lockSync)
       {
-	return (!isReaderEmpty() || writeInProgress || dumpInProgress);
+	return (!isReaderEmpty() || writeInProgress || !isDumpLockListEmpty());
       }
   }
 
   /**
-   * <p>Add a DBWriteLock to this base's writer queue.</p>
+   * <p>Add a DBWriteLock to this base's writer wait set.</p>
    */
 
   boolean addWriter(DBWriteLock writer)
@@ -2692,7 +2698,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Remove a DBWriteLock from this base's writer queue.</p>
+   * <p>Remove a DBWriteLock from this base's writer wait set.</p>
    */
 
   boolean removeWriter(DBWriteLock writer)
@@ -2709,7 +2715,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Returns true if this base's writer queue is empty.</p>
+   * <p>Returns true if this base's writer wait set is empty.</p>
    */
 
   boolean isWriterEmpty()
@@ -2718,7 +2724,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Returns the size of the writer queue</p>
+   * <p>Returns the size of the writer wait set</p>
    */
 
   int getWriterSize()
@@ -2775,8 +2781,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     return readerList.size();
   }
 
+
   /**
-   * <p>Add a DBDumpLock to this base's dumper queue.</p>
+   * <p>Add a DBDumpLock to this base's dumper waiting set.</p>
    */
 
   boolean addDumper(DBDumpLock dumper)
@@ -2790,7 +2797,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Remove a DBDumpLock from this base's dumper queue.</p>
+   * <p>Remove a DBDumpLock from this base's dumper waiting set.</p>
    */
 
   boolean removeDumper(DBDumpLock dumper)
@@ -2809,7 +2816,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Returns true if this base's dumper list is empty.</p>
+   * <p>Returns true if this base's dumper wait set is empty.</p>
    */
 
   boolean isDumperEmpty()
@@ -2818,12 +2825,61 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Returns the size of the dumper list</p>
+   * <p>Returns the size of the dumper wait set</p>
    */
 
   int getDumperSize()
   {
     return dumperList.size();
+  }
+
+  /**
+   * <p>Add a DBDumpLock to this base's dumper lock list.</p>
+   */
+
+  boolean addDumpLock(DBDumpLock dumper)
+  {
+    synchronized (store.lockSync)
+      {
+	dumpLockList.addElement(dumper);
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>Remove a DBDumpLock from this base's dumper lock list.</p>
+   */
+
+  boolean removeDumpLock(DBDumpLock dumper)
+  {
+    boolean result;
+
+    synchronized (store.lockSync)
+      {
+	result = dumpLockList.removeElement(dumper);
+
+	store.lockSync.notifyAll();
+	return result;
+      }
+  }
+
+  /**
+   * <p>Returns true if this base's dumper lock list is empty.</p>
+   */
+
+  boolean isDumpLockListEmpty()
+  {
+    return dumpLockList.isEmpty();
+  }
+
+  /**
+   * <p>Returns the size of the dumper lock list</p>
+   */
+
+  int getDumpLockListSize()
+  {
+    return dumpLockList.size();
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/02/10 04:35:37 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/12/06 09:59:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -150,37 +150,40 @@ public class DBReadLock extends DBLock {
 
 	    if (lockSync.isLockHeld(key) && !lockSync.isReadLock(key))
 	      {
-		// we've got a write lock or a dump lock.. it's ok to hold off here.
+		// we've got a write lock or a dump lock already held
+		// on this key.  we can't proceed or else we might
+		// deadlock in a number of ways.. if this lock wants
+		// bases that we don't already have locked under this
+		// key, or if granting this lock to a subset or our
+		// locked set would confuse the lock scheduling,
+		// either way.  better not to risk it.
 
 		if (debug)
 		  {
-		    // Ganymede.debug("DBReadLock (" + key + "):  dump or write lock blocking us");
-		    
 		    System.err.println("DBReadLock (" + key + "):  dump or write lock blocking us");
 		  }
 		
 		throw new RuntimeException("Error: read lock sought by owner of existing write or dump lockset.");
 	      }
-	    else
-	      {
-		// we may already have a readlock registered with this
-		// key, but that's okay, since we only do read locks
-		// in the GanymedeSession query() and dump() methods.
-		// These methods have no possibility of deadlock, so
-		// we don't care.
 
-		lockSync.addReadLock(key, this);
-		added = true;
-	      }
+	    // we may already have a readlock registered with this
+	    // key, but that's okay, since we only do read locks
+	    // in the GanymedeSession query() and dump() methods.
+	    // These methods have no possibility of deadlock, as
+	    // they will proceed to completion without acquiring
+	    // more locks.
+
+	    // so, record who we are and that we are pending 
+
+	    inEstablish = true;	    
+	    this.key = key;
+	    lockSync.addReadLock(key, this);
+	    added = true;
 
 	    // okay, we've made sure that we're not going to chance a
 	    // deadlock by grabbing incompatible locks after we've
 	    // already gotten some.  now we need to actually acquire
 	    // lock the bases down.
-
-	    this.key = key;
-
-	    inEstablish = true;
 
 	    done = false;
 
@@ -188,8 +191,6 @@ public class DBReadLock extends DBLock {
 	      {
 		if (debug)
 		  {
-		    // Ganymede.debug("DBReadLock (" + key + "):  looping to get establish permission");
-
 		    System.err.println("DBReadLock (" + key + "):  looping to get establish permission");
 		  }
 
@@ -197,22 +198,7 @@ public class DBReadLock extends DBLock {
 
 		if (abort)
 		  {
-		    // this lock is going away.. dissociate it from the key
-		    // in the lockSync lockHash.
-
-		    lockSync.delReadLock(key, this);
-		    added = false;
-
-		    if (debug)
-		      {
-			// Ganymede.debug("DBReadLock (" + key + "):  aborting before permission granted");
-
-			System.err.println("DBReadLock (" + key + "):  aborting before permission granted");
-		      }
-
-		    inEstablish = false;
-
-		    throw new InterruptedException();
+		    throw new InterruptedException("DBReadLock (" + key + "):  establish aborting before permission granted");
 		  }
 
 		// assume we can proceed to get our lock until we find out
@@ -230,25 +216,50 @@ public class DBReadLock extends DBLock {
 		
 		    // check for writers.  we don't care about dumpers, since
 		    // we can read without problems while a dump lock is held
+
+		    // note that we check to see if the writer *wait
+		    // queue* is non-empty.  the writer will remain in
+		    // the writer wait queue as long as the lock is
+		    // held
+
+		    // we're being very polite, for we are a lowly
+		    // read lock
 		    
-		    if (!base.isWriterEmpty())
+		    if (!base.isWriterEmpty() || base.writeInProgress)
 		      {
 			if (debug)
 			  {
 			    System.err.println("DBReadLock (" + key + "):  base " + 
-					       base.getName() + " has writers queued");
+					       base.getName() + " has writers queued/locked");
 			  }
 
 			okay = false;
 		      }
 		  }
 
-		// at this point, we'll know whether or not we can
-		// grant the lock.  if okay is true, we'll mark the
-		// bases off as having us locked on them.
-
-		if (okay)
+		if (!okay)
 		  {
+		    // oops, things aren't clear for us to lock yet.
+		    // we need to wait for a few seconds, or until
+		    // something wakes us up by doing a notifyAll() on
+		    // our lockSync.p
+		    
+		    if (debug)
+		      {
+			System.err.println("DBReadLock (" + key + "):  waiting on lockSync");
+		      }
+		    
+		    lockSync.wait(2500); // an InterruptedException here gets propagated up
+
+		    if (debug)
+		      {
+			System.err.println("DBReadLock (" + key + "):  done waiting on lockSync");
+		      }
+		  }
+		else
+		  {
+		    // we were given the okay to lock, do it
+
 		    int i = 0;
 		    
 		    try
@@ -258,12 +269,14 @@ public class DBReadLock extends DBLock {
 			    base = (DBObjectBase) baseSet.elementAt(i);
 			    base.addReader(this);
 			  }
+
+			done = true;
 		      }
 		    catch (RuntimeException ex)
 		      {
 			ex.printStackTrace();
 
-			// clean up if we can
+			// clean up intelligently if we can
 
 			for (int j = i-1; j >= 0; j--)
 			  {
@@ -273,60 +286,12 @@ public class DBReadLock extends DBLock {
 
 			throw ex; // the finally clause below will clean up
 		      }
-
-		    done = true;
-		  }
-		else
-		  {
-		    // oops, things aren't clear for us to lock yet.
-		    // we need to wait for a few seconds, or until
-		    // something wakes up by doing a notifyAll() on
-		    // our lockSync.
-
-		    if (debug)
-		      {
-			// Ganymede.debug("DBReadLock (" + key + "):  waiting on lockSync");
-
-			System.err.println("DBReadLock (" + key + "):  waiting on lockSync");
-		      }
-		 
-		    try
-		      {
-			lockSync.wait(2500); // an InterruptedException here gets propagated up
-
-			if (debug)
-			  {
-			    // Ganymede.debug("DBReadLock (" + key + "):  done waiting on lockSync");
-
-			    System.err.println("DBReadLock (" + key + "):  done waiting on lockSync");
-			  }
-		      }
-		    catch (InterruptedException ex)
-		      {
-			// looks like something wants us to abort the
-			// lock?  dissociate this lock from our key in
-			// the lockSync's lockHash and throw the
-			// exception up.
-
-			if (debug)
-			  {
-			    // Ganymede.debug("DBReadLock (" + key + "):  interrupted exception");
-
-			    System.err.println("DBReadLock (" + key + "):  interrupted exception");
-			  }
-
-			lockSync.delReadLock(key, this);
-			added = false;
-
-			throw ex;
-		      }
 		  }
 	      } // while (!done)
 
 	    // okay!  if we got this far, we're locked
 
 	    locked = true;
-	    inEstablish = false;
 	    lockSync.addLock();	// notify consoles
 
 	    if (debug)
@@ -337,12 +302,13 @@ public class DBReadLock extends DBLock {
 	finally
 	  {
 	    inEstablish = false; // in case we threw an exception while establishing
-	    lockSync.notifyAll(); // let a thread trying to release this lock proceed
 
-	    if (added && !done)
+	    if (added && !locked)
 	      {
 		lockSync.delReadLock(key, this);
 	      }
+
+	    lockSync.notifyAll(); // let a thread trying to release this lock proceed
 	  }
       }	// synchronized (lockSync)
   }
@@ -373,80 +339,66 @@ public class DBReadLock extends DBLock {
 
     if (debug)
       {
-	// Ganymede.debug("DBReadLock (" + key + "):  attempting release");
-
 	System.err.println("DBReadLock (" + key + "):  attempting release");
       }
 
     synchronized (lockSync)
       {
-	try
+	// if this lock is being established in another thread, we
+	// need to wait until that thread exits its establish
+	// section.  if we haven't set abort to true, this won't
+	// happen until it gets the lock established, or it
+	// catches an InterruptedException for some reason.
+
+	while (inEstablish)
 	  {
-	    // if this lock is being established in another thread, we
-	    // need to wait until that thread exits its establish
-	    // section.  if we haven't set abort to true, this won't
-	    // happen until it gets the lock established, or it
-	    // catches an InterruptedException for some reason.
-
-	    while (inEstablish)
-	      {
-		if (debug)
-		  {
-		    // Ganymede.debug("DBReadLock (" + key + "):  release() looping waiting on inEstablish");
-
-		    System.err.println("DBReadLock (" + key + "):  release() looping waiting on inEstablish");
-		  }
-
-		try
-		  {
-		    lockSync.wait(2500);
-		  } 
-		catch (InterruptedException ex)
-		  {
-		  }
-	      }
-
-	    if (!locked)
-	      {
-		if (debug)
-		  {
-		    // Ganymede.debug("DBReadLock (" + key + "):  release() not locked, returning");
-
-		    System.err.println("DBReadLock (" + key + "):  release() not locked, returning");
-		  }
-
-		return;
-	      }
-
-	    for (int i = 0; i < baseSet.size(); i++)
-	      {
-		base = (DBObjectBase) baseSet.elementAt(i);
-		base.removeReader(this);
-	      }
-
-	    locked = false;
-
-	    // dissociate this lock from the lockSync's lockHash.
-	    // if this key has another readlock, that other lock will
-	    // need to take care of its own dissociation
-
-	    lockSync.delReadLock(key, this);
-
-	    key = null;		// for gc
-
 	    if (debug)
 	      {
-		// Ganymede.debug("DBReadLock (" + key + "):  release() released");
-
-		System.err.println("DBReadLock (" + key + "):  release() released");
+		System.err.println("DBReadLock (" + key + "):  release() looping waiting on inEstablish");
 	      }
 
-	    lockSync.removeLock();	// notify consoles
+	    try
+	      {
+		lockSync.wait(2500); // or until notify'ed
+	      } 
+	    catch (InterruptedException ex)
+	      {
+	      }
 	  }
-	finally
+
+	if (!locked)
 	  {
-	    lockSync.notifyAll(); // let other threads waiting to establish proceed
+	    if (debug)
+	      {
+		System.err.println("DBReadLock (" + key + "):  release() not locked, returning");
+	      }
+
+	    return;
 	  }
+
+	for (int i = 0; i < baseSet.size(); i++)
+	  {
+	    base = (DBObjectBase) baseSet.elementAt(i);
+	    base.removeReader(this);
+	  }
+
+	locked = false;
+
+	// dissociate this lock from the lockSync's lockHash.
+	// if this key has another readlock, that other lock will
+	// need to take care of its own dissociation
+
+	lockSync.delReadLock(key, this);
+
+	key = null;		// for gc
+
+	if (debug)
+	  {
+	    System.err.println("DBReadLock (" + key + "):  release() released");
+	  }
+
+	lockSync.removeLock();	// notify consoles
+	lockSync.notifyAll(); // let other threads waiting to establish proceed
       }
   }
 
@@ -476,15 +428,8 @@ public class DBReadLock extends DBLock {
   {
     synchronized (lockSync)
       {
-	try
-	  {
-	    abort = true;
-	    release();		// blocks until freed
-	  }
-	finally
-	  {
-	    lockSync.notifyAll();
-	  }
+	abort = true;
+	release();		// blocks until freed
       }
   }
 }

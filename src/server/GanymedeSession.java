@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.215 $
-   Last Mod Date: $Date: 2000/11/24 04:43:40 $
+   Version: $Revision: 1.216 $
+   Last Mod Date: $Date: 2000/12/06 09:59:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.215 $ $Date: 2000/11/24 04:43:40 $
+ * @version $Revision: 1.216 $ $Date: 2000/12/06 09:59:42 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -555,7 +555,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
 
-    if (sessionLabel.equals("builder"))
+    if (sessionLabel.startsWith("builder:"))
       {
 	if (disabledMessage != null && !disabledMessage.equals("shutdown"))
 	  {
@@ -565,8 +565,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    throw new RuntimeException("semaphore error: " + disabledMessage);
 	  }
       }
-    else if ((!sessionLabel.equals("internal") && !sessionLabel.equals("builder")) || 
-	     (sessionLabel.equals("builder") && disabledMessage == null))
+    else if ((!sessionLabel.equals("internal") && !sessionLabel.startsWith("builder:")) || 
+	     (sessionLabel.startsWith("builder:") && disabledMessage == null))
       {
 	try
 	  {
