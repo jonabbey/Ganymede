@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,8 @@ package arlut.csd.ganymede;
 
 import arlut.csd.Util.*;
 import arlut.csd.DataComponent.*;
+
+import tablelayout.*;
 
 import java.rmi.*;
 import java.rmi.server.*;
@@ -971,4 +973,4 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
   }
 }
-// ladj
+
