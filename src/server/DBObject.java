@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 1999/01/27 21:45:13 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 1999/02/08 21:35:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,7 +88,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.63 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.64 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1587,6 +1587,36 @@ public class DBObject implements db_object, FieldType, Remote {
       }
 
     return f.getValueLocal();
+  }
+
+  /**
+   *
+   * <P>This method is for use on the server, so that custom code can call a simple
+   * method to test to see if a boolean field is defined and has a true value.</P>
+   *
+   * <P>An exception will be thrown if the field is not a boolean.</P>
+   *
+   */
+
+  public boolean isSet(short fieldID)
+  {
+    DBField f = (DBField) getField(fieldID);
+
+    /* -- */
+    
+    if (f == null)
+      {
+	return false;
+      }
+
+    if (f.isVector())
+      {
+	throw new RuntimeException("Can't call isSet on a vector field.");
+      }
+
+    Boolean bool = (Boolean) f.getValueLocal();
+
+    return (bool != null && bool.booleanValue());
   }
 
   /**
