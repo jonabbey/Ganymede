@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2003/02/10 22:20:39 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2003/02/10 22:27:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -949,8 +949,8 @@ public class GanymedeScheduler extends Thread {
 	      }
 	    catch (Throwable ex)
 	      {
-		Ganymede.debug("Ganymede scheduler caught exception");
-		Ganymede.debug(Ganymede.stackTrace(ex));
+		System.err.println("Ganymede scheduler caught exception");
+		System.err.println(Ganymede.stackTrace(ex));
 
 		try
 		  {
