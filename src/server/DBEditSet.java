@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -195,7 +195,15 @@ public class DBEditSet {
 	System.err.println(session.key + ": DBEditSet.commit(): created write lock");
       }
 
-    wLock.establish(session.key);	// wait for write lock
+    try
+      {
+	wLock.establish(session.key);	// wait for write lock
+      }
+    catch (InterruptedException ex)
+      {
+	release();
+	return false;
+      }
 
     // This yield is here to allow me to verify that the locking logic
     // works properly.
@@ -218,6 +226,15 @@ public class DBEditSet {
 	    release();
 	    return false;
 	  }
+      }
+
+    // need to clear out any transients before
+    // we write the transaction out to disk
+
+    for (int i = 0; i < objects.size(); i++)
+      {
+	eObj = (DBEditObject) objects.elementAt(i);
+	eObj.clearTransientFields();
       }
 
     // write this transaction out to the Journal
