@@ -5,7 +5,7 @@
    This class holds the basic per-object / per-field access control bits.
    
    Created: 27 June 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,6 +26,8 @@ public class PermEntry implements java.io.Serializable {
   boolean visible;
   boolean editable;
   boolean create;
+
+  static final PermEntry fullPerms = new PermEntry(true, true, true);
 
   /* -- */
 
