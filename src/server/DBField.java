@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2001/01/12 01:12:32 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2001/01/12 01:31:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -793,6 +793,44 @@ public abstract class DBField implements Remote, db_field {
   public final DBObjectBaseField getFieldDef()
   {
     return owner.getFieldDef(fieldcode);
+  }
+
+  /**
+   *
+   * This version of getFieldDef() is intended for use by code
+   * sections that need to interrogate a field's type definition
+   * before it is linked to an owner object.
+   *
+   */
+
+  public final DBObjectBaseField getFieldDef(short objectType)
+  {
+    DBObjectBase base = Ganymede.db.getObjectBase(objectType);
+
+    if (base == null)
+      {
+	return null;
+      }
+
+    return (DBObjectBaseField) base.getField(fieldcode);
+  }
+
+  /**
+   *
+   * This version of getFieldDef() is intended for use by code
+   * sections that need to interrogate a field's type definition
+   * before it is linked to an owner object.
+   *
+   */
+
+  public final DBObjectBaseField getFieldDef(DBObjectBase base)
+  {
+    if (base == null)
+      {
+	return null;
+      }
+
+    return (DBObjectBaseField) base.getField(fieldcode);
   }
 
   /**
