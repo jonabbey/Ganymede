@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -91,11 +91,21 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (field.getID() == SchemaConstants.PersonaNameField)
       {
+	if (debug)
+	  {
+	    System.err.println("adminPersonaCustom.finalizeSetValue(): setting persona name, refreshing label");
+	  }
+
 	return refreshLabelField((String) value, null, null);
       }
 
     if (field.getID() == SchemaConstants.PersonaAssocUser)
       {
+	if (debug)
+	  {
+	    System.err.println("adminPersonaCustom.finalizeSetValue(): setting persona user, refreshing label");
+	  }
+
 	return refreshLabelField(null, (Invid) value, null);
       }
 
@@ -120,7 +130,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	  }
       }
 
-    if ((userInvid == null) && (newName != null))
+    if ((userInvid == null) && (newName == null))
       {
 	InvidDBField assocUserField = (InvidDBField) getField(SchemaConstants.PersonaAssocUser);
 
@@ -143,6 +153,11 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     if (newName == null)
       {
 	newName = this.getGSession().viewObjectLabel(userInvid);
+      }
+
+    if (debug)
+      {
+	System.err.println("Trying to set label to " + newName + ":" + descrip);
       }
 
     return setFieldValueLocal(SchemaConstants.PersonaLabelField, newName + ":" + descrip);
