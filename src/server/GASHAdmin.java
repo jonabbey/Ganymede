@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 2000/02/01 04:04:15 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 2000/02/01 04:19:12 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1218,13 +1218,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       {
 	boolean waitForUsers=false;
 
-	if (shutdownDialog == null)
-	  {
-	    shutdownDialog = new StringDialog(this,
-					      "Confirm Ganymede Server Shutdown", 
-					      "Are you sure you want to \nshutdown the Ganymede server?", 
-					      "Yes", "No", question);
-	  }
+	shutdownDialog = new StringDialog(this,
+					  "Confirm Ganymede Server Shutdown", 
+					  "Are you sure you want to \nshutdown the Ganymede server?", 
+					  "Yes", "No", question);
 
 	if (shutdownDialog.DialogShow() != null)
 	  {
