@@ -4176,6 +4176,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   boolean OKToProceed()
   {
+    // we're using the enabled status of the logoutMI as a flag to
+    // control whether we're in the middle of bringing up an internal
+    // frame.  by gating on this, we can prevent the client from
+    // throwing an exception due to a mistimed logout/window close.
+
+    if (!logoutMI.isEnabled())
+      {
+	return false;
+      }
+
     if (wizardActive > 0)
       {
 	if (debug)

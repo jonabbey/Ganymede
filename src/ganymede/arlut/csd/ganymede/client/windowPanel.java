@@ -437,6 +437,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    final String localTitle = title;
 	    final boolean localIsNewlyCreated = isNewlyCreated;
 
+	    // don't let the user log out while we're creating a new
+	    // window in the background
+
+	    gc.logoutMI.setEnabled(false);
+
 	    w = (framePanel) foxtrot.Worker.post(new foxtrot.Task()
 	      {
 		public Object run() throws Exception
@@ -450,6 +455,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  }
 	catch (Exception ex)
 	  {
+	  }
+	finally
+	  {
+	    gc.logoutMI.setEnabled(true);
 	  }
 
 	w.setOpaque(true);
