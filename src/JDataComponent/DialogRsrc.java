@@ -10,8 +10,6 @@ import java.awt.*;
 
 import com.sun.java.swing.*;
 
-import gjt.*;
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                                       DialogRsrc
@@ -131,8 +129,8 @@ public class DialogRsrc {
    */
   public void addSeparator()
   {
-    System.out.println("Adding separator");
-    objects.addElement(new Separator());
+    System.out.println("NOT Adding separator.. not using gjt");
+    //    objects.addElement(new Separator());
   }
 
   /**
