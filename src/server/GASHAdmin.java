@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -230,7 +230,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	if (handle.isRunning)
 	  {
 	    frame.taskTable.setCellText(handle.name, 1, "Running", false);
-	    frame.taskTable.setCellColor(handle.name, 1, Color.green, false);
+	    frame.taskTable.setCellColor(handle.name, 1, Color.blue, false);
 	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
 	else if (handle.suspend)
