@@ -5,7 +5,7 @@
    This file is a management class for ip objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -72,6 +72,58 @@ public class ipCustom extends DBEditObject implements SchemaConstants {
     super(original, editset);
   }
   
+  /**
+   *
+   * Hook to determine whether it is permissible to enter
+   * an IPv6 address in a particular (IP) DBField.
+   *
+   */
+
+  public boolean isIPv6OK(DBField field)
+  {
+    // our IP records have an IP address in field 257
+
+    if (field.getID() == 257)
+      {
+	// our IP records have a pointer to the containing I.P. net record
+	// in field 258
+
+	InvidDBField invF = (InvidDBField) getField((short)258);
+
+	if (invF == null)
+	  {
+	    return false;	// we shouldn't really get here in production
+	  }
+
+	// get our I.P. network record
+
+	DBObject ipNet = editset.getSession().viewDBObject(invF.value());
+
+	if (ipNet == null)
+	  {
+	    return false;
+	  }
+	else
+	  {
+	    // our I.P. Net records have a boolean indicating whether or not v6
+	    // addresses are allowed in field 262.
+
+	    BooleanDBField bF = (BooleanDBField) ipNet.getField((short)262);
+	    
+	    if (bF == null || !bF.isDefined())
+	      {
+		return false;
+	      }
+	    else
+	      {
+		return bF.value();
+	      }
+	  }
+      }
+
+    return false;
+  }
+
   /**
    *
    * Hook to have this object create a new embedded object
