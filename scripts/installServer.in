@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.36 $
-# $Date: 2001/01/31 11:19:58 $
+# $Revision: 1.37 $
+# $Date: 2001/01/31 11:54:55 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -53,7 +53,7 @@ chdir($rootdir);
 	 "MAILHOST" => "",
          "RETURNADDR" => "",
          "SUPERNAME" => "supergash",
-         "SUPERPASS" => "newpass",
+         "SUPERPASS" => "",
          "MONITORNAME" => "monitor",
          "MONITORPASS" => "monitor",
          "HELPWEB" => "http://www.arlut.utexas.edu/gash2/help/");
