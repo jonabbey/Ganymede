@@ -730,7 +730,6 @@ public class DBQueryHandler {
 		    return false;	// invalid comparator
 		  }
 	      }
-
 	  }
 
 	return false;		// wtf?
