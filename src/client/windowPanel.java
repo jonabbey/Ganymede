@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 2001/10/11 23:26:37 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 2001/10/12 03:28:11 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -83,7 +83,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.77 $ $Date: 2001/10/11 23:26:37 $ $Name:  $
+ * @version $Revision: 1.78 $ $Date: 2001/10/12 03:28:11 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -271,7 +271,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void addWindow(Invid invid, db_object object, boolean editable, String objectType, boolean isNewlyCreated)
   {
+    Invid finalInvid = invid;
     String temp, title;
+
+    /* -- */
 
     if (object == null)
       {
@@ -294,16 +297,16 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 						   "embedded object: " + object);
 	      }
 	    
-	    Invid i  = (Invid) ((invid_field)parent).getValue();
+	    finalInvid  = (Invid) ((invid_field)parent).getValue();
 
-	    if (i == null)
+	    if (finalInvid == null)
 	      {
 		throw new RuntimeException("Invid value of ContainerField is null");
 	      }
 	    
 	    if (editable)
 	      {
-		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(i));
+		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(finalInvid));
 		object = (db_object) rv.getObject();
 
 		if (object == null)
@@ -314,7 +317,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	      }
 	    else
 	      {
-		object = (db_object) (gc.handleReturnVal(gc.getSession().view_db_object(i))).getObject();
+		object = (db_object) (gc.handleReturnVal(gc.getSession().view_db_object(finalInvid))).getObject();
 
 		if (object == null)
 		  {
@@ -354,7 +357,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  {
 	    if (objectType == null)
 	      {
-		objectType = gc.getObjectType(invid);
+		objectType = gc.getObjectType(finalInvid);
 	      }
 
 	    if (isNewlyCreated)
@@ -395,7 +398,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    title = temp + num++;
 	  }
 
-	framePanel w = new framePanel(invid, object, editable, this, title, isNewlyCreated);
+	framePanel w = new framePanel(finalInvid, object, editable, this, title, isNewlyCreated);
 	w.setOpaque(true);
     
 	windowList.put(title, w);
