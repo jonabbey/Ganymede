@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -70,37 +70,6 @@ package arlut.csd.ganymede.server;
  */
 
 public class IPwrap {
-  
-  /**
-   *
-   * This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value.
-   *
-   */
-
-  public final static byte u2s(int x)
-  {
-    if ((x < 0) || (x > 255))
-      {
-	throw new IllegalArgumentException("Out of range: " + x);
-      }
-
-    return (byte) (x - 128);
-  }
-
-  /**
-   *
-   * This method maps a u2s-encoded signed byte value to an
-   * int value between 0 and 255 inclusive.
-   *
-   */
-
-  public final static short s2u(byte b)
-  {
-    return (short) (b + 128);
-  }
-
-  // ---
 
   Byte[] address;
 
@@ -109,6 +78,18 @@ public class IPwrap {
   public IPwrap(Byte[] address)
   {
     this.address = address;
+  }
+
+  public IPwrap(String addressStr)
+  {
+    if (addressStr.indexOf(':') == -1)
+      {
+	this.address = IPDBField.genIPV4bytes(addressStr);
+      }
+    else
+      {
+	this.address = IPDBField.genIPV6bytes(addressStr);
+      }
   }
 
   /**
@@ -194,5 +175,25 @@ public class IPwrap {
       }
 
     return true;
+  }
+
+  /**
+   * <p>Getter method.  This method creates a copy of the address
+   * before returning it, to avoid the calling function messing with
+   * the internally editable array representation.</p>
+   */
+
+  public Byte[] getAddress()
+  {
+    Byte[] result = new Byte[this.address.length];
+
+    System.arraycopy(this.address, 0, result, 0, this.address.length);
+
+    return result;
+  }
+
+  public String toString()
+  {
+    return IPDBField.genIPString(address);
   }
 }
