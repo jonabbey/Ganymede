@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.56 $
-# $Date: 2001/03/16 10:04:15 $
+# $Revision: 1.57 $
+# $Date: 2001/06/02 01:30:16 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -491,6 +491,12 @@ write_install("installClient.in", "installClient");
 write_install("installWeb.in", "installWeb");
 write_install("installServer.in", "installServer");
 
-print "Done with configure.\n";
+print <<ENDCODA;
+Done.
 
+Ganymede is now configured for installation.  You can now run the
+installServer, installClient, and installWeb scripts to install the
+Ganymede software.
+
+ENDCODA
 exit;
