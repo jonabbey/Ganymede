@@ -3,8 +3,8 @@
 
    Created: 15 March 2001
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2001/03/16 10:10:04 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/03/16 10:11:35 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -721,7 +721,7 @@ public class smbencrypt {
       {
 	char c = c_ary[i];
 
-	wpwd[2*i] = (byte) (c & 0xff);
+	wpwd[2*i] = (byte) (c & 0x00ff);
 	wpwd[2*i+1] = (byte) (c & 0xff00);
       }
 
