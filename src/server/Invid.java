@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,7 +18,7 @@
 
 package arlut.csd.ganymede;
 
-public class Invid {
+public class Invid implements java.io.Serializable {
 
   //  static final int FIRST = 1;
   //  static final int LAST = 9;
