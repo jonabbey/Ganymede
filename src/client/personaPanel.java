@@ -6,8 +6,8 @@
    
    Created: 6 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/10/29 16:12:25 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/06/21 18:36:14 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -284,9 +284,10 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    personaContainer pc = new personaContainer(newObject.getInvid(), editable, this, newObject);
 	    middle.addTab("New Persona " + index, pc);
 
-	    pc.run();
-	    
 	    panels.addElement(pc);
+
+	    pc.run();
+
 	    //Thread t = new Thread(pc);
 	    //t.start();
 

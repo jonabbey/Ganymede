@@ -5,8 +5,8 @@
    a panel for handling User's personae.
    
    Created: 15 January 1999
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/03/12 20:47:18 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/06/21 18:36:14 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -167,7 +167,6 @@ class personaContainer extends JScrollPane implements Runnable{
 
     pp.invalidate();
     pp.fp.validate();
-
   }
 
   public synchronized void waitForLoad()
