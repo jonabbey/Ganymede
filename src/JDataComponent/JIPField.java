@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -61,27 +61,20 @@ public class JIPField extends JentryField {
    * Base constructor for JIPField
    * 
    * @param columns number of colums in the JIPField
-   * @param valueAttr used to determine the foregoudn/background/font for this JIPField
    * @param is_editable true if this JIPField is editable
    */
 
-  public JIPField(JcomponentAttr valueAttr,
-		  boolean is_editable,
+  public JIPField(boolean is_editable,
 		  boolean allowV6)
   {
     super(DEFAULT_COLS);
-    
-    this.valueAttr = valueAttr;
+
     this.allowV6 = allowV6;
     
     //    setText(null);
 
     setEditable(is_editable);  // will this JIPField be editable or not?
 
-    if (valueAttr != null)
-      {
-	JcomponentAttr.setAttr(this,valueAttr);
-      }
 
     enableEvents(AWTEvent.KEY_EVENT_MASK); 
   }
@@ -94,9 +87,7 @@ public class JIPField extends JentryField {
 
   public JIPField(boolean allowV6)
   {
-    this(new JcomponentAttr(null,new Font("Courier",Font.PLAIN,12),
-			    Color.black,Color.white),
-	 true,
+    this(true,
 	 allowV6);
   }
 
@@ -105,19 +96,17 @@ public class JIPField extends JentryField {
     * that knows about its parent.
     *
     * @param cols number of colums in the JIPField
-    * @param valueAttr used to determine the foregoudn/background/font for this JIPField
     * @param parent the container within which this JIPField is contained
     *        (This container will implement an interface that will utilize the
     *         data contained within this JIPField.)
     *
     */
 
-  public JIPField(JcomponentAttr valueAttr,
-		  boolean is_editable,
+  public JIPField(boolean is_editable,
 		  JsetValueCallback callback,
 		  boolean allowV6)
   {
-    this(valueAttr,is_editable, allowV6);
+    this(is_editable, allowV6);
 
     setCallback(callback);
   }
