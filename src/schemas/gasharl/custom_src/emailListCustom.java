@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/02/16 18:57:45 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/02/16 19:51:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -145,10 +145,15 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
     if (membersChoice == null)
       {
+	// we want to present a list of all users, mail groups besides
+	// this one, and external mail aliases (email addresses that
+	// have local aliases in ARL's mail system) as valid choices
+	// for the MEMBERS field.
+
 	Query query1 = new Query(SchemaConstants.UserBase, null, false); // list all users
 	Query query2 = new Query((short) 275, null, false); // list all external email targets
 	
-	QueryNode root3 = new QueryNotNode(new QueryDataNode(-2, QueryDataNode.EQUALS, this.getInvid()));
+	QueryNode root3 = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.getInvid()));
 	Query query3 = new Query((short) 274, root3, false); // list all other email groups, but not ourselves
 	
 	QueryResult result = editset.getSession().getGSession().query(query1);
