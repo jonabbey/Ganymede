@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.141 $
-   Last Mod Date: $Date: 1999/03/19 05:52:27 $
+   Version: $Revision: 1.142 $
+   Last Mod Date: $Date: 1999/03/19 06:03:18 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -2571,16 +2571,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	// The order here matters, because it might be in more than
 	// one hash.  So put the most important stuff first
 
-	if (createHash.containsKey(invid))
-	  {
-	    if (debug)
-	      {
-		System.out.println("Setting icon to create.");
-	      }
-
-	    node.setImages(OPEN_FIELD_CREATE, CLOSED_FIELD_CREATE);
-	  }
-	else if (deleteHash.containsKey(invid))
+	if (deleteHash.containsKey(invid))
 	  {
 	    if (debug)
 	      {
@@ -2588,6 +2579,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      }
 
 	    node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
+	  }
+	else if (createHash.containsKey(invid))
+	  {
+	    if (debug)
+	      {
+		System.out.println("Setting icon to create.");
+	      }
+
+	    node.setImages(OPEN_FIELD_CREATE, CLOSED_FIELD_CREATE);
 	  }
 	else if (handle != null)
 	  {
