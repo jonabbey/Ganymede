@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.62 $ %D%
+   Version: $Revision: 1.63 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -787,7 +787,9 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     this.newValue = value;
 
-    if (eObj.finalizeSetValue(this, value))
+    newRetVal = eObj.finalizeSetValue(this, value);
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	if (value != null)
 	  {
@@ -802,7 +804,19 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
 	this.newValue = null;
 
-	return retVal;		// success
+	// if the return value from the wizard was not null,
+	// it might have included rescan information, which
+	// we'll want to combine with that from our 
+	// finalizeSetValue() call.
+
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;		// success
+	  }
       }
     else
       {
@@ -818,9 +832,9 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	    mark(this.value);
 	  }
 
-	return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
-					  "Custom code rejected set operation for value " + 
-					  value);
+	// go ahead and return the dialog that was set by finalizeSetValue().
+
+	return newRetVal;
       }
   }
 
@@ -1028,13 +1042,27 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    if (eObj.finalizeSetElement(this, index, value))
+    newRetVal = eObj.finalizeSetElement(this, index, value);
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.setElementAt(value, index);
 
 	defined = true;
 	
-	return retVal;
+	// if the return value from the wizard was not null,
+	// it might have included rescan information, which
+	// we'll want to combine with that from our 
+	// finalizeSetElement() call.
+
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;		// success
+	  }
       }
     else
       {
@@ -1048,9 +1076,9 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	    mark(values.elementAt(index));
 	  }
 
-	return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
-					  "Custom code rejected set operatin for value " + 
-					  value);
+	// return the error dialog from finalizeSetElement().
+
+	return newRetVal;
       }
   }
 
@@ -1166,11 +1194,26 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	  }
       }
 
-    if (eObj.finalizeAddElement(this, value)) 
+    newRetVal = eObj.finalizeAddElement(this, value);
+
+    if (newRetVal == null || newRetVal.didSucceed()) 
       {
 	values.addElement(value);
 	defined = true;
-	return retVal;
+
+	// if the return value from the wizard was not null,
+	// it might have included rescan information, which
+	// we'll want to combine with that from our 
+	// finalizeAddElement() call.
+
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;		// success
+	  }
       } 
     else
       {
@@ -1179,9 +1222,9 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	    unmark(value);	// *sync* DBNameSpace
 	  }
 
-	return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
-					  "Custom code rejected add operation for value " + 
-					  value + "\n" + getLastError());
+	// return the error dialog created by finalizeAddElement
+
+	return newRetVal;
       }
   }
 
@@ -1280,13 +1323,27 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	unmark(values.elementAt(index)); // *sync* DBNameSpace
       }
 
-    if (eObj.finalizeDeleteElement(this, index))
+    newRetVal = eObj.finalizeDeleteElement(this, index);
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.removeElementAt(index);
 
 	defined = (values.size() > 0);
 
-	return retVal;
+	// if the return value from the wizard was not null,
+	// it might have included rescan information, which
+	// we'll want to combine with that from our 
+	// finalizeDeleteElement() call.
+
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;		// success
+	  }
       }
     else
       {
@@ -1295,9 +1352,9 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	    mark(values.elementAt(index)); // *sync* DBNameSpace
 	  }
 
-	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
-					  "Custom code rejected deletion operation for value " + 
-					  value + "\n" + getLastError());
+	// return the error dialog from finalizeDeleteElement().
+
+	return newRetVal;
       }
   }
 

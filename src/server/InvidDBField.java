@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.93 $ %D%
+   Version: $Revision: 1.94 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.93 $ %D%
+ * @version $Revision: 1.94 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1726,22 +1726,34 @@ public final class InvidDBField extends DBField implements invid_field {
 	    return null;	// we're already dissolved, effectively
 	  }
 
-	if (eObj.finalizeDeleteElement(this, index))
+	ReturnVal retVal = eObj.finalizeDeleteElement(this, index);
+
+	if (retVal == null || retVal.didSucceed())
 	  {
 	    values.removeElementAt(index);
 
 	    defined = (values.size() > 0 ? true : false);
 
-	    return null;
+	    return retVal;
 	  }
 	else
 	  {
 	    setLastError("InvidDBField remote dissolve: couldn't finalizeDeleteElement");
 
-	    return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
-					      "The custom plug-in class for object " + eObj.getLabel() +
-					      "refused to allow us to clear out all the references in field " + 
-					      getName());
+	    if (retVal.getDialog() != null)
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
+						  "The custom plug-in class for object " + eObj.getLabel() +
+						  "refused to allow us to clear out all the references in field " + 
+						  getName() + ":\n\n" + retVal.getDialog().getText());
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
+						  "The custom plug-in class for object " + eObj.getLabel() +
+						  "refused to allow us to clear out all the references in field " + 
+						  getName());
+	      }
 	  }
       }
     else
@@ -1753,20 +1765,34 @@ public final class InvidDBField extends DBField implements invid_field {
 	    throw new RuntimeException("dissolve called with an unbound invid (scalar)");
 	  }
 
-	if (eObj.finalizeSetValue(this, null))
+	ReturnVal retVal = eObj.finalizeSetValue(this, null);
+
+	if (retVal == null || retVal.didSucceed())
 	  {
 	    value = null;
-	    return null;
+
+	    return retVal;
 	  }
 	else
 	  {
 	    setLastError("InvidDBField remote dissolve: couldn't finalizeSetValue");
 
-	    return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeSetValue",
-					      "The custom plug-in class for object " + 
-					      eObj.getLabel() +
-					      "refused to allow us to clear out the reference in field " + 
-					      getName());
+	    if (retVal.getDialog() != null)
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeSetValue",
+						  "The custom plug-in class for object " + 
+						  eObj.getLabel() +
+						  "refused to allow us to clear out the reference in field " + 
+						  getName() + ":\n\n" + retVal.getDialog().getText());
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeSetValue",
+						  "The custom plug-in class for object " + 
+						  eObj.getLabel() +
+						  "refused to allow us to clear out the reference in field " + 
+						  getName());
+	      }
 	  }
       }
   }
@@ -1847,22 +1873,35 @@ public final class InvidDBField extends DBField implements invid_field {
 					      "will be broken.\n\nHave your adopter check the schema.");
 	  }
 
-	if (eObj.finalizeAddElement(this, newInvid))
+	retVal = eObj.finalizeAddElement(this, newInvid);
+
+	if (retVal == null || retVal.didSucceed())
 	  {
 	    values.addElement(newInvid);
 	    defined = true;
 
-	    return null;
+	    return retVal;
 	  }
 	else
 	  {
 	    setLastError("InvidDBField remote establish: finalize returned false");
 
-	    return Ganymede.createErrorDialog("InvidDBField.establish(): field addvalue refused",
-					      "Couldn't establish a new linkage in vector field " + getName() +
-					      " in object " + getOwner().getLabel() +
-					      "because the custom plug in code for this object refused to " +
-					      "approve the operation.");
+	    if (retVal.getDialog() != null)
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.establish(): field addvalue refused",
+						  "Couldn't establish a new linkage in vector field " + getName() +
+						  " in object " + getOwner().getLabel() +
+						  "because the custom plug in code for this object refused to " +
+						  "approve the operation:\n\n" + retVal.getDialog().getText());
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.establish(): field addvalue refused",
+						  "Couldn't establish a new linkage in vector field " + getName() +
+						  " in object " + getOwner().getLabel() +
+						  "because the custom plug in code for this object refused to " +
+						  "approve the operation.");
+	      }
 	  }
       }
     else
@@ -1897,12 +1936,21 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 	  }
 
-	if (eObj.finalizeSetValue(this, newInvid))
+	ReturnVal newRetVal = eObj.finalizeSetValue(this, newInvid);
+
+	if (newRetVal == null || newRetVal.didSucceed())
 	  {
 	    value = newInvid;
 	    defined = true;
 
-	    return retVal;
+	    if (retVal != null)
+	      {
+		return retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		return newRetVal;
+	      }
 	  }
 	else
 	  {
@@ -1913,11 +1961,22 @@ public final class InvidDBField extends DBField implements invid_field {
 		throw new RuntimeException("couldn't rebind a value " + tmp + " we just unbound.. sync error");
 	      }
 
-	    return  Ganymede.createErrorDialog("InvidDBField.establish(): field set value refused",
-					       "Couldn't establish a new linkage in field " + getName() +
-					       " in object " + getOwner().getLabel() +
-					       "because the custom plug in code for this object refused to " +
-					       "approve the operation.");
+	    if (newRetVal.getDialog() != null)
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.establish(): field set value refused",
+						  "Couldn't establish a new linkage in field " + getName() +
+						  " in object " + getOwner().getLabel() +
+						  "because the custom plug in code for this object refused to " +
+						  "approve the operation:\n\n" + newRetVal.getDialog().getText());
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.establish(): field set value refused",
+						  "Couldn't establish a new linkage in field " + getName() +
+						  " in object " + getOwner().getLabel() +
+						  "because the custom plug in code for this object refused to " +
+						  "approve the operation.");
+	      }
 	  }
       }
   }
@@ -2296,7 +2355,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     this.newValue = value;
 
-    if (eObj.finalizeSetValue(this, value))
+    newRetVal = eObj.finalizeSetValue(this, value);
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	this.value = value;
 
@@ -2316,7 +2377,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	    eObj.getSession().popCheckpoint(checkkey);
 	  }
 
-	return retVal;
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;
+	  }
       }
     else
       {
@@ -2327,8 +2395,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    eObj.getSession().rollback(checkkey);
 	  }
 
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
-					  "InvidDBField setValue: couldn't finalize");
+	return newRetVal;
       }
   }
 
@@ -2456,7 +2523,9 @@ public final class InvidDBField extends DBField implements invid_field {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    if (eObj.finalizeSetElement(this, index, value))
+    newRetVal = eObj.finalizeSetElement(this, index, value);
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.setElementAt(value, index);
 
@@ -2465,7 +2534,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	    eObj.getSession().popCheckpoint(checkkey);
 	  }
 
-	return retVal;
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;
+	  }
       }
     else
       {
@@ -2474,9 +2550,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    eObj.getSession().rollback(checkkey);
 	  }
 
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setElement()",
-					  "InvidDBField setElement: couldn't finalize\n" +
-					  getLastError());
+	return newRetVal;
       }
   }
 
@@ -2605,7 +2679,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	retVal = newRetVal;
       }
 
-    if (eObj.finalizeAddElement(this, value)) 
+    newRetVal = eObj.finalizeAddElement(this, value);
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.addElement(value);
 
@@ -2616,7 +2692,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	    eObj.getSession().popCheckpoint(checkkey);
 	  }
 
-	return retVal;
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;
+	  }
       } 
     else
       {
@@ -2625,8 +2708,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    eObj.getSession().rollback(checkkey);
 	  }
 
-	return Ganymede.createErrorDialog("InvidDBField.addElement() - custom logic reject",
-					  "Couldn't finalize\n" + getLastError());
+	return newRetVal;
       }
   }
 
@@ -2768,7 +2850,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    if (eObj.finalizeAddElement(this, newObj))
+    ReturnVal newRetVal = eObj.finalizeAddElement(this, newObj);
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.addElement(newObj);
 
@@ -2786,14 +2870,25 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	retVal.setInvid(newObj);
 
-	return retVal;
+	return retVal.unionRescan(newRetVal);
       } 
     else
       {
 	embeddedObj.setFieldValue(SchemaConstants.ContainerField, null); // *sync* DBField
-	return Ganymede.createErrorDialog("Couldn't create embedded object",
-					  "The custom code for this object type refused to okay adding " +
-					  "a new embedded object.  It was created though..");
+
+	if (newRetVal.getDialog() != null)
+	  {
+	    return Ganymede.createErrorDialog("Couldn't create embedded object",
+					      "The custom code for this object type refused to okay adding " +
+					      "a new embedded object.  It was created though..\n\n" +
+					      newRetVal.getDialog().getText());
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("Couldn't create embedded object",
+					      "The custom code for this object type refused to okay adding " +
+					      "a new embedded object.  It was created though..");
+	  }
       }
   }
 
@@ -2927,10 +3022,21 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // finalizeDeleteElement() just gives the DBEditObject a chance to
     // approve or disapprove deleting an element from this field
+    
+    newRetVal = eObj.finalizeDeleteElement(this, index);
 
-    if (eObj.finalizeDeleteElement(this, index))
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.removeElementAt(index);
+
+	if (retVal != null)
+	  {
+	    retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    retVal = newRetVal;
+	  }
 
 	// if we are an editInPlace field, unlinking this object means
 	// that we should go ahead and delete the object.
@@ -2980,8 +3086,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	    eObj.getSession().rollback(checkkey);
 	  }
 
-	return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
-					  "Couldn't finalize\n" + getLastError());
+	if (newRetVal.getDialog() != null)
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
+					      "Couldn't finalize\n\n" + newRetVal.getDialog().getText());
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
+					      "Couldn't finalize\n" + getLastError());
+	  }
       }
   }
 

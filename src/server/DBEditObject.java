@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.86 $ %D%
+   Version: $Revision: 1.87 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.86 $ %D%
+ * @version $Revision: 1.87 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1374,103 +1374,91 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    *
-   * This method allows the DBEditObject to have executive approval
-   * of any vector delete operation, and to take any special actions
-   * in reaction to the delete.. if this method returns true, the
-   * DBField that called us will proceed to make the change to
-   * its vector.  If this method returns false, the DBField
-   * that called us will not make the change, and the field
-   * will be left unchanged.<br><br>
+   * This method allows the DBEditObject to have executive approval of
+   * any vector delete operation, and to take any special actions in
+   * reaction to the delete.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us will proceed to
+   * make the change to its vector.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.<br><br>
    *
    * The DBField that called us will take care of all possible checks
    * on the operation (including vector bounds, etc.).  Under normal
    * circumstances, we won't need to do anything here.<br><br>
    *
-   * If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.
-   *
    */
 
-  public boolean finalizeDeleteElement(DBField field, int index)
+  public ReturnVal finalizeDeleteElement(DBField field, int index)
   {
-    return true;
+    return null;
   }
 
   /**
    *
-   * This method allows the DBEditObject to have executive approval
-   * of any vector add operation, and to take any special actions
-   * in reaction to the add.. if this method returns true, the
-   * DBField that called us will proceed to make the change to
-   * its vector.  If this method returns false, the DBField
-   * that called us will not make the change, and the field
-   * will be left unchanged.<br><br>
+   * This method allows the DBEditObject to have executive approval of
+   * any vector add operation, and to take any special actions in
+   * reaction to the add.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us will proceed to
+   * make the change to its vector.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.<br><br>
    *
-   * The DBField that called us will take care of all possible
-   * checks on the operation (including vector bounds, etc.),
-   * acceptable values as appropriate (including a call to our
-   * own verifyNewValue() method).  Under normal circumstances,
-   * we won't need to do anything here.<br><br>
+   * The DBField that called us will take care of all possible checks
+   * on the operation (including vector bounds, etc.).  Under normal
+   * circumstances, we won't need to do anything here.<br><br>
    *
-   * If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.
-   * 
    */
 
-  public boolean finalizeAddElement(DBField field, Object value)
+  public ReturnVal finalizeAddElement(DBField field, Object value)
   {
-    return true;
+    return null;
   }
 
   /**
    *
-   * This method allows the DBEditObject to have executive approval
-   * of any vector set operation, and to take any special actions
-   * in reaction to the set.. if this method returns true, the
-   * DBField that called us will proceed to make the change to
-   * it's vector.  If this method returns false, the DBField
-   * that called us will not make the change, and the field
-   * will be left unchanged.<br><br>
+   * This method allows the DBEditObject to have executive approval of
+   * any vector set operation, and to take any special actions in
+   * reaction to the set.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us will proceed to
+   * make the change to its vector.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.<br><br>
    *
-   * The DBField that called us will take care of all possible
-   * checks on the operation (including vector bounds, etc.),
-   * acceptable values as appropriate (including a call to our
-   * own verifyNewValue() method.  Under normal circumstances,
-   * we won't need to do anything here.<br><br>
+   * The DBField that called us will take care of all possible checks
+   * on the operation (including vector bounds, etc.).  Under normal
+   * circumstances, we won't need to do anything here.<br><br>
    *
-   * If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.
-   * 
    */
 
-  public boolean finalizeSetElement(DBField field, int index, Object value)
+  public ReturnVal finalizeSetElement(DBField field, int index, Object value)
   {
-    return true;
+    return null;
   }
 
   /**
    *
-   * This method allows the DBEditObject to have executive approval
-   * of any scalar set operation, and to take any special actions
-   * in reaction to the set.. if this method returns true, the
-   * DBField that called us will proceed to make the change to
-   * it's value.  If this method returns false, the DBField
-   * that called us will not make the change, and the field
-   * will be left unchanged.<br><br>
+   * This method allows the DBEditObject to have executive approval of
+   * any scalar set operation, and to take any special actions in
+   * reaction to the set.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us will proceed to
+   * make the change to its value.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.<br><br>
    *
    * The DBField that called us will take care of all possible checks
    * on the operation (including a call to our own verifyNewValue()
    * method.  Under normal circumstances, we won't need to do anything
    * here.<br><br>
    *
-   * If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.
-   *  
    */
 
-  public boolean finalizeSetValue(DBField field, Object value)
+  public ReturnVal finalizeSetValue(DBField field, Object value)
   {
-    return true;
+    return null;
   }
 
   /**
