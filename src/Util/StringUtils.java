@@ -4,8 +4,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/08/15 01:53:54 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/08/15 02:34:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -219,7 +219,10 @@ public class StringUtils {
 	    buffer.append(joinString);
 	  }
 
-	buffer.append(elems[i]);
+	if (elems[i] != null)
+	  {
+	    buffer.append(elems[i]);
+	  }
       }
 
     return buffer.toString();
