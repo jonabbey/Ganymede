@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 2003/07/16 23:09:56 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 2003/08/02 00:10:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -190,7 +190,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      }
 	  }
 
-	//	writeMailDirect();
 	writeMailDirect2();
 	writeSambafileVersion1();
 	writeNTfile();
@@ -555,126 +554,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     writer.println(result.toString());
-  }
-
-  /**
-   * we write out a file that maps social security numbers to a
-   * user's primary email address and user name for the
-   * personnel office's phonebook database to use
-   *
-   * This method writes lines to the maildirect GASH output file.
-   *
-   * The lines in this file look like the following.
-   *
-   * 999341010 jonabbey@arlut.utexas.edu broccol
-   *
-   */
-
-  private void writeMailDirect()
-  {
-    PrintWriter out;
-    Hashtable map = new Hashtable(); // map ss addresses to DBObject
-    Hashtable results = new Hashtable(); // map ss addresses to strings
-
-    /* -- */
-
-    try
-      {
-	out = openOutFile(path + "maildirect", "gasharl");
-      }
-    catch (IOException ex)
-      {
-	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open maildirect file: " + ex);
-	return;
-      }
-	
-    try
-      {
-	DBObject user;
-	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-		
-	while (users.hasMoreElements())
-	  {
-	    user = (DBObject) users.nextElement();
-
-	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
-	    String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
-	    String socSecurity = (String) user.getFieldValueLocal(userSchema.SOCIALSECURITY);
-	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
-
-	    StringBuffer socBuffer = new StringBuffer();
-		
-	    if (normalCategory == null)
-	      {
-		if (category != null)
-		  {
-		    String label;
-
-		    label = getLabel(category);
-
-		    if (label != null && label.equals("normal"))
-		      {
-			normalCategory = category;
-		      }
-		  }
-	      }
-    
-	    if (username != null && signature != null && socSecurity != null && 
-		category != null && category.equals(normalCategory) && !user.isInactivated())
-	      {
-		for (int i = 0; i < socSecurity.length(); i++)
-		  {
-		    char c = socSecurity.charAt(i);
-
-		    if (c != '-')
-		      {
-			socBuffer.append(c);
-		      }
-		  }
-
-		if (map.containsKey(socBuffer.toString()))
-		  {
-		    // we've got more than one entry with the same
-		    // social security number.. that should only
-		    // happen if one of the users is an GASH admin, or
-		    // if one is inactivated.
-
-		    DBObject oldUser = (DBObject) map.get(socBuffer.toString());
-
-		    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
-
-		    if (field != null && field.isDefined())
-		      {
-			continue; // we've already got an admin record for this SS#
-		      }
-		  }
-
-		result.setLength(0);
-
-		result.append(socBuffer.toString());
-		result.append(" ");
-		result.append(signature);
-		result.append("@");
-		result.append(dnsdomain.substring(1)); // skip leading .
-		result.append(" ");
-		result.append(username);
-
-		map.put(socBuffer.toString(), user);
-		results.put(socBuffer.toString(), result.toString());
-	      }
-	  }
-
-	Enumeration lines = results.elements();
-
-	while (lines.hasMoreElements())
-	  {
-	    out.println((String) lines.nextElement());
-	  }
-      }
-    finally
-      {
-	out.close();
-      }
   }
 
   /**
