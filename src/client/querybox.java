@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -93,9 +93,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   Button qLoad = new Button("Load");
   Button qDone = new Button("Done");
   Button qCancel = new Button("Cancel");
-  Button lCancel = new Button(" Cancel ");
+  Button lCancel = new Button("Cancel");
   Button lRename = new Button("Rename");
-  Button lSelect = new Button(" Select ");
+  Button lSelect = new Button("Select");
 
   //-----------
 
@@ -121,9 +121,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   
   qChoice baseChoice = new qChoice(); // there's only one of these
   qfieldChoice fieldChoice; // but there's liable to be a whole slew of these
-  qChoice opChoice; // and these too
-  qChoice intChoice;
-  qChoice dateChoice;
+  qaryChoice opChoice;
+  qaryChoice intChoice;
+  qaryChoice dateChoice;
+  qaryChoice vectorChoice;
   qaryChoice isNot; // will either be a boolean choice, or a list of operators
                     // depending on whether the field is an array
 
@@ -754,58 +755,59 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     qaryChoice returnChoice = new qaryChoice();
     returnChoice.qRow = this.row;
 
-    try 
-      {  
-	// Look it up in the fieldHash. if it's there, then goodie!
+    // Look it up in the fieldHash. if it's there, then goodie!
 
-	BaseField myField = (BaseField) fieldHash.get(field);
-
-	// If the field contains slashes, then we'll remove 'em
-	// by using the name hash
+    BaseField myField = (BaseField) fieldHash.get(field);
     
-	field = (String) nameHash.get(field);
-	  
-	// easy as cake
-	 
-	if (myField == null)
-	  {
-	    // It's not an edit in place.
-	    
-	    myField = this.defaultBase.getField(field);  
-	  }
-	else 
-	  {
-	    //System.out.println("Yes, brothers and sisters, we have an EIP!!!");
-	  }
-
-	if (myField == null)
-	  {
-	    System.out.println("Not Good. MyField == null.");
-	    myField = this.defaultBase.getField(field);  
-	  }
-
-	if (myField.isArray())
-	  {
-	    returnChoice.add("Length");
-	    returnChoice.add("Contains Any");
-	    returnChoice.add("Contains None");
-	    returnChoice.add("Contains All");
-	  }
-	else 
-	  {
-	    returnChoice.add("is");
-	    returnChoice.add("is not");
-	  }
-
-	returnChoice.addItemListener(this);
-	return returnChoice;
-      }  
-    catch (RemoteException ex)
+    // If the field contains slashes, then we'll remove 'em
+    // by using the name hash
+    
+    field = (String) nameHash.get(field);
+    
+    // easy as cake
+    
+    if (myField == null)
       {
-	throw new RuntimeException("caught remote exception: " + ex);	
+	// It's not an edit in place.
+	
       }
-  }
+    else 
+      {
+	//System.out.println("Yes, brothers and sisters, we have an EIP!!!");
+      }
+  
+    returnChoice.add("is");
+    returnChoice.add("is not");
+ 
+    returnChoice.addItemListener(this);
+    return returnChoice;
+  }  
+  
 
+  /**
+   *
+   * This internal method generates the GUI choice component
+   * displaying the 'does/does not' strings appropriate type for the type
+   * of field selected. Purely for grammatical purposes
+   * 
+   */
+
+  private qaryChoice getDoesNot ()
+    {
+      qaryChoice returnChoice = new qaryChoice();
+      returnChoice.qRow = this.row;
+      
+      returnChoice.add("does");
+      returnChoice.add("does not");
+      
+      System.out.println("Deos not selected");
+
+      returnChoice.addItemListener(this);
+      return returnChoice;
+
+     
+    }
+  
   /**
    *
    * This internal method generates a GUI input component of
@@ -884,7 +886,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
    *
    */
 
-  private qChoice getOpChoice (String field)
+  private qaryChoice getOpChoice (String field)
   {
     try 
       {
@@ -903,16 +905,17 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    myField = this.defaultBase.getField(field);  
 	  }
 	
-	intChoice = new qChoice();
+	intChoice = new qaryChoice();
 	intChoice.add("="); 
 	intChoice.add(">="); 
 	intChoice.add("<="); 
 	intChoice.add("<"); 
 	intChoice.add(">");
 	intChoice.add("= [Case Insensitive]");
-	intChoice.add("Starts With");
-	intChoice.add("Ends With");
-  
+	intChoice.add("Start With");
+	intChoice.add("End With");
+	intChoice.addItemListener(this);
+
 	// Do a nice null test to make sure stuff isn't screwey
 	  
 	if (myField == null)
@@ -926,19 +929,33 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 	if (myField.isDate())
 	  {
-	    dateChoice = new qChoice();
+	    dateChoice = new qaryChoice();
 	    dateChoice.add("Same Day As");
 	    dateChoice.add("Same Week As");
 	    dateChoice.add("Same Month As");
 	    dateChoice.add("Before");
 	    dateChoice.add("After");
 
+	    dateChoice.addItemListener(this);
 	    return dateChoice;   
 	  }
 	else if (myField.isNumeric())
 	  {
 	    //System.out.println("Field: It's a number!");
 	    return intChoice; 
+	  }
+	else if (myField.isArray())
+	  {
+	    vectorChoice = new qaryChoice();
+	    vectorChoice.add("Contains All");
+	    vectorChoice.add("Contains Any");
+	    vectorChoice.add("Contains None");
+	    vectorChoice.add("Length <");
+	    vectorChoice.add("Length >");
+	    vectorChoice.add("Length =");
+	    vectorChoice.addItemListener(this);
+
+	    return vectorChoice;
 	  }
 	else 
 	  {
@@ -1163,11 +1180,11 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {
 	    opValue = 6;
 	  }
-	else if (operator.equals("Starts With"))
+	else if (operator.equals("Start With"))
 	  {
 	    opValue = 7;
 	  }
-	else if (operator.equals("Ends With"))
+	else if (operator.equals("End With"))
 	  {
 	    opValue = 8;
 	  }
@@ -1193,15 +1210,15 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {
 	    opValue = 3;
 	  } 
-	else if (operator.equals("Length Equals")) 
+	else if (operator.equals("Length =")) 
 	  {
 	    opValue = 4;
 	  } 
-	else if (operator.equals("Length Greater Than")) 
+	else if (operator.equals("Length >")) 
 	  {
 	    opValue = 5;
 	  } 
-	else if (operator.equals("Length Less Than"))
+	else if (operator.equals("Length <"))
 	  {
 	    opValue = 6;
 	  }
@@ -1215,7 +1232,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     
 	dataNode = new QueryDataNode(fieldName, opValue, value);
     
-	if (notValue == "is not")
+	if (notValue == "is not" || notValue == "does not")
 	  {
 	    notNode = new QueryNotNode(dataNode); // if NOT then add NOT node
 	    myNode = notNode;
@@ -1237,7 +1254,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      {
 		short baseid = baseID.shortValue();
 
-		if (notValue == "is not")
+		if (notValue == "is not" || notValue == "does not")
 		  {
 		    myQuery = new Query(baseid, myNode, editOnly); // Use the NOT node (see above)
 		  } 
@@ -1265,7 +1282,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      }
 	    else
 	      {
-		if (notValue == "is not")
+		if (notValue == "is not" || notValue == "does not")
 		  {
 		    myQuery = new Query(baseName, myNode, editOnly); // Use the NOT node (see above)
 		  } 
@@ -1419,7 +1436,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		
 		dataNode = new QueryDataNode(fieldName, opValue, value);
 		
-		if (notValue == "is not")
+		if (notValue == "is not" || notValue == "does not")
 		  {
 		    notNode = new QueryNotNode(dataNode); // if NOT then add NOT node
 		    tempNode = notNode;
@@ -1627,6 +1644,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	Label l;
 	int n;
 	Panel listPanel = new Panel();
+	Panel centeringPanel = new Panel();
 
 	GridBagLayout gbl = new GridBagLayout();
 	GridBagConstraints gbc = new GridBagConstraints();
@@ -1637,6 +1655,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	button_panel.setSize(100, 50);
 	button_panel.setBackground(Color.white);
 	
+	centeringPanel.setLayout(new FlowLayout());
 	loadBox = new Dialog(optionsFrame, "Load Query", true);	
 	List queryList = new List(10);
 
@@ -1673,7 +1692,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
  
 	// -- Add the elements to the choice list
 
-	listPanel.setBackground(Color.lightGray);
+	listPanel.setBackground(Color.blue);
 	listPanel.setLayout(new BorderLayout());
 	listPanel.add(queryList);
 
@@ -1682,15 +1701,18 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	Font f = new Font("TimesRoman", Font.BOLD, 14);
 	Label qLabel = new Label("Saved Queries");
 	qLabel.setFont(f);
-	listPanel.add("North", qLabel);
+	qLabel.setForeground(Color.white);
+	centeringPanel.add(qLabel);
+	listPanel.add("North", centeringPanel);
 
 	queryList.setBackground(Color.white);
+	queryList.setForeground(Color.blue);
 	queryList.setSize(100, 100);
 	queryList.add("Testing 1");
 	queryList.add("Testing 2");
 	queryList.add("Testing 3");
 
-	listPanel.add("South", queryList);
+	listPanel.add("Center", queryList);
 
 	JSplitPane loadPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, button_panel);
 
@@ -1854,10 +1876,11 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	tempRow[7] = newInput;
 	addRow(tempRow, true, inner_choice, currentRow);
       }
+    
     else if (e.getSource() instanceof qaryChoice)
       {
-	System.out.println("QCHOICE SELECTED!");
-	
+	System.out.println("Other Choice selected (presumably operator choice)");
+
 	qaryChoice source = (qaryChoice) e.getSource();
 	
 	String opName = source.getSelectedItem();
@@ -1865,31 +1888,60 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	int currentRow = source.getRow();
 	Component[] tempRow = (Component[]) Rows.elementAt(currentRow);
 	
+	if ((opName.equalsIgnoreCase("Start With")) ||
+	    (opName.equalsIgnoreCase("End With"))	    )
+	  {
+	    // For grammatical purposes, we're changing the "is/is not"
+	    // choice to "does/does not"
+	    
+	    tempRow[3].setVisible(false);
+	    tempRow[3] = getDoesNot();    
+	    
+	  }
+	
+	else 
+	  {
+	    Choice tempChoice = (Choice) tempRow[1];
+	    String myField = tempChoice.getSelectedItem();
+	    tempRow[3].setVisible(false);
+	    tempRow[3] = getIsNot(myField);
+	    System.out.println("NO START WITH");
+	    
+	  }
+
+	removeRow(tempRow, inner_choice, currentRow);
+	addRow(tempRow, true, inner_choice, currentRow); // make sure the new 
+	                                                 // component makes it into the 
+	                                                 //row
+	
+
 	if ((opName.equalsIgnoreCase("Contains All")) || 
 	    (opName.equalsIgnoreCase("Contains None")) ||
 	    (opName.equalsIgnoreCase("Contains Any")))
 	  {
-	    // disable the numeric operator choice cause it makes
+	    // disable the is/is not choice cause it makes
 	    // no sense in this contaxt
 	    
-	    if (tempRow[5].isEnabled())
+	    // NOTE: this doesn't seem to work yet...
+
+	    if (tempRow[3].isEnabled())
 	      {	
-		tempRow[5].setEnabled(false);
+		tempRow[3].setEnabled(false);
 	      }
 	  }
 	else
 	  {
 	    // make sure everything's enabled
 
-	    if (! tempRow[5].isEnabled())
+	    if (! tempRow[3].isEnabled())
 	      {
-		tempRow[5].setEnabled(true);
+		tempRow[3].setEnabled(true);
 	      }
 	  }
       }
     else 
       {
-	// ?? what the heck is it? We don't recognize this oprator 
+	// ?? what the heck is it? We don't recognize this component
       }
   }
 
@@ -1898,8 +1950,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   public Query readQuery (String savedQuery)
     {
       /** 
-       * NOTE: CONVERT STRING TO QUERY AFTER TESTING
-       *
        *
        * This method takes a as its parameter query and sets the 
        * gui components of the querybox to reflect the state of 
@@ -1951,8 +2001,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       // ignore backslashed characters
 
 
-
-
+      // <<< Insert well written and robust code here >>>
 
 
       /* Step Two: Figure out what the base is, and what form it's in (ie, baseID,
@@ -2154,9 +2203,31 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      this.queryString = this.queryString.substring(2, this.readLength);
 	      this.readLength = this.readLength - 2;
 	    }
+
+	  else if (temp.startsWith("= [Case Insensitive]"))
+	    {
+	      comparator = 6;
+	      this.queryString = this.queryString.substring(20, this.readLength);
+	      this.readLength = this.readLength - 20;
+	    }
+	  
+	  else if (temp.startsWith("Start With"))
+	    {
+	      comparator = 7;
+	      this.queryString = this.queryString.substring(10, this.readLength);
+	      this.readLength = this.readLength - 10;
+	    }
+	  
+	  else if (temp.startsWith("End With"))
+	    {
+	      comparator = 8;
+	      this.queryString = this.queryString.substring(8, this.readLength);
+	      this.readLength = this.readLength - 8;
+	    }
+
 	  else
 	    {
-	      System.out.println("Help! Here's temp: " + temp);
+	      System.out.println("Help! rDecode operator not found: " + temp);
 	    }
 	  
 	  // We've got the operator. Now we have to get the fieldname and value
