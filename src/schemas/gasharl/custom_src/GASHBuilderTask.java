@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1052,6 +1052,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String groupname;
     Vector group_targets;
     Vector external_targets;
+    Invid userInvid;
     String target;
 
     StringBuffer result = new StringBuffer();
@@ -1075,9 +1076,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		result.append(", ");
 	      }
 	    
-	    target = (String) group_targets.elementAt(i);
+	    userInvid = (Invid) group_targets.elementAt(i);
 	    
-	    result.append(target);
+	    result.append(getLabel(userInvid));
 	  }
       }
 
@@ -1085,7 +1086,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	for (int i = 0; i < external_targets.size(); i++)
 	  {
-	    if ((i > 0) || (group_targets.size() > 0))
+	    if ((i > 0) || (group_targets != null && group_targets.size() > 0))
 	      {
 		result.append(", ");
 	      }
