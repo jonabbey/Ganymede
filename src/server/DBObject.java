@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -362,5 +362,58 @@ public class DBObject {
   public DBField viewField(short id)
   {
     return (DBField) fields.get(new Integer(id));
+  }
+
+  /**
+   *
+   * Generate a complete printed representation of the object,
+   * suitable for printing to a debug or log stream.
+   *
+   */
+
+  public synchronized void print(PrintStream out)
+  {
+    Enumeration enum;
+    Object key;
+    DBField field;
+    DBArrayField afield;
+
+    /* -- */
+
+    out.println(objectBase.object_name + " : " + id);
+   
+    enum = fields.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+	out.print(((DBObjectBaseField) objectBase.fieldHash.get(key)).field_name);
+	out.print(" : ");
+
+	field = (DBField) fields.get(key);
+
+	if (field instanceof DBArrayField)
+	  {
+	    afield = (DBArrayField) field;
+
+	    for (int i = 0; i < afield.size(); i++)
+	      {
+		out.print("\t" + afield.key(i));
+
+		if (i + 1 < afield.size())
+		  {
+		    out.println(",");
+		  }
+		else
+		  {
+		    out.println();
+		  }
+	      }
+	  }
+	else
+	  {
+	    out.println(field.key());
+	  }
+      }    
   }
 }
