@@ -6,8 +6,8 @@
    
    Created: 17 September 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:03:55 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/03/17 03:42:26 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -117,6 +117,19 @@ public class JCenterDialog extends JDialog {
 
 	    int loc = r.width/2 + r.x - width/2;
 	    int locy = r.height/2 + r.y - height/2;
+
+	    // make sure that we don't put the dialog off screen if
+	    // the dialog is bigger than the frame it's attached to..
+
+	    if (loc < 0)
+	      {
+		loc = width/2;
+	      }
+
+	    if (locy < 0)
+	      {
+		locy = height/2;
+	      }
 	    
 	    setLocation(loc, locy);
 
@@ -145,7 +158,12 @@ public class JCenterDialog extends JDialog {
   public void pack()
   {
     super.pack();
-    pack(getSize().width,getSize().height);
+    place(getSize().width, getSize().height);
+
+    // on NT with the version of Swing in JDK 1.2, it helps to repack
+    // the dialog after placing it..
+
+    super.pack();
   }
 
   /**
@@ -157,9 +175,9 @@ public class JCenterDialog extends JDialog {
 
   public void pack(int width, int height)
   {
-    place(width, height);
     super.pack();
     setSize(width, height);
+    place(width, height);
   }
 
 }
