@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ import javax.swing.border.*;
  * @see DialogRsrc
  */
 
-public class StringDialog extends JCenterDialog implements ActionListener, JsetValueCallback, ItemListener {
+public class StringDialog extends JCenterDialog implements ActionListener {
 
   static final boolean debug = false;
 
@@ -295,10 +295,9 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
     gbc.gridy = 2;
     gbc.gridwidth = 1;
     gbc.gridheight = 1;
-    JScrollPane scroller = new JScrollPane(panel);
-    scroller.setBorder(null);
-    gbl.setConstraints(scroller, gbc);
-    mainPanel.add(scroller);
+    panel.setBorder(null);
+    gbl.setConstraints(panel, gbc);
+    mainPanel.add(panel);
 
     // The panel uses its own grid bag stuff
 
@@ -310,371 +309,332 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
     
     // add stuff to panel here
 
-    if (objects != null)
+    if (objects == null)
       {
 	if (debug)
 	  {
-	    System.out.println("objects != null");
+	    System.out.println("null objects vector");
 	  }
 
-	int numberOfObjects = objects.size();
+	pack();
+	return;
+      }
+
+    int numberOfObjects = objects.size();
 	
-	if (numberOfObjects > 0) 
+    if (numberOfObjects == 0) 
+      {
+	if (debug)
+	  {
+	    System.out.println("no fields to add to StringDialog");
+	  }
+
+	pack();
+	return;
+      }
+
+    for (int i = 0; i < numberOfObjects; ++i) 
+      {
+	Object element = objects.elementAt(i);
+
+	if (debug)
+	  {
+	    System.out.println("number: " + numberOfObjects + " current: " + i);
+	  }
+
+	if (element instanceof stringThing)
 	  {
 	    if (debug)
 	      {
-		System.out.println("objects.size() > 0"); 
+		System.out.println("Adding string field(JstringField)");
 	      }
-	      
-	    for (int i = 0; i < numberOfObjects; ++i) 
+		    
+	    stringThing st = (stringThing) element;
+
+	    if (st.isMultiline())
 	      {
-		Object element = objects.elementAt(i);
+		JstringArea sa = new JstringArea(5, 40);
+		sa.setText(st.getValue());
+		sa.setEditable(true);
 
-		if (debug)
-		  {
-		    System.out.println("number: " + numberOfObjects + " current: " + i);
-		  }
-
-		if (element instanceof stringThing)
-		  {
-		    if (debug)
-		      {
-			System.out.println("Adding string field(JstringField)");
-		      }
+		addRow(panel, sa, st.getLabel(), i);
 		    
-		    stringThing st = (stringThing) element;
+		componentHash.put(sa, st.getLabel());
+		valueHash.put(st.getLabel(), "");
+	      }
+	    else
+	      {
+		JstringField sf = new JstringField();
+		sf.setText(st.getValue());
+		sf.setEditable(true);
 
-		    if (st.isMultiline())
-		      {
-			JstringArea sa = new JstringArea(5, 40);
-			sa.setText(st.getValue());
-			sa.setEditable(true);
-			sa.setCallback(this);
-
-			addRow(panel, sa, st.getLabel(), i);
+		addRow(panel, sf, st.getLabel(), i);
 		    
-			componentHash.put(sa, st.getLabel());
-			valueHash.put(st.getLabel(), "");
-		      }
-		    else
-		      {
-			JstringField sf = new JstringField();
-			sf.setText(st.getValue());
-			sf.setEditable(true);
-			sf.setCallback(this); 
-
-			if (i == (numberOfObjects - 1)) // This is the last object
-			  {
-			    sf.addActionListener(new ActionListener() {
-			      public void actionPerformed(ActionEvent e)
-				{
-				  OKButton.doClick();
-				}
-			    });
-			  }
-			
-			addRow(panel, sf, st.getLabel(), i);
+		componentHash.put(sf, st.getLabel());
+		valueHash.put(st.getLabel(), "");
+	      }
+	  }
+	else if (element instanceof dateThing)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Adding date field(JdateField)");
+	      }
 		    
-			componentHash.put(sf, st.getLabel());
-			valueHash.put(st.getLabel(), "");
+	    dateThing dt = (dateThing) element;
+
+	    JdateField dateField;
+	    Date currentDate;
+	    Date minDate = new Date();
+
+	    if (dt.getDate() != null)
+	      {
+		currentDate = dt.getDate();
+
+		if (dt.getMaxDate() != null)
+		  {
+		    if (currentDate.after(dt.getMaxDate()))
+		      {
+			currentDate = dt.getMaxDate();
 		      }
 		  }
-		else if (element instanceof dateThing)
+	      }
+	    else
+	      {
+		if (dt.getMaxDate() != null)
 		  {
-		    if (debug)
-		      {
-			System.out.println("Adding date field(JdateField)");
-		      }
-		    
-		    dateThing dt = (dateThing) element;
-
-		    JdateField dateField;
-		    Date currentDate;
-		    Date minDate = new Date();
-
-		    if (dt.getDate() != null)
-		      {
-			currentDate = dt.getDate();
-
-			if (dt.getMaxDate() != null)
-			  {
-			    if (currentDate.after(dt.getMaxDate()))
-			      {
-				currentDate = dt.getMaxDate();
-			      }
-			  }
-		      }
-		    else
-		      {
-			if (dt.getMaxDate() != null)
-			  {
-			    currentDate = dt.getMaxDate();
-			  }
-			else
-			  {
-			    currentDate = null;
-			  }
-		      }
-
-		    if (dt.getMaxDate() != null)
-		      {
-			dateField = new JdateField(currentDate, true, true,
-						   minDate, dt.getMaxDate(), this);
-		      }
-		    else
-		      {
-			dateField = new JdateField(currentDate, true, false,
-						   null, null, this);
-		      }
-
-		    addRow(panel, dateField, dt.getLabel(), i);
-
-		    componentHash.put(dateField, dt.getLabel());
-		    valueHash.put(dt.getLabel(), currentDate);
-		  }
-		else if (element instanceof passwordThing)
-		  {
-		    if (debug)
-		      {
-			System.out.println("Adding password field(JpasswordField)");
-		      }
-
-		    passwordThing pt = (passwordThing)element;
-
-		    if (pt.isNew())
-		      {
-			if (debug)
-			  {
-			    System.out.println("This password is new.");
-			  }
-
-			JpassField sf = new JpassField(null, true, 10,100,true);
-			
-			sf.setCallback(this); 
-			addRow(panel, sf, pt.getLabel(), i);
-			
-			componentHash.put(sf, pt.getLabel());
-		      }
-		    else
-		      {
-			if (debug)
-			  {
-			    System.out.println("This password is not new.");
-			  }
-
-			JpasswordField sf = new JpasswordField();
-			sf.setEditable(true);
-
-			sf.setCallback(this); 
-
-			if (i == (numberOfObjects - 1)) // This is the last object
-			  {
-			    if (debug)
-			      {
-				System.out.println("Adding action listener.");
-			      }
-
-			    sf.addActionListener(new ActionListener() {
-			      public void actionPerformed(ActionEvent e)
-				{
-				  OKButton.doClick();
-				}
-			    });
-			    
-			  }
-			
-			addRow(panel, sf, pt.getLabel(), i);
-			componentHash.put(sf, pt.getLabel());
-		      }
-
-		    valueHash.put(pt.getLabel(), "");
-		  }
-		else if (element instanceof booleanThing)
-		  {
-		    if (debug)
-		      {
-			System.out.println("Adding boolean field (JcheckboxField)");
-		      }
-
-		    booleanThing bt = (booleanThing)element;
-		    JCheckBox cb = new JCheckBox();
-		    cb.setSelected(bt.getValue());
-		    cb.addItemListener(this);
-
-		    addRow(panel, cb, bt.getLabel(), i);
-		      
-		    componentHash.put(cb, bt.getLabel());
-		    valueHash.put(bt.getLabel(), new Boolean(bt.getValue()));
-		  }
-		else if (element instanceof choiceThing)
-		  {
-		    if (debug)
-		      {
-			System.out.println("Adding choice field (JComboBox)");
-		      }
-
-		    choiceThing ct = (choiceThing)element;
-		    JComboBox ch = new JComboBox();
-
-		    if (debug)
-		      {
-			System.out.println("Getting choice lists");
-		      }
-
-		    Vector items = ct.getItems();
-
-		    if (debug)
-		      {
-			System.out.println("Got choice lists");
-		      }
-
-		    if (items == null)
-		      {
-			if (debug)
-			  {
-			    System.out.println("Nothing to add to Choice, empty vector");
-			  }
-		      }
-		    else
-		      {
-			int total = items.size();
-
-			for (int j = 0; j < total ; ++j)
-			  {
-			    //String str = (String)items.elementAt(j);
-			    ch.addItem(items.elementAt(j));
-			  }
-
-			if (ct.getSelectedItem() != null)
-			  {
-			    ch.setSelectedItem(ct.getSelectedItem());
-			  }
-
-			ch.addItemListener(this);
-			addRow(panel, ch, ct.getLabel(), i);
-
-			componentHash.put(ch, ct.getLabel());
-
-			if (ch.getSelectedItem() != null)
-			  {
-			    valueHash.put(ct.getLabel(), ch.getSelectedItem());
-			  }
-		      }
+		    currentDate = dt.getMaxDate();
 		  }
 		else
 		  {
-		    System.out.println("Item " + i + " is of unknown type");
+		    currentDate = null;
 		  }
 	      }
+
+	    if (dt.getMaxDate() != null)
+	      {
+		dateField = new JdateField(currentDate, true, true,
+					   minDate, dt.getMaxDate());
+	      }
+	    else
+	      {
+		dateField = new JdateField(currentDate, true, false,
+					   null, null);
+	      }
+
+	    addRow(panel, dateField, dt.getLabel(), i);
+
+	    componentHash.put(dateField, dt.getLabel());
+	    valueHash.put(dt.getLabel(), currentDate);
+	  }
+	else if (element instanceof passwordThing)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Adding password field(JpasswordField)");
+	      }
+
+	    passwordThing pt = (passwordThing)element;
+
+	    if (pt.isNew())
+	      {
+		if (debug)
+		  {
+		    System.out.println("This password is new.");
+		  }
+
+		JpassField sf = new JpassField(null, true, 10,100,true);
+			
+		addRow(panel, sf, pt.getLabel(), i);
+			
+		componentHash.put(sf, pt.getLabel());
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println("This password is not new.");
+		  }
+
+		JpasswordField sf = new JpasswordField();
+		sf.setEditable(true);
+
+		addRow(panel, sf, pt.getLabel(), i);
+		componentHash.put(sf, pt.getLabel());
+	      }
+
+	    valueHash.put(pt.getLabel(), "");
+	  }
+	else if (element instanceof booleanThing)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Adding boolean field (JcheckboxField)");
+	      }
+
+	    booleanThing bt = (booleanThing)element;
+	    JCheckBox cb = new JCheckBox();
+	    cb.setSelected(bt.getValue());
+
+	    addRow(panel, cb, bt.getLabel(), i);
+		      
+	    componentHash.put(cb, bt.getLabel());
+	    valueHash.put(bt.getLabel(), new Boolean(bt.getValue()));
+	  }
+	else if (element instanceof choiceThing)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Adding choice field (JComboBox)");
+	      }
+
+	    choiceThing ct = (choiceThing)element;
+	    JComboBox ch = new JComboBox();
 
 	    if (debug)
 	      {
-		System.err.println("Created components, registering callbacks.");
+		System.out.println("Getting choice lists");
 	      }
 
-	    for (int i = 0; i < components.size(); i++)
-	      {
-		JComponent c = (JComponent)components.elementAt(i);
+	    Vector items = ct.getItems();
 
+	    if (debug)
+	      {
+		System.out.println("Got choice lists");
+	      }
+
+	    if (items == null)
+	      {
 		if (debug)
 		  {
-		    System.out.println("Checking component: " + c);
+		    System.out.println("Nothing to add to Choice, empty vector");
+		  }
+	      }
+	    else
+	      {
+		int total = items.size();
+
+		for (int j = 0; j < total ; ++j)
+		  {
+		    ch.addItem(items.elementAt(j));
 		  }
 
-		if (c instanceof JstringField)
+		if (ct.getSelectedItem() != null)
 		  {
-		    JstringField sf = (JstringField) c;
-
-		    if (i == components.size() -1) // last one!
-		      {
-			sf.addActionListener
-			  (
-			   new ActionListener()
-			   {
-			     public void actionPerformed(ActionEvent e) {
-			       OKButton.doClick();
-			     }
-			   });
-		      }
-		    else
-		      {
-			sf.addActionListener
-			  (
-			   new ActionListener()
-			   {
-			     public void actionPerformed(ActionEvent e) {
-			       JComponent thisComp = (JComponent)e.getSource();
-			       
-			       ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
-			     }
-			   });
-		      }
-		    
-		    if (i == 0) // first object
-		      {
-			firstComp = sf;
-		      }
+		    ch.setSelectedItem(ct.getSelectedItem());
 		  }
-		else if (c instanceof JpasswordField)
-		  {
-		    if (debug)
-		      {
-			System.out.println("This is a JpasswordField, number " + i);
-		      }
 
-		    JpasswordField pf = (JpasswordField) c;
+		addRow(panel, ch, ct.getLabel(), i);
 
-		    if (i == components.size() -1)
-		      {
-			pf.addActionListener
-			  (
-			   new ActionListener()
-			   {
-			     public void actionPerformed(ActionEvent e) {
-			       OKButton.doClick();
-			     }
-			   });
-		      }
-		    else
-		      {
-			pf.addActionListener
-			  (
-			   new ActionListener()
-			   {
-			     public void actionPerformed(ActionEvent e) {
-			       JComponent thisComp = (JComponent)e.getSource();
-			       
-			       ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
-			     }
-			   });
-		      }
-		    if (i == 0) // first object
-		      {
-			firstComp = pf;
-		      }
-		  }
-		else if (c instanceof JComboBox)
+		componentHash.put(ch, ct.getLabel());
+
+		if (ch.getSelectedItem() != null)
 		  {
-		    if (i == 0)
-		      {
-			firstComp = c;
-		      }
+		    valueHash.put(ct.getLabel(), ch.getSelectedItem());
 		  }
 	      }
 	  }
-	else if (debug)
+	else
 	  {
-	    System.out.println("No objects to add to StringDialog");
+	    System.out.println("StringDialog constructor: Item " + i + " is of unknown type");
 	  }
       }
-    else if (debug)
-      {
-	System.out.println("null objects vector");
-      }
+
+    registerCallbacks();
     
     pack();
   }
 
+  /**
+   *
+   * We want to make it so that when the user hits enter on the last
+   * string or password field in the dialog, the ok button is clicked.
+   *
+   */
+
+  public void registerCallbacks()
+  {
+    for (int i = 0; i < components.size(); i++)
+      {
+	JComponent c = (JComponent)components.elementAt(i);
+
+	// first object.. we'll remember it for initial focus
+
+	if (i == 0) 
+	  {
+	    firstComp = c;
+	  }
+	
+	if (debug)
+	  {
+	    System.out.println("Checking component: " + c);
+	  }
+	
+	if (c instanceof JstringField)
+	  {
+	    JstringField sf = (JstringField) c;
+	    
+	    if (i == components.size() -1) // last one!
+	      {
+		sf.addActionListener
+		  (
+		   new ActionListener()
+		   {
+		     public void actionPerformed(ActionEvent e) {
+		       OKButton.doClick();
+		     }
+		   });
+	      }
+	    else
+	      {
+		sf.addActionListener
+		  (
+		   new ActionListener()
+		   {
+		     public void actionPerformed(ActionEvent e) {
+		       JComponent thisComp = (JComponent)e.getSource();
+		       
+		       ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
+		     }
+		   });
+	      }
+	  }
+	else if (c instanceof JpasswordField)
+	  {
+	    if (debug)
+	      {
+		System.out.println("This is a JpasswordField, number " + i);
+	      }
+	    
+	    JpasswordField pf = (JpasswordField) c;
+	    
+	    if (i == components.size() -1)
+	      {
+		pf.addActionListener
+		  (
+		   new ActionListener()
+		   {
+		     public void actionPerformed(ActionEvent e) {
+		       OKButton.doClick();
+		     }
+		   });
+	      }
+	    else
+	      {
+		pf.addActionListener
+		  (
+		   new ActionListener()
+		   {
+		     public void actionPerformed(ActionEvent e) {
+		       JComponent thisComp = (JComponent)e.getSource();
+			       
+		       ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
+		     }
+		   });
+	      }
+	  }
+      }
+  }
 
   /**
    * Display the dialog box.
@@ -691,6 +651,9 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
     pack();
     show();
 
+    // at this point we're frozen, since we're a modal dialog.. we'll continue
+    // at this point when the ok or cancel buttons are pressed.
+
     if (debug)
       {
 	System.out.println("Done invoking.");
@@ -699,169 +662,91 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
     return valueHash;
   }
 
-  public  void actionPerformed(ActionEvent e)
-  {
-    //    System.out.println("There was some action performed in StringDialog");
+  /**
+   *
+   * Handle the ok and cancel buttons.
+   *
+   */
 
+  public void actionPerformed(ActionEvent e)
+  {
     if (e.getSource() == OKButton)
       {
-	//System.out.println("OKButton clicked, returning Hashtable");
+	loadValueHash();
       }
     else
       {
-	//System.out.println("CancelButton clicked, returning null Hashtable");
-
 	valueHash = null;
       }
+
+    // pop up down so that DialogShow() can proceed to completion.
 
     setVisible(false);
   }
 
-  public void itemStateChanged(ItemEvent e)
+  /**
+   *
+   * This method is responsible for scanning all of the input fields
+   * in this dialog and loading their values into valueHash for
+   * DialogShow() to return.
+   * 
+   */
+
+  private void loadValueHash()
   {
-    Object obj = e.getSource();
-
-    if (obj instanceof JComboBox)
+    for (int i = 0; i < components.size(); i++)
       {
-	String label = (String)componentHash.get(obj);
-	JComboBox ch = (JComboBox) obj;
-
-	if (valueHash != null)
-	  {
-	    valueHash.put(label, ch.getSelectedItem());
-	  }
+	JComponent c = (JComponent)components.elementAt(i);
+	String label = (String) componentHash.get(c);
 	
 	if (debug)
 	  {
-	    System.out.println(ch.getSelectedItem() + " chosen");
-	  }
-      }
-    else if (obj instanceof JCheckBox)
-      {
-	String label = (String)componentHash.get(obj);
-
-	if (label == null)
-	  {
-	    System.out.println("in itemStateChanged from JcheckboxField: label = null");
-	    return;
+	    System.out.println("Loading value for field: " + label);
 	  }
 
-	JCheckBox cb = (JCheckBox)obj;
-	Boolean answer = new Boolean(cb.isSelected());
-
-	if (valueHash != null)
+	try
 	  {
-	    valueHash.put(label, answer);
-	  }
-      }
-    else
-      {
-	System.out.println("Unknown item type generated action");
-      }
-  }
-
-  public boolean setValuePerformed(JValueObject v)
-  {
-    Component comp = v.getSource();
-
-    if (comp instanceof JstringField)
-      {
-	String label = (String)componentHash.get(comp);
-	JstringField sf = (JstringField)comp;
-
-	if (valueHash != null)
-	  {
-	    valueHash.put(label, sf.getText());
-	  }
-
-	if (debug)
-	  {
-	    System.out.println("Setting " + label + " to " + sf.getText());
-	  }
-      }
-    else if (comp instanceof JdateField)
-      {
-	String label = (String) componentHash.get(comp);
-	JdateField dateField = (JdateField) comp;
-
-	if (debug)
-	  {
-	    System.out.println("Setting " + label + " to " + dateField.getDate());
-	  }
-
-	if (valueHash != null)
-	  {
-	    if (dateField.getDate() == null)
+	    if (c instanceof JstringField)
 	      {
-		valueHash.remove(label);
+		JstringField sf = (JstringField) c;
+
+		valueHash.put(label, sf.getText());
 	      }
-	    else
+	    else if (c instanceof JstringArea)
 	      {
-		valueHash.put(label, dateField.getDate());
+		JstringArea sA = (JstringArea) c;
+
+		valueHash.put(label, sA.getText());
+	      }
+	    else if (c instanceof JpasswordField)
+	      {
+		JpasswordField pf = (JpasswordField) c;
+	    
+		valueHash.put(label, pf.getText());
+	      }
+	    else if (c instanceof JdateField)
+	      {
+		JdateField dF = (JdateField) c;
+
+		valueHash.put(label, dF.getDate());
+	      }
+	    else if (c instanceof JCheckBox)
+	      {
+		JCheckBox cb = (JCheckBox) c;
+
+		valueHash.put(label, new Boolean(cb.isSelected()));
+	      }
+	    else if (c instanceof JComboBox)
+	      {
+		JComboBox combo = (JComboBox) c;
+
+		valueHash.put(label, combo.getSelectedItem());
 	      }
 	  }
-      }
-    else if (comp instanceof JpasswordField)
-      {
-	String label = (String)componentHash.get(comp);
-	JpasswordField sf = (JpasswordField)comp;
-
-	if (debug)
+	catch (NullPointerException ex)
 	  {
-	    System.out.println("label is " + label);
 	  }
-	
-	if (valueHash != null)
-	  {
-	    valueHash.put(label, sf.getText());
-	  }
-
-	if (debug)
-	  {
-	    System.out.println("Setting " + label + " to " + sf.getText());
-	  }
-      }
-    else if (comp instanceof JpassField)
-      {
-	String label = (String)componentHash.get(comp);
-	JpassField sf = (JpassField)comp;
-
-	if (debug)
-	  {
-	    System.out.println("label is " + label);
-	  }
-	
-	if (valueHash != null)
-	  {
-	    valueHash.put(label, (String)v.getValue());
-	  }
-
-	if (debug)
-	  {
-	    System.out.println("Setting " + label + " to " + (String)v.getValue());
-	  }
-      }
-    else if (comp instanceof JstringArea)
-      {
-	String label = (String) componentHash.get(comp);
-
-	if (debug)
-	  {
-	    System.out.println("label is " + label);
-	  }
-	
-	if (valueHash != null)
-	  {
-	    valueHash.put(label, (String) v.getValue());
-	  }
-
-	if (debug)
-	  {
-	    System.out.println("Setting " + label + " to " + (String) v.getValue());
-	  }
-      }
-
-    return true;
+      }    
   }
 
   private final void addRow(JPanel parent, JComponent comp,  String label, int row)
@@ -888,32 +773,6 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
     compgbl.setConstraints(comp, compgbc);
     parent.add(comp);
 
-    //parent.add("0 " + row + " rhwHW", l);
-    //parent.add("1 " + row + " lhH", comp);
-
     parent.invalidate();
   }
-
-  /**
-   * Activator cuts off the bottom 10 pixels or so, so add some space to make up for it.
-   */
-  private final void addSpace(JPanel parent, int space, int row)
-  {
-    // Do nothing.  See nothing.  Hear nothing.
-    //parent.add("0 " + row + " rhH", Box.createVerticalStrut(space));
-  }
-
-  private final void addSeparator(JPanel parent, Component comp, int row)
-  {
-    compgbc.gridy = row;
-    compgbc.gridx = 1;
-    compgbc.gridwidth = GridBagConstraints.REMAINDER;
-    compgbc.fill = GridBagConstraints.HORIZONTAL;
-
-    compgbl.setConstraints(parent, gbc);
-    parent.add("0 " + row + " 2 1 hH", comp);
-  }
-  
-} // JStringDialog
-
-
+}
