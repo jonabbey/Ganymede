@@ -168,7 +168,7 @@ public final class DBStore implements JythonMap {
    * after id_string
    */
 
-  static final byte minor_version = 9;
+  static final byte minor_version = 10;
 
   /**
    * XML version major id
