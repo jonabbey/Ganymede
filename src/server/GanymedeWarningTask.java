@@ -8,8 +8,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/22 18:05:46 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/07/21 05:38:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -434,7 +434,7 @@ public class GanymedeWarningTask implements Runnable {
     // we've already put the description in the event, don't need
     // to provide a separate description string to mailNotify
     
-    Ganymede.log.mailNotify(title, null, event, true);
+    Ganymede.log.mailNotify(title, null, event, true, null);
 
     // Ganymede.debug(description);
   }

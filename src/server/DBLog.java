@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/06/15 02:48:18 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/07/21 05:38:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -247,7 +247,8 @@ public class DBLog {
    */
 
   public synchronized void mailNotify(String title, String description,
-				      DBLogEvent event, boolean mailToOwners)
+				      DBLogEvent event, boolean mailToOwners,
+				      DBSession session)
   {
     systemEventType type;
 
@@ -260,7 +261,7 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("DBLopg.mailNotify(): Writing log event " + event.eventClassToken);
+	System.err.println("DBLog.mailNotify(): Writing log event " + event.eventClassToken);
       }
 
     updateSysEventCodeHash();
@@ -271,7 +272,7 @@ public class DBLog {
 
     if (mailToOwners)
       {
-	calculateMailTargets(event);
+	calculateMailTargets(event, session);
       }
 
     // log the event to the log file.
@@ -530,7 +531,8 @@ public class DBLog {
 
 	if (debug)
 	  {
-	    System.err.println("DBLog.logTransaction(): logging event: " + event.description);
+	    System.err.println("DBLog.logTransaction(): logging event: \n** " + 
+			       event.eventClassToken + " **\n" + event.description);
 	  }
 
 	if (event.subject == null)
@@ -556,7 +558,7 @@ public class DBLog {
 	    // on event, which handles calculating who needs to receive
 	    // email about this event.
 	
-	    appendMailOut(event, mailOuts);
+	    appendMailOut(event, mailOuts, transaction.session);
 	    event.writeEntry(logWriter, currentTime, transactionID);
 	  }
 	else
@@ -608,8 +610,10 @@ public class DBLog {
     while (enum.hasMoreElements())
       {
 	MailOut mailout = (MailOut) enum.nextElement();
-	String description = arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + 
-	  "\n\n" + signature;
+	String description = "Transaction summary: User " + adminName + ":" + 
+	  currentTime.toString() + "\n\n" + 
+	  arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + 
+	  "\n" + signature;
 
 	if (debug)
 	  {
@@ -620,7 +624,7 @@ public class DBLog {
 	  {
 	    mailer.sendmsg(Ganymede.returnaddrProperty,
 			   mailout.addresses,
-			   "Ganymede: transaction notification",
+			   "Ganymede: Updates",
 			   description);
 	  }
 	catch (UnknownHostException ex)
@@ -859,7 +863,7 @@ public class DBLog {
       {
 	String name;
 
-	name = convertAdminInvidToString(event.admin);
+	name = adminPersonaCustom.convertAdminInvidToString(event.admin, session.getSession());
 
 	if (name == null)
 	  {
@@ -871,7 +875,8 @@ public class DBLog {
 
     if (eventRec.ccToOwners)
       {
-	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects));
+	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects,
+				     session.getSession()));
       }
 
     mailList = VectorUtils.union(mailList, eventRec.addressVect);
@@ -1087,7 +1092,7 @@ public class DBLog {
    * code that originally generated the log event.</P>
    */
 
-  private void calculateMailTargets(DBLogEvent event)
+  private void calculateMailTargets(DBLogEvent event, DBSession session)
   {
     Vector 
       notifyVect,
@@ -1105,18 +1110,15 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("calculateMailTargets: entering");
+	System.err.println("DBLog.java: calculateMailTargets: entering");
+	System.err.println(event.toString());
       }
-
-    // If the event's notifyVect is null, we'll create a new vector,
-    // otherwise, we'll be appending to the existing list.
-
-    notifyVect = event.notifyVect;
 
     // first we calculate what email addresses we should notify based
     // on the ownership of the objects
 
-    notifyVect = VectorUtils.union(notifyVect, calculateOwnerAddresses(event.objects));
+    notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects,
+									     session));
 
     // now update notifyList
 
@@ -1126,6 +1128,12 @@ public class DBLog {
     // its email list.
 
     event.augmented = true;
+
+    if (debug)
+      {
+	System.err.println("DBLog.java: calculateMailTargets: exiting");
+	System.err.println(event.toString());
+      }
   }
 
   /**
@@ -1136,7 +1144,7 @@ public class DBLog {
    * &lt;objects&gt; list.</P>
    */
 
-  private Vector calculateOwnerAddresses(Vector objects)
+  static public Vector calculateOwnerAddresses(Vector objects, DBSession session)
   {
     Enumeration objectsEnum, ownersEnum;
     Invid invid, ownerInvid;
@@ -1148,12 +1156,22 @@ public class DBLog {
 
     /* -- */
 
+    if (session == null)
+      {
+	session = Ganymede.internalSession.getSession();
+      }
+
+    if (debug)
+      {
+	System.err.println("DBLog.java: calculateOwnerAddresses");
+      }
+
     objectsEnum = objects.elements();
 
     while (objectsEnum.hasMoreElements())
       {
 	invid = (Invid) objectsEnum.nextElement();
-	object = Ganymede.internalSession.session.viewDBObject(invid);
+	object = session.viewDBObject(invid);
 
 	if (object == null)
 	  {
@@ -1174,28 +1192,59 @@ public class DBLog {
 	// okay, we've got a reference to (one of) the DBObject's being
 	// modified by this event.. what do we want to do with it?
 
-	// we don't want to mess with embedded objects
-
 	if (object.isEmbedded())
 	  {
 	    if (debug)
 	      {
-		System.err.println("calculateOwnerAddresses(): Skipping Embeded invid " + 
+		System.err.println("calculateOwnerAddresses(): Looking up perms for Embeded invid " + 
 				   invid.toString());
 	      }
 
-	    continue;
+	    DBObject refObj = object;
+
+	    // if we have are getting rid of an embedded object, we'll need to look
+	    // at the original version of the object to get its parent.
+
+	    if (refObj instanceof DBEditObject)
+	      {
+		DBEditObject refEObj = (DBEditObject) refObj;
+
+		if (refEObj.getStatus()== ObjectStatus.DELETING)
+		  {
+		    refObj = refEObj.getOriginal();
+		  }
+	      }
+
+	    refObj = session.getGSession().getContainingObj(refObj);
+	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
 	  }
+	else
+	  {
+	    // get a list of owners invid's for this object
 
-	// get a list of owners invid's for this object
+	    DBObject refObj = object;
+	    
+	    // if we are deleting an object, we'll need to look at the
+	    // original to get the list of owners for it
+	    
+	    if (refObj instanceof DBEditObject)
+	      {
+		DBEditObject refEObj = (DBEditObject) refObj;
 
-	ownersField = (InvidDBField) object.getField(SchemaConstants.OwnerListField);
+		if (refEObj.getStatus()== ObjectStatus.DELETING)
+		  {
+		    refObj = refEObj.getOriginal();
+		  }
+	      }
+
+	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
+	  }
 	
 	if (ownersField == null)
 	  {
 	    if (debug)
 	      {
-		System.err.println("calculateOwnerAddresses(): Couldn't access owner list for invid " + 
+		System.err.println("calculateOwnerAddresses(): disregarding supergash-owned invid " + 
 				   invid.toString());
 	      }
 
@@ -1234,10 +1283,11 @@ public class DBLog {
 		if (debug)
 		  {
 		    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " + 
-				       session.viewObjectLabel(ownerInvid));
+				       session.getGSession().viewObjectLabel(ownerInvid));
 		  }
 
-		results = VectorUtils.union(results, getOwnerGroupAddresses(ownerInvid));
+		results = VectorUtils.union(results, ownerCustom.getAddresses(ownerInvid, 
+									      session));
 		
 		seenOwners.put(ownerInvid, ownerInvid);
 	      }
@@ -1266,153 +1316,6 @@ public class DBLog {
   }
 
   /**
-   * This method takes an {@link arlut.csd.ganymede.Invid Invid} for
-   * an Owner Group {@link arlut.csd.ganymede.DBObject DBObject}
-   * and returns a Vector of Strings containing the list
-   * of email addresses for that owner group.
-   */
-
-  private Vector getOwnerGroupAddresses(Invid ownerInvid)
-  {
-    DBObject ownerGroup;
-    Vector result = new Vector();
-    InvidDBField emailInvids;
-    StringDBField externalAddresses;
-
-    /* -- */
-
-    ownerGroup = session.session.viewDBObject(ownerInvid);
-
-    if (ownerGroup == null)
-      {
-	if (debug)
-	  {
-	    System.err.println("getOwnerGroupAddresses(): Couldn't look up owner group " + 
-			       ownerInvid.toString());
-	  }
-	
-	return result;
-      }
-
-    // should we cc: the admins?
-
-    Boolean cc = (Boolean) ownerGroup.getFieldValueLocal(SchemaConstants.OwnerCcAdmins);
-
-    if (cc != null && cc.booleanValue())
-      {
-	Vector adminList = new Vector();
-	Vector adminInvidList;
-	Invid adminInvid;
-	String adminAddr;
-
-	adminInvidList = ownerGroup.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
-
-	for (int i = 0; i < adminInvidList.size(); i++)
-	  {
-	    adminInvid = (Invid) adminInvidList.elementAt(i);
-	    adminAddr = convertAdminInvidToString(adminInvid);
-
-	    if (adminAddr != null)
-	      {
-		adminList.addElement(adminAddr);
-	      }
-	  }
-
-	result = VectorUtils.union(result, adminList);
-      }
-
-    // do we have any external addresses?
-
-    externalAddresses = (StringDBField) ownerGroup.getField(SchemaConstants.OwnerExternalMail);
-
-    if (externalAddresses == null)
-      {
-	if (debug)
-	  {
-	    System.err.println("getOwnerGroupAddresses(): No external mail list defined for owner group " + 
-			       ownerInvid.toString());
-	  }
-      }
-    else
-      {
-	// we don't have to clone externalAddresses.getValuesLocal()
-	// since union() will copy the elements rather than just
-	// setting result to the vector returned by
-	// externalAddresses.getValuesLocal() if result is currently
-	// null.
-
-	result = VectorUtils.union(result, externalAddresses.getValuesLocal());
-      }
-
-    if (debug)
-      {
-	System.err.print("getOwnerGroupAddresses(): returning: ");
-
-	for (int i = 0; i < result.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		System.err.print(", ");
-	      }
-
-	    System.err.print(result.elementAt(i));
-	  }
-
-	System.err.println();
-      }
-
-    return result;
-  }
-
-  /**
-   * <P>This method takes an Invid pointing to an Admin persona
-   * record, and returns a string that can be used to send
-   * email to that person.  This method will return null
-   * if no address could be determined for this administrator.</P>
-   */
-
-  private String convertAdminInvidToString(Invid adminInvid)
-  {
-    DBObject admin;
-    String address;
-    int colondex;
-
-    /* -- */
-
-    if (adminInvid.getType() != SchemaConstants.PersonaBase)
-      {
-	throw new RuntimeException("not an administrator invid");
-      }
-
-    admin = session.session.viewDBObject(adminInvid);
-
-    address = (String) admin.getFieldValueLocal(SchemaConstants.PersonaMailAddr);
-
-    if (address == null)
-      {
-	// okay, we got no address pre-registered for this
-	// admin.. we need now to try to guess at one, by looking
-	// to see this admin's name is of the form user:role, in
-	// which case we can just try to send to 'user', which will
-	// work as long as Ganymede's users cohere with the user names
-	// at Ganymede.mailHostProperty.
-
-	String adminName = session.viewObjectLabel(adminInvid);
-
-	colondex = adminName.indexOf(':');
-	
-	if (colondex == -1)
-	  {
-	    return null;
-	  }
-    
-	address = adminName.substring(0, colondex);
-      }
-
-    return address;
-  }
-
-  /**
    * <P>This method takes a DBLogEvent object, scans it to determine
    * what mailing lists should be notified of the event in the
    * context of a transaction, and adds a description of the
@@ -1425,7 +1328,7 @@ public class DBLog {
    * transaction's records are mailed out.</P>
    */
 
-  private void appendMailOut(DBLogEvent event, Hashtable map)
+  private void appendMailOut(DBLogEvent event, Hashtable map, DBSession session)
   {
     Enumeration enum;
     String str;
@@ -1433,7 +1336,7 @@ public class DBLog {
 
     /* -- */
 
-    calculateMailTargets(event);
+    calculateMailTargets(event, session);
     
     enum = event.notifyVect.elements();
 
@@ -1451,12 +1354,31 @@ public class DBLog {
 	if (mailout == null)
 	  {
 	    mailout = new MailOut(str);
+	    mailout.append("------------------------------------------------------------\n\n");
+	    mailout.append(event.eventClassToken);
+	    mailout.append("\n");
+
+	    for (int i = 0; i < event.eventClassToken.length(); i++)
+	      {
+		mailout.append("-");
+	      }
+
+	    mailout.append("\n\n");
 	    mailout.append(event.description);
 	    map.put(str, mailout);
 	  }
 	else
 	  {
+	    mailout.append("------------------------------------------------------------\n\n");
+	    mailout.append(event.eventClassToken);
 	    mailout.append("\n");
+
+	    for (int i = 0; i < event.eventClassToken.length(); i++)
+	      {
+		mailout.append("-");
+	      }
+
+	    mailout.append("\n\n");
 	    mailout.append(event.description);
 	  }
       }

@@ -6,8 +6,8 @@
    
    Created: 8 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/01/22 18:05:55 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/07/21 05:38:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,6 +66,59 @@ import java.rmi.*;
 public class adminPersonaCustom extends DBEditObject implements SchemaConstants {
   
   static final boolean debug = false;
+
+  /**
+   * <P>This method takes an Invid pointing to an Admin persona
+   * record, and returns a string that can be used to send
+   * email to that person.  This method will return null
+   * if no address could be determined for this administrator.</P>
+   */
+
+  static public String convertAdminInvidToString(Invid adminInvid, DBSession session)
+  {
+    DBObject admin;
+    String address;
+    int colondex;
+
+    /* -- */
+
+    if (adminInvid.getType() != SchemaConstants.PersonaBase)
+      {
+	throw new RuntimeException("not an administrator invid");
+      }
+
+    if (session == null)
+      {
+	session = Ganymede.internalSession.getSession();
+      }
+
+    admin = session.viewDBObject(adminInvid);
+
+    address = (String) admin.getFieldValueLocal(SchemaConstants.PersonaMailAddr);
+
+    if (address == null)
+      {
+	// okay, we got no address pre-registered for this
+	// admin.. we need now to try to guess at one, by looking
+	// to see this admin's name is of the form user:role, in
+	// which case we can just try to send to 'user', which will
+	// work as long as Ganymede's users cohere with the user names
+	// at Ganymede.mailHostProperty.
+
+	String adminName = session.getGSession().viewObjectLabel(adminInvid);
+
+	colondex = adminName.indexOf(':');
+	
+	if (colondex == -1)
+	  {
+	    return null;
+	  }
+    
+	address = adminName.substring(0, colondex);
+      }
+
+    return address;
+  }
 
   /**
    *

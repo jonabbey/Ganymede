@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 1999/07/15 01:47:10 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 1999/07/21 05:38:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.84 $ %D%
+ * @version $Revision: 1.85 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -125,7 +125,7 @@ public class DBStore {
 
   static final String id_string = "Gstore";
   static final byte major_version = 1;
-  static final byte minor_version = 11;
+  static final byte minor_version = 12;
 
   static boolean debug = false;
 

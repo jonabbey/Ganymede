@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 1999/07/14 04:45:59 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 1999/07/21 05:38:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.113 $ $Date: 1999/07/14 04:45:59 $ $Name:  $
+ * @version $Revision: 1.114 $ $Date: 1999/07/21 05:38:16 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -519,6 +519,33 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final byte getStatus()
   {
     return status;
+  }
+
+  /**
+   * <P>Returns the primary label of this object.. calls
+   * {@link arlut.csd.ganymede.DBEditObject#getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
+   * on the {@link arlut.csd.ganymede.DBEditObject DBEditObject} serving
+   * as the {@link arlut.csd.ganymede.DBObjectBase#objectHook objectHook} for
+   * this object's {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+   * to get the label for this object.</P>
+   *
+   * <P>If the objectHook customization object doesn't define a getLabelHook()
+   * method, this base implementation will return a string based on the
+   * designated label field for this object, or a generic
+   * label constructed based on the object type and invid if no label
+   * field is designated.</P>
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public String getLabel()
+  {
+    if (getStatus() == DELETING)
+      {
+	return getOriginal().getLabel();
+      }
+
+    return super.getLabel();
   }
 
   /**
@@ -2411,19 +2438,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		  }
 	      }
 	  }
-
-	// ok, we should be successful if we get here.  log the object deletion.
-
-	Vector invids = new Vector();
-	invids.addElement(this.getInvid());
-
-	editset.logEvents.addElement(new DBLogEvent("deleteobject",
-						    getTypeDesc() + ":" + label,
-						    (gSession.personaInvid == null ?
-						     gSession.userInvid : gSession.personaInvid),
-						    gSession.username,
-						    invids,
-						    null));
 
 	return finalResult;
       }

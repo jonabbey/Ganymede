@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 1999/07/19 21:02:01 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 1999/07/21 05:38:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -602,7 +602,8 @@ public class DBEditSet {
 
 	if (debug)
 	  {
-	    System.err.println("DBEditSet.rollback(): object in transaction at rollback time: " + obj.getLabel() +
+	    System.err.println("DBEditSet.rollback(): object in transaction at rollback time: " + 
+			       obj.getLabel() +
 			       " (" + obj.getInvid().toString() + ")");
 	  }
 
@@ -776,7 +777,8 @@ public class DBEditSet {
 	  }
 
 	return Ganymede.createErrorDialog("Commit failure",
-					  "Couldn't commit transaction, our write lock was denied.. server going down?");
+					  "Couldn't commit transaction, our write lock was " +
+					  "denied.. server going down?");
       }
 
     if (debug)
@@ -1059,6 +1061,7 @@ public class DBEditSet {
 		    switch (eObj.getStatus())
 		      {
 		      case DBEditObject.EDITING:
+
 			invids = new Vector();
 			invids.addElement(eObj.getInvid());
 		   
@@ -1078,8 +1081,9 @@ public class DBEditSet {
 			      }
 			
 			    logEvent("objectchanged",
-				     eObj.getTypeDesc() + ":" + eObj.getLabel() +
-				     " --\n" + diff,
+				     eObj.getTypeDesc() + " " + eObj.getLabel() +
+				     ", <" +  eObj.getInvid() + "> was modified.\n\n" +
+				     diff,
 				     (gSession.personaInvid == null ?
 				      gSession.userInvid : gSession.personaInvid),
 				     gSession.username,
@@ -1111,8 +1115,9 @@ public class DBEditSet {
 			      }
 			
 			    logEvent("objectcreated",
-				     eObj.getTypeDesc() + ":" + eObj.getLabel() +
-				     " --\n" + diff,
+				     eObj.getTypeDesc() + " " + eObj.getLabel() +
+				     ", <" +  eObj.getInvid() + "> was created.\n\n" +
+				     diff,
 				     (gSession.personaInvid == null ?
 				      gSession.userInvid : gSession.personaInvid),
 				     gSession.username,
@@ -1134,7 +1139,8 @@ public class DBEditSet {
 			// DBEditObject.diff() does not work for deleted objects.
 
 			logEvent("deleteobject",
-				 eObj.getTypeDesc() + ":" + eObj.getLabel(),
+				 eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
+				 eObj.getInvid() + "> was deleted.\n\n",
 				 (gSession.personaInvid == null ?
 				  gSession.userInvid : gSession.personaInvid),
 				 gSession.username,
@@ -1159,8 +1165,10 @@ public class DBEditSet {
 		    // so DBSession and the client should know we're doing a total
 		    // scrub.
 		
-		    return Ganymede.createErrorDialog("Couldn't commit transaction, couldn't write transaction to disk",
-						      "Couldn't commit transaction, the server may have run out of" +
+		    return Ganymede.createErrorDialog("Couldn't commit transaction, couldn't write " +
+						      "transaction to disk",
+						      "Couldn't commit transaction, the server may " +
+						      "have run out of" +
 						      " disk space.  Couldn't write transaction to disk.");
 		  }
 	      }
@@ -1180,8 +1188,10 @@ public class DBEditSet {
 		// so DBSession and the client should know we're doing a total
 		// scrub.
 
-		return Ganymede.createErrorDialog("Couldn't commit transaction, IOException caught writing journal",
-						  "Couldn't commit transaction, the server may have run out of" +
+		return Ganymede.createErrorDialog("Couldn't commit transaction, IOException caught " + 
+						  "writing journal",
+						  "Couldn't commit transaction, the server may have " + 
+						  "run out of" +
 						  " disk space.");
 	      }
 
@@ -1214,8 +1224,13 @@ public class DBEditSet {
 	    // so DBSession and the client should know we've done a total
 	    // scrub.
 
-	    retVal = Ganymede.createErrorDialog("Couldn't commit transaction, exception caught in DBEditSet.commit()",
-						ex.getMessage());
+	    StringWriter stringWriter = new StringWriter();
+	    PrintWriter printWriter = new PrintWriter(stringWriter);
+	    ex.printStackTrace(printWriter);
+
+	    retVal = Ganymede.createErrorDialog("Couldn't commit transaction, exception " +
+						"caught in DBEditSet.commit()",
+						stringWriter.toString());
 	    return retVal;
 	  }
 	catch (Error ex)
@@ -1230,8 +1245,12 @@ public class DBEditSet {
 	    // so DBSession and the client should know we've done a total
 	    // scrub.
 
+	    StringWriter stringWriter = new StringWriter();
+	    PrintWriter printWriter = new PrintWriter(stringWriter);
+	    ex.printStackTrace(printWriter);
+
 	    retVal = Ganymede.createErrorDialog("Couldn't commit transaction, error caught in DBEditSet.commit()",
-						ex.getMessage());
+						stringWriter.toString());
 	    return retVal;
 	  }
 

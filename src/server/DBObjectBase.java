@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 1999/06/18 22:43:20 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 1999/07/21 05:38:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -743,6 +743,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	out.writeBoolean(embedded);	// added at file version 1.5
       }
 
+    // since we're doing a partial emit for a schema dump, we won't
+    // record an explicit maxid.. our receive method will still keep
+    // the maxid for this base at a safe high-water mark.. we don't
+    // want to uniquely preserve Invid's across a schema dump
+
+    if ((store.major_version >= 1) && (store.minor_version >= 12))
+      {
+	out.writeInt(0);	// added at file version 1.12
+      }
+
     // now, we're doing a partial emit.. if we're SchemaConstants.PersonaBase,
     // we only want to emit the 'constant' personae.. those that aren't associated
     // with regular user accounts.
@@ -893,6 +903,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (dumpObjects)
       {
+	if ((store.major_version >= 1) && (store.minor_version >= 12))
+	  {
+	    out.writeInt(maxid);	// added at file version 1.12
+	  }
+
 	out.writeInt(objectTable.size());
    
 	baseEnum = objectTable.elements();
@@ -904,6 +919,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
     else
       {
+	if ((store.major_version >= 1) && (store.minor_version >= 12))
+	  {
+	    out.writeInt(0);	// added at file version 1.12
+	  }
+
 	out.writeInt(0);
       }
   }
@@ -1031,6 +1051,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if ((store.file_major >= 1) && (store.file_minor >= 5))
       {
 	embedded = in.readBoolean(); // added at file version 1.5
+      }
+
+    if ((store.file_major >= 1) && (store.file_minor >= 12))
+      {
+	maxid = in.readInt(); // added at file version 1.12
       }
 
     // read in the objects belonging to this ObjectBase

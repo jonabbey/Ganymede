@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 1999/07/15 01:07:46 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 1999/07/21 05:38:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.71 $ %D%
+ * @version $Revision: 1.72 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -546,6 +546,34 @@ final public class DBSession {
    * view_db_object()} method to get the object.</P>
    *
    * @param invid The invariant id of the object to be viewed.
+   * @param getOriginal if true, viewDBObject will return the original
+   * version of a DBEditObject in this session if the specified object
+   * is in the middle of being deleted 
+   */
+
+  public DBObject viewDBObject(Invid invid, boolean getOriginal)
+  {
+    return viewDBObject(invid.getType(), invid.getNum(), getOriginal);
+  }
+
+  /**
+   * <P>Get a reference to a read-only copy of an object in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
+   *
+   * <P>If this session has a transaction currently open, this method will return
+   * the checked out shadow of invid, if it has been checked out by this
+   * transaction.</P>
+   *
+   * <P>Note that unless the object has been checked out by the current session,
+   * this method will return access to the object as it is stored directly
+   * in the main datastore hashes.  This means that the object will be
+   * read-only and will grant all accesses, as it will have no notion of
+   * what session or transaction owns it.  If you need to have access to the
+   * object's fields be protected, use {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#view_db_object(arlut.csd.ganymede.Invid) 
+   * view_db_object()} method to get the object.</P>
+   *
+   * @param invid The invariant id of the object to be viewed.
    */
 
   public DBObject viewDBObject(Invid invid)
@@ -579,6 +607,39 @@ final public class DBSession {
 
   public DBObject viewDBObject(short baseID, int objectID)
   {
+    return viewDBObject(baseID, objectID, false);
+  }
+
+  /**
+   * <P>Get a reference to a read-only copy of an object in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore}.</P>
+   *
+   * <P>If this session has a transaction currently open, this method will return
+   * the checked out shadow of invid, if it has been checked out by this
+   * transaction.</P>
+   *
+   * <P>Note that unless the object has been checked out by the current session,
+   * this method will return access to the object as it is stored directly
+   * in the main datastore hashes.  This means that the object will be
+   * read-only and will grant all accesses, as it will have no notion of
+   * what session or transaction owns it.  If you need to have access to the
+   * object's fields be protected, use {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#view_db_object(arlut.csd.ganymede.Invid) 
+   * view_db_object()} method to get the object.</P>
+   *
+   * @param baseID The short id number of the DBObjectBase containing the object to
+   *               be viewed.
+   *
+   * @param objectID The int id number of the object to be viewed within the specified
+   *                 object base.
+   *
+   * @param getOriginal if true, viewDBObject will return the original
+   * version of a DBEditObject in this session if the specified object
+   * is in the middle of being deleted 
+   */
+
+  public DBObject viewDBObject(short baseID, int objectID, boolean getOriginal)
+  {
     DBObjectBase base;
     DBObject     obj = null;
     Short      baseKey;
@@ -599,6 +660,14 @@ final public class DBSession {
 
 	if (obj != null)
 	  {
+	    if (getOriginal)
+	      {
+		if (obj instanceof DBEditObject && ((DBEditObject) obj).getStatus() == ObjectStatus.DELETING)
+		  {
+		    return ((DBEditObject) obj).getOriginal();
+		  }
+	      }
+
 	    return obj;
 	  }
       }

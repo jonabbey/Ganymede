@@ -6,8 +6,8 @@
    
    Created: 9 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/03/17 05:32:50 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/07/21 05:38:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -48,6 +48,8 @@
 
 package arlut.csd.ganymede;
 
+import arlut.csd.Util.VectorUtils;
+
 import java.util.*;
 import java.rmi.*;
 
@@ -58,6 +60,111 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 public class ownerCustom extends DBEditObject implements SchemaConstants {
+
+  /**
+   * <P>This method takes an {@link arlut.csd.ganymede.Invid Invid} for
+   * an Owner Group {@link arlut.csd.ganymede.DBObject DBObject}
+   * and returns a Vector of Strings containing the list
+   * of email addresses for that owner group.</P>
+   */
+
+  static public Vector getAddresses(Invid ownerInvid, DBSession session)
+  {
+    DBObject ownerGroup;
+    Vector result = new Vector();
+    InvidDBField emailInvids;
+    StringDBField externalAddresses;
+
+    /* -- */
+
+    if (session == null)
+      {
+	session = Ganymede.internalSession.getSession();
+      }
+
+    ownerGroup = session.viewDBObject(ownerInvid);
+
+    if (ownerGroup == null)
+      {
+	if (debug)
+	  {
+	    System.err.println("getOwnerGroupAddresses(): Couldn't look up owner group " + 
+			       ownerInvid.toString());
+	  }
+	
+	return result;
+      }
+
+    // should we cc: the admins?
+
+    Boolean cc = (Boolean) ownerGroup.getFieldValueLocal(SchemaConstants.OwnerCcAdmins);
+
+    if (cc != null && cc.booleanValue())
+      {
+	Vector adminList = new Vector();
+	Vector adminInvidList;
+	Invid adminInvid;
+	String adminAddr;
+
+	adminInvidList = ownerGroup.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+
+	for (int i = 0; i < adminInvidList.size(); i++)
+	  {
+	    adminInvid = (Invid) adminInvidList.elementAt(i);
+	    adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
+
+	    if (adminAddr != null)
+	      {
+		adminList.addElement(adminAddr);
+	      }
+	  }
+
+	result = VectorUtils.union(result, adminList);
+      }
+
+    // do we have any external addresses?
+
+    externalAddresses = (StringDBField) ownerGroup.getField(SchemaConstants.OwnerExternalMail);
+
+    if (externalAddresses == null)
+      {
+	if (debug)
+	  {
+	    System.err.println("getOwnerGroupAddresses(): No external mail list defined for owner group " + 
+			       ownerInvid.toString());
+	  }
+      }
+    else
+      {
+	// we don't have to clone externalAddresses.getValuesLocal()
+	// since union() will copy the elements rather than just
+	// setting result to the vector returned by
+	// externalAddresses.getValuesLocal() if result is currently
+	// null.
+
+	result = VectorUtils.union(result, externalAddresses.getValuesLocal());
+      }
+
+    if (debug)
+      {
+	System.err.print("getOwnerGroupAddresses(): returning: ");
+
+	for (int i = 0; i < result.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		System.err.print(", ");
+	      }
+
+	    System.err.print(result.elementAt(i));
+	  }
+
+	System.err.println();
+      }
+
+    return result;
+  }
+
 
   /**
    *
