@@ -130,7 +130,7 @@ public class JPropertyPanel extends JPanel implements ActionListener {
     JPanel lists = new JPanel();
     lists.setLayout(gbl);
 
-    model = new JPropertyPanelTM();
+    model = new JPropertyPanelTM(editable);
     table = new JTable(model);
 
     BevelBorder
@@ -240,6 +240,13 @@ public class JPropertyPanel extends JPanel implements ActionListener {
       {
 	return;
       }
+
+    if (e.getActionCommand().equals("AddNewString"))
+      {
+	model.addRow(custom.getText());
+	custom.setText("");
+	table.repaint();
+      }
   }
 
   /**
@@ -264,11 +271,9 @@ public class JPropertyPanel extends JPanel implements ActionListener {
 	v2.addElement( Integer.toString( 20-i ) );
       }
 
-    JPropertyPanel ss = new JPropertyPanel(frame, false);
+    JPropertyPanel jpp = new JPropertyPanel(frame, true);
 
-    //    ss.update(v1, true, null, v2, true, null);
-	
-    frame.getContentPane().add(ss, BorderLayout.CENTER);
+    frame.getContentPane().add(jpp, BorderLayout.CENTER);
 
     frame.addWindowListener(new WindowAdapter() 
     {
@@ -295,9 +300,17 @@ public class JPropertyPanel extends JPanel implements ActionListener {
 
 class JPropertyPanelTM extends AbstractTableModel {
 
-  String[][] values = {{"syncRole", "IRIS"},
-		       {"syncRol", "WinAD"},
-		       {"svc_class", "unix"}};
+  final static boolean debug = true;
+  private boolean editable;
+
+  ArrayList rows = new ArrayList();
+
+  /* -- */
+
+  public JPropertyPanelTM(boolean editable)
+  {
+    this.editable = editable;
+  }
   
   public String getColumnName(int col)
   {
@@ -310,18 +323,77 @@ class JPropertyPanelTM extends AbstractTableModel {
     return "Huh?";
   }
 
+  public void setValueAt(Object value, int row, int col)
+  {
+    if (debug)
+      {
+	System.out.println("setValueAt(" + value + ", " + row + ", " + col + ")");
+      }
+
+    ArrayList x = (ArrayList) rows.get(row);
+
+    if (col > x.size()-1)
+      {
+	x.add(value);
+      }
+    else
+      {
+	x.set(col, value);
+      }
+
+    fireTableCellUpdated(row, col);
+  }
+
   public Object getValueAt(int row, int col)
   {
-    return values[row][col];
+    if (debug)
+      {
+	System.out.println("getValueAt(" + row + ", " + col + ")");
+      }
+
+    ArrayList x = (ArrayList) rows.get(row);
+
+    if (col > x.size()-1)
+      {
+	return null;
+      }
+
+    return x.get(col);
   }
 
   public int getRowCount()
   {
-    return 3;
+    return rows.size();
   }
 
   public int getColumnCount()
   {
     return 2;
+  }
+
+  public Class getColumnClass(int col)
+  {
+    return java.lang.String.class;
+  }
+
+  public boolean isCellEditable(int row, int col)
+  {
+    return editable;
+  }
+
+  public void addRow(String key)
+  {
+    if (debug)
+      {
+	System.out.println("addRow(" + key + ")");
+      }
+
+    ArrayList x = new ArrayList();
+    x.add(key);
+    rows.add(x);
+
+    int size = rows.size() -1;
+    fireTableRowsUpdated(size, size);
+    fireTableCellUpdated(size, 0);
   }
 }
