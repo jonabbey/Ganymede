@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.13 $ %D%
+    Version: $Revision: 1.14 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ import arlut.csd.JDataComponent.*;
 
 public class containerPanel extends JBufferedPane implements ActionListener, JsetValueCallback, ItemListener{  
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // -- 
   
@@ -48,6 +48,9 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
   
   windowPanel
     winP;			// for interacting with our containing context
+
+  protected framePanel
+    frame;
 
   Hashtable
     rowHash, 
@@ -86,7 +89,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
    *
    */
 
-  public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window)
+  public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame)
   {
     String tempString = null;
 
@@ -102,29 +105,11 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
     this.winP = window;
     this.object = object;
     this.editable = editable;
+    this.frame = frame;
 
     objectHash = new Hashtable();
     rowHash = new Hashtable();
 
-    if (editable)
-      {
-	parent.setStatus("Opening object for edit");
-	  
-	if (debug)
-	  {
-	    System.out.println("Setting status for edit");
-	  }
-      }
-    else
-      {
-	parent.setStatus("Getting object for viewing");
-	  
-	if (debug)
-	  {
-	    System.out.println("Setting status for viewing");
-	  }
-      }
-      
     //    setLayout(new BorderLayout());
 
     //panel = new JBufferedPane();
@@ -158,15 +143,12 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 		  {
 		    tempString = fields[i].getName();
 		  }
-		int id = fields[i].getID();
-		if ((id == SchemaConstants.ExpirationField) || 
-		    (id == SchemaConstants.RemovalField)    ||
-		    (id == SchemaConstants.OwnerListField))
+	
+		if (fields[i].isBuiltIn())
 		  {
-		    // don't add these
 		    if (debug)
 		      {
-			System.out.println("Skipping Expiration or Removal fields");
+			System.out.println("Skipping a built in fieldfields");
 		      }
 		  }
 		else
@@ -270,12 +252,18 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
     if (v.getSource() instanceof JstringField)
       {
-	System.out.println((String)v.getValue());
+	if (debug)
+	  {
+	    System.out.println((String)v.getValue());
+	  }
 	db_field field = (db_field)objectHash.get(v.getSource());
 
 	try
 	  {
-	    System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+	    if (debug)
+	      {
+		System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+	      }
 
 	    if (field.setValue(v.getValue()))
 	      {
@@ -284,9 +272,16 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	      }
 	    else
 	      {
-		System.err.println("Could not change field, reverting to " + (String)field.getValue());
+		if (debug)
+		  {
+		    System.err.println("Could not change field, reverting to " + (String)field.getValue());
+		  }
 		((JstringField)v.getSource()).setText((String)field.getValue());
-		System.err.println("Here's what went wrong: " + parent.getSession().getLastError());
+		if (debug)
+		  {
+		    System.err.println("Here's what went wrong: " + parent.getSession().getLastError());
+		  }
+
 		returnValue = false;
 	      }
 	  }
@@ -297,12 +292,19 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       }
     else if (v.getSource() instanceof JpassField)
       {
-	System.out.println((String)v.getValue());
+	if (debug)
+	  {
+	    System.out.println((String)v.getValue());
+	  }
+
 	pass_field field = (pass_field)objectHash.get(v.getSource());
 
 	try
 	  {
-	    System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+	    if (debug)
+	      {
+		System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
+	      }
 
 	    if (field.setPlainTextPass((String)v.getValue()))
 	      {
@@ -311,7 +313,11 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	      }
 	    else
 	      {
-		System.err.println("Could not change field");
+		if (debug)
+		  {
+		    System.err.println("Could not change field");
+		  }
+
 		returnValue =  false;
 	      }
 	  }
@@ -323,7 +329,11 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       }
     else if (v.getSource() instanceof JdateField)
       {
-	System.out.println("date field changed");
+	if (debug)
+	  {
+	    System.out.println("date field changed");
+	  }
+
 	db_field field = (db_field)objectHash.get(v.getSource());
 
 	try
@@ -343,9 +353,17 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       }
     else if (v.getSource() instanceof stringSelector)
       {
+	if (debug)
+	  {
+	    System.out.println("value performed from stringSelector");
+	  }
 	if (v.getValue() instanceof Invid)
 	  {
 	    db_field field = (db_field)objectHash.get(v.getSource());
+	    if (field == null)
+	      {
+		throw new RuntimeException("Could not find field in objectHash");
+	      }
 	    Invid invid = (Invid)v.getValue();
 	    int index = v.getIndex();
 	    try
@@ -382,6 +400,10 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	      {
 		throw new RuntimeException("Could not change owner field: " + rx);
 	      }
+	  }
+	else if (v.getValue() instanceof String)
+	  {
+	    System.out.println("String stringSelector callback, not implemented yet");
 	  }
 	else
 	  {
@@ -426,7 +448,10 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	      }
 	    else
 	      {
-		System.err.println("Could not change checkbox, resetting it now");
+		if (debug)
+		  {
+		    System.err.println("Could not change checkbox, resetting it now");
+		  }
 		((JCheckBox)e.getSource()).setSelected(((Boolean)field.getValue()).booleanValue());
 	      }
 	  }
@@ -457,7 +482,10 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
   public void itemStateChanged(ItemEvent e)
   {
-    System.out.println("Item changed: " + e.getItem());
+    if (debug)
+      {
+	System.out.println("Item changed: " + e.getItem());
+      }
 
     if (e.getSource() instanceof JComboBox)
       {
@@ -465,13 +493,18 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
 	try
 	  {
-	    if (field.setValue((String)e.getItem()))
+	    boolean ok = false;
+	    ok = field.setValue((String)e.getItem());
+	    if (debug)
 	      {
-		System.out.println("field setValue returned true");
-	      }
-	    else
-	      {
-		System.out.println("field setValue returned FALSE!!");
+		if (ok)
+		  {
+		    System.out.println("field setValue returned true");
+		  }
+		else
+		  {
+		    System.out.println("field setValue returned FALSE!!");
+		  }
 	      }
 	  }
 	catch (RemoteException rx)
@@ -498,6 +531,9 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
     comp.setBackground(ClientColor.ComponentBG);
     add("0 " + row + " lthwHW", l);
     add("1 " + row + " lthwHW", comp);
+
+    invalidate();
+    frame.validate();
 
     row++;
   }
@@ -562,16 +598,19 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       }
     else if (type == FieldType.INVID && isEditInPlace)
       {
-	// Add a new Container Panel here
-
-	try 
+	try
 	  {
-	    addRow( new JLabel("new container panel will go here"), name, field.isVisible());
+	    if (debug)
+	      {
+		System.out.println("Hey, " + field.getName() + " is edit in place but not a vector, what gives?");
+	      }
+	    addRow(new JLabel("edit in place non-vector"), name, field.isVisible());
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Could not check visibility");
+	    throw new RuntimeException("Couldn't even check the name: " + rx);
 	  }
+
       }
     else
       {
@@ -627,12 +666,18 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
   private void addStringVector(string_field field) throws RemoteException
   {
-    System.out.println("Adding StringSelector, its a vector of strings!");
+    if (debug)
+      {
+	System.out.println("Adding StringSelector, its a vector of strings!");
+      }
 
     stringSelector ss = new stringSelector(gclient.parseDump(field.choices()),
 					   field.getValues(), 
 					   this,
 					   editable);
+    objectHash.put(ss, field);
+    ss.setBorderStyle(1);
+    ss.setCallback(this);
     addRow( ss, field.getName(), field.isVisible()); 
   }
 
@@ -655,9 +700,11 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       result;
 
     /* -- */
+    if (debug)
+      {
+	System.out.println("Adding StringSelector, its a vector of invids!");
+      }
 
-    System.out.println("Adding StringSelector, its a vector of invids!");
-    
     valueResults = gclient.parseDump(field.encodedValues());
 
     if (editable)
@@ -686,6 +733,8 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       }
 
     stringSelector ss = new stringSelector(choiceHandles, valueHandles, this, editable);
+    objectHash.put(ss, field);
+    ss.setCallback(this);
     addRow( ss, field.getName(), field.isVisible()); 
   }
 
@@ -714,7 +763,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	  }
       }
 
-    vectorPanel vp = new vectorPanel(field, winP, editable, isEditInPlace);
+    vectorPanel vp = new vectorPanel(field, winP, editable, isEditInPlace, this);
 
     try
       {
@@ -744,12 +793,17 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       {
 	if (field.canChoose())
 	  {
-	    System.out.println("You can choose");
-			      
+	    if (debug)
+	      {
+		System.out.println("You can choose");
+	      }
+      
 	    if (field.mustChoose())
 	      {
-		System.out.println("You must choose.");
-				  
+		if (debug)
+		  {
+		    System.out.println("You must choose.");
+		  }	  
 				// Add a choice
 				  
 		JComboBox choice = new JComboBox();
@@ -807,7 +861,10 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 			  }
 		      }
 
-		    System.out.println("Adding " + (String)choices.elementAt(j));
+		    if (debug)
+		      {
+			System.out.println("Adding " + (String)choices.elementAt(j));
+		      }
 		  }
 
 		// if the current value wasn't in the choice, add it in now
@@ -823,11 +880,16 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 		combo.setVisible(true);
 
 		combo.setCurrentValue(currentChoice);
-		System.out.println("Setting current value: " + currentChoice);
-				  
+		if (debug)
+		  {
+		    System.out.println("Setting current value: " + currentChoice);
+		  }	  
 		combo.addItemListener(this); // register callback
 		objectHash.put(combo, field);
-		System.out.println("Adding to panel");
+		if (debug)
+		  {
+		    System.out.println("Adding to panel");
+		  }
 
 		try
 		  {
@@ -842,8 +904,11 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	else
 	  {
 	    // It's not a choice
-	    System.out.println("This is not a choice");
-			      
+	    if (debug)
+	      {
+		System.out.println("This is not a choice");
+	      }
+      
 	    sf = new JstringField(20,
 				  field.maxSize(),
 				  new JcomponentAttr(null,
@@ -984,7 +1049,55 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
   private void addNumericField(db_field field) throws RemoteException
   {
-    System.out.println("Numeric field. skipping");
+    // It's not a choice
+    if (debug)
+      {
+	System.out.println("Adding numeric field");
+      }
+      
+    JnumberField nf = new JnumberField();
+
+			      
+    objectHash.put(nf, field);
+	
+		      
+    try
+      {
+	Integer value = (Integer)field.getValue();
+	if (value != null)
+	  {
+	    nf.setValue(value.intValue());
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get value for field: " + rx);
+      }
+			    
+    nf.setCallback(this);
+    nf.setEditable(editable);
+    nf.setColumns(20);
+    
+    try
+      {
+	nf.setToolTipText(field.getComment());
+	
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get tool tip text: " + rx);
+      }
+    
+    
+    try
+      {
+	addRow( nf, field.getName(), field.isVisible());
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not check visibility: " + rx);
+      }
+    
   }
 
   /**
@@ -1056,7 +1169,10 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       }
     catch (NullPointerException ex)
       {
-	System.out.println("Null pointer: " + ex);
+	if (debug)
+	  {
+	    System.out.println("Null pointer setting selected choice: " + ex);
+	  }
       }
 
     try
@@ -1088,7 +1204,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
     perm_button pb = new perm_button((perm_field) field,
 				     editable,
-				     parent.baseHash);
+				     parent.getBaseHash());
     try
       {
 	addRow( pb, field.getName(), field.isVisible());
@@ -1128,5 +1244,30 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       }
   }
 
+
+  /**
+   * The idea here is that you could use this in a catch from a RemoteException
+   *
+   * like this:
+   * try
+   *   {
+   *      whatever;
+   *   }
+   * catch (RemoteException rx)
+   *   {
+   *      error("Something went wrong", rx);
+   */
+  private void error(String label, RemoteException rx)
+    {
+      try
+	{
+	  System.out.println("Last error: " + parent.getSession().getLastError());
+	}
+      catch (RemoteException ex)
+	{
+	  System.out.println("Exception getting last error: " + rx);
+	}
+      throw new RuntimeException(label + rx);
+    }
 
 }
