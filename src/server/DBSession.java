@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -249,6 +249,11 @@ public class DBSession {
       }
 
     obj = viewDBObject(baseID, objectID);
+
+    if (obj == null)
+      {
+	return null;
+      }
 
     if (obj instanceof DBEditObject)
       {
@@ -750,5 +755,17 @@ public class DBSession {
       }
 
     return result;
+  }
+
+  /**
+   *
+   * This method returns a handle to the Ganymede Session
+   * that owns this DBSession.
+   *
+   */
+
+  public GanymedeSession getGSession()
+  {
+    return GSession;
   }
 }
