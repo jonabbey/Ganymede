@@ -1563,10 +1563,20 @@ public class xmlfield implements FieldType {
 	if (x instanceof xInvid)
 	  {
 	    invid = ((xInvid) x).getInvid();
+
+	    if (debug && invid == null)
+	      {
+		owner.xSession.err.println("Couldn't find an invid from an xInvid.getInvid() call on " + x);
+	      }
 	  }
 	else if (x instanceof xmlobject)
 	  {
 	    invid = ((xmlobject) x).getInvid();
+
+	    if (debug && invid == null)
+	      {
+		owner.xSession.err.println("Couldn't find an invid from an xmlobject.getInvid() call on " + x);
+	      }
 	  }
 	else
 	  {
