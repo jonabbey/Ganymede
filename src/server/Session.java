@@ -10,8 +10,8 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.5 $ %D%
-   Module By: Jonathan Abbey
+   Version: $Revision: 1.6 $ %D%
+   Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
 */
@@ -32,6 +32,9 @@ import java.util.*;
  *   Ganymede Session object holds the state for a .Ganymede client's session
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
+ *
+ * @version $Revision: 1.6 $ %D%
+ * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
  */
@@ -84,9 +87,9 @@ public interface Session extends Remote {
    * commitTransaction() will instead abort the transaction.  In any
    * case, calling commitTransaction() will close the transaction.
    *
-   * @returns false if the transaction could not be committed.  
-   *                getLastError() can be called to obtain an explanation
-   *                of commit failure.
+   * @return false if the transaction could not be committed.
+   *               getLastError() can be called to obtain an explanation
+   *               of commit failure.
    * 
    */
 
@@ -108,7 +111,8 @@ public interface Session extends Remote {
    * The database will be read-locked during the query, assuring
    * a transaction-consistent view of the database.
    *
-   * @returns a Vector of Result objects.
+   * @see arlut.csd.ganymede.Result
+   * @return a Vector of Result objects.
    *
    */
 
@@ -132,6 +136,8 @@ public interface Session extends Remote {
    * state at the time the view_db_object() call is processed, and will
    * be transaction-consistent internally.
    *
+   * @return the object for viewing
+   *
    */
 
   db_object   view_db_object(Invid invid) throws RemoteException;
@@ -141,6 +147,8 @@ public interface Session extends Remote {
    * Check an object out from the database for editing.  If the return
    * value is null, getLastError() should be called for a description
    * of the problem. 
+   *
+   * @return the object for editing
    *
    */
 
@@ -167,8 +175,7 @@ public interface Session extends Remote {
    * to have time to do accounting, clean up, etc., before a user id or
    * network address is re-used.
    *
-   * @return true if the object was inactivated, if false, check
-   * getLastError()
+   * @return true if the object was inactivated, if false, check getLastError()
    *
    */
 
@@ -182,8 +189,7 @@ public interface Session extends Remote {
    * simply removed on demand.  The active permissions for the client
    * may determine whether a particular type of object may be removed.
    *
-   * @return true if the object was removed, if false, check
-   * getLastError()
+   * @return true if the object was removed, if false, check getLastError()
    *
    */
 
