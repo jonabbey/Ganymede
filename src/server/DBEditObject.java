@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,6 +67,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   DBObject original;
   boolean committing;
+  boolean finalized = false;	// true if this object has been processed
+				// by a DBEditSet's commit logic
 
   byte status;
   boolean stored;		// true if the object has a version currently
@@ -673,7 +675,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public boolean canInactivate(DBSession session, DBObject object)
   {
-    return true;
+    return false;
   }
 
   /**
@@ -1221,6 +1223,24 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    *
+   * This method handles removal logic for this object type.  This method
+   * will be called from DBSession.deleteDBObject() during the transaction's
+   * commit logic.  The remove() method can cause other objects to be
+   * deleted, can cause strings to be removed from fields in other objects,
+   * whatever.
+   *
+   * If remove() returns false, the transaction that the object is being
+   * deleted in will be aborted.
+   *
+   */
+
+  public synchronized boolean remove()
+  {
+    return true;
+  }
+
+  /**
+   *
    * This method handles Ganymede-internal deletion logic for this object
    * type.  remove() is responsible for dissolving any invid inter-object
    * references in particular.<br><br>
@@ -1233,17 +1253,27 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * cause the DBSession to abort the transaction; this method is not
    * responsible for undoing unsuccessful partial removal bookkeeping.
    *
+   * Note that this method is issued from DBEditSet's transaction commit
+   * logic, and should generally not be called from anywhere else.
+   *
    * @see #commitPhase1()
    * @see #commitPhase2()
    */
 
-  public synchronized boolean remove()
+  public synchronized boolean finalizeRemove()
   {
     DBField field;
     Enumeration enum;
     DBSession session;
 
     /* -- */
+
+    // call the remove logic hook
+
+    if (!remove())
+      {
+	return false;
+      }
 
     // we want to delete / null out all fields.. this will take care
     // of invid links and namespace allocations.
