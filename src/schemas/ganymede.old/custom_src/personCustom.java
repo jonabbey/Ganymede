@@ -5,7 +5,7 @@
    This file is a management class for person objects in Ganymede.
    
    Created: 25 March 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -225,4 +225,39 @@ public class personCustom extends DBEditObject implements SchemaConstants {
     return result;
   }
 
+  /**
+   *
+   * This is the hook that DBEditObject subclasses use to interpose wizards whenever
+   * a sensitive field is being changed.<br><br>
+   *
+   * In this case, we want to have the client rescan user objects when we add or
+   * delete an account from this person object.
+   *
+   */
+
+  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
+  {
+    ReturnVal result;
+    
+    /* -- */
+
+    if (field.getID() == personSchema.ACCOUNTS)
+      {
+	if ((operation == DELELEMENT) ||
+	    (operation == ADDELEMENT))
+	  {
+	    Invid change = (Invid) param2;
+
+	    ReturnVal rescan = new ReturnVal(true);
+	    rescan.addRescanField(userSchema.PERSON);
+
+	    result = new ReturnVal(true, true);
+	    result.addRescanObject(change, rescan);
+
+	    return result;
+	  }
+      }
+
+    return null;
+  }
 }
