@@ -6,7 +6,7 @@
    tuned for use as Ganymede's object hashes.
    
    Created: 9 June 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -62,7 +62,7 @@ public class DBObjectTable {
 
   public DBObjectTable(int initialCapacity, float loadFactor) 
   {
-    if ((initialCapacity <= 0) || (loadFactor <= 0.0)) 
+    if ((initialCapacity <= 0) || (loadFactor <= 0.0) || (loadFactor > 1.0)) 
       {
 	throw new IllegalArgumentException();
       }
@@ -340,6 +340,44 @@ public class DBObjectTable {
     tab[index] = value;
     count++;
     
+    return;
+  }
+
+  /**
+   *
+   * Inserts a DBObject into this DBObjectTable.
+   *
+   * This put is not sync'ed, and should only be used with
+   * higher level sync provisions.
+   *
+   */
+
+  public void putNoSyncNoRemove(DBObject value) 
+  {
+    // Make sure the value is not null
+
+    if (value == null) 
+      {
+	throw new NullPointerException();
+      }
+
+    DBObject tab[] = table;
+    int hash = value.hashCode();
+    int index = (hash & 0x7FFFFFFF) % tab.length;
+
+    if (count >= threshold) 
+      {
+	rehash();
+	putNoSync(value);
+
+	return;
+      } 
+
+    // Insert the new entry.
+
+    value.next = tab[index];
+    tab[index] = value;
+    count++;
     return;
   }
 
