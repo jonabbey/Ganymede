@@ -303,7 +303,9 @@ while (<INPUT>) {
   } elsif (defined $runconvert{$1}) {
     print OUTPUT "$1=$runconvert{$1}\n";
   } else {
-    print "Unrecognized template entry $1 - copying template value\n";
+    if ($debug) {
+      print "Unrecognized template entry $1 - copying template value\n";
+    }
     print OUTPUT $_;
   }
 }
@@ -325,7 +327,9 @@ while (<INPUT>) {
   } elsif (defined $runconvert{$1}) {
     print OUTPUT "$1=$runconvert{$1}\n";
   } else {
-    print "Unrecognized template entry $1 - copying template value\n";
+    if ($debug) {
+      print "Unrecognized template entry $1 - copying template value\n";
+    }
     print OUTPUT $_;
   }
 }
@@ -370,8 +374,10 @@ while (<INPUT>) {
     } elsif (defined $runconvert{$1}) {
 	print OUTPUT "$1=$runconvert{$1}\n";
     } else {
+      if ($debug) {
 	print "Unrecognized template entry $1 - copying template value\n";
-	print OUTPUT $_;
+      }
+      print OUTPUT $_;
     }
 }
 

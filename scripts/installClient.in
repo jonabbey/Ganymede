@@ -209,8 +209,11 @@ while (<INPUT>) {
     } elsif (defined $clientconvert{$1}) {
 	print OUTPUT "$1=$clientconvert{$1}\n";
     } else {
+      if ($debug) {
 	print "Error.. unrecognized template entry $1 - copying template value\n";
-	print OUTPUT $_;
+      }
+
+      print OUTPUT $_;
     }
 }
 
@@ -237,8 +240,11 @@ while (<INPUT>) {
     } elsif (defined $runconvert{$1}) {
 	print OUTPUT "$1=$runconvert{$1}\n";
     } else {
+      if ($debug) {
 	print "Error.. unrecognized template entry $1 - copying template value\n";
-	print OUTPUT $_;
+      }
+
+      print OUTPUT $_;
     }
 }
 
@@ -265,8 +271,11 @@ while (<INPUT>) {
     } elsif (defined $runconvert{$1}) {
 	print OUTPUT "$1=$runconvert{$1}\n";
     } else {
+      if ($debug) {
 	print "Error.. unrecognized template entry $1 - copying template value\n";
-	print OUTPUT $_;
+      }
+
+      print OUTPUT $_;
     }
 }
 
@@ -295,8 +304,11 @@ while (<INPUT>) {
     } elsif (defined $runconvert{$1}) {
 	print OUTPUT "$1=$runconvert{$1}\n";
     } else {
+      if ($debug) {
 	print "Error.. unrecognized template entry $1 - copying template value\n";
-	print OUTPUT $_;
+      }
+
+      print OUTPUT $_;
     }
 }
 
