@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -750,6 +750,225 @@ public final class InvidDBField extends DBField implements invid_field {
 	    return false;
 	  }
       }
+  }
+
+  /**
+   *
+   * This method tests to see if the invid's held in this InvidDBField
+   * are properly back-referenced.
+   *
+   */
+
+  synchronized boolean test(DBSession session, String objectName)
+  {
+    Invid temp = null;
+    Invid myInvid = getOwner().getInvid();
+    short targetField;
+    DBObject target;
+    InvidDBField backField;
+    boolean result = true;
+
+    /* -- */
+
+    // find out what the back-pointer field in the target object is
+
+    if (getFieldDef().isSymmetric())
+      {
+	targetField = getFieldDef().getTargetField();
+      }
+    else
+      {
+	targetField = SchemaConstants.BackLinksField;
+      }
+
+    if (isVector())
+      {
+
+	// test for all values in our vector
+
+	for (int i = 0; i < values.size(); i++)
+	  {
+	    temp = (Invid) values.elementAt(i);
+
+	    if (temp == null)
+	      {
+		Ganymede.debug("HEEEEEYYYYY!!!!!");
+	      }
+
+	    // find the object that this invid points to
+
+	    target = session.viewDBObject(temp);
+
+	    if (target == null)
+	      {
+		Ganymede.debug("*** InvidDBField.test(): Invid pointer to null object located: " + 
+			       objectName + " in field " + getName());
+		result = false;
+
+		continue;
+	      }
+
+	    // find the field that should contain the back-pointer
+	    
+	    try
+	      {
+		backField = (InvidDBField) target.getField(targetField);
+	      }
+	    catch (ClassCastException ex)
+	      {
+		String fieldName = ((DBField) target.getField(targetField)).getName();
+
+		Ganymede.debug("**** InvidDBField.test(): schema error!  back-reference field not an invid field!!\n\t>" +
+			       target.getLabel() + ":" + fieldName + ", referenced from " + objectName +
+			       ":" + getName());
+		result = false;
+
+		continue;
+	      }
+
+	    if (backField == null || !backField.defined)
+	      {
+		Ganymede.debug("InvidDBField.test(): Null backField field in targeted field: " + 
+			       objectName + " in field " + getName());
+		result = false;
+
+		continue;
+	      }
+
+	    if (backField.isVector())
+	      {
+		if (backField.values == null)
+		  {
+		    Ganymede.debug("*** InvidDBField.test(): Null back-link invid found for invid " + 
+				   temp + " in object " + objectName + " in field " + getName());
+		    result = false;
+		    
+		    continue;
+		  }
+		else
+		  {
+		    boolean found = false;
+		    Invid testInv;
+
+		    /* -- */
+
+		    for (int j = 0; !found && (j < backField.values.size()); j++)
+		      {
+			testInv = (Invid) backField.values.elementAt(j);
+
+			if (myInvid.equals(testInv))
+			  {
+			    found = true;
+			  }
+		      }
+
+		    if (!found)
+		      {
+			Ganymede.debug("*** InvidDBField.test(): No back-link invid found for invid " + 
+				       temp + " in object " + objectName + ":" + getName() + " in " + 
+				       backField.getName());
+			result = false;
+			
+			continue;
+		      }
+		  }
+	      }
+	    else
+	      {
+		if ((backField.value == null) || !(backField.value.equals(myInvid)))
+		  {
+		    Ganymede.debug("*** InvidDBField.test(): <scalar> No back-link invid found for invid " + 
+				   temp + " in object " + objectName + " in field " + getName());
+		    result = false;
+		    
+		    continue;
+		  }
+	      }
+	  }
+      }
+    else
+      {
+	temp = (Invid) value;
+
+	if (temp != null)
+	  {
+	    target = session.viewDBObject(temp);
+
+	    if (target == null)
+	      {
+		Ganymede.debug("*** InvidDBField.test(): Invid pointer to null object located: " + objectName);
+	    
+		return false;
+	      }
+
+	    try
+	      {
+		backField = (InvidDBField) target.getField(targetField);
+	      }
+	    catch (ClassCastException ex)
+	      {
+		Ganymede.debug("**** InvidDBField.test(): schema error!  back-reference field not an invid field!! " +
+			       "field: " + getName() + " in object " + objectName);
+
+		return false;
+	      }
+
+	    if (backField == null || !backField.defined)
+	      {
+		Ganymede.debug("*** InvidDBField.test(): No proper back-reference field in targeted field: " + 
+			       objectName + ":" + getName());
+	    
+		return false;
+	      }
+	
+	    if (backField.isVector())
+	      {
+		if (backField.values == null)
+		  {
+		    Ganymede.debug("*** InvidDBField.test(): Null back-link invid found for invid " + 
+				   temp + " in object " + objectName + " in field " + getName());
+		    
+		    return false;
+		  }
+		else
+		  {
+		    boolean found = false;
+		    Invid testInv;
+
+		    for (int j = 0; !found && (j < backField.values.size()); j++)
+		      {
+			testInv = (Invid) backField.values.elementAt(j);
+
+			if (myInvid.equals(testInv))
+			  {
+			    found = true;
+			  }
+		      }
+
+		    if (!found)
+		      {
+			Ganymede.debug(">>> InvidDBField.test(): No back-link invid found for invid " + 
+				       temp + " in object " + objectName + ":" + getName() + " in " + 
+				       backField.getName());
+
+			return false;
+		      }
+		  }
+	      }
+	    else
+	      {
+		if ((backField.value == null) || !(backField.value.equals(myInvid)))
+		  {
+		    Ganymede.debug("*** InvidDBField.test(): <scalar> No back-link invid found for invid " + 
+				   temp + " in object " + objectName + ":" + getName());
+		    
+		    return false;
+		  }
+	      }
+	  }
+      }
+
+    return result;
   }
 
   // ****
