@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.162 $
-   Last Mod Date: $Date: 2001/12/05 19:44:09 $
+   Version: $Revision: 1.163 $
+   Last Mod Date: $Date: 2002/01/20 18:47:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.162 $ $Date: 2001/12/05 19:44:09 $ $Name:  $
+ * @version $Revision: 1.163 $ $Date: 2002/01/20 18:47:34 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -312,7 +312,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	    if (tmp != null)
 	      {
-		saveField(tmp);
+		saveField(tmp);	// safe, we know our fieldAry was empty
 	      }
 	  }
       }
@@ -407,7 +407,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	if (tmp != null)
 	  {
-	    saveField(tmp);
+	    saveField(tmp);	// safe, we know our fieldAry was empty
 	  }
       }
 	
@@ -472,7 +472,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		  }
 
-		saveField(tmp);
+		saveField(tmp);	// safe, we know we didn't already have a field with the same id
 	      }
 	  }
       }

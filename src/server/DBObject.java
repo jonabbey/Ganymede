@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.134 $
-   Last Mod Date: $Date: 2001/08/18 06:16:27 $
+   Version: $Revision: 1.135 $
+   Last Mod Date: $Date: 2002/01/20 18:47:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -67,22 +67,30 @@ import com.jclark.xml.output.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Class to hold a typed database object as represented in the Ganymede
- * {@link arlut.csd.ganymede.DBStore DBStore} database.  Clients can get access to
- * instances of DBObject for viewing or editing in the form of a
- * {@link arlut.csd.ganymede.db_object db_object} RMI interface type
- * from a {@link arlut.csd.ganymede.Session Session} reference.</p>
+ * <p>Class to hold a typed, read-only database object as represented
+ * in the Ganymede {@link arlut.csd.ganymede.DBStore DBStore}
+ * database.  DBObjects can be exported via RMI for remote access by
+ * remote clients. Clients directly access instances of DBObject for
+ * viewing or editing in the form of a {@link
+ * arlut.csd.ganymede.db_object db_object} RMI interface type passed
+ * as return value in calls made on the {@link
+ * arlut.csd.ganymede.Session Session} remote interface.</p>
  *
- * <p>A DBObject is identified by a unique identifier called an
- * {@link arlut.csd.ganymede.Invid Invid} and contains a set of
- * {@link arlut.csd.ganymede.DBField DBField} objects
- * which hold the actual data values held in the object.  The client typically
- * interacts with the fields held in this object directly using the
- * {@link arlut.csd.ganymede.db_field db_field}
- * remote interface which is returned by the DBObject getField methods.  DBObject
- * is not directly involved in the client's interaction with the DBFields, although
- * the DBFields will call methods on the owning DBObject to consult about permissions
- * and the like.</p>
+ * <p>A DBObject is identified by a unique identifier called an {@link
+ * arlut.csd.ganymede.Invid Invid} and contains a set of {@link
+ * arlut.csd.ganymede.DBField DBField} objects which hold the actual
+ * data values held in the object.  The client typically interacts
+ * with the fields held in this object directly using the {@link
+ * arlut.csd.ganymede.db_field db_field} remote interface which is
+ * returned by the DBObject getField methods.  DBObject is not
+ * directly involved in the client's interaction with the DBFields,
+ * although the DBFields will call methods on the owning DBObject to
+ * consult about permissions and the like.  Clients that call the
+ * GanymedeSession's {@link
+ * arlut.csd.ganymede.GanymedeSession#view_db_object(arlut.csd.ganymede.Invid)
+ * view_db_object()} method to view a DBObject actually interact with
+ * a copy of the DBObject created by the view_db_object() method to
+ * enforce appropriate read permissions.</p>
  *
  * <p>A plain DBObject is not editable;  all value-changing calls to DBFields contained
  * in a plain DBObject will reject any change requests.  In order to edit a DBObject,
@@ -143,7 +151,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.134 $ $Date: 2001/08/18 06:16:27 $
+ * @version $Revision: 1.135 $ $Date: 2002/01/20 18:47:35 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -357,7 +365,7 @@ public class DBObject implements db_object, FieldType, Remote {
 		// exported field makes a *huge* difference in overall
 		// memory usage on the Ganymede server.
 		
-		saveField(field.getCopy(this));
+		saveField(field.getCopy(this));	// safe since we started with an empty fieldAry
 	      }
 	  }
       }
@@ -1066,7 +1074,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	if (tmp.isDefined())
 	  {
-	    saveField(tmp);
+	    saveField(tmp);	// safe since we started with an empty fieldAry
 	  }
 	else
 	  {
@@ -1416,14 +1424,23 @@ public class DBObject implements db_object, FieldType, Remote {
 
   /**
    * <p>This method places a DBField into a slot in this object's
-   * fieldAry DBField array.  saveField() uses a hashing algorithm to
-   * try and speed up field save and retrieving, but we are optimizing
-   * for low memory usage rather than O(1) saving and retrieving.
-   * Hash collisions are saved directly in the fieldAry, meaning that
-   * any hash collisions increase the likelihood of further hash
-   * collisions, but we don't need an extra 'next' pointer in the
-   * DBField class, saving us 4 bytes of memory for every field of
-   * every object in the database.</p>.
+   * fieldAry DBField array.  This method makes no checks to ensure
+   * that another DBField with the same field id has not previously
+   * been stored, so it should only be used when the DBObject's
+   * fieldAry is in a known state.  Otherwise, {@link
+   * arlut.csd.ganymede.DBObject#clearField(short) clearField()}
+   * should be called before calling saveField(), so that duplicate
+   * field id's are not accidentally introduced into the DBObject's
+   * fieldAry.</p>
+   *
+   * <p>saveField() uses a hashing algorithm to try and speed up field
+   * save and retrieving, but we are optimizing for low memory usage
+   * rather than O(1) saving and retrieving.  Hash collisions are
+   * saved directly in the fieldAry, meaning that any hash collisions
+   * increase the likelihood of further hash collisions, but we don't
+   * need an extra 'next' pointer in the DBField class, saving us 4
+   * bytes of memory for every field of every object in the
+   * database.</p>.
    */
 
   public final void saveField(DBField field)
@@ -1441,6 +1458,10 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	while (fieldAry[index] != null)
 	  {
+	    // we don't guarantee that the fieldAry has a prime
+	    // length, so we have to use a linear hashing probe step
+	    // of 1
+
 	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
@@ -1459,18 +1480,20 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   * <p>This method places a DBField into a slot in this object's
-   * fieldAry DBField array.  replaceField() uses a hashing algorithm to
-   * try and speed up field save and retrieving, but we are optimizing
-   * for low memory usage rather than O(1) saving and retrieving.
-   * Hash collisions are saved directly in the fieldAry, meaning that
-   * any hash collisions increase the likelihood of further hash
-   * collisions, but we don't need an extra 'next' pointer in the
-   * DBField class, saving us 4 bytes of memory for every field of
-   * every object in the database.</p>.
+   * <p>This method replaces a DBField with a given field id in this
+   * object's fieldAry DBField array with a new DBField sharing the
+   * same id.  If this DBObject does not contain a field with the same
+   * id as the field argument for this method, no action will be taken
+   * and an IllegalArgumentException will be thrown.</p>
    *
-   * <p>This method will throw an exception if a field with a matching
-   * field id is not already present in the fieldAry.</p>
+   * <p>replaceField() uses a hashing algorithm to try and speed up
+   * field save and retrieving, but we are optimizing for low memory
+   * usage rather than O(1) saving and retrieving.  Hash collisions
+   * are saved directly in the fieldAry, meaning that any hash
+   * collisions increase the likelihood of further hash collisions,
+   * but we don't need an extra 'next' pointer in the DBField class,
+   * saving us 4 bytes of memory for every field of every object in
+   * the database.</p>.
    */
 
   public final void replaceField(DBField field)
@@ -1479,7 +1502,7 @@ public class DBObject implements db_object, FieldType, Remote {
       {
 	if (field == null)
 	  {
-	    throw new IllegalArgumentException("null value passed to clearField");
+	    throw new IllegalArgumentException("null value passed to replaceField");
 	  }
 
 	short id = field.getID();
@@ -1490,6 +1513,10 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
 	  {
+	    // we don't guarantee that the fieldAry has a prime
+	    // length, so we have to use a linear hashing probe step
+	    // of 1
+
 	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
@@ -1512,8 +1539,12 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   * <p>This method places a DBField into a slot in this object's
-   * fieldAry DBField array.  saveField() uses a hashing algorithm to
+   * <p>This method removes a DBField that has the a field id matching
+   * the argument from this object's fieldAry.  This method will never
+   * fail..  if there is no field matching the given field id, the
+   * method will return without changing the fieldAry.</p>
+   *
+   * <p>clearField() uses a hashing algorithm to
    * try and speed up field save and retrieving, but we are optimizing
    * for low memory usage rather than O(1) saving and retrieving.
    * Hash collisions are saved directly in the fieldAry, meaning that
@@ -1533,6 +1564,10 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
 	  {
+	    // we don't guarantee that the fieldAry has a prime
+	    // length, so we have to use a linear hashing probe step
+	    // of 1
+
 	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
@@ -1572,6 +1607,10 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
 	  {
+	    // we don't guarantee that the fieldAry has a prime
+	    // length, so we have to use a linear hashing probe step
+	    // of 1
+
 	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
@@ -1606,6 +1645,10 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
 	  {
+	    // we don't guarantee that the fieldAry has a prime
+	    // length, so we have to use a linear hashing probe step
+	    // of 1
+
 	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
@@ -1638,6 +1681,10 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
 	  {
+	    // we don't guarantee that the fieldAry has a prime
+	    // length, so we have to use a linear hashing probe step
+	    // of 1
+
 	    if (++index >= fieldAry.length)
 	      {
 		index = 0;
@@ -2303,7 +2350,7 @@ public class DBObject implements db_object, FieldType, Remote {
 		
 		if (newBase.getField(field.getID()) != null && field.isDefined())
 		  {
-		    saveField(field);
+		    saveField(field); // safe since we start with an empty fieldAry
 		  }
 		else
 		  {
