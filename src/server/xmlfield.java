@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2001/03/25 10:47:46 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2001/10/29 21:44:10 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.10 $ $Date: 2001/03/25 10:47:46 $ $Name:  $
+ * @version $Revision: 1.11 $ $Date: 2001/10/29 21:44:10 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -945,7 +945,7 @@ public class xmlfield implements FieldType {
 	    pass_field field = (pass_field) owner.objref.getField(fieldDef.getID());
 
 	    // set anything we can.. note that if we transmit null for
-	    // any of the three password options, it will null the
+	    // any of the password hash options, it will null the
 	    // password out entirely, so we don't want to transmit a
 	    // null unless all three password options are all null.
 
@@ -953,9 +953,8 @@ public class xmlfield implements FieldType {
 	      {
 		result = field.setPlainTextPass(xp.plaintext);
 
-		// setting plaintext will cause the server to
-		// generate its own crypt and md5 text, so we
-		// will just return here
+		// setting plaintext will cause the server to generate
+		// all other hashes, so we will just return here
 
 		return result;
 	      }
@@ -972,6 +971,20 @@ public class xmlfield implements FieldType {
 				       owner);
 		  }
 
+		if (xp.lanman != null)
+		  {
+		    owner.xSession.err.println("Warning, setting crypt() hash and ignoring lanman hash " +
+					       "for password in object " +
+					       owner);
+		  }
+
+		if (xp.ntmd4 != null)
+		  {
+		    owner.xSession.err.println("Warning, setting crypt() hash and ignoring ntmd4 hash " +
+					       "for password in object " +
+					       owner);
+		  }
+
 		result = field.setCryptPass(xp.crypttext);
 		
 		if (result != null && !result.didSucceed())
@@ -981,8 +994,31 @@ public class xmlfield implements FieldType {
 	      }
 	    else if (xp.md5text != null)
 	      {
+		if (xp.lanman != null)
+		  {
+		    owner.xSession.err.println("Warning, setting md5crypt() hash and ignoring lanman hash " +
+					       "for password in object " +
+					       owner);
+		  }
+
+		if (xp.ntmd4 != null)
+		  {
+		    owner.xSession.err.println("Warning, setting md5crypt() hash and ignoring ntmd4 hash " +
+					       "for password in object " +
+					       owner);
+		  }
+
 		result = field.setMD5CryptedPass(xp.md5text);
 		
+		if (result != null && !result.didSucceed())
+		  {
+		    return result;
+		  }
+	      }
+	    else if (xp.lanman != null || xp.ntmd4 != null)
+	      {
+		result = field.setWinCryptedPass(xp.lanman, xp.ntmd4);
+
 		if (result != null && !result.didSucceed())
 		  {
 		    return result;
@@ -992,7 +1028,11 @@ public class xmlfield implements FieldType {
 	    // if we have to, clear the password out.  We do this if we see
 	    // something like <password/> instead of <password plaintext="pass"/>
 
-	    if (xp.plaintext == null && xp.crypttext == null && xp.md5text == null)
+	    if (xp.plaintext == null && 
+		xp.crypttext == null && 
+		xp.md5text == null && 
+		xp.lanman == null && 
+		xp.ntmd4 == null)
 	      {
 		result = field.setPlainTextPass(null);
 
@@ -1700,11 +1740,12 @@ class xInvid {
  * <p>This class is used by the Ganymede XML client to represent
  * a password field value.</p>
  *
- * <p>This class has three separate value fields, for the
+ * <p>This class has five separate value fields, for the
  * possible password formats supported by Ganymede, but in fact
  * only one of them at a time should be anything other than
  * null, as setting any of these attributes on a Ganymede
- * password field clears the others.</p>
+ * password field clears the others, with the exception of the
+ * paired NT/Samba hash formats.</p>
  */
 
 class xPassword {
@@ -1712,6 +1753,8 @@ class xPassword {
   String plaintext;
   String crypttext;
   String md5text;
+  String lanman;
+  String ntmd4;
 
   /* -- */
 
@@ -1731,13 +1774,17 @@ class xPassword {
     plaintext = item.getAttrStr("plaintext");
     crypttext = item.getAttrStr("crypt");
     md5text = item.getAttrStr("md5crypt");
+    lanman = item.getAttrStr("lanman");
+    ntmd4 = item.getAttrStr("ntmd4");
   }
 
-  public xPassword(String plaintext, String crypttext, String md5text)
+  public xPassword(String plaintext, String crypttext, String md5text, String lanman, String ntmd4)
   {
     this.plaintext = plaintext;
     this.crypttext = crypttext;
     this.md5text = md5text;
+    this.lanman = lanman;
+    this.ntmd4 = ntmd4;
   }
 
   public String toString()
@@ -1766,6 +1813,20 @@ class xPassword {
       {
 	result.append(" md5crypt=\"");
 	result.append(md5text);
+	result.append("\"");
+      }
+
+    if (lanman != null)
+      {
+	result.append(" lanman=\"");
+	result.append(lanman);
+	result.append("\"");
+      }
+
+    if (ntmd4 != null)
+      {
+	result.append(" ntmd4=\"");
+	result.append(ntmd4);
 	result.append("\"");
       }
 
