@@ -332,7 +332,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     else
       {
-	hostField = new JTextField(GASHAdmin.url, 40);
+	hostField = new JTextField(GASHAdmin.url + "  [NO SSL]", 40);
       }
 
     hostField.setEditable(false);
