@@ -6,8 +6,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/01/27 21:43:35 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/02/11 00:58:36 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -51,7 +51,7 @@ package arlut.csd.ganymede.client;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.*;
 import java.util.Vector;
 import java.util.Hashtable;
 
@@ -117,7 +117,11 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     currentObject = null;
 
   JLabel
-    titleL;
+    titleL,
+    iconL;
+
+  ImageIcon 
+    icon;
 
   String lastValue = null;
 
@@ -182,6 +186,16 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     gbc.gridwidth = 4;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(titleL, gbc);
+
+    // Set up the dialog's icon (by default, no icon).
+    // gclient actually specifies the image 
+    // by calling openObjectDialog's setIcon method.
+
+    this.icon = new ImageIcon();
+    iconL = new JLabel(icon);
+    iconL.setBorder(new EmptyBorder(10,15,10,15));
+
+    middle.add(iconL, SwingConstants.CENTER);
     middle.add(titleL);
     
     gbc.fill = GridBagConstraints.NONE;
@@ -341,6 +355,11 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
   {
     titleL.setText(text);
   }
+
+  public void setIcon(ImageIcon icon) 
+    {
+      iconL.setIcon(icon);
+    }
 
   public void setReturnEditableOnly(boolean editableOnly)
   {
