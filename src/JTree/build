@@ -2,8 +2,8 @@
 #
 # Ganymede build script
 #
-# Version: $Revision: 1.1 $
-# Date: $Date: 1999/01/15 00:16:12 $
+# Version: $Revision: 1.2 $
+# Date: $Date: 1999/01/15 02:51:30 $
 #
 ############################################################
 
@@ -23,8 +23,6 @@ cd $builddir
 # And do the build
 
 echo "Compiling $COMPNAME"
-
-umask 0133;
 
 CLASSPATH=$CLASSDIR:$CLASSPATH; export CLASSPATH
 $JAVAC -J-mx128m -deprecation -d $CLASSDIR *.java
