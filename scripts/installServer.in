@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.23 $
-# $Date: 2000/11/14 05:30:13 $
+# $Revision: 1.24 $
+# $Date: 2000/11/14 07:19:35 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -224,7 +224,11 @@ copy("scripts/signature", "$installdir/db/signature"); print ".";
 		"ganymede.defaultrootpass" => $vars{"SUPERPASS"},
 		"ganymede.monitorname" => $vars{"MONITORNAME"},
 		"ganymede.defaultmonitorpass" => $vars{"MONITORPASS"},
-		"ganymede.helpbase" => $vars{"HELPWEB"});
+		"ganymede.helpbase" => $vars{"HELPWEB"},
+		"ganymede.softtimeout" => "false",
+		"ganymede.timeoutIdleNoObjs" => "15",
+		"ganymede.timeoutIdleWithObjs" => "20"
+	       );
 
 open INPUT, $template or die "Couldn't open properties template!";
 open OUTPUT, ">$installdir/ganymede.properties" or die "Couldn't write ganymede.properties";

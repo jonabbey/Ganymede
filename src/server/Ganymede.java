@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 2000/10/06 23:39:21 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 2000/11/14 07:19:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -226,7 +226,6 @@ public class Ganymede {
   public static String dbFilename = null;
   public static String journalProperty = null;
   public static String logProperty = null;
-  public static String schemaProperty = null;
   public static String htmlProperty = null;
   public static String serverHostProperty = null;
   public static String rootname = null;
@@ -1083,7 +1082,6 @@ public class Ganymede {
     dbFilename = System.getProperty("ganymede.database");
     journalProperty = System.getProperty("ganymede.journal");
     logProperty = System.getProperty("ganymede.log");
-    schemaProperty = System.getProperty("ganymede.schemadump");
     htmlProperty = System.getProperty("ganymede.htmldump");
     serverHostProperty = System.getProperty("ganymede.serverhost");
     rootname = System.getProperty("ganymede.rootname");
@@ -1150,12 +1148,6 @@ public class Ganymede {
     if (logProperty == null)
       {
 	System.err.println("Couldn't get the log property");
-	success = false;
-      }
-
-    if (schemaProperty == null)
-      {
-	System.err.println("Couldn't get the schema property");
 	success = false;
       }
 
