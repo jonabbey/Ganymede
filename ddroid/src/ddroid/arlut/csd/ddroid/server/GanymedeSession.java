@@ -528,10 +528,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (disabledMessage != null && !disabledMessage.equals("shutdown"))
 	  {
-	    Ganymede.debug("Couldn't create " + sessionLabel +
-			   " GanymedeSession.. semaphore disabled: " + disabledMessage);
-	    
-	    throw new RuntimeException("semaphore error: " + disabledMessage);
+	    Ganymede.debug(ts.l("init.no_semaphore", sessionLabel, disabledMessage));
+
+	    throw new RuntimeException(ts.l("init.semaphore_error", disabledMessage));
 	  }
       }
     else if ((!sessionLabel.equals("internal") && !sessionLabel.startsWith("builder:")) || 
@@ -543,10 +542,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    if (error != null)
 	      {
-		Ganymede.debug("Couldn't create " + sessionLabel +
-			       " GanymedeSession.. semaphore disabled: " + error);
-	    
-		throw new RuntimeException("semaphore error: " + error);
+		Ganymede.debug(ts.l("init.no_semaphore", sessionLabel, error));
+
+		throw new RuntimeException(ts.l("init.semaphore_error", error));	    
 	      }
 	    else
 	      {
@@ -685,8 +683,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // update status, update the admin consoles
 
     loggedInSemaphore.set(true);
-    status = "logged in";
-    lastEvent = "logged in";
+    status = ts.l("init.loggedin");
+    lastEvent = ts.l("init.loggedin");
     GanymedeAdmin.refreshUsers();
 
     // precalc the permissions applicable for this user
@@ -738,7 +736,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (session.editSet == null)
       {
-	throw new RuntimeException("checkpoint called in the absence of a transaction");
+	throw new RuntimeException(ts.l("checkpoint.exception"));
       }
 
     session.checkpoint(key);
@@ -759,7 +757,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (session.editSet == null)
       {
-	throw new RuntimeException("rollback called in the absence of a transaction");
+	throw new RuntimeException(ts.l("rollback.exception"));
       }
 
     return session.rollback(key);
@@ -793,8 +791,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	try
 	  {
-	    throw new RuntimeException("Directory Droid session for " + username +
-				       " had a checkIn() cause objectsCheckedOut go negative");
+	    throw new RuntimeException(ts.l("checkIn.exception", username));
 	  }
 	catch (RuntimeException ex)
 	  {
@@ -884,7 +881,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if ((minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0) ||
 	    minutesIdle > Ganymede.timeoutIdleWithObjs)
 	  {
-	    System.err.println("Sending a timeout message to " + this.toString());
+	    System.err.println(ts.l("timeCheck.sending", this.toString()));
 
 	    timedout = true;
 	    sendMessage(ClientMessage.SOFTTIMEOUT, null);
@@ -895,15 +892,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
 	  {
-	    forceOff("You have been idle for over " + Ganymede.timeoutIdleNoObjs +
-		     " minutes with no transactions in progress. " +
-		     "You are being disconnected as a security precaution.");
+	    forceOff(ts.l("timeCheck.forceOffNoObjs", Ganymede.timeoutIdleNoObjs));
 	  }
 	else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
 	  {
-	    forceOff("You have been idle for over " + Ganymede.timeoutIdleWithObjs + 
-		     " minutes.  You are being disconnected as a " +
-		     "security precaution.");
+	    forceOff(ts.l("timeCheck.forceOffWithObjs", Ganymede.timeoutIdleWithObjs));
 	  }
 
 	return;
@@ -911,15 +904,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0)
       {
-	forceOff("You have been idle for over " + Ganymede.timeoutIdleNoObjs +
-		 " minutes with no transactions in progress. " +
-		 "You are being disconnected as a security precaution.");
+	forceOff(ts.l("timeCheck.forceOffNoObjs", Ganymede.timeoutIdleNoObjs));
       }
     else if (minutesIdle > Ganymede.timeoutIdleWithObjs)
       {
-	forceOff("You have been idle for over " + Ganymede.timeoutIdleWithObjs + 
-		 " minutes.  You are being disconnected as a " +
-		 "security precaution.");
+	forceOff(ts.l("timeCheck.forceOffWithObjs", Ganymede.timeoutIdleWithObjs));
       }
   }
 
@@ -955,15 +944,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if (Ganymede.log != null)
 	  {
 	    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
-						       "Abnormal termination for username: " + username + "\n" +
-						       reason,
+						       ts.l("forceOff.log_event", username, reason),
 						       userInvid,
 						       username,
 						       objects,
 						       null));
 	  }
 
-	Ganymede.debug("Forcing " + username + " off for " + reason);
+	Ganymede.debug(ts.l("forceOff.forcing", username, reason));
 
 	try
 	  {
@@ -990,7 +978,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (type < ClientMessage.FIRST || type > ClientMessage.LAST)
       {
-	throw new IllegalArgumentException("type out of range");
+	throw new IllegalArgumentException(ts.l("sendMessage.exception"));
       }
 
     if (asyncPort != null)
@@ -1019,7 +1007,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (loggedInSemaphore.isSet())
       {
-	forceOff("dead client");
+	forceOff(ts.l("unreferenced.reason"));
       }
   }
 
@@ -1117,7 +1105,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		if (Ganymede.log != null)
 		  {
 		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
-							       "OK logout for username: " + username,
+							       ts.l("logout.normal_event", username),
 							       userInvid,
 							       username,
 							       objects,
@@ -1203,7 +1191,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    GanymedeServer.userLogOuts.put(personaInvid, new Date());
 	  }
 
-	Ganymede.debug(username + " logged off");
+	Ganymede.debug(ts.l("logout.logged_off", username));
 
 	userInvid = null;
 	personaInvid = null;
@@ -1480,7 +1468,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (timedout && password != null)
 	  {
-	    Ganymede.debug("User " + username + " attempting timedout verification");
+	    Ganymede.debug(ts.l("selectPersona.attempting_timecheck", username));
 
 	    pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 	    
@@ -1490,13 +1478,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	    else
 	      {
-		Ganymede.debug("User " + username + " failed a timedout verification");
+		Ganymede.debug(ts.l("selectPersona.failed_timecheck", username));
 		return false;
 	      }
 	  }
 	else
 	  {
-	    Ganymede.debug("User " + username + " switching to nonprivileged without timedout verification");
+	    Ganymede.debug(ts.l("selectPersona.giving_up", username));
 	  }
 
 	// the GUI client will close transactions first, but since we
@@ -1557,7 +1545,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (personaObject == null)
       {
-	Ganymede.debug("Couldn't find persona " + persona + " for user:" + username);
+	Ganymede.debug(ts.l("selectPersona.no_persona", persona, username));
 	return false;
       }
 
@@ -1565,7 +1553,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     if (pdbf != null && pdbf.matchPlainText(password))
       {
-	Ganymede.debug("User " + username + " switched to persona " + persona);
+	Ganymede.debug(ts.l("selectPersona.switched", username, persona));
 
 	if (timedout)
 	  {
@@ -1695,8 +1683,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	
 	if (ownerInvidItem.getType() != SchemaConstants.OwnerBase)
 	  {
-	    return Ganymede.createErrorDialog("Error in setDefaultOwner()",
-					      "Error.. ownerInvids contains an invalid invid");
+	    return Ganymede.createErrorDialog(ts.l("setDefaultOwner.error_title"),
+					      ts.l("setDefaultOwner.error_text"));
 	  }
 
 	// we don't want to explicitly place the object in
@@ -1718,8 +1706,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!supergashMode && !isMemberAll(tmpInvids))
       {
-	return Ganymede.createErrorDialog("Error in setDefaultOwner()",
-					  "Error.. ownerInvids contains invid that the persona is not a member of.");
+	return Ganymede.createErrorDialog(ts.l("setDefaultOwner.error_title"),
+					  ts.l("setDefaultOwner.error_text2"));
       }
     else
       {
@@ -1760,8 +1748,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
-	return Ganymede.createErrorDialog("Server: Error in filterQueries()",
-					  "Error.. ownerInvids contains invid that the persona is not a member of.");
+	return Ganymede.createErrorDialog(ts.l("filterQueries.error"),
+					  ts.l("setDefaultOwner.error_text2"));
       }
     else
       {
@@ -2082,8 +2070,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (session.editSet != null)
       {
-	return Ganymede.createErrorDialog("Server: Error in openTransaction()",
-					  "Error.. transaction already opened");
+	return Ganymede.createErrorDialog(ts.l("openTransaction.error"),
+					  ts.l("openTransaction.error_text"));
       }
 
     /* - */
@@ -2136,8 +2124,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (session.editSet == null)
       {
-	return Ganymede.createErrorDialog("Server: Error in commitTransaction()",
-					  "Error.. no transaction in progress");
+	return Ganymede.createErrorDialog(ts.l("commitTransaction.error"),
+					  ts.l("commitTransaction.error_text"));
       }
 
     /* - */
@@ -2241,7 +2229,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (session.editSet == null)
       {
-	throw new IllegalArgumentException("no transaction in progress");
+	throw new IllegalArgumentException(ts.l("abortTransaction.exception"));
       }
 
     /* - */
@@ -2334,11 +2322,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // create the signature
 
-    signature.append("This message was sent by ");
-    signature.append(username);
-    signature.append(", who is running the Directory Droid client on ");
-    signature.append(clienthost);
-    signature.append(".");
+    signature.append(ts.l("sendMail.signature", username, clienthost));
 
     body.append("\n--------------------------------------------------------------------------------\n");
     body.append(WordWrap.wrap(signature.toString(), 78, null));
@@ -2348,7 +2332,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	mailer.sendmsg(returnAddr,
 		       addresses,
-		       "Ganymede: " + subject,
+		       "Directory Droid: " + subject,
 		       body.toString());
       }
     catch (ProtocolException ex)
@@ -2440,11 +2424,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	asciiContent.append("\n\n");
       }
 
-    signature.append("This message was sent by ");
-    signature.append(username);
-    signature.append(", who is running the Directory Droid client on ");
-    signature.append(clienthost);
-    signature.append(".");
+    signature.append(ts.l("sendMail.signature", username, clienthost));
 
     asciiContent.append("\n--------------------------------------------------------------------------------\n");
     asciiContent.append(WordWrap.wrap(signature.toString(), 78, null));
@@ -2454,7 +2434,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	mailer.sendHTMLmsg(returnAddr,
 			   addresses,
-			   "Ganymede: " + subject,
+			   "Directory Droid: " + subject,
 			   (HTMLbody != null) ? HTMLbody.toString(): null,
 			   "greport.html",
 			   asciiContent.toString());
@@ -3282,7 +3262,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    if (adjunctQuery.linkedQueries != null)
 	      {
-		Ganymede.debug("GanymedeSession.queryDispatch(): linked queries have linked queries");
+		Ganymede.debug(ts.l("queryDispatch.linked_warning"));
 
 		adjunctQuery.linkedQueries = null;
 	      }
@@ -3337,8 +3317,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    if (!extantLock.isLocked(baseLock))	// *sync* DBStore
 	      {
-		throw new IllegalArgumentException("error, didn't have all bases needed for query " + 
-						   " locked with extantLock");
+		throw new IllegalArgumentException(ts.l("queryDispatch.lock_exception"));
 	      }
 
 	    rLock = extantLock;
@@ -3417,14 +3396,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (!loggedInSemaphore.isSet())
 	  {
-	    throw new RuntimeException("Error, couldn't complete query processing..\n" +
-				       "GanymedeSession logged out during processing"); 
+	    throw new RuntimeException(ts.l("queryDispatch.logged_out_exception"));
 	  }
 
 	if (rLock != null && !session.isLocked(rLock))
 	  {
-	    throw new RuntimeException("Error, couldn't complete query processing..\n" +
-				       "Read lock released during processing"); 
+	    throw new RuntimeException(ts.l("queryDispatch.read_lock_exception"));
 	  }
 
 	if (debug)
@@ -3502,7 +3479,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		    if (obj == null)
 		      {
-			Ganymede.debug("Error, couldn't find a containing object for an embedded query");
+			Ganymede.debug(ts.l("queryDispatch.containment_error"));
 			continue;	// try next match
 		      }
 
@@ -3927,7 +3904,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (invid == null)
       {
-	setLastError("Null invid passed into viewObjectHistory");
+	setLastError(ts.l("viewObjectHistory.null_invid"));
 	return null;
       }
 
@@ -3938,19 +3915,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (obj == null)
       {
-	throw new NullPointerException("argh!! null object in viewObjectHistory on invid " +
-				       invid.toString());
+	throw new NullPointerException(ts.l("viewObjectHistory.null_pointer", String.valueOf(invid)));
       }
 
     if (!getPerm(obj).isVisible())
       {
-	setLastError("Permissions denied to view the history for this invid.");
+	setLastError(ts.l("viewObjectHistory.permissions"));
 	return null;
       }
 
     if (Ganymede.log == null)
       {
-	setLastError("Log not active, can't view invid history");
+	setLastError(ts.l("viewObjectHistory.no_log"));
 	return null;
       }
 
@@ -3980,13 +3956,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (invid == null)
       {
-	setLastError("Null invid passed into viewObjectHistory");
+	setLastError(ts.l("viewAdminHistory.null_invid"));
 	return null;
       }
 
     if (invid.getType() != SchemaConstants.PersonaBase)
       {
-	setLastError("Wrong type of invid passed into viewAdminHistory");
+	setLastError(ts.l("viewAdminHistory.wrong_invid"));
 	return null;
       }
 
@@ -3996,19 +3972,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (obj == null)
       {
-	throw new NullPointerException("argh!! null obj in viewAdminHistory on " +
-				       invid.toString());
+	throw new NullPointerException(ts.l("viewAdminHistory.null_pointer", String.valueOf(invid)));
       }
 
     if (!getPerm(obj).isVisible())
       {
-	setLastError("Permissions denied to view the history for this invid.");
+	setLastError(ts.l("viewObjectHistory.permissions"));
 	return null;
       }
 
     if (Ganymede.log == null)
       {
-	setLastError("Log not active, can't view invid history");
+	setLastError(ts.l("viewObjectHistory.no_log"));
 	return null;
       }
 
@@ -4065,9 +4040,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (obj == null)
       {
-	return Ganymede.createErrorDialog("Object Not Found",
-					  "Could not find object " + invid.toString() +
-					  " in the database.  Perhaps the object doesn't exist?");
+	return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
+					  ts.l("view_db_object.no_object_error_text", String.valueOf(invid)));
       }
 
     if (getPerm(obj).isVisible())
@@ -4120,10 +4094,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	return Ganymede.createErrorDialog("Permissions Error",
-					  "Permission to view object [" + 
-					  viewObjectLabel(invid) +
-					  " - " + invid + "] denied.");
+	return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
+					  ts.l("view_db_object.permissions_error_text", viewObjectLabel(invid), String.valueOf(invid)));
       }
   }
 
@@ -4162,9 +4134,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (obj == null)
       {
-	return Ganymede.createErrorDialog("Object not found",
-					  "Error, object [" + invid +
-					  "] does not appear to exist.  Couldn't edit it.");
+	return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
+					  ts.l("edit_db_object.no_object_error_text", String.valueOf(invid)));
       }
 
     // we always want to check permissions, even if the object has
@@ -4226,26 +4197,30 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    edit_username = editing.gSession.username;
 		    edit_hostname = editing.gSession.clienthost;
 
-		    return Ganymede.createErrorDialog("Error, object already being edited",
-						      obj.getTypeName() + " [" + 
-						      viewObjectLabel(invid) + " - " + invid + 
-						      "] is already being edited by user " +
-						      edit_username + " on host " + edit_hostname);
+		    return Ganymede.createErrorDialog(ts.l("edit_db_object.already_editing"),
+						      ts.l("edit_db_object.already_editing_text",
+							   obj.getTypeName(),
+							   viewObjectLabel(invid),
+							   String.valueOf(invid),
+							   edit_username,
+							   edit_hostname));
 		  }
 	      }
 
-	    return Ganymede.createErrorDialog("Error checking object out for editing",
-					      "Error checking out " + obj.getTypeName() + " [" + 
-					      viewObjectLabel(invid) + " - " + invid + 
-					      "] for editing.\nPerhaps someone else was editing it?");
+	    return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
+					      ts.l("edit_db_object.checking_out_error_text",
+						   obj.getTypeName(),
+						   viewObjectLabel(invid),
+						   String.valueOf(invid)));
 	  }
       }
     else
       {
-	return Ganymede.createErrorDialog("Permissions Error",
-					  "Permission to edit " + obj.getTypeName() + " [" + 
-					  viewObjectLabel(invid) +
-					  " - " + invid + "] denied.");
+	return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
+					  ts.l("edit_db_object.permissions_error_text",
+					       obj.getTypeName(),
+					       viewObjectLabel(invid),
+					       String.valueOf(invid)));
       }
   }
 
@@ -4313,14 +4288,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (base == null)
 	  {
-	    error = "Permission to create object of *invalid* type " + type + " denied.";
+	    error = ts.l("create_db_object.invalid_type", type);
 	  }
 	else
 	  {
-	    error = "Permission to create object of type " + base.getName() + " denied.";
+	    error = ts.l("create_db_object.type_no_perm", base.getName());
 	  }
 
-	return Ganymede.createErrorDialog("Can't create", error);
+	return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"), error);
       }
 
     // i think this section of code is actually pretty unlikely to
@@ -4335,8 +4310,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (retVal == null)
 	  {
-	    return Ganymede.createErrorDialog("Can't create",
-					      "Can't create new object, the operation was refused");
+	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+					      ts.l("create_db_object.operation_refused"));
 	  }
 	else if (!retVal.didSucceed())
 	  {
@@ -4389,8 +4364,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		
 		if (ownerList.size() == 0)
 		  {
-		    return Ganymede.createErrorDialog("Can't create",
-						      "Can't create new object, no owner group to put it in.");
+		    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+						      ts.l("create_db_object.no_owner_group"));
 		  }
 		
 		// if we're interactive, the client really should have
@@ -4399,9 +4374,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		
 		if (enableWizards)
 		  {
-		    return Ganymede.createErrorDialog("Can't create",
-						      "Can't create new object, no way of knowing which " +
-						      "owner groups to place it in");
+		    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+						      ts.l("create_db_object.which_groups"));
 		  }
 		else
 		  {
@@ -4422,8 +4396,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (retVal == null)
 	  {
-	    return Ganymede.createErrorDialog("Can't create",
-					      "Can't create new object, the operation was refused");
+	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+					      ts.l("create_db_object.operation_refused"));
 	  }
 	else if (!retVal.didSucceed())
 	  {
@@ -4436,9 +4410,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (randomOwner)
 	  {
-	    retVal = Ganymede.createInfoDialog("Warning, picked an owner group at random",
-					       "Warning: created " + newObj.getTypeName() + 
-					       " in owner group " + viewObjectLabel(ownerList.getInvid(0)));
+	    retVal = Ganymede.createInfoDialog(ts.l("create_db_object.random"),
+					       ts.l("create_db_object.random_text", newObj.getTypeName(), viewObjectLabel(ownerList.getInvid(0))));
 	  }
 	else
 	  {
@@ -4497,8 +4470,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (invid == null)
       {
-	return Ganymede.createErrorDialog("Client error",
-					  "Error, the client attempted to clone a null invid.");
+	return Ganymede.createErrorDialog(ts.l("clone_db_object.clone_error"),
+					  ts.l("clone_db_object.clone_error_text"));
       }
 
     retVal = view_db_object(invid); // get a copy customized for per-field visibility
@@ -4568,27 +4541,29 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (vObj == null)
       {
-	setLastError("Can't inactivate non-existent object");
+	setLastError(ts.l("inactivate_db_object.error_text"));
 
-	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
-					  "Error.. can't inactivate non-existent object");
+	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+					  ts.l("inactivate_db_object.error_text"));
       }
 
     if (vObj.isInactivated())
       {
-	return Ganymede.createErrorDialog("Server: Can't inactivate an inactive object",
-					  "Error.. can't inactivate " + vObj.getTypeName() + " " + 
-					  vObj.getLabel() + ", object is already inactivated.");
+	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.already_inactivated"),
+					  ts.l("inactivate_db_object.already_inactivated_text",
+					       vObj.getTypeName(),
+					       vObj.getLabel()));
       }
 
     if (!getPerm(vObj).isDeletable())
       {
-	setLastError("Don't have permission to inactivate " + 
-		     vObj.getTypeName() + " " + vObj.getLabel());
+	setLastError(ts.l("inactivate_db_object.permission_text",
+			  vObj.getTypeName(),
+			  vObj.getLabel()));
 
-	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
-					  "Don't have permission to inactivate " +
-					  vObj.getTypeName() + " " + vObj.getLabel());
+	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+					  ts.l("inactivate_db_object.permission_text",
+					       vObj.getTypeName(), vObj.getLabel()));
       }
 
     ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
@@ -4597,15 +4572,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (eObj == null)
       {
-	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
-					  "Couldn't check out this object for inactivation");
+	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+					  ts.l("inactivate_db_object.no_checkout",
+					       vObj.getTypeName(), vObj.getLabel()));
       }
 
     if (!eObj.canBeInactivated() || !eObj.canInactivate(session, eObj))
       {
-	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
-					  "Object " + eObj.getLabel() +
-					  " is not of a type that may be inactivated");
+	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+					  ts.l("inactivate_db_object.not_inactivatable", eObj.getLabel()));
       }
 
     setLastEvent("inactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
@@ -4648,24 +4623,26 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (vObj == null)
       {
-	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
-					  "Error.. can't inactivate non-existent object");
+	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+					  ts.l("reactivate_db_object.no_such"));
       }
 
     if (!vObj.isInactivated())
       {
-	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
-					  vObj.getTypeName() + " " + vObj.getLabel() +
-					  " is not inactivated");
+	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+					  ts.l("reactivate_db_object.not_inactivated",
+					       vObj.getTypeName(),
+					       vObj.getLabel()));
       }
 
     // we'll treat the object's deletion bit as the power-over-life-and-death bit
 
     if (!getPerm(vObj).isDeletable())
       {
-	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
-					  "Don't have permission to reactivate " + 
-					  vObj.getTypeName() + " " + vObj.getLabel());
+	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+					  ts.l("reactivate_db_object.permission_text",
+					       vObj.getTypeName(),
+					       vObj.getLabel()));
       }
 
     ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
@@ -4674,8 +4651,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (eObj == null)
       {
-	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
-					  "Couldn't check out this object for reactivation");
+	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+					  ts.l("reactivate_db_object.no_checkout",
+					       vObj.getTypeName(),
+					       vObj.getLabel()));
       }
 
     setLastEvent("reactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
@@ -4719,26 +4698,22 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if ((invid.getType() == SchemaConstants.RoleBase) &&
 	(invid.getNum() == SchemaConstants.RoleDefaultObj))
       {
-	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "Error.. can't delete default permissions definitions.. this object " +
-					  "is critical to the proper functioning of the Directory Droid server.");
+	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+					  ts.l("remove_db_object.badobj1"));
       }
 
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
 	(invid.getNum() == SchemaConstants.PersonaSupergashObj))
       {
-	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "Error.. can't delete the " + 
-					  Ganymede.rootname + " persona.. this object " +
-					  "is critical to the proper functioning of the Directory Droid server.");
+	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+					  ts.l("remove_db_object.badobj2", Ganymede.rootname));
       }
 
     if ((invid.getType() == SchemaConstants.OwnerBase) &&
 	(invid.getNum() == SchemaConstants.OwnerSupergash))
       {
-	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "Error.. can't delete the supergash owner group.. this object " +
-					  "is critical to the proper functioning of the Directory Droid server.");
+	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+					  ts.l("remove_db_object.badobj3"));
       }
 
     DBObjectBase objBase = Ganymede.db.getObjectBase(invid.getType());
@@ -4746,8 +4721,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (vObj == null)
       {
-	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					  "Error.. can't delete non-existent object");
+	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+					  ts.l("remove_db_object.no_such"));
       }
 
     // if the object is newly created or is already marked for
@@ -4761,10 +4736,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (!getPerm(vObj).isDeletable())
 	  {
-	    return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					      "You do not have permission to delete " +
-					      vObj.getTypeName() + " " +
-					      vObj.getLabel());
+	    return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+					      ts.l("remove_db_object.permission_text",
+						   vObj.getTypeName(),
+						   vObj.getLabel()));
 	  }
 
 	ReturnVal retVal = objBase.objectHook.canRemove(session, vObj);
@@ -4776,17 +4751,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		return retVal;
 	      }
 
+	    // if an object type can be inactivated, then it *must* be
+	    // inactivated, unless the user is supergash
+
 	    if (!isSuperGash() && objBase.objectHook.canBeInactivated())
 	      {
-		return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-						  "You do not have permission to remove " + vObj.getTypeName() + " " + vObj +
-						  ".\n\nOnly supergash-level admins can remove objects of this type," +
-						  "other admins must use inactivate.");
+		return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+						  ts.l("remove_db_object.must_inactivate",
+						       vObj.getTypeName(),
+						       vObj.getLabel()));
 	      }
+
+	    // otherwise, generic refusal
 	    
-	    return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					      "Object Manager refused deletion for " + vObj.getTypeName() + " " +
-					      vObj.getLabel());
+	    return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+					      ts.l("remove_db_object.deletion_refused",
+						   vObj.getTypeName(),
+						   vObj.getLabel()));
 	  }
       }
 
@@ -4874,14 +4855,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (sendData)
 	  {
-	    message = "You do not have permission to dump the server's data with the xml client";
+	    message = ts.l("sendXML.data_refused");
 	  }
 	else
 	  {
-	    message = "You do not have permission to dump the server's schema definition with the xml client";
+	    message = ts.l("sendXML.schema_refused");
 	  }
 
-	return Ganymede.createErrorDialog("permissions error",
+	return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
 					  message);
       }
 
@@ -4914,11 +4895,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		// nothing we can productively do here, go
 		// ahead and show it for debug purposes
 
-		System.err.println("XML remote data/schema dump hit EOF.. client disconnected");
+		System.err.println(ts.l("sendXML.eof"));
 		
 		if (logoutOnFail)
 		  {
-		    mySession.forceOff("xmlclient dump error");
+		    mySession.forceOff(ts.l("sendXML.dump_error"));
 		  }
 	      }
 	  }}, "Directory Droid XMLSession Schema/Data Dump Thread");
@@ -4975,17 +4956,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    if (!retVal.didSucceed())
 		      {
 			receiver.end(false);
-			return Ganymede.createErrorDialog("xml transmission error",
-							  "Error, couldn't successfully send XML schema to xmlclient");
+			return Ganymede.createErrorDialog(ts.l("sendXML.transmission_error"),
+							  ts.l("sendXML.error_text"));
 		      }
 		  }
 	      }
 	    catch (RemoteException ex)
 	      {
 		ex.printStackTrace();
-		return Ganymede.createErrorDialog("xml transmission error",
-						  "Error, couldn't successfully send XML schema to xmlclient due to RemoteException:" +
-						  ex.getMessage());
+		return Ganymede.createErrorDialog(ts.l("sendXML.transmission_error"),
+						  ts.l("sendXML.error_exception_text",
+						       ex.getMessage()));
 	      }
 	  }
 
@@ -5001,18 +4982,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    ex.printStackTrace();
 
-	    return Ganymede.createErrorDialog("xml transmission error",
-					      "Error, couldn't successfully send XML schema to xmlclient due to RemoteException:" +
-					      ex.getMessage());
+	    return Ganymede.createErrorDialog(ts.l("sendXML.transmission_error"),
+					      ts.l("sendXML.error_exception_text",
+						   ex.getMessage()));
 	  }
       }
     catch (IOException ex)
       {
 	ex.printStackTrace();
 
-	return Ganymede.createErrorDialog("xml transmission error",
-					  "Error, couldn't successfully send XML schema to xmlclient due to IOException:" +
-					  ex.getMessage());
+	return Ganymede.createErrorDialog(ts.l("sendXML.transmission_error"),
+					  ts.l("sendXML.error_ioexception_text",
+					       ex.getMessage()));
       }
   }
 
@@ -5076,8 +5057,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	try
 	  {
-	    throw new RuntimeException("Error, getObjects() called on baseid " + baseid +
-				       ", but that base does not exist.");
+	    throw new RuntimeException(ts.l("getObjects.no_base", baseid));
 	  }
 	catch (RuntimeException ex)
 	  {
@@ -5790,8 +5770,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    if (!Ganymede.firstrun)
 	      {
-		Ganymede.debug("Serious error!  No default permissions object found in database!");
-		throw new RuntimeException("Serious error!  No default permissions object found in database!");
+		Ganymede.debug(ts.l("updatePerms.no_default_perms"));
+		throw new RuntimeException(ts.l("updatePerms.no_default_perms"));
 	      }
 	    else
 	      {
@@ -5899,7 +5879,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		
 		if (selfPerm == null)
 		  {
-		    System.err.println("updatePerms(): Error: PermMatrix field's value is null in selfperm object");
+		    System.err.println(ts.l("updatePerms.null_selfperm"));
 		  }
 	      }
 
@@ -6251,7 +6231,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     else
       {
-	throw new IllegalArgumentException("tried to unregister a wizard that wasn't registered");
+	throw new IllegalArgumentException(ts.l("unregisterWizard.exception"));
       }
   }
 
