@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1133,7 +1133,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-
 	// test for all values in our vector
 
 	for (int i = 0; i < values.size(); i++)
@@ -1332,11 +1331,10 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * Sets the value of this field, if a scalar.
-   * Returns true on success, false on failure.
-   * If false is returned, the DBSession's
-   * last error value will have been set to
-
-   * indicate the reason for failure.
+   *
+   * The ReturnVal object returned encodes
+   * success or failure, and may optionally
+   * pass back a dialog.
    *
    * @see arlut.csd.ganymede.DBSession
    *
@@ -1433,10 +1431,10 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * Sets the value of an element of this field, if a vector.
-   * Returns true on success, false on failure.
-   * If false is returned, the DBSession's
-   * last error value will have been set to
-   * indicate the reason for failure.
+   *
+   * The ReturnVal object returned encodes
+   * success or failure, and may optionally
+   * pass back a dialog.
    *
    * @see arlut.csd.ganymede.DBSession
    *
@@ -1511,12 +1509,10 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * Adds an element to the end of this field, if a vector.
-   * Returns true on success, false on failure.
-   * If false is returned, the DBSession's
-   * last error value will have been set to
-   * indicate the reason for failure.
    *
-   * @see arlut.csd.ganymede.DBSession
+   * The ReturnVal object returned encodes
+   * success or failure, and may optionally
+   * pass back a dialog.
    *
    */
 
@@ -1697,8 +1693,6 @@ public final class InvidDBField extends DBField implements invid_field {
    * If non-null is returned, the ReturnVal object
    * will include a dialog specification that the
    * client can use to display the error condition.
-   *
-   * @see arlut.csd.ganymede.DBSession
    *
    */
 
