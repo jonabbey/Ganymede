@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/10/20 04:34:27 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/10/26 19:35:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import javax.swing.*;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
- * @version $Revision: 1.28 $ $Date: 1999/10/20 04:34:27 $ $Name:  $
+ * @version $Revision: 1.29 $ $Date: 1999/10/26 19:35:51 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -138,8 +138,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   JPopupMenu popMenu;
   JMenuItem viewMI;
   JMenuItem editMI;
+  JMenuItem deleteMI;
+  JMenuItem inactivateMI;
 
   JToolBar toolbar;
+
   /* -- */
 
   /**
@@ -161,9 +164,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     popMenu = new JPopupMenu();
     viewMI = new JMenuItem("View Entry");
     editMI = new JMenuItem("Edit Entry");
+    deleteMI = new JMenuItem("Delete Entry");
+    inactivateMI = new JMenuItem("Inactivate Entry");
 
     popMenu.add(viewMI);
     popMenu.add(editMI);
+    popMenu.add(deleteMI);
+    popMenu.add(inactivateMI);
 
     contentPane = getContentPane();
 
@@ -174,7 +181,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     toolbar.grabFocus();
 
     loadResults(results);
-
   }
 
   public void actionPerformed(ActionEvent event)
@@ -510,6 +516,14 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     else if (event.getSource() == editMI)
       {
 	wp.getgclient().editObject((Invid)key);
+      }
+    else if (event.getSource() == deleteMI)
+      {
+	wp.getgclient().deleteObject((Invid)key);
+      }
+    else if (event.getSource() == inactivateMI)
+      {
+	wp.getgclient().inactivateObject((Invid)key);
       }
   }
 
