@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1486,7 +1486,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   
   public Query setFields(Query someQuery)
   {
-    BaseField tempField;
+    FieldTemplate tempField;
     short tempShort;
     String tempString;
     JCheckBox tempBox;
@@ -1500,50 +1500,50 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     fieldLoop :for (int x = 0; x < fieldOptions.size(); x ++)
       {
-	try
-	  {
-	    tempVector = (Vector) fieldOptions.elementAt(x);
+	tempVector = (Vector) fieldOptions.elementAt(x);
 	    
-	    for (int y = 0; y < tempVector.size(); y ++)
-	      {
-		// here we process each checkbox in the row
+	for (int y = 0; y < tempVector.size(); y ++)
+	  {
+	    // here we process each checkbox in the row
 		
-		tempBox = (JCheckBox) tempVector.elementAt(y);
+	    tempBox = (JCheckBox) tempVector.elementAt(y);
 
-		if (tempBox.isSelected())
-		  {
-		    // the box has been checked -- we want this field
+	    if (tempBox.isSelected())
+	      {
+		// the box has been checked -- we want this field
 
-		    tempString = tempBox.getText();
-		    tempField = defaultBase.getField(tempString);
+		tempString = tempBox.getText();
+		tempField = getTemplateFromName(tempString);
 			
-		    // Sometimes this next lines gives us fits...why?
+		// Sometimes this next lines gives us fits...why?
 
-		    if (tempField == null) 
-		      {  
-			System.out.println("It's a cold, null world,");
-			System.out.println("Thetrefore, we're breaking out of loop");
-			break fieldLoop;
-		      }
-		    else 
-		      {
-			tempShort = tempField.getID();
-			someQuery.addField(tempShort); // add the field to the query return
-			
-			System.out.println("Setting Return: " + tempField.getName());
-		      }
+		if (tempField == null) 
+		  {  
+		    System.out.println("It's a cold, null world,");
+		    System.out.println("Thetrefore, we're breaking out of loop");
+
+		    break fieldLoop;
 		  }
 		else 
 		  {
-		    // else just skip this box
-		    
+		    tempShort = tempField.getID();
+		    someQuery.addField(tempShort); // add the field to the query return
+			
+		    if (debug)
+		      {
+			System.out.println("Setting Return: " + tempField.getName());
+		      }
+		  }
+	      }
+	    else 
+	      {
+		// else just skip this box
+
+		if (debug)
+		  {
 		    System.out.println("Skipping " + tempBox.getText()); 
 		  }
 	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote exception: " + ex);	
 	  }
       }
 
