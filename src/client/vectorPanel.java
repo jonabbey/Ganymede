@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.42 $ %D%
+  Version: $Revision: 1.43 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -403,7 +403,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  {
 	    retVal = ((invid_field)my_field).createNewEmbedded();
 	    gc.handleReturnVal(retVal);
-	    container.checkReturnValForRescan(retVal);
 
 	    if (retVal != null && retVal.didSucceed())
 	      {
