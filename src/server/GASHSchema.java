@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.76 $ %D%
+   Version: $Revision: 1.77 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -145,7 +145,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   GridBagLayout
     nameGBL = new GridBagLayout(),
-    catGBL = new GridBagLayout(),
+    catGBL = new GridBagLayout();
   
   GridBagConstraints
     gbc = new GridBagConstraints();
