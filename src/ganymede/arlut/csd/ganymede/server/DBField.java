@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -621,6 +621,23 @@ public abstract class DBField implements Remote, db_field {
   abstract public String getDiffString(DBField orig);
 
   /**
+   * <p>This method returns true if this field differs from the orig.
+   * It is intended to do a quick before/after comparison when we are
+   * handling a transaction commit.</p>
+   */
+
+  public boolean hasChanged(DBField orig)
+  {
+    if (!(orig.getClass().equals(this.getClass())))
+      {
+	throw new IllegalArgumentException("bad field comparison");
+      }
+
+    return (!this.equals(orig));
+  }
+
+
+  /**
    *
    * Returns true if this field has a value associated
    * with it, or false if it is an unfilled 'placeholder'.
@@ -658,12 +675,24 @@ public abstract class DBField implements Remote, db_field {
   }
 
   /**
-   * <P>This method is used to mark a field as undefined when it is
-   * checked out for editing.  Different subclasses of DBField may
-   * implement this in different ways, if simply setting the field's
-   * value member to null is not appropriate.  Any namespace values claimed
-   * by the field will be released, and when the transaction is
-   * committed, this field will be released.</P>
+   * <p>This method is used to mark a field as undefined when it is
+   * checked out for editing.  Different subclasses of {@link
+   * arlut.csd.ganymede.server.DBField DBField} may implement this in
+   * different ways, if simply setting the field's value member to
+   * null is not appropriate.  Any namespace values claimed by the
+   * field will be released, and when the transaction is committed,
+   * this field will be released.</p>
+   *
+   * <p>Note that this method is really only intended for those fields
+   * which have some significant internal structure to them, such as
+   * permission matrix, field option matrix, and password fields.</p>
+   *
+   * <p>NOTE: There is, at present, no defined DBEditObject callback
+   * method that tracks generic field nullification.  This means that
+   * if your code uses setUndefined on a PermissionMatrixDBField,
+   * FieldOptionDBField, or PasswordDBField, the plugin code is not
+   * currently given the opportunity to review and refuse that
+   * operation.  Caveat Coder.</p>
    */
 
   public synchronized ReturnVal setUndefined(boolean local)
