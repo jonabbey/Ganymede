@@ -665,11 +665,15 @@ The <b>&lt;password&gt;</b> element contains a Java password value.
 As password fields are scalar in Ganymede, only one
 <b>&lt;password&gt;</b> element at a time may be contained in a field
 element.  The <b>&lt;password&gt;</b> element must be empty.  The
-<b>&lt;password&gt;</b> element must contain exactly one of three
-optional attributes, <b>plaintext</b>, <b>crypt</b>, or <b>md5crypt</b>,  or
-both of <b>lanman</b> and <b>ntmd4</b>, if loading passwords from
-a Samba password file. These options are explained below.
-<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+<b>&lt;password&gt;</b> element may contain any or all of the five
+optional attributes, <b>plaintext</b>, <b>crypt</b>, <b>md5crypt</b>,
+<b>lanman</b> and <b>ntmd4</b>.  If the <b>plaintext</b> attribute is
+present, all other hashes will be ignored, and the Ganymede server
+will generate new hashes as needed from the plaintext given. If none of the optional
+attributes are present, the password field will be cleared. All of
+these options are explained below.  <font size="-1"><a
+href="walkthru.html#GANY_DNS">[Example]</a> , <a
+href="#TABLE_TOP">[Top]</a></font>
 </td>
 </tr>
 
@@ -695,47 +699,41 @@ a Samba password file. These options are explained below.
 
 <dd>This attribute, if present, contains a password string in plain
 text.  The client will transmit this password to the server, which
-will generate the UNIX crypt and md5Crypt and the Windows NT/Samba
-hashes according to the schema configuration for this field.</dd>
+will generate any needed hash formats according to the schema
+configuration for this field. If <b>plaintext</b> is specified, all
+other hash information in this element will be ignored.</dd>
 
 <dt><b>crypt</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
-in UNIX crypt() format.  The client will transmit this password
-to the server, and will clear any pre-existing plain text or
-alternatively hashed password information stored in this field in the
-server.</dd>
+in UNIX crypt() format.  The client will transmit this password to the
+server, and will clear any pre-existing plain text information stored
+in this field in the server.</dd>
 
 <dt><b>md5crypt</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
-in FreeBSD-style md5Crypt() format.  The client will transmit this password
-to the server, and will clear any pre-existing plain text or
-alternatively hashed password information stored in this field in the
-server.</dd>
-
+in FreeBSD-style md5Crypt() format.  The client will transmit this
+password to the server, and will clear any pre-existing plain text
+information stored in this field in the server.</dd>
 
 <dt><b>lanman</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
-in the LANMAN encoding used by older versions of Windows networking.  This
-hash format is one of the two password encryption formats used by
-the Samba password file.  The client will transmit this password
-to the server, and will clear any pre-existing plain text or
-alternately hashed password information stored in this field in the
-server.  The lanman and ntmd4 hashes may be set as a pair, in which
-case all other hashes are cleared.</dd>
+in the LANMAN encoding used by older versions of Windows networking.
+This hash format is one of the two password encryption formats used by
+the Samba password file.  The client will transmit this password to
+the server, and will clear any pre-existing plain text information
+stored in this field in the server.</dd>
 
 <dt><b>ntmd4</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
-in the Unicode-md4 encoding used by Windows NT and Windows 98 and later.  This
-hash format is one of the two password encryption formats used by
-the Samba password file.  The client will transmit this password
-to the server, and will clear any pre-existing plain text or
-alternately hashed password information stored in this field in the
-server. The lanman and ntmd4 hashes may be set as a pair, in which
-case all other hashes are cleared.</dd>
+in the Unicode-md4 encoding used by Windows NT and Windows 98 and
+later.  This hash format is one of the two password encryption formats
+used by the Samba password file.  The client will transmit this
+password to the server, and will clear any pre-existing plain text
+information stored in this field in the server.</dd>
 
 </dl>
 </td>
@@ -745,8 +743,7 @@ case all other hashes are cleared.</dd>
 <td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2">&lt;password crypt="nxGots4NO.BJY"/&gt;</td></tr>
-
+<tr><td COLSPAN="2">&lt;password crypt="nxGots4NO.BJY" md5crypt="$1$apr1$f398vNQ51gnzf"/&gt;</td></tr>
 </table></center>
 
 <!-- INVID -->
@@ -900,7 +897,7 @@ object on the server, regardless of whatever other activity the
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 25 21:18:12 CDT 2000 -->
 <!-- hhmts start -->
-Last modified: Mon Oct 29 14:08:45 CST 2001
+Last modified: Tue Oct 30 21:59:35 CST 2001
 <!-- hhmts end -->
   </body>
 </html>

@@ -6,15 +6,16 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/03/24 07:42:25 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/10/31 04:11:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -149,4 +150,23 @@ public interface pass_field extends db_field {
    */
 
   ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4) throws RemoteException;
+
+
+  /**
+   * <p>This method is used to force all known hashes into this password
+   * field.  Ganymede does no verifications to insure that all of these
+   * hashes really match the same password, so caveat emptor.  If any of
+   * these hashes are null or empty string, those hashes will be cleared.</p>
+   *
+   * <p>Calling this method will clear the password's stored plaintext,
+   * if any.</p>
+   *
+   * <p>If this password field is not configured to support any of the
+   * various hash formats in the Ganymede schema, an error will be returned.</p>
+   */
+
+  public ReturnVal setAllHashes(String crypt, String md5crypt,
+				String LANMAN, String NTUnicodeMD4, 
+				boolean local, boolean noWizards) throws RemoteException;
+
 }

@@ -45,13 +45,28 @@ The querybox now takes care to get an updated reference to the caching
 structures it needs, so that re-use of the client querybox after
 a forced time out will not cause an exception to be thrown.
 
-4. [SERVER] Implemented LANMAN and NTMD4 hash support in the XML system
+4. [SERVER/XML] Improved password importing support in the XML system
 
 The server's xmlfield code was missing support for processing the
 "lanman" and "ntmd4" XML attributes for the <password> element in the
 Ganymede XML file format when loading data.  This support has now been
 added, and it should now be possible to write scripts to load user
 accounts, passwords included, from a Samba password file.
+
+In addition, the XML client can now simultaneously load passwords in
+several hash formats, so if you already have a Samba file with LANMAN
+and NTMD4 password hashes along with your UNIX passwd file's crypt and
+md5 crypt passwords, you can load all four hashes into accounts in
+Ganymede at once.
+
+Ganymede obviously can't verify that the hashes match in this case,
+but if you already have been synchronizing passwords to different hash
+formats, this will let Ganymede support your accounts without
+requiring that your current passwords be available in plaintext.
+
+This entails a slightly incompatible change in the RMI API between the
+client and the server, so the Ganymede 1.0.8 and later xmlclients
+should not be used with a 1.0.7 or earlier server.
 
 5. [CLIENT/SERVER] Fixed query filtering in Ganymede client and server
 

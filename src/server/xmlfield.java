@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2001/10/29 21:44:10 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/10/31 04:11:50 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.11 $ $Date: 2001/10/29 21:44:10 $ $Name:  $
+ * @version $Revision: 1.12 $ $Date: 2001/10/31 04:11:50 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -959,93 +959,13 @@ public class xmlfield implements FieldType {
 		return result;
 	      }
 
-	    // we can't set both crypttext and md5 text, because
-	    // setting one clears the other
+	    // okay, set whatever hashes we were given.. note that if
+	    // we see something like <password/>, with no attributes
+	    // set, we'll wind up clearing the password field entirely
 
-	    if (xp.crypttext != null)
-	      {
-		if (xp.md5text != null)
-		  {
-		    owner.xSession.err.println("Warning, setting crypt() hash and ignoring md5Crypt hash " +
-				       "for password in object " +
-				       owner);
-		  }
+	    result = field.setAllHashes(xp.crypttext, xp.md5text, xp.lanman, xp.ntmd4, false, false);
 
-		if (xp.lanman != null)
-		  {
-		    owner.xSession.err.println("Warning, setting crypt() hash and ignoring lanman hash " +
-					       "for password in object " +
-					       owner);
-		  }
-
-		if (xp.ntmd4 != null)
-		  {
-		    owner.xSession.err.println("Warning, setting crypt() hash and ignoring ntmd4 hash " +
-					       "for password in object " +
-					       owner);
-		  }
-
-		result = field.setCryptPass(xp.crypttext);
-		
-		if (result != null && !result.didSucceed())
-		  {
-		    return result;
-		  }
-	      }
-	    else if (xp.md5text != null)
-	      {
-		if (xp.lanman != null)
-		  {
-		    owner.xSession.err.println("Warning, setting md5crypt() hash and ignoring lanman hash " +
-					       "for password in object " +
-					       owner);
-		  }
-
-		if (xp.ntmd4 != null)
-		  {
-		    owner.xSession.err.println("Warning, setting md5crypt() hash and ignoring ntmd4 hash " +
-					       "for password in object " +
-					       owner);
-		  }
-
-		result = field.setMD5CryptedPass(xp.md5text);
-		
-		if (result != null && !result.didSucceed())
-		  {
-		    return result;
-		  }
-	      }
-	    else if (xp.lanman != null || xp.ntmd4 != null)
-	      {
-		result = field.setWinCryptedPass(xp.lanman, xp.ntmd4);
-
-		if (result != null && !result.didSucceed())
-		  {
-		    return result;
-		  }
-	      }
-
-	    // if we have to, clear the password out.  We do this if we see
-	    // something like <password/> instead of <password plaintext="pass"/>
-
-	    if (xp.plaintext == null && 
-		xp.crypttext == null && 
-		xp.md5text == null && 
-		xp.lanman == null && 
-		xp.ntmd4 == null)
-	      {
-		result = field.setPlainTextPass(null);
-
-		if (result != null && !result.didSucceed())
-		  {
-		    return result;
-		  }
-	      }
-
-	    // we'll never get here, but the java compiler isn't smart enough to detect
-	    // that
-
-	    return null;
+	    return result;
 	  }
 	else if (fieldDef.isInvid())
 	  {

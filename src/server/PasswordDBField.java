@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 2001/08/15 03:47:19 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 2001/10/31 04:11:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1176,12 +1176,16 @@ public class PasswordDBField extends DBField implements pass_field {
 
     clear_stored();
 
-    if (plaintext == null)
+    // if we've got an empty string, clear the plaintext, too
+
+    if (plaintext == null || plaintext.equals(""))
       {
+	uncryptedPass = null;
+
 	return retVal;
       }
 
-    // go ahead and set everything
+    // else, go ahead and set everything
 
     uncryptedPass = plaintext;
 
@@ -1330,11 +1334,11 @@ public class PasswordDBField extends DBField implements pass_field {
 					  "Can't set a pre-crypted MD5Crypt value into a non-MD5Crypted password field");
       }
 
-    if (text != null && (!text.startsWith("$1$") || (text.indexOf('$', 3) == -1)))
+    if (text != null && !text.equals("") && (!text.startsWith("$1$") || (text.indexOf('$', 3) == -1)))
       {
 	return Ganymede.createErrorDialog("Password Field Error",
 					  "setMD5CryptedPass() called with an improperly " +
-					  "formatted OpenBSD-style password entry.");
+					  "formatted FreeBSD-style password entry.");
       }
 
     eObj = (DBEditObject) owner;
@@ -1413,7 +1417,7 @@ public class PasswordDBField extends DBField implements pass_field {
     if (!getFieldDef().isWinHashed())
       {
 	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setWinCryptedPass()",
-					  "Can't set a pre-crypted MD5Crypt value into a non-MD5Crypted password field");
+					  "Can't set pre-crypted Samba hash values into a non-WinCrypted password field");
       }
 
     eObj = (DBEditObject) owner;
@@ -1463,6 +1467,165 @@ public class PasswordDBField extends DBField implements pass_field {
       }
 
     return retVal;
+  }
+
+  /**
+   * <p>This method is used to force all known hashes into this password
+   * field.  Ganymede does no verifications to insure that all of these
+   * hashes really match the same password, so caveat emptor.  If any of
+   * these hashes are null or empty string, those hashes will be cleared.</p>
+   *
+   * <p>Calling this method will clear the password's stored plaintext,
+   * if any.</p>
+   *
+   * <p>If this password field is not configured to support any of the
+   * various hash formats in the Ganymede schema, an error will be returned.</p>
+   */
+
+  public ReturnVal setAllHashes(String crypt,
+				String md5crypt,
+				String LANMAN, 
+				String NTUnicodeMD4, 
+				boolean local, 
+				boolean noWizards)
+  {
+    ReturnVal retVal;
+    DBEditObject eObj;
+    boolean settingCrypt, settingMD5, settingWin;
+
+    /* -- */
+
+    if (!isEditable(local))
+      {
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "Don't have permission to edit field " + getName() +
+					  " in object " + owner.getLabel());
+      }
+
+    settingCrypt = (crypt != null && !crypt.equals(""));
+    settingMD5 = (md5crypt != null && !md5crypt.equals(""));
+    settingWin = (LANMAN != null && !LANMAN.equals("")) || (NTUnicodeMD4 != null && !NTUnicodeMD4.equals(""));
+
+    if (!settingCrypt && !settingWin && !settingMD5)
+      {
+	// clear it!
+
+	return setPlainTextPass(null);
+      }
+
+    // nope, we're setting something.. let's find out what
+
+    if (settingWin && !getFieldDef().isWinHashed())
+      {
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
+					  "Can't set pre-crypted Samba hash values into a non-WinCrypted password field");
+      }
+
+    if (settingMD5 && !getFieldDef().isMD5Crypted())
+      {
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
+					  "Can't set pre-crypted md5 hash values into a non-MD5Crypted password field");
+      }
+
+    // it's easy to sanity-check md5 hashes
+
+    if (settingMD5 && (!md5crypt.startsWith("$1$") || (md5crypt.indexOf('$', 3) == -1)))
+      {
+	return Ganymede.createErrorDialog("Password Field Error",
+					  "setAllHashes() called with an improperly " +
+					  "formatted FreeBSD-style md5Crypt password entry: " + md5crypt);
+      }
+
+    if (settingCrypt && !getFieldDef().isCrypted())
+      {
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setAllHashes()",
+					  "Can't set pre-crypted hash values into a non-Crypted password field");
+      }
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	if (settingWin)
+	  {
+	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSWINHASHES, LANMAN, NTUnicodeMD4);
+
+	    // if a wizard intercedes, we are going to let it take the ball.
+	    
+	    if (retVal != null && !retVal.doNormalProcessing)
+	      {
+		return retVal;
+	      }
+	  }
+
+	if (settingMD5)
+	  {
+	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSMD5, md5crypt, null);
+
+	    // if a wizard intercedes, we are going to let it take the ball.
+	    
+	    if (retVal != null && !retVal.doNormalProcessing)
+	      {
+		return retVal;
+	      }
+	  }
+
+	if (settingCrypt)
+	  {
+	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSCRYPT, crypt, null);
+
+	    // if a wizard intercedes, we are going to let it take the ball.
+	    
+	    if (retVal != null && !retVal.doNormalProcessing)
+	      {
+		return retVal;
+	      }
+	  }
+      }
+
+    // call finalizeSetValue to allow for chained reactions
+
+    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+
+    if (retVal == null || retVal.didSucceed())
+      {
+	// whenever the hashes are set directly, we lose 
+	// plaintext and alternate hashes
+
+	clear_stored();
+
+	if ((LANMAN == null) || (LANMAN.equals("")))
+	  {
+	    lanHash = null;
+	  }
+	else
+	  {
+	    lanHash = LANMAN;
+	  }
+
+	if ((NTUnicodeMD4 == null) || (NTUnicodeMD4.equals("")))
+	  {
+	    ntHash = null;
+	  }
+	else
+	  {
+	    ntHash = NTUnicodeMD4;
+	  }
+
+	if (settingCrypt)
+	  {
+	    cryptedPass = crypt;
+	  }
+
+	if (settingMD5)
+	  {
+	    md5CryptPass = md5crypt;
+	  }
+      }
+
+    return retVal;    
   }
 
   // ****
