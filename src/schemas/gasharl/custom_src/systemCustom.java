@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2001/04/10 07:44:37 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2001/04/11 07:05:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,21 +80,32 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   Vector netsToChooseFrom = new Vector();
 
   /**
-   * vector of ip network Object Handles free in current room
-   */
-
-  Vector freeNets = new Vector();
-
-  /**
-   * <p>map of IPNet Invids to addresses.  This hashtable maps invids of
-   * network DBObjects to IP addresses that this system has allocated for
-   * each network.  If a system has multiple interfaces and we take an
-   * interface from one net to another, and then move it back, this
-   * hashtable will let us give it back the same address that it had
-   * before when it was associated with this net.</p>
+   * <p>Hashtable mapping Network invid's to a stack of IP
+   * addresses in Byte array form.  If the user switches the
+   * network of an interface, we push the old network on a
+   * stack in ipAddresses so that we can pop it back off if
+   * another interface is moved onto that network.</p>
    */
 
   Hashtable ipAddresses = new Hashtable();
+
+  /**
+   * <p>If this system is associated with a system type that
+   * specifies a fourth-octet IP address search pattern,
+   * we'll record the starting point for that seek here, or
+   * -1 if we don't have one..</p>
+   */
+
+  int startSearchRange = -1;
+
+  /**
+   * <p>If this system is associated with a system type that
+   * specifies a fourth-octet IP address search pattern,
+   * we'll record the stopping point for that seek here, or
+   * -1 if we don't have one..</p>
+   */
+
+  int stopSearchRange = -1;
 
   /**
    *
@@ -307,123 +318,105 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   {
     if (debug)
       {
-	System.err.println("systemCustom: returning freeNets");
+	System.err.println("systemCustom: returning netsToChooseFrom");
 
-	for (int i = 0; i < freeNets.size(); i++)
+	for (int i = 0; i < netsToChooseFrom.size(); i++)
 	  {
-	    ObjectHandle handle = (ObjectHandle) freeNets.elementAt(i);
+	    ObjectHandle handle = (ObjectHandle) netsToChooseFrom.elementAt(i);
 	    
 	    System.err.println(i + ": " + handle.getLabel());
 	  }
       }
 
-    return freeNets;
+    return netsToChooseFrom;
   }
 
   /**
-   * This method returns an IPv4 address for an embedded interface
-   * based on the network invid passed in.
-   */
-
-  public Byte[] getAddress(Invid netInvid)
-  {
-    if (debug)
-      {
-	System.err.println("systemCustom: returning address for net " + getGSession().viewObjectLabel(netInvid));
-      }
-
-    return (Byte[]) ipAddresses.get(netInvid);
-  }
-
-  /**
-   * This method allows an embedded interfaceCustom object to change
-   * this systemCustom's notion of what the preferred address is for a
-   * particular available IP network.
-   */
-
-  public void setAddress(Byte[] address, Invid netInvid)
-  {
-    if (debug)
-      {
-	System.err.println("systemCustom.setAddress(): setting address for net " + 
-			   getGSession().viewObjectLabel(netInvid));
-      }
-
-    ipAddresses.put(netInvid, address);
-  }
-
-  /**
-   * <p>Marks a network in the current room that was previously used as
-   * available for an interface attached to this system to be
-   * connected to.</p>
+   * <p>This method scans through the networks available to the user editing
+   * this object and returns an Invid for a network definition object, if
+   * one can be found which matches the address in question.</p>
    *
-   * <p>Used by the interfaceCustom object to provide a list of network
-   * choices.</p>
+   * <p>If no matching network is available, null is returned.</p>
+   *
+   * <p>Called from {@link arlut.csd.ganymede.custom.interfaceCustom
+   * interfaceCustom}.</p>
    */
 
-  public synchronized boolean freeNet(Invid netInvid)
+  public Invid findMatchingNet(Byte[] address)
   {
-    ObjectHandle handle;
-    boolean found = false;
-    String label = null;
+    for (int i = 0; i < netsToChooseFrom.size(); i++)
+      {
+	ObjectHandle handle = (ObjectHandle) netsToChooseFrom.elementAt(i);
+
+	Invid netInvid = handle.getInvid();
+	
+	if (checkMatchingNet(netInvid, address))
+	  {
+	    return netInvid;
+	  }
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method returns true if the given address fits in the
+   * network object pointed to by netInvid, or false otherwise.</p>
+   */
+
+  public boolean checkMatchingNet(Invid netInvid, Byte[] address)
+  {
+    IPv4Range range;
 
     /* -- */
 
-    if (netInvid == null)
-      {
-	System.err.println("systemCustom.freeNet(): trying to free null");
-	return true;
-      }
-
-    if (debug)
-      {
-	label = getGSession().viewObjectLabel(netInvid);
-	System.err.println("systemCustom.freeNet(): attempting to free " + label);
-      }
-
-    // do we already have this net in our free list?
-
-    for (int i = 0; !found && i < freeNets.size(); i++)
-      {
-	handle = (ObjectHandle) freeNets.elementAt(i);
+    DBObject netObj = getSession().viewDBObject(netInvid);
+    String rangeString = (String) netObj.getFieldValueLocal(networkSchema.ALLOCRANGE);
 	
-	if (handle.getInvid().equals(netInvid))
-	  {
-	    found = true;
-	  }
-      }
-
-    if (found)
+    if (rangeString != null && !rangeString.equals(""))
       {
-	if (debug)
-	  {
-	    System.err.println("systemCustom.freeNet(): " + label + " is already freed");
-	  }
-
-	return true;
+	range = new IPv4Range(rangeString);
       }
-
-    // the net wasn't already in the freeNets vector.  See if we can
-    // find the net in our current netsToChooseFrom, and if so add it to
-    // our freeNets vector
-
-    for (int i = 0; i < netsToChooseFrom.size(); i++)
+    else
       {
-	handle = (ObjectHandle) netsToChooseFrom.elementAt(i);
+	Byte[] netNum = (Byte[]) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
+
+	if (netNum == null)
+	  {
+	    System.err.println("systemCustom.checkMatchingNet() found network " + 
+			       "object with no range string and no netNum");
+
+	    return false;
+	  }
 	
-	if (handle.getInvid().equals(netInvid))
-	  {
-	    freeNets.addElement(handle);
+	range = new IPv4Range(netNum);
+      }
+    
+    return range.matches(address);
+  }
 
-	    if (debug)
-	      {
-		System.err.println("systemCustom.freeNet(" + handle.getLabel() + ")");
-	      }
+  /**
+   * <p>Called when an interface has its network changed, or when an
+   * address on an interface is changed within a network.  saveAddress()
+   * pushes the address onto a stack in association with the specified
+   * network's netInvid.  Future getAddress() calls on the same netInvid
+   * will return addresses pushed on the stack with saveAddress() before
+   * scanning for new addresses from the network's IPv4Range.</p>
+   */
 
-	    return true;
-	  }
+  public synchronized boolean saveAddress(Invid netInvid, Byte[] address)
+  {
+    Stack s = (Stack) ipAddresses.get(netInvid);
+
+    if (s == null)
+      {
+	s = new Stack();
+
+	ipAddresses.put(netInvid, s);
       }
 
+    s.push(address);
+    
     return true;		// we're probably freeing a net from an old room
   }
 
@@ -434,29 +427,23 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * choices.</p>
    */
 
-  public synchronized boolean allocNet(Invid netInvid)
+  public synchronized Byte[] getAddress(Invid netInvid)
   {
-    ObjectHandle handle;
+    Stack s = (Stack) ipAddresses.get(netInvid);
 
-    /* -- */
-    
-    for (int i = 0; i < freeNets.size(); i++)
+    if (s != null)
       {
-	handle = (ObjectHandle) freeNets.elementAt(i);
-	
-	if (handle.getInvid().equals(netInvid))
-	  {
-	    if (debug)
-	      {
-		System.err.println("systemCustom.allocNet(" + handle.getLabel() + ")");
-	      }
+	Byte[] address = (Byte[]) s.pop();
 
-	    freeNets.removeElementAt(i);
-	    return true;
+	if (s.size() == 0)
+	  {
+	    ipAddresses.remove(netInvid);
 	  }
+
+	return address;
       }
 
-    return false;
+    return getIPAddress(netInvid, startSearchRange, stopSearchRange);
   }
 
   /**
@@ -464,23 +451,16 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * private helper method to initialize our network choices
    * that our interface code uses.  This method will load our
    * netsToChooseFrom vector with a list of object handles suitable
-   * for use as network choices for our embedded interfaces,
-   * will reset our freeNets vector with a list of object
-   * handles that are available for new interfaces, or to
-   * change an existing interface to, and builds the ipAddresses
-   * hash to give us a quick way of picking an ip address for
-   * a given subnet.
+   * for use as network choices for our embedded interfaces, and
+   * will determine the start and stop range from the specified
+   * system type, if any.
    *
    */
 
   private void initializeNets()
   {
     DBObject interfaceObj;
-    Invid netInvid;
-    String label;
-    ObjectHandle handle;
     boolean usingNet = false;
-    Hashtable localAddresses = new Hashtable();
     Byte[] address;
 
     /* -- */
@@ -488,24 +468,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     if (debug)
       {
 	System.err.println("systemCustom.initializeNets()");
-      }
-
-    if (netsToChooseFrom == null)
-      {
-	netsToChooseFrom = new Vector();
-      }
-    else
-      {
-	netsToChooseFrom.removeAllElements();
-      }
-
-    if (freeNets == null)
-      {
-	freeNets = new Vector();
-      }
-    else
-      {
-	freeNets.removeAllElements();
       }
 
     // what embedded interfaces do we have right now?
@@ -520,79 +482,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     netsToChooseFrom = netsEditable.getHandles();
 
-    for (int i = 0; i < netsToChooseFrom.size(); i++)
-      {
-	handle = (ObjectHandle) netsToChooseFrom.elementAt(i);
-	netInvid = handle.getInvid();
-	label = handle.getLabel();
-
-	if (debug)
-	  {
-	    System.err.println("systemCustom.initializeNets(): processing net " + label);
-	  }
-
-	// find out what nets are new with this new room invid and which we
-	// were already using
-
-	if (!ipAddresses.containsKey(netInvid))
-	  {
-	    // ok, we don't have an address for this net stored yet.. see whether
-	    // an interface hooked up to us is using this net.. if so, see if
-	    // it has an address and keep that if so.
-
-	    usingNet = false;
-
-	    if (interfaces != null)
-	      {
-		for (int j = 0; j < interfaces.size(); j++)
-		  {
-		    interfaceObj = getSession().viewDBObject((Invid) interfaces.elementAt(j));
-
-		    // interfaceObj damn well shouldn't be null
-
-		    Invid netInvid2 = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
-
-		    if (netInvid2 != null && netInvid2.equals(netInvid))
-		      {
-			address = (Byte[]) interfaceObj.getFieldValueLocal(interfaceSchema.ADDRESS);
-
-			if (address != null)
-			  {
-			    usingNet = true;
-
-				// remember this address for this net
-			
-			    ipAddresses.put(netInvid, address);
-			    break;
-			  }
-		      }
-		  }
-	      }
-
-	    // if we didn't find an interface using this net, we'll need to generate
-	    // a new address for this network.
-
-	    if (!usingNet)
-	      {
-		localAddresses.put(netInvid, netInvid);
-	      }
-	  }
-      }
-
-    // okay, now localAddresses has a map for the nets that we were
-    // not previously on.
-    //
-    // now we need to get an IP address on each net.. if any of the
-    // nets are full, we'll remove that network from netsToChooseFrom to
-    // mark that net as not being usable for a new address
-
-    // default IP host-byte scan pattern.. we leave these set to -1 unless
-    // we find that we need to use a restricted set
-
-    int start = -1;
-    int stop = -1;
-
-    // first see if we have an attached system type which modifies our IP
+    // see if we have an attached system type which modifies our IP
     // search pattern
 
     try
@@ -606,119 +496,28 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	    if (rangeRequired != null && rangeRequired.booleanValue())
 	      {
-		start = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STARTIP)).intValue();
-		stop = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STOPIP)).intValue();
+		startSearchRange = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STARTIP)).intValue();
+		stopSearchRange = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STOPIP)).intValue();
 
 		if (debug)
 		  {
-		    System.err.println("systemCustom.getIPAddress(): found start and stop for this type: " + 
-				       start + "->" + stop);
+		    System.err.println("systemCustom.initializeNets(): found start and stop for this type: " + 
+				       startSearchRange + "->" + stopSearchRange);
 		  }
 	      }
 	  }
       }
     catch (NullPointerException ex)
       {
-	System.err.println("systemCustom.getIPAddress(): null pointer exception trying to get system type info");
-      }
-
-    Enumeration enum = localAddresses.keys();
-
-    while (enum.hasMoreElements())
-      {
-	netInvid = (Invid) enum.nextElement();
-
-	if (debug)
-	  {
-	    System.err.println("systemCustom.initializeNets() trying to find an address on " + 
-			       getGSession().viewObjectLabel(netInvid));
-	  }
-
-	address = getIPAddress(netInvid, start, stop);
-
-	if (address != null)
-	  {
-	    // we've allocated a new address for a net that
-	    // we don't yet have an address for.. store
-	    // the address we allocated
-
-	    ipAddresses.put(netInvid, address);
-	  }
-	else
-	  {
-	    // we couldn't get an address for netInvid.. take the net
-	    // out of our netsToChooseFrom vector.
-
-	    if (debug)
-	      {
-		System.err.println("systemCustom.initializeNets(): net " + 
-				   getGSession().viewObjectLabel(netInvid) + 
-				   " can't be used for allocation, we couldn't find an address on it.");
-	      }
-
-	    for (int i = 0; i < netsToChooseFrom.size(); i++)
-	      {
-		handle = (ObjectHandle) netsToChooseFrom.elementAt(i);
-
-		if (handle.getInvid().equals(netInvid))
-		  {
-		    netsToChooseFrom.removeElementAt(i);
-		    break;
-		  }
-	      }
-	  }
-      }
-
-    // okay, we have ipAddresses loaded with addresses available for
-    // this system in this room.  we need to go through the nets that
-    // we have registered and for those addresses that are both
-    // available in this room and not already taken, we need to
-    // add handles to them to the freeNets vector which we
-    // cleared upon entering initializeNets().
-
-    enum = ipAddresses.keys();
-
-    while (enum.hasMoreElements())
-      {
-	netInvid = (Invid) enum.nextElement();
-
-	// is this netInvid really available in our current room?
-
-	for (int i = 0; i < netsToChooseFrom.size(); i++)
-	  {
-	    handle = (ObjectHandle) netsToChooseFrom.elementAt(i);
-		
-	    if (handle.getInvid().equals(netInvid))
-	      {
-		if (debug)
-		  {
-		    System.err.println("systemCustom.initializeNets(): net " + 
-				       handle.getLabel() + " is available for allocation");
-		  }
-
-		usingNet = false;
-		
-		for (int j = 0; j < interfaces.size(); j++)
-		  {
-		    interfaceObj = getSession().viewDBObject((Invid) interfaces.elementAt(j));
-
-		    Invid netInvid2 = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
-
-		    if (netInvid2 != null && netInvid2.equals(netInvid))
-		      {
-			usingNet = true;
-		      }
-		  }
-
-		if (!usingNet)
-		  {
-		    freeNets.addElement(handle);
-		    break;
-		  }
-	      }
-	  }
+	System.err.println("systemCustom.initializeNets(): null pointer exception trying to get system type info");
       }
   }
+
+  /**
+   * <p>This method updates the cached and static list of system type
+   * choices in the event that the System Type object base has changed
+   * since the cache was last updated.</p>
+   */
 
   void updateSystemTypeChoiceList()
   {
@@ -769,8 +568,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * @param stop The octet value to stop seeking at, or -1 if not
    * used
    *
-   * @return An IP address if one could be allocated, null otherwise
-   */
+   * @return An IP address if one could be allocated, null otherwise */
 
   private Byte[] getIPAddress(Invid netInvid, int start, int stop)
   {
@@ -800,6 +598,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     else
       {
 	Byte[] netNum = (Byte[]) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
+
+	if (netNum == null)
+	  {
+	    System.err.println("systemCustom.getIPAddress(): no range or netnum in network object");
+	    return null;
+	  }
 	
 	range = new IPv4Range(netNum);
       }
@@ -1161,10 +965,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  getSession().editDBObject((Invid) interfaces.elementAt(index));
 
 	Invid oldNet = (Invid) delInterface.getFieldValueLocal(interfaceSchema.IPNET);
+	Byte[] address = (Byte[]) delInterface.getFieldValueLocal(interfaceSchema.ADDRESS);
 
-	if (oldNet != null)
+	if (oldNet != null && address != null)
 	  {
-	    freeNet(oldNet);
+	    saveAddress(oldNet, address);
 	  }
 
 	// if we have less than or more than 2 interfaces, we don't
@@ -1242,54 +1047,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	return result;
       }
 
-    return null;
-  }
-
-  /**
-   * <p>This method is the hook that DBEditObject subclasses use to interpose
-   * {@link arlut.csd.ganymede.GanymediatorWizard wizards} when a field's
-   * value is being changed.</p>
-   *
-   * <p>Whenever a field is changed in this object, this method will be
-   * called with details about the change. This method can refuse to
-   * perform the operation, it can make changes to other objects in
-   * the database in response to the requested operation, or it can
-   * choose to allow the operation to continue as requested.</p>
-   *
-   * <p>In the latter two cases, the wizardHook code may specify a list
-   * of fields and/or objects that the client may need to update in
-   * order to maintain a consistent view of the database.</p>
-   *
-   * <p>If server-local code has called
-   * {@link arlut.csd.ganymede.GanymedeSession#enableOversight(boolean) 
-   * enableOversight(false)},
-   * this method will never be
-   * called.  This mode of operation is intended only for initial
-   * bulk-loading of the database.</p>
-   *
-   * <p>This method may also be bypassed when server-side code uses
-   * setValueLocal() and the like to make changes in the database.</p>
-   *
-   * <p>This method is called before the finalize*() methods.. the finalize*()
-   * methods is where last minute cascading changes should be performed..
-   * Note as well that wizardHook() is called before the namespace checking
-   * for the proposed value is performed, while the finalize*() methods are
-   * called after the namespace checking.</p>
-   *
-   * @return a ReturnVal object indicated success or failure, objects and
-   * fields to be rescanned by the client, and a doNormalProcessing flag
-   * that will indicate to the field code whether or not the operation
-   * should continue to completion using the field's standard logic.
-   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
-   * if the wizardHook wishes to simply specify rescan information while
-   * having the field perform its standard operation.</b>  wizardHook() may
-   * return new ReturnVal(true, false) if the wizardHook performs the operation
-   * (or a logically related operation) itself.  The same holds true for the
-   * respond() method in GanymediatorWizard subclasses.
-   */
-
-  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
-  {
     return null;
   }
 }

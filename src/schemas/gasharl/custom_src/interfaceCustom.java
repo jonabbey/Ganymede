@@ -6,15 +6,15 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2000/10/09 05:51:47 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2001/04/11 07:05:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -43,7 +43,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -68,8 +69,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   // ---
 
   systemCustom sysObj = null;
-  Invid myNet = null;
   boolean inFinalizeAddrChange = false;
+  boolean inFinalizeNetChange = false;
 
   /* -- */
 
@@ -105,7 +106,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   public interfaceCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
-    getParentObj();
   }
 
   /**
@@ -198,8 +198,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // get the vector of currently available nets from our containing
     // System
 
-    sysObj = getParentObj();
-    Vector ipNetVec = sysObj.getAvailableNets();
+    Vector ipNetVec = getParentObj().getAvailableNets();
 
     if (ipNetVec != null)
       {
@@ -370,32 +369,35 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // if this embedded interface is being removed, we won't try to get
     // fancy with the address/ipnet stuff.
 
-    if (deleting)
+    if (isDeleting())
+      {
+	return null;
+      }
+
+    // we don't want to mess with the available-network
+    // management code if we are doing bulk-loading.
+    
+    if (!gSession.enableOversight || !gSession.enableWizards)
       {
 	return null;
       }
 
     if (field.getID() == interfaceSchema.IPNET)
       {
-	// we don't want to mess with the available-network
-	// management code if we are doing bulk-loading.
-
-	if (!gSession.enableOversight || !gSession.enableWizards)
+	// if this net change was initiated by an approved ADDRESS change,
+	// we're not going to try to second-guess their address choice.
+	
+	if (inFinalizeAddrChange)
 	  {
 	    return null;
 	  }
-
-	// we're changing the IP net.. make sure our parent is ok with us
-	// taking the new net.
 	
-	sysObj = getParentObj();
-
 	// if the net is being set to a net that matches what's already
-	// in the address field, we'll go ahead and ok it
-
+	// in the address field for some reason, we'll go ahead and ok it
+	
 	Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
 
-	if (address != null && matchNet(address, (Invid) value))
+	if (address != null && getParentObj().checkMatchingNet((Invid) value, address))
 	  {
 	    if (debug)
 	      {
@@ -405,373 +407,106 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	    return null;
 	  }
 	
-	// free the old net for others to use.. note that at this point, 
-	// field.getValueLocal() holds the field's old value and value is the
-	// proposed new value
-
-	if (debug)
-	  {
-	    System.err.println("interfaceCustom.finalizeSetValue(): about to check net stuff");
-	  }
+	// okay, we didn't match, tell the system object to remember the
+	// address that was formerly associated with the old network value
 	
-	if (!sysObj.freeNet((Invid) field.getValueLocal()))
-	  {
-	    if (debug)
-	      {
-		System.err.println("interfaceCustom.finalizeSetValue(): couldn't free old net num");
-	      }
-	
-	    return Ganymede.createErrorDialog("schema error",
-					      "interfaceCustom.finalizeSetValue(): couldn't free old net num");
-	  }
-	else if (!sysObj.allocNet((Invid) value))
-	  {
-	    if (debug)
-	      {
-		System.err.println("interfaceCustom.finalizeSetValue(): couldn't alloc new net num");
-	      }
-	
-	    sysObj.allocNet((Invid) field.getValueLocal()); // take it back
+	getParentObj().saveAddress((Invid) field.getValueLocal(), address);
 
-	    return Ganymede.createErrorDialog("schema error",
-					      "interfaceCustom.finalizeSetValue(): couldn't alloc new net num");
+	// now find a new address for this object based on the network we
+	// are being asked to change to.
+
+	address = getParentObj().getAddress((Invid) value);
+
+	if (address == null)
+	  {
+	    String label = getGSession().viewObjectLabel((Invid) value);
+
+	    return Ganymede.createErrorDialog("Network Full",
+					      "There are no more addresses available in the " +
+					      getGSession().viewObjectLabel((Invid) value) +
+					      " network.");
 	  }
 
-	// if this net change was initiated by an approved ADDRESS change,
-	// we're not going to try to second-guess their address choice.
-
-	if (inFinalizeAddrChange)
-	  {
-	    return null;
-	  }
-
-	// set our address.. the wizardHook will have instructed the
-	// client to rescan the address field.
-
-	if (debug)
-	  {
-	    System.err.println("interfaceCustom.finalizeSetValue(): getting address");
-	  }
+	// we've got a new IP address, go ahead and set it
 
 	IPDBField ipfield = (IPDBField) getField(interfaceSchema.ADDRESS);
-	address = getParentObj().getAddress((Invid) value);
-	
-	if (address != null)
-	  {
-	    // this will work or not, the client's rescan will show the
-	    // result regardless
 
-	    if (debug)
-	      {
-		System.err.print("interfaceCustom.finalizeSetValue(): setting address to ");
+	// set the inFinalizeNetChange variable around the call to
+	// setValueLocal() so that the recursive call to finalizeSetValue()
+	// doesn't waste time trying to find a network to match the
+	// new address before we complete the network change
 
-		for (int j = 0; j < address.length; j++)
-		  {
-		    if (j > 0)
-		      {
-			System.err.print(".");
-		      }
-		    
-		    System.err.print(s2u(address[j].byteValue()));
-		  }
-		
-		System.err.println();
-	      }
+	inFinalizeNetChange = true;
+	ipfield.setValueLocal(address);
+	inFinalizeNetChange = false;
 
-	    ipfield.setValueLocal(address);
-	  }
-	else
-	  {
-	    System.err.println("interfaceCustom.finalizeSetValue(): null address from parent"); 
-	  }
+	// and tell the client to rescan the address field to update
+	// the display
+
+	ReturnVal retVal = new ReturnVal(true, true);
+	retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
+
+	return retVal;
       }
 
     if (field.getID() == interfaceSchema.ADDRESS)
       {
-	// don't get fancy if we're bulk loading
+	// if the address is being set in response to a network change,
+	// don't bounce back and set the network again
 
-	if (!gSession.enableOversight || !gSession.enableWizards)
+	if (inFinalizeNetChange)
 	  {
 	    return null;
 	  }
 
-	if (myNet != null)
+	Invid netInvid = (Invid) getFieldValueLocal(interfaceSchema.IPNET);
+	Byte[] address = (Byte[]) value;
+
+	if (getParentObj().checkMatchingNet(netInvid, address))
 	  {
-	    // we need to turn off the wizardHook's intercession
-	    // as we correct the IPNET.. we use the inFinalizeAddrChange
-	    // object variable to accomplish this.
+	    // fine, no change to the network required
 
-	    inFinalizeAddrChange = true;
-	    ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, myNet);
-	    inFinalizeAddrChange = false;
-
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		if (debug)
-		  {
-		    System.err.println("interfaceCustom.finalizeSetValue(): failed to set ip net");
-		  }
-
-		return Ganymede.createErrorDialog("schema error",
-						  "interfaceCustom.finalizeSetValue(): failed to set ip net");
-	      }
-
-	    // ok, we've got a valid address change request.. let the system object
-	    // know that it should remember *this* address for the matching
-	    // net.
-
-	    sysObj = getParentObj();
-	    sysObj.setAddress((Byte[]) value, myNet);
-
-	    // ok, we tried it
-
-	    myNet = null;
-	  }
-      }
-
-    return null;
-  }
-
-  /**
-   * This method is the hook that DBEditObject subclasses use to interpose
-   * wizards when a field's value is being changed.<br><br>
-   *
-   * Whenever a field is changed in this object, this method will be
-   * called with details about the change. This method can refuse to
-   * perform the operation, it can make changes to other objects in
-   * the database in response to the requested operation, or it can
-   * choose to allow the operation to continue as requested.<br><br>
-   *
-   * In the latter two cases, the wizardHook code may specify a list
-   * of fields and/or objects that the client may need to update in
-   * order to maintain a consistent view of the database.<br><br>
-   *
-   * If server-local code has called
-   * GanymedeSession.enableOversight(false), this method will never be
-   * called.  This mode of operation is intended only for initial
-   * bulk-loading of the database.<br><br>
-   *
-   * This method may also be bypassed when server-side code uses
-   * setValueLocal() and the like to make changes in the database.<br><br>
-   *
-   * This method is called before the finalize*() methods.. the finalize*()
-   * methods is where last minute cascading changes should be performed..
-   * the finalize*() methods have no power to set object/field rescan
-   * or return dialogs to the client, however.. in cases where such
-   * is necessary, a custom plug-in class must have wizardHook() and
-   * finalize*() configured to work together to both provide proper field
-   * rescan notification and to check the operation being performed and
-   * make any changes necessary to other fields and/or objects.<br><br>
-   *
-   * Note as well that wizardHook() is called before the namespace checking
-   * for the proposed value is performed, while the finalize*() methods are
-   * called after the namespace checking.
-   *
-   * @return a ReturnVal object indicated success or failure, objects and
-   * fields to be rescanned by the client, and a doNormalProcessing flag
-   * that will indicate to the field code whether or not the operation
-   * should continue to completion using the field's standard logic.
-   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
-   * if the wizardHook wishes to simply specify rescan information while
-   * having the field perform its standard operation.</b>  wizardHook() may
-   * return new ReturnVal(true, false) if the wizardHook performs the operation
-   * (or a logically related operation) itself.  The same holds true for the
-   * respond() method in GanymediatorWizard subclasses.
-   *
-   */
-
-  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
-  {
-    if (!gSession.enableWizards)
-      {
-	return null;
-      }
-
-    // we don't want to play our address/ipnet games if we're being deleted.
-
-    if (deleting)
-      {
-	return null;
-      }
-
-    if (field.getID() == interfaceSchema.IPNET && operation == SETVAL)
-      {
-	// we don't want to mess with the IPNET change if it was initiated
-	// by the client changing the IP address
-
-	if (inFinalizeAddrChange)
-	  {
 	    return null;
 	  }
 
-	// Ok, we want to create a ReturnVal which will cause the
-	// field.setValue() call which triggered us to continue normal
-	// processing, and return our list of rescan preferences to
-	// the client.
+	// we need to find a new network to match, and to set that
+	// into our network field
 
-	ReturnVal result = new ReturnVal(true, true);
-	result.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
+	netInvid = getParentObj().findMatchingNet((Byte[]) value);
 
-	// Now scan through our siblings and let the client know that
-	// they need to refresh their IPNET fields so that they won't
-	// have the net that *we* just chose show up as options.
-
-	Vector entries = getSiblingInvids();
-
-	for (int i = 0; i < entries.size(); i++)
+	if (netInvid == null)
 	  {
-	    if (debug)
-	      {
-		System.err.println("interfaceCustom.wizardHook(): adding object " + 
-				   entries.elementAt(i) + " for rescan");
-	      }
-	    result.addRescanField((Invid) entries.elementAt(i), interfaceSchema.IPNET);
+	    return Ganymede.createErrorDialog("Unacceptable IP address",
+					      "IP address " + IPDBField.genIPString(address) +
+					      "does not match any network available to you." +
+					      "  You may have misentered the address, or this may " +
+					      "be a permissions issue.");
 	  }
 
-	if (debug)
+	// we need to fix up the IP Network link to point to the
+	// network that matches the new address.  We set
+	// inFinalizeAddrChange to let the recursive call to
+	// finalizeSetValue() spawned by setFieldValue() know not to
+	// try and choose a new IP address before we get a chance to
+	// return and okay the IP address change we are processing.
+	
+	inFinalizeAddrChange = true;
+	ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, netInvid);
+	inFinalizeAddrChange = false;
+	
+	if (retVal != null && !retVal.didSucceed())
 	  {
-	    System.err.println("interfaceCustom.wizardHook(): requesting ADDRESS field rescan");
-	  }
-
-	return result;
-      }
-
-    if (field.getID() == interfaceSchema.ADDRESS && operation == SETVAL)
-      {
-	if (!findNet((Byte[]) param1))
-	  {
-	    return Ganymede.createErrorDialog("Can't change IP net",
-					      "The IP address you have selected does not match any network number " +
-					      "available in this room.  Either this room does not have that network " +
-					      "listed, or another interface on this system is already allocated on " +
-					      "that network.");
-	  }
-
-	// findNet prepped finalizeSetValue() to set the IPNET for us
-	// to myNet.. tell the client to rescan the IPNET field so it
-	// sees the change
-
-	ReturnVal result = new ReturnVal(true, true);
-	result.addRescanField(this.getInvid(), interfaceSchema.IPNET);
-
-	if (debug)
-	  {
-	    System.err.println("interfaceCustom.wizardHook(): asking for IPNET rescan in response to net change");
+	    return Ganymede.createErrorDialog("schema error",
+					      "interfaceCustom.finalizeSetValue(): failed to set ip net");
 	  }
 	
-	return result;
+	retVal = new ReturnVal(true, true);
+	retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
+	
+	return retVal;
       }
 
     return null;
-  }
-
-  /**
-   *
-   * This private helper method tries to find an IP net linked to the room that this
-   * system is in.
-   *
-   */
-
-  private boolean findNet(Byte[] address)
-  {
-    if (!matchNet(address, (Invid) getFieldValueLocal(interfaceSchema.IPNET)))
-      {
-	// need to find a net that matches the new address, if we can.
-
-	if (debug)
-	  {
-	    System.err.println("interfaceCustom.findNet(): going to have to try to find a new net");
-	  }
-
-	Vector ipNetVec = sysObj.getAvailableNets();
-	Invid netInvid;
-	boolean found = false;
-	ReturnVal retVal = null;
-	String label;
-
-	for (int i = 0; i < ipNetVec.size(); i++)
-	  {
-	    netInvid = ((ObjectHandle) ipNetVec.elementAt(i)).getInvid();
-	    label = getGSession().viewObjectLabel(netInvid);
-
-	    if (debug)
-	      {
-		System.err.println("interfaceCustom.findNet(): testing network " + label);
-	      }
-
-	    if (matchNet(address, netInvid))
-	      {
-		if (debug)
-		  {
-		    System.err.println("interfaceCustom.findNet(): found a network: " + label);
-		  }
-
-		found = true;
-
-		// save this net for finalizeSetValue() to use
-		myNet = netInvid;
-		break;
-	      }
-	  }
-	
-	return found;
-      }
-
-    return true;
-  }
-
-  /**
-   *
-   * This private helper method compares the address given with the
-   * IP network referenced by netInvid, returning true if the
-   * address specified fits with the network referenced by netInvid.<br><br>
-   *
-   * This code, like the rest of the GASH network schema code, currently
-   * assumes that all IP networks are 'Class C', where the first 3 octets
-   * of an IPv4 address are the net number and the last octet is the
-   * host id.
-   *
-   */
-
-  private boolean matchNet(Byte[] address, Invid netInvid)
-  {
-    try
-      {
-	DBObject netObj = getSession().viewDBObject(netInvid);
-	Byte[] netNum = (Byte[]) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
-	
-	if (debug)
-	  {
-	    System.err.println("interfaceCustom.matchNet():");
-
-	    System.err.println("\taddress: " + IPDBField.genIPV4string(address));
-	    System.err.println("\tnet num: " + IPDBField.genIPV4string(netNum));
-	  }
-
-	for (int i = 0; i < (netNum.length-1); i++)
-	  {
-	    if (!netNum[i].equals(address[i]))
-	      {
-		if (debug)
-		  {
-		    System.err.println("interfaceCustom.matchNet(): failure to match octet " + i);
-		  }
-
-		return false;
-	      }
-	  }
-      }
-    catch (NullPointerException ex)
-      {
-	if (debug)
-	  {
-	    ex.printStackTrace();
-	    Ganymede.debug("interfaceCustom.matchNet: NullPointer " + ex.getMessage());
-	  }
-	return false;
-      }
-    
-    return true;
   }
 
   private systemCustom getParentObj()
@@ -817,22 +552,31 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   private Vector getSiblingInvids(DBObject object)
   {
     Vector result;
-    DBSession session;
-    DBObject sysObj;
-    Invid sysInvid = (Invid) object.getFieldValueLocal(SchemaConstants.ContainerField);
+    DBObject parentObj;
+    Invid sysInvid;
+
+    /* -- */
+
+    // we can't use getParentObj() because that only works in an editing
+    // context.  The checkRequiredFields() call may be called from a task
+    // that wants to just sweep through the database looking for incomplete
+    // objects, so we arrange to find a DBObject reference to parentObj
+    // so that we can get access to the list of our siblings.
+
+    sysInvid = (Invid) object.getFieldValueLocal(SchemaConstants.ContainerField);
 
     if (object instanceof DBEditObject)
       {
-	sysObj = ((DBEditObject) object).getSession().viewDBObject(sysInvid);
+	parentObj = ((DBEditObject) object).getSession().viewDBObject(sysInvid);
       }
     else
       {
-	sysObj = Ganymede.internalSession.getSession().viewDBObject(sysInvid);
+	parentObj = Ganymede.internalSession.getSession().viewDBObject(sysInvid);
       }
 
     try
       {
-	result = (Vector) sysObj.getFieldValuesLocal(systemSchema.INTERFACES).clone();
+	result = (Vector) parentObj.getFieldValuesLocal(systemSchema.INTERFACES).clone();
       }
     catch (NullPointerException ex)
       {
