@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.6 $ %D%
+  Version: $Revision: 1.7 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,7 +57,7 @@ import com.sun.java.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.6 $ %D%
+ * @version $Revision: 1.7 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -1439,7 +1439,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 ------------------------------------------------------------------------------*/
 
 
-class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
+class treeCanvas extends JComponent implements MouseListener, MouseMotionListener {
 
   static final boolean debug = false;
   static final Object SPACE = new Object();
@@ -1501,7 +1501,7 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 
   public treeCanvas(treeControl ctrl, Font font, Color fgColor, Color bgColor, Image[] images)
   {
-    super(false);		// no double buffering for us, we'll do it ourselves
+    //    super(false);		// no double buffering for us, we'll do it ourselves
 
     this.ctrl = ctrl;
     this.font = font;
