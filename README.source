@@ -32,11 +32,7 @@ what you do:
 4. Run 'ant jars'.  This will recreate the 4 jar files used by
    the installation scripts.
 
-5. If you haven't already, run 'configure' from the Ganymede
-   distribution directory to create the install scripts that you will
-   use to install the software.
-
-6. Copy your new jar files into your server and client jars
+5. Copy your new jar files into your server and client jars
    directories.
 
 Note that the Ant build file has a lot of possible operations.  To
