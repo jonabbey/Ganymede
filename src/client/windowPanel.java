@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import arlut.csd.JDataComponent.*;
 
 ------------------------------------------------------------------------------*/
 
-public class windowPanel extends JPanel implements ActionListener, InternalFrameListener, JsetValueCallback{
+public class windowPanel extends JPanel implements ActionListener, InternalFrameListener, JsetValueCallback, ItemListener{
 
   static final boolean debug = true;
 
@@ -323,42 +323,89 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 		    break;
 
 		  case FieldType.STRING:
-
-		    sf = new JstringField(20,
-					  19,
-					  new JcomponentAttr(null,
-							     new Font("Helvetica",Font.PLAIN,12),
-							     Color.black,Color.white),
-					  true,
-					  false,
-					  null,
-					  null);
-
-		    objectHash.put(sf, fields[i]);
-
-		    try
+		    try 
 		      {
-			sf.setText((String)fields[i].getValue());
+			if (((string_field)fields[i]).mustChoose())
+			  {
+			    System.out.println("You must choose.");
+			    // Add a choice
+			    JChoice choice = new JChoice();
+			    Vector choices = ((string_field)fields[i]).choices();
+			    for (int j = 0; j < choices.size(); j++)
+			      {
+				choice.addItem((String)choices.elementAt(j));
+			      }
+
+			  }
+			else if (((string_field)fields[i]).canChoose())
+			  {
+			    System.out.println("You can choose");
+			    // Add a combo box
+			    JComboBox combo = new JComboBox();
+			    Vector choices = ((string_field)fields[i]).choices();
+			    for (int j = 0; j < choices.size(); j++)
+			      {
+				combo.addPossibleValue((String)choices.elementAt(j));
+			      }
+			    combo.setEditable(editable);
+			    combo.addItemListener(this);
+			  }
+			else
+			  {
+			    // It's not a choice
+			    System.out.println("This is not a choice");
+
+			    Vector choices = ((string_field)fields[i]).choices();
+			    if (choices != null)
+			      {
+				System.out.println("Here are the choices anyway:");
+				for (int j = 0; j < choices.size(); j++)
+				  {
+				    System.out.println((String)choices.elementAt(j));
+				  }
+			      }
+			    sf = new JstringField(20,
+						  19,
+						  new JcomponentAttr(null,
+								     new Font("Helvetica",Font.PLAIN,12),
+								     Color.black,Color.white),
+						  editable,
+						  false,
+						  null,
+						  null,
+						  this);
+			    
+			    objectHash.put(sf, fields[i]);
+			    
+			    try
+			      {
+				sf.setText((String)fields[i].getValue());
+			      }
+			    catch (RemoteException rx)
+			      {
+				throw new RuntimeException("Could not get value for field: " + rx);
+			      }
+			    
+			    //sf.setCallback(this);
+			    //sf.setEditable(editable);
+			    
+			    try
+			      {
+				sf.setToolTipText((String)fields[i].getComment());
+				//System.out.println("Setting tool tip to " + (String)fields[i].getComment());
+			      }
+			    catch (RemoteException rx)
+			      {
+				throw new RuntimeException("Could not get tool tip text: " + rx);
+			      }
+			    
+			    addRow(panel, sf, name, i);
+			  }
 		      }
 		    catch (RemoteException rx)
 		      {
-			throw new RuntimeException("Could not get value for field: " + rx);
+			throw new RuntimeException("Could not set up stringfield: " + rx);
 		      }
-		      
-		    sf.setCallback(this);
-		    sf.setEditable(editable);
-		      
-		    try
-		      {
-			sf.setToolTipText((String)fields[i].getComment());
-			//System.out.println("Setting tool tip to " + (String)fields[i].getComment());
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Could not get tool tip text: " + rx);
-		      }
-		      
-		    addRow(panel, sf, name, i);
 
 		    break;
 
@@ -860,6 +907,11 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	  }
       }
   }
+
+  public void itemStateChanged(ItemEvent e)
+    {
+      System.out.println("Item changed: " + e.getItem());
+    }
 
   public  void frameDidClose(InternalFrameEvent e)
   {
