@@ -1,10 +1,14 @@
 /*
    JentryField.java
+
+   JentryField serves as an abstract base class for all Fields that
+   use textfields.  The subclasses of this class should be used.
    
    Created: 12 Jul 1996
-   Version: 1.2 97/07/22
+   Version: $Revision: 1.18 $ %D%
    Module By: Navin Manohar
-   Applied Research Laboratories, The University of Texas at Austin
+   Applied Research Laboratories, The University of Texas at Austin 
+
 */
 
 package arlut.csd.JDataComponent;
@@ -15,9 +19,11 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.text.*;
 
-//---------------------------------------------------------------------
-//                                                 class JentryField
-//---------------------------------------------------------------------
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                     JentryField
+
+------------------------------------------------------------------------------*/
 
 /**
  *  JentryField serves as an abstract base class for all Fields that use textfields.
@@ -25,12 +31,17 @@ import javax.swing.text.*;
  */
 
 abstract public class JentryField extends JTextField implements FocusListener{
-  final boolean debug = false;
+
+  static final boolean debug = false;
+
+  // ---
 
   public boolean allowCallback = false;
   protected boolean changed = false; 
 
   protected JsetValueCallback my_parent = null;
+
+  /* -- */
 
   //////////////////
   // Constructors //
@@ -45,6 +56,9 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
     enableEvents(AWTEvent.KEY_EVENT_MASK); 
 
+    // try to force a validate so that NT isn't so bitchy
+
+    setColumns(columns);
   }
 
   ///////////////////
@@ -60,7 +74,6 @@ abstract public class JentryField extends JTextField implements FocusListener{
   {
     return changed;
   }
-
   
   /**
    *  sets the parent of this component for callback purposes
@@ -82,8 +95,8 @@ abstract public class JentryField extends JTextField implements FocusListener{
   /**
    * sendCallback is called when focus is lost.
    */
+
   public abstract void sendCallback();
-    
 
   /**
    *  Stub function that is overriden in subclasses of JentryField
@@ -135,7 +148,6 @@ abstract public class JentryField extends JTextField implements FocusListener{
       {
 	super.processKeyEvent(e);
       }
-
 
     // otherwise, we ignore it
   }
