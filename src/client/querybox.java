@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -921,6 +921,7 @@ class QueryRow implements ItemListener {
     // we have to wrap the operand component in a container so that
     // we can change the operand component later
 
+    operandContainer.setOpaque(false);
     operandContainer.add(operand);
 
     gbl.setConstraints(operandContainer, gbc);
@@ -1333,6 +1334,10 @@ class QueryRow implements ItemListener {
 	  {
 	    opValue = QueryDataNode.LENGTHLE;
 	  }
+	else if (operator.equals("Defined"))
+	  {
+	    opValue = QueryDataNode.DEFINED;
+	  }
 
 	if (opValue == 0)
 	  {
@@ -1386,6 +1391,10 @@ class QueryRow implements ItemListener {
 	else if (operator.equals("End With"))
 	  {
 	    opValue = QueryDataNode.ENDSWITH;
+	  }
+	else if (operator.equals("Defined"))
+	  {
+	    opValue = QueryDataNode.DEFINED;
 	  }
 
 	if (opValue == 0)
@@ -1682,7 +1691,10 @@ class OptionsFrame extends JFrame implements ActionListener {
 	      }
 	  }
 
-	if (!allFields)
+	// if allFields is still true, let the Query mechanism
+	// return default fields.
+
+	if (allFields)
 	  {
 	    parent.fieldsToReturn = null;
 	  }
