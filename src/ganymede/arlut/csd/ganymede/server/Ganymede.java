@@ -264,6 +264,13 @@ public class Ganymede {
 
   public static Vector builderTasks = new Vector();
 
+  /**
+   * <p>A vector of {@link arlut.csd.ganymede.server.SyncRunner SyncRunner}
+   * objects initialized on database load.</p>
+   */
+
+  public static Vector syncRunners = new Vector();
+
   // properties from the ganymede.properties file
   
   public static String dbFilename = null;
@@ -1096,10 +1103,16 @@ public class Ganymede {
 				new timeOutTask(),
 				ts.l("registerTasks.idle_task"));
 
+    // register background memory status updater task
+
     scheduler.addPeriodicAction(new Date(System.currentTimeMillis() + 60000),
 				1,
 				new memoryStatusTask(),
 				ts.l("registerTasks.memory_status_task"));
+
+    // register garbage collection task without any schedule for
+    // execution.. this is so that the admin can launch it from the
+    // admin console
 
     scheduler.addActionOnDemand(new gcTask(),
 				ts.l("registerTasks.gc_task"));
@@ -1163,6 +1176,31 @@ public class Ganymede {
 	    scheduler.demandTask((String) builderTasks.elementAt(i), options);
 	  }
       }
+  }
+
+  static void registerSyncChannel(SyncRunner channel)
+  {
+    String channelName = channel.getName();
+
+    if (debug)
+      {
+	System.err.println(ts.l("registerSyncChannel.debug_register", channelName));
+      }
+
+    synchronized (syncRunners)
+      {
+	arlut.csd.Util.VectorUtils.unionAdd(syncRunners, channelName);
+      }
+  }
+
+  static void unregisterSyncChannel(String channelName)
+  {
+    if (debug)
+      {
+	System.err.println(ts.l("unregisterSyncChannel.debug_unregister", channelName));
+      }
+
+    syncRunners.removeElement(channelName); // sync'ed on builderTasks vector method
   }
 
   /**

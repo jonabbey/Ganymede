@@ -1396,6 +1396,7 @@ public class DBEditSet {
     /* -- */
 
     commit_persistTransaction(); // persist transaction to journal
+    commit_writeSyncChannels();	// send the object changes to our builder queues
     commit_logTransaction(fieldsTouched); // log and reabsorb objects
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
@@ -1426,6 +1427,26 @@ public class DBEditSet {
 								  ts.l("commit_persistTransaction.exception_text",
 								       ex.getMessage())));
       }
+  }
+
+  /**
+   * <p>This private helper method for commit() writes the transaction
+   * to all of the builder queue sync channels.</p>
+   */
+
+  private final void commit_writeSyncChannels() throws CommitFatalException
+  {
+    /*
+    try
+      {
+      }
+    catch (IOException ex)
+      {
+	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+								  ts.l("commit_writeSyncChannels.exception_text",
+								       ex.getMessage())));
+      }
+    */
   }
 
   /**

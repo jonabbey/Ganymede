@@ -163,6 +163,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
     /* -- */
 
+    /*
     if (original != null)
       {
 	origName = (String) original.getFieldValueLocal(SchemaConstants.SyncChannelName);
@@ -234,6 +235,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	    Ganymede.registerBuilderTask(taskName);
 	  }
       }
+    */
   }
 
 }

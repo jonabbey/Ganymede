@@ -2118,7 +2118,7 @@ public final class DBStore implements JythonMap {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Sync Channel";
-	b.classname = "arlut.csd.ganymede.server.taskCustom";
+	b.classname = "arlut.csd.ganymede.server.syncChannelCustom";
 	b.type_code = (short) SchemaConstants.SyncChannelBase; // 7
 
 	adminCategory.addNodeAfter(b, null); // add it to the end is ok
@@ -2128,7 +2128,7 @@ public final class DBStore implements JythonMap {
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
 	bf.loading = true;
-	bf.setNameSpace("syncchannel");
+	bf.setNameSpace("buildertask");	// same namespace as tasks
 	bf.loading = false;
 	b.addFieldToEnd(bf);
 

@@ -62,6 +62,9 @@ import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.TranslationService;
 
+import java.io.File;
+import java.io.IOException;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                       SyncRunner
@@ -84,6 +87,8 @@ public class SyncRunner implements Runnable {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.SyncRunner");
+
+  private static Runtime runtime = null;
 
   // ---
 
