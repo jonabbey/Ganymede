@@ -5,7 +5,7 @@
    A Dialog to open an object from the database for a variety of operations.
    
    Created: 31 October 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -370,7 +370,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
 	if ((string == null) || (string.equals("")))
 	  {
-	    client.setStatus("You are going to have to do better than that.");
+	    client.setStatus("Error, I need to have a name of an object to work with.");
 	    return;
 	  }
 
@@ -401,8 +401,6 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		pane.setBorder(new TitledBorder("Matching objects"));
 	      }
 
-	    client.setStatus("Searching for objects begining with " + string);
-	    
 	    if (type == null)
 	      {
 		System.out.println("edit object type = null");
@@ -428,6 +426,8 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		  {
 		    System.out.println("Trying exact match...");
 		  }
+
+		client.setStatus("Searching for object named " + string);
 
 		edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 
@@ -458,6 +458,8 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		      {
 			System.out.println("Looking for Startswith...");
 		      }
+
+		    client.setStatus("Searching for objects beginning with " + string);
 
 		    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  
 		    edit_query = null;
