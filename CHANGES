@@ -302,22 +302,22 @@ than depending on an external rmiregistry support process.  This
 simplifies the startup and shutdown of the Ganymede server, as well as
 operational usage generally.
 
-18. [XML] The namespace element now requires a mandatory case-sensitive attribute
+18. [XML] Improvements to namespace handling in <ganyschema>
 
 In some testing we were doing, we got surprised at the case
 sensitivity of namespaces that we were creating with the xmlclient.
 The surprise was that by default, namespaces created are
 case-insensitive.  To be fair, our documentation said this, but it was
 just too easy to forget this when crafting xml test data.  To address
-this, we have made the system force the presence of the case-sensitive
-attribute on <namespace> elements in the <ganyschema> section of the
-xmlclient input.
+this, we have made the system warn if the case-sensitive attribute is
+not present in <namespace>.
 
 Also, the Ganymede server now properly handles switching a namespace
-from case-sensitive to insensitive, or vice-vera, as needed, so long
-as collisions do not occur.  The admin console's schema editor still
-does not allow changing the case sensitivity of a namespace, but the
-xmlclient may be used to do this.
+from case-sensitive to insensitive, or vice-vera, as needed, and
+checks to amke sure that this redefinition operation can be done
+safely on the namespace-constrained data loaded in the server.  The
+admin console's schema editor still does not allow changing the case
+sensitivity of a namespace, but the xmlclient may be used to do this.
 
 19. [SERVER] Fixed a bug that made newly define object types inaccessible
 
@@ -331,6 +331,51 @@ lot of object types through the schema editor without subsequently
 shutting down and restarting the server.
 
 Gotta love really exercising old code paths in relatively new ways.
+
+20. [CLIENT,SERVER,userKit] Scalability work
+
+Lots of work on increasing the scalability of the Ganymede server and
+client.  At the time of this writing, we've tested the userKit to a
+loading of 50,000 users and 50,000 groups, perhaps 1.5 million data
+items, with a nominal memory usage of around 120 megabytes on the
+server.  In order to get there, we had to fix some poor algorithmic
+choices in certain points in the Ganymede server.  This included a
+complete cut over from using the old cheapo QuickSort implementation I
+slapped together in a day from someone's online course notes to using
+the java.util.Arrays sort algorithm that came in Java 1.2.
+
+I also fixed a bug in the userKit userCustom.java class that made it
+do about a bazillion times more work than it should have when doing
+processing, thanks to a failure to set and retain the schemaConfStamp
+time stamp variable properly.
+
+The Ganymede transaction logging system is now very much more
+efficient as well.  Previously, all events that needed to be logged in
+conjunction with a transaction would be assembled into a Vector of
+DBLogEvent objects before any events were logged to disk.  Now, the
+transaction commit logic streams these log events to the logging
+system as they are generated, so that garbage collection can occur
+during the logging process.  This should help reduce memory loading on
+very large transactions.
+
+Made some improvements in the XML import logic to intern commonly
+occuring strings, again to reduce memory usage.
+
+21. [CLIENT,SERVER] Invid redefined, private constructors, InvidPool
+
+The Ganymede object id pointer class, arlut.csd.ganymede.common.Invid,
+has been modified slightly to make its constructors private, in order
+to force wanting to create Invids to go through the Invid class'
+static factory method, createInvid().  The purpose of this is to allow
+for intelligent re-use of Invid objects on the server, so that the
+server will only need to keep one copy of any given Invid.  This has
+an effect similar to the interning that the Ganymede server has always
+done when loading strings from its database, and should help lower the
+server's memory usage a bit on large datasets.
+
+In addition, an InvidPool has been implemented on the server, which
+uses a hashing SoftReference data structure to efficiently implement
+Invid interning.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
