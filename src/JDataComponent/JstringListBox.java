@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.5 $ %D%
+ Version: $Revision: 1.6 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -112,7 +112,10 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 
   public void setCallback(JsetValueCallback parent)
   {
-    System.out.println("Setting callback in JstringListBox");
+    if (debug)
+      {
+	System.out.println("Setting callback in JstringListBox");
+      }
 
     if (parent == null)
       {
@@ -278,7 +281,10 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
       }
     else
       {
-	System.out.println("allowCallback = false");
+	if (debug)
+	  {
+	    System.out.println("allowCallback = false");
+	  }
       }
   }
 }
