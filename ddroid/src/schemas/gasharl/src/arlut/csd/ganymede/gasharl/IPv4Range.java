@@ -4,7 +4,7 @@
    IPv4Range.java
 
    Created: 4 April 2001
-   Version: $Revision: 1.10 $
+   Version: $Revision$
    Last Mod Date: $Date$
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 

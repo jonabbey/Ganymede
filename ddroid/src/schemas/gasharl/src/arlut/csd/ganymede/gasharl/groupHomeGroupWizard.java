@@ -5,7 +5,7 @@
   A wizard to allow deletion of a user's home group from the group edit window.
 
   Created: 8 April 1998
-  Version: $Revision: 1.8 $ %D%
+  Version: $Revision$ %D%
   Module by: Mike Mulvaney
 
    -----------------------------------------------------------------------
