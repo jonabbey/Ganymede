@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1213,7 +1213,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   void updateTimeStamp()
   {
-    lastChange.setTime(Date.currentTimeMilis());
+    lastChange.setTime(System.currentTimeMillis());
+  }
+
+  public Date getTimeStamp()
+  {
+    return lastChange;
   }
 
   // the following methods are used to manage locks on this base
