@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,12 +28,13 @@ import gjt.Box;
 import gjt.RowLayout;
 import jdj.*;
 
+import arlut.csd.JDialog.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.DataComponent.*;
 import arlut.csd.ganymede.*;
 import arlut.csd.ganymede.client.*;
 import arlut.csd.Tree.*;
-import arlut.csd.Dialog.*;
+//import arlut.csd.Dialog.*;
 import arlut.csd.Util.*;
 
 import com.sun.java.swing.*;
@@ -46,11 +47,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   //containerPanel _cPanel;
   //Panel centerPanel;
 
+  boolean
+    somethingChanged = false;
+
   Image images[];
 
-  JButton commit;
-  JButton cancel;
+  JButton 
+    commit,
+    cancel;
   
+  TextField
+    statusLabel;
+
   treeControl tree;
 
   windowPanel
@@ -122,9 +130,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // Window list menu
     windowMenu = new Menu("Windows");
-    
+
     // Look and Feel menu
-    LandFMenu = new Menu("Look and Feel");
+    LandFMenu = new Menu("Look");
     roseMI = new MenuItem("Rose");
     roseMI.addActionListener(this);
     win95MI = new MenuItem("Win95");
@@ -136,7 +144,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     menubar.add(LandFMenu);
     menubar.add(windowMenu);
     this.setMenuBar(menubar);
-    
+
+
+
     //centerPanel.propagateInvalidate();
 
     createMI = new MenuItem("Create");
@@ -190,7 +200,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // The right panel which will contain the windowPanel
 
-    Panel rightP = new Panel();
+    JPanel rightP = new JPanel();
 
     rightP.setLayout(new BorderLayout());
 
@@ -209,7 +219,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     leftButtonP.setLayout(new RowLayout());
     rightButtonP.setLayout(new RowLayout());
     // Taskbar to track windows
-    WindowBar windowBar = new WindowBar(wp, rightButtonP);
+    WindowBar windowBar = new WindowBar(wp, rightP);
     wp.addWindowBar(windowBar);
 
     commit = new JButton("Commit");
@@ -226,6 +236,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    
     add("Center",rightP);
 
+    JPanel statusBar = new JPanel();
+    statusBar.setLayout(new BorderLayout());
+    statusLabel = new TextField();
+    statusLabel.setEditable(false);
+    statusBar.add("West", new JLabel("Status:"));
+    statusBar.add("Center", statusLabel);
+    add("South", statusBar);
+
+    statusLabel.setText("Starting up");
+
     try
       {
 	session.openTransaction();
@@ -238,6 +258,45 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     setSize(800, 600);
     show();
   }
+
+  /**
+   * Change the text in the status bar
+   *
+   * @param status The text to display
+   */
+  public void setStatus(String status)
+    {
+      statusLabel.setText(status);
+      statusLabel.repaint();
+    }
+
+  /**
+   * Get the status line for the window
+   */
+  public String getStatus()
+    {
+      return statusLabel.getText();
+    }
+
+  /**
+   * Set the look and feel for the window
+   *
+   * @param look path to UIFactory
+   */
+  public void setLook(String look)
+    {
+      try
+	{
+	  UIManager.setUIFactory(look, this);
+	}
+      catch (ClassNotFoundException ex)
+	{
+	  System.out.println("Could not load Rose: " + ex);
+	}
+	  
+    }
+
+  // Private methods
 
   void buildTree()
     {
@@ -313,6 +372,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	//Now get all the children
 	_query = new Query(base.getTypeID());
+	node.setQuery(_query);
       }
     catch (RemoteException rx)
       {
@@ -453,8 +513,88 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	tree.refresh();
       }
   }
+  /*
+  JMenuBar createMenuBar()
+    {
+      JMenuBar menuBar = new JMenuBar();
+      JMenuItem mi;
 
+      JMenu file = (JMenu)menuBar.add(new JMenu("File"));
+      mi = (JMenuItem)file.add(new JMenuItem("Close All Windows"));
+      mi.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) 
+	  {
+	    wp.closeAll();
+	  }
 
+      });
+      mi.add(new JSeparator());
+
+      mi = (JMenuItem)file.add(new JMenuItem("Logout"));
+      mi.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e)
+	  {
+	    logout();
+	  }
+      });
+
+      // Now the Look and Feel menu
+      JMenu LandF = (JMenu)menuBar.add(new JMenu("Look"));
+      mi = (JMenuItem)file.add(new JMenuItem("Rose"));
+      mi.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e)
+	  {
+	    setLook("com.sun.java.swing.rose.RoseFactory");
+	  }
+      });
+      mi = (JMenuItem)file.add(new JMenuItem("Basic"));
+
+      mi.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e)
+	  {
+	    setLook("com.sun.java.swing.basic.Basic.Factory");
+	  }
+      });
+	
+      return menuBar;
+    }
+    */
+  void logout()
+    {
+
+      try
+	{
+	  session.logout();
+	  this.dispose();
+	  _myglogin.connector.setEnabled(true);
+	  _myglogin._quitButton.setEnabled(true);
+	}
+      catch (RemoteException rx)
+	{
+	  throw new IllegalArgumentException("could not logout: " + rx);
+	}
+    }
+
+  boolean OKToProceed()
+    {
+      if (somethingChanged)
+	{
+	  StringDialog dialog = new StringDialog(this, 
+						 "Warning: changes have been made",
+						 "You have made changes in objects without \ncommiting those changes.  If you continue, \nthose changes will be lost",
+						 "Continue",
+						 "Cancel");
+	  // if DialogShow is null, cancel was clicked
+	  // So return will be false if cancel was clicked
+	  return (dialog.DialogShow() != null);
+	  
+	}
+      else
+	{
+	  return true;
+	}
+
+    }
   // ActionListener Methods
 
   
@@ -467,6 +607,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    {
 	      wp.closeEditables();
 	      session.abortTransaction();
+	      somethingChanged = false;
 	      session.openTransaction();
 	    }
 	  catch (RemoteException rx)
@@ -479,12 +620,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  System.out.println("commit button clicked");
 	  try
 	    {
+	      this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	      wp.closeEditables();
+	      somethingChanged = false;
 	      session.commitTransaction();
+	      wp.refreshTableWindows();
 	      session.openTransaction();
 
 	      refreshTree();
 	      System.out.println("Done committing");
+	      this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
 	    }
 	  catch (RemoteException rx)
 	    {
@@ -493,27 +639,42 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	}
       else if (event.getSource() == removeAllMI)
 	{
-	  wp.closeAll();
+	  if (OKToProceed())
+	    {
+	      wp.closeAll();
+	    }
 	}
       else if (event.getSource() == logoutMI)
 	{
-	  try
+	  if (OKToProceed())
 	    {
-	      session.logout();
-	      this.dispose();
-	      _myglogin.connector.setEnabled(true);
-	      _myglogin._quitButton.setEnabled(true);
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new IllegalArgumentException("could not logout: " + rx);
+
+	      logout();
+	      /*
+	      try
+		{
+		  session.logout();
+		  this.dispose();
+		  _myglogin.connector.setEnabled(true);
+		  _myglogin._quitButton.setEnabled(true);
+		}
+	      catch (RemoteException rx)
+		{
+		  throw new IllegalArgumentException("could not logout: " + rx);
+		}*/
 	    }
 	}
       else if (event.getSource() == roseMI)
 	{
 	  try
 	    {
+	      setStatus("Switching to Rose look and feel");
+	      this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	      UIManager.setUIFactory("com.sun.java.swing.rose.RoseFactory", this);
+	      this.invalidate();
+	      this.validate();
+	      this.repaint();
+	      this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	    }
 	  catch (ClassNotFoundException ex)
 	    {
@@ -523,7 +684,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	}
       else if (event.getSource() == win95MI)
 	{
-
+	  setStatus("Switching to win95 look and feel");
 	  try
 	    {
 	      UIManager.setUIFactory("com.sun.java.swing.basic.BasicFactory", this);
@@ -597,8 +758,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		  }
 		else
 		  {
-		    
-		    wp.addTableWindow(session, results, "Query Results");
+		    wp.addTableWindow(session, baseN.getQuery(), results, "Query Results");
 		  }
 	      }
 	    catch (RemoteException rx)
@@ -700,6 +860,7 @@ class ObjectNode extends arlut.csd.Tree.treeNode {
       return object;
     }
 
+  // Can't think of why you would ever want this
   public void setObject(db_object object)
     {
       this.object = object;
@@ -710,7 +871,7 @@ class ObjectNode extends arlut.csd.Tree.treeNode {
 
 
 /*------------------------------------------------------------------------------
-                                                                           class
+                                                                           Class
                                                                         BaseNode
 
 v------------------------------------------------------------------------------*/
@@ -718,6 +879,7 @@ v------------------------------------------------------------------------------*
 class BaseNode extends arlut.csd.Tree.treeNode {
 
   private Base base;
+  private Query query;
 
   /* -- */
 
@@ -726,6 +888,7 @@ class BaseNode extends arlut.csd.Tree.treeNode {
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.base = base;
+
   }
 
   public Base getBase()
@@ -737,5 +900,16 @@ class BaseNode extends arlut.csd.Tree.treeNode {
   {
     this.base = base;
   }
+
+  public void setQuery(Query query)
+    {
+      this.query = query;
+    }
+
+  public Query getQuery()
+    {
+      return query;
+    }
+
 }
 
