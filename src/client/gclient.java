@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -75,7 +75,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   Session session;
   glogin _myglogin;
 
-  Hashtable
+  private Hashtable
     baseHash = null,	             // used to reduce the time required to get listings
                                      // of bases and fields.. keys are Bases, values
 		      	             // are vectors of fields
@@ -83,7 +83,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     deleteHash = new Hashtable(),    // Hash of objects waiting to be deleted
     createHash = new Hashtable();    // Hash of objects waiting to be created
                                      // Create and Delete are pending on the Commit button. 
-    
+   
+  Loader 
+    loader;      // Use this to do start up stuff in a thread
+  
   boolean
     somethingChanged = false;
 
@@ -93,7 +96,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     commit,
     cancel;
   
-  JLabel
+  JTextField
     statusLabel;
 
   JSplitPane
@@ -153,7 +156,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   Menu 
     windowMenu,
     fileMenu,
-    LandFMenu;
+    LandFMenu,
+    PersonaMenu;
+
+  PersonaListener
+    personaListener;
 
   WindowBar
     windowBar;
@@ -294,9 +301,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     BorderLayout layout = new BorderLayout();
     setLayout( layout );
 
+    if (debug)
+      {
+	System.out.println("Creating menu bar");
+      }
+
     // Make the menu bar
-    menubar = new MenuBar();
-    
+    menubar = new MenuBar();    
 
     // File menu
     fileMenu = new Menu("File");
@@ -335,9 +346,31 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     LandFMenu.add(roseMI);
     LandFMenu.add(win95MI);
 
+    // Personae menu
+    PersonaMenu = new Menu("Persona");
+    personaListener = new PersonaListener(session);
+    try
+      {
+	Vector personae = session.getPersonae();
+	if (personae != null)
+	  {
+	    for (int i = 0; i < personae.size(); i++)
+	      {
+		MenuItem mi = new MenuItem((String)personae.elementAt(i));
+		mi.addActionListener(personaListener);
+		PersonaMenu.add(mi);
+	      }
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not load personas: " + rx);
+      }
+
     menubar.add(fileMenu);
     menubar.add(LandFMenu);
     menubar.add(windowMenu);
+    menubar.add(PersonaMenu);
     this.setMenuBar(menubar);
 
     createMI = new MenuItem("Create");
@@ -347,6 +380,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     pMenu.add(viewMI);
     pMenu.add(createMI);
     pMenu.add(queryMI);
+
+    if (debug)
+      {
+	System.out.println("Loading images for tree");
+      }
 
     Image openFolder = PackageResources.getImageResource(this, "openfolder.gif", getClass());
     Image closedFolder = PackageResources.getImageResource(this, "folder.gif", getClass());
@@ -379,7 +417,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     
     images[OPEN_CAT] = redOpenFolder;
     images[CLOSED_CAT] = redClosedFolder;
-    
+
+
+    // What is this for?
     for (int j = 0; j < 3; j++)
       {
 	if (images[j] == null)
@@ -393,6 +433,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 			   null);
 
     tree.setMinimumWidth(200);
+
+    if (debug)
+      {
+	System.out.println("Adding left and right panels");
+      }
 
     //    Box leftBox = new Box(tree, "Objects");
     JBufferedPane leftP = new JBufferedPane(false);
@@ -416,6 +461,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     leftP.add("North", leftBorder);
 
+    if (debug)
+      {
+	System.out.println("Creating pop up menus");
+      }
+
     objectPM = new treeMenu();
     objViewMI = new MenuItem("View Object");
     objEditMI = new MenuItem("Edit Object");
@@ -428,15 +478,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     objectPM.add(objCloneMI);
     objectPM.add(objInactivateMI);
     objectPM.add(objDeleteMI);
-
-    try
-      {
-	loadBaseHash();
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote exception in loadBaseHash: " + ex);
-      }
 
     try
       {
@@ -515,27 +556,35 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     bottomBar.setForeground(ClientColor.menuText);
     bottomBar.setLayout(new BorderLayout());
 
-    JBorderedPane statusBorder = new JBorderedPane(BorderFactory.createBezelBorder(1));
+    JBorderedPane statusBorder = new JBorderedPane(BorderFactory.createGroovedBorder());
     statusBorder.setLayout(new BorderLayout());
+    JBufferedPane statusPane = new JBufferedPane(new BorderLayout());
+    statusPane.setInsets(new Insets(5,5,5,5));
 
-    statusLabel = new JLabel();
+    statusPane.setBackground(ClientColor.menu);
+    statusPane.setForeground(ClientColor.menuText);
+
+    statusLabel = new JTextField();
     statusLabel.setBackground(ClientColor.menu);
     statusLabel.setForeground(ClientColor.menuText);
-    statusLabel.setInsets(new Insets(5,5,5,5));
+    //statusLabel.setInsets(new Insets(5,5,5,5));
 
-    statusBorder.add("Center", statusLabel);
+    statusPane.add("Center", statusLabel);
+    statusBorder.add("Center", statusPane);
 
     JLabel l = new JLabel("Status: ");
     l.setBackground(ClientColor.menu);
     l.setForeground(ClientColor.menuText);
-    l.setInsets(new Insets(5,5,5,5));
+    //l.setInsets(new Insets(5,5,5,5));
+    JBufferedPane lPane = new JBufferedPane(new BorderLayout());
+    lPane.add("Center", l);
+    lPane.setInsets(new Insets(5,5,5,5));
 
-
-    JBorderedPane labelBorder = new JBorderedPane(BorderFactory.createBezelBorder(1));
+    JBorderedPane labelBorder = new JBorderedPane(BorderFactory.createGroovedBorder());
     labelBorder.setLayout(new BorderLayout());
-    labelBorder.add("Center", l);
+    labelBorder.add("Center", lPane);
 
-    bottomBar.add("West", l);
+    bottomBar.add("West", labelBorder);
     bottomBar.add("Center", statusBorder);
     add("South", bottomBar);
 
@@ -551,6 +600,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
 
     timer.start();
+
+    loader = new Loader(session);
+    loader.start()
+;
     pack();
     setSize(800, 600);
     show();
@@ -563,6 +616,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   public Session getSession()
   {
     return session;
+  }
+  
+  /**
+   * Returns the base hash.
+   *
+   * Checks to see if the baseHash was loaded, and if not, it loads it.
+   *
+   */
+
+  public Hashtable getBaseHash()
+  {
+    if (baseHash == null)
+      {
+	baseHash = loader.getBaseHash();
+      }
+
+    return baseHash;
   }
 
   /**
@@ -578,7 +648,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	System.out.println("Setting status: " + status);
       }
     statusLabel.setText(status);
-    statusLabel.repaint();
   }
 
   /**
@@ -610,41 +679,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   // Private methods
 
-  /**
-   *
-   * loadBaseHash is used to prepare a hash table mapping Bases to
-   * Vector's of BaseField.. this is used to allow different pieces
-   * of client-side code to get access to the Base/BaseField information,
-   * which changes infrequently (not at all?) while the client is
-   * connected.. the perm_editor panel created by the windowPanel class
-   * benefits from this, as does buildTree() below. 
-   *
-   */
-
-  void loadBaseHash() throws RemoteException
-  {
-    Base base;
-    Vector typesV;
-
-    /* -- */
-
-    typesV = session.getTypes();
-
-    if (baseHash != null)
-      {
-	baseHash.clear();
-      }
-    else
-      {
-	baseHash = new Hashtable(typesV.size());
-      }
-    
-    for (int i = 0; i < typesV.size(); i++)
-      {
-	base = (Base) typesV.elementAt(i);
-	baseHash.put(base, base.getFields());
-      }
-  }
 
   /**
    * This clears out the tree and completely rebuilds it.
@@ -1066,53 +1100,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
-  /*
-  JMenuBar createMenuBar()
-    {
-      JMenuBar menuBar = new JMenuBar();
-      JMenuItem mi;
-
-      JMenu file = (JMenu)menuBar.add(new JMenu("File"));
-      mi = (JMenuItem)file.add(new JMenuItem("Close All Windows"));
-      mi.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) 
-	  {
-	    wp.closeAll();
-	  }
-
-      });
-      mi.add(new JSeparator());
-
-      mi = (JMenuItem)file.add(new JMenuItem("Logout"));
-      mi.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e)
-	  {
-	    logout();
-	  }
-      });
-
-      // Now the Look and Feel menu
-      JMenu LandF = (JMenu)menuBar.add(new JMenu("Look"));
-      mi = (JMenuItem)file.add(new JMenuItem("Rose"));
-      mi.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e)
-	  {
-	    setLook("com.sun.java.swing.rose.RoseFactory");
-	  }
-      });
-      mi = (JMenuItem)file.add(new JMenuItem("Basic"));
-
-      mi.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e)
-	  {
-	    setLook("com.sun.java.swing.basic.Basic.Factory");
-	  }
-      });
-	
-      return menuBar;
-    }
-    */
-
   void logout()
   {
     try
@@ -1155,6 +1142,33 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
+  void updateNotePanels()
+  {
+    Vector windows = wp.getEditables();
+    for (int i = 0; i < windows.size(); i++)
+      {
+	framePanel fp = (framePanel)windows.elementAt(i);
+	if (fp == null)
+	  {
+	    System.out.println("null frame panel in updateNotesPanels");
+	  }
+	else
+	  {
+	    notesPanel np = fp.getNotesPanel();
+	    if (np == null)
+	      {
+		System.out.println("null notes panel in frame panel");
+	      }
+	    else
+	      {
+		np.updateNotes();
+	      }
+	  }
+
+      }
+
+
+  }
   // ActionListener Methods
   
   public void actionPerformed(java.awt.event.ActionEvent event)
@@ -1183,8 +1197,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	try
 	  {
 	    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-	    // Update all the note panels here
-
+	    updateNotePanels();
+	    
 	    wp.closeEditables();
 	    somethingChanged = false;
 	    session.commitTransaction();
@@ -1212,6 +1226,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else if (event.getSource() == menubarQueryMI)
       {
+	if (baseHash == null)
+	  {
+	    baseHash = loader.getBaseHash();
+	  }
+
 	querybox box = new querybox(baseHash, this, "Query Panel");
 	Query q = box.myshow();
 
@@ -1298,6 +1317,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    System.out.println("Could not load basic factory: " + ex);
 	  }
       }
+
     else
       {
 	System.err.println("Unknown action event generated");
@@ -1435,6 +1455,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	if (node instanceof BaseNode)
 	  {
+	    if (baseHash == null)
+	      {
+		baseHash = loader.getBaseHash();
+	      }
+
 	    Base base = ((BaseNode) node).getBase();
 
 	    querybox box = new querybox(base, baseHash, this, "Query Panel");
@@ -1638,4 +1663,32 @@ class BaseNode extends arlut.csd.Tree.treeNode {
     loaded = false;
   }
   
+}
+
+class PersonaListener implements ActionListener{
+
+  Session session;
+
+  PersonaListener(Session session)
+    {
+      this.session = session;
+    }
+
+  public void actionPerformed(ActionEvent event)
+    {
+      
+      System.out.println("MenuItem action command: " + event.getActionCommand());
+      try
+	{
+	  String password = new String("heya");
+	  session.selectPersona(event.getActionCommand(), password);
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not set persona to " + event.getActionCommand() + ": " + rx);
+	}
+      
+
+    }
+
 }
