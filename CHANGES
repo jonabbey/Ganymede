@@ -1,7 +1,19 @@
-Ganymede Release 1.04
-July 9, 2001
+Ganymede Release 1.0.5
+July ??, 2001
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.04 to 1.05 -------------------
+
+RELEASE DATE: July ??, 2001
+
+1. [DISTRIB] Fixed a number of bugs for 1.4
+
+Fixed a few places that assumed SimpleTimeZone.getDefault()
+would return an object of class SimpleTimeZone.
+
+Fixed the jar packaging to satisfy Java 1.4's slightly pickier
+serialization logic.
 
 -------------------- Changes from 1.03 to 1.04 -------------------
 

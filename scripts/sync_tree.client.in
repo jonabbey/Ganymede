@@ -2,8 +2,8 @@
 #
 # sync_tree.client
 #
-# $Revision: 1.9 $
-# $Date: 2000/09/17 10:05:54 $
+# $Revision: 1.10 $
+# $Date: 2001/07/14 02:03:31 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -34,10 +34,12 @@
 		     "FileReceiver",
 
 		     # things the client doesn't really need to use,
-		     # but needs so it can tell what the server
-		     # object expects.
+		     # but needs so it can handle deserialization of
+		     # objects which reference them
 
 		     "adminSession", "Admin", "SchemaEdit",
+		     "DBBaseCategory", "DBObjectBase", "DBObject",
+		     "GanymedeSession",
 
 		     # query stuff
 
