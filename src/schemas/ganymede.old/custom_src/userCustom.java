@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -808,6 +808,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
   }
 
+  /**
+   *
+   * This method is called after the set value operation has been ok'ed
+   * by any appropriate wizard code.
+   *
+   */
+
   public synchronized boolean finalizeSetValue(DBField field, Object value)
   {
     InvidDBField inv;
@@ -820,6 +827,40 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     boolean okay = true;
 
     /* -- */
+
+    // we don't want to allow the home directory to be changed
+    // except by when the username field is being changed.
+
+    if (field.getID() == HOMEDIR)
+      {
+	String dir = (String) value;
+
+	/* -- */
+
+	sf = (StringDBField) getField(USERNAME);
+
+	if (sf != null)
+	  {
+	    if (sf.getNewValue() != null)
+	      {
+		String expected = "/home/" + (String) sf.getNewValue();
+
+		if (dir.equals(expected))
+		  {
+		    return true;
+		  }
+		else
+		  {
+		    return false;
+		  }
+	      }
+	  }
+
+	return false;
+      }
+
+    // when we rename a user, we have lots to do.. a number of other
+    // fields in this object and others need to be updated to match.
 
     if (field.getID() == USERNAME)
       {
@@ -851,6 +892,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		sf.setValue(value);	// set the signature alias to the user's new name
 	      }
 	  }
+
+	sf = (StringDBField) getField(HOMEDIR);
+
+	sf.setValue("/home/" + (String) value);	// ** ARL
 
 	inv = (InvidDBField) getField(PERSONAE);
 	
