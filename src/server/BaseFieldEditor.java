@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -325,7 +325,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	setRowVisible(falseLabelS, false);
       }
 
-    setRowVisible(multiLineCF, stringShowing);
+    setRowVisible(multiLineCF, stringShowing  && !vectorCF.isSelected());
     setRowVisible(OKCharS, stringShowing || passwordShowing);
     setRowVisible(BadCharS, stringShowing || passwordShowing);
     setRowVisible(minLengthN, stringShowing || passwordShowing);
@@ -1320,7 +1320,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    if (debug)
 	      {
-		System.out.println("multiLineCF");
+		System.out.println("multiLineCF: " + multiLineCF.isSelected());
 	      }
 
 	    fieldDef.setMultiLine(multiLineCF.isSelected());
