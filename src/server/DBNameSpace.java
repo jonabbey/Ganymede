@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2000/10/02 22:00:19 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2000/10/06 02:38:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -277,7 +277,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   /**
    *
-   * Turns case sensitivity on/off.  If b is true, case is be
+   * Turns case sensitivity on/off.  If b is true, case will be
    * disregarded in comparing entries in namespace managed fields.
    *
    * @see arlut.csd.ganymede.NameSpace 
@@ -295,6 +295,8 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     // over the old hashtable entries.. this loop should check for
     // membership before inserting a new value in the case that
     // we are changing from case insensitivity to case sensitivity
+
+    // right now, of course, we do none of this
 
     caseInsensitive = b;
   }
@@ -463,7 +465,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	    handle.shadowField = field;
 
 	    // we don't have to make a note in reserved since
-	    // we already have this value noted in the editset?
+	    // we already have this value noted in the editset
 	  }
       }
     else
@@ -844,6 +846,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     if (point == null)
       {
 	System.err.println("DBNameSpace.popCheckpoint: couldn't find checkpoint for " + name);
+	System.err.println("In transaction " + editSet.description);
 	System.err.println("\nCurrently registered checkpoints:");
 	System.err.println(transpoints.toString());
       }
@@ -893,6 +896,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     if (point == null)
       {
 	System.err.println("DBNameSpace.rollback(): couldn't find checkpoint for " + name);
+	System.err.println("In transaction " + editSet.description);
 	System.err.println("\nCurrently registered checkpoints:");
 	System.err.println(transpoints.toString());
 	return false;
@@ -911,6 +915,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	if (point.values.size() != 0)
 	  {
 	    System.err.println("DBNameSpace.rollback(): In editSet: " + editSet.description);
+	    System.err.println("In transaction " + editSet.description);
 	    System.err.println("DBNameSpace.rollback(): no values held for transaction in namespace");
 	    return false;
 	  }
@@ -947,8 +952,16 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	    
 	    if (handle1.original)
 	      {
-		handle1.owner = null;
+		// remember, shadowField is just for our use while
+		// we're manipulating a namespace allocation within a
+		// transaction.  we're not screwing with handle.field
+		// here, which is still left standing so that the
+		// namespace-optimized query mechanism in
+		// GanymedeSession can track down the field bound to
+		// the namespace value.
+
 		handle1.shadowField = null;
+		handle1.owner = null;
 		handle1.inuse = true;
 	      }
 	    else

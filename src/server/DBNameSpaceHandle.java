@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:05:35 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/10/06 02:38:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -61,17 +61,14 @@ import java.rmi.server.Unreferenced;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * <p>This class is intended to be the targets of elements of a name
  * space's unique value hash.  The fields in this class are used to
  * keep track of who currently 'owns' a given value, and whether or not
  * there is actually any field in the namespace that really contains
  * that value.</p>
  *
- *
  * <p>This class will be manipulated by the DBNameSpace class and by the
  * DBEditObject class.</p>
- *
  */
 
 class DBNameSpaceHandle {
@@ -99,7 +96,6 @@ class DBNameSpaceHandle {
   /**
    * so the namespace hash can be used as an index
    * field always points to the field that contained
-   * field always points to the field that contained
    * this value at the time this field was last
    * committed in a transaction
    */
@@ -107,9 +103,12 @@ class DBNameSpaceHandle {
   DBField field;
 
   /**
-   * if this handle is currently being edited
-   * by an editset, shadowField points to the
-   * new field
+   * if this handle is currently being edited by an editset,
+   * shadowField points to the field in the transaction that contains
+   * this value.  If the transaction is committed, the DBField pointer
+   * in shadowField will be transferred to field.  If this value is
+   * not being manipulated by a transaction, shadowField will be equal
+   * to null.
    */
 
   DBField shadowField;

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/02/10 04:35:39 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/10/06 02:38:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -199,7 +199,12 @@ public class DBWriteLock extends DBLock {
 
 		String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
 
-		if (disabledMessage != null)
+		// if the server is in soon-to-be-shutdown mode, we'll
+		// go ahead and allow the transaction to complete.  if
+		// the server is in schema edit mode, or for some
+		// other reason is refusing logins, we won't.
+
+		if (disabledMessage != null && !disabledMessage.equals("shutdown"))
 		  {
 		    throw new InterruptedException(disabledMessage); // finally will clean up
 		  }
