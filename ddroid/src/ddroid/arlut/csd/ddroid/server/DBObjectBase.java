@@ -1306,7 +1306,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	return retVal;
       }
 
-    retval = setClassOptionString(_classOptionStr);
+    retVal = setClassOptionString(_classOptionStr);
 
     if (retVal != null && !retVal.didSucceed())
       {
