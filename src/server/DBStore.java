@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -540,13 +540,14 @@ public class DBStore {
 	    base = (DBObjectBase) basesEnum.nextElement();
 
 	    if (base.type_code == SchemaConstants.OwnerBase ||
-		 base.type_code == SchemaConstants.PersonaBase)
+		 base.type_code == SchemaConstants.PersonaBase ||
+		 base.type_code == SchemaConstants.PermBase)
 	      {
 		base.emit(out, true); // gotta retain admin login ability
 	      }
 	    else
 	      {
-		base.emit(out, false);
+		base.emit(out, false); // just write out the schema info
 	      }
 	  } 
 
@@ -1134,6 +1135,7 @@ public class DBStore {
     InvidDBField i;
     BooleanDBField b;
     DBSession session;
+    PermissionMatrixDBField pm;
     
     /* -- */
 
@@ -1181,6 +1183,22 @@ public class DBStore {
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
     b.setValue(new Boolean(false));
+
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase); // create SchemaConstants.PermDefaultObj
+
+    s = (StringDBField) eO.getField(SchemaConstants.PermName);
+    s.setValue("Default");
+
+    pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
+    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); // view users
+
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase); // create SchemaConstants.PermEndUserObj
+
+    s = (StringDBField) eO.getField(SchemaConstants.PermName);
+    s.setValue("End User");
+
+    pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
+    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); // view users
 
     session.commitTransaction();
   }
