@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.108 $ %D%
+   Version: $Revision: 1.109 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.108 $ %D%
+ * @version $Revision: 1.109 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -2054,7 +2054,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     result = new DumpResult(fieldDefs);
 
-    QueryResult temp_result = queryDispatch(query, false, false, null, null);
+    QueryResult temp_result = queryDispatch(query, false, false, rLock, null);
 
     // any associated queries?
 
@@ -2069,7 +2069,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    Query adjunctQuery = (Query) query.linkedQueries.elementAt(i);
 	    QueryResult adjunctResult = queryDispatch(adjunctQuery, false, false,
-						      null, null);
+						      rLock, null);
 
 	    if (debug)
 	      {
@@ -2088,6 +2088,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	  }
       }
+
+    session.releaseLock(rLock); // *sync* DBSession
 
     if (debug)
       {
