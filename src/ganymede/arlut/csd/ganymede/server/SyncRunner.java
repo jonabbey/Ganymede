@@ -616,6 +616,7 @@ public class SyncRunner implements Runnable {
   {
     int myTransactionNumber;
     String myName, myServiceProgram, invocation;
+    String shutdownState = null;
     File file;
 
     /* -- */
@@ -628,45 +629,72 @@ public class SyncRunner implements Runnable {
 	invocation = myServiceProgram + " " + String.valueOf(myTransactionNumber);
       }
 
-    // "SyncRunner {0} running"
-    Ganymede.debug(ts.l("run.running", myName));
+    // increment the shutdownSemaphore so that the system knows we are
+    // in the middle of running a critical task
 
-    if (getServiceProgram() != null)
+    try
       {
-	file = new File(getServiceProgram());
+	shutdownState = GanymedeServer.shutdownSemaphore.increment(0);
 
-	if (file.exists())
+	if (shutdownState != null)
 	  {
-	    if (runtime == null)
-	      {
-		runtime = Runtime.getRuntime();
-	      }
+	    // "Refusing to run Sync Channel {0}, due to shutdown condition: {1}"
+	    Ganymede.debug(ts.l("run.shutting_down", this.getName(), shutdownState));
+	    return;
+	  }
+      }
+    catch (InterruptedException ex)
+      {
+	// will never happen, since we are giving 0 to
+	// increment
+      }
 
-	    try
+    try
+      {
+	// "SyncRunner {0} running"
+	Ganymede.debug(ts.l("run.running", myName));
+
+	if (getServiceProgram() != null)
+	  {
+	    file = new File(getServiceProgram());
+	    
+	    if (file.exists())
 	      {
-		FileOps.runProcess(invocation);
+		if (runtime == null)
+		  {
+		    runtime = Runtime.getRuntime();
+		  }
+		
+		try
+		  {
+		    FileOps.runProcess(invocation);
+		  }
+		catch (IOException ex)
+		  {
+		    // "Couldn''t exec SyncRunner {0}''s service program "{1}" due to IOException: {2}"
+		    Ganymede.debug(ts.l("run.ioException", myName, myServiceProgram, ex));
+		  }
+		catch (InterruptedException ex)
+		  {
+		    // "Failure during exec of SyncRunner {0}''s service program "{1}""
+		    Ganymede.debug(ts.l("run.interrupted", myName, myServiceProgram));
+		  }
 	      }
-	    catch (IOException ex)
+	    else
 	      {
-		// "Couldn''t exec SyncRunner {0}''s service program "{1}" due to IOException: {2}"
-		Ganymede.debug(ts.l("run.ioException", myName, myServiceProgram, ex));
-	      }
-	    catch (InterruptedException ex)
-	      {
-		// "Failure during exec of SyncRunner {0}''s service program "{1}""
-		Ganymede.debug(ts.l("run.interrupted", myName, myServiceProgram));
+		// ""{0}" doesn''t exist, not running external service program for SyncRunner {1}"
+		Ganymede.debug(ts.l("run.nonesuch", myServiceProgram, myName));
 	      }
 	  }
 	else
 	  {
-	    // ""{0}" doesn''t exist, not running external service program for SyncRunner {1}"
-	    Ganymede.debug(ts.l("run.nonesuch", myServiceProgram, myName));
+	    // "No external service program defined for SyncRunner {0}, not servicing {0}!"
+	    Ganymede.debug(ts.l("run.undefined", myName));
 	  }
       }
-    else
+    finally
       {
-	// "No external service program defined for SyncRunner {0}, not servicing {0}!"
-	Ganymede.debug(ts.l("run.undefined", myName));
+	GanymedeServer.shutdownSemaphore.decrement();
       }
 
     // "SyncRunner {0} finished"
