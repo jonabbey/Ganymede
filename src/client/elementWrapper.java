@@ -1,12 +1,18 @@
-  /////////////////////////////////////////////////////////////////////////
+/*
 
-  /**
-   *  This class will be used as a wrapper for each of the elements in the
-   *  vector.  It contains plus and minus buttons that will allow a
-   *  component to be deleted or a component to be added to the vector being
-   *  displayed.
-   *
-   */ 
+   elementWrapper.java
+
+   This class will be used as a wrapper for each of the elements in
+   the vector.  It contains plus and minus buttons that will allow a
+   component to be deleted or a component to be added to the vector
+   being displayed.
+   
+   Created: 16 October 1997
+   Version: $Revision: 1.18 $ %D%
+   Module By: Michael Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
+
+*/
 
 package arlut.csd.ganymede.client;
 
@@ -18,6 +24,12 @@ import javax.swing.border.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.ganymede.*;
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                  elementWrapper
+
+------------------------------------------------------------------------------*/
+
 /**
  * Each object in a vector panel is wrapped in an elementWrapper.  This class
  * controls the expanding of the element, and the creation of the containerPanel
@@ -25,7 +37,6 @@ import arlut.csd.ganymede.*;
  */
 
 class elementWrapper extends JPanel implements ActionListener, MouseListener {
-
   
   boolean debug = false;
 
@@ -55,7 +66,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     loaded = false;
 
   long
-    lastClick = 0;  //Used to determine double clicks
+    lastClick = 0;  // Used to determine double clicks
+
+  /* -- */
 
   // class methods
 
@@ -109,7 +122,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	    title = new JLabel("Component");
 	  }
 	
-	
 	title.setForeground(Color.white);
 	title.addMouseListener(this);
 
@@ -123,6 +135,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	
 	buttonPanel.add("West", expand);
 	buttonPanel.add("Center", title);
+
 	if (editable)
 	  {
 	    buttonPanel.add("East",remove);
@@ -134,18 +147,17 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	  {
 	    buttonPanel.add("West", new JLabel(titleText));
 	  }
+
 	buttonPanel.add("Center", comp);
+
 	if (editable)
 	  {
 	    buttonPanel.add("East", remove);
 	  }
       }
 
-
     my_component = comp;
 
-      
-    //add("Center",my_component);
     add("North",buttonPanel);
   }
 
@@ -156,13 +168,12 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
   public Invid getObjectInvid()
   {
-    if (! (my_component instanceof containerPanel))
+    if (!(my_component instanceof containerPanel))
       {
 	return null;
       }
 
     return ((containerPanel)my_component).getObjectInvid();
-    
   }
 
   public void checkValidation()
@@ -206,30 +217,39 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
    *  Expand this element wrapper.
    *
    */
+
   public void open()
   {
-    if (! loaded)
+    if (my_component instanceof containerPanel)
       {
-	setStatus("Loading vector element.");
-	((containerPanel)my_component).load();
-	setStatus("Finished.");
-	add("Center", my_component);
-	loaded = true;
+	containerPanel myContainerPanel = (containerPanel) my_component;
+
+	if (!loaded)
+	  {
+	    setStatus("Loading vector element.");
+
+	    if (!myContainerPanel.isLoaded())
+	      {
+		myContainerPanel.load();
+	      }
+
+	    setStatus("Finished.");
+	    add("Center", my_component);
+	    loaded = true;
+	  }
       }
-    else
-      {
-	my_component.setVisible(true);
-      }
-    
+
+    my_component.setVisible(true);
+
     expand.setIcon(vp.wp.openIcon);
     expand.setToolTipText("Expand this element");
     expanded = true;
-
   }
 
   /**
    * Close this element wrapper.
    */
+
   public void close()
   {
     my_component.setVisible(false);	
@@ -243,9 +263,11 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
    *
    * If the elementWrapper is open, this will close it.  If it is closed, this will open it.  
    */
+
   public void toggle()
   {
     vp.wp.getgclient().setWaitCursor();
+
     if (debug)
       {
 	System.out.println("toggle().");
@@ -265,7 +287,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	open();
       }
 
-    if(debug)
+    if (debug)
       {
 	System.out.println("Done with toggle().");
       }
@@ -279,6 +301,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       {
 	System.out.println("Action performed: " + evt.getActionCommand());
       }
+
     if (evt.getSource() == remove) 
       {
 	JValueObject v = new JValueObject(this,"remove");
@@ -303,8 +326,8 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	toggle();
 	invalidate();
 	vp.container.frame.validate();
-
       }
+
     lastClick = e.getWhen();
   }
 
@@ -317,7 +340,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     vp.wp.getgclient().setStatus(status);
   }
-
 }
 
 
