@@ -1716,7 +1716,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     if (problem)
       {
 	// "Possible Clone Problem"
-	retVal.setDialog(new JDialogBuff(ts.l("cloneFromObject.possibleError"), resultBuf.toString(),
+	// "A portion of this object could not be cloned.\n\n{0}\n\nThe rest of the object was cloned successfully."
+	retVal.setDialog(new JDialogBuff(ts.l("cloneFromObject.possibleError"),
+					 ts.l("cloneFromObject.explanation", resultBuf.toString()),
 					 ts.l("global.buttonOK"), null, "ok.gif"));
       }
     
