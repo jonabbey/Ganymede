@@ -4,8 +4,8 @@
    Handy, simple synchronized flag class
 
    Created: 29 March 2001
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2001/03/29 06:40:56 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2001/03/29 06:42:47 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -65,11 +65,11 @@ package arlut.csd.Util;
  * on multiprocessor systems, etc.</p>
  */
 
-public class booleanSempahore {
+public class booleanSemaphore {
 
   private boolean state;
 
-  public booleanSempahore(boolean initialState)
+  public booleanSemaphore(boolean initialState)
   {
     this.state = initialState;
   }
