@@ -631,7 +631,21 @@ public final class DBNameSpace implements NameSpace {
 	  }
 	else
 	  {
-	    return !handle.inuse;
+	    if (editSet.isInteractive())
+	      {
+		return !handle.inuse;
+	      }
+	    else
+	      {
+		if (!handle.inuse || handle.getShadowFieldB() == null)
+		  {
+		    return true;
+		  }
+		else
+		  {
+		    return false;
+		  }
+	      }
 	  }
       }
     
@@ -684,23 +698,20 @@ public final class DBNameSpace implements NameSpace {
 	
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.owner != editSet)
+	if (handle.owner != editSet && editSet.isInteractive())
 	  {
-	    // either someone else is manipulating this value, or an object
-	    // stored in the database holds this value.  We would need to
-	    // pull that object out of the database and unmark the value on
-	    // that object before we could mark that value someplace else.
-
+	    // another transaction is manipulating this value
+		
 	    if (debug)
 	      {
 		System.err.println(editSet.session.key + ": DBNameSpace.mark(): we don't own handle");
 	      }
-
+	    
 	    return false;	// somebody else owns it
 	  }
 	else
 	  {
-	    // we own it
+	    // we own it, or can own it
 
 	    // If we are an interactive transaction, we can't mark
 	    // this value if this namespace value is still being used
@@ -715,12 +726,30 @@ public final class DBNameSpace implements NameSpace {
 
 	    if (handle.inuse)
 	      {
-		if (editSet.isInteractive() || handle.getShadowFieldB() != null)
+		if (editSet.isInteractive())
 		  {
 		    return false;
 		  }
 		else
 		  {
+		    if (handle.owner == null)
+		      {
+			handle.owner = editSet;
+		      }
+
+		    if (handle.getShadowFieldB() != null)
+		      {
+			// we've already speculatively associated
+			// ourselves with this value with another
+			// field.. we can't do more than one
+			// speculative association in one
+			// non-interactice transaction and have any
+			// chance of consistency at the end, so just
+			// go ahead and reject this attempt
+
+			return false;
+		      }
+
 		    handle.setShadowFieldB(field);
 		  }
 	      }
@@ -1014,21 +1043,29 @@ public final class DBNameSpace implements NameSpace {
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
+	// let's make sure this is a proper unbinding.
+	//
+	// if we're non-interactive (as in the xmlclient), we should
+	// only be unsetting field associations that pre-dated this
+	// transaction.  We don't expect the xmlclient to set an
+	// association and then break it.  Nonetheless, I'll go ahead
+	// and check oldField against both shadowFields held in the
+	// handle, just in case some non-interactive transaction does
+	// try to make and then break a namespace mark
+
+	if (!handle.matches(oldField) && handle.getShadowField() != oldField && handle.getShadowFieldB() != oldField)
+	  {
+	    throw new RuntimeException("Error, unmarking a value from a field that shouldn't have had it!");
+	  }
+
 	if (handle.owner == null)
 	  {
-	    // no one has claimed this, give it to the editSet.
-	    // Note that we are assuming here that the editset
-	    // has properly checked out the object containing
-	    // this value.  The namespace code does not check
-	    // to make sure that the editset really has the
-	    // right to acquire this value.  The DBEditObject
-	    // code should be set up to always do the right
-	    // thing.  Probably the mark methods in DBNameSpace
-	    // should not be public.
+	    // no one has claimed this for transactional lock-out,
+	    // give it to this editSet.
 
-	    // note that since this handle has no owner,
-	    // we know that the original state should be true,
-	    // else it wouldn't have been in the hash to begin
+	    // note that since this handle currently has no owner, we
+	    // know that the original (persisted) state should be
+	    // true, else it wouldn't have been in the hash to begin
 	    // with
 
 	    handle.owner = editSet;
@@ -1042,7 +1079,16 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    if (handle.owner != editSet)
 	      {
-		return false;	// somebody else owns it
+		// somebody else owns it.. that somebody may be a
+		// non-interactive session speculatively marking the
+		// value, but if so, the non-interactive session will
+		// learn soon enough that its transaction has to fail,
+		// since it can't edit our exclusively checked out
+		// object containing oldField, which would be
+		// necessary to complete the speculative namespace
+		// shuffle.
+
+		return false;
 	      }
 	    else
 	      {
@@ -1056,26 +1102,12 @@ public final class DBNameSpace implements NameSpace {
 		  }
 		else
 		  {
-		    // if we're non-interactive (as in the xmlclient),
-		    // we should only be unsetting field associations
-		    // that pre-dated this transaction.  We don't
-		    // expect the xmlclient to set an association and
-		    // then break it.  Nonetheless, I'll go ahead and
-		    // check oldField against both shadowFields held
-		    // in the handle, just in case some
-		    // non-interactive transaction does try to make
-		    // and then break a namespace mark
-
-		    if (!handle.matches(oldField) && handle.getShadowField() != oldField && handle.getShadowFieldB() != oldField)
-		      {
-			throw new RuntimeException("Error, unmarking a value from a field that shouldn't have had it!");
-		      }
-
-		    // likewise, I really don't expect
-		    // getShadowFieldB() to be equal to the oldField,
-		    // but I'll let it handle that case in the event
-		    // we do have some very weird non-interactive
-		    // client talking to us.
+		    // I really don't expect getShadowFieldB() to be
+		    // equal to the oldField, but I'll let it handle
+		    // that case in the event we do have some very
+		    // weird non-interactive client talking to us
+		    // which decided to set a prospective mark and
+		    // then clear it
 
 		    // What we're really wanting to do here, however,
 		    // is to handle the case where we are unmarking a
