@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1301,6 +1301,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public final synchronized ReturnVal finalizeRemove()
   {
+    ReturnVal retVal = null;
     DBField field;
     Enumeration enum;
     DBSession session;
@@ -1320,7 +1321,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    while (field.size() > 0)
 	      {
-		if (field.deleteElement(0) != null)
+		retVal = field.deleteElement(0);
+
+		if (retVal != null && !retVal.didSucceed())
 		  {
 		    session = editset.getSession();
 		    
@@ -1343,7 +1346,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    if (field.getType() != PERMISSIONMATRIX &&
 		field.getType() != PASSWORD)
 	      {
-		if (field.setValue(null) != null)
+		retVal = field.setValue(null);
+
+		if (retVal != null && !retVal.didSucceed())
 		  {
 		    session = editset.getSession();
 		    
@@ -1364,7 +1369,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  }
       }
 
-    return null;
+    return retVal;
   }
 
   /**
