@@ -1201,7 +1201,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		// "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
 		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
 						  ts.l("bind.schema_error",
-						       Integer.getName(targetField), oldRef.getLabel()));
+						       Integer.toString(targetField), oldRef.getLabel()));
 	      }
 	  }
 	
@@ -1220,7 +1220,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		// "InvidDBField.bind(): Couldn''t unlink from old reference"
 		// "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
 		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						  ts.l("bind.inconsistency", Integer.getName(targetField), oldRef.getLabel()));
+						  ts.l("bind.inconsistency", Integer.toString(targetField), oldRef.getLabel()));
 	      }
 	    else
 	      {
