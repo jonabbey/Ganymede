@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.70 $ %D%
+    Version: $Revision: 1.71 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -3117,17 +3117,24 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    for (int j = 0; j < choices.size(); j++)
 	      {
 		listHandle thisChoice = (listHandle) choices.elementAt(j);
-		
-		if (thisChoice.getObject().equals(currentChoice))
- 		  {
- 		    if (debug)
- 		      {
- 			System.out.println("Found the current object in the list!");
- 		      }
- 		    currentListHandle = thisChoice;
- 		    found = true;
- 		    break;
- 		  }
+
+		if (thisChoice.getObject() == null)
+		  {
+		    System.err.println("***>>> hey!  thisChoice (" + thisChoice + ") has a null object!");
+		  }
+		else
+		  {
+		    if (thisChoice.getObject().equals(currentChoice))
+		      {
+			if (debug)
+			  {
+			    System.out.println("Found the current object in the list!");
+			  }
+			currentListHandle = thisChoice;
+			found = true;
+			break;
+		      }
+		  }
  	      }
 
  	    if (!found)
