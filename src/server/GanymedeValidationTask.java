@@ -7,8 +7,8 @@
    
    Created: 26 January 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/01/27 21:49:37 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/01/27 23:12:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -96,11 +96,11 @@ public class GanymedeValidationTask implements Runnable {
 
     /* -- */
 
-    Ganymede.debug("Expiration Task: Starting");
+    Ganymede.debug("Validation Task: Starting");
 
     if (Ganymede.db.schemaEditInProgress)
       {
-	Ganymede.debug("Deferring expiration task - schema being edited");
+	Ganymede.debug("Deferring validation task - schema being edited");
 	return;
       }
 
