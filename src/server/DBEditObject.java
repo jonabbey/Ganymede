@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.91 $ %D%
+   Version: $Revision: 1.92 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.91 $ %D%
+ * @version $Revision: 1.92 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1539,22 +1539,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       {
 	DBObjectBaseField fieldDef;
 	short baseId;
-	short targetField;
 
 	/* -- */
 
 	fieldDef = field.getFieldDef();
 	
 	baseId = fieldDef.getTargetBase();
-
-	if (fieldDef.isSymmetric())
-	  {
-	    targetField = fieldDef.getTargetField();
-	  }
-	else
-	  { 
-	    targetField = SchemaConstants.BackLinksField;
-	  }
 
 	if (baseId < 0)
 	  {
@@ -1584,14 +1574,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    root = null;
 	  }
 
-	// the list of objects we return is intended to be ones that
-	// could actually be linked to the object presenting the
-	// list..  we need to check to see if we are allowed to do
-	// linking outside of the bounds of general object editability..
-
-	DBObjectBase targetBase = Ganymede.db.getObjectBase(baseId);
-
-	boolean editOnly = !targetBase.getObjectHook().anonymousLinkOK(this, targetField, this.gSession);
+	boolean editOnly = !choiceListHasExceptions(field);
 
 	QueryResult result = editset.getSession().getGSession().query(new Query(baseId, root, editOnly), this);
 
@@ -1603,6 +1586,49 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     
     //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
     return null;
+  }
+
+  /**
+   *
+   * This method is used to tell the client whether the list of options it gets
+   * back for a field can be taken out of the cache.  If this method returns
+   * true, that means that some of the results that obtainChoiceList() will
+   * return will include items that normally wouldn't be availble to the
+   * client, but are in this case because of the anonymousLinkOK() results.
+   *
+   */
+
+  public boolean choiceListHasExceptions(DBField field)
+  {
+    if (!(field instanceof InvidDBField))
+      {
+	throw new IllegalArgumentException("choiceListHasExceptions(): field not an InvidDBField.");
+      }
+
+    // --
+
+    DBObjectBaseField fieldDef;
+    short baseId;
+    short targetField;
+
+    /* -- */
+
+    fieldDef = field.getFieldDef();
+	
+    baseId = fieldDef.getTargetBase();
+
+    if (fieldDef.isSymmetric())
+      {
+	targetField = fieldDef.getTargetField();
+      }
+    else
+      { 
+	targetField = SchemaConstants.BackLinksField;
+      }
+    
+    DBObjectBase targetBase = Ganymede.db.getObjectBase(baseId);
+
+    return targetBase.getObjectHook().anonymousLinkOK(this, targetField, this.gSession);
   }
 
   /**
