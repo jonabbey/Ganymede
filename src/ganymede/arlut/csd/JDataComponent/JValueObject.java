@@ -81,7 +81,7 @@ public class JValueObject {
    * Boundary guard for acceptable operation types.
    */
 
-  public static final int FIRST = -1011;
+  public static final int FIRST = -1012;
 
   /**
    * Vector add/scalar operation.  Also used to indicate item selection in JstringListBox.
@@ -113,6 +113,13 @@ public class JValueObject {
    */
 
   public static final int DELETEVECTOR = -1010;
+
+  /**
+   * Property set operation, value = key, parameter = value, parameter2
+   * = old value, if we are changing an old key/value association.
+   */
+
+  public static final int SETPROPERTY = -1012;
 
   /**
    * Scalar value set operation.  Requires value to be set.
@@ -175,14 +182,22 @@ public class JValueObject {
    * A multi-purpose value object.  Interpreted differently for different operation types.
    */
 
-  private Object value;
+  private Object value = null;
 
   /**
    * An auxiliary value used for some kinds of operation types.  Often used to indicate
    * ActionCommands for pop-up menus attached to arlut.csd.JDataComponent GUI components.
    */
 
-  private Object parameter;
+  private Object parameter = null;
+
+  /**
+   * An additional auxiliary value used for some kinds of operation
+   * types.  Used by the SETPROPERTY operation to record the old value of a property
+   * if we are changing an existing property rather than adding a new one.
+   */
+
+  private Object parameter2 = null;
 
   /**
    * Index used to indicate what value of a vector is being modified by this message.
@@ -313,6 +328,41 @@ public class JValueObject {
     this.value = value;
   }
 
+
+  /**
+   *
+   * Generic constructor
+   *
+   * @param source arlut.csd.JDataComponent GUI component originating message
+   * @param index index of vector connected to arlut.csd.JDataComponent GUI component being changed.
+   * @param value Value being set by the originating GUI component, or the key in a property operation
+   * @param operation Operation type, one of ADD, INSERT, DELETE, SET,
+   * ERROR, SPECIAL, PARAMETER, SETPROPERTY
+   * @param parameter Auxiliary object value, used when passing pop-up menu information, or the value
+   * in a property operation
+   * @param parameter2 Additional auxiliary object value, used to represent the old value
+   * when a SETPROPERTY operation is replacing an old value.
+   *
+   */
+
+  public JValueObject(Component source, int index, int operation, Object value, Object parameter,
+		      Object parameter2)
+  {
+    this.source = source;
+    this.index = index;
+    this.parameter = parameter;
+    this.parameter2 = parameter2;
+    
+    if ((operation < FIRST) || (operation > LAST))
+      {
+	throw new IllegalArgumentException("Illegal Argument: operation has invalid value: " + operation);
+      }
+    
+    this.operationValue = operation;
+    
+    this.value = value;
+  }
+
   /**
    * Returns the arlut.csd.JDataComponent GUI component that originated this message.
    */
@@ -330,6 +380,17 @@ public class JValueObject {
   public Object getParameter() 
   {
     return parameter;
+  }
+
+  /**
+   * Returns an auditional auxiliary value.  Used for passing the old
+   * value of a property's value when a property entry is being
+   * changed (rather than adding a new property/value pair).
+   */
+
+  public Object getParameter2()
+  {
+    return parameter2;
   }
 
   /**
@@ -399,6 +460,20 @@ public class JValueObject {
       case SET:
 
 	result += " set value ";
+	result += String.valueOf(value);
+
+	break;
+
+      case SETPROPERTY:
+
+	result += " set property";
+	result += " key: " + String.valueOf(value);
+	result += ", new value: " + String.valueOf(parameter);
+
+	if (parameter2 != null)
+	  {
+	    result += ", old value: " + String.valueOf(parameter2);
+	  }
 
 	break;
 
@@ -408,8 +483,6 @@ public class JValueObject {
 
 	break;
       }
-
-    result += value;
 
     return result;
   }
