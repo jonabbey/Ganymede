@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,7 @@ import java.util.*;
 
 class DBDumpLock extends DBLock {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   private Object key;
   private DBStore lockManager;
