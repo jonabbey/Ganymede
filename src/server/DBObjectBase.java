@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.53 $ %D%
+   Version: $Revision: 1.54 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -154,6 +154,24 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	fieldHash.put(new Short(bf.field_code), bf);
 
+	/* And our 8 field, the backlinks field */
+
+	bf = new DBObjectBaseField(this);
+    
+	bf.field_name = "Back Links";
+	bf.field_code = SchemaConstants.BackLinksField;
+	bf.field_type = FieldType.INVID;
+	bf.allowedTarget = -1;	// we can point at anything, but there'll be a special
+	bf.targetField = -1;	// procedure for handling deletion and what not..
+	bf.field_order = 8;
+	bf.editable = false;
+	bf.removable = false;
+	bf.builtIn = true;	// this isn't optional
+	bf.array = true;
+	bf.visibility = false;	// we don't want the client to show the backlinks field
+
+	fieldHash.put(new Short(bf.field_code), bf);
+
 	// note that we won't have an expiration date or removal date
 	// for an embedded object
       }
@@ -274,6 +292,23 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	fieldHash.put(new Short(bf.field_code), bf);
 
+	/* And our 8 field, the backlinks field */
+
+	bf = new DBObjectBaseField(this);
+    
+	bf.field_name = "Back Links";
+	bf.field_code = SchemaConstants.BackLinksField;
+	bf.field_type = FieldType.INVID;
+	bf.allowedTarget = -1;	// we can point at anything, but there'll be a special
+	bf.targetField = -1;	// procedure for handling deletion and what not..
+	bf.field_order = 8;
+	bf.editable = false;
+	bf.removable = false;
+	bf.builtIn = true;	// this isn't optional
+	bf.array = true;
+	bf.visibility = false;	// we don't want the client to show the backlinks field
+
+	fieldHash.put(new Short(bf.field_code), bf);
       }
 
     objectHook = this.createHook();
@@ -332,9 +367,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	object_name = original.object_name;
 	classname = original.classname;
 	classdef = original.classdef;
+	type_code = original.type_code;
 	label_id = original.label_id;
 	category = original.category;
-	type_code = original.type_code;
 	displayOrder = original.displayOrder;
 	embedded = original.embedded;
     
@@ -350,7 +385,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	while (enum.hasMoreElements())
 	  {
 	    field = (DBObjectBaseField) enum.nextElement();
-	    bf = new DBObjectBaseField(field, editor);
+	    bf = new DBObjectBaseField(field, editor); // copy this base field
 	    bf.base = this;
 	    fieldHash.put(field.getKey(), bf);
 
@@ -359,14 +394,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	sortFields();
 
-	// remember the objects
+	// remember the objects.. note that we don't at this point notify
+	// the objects that this new DBObjectBase is their owner.. we'll
+	// take care of that when and if the DBSchemaEdit base editing session
+	// commits this copy
 
 	objectHash = original.objectHash;
 
 	maxid = original.maxid;
     
 	changed = false;
-	this.original = original;
+	this.original = original; // remember that we are a copy
 
 	// in case our classdef was set during the copy.
 
