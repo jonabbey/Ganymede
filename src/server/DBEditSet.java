@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -234,36 +234,41 @@ public class DBEditSet {
 	  {
 	  case DBEditObject.CREATING:
 	    
-	    df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
-	    df.setValue(modDate);
-
-	    sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
-
-	    result = session.getID();
-
-	    if (description != null)
+	    if (!eObj.getBase().isEmbedded())
 	      {
-		result += ": " + description;
-	      }
+		df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+		df.setValue(modDate);
+		
+		sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+		
+		result = session.getID();
+		
+		if (description != null)
+		  {
+		    result += ": " + description;
+		  }
 
-	    sf.setValue(result);
+		sf.setValue(result);
+	      }
 
 	  case DBEditObject.EDITING:
 
-	    df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
-	    df.setValue(modDate);
-
-	    sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
-
-	    result = session.getID();
-
-	    if (description != null)
+	    if (!eObj.getBase().isEmbedded())
 	      {
-		result += ": " + description;
+		df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+		df.setValue(modDate);
+
+		sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+
+		result = session.getID();
+
+		if (description != null)
+		  {
+		    result += ": " + description;
+		  }
+
+		sf.setValue(result);
 	      }
-
-	    sf.setValue(result);
-
 	    break;
 
 	  case DBEditObject.DELETING:
