@@ -10,7 +10,7 @@
 
    
    Created: 28 Feb 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -108,6 +108,10 @@ public class JValueObject {
 
   public int operationType() {
 
+    return operationValue;
+  }
+
+  public int getOperationType() {
     return operationValue;
   }
 
