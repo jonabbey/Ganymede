@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.90 $ %D%
+   Version: $Revision: 1.91 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.90 $ %D%
+ * @version $Revision: 1.91 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1539,12 +1539,22 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       {
 	DBObjectBaseField fieldDef;
 	short baseId;
+	short targetField;
 
 	/* -- */
 
 	fieldDef = field.getFieldDef();
 	
 	baseId = fieldDef.getTargetBase();
+
+	if (fieldDef.isSymmetric())
+	  {
+	    targetField = fieldDef.getTargetField();
+	  }
+	else
+	  { 
+	    targetField = SchemaConstants.BackLinksField;
+	  }
 
 	if (baseId < 0)
 	  {
@@ -1581,7 +1591,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	DBObjectBase targetBase = Ganymede.db.getObjectBase(baseId);
 
-	boolean editOnly = !targetBase.getObjectHook().anonymousLinkOK(this, field.getID(), this.gSession);
+	boolean editOnly = !targetBase.getObjectHook().anonymousLinkOK(this, targetField, this.gSession);
+
+	QueryResult result = editset.getSession().getGSession().query(new Query(baseId, root, editOnly), this);
 
 	// note that the query we are submitting here *will* be filtered by the
 	// current visibilityFilterInvid field in GanymedeSession.
