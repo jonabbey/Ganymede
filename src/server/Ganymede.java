@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 2001/01/11 23:35:59 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 2001/01/31 10:05:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -550,6 +550,8 @@ public class Ganymede {
       {
 	debug("Setup and bound server object OK");
       }
+
+    debug("Ganymede Server Ready.");
   }
 
   /**
