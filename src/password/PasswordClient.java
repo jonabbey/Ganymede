@@ -6,8 +6,8 @@
    
    Created: 28 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/03/21 20:30:12 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/05/25 07:22:32 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -217,6 +217,14 @@ public class PasswordClient implements ClientListener {
 		  }
 		
 		client.disconnect();
+
+		String resultText = returnValue.getDialogText();
+
+		if (resultText != null && !resultText.equals(""))
+		  {
+		    System.err.println(resultText);
+		  }
+
 		return false;
 	      }
 	  }
@@ -410,6 +418,7 @@ public class PasswordClient implements ClientListener {
       }
 
     // Now change the password with the passwordClient.
+
     boolean success = client.changePassword(argv[1], oldPassword, newPassword);
 
     if (success)
