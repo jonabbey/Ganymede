@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -329,6 +329,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       {
 	System.err.println("DBObjectBase.receive(): maxid for " + object_name + " is " + maxid);
       }
+  }
+
+  /**
+   *
+   * This method indicates whether this base may be removed in
+   * the Schema Editor.  
+   *
+   * We don't allow removal of Base 0 because it is the Ganymede
+   * administrator Base, a privileged Base in the Ganymede system.
+   *
+   */
+
+  public boolean isRemovable()
+  {
+    return (getTypeID() > 0);
   }
 
   /**
@@ -1059,7 +1074,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
     /* -- */
 
-    Ganymede.debug("entered clearEditor");
+    //    Ganymede.debug("entered clearEditor");
 
     if (this.editor != editor)
       {
