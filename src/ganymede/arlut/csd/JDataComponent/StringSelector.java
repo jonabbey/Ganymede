@@ -494,6 +494,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   /**
    * <p>This method attaches popup menus to the in box and out
    * box.</p>
+   *
+   * <p>The two popup menus must be distinct, so that they can be
+   * attached to separate JstringListBoxes in the StringSelector,
+   * without having each JstringListBox listening to the same popup
+   * menu.</p>
    */
 
   public void setPopups(JPopupMenu inPopup, JPopupMenu outPopup)
