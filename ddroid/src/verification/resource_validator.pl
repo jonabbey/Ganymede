@@ -459,4 +459,7 @@ foreach $file (@javafiles) {
 
 if (!$errors_found) {
   print "No problems found\n";
+  exit 0;
+} else {
+  exit 1;
 }
