@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,7 @@ import com.sun.java.swing.preview.*;  // This is for the FileChooser
 
 public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
   
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
@@ -150,7 +150,14 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	try
 	  {
-	    session.sendMail(addresses, "Query Report", report);
+	    if (format.equals("HTML"))
+	      {
+		session.sendHTMLMail(addresses, "Query Report", null, report);
+	      }
+	    else
+	      {
+		session.sendMail(addresses, "Query Report", report);
+	      }
 	  }
 	catch (RemoteException ex)
 	  {
@@ -434,6 +441,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     Enumeration enum = table.keys();
     Object rowKey;
     String cellText;
+    String date = (new Date()).toString();
 
     /* -- */
 
@@ -446,10 +454,14 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     result.append("<HTML>\n");
     result.append("<HEAD>\n");
-    result.append("<TITLE>Ganymede Table Dump</TITLE>\n");
+    result.append("<TITLE>Ganymede Table Dump - ");
+    result.append(date);
+    result.append("</TITLE>\n");
     result.append("</HEAD>\n");
     result.append("<BODY BGCOLOR=\"#FFFFFF\">\n");
-    result.append("<H1>Ganymede Table Dump</H1>\n");
+    result.append("<H1>Ganymede Table Dump - ");
+    result.append(date);
+    result.append("</H1>\n");
     result.append("<HR>\n");
     result.append("<TABLE BORDER>\n");
     result.append("<TR>\n");
