@@ -5,7 +5,7 @@
    The tab that holds history information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -83,13 +83,13 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     showHistory.addActionListener(this);
     
     buttonPanel.add(showHistory);
-    topPanel.add("North", new datesPanel(creator_field, creation_date_field, modifier_field, modification_date_field));
+    topPanel.add("North", new datesPanel(creator_field, creation_date_field, 
+					 modifier_field, modification_date_field));
     
     JPanel p = new JPanel(new BorderLayout());
     titledBorder = new TitledBorder("Detailed History");
     p.setBorder(titledBorder);
     p.add("North", buttonPanel);
-
     
     historyText = new JTextArea();
     historyText.setBackground(Color.white);
@@ -100,10 +100,8 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, p);
     topPanel.setMinimumSize(new Dimension(1,1));
     add("Center", split);
-    //add("Center", p);
   }
   
-
   public void actionPerformed(ActionEvent e)
   {
     if (e.getSource() == showHistory)
@@ -112,6 +110,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	  {
 	    gc.setWaitCursor();
 	    historyText.setText((gc.getSession().viewObjectHistory(invid, selectedDate)).toString());
+
 	    if (selectedDate != null)
 	      {
 		titledBorder.setTitle("History: starting from " + selectedDate);
@@ -120,6 +119,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	      {
 		titledBorder.setTitle("History");
 	      }
+
 	    gc.setNormalCursor();
 	  }
 	catch (RemoteException rx)
@@ -127,7 +127,6 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	    gc.setNormalCursor();
 	    throw new RuntimeException("Could not get object history.");
 	  }
-
       }
   }
 
@@ -143,12 +142,31 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     return false;
   }
 
+  /**
+   *
+   * This method is called to clean up any auxiliary windows when our
+   * framePanel is closed in the client.
+   * 
+   */
+
+  public void unregister()
+  {
+    if (selectDate != null)
+      {
+	selectDate.unregister();
+      }
+  }
 }
 
-class datesPanel extends JPanel {
-  
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                      datesPanel
 
-  boolean debug = false;
+------------------------------------------------------------------------------*/
+
+class datesPanel extends JPanel {
+
+  static final boolean debug = false;
 
   string_field notes_field;
 
@@ -165,17 +183,27 @@ class datesPanel extends JPanel {
     gbc;
 
   int row = 0;
+
+  /* -- */
   
   public datesPanel(string_field    creator_field, 
 		    date_field      creation_date_field,
 		    string_field    modifier_field,
 		    date_field      modification_date_field)
   {
-    
     if (debug)
       {
 	System.out.println("Creating notes panel");
       }
+
+    String creator = null;
+    Date creation_date = null;
+    String modifier = null;
+    Date mod_date = null;
+    
+    SimpleDateFormat dateformat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+
+    /* -- */
     
     this.notes_field = notes_field;
 
@@ -188,36 +216,29 @@ class datesPanel extends JPanel {
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.insets = new Insets(6,6,6,6);
     
-    String creator = null;
-    Date creation_date = null;
-    String modifier = null;
-    Date mod_date = null;
-    
-    SimpleDateFormat dateformat = new SimpleDateFormat("MMM dd, yyyy",Locale.getDefault());
-    
     try
       {
 	if (creator_field != null)
 	  {
-	    creator = (String)creator_field.getValue();
+	    creator = (String) creator_field.getValue();
 	  }
 
 	if (creation_date_field != null)
 	  {
-	    creation_date = (Date)creation_date_field.getValue();
+	    creation_date = (Date) creation_date_field.getValue();
 	  }
 
 	if (modifier_field != null)
 	  {
-	    modifier = (String)modifier_field.getValue();
+	    modifier = (String) modifier_field.getValue();
 	  }
 
 	if (modification_date_field != null)
 	  {
-	    mod_date = (Date)modification_date_field.getValue();
+	    mod_date = (Date) modification_date_field.getValue();
 	  }
       }
-    catch ( RemoteException rx)
+    catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not get creation info: " + rx);
       }
@@ -249,6 +270,7 @@ class datesPanel extends JPanel {
     addRow(createdOn, "Created On:");
     
     modifiedBy = new JTextField(30);
+
     if (modifier == null)
       {
 	modifiedBy.setText("No information about the last modifier.");
@@ -261,6 +283,7 @@ class datesPanel extends JPanel {
     addRow(modifiedBy, "Modified By:");
     
     modifiedOn = new JTextField(30);
+
     if (mod_date == null)
       {
 	modifiedOn.setText("No last modification date");
@@ -271,13 +294,13 @@ class datesPanel extends JPanel {
       }
     
     addRow(modifiedOn, "Modified on:");
-    
   }
 
   void addRow(JComponent comp, String title)
   {
-
     JLabel l = new JLabel(title);
+
+    /* -- */
     
     gbc.weightx = 0.0;
     gbc.fill = GridBagConstraints.NONE;
@@ -294,6 +317,5 @@ class datesPanel extends JPanel {
     add(comp);
 
     row++;
-
   }
 }
