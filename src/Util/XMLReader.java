@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2000/12/04 04:36:53 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2000/12/04 06:04:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -731,11 +731,14 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	  {
 	    ex.printStackTrace();
 
+	    System.err.println("XMLReader parse error, writing into error stream");
+
 	    err.println("XMLReader parse error: " + ex.getMessage());
 	    err.println("Leading context:");
 	    err.println(circleBuffer.getContents());
-
-	    close();
+	    err.flush();
+	    
+	    System.err.println("XMLReader parse error, wrote into error stream");
 
 	    throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
 	  }
@@ -750,14 +753,21 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	  {
 	    ex.printStackTrace();
 
+	    System.err.println("XMLReader io error, writing into error stream");
+
 	    err.println("XMLReader io error: " + ex.getMessage());
 	    err.println("Leading context:");
 	    err.println(circleBuffer.getContents());
-	    
-	    close();
+	    err.flush();
 
-	    throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
+	    System.err.println("XMLReader io error, wrote into error stream");
+
+	    throw new RuntimeException("XMLReader io error: " + ex.getMessage());
 	  }
+      }
+    finally
+      {
+	close();
       }
   }
 
@@ -901,7 +911,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    throw ex;
 	  }
 
-	done = true;	
+	// we don't set done true here any more.. the finally in the run() method
+	// should take care of that
+
 	pourIntoBuffer(new XMLEndDocument());
       }
   }

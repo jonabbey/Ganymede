@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2000/11/21 22:14:21 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2000/12/04 06:04:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -386,6 +386,49 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
 	catch (IOException ex)
 	  {
+	    // the XMLReader may provide our error buffer with more
+	    // details about what happened after the parser closes the
+	    // pipe, so we'll spin here for a bit until the reader
+	    // finishes with everything and closes down.
+
+	    // but, because we're not nuts, we'll not wait more than
+	    // 10 seconds
+
+	    int waitCount = 0;
+
+	    while (!reader.isDone() && waitCount < 10)
+	      {
+		System.err.println("Waiting for reader to close down:" + waitCount);
+
+		try
+		  {
+		    Thread.sleep(1000); // sleep for one second
+		  }
+		catch (InterruptedException ex2)
+		  {
+		    // ?
+		  }
+
+		waitCount++;
+	      }
+
+	    if (reader.isDone())
+	      {
+		System.err.println("Reader has shut down");
+
+		System.err.println("errBuffer: ");
+		System.err.println(errBuf.getBuffer().toString());
+		System.err.println("done with errBuffer");
+	      }
+	    else
+	      {
+		System.err.println("Reader was hanging");
+
+		System.err.println("errBuffer: ");
+		System.err.println(errBuf.getBuffer().toString());
+		System.err.println("done with errBuffer");
+	      }
+
 	    return getReturnVal("pipe writing: " + ex.getMessage(), false);
 	  }
       }
