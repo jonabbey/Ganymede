@@ -6,8 +6,8 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 1999/01/22 18:05:42 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 1999/06/09 03:33:38 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -71,6 +71,13 @@ import java.rmi.server.*;
                                                                       GASHSchema
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>GUI Schema Editor, part of the Ganymede admin console.</P>
+ *
+ * <P>GASHSchema talks to the server by way of the
+ * {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} remote interface.</P>
+ */
 
 public class GASHSchema extends JFrame implements treeCallback, treeDragDropCallback, ActionListener {
 

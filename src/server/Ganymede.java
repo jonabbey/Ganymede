@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 1999/05/28 02:48:17 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 1999/06/09 03:33:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -70,16 +70,53 @@ import arlut.csd.Util.ParseArgs;
 
 ------------------------------------------------------------------------------*/
 
-/**
- * <p>This class is the main server module, providing the static main()
- * method executed to start the server.  That method instantiates a
- * {@link arlut.csd.ganymede.GanymedeServer GanymedeServer} object and publishes
- * it in the RMI registry.  Clients and admin consoles will connect to the
- * published GanymedeServer object to get logged into the server.</p>
+/** 
+ * <p>This class is the main server module, providing the static
+ * main() method executed to start the server.  This class is never
+ * instantiated, but instead provides a bunch of static variables and
+ * convenience methods in addition to the main() start method.</p>
  *
- * <p>This class is never instantiated, but instead provides a bunch of
- * static variables and convenience methods in addition to the main()
- * start method.</p>
+ * <p>When started, the Ganymede server creates a 
+ * {@link arlut.csd.ganymede.DBStore DBStore} object, which in turn
+ * creates and loads a set of {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+ * objects, one for each type of object held in the ganymede.db file.  Each
+ * DBObjectBase contains {@link arlut.csd.ganymede.DBObject DBObject}
+ * objects which hold the {@link arlut.csd.ganymede.DBField DBField}'s
+ * which ultimately hold the actual data from the database.</p>
+ *
+ * <p>The ganymede.db file may define a number of task classes that are to
+ * be run by the server at defined times.  The server's main() method starts
+ * a background {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler}
+ * thread to handle background tasks.</p>
+ *
+ * <p>When the database has been loaded from disk, the main() method
+ * creates a {@link arlut.csd.ganymede.GanymedeServer GanymedeServer}
+ * object.  GanymedeServer implements the {@link arlut.csd.ganymede.Server
+ * Server} RMI remote interface, and is published in the RMI registry.</p>
+ *
+ * <p>Clients and admin consoles may then connect to the published GanymedeServer
+ * object via RMI to establish a connection to the server.</p>
+ *
+ * <p>The GanymedeServer's {@link arlut.csd.ganymede.GanymedeServer#login(arlut.csd.ganymede.Client) login}
+ * method is used to create a {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+ * object to manage permissions and communications with an individual client.  The
+ * client communicates with the GanymedeSession object through the 
+ * {@link arlut.csd.ganymede.Session Session} RMI remote interface.</p>
+ *
+ * <p>While the GanymedeServer's login method is used to handle client connections,
+ * the GanymedeServer's
+ * {@link arlut.csd.ganymede.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin}
+ * method is used to create a {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin} object
+ * to handle the admin console's communications with the server.  The admin
+ * console communicates with the GanymedeAdmin object through the  
+ * {@link arlut.csd.ganymede.adminSession adminSession} RMI remote interface.</p>
+ *
+ * <p>Most of the server's database logic is handled by the DBStore object
+ * and its related classes ({@link arlut.csd.ganymede.DBObject DBObject},
+ * {@link arlut.csd.ganymede.DBEditSet DBEditSet}, {@link arlut.csd.ganymede.DBNameSpace DBNameSpace},
+ * and {@link arlut.csd.ganymede.DBJournal DBJournal}).</p>
+ *
+ * <p>All client permissions and communications are handled by the GanymedeSession class.</p> 
  */
 
 public class Ganymede {

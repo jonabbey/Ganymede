@@ -7,8 +7,8 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/03/17 20:13:51 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/06/09 03:33:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,14 +58,29 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <P>Handle object used to help manage background tasks registered in the 
+ * Ganymede Server's
+ * {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler}.  In addition
+ * to being used by the server's task scheduler to organize and track
+ * registered tasks, vectors of serialized scheduleHandle objects are passed to the
+ * Ganymede admin console's 
+ * {@link arlut.csd.ganymede.Admin#changeTasks(java.util.Vector) changeTasks} 
+ * method.</P>
+ * 
+ * <P>Within the Ganymede server, scheduleHandle objects are held within the 
+ * GanymedeScheduler to track the status of each registered task.  When the 
+ * GanymedeScheduler needs to run a background task, the scheduleHandle's
+ * {@link arlut.csd.ganymede.scheduleHandle#runTask() runTask()} method
+ * is called.  runTask() creates a pair of threads, one to run the task
+ * and another {@link arlut.csd.ganymede.taskMonitor taskMonitor} thread
+ * to wait for the task to be completed.  When the thread running
+ * the task completes, the task's taskMonitor calls the scheduleHandle's 
+ * {@link arlut.csd.ganymede.scheduleHandle#notifyCompletion notifyCompletion()}
+ * method, which in turn notifies the GanymedeScheduler that the task
+ * has completed its execution.</P>
  *
- * This class is used to keep track of background tasks running on the
- * Ganymede Server.  It is also used to pass data to the admin console.
- *
- * This class works hand in glove with the GanymedeScheduler class.
- *
- * @see arlut.csd.ganymede.GanymedeScheduler
- *
+ * <P>The various scheduling methods in scheduleHandle will throw an
+ * IllegalArgumentException if called post-serialization on the Ganymede client.</P>
  */
 
 public class scheduleHandle implements java.io.Serializable {
@@ -144,6 +159,14 @@ public class scheduleHandle implements java.io.Serializable {
 
   /* -- */
 
+  /**
+   * @param scheduler Reference to the server's GanymedeScheduler
+   * @param time Anchor point for interval calculations
+   * @param interval Number of seconds between runs of this task
+   * @param task Java Runnable object to be run in a thread
+   * @param name Name to report for this task
+   */
+
   public scheduleHandle(GanymedeScheduler scheduler,
 			Date time, int interval, 
 			Runnable task, String name)
@@ -168,12 +191,11 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
+   * <P>Runs this task in a background thread.  A second background thread
+   * is created to handle a {@link arlut.csd.ganymede.taskMonitor taskMonitor}
+   * to wait and report when the task completes.</P>
    *
-   * This server-side method causes the task represented by this scheduleHandle to
-   * be spawned into a new thread.
-   *
-   * This method is invalid on the client.
-   *
+   * <P>This method is invalid on the client.</P>
    */
 
   synchronized void runTask()
@@ -210,13 +232,12 @@ public class scheduleHandle implements java.io.Serializable {
     monitor.start();
   }
 
-  /**
-   *
-   * This method is called by our task monitor when our task
+  /** 
+   * <P>This method is called by our {@link
+   * arlut.csd.ganymede.taskMonitor taskMonitor} when our task
    * completes.  This method has no meaning outside of the context of
    * the taskMonitor spawned by this handle, and should not be called
-   * from any other code.
-   * 
+   * from any other code.</P> 
    */
 
   synchronized void notifyCompletion()
@@ -233,9 +254,9 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   *
-   * Server-side method to determine whether this task should be rescheduled
-   *
+   * <P>Server-side method to determine whether this task should be rescheduled.
+   * Increments the startTime and returns true if this is a periodically
+   * executed task.</P>
    */
 
   synchronized boolean reschedule()
@@ -257,10 +278,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method lets the GanymedeScheduler check to see whether this task
-   * should be re-run when it terminates
-   *
+   * <P>This method lets the GanymedeScheduler check to see whether this task
+   * should be re-run when it terminates</P>
    */
 
   synchronized boolean runAgain()
@@ -269,9 +288,7 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns true if this task is not scheduled for periodic execution
-   *
+   * <P>Returns true if this task is not scheduled for periodic execution</P>
    */
 
   synchronized boolean isOnDemand()
@@ -285,10 +302,10 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   *
-   * Server-side method to request that this task be re-run after
-   * its current completion.  Intended for on-demand tasks.
-   *
+   * <P>Server-side method to request that this task be re-run after
+   * its current completion.  Intended for on-demand tasks that are
+   * requested by the {@link arlut.csd.ganymede.GanymedeScheduler
+   * GanymedeScheduler} while they are already running.</P>
    */
 
   synchronized void runOnCompletion()
@@ -302,10 +319,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   *
-   * Server-side method to request that this task not be kept after its
-   * current completion.  Used to remove a task from the Ganymede scheduler.
-   *
+   * <P>Server-side method to request that this task not be kept after its
+   * current completion.  Used to remove a task from the Ganymede scheduler.</P>
    */
 
   synchronized void unregister()
@@ -320,9 +335,7 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   *
-   * Server-side method to bring this task to an abrupt halt.
-   *
+   * <P>Server-side method to bring this task to an abrupt halt.</P>
    */
 
   synchronized void stop()
@@ -339,9 +352,7 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   *
-   * Server-side method to disable future invocations of this task
-   *
+   * <P>Server-side method to disable future invocations of this task</P>
    */
 
   synchronized void disable()
@@ -355,9 +366,7 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   *
-   * Server-side method to enable future invocations of this task
-   *
+   * <P>Server-side method to enable future invocations of this task</P>
    */
 
   synchronized void enable()
@@ -370,11 +379,10 @@ public class scheduleHandle implements java.io.Serializable {
     suspend = false;
   }
 
-
   /**
+   * <P>Server-side method to change the interval for this task</P>
    *
-   * Server-side method to change the interval for this task
-   *
+   * @param interval Number of seconds between runs of this task
    */
 
   synchronized void setInterval(int interval)
@@ -493,6 +501,14 @@ public class scheduleHandle implements java.io.Serializable {
                                                                      taskMonitor
 
 ------------------------------------------------------------------------------*/
+
+/** 
+ * <P>{@link arlut.csd.ganymede.GanymedeSchedule GanymedeSchedule}
+ * helper class used to notify the scheduler when a background task
+ * has completed.</P>
+ *
+ * @see arlut.csd.ganymede.scheduleHandle
+ */
 
 class taskMonitor implements Runnable {
 

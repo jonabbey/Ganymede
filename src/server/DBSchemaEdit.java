@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 1999/03/23 06:22:14 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 1999/06/09 03:33:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -61,9 +61,41 @@ import java.io.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <P>Server-side schema editing class.  This class implements the
+ * {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} remote interface to support
+ * schema editing by the admin console.</P>  
  *
- * Class to manage schema editing through the admin console.
+ * <P>Only one DBSchemaEdit object may be active in the server at a time;  only
+ * one admin console can edit the server's schema at a time.  While the server's
+ * schema is being edited, no users may be logged on to
+ * the system. An admin console puts the server into schema-editing mode by calling the
+ * {@link arlut.csd.ganymede.GanymedeAdmin#editSchema editSchema()} method on
+ * a server-side {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin} object.</P>
  *
+ * <P>When the DBSchemaEdit object is created, it makes copies of all of the
+ * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} type definition objects
+ * in the server.  The admin console can then talk to those DBObjectBase objects
+ * remotely by way of the {@link arlut.csd.ganymede.Base Base} remote interface,
+ * accessing data fields, reordering the type tree visible in the client, and
+ * so forth.</P>
+ *
+ * <P>When the user has made the desired changes, the 
+ * {@link arlut.csd.ganymede.DBSchemaEdit#commit() commit()} method is called,
+ * which replaces the set of DBObjectBase objects held in the server's
+ * {@link arlut.csd.ganymede.DBStore DBStore} with the modified set that was
+ * created and modified by DBSchemaEdit.</P>
+ *
+ * <P>Note that the schema editing system doesn't support changing the field type
+ * of existing fields very gracefully, nor are background tasks suspended while
+ * the server is in schema editing mode.  Generally speaking, you should be
+ * using the schema editor to define new fields, or to change field definitions
+ * for fields that are not yet in use in the database, not to try to redefine
+ * parts of the database that are in actual use and which hold actual data.</P>
+ *
+ * <P>Generally speaking, the schema editing system is really the most fragile
+ * thing in the Ganymede server.  It generally works, but it is not as robust
+ * as it ought to be.  It's always a good idea to make a backup copy of your
+ * ganymede.db file before going in and editing your database schema.</P>
  */
 
 public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, SchemaEdit {
@@ -134,11 +166,9 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   /* -- */
 
   /**
-   *
-   * Constructor.  This constructor should only be called in
-   * a critical section synchronized on the primary DBStore
-   * object.
-   *
+   * <P>Constructor.  This constructor should only be called in
+   * a critical section synchronized on the primary 
+   * {@link arlut.csd.ganymede.DBStore DBStore} object.</P>
    */
 
   public DBSchemaEdit(Admin console) throws RemoteException
@@ -225,15 +255,13 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   *
-   * Returns true if the schema editor is allowing
+   * <P>Returns true if the schema editor is allowing
    * the 'constant' fields to be edited.  This is
    * provided solely so the Ganymede developers can
    * make incompatible changes to the 'constant' schema
-   * items during development.
+   * items during development.</P>
    *
    * @see arlut.csd.ganymede.SchemaEdit
-   *
    */
 
   public boolean isDevelopMode()
@@ -242,13 +270,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   *
-   * When the server is in develop mode, it is possible to create new
+   * <P>When the server is in develop mode, it is possible to create new
    * built-in fields, or fields that can be relied on by the server
-   * code to exist in every non-embedded object type defined.
+   * code to exist in every non-embedded object type defined.</P>
    *
    * @see arlut.csd.ganymede.SchemaEdit
-   *
    */
 
   public BaseField createNewBuiltIn()
@@ -309,11 +335,9 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   *
-   * Returns the root category node from the server
+   * <P>Returns the root category node from the server</P>
    *
    * @see arlut.csd.ganymede.SchemaEdit
-   *
    */
 
   public Category getRootCategory()
@@ -411,15 +435,13 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   *
-   * Returns a list of bases from the current (non-committed) state of the system.
+   * <P>Returns a list of bases from the current (non-committed) state of the system.</P>
    *
    * @param embedded If true, getBases() will only show bases that are intended
    * for embedding in other objects.  If false, getBases() will only show bases
    * that are not to be embedded.
    *
    * @see arlut.csd.ganymede.SchemaEdit
-   *
    */
 
   public synchronized Base[] getBases(boolean embedded)
@@ -495,11 +517,9 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   *
-   * Returns a list of bases from the current (non-committed) state of the system.
+   * <P>Returns a list of bases from the current (non-committed) state of the system.</P>
    *
    * @see arlut.csd.ganymede.SchemaEdit
-   *
    */
 
   public synchronized Base[] getBases()
@@ -523,13 +543,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
+   * <P>Returns a {@link arlut.csd.ganymede.Base Base} reference to match the id, or
+   * null if no match.</P>
    *
-   * Returns a Base reference to match the id.
-   * Returns null if no match.
-   *
-   * @see arlut.csd.ganymede.Base
    * @see arlut.csd.ganymede.SchemaEdit
-   *
    */
 
   public Base getBase(short id)
@@ -538,13 +555,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
+   * <P>Returns a {@link arlut.csd.ganymede.Base Base} reference to match the baseName,
+   * or null if no match.</P>
    *
-   * Returns a Base reference to match the baseName.
-   * Returns null if no match.
-   *
-   * @see arlut.csd.ganymede.Base
    * @see arlut.csd.ganymede.SchemaEdit
-   *
    */
 
   public synchronized Base getBase(String baseName)
@@ -567,13 +581,14 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     return null;
   }
 
-  /**
+  /** 
+   * <P>This method creates a new {@link
+   * arlut.csd.ganymede.DBObjectBase DBObjectBase} object and returns
+   * a remote handle to it so that the admin client can set fields on
+   * the base, set attributes, and generally make a nuisance of
+   * itself.</P>
    *
-   * This method creates a new DBObjectBase object and returns a remote handle
-   * to it so that the admin client can set fields on the base, set attributes,
-   * and generally make a nuisance of itself.
-   *
-   * @see arlut.csd.ganymede.SchemaEdit
+   * @see arlut.csd.ganymede.SchemaEdit 
    */
 
   public synchronized Base createNewBase(Category category, boolean embedded, boolean builtIn)
@@ -708,10 +723,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   *
-   * This method deletes a DBObjectBase, removing it from the
+   * <P>This method deletes a {@link
+   * arlut.csd.ganymede.DBObjectBase DBObjectBase}, removing it from the
    * Schema Editor's working set of bases.  The removal won't
-   * take place for real unless the SchemaEdit is committed.
+   * take place for real unless the SchemaEdit is committed.</P>
    *
    * @see arlut.csd.ganymede.SchemaEdit
    */
@@ -759,12 +774,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   * This method returns an array of defined NameSpace objects.
+   * <P>This method returns an array of defined 
+   * {@link arlut.csd.ganymede.NameSpace NameSpace} objects.</P>
    *
-   *
-   * @see arlut.csd.ganymede.NameSpace
    * @see arlut.csd.ganymede.SchemaEdit
-   *
    */
 
   public synchronized NameSpace[] getNameSpaces()
@@ -792,12 +805,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   * This method returns a NameSpace by matching name,
-   * or null if no match is found.
+   * <P>This method returns a {@link arlut.csd.ganymede.NameSpace NameSpace} by matching name,
+   * or null if no match is found.</P>
    *
    * @see arlut.csd.ganymede.NameSpace
    * @see arlut.csd.ganymede.SchemaEdit
-   *
    */
 
   public synchronized NameSpace getNameSpace(String name)
@@ -833,10 +845,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   *
-   * This method creates a new DBNameSpace object and returns a remote handle
+   * <P>This method creates a new {@link arlut.csd.ganymede.DBNameSpace DBNameSpace} 
+   * object and returns a remote handle
    * to it so that the admin client can set attributes on the DBNameSpace,
-   * and generally make a nuisance of itself.
+   * and generally make a nuisance of itself.</P>
    *
    * @see arlut.csd.ganymede.SchemaEdit
    */
@@ -870,13 +882,19 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
+   * <P>This method deletes a
+   *  {@link arlut.csd.ganymede.DBNameSpace DBNameSpace} object, returning true if
+   * the deletion could be carried out, false otherwise.</P>
    *
-   * This method deletes a DBNameSpace object, returning true if
-   * the deletion could be carried out, false otherwise.
-   *
-   * Currently, this method doesn't do any checking to see if the
-   * namespace has any fields created on it.. this will need to
-   * be elaborated as time goes by.
+   * <P>Currently, this method doesn't do any checking to see if the
+   * namespace has any fields created on it.  If you delete a namespace
+   * that fields are using and commit the schema change, when
+   * you stop and restart the server, the loader will complain that
+   * the fields refer to a non-existent namespace.  This code should
+   * really scan through the
+   * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} objects
+   * in the schema editor's working set and clear any fields that point
+   * to this namespace.</P>
    *
    * @see arlut.csd.ganymede.SchemaEdit
    */
@@ -910,9 +928,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
+   * <P>Commit this schema edit, instantiate the modified schema</P>
    *
-   * Commit this schema edit, instantiate the modified schema
-   *
+   * <P>It is an error to attempt any schema editing operations after this
+   * method has been called.</P>
    */
 
   public synchronized void commit()
@@ -1017,23 +1036,21 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
-   *
-   * The schema editor edits built-in fields by editing the set of
+   * <P>The schema editor edits built-in fields by editing the set of
    * built-in fields associated with base SchemaConstants.UserBase
    * (which is chosen randomly as a representative non-embedded
    * object).  This method replicates the builtin fields from
    * SchemaConstants.UserBase into the rest of the non-embedded object
-   * types defined in th server.<br><br>
+   * types defined in th server.</P>
    *
-   * IMPORTANT NOTE: This is only to be used when the Schema Editing rig
+   * <P>IMPORTANT NOTE: This is only to be used when the Schema Editing rig
    * is being used to alter the basic built-in fields that the Ganymede
    * schema depends on.  As such, it is critical that built-ins only
    * be modified with great caution.  Note also that DBObjectBase()'s
    * constructor is responsible for implementing built-ins for newly
    * created object base types.  DBObjectBase.java should be edited
    * before any new bases are created after any editing of the built-in
-   * fields.
-   * 
+   * fields.</P>
    */
 
   private boolean synchronizeBuiltInFields()
@@ -1179,9 +1196,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   }
 
   /**
+   * <P>Abort this schema edit, return the schema to its prior state.</P>
    *
-   * Abort this schema edit, return the schema to its prior state.
-   *
+   * <P>It is an error to attempt any schema editing operations after this
+   * method has been called.</P>
    */
 
   public synchronized void release()

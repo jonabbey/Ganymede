@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 1999/05/26 23:17:25 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 1999/06/09 03:33:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -874,10 +874,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   /**
    * <p>Sets the {@link arlut.csd.ganymede.FieldType field type}
-   * for this field.  Changing the field type
-   * is an incompatible change, and will result in the class managing
-   * this field type being reset to the default class for the field
-   * type.</p>
+   * for this field.  Changing the basic type of a field that is already being
+   * used in the server will cause very bad things to happen.  The
+   * right way to change an existing field is to delete the field, commit
+   * the schema edit, edit the schema again, and recreate the field with
+   * the desired field type.</P>
    *
    * <p>If the new field type is not string, invid, or IP, the field
    * will be made a scalar field.</p>

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 1999/05/26 18:28:11 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 1999/06/09 03:33:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -488,12 +488,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   }
 
   /**
-   * Establishes an GanymedeAdmin object in the server. 
+   * <P>Establishes an GanymedeAdmin object in the server.</P>
    *
-   * Adds <admin> as a monitoring admin console
+   * <P>Adds &lt;admin&gt; as a monitoring admin console.</P>
    *
    * @see arlut.csd.ganymede.Server
-   *
    */
 
   public synchronized adminSession admin(Admin admin) throws RemoteException
@@ -780,20 +779,18 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   }
 
   /**
-   *
-   * This method is used for testing.  This method sweeps 
+   * <P>This method is used for testing.  This method sweeps 
    * through all invid's listed in the (loaded) database, and
-   * checks to make sure that they all have valid back pointers.
+   * checks to make sure that they all have valid back pointers.</P>
    *
-   * Since the backlinks field (SchemaConstants.BackLinksField)
+   * <P>Since the backlinks field (SchemaConstants.BackLinksField)
    * is a general sink for invid's with no homes, we won't explicitly
    * check to see if an invid in a backlink field has a field pointing
    * to it in the target object.. we'll just verify the existence of
-   * the object listed.
+   * the object listed.</P>
    *
    * @return true if there were any invids without back-pointers in
    * the database
-   * 
    */
 
   public synchronized boolean checkInvids()

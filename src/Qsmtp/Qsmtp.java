@@ -53,6 +53,8 @@ Added the extraHeaders parameter to sendMsg() to support sendHTMLmsg().
 
 Modified the code to use the 1.1 io and text formatting classes.
 
+Added javadocs (9 June 1999).
+
 ***********************************************************************/
 
 import java.net.*;
@@ -65,6 +67,28 @@ import java.text.*;
                                                                            Qsmtp
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>SMTP mailer class, used to send email messages (with optional HTML MIME
+ * attachments) through direct TCP/IP communication with Internet SMTP mail
+ * servers.</P>
+ *
+ * <P>The Qsmtp constructors take an address for a SMTP mail server, and all 
+ * messages subsequently sent out by the Qstmp object are handled by
+ * that SMTP server.</P>
+ *
+ * <P>Once created, a Qsmtp object can be used to send any number of messages
+ * through that mail server.  Each call to 
+ * {@link Qsmtp#sendmsg(java.lang.String, java.util.Vector, java.lang.String, 
+ * java.lang.String) sendmsg} or
+ * {@link Qsmtp#sendHTMLmsg(java.lang.String, java.util.Vector, java.lang.String, 
+ * java.lang.String, java.lang.String, java.lang.String) sendHTMLmsg} opens a
+ * separate SMTP connection to the designated mail server and transmits a
+ * single message.</P>
+ *
+ * <P>Because this class opens a socket to a potentially remote TCP/IP server,
+ * this class may not function properly when used within an applet.</P>
+ */
 
 public class Qsmtp {
 
@@ -83,12 +107,6 @@ public class Qsmtp {
   private int port = DEFAULT_PORT;
 
   /* -- */
-
-  /**
-   *   Create a Qsmtp object pointing to the specified host
-   *
-   *   @param hostid The host to connect to.
-   */
 
   public Qsmtp(String hostid)
   {
@@ -112,11 +130,110 @@ public class Qsmtp {
     this.port = port;
   }
 
+  /**
+   * <P>Sends a plain ASCII mail message</P>
+   *
+   * @param from_address Who is sending this message?
+   * @param to_addresses Vector of string addresses to send this message to
+   * @param subject Subject for this message
+   * @param message The text for the mail message
+   *
+   * @exception ProtocolException
+   * @exception IOException
+   */
+
   public void sendmsg(String from_address, Vector to_addresses,
 		      String subject, String message) throws IOException, ProtocolException 
   {
     sendmsg(from_address, to_addresses, subject, message, null);
   }
+
+  /**
+   * <P>Sends a message with a MIME-attached HTML message</P>
+   *
+   * <p>In a perfect world, we'd do a generic MIME-capable mail system here, but
+   * as it is, we only support HTML.</p>
+   *
+   * @param from_address Who is sending this message?
+   * @param to_addresses Vector of string addresses to send this message to
+   * @param subject Subject for this message
+   * @param htmlBody A string containing the HTML document to be sent
+   * @param htmlFilename The name to label the HTML document with, will
+   * show up in mail clients
+   * @param textBody The text for the non-HTML part of the mail message
+   *
+   * @exception ProtocolException
+   * @exception IOException
+   */
+
+  public void sendHTMLmsg(String from_address, Vector to_addresses,
+			  String subject, String htmlBody, String htmlFilename,
+			  String textBody) throws IOException, ProtocolException 
+  {
+    Vector MIMEheaders = new Vector();
+    String separator = "B24FDA77DFMIMEISNEAT4976B1CA5E8A49";
+    StringBuffer buffer = new StringBuffer();
+
+    /* -- */
+
+    MIMEheaders.addElement("MIME-Version: 1.0");
+    MIMEheaders.addElement("Content-Type: multipart/mixed; boundary=\"" + separator + "\"");
+
+    buffer.append("This is a multi-part message in MIME format.\n");
+    
+    if (textBody != null)
+      {
+	buffer.append("--");
+	buffer.append(separator);
+	buffer.append("\nContent-Type: text/plain; charset=us-ascii\n");
+	buffer.append("Content-Transfer-Encoding: 7bit\n\n");
+	buffer.append(textBody);
+	buffer.append("\n");
+      }
+
+    if (htmlBody != null)
+      {
+	buffer.append("--");
+	buffer.append(separator);
+	buffer.append("\nContent-Type: text/html; charset=us-ascii\n");
+	buffer.append("Content-Transfer-Encoding: 7bit\n");
+	
+	if (htmlFilename != null && !htmlFilename.equals(""))
+	  {
+	    buffer.append("Content-Disposition: inline; filename=\"");
+	    buffer.append(htmlFilename);
+	    buffer.append("\"\n\n");
+	  }
+	else
+	  {
+	    buffer.append("Content-Disposition: inline;\n\n");
+	  }
+
+	buffer.append(htmlBody);
+	buffer.append("\n");
+      }
+
+    buffer.append("--");
+    buffer.append(separator);
+    buffer.append("--\n\n");
+
+    sendmsg(from_address, to_addresses, subject, buffer.toString(), MIMEheaders);
+  }
+
+  /**
+   * <P>Sends a mail message with some custom-specified envelope headers.  Used
+   * internally by the other Qsmtp sendmsg and sendHTMLmsg methods.</P>
+   *
+   * @param from_address Who is sending this message?
+   * @param to_addresses Vector of string addresses to send this message to
+   * @param subject Subject for this message
+   * @param message The text for the mail message
+   * @param extraHeaders Vector of string headers to include in the message's
+   * envelope
+   *
+   * @exception ProtocolException
+   * @exception IOException
+   */
 
   public void sendmsg(String from_address, Vector to_addresses, 
 		      String subject, String message,
@@ -297,66 +414,6 @@ public class Qsmtp {
     sock.close();
   }
 
-  /**
-   * <p>In a perfect world, we'd do a generic MIME-capable mail system here.</p>
-   *
-   * @exception ProtocolException
-   * @exception IOException
-   */
-
-  public void sendHTMLmsg(String from_address, Vector to_addresses,
-			  String subject, String htmlBody, String htmlFilename,
-			  String textBody) throws IOException, ProtocolException 
-  {
-    Vector MIMEheaders = new Vector();
-    String separator = "B24FDA77DFMIMEISNEAT4976B1CA5E8A49";
-    StringBuffer buffer = new StringBuffer();
-
-    /* -- */
-
-    MIMEheaders.addElement("MIME-Version: 1.0");
-    MIMEheaders.addElement("Content-Type: multipart/mixed; boundary=\"" + separator + "\"");
-
-    buffer.append("This is a multi-part message in MIME format.\n");
-    
-    if (textBody != null)
-      {
-	buffer.append("--");
-	buffer.append(separator);
-	buffer.append("\nContent-Type: text/plain; charset=us-ascii\n");
-	buffer.append("Content-Transfer-Encoding: 7bit\n\n");
-	buffer.append(textBody);
-	buffer.append("\n");
-      }
-
-    if (htmlBody != null)
-      {
-	buffer.append("--");
-	buffer.append(separator);
-	buffer.append("\nContent-Type: text/html; charset=us-ascii\n");
-	buffer.append("Content-Transfer-Encoding: 7bit\n");
-	
-	if (htmlFilename != null && !htmlFilename.equals(""))
-	  {
-	    buffer.append("Content-Disposition: inline; filename=\"");
-	    buffer.append(htmlFilename);
-	    buffer.append("\"\n\n");
-	  }
-	else
-	  {
-	    buffer.append("Content-Disposition: inline;\n\n");
-	  }
-
-	buffer.append(htmlBody);
-	buffer.append("\n");
-      }
-
-    buffer.append("--");
-    buffer.append(separator);
-    buffer.append("--\n\n");
-
-    sendmsg(from_address, to_addresses, subject, buffer.toString(), MIMEheaders);
-  }
 
   /**
    * <p>This method returns a properly mail-formatted date string.</p>

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 1999/05/26 23:17:25 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 1999/06/09 03:33:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,10 +64,33 @@ import arlut.csd.Util.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>The data dictionary and object store for a particular kind of
+ * object in the {@link arlut.csd.ganymede.DBStore DBStore}.</p>
  *
- * This class is the data dictionary and object store for a particular kind of
- * object in the DBObjectStore.
+ * <p>Each DBObjectBase object includes a set of
+ * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} objects, which
+ * define the types and constraints on fields that may be present in objects
+ * of this type.  These field definitions are held in an
+ * {@link arlut.csd.ganymede.DBBaseFieldTable DBBaseFieldTable}.</p>
  *
+ * <p>The actual {@link arlut.csd.ganymede.DBObject DBObject}'s themselves are
+ * contained in an optimized {@link arlut.csd.ganymede.DBObjectTable DBObjectTable}
+ * contained within this DBObjectBase.</p>
+ *
+ * <p>In addition to holding name, type id, and category information for a
+ * given object type, the DBObjectBase class may also contain a string classname
+ * for a Java class to be dynamically loaded to manage the server's interactions
+ * with objects of this type.  Such a class name must refer to a subclass of the
+ * {@link arlut.csd.ganymede.DBEditObject DBEditObject} class.</p>
+ *
+ * <p>DBObjectBase also keeps track of {@link arlut.csd.ganymede.DBReadLock DBReadLocks},
+ * {@link arlut.csd.ganymede.DBWriteLock DBWriteLocks}, and 
+ * {@link arlut.csd.ganymede.DBDumpLock DBDumpLocks}, to manage 
+ * changes to be made to objects contained in this DBObjectBase.</p>
+ *
+ * <p>DBObjectBase implements the {@link arlut.csd.ganymede.Base Base} RMI remote 
+ * interface, which is used by the client to determine type information for objects
+ * of this type, as well as by the schema editor when the schema is being edited.</p>
  */
 
 public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryNode {
@@ -91,24 +114,57 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   String classname;
   Class classdef;
   short type_code;
-  short label_id;		// which field represents our label?
-  Category category;	// what type of object is this?
+
+  /**
+   * which field represents our label?
+   */
+
+  short label_id;
+
+  /**
+   * what type of object is this?
+   */
+
+  Category category;	
   int displayOrder = 0;
 
   private boolean embedded;
 
   // runtime data
 
-  Vector sortedFields;		// field dictionary, sorted in displayOrder
-  Hashtable containingHash;	// The hash listing us by object type
-				// id.. we can iterate over the elements of
-				// this hash to determine whether a proposed name
-				// is acceptable.
+  /**
+   * field dictionary, sorted in displayOrder
+   */
+
+  Vector sortedFields;
+
+  /**
+   * The hash listing us by object type
+   * id.. we can iterate over the elements of
+   * this hash to determine whether a proposed name
+   * is acceptable.
+   */
+
+  Hashtable containingHash;	
   
-  DBBaseFieldTable fieldTable;		// field dictionary
-  DBObjectTable objectTable;		// objects in our objectBase
+  /**
+   * field dictionary
+   */
+
+  DBBaseFieldTable fieldTable;
+
+  /**
+   * objects in our objectBase
+   */
+
+  DBObjectTable objectTable;
   int object_count;
-  int maxid;			// highest invid to date
+
+  /**
+   * highest invid to date
+   */
+
+  int maxid;
   Date lastChange;
 
   boolean reallyLoading;
@@ -129,7 +185,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   // Customization Management Object
 
-  DBEditObject objectHook;	// a hook to allow static method calls on a DBEditObject management subclass
+  /**
+   * a hook to allow pseudostatic method calls on a DBEditObject management subclass
+   */
+
+  DBEditObject objectHook;	
 
   /* -- */
 
@@ -362,10 +422,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Creation constructor.  Used when the schema editor interface is
-   * used to create a new DBObjectBase.
-   *
+   * <p>Creation constructor.  Used when the schema editor interface is
+   * used to create a new DBObjectBase.</p>
    */
 
   public DBObjectBase(DBStore store, short id, boolean embedded,
@@ -410,8 +468,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * receive constructor.  Used to initialize this DBObjectBase from disk
-   * and load the objects of this type in from the standing store.
+   * <p>receive constructor.  Used to initialize this DBObjectBase from disk
+   * and load the objects of this type in from the standing store.</p>
    */
 
   public DBObjectBase(DataInput in, DBStore store) throws IOException, RemoteException
@@ -420,10 +478,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * copy constructor.  Used to create a copy that we can play with for
-   * schema editing.
-   *
+   * <p>copy constructor.  Used to create a copy that we can play with for
+   * schema editing.</p>
    */
 
   public DBObjectBase(DBObjectBase original, DBSchemaEdit editor) throws RemoteException
@@ -490,13 +546,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>This method writes out a schema-only definition of this base
+   * to disk, for use by the DBStore dumpSchema() method.</p>
    *
-   * This method writes out a schema-only definition of this base
-   * to disk, for use by the DBStore dumpSchema() method.<br><br>
-   *
-   * Note that some objects are emitted by this method, specifically
-   * things like the the supergash owner group, and the like.
-   *
+   * <p>Note that some objects are emitted by this method, specifically
+   * things like the the supergash owner group, and the like.</p>
    */
 
   synchronized void partialEmit(DataOutput out) throws IOException
@@ -879,13 +933,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * This method returns true if this object base is for
+   * <p>This method returns true if this object base is for
    * an embedded object.  Embedded objects do not have
    * their own expiration and removal dates, do not have
    * history trails, and can be only owned by a single
-   * object, not by a list of administrators.
-   *
+   * object, not by a list of administrators.</p>
    */
 
   public boolean isEmbedded()
@@ -910,10 +962,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * This method is used to force a reload of the custom object code
-   * for this object type.
-   *
+   * <p>This method is used to force a reload of the custom object code
+   * for this object type.</p>
    */
 
   public synchronized void reloadCustomClass()
@@ -931,11 +981,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * This method is used to create a DBEditObject subclass handle, to
+   * <p>This method is used to create a DBEditObject subclass handle, to
    * allow various classes to make calls to overridden static methods
-   * for DBEditObject subclasses.
-   *
+   * for DBEditObject subclasses.</p>
    */
 
   DBEditObject createHook() throws RemoteException
@@ -1178,8 +1226,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Print a debugging summary of the type information encoded
-   * in this objectbase to a PrintWriter.
+   * <p>Print a debugging summary of the type information encoded
+   * in this objectbase to a PrintWriter.</p>
    *
    * @param out PrintWriter to print to.
    */
@@ -1259,8 +1307,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Print a debugging summary of the type information encoded
-   * in this objectbase to a PrintWriter.
+   * <p>Print a debugging summary of the type information encoded
+   * in this objectbase to a PrintWriter.</p>
    *
    * @param out PrintWriter to print to.
    */
@@ -1288,7 +1336,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the DBStore containing this DBObjectBase.
+   * <p>Returns the DBStore containing this DBObjectBase.</p>
    */
 
   public DBStore getStore()
@@ -1297,7 +1345,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the name of this object type
+   * <p>Returns the name of this object type</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1365,7 +1413,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the name of the class managing this object type
+   * <p>Returns the name of the class managing this object type</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1430,7 +1478,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the class definition for this object type
+   * <p>Returns the class definition for this object type</p>
    */
 
   public Class getClassDef()
@@ -1439,8 +1487,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns true if the current session is permitted to
-   * create an object of this type.
+   * <p>Returns true if the current session is permitted to
+   * create an object of this type.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1451,7 +1499,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns true if this object type can be inactivated
+   * <p>Returns true if this object type can be inactivated</p>
+   *
    * @see arlut.csd.ganymede.Base
    */
 
@@ -1461,7 +1510,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the invid type id for this object definition
+   * <p>Returns the invid type id for this object definition</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1472,10 +1521,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the short type id for the field designated as this object's
+   * <p>Returns the short type id for the field designated as this object's
    * primary label field, if any.  Objects do not need to have a primary
    * label field designated if labels for this object type are dynamically
-   * generated.
+   * generated.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1486,9 +1535,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the field name for the field designated as this object's
+   * <p>Returns the field name for the field designated as this object's
    * primary label field.  null is returned if no label has been
-   * designated.
+   * designated.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1522,8 +1571,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the invid type id for this object definition as
-   * a Short, suitable for use in a hash.
+   * <p>Returns the invid type id for this object definition as
+   * a Short, suitable for use in a hash.</p>
    */
 
   public Short getKey()
@@ -1577,8 +1626,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the field definition for the field matching id,
-   * or null if no match found.
+   * <p>Returns the field definition for the field matching id,
+   * or null if no match found.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    * @see arlut.csd.ganymede.Base
@@ -1590,8 +1639,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the field definition for the field matching name,
-   * or null if no match found.
+   * <p>Returns the field definition for the field matching name,
+   * or null if no match found.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    * @see arlut.csd.ganymede.Base
@@ -1704,9 +1753,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Get the parent Category for this object type.  This is used by the
+   * <p>Get the parent Category for this object type.  This is used by the
    * Ganymede client and schema editor to present object types in
-   * a hierarchical tree.
+   * a hierarchical tree.</p>
    *
    * @see arlut.csd.ganymede.Base
    * @see arlut.csd.ganymede.CategoryNode
@@ -1921,8 +1970,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * This method is used by the SchemaEditor to detect whether any
-   * objects are using a field definition.
+   * <p>This method is used by the SchemaEditor to detect whether any
+   * objects are using a field definition.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1956,8 +2005,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Returns the display order of this Base within the containing
-   * category.
+   * <p>Returns the display order of this Base within the containing
+   * category.</p>
    *
    * @see arlut.csd.ganymede.CategoryNode
    */
@@ -1968,8 +2017,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Sets the display order of this Base within the containing
-   * category.
+   * <p>Sets the display order of this Base within the containing
+   * category.</p>
    *
    * @see arlut.csd.ganymede.CategoryNode
    */
@@ -1980,7 +2029,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Helper method for DBEditObject subclasses
+   * <p>Helper method for DBEditObject subclasses</p>
    */
 
   public DBEditObject getObjectHook()
@@ -2002,7 +2051,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Get the next available field id for a new field.
+   * <p>Get the next available field id for a new field.</p>
    */
 
   synchronized short getNextFieldID(boolean lowRange)
@@ -2038,10 +2087,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * Clear the editing flag.  This disables the DBObjectBase set
+   * <p>Clear the editing flag.  This disables the DBObjectBase set
    * methods on this ObjectBase and all dependent field definitions.
    * This method also updates the FieldTemplate for each field and 
-   * resorts the field index.
+   * resorts the field index.</p>
    */
   
   synchronized void clearEditor(DBSchemaEdit editor)
@@ -2095,9 +2144,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * This method is used to update base references in objects
+   * <p>This method is used to update base references in objects
    * after this base has replaced an old version via the
-   * SchemaEditor.
+   * SchemaEditor.</p>
    */
 
   synchronized void updateBaseRefs()
@@ -2136,9 +2185,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   // must be synchronized on store.
 
   /**
-   *
-   * Add a DBWriteLock to this base's writer queue.
-   *
+   * <p>Add a DBWriteLock to this base's writer queue.</p>
    */
 
   boolean addWriter(DBWriteLock writer)
@@ -2152,9 +2199,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Remove a DBWriteLock from this base's writer queue.
-   *
+   * <p>Remove a DBWriteLock from this base's writer queue.</p>
    */
 
   boolean removeWriter(DBWriteLock writer)
@@ -2170,9 +2215,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns true if this base's writer queue is empty.
-   *
+   * <p>Returns true if this base's writer queue is empty.</p>
    */
 
   boolean isWriterEmpty()
@@ -2181,9 +2224,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns the size of the writer queue
-   *
+   * <p>Returns the size of the writer queue</p>
    */
 
   int getWriterSize()
@@ -2193,9 +2234,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 
   /**
-   *
-   * Add a DBReadLock to this base's reader list.
-   *
+   * <p>Add a DBReadLock to this base's reader list.</p>
    */
 
   boolean addReader(DBReadLock reader)
@@ -2209,9 +2248,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Remove a DBReadLock from this base's reader list.
-   *
+   * <p>Remove a DBReadLock from this base's reader list.</p>
    */
 
   boolean removeReader(DBReadLock reader)
@@ -2228,9 +2265,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns true if this base's reader list is empty.
-   *
+   * <p>Returns true if this base's reader list is empty.</p>
    */
 
   boolean isReaderEmpty()
@@ -2239,9 +2274,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns the size of the reader list
-   *
+   * <p>Returns the size of the reader list</p>
    */
 
   int getReaderSize()
@@ -2250,9 +2283,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Add a DBDumpLock to this base's dumper queue.
-   *
+   * <p>Add a DBDumpLock to this base's dumper queue.</p>
    */
 
   boolean addDumper(DBDumpLock dumper)
@@ -2266,9 +2297,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Remove a DBDumpLock from this base's dumper queue.
-   *
+   * <p>Remove a DBDumpLock from this base's dumper queue.</p>
    */
 
   boolean removeDumper(DBDumpLock dumper)
@@ -2287,9 +2316,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns true if this base's dumper list is empty.
-   *
+   * <p>Returns true if this base's dumper list is empty.</p>
    */
 
   boolean isDumperEmpty()
@@ -2298,9 +2325,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns the size of the dumper list
-   *
+   * <p>Returns the size of the dumper list</p>
    */
 
   int getDumperSize()
@@ -2309,9 +2334,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Let's get our name here.
-   * 
+   * <p>Let's get our name here.</p>
    */
 
   public String toString()
@@ -2320,10 +2343,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * A debug tool, to show how field definitions are currently ordered
-   * in this base.
-   * 
+   * <p>A debug tool, to show how field definitions are currently ordered
+   * in this base.</p>
    */
 
   synchronized void displayFieldOrder()
@@ -2337,10 +2358,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * This method is used to put a new field into both the hashed field
-   * table and the sortedFields vector.
-   * 
+   * <p>This method is used to put a new field into both the hashed field
+   * table and the sortedFields vector.</p>
    */
 
   synchronized void addField(DBObjectBaseField field)
@@ -2350,10 +2369,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * This method is used to remove a field from this base's
-   * field database.
-   * 
+   * <p>This method is used to remove a field from this base's
+   * field database.</p>
    */
 
   synchronized void removeField(DBObjectBaseField field)
@@ -2367,13 +2384,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * This method reshuffles the fields in keeping with the fields'
+   * <p>This method reshuffles the fields in keeping with the fields'
    * display order.  Note that there's no guarantee that the field
    * orders will be unique.. the schema editor will keep the
    * non-builtin fields' displayOrder unique, which is what we really
-   * care about.
-   * 
+   * care about.</p>
    */
 
   synchronized void sortFields()

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/04/28 06:46:51 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 1999/06/09 03:33:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,11 +65,13 @@ import java.rmi.server.Unreferenced;
  * various EditSets that would possibly want to modify fields constrained
  * to have a unique value.</p>
  *
- * <p>Several different fields in different DBObjectBase's can point to the
+ * <p>Several different fields in different 
+ * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}'s can point to the
  * same DBNameSpace.  All such fields thus share a common name space.</p>
  *
  * <p>DBNameSpace is designed to coordinate transactional access in conjunction with
- * DBEditSet's and DBEditObject's.</p>
+ * {@link arlut.csd.ganymede.DBEditSet DBEditSet}'s and 
+ * {@link arlut.csd.ganymede.DBEditObject DBEditObject}'s.</p>
  *
  * <p>When an object is pulled out from editing, it can't affect any other object,
  * except through the acquisition of values in unique contraint fields.  Such
@@ -78,7 +80,6 @@ import java.rmi.server.Unreferenced;
  * DBEditSet is committed.</p>
  *
  * <p>The actual acquisition logic is in the DBEditObject's setValue method.</p>
- *
  */
 
 public final class DBNameSpace extends UnicastRemoteObject implements NameSpace {

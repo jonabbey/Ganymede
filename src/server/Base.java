@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/05/26 23:17:21 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/06/09 03:33:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,15 +58,15 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * <p>Client side interface definition for the Ganymede DBObjectBase class.  This
+ * <P>Client side interface definition for the Ganymede
+ * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} class.  This
  * interface allows the client to query type information remotely, and allows
- * the schema editor in the admin console to remotely edit object type information.</p>
+ * the schema editor in the admin console to remotely edit object type information.</P>
  *
- * <p>The {@link arlut.csd.ganymede.Category Category} interface is also vital to
- * the client and schema editor's work with object types.</p>
+ * <P>The {@link arlut.csd.ganymede.Category Category} interface is also vital to
+ * the client and schema editor's work with object types.</P>
  *
- * @version $Revision: 1.16 $ $Date: 1999/05/26 23:17:21 $ $Name:  $
+ * @version $Revision: 1.17 $ $Date: 1999/06/09 03:33:35 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 

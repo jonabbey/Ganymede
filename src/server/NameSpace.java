@@ -6,8 +6,8 @@
    
    Created: 21 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:48 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/06/09 03:33:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,11 +57,10 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * Client side interface for the Ganymede DBNameSpace class.  This interface
+ * <P>Client side interface for the Ganymede
+ * {@link arlut.csd.ganymede.DBNameSpace DBNameSpace} class.  This interface
  * allows the admin console to be able to view the name of the namespace and
- * view/set the case sensitivity of this namespace.
- *
+ * view/set the case sensitivity of this namespace.</P>
  */
 
 public interface NameSpace extends Remote {

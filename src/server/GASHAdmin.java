@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 1999/04/28 09:33:01 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 1999/06/09 03:33:38 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1320,6 +1320,24 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
                                                                        GASHAdmin
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>Ganymede GUI admin console.</P>
+ *
+ * <P>GASHAdmin is a dual-mode (applet/application) GUI app for monitoring and
+ * controlling the Ganymede server.  In addition to monitoring users and tasks
+ * on the Ganymede server, the admin console includes a full-functioned
+ * {@link arlut.csd.ganymede.GASHSchema schema editor}.</P>
+ *
+ * <P>GASHAdmin connects to a running
+ * {@link arlut.csd.ganymede.GanymedeServer GanymedeServer} using the 
+ * {@link arlut.csd.ganymede.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin()}
+ * method.  In order to get logged into the server, GASHAdmin 
+ * itself publishes an {@link arlut.csd.ganymede.iAdmin iAdmin}
+ * object via RMI implementing the {@link arlut.csd.ganymede.Admin Admin}
+ * interface so that the server can dynamically update us as things happen on
+ * the server.</P>
+ */
 
 public class GASHAdmin extends JApplet implements ActionListener {
 
