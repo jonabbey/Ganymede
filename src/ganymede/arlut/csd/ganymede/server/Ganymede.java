@@ -694,7 +694,7 @@ public class Ganymede {
 	  {
 	    for (int i = 0; i < syncRunners.size(); i++)
 	      {
-		SyncRunner channel = (SyncRunner) syncRunners.elementAt(i);
+		SyncRunner channel = getSyncChannel((String) syncRunners.elementAt(i));
 
 		try
 		  {
