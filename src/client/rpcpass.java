@@ -9,8 +9,8 @@
 
    Created: 6 May 1999
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2001/10/25 21:43:13 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/10/25 21:44:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,6 +75,10 @@ import arlut.csd.Util.ParseArgs;
  *
  * <p>This client uses the {@link arlut.csd.ganymede.client.ClientBase ClientBase}
  * client stub for communications with the server.</p>
+ *
+ * <p>This code should be considered quasi-deprecatd, because the NIS
+ * passwd daemon can't pass plaintext to Ganymede, making it useless
+ * for updating Samba, md5 or NT password hashes.</p> 
  */
 
 public class rpcpass implements ClientListener {
