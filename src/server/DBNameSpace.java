@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -675,6 +675,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
     if (transpoints == null)
       {
+	System.err.println("DBNameSpace.rollback(): In editSet: " + editSet.description);
 	System.err.println("DBNameSpace.rollback(): no checkpoints found for transaction");
 	return false;
       }
@@ -683,7 +684,8 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
     if (point == null)
       {
-	System.err.println("DBNameSpace.rollback(): no checkpoint found by requested name");
+	System.err.println("DBNameSpace.rollback(): In editSet: " + editSet.description);
+	System.err.println("DBNameSpace.rollback(): no checkpoint found by requested name: " + name);
 	return false;
       }
 
@@ -693,6 +695,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
       {
 	if (point.values.size() != 0)
 	  {
+	    System.err.println("DBNameSpace.rollback(): In editSet: " + editSet.description);
 	    System.err.println("DBNameSpace.rollback(): no values held for transaction in namespace");
 	    return false;
 	  }
