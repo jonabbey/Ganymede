@@ -58,6 +58,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import java.util.HashMap;
@@ -75,6 +76,9 @@ import java.util.Iterator;
  *
  * <p>All methods on a constructed JLabelPanel object should be called on the
  * GUI thread once the JLabelPanel has been added to a GUI container.</p>
+ *
+ * @version $Id$
+ * @author Jonathan Abbey
  */
 
 public class JLabelPanel extends JPanel {
@@ -85,9 +89,11 @@ public class JLabelPanel extends JPanel {
   private GridBagConstraints gbc;
   private int row = 0;
   private HashMap rowHash;
+  private HashMap idHash;
   private Font font = null;
   private float size = 0.0F;
   private int style = 0;
+  private Insets insets = new java.awt.Insets(0,0,0,0);
 
   /**
    * <p>If true, we'll put in a JSpacer to keep the label cells
@@ -131,6 +137,7 @@ public class JLabelPanel extends JPanel {
 
     row = 0;
     rowHash = new HashMap();
+    idHash = new HashMap();
   }
 
   /**
@@ -169,6 +176,34 @@ public class JLabelPanel extends JPanel {
       {
 	gPanel.remove(spacer);
 	spacer = null;
+      }
+  }
+
+  /**
+   * <p>Sets standardized insets around each label and component
+   * to be added to this JLabelPanel.</p>
+   */
+
+  public synchronized void setInsets(int top, int left, int bottom, int right)
+  {
+    this.insets = new java.awt.Insets(top,left,bottom,right);
+  }
+
+
+  /**
+   * <p>Sets standardized insets around each label and component
+   * to be added to this JLabelPanel.</p>
+   */
+
+  public synchronized void setInsets(java.awt.Insets insets)
+  {
+    if (insets == null)
+      {
+	this.insets = new java.awt.Insets(0,0,0,0);
+      }
+    else
+      {
+	this.insets = insets;
       }
   }
 
@@ -290,11 +325,30 @@ public class JLabelPanel extends JPanel {
    * <p>For adding a labeled item.</p>
    *
    * <p>Each row that is added is placed below all rows above it.</p>
+   *
+   * @param label The text to put in a label on the leftmost column for this row.  May be null.
+   * @param comp The component to add in the right column, after the label, if any.
    */
 
   public void addRow(String label, Component comp)
   {
-    addRow(label, comp, false, false);
+    addRow(label, comp, false, false, null);
+  }
+
+  /**
+   * <p>For adding a labeled item.</p>
+   *
+   * <p>Each row that is added is placed below all rows above it.</p>
+   *
+   * @param label The text to put in a label on the leftmost column for this row.  May be null.
+   * @param comp The component to add in the right column, after the label, if any.
+   * @param id If non-null, the hashable identifier provided will be used to allow
+   * direct look-up of the given component using the findID() call.
+   */
+
+  public void addRow(String label, Component comp, Object id)
+  {
+    addRow(label, comp, false, false, id);
   }
 
   /**
@@ -302,22 +356,57 @@ public class JLabelPanel extends JPanel {
    * to fill the entire panel.</p>
    *
    * <p>Each row that is added is placed below all rows above it.</p>
+   *
+   * @param label The text to put in a label on the leftmost column for this row.  May be null.
+   * @param comp The component to add in the right column, after the label, if any.
    */
 
   public void addFillRow(String label, Component comp)
   {
-    addRow(label, comp, true, false);
+    addRow(label, comp, true, false, null);
+  }
+
+  /**
+   * <p>For adding a labeled item that is to stretch horizontally
+   * to fill the entire panel.</p>
+   *
+   * <p>Each row that is added is placed below all rows above it.</p>
+   *
+   * @param label The text to put in a label on the leftmost column for this row.  May be null.
+   * @param comp The component to add in the right column, after the label, if any.
+   * @param id If non-null, the hashable identifier provided will be used to allow
+   * direct look-up of the given component using the findID() call.
+   */
+
+  public void addFillRow(String label, Component comp, Object id)
+  {
+    addRow(label, comp, true, false, id);
   }
 
   /**
    * <p>For adding a component that spans the label and item columns.</p>
    *
    * <p>Each row that is added is placed below all rows above it.</p>
+   * @param comp The component to add.
    */
 
   public void addWideComponent(Component comp)
   {
-    addRow(null, comp, false, true);
+    addRow(null, comp, false, true, null);
+  }
+
+  /**
+   * <p>For adding a component that spans the label and item columns.</p>
+   *
+   * <p>Each row that is added is placed below all rows above it.</p>
+   * @param comp The component to add.
+   * @param id If non-null, the hashable identifier provided will be used to allow
+   * direct look-up of the given component using the findID() call.
+   */
+
+  public void addWideComponent(Component comp, Object id)
+  {
+    addRow(null, comp, false, true, id);
   }
 
   /**
@@ -325,11 +414,29 @@ public class JLabelPanel extends JPanel {
    * that is to stretch horizontally to fill the entire panel.</p>
    *
    * <p>Each row that is added is placed below all rows above it.</p>
+   *
+   * @param comp The component to add.
    */
 
   public void addWideFillComponent(Component comp)
   {
-    addRow(null, comp, true, true);
+    addRow(null, comp, true, true, null);
+  }
+
+  /**
+   * <p>For adding a component that spans the label and item columns, and
+   * that is to stretch horizontally to fill the entire panel.</p>
+   *
+   * <p>Each row that is added is placed below all rows above it.</p>
+   *
+   * @param comp The component to add.
+   * @param id If non-null, the hashable identifier provided will be used to allow
+   * direct look-up of the given component using the findID() call.
+   */
+
+  public void addWideFillComponent(Component comp, Object id)
+  {
+    addRow(null, comp, true, true, id);
   }
 
   /**
@@ -345,9 +452,11 @@ public class JLabelPanel extends JPanel {
    * @param wideComponent If true and if label is null, the comp will
    * be horizontally positioned starting in the label column rather
    * than the field column.
+   * @param id If non-null, the hashable identifier provided will be used to allow
+   * direct look-up of the given component using the findID() call.
    */
 
-  private synchronized void addRow(String label, Component comp, boolean fill, boolean wideComponent)
+  private synchronized void addRow(String label, Component comp, boolean fill, boolean wideComponent, Object id)
   {
     if (rowHash == null || gPanel == null)
       {
@@ -372,6 +481,7 @@ public class JLabelPanel extends JPanel {
 	gbc.weightx = 0.0;
 	gbc.gridx = 0;
 	gbc.gridwidth = 1;
+	gbc.insets = this.insets;
 	gbl.setConstraints(l, gbc);
 	gPanel.add(l);
 
@@ -412,6 +522,11 @@ public class JLabelPanel extends JPanel {
 
     gbl.setConstraints(comp, gbc);
     gPanel.add(comp);
+
+    if (id != null)
+      {
+	idHash.put(id, comp);
+      }
 
     row = row + 1;
   }
@@ -468,6 +583,23 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
+   * <p>Returns the Component associated with the given Object identifier,
+   * useful if an identifier was passed in when the component was added.</p>
+   *
+   * <p>This is used so that the components can be 'directly addressed' using
+   * whatever criterion the user of JLabelPanel wishes to associate with each
+   * component.</p>
+   *
+   * <p>This method will return null if no component could be found by the
+   * name in question.</p>
+   */
+
+  public synchronized Component findID(Object id)
+  {
+    return (Component) idHash.get(id);
+  }
+
+  /**
    * <p>Does dissolution of this JLabelPanel.  Useful to make sure we
    * don't keep hold of any lingering references to things.</p>
    */
@@ -476,6 +608,8 @@ public class JLabelPanel extends JPanel {
   {
     rowHash.clear();
     rowHash = null;
+    idHash.clear();
+    idHash = null;
     removeAll();
     gPanel.removeAll();
     bPanel.removeAll();
