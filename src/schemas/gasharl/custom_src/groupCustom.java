@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -78,26 +78,31 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    *
    * Initialize a newly created DBEditObject.
    *
-   * When this method is called, the DBEditObject has
-   * been created and all fields defined in the
-   * controlling DBObjectBase have been instantiated
-   * without defined values.<br><br>
+   * When this method is called, the DBEditObject has been created,
+   * its ownership set, and all fields defined in the controlling
+   * DBObjectBase have been instantiated without defined
+   * values.<br><br>
    *
    * This method is responsible for filling in any default
    * values that can be calculated from the DBSession
    * associated with the editset defined in this DBEditObject.<br><br>
    *
    * If initialization fails for some reason, initializeNewObject()
-   * will return false.  Right now there is no infrastructure in
-   * Ganymede to allow the transaction to be aborted from
-   * within the DBSession's createDBObject() method.  As a result,
-   * if this method is to fail to properly initialize the object,
-   * it should be able to not leave an impact on the rest of the
-   * DBStore.. in other words, setting InvidField values that
-   * involve symmetry relationships could be problematic. <br><br>
+   * will return false.  If the owning GanymedeSession is not in
+   * bulk-loading mode (i.e., enableOversight is true),
+   * DBSession.createDBObject() will checkpoint the transaction before
+   * calling this method.  If this method returns false, the calling
+   * method will rollback the transaction.  This method has no
+   * responsibility for undoing partial initialization, the
+   * checkpoint/rollback logic will take care of that.<br><br>
+   *
+   * If enableOversight is false, DBSession.createDBObject() will not
+   * checkpoint the transaction status prior to calling initializeNewObject(),
+   * so it is the responsibility of this method to handle any checkpointing
+   * needed.<br><br>
    *
    * This method should be overridden in subclasses.
-   *
+   *   
    */
 
   public boolean initializeNewObject()

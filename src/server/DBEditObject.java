@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.67 $ %D%
+   Version: $Revision: 1.68 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1177,15 +1177,21 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * associated with the editset defined in this DBEditObject.<br><br>
    *
    * If initialization fails for some reason, initializeNewObject()
-   * will return false.  DBSession.createDBObject() will checkpoint
-   * the transaction before calling this method.  If this method
-   * returns false, the calling method will rollback the
-   * transaction.  This method has no responsibility for undoing
-   * partial initialization, the checkpoint/rollback logic will take
-   * care of that.<br><br>
+   * will return false.  If the owning GanymedeSession is not in
+   * bulk-loading mode (i.e., enableOversight is true),
+   * DBSession.createDBObject() will checkpoint the transaction before
+   * calling this method.  If this method returns false, the calling
+   * method will rollback the transaction.  This method has no
+   * responsibility for undoing partial initialization, the
+   * checkpoint/rollback logic will take care of that.<br><br>
+   *
+   * If enableOversight is false, DBSession.createDBObject() will not
+   * checkpoint the transaction status prior to calling initializeNewObject(),
+   * so it is the responsibility of this method to handle any checkpointing
+   * needed.<br><br>
    *
    * This method should be overridden in subclasses.
-   *  
+   *   
    */
 
   public boolean initializeNewObject()
