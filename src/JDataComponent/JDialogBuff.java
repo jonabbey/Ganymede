@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -128,6 +128,10 @@ public class JDialogBuff implements java.io.Serializable {
 
 	index++;
       }
+
+    // to speed GC
+
+    chunks = null;
 
     return retVal;
   }
@@ -366,6 +370,13 @@ public class JDialogBuff implements java.io.Serializable {
       {
 	results.addElement(new JDialogBuffChunk((String) labels.elementAt(i), operands.elementAt(i)));
       }
+
+    // to speed GC
+
+    labels = operands = tempVect = null;
+    tempString = null;
+
+    // and we're done
 
     return results;
   }
