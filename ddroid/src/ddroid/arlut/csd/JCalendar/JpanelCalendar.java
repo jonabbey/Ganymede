@@ -5,9 +5,9 @@
 
    Created: 17 March 1997
 
-   Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
+   Last Mod Date: $Date$
    SVN URL: $HeadURL$
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
