@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.22 $
-# $Date: 2001/01/31 10:31:39 $
+# $Revision: 1.23 $
+# $Date: 2001/01/31 10:44:17 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -205,7 +205,7 @@ simply editing the client.properties file.
 ENDREADME
 
 close OUTPUT;
-chmod 0644 "$installdir/README"; print ".";
+chmod 0644, "$installdir/README"; print ".";
 
 copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
 
