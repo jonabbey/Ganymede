@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,10 +23,13 @@ import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
 
-public class ownerPanel extends JBufferedPane {
+public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 
   boolean
     editable;
+
+  invid_field
+    field;
 
   public ownerPanel(invid_field field, boolean editable)
     {
@@ -37,6 +40,7 @@ public class ownerPanel extends JBufferedPane {
 	{
 	  throw new RuntimeException("null field passed to ownerPanel constructor");
 	}
+      
       try
 	{
 	  if (field.getType() == SchemaConstants.OwnerListField)
@@ -50,7 +54,7 @@ public class ownerPanel extends JBufferedPane {
 	}
 
       this.editable = editable;
-
+      this.field = field;
       
       setInsets(new Insets(5,5,5,5));
       
@@ -109,9 +113,41 @@ public class ownerPanel extends JBufferedPane {
       }
 
     stringSelector ss = new stringSelector(choiceHandles, valueHandles, this, editable);
+    ss.setCallback(this);
     return ss;
   }
 
-  
+  public boolean setValuePerformed(JValueObject o)
+    {
+
+      if (o.getSource() instanceof stringSelector)
+	{
+	  if (o.getValue() instanceof Invid)
+	    {
+	      Invid invid = (Invid)o.getValue();
+	      int index = o.getIndex();
+	      try
+		{
+		  if (o.getOperationType() == JValueObject.ADD)
+		    {
+		      return (field.addElement(invid));
+		    }
+		  else if (o.getOperationType() == JValueObject.DELETE)
+		    {
+		      return (field.deleteElement(index));
+		    }
+		}
+	      catch (RemoteException rx)
+		{
+		  throw new RuntimeException("Could not change owner field: " + rx);
+		}
+	    }
+	}
+      else
+	{
+	  System.out.println("Where did this setValuePerformed come from?");
+	}
+      return false;
+    }
 
 }
