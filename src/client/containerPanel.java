@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.39 $ %D%
+    Version: $Revision: 1.40 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,6 +40,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   // -- 
   
+  private boolean 
+    keepLoading = true;
+
   gclient
     gc;			// our interface to the server
 
@@ -168,166 +171,202 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   
   public void load() 
   {
+
     if (loaded)
       {
 	System.out.println("Container panel is already loaded!");
 	return;
       }
 
-    if (debug)
-      {
-	System.out.println("Loading container panel");
-      }
-
-    objectHash = new Hashtable();
-    rowHash = new Hashtable();
-
-    gbl = new GridBagLayout();
-    gbc = new GridBagConstraints();
-    
-    setLayout(gbl);
-    gbc.anchor = GridBagConstraints.NORTHWEST;
-    gbc.insets = new Insets(4,4,4,4);
-    
-    if (progressBar != null)
-      {
-	progressBar.setMinimum(0);
-	progressBar.setMaximum(15);
-	progressBar.setValue(0);
-      }
-      
-    // Get the list of fields
-
-    if (debug)
-      {
-	System.out.println("Getting list of fields");
-      }
-    
     try
       {
-	type = object.getTypeID();
+	gc.registerNewContainerPanel(this);
+
+
+	if (debug)
+	  {
+	    System.out.println("Loading container panel");
+	  }
+
+	objectHash = new Hashtable();
+	rowHash = new Hashtable();
+
+	gbl = new GridBagLayout();
+	gbc = new GridBagConstraints();
+    
+	setLayout(gbl);
+	gbc.anchor = GridBagConstraints.NORTHWEST;
+	gbc.insets = new Insets(4,4,4,4);
+    
+	if (progressBar != null)
+	  {
+	    progressBar.setMinimum(0);
+	    progressBar.setMaximum(15);
+	    progressBar.setValue(0);
+	  }
+      
+	// Get the list of fields
+
+	if (debug)
+	  {
+	    System.out.println("Getting list of fields");
+	  }
+    
+	try
+	  {
+	    type = object.getTypeID();
+
+	    if (progressBar != null)
+	      {
+		progressBar.setValue(1);
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get the fields: " + rx);
+	  }
+
+	Short Type = new Short(type);
+
+	templates = gc.getTemplateVector(Type);
 
 	if (progressBar != null)
 	  {
-	    progressBar.setValue(1);
+	    progressBar.setValue(2);
 	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get the fields: " + rx);
-      }
 
-    Short Type = new Short(type);
-
-    templates = gc.getTemplateVector(Type);
-
-    if (progressBar != null)
-      {
-	progressBar.setValue(2);
-      }
-
-    try
-      {
-	infoVector = object.getFieldInfoVector(true);  // Just gets the custom ones
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get FieldInfoVector: " + rx);
-      }
-
-    if (progressBar != null)
-      {
-	progressBar.setMaximum(infoVector.size());
-	progressBar.setValue(3);
-      }
-
-    if (debug)
-      {
-	System.out.println("Entering big loop");
-      }
-      
-    if (templates != null)
-      {
-	int infoSize = infoVector.size();
-	FieldInfo fieldInfo = null;
-	FieldTemplate fieldTemplate = null;
-	
-	for (int i = 0; i < infoSize ; i++)
+	try
 	  {
-	    if (progressBar != null)
-	      {
-		progressBar.setValue(i + 4);
-	      }
+	    infoVector = object.getFieldInfoVector(true);  // Just gets the custom ones
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get FieldInfoVector: " + rx);
+	  }
 
-	    try
-	      {
-		// Skip some fields.  custom panels hold the built ins, and a few others.
-		fieldInfo = (FieldInfo)infoVector.elementAt(i);
-		// Find the template
-		boolean found = false;
-		int tSize = templates.size();
+	if (progressBar != null)
+	  {
+	    progressBar.setMaximum(infoVector.size());
+	    progressBar.setValue(3);
+	  }
 
-		for (int k = 0; k < tSize; k++)
+	if (debug)
+	  {
+	    System.out.println("Entering big loop");
+	  }
+      
+	if (templates != null)
+	  {
+	    int infoSize = infoVector.size();
+	    FieldInfo fieldInfo = null;
+	    FieldTemplate fieldTemplate = null;
+	
+	    for (int i = 0; i < infoSize ; i++)
+	      {
+		if (keepLoading)
 		  {
-		    fieldTemplate = (FieldTemplate)templates.elementAt(k);
-		    if (fieldTemplate.getID() == fieldInfo.getID())
+		    if (progressBar != null)
 		      {
-			found = true;
-			break;
+			progressBar.setValue(i + 4);
 		      }
-		  }
 		
-		if (! found)
-		  {
-		    throw new RuntimeException("Could not find the template for this field: " + 
-					       fieldInfo.getField());
-		  }
-
-		short ID = fieldTemplate.getID();
-
-		if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned)) 
-		    ||  (ID == SchemaConstants.BackLinksField)
-		    || ((type == SchemaConstants.UserBase) && (ID == SchemaConstants.UserAdminPersonae))
-		    || ((ID == SchemaConstants.ContainerField) && object.isEmbedded()))
-		  {
-		    if (debug)
+		    try
 		      {
-			System.out.println("Skipping a special field: " + fieldTemplate.getName());
+			// Skip some fields.  custom panels hold the built ins, and a few others.
+			fieldInfo = (FieldInfo)infoVector.elementAt(i);
+			// Find the template
+			boolean found = false;
+			int tSize = templates.size();
+		    
+			for (int k = 0; k < tSize; k++)
+			  {
+			    fieldTemplate = (FieldTemplate)templates.elementAt(k);
+			    if (fieldTemplate.getID() == fieldInfo.getID())
+			      {
+				found = true;
+				break;
+			      }
+			  }
+		
+			if (! found)
+			  {
+			    throw new RuntimeException("Could not find the template for this field: " + 
+						       fieldInfo.getField());
+			  }
+		    
+			short ID = fieldTemplate.getID();
+		    
+			if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned)) 
+			    ||  (ID == SchemaConstants.BackLinksField)
+			    || ((type == SchemaConstants.UserBase) && (ID == SchemaConstants.UserAdminPersonae))
+			    || ((ID == SchemaConstants.ContainerField) && object.isEmbedded()))
+			  {
+			    if (debug)
+			      {
+				System.out.println("Skipping a special field: " + fieldTemplate.getName());
+			      }
+			  }
+			else
+			  {
+			    //System.out.println("- number " + i + ".  tSize = " + tSize);
+			    //if (i == tSize - 1)  // This is the last component
+			    //  {
+			    //System.out.println("setting the weighty!");
+			    //gbc.weighty = 1.0;  // Make it strectch to fill up the space
+			    //}
+			    addFieldComponent(fieldInfo.getField(), fieldInfo, fieldTemplate);
+			  }
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("caught remote exception adding field " + ex);
 		      }
 		  }
 		else
 		  {
-		    //System.out.println("- number " + i + ".  tSize = " + tSize);
-		    //if (i == tSize - 1)  // This is the last component
-		    //  {
-		    //System.out.println("setting the weighty!");
-		    //gbc.weighty = 1.0;  // Make it strectch to fill up the space
-		    //}
-		    addFieldComponent(fieldInfo.getField(), fieldInfo, fieldTemplate);
+		    // Yikes, we have to stop loading...
+		    gc.containerPanelFinished(this);
+		    //this.notifyAll();
+		    break;
 		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("caught remote exception adding field " + ex);
+	    
 	      }
 	  }
-      }
     
-    if (debug)
-      {
-	System.out.println("Done with loop");
+	if (debug)
+	  {
+	    System.out.println("Done with loop");
+	  }
+
+	//setViewportView(panel);
+
+	setStatus("Finished loading containerPanel");
+	gc.containerPanelFinished(this);
+	loaded = true;
+
       }
-
-    //setViewportView(panel);
-
-    setStatus("Finished loading containerPanel");
-
-    loaded = true;
+    finally
+      {
+	System.out.println("Got an exception during load, cleaning up in gclient");
+	loaded = true;
+	gc.containerPanelFinished(this);
+      }
   }
 
   public boolean isLoaded()
   {
     return loaded;
+  }
+
+  public void stopLoading()
+  {
+    if (isLoaded())
+      {
+	return;
+      }
+
+    keepLoading = false;
+
   }
 
   /**
@@ -482,9 +521,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("Passfield, ingnoring");
 	      }
-	    else if (comp instanceof tStringSelector)
+	    else if (comp instanceof StringSelector)
 	      {
-		System.out.println("Skipping over tStringSelector.");
+		System.out.println("Skipping over StringSelector.");
 	      }
 	    else 
 	      {
@@ -537,7 +576,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return true;
       }
 
-    boolean returnValue = false;
+    ReturnVal returnValue = null;
 
     /* -- */
 
@@ -556,15 +595,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
 	      }
 
-	    if (field.setValue(v.getValue()))
-	      {
-		returnValue = true;
-	      }
-	    else
-	      {
-		setStatus("Change failed: " + gc.getSession().getLastError());
-		returnValue = false;
-	      }
+	    returnValue = field.setValue(v.getValue());
 	  }
 	catch (RemoteException rx)
 	  {
@@ -587,15 +618,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
 	      }
 
-	    if (field.setPlainTextPass((String)v.getValue()))
-	      {
-		returnValue = true;
-	      }
-	    else
-	      {
-		setStatus("Change failed: " + gc.getSession().getLastError());
-		returnValue =  false;
-	      }
+	    returnValue = field.setPlainTextPass((String)v.getValue());
 	  }
 	catch (RemoteException rx)
 	  {
@@ -625,17 +648,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	System.out.println("Something happened in the vector panel");
       }
-    else if (v.getSource() instanceof tStringSelector)
+    else if (v.getSource() instanceof StringSelector)
       {
 	if (debug)
 	  {
-	    System.out.println("value performed from tStringSelector");
+	    System.out.println("value performed from StringSelector");
 	  }
-	if (v.getOperationType() == JValueObject.ERROR)
-	  {
-	    setStatus((String)v.getValue());
-	  }
-	else if (v.getValue() instanceof Invid)
+	if (v.getValue() instanceof Invid)
 	  {
 	    db_field field = (db_field)objectHash.get(v.getSource());
 
@@ -665,17 +684,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      }
 		    returnValue = (field.deleteElement(invid));
 		  }
-		if (debug)
-		  {
-		    if (returnValue)
-		      {
-			System.out.println("returned true");
-		      }
-		    else
-		      {
-			System.out.println("returned false");
-		      }
-		  }
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -684,7 +692,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else if (v.getValue() instanceof String)
 	  {
-	    System.out.println("String tStringSelector callback, not implemented yet");
+	    System.out.println("String StringSelector callback");
 	    string_field field = (string_field)objectHash.get(v.getSource());
 	    
 	    if (v.getOperationType() == JValueObject.ADD)
@@ -735,7 +743,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     else if (v.getOperationType() == JValueObject.PARAMETER)
       {
-	System.out.println("MenuItem selected in a tStringSelector");
+	System.out.println("MenuItem selected in a StringSelector");
 	String command = (String)v.getParameter();
 
 	if (command.equals("Edit object"))
@@ -774,7 +782,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    throw new RuntimeException("Could not view object: " + rx);
 		  }
 	      }
-	    returnValue = true;
+	    returnValue = null;
 	  }
 	else
 	  {
@@ -788,56 +796,49 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     // Check to see if anything needs updating.
 
-    if (returnValue)
-      {
-	try
-	  {
-	    if (object.shouldRescan())
-	      {
-		update();
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not call shouldRescan(): " + rx);
-	  }
-      }
-
-    System.out.println("returnValue: " + returnValue);
-    
-    // Only set somethingChanged to true if something Changed; never set it to false
-    if (returnValue)
+    if (returnValue == null)  // Success, no need to do anything else
       {
 	gc.somethingChanged = true;
+	return true;
       }
+    else if (returnValue.didSucceed())
+      {
+	if (returnValue.doRescan())
+	  {
 
-    return returnValue;
+	  }
+	else
+	  {
+
+	  }
+	return true;
+      }
+    else
+      {
+	if (returnValue.doRescan())
+	  {
+
+	  }
+	else
+	  {
+
+	  }
+	return false;
+      }
   }
 
 
   public void actionPerformed(ActionEvent e)
   {
-    boolean ok = false;
+    ReturnVal returnValue = null;
+
     if (e.getSource() instanceof JCheckBox)
       {
 	db_field field = (db_field)objectHash.get(e.getSource());
 	  
 	try
 	  {
-	      
-	    if (field.setValue(new Boolean(((JCheckBox)e.getSource()).isSelected())))
-	      {
-		ok = true;
-		gc.somethingChanged = true;
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("Could not change checkbox, resetting it now");
-		  }
-		((JCheckBox)e.getSource()).setSelected(((Boolean)field.getValue()).booleanValue());
-	      }
+	    returnValue = field.setValue(new Boolean(((JCheckBox)e.getSource()).isSelected()));
 	  }
 	catch (RemoteException rx)
 	  {
@@ -850,24 +851,27 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     
     // Check to see if anything needs updating.
-    if (ok)
+    if (returnValue == null)
       {
-	try
+	gc.somethingChanged = true;
+      }
+    else if (returnValue.didSucceed())
+      {
+	if (returnValue.doRescan())
 	  {
-	    if (object.shouldRescan())
-	      {
-		update();
-	      }
+	    
 	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not call shouldRescan(): " + rx);
-	  }
+      }
+    else
+      {
+
       }
   }
 
   public void itemStateChanged(ItemEvent e)
   {
+    ReturnVal returnValue = null;
+
     if (debug)
       {
 	System.out.println("Item changed: " + e.getItem());
@@ -883,18 +887,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    Object item = e.getItem();
 	    if (item instanceof String)
 	      {
-		ok = field.setValue((String)e.getItem());
+		returnValue = field.setValue((String)e.getItem());
 	      }
 	    else if (item instanceof listHandle)
 	      {
-		ok = field.setValue(((Invid) ((listHandle)e.getItem()).getObject() ));
+		returnValue = field.setValue(((Invid) ((listHandle)e.getItem()).getObject() ));
 
 	      }
 	    else 
 	      {
 		System.out.println("Unknown type from JComboBox: " + item);
 	      }
-	    if (ok)
+	    if (returnValue == null)
 	      {
 		gc.somethingChanged = true;
 		if (debug)
@@ -902,9 +906,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    System.out.println("field setValue returned true");
 		  }
 	      }
-	    else if (debug)
+	    else if (returnValue.didSucceed())
 	      {
 		System.out.println("field setValue returned FALSE!!");
+	      }
+	    else
+	      {
+
 	      }
 	    
 	  }
@@ -1132,11 +1140,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
     
-
+	if (! keepLoading)
+	  {
+	    System.out.println("Stopping containerPanel in the midst of loading a StringSelector");
+	    gc.containerPanelFinished(this);
+	    return;
+	  }
 
 	if (qr == null)
 	  {
-	    tStringSelector ss = new tStringSelector(null,
+	    StringSelector ss = new StringSelector(null,
 						     (Vector)fieldInfo.getValue(), 
 						     this,
 						     editable,
@@ -1152,7 +1165,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else
 	  {
-	    tStringSelector ss = new tStringSelector(qr.getLabels(),
+	    StringSelector ss = new StringSelector(qr.getLabels(),
 						     (Vector)fieldInfo.getValue(), 
 						     this,
 						     editable,
@@ -1170,7 +1183,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     else  //not editable, don't need whole list of things
       {
-	    tStringSelector ss = new tStringSelector(null,
+	    StringSelector ss = new StringSelector(null,
 						     (Vector)fieldInfo.getValue(), 
 						     this,
 						     editable,
@@ -1207,6 +1220,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     valueHandles = field.encodedValues().getListHandles();
+
+    if (! keepLoading)
+      {
+	System.out.println("Stopping containerPanel in the midst of loading a StringSelector");
+	gc.containerPanelFinished(this);
+	return;
+      }
 
     if (editable)
       {
@@ -1294,7 +1314,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     invidTablePopup2.add(editO2);
     invidTablePopup2.add(viewO2);
 
-    tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, true, true, 160, "Selected", "Available", invidTablePopup, invidTablePopup2);
+    StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, editable, true, true, 160, "Selected", "Available", invidTablePopup, invidTablePopup2);
     objectHash.put(ss, field);
     if (editable)
       {
