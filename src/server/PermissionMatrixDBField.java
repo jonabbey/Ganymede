@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -557,4 +557,87 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     return (baseID + "::");
   }
+
+  /**
+   *
+   * This method is used to basically dump state out of this field
+   * so that the DBEditSet checkpoint() code can restore it later
+   * if need be.
+   *
+   */
+
+  public synchronized Object checkpoint()
+  {
+    if (matrix != null)
+      {
+	return new PermMatrixCkPoint(this);
+      }
+    else
+      {
+	return null;
+      }
+  }
+
+  /**
+   *
+   * This method is used to basically force state into this field.
+   *
+   * It is used to place a value or set of values that were known to
+   * be good during the current transaction back into this field,
+   * without creating or changing this DBField's object identity.
+   *
+   */
+
+  public synchronized void rollback(Object oldval)
+  {
+    if (!(owner instanceof DBEditObject))
+      {
+	throw new RuntimeException("Invalid rollback on field " + getName() + ", not in an editable context");
+      }
+
+    if (!(oldval instanceof PermMatrixCkPoint))
+      {
+	throw new RuntimeException("Invalid rollback on field " + getName() + ", not a PermMatrixCkPoint");
+      }
+
+    if (oldval == null)
+      {
+	this.defined = false;
+      }
+    else
+      {
+	this.matrix = ((PermMatrixCkPoint) oldval).matrix;
+	this.defined = true;
+      }
+  }
 }
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                               PermMatrixCkPoint
+
+------------------------------------------------------------------------------*/
+
+class PermMatrixCkPoint {
+
+  Hashtable matrix = new Hashtable();
+
+  /* -- */
+
+  public PermMatrixCkPoint(PermissionMatrixDBField field)
+  {
+    Enumeration enum = field.matrix.keys();
+    Object key;
+    PermEntry val;
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+	val = (PermEntry) field.matrix.get(key);
+
+	matrix.put(key, new PermEntry(val));
+      }
+  }
+
+}
+
