@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Ganymede Password Clients Build Script
+#
+###################################################
+
+. config.sh
+
+##################################################
+
+CLASSPATH=${JARDIR}/ganymede.jar:${JARDIR}/ganymedeServer.jar:$CLASSDIR
+export CLASSPATH
+
+echo "Compiling Ganymede Password Client files"
+
+cd $SOURCE
+
+$JAVAC -deprecation -d $CLASSDIR *.java
+
+echo "Creating Jar file"
+
+cd $CLASSDIR
+
+$JAR cf $TARGETJAR arlut
+
+echo "Done"
