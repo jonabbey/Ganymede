@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -653,7 +653,7 @@ class JournalEntry {
 		  {
 		    if (fields[i].isVector())
 		      {
-			for (int j = 0; j < fields[i].size(); i++)
+			for (int j = 0; j < fields[i].size(); j++)
 			  {
 			    currentHandle = (DBNameSpaceHandle) definition.namespace.uniqueHash.get(fields[i].key(j));
 
