@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -103,14 +103,16 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   public windowPanel(gclient gc, JMenu windowMenu)
   {
+    this.gc = gc;
+    debug = gc.debug;
+    this.windowMenu = windowMenu;
+
     if (debug)
       {
 	System.out.println("Initializing windowPanel");
       }
 
-    this.gc = gc;
-    debug = gc.debug;
-    this.windowMenu = windowMenu;
+
 
     setBackground(ClientColor.background);
 
