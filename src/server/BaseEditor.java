@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -182,7 +182,8 @@ class BaseEditor extends ScrollPane implements setValueCallback, ItemListener {
 	  {
 	    try
 	      {
-		if (currentField.isString() || currentField.isNumeric())
+		if (currentField.isString() || currentField.isNumeric() ||
+		    currentField.isIP())
 		  {
 		    labelC.add(currentField.getName());
 		  }
