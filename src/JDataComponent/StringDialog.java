@@ -270,13 +270,16 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     gbc.gridy = 2;
     gbc.gridwidth = 1;
     gbc.gridheight = 1;
-    gbl.setConstraints(panel, gbc);
-    mainPanel.add(panel);
+    JScrollPane scroller = new JScrollPane(panel);
+    scroller.setBorder(null);
+    gbl.setConstraints(scroller, gbc);
+    mainPanel.add(scroller);
 
     // The panel uses its own grid bag stuff
     compgbc = new GridBagConstraints();
     compgbl = new GridBagLayout();
 
+    compgbc.insets = new Insets(0,4,0,4);
     panel.setLayout(compgbl);
     
 
@@ -600,11 +603,11 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	    int width = getPreferredSize().width;
 	    int height = getPreferredSize().height;
 	    
-	    setLocation(r.width/2 - r.x - width/2, r.height/2 - r.y - height/2);
+	    setLocation(r.width/2 + r.x - width/2, r.height/2 + r.y - height/2);
 	    if (debug)
 	      {
-		int loc = r.width/2 - r.x - width/2;
-		int locy = r.height/2 - r.y - height/2;
+		int loc = r.width/2 + r.x - width/2;
+		int locy = r.height/2 = r.y - height/2;
 		System.out.println("Setting location to : " + loc + "," + locy);
 	      }
 	  }
@@ -777,7 +780,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 
     compgbc.gridwidth = 1;
     compgbc.fill = GridBagConstraints.NONE;
-    compgbc.anchor = GridBagConstraints.NORTHWEST;
+    compgbc.anchor = GridBagConstraints.WEST;
     
     compgbc.gridy = row;
     compgbc.gridx = 0;
@@ -817,6 +820,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     compgbc.gridwidth = GridBagConstraints.REMAINDER;
     compgbc.fill = GridBagConstraints.HORIZONTAL;
 
+    compgbl.setConstraints(parent, gbc);
     parent.add("0 " + row + " 2 1 hH", comp);
   }
   
