@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.46 $
-# $Date: 2000/02/17 20:25:20 $
+# $Revision: 1.47 $
+# $Date: 2000/02/18 07:58:05 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -166,7 +166,7 @@ kits:
 clean:
 	\@echo "Removing class files (except gnu-regexp files)"
 	\@find $classdir/arlut -name \*.class -exec rm {} \\; -print
-	\@find $classdir/omg -name \*.class -exec rm {} \\; -print
+	\@find $classdir/org -name \*.class -exec rm {} \\; -print
 	\@find $classdir/com/jclark -name \*.class -exec rm {} \\; -print
 
 cleanconfig:
