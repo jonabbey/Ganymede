@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    *
    */
 
-  public groupCustom(DBObjectBase objectBase) throws RemoteException
+  public groupCustom(DBObjectBase objectBase)
   {
     super(objectBase);
   }
@@ -47,7 +47,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    *
    */
 
-  public groupCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
+  public groupCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
   }
@@ -59,7 +59,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    *
    */
 
-  public groupCustom(DBObject original, DBEditSet editset) throws RemoteException
+  public groupCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
   }

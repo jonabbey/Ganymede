@@ -5,7 +5,7 @@
    This file is a management class for IP network objects in Ganymede.
    
    Created: 20 May 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,7 +16,6 @@ package arlut.csd.ganymede.custom;
 import arlut.csd.ganymede.*;
 
 import java.util.*;
-import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -32,7 +31,7 @@ public class networkCustom extends DBEditObject {
    *
    */
 
-  public networkCustom(DBObjectBase objectBase) throws RemoteException
+  public networkCustom(DBObjectBase objectBase)
   {
     super(objectBase);
   }
@@ -43,7 +42,7 @@ public class networkCustom extends DBEditObject {
    *
    */
 
-  public networkCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
+  public networkCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
   }
@@ -55,7 +54,7 @@ public class networkCustom extends DBEditObject {
    *
    */
 
-  public networkCustom(DBObject original, DBEditSet editset) throws RemoteException
+  public networkCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
   }
@@ -260,5 +259,4 @@ public class networkCustom extends DBEditObject {
 	return super.lookupLabel(object);
       }
   }
-
 }

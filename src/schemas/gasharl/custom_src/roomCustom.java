@@ -5,7 +5,7 @@
    This file is a management class for room objects in Ganymede.
    
    Created: 21 May 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,9 +14,6 @@
 package arlut.csd.ganymede.custom;
 
 import arlut.csd.ganymede.*;
-
-import java.util.*;
-import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -32,7 +29,7 @@ public class roomCustom extends DBEditObject {
    *
    */
 
-  public roomCustom(DBObjectBase objectBase) throws RemoteException
+  public roomCustom(DBObjectBase objectBase)
   {
     super(objectBase);
   }
@@ -43,7 +40,7 @@ public class roomCustom extends DBEditObject {
    *
    */
 
-  public roomCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
+  public roomCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
   }
@@ -55,7 +52,7 @@ public class roomCustom extends DBEditObject {
    *
    */
 
-  public roomCustom(DBObject original, DBEditSet editset) throws RemoteException
+  public roomCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
   }
