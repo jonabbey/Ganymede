@@ -238,7 +238,7 @@ public class JythonEditObjectFactory {
     catch (PyException pex)
       {
         Ganymede.debug(pex.toString());
-        throw new DDroidManagementException(pex.toString());
+        throw new GanymedeManagementException(pex.toString());
       }
   }
   

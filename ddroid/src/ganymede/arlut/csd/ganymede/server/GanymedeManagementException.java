@@ -1,6 +1,6 @@
 /*
 
-DDroidManagementException.java
+GanymedeManagementException.java
 
 Exception used to indicate errors when loading custom Java Object-handling 
 classes.
@@ -56,14 +56,14 @@ package arlut.csd.ganymede.server;
  * This is currently used when there is a problem instantiating a custom DBEditObject
  * subclass.
  */
-public class DDroidManagementException extends RuntimeException {
+public class GanymedeManagementException extends RuntimeException {
 
-  public DDroidManagementException()
+  public GanymedeManagementException()
   {
     super();
   }
   
-  public DDroidManagementException(String message)
+  public GanymedeManagementException(String message)
   {
     super(message);
   }

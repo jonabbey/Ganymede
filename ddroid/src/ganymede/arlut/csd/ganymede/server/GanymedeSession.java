@@ -3990,7 +3990,7 @@ final public class GanymedeSession implements Session, Unreferenced {
           {
             objref = session.editDBObject(invid);
           }
-        catch (DDroidManagementException ex)
+        catch (GanymedeManagementException ex)
           {
 	    // "Error checking object out for editing"
 	    // "Error loading custom class for this object."
@@ -4146,7 +4146,7 @@ final public class GanymedeSession implements Session, Unreferenced {
           {
             retVal = session.createDBObject(type, null); // *sync* DBSession
           }
-        catch (DDroidManagementException ex)
+        catch (GanymedeManagementException ex)
           {
 	    // "Can't create"
 	    // "Error loading custom class for this object."
@@ -4240,7 +4240,7 @@ final public class GanymedeSession implements Session, Unreferenced {
             retVal = session.createDBObject(type, null, ownerInvids); // *sync*
                                                                       // DBSession
           }
-        catch (DDroidManagementException ex)
+        catch (GanymedeManagementException ex)
           {
 	    // "Can't create"
 	    // "Error loading custom class for this object."

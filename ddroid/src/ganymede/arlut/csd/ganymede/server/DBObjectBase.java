@@ -1777,11 +1777,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 		    // "createNewObject failure: {0} in trying to construct custom object"
 		    String errormsg = ts.l("createNewObject.failure1", error_code);
 		    Ganymede.debug(errormsg);
-		    throw new DDroidManagementException(errormsg);
+		    throw new GanymedeManagementException(errormsg);
 		  }
 		else
 		  {
-		    throw new DDroidManagementException();
+		    throw new GanymedeManagementException();
 		  }
 	      }
 	  }
@@ -1877,11 +1877,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 		    // "createNewObject failure: {0} in trying to check out custom object"
 		    String errormsg = ts.l("createNewObject.failure2", error_code);
 		    Ganymede.debug(errormsg);
-		    throw new DDroidManagementException(errormsg);
+		    throw new GanymedeManagementException(errormsg);
 		  }
 		else
 		  {
-		    throw new DDroidManagementException();
+		    throw new GanymedeManagementException();
 		  }
 	      }
 	  }
