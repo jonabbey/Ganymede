@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,6 +28,9 @@ import java.rmi.server.*;
 
 import arlut.csd.ganymede.*;
 
+import arlut.csd.ganymede.custom.userSchema;
+import arlut.csd.ganymede.custom.personSchema;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                     directLoader
@@ -43,6 +46,8 @@ public class directLoader {
   static Hashtable adminUsers = new Hashtable();
   static Vector ownerGroups = new Vector();
   static Hashtable personaMap = new Hashtable();
+
+  static Hashtable persons = new Hashtable();
 
   static Hashtable users = new Hashtable();
   static Hashtable userInvids = new Hashtable();
@@ -219,6 +224,7 @@ public class directLoader {
 	    PermEntry defPerm = new PermEntry(true, true, true);
 	
 	    pf.setPerm(SchemaConstants.UserBase, defPerm);
+	    pf.setPerm((short) 279, defPerm); // person privs
 	    pf.setPerm((short) 257, defPerm); // group privs
 	    pf.setPerm((short) 263, defPerm); // systems privs
 	    pf.setPerm((short) 267, defPerm); // I.P. network
@@ -229,7 +235,7 @@ public class directLoader {
 	    pf.setPerm((short) 271, defPerm); // Systems Netgroups
 	    pf.setPerm((short) 270, defPerm); // User Netgroups
 	    pf.setPerm((short) 269, defPerm); // room
-	    pf.setPerm((short) 258, defPerm); // shell
+	    pf.setPerm((short) 258, defPerm); // shell choices
 	  }
 
 	// now, the ownerGroups Vector has been loaded for us by the scanOwnerGroups() method.
@@ -274,6 +280,10 @@ public class directLoader {
 	System.out.println("\nRegistering users\n");
 
 	registerUsers();
+	my_client.session.commitTransaction();
+
+	my_client.session.openTransaction("GASH directLoader");
+	registerPersons();
 	my_client.session.commitTransaction();
 
 	my_client.session.openTransaction("GASH directLoader");
@@ -1171,50 +1181,47 @@ public class directLoader {
 	current_obj = my_client.session.create_db_object(SchemaConstants.UserBase);
 	invid = current_obj.getInvid();
 
+	userObj.userInvid = invid;
+
 	System.out.print(" [" + invid + "] ");
 
 	userInvids.put(userObj.name, invid);
 
 	// set the username
 	    
-	current_obj.setFieldValue(SchemaConstants.UserUserName, key);
+	current_obj.setFieldValue(userSchema.USERNAME, key);
+
+	// enable unix
+
+	current_obj.setFieldValue(userSchema.UNIX, new Boolean(true));
+
+	// enable unix login if it wasn't an inactivated GASH account
+
+	if (userObj.password.equals("*"))
+	  {
+	    current_obj.setFieldValue(userSchema.UNIXENABLED, new Boolean(false));
+	  }
+	else
+	  {
+	    current_obj.setFieldValue(userSchema.UNIXENABLED, new Boolean(true));
+	  }
 
 	// set the UID
 
-	current_obj.setFieldValue((short) 256, new Integer(userObj.uid));
+	current_obj.setFieldValue(userSchema.UID, new Integer(userObj.uid));
 
 	// set the password
 
-	p_field = (pass_field) current_obj.getField(SchemaConstants.UserPassword);
+	p_field = (pass_field) current_obj.getField(userSchema.PASSWORD);
 	p_field.setCryptPass(userObj.password);
-
-	// set the fullname
-
-	current_obj.setFieldValue((short) 257, userObj.fullname);
-
-	// set the division
-
-	current_obj.setFieldValue((short) 258, userObj.division);
-
-	// set the room
-
-	current_obj.setFieldValue((short) 259, userObj.room);
-
-	// set the office phone
-
-	current_obj.setFieldValue((short) 260, userObj.officePhone);
-
-	// set the home phone
-
-	current_obj.setFieldValue((short) 261, userObj.homePhone);
 
 	// set the home directory
 
-	current_obj.setFieldValue((short) 262, userObj.directory);
+	current_obj.setFieldValue(userSchema.HOMEDIR, userObj.directory);
 
 	// set the shell
 
-	current_obj.setFieldValue((short) 263, userObj.shell);
+	current_obj.setFieldValue(userSchema.LOGINSHELL, userObj.shell);
 
 	// register email aliases for this user
 
@@ -1301,6 +1308,114 @@ public class directLoader {
 
 	    personaField = newPersona.getField(SchemaConstants.PersonaPrivs);
 	    personaField.addElement(gashadminPermInvid);
+	  }
+
+	// we want to record a chain of user accounts linked by social security
+	// number
+
+	if (!persons.containsKey(userObj.socialsecurity))
+	  {
+	    Vector x = new Vector();
+	    x.addElement(userObj);
+
+	    persons.put(userObj.socialsecurity, x);
+	  }
+	else
+	  {
+	    Vector x = (Vector) persons.get(userObj.socialsecurity);
+
+	    x.addElement(userObj);
+	  }
+      }
+  }
+
+  /**
+   *
+   */
+
+  private static void registerPersons() throws RemoteException
+  {
+    String key;
+    Invid invid, objInvid;
+    Enumeration enum;
+    OwnerGroup ogRec;
+    db_object current_obj;
+    db_field current_field;
+    pass_field p_field;
+    Person person;
+    User userObj, localUser;
+    Vector accounts;;
+
+    /* -- */
+
+    System.err.println("\nCreating persons in server: ");
+
+    enum = persons.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+	accounts = (Vector) persons.get(key);
+
+	if (accounts.size() == 1)
+	  {
+	    // we've just got one account for this social security key..
+	    // we'll use this info for the person record
+
+	    userObj = (User) accounts.elementAt(0);
+	  }
+	else
+	  {
+	    // we've got multiple accounts for this social security key..
+	    // we want the one that corresponds to a gash admin
+
+	    userObj = null;
+
+	    for (int i = 0; i < accounts.size(); i++)
+	      {
+		localUser = (User) accounts.elementAt(i);
+
+		if (adminUsers.containsKey(localUser.name))
+		  {
+		    userObj = localUser;
+		    break;
+		  }
+	      }
+	  }
+
+	if (userObj == null)
+	  {
+	    System.err.println("*** Complain!  Couldn't find primary user: " + key);
+	  }
+	else
+	  {
+	    person = new Person(userObj);
+
+	    System.out.println("-- Creating person for user " + userObj.name);
+
+	    current_obj = my_client.session.create_db_object((short) 279);
+	    current_obj.setFieldValue(personSchema.LASTNAME, person.lastName);
+	    current_obj.setFieldValue(personSchema.FIRSTNAME, person.firstName);
+	    current_obj.setFieldValue(personSchema.HOMEPHONE, person.homePhone);
+	    current_obj.setFieldValue(personSchema.OFFICEPHONE, person.officePhone);
+	    current_obj.setFieldValue(personSchema.CELLPHONE, person.cellPhone);
+	    current_obj.setFieldValue(personSchema.FAX, person.faxNumber);
+	    current_obj.setFieldValue(personSchema.DIVISION, person.division);
+	    current_obj.setFieldValue(personSchema.ROOM, person.room);
+	    current_obj.setFieldValue(personSchema.PAGER, person.pagerNumber);
+	    current_obj.setFieldValue(personSchema.BADGE, person.badgeNumber);
+	    current_obj.setFieldValue(personSchema.EMPLOYEETYPE, person.employeeType);
+
+	    // record the accounts.. the schema will automatically back-link these for
+	    // us.
+
+	    invid_field invids = (invid_field) current_obj.getField(personSchema.ACCOUNTS);
+
+	    for (int i = 0; i < accounts.size(); i++)
+	      {
+		localUser = (User) accounts.elementAt(i);
+		invids.addElement(localUser.userInvid);
+	      }
 	  }
       }
   }
@@ -1476,7 +1591,6 @@ public class directLoader {
 	      }
 	  }
       }
-
   }
 
   /**
