@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 1999/07/26 22:22:07 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 1999/07/27 00:20:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.75 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.76 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1139,8 +1139,8 @@ public class DBObject implements db_object, FieldType, Remote {
 	    // instance through the editset since we may not be explicitly checked out
 	    // for viewing
 
-	    editset.getSession().setLastError("createNewObject failure: " + error_code +
-					      " in trying to check out custom object");
+	    Ganymede.debug("createNewObject failure: " + error_code +
+			   " in trying to check out custom object");
 	    return null;
 	  }
       }

@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/07/22 05:34:18 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/07/27 00:20:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -226,6 +226,9 @@ public class DBLog {
   {
     logWriter.close();
     logStream.close();
+
+    mailer.stopThreaded();	// we'll block here while the mailer's email thread drains
+
     closed = true;
 
     if (debug)

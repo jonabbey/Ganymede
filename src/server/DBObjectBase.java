@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 1999/07/26 22:22:08 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 1999/07/27 00:20:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1354,8 +1354,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	if (error_code != null)
 	  {
-	    editset.getSession().setLastError("createNewObject failure: " + 
-					      error_code + " in trying to construct custom object");
+	    Ganymede.debug("createNewObject failure: " + 
+			   error_code + " in trying to construct custom object");
 	  }
       }
 
