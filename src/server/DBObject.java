@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 1999/04/01 22:17:48 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 1999/04/01 22:21:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,7 +86,8 @@ import arlut.csd.JDialog.*;
  * in a plain DBObject will reject any change requests.  In order to edit a DBObject,
  * a client must get access to a {@link arlut.csd.ganymede.DBEditObject DBEditObject}
  * object derived from the DBObject.  This is typically done by calling
- * {@link arlut.csd.ganymede.Session#edit_db_object(arlut.csd.ganymede.Invid) edit_db_object}.</p>
+ * {@link arlut.csd.ganymede.Session#edit_db_object(arlut.csd.ganymede.Invid) edit_db_object}
+ * on the server's {@link arlut.csd.ganymede.Session Session} remote interface.</p>
  *
  * <p>The DBStore contains a single read-only DBObject in its database for each Invid.
  * In order to change a DBObject, that DBObject must have its 
@@ -133,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.68 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.69 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
