@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.7 $ %D%
+ * @version $Revision: 1.8 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -116,17 +116,31 @@ public interface Session extends Remote {
 
   /**
    *
-   * List objects in the database meeting the given query criteria.
+   * This method provides the hook for doing a
+   * fast database dump to a string form.  The StringBuffer
+   * returned comprises a formatted dump of all visible
+   * fields and objects that match the given query.
    *
-   * The database will be read-locked during the query, assuring
-   * a transaction-consistent view of the database.
+   * @see arlut.csd.ganymede.Query
    *
-   * @see arlut.csd.ganymede.Result
-   * @return a Vector of Result objects.
+   * @see arlut.csd.ganymede.Session
    *
    */
 
-  Vector    query(Query query) throws RemoteException;
+  StringBuffer dump(Query query) throws RemoteException;
+
+  /**
+   *
+   * List objects in the database meeting the given query criteria.
+   *
+   * The database will be read-locked during the query, assuring
+   * a transaction-consistent view of the database.  The StringBuffer
+   * returned comprises a formatted dump of the invid's and
+   * labels of the viewable objects matching the provided query.
+   *
+   */
+
+  StringBuffer    query(Query query) throws RemoteException;
 
   /**
    *
