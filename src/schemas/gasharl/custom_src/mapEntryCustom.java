@@ -5,7 +5,7 @@
    This file is a management class for Automounter map entry objects in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -322,7 +322,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     Invid userInvid = (Invid) getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
     DBObject user = getSession().viewDBObject(userInvid);
 
-    result = user.getFieldValuesLocal(userSchema.VOLUMES);
+    result = (Vector) user.getFieldValuesLocal(userSchema.VOLUMES).clone();
     
     // we are not our own sibling.
 
