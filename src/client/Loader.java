@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/02/11 07:09:27 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/05/04 04:17:42 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.16 $ $Date: 2000/02/11 07:09:27 $ $Name:  $
+ * @version $Revision: 1.17 $ $Date: 2000/05/04 04:17:42 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -87,10 +87,32 @@ public class Loader extends Thread {
     baseNamesLoaded = false,
     baseListLoaded = false,
     baseMapLoaded = false,
+    templateLoading = false,
     baseHashLoaded = false;
 
   private Session
     session;
+
+  /**
+   * <p>Hash mapping Short object type id's to Vectors of
+   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s,
+   * used by the client to quickly look up information about fields 
+   * in order to populate 
+   * {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s.</p>
+   *
+   * <p>This hash is used by
+   * {@link arlut.csd.ganymede.client.gclient#getTemplateVector(java.lang.Short) getTemplateVector}.</p>
+   */
+
+  private Hashtable templateHash;
+
+  /**
+   * <p>Hash mapping Short object type id's to a Hash that
+   * maps field name to {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}
+   * object</p>
+   */
+
+  private Hashtable templateNameHash;
 
   /* -- */
 
@@ -191,9 +213,8 @@ public class Loader extends Thread {
 	    System.out.println("***All the hashes are clear.");
 	  }
       }
-     
 
-    while (! ( baseNamesLoaded && baseListLoaded && baseMapLoaded))
+    while (! ( baseNamesLoaded && baseListLoaded && baseMapLoaded && !templateLoading))
       {
 	System.out.println("Loader waiting for previous method to stop.");
 
@@ -208,7 +229,6 @@ public class Loader extends Thread {
 		throw new RuntimeException("Interrupted while waiting for previous loader to finish. " + x);
 	      }
 	  }
-	
       }
 
     if (debug)
@@ -226,6 +246,7 @@ public class Loader extends Thread {
     baseNames = null;
     baseMap = null;
     baseList = null;
+    templateHash = null;
 
     if (debug)
       {
@@ -236,6 +257,28 @@ public class Loader extends Thread {
 
     Thread t = new Thread(this);
     t.start();
+  }
+
+  /**
+   * <p>Returns the type name for a given object.</p>
+   *
+   * <p>If the loader thread hasn't yet downloaded that information, this
+   * method will block until the information is available.</p>
+   */
+
+  public String getObjectType(Invid objId)
+  {
+    try
+      {
+	Hashtable baseMap = getBaseMap(); // block
+	BaseDump base = (BaseDump) baseMap.get(new Short(objId.getType()));
+
+	return base.getName();
+      }
+    catch (NullPointerException ex)
+      {
+	return "<unknown>";
+      }
   }
 
   /**
@@ -420,6 +463,120 @@ public class Loader extends Thread {
       }
 
     return baseToShort;
+  }
+
+  /**
+   * <P>Returns a {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}
+   * for a field specified by object type id and field name.</P>
+   */
+
+  public FieldTemplate getFieldTemplate(short objectid, String fieldname)
+  {
+    return getFieldTemplate(new Short(objectid), fieldname);
+  }
+
+  /**
+   * <P>Returns a {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}
+   * for a field specified by object type id and field name.</P>
+   */
+
+  public FieldTemplate getFieldTemplate(Short objectid, String fieldname)
+  {
+    Hashtable nameHash = (Hashtable) templateNameHash.get(objectid);
+
+    if (nameHash == null)
+      {
+	getTemplateVector(objectid);
+
+	nameHash = (Hashtable) templateNameHash.get(objectid);
+
+	if (nameHash == null)
+	  {
+	    return null;
+	  }
+      }
+
+    return (FieldTemplate) nameHash.get(fieldname);
+  }
+
+  /**
+   * <p>Returns a vector of 
+   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s.</p>
+   *
+   * @param id Object type id to retrieve field information for.
+   */
+
+  public Vector getTemplateVector(short id)
+  {
+    return getTemplateVector(new Short(id));
+  }
+
+  /**
+   * <p>Returns a vector of 
+   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s
+   * listing fields and field informaton for the object type identified by 
+   * id.</p>
+   *
+   * @param id The id number of the object type to be returned the base id.
+   */
+
+  public synchronized Vector getTemplateVector(Short id)
+  {
+    Vector result = null;
+
+    /* -- */
+
+    if (!keepGoing)
+      {
+	return null;
+      }
+
+    try
+      {
+	templateLoading = true;
+
+	if (templateHash == null)
+	  {
+	    templateHash = new Hashtable();
+	  }
+	
+	if (templateHash.containsKey(id))
+	  {
+	    result = (Vector) templateHash.get(id);
+	  }
+	else
+	  {
+	    try
+	      {
+		result = session.getFieldTemplateVector(id.shortValue());
+		templateHash.put(id, result);
+		constructTemplateNameHash(id, result);
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not get field templates: " + rx);
+	      }
+	  }
+	
+	return result;
+      }
+    finally
+      {
+	templateLoading = false;
+      }
+  }
+
+  private void constructTemplateNameHash(Short objectId, Vector fieldTemplates)
+  {
+    Hashtable nameHash = new Hashtable();
+
+    for (int i = 0; i < fieldTemplates.size(); i++)
+      {
+	FieldTemplate x = (FieldTemplate) fieldTemplates.elementAt(i);
+	nameHash.put(x.getName(), x);
+      }
+
+    templateNameHash.put(objectId, nameHash);
   }
 
   /* -- Private methods  --  */

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.171 $
-   Last Mod Date: $Date: 2000/03/16 07:20:08 $
+   Version: $Revision: 1.172 $
+   Last Mod Date: $Date: 2000/05/04 04:17:42 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -89,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.171 $ $Date: 2000/03/16 07:20:08 $ $Name:  $
+ * @version $Revision: 1.172 $ $Date: 2000/05/04 04:17:42 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/03/16 07:20:08 $";
+  static String release_date = "$Date: 2000/05/04 04:17:42 $";
   static String release_number = null;
 
   // ---
@@ -186,47 +186,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   // Yum, caches
   //
 
-  /**
-   * <p>Vector of {@link arlut.csd.ganymede.BaseDump BaseDump} objects,
-   * providing a local cache of {@link arlut.csd.ganymede.Base Base}
-   * references that the client consults during operations.</p>
-   *
-   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
-   * thread.</p>
-   */
-
-  private Vector baseList;
-
-  /**
-   * <p>Cache mapping possibly remote {@link arlut.csd.ganymede.Base Base}
-   * references to their title.</p>
-   *
-   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
-   * thread.</p>
-   */
-
-  private Hashtable baseNames = null;
-
-  /**
-   * <p>Cache mapping possibly remote {@link arlut.csd.ganymede.Base Base}
-   * references to field vectors.</p>
-   *
-   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
-   * thread.</p>
-   */
-
-  private Hashtable baseHash = null;
-
-  /**
-   * <p>Cache mapping Short {@link arlut.csd.ganymede.Base Base} id's to
-   * a possibly remote reference to the corresponding {@link arlut.csd.ganymede.Base Base}.</p>
-   *
-   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
-   * thread.</p>
-   */
-
-  private Hashtable baseMap = null;
-
   /** 
    * Cache of {@link arlut.csd.ganymede.Invid invid}'s for objects
    * that might have been changed by the client.  The keys and the
@@ -267,18 +226,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   private Hashtable createdObjectsWithoutNodes = new Hashtable();
 
-  /** 
-   * <p>Cache mapping possibly remote {@link arlut.csd.ganymede.Base Base}
-   * references to their object type id in Short form.  This is
-   * a holdover from a time when the client didn't create local copies
-   * of the server's Base references.</p>
-   *
-   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
-   * thread.</p>
-   */
-
-  private Hashtable baseToShort = null;
-
   /**
    * <p>Hash mapping Short {@link arlut.csd.ganymede.Base Base} id's to
    * the corresponding {@link arlut.csd.ganymede.client.BaseNode BaseNode}
@@ -295,19 +242,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    */
 
   protected Hashtable invidNodeHash = new Hashtable();
-
-  /**
-   * <p>Hash mapping Short object type id's to Vectors of
-   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s,
-   * used by the client to quickly look up information about fields 
-   * in order to populate 
-   * {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s.</p>
-   *
-   * <p>This hash is used by
-   * {@link arlut.csd.ganymede.client.gclient#getTemplateVector(java.lang.Short) getTemplateVector}.</p>
-   */
-
-  protected Hashtable templateHash;
 
   /**
    * <p>Our main cache, keeps information about all objects we've learned
@@ -627,8 +561,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add("Center", mainPanel);
-
-    templateHash = new Hashtable();
 
     if (debug)
       {
@@ -1180,7 +1112,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public Vector getTemplateVector(short id)
   {
-    return getTemplateVector(new Short(id));
+    return loader.getTemplateVector(new Short(id));
   }
 
   /**
@@ -1194,28 +1126,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public Vector getTemplateVector(Short id)
   {
-    Vector result = null;
-
-    /* -- */
-
-    if (templateHash.containsKey(id))
-      {
-	result = (Vector) templateHash.get(id);
-      }
-    else
-      {
-	try
-	  {
-	    result = session.getFieldTemplateVector(id.shortValue());
-	    templateHash.put(id, result);
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get field templates: " + rx);
-	  }
-      }
-    
-    return result;
+    return loader.getTemplateVector(id);
   }
 
   /**
@@ -1234,18 +1145,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     cachedLists.clearCaches();
-  }
-
-  /**
-   * <p>Clears out all the cached data structures refering to bases.  We 
-   * need to clear these when our persona changes, as different personas
-   * may have a different list of visible bases.</p>
-   */
-
-  public void clearLoaderLists()
-  {
-    baseList = null;
-    baseToShort = baseNames = baseHash = baseMap = null;
   }
 
   /**
@@ -1403,12 +1302,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public final Hashtable getBaseNames()
   {
-    if (baseNames == null)
-      {
-	baseNames = loader.getBaseNames();
-      }
-
-    return baseNames;
+    return loader.getBaseNames();
   }
 
   /**
@@ -1421,17 +1315,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public final synchronized Vector getBaseList()
   {
-    if (baseList == null)
-      {
-	if (debug)
-	  {
-	    System.err.println("getBaseList(): retrieving baseList from Loader thread");
-	  }
-
-	baseList = loader.getBaseList();
-      }
-
-    return baseList;
+    return loader.getBaseList();
   }
 
   /**
@@ -1444,17 +1328,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public Hashtable getBaseMap()
   {
-    if (baseMap == null)
-      {
-	if (debug)
-	  {
-	    System.err.println("getBaseList(): retrieving baseMap from Loader thread");
-	  }
-
-	baseMap = loader.getBaseMap();
-      }
-
-    return baseMap;
+    return loader.getBaseMap();
   }
 
   /**
@@ -1467,17 +1341,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public Hashtable getBaseToShort()
   {
-    if (baseToShort == null)
-      {
-	if (debug)
-	  {
-	    System.err.println("getBaseList(): retrieving baseToShort hash from Loader thread");
-	  }
-
-	baseToShort = loader.getBaseToShort();
-      }
-    
-    return baseToShort;
+    return loader.getBaseToShort();
   }
 
   /**
@@ -1489,17 +1353,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public String getObjectType(Invid objId)
   {
-    try
-      {
-	Hashtable baseMap = getBaseMap(); // block
-	BaseDump base = (BaseDump) baseMap.get(new Short(objId.getType()));
-
-	return base.getName();
-      }
-    catch (NullPointerException ex)
-      {
-	return "<unknown>";
-      }
+    return loader.getObjectType(objId);
   }
 
   /**
@@ -1559,6 +1413,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     final String fStatus = status;
+
+    // use SwingUtilities.invokeLater so that we play nice
+    // with the Java display thread
     
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
@@ -1585,6 +1442,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     buildingPhase1 = (status != null) && status.equals("building");
     buildingPhase2 = (status != null) && status.equals("building2");
+
+    // use SwingUtilities.invokeLater so that we play nice
+    // with the Java display thread
     
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
@@ -1909,14 +1769,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>This method takes a ReturnVal object from the server and, if necessary,
-   * runs through a wizard interaction sequence, possibly displaying several
-   * dialogs before finally returning a final result code.</p>
+   * <p>This method takes a ReturnVal object from the server and, if
+   * necessary, runs through a wizard interaction sequence, possibly
+   * displaying several dialogs before finally returning a final
+   * result code.</p>
    *
-   * <p>Use the ReturnVal returned from this function after this function is
-   * called to determine the ultimate success or failure of any operation
-   * which returns ReturnVal, because a wizard sequence may determine the
-   * ultimate result.</p>
+   * <p>Use the ReturnVal returned from this function after this
+   * function is called to determine the ultimate success or failure
+   * of any operation which returns ReturnVal, because a wizard
+   * sequence may determine the ultimate result.</p>
    *
    * <p>This method should not be synchronized, since handleReturnVal
    * may pop up modal (thread-blocking) dialogs, and if we we
@@ -2300,10 +2161,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     dump = transport.getTree();
 
-    // remember that we'll want to refresh our base list
-
-    baseList = null;
-    
     if (debug)
       {
 	System.out.println("gclient.buildTree(): got root category: " + dump.getName());
@@ -2454,7 +2311,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     Invid invid = null;
     String label = null;
     Vector vect;
-    BaseNode parentNode;
     InvidNode oldNode, newNode, fNode;
     Query _query = null;
 
@@ -2489,7 +2345,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // 
     // **
 
-    //parentNode = node;
     oldNode = null;
     fNode = (InvidNode) node.getChild();
     int i = 0;
@@ -5389,7 +5244,6 @@ class PersonaListener implements ActionListener {
 		gc.ownerGroups = null;
 		gc.clearCaches();
 		gc.loader.clear();  // This reloads the hashes
-		gc.clearLoaderLists();
 		gc.cancelTransaction();
 		gc.buildTree();
 		gc.currentPersonaString = newPersona;
