@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.114 $
-   Last Mod Date: $Date: 2001/02/09 03:30:32 $
+   Version: $Revision: 1.115 $
+   Last Mod Date: $Date: 2001/02/14 21:23:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -949,10 +949,7 @@ public class Ganymede {
 	System.err.println("Unregistering " + taskName + " for execution on transaction commit.");
       }
 
-    synchronized (builderTasks)
-      {
-	builderTasks.removeElement(taskName);
-      }
+    builderTasks.removeElement(taskName); // sync'ed on builderTasks vector method
   }
 
   /**

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.231 $
-   Last Mod Date: $Date: 2001/02/14 06:55:46 $
+   Version: $Revision: 1.232 $
+   Last Mod Date: $Date: 2001/02/14 21:23:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.231 $ $Date: 2001/02/14 06:55:46 $
+ * @version $Revision: 1.232 $ $Date: 2001/02/14 21:23:37 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3490,7 +3490,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// objects that haven't yet been integrated into the object
 	// tables, so we check our transaction's working set here.
 
-	if (session.isTransactionOpen())
+	if (session.isTransactionOpen()) // should be safe since we are sync'ed on GanymedeSession
 	  {
 	    if (debug)
 	      {
@@ -5110,7 +5110,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @return a Vector of DBObject references.
    */
 
-  public Vector getObjects(short baseid)
+  public synchronized Vector getObjects(short baseid)
   {
     DBObjectBase base;
 

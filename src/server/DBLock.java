@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/02/10 04:35:36 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2001/02/14 21:23:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -166,7 +166,10 @@ public abstract class DBLock {
 
   boolean isLocked()
   {
-    return locked;
+    synchronized (lockSync)
+      {
+	return locked;
+      }
   }
 
   /**
@@ -177,13 +180,13 @@ public abstract class DBLock {
 
   boolean isLocked(DBObjectBase base)
   {
-    if (!locked)
-      {
-	return false;
-      }
-
     synchronized (lockSync)
       {
+	if (!locked)
+	  {
+	    return false;
+	  }
+
 	for (int i=0; i < baseSet.size(); i++)
 	  {
 	    if (baseSet.elementAt(i) == base)
