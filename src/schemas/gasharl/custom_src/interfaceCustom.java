@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -215,7 +215,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // editable context.  If we are not being edited, we don't
     // care.. if the fields are there, they can see them.
 
-    if (session == null)
+    if (!(field.getOwner() instanceof interfaceCustom) && (session == null))
       {
 	return true;
       }
@@ -580,8 +580,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	if (!findNet((Byte[]) param1))
 	  {
 	    return Ganymede.createErrorDialog("Can't change IP net",
-					      "There are no IP net records matching the requested IP address in the " +
-					      "room containing this system.");
+					      "The IP address you have selected does not match any network number " +
+					      "available in this room.  Either this room does not have that network " +
+					      "listed, or another interface on this system is already allocated on " +
+					      "that network.");
 	  }
 
 	// findNet prepped finalizeSetValue() to set the IPNET for us
