@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2001/01/11 23:35:55 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2001/01/12 01:12:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -87,7 +87,7 @@ public class BooleanDBField extends DBField implements boolean_field {
     value = null;
     this.owner = owner;
     this.fieldcode = definition.getID();
-    receive(in);
+    receive(in, definition);
   }
 
   /**
@@ -158,7 +158,7 @@ public class BooleanDBField extends DBField implements boolean_field {
     out.writeBoolean(value());
   }
 
-  void receive(DataInput in) throws IOException
+  void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = new Boolean(in.readBoolean());
   }

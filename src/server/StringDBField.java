@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2001/01/11 23:36:03 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2001/01/12 01:12:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -87,7 +87,7 @@ public class StringDBField extends DBField implements string_field {
     value = null;
     this.owner = owner;
     this.fieldcode = definition.getID();
-    receive(in);
+    receive(in, definition);
   }
 
   /**
@@ -219,7 +219,7 @@ public class StringDBField extends DBField implements string_field {
       }
   }
 
-  void receive(DataInput in) throws IOException
+  void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int count;
 

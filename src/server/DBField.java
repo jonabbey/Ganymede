@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 2001/01/11 23:35:56 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2001/01/12 01:12:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -294,7 +294,7 @@ public abstract class DBField implements Remote, db_field {
    * the field's id and type information has been read.</P>
    */
 
-  abstract void receive(DataInput in) throws IOException;
+  abstract void receive(DataInput in, DBObjectBaseField definition) throws IOException;
 
   /**
    * <p>This method is used when the database is being dumped, to write

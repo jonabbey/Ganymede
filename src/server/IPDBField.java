@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2001/01/11 23:36:00 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2001/01/12 01:12:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -103,7 +103,7 @@ public class IPDBField extends DBField implements ip_field {
     value = null;
     this.owner = owner;
     this.fieldcode = definition.getID();
-    receive(in);
+    receive(in, definition);
   }
 
   /**
@@ -236,7 +236,7 @@ public class IPDBField extends DBField implements ip_field {
       }
   }
 
-  void receive(DataInput in) throws IOException
+  void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int count;
 

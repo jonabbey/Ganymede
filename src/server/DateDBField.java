@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2001/01/11 23:35:58 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2001/01/12 01:12:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -98,7 +98,7 @@ public class DateDBField extends DBField implements date_field {
     value = null;
     this.owner = owner;
     this.fieldcode = definition.getID();
-    receive(in);
+    receive(in, definition);
   }
 
   /**
@@ -169,7 +169,7 @@ public class DateDBField extends DBField implements date_field {
     out.writeLong(((Date) value).getTime());
   }
 
-  void receive(DataInput in) throws IOException
+  void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = new Date(in.readLong());
   }

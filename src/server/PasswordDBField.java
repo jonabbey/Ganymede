@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 2001/01/11 23:36:01 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 2001/01/12 01:12:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -148,7 +148,7 @@ public class PasswordDBField extends DBField implements pass_field {
     value = null;
     this.owner = owner;
     this.fieldcode = definition.getID();
-    receive(in);
+    receive(in, definition);
   }
 
   /** 
@@ -344,7 +344,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  void receive(DataInput in) throws IOException
+  void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     // at file format 1.10, we were keeping both crypted and unecrypted
     // passwords on disk.  Since then, we have decided to only write
@@ -368,7 +368,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
     else
       {
-	if (getFieldDef().isCrypted())
+	if (definition.isCrypted())
 	  {
 	    cryptedPass = in.readUTF();
 
@@ -386,7 +386,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	
 	if ((Ganymede.db.file_major >= 1) || (Ganymede.db.file_minor >= 16))
 	  {
-	    if (getFieldDef().isMD5Crypted())
+	    if (definition.isMD5Crypted())
 	      {
 		md5CryptPass = in.readUTF();
 		
@@ -401,7 +401,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	      }
 	  }
 
-	if (getFieldDef().isCrypted() || getFieldDef().isMD5Crypted())
+	if (definition.isCrypted() || definition.isMD5Crypted())
 	  {
 	    uncryptedPass = null;
 	  }

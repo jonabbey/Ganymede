@@ -7,8 +7,8 @@
 
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2001/01/11 23:35:58 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2001/01/12 01:12:33 $
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -87,7 +87,7 @@ public class FloatDBField extends DBField implements float_field {
     value = null;
     this.owner = owner;
     this.fieldcode = definition.getID();
-    receive(in);
+    receive(in, definition);
   }
 
   /**
@@ -158,7 +158,7 @@ public class FloatDBField extends DBField implements float_field {
     out.writeDouble(((Double) value).doubleValue());
   }
 
-  void receive(DataInput in) throws IOException
+  void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = new Double(in.readDouble());
   }

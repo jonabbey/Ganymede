@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2001/01/11 23:36:03 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2001/01/12 01:12:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -459,7 +459,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     value = null;
     this.owner = owner;
     this.fieldcode = definition.getID();
-    receive(in);
+    receive(in, definition);
   }
 
   /**
@@ -752,7 +752,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
   }
 
-  synchronized void receive(DataInput in) throws IOException
+  synchronized void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int tableSize;
     PermEntry pe;
