@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 2001/06/26 03:19:14 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 2001/11/09 21:36:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -306,7 +306,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	      {
 		if (client != null)
 		  {
-		    client.forceDisconnect("The server is currently waiting to shutdown.  No logins will be " +
+		    client.forceDisconnect("The server is currently waiting to shut down.  No logins will be " +
 					   "accepted until the server has restarted.");
 		  }
 	      }
