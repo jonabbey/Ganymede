@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -208,6 +208,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
      
     // - Create the choice window containing the fields 
 
+    Vector baseNames = new Vector();
+
     Enumeration enum = shortHash.elements();
       
     while (enum.hasMoreElements())
@@ -227,28 +229,37 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  {
 	    String choiceToAdd = key.getName();
 
-	    baseChoice.addItem(choiceToAdd);
+	    baseNames.addElement(choiceToAdd);
 	    mapNameToBase(choiceToAdd, key);
 	  }
-	  
-	if (selectedBase != null)
-	  {
-	    baseChoice.setSelectedItem(selectedBase.getName());
-	    this.baseName = selectedBase.getName();
-	  }
-	else 
-	  { 
-	    // no default given. pick the one that's there.
-	    
-	    this.selectedBase = getBaseFromName((String) baseChoice.getSelectedItem());
-	    this.baseName = selectedBase.getName();
-	  }
+      }
 
-	// preload our field cache
-
-	mapBaseNamesToTemplates(selectedBase.getTypeID());
+    // load baseChoice combo box.
+    
+    gc.sortStringVector(baseNames);
+    
+    for (int i = 0; i < baseNames.size(); i++)
+      {
+	baseChoice.addItem((String) baseNames.elementAt(i));
       }
       
+    if (selectedBase != null)
+      {
+	baseChoice.setSelectedItem(selectedBase.getName());
+	this.baseName = selectedBase.getName();
+      }
+    else 
+      { 
+	// no default given. pick the one that's there.
+	
+	this.selectedBase = getBaseFromName((String) baseChoice.getSelectedItem());
+	this.baseName = selectedBase.getName();
+      }
+
+    // preload our field cache
+    
+    mapBaseNamesToTemplates(selectedBase.getTypeID());
+
     baseChoice.addItemListener(this);
 
     bp_gbc.anchor = bp_gbc.WEST;
