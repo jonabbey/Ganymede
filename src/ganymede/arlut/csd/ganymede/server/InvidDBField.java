@@ -3385,6 +3385,7 @@ public final class InvidDBField extends DBField implements invid_field {
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.addElement(newObj);
+	qr = null;
 
 	// now we need to initialize the new embedded object, since we
 	// defer that activity for embedded objects until after we
@@ -3642,6 +3643,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    values.removeElementAt(index);
 
+	    qr = null;	// Clear the cache to force the choices to be read again
+
 	    if (retVal != null)
 	      {
 		retVal.unionRescan(newRetVal);
@@ -3843,6 +3846,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    currentValues.removeElement(valuesToDelete.elementAt(i));
 		  }
 
+		qr = null;
 		success = true;
 
 		// if retVal is not null, we may have some rescan
