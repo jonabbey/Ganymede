@@ -6,7 +6,7 @@
    to delete the group that they have selected for their default group.
    
    Created: 29 January 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -160,8 +160,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
     if (returnHash == null)
       {
 	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("Home Group Removal Canceled",
-				 "Home Group Removal Canceled",
+	dialog = new JDialogBuff("Home Group Removal Cancelled",
+				 "Home Group Removal Cancelled",
 				 "OK",
 				 null,
 				 "ok.gif");
@@ -256,8 +256,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
 	if (!found)
 	  {
 	    retVal = new ReturnVal(false);
-	    dialog = new JDialogBuff("Home Group Removal Canceled",
-				     "Home Group Removal Canceled\n\nError, couldn't deal with the group selected",
+	    dialog = new JDialogBuff("Home Group Removal Cancelled",
+				     "Home Group Removal Cancelled\n\nError, couldn't deal with the group selected",
 				     "OK",
 				     null,
 				     "ok.gif");
