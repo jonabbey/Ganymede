@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.2 $
-# $Date: 1999/01/20 03:43:59 $
+# $Revision: 1.3 $
+# $Date: 1999/01/21 00:26:26 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -13,7 +13,7 @@
 
 # What classes in the ganymede package are necessary for the admin console?
 
-@ganymede_classes = ("Admin", "AdminEntry", 
+@ganymede_classes = ("Admin", "AdminEntry",
 		     "Base", "BaseEditor", "BaseField", "BaseFieldEditor", "BaseNode",
 		     "CatTreeNode", "Category", "CategoryEditor", "CategoryNode",
 		     "FieldNode",
@@ -50,6 +50,7 @@ foreach $file (@ganymede_classes) {
 # Now the class families that we need to finish up
 
 print "Attempting to link class families\n";
+print "We may get some complaints here about file existing.. no problem.\n\n";
 
 foreach $family (@class_families) {
   opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
