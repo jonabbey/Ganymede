@@ -147,7 +147,7 @@ consistent state, ready to try committing again (though it will
 probably fail if the error condition in the plugin classes is not
 fixed).
 
-9. [SERVER, CLIENT] Added SSL support, 1.4 requirement
+9. [SERVER, CLIENT] Added SSL support, 1.4 requirement, Firewall friendliness
 
 Added the arlut.csd.ganymede.server.GanymedeRMIManager class to handle
 all RMI exports, which support for SSL encryption of client/server
@@ -163,10 +163,28 @@ The SSL support now present in Ganymede requires a minimum of Java 1.4
 to work.  We are therefore intending to make JDK 1.4 a minimum
 requirement of Ganymede 2.0.
 
+It is now possible to specify the port number that the Ganymede server
+should use for publishing its RMI object targets.  This means that the
+Ganymede server will now use only two ports, one for the rmiregistry
+and one for client access, and that these can be specified for
+compatibility with a fixed firewall configuration.
+
 10. [SERVER, CLIENT] Changes to Query system (Deepak)
 
-XXX - I forget exactly what Deepak did, but I think the whole
-QueryResults system got changed.. ? XXX
+Deepak implemented support for a text based (ANTLR-based) querying
+language that can be used by Jython code to do queries on the Ganymede
+server.  Deepak also added the new
+arlut.csd.ganymede.common.QueryResultContainer class, which acts like
+the old arlut.csd.ganymede.common.QueryResult class, but which
+implements the java.util.List interface for convenient use from
+Jython.  At this writing, this new QueryResultContainer isn't actually
+being used, yet.
+
+In specifying the ANTLR grammar, Deepak defined a new dereference
+operator, which allows for a query to express a constraint based on
+the value pointed to be an invid field.  By using this dereference
+operation, I was able to drastically simplify and speed up the
+GanymedeSession query logic by pulling some of it inside-out.
 
 11. [SERVER, CLIENT] Removed the OwnerObjectsOwned field from OwnerBase
 
