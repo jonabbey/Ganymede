@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,7 @@ import java.io.*;
 public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private static String path = null;
+  private static String dnsdomain = null;
   private static String buildScript = null;
   private static Runtime runtime = null;
 
@@ -68,11 +69,30 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (path == null)
       {
-	path = System.getProperty("ganymede.nis.output");
+	path = System.getProperty("ganymede.builder.output");
 
 	if (path == null)
 	  {
 	    throw new RuntimeException("GASHBuilder not able to determine output directory.");
+	  }
+
+	path = PathComplete.completePath(path);
+      }
+
+    if (dnsdomain == null)
+      {
+	dnsdomain = System.getProperty("ganymede.gash.dnsdomain");
+
+	if (dnsdomain == null)
+	  {
+	    throw new RuntimeException("GASHBuilder not able to determine DNS domain.");
+	  }
+
+	// prepend a dot if we need to
+
+	if (dnsdomain.indexOf('.') != 0)
+	  {
+	    dnsdomain = "." + dnsdomain;
 	  }
 
 	path = PathComplete.completePath(path);
@@ -187,7 +207,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (baseChanged((short) 263) || // system base
 	baseChanged((short) 267) || // I.P. Network base
-	baseChanged((short) 268) || // DNS Domain base
 	baseChanged((short) 265)) // system interface base
       {
 	Ganymede.debug("Need to build DNS tables");
@@ -726,6 +745,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    ref = (Invid) systems.elementAt(i);
 	    refLabel = getLabel(ref);
+	    refLabel += dnsdomain;
 
 	    if (buffer.length() + refLabel.length() > lengthlimit)
 	      {
@@ -1276,6 +1296,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.setLength(0);
 
     sysname = (String) object.getFieldValueLocal(systemSchema.SYSTEMNAME);
+    sysname += dnsdomain;
 
     interfaceInvids = object.getFieldValuesLocal(systemSchema.INTERFACES);
 
@@ -1284,6 +1305,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	for (int i = 0; i < interfaceInvids.size(); i++)
 	  {
 	    interfaceName = getInterfaceHostname(getObject((Invid) interfaceInvids.elementAt(i)));
+	    interfaceName += dnsdomain;
 	    
 	    if (interfaceName != null)
 	      {
@@ -1430,6 +1452,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // check for null container field here.
 
     sysname = getLabel((Invid) object.getFieldValueLocal(SchemaConstants.ContainerField));
+    sysname += dnsdomain;
 
     // an interface can theoretically have multiple IP records and DNS records, but
     // GASH only supported one.
@@ -1457,6 +1480,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // and the DNS info
 
     hostname = (String) object.getFieldValueLocal(interfaceSchema.NAME);
+    hostname += dnsdomain;
+
     hostAliases = object.getFieldValuesLocal(interfaceSchema.ALIASES);
 
     // now build our output line
