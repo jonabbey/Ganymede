@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -132,17 +132,24 @@ public class DBWriteLock extends DBLock {
 	  {
 	    okay = true;
 
-	    for (int i = 0; okay && (i < baseSet.size()); i++)
+	    if (lockManager.schemaEditInProgress)
 	      {
-		base = (DBObjectBase) baseSet.elementAt(i);
-		if (base.dumperList.size() > 0)
+		okay = false;
+	      }
+	    else
+	      {
+		for (int i = 0; okay && (i < baseSet.size()); i++)
 		  {
-		    if (debug)
+		    base = (DBObjectBase) baseSet.elementAt(i);
+		    if (base.dumperList.size() > 0)
 		      {
-			System.err.println(key + ": DBWriteLock.establish(): waiting for dumpers on base " + base.object_name);
-			System.err.println(key + ": DBWriteLock.establish(): dumperList size: " + base.dumperList.size());
+			if (debug)
+			  {
+			    System.err.println(key + ": DBWriteLock.establish(): waiting for dumpers on base " + base.object_name);
+			    System.err.println(key + ": DBWriteLock.establish(): dumperList size: " + base.dumperList.size());
+			  }
+			okay = false;
 		      }
- 		    okay = false;
 		  }
 	      }
 

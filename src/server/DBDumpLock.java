@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,12 +23,23 @@ import java.util.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ *
+ * DBDumpLock is an object used to lock the DBStore for the purpose of
+ * dumping the database.  A DBDumpLock establish request has lower
+ * priority than DBWriteLock requests, but once a DBDumpLock establish
+ * request is submitted, no new DBWriteLock can be established until
+ * the dumping thread has completed the dump and released the lock.
+ *
+ * DBReadLock's can be established while a DBDumpLock is active.
+ *
+ */
+
 class DBDumpLock extends DBLock {
 
   static final boolean debug = true;
 
   DBStore lockManager;
-  Enumeration enum;
   boolean done, okay;
   DBObjectBase base;
   Vector baseSet;
@@ -40,6 +51,10 @@ class DBDumpLock extends DBLock {
 
   public DBDumpLock(DBStore lockManager)
   {
+    Enumeration enum;
+
+    /* -- */
+
     this.lockManager = lockManager;
     baseSet = new Vector();
 
@@ -79,9 +94,7 @@ class DBDumpLock extends DBLock {
 
     synchronized (lockManager)
       {
-	// add our selves to the ObjectBase dump queues
-
-	enum = lockManager.objectBases.elements();
+	// add ourselves to the ObjectBase dump queues
 
 	for (int i = 0; i < baseSet.size(); i++)
 	  {
@@ -92,15 +105,21 @@ class DBDumpLock extends DBLock {
 	while (!done)
 	  {
 	    okay = true;
-	    enum = lockManager.objectBases.elements();
 
-	    for (int i = 0; okay && (i < baseSet.size()); i++)
+	    if (lockManager.schemaEditInProgress)
 	      {
-		base = (DBObjectBase) baseSet.elementAt(i);
-
-		if (base.writerList.size() > 0 || base.dumpInProgress)
+		okay = false;
+	      }
+	    else
+	      {
+		for (int i = 0; okay && (i < baseSet.size()); i++)
 		  {
-		    okay = false;
+		    base = (DBObjectBase) baseSet.elementAt(i);
+
+		    if (base.writerList.size() > 0 || base.dumpInProgress)
+		      {
+			okay = false;
+		      }
 		  }
 	      }
 
