@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 2000/08/09 02:22:19 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 2000/08/25 21:54:16 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.44 $ %D%
+ * @version $Revision: 1.45 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -717,20 +717,4 @@ public interface Session extends Remote {
    */
 
   ReturnVal     remove_db_object(Invid invid) throws RemoteException;
-
-  /**
-   * <p>This method is used by the db_objectRemote proxy class to transmit method
-   * calls from the client to the server without maintaining a separate RMI
-   * remote reference per object.</p>
-   */
-
-  public Object doObjectCall(Invid objId, String methodName, Object[] params) throws RemoteException;
-
-  /**
-   * <p>This method is used by the db_field Remote proxy classes to
-   * transmit method calls from the client to the server without
-   * maintaining a separate RMI remote reference per field.</p>
-   */
-
-  public Object doFieldCall(Invid objId, short fieldID, String methodName, Object[] params) throws RemoteException;
 }

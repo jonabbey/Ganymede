@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2000/08/22 06:43:43 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2000/08/25 21:54:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -53,7 +53,6 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
-import java.lang.reflect.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.rmi.*;
@@ -85,18 +84,6 @@ public class DateDBField extends DBField implements date_field {
 
   static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss",
 						     java.util.Locale.US);
-
-  /**
-   *  Dynamically loaded RMI proxy class definition for this class.
-   */
-
-  static Class proxyClass = null;
-
-  /**
-   *  Dynamically loaded constructor for instances of the RMI proxy
-   */
-
-  static java.lang.reflect.Constructor proxyConstructor = null;
 
   // ---
 
@@ -175,104 +162,6 @@ public class DateDBField extends DBField implements date_field {
   public Object clone()
   {
     return new DateDBField(owner, this);
-  }
-
-  /**
-   * <p>This method creates an RMI proxy object that channels db_field
-   * calls to a GanymedeSession object over RMI rather than over a
-   * direct RMI field reference.  This is valuable because it can
-   * dramatically decrease the number of references that have to be
-   * managed through distributed garbage collection, increasing the
-   * scalability of the server at the cost of a constant time increase
-   * in initial communications for downloading the proxy.</p>
-   */
-
-  public db_field getProxy()
-  {
-    Object proxy = null;
-
-    /* -- */
-
-    synchronized (getClass())
-      {
-	if (proxyClass == null)
-	  {
-	    // load
-
-	    try
-	      {
-		proxyClass = Class.forName("arlut.csd.ganymede.date_fieldRemote");
-	      }
-	    catch (ClassNotFoundException ex)
-	      {
-		System.err.println("DBField.getProxy(): couldn't find arlut.csd.ganymede.date_fieldRemote");
-		ex.printStackTrace();
-
-		return null;
-	      }
-	  }
-
-	if (proxyConstructor != null)
-	  {
-	    Class constructParams[] = new Class[3];
-
-	    try
-	      {
-		constructParams[0] = Class.forName("arlut.csd.ganymede.Invid");
-		constructParams[1] = short.class;
-		constructParams[2] = Class.forName("arlut.csd.ganymede.Session");
-	      }
-	    catch (ClassNotFoundException ex)
-	      {
-		System.err.println("DBField.getProxy(): couldn't find proxy constructor: " + ex.getMessage());
-		ex.printStackTrace();
-
-		return null;
-	      }
-	    
-	    try
-	      {
-		proxyConstructor = proxyClass.getConstructor(constructParams);
-	      }
-	    catch (NoSuchMethodException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	    catch (SecurityException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	  }
-
-	Object params[] = new Object[3];
-
-	params[0] = getOwner().getInvid();
-	params[1] = new Short(getID());
-	params[2] = getOwner().getGSession();
-	
-	try
-	  {
-	    proxy = proxyConstructor.newInstance(params);
-	  }
-	catch (InstantiationException ex)
-	  {
-	    ex.printStackTrace();
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    ex.printStackTrace();
-	  }
-	catch (IllegalAccessException ex)
-	  {
-	    ex.printStackTrace();
-	  }
-	catch (InvocationTargetException ex)
-	  {
-	    ex.printStackTrace();
-	  }
-	
-	return (db_field) proxy;
-      }
   }
 
   void emit(DataOutput out) throws IOException
