@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -282,14 +282,32 @@ public class ReturnVal implements java.io.Serializable {
 
   public String dumpRescanInfo()
   {
+    StringBuffer buffer = new StringBuffer();
+
     if (rescanList != null)
       {
-	return rescanList.toString();
+	buffer.append(rescanList.toString());
       }
     else
       {
-	return "none";
+	buffer.append("none in this object");
       }
+
+    if (objRescanHash != null)
+      {
+	Enumeration keys = objRescanHash.keys();
+
+	while (keys.hasMoreElements())
+	  {
+	    Object key = keys.nextElement();
+	    ReturnVal retVal = (ReturnVal) objRescanHash.get(key);
+
+	    buffer.append("\n");
+	    buffer.append(retVal.dumpRescanInfo());
+	  }
+      }
+
+    return buffer.toString();
   }
 
   /**
