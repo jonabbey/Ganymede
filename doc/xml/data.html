@@ -301,7 +301,7 @@ following is not allowed:</p>
 </pre>
 
 <p>because the omsovr element is considered to be in an
-<b>&lt;addIfNotPresent&gt&gt;</b>, which may not co-exist with a
+<b>&lt;addIfNotPresent&gt;</b>, which may not co-exist with a
 <b>&lt;set&gt;</b> in a single field element.</p>
 
 <p>There are presently nine different types of data fields supported
@@ -377,10 +377,12 @@ by '<b>&amp;amp;</b>', and anything goes otherwise, including embedded newlines.
 
 <tr>
 <td COLSPAN="2">
-The <b>&lt;boolean&gt;</b> element contains a boolean value for
-a Ganymede boolean field.  As boolean fields are scalar in Ganymede, only
-one <b>&lt;boolean&gt;</b> element at a time may be contained in a boolean field
-element.  The <b>&lt;boolean&gt;</b> element must be empty.
+<p>The <b>&lt;boolean&gt;</b> element is an optional data element for
+Ganymede boolean fields.  Since Ganymede boolean fields are always
+scalar, you can simply place <b>true</b>, <b>t</b>, <b>false</b> or
+<b>f</b> (of whatever capitalization) between the field's start and
+end tags.  If you do use the older <b>&lt;boolean&gt;</b> element as a
+data container, the <b>&lt;boolean&gt;</b> element must be empty.</p>
 <font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
 </td>
 </tr>
@@ -409,7 +411,11 @@ a string corresponding to the value of
 this &lt;boolean&gt; element. "<b>1</b>", "<b>true</b>",
 "<b>t</b>", "<b>yes</b>", and "<b>y</b>", of whatever capitalization,
 all correspond to a true value. Any other value corresponds to a
-false value.</dd>
+false value.  Note that this is a looser standard than is allowed
+if you use a text string to represent the true or false value outside
+of the &lt;boolean&gt; element's val <b>val</b> attribute.  In that
+case, you must use <b>true</b>, <b>t</b>, <b>false</b>, or <b>f</b>,
+of whatever capitalization.</dd>
 </dl>
 </td>
 </tr>
@@ -431,10 +437,12 @@ false value.</dd>
 
 <tr>
 <td COLSPAN="2">
-The <b>&lt;int&gt;</b> element contains a 32 bit signed integer value for
-a Ganymede numeric field.  As numeric fields are scalar in Ganymede, only
-one <b>&lt;int&gt;</b> element at a time may be contained in a field
-element.  The <b>&lt;int&gt;</b> element must be empty.
+<p>The <b>&lt;int&gt;</b> element is an optional data element for
+Ganymede numeric fields.  Since Ganymede numeric fields are always
+scalar, you can simply place a 32 bit signed integer value between the
+containing field's start and end tags. If you do use the older
+<b>&lt;int&gt;</b> element as a data container, the <b>&lt;int&gt;</b>
+element must be empty.</p>
 <font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
 </td>
 </tr>
@@ -462,7 +470,9 @@ element.  The <b>&lt;int&gt;</b> element must be empty.
 the integer value corresponding to this &lt;int&gt; element.  This
 attribute can hold integer values in the range -4294967296 to
 4294967295.  The only characters allowed in this attribute value are
-the numeric digits and the minus sign.</dd>
+the numeric digits and the minus sign.  This same range holds if
+you skip the &lt;int&gt; element and just place the numeric value
+between the start and end tags of the containing field element.</dd>
 </dl>
 </td>
 </tr>
@@ -902,7 +912,7 @@ object on the server, regardless of whatever other activity the
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 25 21:18:12 CDT 2000 -->
 <!-- hhmts start -->
-Last modified: Tue Nov 13 18:39:49 CST 2001
+Last modified: Tue Nov 20 16:09:32 CST 2001
 <!-- hhmts end -->
   </body>
 </html>
