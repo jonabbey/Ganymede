@@ -8,6 +8,8 @@
    Created: 2 July 1996
    Version: $Revision$
    Last Mod Date: $Date$
+   SVN URL: $HeadURL$
+
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
