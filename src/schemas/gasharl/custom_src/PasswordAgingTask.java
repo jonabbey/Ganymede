@@ -7,8 +7,8 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2001/06/15 15:41:35 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/06/15 20:57:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -374,7 +374,7 @@ public class PasswordAgingTask implements Runnable {
       " or else your user account will be inactivated.\n\n" +
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators.";
 
-    Ganymede.log.sendMail(titleString, messageString, true, false, objVect);
+    Ganymede.log.sendMail(null, titleString, messageString, true, false, objVect);
   }
 
   /**
@@ -398,7 +398,7 @@ public class PasswordAgingTask implements Runnable {
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
-    Ganymede.log.sendMail(titleString, messageString, true, true, objVect);
+    Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
   }
 
   /**
@@ -425,6 +425,6 @@ public class PasswordAgingTask implements Runnable {
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
-    Ganymede.log.sendMail(titleString, messageString, true, true, objVect);
+    Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
   }
 }

@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 2001/06/14 17:25:50 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 2001/06/15 20:57:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -297,6 +297,47 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     return null;
+  }
+
+  /**
+   * <p>This method provides a hook that can be used to indicate whether
+   * a field that is defined in this object's field dictionary
+   * should be newly instantiated in this particular object.</p>
+   *
+   * <p>This method does not affect those fields which are actually present
+   * in the object's record in the
+   * {@link arlut.csd.ganymede.DBStore DBStore}.  What this method allows
+   * you to do is have a subclass decide whether it wants to instantiate
+   * a potential field (one that is declared in the field dictionary for
+   * this object, but which doesn't happen to be presently defined in
+   * this object) in this particular object.</p>
+   *
+   * <p>A concrete example will help here.  The Permissions Object type
+   * (base number SchemaConstants.PermBase) holds a permission
+   * matrix, a descriptive title, and a list of admin personae that hold
+   * those permissions for objects they own.</p>
+   *
+   * <p>There are a few specific instances of SchemaConstants.PermBase
+   * that don't properly need the list of admin personae, as their
+   * object invids are hard-coded into the Ganymede security system, and
+   * their permission matrices are automatically consulted in certain
+   * situations.  In order to support this, we're going to want to have
+   * a DBEditObject subclass for managing permission objects.  In that
+   * subclass, we'll define instantiateNewField() so that it will return
+   * false if the fieldID corresponds to the admin personae list if the
+   * object's ID is that of one of these special objects.  As a result,
+   * when the objects are viewed by an administrator, the admin personae
+   * list will not be seen.</p>
+   */
+
+  public boolean instantiateNewField(short fieldID)
+  {
+    if (fieldID == userSchema.PASSWORDCHANGETIME)
+      {
+	return true;
+      }
+
+    return super.instantiateNewField(fieldID);
   }
 
   /**
@@ -1448,7 +1489,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (dateField != null)
 	  {
-	    dateField.setValueLocal(updateTime);
+	    ReturnVal result = dateField.setValueLocal(updateTime);
+
+	    if (result != null)
+	      {
+		System.err.println("UserCustom: setValueLocal on PASSWORDCHANGETIME field failed: " + result);
+	      }
+	  }
+	else
+	  {
+	    System.err.println("UserCustom: can't find PASSWORDCHANGETIME field");
 	  }
 
 	ReturnVal result = new ReturnVal(true, true);	
