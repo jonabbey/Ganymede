@@ -444,7 +444,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
 
     try
       {
-	dialogMethod = this.getClass().getDeclaredMethod("processDialog" + state, null);
+	dialogMethod = this.getClass().getDeclaredMethod("processDialog" + state, ((java.lang.Class[]) null));
       }
     catch (NoSuchMethodException ex)
       {
@@ -454,7 +454,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
 
     try
       {
-	localResult = (ReturnVal) dialogMethod.invoke(this, null);
+	localResult = (ReturnVal) dialogMethod.invoke(this, ((java.lang.Object[]) null));
       }
     catch (InvocationTargetException ex)
       {
