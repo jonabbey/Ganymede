@@ -814,7 +814,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (address != null && !systemCustom.checkMatchingNet(getSession(), netInvid, address))
       {
-	return Ganymede.createErrorDialog("Bad IP Address", "Error, I.P. number/network mismatch in " + this.toString());
+	return Ganymede.createErrorDialog("Bad IP Address", "Error, I.P. number/network mismatch in " + object.toString());
       }
 
     return null;
