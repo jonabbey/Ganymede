@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -391,10 +391,10 @@ public class DBStore {
 
 	// and dump the schema out in a human readable form
 	
-	textOutStream = new FileOutputStream("/home/broccol/public_html/gash2/design/schema");
+	textOutStream = new FileOutputStream("/home/broccol/public_html/gash2/design/schema.html");
 	textOut = new PrintWriter(textOutStream);
-	//	printBases(textOut);
-	printCategoryTree(textOut);
+
+	printCategoryTreeHTML(textOut);
       }
     catch (IOException ex)
       {
@@ -553,10 +553,10 @@ public class DBStore {
 
 	// and dump the schema out in a human readable form
 	
-	textOutStream = new FileOutputStream("/home/broccol/public_html/gash2/design/schema");
+	textOutStream = new FileOutputStream("/home/broccol/public_html/gash2/design/schema.html");
 	textOut = new PrintWriter(textOutStream);
-	//	printBases(textOut);
-	printCategoryTree(textOut);
+
+	printCategoryTreeHTML(textOut);
       }
     catch (IOException ex)
       {
@@ -632,9 +632,17 @@ public class DBStore {
    *
    */
 
-  public synchronized void printCategoryTree(PrintWriter out)
+  public synchronized void printCategoryTreeHTML(PrintWriter out)
   {
-    rootCategory.print(out, "");
+    out.println("<HTML><HEAD><TITLE>Ganymede Schema Dump -- " + new Date() + "</TITLE></HEAD>");
+    out.println("<BODY BGCOLOR=\"#FFFFFF\"><H1>Ganymede Schema Dump -- " + new Date() + "</H1>");
+    out.println("<HR>");
+
+    rootCategory.printHTML(out);
+
+    out.println("<HR>");
+    out.println("Emitted: " + new Date());
+    out.println("</BODY>");
   }
 
   /**
