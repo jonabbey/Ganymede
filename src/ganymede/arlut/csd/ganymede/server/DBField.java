@@ -1133,14 +1133,7 @@ public abstract class DBField implements Remote, db_field {
 
     if (newRetVal == null || newRetVal.didSucceed())
       {
-	if (submittedValue != null)
-	  {
-	    this.value = submittedValue;
-	  }
-	else
-	  {
-	    this.value = null;
-	  }
+	this.value = submittedValue;
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
