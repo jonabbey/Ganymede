@@ -1,0 +1,13 @@
+@media all {
+ body { background: white; }
+ h1 { font-family: Arial Helvetica; }
+ h2 { border-style: solid; border-width: thin; border-color: black; width: 100%; background: #CCFFCC; font-weight: bold;}
+ p.address { font-family: Arial Helvetica; font-weight: italic; }
+}
+
+@media screen {
+}
+
+
+@media print {
+}
