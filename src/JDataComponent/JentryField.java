@@ -90,8 +90,13 @@ abstract public class JentryField extends JTextField implements FocusListener{
    *
    */
 
-  private boolean isAllowed(char ch)
+  public boolean isAllowed(char ch)
   {
+    if (debug)
+      {
+	System.out.println("isAllowed in JentryField");
+      }
+
     return true;
   }
   
@@ -116,7 +121,6 @@ abstract public class JentryField extends JTextField implements FocusListener{
 	(e.getKeyCode() == KeyEvent.VK_END) ||
 	(e.getKeyCode() == KeyEvent.VK_HOME))
       {
-	System.out.println("It's a backspace, delte, end , or home.");
 	super.processKeyEvent(e);
       }
 
@@ -125,18 +129,13 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
     if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
       {
-	System.out.println("Key is undefined, allowing it.");
 	super.processKeyEvent(e);
       }
     else if (isAllowed(e.getKeyChar()))
       {
-	System.out.println("isAllowed returned ok.");
 	super.processKeyEvent(e);
       }
-    else
-      {
-	System.out.println("isAllowed returned false.");
-      }
+
 
     // otherwise, we ignore it
   }
