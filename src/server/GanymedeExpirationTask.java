@@ -6,7 +6,7 @@
    any expirations or removals.
    
    Created: 4 February 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,7 +70,8 @@ public class GanymedeExpirationTask implements Runnable {
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    Ganymede.debug("Expiration Task: Couldn't establish session");
+	    Ganymede.debug("Expiration Task: Couldn't open transaction");
+	    return;
 	  }
 
 	started = true;
@@ -81,26 +82,34 @@ public class GanymedeExpirationTask implements Runnable {
 	Invid invid;
 	Date currentTime = new Date();
 	DBObjectBase base;
-	Enumeration enum;
+	Enumeration baseEnum, enum;
+	QueryDataNode expireNode = new QueryDataNode(SchemaConstants.ExpirationField,
+						     QueryDataNode.LESSEQ,
+						     currentTime);
 
-	Enumeration baseEnum = Ganymede.db.objectBases.elements();
+	QueryDataNode removeNode = new QueryDataNode(SchemaConstants.RemovalField,
+						     QueryDataNode.LESSEQ,
+						     currentTime);
+
+	// --
+
+	baseEnum = Ganymede.db.objectBases.elements();
 
 	while (baseEnum.hasMoreElements())
 	  {
 	    base = (DBObjectBase) baseEnum.nextElement();
+
+	    // embedded objects are inactivated with their parents, we don't
+	    // handle them separately
 
 	    if (base.isEmbedded())
 	      {
 		continue;
 	      }
 	    
-	    Ganymede.debug("Sweeping base " + base.getName() + " for expired objects");
+	    // Ganymede.debug("Sweeping base " + base.getName() + " for expired objects");
 
-	    q = new Query(base.getTypeID(), 
-			  new QueryDataNode(SchemaConstants.ExpirationField, 
-					    QueryDataNode.LESSEQ,
-					    currentTime),
-			  false);
+	    q = new Query(base.getTypeID(), expireNode, false);
 
 	    results = mySession.internalQuery(q);
 
@@ -112,9 +121,16 @@ public class GanymedeExpirationTask implements Runnable {
 
 		invid = result.getInvid();
 
-		Ganymede.debug("Need to inactivate object " + base.getName() + ":" + mySession.viewObjectLabel(invid));
+		retVal = mySession.inactivate_db_object(invid);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    Ganymede.debug("Expiration task was not able to inactivate object " + 
+				   base.getName() + ":" + mySession.viewObjectLabel(invid));
+		  }
+
+		// Ganymede.debug("Need to inactivate object " + base.getName() + ":" + mySession.viewObjectLabel(invid));
 	      }
-							      
 	  }
 
 	// now the removals
@@ -125,18 +141,17 @@ public class GanymedeExpirationTask implements Runnable {
 	  {
 	    base = (DBObjectBase) baseEnum.nextElement();
 
+	    // embedded objects are expired with their parents, we don't
+	    // handle them separately
+
 	    if (base.isEmbedded())
 	      {
 		continue;
 	      }
 	    
-	    Ganymede.debug("Sweeping base " + base.getName() + " for objects to be removed");
+	    // Ganymede.debug("Sweeping base " + base.getName() + " for objects to be removed");
 
-	    q = new Query(base.getTypeID(), 
-			  new QueryDataNode(SchemaConstants.RemovalField, 
-					    QueryDataNode.LESSEQ,
-					    currentTime),
-			  false);
+	    q = new Query(base.getTypeID(), removeNode, false);
 
 	    results = mySession.internalQuery(q);
 
@@ -148,7 +163,15 @@ public class GanymedeExpirationTask implements Runnable {
 
 		invid = result.getInvid();
 
-		Ganymede.debug("Need to remove object " + base.getName() + ":" + mySession.viewObjectLabel(invid));
+		retVal = mySession.remove_db_object(invid);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    Ganymede.debug("Expiration task was not able to remove object " + 
+				   base.getName() + ":" + mySession.viewObjectLabel(invid));
+		  }
+
+		// Ganymede.debug("Need to remove object " + base.getName() + ":" + mySession.viewObjectLabel(invid));
 	      }
 	  }
 	
@@ -156,7 +179,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 	mySession.logout();
 
-	finished = true;	// minimize chance of aborting an open transaction in finally
+	finished = true;	// minimize chance of attempting to abort an open transaction in finally
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -164,7 +187,7 @@ public class GanymedeExpirationTask implements Runnable {
 	  }
 	else
 	  {
-	    Ganymede.debug("Expiration Task: Couldn't transaction committed");
+	    Ganymede.debug("Expiration Task: Transaction committed");
 	  }
       }
     finally
