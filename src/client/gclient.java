@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.99 $ %D%
+   Version: $Revision: 1.100 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -126,12 +126,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     // Hash of objects that are created before nodes are available
     // after the node is created, the invid is taken out of
     // createdObjectsWithoutNodes and put into createHash.
-    createdObjectsWithoutNodes = new Hashtable(),
 
-    inactivateHash = new Hashtable(),
-    expireHash = new Hashtable(),
-    reactivatedHash = new Hashtable(),
-    removeHash = new Hashtable(),
+    createdObjectsWithoutNodes = new Hashtable(),
                                      // Create and Delete are pending on the Commit button. 
     baseToShort = null;              // Map of Base to Short
    
@@ -1149,6 +1145,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	}
 
       handle = null;
+
       if (cachedLists.containsList(type))
 	{
 	  handle = cachedLists.getList(type).getObjectHandle(invid);
@@ -1252,7 +1249,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     about.setVisible(true);
-
   }
 
   public void showCredits()
@@ -1282,11 +1278,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 			      "Mike has contributed significantly to the design of the system " +
 			      "architecture as a whole.  Ganymede would be a far, far poorer thing " +
 			      "were it not for Mike. </p>");
-
-
-
-
-
 	  }
 	
 	credits = new messageDialog(this, "Credits", null);
@@ -1355,10 +1346,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     motd.setVisible(true);
   }
 
-  
   /**
    * Popup a dialog with the default title.
    */
+
   public final void showErrorMessage(String message)
   {
     showErrorMessage("Error", message);
@@ -1367,6 +1358,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   /**
    * Popup an error dialog.
    */
+
   public final void showErrorMessage(String title, String message)
   {
     showErrorMessage(title, message, null);
@@ -1424,6 +1416,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   /**
    * Set the cursor to a wait cursor(usually a watch.)
    */
+
   public void setWaitCursor()
   {
     this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -1441,12 +1434,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   }
 
   /**
-   * This indeicates that something in the database was changed, so canceling this transaction will have consequences.
+   * This indeicates that something in the database was changed, so
+   * canceling this transaction will have consequences.
    *
-   * <p>This should be called whenever the client makes any changes to the database.  That includes
-   * creating objects, editting fields of objects, removing objects, renaming, expiring, deleting,
-   * inactivating, and so on.  It is very important to call this whenever something might have changed. </P>
+   * <p>This should be called whenever the client makes any changes to
+   * the database.  That includes creating objects, editting fields of
+   * objects, removing objects, renaming, expiring, deleting,
+   * inactivating, and so on.  It is very important to call this
+   * whenever something might have changed. </p> 
+   *
    */
+
   public final void somethingChanged()
   {
     commit.setEnabled(true);
@@ -1468,6 +1466,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    * True if something has been changed since the last commit/cancel
    *
    */
+
   public boolean getSomethingChanged()
   {
     return somethingChanged;
@@ -1477,6 +1476,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   /**
    * True if we are in an applet context.
    */
+
   public boolean isApplet()
   {
     return _myglogin.isApplet();
@@ -1650,7 +1650,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		    System.out.println("Checking framePanel: " + fp.getTitle());
 		  }
 
-		// Loop over each containerPanel in the window
+		// Loop over each containerPanel in the framePanel window.. there
+		// may be more than one due to embedded objects
 
 		for (int i = 0; i < fp.containerPanels.size(); i++)
 		  {
@@ -1667,7 +1668,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 			if (debug)
 			  {
 			    System.out.println("  Found container panel for " + invid + ": " + cp.frame.getTitle());
-			    
 			  }
 			
 			if (retVal.rescanAll(invid))
@@ -1679,10 +1679,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 			    cp.update(retVal.getRescanList(invid));
 			  }
 
-				// Don't break the loop, because there
-				// might be multiple containerPanels
-				// or multiple windows containing this
-				// invid.
+			// Don't break the loop, because there
+			// might be multiple containerPanels
+			// or multiple windows containing this
+			// invid.
 		      }
 		  }
 	      }
@@ -2103,11 +2103,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    if (invid != null)
 	      {
 		invidNodeHash.put(invid, objNode);
+
 		if (createdObjectsWithoutNodes.containsKey(invid))
 		  {
 		    if (debug)
 		      {
-			System.out.println("Found this object in the creating objectsWithoutNodes hash: " + handle.getLabel());
+			System.out.println("Found this object in the creating objectsWithoutNodes hash: " + 
+					   handle.getLabel());
 		      }
 		    
 		    
@@ -2190,7 +2192,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     Invid invid = null;
     InvidNode node = null;
 
+    /* -- */
+
+    //
     // First get rid of deleted nodes
+    //
 
     Enumeration deleted = deleteHash.keys();
 
@@ -2198,6 +2204,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	invid = (Invid)deleted.nextElement();
 	node = (InvidNode)invidNodeHash.get(invid);
+
 	if (node != null)
 	  {
 	    if (debug)
@@ -2211,14 +2218,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     
     deleteHash.clear();
-    invid = null;
-    node = null;
 
     //
     // Now change the created nodes
     //
 
+    invid = null;
+    node = null;
+
     Enumeration created = createHash.keys();
+
     while (created.hasMoreElements())
       {
 	invid = (Invid)created.nextElement();
@@ -2239,94 +2248,216 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     createHash.clear();
     createdObjectsWithoutNodes.clear();
-    invid = null;
-    node = null;
 
     //
-    // Last change the changed nodes.
+    // Update any other nodes we touched
     //
 
-    Enumeration changed = changedHash.keys();
-    while (changed.hasMoreElements())
-      {
-	invid = (Invid)changed.nextElement();
-	node = (InvidNode)invidNodeHash.get(invid);
-	if (node != null)
-	  {
-	    if (debug)
-	      {
-		// This shouldn't be the original label.
-		System.out.println("Updating node: " + node.getText());
-	      }
-
-	    node.setText(session.viewObjectLabel(invid));
-	    changedHash.remove(invid);
-	    setIconForNode(invid);
-	  }
-      }
+    refreshChangedObjectHandles();
 
     if (!changedHash.isEmpty())
       {
 	if (debug)
 	  {
-	    System.out.println("Changed hash is not empty, clearing.");
+	    System.out.println("Changed hash is not empty, clearing... client/server sync prob?");
 	  }
 
 	changedHash.clear();
       }
 
-    invid = null;
-    node = null;
-    
-    changed = reactivatedHash.keys();
+    tree.refresh();
+  }
 
-    while (changed.hasMoreElements())
+  /**
+   * This method scans through the changedHash hashtable and generates
+   * queries to the server for all invids that have been touched by
+   * the client after transaction commit.  The results from the
+   * queries are used to update the icons in the tree.
+   *
+   * This method is destructive to the changedHash, and will remove
+   * any entries that it was properly able to refresh.  Any entries
+   * that it was not able to refresh indicate either a network problem,
+   * or that the objects were removed from the server without our knowing,
+   * which shouldn't happen generally.  It _can_ happen, if another transaction
+   * gets the object checked out, deleted, and committed before we can fire
+   * off our queries after commit.  Which really shouldn't happen.
+   */
+
+  public void refreshChangedObjectHandles()
+  {
+    Hashtable typeHash = new Hashtable();
+    Enumeration enum, enum2;
+    QueryNode root = null;
+    Invid invid;
+    Short objectTypeKey;
+    Vector x;
+
+    /* -- */
+
+    setStatus("refreshing object handles after commit");
+
+    enum = changedHash.keys();
+
+    while (enum.hasMoreElements())
       {
-	invid = (Invid)changed.nextElement();
-	node = (InvidNode)invidNodeHash.get(invid);
+	invid = (Invid) enum.nextElement();
 
-	CacheInfo info = (CacheInfo)reactivatedHash.get(invid);
+	objectTypeKey = new Short(invid.getType());
 
-	if (cachedLists.containsList(info.getBaseID()))
+	if (typeHash.containsKey(objectTypeKey))
 	  {
+	    x = (Vector) typeHash.get(objectTypeKey);
+	  }
+	else
+	  {
+	    x = new Vector();
+	    typeHash.put(objectTypeKey, x);
+	  }
 
-	    objectList list = cachedLists.getList(info.getBaseID());
-	    
-	    ObjectHandle handle = list.getObjectHandle(invid);
-	    if (handle != null)
+	x.addElement(invid);
+      }
+
+    // now loop over each type, issuing one query for each..
+
+    enum = typeHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	objectTypeKey = (Short) enum.nextElement();
+
+	setStatus("refreshing object handles for type " + objectTypeKey);
+
+	x = (Vector) typeHash.get(objectTypeKey);
+
+	root = null;
+	enum2 = x.elements();
+
+	while (enum2.hasMoreElements())
+	  {
+	    invid = (Invid) enum2.nextElement();
+
+	    if (root == null)
 	      {
-		handle.setInactive(false);
-		if (debug)
-		  {
-		    System.out.println("Setting handle to not-inactive.");
-		  }
+		root = new QueryDataNode((short) -2, QueryDataNode.EQUALS, invid);
+	      }
+	    else
+	      {
+		root = new QueryOrNode(root, new QueryDataNode((short) -2, QueryDataNode.EQUALS, invid));
 	      }
 	  }
-	  
-	if (node != null)
-	  {
-	    if (debug)
-	      {
-		System.out.println("removing invid from reactivated hash");
-	      }
 
-	    // Maybe this one said "Inactivated" on it.
-	    if (node.getText().indexOf("inactive") > 0)
+	// ok, got our query tree.. send in the query
+
+	setStatus("querying for object handles for type " + objectTypeKey);
+
+	try
+	  {
+	    QueryResult result = session.query(new Query(objectTypeKey.shortValue(), root, false));
+
+	    // now get the results
+	    
+	    Vector handleList = result.getHandles();
+	    
+	    // and update anything we've got in the tree
+	    
+	    setStatus("Updating tree for object handles for type " + objectTypeKey);
+	    
+	    for (int i = 0; i < handleList.size(); i++)
 	      {
-		if (debug)
+		ObjectHandle newHandle = (ObjectHandle) handleList.elementAt(i);
+		
+		InvidNode nodeToUpdate = (InvidNode) invidNodeHash.get(newHandle.getInvid());
+		
+		if (nodeToUpdate != null)
 		  {
-		    System.out.println("Fixing this one: " + node.getText()); 
+		    if (debug)
+		      {
+			System.err.println("got object handle refresh for " + newHandle.debugDump());
+		      }
+
+		    nodeToUpdate.setHandle(newHandle);
+		    
+		    changedHash.remove(newHandle.getInvid());
+		    setIconForNode(newHandle.getInvid());
 		  }
 
-		node.setText(node.getText().substring(0, node.getText().indexOf("(inactive)")));
+		// and update our tree cache for this item
+
+		objectList list = cachedLists.getList(objectTypeKey);
+
+		list.removeInvid(newHandle.getInvid());
+		list.addObjectHandle(newHandle);
 	      }
-	    
-	    reactivatedHash.remove(invid);
-	    setIconForNode(invid);
+	  }
+	catch (RemoteException ex)
+	  {
+	    setStatus("Couldn't get object handle refresh for " + objectTypeKey);
 	  }
       }
 
-    tree.refresh();
+    setStatus("Completed refresh of changed objects in the tree.");
+  }
+
+  /**
+   * This method does the same thing as refreshChangedObjectHandles(), but
+   * for a single object only.
+   */
+
+  public void refreshChangedObject(Invid invid)
+  {
+    QueryNode root = null;
+    Short objectTypeKey;
+
+    /* -- */
+
+    objectTypeKey = new Short(invid.getType());
+
+    root = new QueryDataNode((short) -2, QueryDataNode.EQUALS, invid);
+
+    try
+      {
+	QueryResult result = session.query(new Query(objectTypeKey.shortValue(), root, false));
+	
+	// now get the results
+	    
+	Vector handleList = result.getHandles();
+	    
+	// and update anything we've got in the tree
+	    
+	setStatus("Updating tree for object handles for type " + objectTypeKey);
+	    
+	for (int i = 0; i < handleList.size(); i++)
+	  {
+	    ObjectHandle newHandle = (ObjectHandle) handleList.elementAt(i);
+		
+	    InvidNode nodeToUpdate = (InvidNode) invidNodeHash.get(newHandle.getInvid());
+		
+	    if (nodeToUpdate != null)
+	      {
+		if (debug)
+		  {
+		    System.err.println("got object handle refresh for " + newHandle.debugDump());
+		  }
+		
+		nodeToUpdate.setHandle(newHandle);
+
+		setIconForNode(newHandle.getInvid());
+	      }
+	    
+	    // and update our tree cache for this item
+	    
+	    objectList list = cachedLists.getList(objectTypeKey);
+	    
+	    list.removeInvid(newHandle.getInvid());
+	    list.addObjectHandle(newHandle);
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	setStatus("Couldn't get object handle refresh for " + objectTypeKey);
+      }
+
+    setStatus("Completed singleton refresh.");
   }
 
   /**
@@ -2334,6 +2465,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    * This method changes the icon for the tree node for the
    * provided invid, depending on the various hashes and the object's
    * objectHandle.
+   *
+   * This method does not actually induce the tree to refresh itself.
    *
    */
 
@@ -2369,54 +2502,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	// The order here matters, because it might be in more than
 	// one hash.  So put the most important stuff first
 
-	if (expireHash.containsKey(invid))
-	  {
-	    if (debug)
-	      {
-		System.out.println("expire");
-	      }
-
-	    node.setImages(OPEN_FIELD_EXPIRESET, CLOSED_FIELD_EXPIRESET);
-	  }
-	else if (removeHash.containsKey(invid))
-	  {
-	    if (debug)
-	      {
-		System.out.println("remove");
-	      }
-
-	    node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
-	  }
-	else if (inactivateHash.containsKey(invid))
-	  {
-	    if (debug)
-	      {		
-		System.out.println("inactivate");
-	      }
-
-	    node.setMenu(objectReactivatePM);
-	    String text = node.getText();
-	    if (text.indexOf("(inactive)") > 0)
-	      {
-		if (debug)
-		  {
-		    System.out.println("It already says inactivated.");
-		  }
-	      }
-	    else
-	      {
-		node.setText(node.getText() + " (inactive)");
-	      }
-
-	    node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
-	    tree.refresh();
-	  }
-	else if (createHash.containsKey(invid))
+	if (createHash.containsKey(invid))
 	  {
 	    if (debug)
 	      {
 		System.out.println("Setting icon to create.");
 	      }
+
 	    node.setImages(OPEN_FIELD_CREATE, CLOSED_FIELD_CREATE);
 	  }
 	else if (deleteHash.containsKey(invid))
@@ -2425,122 +2517,105 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	      {
 		System.out.println("Setting icon to delete.");
 	      }
-	    node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
-	  }
-	else if (changedHash.containsKey(invid))
-	  {
-	    if (debug)
-	      {
-		System.out.println("Setting icon to edit.");
-	      }
-	    node.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
-	  }
-	else if (reactivatedHash.containsKey(invid))
-	  {
-	    int index = node.getText().indexOf("(inactive)");
-	    if (index > 0)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Fixing this one: " + node.getText()); 
-		  }
 
-		node.setText(node.getText().substring(0, index));
-	      }
-	    node.setMenu(objectInactivatePM);
-	    node.setImages(OPEN_FIELD, CLOSED_FIELD);
+	    node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
 	  }
 	else if (handle != null)
 	  {
-	    if (handle.isExpirationSet())
+	    if (handle.isInactive())
 	      {
 		if (debug)
-		  {
-		    System.out.println("isExpirationSet");
+		  {		
+		    System.out.println("inactivate");
 		  }
 
-		node.setMenu(objectReactivatePM);
-		node.setImages(OPEN_FIELD_EXPIRESET, CLOSED_FIELD_EXPIRESET);
-	      }
-	    else if (handle.isRemovalSet())
-	      {
-		if (debug)
+		String text = node.getText();
+
+		if (text.indexOf("(inactive)") > 0)
 		  {
-		    System.out.println("isRemovalSet()");
+		    if (debug)
+		      {
+			System.out.println("It already says inactivated.");
+		      }
+		  }
+		else
+		  {
+		    node.setText(node.getText() + " (inactive)");
 		  }
 
 		node.setMenu(objectReactivatePM);
 		node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
 	      }
-	    else // nothing special in handle
+	    else
 	      {
+		// did we previously have this labeled as inactive?
 
-		node.setImages(OPEN_FIELD, CLOSED_FIELD);
-	      } 
+		String text = node.getText();
+		int index = text.indexOf("(inactive)");
+
+		if (index != -1)
+		  {
+		    node.setText(text.substring(0, index));
+		  }
+
+		// now take care of the rest of the possibilities.
+
+		if (handle.isExpirationSet())
+		  {
+		    if (debug)
+		      {
+			System.out.println("isExpirationSet");
+		      }
+
+		    node.setImages(OPEN_FIELD_EXPIRESET, CLOSED_FIELD_EXPIRESET);
+		  }
+		else if (handle.isRemovalSet())
+		  {
+		    if (debug)
+		      {
+			System.out.println("isRemovalSet()");
+		      }
+
+		    node.setMenu(objectReactivatePM);
+		    node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
+		  }
+		else if (changedHash.containsKey(invid))
+		  {
+		    if (debug)
+		      {
+			System.out.println("Setting icon to edit.");
+		      }
+		
+		    node.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
+		  }
+		else // nothing special in handle
+		  {
+		    node.setImages(OPEN_FIELD, CLOSED_FIELD);
+		  } 
+	      }
 	  }
 	else // no handle
 	  {
-	    if (debug)
+	    if (changedHash.containsKey(invid))
 	      {
-		System.out.println("normal");
+		if (debug)
+		  {
+		    System.out.println("Setting icon to edit.");
+		  }
+		
+		node.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
 	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println("normal");
+		  }
 
-	    node.setImages(OPEN_FIELD, CLOSED_FIELD);
+		node.setImages(OPEN_FIELD, CLOSED_FIELD);
+	      }
 	  }
       }
-
-  }
-
-  ///////////////////////////////
-  ///// Hash stuff
-  //////////////////////////////
-
-  /**
-   * This adds an invid to the expireHash.
-   *
-   * Objects in the expire hash have had their expiration dates set in the current session.
-   */
-  public void addToExpireHash(Invid invid)
-  {
-    if (! expireHash.containsKey(invid))
-      {
-	try
-	  {
-	    Short type = new Short(invid.getType());
-	    ObjectHandle handle = getObjectHandle(invid, type);
-	    expireHash.put(invid, new CacheInfo(type, session.viewObjectLabel(invid), null, handle));
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("coult not update expireHash: " + rx);
-	  }
-      }
-    setIconForNode(invid);
-    tree.refresh();
-  }
-  /**
-   * Add invid to the removal hash.
-   *
-   * Things in the removal hash have been removed in the current session.
-   */
-
-  public void addToRemoveHash(Invid invid)
-  {
-    if ( ! removeHash.containsKey(invid))
-      {
-	try
-	  {
-	    Short type = new Short(invid.getType());
-	    ObjectHandle handle = getObjectHandle(invid, type);
-	    removeHash.put(invid, new CacheInfo(type, session.viewObjectLabel(invid), null, handle));
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not update removeHash: " + rx);
-	  }
-      }
-    setIconForNode(invid);
-    tree.refresh();
   }
 
   /********************************************************************************
@@ -2599,7 +2674,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	Short type = new Short(invid.getType());
 	ObjectHandle handle = getObjectHandle(invid, type);
 	  
-	changedHash.put(invid, new CacheInfo(type, session.viewObjectLabel(invid), null, handle));
+	changedHash.put(invid, invid);
+
+	// we don't need to do a full refresh of it, since we've just
+	// checked it out..
 
 	setIconForNode(invid);
 	tree.refresh();
@@ -2923,6 +3001,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    if (retVal != null)
 	      {
 		retVal = handleReturnVal(retVal);
+
 		if (retVal == null)
 		  {
 		    ok = true;
@@ -2942,12 +3021,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		Short type = new Short(invid.getType());
 		ObjectHandle handle = getObjectHandle(invid, type);
 
-		inactivateHash.put(invid, new CacheInfo(type, session.viewObjectLabel(invid), null, handle));
-		setIconForNode(invid);
+		// remember that we changed this object for the refreshChangedObjectHandles
+
+		changedHash.put(invid, invid);
+
+		// refresh it now
+		
+		refreshChangedObject(invid);
+
+		// and update the tree
+
 		tree.refresh();
 		setStatus("Object inactivated.");
 		somethingChanged();
-
 	      }
 	    else
 	      {
@@ -2967,7 +3053,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   /** 
    * Reactivate an object.
    *
-   * This is to reactivate a deacivated object.  I think you should call this from the 
+   * This is to reactivate a deactivated object.  I think you should call this from the 
    * expiration date panel if the date is cleared.
    */
 
@@ -2989,6 +3075,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	else
 	  {
 	    retVal = handleReturnVal(retVal);
+
 	    if (retVal == null)
 	      {
 		ok = true;
@@ -3006,116 +3093,21 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     if (ok)
       {
-
 	somethingChanged();
 	setStatus("Object reactivated.");
 
-	// We need to fix the handle.
-	ObjectHandle h = null;
-	ObjectHandle oh = null;
-	Short type = null;
+	// remember that this invid has been edited, and will need
+	// to be refreshed on commit
 
-	type = new Short(invid.getType());	
+	changedHash.put(invid, invid);
 
-	if (cachedLists.containsList(type))
-	  {
-	    if (debug)
-	      {
-		System.out.println("Getting the handle");
-	      }
+	refreshChangedObject(invid);
 
-	    objectList list = cachedLists.getList(type);
-	    h = list.getObjectHandle(invid);
-
-	    try
-	      {
-		oh = (ObjectHandle)h.clone();
-	      }
-	    catch (Exception x)
-	      {
-		System.out.println("Can't clone the ObjectHandle: " + x);
-	      }
-
-	    if (retVal == null)
-	      {
-		// set everthing to false
-		h.setRemovalSet(false);
-		h.setExpirationSet(false);
-		h.setInactive(false);
-	      }
-	    else
-	      {
-		// need to make some decisions
-		h.setRemovalSet(false);
-		h.setInactive(false);
-		if (retVal.getObjectStatus() == ReturnVal.EXPIRATIONSET)
-		  {
-		    if (debug)
-		      {
-			System.out.println("Still expriation set.");
-		      }
-
-		    h.setExpirationSet(true);
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			System.out.println("Clearing everything.");
-		      }
-
-		    h.setExpirationSet(false);
-		  }
-	      }
-	  }
-
-	// If this is in the inactivateHash, then it was just inactivated in this 
-	// session.  If not, it was inactive before, so we need to stick it in 
-	// the reactivatedHash, because we might need to change the icon back if
-	// the session is canceled.
-
-	if (inactivateHash.containsKey(invid))
-	  {
-	    if (debug)
-	      {
-		System.out.println("-removing from inactivateHash");
-	      }
-	    
-	    InvidNode node = (InvidNode)invidNodeHash.get(invid);
-	    if(node.getText().indexOf("(inactive)") > 0)
-	      {
-		node.setText(node.getText().substring(0, node.getText().indexOf("(inactive)")));
-	      }
-
-	    inactivateHash.remove(invid);
-	    
-	    // Probably should get the original handle, and stick it in the real cache
-	  }
-	else
-	  {
-	    try
-	      {
-		if (h == null)
-		  {
-		    if (debug)
-		      {
-			System.out.println("The handle is null.");
-		      }
-		  }
-		reactivatedHash.put(invid, new CacheInfo(type ,session.viewObjectLabel(invid), null, h, oh));
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get object label. " + rx);
-	      }
-	  }
-
+	tree.refresh();
+	setNormalCursor();
       }
-    
-    setIconForNode(invid);
-    tree.refresh();
-    setNormalCursor();
-    return ok;
+
+    return ok;    
   }
 
   /**
@@ -3844,13 +3836,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     invid = null;
     list = null;
     info = null;
+
     // Next up is created list: remove all the added stuff.
     
     Enumeration created = createHash.keys();
     
     while (created.hasMoreElements())
       {
-	invid = (Invid)created.nextElement();
+	invid = (Invid) created.nextElement();
 	info = (CacheInfo)createHash.get(invid);
 	
 	list = cachedLists.getList(info.getBaseID());
@@ -3879,166 +3872,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     createdObjectsWithoutNodes.clear();
     
     // Now go through changed list and revert any names that may be needed
-    invid = null;
-    list = null;
-    info = null;
-    Enumeration changed = changedHash.keys();
-    
-    while (changed.hasMoreElements())
-      {
-	invid = (Invid)changed.nextElement();
-	info = (CacheInfo)changedHash.get(invid);
-	    
-	list = cachedLists.getList(info.getBaseID());
 
-	if (list != null)
-	  {
-	    if (debug)
-	      {
-		System.out.println("This changed base is cached, fixing it back.");
-	      }
-
-	    list.removeInvid(invid);
-	    handle = info.getOriginalObjectHandle();
-	    if (handle == null)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Null original handle, bummer.");
-		  }
-	      }
-	    else
-	      {
-		list.addObjectHandle(handle);
-		node = (InvidNode)invidNodeHash.get(invid);
-		if (node != null)
-		  {
-		    node.setHandle(handle);
-		  }
-	      }
-	  }
-	changedHash.remove(invid);
-	setIconForNode(invid);
-      }
-
-    node = null;
-    invid = null;
-    list = null;
-    info = null;
-    
-    changed = reactivatedHash.keys();
-
-    while (changed.hasMoreElements())
-      {
-	invid = (Invid)changed.nextElement();
-	node = (InvidNode)invidNodeHash.get(invid);
-	info = (CacheInfo)reactivatedHash.get(invid); 
-
-	list = cachedLists.getList(info.getBaseID());
-
-	if (list != null)
-	  {
-	    ObjectHandle original = info.getOriginalObjectHandle();
-
-	    if (original != null)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Reverting to original ObjectHandle.  isInactive: " + 
-				       original.isInactive() + " isRemovaldate: " + 
-				       original.isRemovalSet() + " isExpire: " + 
-				       original.isExpirationSet());
-		  }
-		    
-		list.removeInvid(invid);
-		list.addObjectHandle(original);
-		node = (InvidNode)invidNodeHash.get(invid);
-		if (node != null)
-		  {
-		    node.setHandle(original);
-		  }
-	      }
-	    else if (debug)
-	      {
-		    
-		System.out.println("No original to put in...");
-	      }
-	  }
-
-	reactivatedHash.remove(invid);
-
-	// Do a little more stuff to the node here, because this should
-	// be just a normal object.  setIconForNode doesn't change
-	// the menu or text of a normal object, so I want to do it here.
-	//
-	// If setIconForNode changed the menu and text for everything, it
-	// would be too slow, because most objects are not in the reactivate/inactivate
-	// group.
-
-	if (debug)
-	  {
-	    System.out.println("Fixing text of reactivated object.");
-	  }
-
-	node.setMenu(objectReactivatePM);  // set it back to the reactivate method
-
-	int index = node.getText().indexOf("(inactive)");
-
-	if (index < 0)
-	  {
-	    node.setText(node.getText() + " (inactive)");
-	  }
-
-	setIconForNode(invid);
-      }
-
-    invid = null;
-    node = null;
-    info = null;
-    list = null;
-    
-    changed = inactivateHash.keys();
-
-    while (changed.hasMoreElements())
-      {
-	invid = (Invid)changed.nextElement();
-	info = (CacheInfo)inactivateHash.get(invid);
-	    
-	node = (InvidNode)invidNodeHash.get(invid);
-
-	if (node.getText().indexOf("(inactive)") > 0)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Fixing this one: " + node.getText()); 
-	      }
-
-	    node.setText(node.getText().substring(0, node.getText().indexOf("(inactive)")));
-	  }
-
-	list = cachedLists.getList(info.getBaseID());
-
-	if (list != null)
-	  {
-	    list.removeInvid(invid);
-	    handle = info.getOriginalObjectHandle();
-	    list.addObjectHandle(handle);
-	    node = (InvidNode)invidNodeHash.get(invid);
-
-	    if (node != null)
-	      {
-		node.setHandle(handle);
-	      }
-	  }
-
-	inactivateHash.remove(invid);
-	node.setMenu(objectInactivatePM);
-	setIconForNode(invid);
-      }
+    refreshChangedObjectHandles();
 
     if (debug && createHash.isEmpty() && deleteHash.isEmpty() && 
-	changedHash.isEmpty() && inactivateHash.isEmpty() && 
-	reactivatedHash.isEmpty())
+	changedHash.isEmpty())
       {
 	System.out.println("Woo-woo the hashes are all empty");
       }
