@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,7 +79,9 @@ public class Loader extends Thread {
 	else
 	  {
 	    System.out.println("**Stopping before baseList is loaded");
+
 	    // Ok, it's not really loaded, but this basically means that it is finished.
+
 	    baseListLoaded = true;
 	    notifyAll();
 	  }
@@ -91,21 +93,10 @@ public class Loader extends Thread {
 	else
 	  {
 	    System.out.println("**Stopping before baseNames are loaded");
+
 	    baseNamesLoaded = true;
 	    this.notifyAll();
 	  }
-
-	/*
- 	if (keepGoing)
-	   {
-	     loadBaseHash();
-	   }
-	else 
-	  { 
-	     baseHashLoaded = true;
-	    this.notifyAll();
-	  } 
-	*/ 
 
 	if (keepGoing)
 	  {
@@ -114,6 +105,7 @@ public class Loader extends Thread {
 	else
 	  {
 	    System.out.println("**Stopping before baseMap is loaded");
+
 	    baseMapLoaded = true;
 	    this.notifyAll();
 	  }
@@ -128,23 +120,25 @@ public class Loader extends Thread {
       {
 	System.out.println("Done with thread in loader.");
       }
-    this.notifyAll();
 
+    this.notifyAll();
   }
 
   /**
+   *
    * Clear out all the information in the loader.
    *
    */
+
   public void clear()
   {
-
     // First stop loading stuff.
+
     keepGoing = false;
     
     if (debug)
       {
-	if( !( baseNamesLoaded && baseListLoaded && baseMapLoaded))
+	if(!( baseNamesLoaded && baseListLoaded && baseMapLoaded))
 	  {
 	    System.out.println("***There are not all finished.");
 	  }
@@ -158,17 +152,19 @@ public class Loader extends Thread {
     while (! ( baseNamesLoaded && baseListLoaded && baseMapLoaded))
       {
 	System.out.println("Loader waiting for previous method to stop.");
-	synchronized (this) {
-	  try
-	    {
-	      this.wait();
-	    }
-	  catch (InterruptedException x)
-	    {
-	      throw new RuntimeException("Interrupted while waiting for previous loader to finish. " + x);
-	    }
-	}	  
 
+	synchronized (this) 
+	  {
+	    try
+	      {
+		this.wait();
+	      }
+	    catch (InterruptedException x)
+	      {
+		throw new RuntimeException("Interrupted while waiting for previous loader to finish. " + x);
+	      }
+	  }
+	
       }
 
     if (debug)
@@ -177,14 +173,13 @@ public class Loader extends Thread {
       }
 
     // Set everything to false, so it will reload them all.
+
     baseNamesLoaded = false;
     baseListLoaded = false;
     baseMapLoaded = false;
-    //baseHashLoaded = false;
     
     baseList = null;
     baseNames = null;
-    //baseHash = null;
     baseMap = null;
     baseList = null;
 
@@ -197,14 +192,17 @@ public class Loader extends Thread {
 
     Thread t = new Thread(this);
     t.start();
-
   }
 
   public Vector getBaseList()
   {
     while (! baseListLoaded)
       {
-	System.out.println("Dang, have to wait to get the base list");
+	if (debug)
+	  {
+	    System.out.println("Dang, have to wait to get the base list");
+	  }
+
 	synchronized (this)
 	  {
 	    try
@@ -238,7 +236,10 @@ public class Loader extends Thread {
   {
     while (! baseNamesLoaded)
       {
-	System.out.println("Dang, have to wait to get the base names list");
+	if (debug)
+	  {
+	    System.out.println("Dang, have to wait to get the base names list");
+	  }
 
 	synchronized (this)
 	  {
@@ -266,44 +267,6 @@ public class Loader extends Thread {
       }
 
     return baseNames;
-    
-  }
-  public Hashtable getBaseHash()
-  {
-    throw new IllegalArgumentException("I don't load no stinking base hash.");
-    /*
-
-    while (! baseHashLoaded)
-      {
-	System.out.println("Loader: waiting for base hash");
-
-	synchronized (this)
-	  {
-	    try
-	      {
-		this.wait();
-	      }
-	    catch (InterruptedException x)
-	      {
-		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
-	      }
-	  }
-      }
-
-    if (debug)
-      {
-	if (baseHash == null)
-	  {
-	    System.out.println("baseHash is null");
-	  }
-	else
-	  {
-	    System.out.println("returning baseHash");
-	  }
-      }
-
-    return baseHash;
-    */    
   }
 
   public Hashtable getBaseMap()
@@ -338,15 +301,19 @@ public class Loader extends Thread {
       }
 
     return baseMap;
-    
   }
+
   public Hashtable getBaseToShort()
   {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
+
     while (! baseMapLoaded)
       {
-	System.out.println("Loader: waiting for base hash");
+	if (debug)
+	  {
+	    System.out.println("Loader: waiting for base hash");
+	  }
 
 	synchronized (this)
 	  {
@@ -374,7 +341,6 @@ public class Loader extends Thread {
       }
 
     return baseToShort;
-    
   }
 
   /* -- Private methods  --  */
@@ -395,9 +361,7 @@ public class Loader extends Thread {
     if (debug)
       {
 	System.out.println("Finished loading base list");
-      }
-    if (debug)
-      {
+
 	if (baseList == null)
 	  {
 	    System.out.println("****** BaseList is null after loading!!!! *****");
@@ -411,7 +375,6 @@ public class Loader extends Thread {
     baseListLoaded = true;
     notifyAll();
   }
-
 
   private synchronized void loadBaseNames() throws RemoteException
   {
@@ -526,6 +489,4 @@ public class Loader extends Thread {
     baseMapLoaded = true;
     notifyAll();
   }
-
-
 }
