@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,7 +15,9 @@ package arlut.csd.ganymede;
 
 import java.rmi.*;
 import java.rmi.server.*;
+
 //import java.awt.*;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Image;
@@ -30,8 +32,6 @@ import java.util.*;
 
 import com.sun.java.swing.*;
 import com.sun.java.swing.border.*;
-
-//import gjt.Box;
 
 import arlut.csd.JTable.*;
 import arlut.csd.JDialog.*;
@@ -284,16 +284,9 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	schemaFrame = new GASHSchema("Schema Editor", editor);
       }
 
-    //    try
-    //      {
-    //	editor.release();
-    //      }
-    //    catch (RemoteException ex)
-    //      {
-    //	System.err.println("release() exception: " + ex);
-    //      }
-
-    //    System.err.println("Released SchemaEdit handle");
+    // the GASHSchema constructor pops itself up at the end of
+    // initialization, and has its own methods for closing itself
+    // down.
   }
 
 }
@@ -326,8 +319,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JMenuItem runInvidTestMI = null;
   JMenuItem killAllMI = null;
 
-  PopupMenu popMenu = null;
-  MenuItem killUserMI = null;
+  JPopupMenu popMenu = null;
+  JMenuItem killUserMI = null;
 
   JPanel topPanel = null;
 
@@ -422,9 +415,9 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     setJMenuBar(mbar);
 
-    popMenu = new PopupMenu();
+    popMenu = new JPopupMenu();
 
-    killUserMI = new MenuItem("Kill User");
+    killUserMI = new JMenuItem("Kill User");
     popMenu.add(killUserMI);
 
     question = PackageResources.getImageResource(this, "question.gif", getClass());
@@ -661,8 +654,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     topGBC.fill = GridBagConstraints.HORIZONTAL;
     topGBC.gridwidth = GridBagConstraints.REMAINDER;
     topGBC.gridheight = 1;
+    topGBC.gridx = 0;
     topGBC.weightx = 1.0;
-    topGBC.weighty = 0;
     
     JPanel topBox = new JPanel(new BorderLayout());
     topBox.add("Center",topPanel);
@@ -673,7 +666,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     // set up our middle text area
 
     topGBC.fill = GridBagConstraints.BOTH;
-    topGBC.weighty = 50;
+    topGBC.weighty = 1.0;
 
     statusArea = new JTextArea("Admin Console Testing\n", 6, 50);
     statusArea.setEditable(false);
@@ -690,10 +683,13 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     // and our bottom user table
 
-    table = new rowTable(colWidths, headers, this, popMenu);
+    table = new rowTable(colWidths, headers, this, false, popMenu);
     JPanel tableBox = new JPanel(new BorderLayout());
     tableBox.add("Center", table);
     tableBox.setBorder(new TitledBorder("Users Connected"));
+
+    // we'll add the table box with the same GridBagConstraints as
+    // the text area had
 
     topGBL.setConstraints(tableBox, topGBC);
     getContentPane().add(tableBox);
