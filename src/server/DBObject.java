@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,7 +48,12 @@ import java.util.*;
 
 public class DBObject {
 
-  static final boolean debug = true;
+  static boolean debug = true;
+
+  public static void setDebug(boolean val)
+  {
+    debug = val;
+  }
 
   DBObjectBase objectBase;
   int id;			// 32 bit id - the object's invariant id
@@ -441,7 +446,7 @@ public class DBObject {
 
     /* -- */
 
-    out.println(objectBase.object_name + " : " + id);
+    out.println("Invid: <" + objectBase.object_name + ":" + id + ">");
    
     enum = fields.keys();
 
