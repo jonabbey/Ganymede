@@ -5,7 +5,7 @@
    Remote interface definition.
 
    Created: 14 November 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -60,7 +60,17 @@ public interface invid_field extends db_field {
 
   // the following methods apply if this is an edit-in-place vector
 
-  Invid createNewEmbedded() throws RemoteException;
+  /**
+   *
+   * This method is used to create a new embedded object in an
+   * invid field that contains a vector of edit-in-place/embedded
+   * objects.  The ReturnVal returned indicates success/failure,
+   * and on success will provide the Invid of the newly created
+   * embedded when ReturnVal.getInvid() is called on it.
+   *
+   */
+
+  ReturnVal createNewEmbedded() throws RemoteException;
 
   /**
    *
