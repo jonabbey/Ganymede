@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.53 $ %D%
+    Version: $Revision: 1.54 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -573,7 +573,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	      Object o = field.getValue();
 
-	      if (o instanceof String)
+	      if (comp instanceof JComboBox)
 		{
 		  if (debug)
 		    {
@@ -595,9 +595,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		  // Do I need to check to make sure that this one is possible?
 
-		  cb.setSelectedItem((String)o);
+		  cb.setSelectedItem(o);
 		}
-	      else if (o instanceof Invid)
+	      else if (comp instanceof JInvidChooser)
 		{
 		  if (debug)
 		    {
@@ -625,14 +625,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  // This might be null.  Which means we should choose <none>.  But do
 		  // we choose (string)<none> or (listHandle)<none>?
 
-		  if (field instanceof string_field)
+		  if (comp instanceof JInvidChooser)
+		    {
+		      ((JInvidChooser)comp).setSelectedItem(new listHandle("<none>", null));
+		    }	
+		  if (comp instanceof JComboBox)
 		    {
 		      ((JComboBox)comp).setSelectedItem("<none>");
 		    }
-		  else if (field instanceof invid_field)
-		    {
-		      ((JInvidChooser)comp).setSelectedItem(new listHandle("<none>", null));
-		    }
+		  
 		  else
 		    {
 		      System.out.println("I am not expecting this type in JComboBox: " + field);
@@ -1099,6 +1100,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (returnValue == null)  // Success, no need to do anything else
 	  {
+	    if (debug)
+	      {
+		System.out.println("retVal is null: returning true");
+	      }
 	    gc.somethingChanged();
 	    return true;
 	  }
@@ -1109,12 +1114,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (returnValue.didSucceed())
 	  {
-	    System.out.println("Returning true.");
+	    if (debug)
+	      {
+		System.out.println("didSucceed: Returning true.");
+	      }
+
+	    gc.somethingChanged();
 	    return true;
 	  }
 	else
 	  {
-	    System.out.println("Returning false.");
+	    if (debug)
+	      {
+		System.out.println("didSucceed: Returning false.");
+	      }
+
 	    return false;
 	  }
       }
