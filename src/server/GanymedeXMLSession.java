@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2000/11/10 05:04:59 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2000/11/21 22:14:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,8 +67,32 @@ import org.xml.sax.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class handles operations and client interactions for the Ganymede
- * server in handling XML file loading.</p>
+ * <p>This class handles all XML loading operations for the Ganymede
+ * server.  GanymedeXMLSession's are created by the {@link
+ * arlut.csd.ganymede.GanymedeServer GanymedeServer}'s {@link
+ * arlut.csd.ganymede.GanymedeServer#xmlLogin(arlut.csd.ganymede.Client)
+ * xmlLogin()} method.  A GanymedeXMLSession is created on top of a
+ * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} and
+ * interacts with the database through that session.  A
+ * GanymedeXMLSession generally looks to the rest of the server like
+ * any other client, except that if the XML file contains a
+ * &lt;ganyschema&gt; section, the GanymedeXMLSession will attempt to
+ * manipulate the server's login semaphore to force the server into
+ * schema editing mode.  This will fail if there are any remote
+ * clients connected to the server at the time the XML file is
+ * processed.</p>
+ *
+ * <p>Once xmlLogin creates (and RMI exports) a GanymedeXMLSession, an xmlclient
+ * repeatedly calls the {@link arlut.csd.ganymede.GanymedeXMLSession#xmlSubmit(byte[]) xmlSubmit()}
+ * method, which writes the bytes received into a pipe.  The GanymedeXMLSession's
+ * thread (also initiated by GanymedeServer.xmlLogin()) then loops, reading
+ * data off of the pipe with an {@link arlut.csd.Util.XMLReader XMLReader} and
+ * doing various schema editing and data loading operations.</p>
+ *
+ * <p>The &lt;ganydata&gt; processing section was originally written as part
+ * of xmlclient, and did all xml parsing on the client side and all data operations
+ * remotely over RMI.  Pulling this logic into a server-side
+ * GanymedeXMLSession sped things up by a factor of 300 in my testing.</p>
  */
 
 public final class GanymedeXMLSession extends java.lang.Thread implements XMLSession, Unreferenced {

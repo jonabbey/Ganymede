@@ -1011,6 +1011,10 @@ schema edits do not result in an incompatibility that will break
 loaded data).  This makes is possible to get rid of the old
 directLoader crud in the schema kits.
 
+70. [SERVER, ADMIN CONSOLE] Fixed exceptions on drag/drop in schema editor
+
+Fixed bug #13 in bugzilla.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
