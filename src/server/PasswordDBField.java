@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,9 +27,9 @@ import jcrypt;
 
 public class PasswordDBField extends DBField implements pass_field {
 
-  boolean crypted;
-
   /* -- */
+  
+  static final boolean debug = false;
 
   /**
    *
@@ -148,13 +148,11 @@ public class PasswordDBField extends DBField implements pass_field {
 
   void emit(DataOutput out) throws IOException
   {
-    out.writeBoolean(crypted);
     out.writeUTF((String)value);
   }
 
   void receive(DataInput in) throws IOException
   {
-    crypted = in.readBoolean();
     value = in.readUTF();
   }
 
@@ -339,17 +337,119 @@ public class PasswordDBField extends DBField implements pass_field {
    * salted by the salt returned by this method.  If the password
    * is stored in plaintext, null will be returned.
    * 
+   * @see arlut.csd.ganymede.pass_field
    */
 
   public String getSalt()
   {
-    if (crypted && value != null)
+    if (definition.isCrypted() && value != null)
       {
 	return ((String) value).substring(2);
       }
     else
       {
 	return null;
+      }
+  }
+
+  /**
+   *
+   * This method is used to set the password for this field,
+   * crypting it if this password field is stored crypted.
+   *
+   * @see arlut.cds.ganymede.pass_field
+   *
+   */
+
+  public boolean setPlainTextPass(String text)
+  {
+    String cryptedText = null;
+
+    /* -- */
+
+    if (!verifyNewValue(text))
+      {
+	return false;
+      }
+
+    if (((DBEditObject)owner).finalizeSetValue(this, text))
+      {
+	if (definition.isCrypted())
+	  {
+	    cryptedText = jcrypt.crypt(text);
+
+	    if (debug)
+	      {
+		System.err.println("Receiving plain text pass.. crypted = " + cryptedText + ", plain = " + text);
+	      }
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.err.println("Not encrypting.. plain = " + text);
+	      }
+	  }
+
+	if ((text == null) || (text.equals("")))
+	  {
+	    value = null;
+	    defined = false;
+	  }
+	else
+	  {
+	    this.value = (cryptedText == null) ? text : cryptedText;
+	    defined = true;
+	  }
+
+	return true;
+      }
+    else
+      {
+	return false;
+      }
+  }
+
+  /**
+   *
+   * This method is used to set a pre-crypted password for this field.
+   * This method will return false if this password field is not
+   * stored crypted.
+   *
+   * @see arlut.csd.ganymede.pass_field
+   *
+   */
+
+  public boolean setCryptPass(String text)
+  {
+    if (!definition.isCrypted())
+      {
+	owner.editset.session.setLastError("can't set a pre-crypted value into a plaintext password field");
+	return false;
+      }
+
+    if (!verifyNewValue(text))
+      {
+	return false;
+      }
+
+    if (((DBEditObject)owner).finalizeSetValue(this, text))
+      {
+	if ((text == null) || (text.equals("")))
+	  {
+	    value = null;
+	    defined = false;
+	  }
+	else
+	  {
+	    this.value = text;
+	    defined = true;
+	  }
+	return true;
+      }
+    else
+      {
+	return false;
       }
   }
 
