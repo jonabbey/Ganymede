@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -192,7 +192,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     crypted = original.crypted;
 
-    template = new FieldTemplate(this);
+    // We'll just re-use the original's FieldTemplate for the time
+    // being.. when the SchemaEditor is done, it will call
+    // clearEditor() on our DBObjectBase, which will create a new
+    // FieldTemplate for us.
+
+    template = original.template;
     this.editor = editor;
     changed = false;
   }
