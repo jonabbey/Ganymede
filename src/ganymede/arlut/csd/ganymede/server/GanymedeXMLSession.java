@@ -2030,6 +2030,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    
 		if (mode == null || mode.equals("create"))
 		  {
+		    // if no mode was specified, we'll tentatively
+		    // identify it as an object that needs to be
+		    // created.. but when it comes time to look at
+		    // that, we'll look up the object identifier
+		    // attributes, and if we find a pre-existing
+		    // match, we'll edit that instead.
+
 		    // if they did specify "create" as the object
 		    // action mode, this object definition record will
 		    // be forced into a new object, rather than trying
@@ -2242,7 +2249,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	
 	invid = session.findLabeledObject(objId, typeId);
 	
-	if (false)
+	if (debug)
 	  {
 	    err.println("Returned from findLabeledObject() on " + typeId + ":" + objId);
 	    err.println("findLabeledObject() returned " + invid);
@@ -2260,6 +2267,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	if (element instanceof xmlobject)
 	  {
 	    invid = ((xmlobject) element).getInvid();
+
+	    if (debug)
+	      {
+		err.println("GanymedeXMLSession.getInvid() found xmlobject in objectHash for " + typeId + ":" + objId);
+		err.println("Found xmlobject is " + element.toString());
+	      }
 
 	    // if invid is null at this point, this object hasn't been
 	    // created or edited yet on the server, so we can't do
@@ -2539,7 +2552,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    incCount(editCount, newObject.typeString);
 
-	    //	    System.err.println("Editing pre-existing " + newObject);
+	    if (debug)
+	      {
+		System.err.println("Editing pre-existing " + newObject);
+	      }
 
 	    attempt = newObject.editOnServer(session);
 
@@ -2566,7 +2582,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    incCount(createCount, newObject.typeString);
 
-	    //	    System.err.println("Creating " + newObject);
+	    if (debug)
+	      {
+		System.err.println("Creating " + newObject);
+	      }
 
 	    newlyCreated = true;
 

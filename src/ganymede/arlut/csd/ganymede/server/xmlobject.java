@@ -539,7 +539,7 @@ public class xmlobject {
 		xSession.err.println("Calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
 	      }
 
-	    invid = xSession.session.findLabeledObject(id, type.shortValue());
+	    invid = xSession.getInvid(id, type.shortValue());
 
 	    if (invid == null)
 	      {
