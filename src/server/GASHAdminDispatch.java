@@ -5,8 +5,8 @@
    Ganymede admin console and the server, bidirectionally.
 
    Created: 28 May 1996
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2003/09/08 18:22:04 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2003/09/08 18:28:18 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -225,27 +225,27 @@ class GASHAdminDispatch implements Runnable {
 		    break;
 
 		  case adminAsyncMessage.SETTRANSACTIONS:
-		    setTransactionsInJournal(((Integer) event.getParam(0)).intValue());
+		    setTransactionsInJournal(event.getInt(0));
 		    break;
 
 		  case adminAsyncMessage.SETOBJSCHECKOUT:
-		    setObjectsCheckedOut(((Integer) event.getParam(0)).intValue());
+		    setObjectsCheckedOut(event.getInt(0));
 		    break;
 
 		  case adminAsyncMessage.SETLOCKSHELD:
-		    setLocksHeld(((Integer) event.getParam(0)).intValue());
+		    setLocksHeld(event.getInt(0));
 		    break;
 
 		  case adminAsyncMessage.CHANGESTATE:
-		    changeState((String) event.getParam(0));
+		    changeState(event.getString(0));
 		    break;
 
 		  case adminAsyncMessage.CHANGESTATUS:
-		    changeStatus((String) event.getParam(0));
+		    changeStatus(event.getString(0));
 		    break;
 
 		  case adminAsyncMessage.CHANGEADMINS:
-		    changeAdmins((String) event.getParam(0));
+		    changeAdmins(event.getString(0));
 		    break;
 
 		  case adminAsyncMessage.CHANGEUSERS:
@@ -257,14 +257,11 @@ class GASHAdminDispatch implements Runnable {
 		    break;
 
 		  case adminAsyncMessage.SETMEMORYSTATE:
-		    long freeMemory = ((Long) event.getParam(0)).longValue();
-		    long totalMemory = ((Long) event.getParam(1)).longValue();
-
-		    setMemoryState(freeMemory, totalMemory);
+		    setMemoryState(event.getLong(0), event.getLong(1));
 		    break;
 
 		  case adminAsyncMessage.FORCEDISCONNECT:
-		    forceDisconnect((String) event.getParam(0));
+		    forceDisconnect(event.getString(0));
 		    break;
 
 		  default:
