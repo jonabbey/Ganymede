@@ -117,7 +117,7 @@ public class DialogRsrc {
     OKText,
     CancelText;
 
-  Class refClass;
+  Class myRefClass;
 
   /* -- */
 
@@ -205,11 +205,11 @@ public class DialogRsrc {
 
     if (refClass == null)
       {
-	this.refClass = frame.getClass();
+	myRefClass = frame.getClass();
       }
     else
       {
-	this.refClass = refClass;
+	myRefClass = refClass;
       }
 
     if (imageName != null)
@@ -220,7 +220,7 @@ public class DialogRsrc {
 	  }
 	else
 	  {
-	    image = arlut.csd.Util.PackageResources.getImageResource(frame, imageName, refClass);
+	    image = arlut.csd.Util.PackageResources.getImageResource(frame, imageName, myRefClass);
 
 	    imageCache.put(imageName, image);
 	  }
