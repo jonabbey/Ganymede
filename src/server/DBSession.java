@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 2000/03/16 06:29:50 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 2000/04/14 01:49:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.81 $ %D%
+ * @version $Revision: 1.82 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -545,8 +545,14 @@ final public class DBSession {
    * {@link arlut.csd.ganymede.DBEditObject#initializeNewObject() initializeNewObject()}
    * method.</P>
    *
-   * <P>This method will return null if the object could
-   * not be constructed and initialized for some reason.</P>
+   * <P>This method returns a ReturnVal object to convey the
+   * result of the creation.  Call the 
+   * {@link arlut.csd.ganymede.ReturnVal#getObject() getObject()} method on
+   * the returned ReturnVal in order to get the created DBEditObject.  Note
+   * that the ReturnVal.getObject() method is intended to support passing
+   * a remote db_object reference to the client, so on the server, it is
+   * necessary to cast the db_object reference to a DBEditObject reference
+   * for use on the server.</P>
    *
    * @param object_type Type of the object to be created
    *
@@ -569,6 +575,8 @@ final public class DBSession {
    * an object out for editing.</P>
    *
    * @param invid The invariant id of the object to be modified.
+   *
+   * @return null if the object could not be found for editing
    *
    * @see arlut.csd.ganymede.DBObjectBase 
    */
@@ -597,6 +605,8 @@ final public class DBSession {
    *
    * @param objectID The int id number of the object to be edited within the specified
    *                 object base.
+   *
+   * @return null if the object could not be found for editing
    */
 
   public synchronized DBEditObject editDBObject(short baseID, int objectID)

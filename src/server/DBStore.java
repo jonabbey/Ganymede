@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.116 $
-   Last Mod Date: $Date: 2000/03/29 01:30:06 $
+   Version: $Revision: 1.117 $
+   Last Mod Date: $Date: 2000/04/14 01:49:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.116 $ %D%
+ * @version $Revision: 1.117 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2246,6 +2246,30 @@ public class DBStore {
 	
 	    //	    i = (InvidDBField) eObj.getField(SchemaConstants.PersonaGroupsField);
 	    //	    i.addElementLocal(supergashOwner);
+	
+	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+	    b.setValueLocal(Boolean.TRUE);
+	
+	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+	    b.setValueLocal(Boolean.TRUE);
+	  }
+	else
+	  {
+	    eObj = session.editDBObject(supergash);
+
+	    if (eObj == null)
+	      {
+		throw new RuntimeException("Couldn't edit supergash admin persona.");
+	      }
+
+	    s = (StringDBField) eObj.getField("Name");
+	    s.setValueLocal(Ganymede.rootname);
+        
+	    if (Ganymede.resetadmin)
+	      {
+		p = (PasswordDBField) eObj.getField("Password");
+		p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+	      }
 	
 	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
 	    b.setValueLocal(Boolean.TRUE);
