@@ -13,7 +13,7 @@
    as we would if we were truly a remote object.
    
    Created: 12 February 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -96,22 +96,29 @@ public class CategoryDump implements Category, CategoryNode {
 
 	token = getChunk(src, lastIndex);
 
-	if (token.equals("cat"))
+	while (!token.equals(">"))
 	  {
-	    catChild = new CategoryDump(this, src, lastIndex);
-	    lastIndex = catChild.getLastIndex();
-	    contents.addElement(catChild);
+	    if (token.equals("cat"))
+	      {
+		catChild = new CategoryDump(this, src, lastIndex);
+		lastIndex = catChild.getLastIndex();
+		contents.addElement(catChild);
+	      }
+	    else if (token.equals("base"))
+	      {
+		baseChild = new BaseDump(this, src, lastIndex);
+		lastIndex = baseChild.getLastIndex();
+		contents.addElement(baseChild);
+	      }
+	    else
+	      {
+		throw new RuntimeException("parse error, unrecognized chunk: " + token);
+	      }
+	    
+	    // get the next member chunk
+	    
+	    token = getChunk(src, lastIndex);
 	  }
-	else
-	  {
-	    baseChild = new BaseDump(this, src, lastIndex);
-	    lastIndex = baseChild.getLastIndex();
-	    contents.addElement(baseChild);
-	  }
-
-	// get the close category chunk
-
-	token = getChunk(src, lastIndex);
       }
     
     if (!token.equals(">"))
