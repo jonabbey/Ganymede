@@ -1,57 +1,3 @@
-/*
-
-   UNIXBuilderTask.java
-
-   This class is intended to dump the Ganymede datastore to the
-   UNIX passwd and group files.
-   
-   Created: 8 September 1998
-
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
-   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
-
-   -----------------------------------------------------------------------
-	    
-   Ganymede Directory Management System
- 
-   Copyright (C) 1996-2005
-   The University of Texas at Austin.
-
-   Contact information
-
-   Author Email: ganymede_author@arlut.utexas.edu
-   Email mailing list: ganymede@arlut.utexas.edu
-
-   US Mail:
-
-   Computer Science Division
-   Applied Research Laboratories
-   The University of Texas at Austin
-   PO Box 8029, Austin TX 78713-8029
-
-   Telephone: (512) 835-3200
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA
-
-*/
-
 package arlut.csd.ganymede.userKit;
 
 import arlut.csd.ganymede.server.*;
@@ -62,19 +8,9 @@ import java.util.*;
 import java.text.*;
 import java.io.*;
 
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                 UNIXBuilderTask
-
-------------------------------------------------------------------------------*/
-
 /**
- *
  * This class is intended to dump the Ganymede datastore to the
  * UNIX passwd and group files.
- *
- * @author Jonathan Abbey jonabbey@arlut.utexas.edu
- *
  */
 
 public class UNIXBuilderTask extends GanymedeBuilderTask {
@@ -92,6 +28,15 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
 
   /* -- */
 
+  /**
+   * <p>The constructor for GanymedeBuilderTask subclasses takes an
+   * Invid for the DBObject in the Ganymede data store that defines
+   * the task.  The taskDefObjInvid member variable is comes from the
+   * GanymedeBuilderTask that we are inheriting from.  Setting it
+   * in this constructor allows us to use the getOptionValue() method to read
+   * our configuration strings for this task.</p>
+   */
+
   public UNIXBuilderTask(Invid _taskObjInvid)
   {
     // set the taskDefObjInvid in GanymedeBuilderTask so
@@ -101,7 +46,6 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   *
    * This method runs with a dumpLock obtained for the builder task.
    *
    * Code run in builderPhase1() can call enumerateObjects() and
@@ -109,7 +53,6 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
    *
    * @return true if builderPhase1 made changes necessitating the
    * execution of builderPhase2.
-   *
    */
 
   public boolean builderPhase1()
@@ -169,12 +112,11 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
 	  
 	    if (out != null)
 	      {
-		DBObject user;
 		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
 	      
 		while (users.hasMoreElements())
 		  {
-		    user = (DBObject) users.nextElement();
+		    DBObject user = (DBObject) users.nextElement();
 		  
 		    writeUserLine(user, out, false);
 		  }
@@ -201,12 +143,11 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
 	  
 	    if (out != null)
 	      {
-		DBObject user;
 		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
 	      
 		while (users.hasMoreElements())
 		  {
-		    user = (DBObject) users.nextElement();
+		    DBObject user = (DBObject) users.nextElement();
 		  
 		    writeUserLine(user, out, true);
 		  }
@@ -240,12 +181,11 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
 	
 	    if (out != null)
 	      {
-		DBObject group;
 		Enumeration groups = enumerateObjects((short) 257);
 
 		while (groups.hasMoreElements())
 		  {
-		    group = (DBObject) groups.nextElement();
+		    DBObject group = (DBObject) groups.nextElement();
 
 		    writeGroupLine(group, out);
 		  }
@@ -477,7 +417,7 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a line to the passwd UNIX source file.
+   * This method writes out a line to the group UNIX source file.
    *
    * The lines in this file look like the following.
    *
