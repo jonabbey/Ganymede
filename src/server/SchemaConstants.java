@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -91,7 +91,36 @@ public interface SchemaConstants {
   final static short UserPassword = 101; // password
   final static short UserAdminPersonae = 102; // pointer to zero or more associated admin personae
 
+  /* mail/log event classes */
+
+  final static short EventBase = 4;
+
+				// single-word token for this event class (String field)
+
+  final static short EventToken = 100;
+
+				// Short name for this event class, suitable for an email message title (String field)
+
+  final static short EventName = 101;
+  
+				// fuller description of this event class, suitable for an email body (String field)
+
+  final static short EventDescription = 102; 
+
+				// if true, events of this type should be mailed (Boolean field)
+
+  final static short EventMailBoolean = 103; 
+
+				// list of email addresses to send this to, in addition to any specifically
+				// requested by the code (String vector field)
+
+  final static short EventMailList = 104;
+
+				// if true, the admin performing the action will get a copy of any mail (Boolean field)
+
+  final static short EventMailToSelf = 105;
+
   /* what's the last base we currently have defined as a mandatory base? */
 
-  final static short FinalBase = UserBase;
+  final static short FinalBase = EventBase;
 }
