@@ -5,7 +5,7 @@
    A wizard to manage step-by-step interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,42 +29,73 @@ import arlut.csd.JDialog.JDialogBuff;
 
 /**
  *
+ * A wizard to handle the wizard interactions required when a user inactivates
+ * a user account.
+ *
+ * <br>This wizard, unlike the userHomeGroupDelWizard and userRenameWizard, does
+ * not directly manipulate fields in the user object.  Instead, it works with
+ * methods written for its benefit in userCustom.<br>
+ *
  * @see arlut.csd.ganymede.ReturnVal
- * @see arlut.csd.ganymede.Ganymediator
+ * @see arlut.csd.ganymede.Ganymediator 
+ * @see arlut.csd.ganymede.custom.userCustom
  */
 
 public class userInactivateWizard extends GanymediatorWizard {
 
+  /**
+   * The user-level session context that this wizard is acting in.  This
+   * object is used to handle necessary checkpoint/rollback activity by
+   * this wizard, as well as to handle any necessary label lookups.
+   */
+
   GanymedeSession session;
+
+  /**
+   * Keeps track of the state of the wizard.  Each time respond() is called,
+   * state is checked to see what results from the user are expected and
+   * what the appropriate dialogs or actions to perform in turn are.<br>
+   * 
+   * state is also used by the userCustom object to make sure that
+   * we have finished our interactions with the user when we tell the
+   * user object to go ahead and remove the group.  <br>
+   * 
+   * <pre>
+   * Values:
+   *         1 - Wizard has been initialized, initial explanatory dialog
+   *             has been generated.
+   * DONE (99) - Wizard has approved the proposed action, and is signalling
+   *             the user object code that it is okay to proceed with the
+   *             action without further consulting this wizard.
+   * </pre>
+   */
+
   int state;
-  DBEditObject object;
-  DBField field;
-  Object param;
-  ReturnVal retVal;
 
-  // reactivation params
+  /**
+   * The actual user object that this wizard is acting on.
+   */
 
-  String password;
-  String shell;
-  String forward;
+  userCustom userObject;
 
   /**
    *
-   * Constructor
+   * This constructor registers the wizard as an active wizard
+   * on the provided session.
+   *
+   * @param session The GanymedeSession object that this wizard will
+   * use to interact with the Ganymede data store.
+   * @param userObject The user object that this wizard will work with.
    *
    */
 
   public userInactivateWizard(GanymedeSession session, 
-			      DBEditObject object, 
-			      DBField field,
-			      Object param) throws RemoteException
+			      userCustom userObject) throws RemoteException
   {
-    super(session);		// register ourselves
+    super(session);		// ** register ourselves **
 
     this.session = session;
-    this.object = object;
-    this.field = field;
-    this.param = param;
+    this.userObject = userObject;
   }
 
   /**
@@ -85,12 +116,13 @@ public class userInactivateWizard extends GanymediatorWizard {
   public ReturnVal respond(Hashtable returnHash)
   {
     JDialogBuff dialog;
+    ReturnVal retVal = null;
 
     /* -- */
 
     if (state == 1)
       {
-	System.err.println("userInactivateWizard: USER_INACTIVATE state 1 processing return vals from dialog");
+	System.err.println("userInactivateWizard: state 1 processing return vals from dialog");
 
 	if (returnHash == null)
 	  {
@@ -107,22 +139,11 @@ public class userInactivateWizard extends GanymediatorWizard {
 	    return retVal;
 	  }
 
-	Enumeration enum = returnHash.keys();
-	int i = 0;
-
-	while (enum.hasMoreElements())
-	  {
-	    Object key = enum.nextElement();
-	    Object value = returnHash.get(key);
-		
-	    System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
-	  }
-	    
 	String forward = (String) returnHash.get("Forwarding Address");
 
 	// and do the inactivation
 	    
-	retVal = ((userCustom) object).inactivate(forward, true);
+	retVal = userObject.inactivate(forward, true);
 
 	if (retVal == null || retVal.didSucceed())
 	  {
@@ -137,10 +158,12 @@ public class userInactivateWizard extends GanymediatorWizard {
 	  }
 	else
 	  {
-	    // failure.. need to do the rollback that would have originally
-	    // been done for us if we hadn't gone through the wizard process
+	    // failure.. need to do the rollback that would have
+	    // originally been done for us if we hadn't gone through
+	    // the wizard process.  Look at DBEditObject.inactivate()
+	    // method for documentation on this.
 
-	    if (!object.getEditSet().rollback("inactivate" + object.getLabel()))
+	    if (!session.rollback("inactivate" + userObject.getLabel()))
 	      {
 		retVal = Ganymede.createErrorDialog("userInactivateWizard: Error",
 						    "Ran into a problem during user inactivation, and rollback failed");
@@ -166,16 +189,17 @@ public class userInactivateWizard extends GanymediatorWizard {
   {
     JDialogBuff dialog;
     StringBuffer buffer = new StringBuffer();
+    ReturnVal retVal = null;
 
     /* -- */
 
     System.err.println("userInactivateWizard: creating inactivation wizard");
 
     buffer.append("Inactivating ");
-    buffer.append(object.getLabel());
+    buffer.append(userObject.getLabel());
     buffer.append("\n\nThis user account will be rendered unusable, but will be ");
     buffer.append("kept in the database for 3 months to preserve accounting information.\n\n");
-    buffer.append("It is recommended that you provide a forwarding email address for this user. ");
+    buffer.append("It is recommended that you provide a forwarding email address for this user.");
 	
     retVal = new ReturnVal(false);
     dialog = new JDialogBuff("User Inactivation Dialog",
