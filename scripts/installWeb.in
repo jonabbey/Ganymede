@@ -3,8 +3,8 @@
 # Install script for Ganymede web resources
 #
 # $Name:  $
-# $Revision: 1.2 $
-# $Date: 1999/07/05 21:03:10 $
+# $Revision: 1.3 $
+# $Date: 1999/07/07 00:24:04 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -123,114 +123,27 @@ if (!-d $installdir) {
   print "Found the web resources directory ok\n";
 }
 
-print "\nConfiguration seems to check out.\n\n";
-print "Installing";
+print <<ENDOK;
+
+Configuration seems to check out.
+
+Installing web resources into $installdir.
+
+ENDOK
 
 copy("jars/ganymede.jar", "$installdir/ganymede.jar"); print ".";
 copy("jars/ganymedeAdmin.jar", "$installdir/ganymedeAdmin.jar"); print ".";
 copy("jars/password.jar", "$installdir/password.jar"); print ".";
 
-# Copy and process the properties file into place
+# Customize and copy the client web pages
 
-%clientconvert = ("ganymede.serverhost" => $vars{"SYSTEMNAME"},
-		  "ganymede.rootname" => $vars{"SUPERNAME"},
-		  "ganymede.registryPort" => $vars{"REGISTRYPORT"});
-
-# Write out the client web pages
-
-# First, the activator form of the client
-
-$systemname = $vars{"SYSTEMNAME"};
-
-open INPUT, "webforms/clientActivator.html" or die "Couldn't open clientActivator web template!";
-open OUTPUT, ">$installdir/client_plugin.html" or die "Couldn't write client_plugin.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
-
-# Now, the hotjava form of the client
-
-open INPUT, "webforms/clientHotJava.html" or die "Couldn't open clientHotJava web template!";
-open OUTPUT, ">$installdir/client_native.html" or die "Couldn't write client_native.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
-
-# Now, the admin console
-
-# Activator version
-
-open INPUT, "webforms/consoleActivator.html" or die "Couldn't open consoleActivator web template!";
-open OUTPUT, ">$installdir/console_plugin.html" or die "Couldn't write console_plugin.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/supergash/$vars{"SUPERNAME"}/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
-
-# HotJava version
-
-open INPUT, "webforms/consoleHotJava.html" or die "Couldn't open consoleHotJava web template!";
-open OUTPUT, ">$installdir/console_native.html" or die "Couldn't write console_native.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/supergash/$vars{"SUPERNAME"}/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
-
-# And the password client
-
-# Activator
-
-$systemname = $vars{"SYSTEMNAME"};
-
-open INPUT, "webforms/passwordActivator.html" or die "Couldn't open password Activator web template!";
-open OUTPUT, ">$installdir/password_plugin.html" or die "Couldn't write password_plugin.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
-
-# Now, the hotjava form of the password client
-
-open INPUT, "webforms/passwordHotJava.html" or die "Couldn't open passwordHotJava web template!";
-open OUTPUT, ">$installdir/password_native.html" or die "Couldn't write password_native.html!";
-
-while (<INPUT>) {
-  s/www\.arlut\.utexas\.edu/$systemname/g;
-  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
-  print OUTPUT $_;
-}
-
-close INPUT;
-close OUTPUT;
+&install_file("webforms/index.html", "$installdir/index.html");
+&install_file("webforms/client_plugin.html", "$installdir/client_plugin.html");
+&install_file("webforms/client_native.html", "$installdir/client_native.html");
+&install_file("webforms/console_plugin.html", "$installdir/console_plugin.html");
+&install_file("webforms/console_native.html", "$installdir/console_native.html");
+&install_file("webforms/password_plugin.html", "$installdir/password_plugin.html");
+&install_file("webforms/password_native.html", "$installdir/password_native.html");
 
 print "\nDone\n";
 
@@ -300,4 +213,29 @@ sub removelastslash{
     if ($_[0] =~ /\/$/) {
 	chop $_[0];
     }
+}
+
+######################################################################### 
+#
+#                                                            install_file
+#
+# input: 1) source file
+#        2) target file
+#
+######################################################################### 
+sub install_file{
+  my ($source, $target) = @_;
+
+  open INPUT, $source or die "Couldn't open $source";
+  open OUTPUT, ">$target" or die "Couldn't write $target";
+
+  while (<INPUT>) {
+      s/#SERVERHOST/$vars{"SYSTEMNAME"}/g;
+      s/#SUPERNAME/$vars{"SUPERNAME"}/g;
+      s/#REGISTRYPORT/$vars{"REGISTRYPORT"}/g;
+      print OUTPUT $_;
+  }
+
+  close INPUT;
+  close OUTPUT;
 }
