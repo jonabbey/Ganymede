@@ -3,8 +3,8 @@
 
    Created: 15 March 2001
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2001/03/16 09:57:19 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2001/03/16 10:10:04 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -600,8 +600,7 @@ public class smbencrypt {
   }
   
   /**
-   * <p>This function does the password hashing used by the NT SAM database,
-   * as well as the Samba password file's LANMAN encoding.</p>
+   * <p>This function does the password hashing used by the NT SAM database</p>
    */
   
   public static void SamOEMhash(byte[] data, byte[] key, boolean bigbuf)
@@ -656,9 +655,12 @@ public class smbencrypt {
   }
 
   /**
-   * <p>This method generates a LANMAN-compatible DES hashing of
-   * the input password string, taking up to the first 14 characters
-   * into account.</p>
+   * <p>This method generates a LANMAN-compatible DES hashing of the
+   * input password string, as used in the Samba encrypted password
+   * file.</p>
+   *
+   * <p>Only the first fourteen characters of the password are used,
+   * and they are converted to uppercase before hashing.</p>
    */
 
   public static String LANMANHash(String password)
@@ -692,6 +694,15 @@ public class smbencrypt {
     return result.toString();
   }
 
+  /**
+   * <p>This method generates a SMB-compatible MD4 hashing of the
+   * input password string in little-endian Unicode format, as used in
+   * the Samba encrypted password file.</p>
+   *
+   * <p>This method hashes the first 128 characters of the password,
+   * with full Unicode range and case preservation.</p>
+   */
+
   public static String NTUNICODEHash(String password)
   {
     if (password.length() > 128)
@@ -720,6 +731,10 @@ public class smbencrypt {
 
     return m.toString().toUpperCase();
   }
+
+  /**
+   * <p>test rig.</p>
+   */
 
   public static void main(String argv[])
   {
