@@ -132,6 +132,7 @@ import java.rmi.*;
 public class DBEditSet {
 
   static final boolean debug = false;
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBEditSet");
 
   /**
    * <p>A hashtable mapping Invids to {@link
@@ -376,7 +377,7 @@ public class DBEditSet {
 
     if (wLock != null)
       {
-	throw new RuntimeException("Can't add objects to the transaction during commit.");
+	throw new RuntimeException(ts.l("addObject.cant_add"));
       }
 
     // remember that we are not allowing objects that this object is
@@ -664,9 +665,7 @@ public class DBEditSet {
 
     if (point == null)
       {
-	System.err.println("DBEditSet.popCheckpoint: couldn't find checkpoint for " + name);
-	System.err.println("\nCurrently registered checkpoints:");
-
+	System.err.println(ts.l("popCheckpoint.no_checkpoint", name));
 	System.err.println(checkpoints.toString());
 
 	return null;
@@ -737,7 +736,7 @@ public class DBEditSet {
 
 	try
 	  {
-	    throw new RuntimeException("rollback called in non-interactive transaction");
+	    throw new RuntimeException(ts.l("rollback.non_interactive"));
 	  }
 	catch (RuntimeException ex)
 	  {
@@ -963,15 +962,14 @@ public class DBEditSet {
 
     if (objects == null)
       {
-	throw new RuntimeException("already committed or released");
+	throw new RuntimeException(ts.l("global.already"));
       }
 
     if (mustAbort)
       {
 	release();
-	return Ganymede.createErrorDialog("Forced Transaction Abort",
-					  "The server ran into a non-reversible error while processing this " +
-					  "transaction and forced an abort.");
+	return Ganymede.createErrorDialog(ts.l("commit.forced_abort"),
+					  ts.l("commit.forced_abort_text"));
       }
 
     try
@@ -999,8 +997,8 @@ public class DBEditSet {
 	Ganymede.debug(Ganymede.stackTrace(ex));
 
 	release();
-	return Ganymede.createErrorDialog("Transaction commit failure", 
-					  "Couldn't commit transaction, exception caught: " + ex);
+	return Ganymede.createErrorDialog(ts.l("commit.commit_failure"),
+					  ts.l("commit.commit_failure_text", ex.toString()));
       }
     finally
       {
@@ -1047,8 +1045,7 @@ public class DBEditSet {
 
     if (wLock != null)
       {
-	throw new Error("Error! DBEditSet " + description + 
-			" commit already has writeLock established!");
+	throw new Error(ts.l("commit_lockBases.wLock", description));
       }
 
     // Create the lock on the bases changed and establish.  This
@@ -1061,14 +1058,12 @@ public class DBEditSet {
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug("DBEditSet.commit(): lock aborted, commit failed, releasing transaction for " + 
-		       session.key);
+	Ganymede.debug(ts.l("commit_lockBases.interrupted", String.valueOf(session.key)));
 
 	releaseWriteLock();
 
-	ReturnVal retVal = Ganymede.createErrorDialog("Commit failure",
-						      "Couldn't commit transaction, our write lock was " +
-						      "denied.. server going down?");
+	ReturnVal retVal = Ganymede.createErrorDialog(ts.l("commit.commit_failure"),
+						      ts.l("commit_lockBases.wLock_refused"));
 	throw new CommitNonFatalException(retVal);
       }
 
@@ -1173,13 +1168,10 @@ public class DBEditSet {
     if (missingFields != null)
       {
 	StringBuffer errorBuf = new StringBuffer();
-	    
-	errorBuf.append("Error, ");
-	errorBuf.append(eObj.getTypeName());
-	errorBuf.append(" object ");
-	errorBuf.append(eObj.getLabel());
-	errorBuf.append(" has not been completely filled out.  The following fields need ");
-	errorBuf.append("to be filled in before this transaction can be committed:\n\n");
+
+	errorBuf.append(ts.l("commit_checkObjectMissingFields.missing_fields_text",
+			     eObj.getTypeName(),
+			     eObj.getLabel()));
 	    
 	for (int j = 0; j < missingFields.size(); j++)
 	  {
@@ -1187,7 +1179,7 @@ public class DBEditSet {
 	    errorBuf.append("\n");
 	  }
 	    
-	retVal = Ganymede.createErrorDialog("Error, required fields not filled in",
+	retVal = Ganymede.createErrorDialog(ts.l("commit_checkObjectMissingFields.missing_fields"),
 					    errorBuf.toString());
 	    
 	// let DBSession/the client know they can retry things.
@@ -1396,10 +1388,13 @@ public class DBEditSet {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
 		    logEvent("objectchanged",
-			     parentObj.getTypeName() + " " + parentObj.getLabel() + 
-			     "'s " + eObj.getTypeName() + ", '" + eObj.getLabel() + "',  " +
-			     "<" +  eObj.getInvid() + "> was modified.\n\n" +
-			     diff,
+			     ts.l("commit_createLogEvent.embedded_modified",
+				  parentObj.getTypeName(),
+				  parentObj.getLabel(),
+				  eObj.getTypeName(),
+				  eObj.getLabel(),
+				  eObj.getInvid(),
+				  diff),
 			     responsibleInvid, responsibleName,
 			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
@@ -1421,9 +1416,11 @@ public class DBEditSet {
 	    if (logNormal)
 	      {
 		logEvent("objectchanged",
-			 eObj.getTypeName() + " " + eObj.getLabel() +
-			 ", <" +  eObj.getInvid() + "> was modified.\n\n" +
-			 diff,
+			 ts.l("commit_createLogEvent.modified",
+			      eObj.getTypeName(),
+			      eObj.getLabel(),
+			      String.valueOf(eObj.getInvid()),
+			      diff),
 			 responsibleInvid, responsibleName,
 			 invids, eObj.getEmailTargets());
 	      }
@@ -1480,10 +1477,13 @@ public class DBEditSet {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
 		    logEvent("objectcreated",
-			     parentObj.getTypeName() + " " + parentObj.getLabel() + 
-			     "'s " + eObj.getTypeName() + ", '" + eObj.getLabel() + "',  " +
-			     "<" +  eObj.getInvid() + "> was created.\n\n" +
-			     diff,
+			     ts.l("commit_createLogEvent.embedded_created",
+				  parentObj.getTypeName(),
+				  parentObj.getLabel(),
+				  eObj.getTypeName(),
+				  eObj.getLabel(),
+				  eObj.getInvid(),
+				  diff),
 			     responsibleInvid, responsibleName,
 			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
@@ -1505,9 +1505,11 @@ public class DBEditSet {
 	    if (logNormal)
 	      {
 		logEvent("objectcreated",
-			 eObj.getTypeName() + " " + eObj.getLabel() +
-			 ", <" +  eObj.getInvid() + "> was created.\n\n" +
-			 diff,
+			 ts.l("commit_createLogEvent.created",
+			      eObj.getTypeName(),
+			      eObj.getLabel(),
+			      String.valueOf(eObj.getInvid()),
+			      diff),
 			 responsibleInvid, responsibleName,
 			 invids, eObj.getEmailTargets());
 	      }
@@ -1563,10 +1565,13 @@ public class DBEditSet {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
 		    logEvent("deleteobject",
-			     parentObj.getTypeName() + " " + parentObj.getLabel() + 
-			     "'s " + eObj.getTypeName() + ", '" + eObj.getLabel() + "',  " +
-			     "<" +  eObj.getInvid() + "> was deleted.\n\n" +
-			     oldVals + "\n",
+			     ts.l("commit_createLogEvent.embedded_deleted",
+				  parentObj.getTypeName(),
+				  parentObj.getLabel(),
+				  eObj.getTypeName(),
+				  eObj.getLabel(),
+				  eObj.getInvid(),
+				  oldVals),
 			     responsibleInvid, responsibleName,
 			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
@@ -1588,9 +1593,11 @@ public class DBEditSet {
 	    if (logNormal)
 	      {
 		logEvent("deleteobject",
-			 eObj.getTypeName() + " " + eObj.getLabel() + ", <" + 
-			 eObj.getInvid() + "> was deleted.\n\n" +
-			 oldVals + "\n",
+			 ts.l("commit_createLogEvent.deleted",
+			      eObj.getTypeName(),
+			      eObj.getLabel(),
+			      String.valueOf(eObj.getInvid()),
+			      oldVals),
 			 responsibleInvid, responsibleName,
 			 invids, eObj.getEmailTargets());
 	      }
@@ -1606,9 +1613,12 @@ public class DBEditSet {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
 		    logEvent("deleteobject",
-			     parentObj.getTypeName() + " " + parentObj.getLabel() + 
-			     "'s " + eObj.getTypeName() + ", '" + eObj.getLabel() + "',  " +
-			     "<" +  eObj.getInvid() + "> was deleted.\n\n",
+			     ts.l("commit_createLogEvent.embedded_deleted_nodiff",
+				  parentObj.getTypeName(),
+				  parentObj.getLabel(),
+				  eObj.getTypeName(),
+				  eObj.getLabel(),
+				  eObj.getInvid()),
 			     responsibleInvid, responsibleName,
 			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
@@ -1630,8 +1640,10 @@ public class DBEditSet {
 	    if (logNormal)
 	      {
 		logEvent("deleteobject",
-			 eObj.getTypeName() + " " + eObj.getLabel() + ", <" + 
-			 eObj.getInvid() + "> was deleted.\n\n",
+			 ts.l("commit_createLogEvent.deleted_nodiff",
+			      eObj.getTypeName(),
+			      eObj.getLabel(),
+			      String.valueOf(eObj.getInvid())),
 			 responsibleInvid, responsibleName,
 			 invids, eObj.getEmailTargets());
 	      }
@@ -1655,20 +1667,15 @@ public class DBEditSet {
       {
 	if (!dbStore.journal.writeTransaction(getObjectList()))
 	  {
-	    throw new CommitFatalException(Ganymede.createErrorDialog("Couldn't commit transaction, couldn't write " +
-								      "transaction to disk",
-								      "Couldn't commit transaction, the server may " +
-								      "have run out of" +
-								      " disk space.  Couldn't write transaction to disk."));
+	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.error"),
+								      ts.l("commit_persistTransaction.error_text"));
 	  }
       }
     catch (IOException ex)
       {
-	throw new CommitFatalException(Ganymede.createErrorDialog("Couldn't commit transaction, IOException caught " + 
-								  "writing journal",
-								  "Couldn't commit transaction, the server may have " + 
-								  "run out of" +
-								  " disk space.\n\n" + ex.getMessage()));
+	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
+								  ts.l("commit_persistTransaction.exception_text",
+								       ex.getMessage()));
       }
   }
 
@@ -2037,7 +2044,7 @@ public class DBEditSet {
 
     if (objects == null)
       {
-	throw new RuntimeException("already committed or released");
+	throw new RuntimeException(ts.l("global.already"));
       }
 
     Enumeration enum = objects.elements();
