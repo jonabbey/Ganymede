@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1013,7 +1013,11 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	    adminPanel.loginButton.setEnabled(true);
 	    setVisible(false);
 	    // This shouldn't kill everything off, but it does for now.  Need to fix this later.
-	    System.exit(0);
+	    
+	    if (! WeAreApplet)
+	      {
+		System.exit(0);
+	      }
 
 	  }
       }
@@ -1234,6 +1238,7 @@ public class GASHAdmin extends JApplet {
 
   static GASHAdmin applet = null;
   static GASHAdminFrame frame = null;
+  boolean WeAreApplet = false;
 
   static String rootname = null;
   static String serverhost = null;
@@ -1261,6 +1266,8 @@ public class GASHAdmin extends JApplet {
   public void init()
   {
     serverhost = getParameter("ganymede.serverhost");
+
+    WeAreApplet = true;
 
     if (serverhost == null)
       {
@@ -1395,7 +1402,7 @@ public class GASHAdmin extends JApplet {
 	      password.setText("");
 	      quitButton.setEnabled(false);
 	      loginButton.setEnabled(false);
-	      frame = new GASHAdminFrame("Ganymede Admin Console", false, admin, applet);
+	      frame = new GASHAdminFrame("Ganymede Admin Console", WeAreApplet, admin, applet);
 	    }
 	  else
 	    {
@@ -1409,7 +1416,10 @@ public class GASHAdmin extends JApplet {
     quitButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e)
 	{
-	  System.exit(0);
+	  if (! WeAreApplet)
+	    {
+	      System.exit(0);
+	    }
 	}});
 
     buttonPanel.add("Center", loginButton);    
