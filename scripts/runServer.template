@@ -25,6 +25,14 @@ echo "Running Ganymede Server"
 
 export CLASSPATH
 
+# Set a higher upper limit on the number of descriptors so that Ganymede
+# doesn't run out while doing big builds
+#
+# This may be Solaris-specific, so use with caution if you're on another
+# operating system.
+#
+# ulimit -n 128
+
 # Run the RMI registry to provide remote name lookup for the server
 
 $RMIREGISTRY $RMIPORT &

@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Ganymede File Glossary 0.99.6 - 27 August 1999</title>
+    <title>Ganymede File Glossary 0.99.7 - 13 October 1999</title>
   </head>
 
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary 0.99.6 - 27 August 1999</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary 0.99.7 - 13 October 1999</FONT></h1>
 <hr>
     <p>This page contains descriptions of various significant files that are part
     of the Ganymede package.</p>
@@ -480,7 +480,8 @@
     keep the password secret, <font color="#ff0000"><code><b>stopServer</b></code></font> will not be able to login to
     the server to bring it down.</p>
 
-    <p><font color="#ff0000"><code><b>stopServer</b></code></font> uses the admin console's API to shut the server
+    <p><font color="#ff0000"><code><b>stopServer</b></code></font>
+    uses the admin console's API to shut the server
     down, and it may take a small amount of time to shut down the
     server, in order to allow transactions in the process of being
     committed to complete.  When the server goes down, all users
@@ -488,6 +489,16 @@
     that the server is immediately going down, and that they have been
     disconnected.  Any uncommitted changes made by active users will
     be lost.</p>
+
+    <p>if the <font
+    color="#ff0000"><code><b>stopServer</b></code></font> command is
+    run with the '<code>-delay</code>' command line switch, the server
+    will not be shut down immediately, but rather will perform a
+    deferred shutdown.  In this case, after the <font
+    color="#ff0000"><code><b>stopServer</b></code></font>
+    <code>-delay</code> command is executed, no new users will be
+    allowed to connect to the server, and when all active users are logged
+    out, the server will automatically shut down.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
@@ -672,7 +683,7 @@
     <hr>
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- hhmts start -->
-Last modified: Fri Aug 27 14:07:46 CDT 1999
+Last modified: Wed Oct 13 15:08:38 CDT 1999
 <!-- hhmts end -->
   </body>
 </html>

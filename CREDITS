@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.99.6
-August 27, 1999
+Ganymede Developer Release 0.99.7
+October 13, 1999
 CREDITS
 ---------------------------------------------
 
@@ -114,6 +114,7 @@ Charles Adams, charles.adams@central.sun.com - bug reports, debugging
 Darrell Tippe, Darrell.Tippe@atcoitek.com - bug reports
 Glen Joseph, gjoseph@us.ibm.com - installServer bug report
 Martin Schneider, martin@ira.uka.de - server customization bug reports
+Michael McEniry, mmceniry@itsc.uah.edu - linux localhost patch
 
 --
 

@@ -1,11 +1,11 @@
 Ganymede Release 0.99.7
-October ??, 1999
+October 13, 1999
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.6 to 0.99.7 -------------------
 
-RELEASE DATE: October ?? , 1999
+RELEASE DATE: October 13 , 1999
 
 1. [SERVER] Fixed the Ganymede server's registry binding for localhost
 
@@ -46,6 +46,173 @@ This change bumps the DBStore revision numbers to
 
 Martin Schneider (martin@ira.uka.de) asked for this change, it seemed
 like a good idea to me.
+
+4. [SERVER] Fixed server-loading bug from 0.99.6.6
+
+Change 6 to Ganymede.java in release 0.99.6 broke loading data from a
+freshly dumped schema.  Fixed the server initialization so that it can
+properly reset passwords if the password field is undefined in the
+supergash persona object.
+
+5. [SERVER] Fixed schema dump bugs in DBObject.partialEmit()
+
+Since July there has been a bug in DBObject.partialEmit() which makes
+it impossible to successfully dump a modified schema to disk and then
+turn around and use it to load a new database.  The problem was that
+when the server was dumping a ganymede.schema file, the supergash
+persona was being written to disk without the link to the supergash
+owner group (owner group 0) that gave it supergash privileges.
+
+Actually, there were a cluster of bugs in the schema dump logic.  All
+of them have been fixed, so schema dumping should produce a clean and
+usable ganymede.schema file now.  I knew the code for schema dumping
+was poorly architected, but I somehow missed the fact that it was so
+thoroughly broken.
+
+6. [SERVER] Added code to protect the essential server data structures
+
+It used to be possible to manually delete the supergash owner group,
+which would put the ganymede.db file in an unusable state.
+GanymedeSession.remove_db_object() now refuses attempts to do this.
+
+In addition, the Ganymede server now checks the database schema on
+start-up to make sure that all of the essential database objects are
+defined, including the supergash persona object, the supergash owner
+group, the default role, and the system event objects.  If any of
+these objects are undefined in the database on server startup, the
+server will now recreate them.
+
+The server still doesn't do a schema sanity check on startup, though.
+Still lots more work to do to clean up schema editing as a whole.
+
+7. [SERVER] Fixed logging for IP address changes
+
+The IPDBField.getDiffString() method had an error that caused it to
+report the old value for a changed IP address when it was meant to be
+showing the new.
+
+8. [SERVER] Added a background task to disconnect idle users
+
+The Ganymede server now has a built-in task which runs every minute to
+disconnect users that have been idle for a certain period of time.
+
+Currently, users with no objects checked out of the database will be
+disconnected after 15 minutes of idle time, and users who are in the
+middle of a transaction but have not done anything for a long time
+will be disconnected after 20 minutes of idle time.
+
+9. [CLIENT, SERVER] Made client able to re-acquire server without restarting
+
+The Ganymede client is now able to attempt to re-acquire the Ganymede
+server if the server goes down while the client is running.
+
+That is, if the server goes down cleanly while the client is running,
+the client will close the main window, leaving the login box.  The
+login box will now be able to attempt to bind to a new instantiation
+of the Ganymede server if the server has been brought back up.
+
+In order to do this properly, I had to add a new method to the
+RMI Server interface (Server.up()), so you'll need to install
+the client from Ganymede 0.99.7 for use with the 0.99.7 server,
+and vice-versa.
+
+Also modified the client to be more responsive to a server shut-down
+message, even if the user was sitting on the persona selection dialog.
+
+10. [SERVER] Server now associates embedded objects with container in log
+
+Previously, if changes were made to an embedded object that did not
+result in a modification to the state of the container, the log for
+that change did not record that the container was involved in the
+transaction, making such changes invisible to the history panel of the
+containing object.
+
+Now, whenever an embedded object is changed, the log record for the
+change will be associated its container and the change will show up
+properly in the container's history view.
+
+11. [SERVER,SCHEMA,DISTRIBUTION] Changes to handle descriptor starvation
+
+We put Ganymede in production at the laboratory on October 10th and
+quickly discovered that the Ganymede server was running into file
+descriptor exhaustion when builds are done at a high rate of speed.
+
+It turns out that one of the problems was that the GASHBuilderTask
+class in the gasharl schema kit wasn't explicitly closing the file
+descriptors for the Process object used to do the external build.
+Looking on the Java BugParade, I found bug item #4025386, which
+describes the problem and how to fix it.
+
+I went through all the BuilderTask classes in all the schema kits
+included with Ganymede and added a finally {} clause to close the
+Process file descriptors once the external build was done.
+
+Even after this change, I still saw the server run out of descriptors,
+so I put a 'ulimit -n 128' in the runServer script (64 is the default
+on Solaris.. the ulimit command is commented out so that people on
+Linux, etc., don't get an artificially low descriptor limit), and I
+fixed a few other places in the code where the system was
+unnecessarily waiting for garbage collection to close resources.
+
+File descriptor depletion is still a big issue with Ganymede, as a
+user with the client login window open is taking up a descriptor on
+the server for the RMI connection, even though the user isn't doing
+anything.  I'm not sure how much I can do about this, since I believe
+the only way to force an RMI break is by allowing the remote object to
+be garbage collected on the client.
+
+In any case, the problem isn't so much that the Ganymede server itself
+is keeping an excessive number of descriptors open, but that the
+extensive Ganymede/GASH build process we initiate on transaction
+commit opens dozens of files, taking up lots of the server's
+descriptors along the way.  Java doesn't provide any good way to
+manage this, but it may be a good idea to put another ulimit
+invocation in the script run by Ganymede?
+
+12. [SERVER] Fixed really stupid DBEditSet rollback mistake
+
+Ugh. Ugh. Ugh.
+
+I had broken the DBEditSet rollback code with change #0.99.6.9 below.
+
+There was no way it could have ever worked.  It didn't come close to
+working.  Not even remotely plausible code.  I am dum.
+
+I fixed it.. it is now both efficient and correct.
+
+13. [SERVER] Optimized DBEditSet.commit()
+
+I reworked DBEditSet.commit() so that it doesn't need to use
+rollback() to handle an incompletely filled-out object at transaction
+commit time.  Basically streamlined commit() so that it does the
+minimum amount of work required to check things out, without doing an
+unnecessary checkpoint()/rollback() pair when one or more objects in a
+transaction aren't completely filled out.
+
+And I checked my work, and I tested the code, this time.
+
+14. [SERVER, ADMIN CONSOLE] Added a deferred shutdown option
+
+The server can now be told to disable logins and to shutdown the server
+when all users log out of the system.  This is very useful for shutting
+the server down cleanly in a production environment.
+
+If you use the 'stopServer' script, you can now say 'stopServer
+-delay' to have the server do a user-friendly shutdown.  If you do do
+'stopServer -delay', the stopServer script will not wait for the
+server to shut down before exiting.
+
+If you shut the server down through the admin console, a dialog will
+pop up asking if you want to make the shut down deferred or not.
+
+This change involves an incompatible change to the
+arlut.csd.ganymede.adminSession RMI remote interface used by the
+server, admin console, and stopServer script.
+
+15. [SCHEMA] Several tweaks to gasharl schema
+
+Lots of minor fix-ups to the gasharl schema code, which we are actually
+using in production at ARL now.
 
 -------------------- Changes from 0.99.5 to 0.99.6 -------------------
 
