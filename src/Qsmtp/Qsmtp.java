@@ -1,5 +1,10 @@
 /*********************************************************************
 
+This code was released by James Driscoll into the public domain.
+
+See http://www.io.com/~maus/JavaPage.html for the statement of
+public domain release.
+
 @version 1.00 7/17/96
 @author James Driscoll maus@io.com
 
@@ -18,20 +23,42 @@ Version History:
                 the compiler didn't optimize it out on your machine - mine
                 didn't (Symantec Cafe Lite, you get what you pay for, and
                 I paid for a book)).
+1.01 9/18/96  - Fixed the call to getLocalHost local, which 1.02 JDK didn't
+                like (Cafe Lite didn't mind, though).  Think I'll be using
+                JDK for all compliations from now on.  Also, added a close
+                method, since finalize() is not guarenteed to be called(!).
+1.1 12/26/96 -  Fixed problem with EOL, I was using the Unix EOL, not the
+                network end of line.  A fragile mail server was barfing.
+                I can't beleive I wrote this - that's what half a year will do.
+                Also, yanked out the debug code.  It annoyed me.
+1.11 12/27/97 - Forgot to flush(), println used to do that for me...
 
-There are a few things still to do to get this to work properly -
+-- 
 
-1)  fix the TZ stuff - getTimezoneOffset returns wierd values.
-    For now, I'm going to let it be and hope that the bug that returns one
-    miniute less than valid gets fixed in the class itself.  The next best
-    solution is for this is to write a wrapper class that fixes the Date class.
-    Not a good solution if you want it to be a lightweight applet machine.
+Modifications by Jonathan Abbey (jonabbey@arlut.utexas.edu):
+
+Mods integrated with 1.11 on 19 January 1999
+
+Made this class open and close connection to the mailer during the
+sendMsg() method, rather than having to do a separate close() and
+recreate a new Qsmtp object to send an additional message.
+
+Modified the sendMsg() to_address parameter to support a vector of
+addresses.
+
+Added the sendHTMLmsg() method to allow for sending MIME-attached
+html pages.
+
+Added the extraHeaders parameter to sendMsg() to support sendHTMLmsg().
+
+Moved the code to use the 1.1 io and text formatting classes.
 
 ***********************************************************************/
 
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.text.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -42,10 +69,10 @@ import java.util.*;
 public class Qsmtp {
 
   static final int DEFAULT_PORT = 25;
-  static final boolean DEBUG = false;
+  static final String EOL = "\r\n"; // network end of line
 
   // --
-  
+
   protected DataInputStream replyStream = null;
   protected BufferedReader reply = null;
   protected PrintWriter send = null;
@@ -56,43 +83,62 @@ public class Qsmtp {
   private int port = DEFAULT_PORT;
 
   /* -- */
-  
-  public Qsmtp( String hostid)
+
+  /**
+   *   Create a Qsmtp object pointing to the specified host
+   *   @param hostid The host to connect to.
+   *   @exception UnknownHostException
+   *   @exception IOException
+   */
+
+  public Qsmtp(String hostid)
   {
     this.hostid = hostid;
   }
 
-  public Qsmtp( String hostid, int port)
+  public Qsmtp(String hostid, int port)
   {
     this.hostid = hostid;
     this.port = port;
   }
 
-  public Qsmtp( InetAddress address )
+  public Qsmtp(InetAddress address)
   {
-    this.address = address;
+    this(address, DEFAULT_PORT);
   }
 
-  public Qsmtp( InetAddress address, int port )
+  public Qsmtp(InetAddress address, int port)
   {
     this.address = address;
     this.port = port;
   }
 
-  public void sendmsg( String from_address, Vector to_addresses,
-		       String subject, String message) throws IOException, ProtocolException 
+  public void sendmsg(String from_address, Vector to_addresses,
+		      String subject, String message) throws IOException, ProtocolException 
   {
     sendmsg(from_address, to_addresses, subject, message, null);
   }
 
-  public void sendmsg( String from_address, Vector to_addresses,
-		       String subject, String message, Vector extraHeaders ) throws IOException, ProtocolException 
+  public void sendmsg(String from_address, Vector to_addresses, 
+		      String subject, String message,
+		      Vector extraHeaders) throws IOException, ProtocolException
   {
+    String rstr;
     String sstr;
 
     InetAddress local;
 
     /* -- */
+
+    try 
+      {
+	local = InetAddress.getLocalHost();
+      }
+    catch (UnknownHostException ioe) 
+      {
+	System.err.println("No local IP address found - is your network up?");
+	throw ioe;
+      }
 
     if (to_addresses == null ||
 	to_addresses.size() == 0)
@@ -104,21 +150,20 @@ public class Qsmtp {
 
     if (hostid != null)
       {
-	sock = new Socket( hostid, port );
+	sock = new Socket(hostid, port);
       }
     else
       {
-	sock = new Socket( address, port );
+	sock = new Socket(address, port);
       }
-    replyStream = new DataInputStream( sock.getInputStream() );
+
+    replyStream = new DataInputStream(sock.getInputStream());
     reply = new BufferedReader(new InputStreamReader(replyStream));
-    send = new PrintWriter( sock.getOutputStream(), true );
+    send = new PrintWriter(sock.getOutputStream(), true);
 
-    String rstr = reply.readLine();
+    rstr = reply.readLine();
 
-    if (DEBUG) System.out.println(rstr);
-
-    if (!rstr.startsWith("220"))
+    if (!rstr.startsWith("220")) 
       {
 	throw new ProtocolException(rstr);
       }
@@ -127,46 +172,30 @@ public class Qsmtp {
       {
 	rstr = reply.readLine();
 
-	if (DEBUG) System.out.println(rstr);
-
 	if (!rstr.startsWith("220")) 
 	  {
 	    throw new ProtocolException(rstr);
 	  }
       }
 
-    // ok, socket initialized
-
-    if (DEBUG) System.out.println("Socket initialized");
-
-    // prepare to send mail
-
-    local = InetAddress.getLocalHost();
     String host = local.getHostName();
-    send.println("HELO " + host);
 
-    //        send.println("HELO smtp");
-
-    if (DEBUG) System.out.println("HELO " + host);
+    send.print("HELO " + host);
+    send.print(EOL);
+    send.flush();
 
     rstr = reply.readLine();
-
-    if (DEBUG) System.out.println("** " + rstr);
-
     if (!rstr.startsWith("250")) 
       {
 	throw new ProtocolException(rstr);
       }
 
     sstr = "MAIL FROM: " + from_address ;
-    send.println(sstr);
-
-    if (DEBUG) System.out.println(sstr);
+    send.print(sstr);
+    send.print(EOL);
+    send.flush();
 
     rstr = reply.readLine();
-
-    if (DEBUG) System.out.println(rstr);
-
     if (!rstr.startsWith("250")) 
       {
 	throw new ProtocolException(rstr);
@@ -175,35 +204,29 @@ public class Qsmtp {
     for (int i = 0; i < to_addresses.size(); i++)
       {
 	sstr = "RCPT TO: " + (String) to_addresses.elementAt(i);
-	send.println(sstr);
-	if (DEBUG) System.out.println(sstr);
+	send.print(sstr);
+	send.print(EOL);
+	send.flush();
 
 	rstr = reply.readLine();
-
-	if (DEBUG) System.out.println(rstr);
-
 	if (!rstr.startsWith("250")) 
 	  {
 	    throw new ProtocolException(rstr);
 	  }
       }
 
-    send.println("DATA");
-
-    if (DEBUG) System.out.println("DATA");
+    send.print("DATA");
+    send.print(EOL);
+    send.flush();
 
     rstr = reply.readLine();
-
-    if (DEBUG) System.out.println(rstr);
-
     if (!rstr.startsWith("354")) 
       {
 	throw new ProtocolException(rstr);
       }
 
-    send.println("From: " + from_address);
-
-    if (DEBUG) System.out.println("From: " + from_address);
+    send.print("From: " + from_address);
+    send.print(EOL);
 
     StringBuffer targetString = new StringBuffer();
 
@@ -217,30 +240,24 @@ public class Qsmtp {
 	targetString.append((String) to_addresses.elementAt(i));
       }
 
-    send.println("To: " + targetString.toString());
-
-    if (DEBUG) System.out.println("To: " + targetString.toString());
-
-    send.println("Subject: " + subject);
-
-    if (DEBUG) System.out.println("Subject: " + subject);
+    send.print("To: " + targetString.toString());
+    send.print(EOL);
+    send.print("Subject: " + subject);
+    send.print(EOL);
     
     // Create Date - we'll cheat by assuming that local clock is right
     
     Date today_date = new Date();
+    send.print("Date: " + formatDate(today_date));
+    send.print(EOL);
+    send.flush();
 
-    send.println("Date: " + today_date.toGMTString());
-
-    if (DEBUG) System.out.println("Date: " + today_date.toGMTString());
-
-    // send.println("Date: " + msgDateFormat(today_date));
-
-    // if (DEBUG) System.out.println("Date: " + msgDateFormat(today_date));
-    
     // Warn the world that we are on the loose - with the comments header:
 
-    //    send.println("Comment: Unauthenticated sender");
-    send.println("X-Mailer: JNet Qsmtp");
+    send.print("Comment: Unauthenticated sender");
+    send.print(EOL);
+    send.print("X-Mailer: JNet Qsmtp");
+    send.print(EOL);
 
     if (extraHeaders != null)
       {
@@ -249,36 +266,35 @@ public class Qsmtp {
 	for (int i = 0; i < extraHeaders.size(); i++)
 	  {
 	    header = (String) extraHeaders.elementAt(i);
-	    send.println(header);
+	    send.print(header);
+	    send.print(EOL);
+	    send.flush();
 	  }
       }
-    
-    // Sending a blank line ends the header part.
-    send.println("");
 
-    if (DEBUG) System.out.println("");
+    // Sending a blank line ends the header part.
+
+    send.print(EOL);
 
     // Now send the message proper
-    send.println(message);
-
-    if (DEBUG) System.out.println(message);
-
-    send.println(".");
-
-    if (DEBUG) System.out.println(".");
-
+    send.print(message);
+    send.print(EOL);
+    send.print(".");
+    send.print(EOL);
+    send.flush();
+    
     rstr = reply.readLine();
-
-    if (DEBUG) System.out.println(rstr);
-
     if (!rstr.startsWith("250")) 
       {
 	throw new ProtocolException(rstr);
       }
 
-    // close our mailer con
+    // close our mailer connection
 
-    send.println("QUIT");
+    send.print("QUIT");
+    send.print(EOL);
+    send.flush();
+
     sock.close();
   }
 
@@ -288,9 +304,9 @@ public class Qsmtp {
    *
    */
 
-  public void sendHTMLmsg( String from_address, Vector to_addresses,
-			   String subject, String htmlBody, String htmlFilename,
-			   String textBody ) throws IOException, ProtocolException 
+  public void sendHTMLmsg(String from_address, Vector to_addresses,
+			  String subject, String htmlBody, String htmlFilename,
+			  String textBody) throws IOException, ProtocolException 
   {
     Vector MIMEheaders = new Vector();
     String separator = "B24FDA77DFMIMEISNEAT4976B1CA5E8A49";
@@ -330,6 +346,7 @@ public class Qsmtp {
 	  {
 	    buffer.append("Content-Disposition: inline;\n\n");
 	  }
+
 	buffer.append(htmlBody);
 	buffer.append("\n");
       }
@@ -341,51 +358,16 @@ public class Qsmtp {
     sendmsg(from_address, to_addresses, subject, buffer.toString(), MIMEheaders);
   }
 
-  private String msgDateFormat( Date senddate) 
+  /**
+   *
+   * This method returns a properly mail-formatted date string.
+   *
+   */
+
+  public static String formatDate(Date date)
   {
-    Calendar cal = Calendar.getInstance();
-    String formatted = "hold";
-    String Day[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    String Month[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
-    /* -- */
-
-    cal.setTime(senddate);
-
-    formatted = Day[cal.get(Calendar.DAY_OF_WEEK)] + ", ";
-    formatted = formatted + String.valueOf(cal.get(Calendar.DATE)) + " ";
-    formatted = formatted + Month[cal.get(Calendar.MONTH)] + " ";
-
-    if (cal.get(Calendar.YEAR) > 99)
-      {
-	formatted = formatted + String.valueOf(cal.get(Calendar.YEAR) + 1900) + " ";
-      }
-    else
-      {
-	formatted = formatted + String.valueOf(cal.get(Calendar.YEAR)) + " ";
-      }
-
-    if (cal.get(Calendar.HOUR) < 10)
-      {
-	formatted = formatted + "0";
-      }
-
-    formatted = formatted + String.valueOf(cal.get(Calendar.HOUR)) + ":";
-
-    if (cal.get(Calendar.MINUTE) < 10) 
-      {
-	formatted = formatted + "0";
-      }
-
-    formatted = formatted + String.valueOf(cal.get(Calendar.MINUTE)) + ":";
-
-    if (cal.get(Calendar.SECOND) < 10) 
-      {
-	formatted = formatted + "0";
-      }
-
-    formatted = formatted + String.valueOf(cal.get(Calendar.SECOND)) + " ";
-
-    return formatted;
+    DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", 
+						java.util.Locale.US);
+    return formatter.format(date);
   }
 }
