@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -104,7 +104,8 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     stringShowing,
     referenceShowing,
     passwordShowing,
-    ipShowing;
+    ipShowing,
+    permissionShowing;
 
   /* -- */
 
@@ -167,6 +168,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     typeC.addItem("Object Reference");
     typeC.addItem("Password");
     typeC.addItem("I.P.");
+    typeC.addItem("Permission Matrix");
     typeC.addItemListener(this);
 
     //choose the one that is the default
@@ -580,6 +582,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     referenceShowing = false;
     passwordShowing = false;
     ipShowing = false;
+    permissionShowing = false;
 
     try
       {
@@ -617,6 +620,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    ipShowing = true;
 	    fieldDef.setType(FieldType.IP);
+	  }
+	else if (selectedItem.equalsIgnoreCase("Permission Matrix"))
+	  {
+	    permissionShowing = true;
+	    fieldDef.setType(FieldType.PERMISSIONMATRIX);
 	  }
       }
     catch (RemoteException ex)
