@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -164,6 +164,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     DBEditObject newObject;
     DBObjectBase targetBase;
     DBObjectBaseField fieldDef;
+    ReturnVal retVal;
 
     /* -- */
 
@@ -173,11 +174,25 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (fieldDef.getTargetBase() > -1)
 	  {
-	    newObject = getSession().createDBObject(fieldDef.getTargetBase(), null, null);
-
+	    newObject = getSession().createDBObject(fieldDef.getTargetBase(),
+						    null, null);
 	    // link it in
 
-	    newObject.setFieldValue(SchemaConstants.ContainerField, getInvid());
+	    InvidDBField invf = (InvidDBField) newObject.getField(SchemaConstants.ContainerField);
+
+	    // we have to use setValueLocal because the permissions system will choke
+	    // on an unlinked embedded object.
+
+	    retVal = invf.setValueLocal(getInvid());
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		System.err.println("*Couldn't create embedded mapEntry object");
+	      }
+	    else
+	      {
+		System.err.println("Created embedded mapEntry object");
+	      }
 	    
 	    return newObject.getInvid();
 	  }
@@ -367,7 +382,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// set the shell to /bin/false
 	
 	stringfield = (StringDBField) getField(LOGINSHELL);
-	retVal = stringfield.setValue("/bin/false");
+	retVal = stringfield.setValueLocal("/bin/false");
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -675,7 +690,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * 
    */
 
-  public synchronized QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field)
   {
     switch (field.getID())
       {
@@ -889,13 +904,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		
 	    if (oldName.equals((String) sf.getValueLocal()))
 	      {
-		sf.setValue(value);	// set the signature alias to the user's new name
+		sf.setValueLocal(value);	// set the signature alias to the user's new name
 	      }
 	  }
 
 	sf = (StringDBField) getField(HOMEDIR);
 
-	sf.setValue("/home/" + (String) value);	// ** ARL
+	sf.setValueLocal("/home/" + (String) value);	// ** ARL
 
 	inv = (InvidDBField) getField(PERSONAE);
 	
@@ -1018,6 +1033,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    
 	    return result;
 	  }
+      }
+
+    // if we are changing the list of email aliases, we'll want
+    // to update the list of choices for the signature field.
+
+    if (field.getID() == ALIASES)
+      {
+	result = new ReturnVal(true);
+	    
+	result.addRescanField(userSchema.SIGNATURE);
+
+	return result;
       }
 
     if (field.getID() == GROUPLIST)
