@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,6 +34,8 @@ public abstract class DBField implements Cloneable {
 				// values in a given set of fields
 
   abstract void emit(DataOutputStream out) throws IOException;
+
+  abstract boolean equals(DBField field);
 
   boolean unmark(DBEditSet editset, DBNameSpace namespace)
   {
