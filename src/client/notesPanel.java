@@ -5,8 +5,8 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/03/25 08:17:07 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/04/01 22:16:41 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -75,7 +75,7 @@ import arlut.csd.JDataComponent.*;
  * GUI components in the client that are connected to database fields on the server,
  * the notesPanel doesn't automatically update the server on focus loss.  Instead,
  * notesPanel currently depends on gclient's 
- * {@link arlut.csd.ganymede.client.gclient.commitTransaction() commitTransaction()}
+ * {@link arlut.csd.ganymede.client.gclient#commitTransaction() commitTransaction()}
  * method to poll all notesPanels open and active for their contents.  This really
  * should be changed, as it means that currently an edit object window which is
  * manually closed will not have its notes field updated on transaction commit.

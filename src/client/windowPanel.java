@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 1999/03/29 22:56:28 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 1999/04/01 22:16:41 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -68,35 +68,84 @@ import arlut.csd.JDataComponent.*;
 
 ------------------------------------------------------------------------------*/
 
-/** 
- * windowPanel is the top level window controlling the framePanels.  There is one
- * windowPanel for each client.  windowPanel is responsible for adding new windows,
- * and maintaining the window list in the menubar.  
+/**
+ * <p>windowPanel is the top level panel containing and controlling the
+ * internal {@link arlut.csd.ganymede.client.framePanel} and
+ * {@link arlut.csd.ganymede.client.gResultTable gResultTable} windows
+ * that are displayed in reaction to actions taken by the user.
+ * windowPanel is responsible for adding these windows, and maintaining
+ * the window list in the menubar.</p>
+ *
+ * <p>windowPanel is also responsible for displaying and removing the
+ * internal 'guy working' status window that lets the user know the client
+ * hasn't frozen up when it is processing a query request.</p>
+ *
+ * @version $Revision: 1.66 $ $Date: 1999/04/01 22:16:41 $ $Name:  $
+ * @author Mike Mulvaney
  */
 
-public class windowPanel extends JDesktopPane implements InternalFrameListener, ActionListener{  
+public class windowPanel extends JDesktopPane implements InternalFrameListener, ActionListener {
 
-  boolean debug = true;
+  boolean debug = false;
 
   final boolean debugProperty = false;
   
   // --
 
+  /**
+   * Reference to the client's main class, used for some utility functions.
+   */
+
   gclient
     gc;
 
-  int 
-    topLayer = 0,
-    windowCount = 0;
+  /**
+   * Constant, the front-most layer in which newly created windows are
+   * placed.
+   */
 
-  Hashtable
-    waitWindowHash = new Hashtable(),
-    menuItems = new Hashtable(),
-    windowList = new Hashtable();
+  final int topLayer = 0;
+
+  /**
+   * <p>windowCount is used to stagger internal windows as they are created
+   * and displayed in this windowPanel.  Each time a window is created and
+   * displayed, windowCount is incremented, which causes addWindow to stagger
+   * the next window created by a certain amount.</p>
+   * 
+   * <p>The 
+   * {@link arlut.csd.ganymede.client.windowPanel#resetWindowCount() resetWindowCount()} 
+   * method resets this variable so that the next window displayed in
+   * the client will be positioned at the top-left side of the
+   * windowPanel.  This is done when a transaction is committed or aborted.</p>
+   */
+
+  int windowCount = 0;
+
+  /**
+   * <p>Used to keep track of multiple 'guy working' internal wait windows
+   * if we have multiple threads waiting for query results from the server.</p>
+   *
+   * <p>This hashtable maps Runnable objects (objects downloading query results
+   * in their own threads) to JInternalFrame's.</p>
+   */
   
-  // This is used as the wait image in other classes.  Currently, it
-  // returns the men at work animated gif.  Keep it here so each
-  // subsequent pane doesn't have to load it.
+  Hashtable waitWindowHash = new Hashtable();
+
+  /**
+   * <p>Hashtable mapping window titles to JInternalFrames.  Used
+   * to make sure that we have unique titles for all of our
+   * internal windows, so that we can properly maintain a 
+   * Windows menu to let the user select an active window from
+   * the menu bar.</p>
+   */
+
+  Hashtable windowList = new Hashtable();
+  
+  /**
+   * This is used as the wait image in other classes.  Currently, it
+   * returns the men at work animated gif.  Keep it here so each
+   * subsequent pane doesn't have to load it.
+   */
 
   Image
     waitImage = null;
@@ -146,7 +195,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     // are we running the client in debug mode?
 
-    debug = gc.debug;
+    if (!debug)
+      {
+	debug = gc.debug;
+      }
 
     this.windowMenu = windowMenu;
 
@@ -154,6 +206,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     // but we need to name it here so we can reference 
     // it in updateMenu. Note assumption that it is first item
     // in original windowMenu.
+
     this.toggleToolBarMI = windowMenu.getItem(0);
 
     if (debug)
@@ -466,7 +519,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * Calls gclient.setStatus
+   * <p>Convenience method, calls
+   * {@link arlut.csd.ganymede.gclient#setStatus(java.lang.String) gclient.setStatus}
+   * to set some text in the client's status bar, with a time-to-live of the
+   * default 5 seconds.</p>
    */
 
   public final void setStatus(String s)
@@ -474,13 +530,26 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     gc.setStatus(s);
   }
 
+  /**
+   * <p>windowCount is used to stagger internal windows as they are created
+   * and displayed in this windowPanel.  resetWindowCount() resets this
+   * variable so that the next window displayed in the client will be
+   * positioned at the top-left side of the windowPanel.</p>
+   */
+
   public void resetWindowCount()
   {
     windowCount = 0;
   }
 
   /**
-   * Add a table window.  Usually the output of a query.
+   * <p>Create and add an internal query result table window.</p>
+   *
+   * @param session Reference to the server, used to refresh the query on command
+   * @param query The Query whose results are being shown in this window, used to
+   * refresh the query on command.
+   * @param results The results of the query that is being shown in this window.
+   * @param title The title to be placed on the window when created.
    */
 
   public void addTableWindow(Session session, Query query, 
@@ -570,6 +639,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
   }
 
+  /**
+   * <p>Pops up an internal 'wait..' window, showing an animated icon of a
+   * guy working.  Used to show the client is still working while a query
+   * is being processed.</p>
+   */
+
   public void addWaitWindow(Runnable key)
   {
     JInternalFrame frame = new JInternalFrame("Query loading");
@@ -591,6 +666,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     add(frame);
     setSelectedWindow(frame);
   }
+
+  /**
+   * <p>Pops down the internal 'wait..' window.</p>
+   */
 
   public void removeWaitWindow(Runnable key)
   {
@@ -624,9 +703,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   *
-   * Returns an Enumeration of all the windows.
-   *
+   * <p>Returns an Enumeration of all the internal windows currently being shown in
+   * the client.</p>
    */
 
   public Enumeration getWindows()
@@ -665,7 +743,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * Closes all windows that are open for editing.  
+   * <p>Closes all windows that are open for editing.</p>
    *
    * <p>This should be called by the parent when the transaction is canceled, to get rid of
    * windows that might confuse the user.</p>
@@ -709,12 +787,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
   
   /**
-   *
-   * Closes all internal frames, editable or no.
+   * <p>Closes all internal frames, editable or no.</p>
    *
    * @param askNoQuestions if true, closeAll() will inhibit the normal
    * dialogs brought up when create/editable windows are closed.
-   *
    */
 
   public void closeAll(boolean askNoQuestions)
@@ -972,12 +1048,5 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   public void internalFrameDeactivated(InternalFrameEvent e) {}
   public void internalFrameOpened(InternalFrameEvent e) {}
   public void internalFrameIconified(InternalFrameEvent e) {}
- 
-  void addRow(JComponent parent, Component comp,  String label, int row)
-  {
-    JLabel l = new JLabel(label);
-    parent.add("0 " + row + " lthwHW", l);
-    parent.add("1 " + row + " lthwHW", comp);
-  }
 }
 

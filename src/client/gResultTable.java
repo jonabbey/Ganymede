@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/03/10 20:12:38 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/04/01 22:16:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -69,33 +69,83 @@ import javax.swing.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>Client internal window for displaying the results of a 
+ * query {@link arlut.csd.ganymede.Session#dump(arlut.csd.ganymede.Query) dump}
+ * in a table form.</p>
+ *
+ * <p>This window is created when {@link arlut.csd.ganymede.client.windowPanel windowPanel}'s
+ * {@link arlut.csd.ganymede.client.windowPanel#addTableWindow(arlut.csd.ganymede.Session,
+ * arlut.csd.ganymede.Query, arlut.csd.ganymede.DumpResult, java.lang.String) addTableWindow}
+ * method is called.</p>
+ * 
+ * <p>Note that windowPanel's addTableWindow method is called from 
+ * {@link arlut.csd.ganymede.client.gclient gclient}'s actionPerformed method,
+ * which spawns a separate thread in which the query is performed and
+ * the gResultTable window is created.</p>
+ *
+ * <p>Constructors for this class take a {@link arlut.csd.ganymede.Query Query} object
+ * describing the query that this table was generated from, and a
+ * {@link arlut.csd.ganymede.DumpResult DumpResult} object actually containing the dump
+ * results from the Ganymede server.  gResultTable can resubmit the dump query to the
+ * server if the user chooses to refresh the query, but normally the dump query
+ * is performed by gclient.</p>
+ *
+ * @version $Revision: 1.25 $ $Date: 1999/04/01 22:16:39 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
+ */
+
 public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
   
   static final boolean debug = false;
 
   // ---
 
+  /**
+   * Reference to the desktop pane containing the client's internal windows.  Used to access
+   * some GUI resources.
+   */
+
   windowPanel wp;
+
+  /**
+   * Main remote interface for communications with the server.  Used to resubmit the
+   * query on query refresh.
+   */
+
+  Session session;
+
+  /**
+   * The actual Query used to create this gResultTable.  Used if the user asks that the
+   * query be refreshed.
+   */
+
+  Query query;
+
+  /**
+   * The GUI table component.
+   */
+
+  rowTable table = null;
+
+  /**
+   * The contentPane for this internal window.  We place the rowTable in this
+   * container.
+   */
+
+  Container contentPane;
+
+  JMenuBar mb;
   JPopupMenu popMenu;
   JMenuItem viewMI;
   JMenuItem editMI;
-  Session session;
-  Query query;
-  rowTable table = null;
-
-  JMenuBar mb;
-
-  Container
-    contentPane;
 
   /* -- */
 
   /**
-   *
    * Constructor for gResultTable.  Creates the GUI table, loads it,
    * and presents it.  DumpResult is dissociated when this constructor is
    * through with it, to aid GC.
-   * 
    */
 
   public gResultTable(windowPanel wp, Session session, Query query, DumpResult results) throws RemoteException

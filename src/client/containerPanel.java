@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 1999/03/31 00:06:53 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 1999/04/01 22:16:38 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -87,17 +87,17 @@ import arlut.csd.Util.VecQuickSort;
  * fields, translating GUI activity to attempted changes to server fields.  Any
  * attempted change that the server refuses will cause a dialog to be popped up via
  * gclient's
- * {@link arlut.csd.ganymede.client.gclient.handleReturnVal(arlut.csd.ganymede.ReturnVal) handleReturnVal()}
+ * {@link arlut.csd.ganymede.client.gclient#handleReturnVal(arlut.csd.ganymede.ReturnVal) handleReturnVal()}
  * method, and the GUI component that caused the change will be reverted to its pre-change
  * status.</p>
  *
  * <p>The gclient's handleReturnVal() method also supports extracting a list of objects
  * and fields that need to be refreshed when one change on the server is reflected
  * across more than one object.  This is handled by containerPanel's
- * {@link arlut.csd.ganymede.client.containerPanel.update(java.util.Vector) update()}
+ * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.100 $ $Date: 1999/03/31 00:06:53 $ $Name:  $
+ * @version $Revision: 1.101 $ $Date: 1999/04/01 22:16:38 $ $Name:  $
  * @author Mike Mulvaney
  */
 

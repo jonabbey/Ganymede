@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.146 $
-   Last Mod Date: $Date: 1999/03/31 00:06:54 $
+   Version: $Revision: 1.147 $
+   Last Mod Date: $Date: 1999/04/01 22:16:40 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -75,11 +75,19 @@ import javax.swing.plaf.basic.BasicToolBarUI;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Main ganymede client class.  When {@link arlut.csd.client.glogin glogin}
- * is run and a user logs in to the server, a single instance of this class
- * is created to handle all client GUI and networking operations for the user.</p>
+ * <p>Main ganymede client class.  When {@link arlut.csd.ganymede.client.glogin glogin}
+ * is run and a user logs in to the server, the client obtains a
+ * {@link arlut.csd.ganymede.Session Session} reference that allows it to talk
+ * to the server on behalf of a user, and a single instance of this class
+ * is created to handle all client GUI and networking operations for that user.</p>
  *
- * @version $Revision: 1.146 $ $Date: 1999/03/31 00:06:54 $ $Name:  $
+ * <p>gclient creates a {@link arlut.csd.ganymede.client.windowPanel windowPanel}
+ * object to contain internal object and query windows on the right side of
+ * a Swing JSplitPane.  The left side contains a custom {@link arlut.csd.JTree.treeControl
+ * treeControl} GUI component displaying object categories, types, and instances
+ * for the user to browse and edit.</p>
+ *
+ * @version $Revision: 1.147 $ $Date: 1999/04/01 22:16:40 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -141,7 +149,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /**
    * Local copy of the category/object tree downloaded from
-   * the server by the {@link arlut.csd.ganymede.client.buildTree() buildTree()}
+   * the server by the {@link arlut.csd.ganymede.client.gclient#buildTree() buildTree()}
    * method.
    */
 
@@ -293,7 +301,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s.</p>
    *
    * <p>This hash is used by
-   * {@link arlut.csd.ganymede.client.gclient.getTemplateVector(java.lang.Short) getTemplateVector}.</p>
+   * {@link arlut.csd.ganymede.client.gclient#getTemplateVector(java.lang.Short) getTemplateVector}.</p>
    */
 
   protected Hashtable templateHash;
@@ -304,7 +312,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * to us by the server.</p>
    *
    * <p>We can get QueryResults from the server by doing direct
-   * {@link arlut.csd.ganymede.Session.Query(arlut.csd.ganymede.Query) Query}
+   * {@link arlut.csd.ganymede.Session#query(arlut.csd.ganymede.Query) query}
    * calls on the server, or by calling choices() on an 
    * {@link arlut.csd.ganymede.invid_field invid_field} or on a
    * {@link arlut.csd.ganymede.string_field string_field}.  Information from
@@ -487,7 +495,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * it is set.</p>
    *
    * <p>Whenever the gclient's
-   * {@link arlut.csd.ganymede.gclient.setStatus(java.lang.String,int) setStatus}
+   * {@link arlut.csd.ganymede.gclient#setStatus(java.lang.String,int) setStatus}
    * method is called, this thread has a countdown timer started, which will
    * clear the status label if it is not reset by another call to setStatus.</p>
    */
@@ -1290,7 +1298,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.client.gclient.baseNames baseNames}.</p>
+   * <p>Returns {@link arlut.csd.ganymede.client.gclient#baseNames baseNames}.</p>
    *
    * <p>Checks to see if the baseNames was loaded, and if not, it loads it.
    * Always use this instead of trying to access baseNames directly.</p>
@@ -1307,7 +1315,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.client.gclient.baseList baseList}.</p>
+   * <p>Returns {@link arlut.csd.ganymede.client.gclient#baseList baseList}.</p>
    *
    * <p>Checks to see if the baseList was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseList
@@ -1325,7 +1333,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.client.gclient.baseMap baseMap}.</p>
+   * <p>Returns {@link arlut.csd.ganymede.client.gclient#baseMap baseMap}.</p>
    *
    * <p>Checks to see if the baseMap was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseMap
@@ -1343,7 +1351,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.client.gclient.baseToShort baseToShort}.</p>
+   * <p>Returns {@link arlut.csd.ganymede.client.gclient#baseToShort baseToShort}.</p>
    *
    * <p>Checks to see if the basetoShort was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseToShort
@@ -2433,7 +2441,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * method directly.</p>
    *
    * <p>This method is precisely analagous in function to
-   * {@link arlut.csd.ganymede.client.gclient.cleanUpAfterCancel() cleanUpAfterCancel()},
+   * {@link arlut.csd.ganymede.client.gclient#cleanUpAfterCancel() cleanUpAfterCancel()},
    * except for use after a commit.</p> 
    */
 
@@ -2528,7 +2536,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Called by refreshTreeAfterCommit().</p>
    *
    * <p>This method is called from
-   * {@link arlut.csd.ganymede.client.gclient.refreshTreeAfterCommit() refreshTreeAfterCommit()}.</p>
+   * {@link arlut.csd.ganymede.client.gclient#refreshTreeAfterCommit() refreshTreeAfterCommit()}.</p>
    *
    * @param paramVect Vector of invid's to refresh.  
    * @param afterCommit If true, this method will update the client's status
@@ -3934,7 +3942,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Cleans up the tree and gclient's caches.</p>
    *
    * <p>This method is precisely analagous in function to
-   * {@link arlut.csd.ganymede.client.gclient.refreshTreeAfterCommit() refreshTreeAfterCommit()},
+   * {@link arlut.csd.ganymede.client.gclient#refreshTreeAfterCommit() refreshTreeAfterCommit()},
    * except for use after a cancel, when nodes marked as deleted are not removed from the tree,
    * and nodes marked as created are not kept.</p>
    */
@@ -4110,6 +4118,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
   
   // ActionListener Methods
+
+  /**
+   * <p>Handles button and menu picks.  Includes logic for threading
+   * out queries and message panels to avoid locking the Java GUI
+   * thread.</p>
+   */
   
   public void actionPerformed(java.awt.event.ActionEvent event)
   {
@@ -4122,7 +4136,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	System.out.println("Action: " + command);
       }
-    
 
     if (source == cancel)
       {
@@ -4265,7 +4278,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     else if (command.equals("Message of the day"))
       {
-
 	Thread thread = new Thread(new Runnable() {
 	  public void run() {
 	    showMOTD();
