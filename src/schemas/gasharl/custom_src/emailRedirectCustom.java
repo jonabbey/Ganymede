@@ -6,8 +6,8 @@
    
    Created: 25 June 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/06/25 22:01:26 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2002/04/10 04:59:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -152,4 +152,103 @@ public class emailRedirectCustom extends DBEditObject implements SchemaConstants
 				 sourceObject, sourceFieldID, gsession);
   }
 
+  /**
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any vector add operation, and to take any special actions in
+   * reaction to the add.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us is guaranteed
+   * to proceed to make the change to its vector.  If this method
+   * returns a non-success code in its ReturnVal, the DBField that
+   * called us will not make the change, and the field will be left
+   * unchanged.</p>
+   *
+   * <p>The &lt;field&gt; parameter identifies the field that is
+   * requesting approval for item deletion, and the &lt;value&gt;
+   * parameter carries the value to be added.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under normal circumstances, we won't need
+   * to do anything here.</p>
+   */
+
+  public ReturnVal finalizeAddElement(DBField field, Object value)
+  {
+    if (field.getID() != emailRedirectSchema.TARGETS)
+      {
+	return null;
+      }
+
+    Vector newItemVect = new Vector();
+    
+    newItemVect.addElement(value);
+
+    if (!fitsInNIS(newItemVect))
+      {
+	return Ganymede.createErrorDialog("Overflow error",
+					  "Error, can't add to " + getTypeName() + ":" + 
+					  getLabel() + " without overflowing the NIS line length limit.");
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any vector-vector add operation, and to take any special
+   * actions in reaction to the add.. if this method returns null or a
+   * success code in its ReturnVal, the DBField that called us is
+   * guaranteed to proceed to make the change to its vector.  If this
+   * method returns a non-success code in its ReturnVal, the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.</p>
+   *
+   * <p>The &lt;field&gt; parameter identifies the field that is
+   * requesting approval for item deletion, and the &lt;submittedValues&gt;
+   * parameter carries the values to be added.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under normal circumstances, we won't need
+   * to do anything here.</p>
+   */
+
+  public ReturnVal finalizeAddElements(DBField field, Vector submittedValues)
+  {
+    if (field.getID() != emailRedirectSchema.TARGETS)
+      {
+	return null;
+      }
+
+    if (!fitsInNIS(submittedValues))
+      {
+	return Ganymede.createErrorDialog("Overflow error",
+					  "Error, can't add all " + submittedValues.size() + 
+					  " new items to " + getTypeName() + ":" + 
+					  getLabel() + " without overflowing the NIS line length limit.");
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method takes a vector of new items and returns true if the new items should
+   * be able to fit in the NIS line built from this emailList object.</p>
+   */
+
+  private boolean fitsInNIS(Vector newItemVect)
+  {
+    StringDBField targets = (StringDBField) getField(emailRedirectSchema.TARGETS);
+
+    int totalLength = targets.getValueString().length();
+
+    for (int i = 0; i < newItemVect.size(); i++)
+      {
+	Object value = newItemVect.elementAt(i);
+
+	totalLength += (((String) value).length() + 2); // need a comma and space
+      }
+
+    return(totalLength < 1024);
+  }
 }

@@ -6,15 +6,15 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2001/11/05 22:38:04 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2002/04/10 04:59:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -44,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -295,4 +296,128 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
     return super.fieldRequired(object, fieldid);
   }
 
+  /**
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any vector add operation, and to take any special actions in
+   * reaction to the add.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us is guaranteed
+   * to proceed to make the change to its vector.  If this method
+   * returns a non-success code in its ReturnVal, the DBField that
+   * called us will not make the change, and the field will be left
+   * unchanged.</p>
+   *
+   * <p>The &lt;field&gt; parameter identifies the field that is
+   * requesting approval for item deletion, and the &lt;value&gt;
+   * parameter carries the value to be added.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under normal circumstances, we won't need
+   * to do anything here.</p>
+   */
+
+  public ReturnVal finalizeAddElement(DBField field, Object value)
+  {
+    if (field.getID() != emailListSchema.MEMBERS && field.getID() != emailListSchema.EXTERNALTARGETS)
+      {
+	return null;
+      }
+
+    Vector newItemVect = new Vector();
+    
+    newItemVect.addElement(value);
+
+    if (!fitsInNIS(newItemVect))
+      {
+	return Ganymede.createErrorDialog("Overflow error",
+					  "Error, can't add to " + getTypeName() + ":" + 
+					  getLabel() + " without overflowing the NIS line length limit.");
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any vector-vector add operation, and to take any special
+   * actions in reaction to the add.. if this method returns null or a
+   * success code in its ReturnVal, the DBField that called us is
+   * guaranteed to proceed to make the change to its vector.  If this
+   * method returns a non-success code in its ReturnVal, the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.</p>
+   *
+   * <p>The &lt;field&gt; parameter identifies the field that is
+   * requesting approval for item deletion, and the &lt;submittedValues&gt;
+   * parameter carries the values to be added.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under normal circumstances, we won't need
+   * to do anything here.</p>
+   */
+
+  public ReturnVal finalizeAddElements(DBField field, Vector submittedValues)
+  {
+    if (field.getID() != emailListSchema.MEMBERS && field.getID() != emailListSchema.EXTERNALTARGETS)
+      {
+	return null;
+      }
+
+    if (!fitsInNIS(submittedValues))
+      {
+	return Ganymede.createErrorDialog("Overflow error",
+					  "Error, can't add all " + submittedValues.size() + 
+					  " new items to " + getTypeName() + ":" + 
+					  getLabel() + " without overflowing the NIS line length limit.");
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method takes a vector of new items and returns true if the new items should
+   * be able to fit in the NIS line built from this emailList object.</p>
+   */
+
+  private boolean fitsInNIS(Vector newItemVect)
+  {
+    StringDBField externalTargets = (StringDBField) getField(emailListSchema.EXTERNALTARGETS);
+    InvidDBField members = (InvidDBField) getField(emailListSchema.EXTERNALTARGETS);
+
+    int totalLength = externalTargets.getValueString().length() + members.getValueString().length();
+
+    for (int i = 0; i < newItemVect.size(); i++)
+      {
+	Object value = newItemVect.elementAt(i);
+
+	if (value instanceof Invid)
+	  {
+	    Invid newInvid = (Invid) value;
+
+	    GanymedeSession gsession = getGSession();
+
+	    if (gsession != null)
+	      {
+		DBObject objectRef = gsession.getSession().viewDBObject(newInvid);
+
+		if (objectRef != null)
+		  {
+		    String label = objectRef.getLabel();
+
+		    if (label != null)
+		      {
+			totalLength += (label.length() + 2); // need a comma and space
+		      }
+		  }
+	      }
+	  }
+	else if (value instanceof String)
+	  {
+	    totalLength += (((String) value).length() + 2); // need a comma and space
+	  }
+      }
+
+    return(totalLength < 1024);
+  }
 }
