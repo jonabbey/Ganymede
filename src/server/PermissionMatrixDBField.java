@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2000/08/25 21:54:15 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2000/09/09 00:29:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -761,7 +761,15 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     /* -- */
 
     tableSize = in.readInt();
-    matrix = new Hashtable(tableSize);
+
+    if (tableSize <= 0)
+      {
+	matrix = new Hashtable();
+      }
+    else
+      {
+	matrix = new Hashtable(tableSize);
+      }
     
     for (int i = 0; i < tableSize; i++)
       {

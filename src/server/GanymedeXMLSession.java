@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/09/08 02:02:27 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/09/09 00:29:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -132,7 +132,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public Hashtable objectTypes = new Hashtable();
 
   /**
-   * <p>Hashtable mapping object type ids to
+   * <p>Hashtable mapping Short object type ids to
    * hashtables mapping field names to 
    * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}
    * objects.</p>
@@ -143,14 +143,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   /**
    * <P>Hashtable mapping Short type ids to
    * hashes which map local object designations to
-   * actual {@link arlut.csd.ganymede.client.xmlobject xmlobject}
+   * actual {@link arlut.csd.ganymede.xmlobject xmlobject}
    * records.</P>
    */
 
   public Hashtable objectStore = new Hashtable();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject xmlobjects}
+   * <p>Vector of {@link arlut.csd.ganymede.xmlobject xmlobjects}
    * that correspond to new Ganymede server objects
    * that have been/need to be created by this GanymedeXMLSession.</p>
    */
@@ -158,7 +158,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public Vector createdObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject xmlobjects}
+   * <p>Vector of {@link arlut.csd.ganymede.xmlobject xmlobjects}
    * that correspond to pre-existing Ganymede
    * server objects that have been/need to be checked out for editing by this
    * GanymedeXMLSession.</p> 
@@ -167,7 +167,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public Vector editedObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject
+   * <p>Vector of {@link arlut.csd.ganymede.xmlobject
    * xmlobjects} that correspond to Ganymede server objects that have
    * been created/checked out for editing during embedded invid field
    * processing, and which need to have their invid fields registered
@@ -177,7 +177,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public Vector embeddedObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject xmlobjects}
+   * <p>Vector of {@link arlut.csd.ganymede.xmlobject xmlobjects}
    * that correspond to pre-existing Ganymede
    * server objects that have been/need to be inactivated by this
    * GanymedeXMLSession.</p>
@@ -186,7 +186,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public Vector inactivatedObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.client.xmlobject xmlobjects}
+   * <p>Vector of {@link arlut.csd.ganymede.xmlobject xmlobjects}
    * that correspond to pre-existing Ganymede
    * server objects that have been/need to be deleted by this
    * GanymedeXMLSession.</p>
@@ -223,6 +223,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    */
 
   private boolean success = false;
+
+  private boolean cleanedup = false;
   
   /* -- */
 
@@ -406,30 +408,37 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * Something to assist in garbage collection.
    */
 
-  public void cleanup()
+  public synchronized void cleanup()
   {
+    if (cleanedup)
+      {
+	return;
+      }
+
     objectTypes.clear();
     objectTypes = null;
 
     objectStore.clear();
     objectStore = null;
-
+    
     createdObjects.setSize(0);
     createdObjects = null;
-
+    
     editedObjects.setSize(0);
     editedObjects = null;
-
+    
     embeddedObjects.setSize(0);
     embeddedObjects = null;
-
+    
     inactivatedObjects.setSize(0);
     inactivatedObjects = null;
-
+    
     deletedObjects.setSize(0);
     deletedObjects = null;
 
     session.logout();
+
+    cleanedup = true;
   }
 
   /**
