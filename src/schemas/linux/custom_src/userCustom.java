@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -98,7 +98,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 	if (shellChoiceStamp == null || shellChoiceStamp.before(base.getTimeStamp()))
 	  {
 	    shellChoices.setLength(0);
-	    shellChoices.append(objectDumpHeader(false)); // non-invid bearing string
+	    shellChoices.append(DBEditObject.objectDumpHeader(false)); // non-invid bearing string
 
 	    Query query = new Query("Shell Choice", null, false);
 	    Vector results = internalSession().internalQuery(query);
