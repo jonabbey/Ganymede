@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,7 +67,8 @@ public class QueryDataNode extends QueryNode {
     this.fieldname = fieldname;
     this.fieldId = -1;
 
-    if (comparator < FIRST || comparator > LAST)
+    if ((comparator < FIRST || comparator > LAST) &&
+	(vecOp == NONE))
       {
 	throw new IllegalArgumentException("bad comparator value: " + comparator);
       }
@@ -126,7 +127,8 @@ public class QueryDataNode extends QueryNode {
     this.fieldname = null;
     this.fieldId = fieldId;
 
-    if (comparator < FIRST || comparator > LAST)
+    if ((comparator < FIRST || comparator > LAST) &&
+	(vecOp == NONE))
       {
 	throw new IllegalArgumentException("bad comparator value: " + comparator);
       }
