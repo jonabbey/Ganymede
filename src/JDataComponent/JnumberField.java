@@ -134,13 +134,14 @@ public class JnumberField extends JentryField {
    */
   public boolean isAllowed(char c)
   {
-    if (((int)c > getMaxValue()) || ((int)c > getMinValue()))
+    if (allowedChars.indexOf(c) == -1)
       {
+	if (debug)
+	  {
+	    System.err.println("JnumberField.isAllowed(): ruling NO WAY on char '" + c + "'");
+	  }
 	return false;
       }
-
-    if (allowedChars.indexOf(c) == -1)
-      return false;
 
     return true;
   }
@@ -317,9 +318,11 @@ public class JnumberField extends JentryField {
   public void sendCallback()
   {
     Integer currentValue = getValue();
+
     if (currentValue == null)
       {
 	System.out.println("Invalid number format.");
+
 	if (allowCallback)
 	  {
 	    try
@@ -338,7 +341,6 @@ public class JnumberField extends JentryField {
 	return;
       }
 
-    
     if ((oldvalue != null) && oldvalue.equals(currentValue))
       {
 	if (debug)
@@ -347,9 +349,19 @@ public class JnumberField extends JentryField {
 	  }
 	return;
       }
-    
 
     changed = false;
+
+    int value = Integer.valueOf(getText()).intValue();
+
+    if (limited)
+      {
+	if ((value > maxSize) || (value < minSize))
+	  {
+	    setValue(oldvalue.intValue());
+	    return;
+	  }
+      }
 
     try
       {
