@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.85 $ %D%
+   Version: $Revision: 1.86 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2734,6 +2734,12 @@ public final class InvidDBField extends DBField implements invid_field {
     if (!isEditable(true))
       {
 	setLastError("object/field not editable");
+
+	if (debug)
+	  {
+	    Ganymede.debug("InvidDBField.verifyNewValue(): object/field not editable");
+	  }
+
 	return false;
       }
 
@@ -2742,6 +2748,12 @@ public final class InvidDBField extends DBField implements invid_field {
     if (!verifyTypeMatch(o))
       {
 	setLastError("type mismatch");
+
+	if (debug)
+	  {
+	    Ganymede.debug("InvidDBField.verifyNewValue(): type mismatch");
+	  }
+
 	return false;
       }
 
@@ -2761,6 +2773,12 @@ public final class InvidDBField extends DBField implements invid_field {
 			 " which should point to an" +
 			 " object of type " + 
 			 getAllowedTarget());
+
+	    if (debug)
+	      {
+		Ganymede.debug("InvidDBField.verifyNewValue(): invid value points to wrong kind of object");
+	      }
+
 	    return false;
 	  }
 
@@ -2771,9 +2789,19 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (qr != null)
 	      {
+		if (debug)
+		  {
+		    Ganymede.debug("InvidDBField.verifyNewValue(): searching for matching choice");
+		  }
+
 		for (int i = 0; i < qr.size() && !ok; i++)
 		  {
 		    inv2 = qr.getInvid(i);
+
+		    if (debug)
+		      {
+			Ganymede.debug("InvidDBField.verifyNewValue(): comparing " + inv + " to " + inv2);
+		      }
 		    
 		    if (inv2.equals(inv))
 		      {
@@ -2785,6 +2813,12 @@ public final class InvidDBField extends DBField implements invid_field {
 	    if (!ok)
 	      {
 		setLastError("invid value " + inv + " is not a valid choice");
+
+		if (debug)
+		  {
+		    Ganymede.debug("InvidDBField.verifyNewValue(): invid not a valid choice");
+		  }
+
 		return false;
 	      }
 	  }
