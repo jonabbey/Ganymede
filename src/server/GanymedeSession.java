@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.54 $ %D%
+   Version: $Revision: 1.55 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -237,6 +237,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   // Non-remote methods (for server-side code)
   //
   //************************************************************
+
+  public boolean isSuperGash()
+  {
+    return supergashMode;
+  }
 
   synchronized void setLastError(String status)
   {
@@ -819,7 +824,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    synchronized (Ganymede.db)
 	      {
-		Ganymede.catTransport = new CategoryTransport(Ganymede.db.rootCategory);
+		// pass Ganymede.internalSession so that the master
+		// CategoryTransport object will correctly grant
+		// object creation privs for all object types
+
+		Ganymede.catTransport = new CategoryTransport(Ganymede.db.rootCategory, Ganymede.internalSession);
 		Ganymede.db.notifyAll(); // in case of locks
 	      }
 	  }
@@ -2787,6 +2796,22 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // duplicate defaultPerms
 
 	    personaPerms = new PermMatrix(defaultPerms);
+
+	    // and add the default object-owned permissions
+
+	    if (defaultObj != null)
+	      {
+		PermissionMatrixDBField permField;
+
+		/* -- */
+
+		permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.PermMatrix);
+
+		if (permField != null)
+		  {
+		    personaPerms = personaPerms.union(permField.getMatrix());
+		  }
+	      }
 
 	    System.err.println("GanymedeSession.updatePerms(): returning.. no persona obj for " + 
 			       (personaName == null ? username : personaName));
