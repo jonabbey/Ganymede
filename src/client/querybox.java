@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 1999/03/29 22:56:27 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 1999/04/14 19:04:40 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -276,6 +276,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     // load baseChoice combo box.
     
+    baseChoice.setKeySelectionManager(new TimedKeySelectionManager());
+
     gc.sortStringVector(baseNames);
     
     for (int i = 0; i < baseNames.size(); i++)
@@ -1120,11 +1122,17 @@ class QueryRow implements ItemListener {
     gbc.gridheight = 1;
     gbc.gridwidth = 1;
 
+    fieldChoice.setKeySelectionManager(new TimedKeySelectionManager());
+
     gbl.setConstraints(fieldChoice, gbc);
     panel.add(fieldChoice);
 
+    boolChoice.setKeySelectionManager(new TimedKeySelectionManager());
+
     gbl.setConstraints(boolChoice, gbc);
     panel.add(boolChoice);
+
+    compareChoice.setKeySelectionManager(new TimedKeySelectionManager());
 
     gbl.setConstraints(compareChoice, gbc);
     panel.add(compareChoice);

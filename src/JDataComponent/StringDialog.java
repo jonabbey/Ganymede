@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 1999/03/22 22:37:55 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 1999/04/14 19:04:03 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.51 $ $Date: 1999/03/22 22:37:55 $ $Name:  $
+ * @version $Revision: 1.52 $ $Date: 1999/04/14 19:04:03 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -536,6 +536,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
 	    choiceThing ct = (choiceThing)element;
 	    JComboBox ch = new JComboBox();
+	    ch.setKeySelectionManager(new TimedKeySelectionManager());
 
 	    if (debug)
 	      {

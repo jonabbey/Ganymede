@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 1999/04/06 04:17:00 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 1999/04/14 19:04:38 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.103 $ $Date: 1999/04/06 04:17:00 $ $Name:  $
+ * @version $Revision: 1.104 $ $Date: 1999/04/14 19:04:38 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -2670,6 +2670,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	boolean found = false;
 	    
 	JComboBox combo = new JComboBox(choices);
+	combo.setKeySelectionManager(new TimedKeySelectionManager());
 
 	combo.setMaximumRowCount(8);
 	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));

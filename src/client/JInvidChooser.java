@@ -1,4 +1,3 @@
-
 /*
 
    JInvidChooser.java
@@ -8,8 +7,8 @@
    
    Created: Before May 7, 1998
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/03/29 22:56:23 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/04/14 19:04:38 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -67,7 +66,7 @@ import java.util.Vector;
 /**
  * <p>A GUI component for choosing an Invid for a scalar invid_field.</p>
  *
- * @version $Revision: 1.20 $ $Date: 1999/03/29 22:56:23 $ $Name:  $
+ * @version $Revision: 1.21 $ $Date: 1999/04/14 19:04:38 $ $Name:  $
  * @author Mike Mulvaney
  */
 

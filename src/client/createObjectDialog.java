@@ -7,8 +7,8 @@
    
    Created: 17 September 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/03/29 22:56:25 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/04/14 19:04:39 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -71,7 +71,7 @@ import arlut.csd.JDialog.JCenterDialog;
  * try to create a new object for the user and put up a window for the user
  * to edit the new object with if we succeed.</p>
  *
- * @version $Revision: 1.10 $ $Date: 1999/03/29 22:56:25 $ $Name:  $
+ * @version $Revision: 1.11 $ $Date: 1999/04/14 19:04:39 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -172,6 +172,7 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 
     listHandles = gc.sortListHandleVector(listHandles);
     types = new JComboBox(listHandles);
+    types.setKeySelectionManager(new TimedKeySelectionManager());
 
     // Ideally, we'd really like for our JComboBox's pop-ups to be
     // able to go beyond the borders of our dialog.  Unfortunately,

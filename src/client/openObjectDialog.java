@@ -6,8 +6,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/02/11 03:07:59 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 1999/04/14 19:04:40 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -208,6 +208,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     gbc.gridwidth = 1;    
     
     type = new JComboBox();
+    type.setKeySelectionManager(new TimedKeySelectionManager());
 
     // Ideally, we'd really like for our JComboBox's pop-ups to be
     // able to go beyond the borders of our dialog.  Unfortunately,

@@ -10,8 +10,8 @@
    
    Created: ? April 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/01/22 18:03:56 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/04/14 19:04:02 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -85,10 +85,12 @@ public class JPanelCombo extends JPanel {
     if (items == null)
       {
 	combo = new JComboBox();
+	combo.setKeySelectionManager(new TimedKeySelectionManager());
       }
     else
       {
 	combo = new JComboBox(items);
+	combo.setKeySelectionManager(new TimedKeySelectionManager());
 
 	// the following try/catch is to workaround
 	// a bug in Swing 1.0.2.
@@ -110,6 +112,7 @@ public class JPanelCombo extends JPanel {
     if (combo == null)
       {
 	combo = new JComboBox();
+	combo.setKeySelectionManager(new TimedKeySelectionManager());
       }
 
     return combo;

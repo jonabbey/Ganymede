@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/01/22 18:04:18 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/04/14 19:04:40 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -125,6 +125,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
     // Build the combo box from the baseList
     JPanel bp = new JPanel(false);
     bases = new JComboBox();
+    bases.setKeySelectionManager(new TimedKeySelectionManager());
     bp.add(new JLabel("Object type:"));
     bp.add(bases);
 

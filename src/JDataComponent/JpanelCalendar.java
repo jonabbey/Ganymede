@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/03/17 05:30:52 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/04/14 19:04:03 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -284,6 +284,7 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
     _nextdate.addActionListener(this);
 
     month = new JComboBox();
+    month.setKeySelectionManager(new TimedKeySelectionManager());
     month.addItem("January");
     month.addItem("Febuary");
     month.addItem("March");
