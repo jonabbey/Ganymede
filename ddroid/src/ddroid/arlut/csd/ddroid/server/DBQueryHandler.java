@@ -83,8 +83,8 @@ import arlut.csd.ddroid.common.QueryOrNode;
  * logic (including namespace-indexed query optimization).  This class is just
  * responsible for applying a recursive QueryNode tree to a particular object.</P>
  *
- * @see QueryNode
- * @see Query
+ * @see {@link arlut.csd.ddroid.common.QueryNode QueryNode}
+ * @see {@link arlut.csd.ddroid.common.Query Query}
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
