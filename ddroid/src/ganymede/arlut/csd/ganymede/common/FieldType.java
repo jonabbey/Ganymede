@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,13 +50,13 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 /**
  * <p>Hackified enumeration of defined types for database fields in
- * the Directory Droid {@link arlut.csd.ddroid.server.DBStore DBStore}.</p>
+ * the Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
  *
- * <p>Directory Droid classes can implement this interface to have access to
+ * <p>Ganymede classes can implement this interface to have access to
  * these constants.</p>
  */
 

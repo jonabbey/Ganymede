@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,11 +51,11 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 /**
- * <p>Serializable data carrier object used by the Directory Droid
- * server to report a row of user status to the Directory Droid admin console.</p>
+ * <p>Serializable data carrier object used by the Ganymede
+ * server to report a row of user status to the Ganymede admin console.</p>
  */
 
 public class AdminEntry implements java.io.Serializable {

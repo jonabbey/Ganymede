@@ -22,7 +22,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -59,13 +59,13 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.rmi.RemoteException;
 import java.util.Vector;
 
-import arlut.csd.ddroid.rmi.Category;
-import arlut.csd.ddroid.rmi.CategoryNode;
+import arlut.csd.ganymede.rmi.Category;
+import arlut.csd.ganymede.rmi.CategoryNode;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -317,7 +317,7 @@ public class CategoryDump implements Category, CategoryNode {
    * @param node Node to place under this category
    * @param prevNodeName the name of the node that the new node is to be added after
    *
-   * @see arlut.csd.ddroid.rmi.Category
+   * @see arlut.csd.ganymede.rmi.Category
    */
 
   public void addNodeAfter(CategoryNode node, String prevNodeName)
@@ -334,7 +334,7 @@ public class CategoryDump implements Category, CategoryNode {
    * @param nextNodeName the name of the node that the new node is to be added before,
    * must not be path-qualified.
    *
-   * @see arlut.csd.ddroid.rmi.Category
+   * @see arlut.csd.ganymede.rmi.Category
    */
 
   public void addNodeBefore(CategoryNode node, String nextNodeName)

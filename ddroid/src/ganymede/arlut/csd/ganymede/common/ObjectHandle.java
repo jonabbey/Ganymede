@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import arlut.csd.JDataComponent.listHandle;
 
@@ -65,7 +65,7 @@ import arlut.csd.JDataComponent.listHandle;
 
 /**
  * <p>This class is used to group information about objects.  It is
- * used in the {@link arlut.csd.ddroid.common.QueryResult QueryResult}
+ * used in the {@link arlut.csd.ganymede.common.QueryResult QueryResult}
  * class to keep things organized, and on the client to keep
  * track of the status of objects on the server.</p>
  *

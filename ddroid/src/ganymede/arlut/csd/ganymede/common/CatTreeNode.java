@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
 
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,11 +50,11 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import arlut.csd.JTree.treeMenu;
 import arlut.csd.JTree.treeNode;
-import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ganymede.rmi.Category;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -64,8 +64,8 @@ import arlut.csd.ddroid.rmi.Category;
 
 /**
  * <p>This class is a simple {@link arlut.csd.JTree.treeNode treeNode} subclass
- * with a {@link arlut.csd.ddroid.rmi.Category Category} data element.  Used in
- * the Directory Droid admin console's schema editor.</p>
+ * with a {@link arlut.csd.ganymede.rmi.Category Category} data element.  Used in
+ * the Ganymede admin console's schema editor.</p>
  */
 
 public class CatTreeNode extends arlut.csd.JTree.treeNode {

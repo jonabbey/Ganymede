@@ -12,7 +12,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -48,7 +48,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -57,8 +57,8 @@ package arlut.csd.ddroid.common;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Logical AND node for use in a serialized {@link arlut.csd.ddroid.common.Query Query}
- * object's {@link arlut.csd.ddroid.common.QueryNode QueryNode} tree.</P>
+ * <P>Logical AND node for use in a serialized {@link arlut.csd.ganymede.common.Query Query}
+ * object's {@link arlut.csd.ganymede.common.QueryNode QueryNode} tree.</P>
  */
 
 public class QueryAndNode extends QueryNode {

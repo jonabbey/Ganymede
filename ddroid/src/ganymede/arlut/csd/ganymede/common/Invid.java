@@ -19,7 +19,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -55,7 +55,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -69,7 +69,7 @@ import java.io.IOException;
 
 /**
  * <P>An Invid is an immutable object id (an INVariant ID) in the
- * Directory Droid system.  All objects created in the database have a unique
+ * Ganymede system.  All objects created in the database have a unique
  * and permanent Invid that identify the object's type and identity.  Because
  * of these properties, the Invid can be used as a persistent object pointer
  * type.</P>
@@ -77,11 +77,11 @@ import java.io.IOException;
  * <P>Invid's are used extensively in the server to track pointer
  * relationships between objects.  Invid's are also used by the client to identify
  * objects to be viewed, edited, deleted, etc.  Basically whenever any code
- * in Directory Droid deals with a reference to an object, it is done through the use
+ * in Ganymede deals with a reference to an object, it is done through the use
  * of Invid's.</P>
  *
- * @see arlut.csd.ddroid.server.InvidDBField
- * @see arlut.csd.ddroid.rmi.Session
+ * @see arlut.csd.ganymede.server.InvidDBField
+ * @see arlut.csd.ganymede.rmi.Session
  */
 
 public final class Invid implements java.io.Serializable {

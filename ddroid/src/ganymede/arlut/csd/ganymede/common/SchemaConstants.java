@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -94,7 +94,7 @@ package arlut.csd.ddroid.common;
  * <tr>
  * <td>User</td>
  * <td>3</td>
- * <td>A person who can log in to Directory Droid.</td>
+ * <td>A person who can log in to Ganymede.</td>
  * </tr>
  * <tr>
  * <td>System Event</td>
@@ -128,55 +128,55 @@ package arlut.csd.ddroid.common;
  * <tr>
  * <td>OwnerListField</td>
  * <td>0</td>
- * <td>{@link arlut.csd.ddroid.server.InvidDBField InvidDBField}</td>
+ * <td>{@link arlut.csd.ganymede.server.InvidDBField InvidDBField}</td>
  * <td>List of owner groups with authority over this object</td>
  * </tr>
  * <tr>
  * <td>ExpirationField</td>
  * <td>1</td>
- * <td>{@link arlut.csd.ddroid.server.DateDBField DateDBField}</td>
+ * <td>{@link arlut.csd.ganymede.server.DateDBField DateDBField}</td>
  * <td>date that this object will expire</td>
  * </tr>
  * <tr>
  * <td>RemovalField</td>
  * <td>2</td>
- * <td>{@link arlut.csd.ddroid.server.DateDBField DateDBField}</td>
+ * <td>{@link arlut.csd.ganymede.server.DateDBField DateDBField}</td>
  * <td>date that this object will be removed</td>
  * </tr>
  * <tr>
  * <td>NotesField</td>
  * <td>3</td>
- * <td>{@link arlut.csd.ddroid.server.StringDBField StringDBField}</td>
+ * <td>{@link arlut.csd.ganymede.server.StringDBField StringDBField}</td>
  * <td>string field for notes for this object</td>
  * </tr>
  * <tr>
  * <td>CreationDateField</td>
  * <td>4</td>
- * <td>{@link arlut.csd.ddroid.server.DateDBField DateDBField}</td>
+ * <td>{@link arlut.csd.ganymede.server.DateDBField DateDBField}</td>
  * <td>date that this object was created</td>
  * </tr>
  * <tr>
  * <td>CreatorField</td>
  * <td>5</td>
- * <td>{@link arlut.csd.ddroid.server.StringDBField StringDBField}</td>
+ * <td>{@link arlut.csd.ganymede.server.StringDBField StringDBField}</td>
  * <td>string describing the creator of this object</td>
  * </tr>
  * <tr>
  * <td>ModificationDateField</td>
  * <td>6</td>
- * <td>{@link arlut.csd.ddroid.server.DateDBField DateDBField}</td>
+ * <td>{@link arlut.csd.ganymede.server.DateDBField DateDBField}</td>
  * <td>date that this object was last modified</td>
  * </tr>
  * <tr>
  * <td>ModifierField</td>
  * <td>7</td>
- * <td>{@link arlut.csd.ddroid.server.StringDBField StringDBField}</td>
+ * <td>{@link arlut.csd.ganymede.server.StringDBField StringDBField}</td>
  * <td>string describing the administrator who last modified this object</td>
  * </tr>
  * <tr>
  * <td>BackLinksField</td>
  * <td>8</td>
- * <td>{@link arlut.csd.ddroid.server.InvidDBField InvidDBField}</td>
+ * <td>{@link arlut.csd.ganymede.server.InvidDBField InvidDBField}</td>
  * <td>any miscellaneous pointers pointing to us are kept track of in
  * this field if we don't have an explicit back-link field set</td>
  * </tr>
@@ -223,7 +223,7 @@ public interface SchemaConstants {
    * this field if we don't have an explicit back-link field.</p>
    *
    * <p>This field is DEPRECATED, and should only be encountered in
-   * ganymede.db files from old versions of the Directory Droid server.</p>
+   * ganymede.db files from old versions of the Ganymede server.</p>
    */
 
   final static short BackLinksField = 8; 
@@ -404,7 +404,7 @@ public interface SchemaConstants {
    * A list of external email addresses to send mail for this event to.
    *
    * That is, addresses in raw string form, rather than as an invid reference
-   * to a user or email list recorded in Directory Droid. (String field)
+   * to a user or email list recorded in Ganymede. (String field)
    */
   final static short EventExternalMail = 107;
 
@@ -458,7 +458,7 @@ public interface SchemaConstants {
    * A list of external email addresses to send mail for this event to.
    *
    * That is, addresses in raw string form, rather than as an invid reference
-   * to a user or email list recorded in Directory Droid. (String field)
+   * to a user or email list recorded in Ganymede. (String field)
    */
   final static short ObjectEventExternalMail = 109;
 

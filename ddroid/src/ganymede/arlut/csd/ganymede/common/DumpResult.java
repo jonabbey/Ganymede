@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.util.Collection;
 import java.util.Date;
@@ -72,7 +72,7 @@ import java.util.Vector;
 /**
  * <p>This class is a serializable transport object, used to transmit the results
  * of a data dump query to the client.  DumpResult objects are created by the
- * {@link arlut.csd.ddroid.server.DumpResultBuilder DumpResultBuilder} factory class.</p>
+ * {@link arlut.csd.ganymede.server.DumpResultBuilder DumpResultBuilder} factory class.</p>
  *
  * <p>The way it works is that DumpResultBuilder creates the
  * DumpResult objects, which is transmitted through RMI to the client.
@@ -81,7 +81,7 @@ import java.util.Vector;
  *
  * <p>DumpResult encodes a list of field headers by name, a list of field types
  * encoded as {@link java.lang.Short Shorts} coded with the
- * values enumerated in the {@link arlut.csd.ddroid.common.FieldType FieldType}
+ * values enumerated in the {@link arlut.csd.ganymede.common.FieldType FieldType}
  * interface, and a list of object rows, each of which contains a Vector of
  * encoded field values.</p>
  *
@@ -147,7 +147,7 @@ public class DumpResult implements java.io.Serializable, List {
    * <p>This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of field type {@link java.lang.Short
    * Shorts} (enumerated in the {@link
-   * arlut.csd.ddroid.common.FieldType FieldType} static constants),
+   * arlut.csd.ganymede.common.FieldType FieldType} static constants),
    * identifying the types of fields for each column in the
    * DumpResult.</p>
    */
@@ -164,7 +164,7 @@ public class DumpResult implements java.io.Serializable, List {
 
   /**
    * <p>This method can be called on the client to obtain a {@link
-   * java.util.Vector Vector} of {@link arlut.csd.ddroid.common.Invid
+   * java.util.Vector Vector} of {@link arlut.csd.ganymede.common.Invid
    * Invids}, identifying the objects that are being returned in the
    * DumpResult.</p>
    */
@@ -181,7 +181,7 @@ public class DumpResult implements java.io.Serializable, List {
 
   /**
    * <p>This method can be called on the client to obtain the object
-   * identifier {@link arlut.csd.ddroid.common.Invid Invid} for a
+   * identifier {@link arlut.csd.ganymede.common.Invid Invid} for a
    * given result row.</p>
    */
 
@@ -199,8 +199,8 @@ public class DumpResult implements java.io.Serializable, List {
    * <p>This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of Vectors, each of which contains
    * the data values returned for each object, in field order matching
-   * the field names and types returned by {@link arlut.csd.ddroid.common.DumpResult#getHeaders getHeaders()}
-   * and {@link arlut.csd.ddroid.common.DumpResult#getTypes getTypes()}.</p>
+   * the field names and types returned by {@link arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()}
+   * and {@link arlut.csd.ganymede.common.DumpResult#getTypes getTypes()}.</p>
    */
 
   public Vector getRows()
@@ -219,8 +219,8 @@ public class DumpResult implements java.io.Serializable, List {
    * java.util.Vector Vector} containing the data values returned for
    * the object at row <i>row</i>, in field order matching the field
    * names and types returned by {@link
-   * arlut.csd.ddroid.common.DumpResult#getHeaders getHeaders()} and
-   * {@link arlut.csd.ddroid.common.DumpResult#getTypes
+   * arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()} and
+   * {@link arlut.csd.ganymede.common.DumpResult#getTypes
    * getTypes()}.</p>
    */
   

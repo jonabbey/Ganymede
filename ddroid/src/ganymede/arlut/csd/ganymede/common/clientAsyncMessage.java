@@ -12,7 +12,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -49,7 +49,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 
 /*------------------------------------------------------------------------------
@@ -59,10 +59,10 @@ package arlut.csd.ddroid.common;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>The clientAsyncMessage class is used by the Directory Droid
- * server to pass asynchronous messages to the Directory Droid client.
- * The Directory Droid client repeatedly calls {@link
- * arlut.csd.ddroid.server.serverClientAsyncResponder#getNextMsg()} to
+ * <p>The clientAsyncMessage class is used by the Ganymede
+ * server to pass asynchronous messages to the Ganymede client.
+ * The Ganymede client repeatedly calls {@link
+ * arlut.csd.ganymede.server.serverClientAsyncResponder#getNextMsg()} to
  * receive asynchonous notifications from the server.</p>
  *
  * @version $Id$

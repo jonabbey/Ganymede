@@ -12,7 +12,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -49,7 +49,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -58,7 +58,7 @@ package arlut.csd.ddroid.common;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a Directory Droid-specific RemoteException subclass that
+ * <p>This is a Ganymede-specific RemoteException subclass that
  * can be thrown by the server if a parse method is called with a
  * string that does not match the parser's grammar.</p>
  */

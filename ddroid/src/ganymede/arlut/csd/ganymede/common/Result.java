@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 
 /*------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ package arlut.csd.ddroid.common;
 
 /**
  * <P>The Result class is effectively a serializable, labeled
- * {@link arlut.csd.ddroid.common.Invid Invid} that can be passed from the server
+ * {@link arlut.csd.ganymede.common.Invid Invid} that can be passed from the server
  * to the client.  The client uses Results to load labeled items into the
  * client tree, or to provide a list of labeled object handles in Invid
  * chooser fields.</P>

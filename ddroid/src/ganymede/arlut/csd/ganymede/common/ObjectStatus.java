@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,11 +50,11 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 /**
  * Interface constants used to enumerate possible editing states for
- * a {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}.
+ * a {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}.
  */
 
 public interface ObjectStatus {

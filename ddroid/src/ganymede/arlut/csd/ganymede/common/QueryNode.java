@@ -19,7 +19,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -55,7 +55,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -64,10 +64,10 @@ package arlut.csd.ddroid.common;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>A QueryNode is a node in a serialized {@link arlut.csd.ddroid.common.Query Query}
+ * <P>A QueryNode is a node in a serialized {@link arlut.csd.ganymede.common.Query Query}
  * tree.  The QueryNodes form a tree of boolean operators and comparison nodes
  * that are submitted to the server by the client, and which are interpreted
- * by the {@link arlut.csd.ddroid.server.DBQueryHandler DBQueryHandler}.</P>
+ * by the {@link arlut.csd.ganymede.server.DBQueryHandler DBQueryHandler}.</P>
  */
 
 public abstract class QueryNode implements java.io.Serializable {

@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -65,13 +65,13 @@ import java.io.IOException;
 /**
  * <P>Serializable and immutable permissions entry object, used to
  * store and transmit permissions for a specific {@link
- * arlut.csd.ddroid.server.DBObjectBase DBObjectBase} and {@link
- * arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField}.</P>
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and {@link
+ * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}.</P>
  *
  * <P>Used in conjunction with
- * {@link arlut.csd.ddroid.server.PermissionMatrixDBField PermissionMatrixDBField}
- * and {@link arlut.csd.ddroid.common.PermMatrix PermMatrix} to handle Permissions
- * in a Role object in the Directory Droid server.</P>
+ * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}
+ * and {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} to handle Permissions
+ * in a Role object in the Ganymede server.</P>
  */
 
 public class PermEntry implements java.io.Serializable {
@@ -300,7 +300,7 @@ public class PermEntry implements java.io.Serializable {
   /**
    *
    * This method returns true if the this entry in a
-   * {@link arlut.csd.ddroid.common.PermMatrix PermMatrix} is granted
+   * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} is granted
    * visibility privilege.
    *
    */ 
@@ -313,7 +313,7 @@ public class PermEntry implements java.io.Serializable {
   /**
    *
    * This method returns true if the this entry in a
-   * {@link arlut.csd.ddroid.common.PermMatrix PermMatrix} is granted
+   * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} is granted
    * editing privilege.
    *
    */ 
@@ -326,7 +326,7 @@ public class PermEntry implements java.io.Serializable {
   /**
    *
    * This method returns true if the this entry in a 
-   * {@link arlut.csd.ddroid.common.PermMatrix PermMatrix} is granted
+   * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} is granted
    * creation privilege.
    *
    */ 
@@ -339,7 +339,7 @@ public class PermEntry implements java.io.Serializable {
   /**
    *
    * This method returns true if the this entry in a
-   * {@link arlut.csd.ddroid.common.PermMatrix PermMatrix} is granted
+   * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} is granted
    * deletion privilege.
    *
    */ 

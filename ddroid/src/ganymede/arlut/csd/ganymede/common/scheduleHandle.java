@@ -3,7 +3,7 @@
    scheduleHandle.java
 
    This class is used to keep track of background tasks running on the
-   Directory Droid Server.  It is also used to pass data to the admin console.
+   Ganymede Server.  It is also used to pass data to the admin console.
    
    Created: 3 February 1998
    Last Mod Date: $Date$
@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,14 +51,14 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.util.Date;
 
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeBuilderTask;
-import arlut.csd.ddroid.server.GanymedeScheduler;
-import arlut.csd.ddroid.server.taskMonitor;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeBuilderTask;
+import arlut.csd.ganymede.server.GanymedeScheduler;
+import arlut.csd.ganymede.server.taskMonitor;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -68,29 +68,29 @@ import arlut.csd.ddroid.server.taskMonitor;
 
 /**
  * <P>Handle object used to help manage background tasks registered in the 
- * Directory Droid Server's
- * {@link arlut.csd.ddroid.server.GanymedeScheduler GanymedeScheduler}.  In addition
+ * Ganymede Server's
+ * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.  In addition
  * to being used by the server's task scheduler to organize and track
  * registered tasks, vectors of serialized scheduleHandle objects are passed to the
- * Directory Droid admin console's 
+ * Ganymede admin console's 
  * {@link arlut.csd.ganymede.Admin#changeTasks(java.util.Vector) changeTasks} 
  * method.</P>
  * 
- * <P>Within the Directory Droid server, scheduleHandle objects are held within the 
+ * <P>Within the Ganymede server, scheduleHandle objects are held within the 
  * GanymedeScheduler to track the status of each registered task.  When the 
  * GanymedeScheduler needs to run a background task, the scheduleHandle's
- * {@link arlut.csd.ddroid.common.scheduleHandle#runTask() runTask()} method
+ * {@link arlut.csd.ganymede.common.scheduleHandle#runTask() runTask()} method
  * is called.  runTask() creates a pair of threads, one to run the task
- * and another {@link arlut.csd.ddroid.server.taskMonitor taskMonitor} thread
+ * and another {@link arlut.csd.ganymede.server.taskMonitor taskMonitor} thread
  * to wait for the task to be completed.  When the thread running
  * the task completes, the task's taskMonitor calls the scheduleHandle's 
- * {@link arlut.csd.ddroid.common.scheduleHandle#notifyCompletion notifyCompletion()}
+ * {@link arlut.csd.ganymede.common.scheduleHandle#notifyCompletion notifyCompletion()}
  * method, which in turn notifies the GanymedeScheduler that the task
  * has completed its execution.</P>
  *
  * <P>The various scheduling methods in scheduleHandle will throw an
  * IllegalArgumentException if called post-serialization on the
- * Directory Droid client.</P>
+ * Ganymede client.</P>
  */
 
 public class scheduleHandle implements java.io.Serializable {
@@ -239,7 +239,7 @@ public class scheduleHandle implements java.io.Serializable {
 
   /**
    * <P>Runs this task in a background thread.  A second background thread
-   * is created to handle a {@link arlut.csd.ddroid.server.taskMonitor taskMonitor}
+   * is created to handle a {@link arlut.csd.ganymede.server.taskMonitor taskMonitor}
    * to wait and report when the task completes.</P>
    *
    * <P>This method is invalid on the client.</P>
@@ -256,12 +256,12 @@ public class scheduleHandle implements java.io.Serializable {
 
     if (debug)
       {
-	System.err.println("Directory Droid Scheduler: Starting task " + name + " at " + new Date());
+	System.err.println("Ganymede Scheduler: Starting task " + name + " at " + new Date());
       }
 
     if (suspend)
       {
-	Ganymede.debug("Directory Droid Scheduler: Task " + name + " skipped at " + new Date());
+	Ganymede.debug("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
 	scheduler.notifyCompletion(this);
 	return;
       }
@@ -305,7 +305,7 @@ public class scheduleHandle implements java.io.Serializable {
 
   /** 
    * <P>This method is called by our {@link
-   * arlut.csd.ddroid.server.taskMonitor taskMonitor} when our task
+   * arlut.csd.ganymede.server.taskMonitor taskMonitor} when our task
    * completes.  This method has no meaning outside of the context of
    * the taskMonitor spawned by this handle, and should not be called
    * from any other code.</P> 
@@ -377,7 +377,7 @@ public class scheduleHandle implements java.io.Serializable {
   /**
    * <P>Server-side method to request that this task be re-run after
    * its current completion.  Intended for on-demand tasks that are
-   * requested by the {@link arlut.csd.ddroid.server.GanymedeScheduler
+   * requested by the {@link arlut.csd.ganymede.server.GanymedeScheduler
    * GanymedeScheduler} while they are already running.</P>
    */
 
@@ -389,7 +389,7 @@ public class scheduleHandle implements java.io.Serializable {
   /**
    * <P>Server-side method to request that this task be re-run after
    * its current completion.  Intended for on-demand tasks that are
-   * requested by the {@link arlut.csd.ddroid.server.GanymedeScheduler
+   * requested by the {@link arlut.csd.ganymede.server.GanymedeScheduler
    * GanymedeScheduler} while they are already running.</P>
    */
 
@@ -407,7 +407,7 @@ public class scheduleHandle implements java.io.Serializable {
 
   /**
    * <P>Server-side method to request that this task not be kept after its
-   * current completion.  Used to remove a task from the Directory Droid scheduler.</P>
+   * current completion.  Used to remove a task from the Ganymede scheduler.</P>
    */
 
   synchronized public void unregister()

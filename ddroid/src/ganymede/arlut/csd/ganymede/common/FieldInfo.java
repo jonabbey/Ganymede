@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,12 +52,12 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.rmi.db_field;
-import arlut.csd.ddroid.server.PasswordDBField;
+import arlut.csd.ganymede.rmi.db_field;
+import arlut.csd.ganymede.server.PasswordDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -67,12 +67,12 @@ import arlut.csd.ddroid.server.PasswordDBField;
 
 /**
  * <p>This class is a serializable object used to return all the value information
- * the client's {@link arlut.csd.ddroid.client.containerPanel containerPanel}
+ * the client's {@link arlut.csd.ganymede.client.containerPanel containerPanel}
  * needs to render a specific field instance, including the current value held
  * in this field and the current editability/visibility this field has with respect
- * to the user's {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}..</p>
+ * to the user's {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}..</p>
  *
- * <p>The {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate} object is used to return
+ * <p>The {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate} object is used to return
  * the invariant (during the client's connection) type information associated
  * with the field generically across all objects of the type containing this field.</p>
  *
@@ -103,9 +103,9 @@ public class FieldInfo implements java.io.Serializable {
   /* -- */
 
   /**
-   * <p>This constructor takes a {@link arlut.csd.ddroid.rmi.db_field
+   * <p>This constructor takes a {@link arlut.csd.ganymede.rmi.db_field
    * db_field} interface instead of a {@link
-   * arlut.csd.ddroid.server.DBField DBField} object so that we can
+   * arlut.csd.ganymede.server.DBField DBField} object so that we can
    * avoid referencing a server-side object in a transport class, but
    * we will create FieldInfo objects from DBFields on the server side.</p>
    */
@@ -152,7 +152,7 @@ public class FieldInfo implements java.io.Serializable {
 
   /**
    * <p>Returns the field's id number within the containing {@link
-   * arlut.csd.ddroid.server.DBObject DBObject} on the server.</p>
+   * arlut.csd.ganymede.server.DBObject DBObject} on the server.</p>
    */
 
   public short getID()
@@ -178,7 +178,7 @@ public class FieldInfo implements java.io.Serializable {
   /**
    * <p>Returns the value of this field.  The Object may be a String,
    * a Date, a Double, an Integer, an {@link
-   * arlut.csd.ddroid.common.Invid Invid}, or even a {@link
+   * arlut.csd.ganymede.common.Invid Invid}, or even a {@link
    * java.util.Vector Vector} in the case of a multi-value field.</p>
    */
 

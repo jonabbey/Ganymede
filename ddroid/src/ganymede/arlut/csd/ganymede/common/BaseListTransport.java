@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.util.Vector;
 
@@ -130,8 +130,8 @@ public class BaseListTransport implements java.io.Serializable {
   /**
    * <p>This method is provided so that server-side code can add chunks of data for serialization.
    * In the BaseListTransport case, the
-   * {@link arlut.csd.ddroid.server.DBObjectBase#addBaseToTransport(arlut.csd.ddroid.common.BaseListTransport,
-   * arlut.csd.ddroid.server.GanymedeSession) method is responsible for calling addChunk to build
+   * {@link arlut.csd.ganymede.server.DBObjectBase#addBaseToTransport(arlut.csd.ganymede.common.BaseListTransport,
+   * arlut.csd.ganymede.server.GanymedeSession) method is responsible for calling addChunk to build
    * 'this' up for serialization.</p>
    */
 

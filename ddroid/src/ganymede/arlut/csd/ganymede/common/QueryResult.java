@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -317,7 +317,7 @@ public class QueryResult implements java.io.Serializable {
 
   /**
    *
-   * This method is used by arlut.csd.ddroid.client.objectList to
+   * This method is used by arlut.csd.ganymede.client.objectList to
    * get access to the raw and sorted vector of ObjectHandle's post-serialization.<br><br>
    *
    * Note that this method does not clone our handles vector, we'll just

@@ -3,7 +3,7 @@
    ReturnVal.java
 
    This class is a serializable return code that is returned from
-   most Directory Droid server operations that need to pass back some
+   most Ganymede server operations that need to pass back some
    sort of status information to the client.  
    
    Created: 27 January 1998
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.rmi.Remote;
 import java.util.Enumeration;
@@ -60,11 +60,11 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
-import arlut.csd.ddroid.rmi.Ganymediator;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.XMLSession;
-import arlut.csd.ddroid.rmi.adminSession;
-import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ganymede.rmi.Ganymediator;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.XMLSession;
+import arlut.csd.ganymede.rmi.adminSession;
+import arlut.csd.ganymede.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -87,20 +87,20 @@ import arlut.csd.ddroid.rmi.db_object;
  * or action on the part of the client will simply return null.</p>
  *
  * <p>If a non-null ReturnVal object is passed back, one of two things
- * may be true.  {@link arlut.csd.ddroid.common.ReturnVal#didSucceed() didSucceed()}
+ * may be true.  {@link arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()}
  * may return true, in which case the
  * operation was successful, but there may be an informational dialog
  * returned and/or a list of objects and fields that need to be
  * updated in response to the successful update.</p>
  *
- * <p>Alternatively, {@link arlut.csd.ddroid.common.ReturnVal#didSucceed() didSucceed()}
+ * <p>Alternatively, {@link arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()}
  *  may return false, in which case the
  * operation either could not succeed or is incomplete.  In this case,
- * {@link arlut.csd.ddroid.common.ReturnVal#doRescan() doRescan()} will return false, and
- * {@link arlut.csd.ddroid.common.ReturnVal#getDialog() getDialog()} should return a valid
+ * {@link arlut.csd.ganymede.common.ReturnVal#doRescan() doRescan()} will return false, and
+ * {@link arlut.csd.ganymede.common.ReturnVal#getDialog() getDialog()} should return a valid
  * {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}.  If the operation is
  * simply incomplete pending more
- * data from the user, {@link arlut.csd.ddroid.common.ReturnVal#getCallback() getCallback()}
+ * data from the user, {@link arlut.csd.ganymede.common.ReturnVal#getCallback() getCallback()}
  * will return a non-null value.  In
  * this case, the user should be presented the dialog box, and the
  * results of that dialog should be passed to the callback.  The
@@ -111,7 +111,7 @@ import arlut.csd.ddroid.rmi.db_object;
  * @see arlut.csd.JDialog.JDialogBuff
  * @see arlut.csd.JDialog.DialogRsrc
  * @see arlut.csd.JDialog.StringDialog
- * @see arlut.csd.ddroid.rmi.Ganymediator
+ * @see arlut.csd.ganymede.rmi.Ganymediator
  * */
 
 public class ReturnVal implements java.io.Serializable {
@@ -138,8 +138,8 @@ public class ReturnVal implements java.io.Serializable {
   Invid newObjectInvid = null;
 
   /**
-   * <p>A remote handle to an RMI reference of various kinds ({@link arlut.csd.ddroid.rmi.db_object db_object},
-   * {@link arlut.csd.ddroid.rmi.Session Session}, {@link arlut.csd.ddroid.rmi.XMLSession XMLSession})
+   * <p>A remote handle to an RMI reference of various kinds ({@link arlut.csd.ganymede.rmi.db_object db_object},
+   * {@link arlut.csd.ganymede.rmi.Session Session}, {@link arlut.csd.ganymede.rmi.XMLSession XMLSession})
    * on the server returned for use by the client.</p>
    */
 
@@ -208,11 +208,11 @@ public class ReturnVal implements java.io.Serializable {
   /**
    * <p>This method is used to get an Invid that the server
    * wants to return to the client.  Used particularly for
-   * {@link arlut.csd.ddroid.rmi.invid_field#createNewEmbedded() invid_field.createNewEmbedded()}.
+   * {@link arlut.csd.ganymede.rmi.invid_field#createNewEmbedded() invid_field.createNewEmbedded()}.
    * Return null if no Invid was set.</p>
    *
-   * @see arlut.csd.ddroid.rmi.invid_field
-   * @see arlut.csd.ddroid.server.InvidDBField
+   * @see arlut.csd.ganymede.rmi.invid_field
+   * @see arlut.csd.ganymede.server.InvidDBField
    */
 
   public Invid getInvid()
@@ -222,12 +222,12 @@ public class ReturnVal implements java.io.Serializable {
 
   /** 
    * <p>This method is used to get a remote {@link
-   * arlut.csd.ddroid.rmi.db_object db_object} reference that the server
+   * arlut.csd.ganymede.rmi.db_object db_object} reference that the server
    * wants to return to the client.  Used particularly for
    * Session.create_db_object() / Session.edit_db_object(), or null if
    * no db_object was returned.</p>
    *
-   * @see arlut.csd.ddroid.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session 
    */
 
   public db_object getObject()
@@ -237,7 +237,7 @@ public class ReturnVal implements java.io.Serializable {
 
   /** 
    * <p>This method is used to get a remote {@link
-   * arlut.csd.ddroid.rmi.Session Session} reference that the server
+   * arlut.csd.ganymede.rmi.Session Session} reference that the server
    * wants to return to the client.  Used to return the results
    * of a remote login attempt.  May be null if the login attempt
    * failed.</p>
@@ -250,7 +250,7 @@ public class ReturnVal implements java.io.Serializable {
 
   /** 
    * <p>This method is used to get a remote {@link
-   * arlut.csd.ddroid.rmi.XMLSession XMLSession} reference that the server
+   * arlut.csd.ganymede.rmi.XMLSession XMLSession} reference that the server
    * wants to return to the client.  Used to return the results
    * of a remote xml login attempt.  May be null if the login attempt
    * failed.</p>
@@ -263,7 +263,7 @@ public class ReturnVal implements java.io.Serializable {
 
   /** 
    * <p>This method is used to get a remote {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} reference that the
+   * arlut.csd.ganymede.rmi.adminSession adminSession} reference that the
    * server wants to return to the admin console.  Used to return the
    * results of a remote admin console connect attempt.  May be null
    * if the connect attempt failed.</p>
@@ -736,7 +736,7 @@ public class ReturnVal implements java.io.Serializable {
 
   /** 
    * <p>This method attaches a remote reference to a
-   * {@link arlut.csd.ddroid.rmi.Ganymediator} 
+   * {@link arlut.csd.ganymede.rmi.Ganymediator} 
    * wizard-handler to this ReturnVal for extraction by the client.</p>
    *
    * <p>For use on the server-side.</p> */
@@ -774,7 +774,7 @@ public class ReturnVal implements java.io.Serializable {
 
   /** 
    * <p>This method is used to set a {@link
-   * arlut.csd.ddroid.rmi.db_object db_object} reference that the client
+   * arlut.csd.ganymede.rmi.db_object db_object} reference that the client
    * can retrieve from us in those cases where a method on the server
    * really does need to return a db_object _and_ a return val.</p>
    *
@@ -788,7 +788,7 @@ public class ReturnVal implements java.io.Serializable {
 
   /** 
    * <p>This method is used to set a {@link
-   * arlut.csd.ddroid.rmi.Session Session} reference that the client
+   * arlut.csd.ganymede.rmi.Session Session} reference that the client
    * can retrieve from us at login time.</p>
    *
    * <p>For use on the server-side.</p> 
@@ -801,7 +801,7 @@ public class ReturnVal implements java.io.Serializable {
 
   /** 
    * <p>This method is used to set a {@link
-   * arlut.csd.ddroid.rmi.XMLSession XMLSession} reference that the client
+   * arlut.csd.ganymede.rmi.XMLSession XMLSession} reference that the client
    * can retrieve from us at login time.</p>
    *
    * <p>For use on the server-side.</p> 
@@ -814,7 +814,7 @@ public class ReturnVal implements java.io.Serializable {
 
   /** 
    * <p>This method is used to set a {@link
-   * arlut.csd.ddroid.rmi.adminSession adminSession} reference that the
+   * arlut.csd.ganymede.rmi.adminSession adminSession} reference that the
    * admin console can retrieve from us at console connect time.</p>
    *
    * <p>For use on the server-side.</p> 

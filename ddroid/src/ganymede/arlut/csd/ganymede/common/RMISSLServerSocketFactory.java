@@ -12,7 +12,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -49,10 +49,10 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import arlut.csd.Util.PackageResources;
-import arlut.csd.ddroid.server.Ganymede;
+import arlut.csd.ganymede.server.Ganymede;
 
 import java.io.*;
 import java.net.*;
@@ -71,7 +71,7 @@ import javax.security.cert.X509Certificate;
 
 public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serializable {
 
-  private int _hashCode = "arlut.csd.ddroid.common.RMISSLServerSocketFactory".hashCode();
+  private int _hashCode = "arlut.csd.ganymede.common.RMISSLServerSocketFactory".hashCode();
 
   private static String passphrase = "ganypassphrase";
   private static String keysResource = "GanymedeSSLServerKeys";
@@ -91,7 +91,7 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
   {
     if (socketDebug)
       {
-	synchronized (arlut.csd.ddroid.common.RMISSLServerSocketFactory.class)
+	synchronized (arlut.csd.ganymede.common.RMISSLServerSocketFactory.class)
 	  {
 	    System.err.println("Creating server socket # " + counter + " on port " + port);
 	    counter++;
@@ -105,7 +105,7 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
 
   public boolean equals(Object object)
   {
-    if (object instanceof arlut.csd.ddroid.common.RMISSLServerSocketFactory)
+    if (object instanceof arlut.csd.ganymede.common.RMISSLServerSocketFactory)
       {
 	return true;
       }

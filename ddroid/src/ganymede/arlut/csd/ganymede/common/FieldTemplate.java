@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,12 +52,12 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.rmi.RemoteException;
 
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.server.DBObjectBaseField;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.server.DBObjectBaseField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -67,12 +67,12 @@ import arlut.csd.ddroid.server.DBObjectBaseField;
 
 /**
  * <p>This class is a serializable object used to return all the static information
- * the client's {@link arlut.csd.ddroid.client.containerPanel containerPanel}
+ * the client's {@link arlut.csd.ganymede.client.containerPanel containerPanel}
  * needs to render a specific kind of field.  A FieldTemplate is basically a summary
- * of the information that can be retrieved through the {@link arlut.csd.ddroid.rmi.BaseField}
+ * of the information that can be retrieved through the {@link arlut.csd.ganymede.rmi.BaseField}
  * remote interface.</p>
  *
- * <p>The {@link arlut.csd.ddroid.common.FieldInfo FieldInfo} object is used to return
+ * <p>The {@link arlut.csd.ganymede.common.FieldInfo FieldInfo} object is used to return
  * the value information associated with an actual instance of a field.</p>
  *
  * @version $Id$
@@ -195,7 +195,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    *
    * Returns a type identifier for this field.
    *
-   * @see arlut.csd.ddroid.common.FieldType
+   * @see arlut.csd.ganymede.common.FieldType
    *
    */
 
@@ -266,7 +266,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * 
    * Returns true if this field is of boolean type
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isBoolean()
@@ -278,7 +278,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * 
    * Returns true if this field is of numeric type
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isNumeric()
@@ -290,7 +290,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * 
    * Returns true if this field is of date type
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isDate()
@@ -302,7 +302,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * 
    * Returns true if this field is of string type
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isString()
@@ -314,7 +314,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * 
    * Returns true if this field is of invid type
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isInvid()
@@ -326,7 +326,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * 
    * Returns true if this field is of permission matrix type
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isPermMatrix()
@@ -338,7 +338,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * 
    * Returns true if this field is of password type
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isPassword()
@@ -350,7 +350,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * 
    * Returns true if this field is of IP type 
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isIP()
@@ -362,7 +362,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    * 
    * Returns true if this field is of float type 
    *
-   * @see arlut.csd.ddroid.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isFloat()
@@ -374,7 +374,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
    *
    * Returns true if this field is one of the standard
    * fields that are part of all objects held in
-   * the Directory Droid server.
+   * the Ganymede server.
    *
    */
 

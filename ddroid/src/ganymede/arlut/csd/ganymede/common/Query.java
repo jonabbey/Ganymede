@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -252,7 +252,7 @@ public class Query implements java.io.Serializable {
    *
    * @param filtered If true, the query will be masked by ownership
    *
-   * @see arlut.csd.ddroid.rmi.Session#filterQueries(java.util.Vector)
+   * @see arlut.csd.ganymede.rmi.Session#filterQueries(java.util.Vector)
    */
 
   public void setFiltered(boolean filtered)

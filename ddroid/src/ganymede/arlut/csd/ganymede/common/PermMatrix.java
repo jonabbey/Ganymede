@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,15 +51,15 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.BaseField;
-import arlut.csd.ddroid.server.PermissionMatrixDBField;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.BaseField;
+import arlut.csd.ganymede.server.PermissionMatrixDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -72,12 +72,12 @@ import arlut.csd.ddroid.server.PermissionMatrixDBField;
  * permissions for a given user, admin, or role.</P>
  *
  * <P>This class stores a read-only Hashtable of
- * {@link arlut.csd.ddroid.common.PermEntry PermEntry} objects, organized by
+ * {@link arlut.csd.ganymede.common.PermEntry PermEntry} objects, organized by
  * object type and field id's.</P>
  *
  * <P>The keys to the Hashtable are Strings that are encoded by the
  * static {@link
- * arlut.csd.ddroid.server.PermissionMatrixDBField#matrixEntry(short,
+ * arlut.csd.ganymede.server.PermissionMatrixDBField#matrixEntry(short,
  * short) matrixEntry()} methods defined in this class.  I probably
  * could have used some sort of class object for the key, but then I
  * would have had to define a key() of similar complexity to the
@@ -93,8 +93,8 @@ import arlut.csd.ddroid.server.PermissionMatrixDBField;
  *
  * <P>PermMatrix is used on the client in the Permissions Editor dialog,
  * and on the server in both
- * {@link arlut.csd.ddroid.server.PermissionMatrixDBField PermissionMatrixDBField}
- * and {@link arlut.csd.ddroid.server.GanymedeSession GanymedeSession}.</P> */
+ * {@link arlut.csd.ganymede.server.PermissionMatrixDBField PermissionMatrixDBField}
+ * and {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.</P> */
 
 public class PermMatrix implements java.io.Serializable {
 
@@ -275,7 +275,7 @@ public class PermMatrix implements java.io.Serializable {
    * <P>If there is no entry in this PermMatrix for the given field,
    * getPerm() will return null.</P>
    *
-   * @see arlut.csd.ddroid.common.PermMatrix 
+   * @see arlut.csd.ganymede.common.PermMatrix 
    */
 
   public PermEntry getPerm(short baseID, short fieldID)
@@ -287,7 +287,7 @@ public class PermMatrix implements java.io.Serializable {
    * <P>Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base &lt;baseID&gt;</P>
    *
-   * @see arlut.csd.ddroid.common.PermMatrix
+   * @see arlut.csd.ganymede.common.PermMatrix
    */
 
   public PermEntry getPerm(short baseID)
@@ -299,7 +299,7 @@ public class PermMatrix implements java.io.Serializable {
    * <P>Returns a PermEntry object representing this PermMatrix's 
    * permissions on the field &lt;field&gt; in base &lt;base&gt;</P>
    *
-   * @see arlut.csd.ddroid.common.PermMatrix
+   * @see arlut.csd.ganymede.common.PermMatrix
    */
 
   public PermEntry getPerm(Base base, BaseField field)
@@ -318,7 +318,7 @@ public class PermMatrix implements java.io.Serializable {
    * <P>Returns a PermEntry object representing this PermMatrix's 
    * permissions on the base &lt;base&gt;</P>
    *
-   * @see arlut.csd.ddroid.common.PermMatrix
+   * @see arlut.csd.ganymede.common.PermMatrix
    */
 
   public PermEntry getPerm(Base base)
@@ -336,8 +336,8 @@ public class PermMatrix implements java.io.Serializable {
   /**
    * <P>Private method to generate a key for use in
    * our internal Hashtable, used to encode the 
-   * permission for a given {@link arlut.csd.ddroid.server.DBObjectBase
-   * DBObjectBase} and {@link arlut.csd.ddroid.server.DBObjectBaseField
+   * permission for a given {@link arlut.csd.ganymede.server.DBObjectBase
+   * DBObjectBase} and {@link arlut.csd.ganymede.server.DBObjectBaseField
    * DBObjectBaseField}.</P>
    */
 
@@ -349,7 +349,7 @@ public class PermMatrix implements java.io.Serializable {
   /**
    * <P>Private method to generate a key for use in
    * our internal Hashtable, used to encode the
-   * permission for a given {@link arlut.csd.ddroid.server.DBObjectBase
+   * permission for a given {@link arlut.csd.ganymede.server.DBObjectBase
    * DBObjectBase}.</P>
    */
   
@@ -360,7 +360,7 @@ public class PermMatrix implements java.io.Serializable {
 
   /**
    * <P>Returns true if the given String encodes the identity of
-   * a {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} and
+   * a {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and
    * not a field within a DBObjectBase.</P>
    */
 
@@ -373,7 +373,7 @@ public class PermMatrix implements java.io.Serializable {
    * <P>Private helper method used to decode a hash key generated
    * by the matrixEntry() methods.</P>
    *
-   * @return Returns the {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * @return Returns the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * object id encoded by the given String.
    */
 
@@ -401,7 +401,7 @@ public class PermMatrix implements java.io.Serializable {
    * by the matrixEntry() methods.</P>
    *
    * @return Returns the
-   * {@link arlut.csd.ddroid.server.DBObjectBaseField DBObjectBaseField}
+   * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
    * object id encoded by the given String.
    */
   
@@ -431,7 +431,7 @@ public class PermMatrix implements java.io.Serializable {
 
   /**
    * <P>Private helper method used to generate a matrixEntry() encoded String
-   * for a single  {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase} from
+   * for a single  {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} from
    * a matrixEntry() encoded String that also includes a field specification.</P>
    */
 

@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 
 /*------------------------------------------------------------------------------
@@ -98,8 +98,8 @@ public class CategoryTransport implements java.io.Serializable {
   /**
    * <p>This method is provided so that server-side code can add chunks of data for serialization.
    * In the CategoryTransport case, the
-   * {@link arlut.csd.ddroid.server.DBBaseCategory#addCategoryToTransport(arlut.csd.ddroid.common.CategoryTransport,
-   * arlut.csd.ddroid.server.GanymedeSession, boolean) method is responsible for calling addChunk to build
+   * {@link arlut.csd.ganymede.server.DBBaseCategory#addCategoryToTransport(arlut.csd.ganymede.common.CategoryTransport,
+   * arlut.csd.ganymede.server.GanymedeSession, boolean) method is responsible for calling addChunk to build
    * 'this' up for serialization.</p>
    */
 

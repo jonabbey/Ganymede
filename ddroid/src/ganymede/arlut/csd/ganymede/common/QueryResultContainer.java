@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
    02111-1307, USA
 
 */
-package arlut.csd.ddroid.common;
+package arlut.csd.ganymede.common;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -257,7 +257,7 @@ public class QueryResultContainer implements List, Serializable {
 
   /**
    *
-   * This method is used by arlut.csd.ddroid.client.objectList to
+   * This method is used by arlut.csd.ganymede.client.objectList to
    * get access to the raw and sorted vector of ObjectHandle's post-serialization.<br><br>
    *
    * Note that this method does not clone our handles vector, we'll just
@@ -387,7 +387,7 @@ public class QueryResultContainer implements List, Serializable {
    * <p>This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of field type {@link java.lang.Short
    * Shorts} (enumerated in the {@link
-   * arlut.csd.ddroid.common.FieldType FieldType} static constants),
+   * arlut.csd.ganymede.common.FieldType FieldType} static constants),
    * identifying the types of fields for each column in the
    * DumpResult.</p>
    */
@@ -401,8 +401,8 @@ public class QueryResultContainer implements List, Serializable {
    * <p>This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of Vectors, each of which contains
    * the data values returned for each object, in field order matching
-   * the field names and types returned by {@link arlut.csd.ddroid.common.DumpResult#getHeaders getHeaders()}
-   * and {@link arlut.csd.ddroid.common.DumpResult#getTypes getTypes()}.</p>
+   * the field names and types returned by {@link arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()}
+   * and {@link arlut.csd.ganymede.common.DumpResult#getTypes getTypes()}.</p>
    */
 
   public synchronized List getRows()
@@ -416,8 +416,8 @@ public class QueryResultContainer implements List, Serializable {
    * java.util.Vector Vector} containing the data values returned for
    * the object at row <i>row</i>, in field order matching the field
    * names and types returned by {@link
-   * arlut.csd.ddroid.common.QueryResultContainer getHeaders()} and
-   * {@link arlut.csd.ddroid.common.QueryResultContainer
+   * arlut.csd.ganymede.common.QueryResultContainer getHeaders()} and
+   * {@link arlut.csd.ganymede.common.QueryResultContainer
    * getTypes()}.</p>
    */
   
