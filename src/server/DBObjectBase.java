@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -76,6 +76,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   boolean save;
   boolean changed;
 
+  DBEditObject objectHook;	// a hook to allow static method calls on a DBEditObject management subclass
+
   /* -- */
 
   /**
@@ -92,10 +94,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
     /* -- */
 
+    this.store = store;
+
     writerList = new Vector();
     readerList = new Vector();
     dumperList = new Vector();
-    this.store = store;
+
     object_name = "";
     classname = "";
     classdef = null;
@@ -115,7 +119,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     bf = new DBObjectBaseField(this);
 
     bf.field_name = "Owner list";
-    bf.field_code = 0;
+    bf.field_code = SchemaConstants.OwnerListField;
     bf.field_type = FieldType.INVID;
     bf.field_order = 0;
     bf.allowedTarget = 0;
@@ -124,21 +128,35 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     bf.removable = false;
     bf.array = true;
 
-    fieldHash.put(new Short((short)0), bf);
+    fieldHash.put(new Short(SchemaConstants.OwnerListField), bf);
 
     /* And our 1 field, the expiration date. */
 
     bf = new DBObjectBaseField(this);
     
     bf.field_name = "Expiration Date";
-    bf.field_code = 1;
+    bf.field_code = SchemaConstants.ExpirationField;
     bf.field_type = FieldType.DATE;
     bf.field_order = 1;
     bf.editable = false;
     bf.removable = false;
 
-    fieldHash.put(new Short((short)1), bf);
+    fieldHash.put(new Short(SchemaConstants.ExpirationField), bf);
 
+    /* And our 2 field, the expiration date. */
+
+    bf = new DBObjectBaseField(this);
+    
+    bf.field_name = "Removal Date";
+    bf.field_code = SchemaConstants.RemovalField;
+    bf.field_type = FieldType.DATE;
+    bf.field_order = 2;
+    bf.editable = false;
+    bf.removable = false;
+
+    fieldHash.put(new Short(SchemaConstants.RemovalField), bf);
+
+    objectHook = this.createHook();
   }
 
   /**
@@ -166,6 +184,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   {
     this(store);
     receive(in);
+    objectHook = this.createHook();
   }
 
   /**
@@ -382,6 +401,59 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     return (getTypeID() > 1);
   }
 
+
+  /**
+   *
+   * This method is used to create a DBEditObject subclass handle, to
+   * allow various classes to make calls to overridden static methods
+   * for DBEditObject subclasses.
+   *
+   */
+
+  private DBEditObject createHook() throws RemoteException
+  {
+    if (classdef == null)
+      {
+	return new DBEditObject();
+      }
+
+    Constructor c;
+    DBEditObject e_object = null;
+
+    try
+      {
+	c = classdef.getDeclaredConstructor(new Class[0]); // no param constructor
+	e_object = (DBEditObject) c.newInstance(new Object[0]);
+      }
+    catch (NoSuchMethodException ex)
+      {
+	System.err.println("NoSuchMethodException " + ex);
+      }
+    catch (SecurityException ex)
+      {
+	System.err.println("SecurityException " + ex);
+      }
+    catch (IllegalAccessException ex)
+      {
+	System.err.println("IllegalAccessException " + ex);
+      }
+    catch (IllegalArgumentException ex)
+      {
+	System.err.println("IllegalArgumentException " + ex);
+      }
+    catch (InstantiationException ex)
+      {
+	System.err.println("InstantiationException " + ex);
+      }
+    catch (InvocationTargetException ex)
+      {
+	System.err.println("InvocationTargetException " + ex);
+      }
+
+    System.err.println("Created objectHook: object of type " + e_object.getClass());
+    return e_object;
+  }
+
   /**
    *
    * Factory method to create a new DBEditObject of this
@@ -493,7 +565,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     return ++maxid;
   }
 
-  /** release an id if an object initially
+  /**
+   * release an id if an object initially
    * created by createDBObject is rejected
    * due to its transaction being aborted
    *
@@ -627,7 +700,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   public boolean canCreate(DBSession session)
   {
-
     // we're going to want to dispatch to the appropriate
     // DBEditObject subclasses canCreate() method.
 
@@ -644,7 +716,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   public boolean canCreate(Session session)
   {
-
     // we're going to want to dispatch to the appropriate
     // DBEditObject subclasses canCreate() method.
 
@@ -660,42 +731,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   public synchronized boolean canInactivate()
   {
-    if (classdef == null)
-      {
-	return DBEditObject.canBeInactivated();
-      }
-    else
-      {
-	Method m;
-	Boolean B;
-
-	try
-	  {
-	    m = classdef.getDeclaredMethod("canInactivate", null);
-	    B = (Boolean) m.invoke(null, null);
-	    return B.booleanValue();
-	  }
-	catch (NoSuchMethodException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
-	catch (SecurityException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
-	catch (IllegalAccessException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
-	catch (InvocationTargetException ex)
-	  {
-	    throw new RuntimeException("couldn't call class method" + ex);
-	  }
-      }
+    return objectHook.canBeInactivated();
   }
 
   /**
@@ -881,7 +917,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   /**
    *
-   *
+   * Choose what field will serve as this objectBase's label.
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -922,7 +958,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   /**
    *
-   *
+   * Choose what field will serve as this objectBase's label.
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1204,6 +1240,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   {
     return writerList.size();
   }
+
 
   /**
    *
