@@ -7,7 +7,7 @@
    depends on for administering default permissions.
    
    Created: 21 July 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -158,6 +158,9 @@ public interface SchemaConstants {
 
   /** permissions applying to all objects not owned by the relevant personae */
   final static short RoleDefaultMatrix = 103; 
+
+  /** can this role be passed on to admins created by admins owning this role? */
+  final static short RoleDelegatable = 104;
 
   /** Object number for a pre-defined object used by the server */
   final static short RoleDefaultObj = 1;
