@@ -7,7 +7,7 @@
    and base structures on the server to the client.
    
    Created: 12 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -186,6 +186,7 @@ public class CategoryTransport implements java.io.Serializable {
     addChunk(String.valueOf(node.getLabelField()));
     addChunk(node.getLabelFieldName());
     addChunk(String.valueOf(node.canInactivate()));
+    addChunk(String.valueOf(node.canCreate(session)));
     addChunk(String.valueOf(node.isEmbedded()));
     addChunk(String.valueOf(node.getDisplayOrder()));
   }
