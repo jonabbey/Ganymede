@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -486,9 +486,13 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
     if (ns != null)
       {
 	unmark(this.value);
+
 	if (!mark(value))
 	  {
-	    mark(this.value); // we aren't clearing the old value after all
+	    if (this.value != null)
+	      {
+		mark(this.value); // we aren't clearing the old value after all
+	      }
 
 	    setLastError("value " + value + " already taken in namespace");
 	    return false;
@@ -954,7 +958,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (value == null)
       {
-	throw new NullPointerException("null value in mark()");
+	return false;
+	//	throw new NullPointerException("null value in mark()");
       }
 
     if (editset == null)
