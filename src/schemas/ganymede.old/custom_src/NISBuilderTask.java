@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to NIS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -152,7 +152,11 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 	baseChanged((short) 278))
       {
 	Ganymede.debug("Need to build automounter maps");
-	result = true;
+
+	if (writeAutoMounterFiles())
+	  {
+	    result = true;
+	  }
       }
 
     return result;
@@ -171,7 +175,7 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 
   public boolean builderPhase2()
   {
-    Ganymede.debug("Need to do NIS build script");
+    Ganymede.debug("Need to run external NIS build script");
     return true;
   }
 
@@ -669,5 +673,134 @@ public class NISBuilderTask extends GanymedeBuilderTask {
       }
 
     writer.println(buffer.toString());
+  }
+
+  /**
+   *
+   * This method generates an auto.vol file, along with auto.home.*
+   * files for all automounter records in the Ganymede database.
+   *
+   */
+
+  private boolean writeAutoMounterFiles()
+  {
+    PrintWriter autoFile = null;
+    DBObject map, obj, user;
+    Enumeration vols, maps, entries;
+    StringBuffer buf = new StringBuffer();
+    String mountopts, mapname;
+    Vector tempVect;
+    Invid ref, userRef;
+
+    /* -- */
+
+    // first, write out the auto.vol file
+
+    try
+      {
+	autoFile = openOutFile(path + "auto.vol");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("NISBuilderTask.writeAutoMounterFiles(): couldn't open auto.vol: " + ex);
+      }
+
+    // find the volume definitions
+
+    vols = enumerateObjects((short) 276);
+
+    while (vols.hasMoreElements())
+      {
+	obj = (DBObject) vols.nextElement();
+
+	buf.setLength(0);
+	buf.append((String) obj.getFieldValueLocal((short) 256)); // volume label
+	buf.append("\t\t");
+
+	mountopts = (String) obj.getFieldValueLocal((short) 260); // mount options.. NeXT's like this.  Ugh.
+
+	if (mountopts != null && !mountopts.equals(""))
+	  {
+	    buf.append(mountopts);
+	    buf.append(" ");
+	  }
+
+	buf.append(getLabel((Invid) obj.getFieldValueLocal((short) 257))); // hostname
+	buf.append(":");
+	buf.append((String) obj.getFieldValueLocal((short) 258)); // mount path
+
+	autoFile.println(buf.toString());
+      }
+
+    autoFile.close();
+
+    // second, write out all the auto.home.* files mapping user name
+    // to volume name.  We depend on the GASH build scripts to convert
+    // these to the form that NIS will actually use.. we could and possibly
+    // will change this to write out the combined auto.home/auto.vol info
+    // rather than forcing it to be done after-the-fact via perl.
+
+    maps = enumerateObjects((short) 277);
+
+    while (maps.hasMoreElements())
+      {
+	map = (DBObject) maps.nextElement();
+
+	mapname = (String) map.getFieldValueLocal((short) 256);
+
+	try
+	  {
+	    autoFile = openOutFile(path + mapname);
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("NISBuilderTask.writeAutoMounterFiles(): couldn't open " + mapname + ": " + ex);
+	  }
+
+	tempVect = map.getFieldValuesLocal((short) 257);
+
+	if (tempVect == null)
+	  {
+	    autoFile.close();
+	    continue;
+	  }
+
+	entries = tempVect.elements();
+
+	while (entries.hasMoreElements())
+	  {
+	    ref = (Invid) entries.nextElement();
+	    obj = getObject(ref);
+
+	    // the entry is embedded in the user's record.. get the user' id and label
+
+	    userRef = (Invid) obj.getFieldValueLocal((short) 0);
+
+	    if (userRef.getType() != SchemaConstants.UserBase)
+	      {
+		throw new RuntimeException("Schema and/or database error");
+	      }
+
+	    buf.setLength(0);
+	    
+	    buf.append(getLabel(userRef)); // the user's name
+	    buf.append("\t");
+
+	    ref = (Invid) obj.getFieldValueLocal((short) 257); // nfs volume for this entry
+
+	    if (ref == null || ref.getType() != (short) 276)
+	      {
+		throw new RuntimeException("Schema and/or database error");
+	      }
+
+	    buf.append(getLabel(ref));
+
+	    autoFile.println(buf.toString());
+	  }
+
+	autoFile.close();
+      }
+
+    return true;
   }
 }
