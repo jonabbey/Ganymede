@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -124,7 +124,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
 		user = (DBObject) users.nextElement();
 
-		writeUserLine(user, out);
+		try
+		  {
+		    writeUserLine(user, out);
+		  }
+		catch (NullPointerException ex)
+		  {
+		    Ganymede.debug("GASHBuilderTask: NullPointerException: Couldn't write user " + user.getLabel());
+		  }
 	      }
 
 	    out.close();
@@ -159,7 +166,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
 		group = (DBObject) groups.nextElement();
 
-		writeGroupLine(group, out);
+		try
+		  {
+		    writeGroupLine(group, out);
+		  }
+		catch (NullPointerException ex)
+		  {
+		    Ganymede.debug("GASHBuilderTask: NullPointerException: Couldn't write user " + group.getLabel());
+		  }
 	      }
 
 	    out.close();
