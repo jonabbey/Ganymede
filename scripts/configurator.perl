@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.41 $
-# $Date: 1999/08/27 17:51:59 $
+# $Revision: 1.42 $
+# $Date: 2000/01/26 04:47:17 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -120,6 +120,8 @@ sub write_makefile {
 
 classfiles:
 	\@echo "Building Ganymede sources"
+        \@cd $rootdir/src/xml; \\
+        ./build
 	\@cd $rootdir/src/Util; \\
 	./build
 	\@cd $rootdir/src/Qsmtp; \\
@@ -164,6 +166,8 @@ kits:
 clean:
 	\@echo "Removing class files (except gnu-regexp files)"
 	\@find $classdir/arlut -name \*.class -exec rm {} \\; -print
+        \@find $classdir/omg -name \*.class -exec rm {} \\; -print
+        \@find $classdir/com/jclark -name \*.class -exec rm {} \\; -print
 
 cleanconfig:
 	\@echo "Removing config.sh files"
@@ -408,7 +412,17 @@ removelastslash($swingdir);
 # rebuild scripts depend on.  See the header for write_config() to
 # identify the three pieces.
 
-@configs=("$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$classdir",
+@configs=("$rootdir/src/xml/sax/config.sh", "OMG XML SAX Parser Classes", "$classdir",
+	  "$rootdir/src/xml/xp/util/config.sh", "James Clark XP XML Parser Utility Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/config.sh", "James Clark XP XML Parser", "$classdir",
+	  "$rootdir/src/xml/xp/xml/parse/config.sh", "James Clark XP XML Parser Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/parse/base/config.sh", "James Clark XP XML Parser Base Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/parse/io/config.sh", "James Clark XP XML Parser IO Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/parse/awt/config.sh", "James Clark XP XML Parser AWT Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/output/config.sh", "James Clark XP XML Writer Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/tok/config.sh", "James Clark XP XML Parser Tokenizer Classes", "$classdir",
+	  "$rootdir/src/xml/xp/xml/sax/config.sh", "James Clark XP XML Parser SAX Driver Classes", "$classdir",
+	  "$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$classdir",
 	  "$rootdir/src/jcrypt", "jcrypt Class", "$classdir",
 	  "$rootdir/src/md5", "md5 Classes", "$classdir",
 	  "$rootdir/src/Util", "Ganymede Utility Classes", "$classdir",
@@ -452,7 +466,17 @@ while ($#schemas > 0) {
 # rewrite the header to properly specify the location of perl on this
 # system.
 
-@rebuilds=("$rootdir/src/Util",
+@rebuilds=("$rootdir/src/xml/sax",
+	   "$rootdir/src/xml/xp/util",
+	   "$rootdir/src/xml/xp/xml",
+	   "$rootdir/src/xml/xp/xml/parse/base",
+	   "$rootdir/src/xml/xp/xml/parse/io",
+	   "$rootdir/src/xml/xp/xml/parse/awt",
+	   "$rootdir/src/xml/xp/xml/parse",
+	   "$rootdir/src/xml/xp/xml/output",
+	   "$rootdir/src/xml/xp/xml/tok",
+	   "$rootdir/src/xml/xp/xml/sax",
+	   "$rootdir/src/Util",
 	   "$rootdir/src/JTable",
 	   "$rootdir/src/JTree",
 	   "$rootdir/src/server",

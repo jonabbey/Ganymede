@@ -3,6 +3,22 @@ January 13, 2000
 CHANGES
 ---------------------------------------------
 
+-------------------- Changes from 0.99.9 to 1.0pre1 -------------------
+
+RELEASE DATE: March ??
+
+1. [SERVER] Another deadlock mitigated
+
+The GanymedeServer.login() method was vulnerable to a nested monitor
+deadlock due to a section being synchronized on both the server's
+GanymedeServer object and its DBStore object.
+
+I went through all code in GanymedeServer and fixed a number of
+improper synchronizations.  The sweepInvids() and checkInvids()
+methods have been fixed so that they are no longer synchronized on
+GanymedeServer but they do now establish a dump lock on the server's
+database, to insure that the object walk is done safely.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
