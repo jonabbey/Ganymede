@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.116 $
-   Last Mod Date: $Date: 2001/02/09 01:55:27 $
+   Version: $Revision: 1.117 $
+   Last Mod Date: $Date: 2001/02/14 22:40:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.116 $ $Date: 2001/02/09 01:55:27 $
+ * @version $Revision: 1.117 $ $Date: 2001/02/14 22:40:31 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -645,6 +645,11 @@ public class DBObject implements db_object, FieldType, Remote {
    * designated label field for this object, or a generic
    * label constructed based on the object type and invid if no label
    * field is designated.</P>
+   *
+   * <P>We don't synchronize getLabel(), as it is very, very frequently
+   * called from all over, and we don't want to chance deadlock.  getField()
+   * and getValueString() are both synchronized on subcomponents of DBObject,
+   * so this method should be adequately safe as written.</P>
    *
    * @see arlut.csd.ganymede.db_object
    */

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.151 $
-   Last Mod Date: $Date: 2001/01/27 03:29:48 $
+   Version: $Revision: 1.152 $
+   Last Mod Date: $Date: 2001/02/14 22:40:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.151 $ %D%
+ * @version $Revision: 1.152 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1160,10 +1160,14 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (oldRef == null)
 	  {
-	    // this check is not truly thread safe, as the shadowObject
-	    // might be cleared by another thread while we're working..
-	    // this isn't a grave risk, but we'll wrap all of this in
-	    // a NullPointerException catch just in case
+	    // this check is not truly thread safe, as the
+	    // shadowObject might be cleared by another thread while
+	    // we're working..  this isn't a grave risk, but we'll
+	    // wrap all of this in a NullPointerException catch just
+	    // in case.  this check is just for informative purposes,
+	    // so we don't mind throwing a null pointer exception in
+	    // here, it's not worth doing all of the careful sync work
+	    // to lock down this stuff without risk of deadlock
 
 	    try
 	      {
@@ -1296,11 +1300,15 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newRef == null)
       {
-	// this check is not truly thread safe, as the shadowObject
+	// this section is not truly thread safe, as the shadowObject
 	// might be cleared by another thread while we're working..
-	// this isn't a grave risk, but we'll wrap all of this in
-	// a NullPointerException catch just in case
-
+	// this isn't a grave risk, but we'll wrap all of this in a
+	// NullPointerException catch just in case.  this clause is
+	// just for informative purposes, so we don't mind throwing a
+	// null pointer exception in here. It's not worth doing all of
+	// the careful sync work to lock down this stuff without risk
+	// of deadlock
+	
 	try
 	  {
 	    String edit_username, edit_hostname;
