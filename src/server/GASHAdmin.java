@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,6 +27,8 @@ import gjt.Box;
 import arlut.csd.Table.*;
 import arlut.csd.JDialog.*;
 
+import jdj.PackageResources;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                           iAdmin
@@ -44,6 +46,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   private adminSession aSession = null;
   private String adminName = null;
   private String adminPass = null;
+
   Frame schemaFrame;
 
   /* -- */
@@ -250,6 +253,8 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
   /* - */
 
+  Image question = null;
+
   Server server = null;
 
   MenuBar mbar = null;
@@ -341,15 +346,17 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     killUserMI = new MenuItem("Kill User");
     popMenu.add(killUserMI);
 
+    question = PackageResources.getImageResource(this, "question.gif", getClass());
+
     shutdownDialog = new StringDialog(this,
 				      "Confirm Ganymede Server Shutdown", 
 				      "Are you sure you want to shutdown the Ganymede server?", 
-				      "Yes", "No");
+				      "Yes", "No", question);
 
     dumpDialog = new StringDialog(this,
 				  "Ganymede Server Dump",
 				  "Are you sure you want to schedule a full dump of the Ganymede database?", 
-				  "Yes", "No");
+				  "Yes", "No", question);
 
     //    setBackground(Color.white);
 
@@ -757,7 +764,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     killDialog = new StringDialog(this,
 				  "Confirm User Kill",
 				  "Are you sure you want to disconnect user " + key + "?",
-				  "Yes", "No");
+				  "Yes", "No", question);
 
     if (killDialog.DialogShow() != null)
       {
