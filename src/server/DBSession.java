@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.56 $ %D%
+   Version: $Revision: 1.57 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ import arlut.csd.JDialog.*;
 
 final public class DBSession {
 
-  static boolean debug = true;
+  static boolean debug = false;
 
   public final static void setDebug(boolean val)
   {
@@ -1086,6 +1086,16 @@ final public class DBSession {
       }
     else
       {
+	// The DBEditSet.commit() method will set retVal.doNormalProcessing true
+	// if the problem that prevented commit was transient.. i.e., missing
+	// fields, lock not available, etc.
+
+	// If we had an IO error or some unexpected exception or the
+	// like, doNormalProcessing will be false, and the transaction
+	// will have been wiped out by the commit logic.  In this case,
+	// there's nothing that can be done, the transaction is dead
+	// and gone.
+
 	if (!retVal.doNormalProcessing)
 	  {
 	    editSet = null;
