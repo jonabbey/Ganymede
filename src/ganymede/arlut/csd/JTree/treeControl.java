@@ -1020,41 +1020,43 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
   void getVisibleDescendantRange(treeNode node, Range range)
   {
-    if (node == null)
+    treeNode myNode = node;
+
+    while (myNode != null)
       {
-	return;
-      }
+	// a row of -1 means we've hit an invisible row, which we
+	// never should do.
 
-    // a row of -1 means we've hit an invisible row, which we
-    // never should do.
+	if (myNode.row == -1)
+	  {
+	    throw new RuntimeException("invisible row hit");
+	  }
 
-    if (node.row == -1)
-      {
-	throw new RuntimeException("invisible row hit");
-      }
+	if (myNode.row > range.high)
+	  {
+	    range.high = myNode.row;
+	  }
 
-    if (node.row > range.high)
-      {
-	range.high = node.row;
-      }
+	if (myNode.row < range.low)
+	  {
+	    range.low = myNode.row;
+	  }
 
-    if (node.row < range.low)
-      {
-	range.low = node.row;
-      }
+	// if we have a sibling below us, we don't need to
+	// check the kids
 
-    // if we have a sibling below us, we don't need to
-    // check the kids
-
-    if (node.nextSibling != null)
-      {
-	getVisibleDescendantRange(node.nextSibling, range);
-	return;
-      }
-
-    if (node.child != null && node.expanded)
-      {
-	getVisibleDescendantRange(node.child, range);
+	if (myNode.nextSibling != null)
+	  {
+	    myNode = nextSibling;
+	  }
+	else if (myNode.child != null && myNode.expanded)
+	  {
+	    myNode = myNode.child;
+	  }
+	else			// we're done going down
+	  {
+	    break;
+	  }
       }
   }
 
