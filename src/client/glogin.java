@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,6 +24,8 @@ import java.applet.*;
 import java.net.*;
 import java.rmi.*;
 import java.rmi.server.*;
+import java.io.*;
+import java.util.*;
 
 import jdj.*;
 
@@ -39,6 +41,12 @@ import arlut.csd.ganymede.*;
 public class glogin extends JApplet implements Runnable {
 
   public static boolean debug = false;
+
+  public static String 
+    properties_file = null,
+    server_url = null;
+
+  public static Properties ganymedeProperties = null;
 
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
@@ -81,21 +89,79 @@ public class glogin extends JApplet implements Runnable {
   {
     WeAreApplet = false;
 
-    if (args.length > 0)
+    for (int i = 0; i < args.length; i++)
       {
-	if (args[0].equals("debug"))
+	System.out.println("Dealing with: " + args[i]);
+	if (args[i].equals("-debug"))
 	  {
 	    System.out.println("Starting up in debug mode.");
 	    debug = true;
 	  }
+	else if (args[i].equals("-properties"))
+	  {
+	    if ((i + 1) < args.length)
+	      {
+		System.out.println("Incrementing i");
+		properties_file = args[++i];
+
+		if (properties_file.equals("-debug"))
+		  {
+		    throw new IllegalArgumentException("-properties takes a String argument.  Example:\n\n  glogin -properties properties_file\n\n");
+		  }
+		    
+	      }
+	    else
+	      {
+		System.out.println("-properties takes a String argument.  Example:\n\n  glogin -properties properties_file\n\n");
+	      }
+	  }
 	else
 	  {
-	    System.out.println("If you want debug mode, you must use the code word:  'debug'.");
+	    System.out.println("Unknown command: " + args[i]);
+	    System.out.println("\nThe only two know command line options are -debug and -properties <property file>\n");
 	  }
 
       }
 
     my_glogin = new glogin();
+
+
+    if (properties_file != null)
+      {
+	System.out.println("Opening properties file: " + properties_file);
+
+	ganymedeProperties = new Properties();
+	
+	if (debug)
+	  {
+	    System.out.println("Loading properties from: " + properties_file);
+	  }
+
+	try
+	  {
+	    ganymedeProperties.load(new BufferedInputStream(new FileInputStream(properties_file)));
+	  }
+	catch (java.io.FileNotFoundException e)
+	  {
+	    throw new RuntimeException("File not found: " + e);
+	  }
+	catch (java.io.IOException e)
+	  {
+	    throw new RuntimeException("Whoa, io exception: " + e);
+	  }
+      }
+
+    if (ganymedeProperties != null)
+      {
+
+	server_url = ganymedeProperties.getProperty("ganymede.serverhost");
+
+      }
+
+    if ((server_url == null) || (server_url.equals("")))
+      {
+	throw new RuntimeException("Trouble:  the server url specified in " + properties_file + " does not contain any information.");
+      }
 
     my_glogin.getContentPane().setLayout(new BorderLayout());
 
@@ -112,7 +178,7 @@ public class glogin extends JApplet implements Runnable {
     my_frame.show();
  
     my_glogin.init();
-    my_glogin.start();
+    //my_glogin.start();
     my_glogin.getContentPane().getLayout().layoutContainer(my_glogin);
   }
 
@@ -134,7 +200,14 @@ public class glogin extends JApplet implements Runnable {
     if (WeAreApplet)
       {
 	my_frame = new JFrame();
+	server_url = getParameter("ganymede.serverhost");
+	if ((server_url == null) || (server_url.equals("")))
+	  {
+	    throw new RuntimeException("Trouble:  the server url specified in " + properties_file + " does not contain any information.");
+	  }
       }
+
+    server_url = "rmi://" + server_url + "/ganymede.server";
 
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
@@ -270,7 +343,7 @@ public class glogin extends JApplet implements Runnable {
 	{
 	  connected = true;
 
-	  Remote obj = Naming.lookup(gConfig._GANYMEDE_SERVER_URL);
+	  Remote obj = Naming.lookup(server_url);
 	  
 	  if (obj instanceof Server)
 	    {
@@ -287,7 +360,7 @@ public class glogin extends JApplet implements Runnable {
 	{
 	  connected = false;
 
-	  System.err.println("RMI: Couldn't find server\n" + gConfig._GANYMEDE_SERVER_URL );
+	  System.err.println("RMI: Couldn't find server\n" + server_url );
 	}
       catch (RemoteException ex)
 	{
@@ -300,7 +373,7 @@ public class glogin extends JApplet implements Runnable {
 	{
 	  connected = false;
 	  	  
-	  System.err.println("RMI: Malformed URL " + gConfig._GANYMEDE_SERVER_URL );
+	  System.err.println("RMI: Malformed URL " + server_url );
 	}
 
       switch (state) 
