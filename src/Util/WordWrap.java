@@ -5,7 +5,7 @@
    This class provides a static word wrap method.
    
    Created: 12 September 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,7 +25,16 @@ public class WordWrap {
 
   /* -- */
 
-  public static String wrap(String inString, int wrap_length)
+  /**
+   *
+   * This method takes a string and wraps it to a line length of no more than
+   * wrap_length.  If prepend is not null, each resulting line will be prefixed
+   * with the prepend string.  In that case, resultant line length will be no
+   * more than wrap_length + prepend.length()
+   *
+   */
+
+  public static String wrap(String inString, int wrap_length, String prepend)
   {
     char[] 
       charAry;
@@ -44,6 +53,11 @@ public class WordWrap {
     if (inString == null || (wrap_length < 0))
       {
 	throw new IllegalArgumentException("bad params");
+      }
+
+    if (prepend != null)
+      {
+	result.append(prepend);
       }
 
     if (debug)
@@ -87,7 +101,13 @@ public class WordWrap {
 	       character so that the isspace(*p) check below will detect
 	       that it hit the \n, and will do the right thing. */
 
-	    result.append(inString.substring(marker, p));
+
+	    result.append(inString.substring(marker, p+1));
+
+	    if (prepend != null)
+	      {
+		result.append(prepend);
+	      }
 
 	    if (debug)
 	      {
@@ -180,12 +200,22 @@ public class WordWrap {
 	if (p < charAry.length) 
 	  {
 	    result.append("\n");
+
+	    if (prepend != null)
+	      {
+		result.append(prepend);
+	      }
 	  }
 
 	p = marker = p2 + 1 + offset;
       }
 
     return result.toString();
+  }
+
+  public static String wrap(String inString, int wrap_length)
+  {
+    return wrap(inString, wrap_length, null);
   }
 
   public static boolean isspace(char c)
