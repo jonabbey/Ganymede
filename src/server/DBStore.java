@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -748,7 +748,7 @@ public class DBStore {
 	bf.editable = false;
 	bf.comment = "Members of this admin group";
 	bf.allowedTarget = SchemaConstants.AdminBase;
-	bf.targetField = 6;
+	bf.targetField = SchemaConstants.AdminGroupsField;
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
@@ -759,8 +759,8 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Admin group this administrative account is a member of";
-	bf.allowedTarget = 0;
-	bf.targetField = 5;
+	bf.allowedTarget = SchemaConstants.AdminBase;
+	bf.targetField = SchemaConstants.AdminMembersField;
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
@@ -771,7 +771,7 @@ public class DBStore {
 	bf.editable = false;
 	bf.comment = "If this administrative account is a user admin, the user account";
 	bf.allowedTarget = SchemaConstants.UserBase;
-	bf.targetField = 4;
+	bf.targetField = SchemaConstants.UserAdminRole;
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
@@ -790,7 +790,7 @@ public class DBStore {
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Objects owned";
 	bf.allowedTarget = -2;	// any
-	bf.targetField = 0;	// owner list field
+	bf.targetField = SchemaConstants.OwnerListField;	// owner list field
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Permissions for this admin entity";
@@ -875,8 +875,8 @@ public class DBStore {
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.UserAdminRole;
 	bf.field_type = FieldType.INVID;
-	bf.allowedTarget = 0;
-	bf.targetField = 5;
+	bf.allowedTarget = SchemaConstants.AdminBase;
+	bf.targetField = SchemaConstants.AdminAssocUser;
 	bf.field_name = "Admin Role";
 	bf.field_order = 4;
 	bf.removable = false;
@@ -918,7 +918,7 @@ public class DBStore {
     s.setValue("monitor");
     
     p = (PasswordDBField) eO.getField("Password");
-    p.setPlainTextPass("display"); // default supergash password
+    p.setPlainTextPass(GanymedeConfig.newMonpass); // default monitor password
     
     session.commitTransaction();
   }
