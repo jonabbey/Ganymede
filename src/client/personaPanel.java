@@ -67,23 +67,21 @@ public class personaPanel extends JPanel implements ActionListener{
 
     setLayout(new BorderLayout());
 
-    // Create the button panel for the bottom
-    JPanel bottom = new JPanel(false);
-    //bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
+    if (editable)
+      {
+	// Create the button panel for the bottom
+	JPanel bottom = new JPanel(false);
 
-    add = new JButton("Create");
-    //add.setMaximumSize(add.getPreferredSize());
-    add.addActionListener(this);
-    delete = new JButton("Delete");
-    //delete.setMaximumSize(delete.getPreferredSize());
-    delete.addActionListener(this);
+	add = new JButton("Create");
+	add.addActionListener(this);
+	delete = new JButton("Delete");
+	delete.addActionListener(this);
 
-    //bottom.add(Box.createHorizontalGlue());
-    bottom.add(add);
-    bottom.add(delete);
-    //bottom.add(Box.createHorizontalGlue());
-
-    add("South", bottom);
+	bottom.add(add);
+	bottom.add(delete);
+	
+	add("South", bottom);
+      }
 
     // Create the middle, content pane
     middle = new JTabbedPane();

@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -90,9 +90,9 @@ public class Loader extends Thread {
   {
     while (! baseListLoaded)
       {
+	System.out.println("Dang, have to wait to get the base list");
 	synchronized (this)
 	  {
-	    System.out.println("Dang, have to wait to get the base list");
 	    try
 	      {
 		this.wait();
@@ -124,9 +124,10 @@ public class Loader extends Thread {
   {
     while (! baseNamesLoaded)
       {
+	System.out.println("Dang, have to wait to get the base names list");
+
 	synchronized (this)
 	  {
-	    System.out.println("Dang, have to wait to get the base names list");
 	    try
 	      {
 		this.wait();
@@ -154,17 +155,22 @@ public class Loader extends Thread {
     
   }
 
-  public synchronized Hashtable getBaseHash()
+  public Hashtable getBaseHash()
   {
     while (! baseHashLoaded)
       {
-	try
+	System.out.println("Loader: waiting for base hash");
+
+	synchronized (this)
 	  {
-	    this.wait();
-	  }
-	catch (InterruptedException x)
-	  {
-	    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+	    try
+	      {
+		this.wait();
+	      }
+	    catch (InterruptedException x)
+	      {
+		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+	      }
 	  }
       }
 
@@ -184,17 +190,22 @@ public class Loader extends Thread {
     
   }
 
-  public synchronized Hashtable getBaseMap()
+  public Hashtable getBaseMap()
   {
     while (! baseMapLoaded)
       {
-	try
+	System.out.println("Loader: waiting for base map");
+
+	synchronized (this)
 	  {
-	    this.wait();
-	  }
-	catch (InterruptedException x)
-	  {
-	    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+	    try
+	      {
+		this.wait();
+	      }
+	    catch (InterruptedException x)
+	      {
+		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+	      }
 	  }
       }
 
@@ -213,19 +224,24 @@ public class Loader extends Thread {
     return baseMap;
     
   }
-  public synchronized Hashtable getBaseToShort()
+  public Hashtable getBaseToShort()
   {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
     while (! baseMapLoaded)
       {
-	try
+	System.out.println("Loader: waiting for base hash");
+
+	synchronized (this)
 	  {
-	    this.wait();
-	  }
-	catch (InterruptedException x)
-	  {
-	    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+	    try
+	      {
+		this.wait();
+	      }
+	    catch (InterruptedException x)
+	      {
+		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+	      }
 	  }
       }
 
@@ -267,6 +283,7 @@ public class Loader extends Thread {
       }
 
     baseListLoaded = true;
+    notifyAll();
   }
 
 
@@ -289,6 +306,7 @@ public class Loader extends Thread {
       }
 
     baseNamesLoaded = true;
+    notifyAll();
   }
 
   /**
@@ -331,6 +349,7 @@ public class Loader extends Thread {
       }
 
     baseHashLoaded = true;
+    notifyAll();
   }
 
   /**
@@ -362,6 +381,7 @@ public class Loader extends Thread {
       }
 
     baseMapLoaded = true;
+    notifyAll();
   }
 
 

@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.27 $ %D%
+  Version: $Revision: 1.28 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -272,10 +272,18 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 		    Invid inv = (Invid)(invidfield.getElement(i));
 		   
-		    db_object object = wp.getgclient().getSession().edit_db_object(inv);
-		    
+		    db_object object = null;
+		    if (editable)
+		      {
+			object = wp.getgclient().getSession().edit_db_object(inv);
+		      }
+		    else
+		      {
+			object = wp.getgclient().getSession().view_db_object(inv);
+		      }
+
 		    containerPanel cp = new containerPanel(object,
-							   invidfield.isEditable() && editable,
+							   editable,
 							   wp.gc,
 							   wp, container.frame,
 							   null, false);
@@ -582,6 +590,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    System.out.println("The likes of this I have never seen: " + comp);
 	  }
       }
+
+    invalidate();
+    container.frame.validate();
   }
   
   public void expandLevels(boolean recursive)

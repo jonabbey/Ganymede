@@ -189,32 +189,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     System.out.println("Done with expand().");
     
-    invalidate();
-    vp.container.frame.validate();
-    
-
   }
-
-  /*
-  public void validate()
-  {
-    System.out.println("--Validate: element Wrapper: " + this);
-    super.validate();
-  }
-
-  public void invalidate()
-  {
-    System.out.println("--inValidate: elementWrapper: " + this);
-    super.invalidate();
-  }
-
-  public void doLayout()
-  {
-    System.out.println("//doLayout in elementW: " + this);
-    super.doLayout();
-    System.out.println("\\doLayout over in ew");
-  }
-  */
 
   /**
    *
@@ -255,6 +230,8 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     else if (evt.getSource() == expand)
       {
 	expand();
+	invalidate();
+	vp.container.frame.validate();
       }
     else
       {
@@ -267,6 +244,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     if (e.getWhen() - lastClick < 500)
       {
 	expand();
+	invalidate();
+	vp.container.frame.validate();
+
       }
     lastClick = e.getWhen();
   }

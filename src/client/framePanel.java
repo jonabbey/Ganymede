@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -254,6 +254,29 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  admin_history_index = current++;
 	}
 
+      // Do we need to show expiration or removal dates?
+
+      try
+	{
+	  exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
+	  rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
+	  
+	  if ((exp_field != null) && (exp_field.getValue() != null))
+	    {
+	      addExpirationDatePanel();
+	    }
+
+	  if ((rem_field != null) && (rem_field.getValue() != null))
+	    {
+	      addRemovalDatePanel();
+	    }
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get date fields: " + rx);
+	}
+
+     
 
       pane.addChangeListener(this);
 
@@ -368,6 +391,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  System.out.println("Creating date panel");
 	}
+
+      if (exp_field == null)
+	{
+	  try
+	    {
+	      exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not get removal field: " + rx);
+	    }
+	}
+
       expiration_date.setViewportView(new datePanel(exp_field, "Expiration date", editable, this));
 	  
       createdList.addElement(new Integer(expiration_date_index));
@@ -382,6 +418,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  System.out.println("Creating removal date panel");
 	}
+
+      if (rem_field == null)
+	{
+	  try
+	    {
+	      rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not get removal field: " + rx);
+	    }
+	}
+
       removal_date.setViewportView(new datePanel(rem_field, "Removal Date", editable, this));
 	  
       createdList.addElement(new Integer(removal_date_index));
@@ -453,8 +502,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       try
 	{
-	  exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
-	  rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
 	  creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
 	  creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
 	  modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
@@ -495,8 +542,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  throw new RuntimeException("Could not get owner objects owned: " + rx);
 	}
 
-      objects_owned.setViewportView(new ownershipPanel(oo, editable, this));
-      createdList.addElement(new Integer(objects_owned_index));
+      if (oo == null)
+	{
+	  JPanel null_oo = new JPanel();
+	  null_oo.add(new JLabel("There are no objects owned here."));
+	  objects_owned.setViewportView(null_oo);
+	}
+      else
+	{
+	  objects_owned.setViewportView(new ownershipPanel(oo, editable, this));
+	  createdList.addElement(new Integer(objects_owned_index));
+	}
 
       objects_owned.invalidate();
       validate();

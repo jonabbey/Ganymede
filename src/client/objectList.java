@@ -8,7 +8,7 @@
    their current state in the client, and more.
    
    Created: 6 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -138,7 +138,7 @@ public class objectList {
       {
 	results = new Vector(activeHandles.size());
 
-	for (int i = 0; i < handles.size(); i++)
+	for (int i = 0; i < activeHandles.size(); i++)
 	  {
 	    handle = (ObjectHandle) activeHandles.elementAt(i);
 

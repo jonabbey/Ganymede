@@ -130,13 +130,14 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     //
     //
 
-    //	listHandles = client.sortListHandleVector(listHandles);
-
+    System.out.println("Sorting...");
+    listHandles = client.sortListHandleVector(listHandles);
+    System.out.println("Adding...");
     for (int i = 0; i < listHandles.size(); i++)
       {
 	type.addItem(listHandles.elementAt(i));
       }
-
+    System.out.println("Laying out...");
     gbc.gridx = 0;
     gbc.gridy = 1;
 

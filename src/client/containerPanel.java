@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.43 $ %D%
+    Version: $Revision: 1.44 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -1013,51 +1013,58 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (e.getSource() instanceof JComboBox)
       {
-	db_field field = (db_field)objectHash.get(e.getSource());
-
-	try
+	if (e.getStateChange() == ItemEvent.SELECTED)
 	  {
-	    boolean ok = false;
-	    Object item = e.getItem();
-	    if (item instanceof String)
-	      {
-		returnValue = field.setValue((String)e.getItem());
-	      }
-	    else if (item instanceof listHandle)
-	      {
-		returnValue = field.setValue(((Invid) ((listHandle)e.getItem()).getObject() ));
+	    db_field field = (db_field)objectHash.get(e.getSource());
 
-	      }
-	    else 
+	    try
 	      {
-		System.out.println("Unknown type from JComboBox: " + item);
-	      }
-
-	    returnValue = gc.handleReturnVal(returnValue);
-
-	    if (returnValue == null)
-	      {
-		gc.somethingChanged();;
-		if (debug)
+		boolean ok = false;
+		Object item = e.getItem();
+		if (item instanceof String)
 		  {
-		    System.out.println("field setValue returned true");
+		    returnValue = field.setValue((String)e.getItem());
 		  }
-	      }
-	    else if (returnValue.didSucceed())
-	      {
-		System.out.println("field setValue returned true!!");
-		checkReturnValForRescan(returnValue);
-	      }
-	    else
-	      {
-		// Some kind of reversion?
-		checkReturnValForRescan(returnValue);
-	      }
+		else if (item instanceof listHandle)
+		  {
+		    returnValue = field.setValue(((Invid) ((listHandle)e.getItem()).getObject() ));
+
+		  }
+		else 
+		  {
+		    System.out.println("Unknown type from JComboBox: " + item);
+		  }
+
+		returnValue = gc.handleReturnVal(returnValue);
+
+		if (returnValue == null)
+		  {
+		    gc.somethingChanged();;
+		    if (debug)
+		      {
+			System.out.println("field setValue returned true");
+		      }
+		  }
+		else if (returnValue.didSucceed())
+		  {
+		    System.out.println("field setValue returned true!!");
+		    checkReturnValForRescan(returnValue);
+		  }
+		else
+		  {
+		    // Some kind of reversion?
+		    checkReturnValForRescan(returnValue);
+		  }
 	    
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not set combo box value: " + rx);
+	      }
 	  }
-	catch (RemoteException rx)
+	else
 	  {
-	    throw new RuntimeException("Could not set combo box value: " + rx);
+	    System.out.println("You very tricky: try to do something with a deselect.");
 	  }
       }
     else
@@ -1291,7 +1298,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 
 	    qr = field.choices();
-	    list = new objectList(qr);
+	    if (qr != null)
+	      {
+		list = new objectList(qr);
+	      }
 	  }
 	else
 	  {
@@ -1509,6 +1519,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     invidTablePopup2.add(viewO2);
     invidTablePopup2.add(createO2);
 
+    System.out.println("Creating StringSelector");
+
     StringSelector ss = new StringSelector(choiceHandles, valueHandles, this, editable, 
 					   true, true, 160, "Selected", "Available",
 					   invidTablePopup, invidTablePopup2);
@@ -1526,25 +1538,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
   }
 
-  /*
-  public void validate()
-  {
-    System.out.println("--Validate: containerPanel: " + this);
-    super.validate();
-  }
-  public void invalidate()
-  {
-    System.out.println("--inValidate: containerPanel: " + this);
-    super.invalidate();
-  }
-
-  public void doLayout()
-  {
-      System.out.println(">> containerP.doLayout(): " + this);
-      super.doLayout();
-      System.out.println("<< cp doLayout done");
-  }
-  */
 
   private final void setStatus(String s)
   {
@@ -2015,7 +2008,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		if (debug)
 		  {
-		    System.out.println("Damn, it's not in there, downloading a new one.");
+		    System.out.println("It's not in there, downloading a new one.");
 		  }
 
 		gc.cachedLists.putList(key, field.choices());
