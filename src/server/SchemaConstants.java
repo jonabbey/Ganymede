@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,8 @@ public interface SchemaConstants {
   final static short CreatorField = 5; // string describing the creator of this object
   final static short ModificationDateField = 6;	// date that this object was last modified
   final static short ModifierField = 7;	// string describing the administrator who last modified this object
+  final static short BackLinksField = 8; // any miscellaneous pointers pointing to us are kept track of in
+				         // this field if we don't have an explicit back-link field
 
   /* all embedded objects have these fields */
 
