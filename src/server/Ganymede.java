@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.136 $
-   Last Mod Date: $Date: 2002/06/14 03:36:43 $
+   Version: $Revision: 1.137 $
+   Last Mod Date: $Date: 2002/08/03 01:40:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -524,7 +524,7 @@ public class Ganymede {
 
     // set the background scheduler running on its own thread
 
-    new Thread(scheduler).start();
+    scheduler.start();
 
     // and install the tasks listed in the database
 

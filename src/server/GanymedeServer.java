@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 2002/06/19 23:16:27 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 2002/08/03 01:40:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -783,7 +783,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		GanymedeServer.shutdown();
 	      }
-	    });
+	    }, "Ganymede Shutdown Thread");
 
 	    deathThread.start();
 	  }

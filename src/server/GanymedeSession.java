@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.257 $
-   Last Mod Date: $Date: 2002/06/19 23:16:27 $
+   Version: $Revision: 1.258 $
+   Last Mod Date: $Date: 2002/08/03 01:40:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.257 $ $Date: 2002/06/19 23:16:27 $
+ * @version $Revision: 1.258 $ $Date: 2002/08/03 01:40:28 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1026,7 +1026,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		// ok, they're already gone.. (?)
 	      }
 	  }
-      }}, "Client Disconnector Thread");
+      }}, "Ganymede Client Disconnector Thread");
 
     forceThread.start();
   }
@@ -4974,7 +4974,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    mySession.forceOff("xmlclient dump error");
 		  }
 	      }
-	  }}, "XMLSession Schema/Data Dump Thread");
+	  }}, "Ganymede XMLSession Schema/Data Dump Thread");
 
 	// and set it running
 
