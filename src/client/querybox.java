@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1164,7 +1164,8 @@ class QueryRow implements ItemListener {
 
     does = opName.equalsIgnoreCase("Start With") ||
       opName.equalsIgnoreCase("End With") ||
-      opName.equalsIgnoreCase("Contain");
+      opName.equalsIgnoreCase("Contain") ||
+      opName.equalsIgnoreCase("Contain Matching");
 
     if (does && (!showDoes || boolChoice.getItemCount() == 0))
       {
@@ -1229,6 +1230,12 @@ class QueryRow implements ItemListener {
     else if (field.isArray())
       {
 	compareChoice.addItem("Contain");
+	
+	if (field.isString() || field.isInvid())
+	  {
+	    compareChoice.addItem("Contain Matching");
+	  }
+
 	compareChoice.addItem("Length <");
 	compareChoice.addItem("Length >");
 	compareChoice.addItem("Length ==");
@@ -1259,7 +1266,7 @@ class QueryRow implements ItemListener {
 	compareChoice.addItem("Start With");
 	compareChoice.addItem("End With");
       }
-    else if (field.isString())
+    else if (field.isString() || field.isInvid())
       {
 	compareChoice.addItem("matching");
 	compareChoice.addItem("==");
@@ -1270,10 +1277,6 @@ class QueryRow implements ItemListener {
 	compareChoice.addItem(">=");
 	compareChoice.addItem("Start With");
 	compareChoice.addItem("End With");
-      }
-    else if (field.isInvid())
-      {
-	compareChoice.addItem("==");
       }
 
     compareChoice.addItem("Defined");
@@ -1583,7 +1586,12 @@ class QueryRow implements ItemListener {
 	  {
 	    opValue = QueryDataNode.EQUALS;
 	    arrayOp = QueryDataNode.CONTAINS;
-	  } 
+	  }
+	else if (operator.equals("Contain Matching"))
+	  {
+	    opValue = QueryDataNode.MATCHES;
+	    arrayOp = QueryDataNode.CONTAINS;
+	  }
 	else if (operator.equals("Length =="))
 	  {
 	    arrayOp = QueryDataNode.LENGTHEQ;

@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -143,24 +143,27 @@ public class DBQueryHandler {
 		value = obj.getLabel();
 	      }
 
-	    // if we've gotten this far, the field is defined, but
-	    // we want to check to see if it is null-valued.
+	    // if we've gotten this far, the field is defined in the
+	    // field dictionary, but we want to check to see if it is
+	    // null-valued.
 
 	    if (n.comparator == n.DEFINED)
 	      {
-		if (field.isVector())
-		  {
-		    return (values != null && values.size() != 0);
-		  }
-		else
-		  {
-		    return value != null;
-		  }
+		return field.isDefined();
 	      }
+
+	    // ok.. check to see if we are checking against the length of an
+	    // array field.
 
 	    switch (n.arrayOp)
 	      {
 	      case n.LENGTHEQ:
+
+		if (!field.isVector())
+		  {
+		    throw new RuntimeException("Can't do an array test on a scalar field.");
+		  }
+
 		intval = ((Integer) n.value).intValue();
 
 		if (debug)
@@ -171,6 +174,12 @@ public class DBQueryHandler {
 		return (intval == values.size());
 
 	      case n.LENGTHGR:
+
+		if (!field.isVector())
+		  {
+		    throw new RuntimeException("Can't do an array test on a scalar field.");
+		  }
+
 		intval = ((Integer) n.value).intValue();
 
 		if (debug)
@@ -181,6 +190,12 @@ public class DBQueryHandler {
 		return (values.size() > intval);
 
 	      case n.LENGTHLE:
+
+		if (!field.isVector())
+		  {
+		    throw new RuntimeException("Can't do an array test on a scalar field.");
+		  }
+
 		intval = ((Integer) n.value).intValue();
 
 		if (debug)
@@ -195,63 +210,14 @@ public class DBQueryHandler {
 
 	    if (n.value instanceof String &&
 		(((value != null) && value instanceof String) ||
-		((values != null) && (values.size() > 0) && (values.elementAt(0) instanceof String))))
+		((values != null) && (values.size() > 0) && 
+		 (values.elementAt(0) instanceof String)))) // assume type consistent array
 	      {
+		// Compare a string value or regexp against a string field
+
 		if (n.arrayOp == n.NONE)
 		  {
-		    if (n.comparator == QueryDataNode.MATCHES)
-		      {
-			if (n.regularExpression == null)
-			  {
-			    if (debug)
-			      {
-				System.err.println("DBQueryHandler: trying to build regexp: /" + n.value + "/");
-			      }
-
-			    try
-			      {
-				n.regularExpression = new gnu.regexp.RE(n.value);
-			      }
-			    catch (gnu.regexp.REException ex)
-			      {
-				System.err.println("DBQueryHandler: REException construction regexp: " + ex.getMessage());
-
-				return false;
-			      }
-
-			    if (debug)
-			      {
-				System.err.println("DBQueryHandler: regexp built successfully: " + n.regularExpression);
-			      }
-			  }
-
-			gnu.regexp.RE regexp = (gnu.regexp.RE) n.regularExpression;
-			
-			if (debug)
-			  {
-			    System.err.println("DBQueryHandler: Trying to match regexp against " + value);
-			  }
-			
-			gnu.regexp.REMatch match = regexp.getMatch(value);
-
-			if (debug)
-			  {
-			    if (match == null)
-			      {
-				System.err.println("DBQueryHandler: Failed match regexp against " + value);
-			      }
-			    else
-			      {
-				System.err.println("DBQueryHandler: Found match regexp against " + value);
-			      }
-			  }
-
-			return (match != null);
-		      }
-		    else
-		      {
-			return compareStrings(n, (String) n.value, (String) value);
-		      }
+		    return compareStrings(n, (String) n.value, (String) value);
 		  }
 		else
 		  {
@@ -358,43 +324,27 @@ public class DBQueryHandler {
 		  {
 		    s1 = (String) n.value;
 		    s2 = (String) session.viewObjectLabel((Invid)value);
+		    
+		    return compareString(n, s1, s2);
 		  }
-
-		if (n.comparator == n.EQUALS)
+		else if (n.arrayOp == n.CONTAINS)
 		  {
-		    if (n.arrayOp == n.NONE)
+		    s1 = (String) n.value;
+		    
+		    /* -- */
+		    
+		    if (debug)
 		      {
-			return s1.equals(s2);
+			System.err.println("Doing a vector string/invid compare against value/regexp " + s1);
 		      }
-		    else
+		    
+		    for (int i = 0; i < values.size(); i++)
 		      {
-			s1 = (String) n.value;
-
-			/* -- */
-
-			switch (n.arrayOp)
+			s2 = session.viewObjectLabel((Invid) values.elementAt(i));
+			
+			if (compareString(n, s1, s2))
 			  {
-			  case n.CONTAINS:
-
-			    if (debug)
-			      {
-				System.err.println("Doing a vector string/invid compare against value " + s1);
-			      }
-
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				s2 = session.viewObjectLabel((Invid) values.elementAt(i));
-
-				if (s1.equals(s2))
-				  {
-				    return true;
-				  }
-			      }
-
-			    return false;
-
-			  default:
-			    return false;
+			    return true;
 			  }
 		      }
 		  }
@@ -578,7 +528,7 @@ public class DBQueryHandler {
 
   private static boolean compareStrings(QueryDataNode n, String queryValue, String value)
   {
-    return compareString(n.comparator, queryValue, value);
+    return compareString(n, queryValue, value);
   }
 
   private static boolean compareStringArray(QueryDataNode n, String queryValue, Vector values)
@@ -594,7 +544,7 @@ public class DBQueryHandler {
 	
 	for (int i = 0; i < values.size(); i++)
 	  {
-	    if (compareString(n.comparator, queryValue, (String) values.elementAt(i)))
+	    if (compareString(n, queryValue, (String) values.elementAt(i)))
 	      {
 		return true;
 	      }
@@ -615,7 +565,7 @@ public class DBQueryHandler {
    *
    */
 
-  private static boolean compareString(int comparator, String string1, String string2)
+  private static boolean compareString(QueryDataNode n, String string1, String string2)
   {
     int result;
 
@@ -626,8 +576,57 @@ public class DBQueryHandler {
 	return false;
       }
 
-    switch (comparator)
+    switch (n.comparator)
       {
+      case QueryDataNode.MATCHES:
+
+	if (n.regularExpression == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("DBQueryHandler: trying to build regexp: /" + n.value + "/");
+	      }
+	    
+	    try
+	      {
+		n.regularExpression = new gnu.regexp.RE(n.value);
+	      }
+	    catch (gnu.regexp.REException ex)
+	      {
+		System.err.println("DBQueryHandler: REException construction regexp: " + ex.getMessage());
+		
+		return false;
+	      }
+	    
+	    if (debug)
+	      {
+		System.err.println("DBQueryHandler: regexp built successfully: " + n.regularExpression);
+	      }
+	  }
+	
+	gnu.regexp.RE regexp = (gnu.regexp.RE) n.regularExpression;
+	
+	if (debug)
+	  {
+	    System.err.println("DBQueryHandler: Trying to match regexp against " + string2);
+	  }
+	
+	gnu.regexp.REMatch match = regexp.getMatch(string2);
+	
+	if (debug)
+	  {
+	    if (match == null)
+	      {
+		System.err.println("DBQueryHandler: Failed match regexp against " + string2);
+	      }
+	    else
+	      {
+		System.err.println("DBQueryHandler: Found match regexp against " + string2);
+	      }
+	  }
+	
+	return (match != null);
+
       case QueryDataNode.EQUALS:
 	return string1.equals(string2);
 
