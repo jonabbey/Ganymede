@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,7 +46,28 @@ public abstract class DBLock {
 
   // type parent
 
+  /**
+   *
+   * Returns true if the lock has the given base
+   * locked.
+   *
+   */
+
   abstract boolean isLocked(DBObjectBase base);
+
+  /**
+   *
+   * This method waits until the lock can be established.
+   * 
+   */
+
   abstract void establish(Object key);
+
+  /**
+   *
+   * Unlock the bases held by this lock.
+   *
+   */ 
+
   abstract void release();
 }
