@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.260 $
-   Last Mod Date: $Date: 2002/11/01 02:24:04 $
+   Version: $Revision: 1.261 $
+   Last Mod Date: $Date: 2002/11/01 02:40:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.260 $ $Date: 2002/11/01 02:24:04 $
+ * @version $Revision: 1.261 $ $Date: 2002/11/01 02:40:18 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -6447,7 +6447,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public boolean isMemberAll(Vector owners)
+  private boolean isMemberAll(Vector owners)
   {
     Invid owner;
     DBObject ownerObj;
@@ -6482,39 +6482,27 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
 
-	if (inf == null)
-	  {
-	    return false;	// no owner members of this owner object
-	  }
-
-	// see if we are a member of this particular owner group
-
-	if (inf.getValuesLocal().contains(personaInvid))
+	if (inf != null && inf.getValuesLocal().contains(personaInvid))
 	  {
 	    found = true;
 	  }
-
-	// didn't find, recurse up
-
-	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
-
-	if (inf != null)
+	else
 	  {
-	    if (inf.isVector())
+	    // didn't find, recurse up
+	    
+	    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
+	    
+	    if (inf != null)
 	      {
 		// using getValuesLocal() here is safe only because
 		// recursePersonasMatch() never tries to modify the
 		// owners value passed in.  Otherwise, we'd have to
 		// clone the results from getValuesLocal().
-
+		
 		if (recursePersonasMatch(inf.getValuesLocal(), new Vector()))
 		  {
 		    found = true;
 		  }
-	      }
-	    else
-	      {
-		throw new RuntimeException("Owner field not a vector!!");
 	      }
 	  }
 
