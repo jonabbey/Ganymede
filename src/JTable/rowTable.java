@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,9 +27,9 @@ import csd.Table.*;
  * access model based on a hashtable.
  *
  *
- * @see csd.baseTable
+ * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.1 $ %D% 
+ * @version $Revision: 1.2 $ %D% 
  */
 
 public class rowTable extends baseTable {
@@ -90,7 +90,7 @@ public class rowTable extends baseTable {
    *
    * @param key A hashtable key to be used to refer to this row in the future
    */
-  public newRow(Object key)
+  public void newRow(Object key)
   {
     rowHandle element;
 
@@ -104,8 +104,6 @@ public class rowTable extends baseTable {
     element = new rowHandle(this);
 
     index.put(key, element);
-
-
   }
 
   /**
@@ -114,7 +112,7 @@ public class rowTable extends baseTable {
    * @param key A hashtable key for the row to delete
    */
 
-  public deleteRow(Object key)
+  public void deleteRow(Object key)
   {
     rowHandle element;
 
@@ -134,15 +132,15 @@ public class rowTable extends baseTable {
     // support any means of row access that isn't
     // sensitive to numeric position
 
-    rows.removeElement(element.rownum);
+    rows.removeElementAt(element.rownum);
 
     // sync up the rowHandles 
 
-    crossref.removeElement(element.rownum);
+    crossref.removeElementAt(element.rownum);
 
     // and make sure the rownums are correct.
 
-    for (i = element.rownum; i < crossref.size(); i++)
+    for (int i = element.rownum; i < crossref.size(); i++)
       {
 	((rowHandle) crossref.elementAt(i)).rownum = i;
       }
@@ -159,7 +157,7 @@ public class rowTable extends baseTable {
   // ? can this be done?  will java do the right thing
   // for method overloading?
 
-  public ReportCell getCell(Object key, int col)
+  public tableCell getCell(Object key, int col)
   {
     return super.getCell(((rowHandle)index.get(key)).rownum, col);
   }
@@ -251,7 +249,7 @@ public class rowTable extends baseTable {
    * @see tableAttr
    */
 
-  public final void setCellJust(ReportCell cell, int just, boolean repaint)
+  public final void setCellJust(Object key, int col, int just, boolean repaint)
   {
     setCellJust(getCell(key,col),just,repaint);
   }
@@ -309,7 +307,7 @@ class rowHandle {
 
   int rownum;
 
-  public rowHandle(baseTable parent)
+  public rowHandle(rowTable parent)
   {
     parent.addRow(false);	// don't repaint table
     rownum = parent.rows.size() - 1; // we always add the new row to the end
@@ -317,11 +315,11 @@ class rowHandle {
     // crossref's index for RowHash element should be same as
     // rows's index for the corresponding ReportRow
 
-    crossref.addElement(this);
+    parent.crossref.addElement(this);
 
     // check to make sure 
 
-    if (crossref.indexOf(this) != rownum)
+    if (parent.crossref.indexOf(this) != rownum)
       {
 	throw new RuntimeException("rowTable / baseTable mismatch");
       }
