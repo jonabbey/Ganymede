@@ -2,7 +2,7 @@
 #
 # Ganymede Loader Run Script 
 # Created: 18 March 1998
-# Ver: $Revision: 1.1 $ %D%
+# Ver: $Revision: 1.2 $ %D%
 #
 # Jonathan Abbey
 #
@@ -59,10 +59,12 @@ echo "Cleaning old journal files"
 
 rm -f $DB/journal*
 
-echo "Running loader"
-
 cd $LOADERDIR
 
+echo "Copying schema definition file to loader directory"
+
 cp $SCHEMAFILE $DB/loader.db
+
+echo "Running loader"
 
 $JAVA -noasyncgc -ms32m -mx256m arlut.csd.ganymede.loader.directLoader $PROPERTIES
