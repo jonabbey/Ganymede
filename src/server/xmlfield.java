@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/09/08 02:02:28 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/09/12 05:08:23 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -73,7 +73,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.2 $ $Date: 2000/09/08 02:02:28 $ $Name:  $
+ * @version $Revision: 1.3 $ $Date: 2000/09/12 05:08:23 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -127,13 +127,13 @@ public class xmlfield implements FieldType {
 
 	if (openElement.isEmpty())
 	  {
-	    throw new NullPointerException("void field def");
+	    throw new NullPointerException("void field def for field element " + elementName);
 	  }
 	else
 	  {
 	    skipToEndField(elementName);
 
-	    throw new NullPointerException("void field def");
+	    throw new NullPointerException("void field def for field element " + elementName);
 	  }
       }
 

@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/09/09 00:29:25 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/09/12 05:08:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -224,29 +224,67 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private boolean success = false;
 
+  /**
+   * <p>This flag is used to make sure we don't run the cleanup process
+   * more than once.</p>
+   */
+
   private boolean cleanedup = false;
   
   /* -- */
 
   public GanymedeXMLSession(GanymedeSession session)
   {
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession constructor");
+      }
+
     this.session = session;
 
     // tell the GanymedeSession about us, so they can notify us with
     // the stopParser() method if our server login gets forcibly
     // revoked.
-    
+
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession GanymedeSession");
+      }
+
     session.setXSession(this);
+
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession calling initializeLookups");
+      }
+
+    initializeLookups();
 
     try
       {
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession creating PipedOutputStream");
+	  }
+
 	// We create a PipedOutputStream that we will write data from
 	// the XML client into.  The XMLReader will create a matching
 	// PipedInputStream internally, that it will use to read data
 	// that we feed into the pipe.
 
 	pipe = new PipedOutputStream();
+
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession creating reader");
+	  }
+
 	reader = new XMLReader(pipe, bufferSize, true);
+
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession created reader");
+	  }
       }
     catch (IOException ex)
       {
@@ -270,10 +308,20 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public ReturnVal xmlSubmit(byte[] bytes)
   {
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession xmlSubmit: " + bytes.length);
+      }
+
     session.checklogin();
     
     if (parsing)
       {
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession xmlSubmit, writing into pipe");
+	  }
+
 	try
 	  {
 	    pipe.write(bytes);	// can block if the parser thread gets behind
@@ -281,8 +329,20 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	catch (IOException ex)
 	  {
 	    return Ganymede.createErrorDialog("xmlSubmit i/o error",
-					      ex.getMessage());
+					      "pipe writing: " + ex.getMessage());
 	  }
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession xmlSubmit, !parsing, skipping writing into pipe");
+	  }
+      }
+
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession xmlSubmit getting errBuffer results");
       }
 
     String progress;
@@ -296,6 +356,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     if (!reader.isDone())
       {
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession xmlSubmit reader not done, returning ok result");
+	  }
+
 	if (progress.length() > 0)
 	  {
 	    ReturnVal retVal = new ReturnVal(true);
@@ -314,6 +379,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     else
       {
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession xmlSubmit reader done, returning failure result");
+	  }
+
 	return Ganymede.createErrorDialog("XML submit errors",
 					  progress);
       }
@@ -333,6 +403,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public synchronized ReturnVal xmlEnd()
   {
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession xmlEnd");
+      }
+
     // note again that we are synchronized, so that we won't start to
     // execute this method until the (also synchronized) run() method
     // terminates.. in this way, xmlEnd will block until the parsing
@@ -384,6 +459,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void unreferenced()
   {
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession unreferenced");
+      }
+
     session.unreferenced();
     abort();
   }
@@ -396,8 +476,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void abort()
   {
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession abort");
+      }
+
     if (parsing)
       {
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession closing reader");
+	  }
+
 	reader.close();		// this will cause the XML Reader to halt
       }
 
@@ -410,13 +500,43 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public synchronized void cleanup()
   {
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession cleanup");
+      }
+
     if (cleanedup)
       {
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession cleanup.. already cleaned");
+	  }
+
 	return;
+      }
+
+    Enumeration keys = objectTypes.keys();
+
+    while (keys.hasMoreElements())
+      {
+	Hashtable fieldHash = (Hashtable) objectTypes.get(keys.nextElement());
+
+	fieldHash.clear();
       }
 
     objectTypes.clear();
     objectTypes = null;
+
+    keys = objectStore.keys();
+
+    while (keys.hasMoreElements())
+      {
+	Hashtable typedHash = (Hashtable) objectStore.get(keys.nextElement());
+
+	typedHash.clear();
+      }
+
+    keys = null;
 
     objectStore.clear();
     objectStore = null;
@@ -436,6 +556,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     deletedObjects.setSize(0);
     deletedObjects = null;
 
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession cleanup logging out session");
+      }
+
     session.logout();
 
     cleanedup = true;
@@ -452,6 +577,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     try
       {
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession run getting startDocument");
+	  }
 
 	XMLItem startDocument = getNextItem();
 
@@ -460,6 +589,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    err.println("XML parser error: first element " + startDocument + 
 			" not XMLStartDocument");
 	    return;
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("GanymedeXMLSession run getting docElement");
 	  }
 
 	XMLItem docElement = getNextItem();
@@ -495,6 +629,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (nextElement.matches("ganyschema"))
 	  {
+	    if (debug)
+	      {
+		System.err.println("GanymedeXMLSession run skipping ganyschema processing");
+	      }
+
 	    processSchema();
 
 	    nextElement = getNextItem();
@@ -502,10 +641,20 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (nextElement.matches("ganydata"))
 	  {
+	    if (debug)
+	      {
+		System.err.println("GanymedeXMLSession run got ganydata, processing..");
+	      }
+
 	    if (!processData())
 	      {
 		// don't both processing rest of XML
 		// doc.. just jump down to finally clause
+		
+		if (debug)
+		  {
+		    System.err.println("GanymedeXMLSession run processData returned false..");
+		  }
 
 		return; 
 	      }
@@ -525,12 +674,16 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// shutdown before our parsing process is done, or if
 	// there is something malformed in the XML
 
-	err.println(ex.getMessage());
+	System.err.println("caught exception for GanymedeXMLSession run()");
 
 	ex.printStackTrace();
+
+	err.println(ex.getMessage());
       }
     finally
       {
+	System.err.println("finally for GanymedeXMLSession run()");
+
 	parsing = false;
 
 	if (reader != null)
@@ -635,10 +788,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	err.println("processData");
       }
 
-
     try
       {
-	err.print("Reading object data");
+	err.println("Reading object data");
 
 	item = getNextItem();
 
@@ -658,12 +810,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    // method without committing the transaction
 		    // our finally clause will log us out
 
+		    ex.printStackTrace();
+
 		    return false;
 		  }
 
 		err.print(".");
-
-		//	    err.println(item);
 
 		String mode = objectRecord.getMode();
 	    
@@ -712,11 +864,19 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    item = getNextItem();
 	  }
 
-	err.print("\n");
+	err.println();
 
 	committedTransaction = transmitData();
 
 	return committedTransaction;
+      }
+    catch (Exception ex)
+      {
+	err.println("Process data.. caught an exception");
+
+	ex.printStackTrace();
+
+	return false;
       }
     finally
       {
@@ -737,6 +897,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private void initializeLookups()
   {
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession: initializeLookups");
+      }
+
     Vector baseList = Ganymede.db.getBases();
 
     for (int i = 0; i < baseList.size(); i++)
@@ -767,6 +932,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public boolean storeObject(xmlobject object)
   {
+    if (debug)
+      {
+	System.err.println("GanymedeXMLSession: storeObject(" + object + ")");
+      }
+
     Hashtable objectHash = (Hashtable) objectStore.get(object.type);
 
     if (objectHash == null)

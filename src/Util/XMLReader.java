@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/08/31 02:02:18 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/09/12 05:08:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -259,7 +259,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (debug)
 	  {
-	    err.println("XMLReader.getNextItem() returning " + value);
+	    System.err.println("XMLReader.getNextItem() returning " + value);
 	  }
 
 	return value;
@@ -355,7 +355,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (debug)
 	  {
-	    err.println("XMLReader.peekNextItem() returning " + value);
+	    System.err.println("XMLReader.peekNextItem() returning " + value);
 	  }
 
 	return value;
