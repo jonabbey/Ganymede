@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -758,6 +758,23 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    typeC.getModel().setSelectedItem("I.P.");
 	    ipShowing = true;
+
+	    // add all defined namespaces here
+
+	    refreshNamespaceChoice();
+
+	    System.out.println(fieldDef.getNameSpaceLabel());
+
+	    if (fieldDef.getNameSpaceLabel() == null)
+	      {
+		namespaceC.getModel().setSelectedItem("<none>");
+		System.out.println("selecting <none> for NameSpace");
+	      }
+	    else
+	      {
+		namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
+		System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+	      }
 	  }
 	else if (fieldDef.isBoolean())
 	  {
@@ -887,6 +904,23 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    typeC.getModel().setSelectedItem("Numeric");
 	    numericShowing = true;
+
+	    // add all defined namespaces here
+
+	    refreshNamespaceChoice();
+
+	    System.out.println(fieldDef.getNameSpaceLabel());
+
+	    if (fieldDef.getNameSpaceLabel() == null)
+	      {
+		namespaceC.getModel().setSelectedItem("<none>");
+		System.out.println("selecting <none> for NameSpace");
+	      }
+	    else
+	      {
+		namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
+		System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+	      }
 	  }
 	else if (fieldDef.isPermMatrix())
 	  {
@@ -894,7 +928,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    typeC.getModel().setSelectedItem("Permission Matrix");
 	  }
 
-	//Here is where the editability is checked.
+	// Here is where the editability is checked.
 
 	System.out.println("+Setting enabled to: " + isEditable);
 

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -263,6 +263,28 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    out.writeUTF("");
 	  }
       }
+    else if (isNumeric())
+      {
+	if (namespace != null)
+	  {
+	    out.writeUTF(namespace.getName());
+	  }
+	else
+	  {
+	    out.writeUTF("");
+	  }
+      }
+    else if (isIP())
+      {
+	if (namespace != null)
+	  {
+	    out.writeUTF(namespace.getName());
+	  }
+	else
+	  {
+	    out.writeUTF("");
+	  }
+      }
     else if (isInvid())
       {
 	out.writeShort(allowedTarget);
@@ -402,6 +424,42 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (!nameSpaceId.equals(""))
 	  {
 	    setNameSpace(nameSpaceId);
+	  }
+      }
+    else if (isNumeric())
+      {
+	String nameSpaceId;
+
+	/* - */
+
+	// at 1.8 we introduced namespaces for number fields
+
+	if ((base.store.file_major >= 1) && (base.store.file_minor >= 8))
+	  {
+	    nameSpaceId = in.readUTF();
+	    
+	    if (!nameSpaceId.equals(""))
+	      {
+		setNameSpace(nameSpaceId);
+	      }
+	  }
+      }
+    else if (isIP())
+      {
+	String nameSpaceId;
+
+	/* - */
+
+	// at 1.8 we introduced namespaces for IP fields
+
+	if ((base.store.file_major >= 1) && (base.store.file_minor >= 8))
+	  {
+	    nameSpaceId = in.readUTF();
+	    
+	    if (!nameSpaceId.equals(""))
+	      {
+		setNameSpace(nameSpaceId);
+	      }
 	  }
       }
     else if (isInvid())
@@ -1286,7 +1344,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    *
    * Set a namespace constraint for this string field.
    *
-   * @see arlut.csd.ganymede.BaseField
+   * Note that this is intended to be called from the Schema Editor,
+   * and won't take effect until the next time the system is stopped
+   * and reloaded.
+   *
+   * @see arlut.csd.ganymede.BaseField 
    */
 
   public synchronized void setNameSpace(String nameSpaceId)
@@ -1296,9 +1358,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
-    if (!isString())
+    if (!isString() && !isNumeric() && !isIP())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalArgumentException("this field type does not accept a namespace constraint");
       }
 
     if (nameSpaceId == null)
