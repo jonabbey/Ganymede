@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -88,6 +88,14 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
     //windowBar.addButton("Test");
     //add("South", windowBar);
   }
+
+  /**
+   * Get the parent gclient
+   */
+  public gclient getgclient()
+    {
+      return parent;
+    }
 
   /**
    *
@@ -299,7 +307,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 		  }
 		else
 		  {
-		    vectorPanel vp = new vectorPanel(fields[i], this);
+		    vectorPanel vp = new vectorPanel(fields[i], this, editable);
 		    addRow(panel, vp, name, i);
 		  }
 	      }
@@ -813,7 +821,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
     else if (v.getSource() instanceof vectorPanel)
       {
 	System.out.println("Something happened in the vector panel");
-
+	parent.somethingChanged = true;
       }
     else
       {
