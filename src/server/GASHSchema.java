@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -201,7 +201,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     objects = new treeNode(null, "Object Types", null, true, 0, 1, objectMenu);
     tree.setRoot(objects);
 
-    PopupMenu nameSpaceMenu = new PopupMenu();
+    PopupMenu nameSpaceMenu = new PopupMenu("Namespace Menu");
     createNameMI = new MenuItem("Create Namespace");
     nameSpaceMenu.add(createNameMI);
 
@@ -662,7 +662,35 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
 
 	StringDialog dialog = new StringDialog(dialogResource);
-	dialog.show();
+	Hashtable results = new Hashtable();
+	results = dialog.DialogShow();
+
+	//Now check the hash
+	System.out.println("Printing the hash:");
+	Enumeration enum = results.elements();
+	while (enum.hasMoreElements()) 
+	  {
+	    //String label = (String)enum.nextElement();
+	    Object ob = enum.nextElement();
+	    if (ob instanceof String) 
+	      {
+		String label = (String)ob;
+	      }
+	    if (ob instanceof Boolean)
+	      {
+		Boolean bool = (Boolean)ob;
+		//This shouldn't matter, should all be strings, but 
+		//it gives as Boolean class exception.  I don't think that
+		// there are any Booleans, just labels and strings,
+		// checkboxField doesn't even do anything yet.
+		// Weird, huh?
+	      }
+	    System.out.println(label + "=" + results.get(label));
+	  }
+	System.out.println("That's it for the hash");
+
+
+
       }
     else if (event.getSource() == deleteObjectMI)
       {
@@ -1157,7 +1185,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     Label l = new Label(label);
     rowHash.put(comp, l);
     parent.add("0 " + row + " lhwHW", l);
-    parent.add("1 " + row + " lhH", comp);
+    parent.add("1 " + row + " lhwHW", comp);
 
     if (visible)
       {
