@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -87,6 +87,10 @@ public class Ganymede {
     else
       {
 	debug("No DBStore exists under filename " + dbFilename + ", not loading");
+	debug("Initializing new schema");
+	db.initialize();
+	debug("Template schema created.");
+
 	try 
 	  {
 	    db.journal = new DBJournal(db, "journal"); // need to parametrize filename
