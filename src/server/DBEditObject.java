@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.96 $ %D%
+   Version: $Revision: 1.97 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.96 $ %D%
+ * @version $Revision: 1.97 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1330,15 +1330,62 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   /**
    *
    * Hook to have this object create a new embedded object
-   * in the given field.  
+   * in the given field.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
-   *
+   * This method now has the appropriate default logic for creating
+   * embedded objects with the user's permissions, but this method may
+   * still be overridden to do customization, if needed.
+   * 
    */
 
   public Invid createNewEmbeddedObject(InvidDBField field)
-  {
-    throw new IllegalArgumentException("Error: createNewEmbeddedObject called on base DBEditObject");
+  {    
+    DBEditObject newObject;
+    DBObjectBase targetBase;
+    DBObjectBaseField fieldDef;
+    ReturnVal retVal;
+
+    /* -- */
+
+    fieldDef = field.getFieldDef();
+
+    if (!fieldDef.isEditInPlace())
+      {
+	throw new RuntimeException("error in server, DBEditObject.createNewEmbeddedObject() called " +
+				    "on non-embedded object");
+      }
+	
+    if (fieldDef.getTargetBase() > -1)
+      {
+	if (getGSession() != null)
+	  {
+	    retVal = getGSession().create_db_object(fieldDef.getTargetBase());
+	
+	    if (retVal == null)
+	      {
+		throw new RuntimeException("error in server, createNewEmbeddedObject could not " +
+					   "get a useful result from create_db_object");
+	      }
+	
+	    if (!retVal.didSucceed())
+	      {
+		return null;	// failure
+	      }
+	
+	    newObject = (DBEditObject) retVal.getObject();
+	
+	    return newObject.getInvid();
+	  }
+	else
+	  {
+	    throw new RuntimeException("error in schema.. createNewEmbeddedObject called " +
+				       "without a valid GanymedeSession..");
+	  }
+      }
+    else
+      {
+	throw new RuntimeException("error in schema.. createNewEmbeddedObject called without a valid target..");
+      }
   }
 
   /**
