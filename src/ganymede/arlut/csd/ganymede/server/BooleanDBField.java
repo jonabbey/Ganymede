@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -205,29 +205,6 @@ public class BooleanDBField extends DBField implements boolean_field {
     return value();
   }
 
-  /**
-   * <P>This method is used to mark a field as undefined when it is
-   * checked out for editing.  Different subclasses of
-   * {@link arlut.csd.ganymede.server.DBField DBField} may
-   * implement this in different ways, if simply setting the field's
-   * value member to null is not appropriate.  Any namespace values claimed
-   * by the field will be released, and when the transaction is
-   * committed, this field will be released.</P>
-   */
-
-  public synchronized ReturnVal setUndefined(boolean local)
-  {
-    if (isEditable(local))
-      {
-	value = Boolean.FALSE;
-	return null;
-      }
-
-    return Ganymede.createErrorDialog("Permissions Error",
-				      "Don't have permission to clear this permission matrix field\n" +
-				      getName());
-  }
-
   // ****
   //
   // type-specific accessor methods
@@ -411,6 +388,5 @@ public class BooleanDBField extends DBField implements boolean_field {
 
     return eObj.verifyNewValue(this, o);
   }
-
 }
 
