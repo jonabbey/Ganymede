@@ -16,6 +16,10 @@
 # This script requires that the XML:Writer module is installed in
 # the Perl 5 package for use.
 #
+# Release: $Name:  $
+# Version: $Revision: 1.2 $
+# Date: $Date: 2000/09/15 05:25:17 $
+#
 #=====================================================================
 
 use XML::Writer;
