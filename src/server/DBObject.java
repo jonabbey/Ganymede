@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.124 $
-   Last Mod Date: $Date: 2001/06/03 09:21:14 $
+   Version: $Revision: 1.125 $
+   Last Mod Date: $Date: 2001/06/03 09:25:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,9 +134,16 @@ import com.jclark.xml.output.*;
  * {@link arlut.csd.ganymede.SchemaConstants SchemaConstants} for details on the
  * built-in field types.</p>
  *
+ * <p>DBObject has had its synchronization revised so that only the createShadow,
+ * clearShadow, getFieldPerm, receive, and emitXML methods are sync'ed on
+ * the DBObject itself.  Everything else syncs on the field table held within
+ * the DBObject.  createShadow() and clearShadow() in particular must remain
+ * sync'ed on the same monitor, but for most things we want to sync on the
+ * interior fieldAry.</p>
+ *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.124 $ $Date: 2001/06/03 09:21:14 $
+ * @version $Revision: 1.125 $ $Date: 2001/06/03 09:25:33 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1307,7 +1314,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public Vector getFieldInfoVector()
+  public Vector getFieldInfoVector()
   {
     Vector results = new Vector();
     DBField field;
@@ -1319,38 +1326,41 @@ public class DBObject implements db_object, FieldType, Remote {
 	System.err.println("DBObject.getFieldInfoVector(): " + this.toString());
       }
 
-    for (int i = 0; i < objectBase.customFields.size(); i++)
+    synchronized (fieldAry)
       {
-	DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
-
-	if (false)
+	for (int i = 0; i < objectBase.customFields.size(); i++)
 	  {
-	    System.err.println("fieldDef: " + fieldDef);
-	  }
-
-	field = retrieveField(fieldDef.getID());
-	
-	if (field != null)
-	  {
-	    try
+	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
+	    
+	    if (false)
 	      {
-		results.addElement(new FieldInfo(field));
+		System.err.println("fieldDef: " + fieldDef);
 	      }
-	    catch (IllegalArgumentException ex)
+	    
+	    field = retrieveField(fieldDef.getID());
+	    
+	    if (field != null)
 	      {
-		if (false)
+		try
 		  {
-		    System.err.println("Caught IllegalArgumentException building FieldInfo for " + field.toString());
-		    ex.printStackTrace();
+		    results.addElement(new FieldInfo(field));
 		  }
-
-		// we had a permissions failure reading this
-		// field.. skip it.
+		catch (IllegalArgumentException ex)
+		  {
+		    if (false)
+		      {
+			System.err.println("Caught IllegalArgumentException building FieldInfo for " + field.toString());
+			ex.printStackTrace();
+		      }
+		    
+		    // we had a permissions failure reading this
+		    // field.. skip it.
+		  }
 	      }
-	  }
-	else if (debug)
-	  {
-	    System.err.println("Couldn't get field for fieldDef id " + fieldDef.getID());
+	    else if (debug)
+	      {
+		System.err.println("Couldn't get field for fieldDef id " + fieldDef.getID());
+	      }
 	  }
       }
 
