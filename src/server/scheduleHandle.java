@@ -7,8 +7,8 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/06/09 03:33:41 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/06/09 04:03:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -503,7 +503,7 @@ public class scheduleHandle implements java.io.Serializable {
 ------------------------------------------------------------------------------*/
 
 /** 
- * <P>{@link arlut.csd.ganymede.GanymedeSchedule GanymedeSchedule}
+ * <P>{@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler}
  * helper class used to notify the scheduler when a background task
  * has completed.</P>
  *

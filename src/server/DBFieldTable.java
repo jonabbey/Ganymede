@@ -7,8 +7,8 @@
    
    Created: 9 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:32 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/06/09 04:03:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,13 +59,12 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * A customized variant of the java.util.Hashtable class that is
- * tuned for use in managing fields in a Ganymede DBObject.
+ * <P>A customized variant of the java.util.Hashtable class that is
+ * tuned for use in managing fields in a Ganymede 
+ * {@link arlut.csd.ganymede.DBObject DBObject}.</P>
  * 
- * @version $Revision: 1.4 $ %D%, Created: 9 June 1998
+ * @version $Revision: 1.5 $ %D%, Created: 9 June 1998
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
- *
  */
 
 public class DBFieldTable {
@@ -144,7 +143,6 @@ public class DBFieldTable {
    * Returns the number of objects in this DBFieldTable.
    *
    * @return  the number of objects in this DBFieldTable.
-   *
    */
 
   public int size() 
@@ -157,7 +155,6 @@ public class DBFieldTable {
    *
    * @return  <code>true</code> if this DBFieldTable contains no values;
    *          <code>false</code> otherwise.
-   *
    */
 
   public boolean isEmpty() 
@@ -185,7 +182,6 @@ public class DBFieldTable {
    *
    * @param      value   a DBField to search for.
    * @exception  NullPointerException  if the value is <code>null</code>.
-   *
    */
 
   public boolean contains(DBField value) 
@@ -214,7 +210,6 @@ public class DBFieldTable {
    * Tests if a DBField with the specified object id is in this DBFieldTable.
    * 
    * @param   key   possible object id.
-   *
    */
 
   public synchronized boolean containsKey(short key) 
@@ -320,12 +315,10 @@ public class DBFieldTable {
   }
 
   /**
+   * <P>Inserts a DBField into this DBFieldTable.</P>
    *
-   * Inserts a DBField into this DBFieldTable.
-   *
-   * This put is not sync'ed, and should only be used with
-   * higher level sync provisions.
-   *
+   * <P>This put is not sync'ed, and should only be used with
+   * higher level sync provisions.</P>
    */
 
   public void putNoSync(DBField value) 
@@ -401,12 +394,10 @@ public class DBFieldTable {
   }
 
   /**
+   * <P>Inserts a DBField into this DBFieldTable.</P>
    *
-   * Inserts a DBField into this DBFieldTable.
-   *
-   * This put is not sync'ed, and should only be used with
-   * higher level sync provisions.
-   *
+   * <P>This put is not sync'ed, and should only be used with
+   * higher level sync provisions.</P>
    */
 
   public void putNoSyncNoRemove(DBField value) 
@@ -527,13 +518,14 @@ public class DBFieldTable {
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                         DBFieldTableEnumerator
+                                                          DBFieldTableEnumerator
 
 ------------------------------------------------------------------------------*/
 
 /**
- * A DBFieldTable enumerator class.  This class should remain opaque 
- * to the client. It will use the Enumeration interface. 
+ * <P>A {@link arlut.csd.ganymede.DBFieldTable DBFieldTable} enumerator class.
+ * This class should remain opaque to the client, which will use the
+ * Enumeration interface.</P>
  */
 
 class DBFieldTableEnumerator implements Enumeration {

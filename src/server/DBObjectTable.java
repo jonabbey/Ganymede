@@ -7,8 +7,8 @@
    
    Created: 9 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:37 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/06/09 04:03:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,6 +57,15 @@ import java.util.*;
                                                                    DBObjectTable
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>A customized variant of the java.util.Hashtable class that is
+ * tuned for use in managing {@link arlut.csd.ganymede.DBObject DBObject}s
+ * in a Ganymede {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}.</P>
+ * 
+ * @version $Revision: 1.5 $ %D%, Created: 9 June 1998
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ */
 
 public class DBObjectTable {
 
@@ -510,8 +519,9 @@ public class DBObjectTable {
 ------------------------------------------------------------------------------*/
 
 /**
- * A DBObjectTable enumerator class.  This class should remain opaque 
- * to the client. It will use the Enumeration interface. 
+ * <P>A {@link arlut.csd.ganymede.DBObjectTable DBObjectTable} enumerator class.
+ * This class should remain opaque to the client, which will use the
+ * Enumeration interface.</P>
  */
 
 class DBObjectTableEnumerator implements Enumeration {

@@ -4,8 +4,8 @@
    Tree node subclass used by gclient.java
 
    Created: 15 January 1999
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:04:08 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/06/09 04:03:40 $
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
 
    -----------------------------------------------------------------------
@@ -56,6 +56,10 @@ import java.rmi.*;
                                                                         BaseNode
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>Subclass of {@link arlut.csd.JTree.treeNode treeNode} used in the client.</P>
+ */
 
 class BaseNode extends arlut.csd.JTree.treeNode {
 

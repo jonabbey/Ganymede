@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:33 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/06/09 04:03:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,7 +59,8 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBLocks arbitrate access to a DBStore object.  Threads wishing to read from,
+ * <p>DBLocks arbitrate access to a {@link arlut.csd.ganymede.DBStore DBStore}
+ * object.  Threads wishing to read from,
  * dump, or update the DBStore must be in possession of an established DBLock.
  * The general scheme is that any number of readers and/or dumpers can read
  * from the database simultaneously.  If a number of readers are processing when
@@ -73,8 +74,9 @@ import java.util.*;
  * dump thread finishes dumping the database.</p>
  * 
  * <p>There is currently no support for handling timeouts, and locks can persist
- * indefinitely.</p>
- *
+ * indefinitely.  However, the {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+ * class will detect a client that has died, and will properly clean up any
+ * locks held by the user.</p>
  */
 
 public abstract class DBLock {

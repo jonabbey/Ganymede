@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/02/04 22:01:51 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/06/09 04:03:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,24 +58,26 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * <p>The DBJournal class is used to provide journalling of changes to the DBStore
+ * <P>The DBJournal class is used to provide journalling of changes to the
+ * {@link arlut.csd.ganymede.DBStore DBStore}
  * during operations.  The Journal file will contain a complete list of all
  * changes made since the last dump of the complete DBStore.  The Journal file
- * is composed of a header block followed by a number of transactions.  </p>
+ * is composed of a header block followed by a number of transactions.</P>
  *
- * <p>Each transaction consists of a number of object modification records, each
+ * <P>Each transaction consists of a number of object modification records, each
  * record specifying the creation, deletion, or modification of a particular
  * object.  At the end of the transaction, a marker indicates the completion of
  * the transaction.  At DBStore startup time, the journal is read in and all
- * complete transactions recorded are performed on the main DBStore.</p>
+ * complete transactions recorded are performed on the main DBStore.</P>
  *
- * <p>Generally, if the DBStore was shut down correctly, the entire memory
+ * <P>Generally, if the DBStore was shut down correctly, the entire memory
  * structure of the DBStore will be cleanly dumped out and the Journal will
  * be removed.  The Journal is intended to insure that the DBStore remains
  * transaction consistent if the server running Ganymede crashes during
- * runtime. </p>
+ * runtime.</P>
  *
+ * <P>See the {@link arlut.csd.ganymede.DBEditSet DBEditSet} class for
+ * more information on Ganymede transactions.</P>
  */
 
 public class DBJournal implements ObjectStatus {

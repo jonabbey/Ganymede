@@ -6,8 +6,8 @@
    
    Created: 14 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:27 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/06/09 04:03:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,6 +57,11 @@ import java.awt.*;
                                                                         BaseNode
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>Subclass of {@link arlut.csd.JTree.treeNode treeNode} used in the admin
+ * console's schema editor.</P>
+ */
 
 class BaseNode extends arlut.csd.JTree.treeNode {
 

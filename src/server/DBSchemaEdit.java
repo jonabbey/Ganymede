@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 1999/06/09 03:33:37 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 1999/06/09 04:03:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import java.io.*;
  * for fields that are not yet in use in the database, not to try to redefine
  * parts of the database that are in actual use and which hold actual data.</P>
  *
- * <P>Generally speaking, the schema editing system is really the most fragile
+ * <P>The schema editing system is really the most fragile
  * thing in the Ganymede server.  It generally works, but it is not as robust
  * as it ought to be.  It's always a good idea to make a backup copy of your
  * ganymede.db file before going in and editing your database schema.</P>

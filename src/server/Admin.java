@@ -10,8 +10,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:24 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/06/09 04:03:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -54,6 +54,24 @@ package arlut.csd.ganymede;
 
 import java.rmi.*;
 import java.util.*;
+
+/*------------------------------------------------------------------------------
+                                                                       interface
+                                                                           Admin
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>RMI interface that must be implemented by clients that connect to the
+ * {@link arlut.csd.ganymede.GanymedeServer GanymedeServer} through the 
+ * {@link arlut.csd.ganymede.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin()}
+ * method.  Basically, the admin console and other programs that can act like the
+ * admin console have to implement this interface someplace.</P>
+ *
+ * <P>The server uses this interface to call methods on the admin console to
+ * update the console's status displays.  The server also uses this interface
+ * to authenticate the console with the getName() and getPassword() methods.</P> 
+ */
 
 public interface Admin extends Remote {
   String getName() throws RemoteException;
