@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 2000/02/14 20:44:57 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 2000/05/27 01:47:41 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -146,7 +146,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   public GASHAdmin() 
   {
-    admin_logo = PackageResources.getImageResource(this, "admint2.gif", getClass());
+    admin_logo = PackageResources.getImageResource(this, "admin.gif", getClass());
     GASHAdmin.applet = this;
   }
 
