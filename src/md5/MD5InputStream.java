@@ -1,5 +1,5 @@
 /* 
- * $Header: /home/broccol/ganymede/cvsroot/ganymede/src/md5/MD5InputStream.java,v 1.1 1999/08/05 22:07:03 broccol Exp $
+ * $Header: /home/broccol/ganymede/cvsroot/ganymede/src/md5/MD5InputStream.java,v 1.2 2002/03/16 01:46:39 broccol Exp $
  *
  * MD5InputStream, a subclass of FilterInputStream implementing MD5
  * functionality on a stream.
@@ -27,6 +27,9 @@
  * and the MD5 class.  
  *
  * $Log: MD5InputStream.java,v $
+ * Revision 1.2  2002/03/16 01:46:39  broccol
+ * Moved the MD5 classes into the md5 package to make 1.4 javac happy
+ *
  * Revision 1.1  1999/08/05 22:07:03  broccol
  * Added support for the MD5 classes.
  *
@@ -41,14 +44,15 @@
  *
  */
 
-import MD5;
+package md5;
+
 import java.io.*;
 
 /**
  * MD5InputStream is a subclass of FilterInputStream adding MD5
  * hashing of the read input.
  *
- * @version	$Revision: 1.1 $
+ * @version	$Revision: 1.2 $
  * @author	Santeri Paavolainen <santtu@cs.hut.fi>
  */
 

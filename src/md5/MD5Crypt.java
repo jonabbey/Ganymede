@@ -4,8 +4,8 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/03/21 02:57:43 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2002/03/16 01:46:39 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
    ----------------------------------------------------------------------------
@@ -53,7 +53,7 @@
 
 */
 
-import MD5;
+package md5;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -69,8 +69,8 @@ import MD5;
  *
  * <p>Created: 3 November 1999</p>
  * <p>Release: $Name:  $</p>
- * <p>Version: $Revision: 1.7 $</p>
- * <p>Last Mod Date: $Date: 2000/03/21 02:57:43 $</p>
+ * <p>Version: $Revision: 1.8 $</p>
+ * <p>Last Mod Date: $Date: 2002/03/16 01:46:39 $</p>
  * <p>Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
  * <p>Original C Version:<pre>
  * ----------------------------------------------------------------------------

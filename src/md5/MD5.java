@@ -1,5 +1,5 @@
 /*
- * $Header: /home/broccol/ganymede/cvsroot/ganymede/src/md5/MD5.java,v 1.2 1999/11/04 21:38:00 broccol Exp $
+ * $Header: /home/broccol/ganymede/cvsroot/ganymede/src/md5/MD5.java,v 1.3 2002/03/16 01:46:39 broccol Exp $
  *
  * MD5 in Java JDK Beta-2
  * written Santeri Paavolainen, Helsinki Finland 1996
@@ -34,6 +34,9 @@
  *
  *
  * $Log: MD5.java,v $
+ * Revision 1.3  2002/03/16 01:46:39  broccol
+ * Moved the MD5 classes into the md5 package to make 1.4 javac happy
+ *
  * Revision 1.2  1999/11/04 21:38:00  broccol
  * Got MD5Crypt calculating the same hash as the OpenBSD md5crypt.c routine.
  *
@@ -50,6 +53,8 @@
  * Initial revision
  *
  */
+
+package md5;			// thanks for nothing, java 1.4!
 
 /**
  * Contains internal state of the MD5 class
@@ -104,7 +109,7 @@ class MD5State {
 /**
  * Implementation of RSA's MD5 hash generator
  *
- * @version	$Revision: 1.2 $
+ * @version	$Revision: 1.3 $
  * @author	Santeri Paavolainen <sjpaavol@cc.helsinki.fi>
  */
 
