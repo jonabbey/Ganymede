@@ -5,7 +5,7 @@
    This class holds the basic per-object / per-field access control bits.
    
    Created: 27 June 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,13 +19,13 @@ package arlut.csd.ganymede;
 
 ------------------------------------------------------------------------------*/
 
-private boolean visible;
-private boolean editable;
-private boolean create;
-
-/* -- */
-
 public class PermEntry implements java.io.Serializable {
+
+  private boolean visible;
+  private boolean editable;
+  private boolean create;
+
+  /* -- */
 
   public PermEntry(boolean visible, boolean editable, boolean create)
   {
