@@ -38,6 +38,18 @@ in the list.
 The query box now uses a pair of StringSelectors to represent
 the list of field choices rather than a bunch of checkboxes.
 
+5. [SERVER] Fixed namespace constraint handling during schema editing
+
+Previously, it was possible during schema editing to set a namespace
+constraint on a field that contained data in violation of that
+constraint.  Now the schema editor will not allow any schema edits to
+be made that would allow a namespace constraint to be placed on a
+field that contains data in violation of such a uniqueness constraint.
+
+With this change, it should now be impossible to put the server into a
+state where fields hold data in contradiction to an expressed
+uniqueness constraint.
+
 -------------------- Changes from 1.02 to 1.03 -------------------
 
 RELEASE DATE: June 22, 2001
