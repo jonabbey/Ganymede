@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.137 $
-   Last Mod Date: $Date: 2002/06/27 21:54:36 $
+   Version: $Revision: 1.138 $
+   Last Mod Date: $Date: 2002/08/07 02:23:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -151,7 +151,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.137 $ $Date: 2002/06/27 21:54:36 $
+ * @version $Revision: 1.138 $ $Date: 2002/08/07 02:23:07 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2450,9 +2450,10 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	if (table != null)
 	  {
+	    int size = table.size();
 	    Enumeration enum = table.elements();
 
-	    while (enum.hasMoreElements())
+	    for (int i = 0; i < size; i++)
 	      {
 		results.addElement(enum.nextElement());
 	      }

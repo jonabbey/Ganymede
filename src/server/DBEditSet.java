@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.124 $
-   Last Mod Date: $Date: 2002/08/02 08:52:57 $
+   Version: $Revision: 1.125 $
+   Last Mod Date: $Date: 2002/08/07 02:23:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -309,11 +309,13 @@ public class DBEditSet {
   {
     synchronized (objects)
       {
-	DBEditObject[] results = new DBEditObject[objects.size()];
+	int size = objects.size();
+
+	DBEditObject[] results = new DBEditObject[size];
 	
 	Enumeration enum = objects.elements();
 	
-	for (int i = 0; enum.hasMoreElements(); i++)
+	for (int i = 0; i < size; i++)
 	  {
 	    results[i] = (DBEditObject) enum.nextElement();
 	  }
