@@ -213,7 +213,11 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 		  }
 		else if (element instanceof passwordThing)
 		  {
-		    System.out.println("Adding password field(JstringField)");
+		    if (debug)
+		      {
+			System.out.println("Adding password field(JstringField)");
+		      }
+
 		    passwordThing pt = (passwordThing)element;
 		    JstringField sf = new JstringField();
 		    //		    sf.setEchoChar('*');
@@ -349,7 +353,11 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 	String label = (String)componentHash.get(obj);
 	Choice ch = (Choice)obj;
 	valueHash.put(label, ch.getSelectedItem());
-	System.out.println(ch.getSelectedItem() + " chosen");
+	
+	if (debug)
+	  {
+	    System.out.println(ch.getSelectedItem() + " chosen");
+	  }
       }
     else
       {
@@ -366,7 +374,11 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 	String label = (String)componentHash.get(comp);
 	JstringField sf = (JstringField)comp;
 	valueHash.put(label, sf.getText());
-	System.out.println("Setting " + label + " to " + sf.getText());
+
+	if (debug)
+	  {
+	    System.out.println("Setting " + label + " to " + sf.getText());
+	  }
       }
     else if (comp instanceof JcheckboxField)
       {
