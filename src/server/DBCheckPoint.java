@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/04/20 18:21:50 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/11/16 08:00:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -81,6 +81,8 @@ class DBCheckPoint {
     objects = null,
     logEvents = null;
 
+  Hashtable noDeleteLocks;
+
   /* -- */
 
   DBCheckPoint(String name, DBEditSet transaction)
@@ -110,6 +112,8 @@ class DBCheckPoint {
 
 	objects.addElement(new DBCheckPointObj(obj));
       }
+
+    noDeleteLocks = (Hashtable) transaction.noDeleteLocks.clone();
   }
 }
 

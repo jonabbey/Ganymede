@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 1999/10/13 20:02:13 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 1999/11/16 08:01:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -574,6 +574,9 @@ public class Ganymede {
     // terminate here.
 
     // wa-la
+
+    //    debug("Dumping all back pointers.. kill me, please");
+    //    db.debugBackPointers();
 
     if (debug)
       {

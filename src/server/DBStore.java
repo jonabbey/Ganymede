@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.96 $
-   Last Mod Date: $Date: 1999/11/05 00:31:36 $
+   Version: $Revision: 1.97 $
+   Last Mod Date: $Date: 1999/11/16 08:01:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.96 $ %D%
+ * @version $Revision: 1.97 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -141,7 +141,11 @@ public class DBStore {
    * after id_string
    */
 
-  static final byte minor_version = 16;
+  static final byte minor_version = 17;
+
+  /**
+   * Enable/disable debug in the DBStore methods
+   */
 
   static boolean debug = false;
 
@@ -177,6 +181,17 @@ public class DBStore {
   Hashtable objectBases;
 
   /** 
+   * <p>hash mapping {@link arlut.csd.ganymede.Invid Invid}'s to Hashtables
+   * of Invid's.  Used to record the set of Invids that point to a
+   * given Invid.</p>
+   *
+   * <p>That is, backPointers.get(anInvid) returns a hashtable whose keys
+   * are the Invid's that point to anInvid via an asymmetric link.</p>
+   */
+
+  Hashtable backPointers;
+
+  /** 
    * <P>Identifier keys for current {@link arlut.csd.ganymede.DBLock
    * DBLocks}.</P>
    *
@@ -190,6 +205,12 @@ public class DBStore {
    */
 
   Hashtable lockHash;
+
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.DBSession DBSession} objects.</p>
+   */
+
+  Vector sessions;
 
   /** 
    * A collection of {@link arlut.csd.ganymede.DBNameSpace
@@ -265,8 +286,10 @@ public class DBStore {
     debug = Ganymede.debug;
 
     objectBases = new Hashtable(20); // default 
+    backPointers = new Hashtable(1000);	// default
     lockHash = new Hashtable(20); // default
     nameSpaces = new Vector();
+    sessions = new Vector();
 
     try
       {
@@ -954,34 +977,104 @@ public class DBStore {
   }
 
   /**
-   * <p>Creates a {@link arlut.csd.ganymede.DBSession DBSession}
-   * handle on this database.  Each {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
-   * created in the Ganymede Server will also have a DBSession.</p>
-   *
-   * @param key Identifying key
+   * <p>Adds a session to our records.</p>
    */
 
-  protected synchronized DBSession login(Object key)
+  public synchronized void login(DBSession session)
   {
     try
       {
-	DBSession retVal;
+	this.sessions.addElement(session);
+      }
+    finally
+      {
+	this.notifyAll();
+      }
+  }
 
-	/* -- */
+  /**
+   * <p>Removes a session from our records.</p>
+   */
 
-	if (schemaEditInProgress)
+  public synchronized void logout(DBSession session)
+  {
+    try
+      {
+	this.sessions.removeElement(session);
+      }
+    finally
+      {
+	this.notifyAll();
+      }
+  }
+
+  /**
+   * <p>This method returns true if no transaction is
+   * blocking deletion of the invid in question due to
+   * having an object checked out which has an asymmetric
+   * pointer to the object.</p>
+   *
+   * @param myTransaction The DBSession that is checking on deletion privs
+   */
+
+  public synchronized boolean okToDelete(Invid invid, DBSession mySession)
+  {
+    if (true)
+      {
+	System.err.println("DBStore.okToDelete(" + Ganymede.internalSession.describe(invid) + ") entering");
+      }
+
+    try
+      {
+	for (int i = 0; i < sessions.size(); i++)
 	  {
-	    throw new RuntimeException("can't login, the server's in schema edit mode");
+	    DBSession session = (DBSession) sessions.elementAt(i);
+	
+	    if (true)
+	      {
+		System.err.println("DBStore.okToDelete() checking session " + session);
+	      }
+
+	    // if mySession is equal to session, the fact that a deletion
+	    // block is set won't really stop us, since that transaction
+	    // can handle the blocking object in its own transaction
+	
+	    if (session == mySession)
+	      {
+		if (true)
+		  {
+		    System.err.println("DBStore.okToDelete() skipping session " + session);
+		  }
+		continue;
+	      }
+
+	    synchronized (session)
+	      {
+		DBEditSet editSet = session.editSet;
+
+		if (editSet == null)
+		  {
+		    System.err.println("DBStore.okToDelete() session " + session + " has null editset");
+		  }
+
+		if (editSet != null && !editSet.canDelete(invid))
+		  {
+		    if (true)
+		      {
+			System.err.println("DBStore.okToDelete() refusing delete");
+		      }
+
+		    return false;
+		  }
+	      }
 	  }
 
-	if (sweepInProgress)
+	if (true)
 	  {
-	    throw new RuntimeException("can't login, the server is performing an invid sweep");
+	    System.err.println("DBStore.okToDelete() okaying delete");
 	  }
 
-	retVal = new DBSession(this, null, key);
-
-	return retVal;
+	return true;
       }
     finally
       {
@@ -1086,13 +1179,13 @@ public class DBStore {
 	  {
 	    result.addElement(((DBObjectBase) enum.nextElement()).getName());
 	  }
+
+	return result;
       }
     finally
       {
 	this.notifyAll();
       }
-
-    return result;
   }
 
   /**
@@ -1222,17 +1315,24 @@ public class DBStore {
 
     /* -- */
 
-    for (int i = 0; i < nameSpaces.size(); i++)
+    try
       {
-	namespace = (DBNameSpace) nameSpaces.elementAt(i);
-
-	if (namespace.name.equals(name))
+	for (int i = 0; i < nameSpaces.size(); i++)
 	  {
-	    return namespace;
+	    namespace = (DBNameSpace) nameSpaces.elementAt(i);
+	    
+	    if (namespace.name.equals(name))
+	      {
+		return namespace;
+	      }
 	  }
+	
+	return null;
       }
-
-    return null;
+    finally
+      {
+	this.notifyAll();
+      }
   }
 
   /**
@@ -2363,4 +2463,34 @@ public class DBStore {
       }
   }
 
+  public void debugBackPointers()
+  {
+    synchronized (backPointers)
+      {
+	Enumeration enum = backPointers.keys();
+
+	while (enum.hasMoreElements())
+	  {
+	    Invid objInvid = (Invid) enum.nextElement();
+
+	    System.err.println("Object: " + describe(objInvid));
+
+	    Hashtable backs = (Hashtable) backPointers.get(objInvid);
+
+	    Enumeration backenum = backs.keys();
+
+	    while (backenum.hasMoreElements())
+	      {
+		System.err.println("\t" + describe((Invid) backenum.nextElement()));
+	      }
+
+	    System.err.println("\n");
+	  }
+      }
+  }
+
+  private final String describe(Invid x)
+  {
+    return Ganymede.internalSession.describe(x);
+  }
 }

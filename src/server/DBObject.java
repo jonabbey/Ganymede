@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 1999/10/29 18:45:13 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 1999/11/16 08:00:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.81 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.82 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -160,14 +160,6 @@ public class DBObject implements db_object, FieldType, Remote {
 
   /**
    *
-   * 32 bit id - the object's invariant id
-   *
-   */
-
-  protected int id;
-
-  /**
-   *
    * Our field table, essentially a custom hash of DBField objects
    * keyed by their numeric field id's.
    *
@@ -187,13 +179,6 @@ public class DBObject implements db_object, FieldType, Remote {
    */
 
   DBEditObject shadowObject;	
-
-  /**
-   * transaction that this object has been checked out in
-   * care of, if any.
-   */
-
-  protected DBEditSet editset;	
 
   /**
    * if this object is being viewed by a particular
@@ -243,13 +228,11 @@ public class DBObject implements db_object, FieldType, Remote {
   DBObject(DBObjectBase objectBase)
   {
     this.objectBase = objectBase;
-    id = 0;
     fields = null;
 
     shadowObject = null;
-    editset = null;
 
-    myInvid = new Invid(objectBase.type_code, id);
+    myInvid = new Invid(objectBase.type_code, 0);
     gSession = null;
   }
 
@@ -263,7 +246,6 @@ public class DBObject implements db_object, FieldType, Remote {
   DBObject(DBObjectBase objectBase, int id)
   {
     this(objectBase);
-    this.id = id;
     myInvid = new Invid(objectBase.type_code, id);
     gSession = null;
   }
@@ -279,7 +261,6 @@ public class DBObject implements db_object, FieldType, Remote {
   {
     this.objectBase = objectBase;
     shadowObject = null;
-    editset = null;
     receive(in, journalProcessing);
     gSession = null;
   }
@@ -305,11 +286,9 @@ public class DBObject implements db_object, FieldType, Remote {
     /* -- */
 
     objectBase = eObj.objectBase;
-    id = eObj.id;
     myInvid = eObj.myInvid;
 
     shadowObject = null;
-    editset = null;
 
     fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
 
@@ -354,11 +333,9 @@ public class DBObject implements db_object, FieldType, Remote {
     /* -- */
 
     objectBase = original.objectBase;
-    id = original.id;
     myInvid = original.myInvid;
 
     shadowObject = null;
-    editset = null;
 
     fields = new DBFieldTable(original.fields.size(), (float) 1.0);
 
@@ -485,7 +462,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public final int hashCode()
   {
-    return id;
+    return myInvid.getNum();
   }
 
   /**
@@ -497,7 +474,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public final int getID()
   {
-    return id;
+    return myInvid.getNum();
   }
 
   /**
@@ -546,6 +523,16 @@ public class DBObject implements db_object, FieldType, Remote {
   public final DBObjectBase getBase()
   {
     return objectBase;
+  }
+
+  /**
+   * <p>Returns the GanymedeSession that this object is checked out in
+   * care of.</p>
+   */
+
+  public GanymedeSession getGSession()
+  {
+    return gSession;
   }
 
   /**
@@ -758,7 +745,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
     //    System.err.println("Partial Emitting " + objectBase.getName() + " <" + id + ">");
 
-    out.writeInt(id);
+    out.writeInt(getID());
 
     if (objectBase.getTypeID() == SchemaConstants.OwnerBase)
       {
@@ -814,6 +801,11 @@ public class DBObject implements db_object, FieldType, Remote {
 	field = (DBField) enum.nextElement();
 	keynum = field.getID();
 	key = new Short(keynum);
+
+	if (keynum == SchemaConstants.BackLinksField)
+	  {
+	    continue;	// don't write out the backlinks field
+	  }
 
 	if (fieldsToEmit.contains(key))
 	  {
@@ -901,12 +893,12 @@ public class DBObject implements db_object, FieldType, Remote {
 
     //    System.err.println("Emitting " + objectBase.getName() + " <" + id + ">");
 
-    out.writeInt(id);
+    out.writeInt(getID());
 
     if (fields.size() == 0)
       {
 	Ganymede.debug("**** Error: writing object with no fields: " + 
-		       objectBase.getName() + " <" + id + ">");
+		       objectBase.getName() + " <" + getID() + ">");
       }
 
     out.writeShort(fields.size());
@@ -926,6 +918,11 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	if (debugEmit)
 	  {
+	    if (field.getID() == SchemaConstants.BackLinksField)
+	      {
+		continue;	// don't write out the backlinks fieldn
+	      }
+
 	    if (field.isDefined())
 	      {
 		out.writeShort(field.getID());
@@ -939,6 +936,11 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
 	else
 	  {
+	    if (field.getID() == SchemaConstants.BackLinksField)
+	      {
+		continue;	// don't write out the backlinks fieldn
+	      }
+
 	    out.writeShort(field.getID());
 	    field.emit(out);
 	  }
@@ -971,8 +973,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
     // get our unique id
 
-    id = in.readInt();
-    myInvid = new Invid(objectBase.type_code, id);
+    myInvid = new Invid(objectBase.type_code, in.readInt());
 
     // get number of fields
 
@@ -980,7 +981,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
     if (debug && tmp_count == 0)
       {
-	System.err.println("DBObject.receive(): No fields reading object " + id);
+	System.err.println("DBObject.receive(): No fields reading object " + getID());
       }
 
     if (tmp_count > 0)
@@ -1037,6 +1038,12 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	  case INVID:
 	    tmp = new InvidDBField(this, in, definition);
+
+	    if (fieldcode == SchemaConstants.BackLinksField)
+	      {
+		continue;	// don't actually put this field in the object
+	      }
+
 	    break;
 
 	  case PERMISSIONMATRIX:
@@ -1208,7 +1215,16 @@ public class DBObject implements db_object, FieldType, Remote {
 	shadowObject = new DBEditObject(this, editset);
       }
 
-    editset.addObject(shadowObject);
+    // if this object currently points to an object that
+    // is being deleted by way of an asymmetric InvidDBField,
+    // addObject() may fail.  In this case, we have to deny
+    // the edit
+
+    if (!editset.addObject(shadowObject))
+      {
+	shadowObject = null;
+	return null;
+      }
 
     // update the session's checkout count first, then
     // update the database's overall checkout, which
@@ -1216,7 +1232,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
     if (editset.session.GSession != null)
       {
-	editset.session.GSession.checkOut();
+	editset.session.GSession.checkOut(); // update session checked out count
       }
 
     objectBase.store.checkOut(); // update checked out count
@@ -1256,19 +1272,6 @@ public class DBObject implements db_object, FieldType, Remote {
     objectBase.store.checkIn(); // update checked out count
 
     return true;
-  }
-
-  /**
-   * <p>Returns the transaction object owning this object, or
-   * null if an unowned data object.</p>
-   *
-   * <p>Note that this is public, but not made available
-   * to the client via a remote interface.</p>
-   */
-
-  public DBEditSet getEditSet()
-  {
-    return editset;
   }
 
   /**
@@ -1952,7 +1955,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
     /* -- */
 
-    out.println("Invid: <" + objectBase.object_name + ":" + id + ">");
+    out.println("Invid: <" + objectBase.object_name + ":" + getID() + ">");
    
     enum = fields.elements();
 
@@ -2069,4 +2072,134 @@ public class DBObject implements db_object, FieldType, Remote {
 
     return field.getValueString();
   }
+
+  /** 
+   * <p>This method returns a Vector of Invids for objects that are
+   * pointed to from this object by way of non-symmetric links.  These
+   * are Invids that may need to be marked as non-deletable if this
+   * object is checked out by a DBEditSet.</p> 
+   */
+
+  public synchronized Vector getASymmetricTargets()
+  {
+    Vector results = new Vector();
+    Enumeration enum = fields.elements();
+    DBField field;
+    InvidDBField invField;
+    
+    while (enum.hasMoreElements())
+      {
+	field = (DBField) enum.nextElement();
+
+	if (field instanceof InvidDBField)
+	  {
+	    invField = (InvidDBField) field;
+
+	    if (invField.isDefined() && !invField.getFieldDef().isSymmetric())
+	      {
+		if (!invField.isVector())
+		  {
+		    VectorUtils.unionAdd(results, invField.value);
+		  }
+		else
+		  {
+		    results = VectorUtils.union(results, invField.getValuesLocal());
+		  }
+	      }
+	  }
+      }
+
+    return results;
+  }
+
+  /**
+   * <p>This method is called to register all asymmetric pointers in
+   * this object with the DBStore's backPointers hash structure.</p>
+   *
+   * <p>Typically this will be done when an object is first loaded from
+   * the database, at a time when the DBStore backPointers hash structure
+   * has no entries for this object at all.</p>
+   *
+   * <p>During the commit process of a normal transaction, the
+   * {@link arlut.csd.ganymede.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.DBEditObject) syncObjBackPointers()}
+   * method in the {@link arlut.csd.ganymede.DBEditSet DBEditSet} class handles these
+   * updates.</p>
+   */
+
+  void setBackPointers()
+  {
+    Vector backPointers;
+    Invid target;
+    Hashtable reverseLinks;
+
+    /* -- */
+
+    synchronized (Ganymede.db.backPointers)
+      {
+	backPointers = getASymmetricTargets();
+
+	for (int i = 0; i < backPointers.size(); i++)
+	  {
+	    target = (Invid) backPointers.elementAt(i);
+
+	    reverseLinks = (Hashtable) Ganymede.db.backPointers.get(target);
+
+	    if (reverseLinks == null)
+	      {
+		reverseLinks = new Hashtable();
+		Ganymede.db.backPointers.put(target, reverseLinks);
+	      }
+
+	    reverseLinks.put(getInvid(), getInvid());
+	  }
+      }
+  }
+
+  /**
+   * <p>This method is called to unregister all asymmetric pointers in
+   * this object from the DBStore's backPointers hash structure.</p>
+   *
+   * <p>Typically this will be done when an object is being deleted from
+   * the database in response to a journal entry, or if the object is
+   * being replaced with an updated version from the journal.</p>
+   *
+   * <p>During the commit process of a normal transaction, the
+   * {@link arlut.csd.ganymede.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.DBEditObject) syncObjBackPointers()}
+   * method in the {@link arlut.csd.ganymede.DBEditSet DBEditSet} class handles these
+   * updates.</p>
+   */
+
+  void unsetBackPointers()
+  {
+    Vector backPointers;
+    Invid target;
+    Hashtable reverseLinks;
+
+    /* -- */
+
+    synchronized (Ganymede.db.backPointers)
+      {
+	backPointers = getASymmetricTargets();
+
+	for (int i = 0; i < backPointers.size(); i++)
+	  {
+	    target = (Invid) backPointers.elementAt(i);
+
+	    reverseLinks = (Hashtable) Ganymede.db.backPointers.get(target);
+
+	    if (reverseLinks == null)
+	      {
+		continue;
+	      }
+
+	    reverseLinks.remove(getInvid());
+
+	    if (reverseLinks.size() == 0)
+	      {
+		Ganymede.db.backPointers.remove(target);
+	      }
+	  }
+      }
+  }
+
 }

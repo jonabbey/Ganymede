@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 1999/10/29 21:46:48 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 1999/11/16 08:01:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.</P>
  *
- * @version $Revision: 1.112 $ %D%
+ * @version $Revision: 1.113 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -452,16 +452,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // where will we go to look up the label for our target(s)?
 
-    try
-      {
-	if (owner.editset != null)
-	  {
-	    gsession = owner.editset.getSession().getGSession();
-	  }
-      }
-    catch (NullPointerException ex)
-      {
-      }
+    gsession = owner.getGSession();
 
     if (gsession == null)
       {
@@ -629,16 +620,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     origI = (InvidDBField) orig;
 
-    try
-      {
-	if (owner.editset != null)
-	  {
-	    gsession = owner.editset.getSession().getGSession();
-	  }
-      }
-    catch (NullPointerException ex)
-      {
-      }
+    gsession = owner.getGSession();
     
     if (gsession == null)
       {
@@ -908,6 +890,11 @@ public final class InvidDBField extends DBField implements invid_field {
     eObj = (DBEditObject) this.owner;
     session = eObj.getSession();
 
+    if ((oldRemote != null) && oldRemote.equals(newRemote))
+      {
+	return null;		// success
+      }
+
     // find out whether there is an explicit back-link field
 
     if (getFieldDef().isSymmetric())
@@ -918,12 +905,49 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	targetField = SchemaConstants.BackLinksField;
-      }
+	// the containerField in an embedded object is a special case.
+	// the containerField is generic across all embedded objects
+	// and doesn't contain the data we need to connect this field
+	// with the embedded object field in our container object.
 
-    if ((oldRemote != null) && oldRemote.equals(newRemote))
-      {
-	return null;		// success
+	// because of this, we won't attempt to try to do a bind here.
+	// instead, this binding will get done by the InvidDBField
+	// createNewEmbedded() method, which handles all the details
+
+	if (owner.objectBase.isEmbedded() && getID() == SchemaConstants.ContainerField)
+	  {
+	    return null;	// done!
+	  }
+
+	// With an asymmetric field, we don't actually ever touch the
+	// target object(s).  Instead, we depend on the DBEditSet
+	// commit logic doing an update of the DBStore backPointers
+	// hash structure at the right time.
+
+	// We do need to make sure that we're not trying to link to
+	// an object that is in the middle of being deleted, so we
+	// check that here.  If deleteLock() returns a successful
+	// result code, the system will prevent the target object
+	// from being deleted until our transaction has cleared.
+
+	// Note that we don't both clearing a delete lock on
+	// oldRemote, which we may still link to in some fashion.  The
+	// user may cancel the transaction, in which case the target
+	// object had better not be deleted.
+
+	retVal = eObj.getEditSet().deleteLock(newRemote);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return Ganymede.createErrorDialog("Bind link error",
+					      "Can't forge an asymmetric link between " + this.toString() +
+					      " and invid " + newRemote.toString() +
+					      ", the target object is being deleted.");
+	  }
+	else
+	  {
+	    return retVal;
+	  }
       }
 
     // check out the old object and the new object
@@ -957,7 +981,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	// having permission to edit it generally.
 
 	anonymous = session.getObjectHook(oldRemote).anonymousUnlinkOK(remobj,
-								       targetField, 
+								       targetField,
 								       this.getOwner(),
 								       this.getID(),
 								       session.getGSession());
@@ -1022,11 +1046,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // editDBObject() will create undefined fields for all fields defined
 	    // in the DBObjectBase, so if we got a null result we have a schema
 	    // corruption problem.
-
-	    String tempString = "InvidDBField.bind: old target field not defined <" + owner.getLabel() +
-	      ":" + getName() + "> in <" + oldRef.getLabel() + ":" + targetField + ">";
-	    
-	    setLastError(tempString);
 
 	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink old reference",
 					      "Your operation could not succeed due to a possible inconsistency in the " +
@@ -1119,11 +1138,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	// in the DBObjectBase, so if we got a null result we have a schema
 	// corruption problem.
 	
-	String tempString = "InvidDBField.bind: target field not defined <" + owner.getLabel() +
-	  ":" + getName() + "> in <" + newRef.getLabel() + ":" + targetField + ">";
-
-	setLastError(tempString);
-
 	return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link new reference",
 					  "Your operation could not succeed due to a possible inconsistency in the " +
 					  "server database.  Target field number " + targetField +
@@ -1242,42 +1256,6 @@ public final class InvidDBField extends DBField implements invid_field {
     eObj = (DBEditObject) this.owner;
     session = eObj.getSession();
 
-    // if we are unbinding a backlinks field, we want to use
-    // unbindAll() to clear any fields that are using the backlinks
-    // pool.
-
-    if (this.getID() == SchemaConstants.BackLinksField)
-      {
-	// our owner will set clearingBackLinks if it is doing a mass
-	// deletion of all links in the BackLinksField.. in this case,
-	// we don't need or want to wrap our unbindAll() call with our
-	// own checkpoint/rollback pair.
-
-	if (eObj.clearingBackLinks)
-	  {
-	    retVal = unbindAll(remote, local);
-	  }
-	else
-	  {
-	    String checkKey = "unbindAll()" + new Date();
-	
-	    session.checkpoint(checkKey);
-	    
-	    retVal = unbindAll(remote, local);
-	    
-	    if (retVal == null || retVal.didSucceed())
-	      {
-		session.popCheckpoint(checkKey);
-	      }
-	    else
-	      {
-		session.rollback(checkKey);
-	      }
-	  }
-
-	return retVal;
-      }
-
     // find out whether there is an explicit back-link field
 
     if (getFieldDef().isSymmetric())
@@ -1288,7 +1266,13 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	targetField = SchemaConstants.BackLinksField;
+	// if we are unbinding an asymmetric field, we do nothing.
+	// the fact that we were linked at some point during this
+	// transaction is enough that we have to maintain the
+	// deletelock that DBEditSet asserted when this object was
+	// pulled into the transaction.
+
+	return null;
       }
 
     // check to see if we have permission to anonymously unlink
@@ -1713,12 +1697,43 @@ public final class InvidDBField extends DBField implements invid_field {
 
   private synchronized final ReturnVal dissolve(Invid oldInvid, boolean local)
   {
+    return this.dissolve(oldInvid, local, false);
+  }
+
+  /**
+   *
+   * <p>This method is used to effect the remote side of an unbind operation.</p>
+   *
+   * <p>An InvidDBField being manipulated with the standard editing accessors
+   * (setValue, addElement, deleteElement, setElement) will call this method
+   * on another InvidDBField in order to unlink a pair of symmetrically bound
+   * InvidDBFields.</p>
+   *
+   * <p>This method will return false if the unbinding could not be performed for
+   * some reason.</p>
+   *
+   * <p>This method is private, and is not to be called by any code outside
+   * of this class.</p>
+   *
+   * @param oldInvid The invid to be unlinked from this field.  If this
+   * field is not linked to the invid specified, nothing will happen.
+   * @param local if true, this operation will be performed without regard
+   * to permissions limitations.
+   * @param allTargets if true, dissolve will remove all references to oldInvid,
+   * rather than just one.
+   *
+   */
+
+  synchronized final ReturnVal dissolve(Invid oldInvid, boolean local, boolean allTargets)
+  {
     int 
       index = -1;
 
     Invid tmp;
 
     DBEditObject eObj;
+
+    ReturnVal successVal = new ReturnVal(true, true);
 
     /* -- */
 
@@ -1729,10 +1744,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-	// note that we only want to remove one instance of the invid pointing
-	// to us.. we may have multiple fields on the remote object pointing
-	// to us, and we want to only clear one back pointer at a time.
-
 	for (int i = 0; i < values.size(); i++)
 	  {
 	    tmp = (Invid) values.elementAt(i);
@@ -1740,7 +1751,42 @@ public final class InvidDBField extends DBField implements invid_field {
 	    if (tmp.equals(oldInvid))
 	      {
 		index = i;
-		break;
+
+		ReturnVal retVal = eObj.finalizeDeleteElement(this, index);
+
+		if (retVal == null || retVal.didSucceed())
+		  {
+		    values.removeElementAt(index);
+		   
+		    if (allTargets)
+		      {
+			successVal = successVal.unionRescan(retVal);
+		      }
+		  }
+		else
+		  {
+		    if (retVal.getDialog() != null)
+		      {
+			return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
+							  "The custom plug-in class for object " + eObj.getLabel() +
+							  "refused to allow us to clear out all " + 
+							  "the references in field " + 
+							  getName() + ":\n\n" + retVal.getDialog().getText());
+		      }
+		    else
+		      {
+			return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
+							  "The custom plug-in class for object " + eObj.getLabel() +
+							  "refused to allow us to clear out all " +
+							  "the references in field " + 
+							  getName());
+		      }
+		  }
+
+		if (!allTargets)
+		  {
+		    return retVal;
+		  }
 	      }
 	  }
 
@@ -1750,37 +1796,11 @@ public final class InvidDBField extends DBField implements invid_field {
 			   owner.getLabel() + ":" + getName() + 
 			   " called with an unbound invid (vector): " + 
 			   oldInvid.toString());
-
+	    
 	    return null;	// we're already dissolved, effectively
 	  }
 
-	ReturnVal retVal = eObj.finalizeDeleteElement(this, index);
-
-	if (retVal == null || retVal.didSucceed())
-	  {
-	    values.removeElementAt(index);
-
-	    return retVal;
-	  }
-	else
-	  {
-	    setLastError("InvidDBField remote dissolve: couldn't finalizeDeleteElement");
-
-	    if (retVal.getDialog() != null)
-	      {
-		return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
-						  "The custom plug-in class for object " + eObj.getLabel() +
-						  "refused to allow us to clear out all the references in field " + 
-						  getName() + ":\n\n" + retVal.getDialog().getText());
-	      }
-	    else
-	      {
-		return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
-						  "The custom plug-in class for object " + eObj.getLabel() +
-						  "refused to allow us to clear out all the references in field " + 
-						  getName());
-	      }
-	  }
+	return successVal;
       }
     else
       {
@@ -1801,8 +1821,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
-	    setLastError("InvidDBField remote dissolve: couldn't finalizeSetValue");
-
 	    if (retVal.getDialog() != null)
 	      {
 		return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeSetValue",
@@ -1864,8 +1882,6 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	if (size() >= getMaxArraySize())
 	  {
-	    setLastError("InvidDBField remote establish: vector overrun");
-
 	    return Ganymede.createErrorDialog("InvidDBField.establish(): field overrun",
 					      "Couldn't establish a new linkage in vector field " + getName() +
 					      " in object " + getOwner().getLabel() +
@@ -1909,8 +1925,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
-	    setLastError("InvidDBField remote establish: finalize returned false");
-
 	    if (retVal.getDialog() != null)
 	      {
 		return Ganymede.createErrorDialog("InvidDBField.establish(): field addvalue refused",
@@ -2635,7 +2649,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isVector())
       {
-	setLastError("vector accessor called on scalar field");
 	throw new IllegalArgumentException("vector accessor called on scalar field " +
 					   getName() + " in object " + owner.getLabel());
       }
@@ -2839,7 +2852,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // check this operation until we link the newly embedded object
     // into its container anyway.
 
-    DBEditObject embeddedObj = (DBEditObject) owner.editset.getSession().editDBObject(newObj); // *sync* DBSession DBObject
+    DBEditObject embeddedObj = ((DBEditObject) owner).getSession().editDBObject(newObj); // *sync* DBSession DBObject
 
     if (embeddedObj == null)
       {
@@ -2903,11 +2916,6 @@ public final class InvidDBField extends DBField implements invid_field {
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.addElement(newObj);
-
-	if (debug)
-	  {
-	    setLastError("InvidDBField debug: successfully added " + newObj);
-	  }
 
 	// now we need to initialize the new embedded object, since we
 	// defer that activity for embedded objects until after we
@@ -3187,7 +3195,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	else
 	  {
 	    return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
-					      "Couldn't finalize\n" + getLastError());
+					      "Couldn't finalize element deletion\n");
 	  }
       }
   }
@@ -3251,16 +3259,7 @@ public final class InvidDBField extends DBField implements invid_field {
 					   getName() + " in object " + owner.getLabel());
       }
 
-    try
-      {
-	if (owner.editset != null)
-	  {
-	    gsession = owner.editset.getSession().getGSession();
-	  }
-      }
-    catch (NullPointerException ex)
-      {
-      }
+    gsession = owner.getGSession();
 
     if (gsession == null)
       {

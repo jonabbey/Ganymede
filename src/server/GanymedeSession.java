@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.161 $
-   Last Mod Date: $Date: 1999/11/05 21:07:29 $
+   Version: $Revision: 1.162 $
+   Last Mod Date: $Date: 1999/11/16 08:01:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.161 $ %D%
+ * @version $Revision: 1.162 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3245,6 +3245,36 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     try
       {
 	return session.viewDBObject(invid).getLabel();
+      }
+    catch (NullPointerException ex)
+      {
+	return null;
+      }
+  }
+
+  /** 
+   * <P>This method is intended as a lightweight way of returning a
+   * handy description of the type and label of the specified invid.
+   * No locking is done, and the label returned will be viewed through
+   * the context of the current transaction, if any.</P> 
+   */
+
+  public String describe(Invid invid)
+  {
+    checklogin();
+
+    // We don't check permissions here, as we use session.viewDBObject().
+
+    // We have made the command decision that finding the label for an
+    // invid is not something we need to guard against.  Using
+    // session.viewDBObject() here makes this a much more lightweight
+    // operation.
+    
+    try
+      {
+	DBObject obj = session.viewDBObject(invid);
+
+	return obj.getTypeName() + " " + obj.getLabel();
       }
     catch (NullPointerException ex)
       {

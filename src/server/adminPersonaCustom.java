@@ -6,8 +6,8 @@
    
    Created: 8 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/10/07 21:04:10 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/11/16 08:01:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -244,7 +244,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	// supergash or monitor persona objects.
 
 	if ((field.getID() == SchemaConstants.PersonaAssocUser) &&
-	    (getInvid().getNum() <= 2))
+	    (getID() <= 2))
 	  {
 	    return Ganymede.createErrorDialog("Permissions Error",
 					      "It is not permitted to set an associated user on either the supergash " +
@@ -288,7 +288,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     // if we are messing with the supergash or monitor persona
     // objects, don't try to mess around with the associated user.
 
-    if (getInvid().getNum() <= 2)
+    if (getID() <= 2)
       {
 	return setFieldValueLocal(SchemaConstants.PersonaLabelField, descrip);
       }
@@ -426,7 +426,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	// supergash and monitor don't have to have associated users
 	// defined.
 
-	if (object.getInvid().getNum() <= 2)
+	if (object.getID() <= 2)
 	  {
 	    return false;
 	  }
@@ -478,7 +478,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
       {
 	DBObject object = field.getOwner();
 
-	if (object.getInvid().getNum() <= 2)
+	if (object.getID() <= 2)
 	  {
 	    return false;
 	  }

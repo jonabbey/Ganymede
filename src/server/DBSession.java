@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 1999/09/22 22:27:55 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 1999/11/16 08:00:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.75 $ %D%
+ * @version $Revision: 1.76 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -190,6 +190,8 @@ final public class DBSession {
     this.key = key;
     this.GSession = GSession;
 
+    store.login(this);
+
     editSet = null;
     lastError = null;
   }
@@ -207,6 +209,8 @@ final public class DBSession {
       {
 	abortTransaction();
       }
+
+    store.logout(this);
 
     this.store = null;
   }
@@ -359,9 +363,45 @@ final public class DBSession {
 	      }
 	  }
 
-	// register the object as created	
+	// register the object as created
 
-	editSet.addObject(e_object);
+	// this can fail if the e_object comes to us already pointing
+	// to an object that is being deleted by another transaction
+	// by way of an asymmetric InvidDBField.  This should never
+	// happen, as it would require a custom object's constructor
+	// to have set an InvidDBField value instead of putting that
+	// logic in its initializeNewObject() method, but we should
+	// check just in case.
+
+	if (!editSet.addObject(e_object))
+	  {
+	    if (checkpointset)
+	      {
+		rollback(ckp_label);
+		checkpointset = false;
+	      }
+
+	    return Ganymede.createErrorDialog("Object creation failure",
+					      "Couldn't create the object, because it came pre-linked " +
+					      "to a deleted object.\nDon't worry, this wasn't your fault.\n" +
+					      "Talk to whoever customized Ganymede for you, or try again later.");
+	  }
+
+	// update admin consoles
+	//
+	// Now that we've added our new object to our transaction, we need
+	// to update objects checked-out counts.  After this point, doing a
+	// rollback will cause the session and server check-out counts to
+	// be decremented for our new object, and we have to increment it
+	// before that happens.
+	//
+	// we need to do the session's checkout count first, then
+	// update the database's overall checkout, which
+	// will trigger a console update
+	
+	GSession.checkOut();
+	
+	store.checkOut();
 
 	if (!base.isEmbedded())
 	  {
@@ -406,16 +446,6 @@ final public class DBSession {
 	  }
       }
 
-    // update admin consoles
-    
-    // update the session's checkout count first, then
-    // update the database's overall checkout, which
-    // will trigger a console update
-    
-    GSession.checkOut();
-    
-    store.checkOut();
-    
     // set the following false to true to view the initial state of the object
     
     if (false)
@@ -590,6 +620,8 @@ final public class DBSession {
       }
     else
       {
+	// the createShadow call will update the check-out counts
+
 	DBEditObject eObj = obj.createShadow(editSet); // *sync* DBObject
 
 	if (eObj == null)
@@ -865,13 +897,41 @@ final public class DBSession {
     switch (eObj.getStatus())
       {
       case DBEditObject.CREATING:
+	synchronized (eObj)
+	  {
+	    if (store.okToDelete(eObj.getInvid(), this))
+	      {
+		eObj.setStatus(DBEditObject.DROPPING);
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("Can't delete " + eObj.toString(),
+						  eObj.toString() + " can't be deleted because an object which points " +
+						  "to it is currently checked out for editing by someone else.");
+	      }
+	  }
+
 	checkpoint(key);
-	eObj.setStatus(DBEditObject.DROPPING);
+
+
 	break;
 
       case DBEditObject.EDITING:
+	synchronized (eObj)
+	  {
+	    if (store.okToDelete(eObj.getInvid(), this))
+	      {
+		eObj.setStatus(DBEditObject.DELETING);
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("Can't delete " + eObj.toString(),
+						  eObj.toString() + " can't be deleted because an object which points " +
+						  "to it is currently checked out for editing by someone else.");
+	      }
+	  }
 	checkpoint(key);
-	eObj.setStatus(DBEditObject.DELETING);
+
 	break;
 
       case DBEditObject.DELETING:
@@ -1660,5 +1720,16 @@ final public class DBSession {
     base = Ganymede.db.getObjectBase(invid.getType());
     return base.objectHook;
   }
-  
+
+  public String toString()
+  {
+    if (editSet != null)
+      {
+	return "DBSession[" + editSet.description + "]";
+      }
+    else
+      {
+	return super.toString();
+      }
+  }
 }

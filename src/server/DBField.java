@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 1999/10/29 21:46:46 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 1999/11/16 08:00:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1081,8 +1081,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 		    mark(this.value); // we aren't clearing the old value after all
 		  }
 		
-		setLastError("value " + submittedValue + " already taken in namespace");
-
 		return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
 						  "value " + submittedValue +
 						  " already taken in namespace");
@@ -1354,8 +1352,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	  {
 	    mark(values.elementAt(index)); // we aren't clearing the old value after all
 
-	    setLastError("value " + submittedValue + " already taken in namespace");
-
 	    return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
 					      "value " + submittedValue +
 					      " already taken in namespace");
@@ -1527,8 +1523,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       {
 	if (!mark(submittedValue))	// *sync* DBNameSpace
 	  {
-	    setLastError("value " + submittedValue + " already taken in namespace");
-
 	    return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
 					      "value " + submittedValue + 
 					      " already taken in namespace");
@@ -1984,7 +1978,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     /* -- */
 
     namespace = getFieldDef().getNameSpace();
-    editset = owner.editset;
+    editset = ((DBEditObject) owner).getEditSet();
 
     if (namespace == null)
       {
@@ -2040,7 +2034,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     /* -- */
 
     namespace = getFieldDef().getNameSpace();
-    editset = owner.editset;
+    editset = ((DBEditObject) owner).getEditSet();
 
     if (namespace == null)
       {
@@ -2073,7 +2067,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     /* -- */
 
     namespace = getFieldDef().getNameSpace();
-    editset = owner.editset;
+    editset = ((DBEditObject) owner).getEditSet();
 
     if (!isVector())
       {
@@ -2123,7 +2117,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     /* -- */
 
     namespace = getFieldDef().getNameSpace();
-    editset = owner.editset;
+    editset = ((DBEditObject) owner).getEditSet();
 
     if (namespace == null)
       {
@@ -2142,35 +2136,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       }
 
     return namespace.mark(editset, value, this);
-  }
-
-  // ****
-  //
-  // Server-side convenience methods
-  //
-  // ****
-
-  void setLastError(String val)
-  {
-    try
-      {
-	owner.editset.session.setLastError(val);
-      }
-    catch (NullPointerException ex)
-      {
-      }
-  }
-
-  String getLastError()
-  {
-    try
-      {
-	return owner.editset.session.lastError;
-      }
-    finally
-      {
-	return null;
-      }
   }
 
   // ****
@@ -2210,8 +2175,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
      /* -- */
 
-     if (!((owner.editset != null && owner.editset.getSession() != null) ||
-	   (owner.gSession != null)))
+     if (owner.getGSession() == null)
        {
 	 return true; // we don't know who is looking at us, assume it's a server-local access
        }
@@ -2237,7 +2201,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public boolean verifyWritePermission()
   {
-    if (owner.editset != null)
+    if (owner instanceof DBEditObject)
       {
 	synchronized (this)
 	  {
@@ -2301,17 +2265,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	return;
       }
 
-    if (owner.editset != null && owner.editset.getSession() != null)
+    gSession = owner.getGSession();
+
+    if (gSession == null)
       {
-	gSession = owner.editset.getSession().getGSession();
-      }
-    else if (owner.gSession != null)
-      {
-	gSession = owner.gSession;
-      }
-    else
-      {
-	return;			// can't update permCache
+	return;			// can't update
       }
 
     permCache = gSession.getPerm(owner, getID()); // *sync* on gSession

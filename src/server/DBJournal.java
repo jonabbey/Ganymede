@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 1999/10/13 20:02:12 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 1999/11/16 08:00:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -385,7 +385,7 @@ public class DBJournal implements ObjectStatus {
 			obj.print(System.err);
 		      }
 
-		    entries.addElement(new JournalEntry(base, obj.id, obj));
+		    entries.addElement(new JournalEntry(base, obj.getID(), obj));
 
 		    break;
 
@@ -402,7 +402,7 @@ public class DBJournal implements ObjectStatus {
 
 		    obj = delta.applyDelta(original);
 
-		    if (!base.objectTable.containsKey(obj.id))
+		    if (!base.objectTable.containsKey(obj.getID()))
 		      {
 			System.err.println("DBJournal.load(): modified object in the journal does not previously exist in DBStore.");
 		      }
@@ -413,7 +413,7 @@ public class DBJournal implements ObjectStatus {
 			obj.print(System.err);
 		      }
 
-		    entries.addElement(new JournalEntry(base, obj.id, obj));
+		    entries.addElement(new JournalEntry(base, obj.getID(), obj));
 
 		    break;
 
@@ -568,12 +568,12 @@ public class DBJournal implements ObjectStatus {
 	      case DELETING:
 		jFile.writeByte(DELETE);
 		jFile.writeShort(eObj.objectBase.type_code);
-		jFile.writeShort(eObj.id);
+		jFile.writeShort(eObj.getID());
 
 		if (debug)
 		  {
 		    System.err.print("Deleting object:\n\t");
-		    System.err.println(eObj.objectBase.object_name + " : " + eObj.id);
+		    System.err.println(eObj.objectBase.object_name + " : " + eObj.getID());
 		  }
 		break;
 
@@ -729,6 +729,11 @@ class JournalEntry {
 	    // objects in their post-commit state, so we don't have
 	    // to worry about it here.
 
+	    // We do need to unregister any backlinks from the DBStore
+	    // backPointers hash structure, however.
+
+	    badObj.unsetBackPointers();
+
 	    db_field[] tempFields = badObj.listFields(false);
 	    fields = new DBField[tempFields.length];
 
@@ -774,7 +779,17 @@ class JournalEntry {
       {
 	// put the new object in place
 
-	// First, we need to go through and put these values in the namespace.. note that
+	// First we need to clear any back links from the old version
+	// of the object, if there was any such.
+
+	badObj = base.objectTable.get(id);
+
+	if (badObj != null)
+	  {
+	    badObj.unsetBackPointers();
+	  }
+
+	// Second, we need to go through and put these values in the namespace.. note that
 	// we don't bother checking to see if the values are already allocated in the
 	// namespace.. we are assuming that the transaction would not have been written
 	// out to disk with improper namespace management.  We pretty much have to make
@@ -815,6 +830,10 @@ class JournalEntry {
 	  }
 
 	base.objectTable.put(obj);
+
+	// update the backpointers for this object
+
+	obj.setBackPointers();
 
 	// keep our base's maxid up to date for
 	// any newly created objects in the journal

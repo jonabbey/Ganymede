@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 1999/10/29 16:14:05 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 1999/11/16 08:00:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -49,6 +49,7 @@
 
 package arlut.csd.ganymede;
 
+import arlut.csd.Util.VectorUtils;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
@@ -183,6 +184,16 @@ public class DBEditSet {
 
   DBWriteLock wLock = null;
 
+  /** 
+   * <p>This hashtable maps Invids to themselves.  These are Invids
+   * that this transaction needs to prevent from being deleted,
+   * because one or more objects checked out by this transaction
+   * points to these Invids.  This is part of the replacement system
+   * for the BackLinksField.</p>
+   */
+
+  Hashtable noDeleteLocks;
+
   /* -- */
 
   /**
@@ -202,6 +213,7 @@ public class DBEditSet {
     objects = new Vector();
     logEvents = new Vector();
     basesModified = new Hashtable(dbStore.objectBases.size());
+    noDeleteLocks = new Hashtable();
   }
 
   /**
@@ -212,6 +224,72 @@ public class DBEditSet {
   public DBSession getSession()
   {
     return session;
+  }
+
+  /** 
+   * <p>This method returns true if this transaction has no objection
+   * to the given Invid being marked for deletion by another
+   * transaction.</p> 
+   */
+
+  public synchronized boolean canDelete(Invid invid)
+  {
+    System.err.println("DBEditSet " + description + ", canDelete(" + 
+		       session.getGSession().describe(invid) + ")");
+
+    boolean result = !noDeleteLocks.containsKey(invid);
+
+    System.err.println("Returning " + result);
+
+    return result;
+  }
+
+  /**
+   * <p>This method is used by InvidDBField.bind() to
+   * attempt to verify the ability to asymmetrically link
+   * to a new object.  This is done for a single field
+   * at a time.  Note that addObject() doesn't use this
+   * method, since it needs to not update noDeleteLocks
+   * unless it can lock a set of objects as a unit.</p>
+   */
+
+  public synchronized ReturnVal deleteLock(Invid target)
+  {
+    DBObject obj;
+    DBEditObject eObj;
+
+    /* -- */
+
+    System.err.println("DBEditSet.deleteLock( " + session.getGSession().describe(target) + ")");
+
+    obj = session.viewDBObject(target);
+
+    eObj = obj.shadowObject;
+	
+    if (eObj != null)
+      {
+	if (eObj.editset != this)
+	  {
+	    synchronized (eObj)
+	      {
+		if (eObj.getStatus() == DBEditObject.DELETING ||
+		    eObj.getStatus() == DBEditObject.DROPPING)
+		  {
+		    return new ReturnVal(false);
+		  }
+		else
+		  {
+		    noDeleteLocks.put(target, target);
+		  }
+	      }
+	  }
+      }
+    else
+      {
+	noDeleteLocks.put(target, target);
+      }
+
+    return null;		// null is true, of course
   }
 
   /**
@@ -265,7 +343,7 @@ public class DBEditSet {
    * @param object The newly created DBEditObject.
    */
 
-  public synchronized void addObject(DBEditObject object)
+  public synchronized boolean addObject(DBEditObject object)
   {
     if (!objects.contains(object))
       {
@@ -277,6 +355,57 @@ public class DBEditSet {
 
 	basesModified.put(object.objectBase, this);
       }
+
+
+    if (true)
+      {
+	System.err.println("DBEditSet adding " + object.getTypeName() + " " + object.getLabel());
+      }
+
+    // remember that we are not allowing objects that this object
+    // is pointing to via an asymmetric link to be deleted
+
+    Hashtable saveNoDeleteLocks = (Hashtable) noDeleteLocks.clone();
+
+    Vector deleteLockInvids = object.getASymmetricTargets();
+    DBObject obj;
+    DBEditObject eObj;
+
+    for (int i = 0; i < deleteLockInvids.size(); i++)
+      {
+	Invid invid = (Invid) deleteLockInvids.elementAt(i);
+	obj = session.viewDBObject(invid);
+
+	eObj = obj.shadowObject;
+
+	System.err.println("\tDelete-locking " + session.getGSession().describe(invid));
+	
+	if (eObj != null)
+	  {
+	    if (eObj.editset != this)
+	      {
+		synchronized (eObj)
+		  {
+		    if (eObj.getStatus() == DBEditObject.DELETING ||
+			eObj.getStatus() == DBEditObject.DROPPING)
+		      {
+			noDeleteLocks = saveNoDeleteLocks;
+			return false;
+		      }
+		    else
+		      {
+			noDeleteLocks.put(invid, invid);
+		      }
+		  }
+	      }
+	  }
+	else
+	  {
+	    noDeleteLocks.put(invid, invid);
+	  }
+      }
+
+    return true;
   }
 
   /**
@@ -549,6 +678,10 @@ public class DBEditSet {
     // rollback our mail/log events
 
     logEvents = point.logEvents;
+
+    // restore the noDeleteLocks we had
+
+    noDeleteLocks = point.noDeleteLocks;
 
     // and our objects
 
@@ -1291,6 +1424,11 @@ public class DBEditSet {
 	      case DBEditObject.CREATING:
 	      case DBEditObject.EDITING:
 
+		// we need to update DBStore.backPointers to take into account
+		// the changes made to this object.
+
+		syncObjBackPointers(eObj);
+
 		// Create a read-only version of eObj, with all fields
 		// reset to checked-in status, put it into our object hash
 
@@ -1306,6 +1444,11 @@ public class DBEditSet {
 
 	      case DBEditObject.DELETING:
 
+		// we need to update DBStore.backPointers to take into account
+		// the changes made to this object.
+
+		syncObjBackPointers(eObj);
+
 		// Deleted objects had their deletion finalization done before
 		// we ever got to this point.  
 
@@ -1316,7 +1459,7 @@ public class DBEditSet {
 		// last one allocated in that base, which is unlikely
 		// enough that we don't worry about it here.
 
-		base.objectTable.remove(eObj.id);
+		base.objectTable.remove(eObj.getID());
 
 		// (note that we can't use a no-sync remove above, since
 		// we don't prevent asynchronous viewDBObject().
@@ -1326,6 +1469,9 @@ public class DBEditSet {
 		break;
 
 	      case DBEditObject.DROPPING:
+
+		// don't need to update backpointers, since this object was
+		// created and destroyed within this transaction
 
 		// dropped objects had their deletion finalization done before
 		// we ever got to this point.. 
@@ -1417,6 +1563,100 @@ public class DBEditSet {
       }
   }
 
+  /**
+   * <p>This method is executed towards the end of a transaction commit,
+   * and compares the current state of this object with its original state,
+   * and makes the appropriate changes to the
+   * {@link arlut.csd.ganymede.DBStore#backPointers backPointers} hash in
+   * the server's {@link arlut.csd.ganymede.DBStore DBStore} object.</p>
+   *
+   * <p>The purpose of this is to support the decoupling of an object
+   * from its backlinks, so that objects can be asymmetrically linked
+   * to an object without having to check that object out for editing.</p>
+   */
+
+  private void syncObjBackPointers(DBEditObject obj)
+  {
+    Vector oldBackPointers;
+    Vector newBackPointers;
+    Vector removedBackPointers;
+    Vector addedBackPointers;
+
+    Invid target;
+    Invid ourInvid = obj.getInvid();
+    Invid testInvid;
+
+    Hashtable reverseLinks;
+
+    DBObject original;
+
+    /* -- */
+
+    synchronized (Ganymede.db.backPointers)
+      {
+	original = obj.getOriginal();
+
+	if (original == null)
+	  {
+	    oldBackPointers = null;
+	  }
+	else
+	  {
+	    oldBackPointers = original.getASymmetricTargets();
+	  }
+
+	newBackPointers = obj.getASymmetricTargets();
+
+	removedBackPointers = VectorUtils.difference(oldBackPointers, newBackPointers);
+	addedBackPointers = VectorUtils.difference(newBackPointers, oldBackPointers);
+	
+	for (int i = 0; i < removedBackPointers.size(); i++)
+	  {
+	    target = (Invid) removedBackPointers.elementAt(i);
+
+	    reverseLinks = (Hashtable) Ganymede.db.backPointers.get(target);
+
+	    if (reverseLinks == null)
+	      {
+		// error.. it should be there so we can remove it
+
+		System.err.println("DBEditObject.syncBackPointers(): missing reverseLinks found removing a backlink: " +
+				   target);
+		continue;
+	      }
+
+	    testInvid = (Invid) reverseLinks.remove(ourInvid);
+
+	    if (testInvid == null || !testInvid.equals(ourInvid))
+	      {
+		System.err.println("DBEditObject.syncBackPointers(): couldn't find and remove proper backlink for: " +
+				   target);
+	      }
+
+	    // if that was the last back-link, pull the second level hash out
+
+	    if (reverseLinks.size() == 0)
+	      {
+		Ganymede.db.backPointers.remove(target);
+	      }
+	  }
+
+	for (int i = 0; i < addedBackPointers.size(); i++)
+	  {
+	    target = (Invid) addedBackPointers.elementAt(i);
+
+	    reverseLinks = (Hashtable) Ganymede.db.backPointers.get(target);
+
+	    if (reverseLinks == null)
+	      {
+		reverseLinks = new Hashtable();
+		Ganymede.db.backPointers.put(target, reverseLinks);
+	      }
+
+	    reverseLinks.put(ourInvid, ourInvid);
+	  }
+      }
+  }
   /**
    * <p>release is used to abandon all changes made in association
    * with this DBEditSet.  All DBObjects created, deleted, or

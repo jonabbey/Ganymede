@@ -7,8 +7,8 @@
    
    Created: 9 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/06/09 04:03:57 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/11/16 08:00:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,7 +63,7 @@ import java.util.*;
  * tuned for use in managing {@link arlut.csd.ganymede.DBObject DBObject}s
  * in a Ganymede {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}.</P>
  * 
- * @version $Revision: 1.5 $ %D%, Created: 9 June 1998
+ * @version $Revision: 1.6 $ %D%, Created: 9 June 1998
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -74,6 +74,13 @@ public class DBObjectTable {
    */
 
   private transient DBObject table[];
+
+  /**
+   * A collection of Vectors, one for each object
+   * in the database.
+   */
+
+  private transient Vector backPointerTable[];
 
   /**
    * The total number of entries in the hash table.
@@ -113,6 +120,7 @@ public class DBObjectTable {
 
     this.loadFactor = loadFactor;
     table = new DBObject[initialCapacity];
+    backPointerTable = new Vector[initialCapacity];
     threshold = (int)(initialCapacity * loadFactor);
   }
 
@@ -286,8 +294,12 @@ public class DBObjectTable {
     int newCapacity = oldCapacity * 2 + 1;
     DBObject newTable[] = new DBObject[newCapacity];
 
+    Vector oldBPTable[] = backPointerTable;
+    Vector newBPTable[] = new Vector[newCapacity];
+
     threshold = (int)(newCapacity * loadFactor);
     table = newTable;
+    backPointerTable = newBPTable;
 
     //System.out.println("rehash old=" + oldCapacity + ", new=" +
     //newCapacity + ", thresh=" + threshold + ", count=" + count);

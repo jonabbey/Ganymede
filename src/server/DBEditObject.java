@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.120 $
-   Last Mod Date: $Date: 1999/10/29 18:45:12 $
+   Version: $Revision: 1.121 $
+   Last Mod Date: $Date: 1999/11/16 08:00:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,13 +111,13 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.120 $ $Date: 1999/10/29 18:45:12 $ $Name:  $
+ * @version $Revision: 1.121 $ $Date: 1999/11/16 08:00:56 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
 public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
-  static boolean debug = false;
+  static boolean debug = true;
 
   public final static int FIRSTOP = 0;
   public final static int SETVAL = 1;
@@ -182,15 +182,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   boolean stored;		
 
   /**
-   * <p>Used as a coordinating signal with InvidDBField to handle
-   * clearing the backlinks field in 
-   * {@link arlut.csd.ganymede.DBEditObject#finalizeRemove(boolean) finalizeRemove()}.</p>
-   *
-   * <p>Should never ever ever ever be messed with outside this
-   * object.</p>
+   * transaction that this object has been checked out in
+   * care of.
    */
 
-  boolean clearingBackLinks = false;
+  public DBEditSet editset;	
 
   /* -- */
 
@@ -355,7 +351,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     synchronized (original)
       {
 	this.original = original;
-	this.id = original.id;
 	this.myInvid = original.myInvid;
 	this.objectBase = original.objectBase;
       }
@@ -508,6 +503,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
+   * <p>Returns the transaction object owning this object, or
+   * null if an unowned data object.</p>
+   *
+   * <p>Note that this is public, but not made available
+   * to the client via a remote interface.</p>
+   */
+
+  public final DBEditSet getEditSet()
+  {
+    return editset;
+  }
+
+  /**
    * <p>Returns the original version of the object that we were created
    * to edit.  If we are a newly created object, this method will
    * return null.</p>
@@ -591,7 +599,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @see arlut.csd.ganymede.ObjectStatus#DROPPING
    */
 
-  final void setStatus(byte new_status)
+  final synchronized void setStatus(byte new_status)
   {
     switch (new_status)
       {
@@ -2431,8 +2439,26 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     this.deleting = true;
 
-    try
+    try				// finally {this.deleting = false;}
       {
+	// first we need to take care of any back links. This scans
+	// this object for asymmetric fields, checks objects pointed
+	// to by us out for editing, and takes this object's invid
+	// out of all fields in those objects.
+
+	retVal = attemptBackLinkClear(true);
+    
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    editset.rollback("del" + label); // *sync*
+
+	    return retVal;
+	  }
+	else if (retVal != null)
+	  {
+	    finalResult.unionRescan(retVal);
+	  }
+
 	enum = fields.elements();
 
 	while (enum.hasMoreElements())
@@ -2454,43 +2480,28 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		    System.err.println("++ Attempting to clear vector field " + field.getName());
 		  }
 
-		try
+		while (field.size() > 0)
 		  {
-		    if (field.getID() == SchemaConstants.BackLinksField)
-		      {
-			// let the InvidDBField code know that it doesn't need
-			// to wrap unbindAll() with its own checkpoint/rollback.
-
-			clearingBackLinks = true;
-		      }
-
-		    while (field.size() > 0)
-		      {
-			// if this is an InvidDBField, deleteElement()
-			// will convert this request into a deletion of
-			// the embedded object.
+		    // if this is an InvidDBField, deleteElement()
+		    // will convert this request into a deletion of
+		    // the embedded object.
 			
-			retVal = field.deleteElement(0); // *sync*
+		    retVal = field.deleteElement(0); // *sync*
 			
-			if (retVal != null && !retVal.didSucceed())
-			  {
-			    session = editset.getSession();
+		    if (retVal != null && !retVal.didSucceed())
+		      {
+			session = editset.getSession();
 			    
-			    editset.rollback("del" + label); // *sync*
+			editset.rollback("del" + label); // *sync*
 			    
-			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							      "DBEditObject disapproved of deleting element from field " + 
-							      field.getName());
-			  }
-			else
-			  {
-			    finalResult.unionRescan(retVal);
-			  }
+			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							  "DBEditObject disapproved of deleting element from field " + 
+							  field.getName());
 		      }
-		  }
-		finally
-		  {
-		    clearingBackLinks = false;
+		    else
+		      {
+			finalResult.unionRescan(retVal);
+		      }
 		  }
 	      }
 	    else
@@ -2599,6 +2610,317 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	
 	deleting = false;
       }
+  }
+
+  /**
+   * <P>This method is used to find all objects which point to us through
+   * non-symmetric links, edit them, and break the link.  We do this by
+   * consulting the global Ganymede.db.backPointers hash structure to get
+   * the list of objects which point to us, and doing the unlink in a
+   * fashion similar to InvidDBField.unbindAll().</p>
+   *
+   * <P><b>This method is private, and is not to be called by any code outside
+   * of this class.</b></P>
+   *
+   * @param local if true, this operation will be performed without regard
+   * to permissions limitations.
+   *
+   * @return null on success, or a ReturnVal with an error dialog encoded on failure
+   */
+
+  private final ReturnVal attemptBackLinkClear(boolean local)
+  {
+    ReturnVal
+      retVal = null,
+      newRetVal = new ReturnVal(true, true);
+
+    Vector
+      targets;
+
+    Invid remote;
+
+    /* -- */
+
+    if (true)
+      {
+	System.err.println("Entering attemptBackLinkClear() for object " + toString());
+      }
+
+    synchronized (Ganymede.db.backPointers)
+      {
+	Hashtable backPointers = (Hashtable) Ganymede.db.backPointers.get(getInvid());
+	
+	if (backPointers == null)
+	  {
+	    return null;
+	  }
+
+	targets = new Vector();
+
+	if (true)
+	  {
+	    System.err.println("Deleting " + toString() + ", chasing back pointers from global hash");
+	  }
+
+	Enumeration enum = backPointers.keys();
+
+	while (enum.hasMoreElements())
+	  {
+	    remote = (Invid) enum.nextElement();
+
+	    if (true)
+	      {
+		System.err.println("\t" + getGSession().describe(remote));
+	      }
+
+	    targets.addElement(remote);
+	  }
+      }
+
+    Enumeration targetEnum = targets.elements();
+
+    while (targetEnum.hasMoreElements())
+      {
+	remote = (Invid) targetEnum.nextElement();
+	retVal = clearBackLink(remote, local);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+
+	newRetVal = newRetVal.unionRescan(retVal);
+      }
+
+    return newRetVal;		// success
+  }
+
+  /**
+   * <p>This method is called by attemptBackLinkClear(), and is responsible for
+   * checking the object with Invid remote out for editing, and clearing our
+   * own Invid out of all of the remote object's fields.</p>
+   *
+   * <p>This method does no checkpointing, so attemptBackLinkClear() has to
+   * do that for us.</p>
+   *
+   * @param remote An Invid for an object that we have asymmetric back links to.
+   * @param local If true, we won't do a permissions check before trying to edit the
+   * remote object.
+   */
+
+  private ReturnVal clearBackLink(Invid remote, boolean local)
+  {
+    short targetField;
+
+    DBEditObject 
+      eObj = null,
+      oldRef = null;
+
+    DBObject
+      remobj;
+
+    InvidDBField 
+      oldRefField = null;
+
+    DBSession
+      session = getSession();
+
+    ReturnVal
+      retVal = null,
+      newRetVal;
+
+    Vector
+      fieldsToUnbind = new Vector();
+
+    Vector
+      targets;
+
+    /* -- */
+
+    // check to see if we have permission to anonymously unlink
+    // this field from the target field, else go through the
+    // GanymedeSession layer to have our permissions checked.
+    
+    // note that if the GanymedeSession layer has already checked out the
+    // object, session.editDBObject() will return a reference to that
+    // version, and we'll lose our security bypass.. for that reason,
+    // we also use the anon variable to instruct dissolve to disregard
+    // write permissions if we have gotten the anonymous OK
+    
+    remobj = session.viewDBObject(remote);
+	
+    if (remobj == null)
+      {
+	return Ganymede.createErrorDialog("DBEditObject.clearBackLink(): Couldn't find old reference",
+					  "Your operation could not succeed because " + toString() +
+					  " was linked to a remote reference " + remote.toString() + 
+					  " that could not be found for unlinking.\n\n" +
+					  "This is a serious logic error in the server.");
+      }
+
+    if (true)
+      {
+	System.err.println("DBEditObject.clearBackLink(): Clearing link in " + getGSession().describe(remote));
+      }
+
+    // loop over the invid fields in the target, get a list of fields we need to unlink.
+    
+    Invid myInvid = getInvid();
+    Enumeration fieldEnum = remobj.fields.elements();
+    
+    while (fieldEnum.hasMoreElements())
+      {
+	DBField tmpField = (DBField) fieldEnum.nextElement();
+
+	if (!(tmpField instanceof InvidDBField))
+	  {
+	    continue;
+	  }
+
+	// if the field is symmetric and doesn't point to us, we won't
+	// try to unlink it here.
+
+	if (tmpField.getFieldDef().isSymmetric())
+	  {
+	    continue;
+	  }
+
+	// If the invid field we're checking out doesn't reference
+	// us, don't bother with it.
+
+	if (tmpField.isVector())
+	  {
+	    if (!tmpField.containsElementLocal(myInvid))
+	      {
+		continue;
+	      }
+	  }
+	else
+	  {
+	    Invid tempInvid = (Invid) tmpField.getValueLocal();
+
+	    if (tempInvid == null || !tempInvid.equals(myInvid))
+	      {
+		continue;
+	      }
+	  }
+
+	if (true)
+	  {
+	    System.err.println("\tNeed to clear field " + tmpField.toString());
+	  }
+
+	// ok, we know we need to do the unbinding for this field.
+
+	fieldsToUnbind.addElement(new Short(tmpField.getID()));
+      }
+
+    if (remobj instanceof DBEditObject)
+      {
+	oldRef = (DBEditObject) remobj;
+      }
+    else
+      {
+	if (local || getGSession().getPerm(remobj).isEditable())
+	  {
+	    oldRef = (DBEditObject) session.editDBObject(remote);
+	  }
+      }
+
+    if (oldRef == null)
+      {
+	// it's there, but we can't unlink it
+		
+	return Ganymede.createErrorDialog("DBEditObject.clearBackLink(): Couldn't unlink old reference",
+					  "We couldn't unlink object " +
+					  getLabel() + " from one or more fields in object " +
+					  remobj.toString() +
+					  " due to a permissions problem.");
+      }
+
+    // initialize a ReturnVal to remember our rescan information.
+
+    newRetVal = new ReturnVal(true, true);
+    
+    for (int i = 0; i < fieldsToUnbind.size(); i++)
+      {
+	Short remote_fieldid = (Short) fieldsToUnbind.elementAt(i);
+	targetField = remote_fieldid.shortValue();
+
+	newRetVal.addRescanField(remote, targetField);
+
+	// are we allowed to ignore permissions on this field?
+
+	try
+	  {
+	    oldRefField = (InvidDBField) oldRef.getField(targetField);
+	  }
+	catch (ClassCastException ex)
+	  {
+	    try
+	      {
+		return Ganymede.createErrorDialog("DBEditObject.clearBackLink(): Couldn't unlink old reference",
+						  "Your operation could not succeed due to an error in the " +
+						  "server's schema.  Target field " + 
+						  oldRef.getField(targetField).getName() +
+						  " in object " + oldRef.getLabel() +
+						  " is not an invid field.");
+	      }
+	    catch (RemoteException rx)
+	      {
+		return Ganymede.createErrorDialog("DBEditObject.clearBackLink(): Couldn't unlink old reference",
+						  "Your operation could not succeed due to an error in the " +
+						  "server's schema.  Target field " + targetField +
+						  " in object " + oldRef.getLabel() +
+						  " is not an invid field.");
+	      }
+	  }
+
+	if (oldRefField == null)
+	  {
+	    // editDBObject() will create undefined fields for all fields defined
+	    // in the DBObjectBase, so if we got a null result we have a schema
+	    // corruption problem.
+
+	    return Ganymede.createErrorDialog("DBEditObject.clearBackLink(): Couldn't unlink old reference",
+					      "Your operation could not succeed due to a possible inconsistency in the " +
+					      "server database.  Target field number " + targetField +
+					      " in object " + oldRef.getLabel() +
+					      " does not exist, or you do not have permission to access " +
+					      "this field.");
+	  }
+
+	try
+	  {
+	    // clear all references in this field to us, if we can
+
+	    if (true)
+	      {
+		System.err.println("DBEditObject.clearBackLink(): calling dissolve on " + oldRefField);
+	      }
+
+	    retVal = oldRefField.dissolve(getInvid(), local, true);
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return retVal;
+	      }
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	    System.err.println("hm, couldn't dissolve a reference in " + getLabel());
+
+	    System.err.println("Did do an anonymous edit on target");
+
+	    throw (IllegalArgumentException) ex;
+	  }
+      }
+    
+    // tell the client that it needs to rescan the old remote ends of this binding
+
+    newRetVal.unionRescan(retVal);
+
+    return newRetVal;
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.96 $
-   Last Mod Date: $Date: 1999/10/07 17:37:10 $
+   Version: $Revision: 1.97 $
+   Last Mod Date: $Date: 1999/11/16 08:00:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -195,7 +195,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    */
 
   DBObjectTable objectTable;
-  int object_count;
 
   /**
    * highest invid to date
@@ -940,6 +939,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     int size;
     DBObject tempObject;
     int temp_val;
+    int object_count;
     DBObjectBaseField field;
 
     /* -- */
@@ -1087,14 +1087,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	tempObject = new DBObject(this, in, false);
 
-	if (tempObject.id > maxid)
+	if (tempObject.getID() > maxid)
 	  {
-	    maxid = tempObject.id;
+	    maxid = tempObject.getID();
 	  }
 
 	if (reallyLoading)
 	  {
 	    objectTable.putNoSyncNoRemove(tempObject);
+	    tempObject.setBackPointers();
 	  }
       }
 

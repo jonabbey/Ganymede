@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/10/29 21:46:47 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/11/16 08:01:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -749,8 +749,6 @@ public class IPDBField extends DBField implements ip_field {
 
     if (size() >= getMaxArraySize())
       {
-	setLastError("Field " + getName() + " already at or beyond array size limit");
-
 	return Ganymede.createErrorDialog("Server: Error in IPDBField.addElement()",
 					  "Field " + getName() + " already at or beyond array size limit");
       }
@@ -777,10 +775,8 @@ public class IPDBField extends DBField implements ip_field {
       {
 	if (!mark(bytes))
 	  {
-	    setLastError("value " + value + " already taken in namespace");
-
 	    return Ganymede.createErrorDialog("Server: Error in IPDBField.addElement()",
-					     "IP address already in use\n" + getLastError());
+					     "IP address already in use\n");
 	  }
       }
 

@@ -6,8 +6,8 @@
    
    Created: 21 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:59 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/11/16 08:01:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -135,7 +135,7 @@ public class permCustom extends DBEditObject implements SchemaConstants {
   {
     if (fieldID == SchemaConstants.RolePersonae)
       {
-	if (id == SchemaConstants.RoleDefaultObj)
+	if (getID() == SchemaConstants.RoleDefaultObj)
 	  {
 	    return false;
 	  }
@@ -173,7 +173,7 @@ public class permCustom extends DBEditObject implements SchemaConstants {
       }
 
     if ((field.getID() == SchemaConstants.RoleDelegatable) &&
-	(field.getOwner().getInvid().getNum() == SchemaConstants.RoleDefaultObj))
+	(field.getOwner().getID() == SchemaConstants.RoleDefaultObj))
       {
 	return false;
       }

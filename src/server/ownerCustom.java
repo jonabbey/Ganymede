@@ -6,8 +6,8 @@
    
    Created: 9 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/07/22 05:34:20 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/11/16 08:01:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -236,7 +236,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     try
       {
-	session = object.editset.session;
+	session = object.getGSession().getSession();
       }
     catch (NullPointerException ex)
       {
@@ -331,7 +331,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
     // We really don't want the supergash owner group ever
     // having any explicit ownership links.
 
-    if (field.getOwner().getInvid().getNum() == SchemaConstants.OwnerSupergash &&
+    if (field.getOwner().getID() == SchemaConstants.OwnerSupergash &&
 	getID() == SchemaConstants.OwnerObjectsOwned)
       {
 	return Ganymede.createErrorDialog("Owner Object Error",
