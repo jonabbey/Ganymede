@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 2001/12/19 23:51:49 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 2002/03/29 04:04:46 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -45,7 +45,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.ganymede;
@@ -127,6 +129,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     editInPlaceCF,		// invid
     cryptedCF,			// password
     md5cryptedCF,		// password
+    apachemd5cryptedCF,		// password
     winHashcryptedCF,		// password
     plainTextCF,		// password
     multiLineCF;		// string
@@ -236,7 +239,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     md5cryptedCF = new JcheckboxField(null, false, true);
     md5cryptedCF.setCallback(this);
-    addRow(editPanel, md5cryptedCF, "OpenBSD-style MD5 Crypted:" , rowcount++);
+    addRow(editPanel, md5cryptedCF, "FreeBSD-style MD5 Crypted:" , rowcount++);
+
+    apachemd5cryptedCF = new JcheckboxField(null, false, true);
+    apachemd5cryptedCF.setCallback(this);
+    addRow(editPanel, apachemd5cryptedCF, "Apache-style MD5 Crypted:" , rowcount++);
 
     winHashcryptedCF = new JcheckboxField(null, false, true);
     winHashcryptedCF.setCallback(this);
@@ -402,6 +409,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
       {
 	setRowVisible(cryptedCF, true);
 	setRowVisible(md5cryptedCF, true);
+	setRowVisible(apachemd5cryptedCF, true);
 	setRowVisible(winHashcryptedCF, true);
 	setRowVisible(plainTextCF, true);
       }
@@ -409,6 +417,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
       {
 	setRowVisible(cryptedCF, false);
 	setRowVisible(md5cryptedCF, false);
+	setRowVisible(apachemd5cryptedCF, false);
 	setRowVisible(winHashcryptedCF, false);
 	setRowVisible(plainTextCF, false);
       }
@@ -1054,6 +1063,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	    cryptedCF.setValue(fieldDef.isCrypted());
 	    md5cryptedCF.setValue(fieldDef.isMD5Crypted());
+	    apachemd5cryptedCF.setValue(fieldDef.isApacheMD5Crypted());
 	    winHashcryptedCF.setValue(fieldDef.isWinHashed());
 	    plainTextCF.setValue(fieldDef.isPlainText());
 
@@ -1370,6 +1380,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	multiLineCF.setEnabled(true);
 	cryptedCF.setEnabled(true);
 	md5cryptedCF.setEnabled(true);
+	apachemd5cryptedCF.setEnabled(true);
 	winHashcryptedCF.setEnabled(true);
 
 	if (passwordShowing)
@@ -1377,7 +1388,8 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    // if we aren't using a hashed form for password storage,
 	    // we have to use plaintext
 
-	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected())
+	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected())
 		&& plainTextCF.isSelected())
 	      {
 		plainTextCF.setEnabled(false);
@@ -1618,13 +1630,15 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    // a password field has to have plaintext stored if it
 	    // is not to store the password in crypted form.
 
-	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
+		!apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
 		&& !plainTextCF.isSelected())
 	      {
 		plainTextCF.setValue(true);
 	      }
 
-	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
 	      {
 		plainTextCF.setEnabled(false);
 	      }
@@ -1660,6 +1674,35 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		plainTextCF.setEnabled(true);
 	      }
 	  }
+	else if (comp == apachemd5cryptedCF)
+	  {
+	    if (debug)
+	      {
+		System.out.println("apachemd5cryptedCF");
+	      }
+
+	    owner.handleReturnVal(fieldDef.setApacheMD5Crypted((apachemd5cryptedCF.isSelected())));
+
+	    // a password field has to have plaintext stored if it
+	    // is not to store the password in crypted form.
+
+	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
+		!apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+		&& !plainTextCF.isSelected())
+	      {
+		plainTextCF.setValue(true);
+	      }
+
+	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+	      {
+		plainTextCF.setEnabled(false);
+	      }
+	    else
+	      {
+		plainTextCF.setEnabled(true);
+	      }
+	  }
 	else if (comp == winHashcryptedCF)
 	  {
 	    if (debug)
@@ -1672,13 +1715,15 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    // a password field has to have plaintext stored if it
 	    // is not to store the password in crypted form.
 
-	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+	    if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
+		!apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
 		&& !plainTextCF.isSelected())
 	      {
 		plainTextCF.setValue(true);
 	      }
 
-	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
 	      {
 		plainTextCF.setEnabled(false);
 	      }
@@ -2049,6 +2094,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     this.editInPlaceCF = null;
     this.cryptedCF = null;
     this.md5cryptedCF = null;
+    this.apachemd5cryptedCF = null;
     this.winHashcryptedCF = null;
     this.plainTextCF = null;
     this.multiLineCF = null;
