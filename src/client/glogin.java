@@ -9,11 +9,11 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 1999/01/22 18:04:15 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 1999/01/29 05:08:53 $
    Release: $Name:  $
 
-   Module By: Navin Manohar and Mike Mulvaney
+   Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
@@ -53,6 +53,7 @@
 package arlut.csd.ganymede.client;
 
 import javax.swing.*;
+import javax.swing.border.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -235,31 +236,41 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     server_url = "rmi://" + serverhost + "/ganymede.server";
 
+    appletContentPane = getContentPane();
+    appletContentPane.setLayout(new BorderLayout());
+
+    JPanel loginBox = new JPanel();
+    //    loginBox.setBorder(new BevelBorder(BevelBorder.RAISED));
+    loginBox.setBorder(BorderFactory.createEtchedBorder());
+    appletContentPane.add(loginBox, "Center");
+    
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
     gbc.anchor = GridBagConstraints.WEST;
     gbc.gridheight = 1;
     gbc.insets = new Insets(1,1,0,0);
 
-    appletContentPane = getContentPane();
-
-    appletContentPane.setLayout(gbl);
+    loginBox.setLayout(gbl);
 
     JLabel image = new JLabel(new ImageIcon(ganymede_logo));
     image.setOpaque(true);
     image.setBackground(Color.black);
 
-    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.fill = GridBagConstraints.BOTH;
     gbc.gridx = 0;
     gbc.gridy = 0;
     gbc.gridwidth = 3;
+    gbc.weighty = 1.0;
+    gbc.weightx = 1.0;
     gbl.setConstraints(image, gbc);
-    appletContentPane.add(image);
+    loginBox.add(image);
 
     JLabel label = new JLabel("Ganymede Network Management System");
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.weighty = 0.0;
     gbc.gridy = 1;
     gbl.setConstraints(label, gbc);
-    appletContentPane.add(label);
+    loginBox.add(label);
 
     // the username and passwd fields here won't have their
     // callback set with addTextListener().. instead, we'll
@@ -273,30 +284,34 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridy = 2;
     gbc.gridwidth = 1;
+    gbc.weightx = 0.0;
     gbl.setConstraints(userL, gbc);
-    appletContentPane.add(userL);
+    loginBox.add(userL);
 
     username = new JTextField(20);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
+    gbc.weightx = 1.0;
     gbl.setConstraints(username, gbc);
-    appletContentPane.add(username);
+    loginBox.add(username);
     
     JLabel passL = new JLabel("Password:");
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridx = 0;
     gbc.gridy = 3;
     gbc.gridwidth = 1;
+    gbc.weightx = 0.0;
     gbl.setConstraints(passL, gbc);
-    appletContentPane.add(passL);
+    loginBox.add(passL);
 
     passwd = new JPasswordField(20);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
+    gbc.weightx = 1.0;
     gbl.setConstraints(passwd, gbc);
-    appletContentPane.add(passwd);
+    loginBox.add(passwd);
 
     //gbc.insets = new Insets(0,0,0,0);
     gbc.ipady = 0;
@@ -320,9 +335,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     gbc.gridx = 0;
     gbc.gridy = 4;
+    gbc.weightx = 1.0;
     gbc.fill = GridBagConstraints.BOTH;
     gbl.setConstraints(buttonPanel, gbc);
-    appletContentPane.add(buttonPanel);
+    loginBox.add(buttonPanel);
 
     passwd.addActionListener(this);
     username.addActionListener(this);

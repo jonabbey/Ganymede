@@ -8,8 +8,8 @@
    
    Created: 16 September 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/22 18:04:16 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/01/29 05:08:53 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ import arlut.csd.JDialog.JCenterDialog;
  * image on the left side, used for the about.. and motd features
  * in the Ganymede client.
  *   
- * @version $Revision: 1.6 $ %D%
+ * @version $Revision: 1.7 $ %D%
  * @author Mike Mulvaney
  *
  */
@@ -154,7 +154,7 @@ public class messageDialog extends JCenterDialog implements ActionListener{
     
     text.setContentType("text/html");
     text.setText(s);
-    layout(450,300);
+    layout(550,400);
   }
 
   /**
@@ -169,7 +169,7 @@ public class messageDialog extends JCenterDialog implements ActionListener{
   {
     text.setContentType("text/plain");
     text.setText(s);
-    layout(450,300);
+    layout(550,400);
   }
 
   public void actionPerformed(ActionEvent e)

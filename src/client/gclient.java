@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.123 $
-   Last Mod Date: $Date: 1999/01/27 21:43:33 $
+   Version: $Revision: 1.124 $
+   Last Mod Date: $Date: 1999/01/29 05:08:52 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -104,6 +104,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int CLOSED_CAT = 15;
 
   static final int OBJECTNOWRITE = 16;
+
+  static String release_name = "$Name:  $";
+  static String release_number = null;
 
   // ---
 
@@ -530,12 +533,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     helpMenu = new JMenu("Help");
     helpMenu.setMnemonic('h');
-    showHelpMI = new JMenuItem("Help");
-    //    showHelpMI.setMnemonic('h');  // swing can't handle menu and menuitem with same mnemonic
-    showHelpMI.addActionListener(this);
-    helpMenu.add(showHelpMI);
 
-    helpMenu.addSeparator();
+    // we don't have anything done for help.. disable the help menu for now.
+
+    //    showHelpMI = new JMenuItem("Help");
+    //    showHelpMI.setMnemonic('h');  // swing can't handle menu and menuitem with same mnemonic
+    //    showHelpMI.addActionListener(this);
+    //    helpMenu.add(showHelpMI);
+    //
+    //    helpMenu.addSeparator();
 
     // This uses action commands, so you don't need to globally declare these
     JMenuItem showAboutMI = new JMenuItem("About Ganymede");
@@ -1308,10 +1314,39 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	if (aboutMessage == null)
 	  {
-	    aboutMessage = "<head></head><h1>About Ganymede</h1><p>Ganymede is a moon of Jupiter.</p>";
+	    // cut off leading $Name:  $, clean up whitespace
+
+	    if (release_name.length() > 9)
+	      {
+		release_name = release_name.substring(6, release_name.length()-1);
+		release_name.trim();
+
+		// we use ganymede_XXX for our CVS tags
+
+		if (release_name.indexOf('_') != -1)
+		  {
+		    release_number = release_name.substring(release_name.indexOf('_') + 1, release_name.length());
+		  }
+	      }
+	    
+	    StringBuffer buffer = new StringBuffer();
+
+	    buffer.append("<head></head>");
+	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
+	    buffer.append("Release number: ");
+	    buffer.append(release_number);
+	    buffer.append("<p>Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.</p>");
+	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
+	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
+	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
+	    buffer.append("under the conditions of the GNU General Public License.</p>");
+	    buffer.append("<p>Written by Jonathan Abbey, Michael Mulvaney, Navin Manohar, ");
+	    buffer.append("Erik Grostic, and Brian O'Mara.</p>");
+
+	    aboutMessage = buffer.toString();
 	  }
 
-	about = new messageDialog(this, "About Ganymede",  ganymede_logo);
+	about = new messageDialog(this, "About Ganymede",  null);
 	about.setHtmlText(aboutMessage);
       }
 
@@ -1328,12 +1363,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 			      "<p>Ganymede was developed by the Computer Science Division of the Applied " +
 			      "Research Laboratories at The University of Texas at Austin</p>" +
 			      "<p>The primary designer and author of Ganymede was Jonathan Abbey, " +
-			      "jonabbey@arlut.utexas.edu.  Michael Mulvaney, mikem@mail.utexas.edu, "+
-			      "developed large portions of the client.  Significant portions of the client " +
-			      "were initially developed by Navin Manohar.   Erik Grostic also contributed code " +
-			      "to the client.  Both Navin and Erik worked on Ganymede while working as student " +
-			      "employees at ARL.  Dan Scott, dscott@arlut.utexas.edu, oversaw the development " +
-			      " of Ganymede and its predecessor, GASH, and provided high-level " +
+			      "jonabbey@arlut.utexas.edu.</p>  <p>Michael Mulvaney, mikem@mail.utexas.edu, "+
+			      "developed large portions of the client.</p> <p>Significant portions of the client " +
+			      "were initially developed by Navin Manohar.  Erik Grostic and Brian O'Mara " +
+			      "contributed code to the client.</p><p>Navin, Erik, and Brian worked on Ganymede " +
+			      "while working as student employees at ARL.</p>" +
+			      "<p>Dan Scott, dscott@arlut.utexas.edu, oversaw the development " +
+			      "of Ganymede and its predecessor, GASH, and provided high-level " +
 			      "direction and support.</p><br>" +
 			      "<p>The Ganymede web page is currently at " +
 			      "<a href=\"http://www.arlut.utexas.edu/gash2\">" +
@@ -3296,16 +3332,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     _myglogin.logout();
 
-    try {
-      
-      this.dispose();
-      
-    } catch (NullPointerException e) {
-      
-      System.err.println(e + " - logout() tried to remove something that wasn't there.");
-      
-    }
-    
+    try 
+      {
+	this.dispose();
+      }
+    catch (NullPointerException e)
+      {
+	// Swing 1.1 complains about this.
+
+	// System.err.println(e + " - logout() tried to remove something that wasn't there.");
+      }
   }
 
   /**
