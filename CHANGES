@@ -1,7 +1,19 @@
-Ganymede Release 1.0.5
+Ganymede Release 1.0.6
 July 27, 2001
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.0.5 to 1.0.6 -------------------
+
+RELEASE DATE: August ??, 2001
+
+1. [SERVER, ADMIN CONSOLE] Fixed delayed memory release for schema editing
+
+The Ganymede server wasn't properly clearing references to a bunch of
+temporary data structures when a schema edit was cancelled by the
+admin console.  This had the effect of increasing our server's memory
+footprint by a couple hundred thousand kilobytes or so until such time
+as the admin console was stopped and restarted.
 
 -------------------- Changes from 1.04 to 1.0.5 -------------------
 

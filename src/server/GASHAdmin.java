@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 2001/06/05 04:08:36 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 2001/08/03 21:01:39 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -632,7 +632,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   static String debugFilename = null;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/06/05 04:08:36 $";
+  static String release_date = "$Date: 2001/08/03 21:01:39 $";
   static String release_number = null;
 
   // ---
@@ -1663,8 +1663,6 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   private boolean tasksLoaded = false;
   private Vector tasksKnown = null;
 
-  JFrame schemaFrame;
-
   Date serverStart;
 
   /* -- */
@@ -2374,7 +2372,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	    System.err.println("Got SchemaEdit handle");
 	  }
 	
-	schemaFrame = new GASHSchema("Schema Editor", editor, frame.schemaMI);
+	new GASHSchema("Schema Editor", editor, frame.schemaMI);
       }
 
     // the GASHSchema constructor pops itself up at the end of

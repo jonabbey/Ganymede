@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 2001/04/20 20:27:10 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 2001/08/03 21:01:39 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -1384,7 +1384,21 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new RuntimeException("Couldn't release: " + ex);
 	  }
 
+	// speed up GC a little bit
+
+	this.editor = null;
+	this.be = null;
+	this.fe = null;
+	this.ne = null;
+	this.ce = null;
+	this.rootCategory = null;
+	this.objects = null;
+	this.tree = null;
+
 	schemaMI.setEnabled(true);
+
+	this.schemaMI = null;
+
 	setVisible(false);
       }
     else

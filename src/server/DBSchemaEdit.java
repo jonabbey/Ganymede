@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 2001/07/09 07:15:51 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2001/08/03 21:01:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -993,6 +993,20 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     newBases.clear();
     newBases = null;
+
+    // we've already copied oldNameSpaces, no need to keep a ref here
+
+    oldNameSpaces = null;
+
+    // ditch rootCategory or else we'll keep a bunch of stuff pinned
+    // in memory until the admin console releases its remote reference
+    // to us.
+
+    rootCategory = null;
+
+    console = null;
+
+    this.store = null;
 
     GanymedeServer.lSemaphore.enable("schema edit");
 
