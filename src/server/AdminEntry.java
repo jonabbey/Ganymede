@@ -6,7 +6,7 @@
    admin console's table.
    
    Created: 3 February 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,6 +15,10 @@
 package arlut.csd.ganymede;
 
 public class AdminEntry implements java.io.Serializable {
+
+  static final long serialVersionUID = -2534608083606361951L;
+
+  // ---
 
   String
     username,

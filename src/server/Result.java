@@ -8,7 +8,7 @@
    Result is serializable.
    
    Created: 21 October 1996 
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,6 +19,10 @@ package arlut.csd.ganymede;
 import java.rmi.RemoteException;
 
 public class Result implements java.io.Serializable {
+
+  static final long serialVersionUID = -8417751229367613063L;
+
+  // ---
   
   Invid invid;	// remote reference to an object on the server
   String label = null;

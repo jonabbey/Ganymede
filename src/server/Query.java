@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,10 @@ import java.util.*;
  */
 
 public class Query implements java.io.Serializable {
+
+  static final long serialVersionUID = 2321965429672608993L;
+
+  // ---
 
   /**
    *

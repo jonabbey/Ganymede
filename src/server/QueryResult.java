@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,6 +34,8 @@ import arlut.csd.JDataComponent.listHandle;
  */
 
 public class QueryResult implements java.io.Serializable {
+
+  static final long serialVersionUID = 7593411645538822028L;
 
   static final boolean debug = false;
 

@@ -6,7 +6,7 @@
    information defining a field.
    
    Created: 5 November 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,6 +21,10 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 public class FieldTemplate implements java.io.Serializable, FieldType {
+
+  static final long serialVersionUID = 7145562768349169899L;
+
+  // ---
 
   // common field data
 

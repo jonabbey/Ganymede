@@ -6,7 +6,7 @@
    the container panel needs to render a field.
    
    Created: 4 November 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,6 +21,10 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 public class FieldInfo implements java.io.Serializable {
+
+  static final long serialVersionUID = -3986768111784239002L;
+
+  // ---
 
   transient short displayOrder = 0;
 

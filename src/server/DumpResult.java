@@ -7,7 +7,7 @@
    used to extract the results  out of the dump.
    
    Created: 25 September 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,6 +26,8 @@ import java.util.*;
 public class DumpResult implements java.io.Serializable {
 
   static final boolean debug = false;
+
+  static final long serialVersionUID = 2515833829305301719L;
 
   // --
 

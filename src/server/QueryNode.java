@@ -10,7 +10,7 @@
    over an RMI connection.
    
    Created: 21 October 1996
-   Version: %D% $Revision: 1.4 $
+   Version: %D% $Revision: 1.5 $
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,6 +27,6 @@ import arlut.csd.ganymede.*;
 ------------------------------------------------------------------------------*/
 
 public abstract class QueryNode implements java.io.Serializable {
-
+  static final long serialVersionUID = -4396943100372813308L;
 }
 

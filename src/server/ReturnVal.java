@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,12 +67,14 @@ import arlut.csd.JDialog.*;
 
 public class ReturnVal implements java.io.Serializable {
 
+  static final long serialVersionUID = -4832305680354355493L;
+
+  static final boolean debug = false;
+
   public static final byte NONE = 0;
   public static final byte EXPIRATIONSET = 1;
   public static final byte DELETED = 2;
   public static final byte LAST = 2;
-
-  static final boolean debug = false;
 
   // ---
 

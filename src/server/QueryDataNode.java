@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,8 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 public class QueryDataNode extends QueryNode {
+
+  static final long serialVersionUID = 1435603665496067800L;
 
   static public final byte FIRST = 1;
 

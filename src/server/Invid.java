@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,8 +39,9 @@ import java.io.*;
 
 public final class Invid implements java.io.Serializable {
 
-  //  static final int FIRST = 1;
-  //  static final int LAST = 9;
+  static final long serialVersionUID = 5357151693275369893L;
+
+  // ---
 
   private short type;
   private int num;

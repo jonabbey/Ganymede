@@ -3,7 +3,7 @@
    QueryOrNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,10 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 public class QueryOrNode extends QueryNode {
+
+  static final long serialVersionUID = 437285815734883531L;
+
+  // ---
 
   QueryNode child1, child2;  
 

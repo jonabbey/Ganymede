@@ -7,7 +7,7 @@
    and base structures on the server to the client.
    
    Created: 12 February 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,6 +32,10 @@ import java.util.*;
  */
 
 public class CategoryTransport implements java.io.Serializable {
+
+  static final long serialVersionUID = 4104856725462391453L;
+
+  // ---
 
   StringBuffer buffer;
   transient GanymedeSession session = null;

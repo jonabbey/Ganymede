@@ -3,7 +3,7 @@
    QueryAndNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,10 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 public class QueryAndNode extends QueryNode {
+
+  static final long serialVersionUID = -3475701914505388243L;
+
+  // ---
 
   QueryNode child1, child2;
   
