@@ -76,6 +76,15 @@ logic present.
 
 6. [SCHEMA] Lots of refinements to gasharl schema
 
+7. [CLIENT] Reworked the persona select handling
+
+The client now prompts users with multiple admin personae with a
+persona selection dialog on log-in.
+
+8. [SERVER] Fixed the html schema dump code in DBStore.java
+
+Oops.  DBStore had my home directory path hard-coded when it
+should have been using the ganymede.htmldump property.  Fixed.
 
 -------------------- Changes from 0.96 to 0.97 -------------------
 

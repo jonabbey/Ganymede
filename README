@@ -1,20 +1,11 @@
-Ganymede Developer Release 0.97
-February 11, 1999
+Ganymede Developer Release 0.98
+March ??, 1999
 README
 ---------------------------------------------
 
-Greetings.  This package comprises a developer's pre-release of the
-Java-based directory management software we at the Computer Science
-Division of ARL:UT have been developing for the past 3 years.  It is
-intended to allow interested parties to view the work we have done to
-date, to experiment with using the system, and possibly to try their
-hand at doing customization.
-
-This includes just about all the components necessary to have a
-working NIS/DNS management system in the fashion of GASH.  Bear in
-mind that as noted in the COPYRIGHT file, neither ARL:UT nor the
-University Of Texas at Austin is obligated to provide support for this
-code, nor are there any guarantees as to performance or behavior.
+Greetings.  Ganymede is a Java-based directory management software
+system we at the Computer Science Division of ARL:UT have been
+developing for the past 3 years.
 
 This release includes:
 
@@ -57,7 +48,7 @@ Things you will need:
 
   A JDK 1.1.7 or better compliant JVM to run the server, client, and
   admin console.  We recommend using Sun's JDK 1.2 where you can.
-  JDK 1.2 on UNIX thus far only seem to support 8 and 24 bit color
+  JDK 1.2 on UNIX thus far only seems to support 8 and 24 bit color
   displays.
 
   Swing 1.1 (or later) from Sun. You can download this

@@ -1,7 +1,13 @@
-All source code included with Ganymede falls under the GNU
-General Public License except for the Qsmtp code, which is 
-in the public domain, and the jcrypt code, which was included for
-free redistribution with Ganymede by permission of the author.
+Unless otherwise labeled, all source code and materials included with
+Ganymede falls under the GNU General Public License and is copyright
+(C) 1996, 1997, 1998, 1999 The University of Texas at Austin Applied
+Research Laboratories. 
+
+The Qsmtp code is in the public domain, and the jcrypt code is
+included for free redistribution with Ganymede by permission of the
+author.
+
+----------------------------------------------------------------------
 
                     GNU GENERAL PUBLIC LICENSE
                        Version 2, June 1991
