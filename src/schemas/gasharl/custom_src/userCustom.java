@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 2000/01/08 03:23:06 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 2000/02/01 04:02:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -611,6 +611,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  case userSchema.HOMEDIR:
 	  case userSchema.VOLUMES:
 	  case userSchema.CATEGORY:
+	  case userSchema.HOMEGROUP:
 	    return true;
 	  }
       }
@@ -627,6 +628,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  case userSchema.HOMEDIR:
 	  case userSchema.VOLUMES:
 	  case userSchema.CATEGORY:
+	  case userSchema.HOMEGROUP:
 	    return true;
 	  }
       }
