@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -757,7 +757,23 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public boolean canCreate(Session session)
   {
-    return true;
+    if (session != null && (session instanceof GanymedeSession))
+      {
+	GanymedeSession gSession;
+
+	/* -- */
+
+	gSession = (GanymedeSession) session;
+
+	return gSession.getPerm(getTypeID()).isCreatable();
+      }
+
+    // note that we are going ahead and returning false here, as
+    // we assume that the client will always use the local BaseDump
+    // copy and won't generally call us remotely with a remote
+    // interface.
+
+    return false;
   }
 
   /**
