@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -405,37 +405,36 @@ public class JDialogBuff implements java.io.Serializable {
 
 		    tempVect.addElement(tempString.toString());
 		  }
-	      }
-	    else
-	      {
-		if (tempVect != null)
-		  {
-		    if (debug)
-		      {
-			System.err.println("end of a last vector chunk: " + tempString.toString());
-		      }
 
-		    tempVect.addElement(tempString.toString());
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			System.err.println("end of scalar chunk: " + tempString.toString());
-		      }
-
-		    operands.addElement(tempString.toString());
-		  }
+		tempString.setLength(0);
 	      }
 	  }
 
 	if (tempVect != null)
 	  {
+	    if (debug)
+	      {
+		System.err.println("end of a last vector chunk: " + tempString.toString());
+	      }
+
+	    tempVect.addElement(tempString.toString());
 	    operands.addElement(tempVect);
 	  }
-	else if (tempString.length() == 0)
+	else
 	  {
-	    operands.addElement(null);
+	    if (debug)
+	      {
+		System.err.println("end of scalar chunk: " + tempString.toString());
+	      }
+
+	    if (tempString.length() == 0)
+	      {
+		operands.addElement(null);
+	      }
+	    else
+	      {
+		operands.addElement(tempString.toString());
+	      }
 	  }
 
 	index++; // skip |
