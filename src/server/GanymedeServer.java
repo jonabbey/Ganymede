@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -119,7 +119,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
       }
     
-    clientName = client.getName();
+    clientName = client.getName().toLowerCase();
     clientPass = client.getPassword();
 
     root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, clientName);
