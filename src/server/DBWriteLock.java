@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -390,6 +390,18 @@ public class DBWriteLock extends DBLock {
 	lockManager.notifyAll();
 	release();
       }
+  }
+
+  /**
+   *
+   * Returns true if the lock has been established and not
+   * yet aborted / released.
+   *
+   */
+
+  boolean isLocked()
+  {
+    return locked;
   }
 
   /**
