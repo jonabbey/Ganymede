@@ -1,25 +1,15 @@
 
 /*
-   JValueObject.java
+   JSetValueObject.java
 
-   Base class for a new hierarchy of classes used to pass
-   callback data in the arlut.csd.JDataComponent package.
-
-   Formerly, this class was an all-in-one class that tried to encode a
-   bunch of different operations, with a mess of different
-   constructors and interpretations of parameters.
-
-   Now this class will serve as a base class, and all of the actual
-   data transport will be done by operation-specific subclasses.
-
-   Created: 28 Feb 1997
+   Created: 25 October 2004
 
    Last Revision Changed: $Rev$
-   Last Changed By: $Author$
+   Last Changed By: $Author: broccol $
    Last Mod Date: $Date$
    SVN URL: $HeadURL$
 
-   Module By: Navin Manohar
+   Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
@@ -64,7 +54,7 @@ import java.awt.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                    JValueObject
+                                                                 JSetValueObject
 
 ------------------------------------------------------------------------------*/
 
@@ -93,36 +83,74 @@ import java.awt.*;
  * @author Navin Manohar 
  */
 
-public abstract class JValueObject {
+public class JSetValueObject {
+
+  private Component source;
+  private Object value;
+
+  /* -- */
+
+  public JSetValueObject(Component source, Object value)
+  {
+    this.source = source;
+    this.value = value;
+  }
 
   /**
    * Returns the arlut.csd.JDataComponent GUI component that originated this message.
    */
 
-  public abstract Component getSource();
+  public Component getSource()
+  {
+    return source;
+  }
 
   /**
    * Returns an auxiliary value.  Used for passing information about pop-up menu items, but may
    * be used for different purposes if needed.
    */
 
-  public abstract Object getParameter();
+  public Object getParameter() 
+  {
+    return null;
+  }
 
   /**
    * Returns the index of an item operated on in a vector component.
    */
 
-  public abstract int getIndex();
+  public int getIndex() 
+  {
+    return -1;
+  }
 
   /**
    * Returns the index of an item operated on in a vector component.
    */
 
-  public abstract int getIndex2();
+  public int getIndex2() 
+  {
+    return -1;
+  }
 
   /**
    * Returns the value of the object being affected by this message.
    */
 
-  public abstract Object getValue();
+  public Object getValue() 
+  {
+    return value;
+  }
+
+  /**
+   *
+   * Method to get a human-readable description of the event carried
+   * by this object
+   * 
+   */
+
+  public String toString()
+  {
+    return source.toString() +  " set " + String.valueOf(value);
+  }
 }
