@@ -5,7 +5,7 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -99,17 +99,17 @@ public class notesPanel extends JPanel{
 	      creator = (String)creator_field.getValue();
 	    }
 
-	  if (creation_date != null)
+	  if (creation_date_field != null)
 	    {
 	      creation_date = (Date)creation_date_field.getValue();
 	    }
 
-	  if (modifier != null)
+	  if (modifier_field != null)
 	    {
 	      modifier = (String)modifier_field.getValue();
 	    }
 
-	  if (mod_date != null)
+	  if (mod_date_field != null)
 	    {
 	      mod_date = (Date)modification_date_field.getValue();
 	    }
