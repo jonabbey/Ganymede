@@ -263,6 +263,11 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     Vector netgroups = user.getFieldValuesLocal(userSchema.NETGROUPS);
 
+    if (netgroups == null)
+      {
+	return false;
+      }
+
     for (int i = 0; i < netgroups.size(); i++)
       {
 	DBObject netgroup = getObject((Invid) netgroups.elementAt(i));
@@ -291,6 +296,11 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
       }
     
     Vector netgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.OWNERNETGROUPS);
+
+    if (netgroups == null)
+      {
+	return false;
+      }
 
     for (int i = 0; i < netgroups.size(); i++)
       {
