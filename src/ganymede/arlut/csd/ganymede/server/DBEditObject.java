@@ -1510,9 +1510,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @param sourceObj The object that contains the Invid to be written out.
    * @param targetObj The object that the invid resolves to.
    * @param syncChannel The name of the Sync Channel that this Invid is being written to.
+   * @param getOriginal If true and the foreign sync keys are being
+   * generated in a transactional context (as in the incremental Sync
+   * Channel writes), getForeignSyncKeys() will attempt to resolve the
+   * original version of the object.
    */
 
-  public String[] getForeignSyncKeys(Invid invid, DBObject sourceObj, DBObject targetObj, String syncChannel)
+  public String[] getForeignSyncKeys(Invid invid, DBObject sourceObj, DBObject targetObj,
+				     String syncChannel, boolean getOriginal)
   {
     return null;
   }

@@ -2251,6 +2251,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
    * view_db_object()} method to get the object.</P>
    *
+   * <P>This method will return null if the Invid provided does not
+   * exist in the session or the persistent store.</P>
+   *
    * @param target The Invid to retrieve.
    * @param original If true and the lookup is being done in the
    * middle of an editing session, we'll return a reference to the
