@@ -113,10 +113,10 @@ in the GASHARL schema kit that this vulnerability was revealed.
 7. [CLIENT] Optimized out redundant network calls in the GUI client
 
 The Ganymede GUI client has been optimized to remove a great many
-redundant RMI calls.  The client can now display objects from the
-server with only about half the RMI calls that the client made
-previously.  This will speed up the client and reduce loading on the
-server.
+redundant RMI calls when viewing objects on the server.  The client
+can now display objects with only about half the RMI calls that the
+client used previously.  This will speed up the client noticeably on
+slow network links, and will reduce loading on the server slightly.
 
 -------------------- Changes from 1.0.5 to 1.0.6 -------------------
 
