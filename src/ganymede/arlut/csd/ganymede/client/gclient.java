@@ -881,7 +881,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     images[OBJECTNOWRITE] = listnowrite;
 
-    tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
+    tree = new treeControl(new Font("SansSerif", Font.PLAIN, 12),
 			   Color.black, Color.white, this, images,
 			   null);
 
