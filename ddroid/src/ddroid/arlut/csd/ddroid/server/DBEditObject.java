@@ -1744,6 +1744,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p>This method now has the appropriate default logic for creating
    * embedded objects with the user's permissions, but this method may
    * still be overridden to do customization, if needed.</p>
+   *
+   * <p>XXX: It is essential that createNewEmbeddedObject() use
+   * GanymedeSession.create_db_object() in order to check permissions
+   * and to export the created embedded object for the client's use, if
+   * necessary, whatever other customizations a subclass might choose to
+   * do.  We may want to make this method final.</p>
    */
 
   public ReturnVal createNewEmbeddedObject(InvidDBField field) throws NotLoggedInException

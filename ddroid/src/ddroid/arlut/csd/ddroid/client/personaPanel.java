@@ -80,6 +80,13 @@ import arlut.csd.ddroid.rmi.invid_field;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>This Panel is used to present a user's personae when viewing or editing
+ * a user object in the Directory Droid client.</p>
+ *
+ * @author Mike Mulvaney
+ */
+
 public class personaPanel extends JPanel implements ActionListener, ChangeListener{
   
   boolean debug = false;

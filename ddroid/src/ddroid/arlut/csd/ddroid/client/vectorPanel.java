@@ -522,7 +522,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    System.err.println("XX** Invid for new embedded object is " + invid);
 		  }
 		
-		db_object object = (db_object) (gc.handleReturnVal(gc.getSession().edit_db_object(invid))).getObject();
+		db_object object = retVal.getObject();
 		
 		if (local_debug)
 		  {

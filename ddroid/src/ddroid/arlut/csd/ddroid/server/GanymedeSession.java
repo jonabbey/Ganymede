@@ -518,9 +518,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * </p>Constructor for a server-internal GanymedeSession.  Used when
    * the server's internal code needs to do a query, etc.  Note that
-   * the Directory Droid server will create one of these this fairly early on, and will
-   * keep it around for internal usage.  Note that we don't add
-   * this to the data structures used for the admin console.</p>
+   * the Directory Droid server will create one of these fairly early
+   * on, and will keep it around for internal usage.  Note that we
+   * don't add this to the data structures used for the admin
+   * console.</p>
    *
    * <p>Note that all internal session activities (queries, etc.) are
    * currently using a single, synchronized GanymedeSession object.. this
@@ -539,9 +540,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * </p>Constructor for a server-internal GanymedeSession.  Used when
    * the server's internal code needs to do a query, etc.  Note that
-   * the Directory Droid server will create one of these this fairly early on, and will
-   * keep it around for internal usage.  Note that we don't add
-   * this to the data structures used for the admin console.</p>
+   * the Directory Droid server will create one of these fairly early
+   * on, and will keep it around for internal usage.  Note that we
+   * don't add this to the data structures used for the admin
+   * console.</p>
    *
    * <p>Note that all internal session activities (queries, etc.) are
    * currently using a single, synchronized GanymedeSession object.. this
@@ -3877,6 +3879,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (obj == null)
       {
+	// "Object Not Found"
+	// "Error, object [{0}] does not appear to exist.  Couldn't edit it."
 	return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
 					  ts.l("edit_db_object.no_object_error_text", String.valueOf(invid)));
       }
@@ -3906,6 +3910,8 @@ final public class GanymedeSession implements Session, Unreferenced {
           }
         catch (DDroidManagementException ex)
           {
+	    // "Error checking object out for editing"
+	    // "Error loading custom class for this object."
             return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
                                               ts.l("edit_db_object.custom_class_load_error_text"));
           }
@@ -3939,6 +3945,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 		    edit_username = editing.gSession.username;
 		    edit_hostname = editing.gSession.clienthost;
 
+		    // "Error, object already being edited"
+		    // "{0} [{1} - {2}] is already being edited by user {3} on host {4}"
 		    return Ganymede.createErrorDialog(ts.l("edit_db_object.already_editing"),
 						      ts.l("edit_db_object.already_editing_text",
 							   obj.getTypeName(),
@@ -3949,6 +3957,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 		  }
 	      }
 
+	    // "Error checking object out for editing"
+	    // "Error checking out {0} [{1} - {2}] for editing.\nPerhaps someone else was editing it?"
 	    return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
 					      ts.l("edit_db_object.checking_out_error_text",
 						   obj.getTypeName(),
@@ -3958,6 +3968,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     else
       {
+	// "Permissions Error"
+	// "Permission to edit {0} [{1} - {2}] denied."
 	return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
 					  ts.l("edit_db_object.permissions_error_text",
 					       obj.getTypeName(),
@@ -4054,12 +4066,16 @@ final public class GanymedeSession implements Session, Unreferenced {
           }
         catch (DDroidManagementException ex)
           {
+	    // "Can't create"
+	    // "Error loading custom class for this object."
             return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
                                               ts.l("create_db_object.custom_class_load_error_text"));
           }
 
 	if (retVal == null)
 	  {
+	    // "Can't create"
+	    // "Can't create new object, the operation was refused"
 	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
 					      ts.l("create_db_object.operation_refused"));
 	  }
@@ -4105,6 +4121,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 		
 		if (ownerList.size() == 0)
 		  {
+		    // "Can't create"
+		    // "Can't create new object, no owner group to put it in."
 		    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
 						      ts.l("create_db_object.no_owner_group"));
 		  }
@@ -4115,6 +4133,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 		
 		if (enableWizards)
 		  {
+		    // "Can't create"
+		    // "Can't create new object, no way of knowing which owner groups to place it in."
 		    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
 						      ts.l("create_db_object.which_groups"));
 		  }
@@ -4140,12 +4160,16 @@ final public class GanymedeSession implements Session, Unreferenced {
           }
         catch (DDroidManagementException ex)
           {
+	    // "Can't create"
+	    // "Error loading custom class for this object."
             return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
                                               ts.l("create_db_object.custom_class_load_error_text"));
           }
 
 	if (retVal == null)
 	  {
+	    // "Can't create"
+	    // "Can't create new object, the operation was refused"
 	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
 					      ts.l("create_db_object.operation_refused"));
 	  }
@@ -4160,6 +4184,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (randomOwner)
 	  {
+	    // "Can't create"
+	    // "Warning: created {0} in owner group {1}"
 	    retVal = Ganymede.createInfoDialog(ts.l("create_db_object.random"),
 					       ts.l("create_db_object.random_text", newObj.getTypeName(), viewObjectLabel(ownerList.getInvid(0))));
 	  }
@@ -6336,21 +6362,31 @@ final public class GanymedeSession implements Session, Unreferenced {
   private void exportObject(DBObject object)
   {
     // the exportObject call would fail if the object has already been
-    // exported.  This should never be the case but we need to cover
-    // the exception anyway
-
-    try
-      {
-	UnicastRemoteObject.exportObject(object);
-      }
-    catch (RemoteException ex)
-      {
-	Ganymede.debug(Ganymede.stackTrace(ex));
-	return;
-      }
+    // exported.  This can possibly happen if the client attempts to
+    // edit an object in the active transaction which has already been
+    // edited, so we'll check ahead of time to make sure we're not
+    // re-exporting something.. otherwise, if the exportObject() call
+    // fails for some reason, we'll throw up an exception.
 
     synchronized (exported)
       {
+	for (Iterator it = exported.iterator(); it.hasNext();)
+	  {
+	    if (object == it.next())
+	      {
+		return;
+	      }
+	  }
+
+	try
+	  {
+	    UnicastRemoteObject.exportObject(object);
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException(ex);
+	  }
+
 	exported.add(object);
 	object.exportFields();
       }

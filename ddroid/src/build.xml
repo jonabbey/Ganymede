@@ -269,9 +269,9 @@ refresh the jar files.
   <target name="veryclean" depends="javadoc_clean,clean,dist_clean"/>
   
 
-  <target name="total" depends="veryclean,main,jars,javadoc"/>
+  <target name="total" depends="veryclean,main,validate,jars,javadoc"/>
 
 
-  <target name="dist" depends="main,jars,javadoc"/>
+  <target name="dist" depends="main,validate,jars,javadoc"/>
   
 </project>
