@@ -19,7 +19,7 @@ import arlut.csd.JDataComponent.*;
 
 class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
-  final static boolean debug = true;
+  final static boolean debug = false;
 
   // class variables
 
@@ -98,6 +98,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	    title = new JLabel("Component");
 	  }
 	System.out.println("Adding mouse listener.");
+	title.setForeground(Color.white);
 	title.addMouseListener(this);
 
 	expand = new JButton(vp.wp.closeIcon);
@@ -139,7 +140,19 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     return my_component;
   }
 
-  
+  /**
+   *  Expand this element wrapper.
+   *
+   * If makeOpen is true, expand(boolean) will open it or leave it open.
+   * expand() is a misnomer; it is really a toggle.  Use expand(boolean) to
+   * force open or closedness.
+   */
+  public void expand(boolean makeOpen)
+  {
+    expanded = !makeOpen;
+    expand();
+  }
+
   public void expand()
   {
     System.out.println("expand().");
