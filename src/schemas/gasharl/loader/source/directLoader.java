@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -586,7 +586,7 @@ public class directLoader {
       {
 	try
 	  {
-	    categoryObj = new User();
+	    categoryObj = new UserCategory();
 	    done = categoryObj.loadLine(tokens);
 
 	    if (!done && categoryObj.valid)
@@ -1448,6 +1448,7 @@ public class directLoader {
     UserCategory category;
     DBEditObject obj;
     Invid invid;
+    ReturnVal result;
 
     /* -- */
 
@@ -1472,20 +1473,47 @@ public class directLoader {
 
 	categoryInvids.put(category.name, invid);
 
-	obj.setFieldValueLocal(userCategorySchema.TITLE, category.name);
-	obj.setFieldValueLocal(userCategorySchema.SUMMARY, category.shortdescrip);
-	obj.setFieldValueLocal(userCategorySchema.DESCRIPTION, category.longdescrip);
+	result = obj.setFieldValueLocal(userCategorySchema.TITLE, category.name);
+
+	if (result != null && !result.didSucceed())
+	  {
+	    System.err.println("Failure setting category name for " + category.name);
+	  }
+
+	result = obj.setFieldValueLocal(userCategorySchema.SUMMARY, category.shortdescrip);
+
+	if (result != null && !result.didSucceed())
+	  {
+	    System.err.println("Failure setting category summary for " + category.name);
+	  }
+
+	result = obj.setFieldValueLocal(userCategorySchema.DESCRIPTION, category.longdescrip);
+
+	if (result != null && !result.didSucceed())
+	  {
+	    System.err.println("Failure setting category description for " + category.name);
+	  }
 
 	if (category.maillist != null && !category.maillist.equals(""))
 	  {
 	    obj.setFieldValueLocal(userCategorySchema.APPROVALREQ, new Boolean(true));
-	    obj.setFieldValueLocal(userCategorySchema.APPROVALLIST, category.maillist);
+	    result = obj.setFieldValueLocal(userCategorySchema.APPROVALLIST, category.maillist);
+
+	    if (result != null && !result.didSucceed())
+	      {
+		System.err.println("Failure setting category maillist for " + category.name);
+	      }
 	  }
 	
 	if (category.days_limit != 0)
 	  {
 	    obj.setFieldValueLocal(userCategorySchema.EXPIRE, new Boolean(true));
-	    obj.setFieldValueLocal(userCategorySchema.LIMIT, new Integer(category.days_limit));
+	    result = obj.setFieldValueLocal(userCategorySchema.LIMIT, new Integer(category.days_limit));
+
+	    if (result != null && !result.didSucceed())
+	      {
+		System.err.println("Failure setting category expiration for " + category.name);
+	      }
 	  }
 
 	if (category.ssrequired)
@@ -1511,6 +1539,7 @@ public class directLoader {
     db_field current_field;
     pass_field p_field;
     User userObj;
+    Invid categoryInvid;
 
     /* -- */
 
@@ -1575,11 +1604,14 @@ public class directLoader {
 
 	// set the user category
 
-	Invid categoryInvid = (Invid) categoryInvids.get(userObj.category);
-
-	if (categoryInvid != null)
+	if (userObj.category != null && !userObj.category.equals(""))
 	  {
-	    current_obj.setFieldValueLocal(userSchema.CATEGORY, categoryInvid);
+	    categoryInvid = (Invid) categoryInvids.get(userObj.category);
+
+	    if (categoryInvid != null)
+	      {
+		current_obj.setFieldValueLocal(userSchema.CATEGORY, categoryInvid);
+	      }
 	  }
 
 	// set the social security #
