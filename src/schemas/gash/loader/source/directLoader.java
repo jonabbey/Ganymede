@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -62,6 +62,12 @@ public class directLoader {
 
   static Hashtable systemTypes = new Hashtable();
   static Hashtable systemTypeInvids = new Hashtable();
+
+  static Hashtable rooms = new Hashtable();
+  static Hashtable roomInvids = new Hashtable();
+
+  static Hashtable networks = new Hashtable();
+  static Hashtable networkInvids = new Hashtable();
 
   static Hashtable systemInvid = new Hashtable();
 
@@ -147,6 +153,7 @@ public class directLoader {
     scanGroups();
     scanUserNetgroups();
     scanSystemTypes();
+    scanRooms();
     scanSystems();
     scanSystemNetgroups();
     scanAutomounter();
@@ -164,7 +171,7 @@ public class directLoader {
 	Invid invid, objInvid;
 	Enumeration enum;
 	OwnerGroup ogRec;
-	db_object current_obj;
+	DBEditObject current_obj;
 	db_field current_field;
 	pass_field p_field;
 	DBObjectBase base;
@@ -176,12 +183,12 @@ public class directLoader {
 
 	my_client.session.checkpoint("GASHAdmin");
 
-	current_obj = my_client.session.create_db_object(SchemaConstants.PermBase);
+	current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.PermBase);
 	gashadminPermInvid = current_obj.getInvid();
 
 	System.err.println("Trying to create a new GASHAdmin perm object: " + gashadminPermInvid.toString());
 
-	retVal = current_obj.setFieldValue(SchemaConstants.PermName, "GASH Admin");
+	retVal = current_obj.setFieldValueLocal(SchemaConstants.PermName, "GASH Admin");
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -246,7 +253,7 @@ public class directLoader {
 
 	    // create the owner group on the server
 
-	    current_obj = my_client.session.create_db_object(SchemaConstants.OwnerBase);
+	    current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.OwnerBase);
 	    invid = current_obj.getInvid();
 
 	    // record the invid so that we can refer to this ownerbase later
@@ -264,7 +271,7 @@ public class directLoader {
 	    // great, but it will serve for now.  The administrators will be able to
 	    // edit them through the client
 
-	    current_obj.setFieldValue(SchemaConstants.OwnerNameField, ogRec.prefix);
+	    current_obj.setFieldValueLocal(SchemaConstants.OwnerNameField, ogRec.prefix);
 	  }
 
 	commitTransaction();
@@ -292,6 +299,12 @@ public class directLoader {
 	System.out.println("\nRegistering System Types\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystemTypes();
+	commitTransaction();
+
+	System.out.println("\nRegistering networks and rooms\n");
+	my_client.session.openTransaction("GASH directLoader");
+	registerNets();
+	registerRooms();
 	commitTransaction();
 
 	System.out.println("\nRegistering systems\n");
@@ -546,7 +559,7 @@ public class directLoader {
 	      }
 	    else
 	      {
-		System.err.println("x");
+		System.err.print(".");
 
 		switch (line.charAt(0))
 		  {
@@ -555,7 +568,7 @@ public class directLoader {
 		    
 		    externalAliases.addElement(z);
 		    
-		    System.err.println(z);
+		    // System.err.println(z);
 		    break;
 		    
 		  case ':':
@@ -563,7 +576,7 @@ public class directLoader {
 		    
 		    mailGroups.addElement(y);
 		    
-		    System.err.println(y);
+		    // System.err.println(y);
 		    break;
 		    
 		  default:
@@ -571,7 +584,7 @@ public class directLoader {
 		    
 		    userMail.put(x.userName, x);
 		    
-		    System.err.println(x);
+		    // System.err.println(x);
 		    break;
 		  }
 	      }
@@ -586,7 +599,7 @@ public class directLoader {
 	  }
       }
 
-    System.out.println();
+    System.err.println();
     System.out.println("Done scanning aliases_info");
 
     try
@@ -766,6 +779,91 @@ public class directLoader {
 	      {
 		st.display();
 		systemTypes.put(st.name, st);
+	      }
+	  }
+	catch (EOFException ex)
+	  {
+	    done = true;
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("unknown IO exception caught: " + ex);
+	  }
+      }
+
+    try
+      {
+	inStream.close();
+      }
+    catch (IOException ex)
+      {
+	System.err.println("unknown IO exception caught: " + ex);
+      }
+
+    System.out.println();
+    System.out.println("Done scanning internet_assignment file for system type objects");
+  }
+
+  /**
+   *
+   */
+
+  private static void scanRooms()
+  {
+    System.out.println("\nScanning Rooms\n");
+
+    inStream = null;
+    done = false;
+
+    try
+      {
+	inStream = new FileInputStream("input/networks_by_room.cpp");
+      }
+    catch (FileNotFoundException ex)
+      {
+	System.err.println("Couldn't find system types file");
+	done = true;
+      }
+
+    StreamTokenizer tokens = new StreamTokenizer(inStream);
+
+    Room.initTokenizer(tokens);
+
+    String ipNetName;
+    Room room;
+
+    while (!done)
+      {
+	try
+	  {
+	    room = new Room();
+	    done = room.loadLine(tokens);
+	    
+	    // if we got a room ok, show what it looks like and register
+	    // the room and the network info for that room in our
+	    // datastructures.
+
+	    if (room.loaded)
+	      {
+		room.display();
+
+		if (rooms.containsKey(room.name))
+		  {
+		    System.err.println("** Error, multiple room definitions for " + room.name);
+		    continue;
+		  }
+
+		rooms.put(room.name, room);
+
+		for (int i = 0; i < room.nets.size(); i++)
+		  {
+		    ipNetName = (String) room.nets.elementAt(i);
+
+		    if (!networks.containsKey(ipNetName))
+		      {
+			networks.put(ipNetName, ipNetName);
+		      }
+		  }
 	      }
 	  }
 	catch (EOFException ex)
@@ -1007,7 +1105,7 @@ public class directLoader {
     Invid invid, objInvid;
     Enumeration enum;
     OwnerGroup ogRec;
-    db_object current_obj;
+    DBEditObject current_obj;
     db_field current_field;
     Hashtable netHash = new Hashtable();
     ReturnVal retVal;
@@ -1023,12 +1121,12 @@ public class directLoader {
 
 	System.out.print("Creating " + key);
 
-	current_obj = my_client.session.create_db_object((short) 270);	// base 270 is for user netgroups
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 270);	// base 270 is for user netgroups
 	objInvid = current_obj.getInvid();
 
 	System.out.println(" [" + objInvid + "]");
 
-	current_obj.setFieldValue(userNetgroupSchema.NETGROUPNAME, key); // netgroup name
+	current_obj.setFieldValueLocal(userNetgroupSchema.NETGROUPNAME, key); // netgroup name
 	netHash.put(key, objInvid);
 
 	// now we have to put the users in
@@ -1097,12 +1195,8 @@ public class directLoader {
 	key = (String) enum.nextElement();
 	uNetObj = (UserNetgroup) userNetgroup.get(key);
 
-	System.out.print("Loading subnetgroups for " + key);
-
 	objInvid = (Invid) netHash.get(key);
-	current_obj = my_client.session.edit_db_object(objInvid);
-
-	System.out.println(" [" + objInvid + "]");
+	current_obj = (DBEditObject) my_client.session.edit_db_object(objInvid);
 
 	// we have to put the sub netgroups in
 
@@ -1112,11 +1206,17 @@ public class directLoader {
 	String subName;
 	boolean ok = false;
 
+	if (subnets.size() > 0)
+	  {
+	    System.out.print("Loading subnetgroups for " + key);
+	    System.out.println(" [" + objInvid + "]");
+	  }
+
 	for (int i = 0; i < subnets.size(); i++)
 	  {
 	    subName = (String) subnets.elementAt(i);
 
-	    if (subName != null)
+	    if (subName != null && !subName.equals(""))
 	      {
 		invid = (Invid) netHash.get(subName);
 
@@ -1159,7 +1259,7 @@ public class directLoader {
     Invid invid, objInvid;
     Enumeration enum;
     OwnerGroup ogRec;
-    db_object current_obj;
+    DBEditObject current_obj;
     db_field current_field;
     pass_field p_field;
     User userObj;
@@ -1177,7 +1277,7 @@ public class directLoader {
 
 	System.out.print("Creating " + key);
 
-	current_obj = my_client.session.create_db_object(SchemaConstants.UserBase);
+	current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.UserBase);
 	invid = current_obj.getInvid();
 
 	System.out.print(" [" + invid + "] ");
@@ -1186,11 +1286,11 @@ public class directLoader {
 
 	// set the username
 	    
-	current_obj.setFieldValue(SchemaConstants.UserUserName, key);
+	current_obj.setFieldValueLocal(SchemaConstants.UserUserName, key);
 
 	// set the UID
 
-	current_obj.setFieldValue(userSchema.UID, new Integer(userObj.uid));
+	current_obj.setFieldValueLocal(userSchema.UID, new Integer(userObj.uid));
 
 	// set the password
 
@@ -1199,31 +1299,31 @@ public class directLoader {
 
 	// set the fullname
 
-	current_obj.setFieldValue(userSchema.FULLNAME, userObj.fullname);
+	current_obj.setFieldValueLocal(userSchema.FULLNAME, userObj.fullname);
 
 	// set the division
 
-	current_obj.setFieldValue(userSchema.DIVISION, userObj.division);
+	current_obj.setFieldValueLocal(userSchema.DIVISION, userObj.division);
 
 	// set the room
 
-	current_obj.setFieldValue(userSchema.ROOM, userObj.room);
+	current_obj.setFieldValueLocal(userSchema.ROOM, userObj.room);
 
 	// set the office phone
 
-	current_obj.setFieldValue(userSchema.OFFICEPHONE, userObj.officePhone);
+	current_obj.setFieldValueLocal(userSchema.OFFICEPHONE, userObj.officePhone);
 
 	// set the home phone
 
-	current_obj.setFieldValue(userSchema.HOMEPHONE, userObj.homePhone);
+	current_obj.setFieldValueLocal(userSchema.HOMEPHONE, userObj.homePhone);
 
 	// set the home directory
 
-	current_obj.setFieldValue(userSchema.HOMEDIR, userObj.directory);
+	current_obj.setFieldValueLocal(userSchema.HOMEDIR, userObj.directory);
 
 	// set the shell
 
-	current_obj.setFieldValue(userSchema.LOGINSHELL, userObj.shell);
+	current_obj.setFieldValueLocal(userSchema.LOGINSHELL, userObj.shell);
 
 	// register email aliases for this user
 
@@ -1247,7 +1347,7 @@ public class directLoader {
 
 	    // set the signature alias
 
-	    current_obj.setFieldValue(userSchema.SIGNATURE, aliasInfo.aliases.elementAt(0));
+	    current_obj.setFieldValueLocal(userSchema.SIGNATURE, aliasInfo.aliases.elementAt(0));
 
 	    // set the email targets
 
@@ -1300,23 +1400,23 @@ public class directLoader {
 	  {
 	    System.out.print("User " + key + " is a GASH admin.. creating persona object ");
 
-	    db_object newPersona = my_client.session.create_db_object(SchemaConstants.PersonaBase);
+	    DBEditObject newPersona = (DBEditObject) my_client.session.create_db_object(SchemaConstants.PersonaBase);
 	    Invid personaInvid = newPersona.getInvid();
 
 	    System.out.println("[" + personaInvid + "]");
 
-	    newPersona.setFieldValue(SchemaConstants.PersonaAssocUser, invid);
+	    newPersona.setFieldValueLocal(SchemaConstants.PersonaAssocUser, invid);
 
-	    newPersona.setFieldValue(SchemaConstants.PersonaNameField, key + ":GASH Admin");
+	    newPersona.setFieldValueLocal(SchemaConstants.PersonaNameField, key + ":GASH Admin");
 
 	    pass_field passField = (pass_field) newPersona.getField(SchemaConstants.PersonaPasswordField);
 	    passField.setCryptPass(ogRec.password(key));
 
-	    //	    newPersona.setFieldValue(SchemaConstants.PersonaPasswordField,ogRec.password(key));
+	    //	    newPersona.setFieldValueLocal(SchemaConstants.PersonaPasswordField,ogRec.password(key));
 
-	    newPersona.setFieldValue(SchemaConstants.PersonaAdminConsole, new Boolean(true));
+	    newPersona.setFieldValueLocal(SchemaConstants.PersonaAdminConsole, new Boolean(true));
 
-	    newPersona.setFieldValue(SchemaConstants.PersonaAdminPower, new Boolean(false));
+	    newPersona.setFieldValueLocal(SchemaConstants.PersonaAdminPower, new Boolean(false));
 
 	    db_field personaField = newPersona.getField(SchemaConstants.PersonaGroupsField);
 	    personaField.addElement(ogRec.getInvid());
@@ -1338,7 +1438,7 @@ public class directLoader {
     
     ExternMail mailRec;
     MailGroup mailGroup;
-    db_object current_obj;
+    DBEditObject current_obj;
     db_field current_field;
     Invid objInvid, targetInvid;
     OwnerGroup ogRec;
@@ -1356,7 +1456,7 @@ public class directLoader {
       {
 	mailRec = (ExternMail) externalAliases.elementAt(i);
 
-	current_obj = my_client.session.create_db_object((short) 275);	// base 275 is for Email Redirect objects
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 275);	// base 275 is for Email Redirect objects
 	objInvid = current_obj.getInvid();
 
 	// remember that we have this external record as a possible target for
@@ -1364,7 +1464,7 @@ public class directLoader {
 
 	mailInvids.put(mailRec.externalName.toLowerCase(), objInvid);
 
-	current_obj.setFieldValue(emailRedirectSchema.NAME, mailRec.externalName);
+	current_obj.setFieldValueLocal(emailRedirectSchema.NAME, mailRec.externalName);
 
 	// set targets
 
@@ -1420,12 +1520,12 @@ public class directLoader {
       {
 	mailGroup = (MailGroup) mailGroups.elementAt(i);
 
-	current_obj = my_client.session.create_db_object((short) 274);	// base 274 is for Email List objects
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 274);	// base 274 is for Email List objects
 	objInvid = current_obj.getInvid();
 
 	mailInvids.put(mailGroup.listName.toLowerCase(), objInvid);
 
-	current_obj.setFieldValue(emailListSchema.LISTNAME, mailGroup.listName);
+	current_obj.setFieldValueLocal(emailListSchema.LISTNAME, mailGroup.listName);
 
 	// set external targets
 
@@ -1466,7 +1566,7 @@ public class directLoader {
       {
 	mailGroup = (MailGroup) mailGroups.elementAt(i);
 
-	current_obj = my_client.session.edit_db_object((Invid) mailInvids.get(mailGroup.listName.toLowerCase()));
+	current_obj = (DBEditObject) my_client.session.edit_db_object((Invid) mailInvids.get(mailGroup.listName.toLowerCase()));
 
 	// set internal targets
 
@@ -1513,7 +1613,7 @@ public class directLoader {
     Invid invid, objInvid;
     Enumeration enum;
     OwnerGroup ogRec;
-    db_object current_obj;
+    DBEditObject current_obj;
     db_field current_field, current_field2;
     User userObj;
 
@@ -1528,32 +1628,32 @@ public class directLoader {
 	
 	System.out.print("Creating " + key);
 	
-	current_obj = my_client.session.create_db_object((short) 257);	// base 257 is for groups
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 257);	// base 257 is for groups
 	objInvid = current_obj.getInvid();
 	
-	System.out.print(" [" + objInvid + "]");
+	System.out.println(" [" + objInvid + "]");
 
 	groupInvid.put(groupObj.name, objInvid);
 
 	// set the group name
 	    
-	current_obj.setFieldValue(groupSchema.GROUPNAME, key);
+	current_obj.setFieldValueLocal(groupSchema.GROUPNAME, key);
 
 	// set the GID
 
-	current_obj.setFieldValue(groupSchema.GID, new Integer(groupObj.gid));
+	current_obj.setFieldValueLocal(groupSchema.GID, new Integer(groupObj.gid));
 
 	// set the password
 
-	current_obj.setFieldValue(groupSchema.PASSWORD, groupObj.password);
+	current_obj.setFieldValueLocal(groupSchema.PASSWORD, groupObj.password);
 
 	// set the description
 
-	current_obj.setFieldValue(groupSchema.DESCRIPTION, groupObj.description);
+	current_obj.setFieldValueLocal(groupSchema.DESCRIPTION, groupObj.description);
 
 	// set the contract info
 
-	current_obj.setFieldValue(groupSchema.CONTRACT, groupObj.contract);
+	current_obj.setFieldValueLocal(groupSchema.CONTRACT, groupObj.contract);
 
 	// add users
 
@@ -1571,7 +1671,7 @@ public class directLoader {
 
 		if (invid != null)
 		  {
-		    System.err.println("Add " + username + ", [" + invid.toString()+"]");
+		    System.err.println("\tAdd " + username + ", [" + invid.toString()+"]");
 		    current_field.addElement(invid);
 		  }
 		else
@@ -1586,7 +1686,7 @@ public class directLoader {
 
 		if (userObj.gid == groupObj.gid)
 		  {
-		    System.err.println("-- home group add " + username);
+		    System.err.println("\t-- home group add " + username);
 		    current_field2 = current_obj.getField(groupSchema.HOMEUSERS);
 		    current_field2.addElement(invid);
 		  }
@@ -1627,7 +1727,7 @@ public class directLoader {
     Invid invid, objInvid;
     Enumeration enum;
     SystemType st;
-    db_object current_obj;
+    DBEditObject current_obj;
     db_field current_field;
 
     /* -- */
@@ -1641,7 +1741,7 @@ public class directLoader {
 	
 	System.out.print("Creating " + key);
 	
-	current_obj = my_client.session.create_db_object((short) 272);	// base 272 is for system types
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 272);	// base 272 is for system types
 	objInvid = current_obj.getInvid();
 	
 	System.out.print(" [" + objInvid + "]");
@@ -1650,19 +1750,120 @@ public class directLoader {
 
 	// set the system type name
 	    
-	current_obj.setFieldValue(systemTypeSchema.SYSTEMTYPE, key);
+	current_obj.setFieldValueLocal(systemTypeSchema.SYSTEMTYPE, key);
 
 	// set the start mark
 
-	current_obj.setFieldValue(systemTypeSchema.STARTIP, new Integer(st.start));
+	current_obj.setFieldValueLocal(systemTypeSchema.STARTIP, new Integer(st.start));
 
 	// set the end mark
 
-	current_obj.setFieldValue(systemTypeSchema.STOPIP, new Integer(st.end));
+	current_obj.setFieldValueLocal(systemTypeSchema.STOPIP, new Integer(st.end));
 
 	// set the associated user required flag
 
-	current_obj.setFieldValue(systemTypeSchema.USERREQ, new Boolean(st.requireUser));
+	current_obj.setFieldValueLocal(systemTypeSchema.USERREQ, new Boolean(st.requireUser));
+      }
+  }
+
+  /**
+   *
+   */
+
+  private static void registerNets() throws RemoteException
+  {
+    String name;
+    Invid invid, objInvid;
+    Enumeration enum;
+    DBEditObject current_obj;
+    db_field current_field;
+    ReturnVal retVal;
+
+    /* -- */
+
+    enum = networks.keys();
+
+    while (enum.hasMoreElements())
+      {
+	name = (String) enum.nextElement();
+	
+	System.out.print("Creating net: " + name);
+	
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 267);	// base 267 is for system types
+	objInvid = current_obj.getInvid();
+	
+	System.out.println(" [" + objInvid + "]");
+
+	networkInvids.put(name, objInvid);
+
+	// set the network name.. just use the net number by default
+	    
+	current_obj.setFieldValueLocal(networkSchema.NAME, name);
+	current_obj.setFieldValueLocal(networkSchema.IPV6OK, new Boolean(false));
+
+	IPDBField ipfield = (IPDBField) current_obj.getField(networkSchema.NETNUMBER);
+
+	retVal = ipfield.setValueLocal(name);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    System.err.println("*** Error, couldn't register " + name);
+	  }
+      }
+  }
+
+  /**
+   *
+   */
+
+  private static void registerRooms() throws RemoteException
+  {
+    String name;
+    Room room;
+    String netName;
+    Invid netInvid, objInvid;
+    Enumeration enum;
+    DBEditObject current_obj;
+    db_field current_field;
+    InvidDBField networksField;
+    ReturnVal retVal;
+
+    /* -- */
+
+    enum = rooms.keys();
+
+    while (enum.hasMoreElements())
+      {
+	name = (String) enum.nextElement();
+	room = (Room) rooms.get(name);
+	
+	System.out.print("Creating room: " + name);
+	
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 269);	// base 269 is for rooms
+	objInvid = current_obj.getInvid();
+	
+	System.out.println(" [" + objInvid + "]");
+
+	roomInvids.put(name, objInvid);
+
+	// set the network name.. just use the net number by default
+	    
+	current_obj.setFieldValueLocal(roomSchema.ROOMNUMBER, name);
+
+	networksField = (InvidDBField) current_obj.getField(roomSchema.NETWORKS);
+
+	Vector networks = room.nets;
+
+	for (int i = 0; i < networks.size(); i++)
+	  {
+	    netName = (String) networks.elementAt(i);
+	    netInvid = (Invid) networkInvids.get(netName);
+
+	    if (netInvid != null)
+	      {
+		networksField.addElementLocal(netInvid);
+	      }
+	  }
       }
   }
 
@@ -1676,9 +1877,8 @@ public class directLoader {
     Invid invid, dnsInvid, objInvid;
     Enumeration enum;
     OwnerGroup ogRec;
-    db_object current_obj;
+    DBEditObject current_obj;
     db_field current_field;
-    Hashtable roomHash = new Hashtable();
     Invid roomInvid;
 
     system sysObj;
@@ -1687,10 +1887,10 @@ public class directLoader {
 
     // create an arlut.utexas.edu DNS domain entry
 
-    current_obj = my_client.session.create_db_object((short) 268); // base 268 is for DNS domain
+    current_obj = (DBEditObject) my_client.session.create_db_object((short) 268); // base 268 is for DNS domain
     dnsInvid = current_obj.getInvid();
 
-    current_obj.setFieldValue((short) 257, "arlut.utexas.edu");
+    current_obj.setFieldValueLocal((short) 257, "arlut.utexas.edu");	// no dnsSchema yet
 
     // and create all the systems
 
@@ -1703,7 +1903,7 @@ public class directLoader {
 	
 	System.out.print("Creating " + key);
 	
-	current_obj = my_client.session.create_db_object((short) 263);	// base 263 is for systems
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 263);	// base 263 is for systems
 	objInvid = current_obj.getInvid();
 	
 	System.out.print(" [" + objInvid + "]");
@@ -1712,34 +1912,37 @@ public class directLoader {
 
 	// set the system name
 	    
-	current_obj.setFieldValue(systemSchema.SYSTEMNAME,key);
+	current_obj.setFieldValueLocal(systemSchema.SYSTEMNAME,key);
 
 	// set the DNS domain
 	    
-	current_obj.setFieldValue(systemSchema.DNSDOMAIN, dnsInvid);
+	current_obj.setFieldValueLocal(systemSchema.DNSDOMAIN, dnsInvid);
 
 	// set the room
 
 	// this is an invid.. need to see if we've created the room yet,
 	// if not, create then set the invid
 
-	roomInvid = (Invid) roomHash.get(sysObj.room);
+	roomInvid = (Invid) roomInvids.get(sysObj.room);
 
 	if (roomInvid == null)
 	  {
-	    db_object room_obj = my_client.session.create_db_object((short) 269);	// base 269 is for rooms
+	    System.err.println("\nWarning: registerSystems() creating a room entry not defined in");
+	    System.err.println("networks_by_room.cpp file. <" + sysObj.room + ">\n");
+
+	    DBEditObject room_obj = (DBEditObject) my_client.session.create_db_object((short) 269);	// base 269 is for rooms
 	    roomInvid = room_obj.getInvid();
 
 	    // label the room with the room number
 
-	    room_obj.setFieldValue((short) 256, sysObj.room);
+	    room_obj.setFieldValueLocal(roomSchema.ROOMNUMBER, sysObj.room);
 
 	    // remember the room
 
-	    roomHash.put(sysObj.room, roomInvid);
+	    roomInvids.put(sysObj.room, roomInvid);
 	  }
 
-	current_obj.setFieldValue(systemSchema.ROOM, roomInvid);
+	current_obj.setFieldValueLocal(systemSchema.ROOM, roomInvid);
 
 	// set the type
 
@@ -1750,19 +1953,19 @@ public class directLoader {
 	    System.err.println("\n\n***** No such type found: " + sysObj.type + "\n\n");
 	  }
 
-	current_obj.setFieldValue(systemSchema.SYSTEMTYPE, typeInvid);
+	current_obj.setFieldValueLocal(systemSchema.SYSTEMTYPE, typeInvid);
 
 	// set the manu
 
-	current_obj.setFieldValue(systemSchema.MANUFACTURER, sysObj.manu);
+	current_obj.setFieldValueLocal(systemSchema.MANUFACTURER, sysObj.manu);
 
 	// set the model
 
-	current_obj.setFieldValue(systemSchema.MODEL, sysObj.model);
+	current_obj.setFieldValueLocal(systemSchema.MODEL, sysObj.model);
 
 	// set the os
 
-	current_obj.setFieldValue(systemSchema.OS, sysObj.os);
+	current_obj.setFieldValueLocal(systemSchema.OS, sysObj.os);
 
 	// set the user
 
@@ -1772,7 +1975,7 @@ public class directLoader {
 
 	    if (userInv != null)
 	      {
-		current_obj.setFieldValue(systemSchema.PRIMARYUSER, userInv);
+		current_obj.setFieldValueLocal(systemSchema.PRIMARYUSER, userInv);
 	      }
 	  }
 
@@ -1790,24 +1993,41 @@ public class directLoader {
 	current_field = current_obj.getField(systemSchema.INTERFACES);
 
 	Invid intInvid;
+	Invid netInvid;
 	interfaceObj iO;
-	db_object interfaceRef;
+	DBEditObject interfaceRef;
 	db_field interfaceField;
+	String netNum;
 
 	for (int i = 0; i < sysObj.interfaces.size(); i++)
 	  {
 	    iO = (interfaceObj) sysObj.interfaces.elementAt(i);
 
 	    intInvid = ((invid_field) current_field).createNewEmbedded();
-	    interfaceRef = my_client.session.edit_db_object(intInvid);
+	    interfaceRef = (DBEditObject) my_client.session.edit_db_object(intInvid);
 
 	    // set the Ethernet Info for this Interface
 
-	    interfaceRef.setFieldValue(interfaceSchema.ETHERNETINFO, iO.Ether);
+	    interfaceRef.setFieldValueLocal(interfaceSchema.ETHERNETINFO, iO.Ether);
 
 	    // set the IP address for this interface
 
-	    interfaceRef.setFieldValue(interfaceSchema.ADDRESS, iO.IP);	// ip address
+	    interfaceRef.setFieldValueLocal(interfaceSchema.ADDRESS, iO.IP);	// ip address
+
+	    // iO.IP should be a String with four octets in standard IPv4
+	    // dotted decimal notation.. we should have an invid for this
+	    // interface's network in our networkInvids hash
+
+	    if (iO.IP != null)
+	      {
+		netNum = iO.IP.substring(0, iO.IP.lastIndexOf("."));
+		netInvid = (Invid) networkInvids.get(netNum);
+
+		if (netInvid != null)
+		  {
+		    interfaceRef.setFieldValueLocal(interfaceSchema.IPNET, netInvid);
+		  }
+	      }
 
 	    // if the system has a single interface record in GASH, it's
 	    // really a single interface system, and we don't need to
@@ -1821,7 +2041,7 @@ public class directLoader {
 		
 		if (iO.interfaceName != null && !iO.interfaceName.equals(""))
 		  {
-		    interfaceRef.setFieldValue(interfaceSchema.NAME, iO.interfaceName);
+		    interfaceRef.setFieldValueLocal(interfaceSchema.NAME, iO.interfaceName);
 		  }
 		
 		interfaceField = interfaceRef.getField(interfaceSchema.ALIASES);	// aliases
@@ -1901,7 +2121,7 @@ public class directLoader {
     Invid invid, objInvid;
     Enumeration enum;
     OwnerGroup ogRec;
-    db_object current_obj;
+    DBEditObject current_obj;
     db_field current_field;
     Hashtable netHash = new Hashtable();
 
@@ -1916,12 +2136,12 @@ public class directLoader {
 
 	System.out.print("\nCreating " + key);
 
-	current_obj = my_client.session.create_db_object((short) 271);	// base 271 is for system netgroups
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 271);	// base 271 is for system netgroups
 	objInvid = current_obj.getInvid();
 
 	System.out.println(" [" + objInvid + "]");
 
-	current_obj.setFieldValue(systemNetgroupSchema.NETGROUPNAME, key); // netgroup name
+	current_obj.setFieldValueLocal(systemNetgroupSchema.NETGROUPNAME, key); // netgroup name
 
 	netHash.put(key, objInvid);
 
@@ -1992,7 +2212,7 @@ public class directLoader {
 	System.out.print("Loading subnetgroups for " + key);
 
 	objInvid = (Invid) netHash.get(key);
-	current_obj = my_client.session.edit_db_object(objInvid);
+	current_obj = (DBEditObject) my_client.session.edit_db_object(objInvid);
 
 	System.out.println(" [" + objInvid + "]");
 
@@ -2039,7 +2259,8 @@ public class directLoader {
     MapEntry m;
     Enumeration enum;
     String key;
-    db_object current_obj, user_obj, embed_obj;
+    DBEditObject current_obj;
+    DBEditObject user_obj, embed_obj;
     db_field current_field;
     invid_field embed_field;
     Invid objInvid, hostInvid, userInvid;
@@ -2059,21 +2280,21 @@ public class directLoader {
 
 	System.out.print("Creating " + key + " on host: " + v.hostName);
 	
-	current_obj = my_client.session.create_db_object((short) 276); // nfs volume
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 276); // nfs volume
 	objInvid = current_obj.getInvid();
 
 	System.out.println(" [" + objInvid + "]");
 
 	volumeInvids.put(key, objInvid); // save the invid in our hashtable
 
-	current_obj.setFieldValue(volumeSchema.LABEL, key); // volume name
-	current_obj.setFieldValue(volumeSchema.PATH, v.path);	// path
+	current_obj.setFieldValueLocal(volumeSchema.LABEL, key); // volume name
+	current_obj.setFieldValueLocal(volumeSchema.PATH, v.path);	// path
 	
 	hostInvid = (Invid) systemInvid.get(v.hostName);
 
-	current_obj.setFieldValue(volumeSchema.HOST, hostInvid);
+	current_obj.setFieldValueLocal(volumeSchema.HOST, hostInvid);
 
-	current_obj.setFieldValue(volumeSchema.MOUNTOPTIONS, v.mountOptions);
+	current_obj.setFieldValueLocal(volumeSchema.MOUNTOPTIONS, v.mountOptions);
       }
 
     // step 2: create all automounter maps
@@ -2086,9 +2307,9 @@ public class directLoader {
       {
 	key = (String) enum.nextElement();
 
-	current_obj = my_client.session.create_db_object((short) 277); // automounter map
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 277); // automounter map
 
-	current_obj.setFieldValue(mapSchema.MAPNAME, key); // set the name of the map
+	current_obj.setFieldValueLocal(mapSchema.MAPNAME, key); // set the name of the map
 
 	objInvid = current_obj.getInvid();
 
@@ -2111,17 +2332,17 @@ public class directLoader {
 
 	// need to edit this user, create an imbedded object
 
-	user_obj = my_client.session.edit_db_object(userInvid);
+	user_obj = (DBEditObject) my_client.session.edit_db_object(userInvid);
 
 	embed_field = (invid_field) user_obj.getField(userSchema.VOLUMES); // Map Entries
 
-	embed_obj = my_client.session.edit_db_object(embed_field.createNewEmbedded());
+	embed_obj = (DBEditObject) my_client.session.edit_db_object(embed_field.createNewEmbedded());
 
 	// we've got the new map entry, load 'er up
 
-	embed_obj.setFieldValue(mapEntrySchema.MAP, mapInvids.get(m.mapName));	// map invid
+	embed_obj.setFieldValueLocal(mapEntrySchema.MAP, mapInvids.get(m.mapName));	// map invid
 
-	embed_obj.setFieldValue(mapEntrySchema.VOLUME, volumeInvids.get(m.volName)); // volume invid
+	embed_obj.setFieldValueLocal(mapEntrySchema.VOLUME, volumeInvids.get(m.volName)); // volume invid
       }
     
     System.out.println("\nFinished creating automounter map entries\n");
