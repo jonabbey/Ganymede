@@ -123,7 +123,7 @@ public class GanymedeExpirationTask implements Runnable {
       {
 	try
 	  {
-	    mySession = new GanymedeSession("expiration");
+	    mySession = new GanymedeSession("expiration", false); // non-interactive
 	  }
 	catch (RemoteException ex)
 	  {
