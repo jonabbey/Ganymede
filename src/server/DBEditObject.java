@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -876,6 +876,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	if (baseId < 0)
 	  {
+	    //	    Ganymede.debug("DBEditObject: Returning null 2 for choiceList for field: " + field.getName());
 	    return null;
 	  }
 
@@ -892,6 +893,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	return results;
       }
     
+    //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
     return null;
   }
 
