@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.13 $ %D%
+ Version: $Revision: 1.14 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -122,15 +122,17 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
 		    {
 		      System.out.println("Done sorting strings");
 		    }
-	      }   
+	      } 
+	    String string;
 	    for (int i=0 ; i<items.size() ; i++)
 	      {
+		string = (String)items.elementAt(i);
 		if (debug)
 		  {
-		    System.err.println("JstringListBox: adding string " + (String) items.elementAt(i));
+		    System.err.println("JstringListBox: adding string " + string);
 		  }
 		
-		insertHandleAt(new listHandle((String)items.elementAt(i)), i);
+		insertHandleAt(new listHandle(string, string), i);
 	      }
 	  }
 	else if (items.elementAt(0) instanceof listHandle)
@@ -201,7 +203,8 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     // let it know that we want 
 
     setPrototypeCellValue("This is just used to calculate cell height");
-    setFixedCellWidth(-1);
+    setFixedCellWidth(15);
+    setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
   }
 
@@ -229,45 +232,32 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     allowCallback = true;
   }
 
-  public void addString(String label)
+  public void addItem(Object o)
   {
-    addString(label, false);
-  }
-
-  public void addString(String label, boolean redraw)
-  {
-    int i = 0;
-    if (sorted)
+    listHandle lh = null;
+    if (o instanceof String)
       {
-	int total = model.getSize();
-	while ((i < total) && (label.compareTo(((listHandle)model.getElementAt(i)).getLabel()) > 0))
-	  {
-	    i++;
-	  }
+	lh = new listHandle((String)o, (String)o);
+      }
+    else if (o instanceof listHandle)
+      {
+	lh = (listHandle)o;
+      }
+    else
+      {
+	System.err.println("You gave me an object that is neither String nor listHandle: " + o);
       }
 
-    insertHandleAt(new listHandle(label), i);
-    
-  }
-
-  public void addHandle(listHandle handle)
-  {
-    addHandle(handle, false);
-  }
-
-  public void addHandle(listHandle handle, boolean redraw)
-  {
     int i = 0;
-    if (sorted)
-      {
-	int total = model.getSize();
-	while ((i < total) && (handle.getLabel().compareTo(((listHandle)model.getElementAt(i)).getLabel()) > 0))
-	  {
-	    i++;
-	  }
-      }
 
-    insertHandleAt(handle, i);
+    int total = model.getSize();
+    while ((i < total) && (lh.getLabel().compareTo(((listHandle)model.getElementAt(i)).getLabel()) > 0))
+      {
+	i++;
+      }
+      
+    insertHandleAt(lh, i);
+    setSelectedValue(lh, true);
   }
 
   /**
@@ -279,33 +269,41 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     model.insertElementAt(handle, row);
   }
 
-  public void removeString(String item)
+  public void removeItem(Object o)
   {
-    removeString(item, false);
-  }
-
-  public void removeString(String item, boolean redraw)
-  {
-    //labels.removeElement(item);
-    model.removeElement(item);
-    if (redraw)
+    if (o instanceof listHandle)
       {
-	invalidate();
-	validate();
+	model.removeElement((listHandle)o);
+      }
+    else if (o instanceof String)
+      {
+	System.out.println("I am guessing you want me to remove a label...");
+	removeLabel((String) o);
+      }
+    else
+      {
+	System.out.println("Ok, i will look for this object in the listHnaldes.");
+	for (int i = 0; i < model.getSize(); i++)
+	  {
+	    if ((((listHandle)model.elementAt(i)).getObject()).equals(o))
+	      {
+		model.removeElementAt(i);
+		break;
+	      }
+	  }
       }
   }
 
-  public void removeHandle(listHandle item)
-  {
-    removeHandle(item, false);
-  }
 
-  public void removeHandle(listHandle item, boolean redraw)
+  public void removeLabel(String s)
   {
-    model.removeElement(item);
-    if (redraw)
+    for (int i = 0; i < model.getSize(); i++)
       {
-	invalidate();
+	if ((((listHandle)model.elementAt(i)).getLabel()).equals(s))
+	  {
+	    model.removeElementAt(i);
+	    break; //Assume there is only one?
+	  }
       }
   }
 
@@ -331,44 +329,30 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     return false;
   }
 
-  public boolean containsHandle(listHandle h)
+  public boolean containsItem(Object o)
   {
-    for (int i = 0; i < model.getSize(); i++)
+    if (o instanceof String)
       {
-	if ((listHandle)model.elementAt(i) == h)
+	return containsLabel((String)o);
+      }
+    else if (o instanceof listHandle)
+      {
+	return model.contains(o);
+      }
+    else
+      {
+	for (int i = 0; i < model.getSize(); i++)
 	  {
-	    return true;
+	    if (((listHandle)model.elementAt(i)).getObject().equals(o))
+	      {
+		return true;
+	      }
 	  }
       }
     return false;
-  }
-
-  public boolean contains(Object o)
-  {
-    if (o instanceof listHandle)
-      {
-	return containsHandle((listHandle)o);
-      }
-    else if (o instanceof String)
-      {
-	return containsString((String) o);
-      }
-
-    return false;
 
   }
-
-  public void setSelectedHandle(listHandle l)
-  {
-    setSelectedValue(l, true);
-
-  }
-
-  public void setSelectedString(String s)
-  {
-    setSelectedLabel(s);
-  }
-
+   
   /**
    * This selects the item with the given label.
    *
@@ -383,7 +367,7 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
 	lh = (listHandle)model.getElementAt(i);
 	if (lh.getLabel().equals(s))
 	  {
-	    setSelectedValue(lh, true);
+	    setSelected(lh);
 	    break;
 	  }
       }
@@ -394,11 +378,11 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
   {
     if (o instanceof listHandle)
       {
-	setSelectedHandle((listHandle)o);
+	setSelectedValue(o, true); // use the JList.setSelectedValue(Object, boolean shouldScroll)
       }
     else if (o instanceof String)
       {
-	setSelectedString((String)o);
+	setSelectedLabel((String)o);
       }
     else
       {
@@ -407,19 +391,41 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
 
   }
 
-  public String getSelectedString()
+  /**
+   * This returns just the label.
+   */
+  public String getSelectedLabel()
   {
     return ((listHandle)model.elementAt(getSelectedIndex())).getLabel();
   }
 
+  /**
+   * This returns the whole listHandle.
+   */
   public listHandle getSelectedHandle()
   {
     return (listHandle)model.elementAt(getSelectedIndex());
   }
 
+  public Vector getSelectedHandles()
+  {
+    Vector v = new Vector();
+    Object[] values = getSelectedValues();
+    
+    for (int i =0; i < values.length; i++)
+      {
+	v.addElement(values[i]);
+      }
+    return v;
+  }
+
+  /**
+   *This returns the object, without the label.
+   */
   public Object getSelectedItem()
   {
-    return model.elementAt(getSelectedIndex());
+    listHandle lh = (listHandle)model.elementAt(getSelectedIndex());
+    return lh.getObject();
   }
 
   // For the ListSelectionListener
