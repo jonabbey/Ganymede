@@ -5,7 +5,7 @@
    This class holds the basic per-object / per-field access control bits.
    
    Created: 27 June 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -128,6 +128,13 @@ public class PermEntry implements java.io.Serializable {
     return new PermEntry(p.visible || visible,
 			 p.editable || editable,
 			 p.create || create);
+  }
+
+  public final PermEntry intersection(PermEntry p)
+  {
+    return new PermEntry(p.visible && visible,
+			 p.editable && editable,
+			 p.create && create);
   }
 
   /**
