@@ -13,7 +13,7 @@
    as we would if we were truly a remote object.
    
    Created: 12 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -61,6 +61,12 @@ public class BaseDump implements Base, CategoryNode {
 
   /* -- */
 
+  /**
+   *
+   * Constructor for use by a CategoryDump object
+   *
+   */
+
   public BaseDump(CategoryDump parent, char[] src, int index)
   {
     String token;
@@ -70,6 +76,61 @@ public class BaseDump implements Base, CategoryNode {
     // assume whoever called us already extracted the 'cat' chunk.
 
     this.parent = parent;
+    this.name = getChunk(src, index);
+
+    // getChunk() updates lastIndex for us
+
+    try
+      {
+	this.type_code = Short.valueOf(getChunk(src, lastIndex)).shortValue();
+      }
+    catch (NumberFormatException ex)
+      {
+	throw new RuntimeException("couldn't parse type code chunk " + ex);
+      }
+
+    try
+      {
+	this.label_id = Short.valueOf(getChunk(src, lastIndex)).shortValue();
+      }
+    catch (NumberFormatException ex)
+      {
+	throw new RuntimeException("couldn't parse label id chunk " + ex);
+      }
+
+    labelFieldName = getChunk(src, lastIndex);
+
+    this.canInactivate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
+
+    this.canCreate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
+
+    this.isEmbedded = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
+
+    try
+      {
+	this.displayOrder = Integer.valueOf(getChunk(src, lastIndex)).intValue();
+      }
+    catch (NumberFormatException ex)
+      {
+	throw new RuntimeException("couldn't parse display order chunk " + ex);
+      }
+  }
+
+  /**
+   *
+   * Constructor for use by a BaseListTransport object
+   *
+   */
+
+  public BaseDump(BaseListTransport baselist, char[] src, int index)
+  {
+    String token;
+
+    /* -- */
+
+    // assume whoever called us already extracted the 'base' chunk.
+
+    this.parent = null;
     this.name = getChunk(src, index);
 
     // getChunk() updates lastIndex for us
