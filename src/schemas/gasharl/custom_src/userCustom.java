@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2001/08/31 03:19:25 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2001/08/31 04:38:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -201,7 +201,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   public ReturnVal initializeNewObject()
   {
     ReturnVal retVal;
-    Integer uidVal = new Integer(1001);
+    Random rand = new Random();
+    Integer uidVal = null;
 
     /* -- */
 
@@ -218,6 +219,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // see if we have an owner set, check it for our starting uid
 
     Vector owners = getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+    /*
 
     if (owners != null && owners.size() > 0)
       {
@@ -239,6 +242,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
+    */
+
     NumericDBField numField = (NumericDBField) getField(UID);
 
     if (numField == null)
@@ -258,9 +263,31 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // now, find a uid.. unfortunately, we have to use immutable Integers here.. not
     // the most efficient at all.
 
-    while (!namespace.reserve(getEditSet(), uidVal, true))
+    int count = 0;
+    uidVal = new Integer(rand.nextInt(31767) + 1001);
+    
+    while (!namespace.reserve(getEditSet(), uidVal, true) && count < 30000)
       {
-	uidVal = new Integer(uidVal.intValue()+1);
+	uidVal = new Integer(rand.nextInt(31767) + 1001);
+	count++;
+      }
+
+    if (count > 30000)
+      {
+	// we've been looping too long, maybe there's no
+	// uid's free?  let's do an exhaustive search
+	
+	uidVal = new Integer(1001);
+	
+	while (!namespace.reserve(getEditSet(), uidVal, true))
+	  {
+	    uidVal = new Integer(uidVal.intValue() + 1);
+	    
+	    if (uidVal.intValue() > 32767)
+	      {
+		throw new RuntimeException("Couldn't find an allocatable uid through random search");
+	      }
+	  }
       }
 
     // we use setValueLocal so we can set a value that the user can't edit.
