@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.20 $ %D%
+  Version: $Revision: 1.21 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.20 $ %D% 
+ * @version $Revision: 1.21 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -66,6 +66,8 @@ public class rowTable extends baseTable implements ActionListener {
   MenuItem RevSortByMI;
   MenuItem DeleteColMI;
   MenuItem OptimizeMI;
+
+  boolean sortForward = true;
 
   /**
    * This is the base constructor for rowTable, which allows
@@ -111,10 +113,19 @@ public class rowTable extends baseTable implements ActionListener {
 	  menu, null);
     
     rowMenu = new PopupMenu("Column Menu");
-    SortByMI = new MenuItem("Sort By This Column");
-    RevSortByMI = new MenuItem("Reverse Sort By This Column");
-    DeleteColMI = new MenuItem("Delete This Column");
-    OptimizeMI = new MenuItem("Optimize Column Widths");
+    
+    if (colWidths.length > 1)
+      {
+	SortByMI = new MenuItem("Sort By This Column");
+	RevSortByMI = new MenuItem("Reverse Sort By This Column");
+	DeleteColMI = new MenuItem("Delete This Column");
+	OptimizeMI = new MenuItem("Optimize Column Widths");
+      }
+    else
+      {
+	SortByMI = new MenuItem("Sort");
+	RevSortByMI = new MenuItem("Reverse Sort");
+      }
 
     rowMenu.add(SortByMI);
     rowMenu.add(RevSortByMI);
@@ -127,8 +138,12 @@ public class rowTable extends baseTable implements ActionListener {
 
     SortByMI.addActionListener(this);
     RevSortByMI.addActionListener(this);
-    DeleteColMI.addActionListener(this);
-    OptimizeMI.addActionListener(this);
+
+    if (colWidths.length > 1)
+      {
+	DeleteColMI.addActionListener(this);
+	OptimizeMI.addActionListener(this);
+      }
     
     canvas.add(rowMenu);
 
@@ -654,11 +669,13 @@ public class rowTable extends baseTable implements ActionListener {
 
 	if (e.getSource() == SortByMI)
 	  {
-	    resort(menuCol, true, true);
+	    sortForward = true;
+	    resort(menuCol, true);
 	  }
 	else if (e.getSource() == RevSortByMI)
 	  {
-	    resort(menuCol, false, true);
+	    sortForward = false;
+	    resort(menuCol, true);
 	  }
 	else if (e.getSource() == OptimizeMI)
 	  {
@@ -687,6 +704,23 @@ public class rowTable extends baseTable implements ActionListener {
     menuRow = -1;
     menuCol = -1;
 
+  }
+
+  /**
+   *
+   * Sort by column <column>, according to the direction
+   * of the last sort.
+   *
+   */
+
+  public void resort(int column, boolean repaint)
+  {
+    new rowSorter(sortForward, this, column).sort();
+
+    if (repaint)
+      {
+	refreshTable();
+      }
   }
 
   public void resort(int column, boolean forward, boolean repaint)
