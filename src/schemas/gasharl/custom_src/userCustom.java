@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 1999/03/10 21:47:20 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 1999/06/25 01:46:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -281,27 +281,65 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
+   * <p>This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this 
+   * {@link arlut.csd.ganymede.DBObject DBObject} type when the
+   * user only has editing access for the source 
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
+   * the target.</p>
    *
-   * This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this DBObject type when the
-   * user only has editing access for the source InvidDBField and not
-   * the target.<br><br>
+   * <p>This version of anonymousLinkOK takes additional parameters
+   * to allow an object type to decide that it does or does not want
+   * to allow a link based on what field of what object wants to link
+   * to it.</P>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK() 
+   * method are chained together, so that the customizer can choose
+   * which level of detail he is interested in.
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField}'s
+   * {@link arlut.csd.ganymede.InvidDBField#bind(arlut.csd.ganymede.Invid,arlut.csd.ganymede.Invid,boolean) bind()}
+   * method calls this version.  This version calls the three parameter
+   * version, which calls the two parameter version, which returns
+   * false by default.  Customizers can implement any of the three
+   * versions, but unless you maintain the version chaining yourself,
+   * there's no point to implementing more than one of them.</P>
    *
-   * @param object The object that the link is to be created in
-   * @param fieldID The field that the link is to be created in
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
+   * @param targetObject The object that the link is to be created in
+   * @param targetFieldID The field that the link is to be created in
+   * @param sourceObject The object on the other side of the proposed link
+   * @param sourceFieldID  The field on the other side of the proposed link
+   * @param gsession Who is trying to do this linking?
    */
 
-  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
+				 DBObject sourceObject, short sourceFieldID,
+				 GanymedeSession gsession)
   {
-    if (fieldID == userSchema.GROUPLIST)
+    // if they can edit the group, they can put us in it.. the
+    // gasharl schema specifies the mandatory type for the other
+    // end of the GROUPLIST field's link, so we don't have to 
+    // check that here
+
+    if (targetFieldID == userSchema.GROUPLIST)
       {
 	return true;
       }
 
-    return super.anonymousLinkOK(object, fieldID);
+    // if someone tries to put this user in an email list, let them.
+
+    if ((targetFieldID == SchemaConstants.BackLinksField) &&
+	(sourceObject.getTypeID() == 274) && // email list
+	(sourceFieldID == 257))	// email list members
+      {
+	return true;
+      }
+
+    // the default anonymousLinkOK() method returns false
+
+    return super.anonymousLinkOK(targetObject, targetFieldID,
+				 sourceObject, sourceFieldID, gsession);
   }
 
   /**
