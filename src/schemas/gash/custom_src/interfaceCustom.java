@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,11 +26,15 @@ import java.rmi.*;
 
 public class interfaceCustom extends DBEditObject implements SchemaConstants {
   
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
   systemCustom sysObj = null;
+  Invid myNet = null;
+  boolean inFinalizeAddrChange = false;
+
+  /* -- */
 
   /**
    *
@@ -220,6 +224,19 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// taking the new net.
 	
 	sysObj = getParentObj();
+
+	// if the net is being set to a net that matches what's already
+	// in the address field, we'll go ahead and ok it
+
+	if (matchNet((Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS), (Invid) value))
+	  {
+	    if (debug)
+	      {
+		System.err.println("interfaceCustom.finalizeSetValue(): approving ipnet change");
+	      }
+
+	    return true;
+	  }
 	
 	// free the old net for others to use.. note that at this point, 
 	// field.getOldValue() holds the field's old value and value is the
@@ -248,6 +265,14 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	
 	    sysObj.allocNet((Invid) field.getOldValue()); // take it back
 	    return false;
+	  }
+
+	// if this net change was initiated by an approved ADDRESS change,
+	// we're not going to try to second-guess their address choice.
+
+	if (inFinalizeAddrChange)
+	  {
+	    return true;
 	  }
 
 	// set our address.. the wizardHook will have instructed the
@@ -293,39 +318,36 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == interfaceSchema.ADDRESS)
       {
-	if (!matchNet((Byte[]) value, (Invid) getFieldValueLocal(interfaceSchema.IPNET)))
+	if (myNet != null)
 	  {
-	    // need to find a net that matches the new address, if we can.
+	    // we need to turn off the wizardHook's intercession
+	    // as we correct the IPNET.. we use the inFinalizeAddrChange
+	    // object variable to accomplish this.
 
-	    Vector ipNetVec = sysObj.getAvailableNets();
-	    boolean found = false;
-	    ReturnVal retVal = null;
+	    inFinalizeAddrChange = true;
+	    ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, myNet);
+	    inFinalizeAddrChange = false;
 
-	    for (int i = 0; i < ipNetVec.size(); i++)
+	    if (retVal != null && !retVal.didSucceed())
 	      {
-		if (matchNet((Byte[]) value, (Invid) ipNetVec.elementAt(i)))
+		if (debug)
 		  {
-		    retVal = setFieldValue(interfaceSchema.IPNET, (Invid) ipNetVec.elementAt(i));
-		    found = true;
-		    break;
+		    System.err.println("interfaceCustom.finalizeSetValue(): failed to set ip net");
 		  }
-	      }
-
-	    if (found = true)
-	      {
-		if (retVal != null && !retVal.didSucceed())
-		  {
-		    return false;
-		  }
-	      }
-	    else
-	      {
-		// no IPnet to match.. fail
 
 		return false;
 	      }
-	    
-	    return true;
+
+	    // ok, we've got a valid address change request.. let the system object
+	    // know that it should remember *this* address for the matching
+	    // net.
+
+	    sysObj = getParentObj();
+	    sysObj.setAddress((Byte[]) value, myNet);
+
+	    // ok, we tried it
+
+	    myNet = null;
 	  }
       }
 
@@ -343,6 +365,14 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == interfaceSchema.IPNET && operation == SETVAL)
       {
+	// we don't want to mess with the IPNET change if it was initiated
+	// by the client changing the IP address
+
+	if (inFinalizeAddrChange)
+	  {
+	    return null;
+	  }
+
 	// ok, we want to go ahead and approve the operation,
 	// but we want to cause the client to rescan the IPNET
 	// field in all of our siblings so that their choice
@@ -386,16 +416,84 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == interfaceSchema.ADDRESS && operation == SETVAL)
       {
-	if (!matchNet((Byte[]) param1, (Invid) getFieldValueLocal(interfaceSchema.IPNET)))
+	if (!findNet((Byte[]) param1))
 	  {
-	    // the finalize code will have to try to find a matching IPNET
-
-	    ReturnVal result = new ReturnVal(true, true);
-	    result.addRescanField(interfaceSchema.IPNET);
+	    return Ganymede.createErrorDialog("Can't change IP net",
+					      "There are no IP net records matching the requested IP address in the " +
+					      "room containing this system.");
 	  }
+
+	// findNet prepped finalizeSetValue() to set the IPNET for us
+	// to myNet.. tell the client to rescan the IPNET field so it
+	// sees the change
+
+	ReturnVal result = new ReturnVal(true, true);
+	result.addRescanField(interfaceSchema.IPNET);
+
+	if (debug)
+	  {
+	    System.err.println("interfaceCustom.wizardHook(): asking for IPNET rescan in response to net change");
+	  }
+	
+	return result;
       }
 
     return null;
+  }
+
+  /**
+   *
+   * This private helper method tries to find an IP net linked to the room that this
+   * system is in.
+   *
+   */
+
+  private boolean findNet(Byte[] address)
+  {
+    if (!matchNet(address, (Invid) getFieldValueLocal(interfaceSchema.IPNET)))
+      {
+	// need to find a net that matches the new address, if we can.
+
+	if (debug)
+	  {
+	    System.err.println("interfaceCustom.findNet(): going to have to try to find a new net");
+	  }
+
+	Vector ipNetVec = sysObj.getAvailableNets();
+	Invid netInvid;
+	boolean found = false;
+	ReturnVal retVal = null;
+	String label;
+
+	for (int i = 0; i < ipNetVec.size(); i++)
+	  {
+	    netInvid = ((ObjectHandle) ipNetVec.elementAt(i)).getInvid();
+	    label = getGSession().viewObjectLabel(netInvid);
+
+	    if (debug)
+	      {
+		System.err.println("interfaceCustom.findNet(): testing network " + label);
+	      }
+
+	    if (matchNet(address, netInvid))
+	      {
+		if (debug)
+		  {
+		    System.err.println("interfaceCustom.findNet(): found a network: " + label);
+		  }
+
+		found = true;
+
+		// save this net for finalizeSetValue() to use
+		myNet = netInvid;
+		break;
+	      }
+	  }
+	
+	return found;
+      }
+
+    return true;
   }
 
   /**
@@ -418,10 +516,21 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	DBObject netObj = getSession().viewDBObject(netInvid);
 	Byte[] netNum = (Byte[]) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
 	
-	for (int i = 0; i < netNum.length; i++)
+	if (debug)
+	  {
+	    System.err.println("interfaceCustom.matchNet():");
+	    System.err.println("\taddress: " + IPDBField.genIPV4string(address));
+	    System.err.println("\tnet num: " + IPDBField.genIPV4string(netNum));
+	  }
+
+	for (int i = 0; i < (netNum.length-1); i++)
 	  {
 	    if (!netNum[i].equals(address[i]))
 	      {
+		if (debug)
+		  {
+		    System.err.println("interfaceCustom.matchNet(): failure to match octet " + i);
+		  }
 		return false;
 	      }
 	  }
