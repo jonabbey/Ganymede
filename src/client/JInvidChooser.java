@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: ?
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -88,6 +88,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
     if (objectType > -1) // If it is -1, then it doesn't have a target
       {
 	create = new JMenuItem("New");
+	create.addActionListener(this);
 	menu.add(create);
       }
 
@@ -304,7 +305,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
 	    Invid invid = object.getInvid();
 	    listHandle lh = new listHandle("New Object", invid);
-	    invid_field field = (invid_field)cp.objectHash.get(getCombo());
+	    invid_field field = (invid_field)cp.objectHash.get(this);
 	    if (field == null)
 	      {
 		showErrorMessage("I can't create a new object, because I can't find the invid_field for this chooser.");
