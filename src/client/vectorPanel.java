@@ -4,7 +4,7 @@
    vectorPanel.java
 
    Created: 17 Oct 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */

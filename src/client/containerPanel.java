@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.2 $ %D%
+    Version: $Revision: 1.3 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -187,7 +187,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			  System.out.println("Adding StringSelector, its a vector of strings!");
 			  try
 			    {
-			      addRow(panel, new stringSelector((string_field)fields[i], this), name, i, fields[i].isVisible());
+			      string_field sf = (string_field)fields[i];
+			      stringSelector ss = new stringSelector(sf.getValues(), sf.choices(), this);
+			      addRow(panel, ss,  name, i, fields[i].isVisible()); 
 			    }
 			  catch (RemoteException rx)
 			    {
@@ -295,14 +297,25 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 				  JComboBox combo = new JComboBox();
 				//Choice combo = new Choice();
 				  Vector choices = ((string_field)fields[i]).choices();
-				  
+				  String currentChoice = (String)((string_field)fields[i]).getValue();
+				  boolean found = false;
 				  for (int j = 0; j < choices.size(); j++)
 				    {
-				      combo.addPossibleValue((String)choices.elementAt(j));
-				      //combo.addItem((String)choices.elementAt(j));
+				      String thisChoice = (String)choices.elementAt(j);
+				      combo.addPossibleValue(currentChoice);
+				      if (!found)
+					{
+					  if (thisChoice.equals(currentChoice))
+					    {
+					      found = true;
+					    }
+					}
+				      if (!found)
+					{
+					  combo.addPossibleValue(currentChoice);
+					}
 				      System.out.println("Adding " + (String)choices.elementAt(j));
 				    }
-				// This is what's doing it.
 				  
 				  combo.setMaximumRowCount(4);
 				  combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
