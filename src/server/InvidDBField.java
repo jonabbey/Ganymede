@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.72 $ %D%
+   Version: $Revision: 1.73 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2408,13 +2408,28 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    object = gsession.getSession().viewDBObject(invid);
 
-	    if (owner instanceof DBEditObject)
+	    if (object == null)
 	      {
-		label = owner.lookupLabel(object);
+		Ganymede.debug("Error in InvidDBField field <" + owner.getLabel() + ":" + getName() +
+			       "> encodedValues() method.. couldn't " +
+			       "view invid " + invid.toString() + " to pull its label");
+
+		label = invid.toString();
 	      }
 	    else
 	      {
-		label = owner.getBase().getObjectHook().lookupLabel(object);
+		// use lookupLabel because our owner may wish to construct a custom
+		// label for the object.. different objects may display the name
+		// of a referenced object differently.
+		
+		if (owner instanceof DBEditObject)
+		  {
+		    label = owner.lookupLabel(object);
+		  }
+		else
+		  {
+		    label = owner.getBase().getObjectHook().lookupLabel(object);
+		  }
 	      }
 	  }
 	else
