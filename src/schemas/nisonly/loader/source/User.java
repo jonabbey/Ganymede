@@ -7,8 +7,8 @@
    
    Created: 22 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:24 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/04/19 17:00:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -83,6 +83,8 @@ public class User {
   String directory;
   String shell;
 
+  StreamTokenizer tokens;
+
   // instance constructor
 
   public User()
@@ -91,6 +93,8 @@ public class User {
 
   public boolean loadLine(StreamTokenizer tokens) throws IOException, EOFException
   {
+    this.tokens = tokens;
+
     // read username
 
     tokens.nextToken();
@@ -122,7 +126,14 @@ public class User {
 
     // System.out.println("gid = '" + gid + "'");
 
-    fullname = getNextBit(tokens);
+    /*
+     * we expect to see gcos fields that look like:
+     *
+     * Jonathan Abbey,S321 CSD,3199,8343915
+     *
+     */
+
+    fullname = getNextBit(tokens); // until next comma
 
     // System.out.println("fullname = '" + fullname + "'");
 
@@ -206,18 +217,103 @@ public class User {
 		       ", officePhone: " + officePhone + ", homePhone: " + homePhone);
     System.out.println("Directory: " + directory + ", shell: " + shell);
   }
+
+  /**
+   *
+   * Returns true if we're at EOL
+   *
+   */
+
+  private boolean atEOL()
+  {
+    return tokens.ttype == StreamTokenizer.TT_EOL;
+  }
+
+  /**
+   *
+   * Returns true if we're at EOF
+   *
+   */
+
+  private boolean atEOF()
+  {
+    return tokens.ttype == StreamTokenizer.TT_EOF;
+  }
+
+  /**
+   *
+   * This method runs tokens to the end of the line.
+   *
+   */
+
+  private void skipToEndLine() throws IOException
+  {
+    while (!atEOL() && !atEOF())
+      {
+	tokens.nextToken();
+      }
+  }
+  
+  /**
+   *
+   * getNextBit() returns the next String from the StreamTokenizer,
+   * where the bits are separated by colons and commas.
+   *
+   */
   
   private String getNextBit(StreamTokenizer tokens) throws IOException
+  {
+    return getNextBit(tokens, true);
+  }
+  
+  /**
+   *
+   * getNextBit() returns the next String from the StreamTokenizer,
+   * where the bits are separated by colons and commas.
+   *
+   * @param skipleading if true, getNextBit will chew through leading
+   * commas and colons until it gets to either a normal string or
+   * eol/eof.
+   *
+   */
+  
+  private String getNextBit(StreamTokenizer tokens, boolean skipleading) throws IOException
   {
     int token;
     String result;
 
     token = tokens.nextToken();
 
-    while (tokens.ttype == ':' || tokens.ttype == ',')
+    if (atEOF() || atEOL())
       {
-	//	System.err.println("*");
-	token = tokens.nextToken();
+	return "";
+      }
+
+    // eat any leading :'s or ,'s
+
+    if (!skipleading)
+      {
+	// skip only the single leading token
+
+	if (tokens.ttype == ':' || tokens.ttype == ',')
+	  {
+	    token = checkNextToken(tokens);
+
+	    if (token != ':' && token != ',')
+	      {
+		token = tokens.nextToken();
+	      }
+	  }
+      }
+    else
+      {
+	// skip any leading colons and commas
+
+	while (tokens.ttype == ':' || tokens.ttype == ',')
+	  {
+	    //	System.err.println("*");
+	    token = tokens.nextToken();
+	  }
       }
 
     if (tokens.ttype == StreamTokenizer.TT_WORD)
@@ -245,8 +341,14 @@ public class User {
 	return result;
       }
 
-
     return null;
   }
 
+  private int checkNextToken(StreamTokenizer tokens) throws IOException
+  {
+    tokens.nextToken();
+    int result = tokens.ttype;
+    tokens.pushBack();
+    return result;
+  }
 }
