@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede client</title>
+  </head>
+
+  <body>
+    <h1>Ganymede client</h1>
+    <blockquote>
+    <p>The Ganymede client is the main interface to the Ganymede server.</p>
+    </blockquote>
+
+    <h3>Synopsis</h3>
+    <blockquote>
+      <p>
+	<code>
+	  java arlut.csd.ganymede.client.glogin properties=<u>properties_file</u> [-debug]
+      </p>
+
+      <pre>
+&lt;applet archive="ganymede.jar" code="arlut.csd.ganymede.client.glogin" height=380 width=265&gt;
+&lt;param ganymede.serverhost=http://www.arlut.utexas.edu/ganymede.server&gt;
+&lt;/applet&gt;
+      </pre>
+      
+    </code>
+    </blockquote>
+
+
+    <h3>Summary</h3>
+    <blockquote>
+
+      <p>
+	glogin will open a new window with the ganymede login.  After logging in, 
+	the main client window will appear.
+      </p>
+
+      <p>
+	One property must be loaded in the client, <code>ganymede.serverhost</code>.  If the 
+	client is run in an applet context, this property is passed in as a parameter to the
+	<code>&lt;applet&gt;</code> tag.  <code>ganymede.serverhost</code> specifies the location
+	of the ganymede server.
+      </p>
+
+      <p>
+	glogin takes one optional parameter, <code>-debug</code>.  If present, the application
+	will output extra debugging information.
+      </p>
+
+    </blockquote>
+
+    <h3>Usage</h3>
+    <blockquote>
+      <p>
+	There are two main areas of the client: the tree, and the
+	window panel.  The tree holds a node for each object visible to
+	the user.  The window panel holds the internal windows which
+	allow for editing of the objects in the server.  A menu bar is
+	at the top of the screen, and a status bar is at the bottom.
+      </p>
+
+      <h4>The Tree</h4>
+      <blockquote>
+	<p>
+	  The tree acts much like the tree in the Windows Explorer.
+	  Folders are opened either by clicking on the plus sign in
+	  front of the folder or by double clicking on the folder or
+	  the text.
+	</p>
+
+	<img src = gifs/tree.gif height=248 width=206 align=right>
+
+	<p>
+	  There are three things in the tree: categories (red folders),
+	  object types (yellow folders), and objects.
+	  Categories are used to organize the tree.  Object types
+	  represent the basic types of information held in the
+	  tree(users, groups).  Objects are the individual items in
+	  the database.
+	</p>
+
+	<p>
+	  Much of the tree's functionality is accessed through the
+	  use of the right mouse button, or the appropriate popup-menu
+	  trigger for the system.  When the right mouse button is
+	  clicked a menu will be drawn over the item.  (Sometimes the
+	  menu is not aligned with the tree correctly on Windows 95
+	  machines.  This is a known bug in Java 1.1.5.)  The menu
+	  will be different depending on the type of object clicked on
+	  and the current state of the client.
+	</p>
+
+	<p>
+	  By default, only editable objects are displayed in the tree.
+	  In order to see all permissible objects you can choose the
+	  "Show all objects" menu item on the corresponding object
+	  type(yellow folder.)  This will mix in the editable and
+	  non-editable objects, and the editable objects will have a
+	  slightly different icon to distinguish them.
+	</p>
+
+	<p>
+	  The icons for different objects in the tree can change when
+	  actions are taken.  Currently, all objects currently open
+	  for editing will have a pencil icon, all objects waiting to
+	  be deleted have a trash can icon, and all objects currently
+	  inactivated have a clock icon.  After a session is committed
+	  or canceled, the icons may revert back to the original state
+	  or may be removed from the tree completely.
+	</p>
+      </blockquote>
+
+      <h4>The Window Panel</h4>
+      <blockquote>
+	<p>
+	  The window panel holds all the currently open objects.  These
+	  windows can be moved, iconified, maximized, and closed just
+	  like normal windows.  Each window also has its own menu bar, 
+	  which can be used to take actions on the object.
+	</p>
+
+	<img src= gifs/window-top.gif>
+
+	<p>
+	  The tabs just below the menu bar are used to select
+	  different editing panes in the window.  The "General" tab
+	  contains all the custom information.  The other tabs contain
+	  various built-in fields.  "Owner" shows the owners of this
+	  object.  "Notes" shows information about the creation and
+	  deletion of this object, along with a text area for writing
+	  notes.  A small note icon will be placed in the "Notes" tab
+	  if there are any notes for this object.  The "History" tab
+	  leads to a panel that allows a trace of this object's
+	  history.
+	</p>
+
+	<p>
+	  The "Persona" tab is only available on "User" objects.  This
+	  panel allows editing of admin personae associated with the
+	  user object.
+	</p>
+      </blockquote>
+
+      <h4>The menu bar</h4>
+      <blockquote>
+	  The menu bar has five menus on it.
+	<dl>
+	  <dt><strong>File</strong></dt>
+	  <dd>
+	    <dl>
+	      <dt>Clear Tree</dt>  <dd>Removes all the objects from the tree, so it can be rebuilt.</dd>
+	      <dt>Remove All Windows</dt>  <dd>Removes all the windows from the window panel.</dd>
+	      <dt>Filter Query</dt>  <dd>Choose a certain group to filter queries with, so the query results are not so big.</dd>
+	      <dt>Set Default Owner</dt>  <dd>Set a default owner group for newly created objects.</dd>
+	      <dt>Logout</dt>  <dd>Close the client.  The client will prompt before canceling the transaction if anything has been changed.</dd>
+	    </dl>
+	   </dd>
+
+	  <dt><strong>Look</strong></dt>
+	  <dd>
+	    This menu allows you to choose the look at feel.  Note that not all look and feels are available on all platforms.
+	  </dd>
+	  
+	  <dt><strong>Action</strong></dt>
+	  <dd>
+	    <dl>
+	      <dt>Query</dt> <dd>Opens a new query box.</dd>
+	      <dt>Edit Object</dt> <dd>Open an object for editing.  A dialog will prompt for the label and type of object.</dd>
+	      <dt>View Object</dt> <dd>Open an object for viewing.  A dialog will prompt for the label and type of object.</dd>
+	      <dt>Delete Object</dt> <dd>Delete an object.  A dialog will prompt for the label and type of object.</dd>
+	      <dt>Inactivate Object</dt> <dd>Inactivate an object.  A dialog will prompt for the label and type of object.</dd>
+	    </dl>
+	  </dd>
+	  
+	  <dt><strong>Windows</strong></dt>
+	  <dd>
+	    The windows menu will contain an entry for each window
+	    open in the window panel.  Choose a title, and the window
+	    will be moved to the front.
+	  </dd>
+
+	  <dt><strong>Persona</strong></dt>
+	  <dd>
+	    Any available personas will be in this menu.  Note that if
+	    a user only has one persona, the persona menu will not be
+	    there.  
+	  </dd>
+
+	  <dt><strong>Help</strong></dt>
+	  <dd>
+	    Possibly a future online support system, but it is not
+	    finished for this release.
+	  </dd>
+	  
+
+	</dl>
+
+      </blockquote>
+
+      <h4>The status bar</h4>
+      <blockquote>
+	<p>
+	  The status bar contains a line of text which gives feedback
+	  on client operations, as well as the commit and cancel
+	  buttons.  The commit and cancel buttons control what happens
+	  to the changes made in the current session.
+	</p>
+
+      </blockquote>
+
+
+	<p>
+	  A session begins when a user first logs on, and continues
+	  until the commit or cancel buttons are pressed, or the user
+	  logs out.  Any changes made to the system are not committed
+	  to the database until the commit button is pressed.
+	</p>
+      </blockquote>
+
+    </blockquote>
+
+
+
+    <hr>
+    <address><a href="mailto:ganymede@arlut.utexas.edu">Ganymede mailing list</a></address>
+<!-- Created: Mon Mar 16 11:27:50 CST 1998 -->
+<!-- hhmts start -->
+Last modified: Mon May 18 15:18:13 CDT 1998
+<!-- hhmts end -->
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede Developer Release 3 - DBEditObject Subclassing 21 May 1998</title>
+  </head>
+
+  <body BGCOLOR="#FFFFFF">
+    <h1>Ganymede Developer Release 3 - DBEditObject Subclassing 21 May 1998</h1>
+    <hr>
+
+<p>The DBEditObject class is the Ganymede class that oversees
+everything having to do with the editing of a particular type of
+object held in the Ganymede object store.  Each type of object defined
+in the schema editor can have its own custom class written to manage a
+wide variety of activities involving objects of that type.  This list
+includes the following activites:</p>
+
+    <ol>
+    <li>Initialization of newly created objects</li>
+
+    <li>Approving object linking and unlinking by users that don't have permission to
+        edit an object of the managed type directly</li>
+    <li>Extending the Ganymede permission model to take into account the actual contents
+        of an object of the managed type for special purposes</li>
+    <li>Validating objects of this type for completeness and consistency at transaction
+        commit time</li>
+    <li>Specifying what fields must be filled out before objects of this type
+        can be committed</li>
+    <li>Specifying whether this object type supports inactivation/reactivation and cloning</li>
+    <li>Generating custom labels based on the contents of this or other objects</li>
+    <li>Overseeing all operations on fields contained in the object, including
+        the ability to refuse any operation on any field, the ability to make changes
+        in other objects in response to operations on fields, the ability to
+        cause the client to refresh other portions of its display to reflect
+        effects that a change may have had on other objects and fields, and the
+        ability to create wizard dialogs to walk the user through the ramifications
+        of making certain kinds of changes to contained fields</li>
+    <li>Controlling whether or not string and invid (object reference) fields have a list
+        of predefined choices provided, and generating that list if the default choices
+        are not appropriate.  By default, the server will handle providing a list of available
+        choices for invid fields that are configured to point to objects of a certain type.</li>
+    <li>Controlling certain constraints on acceptable values for contained fields, including
+        whether an IP field can accept IPv6 addresses, whether a date field is limited to
+        a certain range, and the like.</li>
+    <li>Overseeing the transaction commit logic for transactions involving objects of this 
+        type.  Custom DBEditObject subclasses can be written to transmit changes to an object
+        of the managed type to external databases or files.  The Ganymede server supports
+        a two phase commit protocol to allow changes to be propagated to external databases
+        in a transaction-safe manner.</li>
+    <li>Customization of how remote objects are labeled when presented in contained invid 
+        fields.</li>
+    <li>Custom creation logic for new embedded objects.</li>    
+    </ol>
+
+<p>All of these functions are documented in the Javadocs for the DBEditObject class, and you
+can view the source code for arlut.csd.ganymede.DBEditObject in the schemas/base_classes
+directory that is present when you un-tar the Ganymede distribution.  We will be documenting
+things further in later releases.</p>
+
+    <hr>
+    <address><a href="mailto:ganymede@arlut.utexas.edu">Ganymede mailing list</a></address>
+  </body>
+</html>

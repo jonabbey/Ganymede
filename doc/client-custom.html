@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Implementing a custom Ganymede client</title>
+  </head>
+
+  <body>
+    <h1>Implementing a custom Ganymede client</h1>
+
+    <p>
+      Creating a custom client for the Ganymede server is very simple.
+      All of the work involved in connecting to and communicating with
+      the server is done through 2 classes: the ClientBase and the
+      ClientListener.
+    </p>
+
+    <h2>Necessary Classes</h2>
+
+    <h4>The ClientBase class</h4>
+    <p>
+      The groundwork for connecting to the Ganymede server is
+      implemented in the ClientBase.  The ClientBase has two main
+      methods for communicating with the server:
+    </p>
+    <blockquote>
+    <table border cellpadding = 3>
+	<tr>
+	  
+	  <td align=right><tt>Session <strong>login</strong>(String username, String password)</tt></td>
+	  <td>Start a new Session on the Ganymede server.</td>
+	  
+	</tr>
+	<tr>
+	  <td ><tt>void <strong>disconnect</strong>()</tt></td>
+	  <td>Close the Session.</td>
+	</tr>
+      </table>
+	  
+    </pre>
+    </blockquote>
+
+    <p>
+      <tt>login</tt> starts up a new Ganymede session, and <tt>disconnect</tt> finishes
+      a session.  All other communication is handled through the
+      ClientListener interface.
+    </p>
+
+    <h4>The ClientListener interface</h4>
+    <p>
+      The ClientListener handles the communication from the server to
+      the client.  Only two methods are defined:
+    </p>
+    <blockquote>
+      <table border cellpadding=3>
+	<tr>
+	  <td><tt><strong>messageReceived</strong>(ClientEvent e)</tt></td>
+	  <td>Called when the server needs to send a message to the client.</td>
+	</tr>
+	<tr>
+	  <td><tt>void <strong>disconnected</strong>(ClientEvent e)</tt></td>
+	  <td>Called when the client is disconnected.  This is for abnormal disconnects, not the <tt>disconnect()</tt> method in ClientBase.</td>
+	  </tr>
+      </table>
+    </blockquote>
+
+    <h2>Creating a client</h2>
+
+    <p>
+    In order to instantiate a new ClientBase, one must provide a
+    string representing the Ganymede server URL and an object that
+    implements the ClientListener interface.  After creating the
+    ClientBase object, login is used to get a referrence to the
+    Session object.  The Session object provides the interface to the
+    server for future operations.
+      
+    </p>
+
+    <h2>Example: PasswordClient</h2>
+
+    <p>
+      The PasswordClient is a simple text based program that emulates
+      the Unix command <tt>passwd</tt>.  
+    </p>
+
+    <ul>
+      <LI><a href=PasswordClient.java>PasswordClient.java</a>
+      <li><a href=PasswordApplet.java>PasswordApplet.java</a>
+    </ul>
+    <hr>
+    <address><a href="mailto:ganymede@csdsun1.arlut.utexas.edu">Ganymede mailing list</a></address>
+<!-- Created: Mon May 18 16:12:02 CDT 1998 -->
+<!-- hhmts start -->
+Last modified: Mon May 18 18:38:25 CDT 1998
+<!-- hhmts end -->
+  </body>
+</html>
