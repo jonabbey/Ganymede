@@ -8,8 +8,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/02/14 20:44:59 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/02/21 19:50:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -87,12 +87,10 @@ public class GanymedeWarningTask implements Runnable {
     GanymedeSession mySession = null;
     boolean started = false;
     boolean finished = false;
+    String semaphoreCondition;
+    Thread currentThread = java.lang.Thread.currentThread();
 
     /* -- */
-
-    Ganymede.debug("Warning Task: Starting");
-
-    String semaphoreCondition;
 
     // we have to increment the GanymedeServer loginSemaphore, because
     // we are using a non-semaphored local GanymedeSession
@@ -112,6 +110,8 @@ public class GanymedeWarningTask implements Runnable {
 	ex.printStackTrace();
 	throw new RuntimeException(ex.getMessage());
       }
+
+    Ganymede.debug("Warning Task: Starting");
 
     try
       {
@@ -153,6 +153,11 @@ public class GanymedeWarningTask implements Runnable {
 
 	for (int i = 0; i < 3; i++)
 	  {
+	    if (currentThread.isInterrupted())
+	      {
+		throw new InterruptedException("scheduler ordering shutdown");
+	      }
+
 	    cal.add(Calendar.DATE, 7);
 	    loTime = cal.getTime();
 
@@ -179,6 +184,11 @@ public class GanymedeWarningTask implements Runnable {
 		    continue;
 		  }
 	    
+		if (currentThread.isInterrupted())
+		  {
+		    throw new InterruptedException("scheduler ordering shutdown");
+		  }
+	    
 		q = new Query(base.getTypeID(), expireNode, false);
 
 		results = mySession.internalQuery(q);
@@ -187,6 +197,11 @@ public class GanymedeWarningTask implements Runnable {
 
 		while (enum.hasMoreElements())
 		  {
+		    if (currentThread.isInterrupted())
+		      {
+			throw new InterruptedException("scheduler ordering shutdown");
+		      }
+
 		    result = (Result) enum.nextElement();
 
 		    invid = result.getInvid();
@@ -244,6 +259,11 @@ public class GanymedeWarningTask implements Runnable {
 
 	    while (baseEnum.hasMoreElements())
 	      {
+		if (currentThread.isInterrupted())
+		  {
+		    throw new InterruptedException("scheduler ordering shutdown");
+		  }
+
 		base = (DBObjectBase) baseEnum.nextElement();
 
 		if (base.isEmbedded())
@@ -259,6 +279,11 @@ public class GanymedeWarningTask implements Runnable {
 
 		while (enum.hasMoreElements())
 		  {
+		    if (currentThread.isInterrupted())
+		      {
+			throw new InterruptedException("scheduler ordering shutdown");
+		      }
+
 		    result = (Result) enum.nextElement();
 
 		    invid = result.getInvid();
@@ -314,6 +339,11 @@ public class GanymedeWarningTask implements Runnable {
 	
 	while (baseEnum.hasMoreElements())
 	  {
+	    if (currentThread.isInterrupted())
+	      {
+		throw new InterruptedException("scheduler ordering shutdown");
+	      }
+
 	    base = (DBObjectBase) baseEnum.nextElement();
 	    
 	    if (base.isEmbedded())
@@ -329,6 +359,11 @@ public class GanymedeWarningTask implements Runnable {
 
 	    while (enum.hasMoreElements())
 	      {
+		if (currentThread.isInterrupted())
+		  {
+		    throw new InterruptedException("scheduler ordering shutdown");
+		  }
+		
 		result = (Result) enum.nextElement();
 		
 		invid = result.getInvid();
@@ -378,6 +413,11 @@ public class GanymedeWarningTask implements Runnable {
 	
 	while (baseEnum.hasMoreElements())
 	  {
+	    if (currentThread.isInterrupted())
+	      {
+		throw new InterruptedException("scheduler ordering shutdown");
+	      }
+
 	    base = (DBObjectBase) baseEnum.nextElement();
 	    
 	    if (base.isEmbedded())
@@ -393,6 +433,11 @@ public class GanymedeWarningTask implements Runnable {
 
 	    while (enum.hasMoreElements())
 	      {
+		if (currentThread.isInterrupted())
+		  {
+		    throw new InterruptedException("scheduler ordering shutdown");
+		  }
+
 		result = (Result) enum.nextElement();
 
 		invid = result.getInvid();
@@ -421,9 +466,11 @@ public class GanymedeWarningTask implements Runnable {
 	
 	mySession.logout();
 
-	Ganymede.debug("Warning Task: Completed");
-
 	finished = true;
+      }
+    catch (InterruptedException ex)
+      {
+	Ganymede.debug("Warning task aborted due to task stop command.");
       }
     finally
       {
@@ -435,6 +482,10 @@ public class GanymedeWarningTask implements Runnable {
 
 	    Ganymede.debug("Warning Task: Forced to terminate early, aborting.");
 	    mySession.logout();
+	  }
+	else
+	  {
+	    Ganymede.debug("Warning Task: Completed");
 	  }
       }
   }

@@ -7,8 +7,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2000/01/27 06:03:21 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/02/21 19:50:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -89,6 +89,7 @@ public class GanymedeExpirationTask implements Runnable {
     GanymedeSession mySession = null;
     boolean started = false;
     boolean finished = false;
+    Thread currentThread = java.lang.Thread.currentThread();
 
     /* -- */
 
@@ -160,6 +161,11 @@ public class GanymedeExpirationTask implements Runnable {
 
 	while (baseEnum.hasMoreElements())
 	  {
+	    if (currentThread.isInterrupted())
+	      {
+		throw new InterruptedException("scheduler ordering shutdown");
+	      }
+
 	    base = (DBObjectBase) baseEnum.nextElement();
 
 	    // embedded objects are inactivated with their parents, we don't
@@ -183,6 +189,11 @@ public class GanymedeExpirationTask implements Runnable {
 
 	    while (enum.hasMoreElements())
 	      {
+		if (currentThread.isInterrupted())
+		  {
+		    throw new InterruptedException("scheduler ordering shutdown");
+		  }
+
 		result = (Result) enum.nextElement();
 
 		invid = result.getInvid();
@@ -214,6 +225,11 @@ public class GanymedeExpirationTask implements Runnable {
 
 	while (baseEnum.hasMoreElements())
 	  {
+	    if (currentThread.isInterrupted())
+	      {
+		throw new InterruptedException("scheduler ordering shutdown");
+	      }
+
 	    base = (DBObjectBase) baseEnum.nextElement();
 
 	    // embedded objects are removed with their parents, we don't
@@ -238,6 +254,11 @@ public class GanymedeExpirationTask implements Runnable {
 
 	    while (enum.hasMoreElements())
 	      {
+		if (currentThread.isInterrupted())
+		  {
+		    throw new InterruptedException("scheduler ordering shutdown");
+		  }
+
 		result = (Result) enum.nextElement();
 
 		invid = result.getInvid();
@@ -291,6 +312,9 @@ public class GanymedeExpirationTask implements Runnable {
 	  {
 	    Ganymede.debug("Expiration Task: Transaction committed");
 	  }
+      }
+    catch (InterruptedException ex)
+      {
       }
     finally
       {

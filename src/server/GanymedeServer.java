@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 2000/02/16 11:32:00 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 2000/02/21 19:50:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -994,7 +994,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     // stop any background tasks running
 
-    Ganymede.scheduler.stop();
+    Ganymede.scheduler.interrupt();
 
     // disconnect the admin consoles
 

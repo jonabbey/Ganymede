@@ -7,8 +7,8 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/06/09 04:03:58 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/02/21 19:50:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -345,8 +345,9 @@ public class scheduleHandle implements java.io.Serializable {
 	throw new IllegalArgumentException("can't run this method on the client");
       }
 
-    monitor.stop();
-    thread.stop();
+    monitor.interrupt();
+    thread.interrupt();		// this used to be a stop, but stop is deprecated
+				// as unsafe in 1.2, so we do the next best thing
 
     isRunning = false;
   }

@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2000/02/16 11:32:00 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/02/21 19:50:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,6 +113,7 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
     boolean
       success1 = false,
       success2 = false;
+    Thread currentThread = java.lang.Thread.currentThread();
 
     /* -- */
 
@@ -137,6 +138,7 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 	catch (InterruptedException ex)
 	  {
 	    Ganymede.debug("Could not run task " + this.getClass().toString() + ", couldn't get dump lock");
+	    return;
 	  }
 
 	// update our time as soon as possible, so that any changes
@@ -171,6 +173,12 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 	    session.logout();	// will clear the dump lock
 	    session = null;
 	    lock = null;
+	  }
+
+	if (currentThread.isInterrupted())
+	  {
+	    Ganymede.debug("Builder task interrupted, not doing network build.");
+	    return;
 	  }
 
 	if (success1)

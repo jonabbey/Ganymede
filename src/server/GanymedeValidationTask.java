@@ -7,8 +7,8 @@
    
    Created: 26 January 1999
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/01/27 06:03:24 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/02/21 19:50:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -94,6 +94,7 @@ public class GanymedeValidationTask implements Runnable {
     DBObject object;
     DBObjectBase base;
     Enumeration baseEnum;
+    Thread currentThread = java.lang.Thread.currentThread();
 
     /* -- */
 
@@ -127,6 +128,11 @@ public class GanymedeValidationTask implements Runnable {
 
 	while (baseEnum.hasMoreElements())
 	  {
+	    if (currentThread.isInterrupted())
+	      {
+		throw new InterruptedException("task interrupted.");
+	      }
+
 	    base = (DBObjectBase) baseEnum.nextElement();
 
 	    objects = mySession.getObjects(base.getTypeID());
@@ -138,6 +144,11 @@ public class GanymedeValidationTask implements Runnable {
 
 	    for (int i = 0; i < objects.size(); i++)
 	      {
+		if (currentThread.isInterrupted())
+		  {
+		    throw new InterruptedException("task interrupted.");
+		  }
+
 		object = (DBObject) objects.elementAt(i);
 
 		missingFields = object.checkRequiredFields();
@@ -159,6 +170,10 @@ public class GanymedeValidationTask implements Runnable {
 	  {
 	    Ganymede.debug("Validation Task: Some objects had missing fields.");
 	  }
+      }
+    catch (InterruptedException ex)
+      {
+	Ganymede.debug("GanymedeValidationTask interrupted by GanymedeScheduler, validation incomplete.");
       }
     finally
       {

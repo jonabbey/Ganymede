@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/10/08 01:41:29 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/02/21 19:50:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -750,6 +750,12 @@ public class GanymedeScheduler extends Thread {
 
 	while (true)
 	  {
+	    if (isInterrupted())
+	      {
+		System.err.println("Scheduler interrupted");
+		return;	// jump to finally, then return
+	      }
+
 	    if (debug)
 	      {
 		System.err.println("loop");
@@ -870,7 +876,7 @@ public class GanymedeScheduler extends Thread {
 	    System.err.println("Ganymede Scheduler going down");
 	  }
 
-	cleanUp();
+	cleanUp();		// send interrupts to all running tasks
 
 	if (logStuff)
 	  {
