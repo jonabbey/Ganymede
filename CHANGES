@@ -7,16 +7,14 @@ CHANGES
 
 RELEASE DATE: July ??, 1999
 
-1. [SCHEMA] gasharl schema modified to call user rename, dir create scripts
+1. [SCHEMA] Several gasharl schema mods
 
 The commitPhase2() method in userCustom for the gasharl schema now
 calls out to 'directory_namer' and 'directory_maker' to handle
 external actions when users are renamed or created.
 
-Added system event types 'userrenamed' and 'usermoved' added to the
-gasharl ganymede.schema file.  Users of the gasharl schema kit should
-generate system event objects for these event types if you want to use
-a ganymede.db file from a previous release of the gasharl schema kit.
+Added support for generation of the ARL maildirect file, which will be
+of absolutely no interest to anyone outside of ARL.
 
 2. [CLIENT] Fixed client behavior on catastrophic transaction commit failure
 
@@ -203,6 +201,62 @@ and are used by the logging system.
 A number of the GUI field types supported by the clients were not
 being added to containerPanel with any registered field comments set
 as tooltips.  Fixed.
+
+12. [SERVER] GanymedeScheduler could lose on-demand tasks
+
+If the Ganymede server tried to initiate an on-demand task that was
+currently running, the scheduler would 'lose' the task instead of
+properly doing back-to-back execution of the task.  Big oops.
+
+13. [SERVER] GanymedeBuilderTask didn't do overlap properly
+
+The GanymedeBuilderTask base class has code that remembers the last
+time the builder task was run, so that it can check for changes in
+the various object bases that occurred since the last builder task
+run.  Unfortunately, the time stamp was being recorded after the
+builder task completed, even though changes could be made in the
+database after builderPhase1() finishes and before builderPhase2()
+completes, which left the possiblity for build tasks to not be
+re-issued properly if two transactions affecting the same object
+base were committed back-to-back .
+
+The GanymedeBuilderTask base class now properly records the time
+before entering builderPhase1(), so that rapid sequences of changes to
+the database will always properly trigger subsequent builds.
+
+14. [SERVER, CLIENT, CONSOLE] Cleaned up login sequence
+
+Both the admin console and client will now give a nice dialog if login
+fails.  Previously, the admin console showed an exception trace, which
+did not make it clear that the problem was a bad username or password.
+
+Made the clients include error.gif in several of their dialogs.
+
+15. [CLIENT] Removed extraneous menu items from object windows
+
+The object view/edit windows had a menu on them that included a number
+of options that didn't always apply, as well as a 'print' option which
+never worked well enough to be available to the end user.
+
+Now, the object window's "File" menu only includes actions that can't
+be done anywhere else.
+
+The File menu will now only present the 'Set Inactivate Date' option
+when the object being edited can in fact be inactivated.
+
+16. [SERVER] Cleaned up schema dumping of persona objects
+
+Modified DBObject and DBObjectBase's partialEmit() methods so that
+supergash's locally-defined email address is not saved into the
+ganymede.schema file.
+
+17. [WEB FILES] Reworked the web access system for the Ganymede clients
+
+Brian O'Mara did a very nice job of making a new set of web pages for
+the Ganymede clients.  The new primary web page uses JavaScript to
+launch the clients in their own frames, making it possible to run a
+client and console simultaneously, and to be able to close the
+original launch frame without killing the clients.
 
 -------------------- Changes from 0.99.3 to 0.99.4 -------------------
 
