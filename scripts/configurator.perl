@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.30 $
-# $Date: 1999/01/22 01:00:32 $
+# $Revision: 1.31 $
+# $Date: 1999/01/22 20:15:54 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -78,6 +78,22 @@ sub resolve{
     $alinkp="/@alinkp";
 }
 
+######################################################################### 
+#
+#                                                         removelastslash
+#
+# input: a pathname to test
+#
+# this function will remove a trailing slash from the directory name 
+# input
+#
+######################################################################### 
+sub removelastslash{
+    
+    if ($_[0] =~ /\/$/) {
+	chop $_[0];
+    }
+}
 
 #########################################################################
 #
@@ -308,6 +324,8 @@ $perlname = $ENV{GPERL};
 $rootdir = &resolve(cwd(), $ENV{GROOTDIR});
 $javadir = $ENV{GJAVA};
 
+removelastslash($javadir);
+
 # First we need to put out all the config.sh files that the build and
 # rebuild scripts depend on.  See the header for write_config() to
 # identify the three pieces.
@@ -323,7 +341,7 @@ $javadir = $ENV{GJAVA};
 	  "$rootdir/src/classes", "Ganymede Jars", "$rootdir/src/classes",
 	  "$rootdir/src/password", "Ganymede Sample Password Client", "$rootdir/src/password/classes");
 
-print "Generating config.sh files in source directories.\n\n";
+print "\nGenerating config.sh files in source directories.\n";
 
 while ($#configs > 0) {
     write_config(shift @configs, shift @configs, shift @configs);
@@ -336,7 +354,7 @@ while ($#configs > 0) {
 	  "$rootdir/src/schemas/nisonly", "Solaris NIS",
 	  "$rootdir/src/schemas/ganymede.old", "Developmental Next-generation");
 
-print "Generating config.sh files for schema kits.\n\n";
+print "Generating config.sh files for schema kits.\n";
 
 while ($#schemas > 0) {
     $schemadir = shift @schemas;
@@ -367,7 +385,7 @@ while ($#schemas > 0) {
 	   "$rootdir/src/schemas/nisonly/custom_src",
 	   "$rootdir/src/schemas/ganymede.old/custom_src");
 
-print "Generating rebuild files in source directories.\n\n";
+print "Generating rebuild files in source directories.\n";
 
 while ($#rebuilds > 0) {
     write_rebuild(shift @rebuilds);
@@ -388,11 +406,11 @@ while ($#sync > 0) {
     write_syncjars(shift @sync, shift @sync);
 }
 
-print "Generating $rootdir/src/Makefile\n\n";
+print "Generating $rootdir/src/Makefile\n";
 
 write_makefile("$rootdir/src");
 
-print "Generating install scripts\n\n";
+print "Generating install scripts\n";
 
 write_install("installClient.in", "installClient");
 write_install("installClient2.in", "installClient2");
