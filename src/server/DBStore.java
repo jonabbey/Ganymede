@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.66 $ %D%
+   Version: $Revision: 1.67 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -110,12 +110,16 @@ public class DBStore {
    *
    * Load the database from disk.<br><br>
    *
-   * This method loads both the database type
-   * definition and database contents from a single disk file.
+   * This method loads both the database type definition and database
+   * contents from a single disk file.<br><br>
+   *
+   * Note that this method does _not_ do a this.notifyAll() upon
+   * returning, this is acceptable because we are assuming we will
+   * never call load() on a DBStore with locks held.
    *
    * @param filename Name of the database file
    * @see arlut.csd.ganymede.DBJournal
-   *
+   * 
    */
 
   public synchronized void load(String filename)
