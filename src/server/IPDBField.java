@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1050,7 +1050,9 @@ public class IPDBField extends DBField implements ip_field {
 
   /**
    *
-   * Returns true if the value stored in this IP field is an IPV4 address
+   * Returns true if the value stored in this IP field is an IPV4
+   * address.  If no value has been set for this field, false is
+   * returned.
    *
    * @see arlut.csd.ganymede.ip_field
    *
@@ -1065,13 +1067,21 @@ public class IPDBField extends DBField implements ip_field {
 
     Byte[] element = (Byte[]) value;
 
-    return (element.length == 4);
+    if (element == null)
+      {
+	return false;
+      }
+    else
+      {
+	return (element.length == 4);
+      }
   }
 
   /**
    *
    * Returns true if the value stored in the given element of this IP
-   * field is an IPV4 address.
+   * field is an IPV4 address, if no value is set, this method will
+   * return false.
    *
    * @param index Array index for the value to be checked
    *
@@ -1088,12 +1098,20 @@ public class IPDBField extends DBField implements ip_field {
 
     Byte[] element = (Byte[]) values.elementAt(index);
 
-    return (element.length == 4);
+    if (element == null)
+      {
+	return false;
+      }
+    else
+      {
+	return (element.length == 4);
+      }
   }
 
   /**
    *
-   * Returns true if the value stored in this IP field is an IPV6 address
+   * Returns true if the value stored in this IP field is an IPV6 address.  If
+   * this field has no value set, this method will return false by default.
    *
    * @see arlut.csd.ganymede.ip_field
    *
@@ -1108,13 +1126,21 @@ public class IPDBField extends DBField implements ip_field {
 
     Byte[] element = (Byte[]) value;
 
-    return (element.length == 16);
+    if (element == null)
+      {
+	return false;
+      }
+    else
+      {
+	return (element.length == 16);
+      }
   }
 
   /**
    *
    * Returns true if the value stored in the given element of this IP
-   * field is an IPV6 address.
+   * field is an IPV6 address.  If no value is stored in this field,
+   * false is returned.
    *
    * @param index Array index for the value to be checked
    *
@@ -1131,7 +1157,14 @@ public class IPDBField extends DBField implements ip_field {
 
     Byte[] element = (Byte[]) values.elementAt(index);
 
-    return (element.length == 16);
+    if (element == null)
+      {
+	return false;
+      }
+    else
+      {
+	return (element.length == 16);
+      }
   }
 
   // ****
