@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -98,7 +98,18 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public Vector getAvailableNets()
   {
-    System.err.println("systemCustom: returning freeNets");
+    if (debug)
+      {
+	System.err.println("systemCustom: returning freeNets");
+
+	for (int i = 0; i < freeNets.size(); i++)
+	  {
+	    ObjectHandle handle = (ObjectHandle) freeNets.elementAt(i);
+	    
+	    System.err.println(i + ": " + handle.getLabel());
+	  }
+      }
+
     return freeNets;
   }
 
@@ -111,8 +122,31 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public Byte[] getAddress(Invid netInvid)
   {
-    System.err.println("systemCustom: returning address for net " + getGSession().viewObjectLabel(netInvid));
+    if (debug)
+      {
+	System.err.println("systemCustom: returning address for net " + getGSession().viewObjectLabel(netInvid));
+      }
+
     return (Byte[]) ipAddresses.get(netInvid);
+  }
+
+  /**
+   *
+   * This method allows an embedded interfaceCustom object to change
+   * this systemCustom's notion of what the preferred address is for a
+   * particular available IP network.
+   *
+   */
+
+  public void setAddress(Byte[] address, Invid netInvid)
+  {
+    if (debug)
+      {
+	System.err.println("systemCustom.setAddress(): setting address for net " + 
+			   getGSession().viewObjectLabel(netInvid));
+      }
+
+    ipAddresses.put(netInvid, address);
   }
 
   /**
@@ -133,6 +167,18 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     /* -- */
 
+    if (netInvid == null)
+      {
+	System.err.println("systemCustom.freeNet(): trying to free null");
+      }
+
+    String label = getGSession().viewObjectLabel(netInvid);
+
+    if (debug)
+      {
+	System.err.println("systemCustom.freeNet(): attempting to free " + label);
+      }
+
     // do we already have this net in our free list?
 
     for (int i = 0; i < freeNets.size(); i++)
@@ -147,7 +193,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     if (found)
       {
-	return false;
+	if (debug)
+	  {
+	    System.err.println("systemCustom.freeNet(): " + label + " is already freed");
+	  }
+	return true;
       }
 
     for (int i = 0; i < netsInRoom.size(); i++)
