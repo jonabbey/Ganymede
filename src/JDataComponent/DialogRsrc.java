@@ -43,7 +43,10 @@ import com.sun.java.swing.*;
  */
 public class DialogRsrc {
 
+  private final boolean debug = false;
+
   static Hashtable imageCache = new Hashtable();
+
 
   // ---
   
@@ -241,7 +244,6 @@ public class DialogRsrc {
    */
   public void addSeparator()
   {
-    System.out.println("Adding Jseparator");
     objects.addElement(new JSeparator());
   }
 
@@ -265,7 +267,11 @@ public class DialogRsrc {
    */
   public void addPassword(String label, boolean isNew)
   {
-    System.out.println("Adding password field: "  + isNew);
+    if (debug)
+      {
+	System.out.println("Adding password field: "  + isNew);
+      }
+
     objects.addElement(new passwordThing(label, isNew));
   }
 
