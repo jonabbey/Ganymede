@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/03/12 20:41:07 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/03/17 03:17:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -185,10 +185,24 @@ public class StringDBField extends DBField implements string_field {
   {
     if (isVector())
       {
-	out.writeShort(values.size());
+	int count = 0;
+
 	for (int i = 0; i < values.size(); i++)
 	  {
-	    out.writeUTF((String) values.elementAt(i));
+	    if (!values.elementAt(i).equals(""))
+	      {
+		count++;
+	      }
+	  }
+
+	out.writeShort(count);
+
+	for (int i = 0; i < values.size(); i++)
+	  {
+	    if (!values.elementAt(i).equals(""))
+	      {
+		out.writeUTF((String) values.elementAt(i));
+	      }
 	  }
       }
     else
@@ -493,6 +507,41 @@ public class StringDBField extends DBField implements string_field {
 	    result.append("\n");
 	
 	    return result.toString();
+	  }
+      }
+  }
+
+  /**
+   *
+   * Returns true if this field has a value associated
+   * with it, or false if it is an unfilled 'placeholder'.
+   *
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  public synchronized boolean isDefined()
+  {
+    if (isVector())
+      {
+	if (values != null && values.size() > 0)
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
+    else
+      {
+	if (value != null && !((String) value).equals(""))
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return false;
 	  }
       }
   }

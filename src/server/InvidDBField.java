@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.101 $
-   Last Mod Date: $Date: 1999/01/22 18:05:48 $
+   Version: $Revision: 1.102 $
+   Last Mod Date: $Date: 1999/03/17 03:17:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.101 $ %D%
+ * @version $Revision: 1.102 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -2257,7 +2257,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object: " +
+	return Ganymede.createErrorDialog("InvidDBField.setValue()",
+					  "don't have permission to change field /  non-editable object: " +
 					   getName() + " in object " + owner.getLabel());
       }
 
@@ -2454,8 +2455,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object: " +
-					   getName() + " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog("InvidDBField.setElement()",
+					  "don't have permission to change field /  non-editable object: " +
+					  getName() + " in object " + owner.getLabel());
       }
 
     if (this.value.equals(values.elementAt(index)))
@@ -2597,15 +2599,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isEditInPlace())
       {
-	throw new IllegalArgumentException("can't manually add element to edit-in-place vector" +
-					   getName() + " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog("InvidDBFIeld.addElement()",
+					  "can't manually add element to edit-in-place vector" +
+					  getName() + " in object " + owner.getLabel());
       }
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	setLastError("don't have permission to change field /  non-editable object");
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " +
-					   getName() + " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog("InvidDBFIeld.addElement()",
+					  "don't have permission to change field /  non-editable object " +
+					  getName() + " in object " + owner.getLabel());
       }
 
     if (!isVector())
@@ -2752,8 +2755,9 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object: " +
-					   getName() + " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
+					  "don't have permission to change field /  non-editable object: " +
+					  getName() + " in object " + owner.getLabel());
       }
 
     if (!isVector())
@@ -2939,8 +2943,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " +
-					   getName() + " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog("Ganymedce.deleteElement()",
+					  "don't have permission to change field /  non-editable object " +
+					  getName() + " in object " + owner.getLabel());
       }
 
     if (!isVector())
