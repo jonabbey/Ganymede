@@ -1,7 +1,108 @@
-Ganymede Release 0.99.8
-November 23, 1999
+Ganymede Release 0.99.9
+January ??, 2000
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 0.99.8 to 0.99.9 -------------------
+
+RELEASE DATE: January ?? , 2000
+
+1. [SCHEMA] Fixed error when editing system in room with no networks
+
+The gasharl schema kit had a bug which made it impossible to edit a
+system if that system was connected to a room that had no networks
+listed.
+
+2. [SERVER] Fixed race condition in Qstmp stopThreaded() method
+
+The Qstmp shutdown process could throw a NullPointerException in
+stopThreaded() if thread timing worked out just wrong.  This has been
+caught, and this race condition will no longer be able to prevent
+clean server shut-down.
+
+3. [SERVER] Fixed various deadlock possibilities in server
+
+The 3 DBLock subclasses (DBReadLock, DBWriteLock, DBDumpLock) did not
+properly call notifyAll() on the DBStore object if they threw an
+exception in their establish() method.  Now, all synchronized blocks
+in the DBLock subclasses use try..finally to guarantee that other
+threads waiting on DBStore will be woken up, even if something
+unexpected happens.
+
+The DBReadLock.establish() code had code to throw an exception if a
+session that possessed a write or dump lock tried to obtain a readlock
+at the same time.  Unfortunately, the internal sessions used for the
+Ganymede builder tasks, expiration task, and warning task were given
+the same identifier as the standard 'internal' session used to process
+queries in the login process, so if a login was attempted during a
+builder task's phase1 execution, or during portions of the expire or
+warning task, an exception could be thrown, possibly causing
+threadlock if other threads had wait()'ed at that point.
+
+All this should be fixed now.
+
+4. [SCHEMA] The gasharl netgroup folding code wasn't working properly
+
+The gasharl GASHBuilderTask code is designed to handle netgroups that
+overflow the 1024 byte NIS line length limit, but the code that
+handled netgroup folding did so very inefficiently, putting only one
+netgroup entry per line after the first.
+
+5. [SERVER/CLIENT] Added support for 'browse' mode
+
+John Knutson pointed out that the Ganymede client wasn't an adequate
+directory browser because it always hid things that couldn't be
+edited, when in fact the user had a perfect right to see everything
+for which he is granted view access.  This was intended to be a
+feature of the client, that it could present a simplified tree to the
+user to avoid confusion, but it needlessly restricts advanced users.
+
+The server and client have now been modified so that the client can
+display all objects and object types viewable by the user, even if
+the user does not have editing permission.
+
+This is toggled by a 'Hide non-editable objects' checkbox menu item
+under the client's 'File' menu.  I expect I may move this someplace
+else in the client's GUI eventually.
+
+This involved changes to GanymedeSession.java, Session.java, and
+CategoryTransport.java on the server, and gclient.java on the client.
+
+As before, the server is really responsible for deciding what object
+types are reported to the client.. the client can't choose to show
+object types in the tree if the server doesn't report them, but the
+client can now ask to have all visible object types reported, which it
+couldn't do before.
+
+6. [CLIENT] Reworked object folder pop-up menus in client tree display
+
+The client's object folder pop-up menus in the tree display has been
+reworked to be less ambiguous.  The old 'List editable' and 'List all'
+have been changed to 'Report editable' and 'Report all', and the old
+'Show All Objects' has been changed to 'Show Non-Editables', and moved
+to the top of the pop-up menu.
+
+Hopefully this should be less confusing for folks.
+
+7. [SERVER] Fixed custom schema migration from 0.99.7
+
+Change 0.99.8, #17, listed below, which modified how the server
+handles non-symmetrically linked InvidDBFields, didn't properly handle
+InvidDBField definitions that explicitly listed the backlinks field as
+the field to be linked to.  Apparently, in 0.99.7 and before, the
+schema editor presented the backlinks field as a valid symmetric field
+target.
+
+Martin Schneider reported that Ganymede 0.99.8 was complaining when it
+came across such a field in his ganymede.db file from 0.99.7.  I had
+the server handling invid fields with target fields set to 'none', but
+I hadn't handled the equivalence case of the 'backlinks' target.
+
+The Ganymede server will now treat an invid field with a target field
+set to field 8 (the obsolete backlinks field) in precisely the same
+way that it treats invid fields with no target field specified.  This
+should make Martin's ganymede.db file from 0.99.7 work properly in
+0.99.9.
 
 -------------------- Changes from 0.99.7 to 0.99.8 -------------------
 
