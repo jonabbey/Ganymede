@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.23 $ %D%
+  Version: $Revision: 1.24 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.23 $ %D%
+ * @version $Revision: 1.24 $ %D%
  */
 
 public class baseTable extends JBufferedPane implements AdjustmentListener, ActionListener {
@@ -3781,7 +3781,6 @@ class tableCell {
     int 
       p,
       p2,
-      offset = 0,
       marker;
 
     StringBuffer
@@ -3833,7 +3832,7 @@ class tableCell {
       {
 	localWidth = 0;
 
-	while ((p < charAry.length) && (charAry[p] != '\n') && (localWidth < wrap_length))
+	while ((p < charAry.length) && (charAry[p] != '\n') && (localWidth + fm.charWidth(charAry[p]) < wrap_length))
 	  {
 	    localWidth += fm.charWidth(charAry[p++]);
 	  }
@@ -3842,6 +3841,8 @@ class tableCell {
 	// the first character that extends past the desired wrap_length,
 	// or the first newline after marker, or it will have overflowed
 	// to be == charAry.length
+
+	// remember what our current needs are after wrapping
 
 	if (localWidth > this.currentWidth)
 	  {
@@ -3903,12 +3904,7 @@ class tableCell {
 	
 	if (p < charAry.length)
 	  {
-	    if (isspace(charAry[p]))
-	      {
-		offset = 1;	/* the next character is white space.  We'll
-				   want to skip that. */
-	      }
-	    else
+	    if (!isspace(charAry[p]))
 	      {
 		/* back p2 up to the last white space before the break point */
 
@@ -3916,8 +3912,6 @@ class tableCell {
 		  {
  		    p2--;
 		  }
-
-		offset = 0;
 	      }
 	  }
 
@@ -3983,7 +3977,7 @@ class tableCell {
 	    rowSpan++;
 	  }
 
-	p = marker = p2 + 1 + offset;
+	p = marker = p2 + 1;
       }
 
     text = result.toString();
