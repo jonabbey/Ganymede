@@ -221,3 +221,16 @@ and DCE-compliant globally unique identifiers for our Macintosh LDAP
 synchronization was written by Tatu Saloranta, tatu.saloranta@iki.fi,
 and is included in Directory Droid under the Lesser General Public License.
 See http://www.doomdark.org/doomdark/proj/jug/ for more information.
+
+The Java implementation of the SHA-1 hashing algorithm (here
+arlut.csd.crypto.SHA1) was written by Chuck McManis
+(cmcmanis@netcom.com) and placed into the public domain.
+
+The Java Base 64 encoder/decoder (here arlut.csd.crypto.Base64) was
+written by Robert Harder (rob@iharder.net) and placed into the public
+domain.
+
+--
+
+Special thanks to authors of Ant and Subversion for high quality build
+and version control tools.
