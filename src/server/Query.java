@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,7 @@ public class Query implements java.io.Serializable {
   short returnType = -1;
   QueryNode root;
   boolean editableOnly;
+  boolean filtered;
   Hashtable permitList = null;
 
   /* -- */
@@ -146,6 +147,24 @@ public class Query implements java.io.Serializable {
     objectType = -1;
     root = null;
     editableOnly = true;
+  }
+
+  /**
+   *
+   * This method determines whether the query engine
+   * will filter the query according to the current
+   * list of visible owner groups.  Queries by default
+   * are filtered.
+   *
+   * @param filtered If true, the query will be masked by ownership
+   *
+   * @see arlut.csd.ganymede.Session#filterQueries()
+   * 
+   */
+
+  public void setFiltered(boolean filtered)
+  {
+    this.filtered = filtered;
   }
 
   /**
