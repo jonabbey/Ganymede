@@ -3,6 +3,12 @@
   PasswordApplet.java
 
   A simple password change utility in applet form.
+
+  Created: 28 January 1998
+  Version: $Revision: 1.2 $ %D%
+  Module By: Michael Mulvaney
+  Applied Research Laboratories, The University of Texas at Austin
+
 */
 
 package arlut.csd.ganymede.client.password;
@@ -41,13 +47,22 @@ public class PasswordApplet extends Applet implements ActionListener{
   GridBagConstraints
     gbc;
 
+  String serverhost;
+
   /* -- */
 
   public void init()
   {
+    serverhost = getParameter("ganymede.serverhost");
+
+    if (serverhost == null || serverhost.equals(""))
+      {
+	serverhost = getCodeBase().getHost();
+      }
+
     try
       {
-	client = new PasswordClient("//" + getCodeBase().getHost() + "/ganymede.server");
+	client = new PasswordClient("//" + serverhost + "/ganymede.server");
       }
     catch (java.rmi.RemoteException rx)
       {
