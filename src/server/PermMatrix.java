@@ -7,8 +7,8 @@
    
    Created: 3 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2001/05/07 05:57:54 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2001/07/27 01:02:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,15 +106,15 @@ public class PermMatrix implements java.io.Serializable {
     matrix = new Hashtable();
   }
 
-  public PermMatrix(PermissionMatrixDBField field)
+  public PermMatrix(Hashtable orig)
   {
-    if ((field == null) || (field.matrix == null))
+    if (orig == null)
       {
 	this.matrix = new Hashtable();
-      }	
+      }
     else
       {
-	this.matrix = (Hashtable) field.matrix.clone();
+	this.matrix = (Hashtable) orig.clone();
       }
   }
 
@@ -130,7 +130,7 @@ public class PermMatrix implements java.io.Serializable {
    * would.</P>
    */
 
-  public PermMatrix union(PermissionMatrixDBField orig)
+  public PermMatrix union(Hashtable orig)
   {
     return union(new PermMatrix(orig));	// this will cause a redundant copy, but who cares?
   }

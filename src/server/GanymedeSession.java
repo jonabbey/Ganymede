@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.240 $
-   Last Mod Date: $Date: 2001/06/23 04:00:27 $
+   Version: $Revision: 1.241 $
+   Last Mod Date: $Date: 2001/07/27 01:02:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.240 $ $Date: 2001/06/23 04:00:27 $
+ * @version $Revision: 1.241 $ $Date: 2001/07/27 01:02:19 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -6112,6 +6112,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    // DO NOT modify vals here!
 
 		    PermissionMatrixDBField pmdbf, pmdbf2;
+		    Hashtable pmdbfMatrix1 = null, pmdbfMatrix2 = null;
 		    DBObject pObj;
 
 		    /* -- */
@@ -6148,24 +6149,34 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 			    pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleMatrix);
 
+			    if (pmdbf != null)
+			      {
+				pmdbfMatrix1 = pmdbf.matrix;
+			      }
+
 			    pmdbf2 = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleDefaultMatrix);
+
+			    if (pmdbf2 != null)
+			      {
+				pmdbfMatrix2 = pmdbf2.matrix;
+			      }
 
 			    if (permsdebug)
 			      {
-				PermMatrix pm = new PermMatrix(pmdbf);
+				PermMatrix pm = new PermMatrix(pmdbfMatrix1);
 
 				System.err.println("updatePerms(): RoleMatrix for " + pObj + ":");
 
 				PermissionMatrixDBField.debugdump(pm);
 
-				pm = new PermMatrix(pmdbf2);
+				pm = new PermMatrix(pmdbfMatrix2);
 
 				System.err.println("updatePerms(): RoleDefaultMatrix for " + pObj + ":");
 
 				PermissionMatrixDBField.debugdump(pm);
 			      }
 
-			    personaPerms = personaPerms.union(pmdbf);
+			    personaPerms = personaPerms.union(pmdbfMatrix1);
 
 			    if (permsdebug)
 			      {
@@ -6174,7 +6185,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 				PermissionMatrixDBField.debugdump(personaPerms);
 			      }
 
-			    personaPerms = personaPerms.union(pmdbf2);
+			    personaPerms = personaPerms.union(pmdbfMatrix2);
 
 			    if (permsdebug)
 			      {
@@ -6183,7 +6194,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 				PermissionMatrixDBField.debugdump(personaPerms);
 			      }
 
-			    defaultPerms = defaultPerms.union(pmdbf2);
+			    defaultPerms = defaultPerms.union(pmdbfMatrix2);
 
 			    // we want to maintain our notion of
 			    // delegatable permissions separately..
@@ -6192,8 +6203,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 			    if (delegatable != null && delegatable.booleanValue())
 			      {
-				delegatablePersonaPerms = delegatablePersonaPerms.union(pmdbf).union(pmdbf2);
-				delegatableDefaultPerms = delegatableDefaultPerms.union(pmdbf2);
+				delegatablePersonaPerms = delegatablePersonaPerms.union(pmdbfMatrix1).union(pmdbfMatrix2);
+				delegatableDefaultPerms = delegatableDefaultPerms.union(pmdbfMatrix2);
 			      }
 			  }
 		      }

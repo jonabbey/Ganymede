@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 2001/05/07 05:57:54 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2001/07/27 01:02:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1038,7 +1038,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermMatrix getMatrix()
   {
-    return new PermMatrix(this);
+    return new PermMatrix(this.matrix);
   }
 
   /**
