@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 2000/10/09 21:51:49 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 2000/10/10 02:59:12 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -62,6 +62,7 @@ import java.rmi.server.*;
 import java.io.*;
 import java.util.*;
 
+import arlut.csd.JDataComponent.*;
 import arlut.csd.JTable.*;
 import arlut.csd.JDialog.*;
 import arlut.csd.Util.*;
@@ -422,6 +423,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	password.setEnabled(true);
 	password.addActionListener(this);
 	
+	username.requestFocus();
 	invalidate();
 	validate();
       }
@@ -654,8 +656,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JTabbedPane tabPane = null;
 
   StringDialog
-    shutdownDialog = null,
     dumpDialog = null;
+
+  consoleShutdownDialog
+    shutdownDialog = null;
 
   String killVictim = null;
 
@@ -773,6 +777,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     debugMenu.add(runInvidSweepMI);
     debugMenu.add(runEmbeddedTestMI);
     debugMenu.add(runEmbeddedSweepMI);
+    debugMenu.addSeparator();
     debugMenu.add(dumpSchemaMI);
     debugMenu.add(reloadClassesMI);
 
@@ -1275,49 +1280,40 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       {
 	boolean waitForUsers=false;
 
-	shutdownDialog = new StringDialog(this,
-					  "Confirm Ganymede Server Shutdown", 
-					  "Are you sure you want to \nshutdown the Ganymede server?", 
-					  "Yes", "No", question);
+	shutdownDialog = new consoleShutdownDialog(this);
 
-	if (shutdownDialog.DialogShow() != null)
+	int result = shutdownDialog.DialogShow();
+
+	if (result == 0)
 	  {
-	    shutdownDialog = new StringDialog(this,
-					      "Wait for users to log out?",
-					      "Do you want to suspend shutdown until all users are logged off?",
-					      "Yes, wait", "No, shutdown now", question);
+	    return;
+	  }
 
-	    if (shutdownDialog.DialogShow() != null)
-	      {
-		waitForUsers = true;
-	      }
+	if (result == 2)
+	  {
+	    waitForUsers = true;
+	  }
 
-	    if (debug)
-	      {
-		System.err.println("Affirmative shutdown request");
-	      }
+	boolean success = true;
 
-	    boolean success = true;
+	try
+	  {
+	    success = admin.shutdown(waitForUsers);
+	  }
+	catch (RemoteException ex)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	  }
 
-	    try
-	      {
-		success = admin.shutdown(waitForUsers);
-	      }
-	    catch (RemoteException ex)
-	      {
-		admin.forceDisconnect("Couldn't talk to server" + ex);
-	      }
-
-	    if (success)
-	      {
-		adminPanel.quitButton.setEnabled(true);
-		adminPanel.loginButton.setEnabled(true);
-		setVisible(false);
+	if (success)
+	  {
+	    adminPanel.quitButton.setEnabled(true);
+	    adminPanel.loginButton.setEnabled(true);
+	    setVisible(false);
 		
-		if (!GASHAdmin.WeAreApplet)
-		  {
-		    System.exit(0);
-		  }
+	    if (!GASHAdmin.WeAreApplet)
+	      {
+		System.exit(0);
 	      }
 	  }
       }
@@ -2199,3 +2195,268 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                           consoleShutdownDialog
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>GUI dialog for presenting server shutdown options in the admin console.</P>
+ */
+
+class consoleShutdownDialog extends JCenterDialog implements ActionListener, WindowListener {
+
+  private final static boolean debug = false;
+
+  GridBagLayout
+    gbl;
+  
+  GridBagConstraints
+    gbc;
+
+  JButton
+    now, later, cancel;
+
+  JPanel
+    mainPanel, imagePanel, buttonPanel;
+
+  JMultiLineLabel 
+    textLabel;
+
+  Image image;
+
+  JLabel
+    imageCanvas;
+
+  String body = "Shut down the Ganymede server?";
+  String buttonText[] = {"Yes, Immediately",
+			 "Yes, When Users Log Off",
+			 "No, Cancel"};
+
+  JButton
+    button1, button2, button3;
+
+  private int result = 0;
+  private boolean done = false;
+
+  /* -- */
+
+  public consoleShutdownDialog(Frame frame)
+  {
+    super(frame, "Confirm Ganymede Server Shutdown?", true);
+
+    this.addWindowListener(this);
+
+    gbl = new GridBagLayout();
+    gbc = new GridBagConstraints();
+
+    gbc.insets = new Insets(4,4,4,4);
+
+    mainPanel = new JPanel();
+    mainPanel.setBorder(new CompoundBorder(new EtchedBorder(),
+					   new EmptyBorder(10, 10, 10, 10)));
+    mainPanel.setLayout(gbl);
+    setContentPane(mainPanel);
+
+    //
+    // Title at top of dialog
+    //
+
+    JLabel titleLabel = new JLabel("Confirm Ganymede Server Shutdown?", SwingConstants.CENTER);
+    titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
+
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 2;
+    gbc.gridheight = 1;
+    gbl.setConstraints(titleLabel, gbc);
+    mainPanel.add(titleLabel);
+
+    //
+    // Text message under title
+    //
+
+    textLabel = new JMultiLineLabel(body);
+    
+    gbc.gridy = 1;
+    gbc.gridx = 1;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(textLabel, gbc);
+    mainPanel.add(textLabel);
+
+    //
+    // Separator goes all the way accross
+    // 
+
+    arlut.csd.JDataComponent.JSeparator sep = new arlut.csd.JDataComponent.JSeparator();
+
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+    gbc.gridwidth = 2;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(sep, gbc);
+    mainPanel.add(sep);
+
+    //
+    // ButtonPanel takes up the bottom of the dialog
+    //
+
+    buttonPanel = new JFocusRootPanel();
+
+    button1 = new JButton(buttonText[0]);
+    button1.addActionListener(this);
+    buttonPanel.add(button1);
+
+    button2 = new JButton(buttonText[1]);
+    button2.addActionListener(this);
+    buttonPanel.add(button2);
+
+    button3 = new JButton(buttonText[2]);
+    button3.addActionListener(this);
+    buttonPanel.add(button3);
+
+    //
+    // buttonPanel goes underneath
+    //
+
+    gbc.gridx = 0;
+    gbc.gridy = 4;
+    gbc.gridwidth = 2;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(buttonPanel, gbc);
+    mainPanel.add(buttonPanel);
+
+    //
+    // Image on left hand side
+    //
+
+    image = arlut.csd.Util.PackageResources.getImageResource(frame, "question.gif", frame.getClass());
+    imagePanel = new JPanel();
+
+    if (image != null)
+      {
+	imageCanvas = new JLabel(new ImageIcon(image));
+	imagePanel.add(imageCanvas);
+      }
+    else
+      {
+	imagePanel.add(Box.createGlue());
+      }
+
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 2;
+    gbc.weightx = 0.0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbl.setConstraints(imagePanel, gbc);
+    mainPanel.add(imagePanel);
+
+    pack();
+  }
+
+  /**
+   * <p>Display the dialog box, locks this thread while the dialog is being
+   * displayed, and returns a hashtable of data field values when the
+   * user closes the dialog box.</p>
+   *
+   * <p>Use this instead of Dialog.show().  If Hashtable returned is null,
+   * then the cancel button was clicked.  Otherwise, it will contain a 
+   * hash of labels(String) to results (Object).</p>
+   *
+   * @return HashTable of labels to values
+   */
+
+  public int DialogShow()
+  {
+    mainPanel.revalidate();
+    show();
+
+    // at this point we're frozen, since we're a modal dialog.. we'll continue
+    // at this point when the ok or cancel buttons are pressed.
+
+    if (debug)
+      {
+	System.err.println("Done invoking.");
+      }
+
+    return result;
+  }
+
+  public synchronized void actionPerformed(ActionEvent e)
+  {
+    if (e.getSource() == button1)
+      {
+	result = 1;
+      }
+    else if (e.getSource() == button2)
+      {
+	result = 2;
+      }
+    else if (e.getSource() == button3)
+      {
+	result = 0;
+      }
+    else
+      {
+	return;
+      }
+
+    // pop down so that DialogShow() can proceed to completion.
+
+    done = true;
+
+    setVisible(false);
+  }
+
+  // WindowListener methods
+
+  public void windowActivated(WindowEvent event)
+  {
+  }
+
+  public void windowClosed(WindowEvent event)
+  {
+  }
+
+  public synchronized void windowClosing(WindowEvent event)
+  {
+    if (!done)
+      {
+	if (debug)
+	  {
+	    System.err.println("Window is closing and we haven't done a cancel.");
+	  }
+
+	// by setting valueHash to null, we're basically treating
+	// this window close as a cancel.
+	
+	result = 0;
+      }
+
+    done = true;
+
+    this.setVisible(false);
+  }
+
+  public void windowDeactivated(WindowEvent event)
+  {
+  }
+
+  public void windowDeiconified(WindowEvent event)
+  {
+  }
+
+  public void windowIconified(WindowEvent event)
+  {
+  }
+
+  public void windowOpened(WindowEvent event)
+  {
+    button3.requestFocus();
+  }
+}

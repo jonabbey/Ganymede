@@ -958,6 +958,13 @@ so as not to lock up the GUI thread initially.  This will get rid of
 the ugly lack of refresh that was visible when the user dismissed
 the select persona dialog.
 
+65. [CLIENT, ADMIN CONSOLE] Cleaned up login boxes, console shutdown dialog
+
+I finally went back and got the admin console and gui client to put
+the focus on the username box, so people can just start typing their name
+when the clients come up.  I reworked the admin console shutdown dialog
+so it just uses one dialog box for the various shutdown modes.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

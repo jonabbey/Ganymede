@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 2000/06/30 04:24:43 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 2000/10/10 02:59:09 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -88,7 +88,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.65 $ $Date: 2000/06/30 04:24:43 $ $Name:  $
+ * @version $Revision: 1.66 $ $Date: 2000/10/10 02:59:09 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -283,7 +283,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     my_frame.pack();
     my_frame.setSize(265,380);    
     my_frame.show();
- 
+
     my_glogin.init();
     my_glogin.getContentPane().getLayout().layoutContainer(my_glogin);
   }
@@ -528,6 +528,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		passwd.setEnabled(true);
 		username.paintImmediately(username.getVisibleRect());
 		passwd.paintImmediately(passwd.getVisibleRect());
+		username.requestFocus();
 		
 		invalidate();
 		validate();
@@ -887,7 +888,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.65 $ $Date: 2000/06/30 04:24:43 $ $Name:  $
+ * @version $Revision: 1.66 $ $Date: 2000/10/10 02:59:09 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -981,7 +982,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.65 $ $Date: 2000/06/30 04:24:43 $ $Name:  $
+ * @version $Revision: 1.66 $ $Date: 2000/10/10 02:59:09 $ $Name:  $
  * @author Jonathan Abbey
  */
 
