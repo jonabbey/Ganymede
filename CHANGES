@@ -951,6 +951,13 @@ into our database, wherein embedded objects were left in the database
 when their owners had been deleted.  I added test features to the
 server and the admin console to detect and repair this condition.
 
+64. [CLIENT] Made Client check for MOTD message in background
+
+The client now runs its check for a new MOTD in a background thread,
+so as not to lock up the GUI thread initially.  This will get rid of
+the ugly lack of refresh that was visible when the user dismissed
+the select persona dialog.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
