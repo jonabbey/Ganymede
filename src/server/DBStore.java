@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.56 $ %D%
+   Version: $Revision: 1.57 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -275,7 +275,9 @@ public class DBStore {
       {
 	// what do we really want to do here?
 
-	throw new RuntimeException("couldn't initialize journal");
+	ex.printStackTrace();
+
+	throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
       }
 
     if (!journal.clean())
