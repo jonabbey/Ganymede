@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 2001/01/12 08:38:04 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 2001/01/12 16:42:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1079,7 +1079,7 @@ public class DBEditSet {
 	    // intern the result string so that we don't have multiple
 	    // copies of common strings in our heap
 
-	    result.intern();
+	    result = result.intern();
 
 	    for (int i = 0; i < committedObjects.size(); i++)
 	      {
