@@ -165,7 +165,7 @@ public class Qsmtp implements Runnable {
 	  }
       }
 
-    backgroundThread = new Thread(this, "Ganymede Mail Thread");
+    backgroundThread = new Thread(this, "Directory Droid Mail Thread");
     this.threaded = true;
     backgroundThread.start();
   }
