@@ -1,5 +1,5 @@
 /*
-   tStringSelector.java
+   StringSelector.java
 
    Created: 10 October 1997
    Version: 1.10 98/01/20
@@ -25,7 +25,7 @@ import arlut.csd.JTable.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                 tStringSelector
+                                                                 StringSelector
 
 
 ------------------------------------------------------------------------------*/
@@ -36,7 +36,7 @@ import arlut.csd.JTable.*;
  *
  */
 
-public class tStringSelector extends JPanel implements ActionListener, JsetValueCallback {
+public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
 
   static final boolean debug = true;
 
@@ -49,13 +49,9 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
     add,
     remove;
 
-  rowTable
+  JstringListBox
     in, 
     out = null;
-
-  tableHandler
-    inHandler,
-    outHandler;
 
   JPanel
     inPanel = new JPanel(),
@@ -87,51 +83,55 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
   LineBorder
     lborder = new LineBorder(Color.black);
 
-  Object
-    inSelected = null,
-    outSelected = null;
-
-  int[] colWidths, colWidths2;
-
-  String[] inHeaders, outHeaders;
+  Vector
+    inVector = new Vector(),
+    outVector = new Vector();
+  
+  int rowWidth;
 
   /**
    *
-   * Constructor for tStringSelector
+   * Constructor for StringSelector
    *
    * @param available Vector of listHandles for choices that are available
    * but are not currently in the set of selected values
    *
    * @param chosen Vector of listHandles for available choices
    *
-   * @param parent AWT container that the tStringSelector will be contained in.
+   * @param parent AWT container that the StringSelector will be contained in.
    * @param editable If false, this string selector is for display only
    * @param canChoose Choice must be made from vector of choices
    * @param mustChoose Vector of choices is available
    */
 
-  public tStringSelector(Vector available, Vector chosen, Container parent, 
+  public StringSelector(Vector available, Vector chosen, Container parent, 
 			boolean editable, boolean canChoose, boolean mustChoose, int rowWidth)
   {
     this(available, chosen, parent, editable, canChoose, mustChoose, rowWidth, "Selected", "Available", null, null);
   }
 
+  public StringSelector(Vector available, Vector chosen, Container parent, 
+			boolean editable, boolean canChoose, boolean mustChoose)
+  {
+    this(available, chosen, parent, editable, canChoose, mustChoose, 10, "Selected", "Available", null, null);
+  }
+
   /**
    *
-   * Constructor for tStringSelector
+   * Constructor for StringSelector
    *
    * @param available Vector of listHandles for choices that are available
    * but are not currently in the set of selected values
    *
    * @param chosen Vector of listHandles for available choices
    *
-   * @param parent AWT container that the tStringSelector will be contained in.
+   * @param parent AWT container that the StringSelector will be contained in.
    * @param editable If false, this string selector is for display only
    * @param inLabel Label for the list of selected choices
    * @param outLabel Label for the list of available choices
    */
 
-  public tStringSelector(Vector available, Vector chosen, Container parent, 
+  public StringSelector(Vector available, Vector chosen, Container parent, 
 			boolean editable, int rowWidth,
 			 String inLabel, String outLabel)
   {
@@ -140,34 +140,34 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 
   /**
    *
-   * Constructor for tStringSelector
+   * Constructor for StringSelector
    *
    * @param available Vector of listHandles for choices that are available
    * but are not currently in the set of selected values
    *
    * @param chosen Vector of listHandles for available choices
    *
-   * @param parent AWT container that the tStringSelector will be contained in.
+   * @param parent AWT container that the StringSelector will be contained in.
    * @param editable If false, this string selector is for display only
    * @param rowWidth How many columns wide should each box be?
    *
    */
   
-  public tStringSelector(Vector available, Vector chosen, Container parent, boolean editable, int rowWidth)
+  public StringSelector(Vector available, Vector chosen, Container parent, boolean editable, int rowWidth)
   {
     this(available, chosen, parent, editable, (available != null), false, rowWidth);
   }
 
   /**
    *
-   * Fully specified Constructor for tStringSelector
+   * Fully specified Constructor for StringSelector
    *
    * @param available Vector of listHandles for choices that are available
    * but are not currently in the set of selected values
    *
    * @param chosen Vector of listHandles for available choices
    *
-   * @param parent AWT container that the tStringSelector will be contained in.
+   * @param parent AWT container that the StringSelector will be contained in.
    * @param editable If false, this string selector is for display only
    * @param canChoose Choice must be made from vector of choices
    * @param mustChoose Vector of choices is available
@@ -178,13 +178,13 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
    * @param outPopup PopupMenu for out table
    */
 
-  public tStringSelector(Vector available, Vector chosen, Container parent, 
+  public StringSelector(Vector available, Vector chosen, Container parent, 
 			 boolean editable, boolean canChoose, boolean mustChoose, int rowWidth,
 			 String inLabel, String outLabel, JPopupMenu inPopup, JPopupMenu outPopup)
   {
     if (debug)
       {
-	System.out.println("-Adding new tStringSelector-");
+	System.out.println("-Adding new StringSelector-");
       }
     
     setBorder(new com.sun.java.swing.border.EtchedBorder());
@@ -193,19 +193,8 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
     this.editable = editable;
     this.canChoose = canChoose;
     this.mustChoose = mustChoose;
-
-    colWidths = new int[1];
-    colWidths[0] = rowWidth;
-
-    colWidths2 = new int[1];
-    colWidths2[0] = rowWidth;
-
-    inHeaders = new String[1];
-    inHeaders[0] = inLabel;
-
-    outHeaders = new String[1];
-    outHeaders[0] = outLabel;
-
+    this.rowWidth = rowWidth;
+    
     //setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
     setLayout(new BorderLayout());
@@ -218,15 +207,35 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 
     // Set up the inPanel, which holds the in list and button
 
-    inHandler = new tableHandler(this);
-    in = new rowTable(colWidths, inHeaders, inHandler, false, inPopup);
-    in.setRowsVisible(8);
-    inHandler.setTable(in);
-    
+
+    // chosen is a vector of listhandles or Strings.  If it is strings,
+    // create a vector of listhandles.
+    if ((chosen != null) && (chosen.size() > 0))
+      {
+	if ((chosen.elementAt(0) == null) || (chosen.elementAt(0) instanceof listHandle))
+	  {
+	    inVector = chosen;
+	  }
+	else
+	  {
+	    String label;
+	    for (int i = 0; i < chosen.size(); i++)
+	      {
+		label = (String) chosen.elementAt(i);
+		inVector.addElement(new listHandle(label, label));
+	      }	    
+	  }
+      }
+
+    // JstringListBox does the sorting
+    in = new JstringListBox(inVector);
+    in.setCallback(this);
+
     inPanel.setBorder(bborder);
     inPanel.setLayout(new BorderLayout());
 
-    inPanel.add("Center", in);
+    inPanel.add("Center", new JScrollPane(in));
+    inPanel.add("North", new JLabel(inLabel));
 
     if (editable)
       {
@@ -241,6 +250,42 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
     lists.add(inPanel);
 
     // Set up the outPanel.
+    // If we need an out box, build it now.
+    if (editable && canChoose) 
+      {
+	if (available == null)
+	  {
+	    System.out.println(" HEY!  You tried to make a canChoose StringSelector with a null available vector.  That's ok, we forgive you.");
+	  }
+	else
+	  {
+	    String label = null;
+	    listHandle lh = null;
+	    for (int i = 0; i < available.size(); i++)
+	      {
+		if (available.elementAt(i) instanceof listHandle)
+		  {
+		    lh = (listHandle) available.elementAt(i);
+
+		  }
+		else
+		  {
+		    label = (String) available.elementAt(i);
+		    lh = new listHandle(label, label);
+		  }
+	    
+		// Don't add them if they are already in the in list
+
+		if (! in.contains(lh))
+		  {
+		    outVector.addElement(lh);
+		  }
+	      }
+	  }
+      }
+
+    // JstringListBox does the sorting
+
 
     if (editable && canChoose && (available != null))
       {
@@ -250,15 +295,14 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	add.setActionCommand("Add");
 	add.addActionListener(this);
 
-	outHandler = new tableHandler(this);
-	out = new rowTable(colWidths2, outHeaders, outHandler, false, outPopup);
-	out.setRowsVisible(8);
-	outHandler.setTable(out);
+	out = new JstringListBox(outVector);
+	out.setCallback(this);
 	
 	outPanel.setBorder(bborder);
 	outPanel.setLayout(new BorderLayout());
-	outPanel.add("Center", out);
+	outPanel.add("Center", new JScrollPane(out));
 	outPanel.add("South", add);
+	outPanel.add("North", new JLabel(outLabel));
 	lists.add(outPanel);
       }
 
@@ -266,6 +310,14 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 
     custom = new JstringField();
     custom.setBorder(new EmptyBorder(new Insets(0,0,0,4)));
+    custom.addActionListener(new ActionListener() 
+			     {
+			       public void actionPerformed(ActionEvent e)
+				 {
+				   addCustom.doClick();
+				 }
+			     });
+      
     custom.setCallback(this);
     
     JPanel customP = new JPanel();
@@ -285,68 +337,6 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
     
     add("South", customP);
 
-    Object key;
-    String label;
-
-    if (chosen != null)
-      {
-	for (int i = 0; i < chosen.size(); i++)
-	  {
-	    if (chosen.elementAt(i) instanceof listHandle)
-	      {
-		listHandle item = (listHandle) chosen.elementAt(i);
-		key = item.getObject();
-		label = item.getLabel();
-	      }
-	    else
-	      {
-		label = (String) chosen.elementAt(i);
-		key = label;
-	      }
-	    
-	    in.newRow(key);
-	    in.setCellText(key, 0, label, false);
-	  }
-      }
-
-    in.resort(0, false);
-
-    // If we need an out box, build it now.
-    if (editable && canChoose) 
-      {
-	if (available == null)
-	  {
-	    System.out.println(" HEY!  You tried to make a canChoose tStringSelector with a null available vector.  That's ok, we forgive you.");
-	  }
-	else
-	  {
-	    for (int i = 0; i < available.size(); i++)
-	      {
-		if (available.elementAt(i) instanceof listHandle)
-		  {
-		    listHandle item = (listHandle) available.elementAt(i);
-		    key = item.getObject();
-		    label = item.getLabel();
-		  }
-		else
-		  {
-		    label = (String) available.elementAt(i);
-		    key = label;
-		  }
-	    
-		// Don't add them if they are already in the in list
-
-		if (! in.containsKey(key))
-		  {
-		    out.newRow(key);
-		    out.setCellText(key, 0, label, false);
-		  }
-	      }
-	
-	    out.resort(0, false);
-	  }
-      }
-
     invalidate();
     parent.validate();
 
@@ -360,12 +350,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 
   public void setVisibleRowCount(int numRows)
   {
-    in.setRowsVisible(numRows);
-
-    if (out != null)
-      {
-    	out.setRowsVisible(numRows);
-      }
+    System.out.println("I don't know how to setVisibleRowCount yet.");
   }
 
   /**
@@ -398,7 +383,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
       {
 	if (debug)
 	  {
-	    System.err.println("tStringSelector: add Action");
+	    System.err.println("StringSelector: add Action");
 	  }
 
 	addItem();
@@ -407,7 +392,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
       {
 	if (debug)
 	  {
-	    System.err.println("tStringSelector: remove Action");
+	    System.err.println("StringSelector: remove Action");
 	  }
 
 	removeItem();
@@ -416,12 +401,12 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
       {
 	if (debug)
 	  {
-	    System.err.println("tStringSelector: addNewString Action");
+	    System.err.println("StringSelector: addNewString Action");
 	  }
 
 	String item = custom.getText();
 
-	if (item.equals("") || in.containsKey(item))
+	if (item.equals("") || in.containsLabel(item))
 	  {
 	    if (debug)
 	      {
@@ -430,7 +415,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	      }
 	  }
 
-	if (mustChoose)
+	if (mustChoose) 
 	  {
 	    // Check to see if it is in there
 	    System.out.println("Checking to see if this is a viable option");
@@ -438,76 +423,65 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 
 	    if (out != null)
 	      {
-		Enumeration theKeys = out.keys();
-		while (theKeys.hasMoreElements())
+		if (out.containsLabel(item))
 		  {
-		    Object key = theKeys.nextElement();
-		    if (out.getCellText(key, 0).equals(item))
+		    out.setSelectedLabel(item);
+		    // Not sure if this cast is going to always work.
+		    listHandle handle = (listHandle)out.getSelectedItem();
+			
+		    boolean ok = true;
+		    
+		    if (allowCallback)
 		      {
-			out.selectRow(key);
-			listHandle handle = null;
-			if (outSelected instanceof String)
+			ok = false;
+			try
 			  {
-			    handle = new listHandle((String)outSelected, null);
+			    ok = my_parent.setValuePerformed(new JValueObject(this, 
+									      0,  //in.getSelectedIndex(),
+									      JValueObject.ADD,
+									      handle.getObject()));
 			  }
-			else
+			catch (RemoteException rx)
 			  {
-			    handle = new listHandle(out.getCellText(outSelected, 0), outSelected);
+			    throw new RuntimeException("Could not setValuePerformed: " + rx);
 			  }
-			
-			boolean ok = true;
-
-			if (allowCallback)
-			  {
-			    ok = false;
-			    try
-			      {
-				ok = my_parent.setValuePerformed(new JValueObject(this, 
-										  0,  //in.getSelectedIndex(),
-										  JValueObject.ADD,
-										  handle.getObject()));
-			      }
-			    catch (RemoteException rx)
-			      {
-				throw new RuntimeException("Could not setValuePerformed: " + rx);
-			      }
-			  }
-			
-			if (ok)
-			  {
-			    putItemIn(handle);
-			    custom.setText("");
-			    inThere = true;
-			  }
-			else
-			  {
-			    try
-			      {
-				if (out == null)
-				  {
-				    my_parent.setValuePerformed(new JValueObject(this, 
-										 0,  
-										 JValueObject.ERROR,
-										 "You can't choose stuff for this vector.  Sorry."));
-				  }
-				else
-				  {
-				    my_parent.setValuePerformed(new JValueObject(this, 
-										 0,  
-										 JValueObject.ERROR,
-										 "That choice is not appropriate.  Please choose from the list."));
-				  }
-			      }
-			    catch (RemoteException rx)
-			      {
-				throw new RuntimeException("Could not tell parent what is wrong: " + rx);
-			      }
-			  }
-
 		      }
-	       
+		    
+		    if (ok)
+		      {
+			putItemIn(handle);
+			custom.setText("");
+			inThere = true;
+		      }
+		    else
+		      {
+			try
+			  {
+			    if (out == null)
+			      {
+				my_parent.setValuePerformed(new JValueObject(this, 
+									     0,  
+									     JValueObject.ERROR,
+									     "You can't choose stuff for this vector.  Sorry."));
+			      }
+			    else
+			      {
+				my_parent.setValuePerformed(new JValueObject(this, 
+									     0,  
+									     JValueObject.ERROR,
+									     "That choice is not appropriate.  Please choose from the list."));
+			      }
+			  }
+			catch (RemoteException rx)
+			  {
+			    throw new RuntimeException("Could not tell parent what is wrong: " + rx);
+			  }
+		      }
+
 		  }
+		
 	      }
+	
 
 	    if (! inThere)
 	      {
@@ -544,6 +518,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	    return;
 	    
 	  }
+	// not mustChoose, so you can stick it in there.
 	else if (allowCallback)
 	  {
 	    boolean ok = false;
@@ -552,7 +527,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 		ok = my_parent.setValuePerformed(new JValueObject(this, 
 								  0,  //in.getSelectedIndex(),
 								  JValueObject.ADD,
-								  item));
+								  item));  //item is a String
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -561,8 +536,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	    
 	    if (ok)
 	      {
-		in.newRow(item);
-		in.setCellText(item, 0, item, true);
+		in.addHandle(new listHandle(item, item));
 		
 		//	in.setSelectedValue(item, true);
 		custom.setText("");
@@ -574,9 +548,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	  }
 	else //no callback to check
 	  {
-	    in.newRow(item);
-	    in.setCellText(item, 0, item, true);
-	    
+	    in.addHandle(new listHandle(item, item));
 	    //		    in.setSelectedValue(item, true);
 	    custom.setText("");
 	  }
@@ -590,15 +562,16 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
     boolean ok = false;
     listHandle handle;
 
-    if (outSelected == null)
+    if (out.getSelectedItem() == null)
       {
 	System.err.println("Error.. got addItem with outSelected == null");
 	return;
       }
 	
-    if (outSelected instanceof String)
+    if (out.getSelectedItem() instanceof String)
       {
-	handle = new listHandle((String)outSelected, null);
+	String os = (String)out.getSelectedItem();
+	handle = new listHandle(os, os);
       }
     else
       {
@@ -609,7 +582,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	  }
 	else
 	  {
-	    handle = new listHandle(out.getCellText(outSelected, 0), outSelected);
+	    handle = out.getSelectedHandle();
 	  }
       }
     
@@ -620,7 +593,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	    ok = my_parent.setValuePerformed(new JValueObject(this, 
 							      0, // we are not giving a true index
 							      JValueObject.ADD,
-							      outSelected));
+							      handle.getObject()));
 	  }
 	catch (RemoteException rx)
 	  {
@@ -654,19 +627,20 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 
     /* -- */
 
-    if (inSelected == null)
+    if (in.getSelectedItem() == null)
       {
 	System.err.println("Error.. got removeItem with inSelected == null");
 	return;
       }
 	
-    if (inSelected instanceof String)
+    if (in.getSelectedItem() instanceof String)
       {
-	handle = new listHandle((String)inSelected, null);
+	String os = (String)in.getSelectedItem();
+	handle = new listHandle(os, os);
       }
     else
       {
-	handle = new listHandle(in.getCellText(inSelected, 0), inSelected);
+	handle = in.getSelectedHandle();
       }
 
     if (allowCallback)
@@ -678,7 +652,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	    ok = my_parent.setValuePerformed(new JValueObject(this, 
 							      0,
 							      JValueObject.DELETE,
-							      inSelected));
+							      handle.getObject()));
 	  }
 	catch (RemoteException rx)
 	  {
@@ -716,16 +690,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
       {
 	if (out != null)
 	  {
-	    out.unSelectAll();
-	    
-	    if (item.getObject() != null)
-	      {
-		out.deleteRow(item.getObject(), true);
-	      }
-	    else
-	      {
-		out.deleteRow(item.getLabel(), true);
-	      }
+	    out.removeHandle(item, false);
 	  }
 
 	if (debug)
@@ -733,18 +698,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	    System.out.println("Adding handle");
 	  }
 
-	if (item.getObject() != null)
-	  {
-	    in.newRow(item.getObject());
-	    in.setCellText(item.getObject(), 0, item.getLabel(), false);
-	  }
-	else
-	  {
-	    in.newRow(item.getLabel());
-	    in.setCellText(item.getLabel(), 0, item.getLabel(), false);
-	  }
-
-	in.resort(0, true);
+	in.addHandle(item, true);
 
 	if (debug)
 	  {
@@ -754,7 +708,7 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
       }
     else
       {
-	throw new RuntimeException("Can't add something from the out box to a non-canChoose tStringSelector!");
+	throw new RuntimeException("Can't add something from the out box to a non-canChoose StringSelector!");
       }
 
   }
@@ -771,31 +725,11 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 	return;
       }
 
-    in.unSelectAll();
-
-    if (item.getObject() != null)
-      {
-	in.deleteRow(item.getObject(), true);
-      }
-    else
-      {
-	in.deleteRow(item.getLabel(), true);
-      }
+    in.removeHandle(item);
 
     if (out != null)
       {
-	if (item.getObject() != null)
-	  {
-	    out.newRow(item.getObject());
-	    out.setCellText(item.getObject(), 0, item.getLabel(), false);
-	  }
-	else
-	  {
-	    out.newRow(item.getLabel());
-	    out.setCellText(item.getLabel(), 0, item.getLabel(), false);
-	  }
-
-	out.resort(0, true);
+	out.addHandle(item);
       }
 
     // This should scroll to the new selected item
@@ -811,185 +745,70 @@ public class tStringSelector extends JPanel implements ActionListener, JsetValue
 
   public boolean setValuePerformed(JValueObject o)
   {
-    if (!editable)
-      {
-	return false;
-      }
-
-    if (debug)
-      {
-	System.out.println("set value in stringSelector");
-      }
-
     if (o.getSource() == custom)
       {
+	addCustom.doClick();
 	return true;
       }
-    else
+    else if (o.getSource() == in)
       {
-	System.out.println("Unknown object generated setValuePerformed in stringSelector.");
-      }
-    return false;
-  }
-
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                    tableHandler
-
-------------------------------------------------------------------------------*/
-
-class tableHandler implements rowSelectCallback {
-
-  tStringSelector parent;
-  rowTable table;
-
-  /* -- */
-
-  /**
-   * Constructor, remembers which table this handler is
-   * responsible for.
-   *
-   */
-
-  public tableHandler(tStringSelector parent)
-  {
-    this.parent = parent;
-  }
-
-  public void setTable(rowTable table)
-  {
-    this.table = table;
-  }
-
-  /**
-   * Called when a row is selected in rowTable
-   * 
-   * @param key Hash key for the selected row
-   */
-
-  public void rowSelected(Object key)
-  {
-    if (table == parent.in)
-      {
-	parent.inSelected = key;
-	
-	if (parent.out != null)
+	if (o.getOperationType() == JValueObject.INSERT)
 	  {
-	    parent.out.unSelectAll();
-	    parent.add.setEnabled(false);
-	  }
-
-	if (parent.remove != null)
-	  {
-	    parent.remove.setEnabled(true);
-	  }
-      }
-    else if (table == parent.out)
-      {
-	parent.outSelected = key;
-	parent.in.unSelectAll();
-	parent.remove.setEnabled(false);
-	parent.add.setEnabled(true);
-      }
-    else
-      {
-	throw new RuntimeException("row selected in unknown table");
-      }
-  }
-
-  /**
-   * Called when a row is double selected (double clicked) in rowTable
-   * 
-   * @param key Hash key for the selected row
-   */
-
-  public void rowDoubleSelected(Object key)
-  {
-    if (table == parent.in)
-      {
-	parent.inSelected = key;
-	parent.removeItem();
-      }
-    else if (table == parent.out)
-      {
-	parent.outSelected = key;
-	parent.addItem();
-      }
-    else
-      {
-	throw new RuntimeException("row double-selected in unknown table");
-      }
-
-  }
-  
-  /**
-   * Called when a row is unselected in rowTable
-   * 
-   * @param key Hash key for the unselected row
-   * @param endSelected false if the callback should assume that the final
-   *                    state of the system due to the user's present 
-   *                    action will have no row selected
-   */
-
-  public void rowUnSelected(Object key, boolean endSelected)
-  {
-    if (endSelected)
-      {
-	if (table == parent.in)
-	  {
-	    parent.inSelected = null;
-	  }
-	else if (table == parent.out)
-	  {
-	    parent.outSelected = null;
+	    remove.doClick();
+	    return true;
 	  }
 	else
 	  {
-	    throw new RuntimeException("row unselected in unknown table");
+	    if (add != null)
+	      {
+		add.setEnabled(false);
+	      }
+
+	    remove.setEnabled(true);
+
+	    if (out != null)
+	      {
+		out.setSelectedValue(null, false);
+	      }
+	    
+	    return true;
 	  }
       }
-  }
-
-  /**
-   * Called when a popup menu action is performed
-   * 
-   * @param key Hash key for the row on which the popup menu item was performed
-   * @param event the original ActionEvent from the popupmenu.  
-   *              See event.getSource() to identify the menu item performed.
-   */
-
-  public void rowMenuPerformed(Object key, java.awt.event.ActionEvent event)
-  {
-    System.out.println("menu performed: " + event.getActionCommand());
-
-    
-    if (table == parent.in)
+    else if (o.getSource() == out)
       {
-	parent.inSelected = key;
+	if (o.getOperationType() == JValueObject.INSERT)
+	  {
+	    add.doClick();
+	    return true;
+	  }
+	else
+	  {
+	    add.setEnabled(true);
+	    remove.setEnabled(false);
+	    in.setSelectedValue(null, false);
+
+	    return true;
+	  }
       }
     else
-      {
-	parent.outSelected = key;
-      }
-      
-    
-    if (parent.allowCallback)
-      {
-	try
+      {	
+	if (!editable)
 	  {
-	    parent.my_parent.setValuePerformed(new JValueObject(null, 
-								0,
-								JValueObject.PARAMETER,
-								key,
-								event.getActionCommand()));
+	    return false;
 	  }
-	catch (RemoteException rx)
+
+	if (debug)
 	  {
-	    throw new RuntimeException("Could not pass back the menu action: " + rx);
+	    System.out.println("set value in stringSelector");
 	  }
+	
+	System.out.println("Unknown object generated setValuePerformed in stringSelector.");
+	
+	return false;
       }
+
+
   }
 
 }
+
