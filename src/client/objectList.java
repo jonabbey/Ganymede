@@ -8,7 +8,7 @@
    their current state in the client, and more.
    
    Created: 6 February 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,8 @@ import arlut.csd.Util.*;
  */
 
 public class objectList {
+
+  final static boolean debug = false;
 
   static Compare comparator = new arlut.csd.Util.Compare() 
     {
@@ -105,6 +107,15 @@ public class objectList {
 	if (handle.isInactive())
 	  {
 	    activeHandles.removeElementAt(i);
+
+	    if (debug)
+	      {
+		System.err.println("objectList constructor: handle " + handle.debugDump() + " is inactive");
+	      }
+	  }
+	else if (debug)
+	  {
+	    System.err.println("objectList constructor: handle " + handle.debugDump() + " is not inactive");
 	  }
       }
 
@@ -177,7 +188,7 @@ public class objectList {
    * for any inactive objects 
    */
   
-  public  Vector getListHandles(boolean includeInactives)
+  public Vector getListHandles(boolean includeInactives)
   {
     return getListHandles(includeInactives, false);
   }
@@ -476,6 +487,19 @@ public class objectList {
     activeHandles.removeElement(handle);
 
     return handle;
+  }
+
+  public synchronized String toString()
+  {
+    StringBuffer tempBuf = new StringBuffer();
+
+    for (int i = 0; handles != null && i < handles.size(); i++)
+      {
+	tempBuf.append(handles.elementAt(i));
+	tempBuf.append("\n");
+      }
+
+    return tempBuf.toString();
   }
 
   // ***
