@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -187,13 +187,21 @@ public class JIPField extends JentryField {
 
 	if (value == null || !value.equals(str))
 	  {
-	    if (str.indexOf(':') != -1)
+	    try
 	      {
-		bytes = genIPV6bytes(str);
+		if (str.indexOf(':') != -1)
+		  {
+		    bytes = genIPV6bytes(str);
+		  }
+		else
+		  {
+		    bytes = genIPV4bytes(str);
+		  }
 	      }
-	    else
+	    catch (IllegalArgumentException ex)
 	      {
-		bytes = genIPV4bytes(str);
+		reportError(ex.getMessage());
+		return;
 	      }
 	  }
 	else
@@ -262,6 +270,32 @@ public class JIPField extends JentryField {
 		
 		changed = true;
 	      }
+	  }
+      }
+  }
+
+  /**
+   *
+   * This private method is used to report an error condition to the user.
+   *
+   */
+
+  private void reportError(String error)
+  {
+    if (allowCallback) 
+      {
+	try 
+	  {
+	    if (debug)
+	      {
+		System.err.println("JIPField.processFocusEvent: making callback");
+	      }
+	    
+	    my_parent.setValuePerformed(new JValueObject(this, error, JValueObject.ERROR));
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("failure in error report: " + ex); 
 	  }
       }
   }
