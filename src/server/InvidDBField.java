@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -252,6 +252,10 @@ public class InvidDBField extends DBField implements invid_field {
 
   public synchronized String getValueString()
   {
+    Invid localInvid;
+
+    /* -- */
+
     if (!verifyReadPermission())
       {
 	throw new IllegalArgumentException("permission denied to read this field");
@@ -264,7 +268,16 @@ public class InvidDBField extends DBField implements invid_field {
 	    return "null";
 	  }
 
-	return this.value().toString();
+	localInvid = (Invid) this.value();
+
+	if (Ganymede.internalSession != null)
+	  {
+	    return Ganymede.internalSession.viewObjectLabel(localInvid);
+	  }
+	else
+	  {
+	    return this.value().toString();
+	  }
       }
 
     String result = "";
@@ -277,7 +290,14 @@ public class InvidDBField extends DBField implements invid_field {
 	    result = result + ", ";
 	  }
 
-	result = result + this.value(i).toString();
+	if (Ganymede.internalSession != null)
+	  {
+	    result = result + Ganymede.internalSession.viewObjectLabel(this.value(i));
+	  }
+	else
+	  {
+	    result = result + this.value(i).toString();
+	  }
       }
 
     return result;
