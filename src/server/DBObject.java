@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.120 $
-   Last Mod Date: $Date: 2001/04/16 04:54:25 $
+   Version: $Revision: 1.121 $
+   Last Mod Date: $Date: 2001/04/17 03:53:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.120 $ $Date: 2001/04/16 04:54:25 $
+ * @version $Revision: 1.121 $ $Date: 2001/04/17 03:53:01 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -345,13 +345,6 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	    saveField(field.getCopy(this));
 	  }
-
-	// clear the owner object ref as a security measure (to
-	// prevent the client from accessing the field after we have
-	// checked in in, and to assist garbage collection in ditching
-	// the old DBEditObject
-
-	field.owner = null;
       }
 
     gSession = null;
