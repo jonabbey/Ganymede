@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 2001/10/26 21:41:03 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 2001/10/26 21:48:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2601,6 +2601,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	DBObject ownerObj = getSession().viewDBObject(ownerOne);
 	ownerName = ownerObj.getLabel();
+
+	// we want underscores to separate words, not spaces
+
+	ownerName = ownerName.replace(' ', '_');
       }
     else
       {
