@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.114 $
-   Last Mod Date: $Date: 1999/07/21 05:38:16 $
+   Version: $Revision: 1.115 $
+   Last Mod Date: $Date: 1999/07/22 03:52:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.114 $ $Date: 1999/07/21 05:38:16 $ $Name:  $
+ * @version $Revision: 1.115 $ $Date: 1999/07/22 03:52:33 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2053,7 +2053,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    buffer.append(getLabel());
 	    buffer.append(" has been inactivated.\n\nThe object is due to be removed from the database at ");
 	    buffer.append(getFieldValueLocal(SchemaConstants.RemovalField).toString());
-	    buffer.append(".");
+	    buffer.append(".\n");
+
+	    // if we are inactivating a user, the user deserves to
+	    // know about it
+
+	    Vector addresses = new Vector();
+	    
+	    if (getTypeID() == SchemaConstants.UserBase)
+	      {
+		addresses.addElement(getLabel());
+	      }
 	
 	    editset.logEvents.addElement(new DBLogEvent("inactivateobject",
 							buffer.toString(),
@@ -2061,7 +2071,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 							 gSession.userInvid : gSession.personaInvid),
 							gSession.username,
 							invids,
-							null));
+							addresses));
 	  }
 	else
 	  {
@@ -2074,7 +2084,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    buffer.append(getTypeDesc());
 	    buffer.append(" ");
 	    buffer.append(getLabel());
-	    buffer.append(" has been inactivated.\n\nThe object has no removal date set.");
+	    buffer.append(" has been inactivated.\n\nThe object has no removal date set.\n");
+
+	    // if we are inactivating a user, the user deserves to
+	    // know about it
+
+	    Vector addresses = new Vector();
+	    
+	    if (getTypeID() == SchemaConstants.UserBase)
+	      {
+		addresses.addElement(getLabel());
+	      }
 	
 	    editset.logEvents.addElement(new DBLogEvent("inactivateobject",
 							buffer.toString(),
@@ -2082,7 +2102,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 							 gSession.userInvid : gSession.personaInvid),
 							gSession.username,
 							invids,
-							null));
+							addresses));
 	  }
 
 	editset.popCheckpoint("inactivate" + getLabel());
@@ -2160,6 +2180,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	buffer.append(" ");
 	buffer.append(getLabel());
 	buffer.append(" has been reactivated.\n");
+
+	Vector addresses = new Vector();
+
+	if (getTypeID() == SchemaConstants.UserBase)
+	  {
+	    addresses.addElement(getLabel());
+	  }
 	
 	editset.logEvents.addElement(new DBLogEvent("reactivateobject",
 						    buffer.toString(),
@@ -2167,7 +2194,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 						     gSession.userInvid : gSession.personaInvid),
 						    gSession.username,
 						    invids,
-						    null));
+						    addresses));
       }
     else
       {

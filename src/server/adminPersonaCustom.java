@@ -6,8 +6,8 @@
    
    Created: 8 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/07/21 05:38:22 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/07/22 03:52:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,6 +111,8 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	
 	if (colondex == -1)
 	  {
+	    // supergash?
+
 	    return null;
 	  }
     

@@ -8,8 +8,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/07/21 05:38:18 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/07/22 03:52:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -807,7 +807,7 @@ public class DBLogEvent {
   {
     StringWriter writer = new StringWriter();
     PrintWriter pWriter = new PrintWriter(writer);
-    writeEntry(pWriter, new Date(), "toString");
+    writeEntry(pWriter, new Date(), "");
     return writer.toString();
   }
 }

@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/07/21 05:38:18 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/07/22 03:52:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -210,6 +210,10 @@ public class DBLog {
     // initalize our mailer
 
     mailer = new Qsmtp(Ganymede.mailHostProperty);
+
+    // run the Qsmtp mailer in non-blocking mode
+
+    mailer.goThreaded();
   }
 
   /**
@@ -314,7 +318,7 @@ public class DBLog {
 
     // the signature is pre-wrapped
 	
-    message = message + "\n\n" + signature;
+    message = message + signature;
 
     // get our list of recipients from the event's enumerated list of recipients
     // and the event code's address list.
@@ -332,13 +336,9 @@ public class DBLog {
 		       "Ganymede: " + ((title == null) ? type.name : title),
 		       message);
       }
-    catch (UnknownHostException ex)
-      {
-	throw new RuntimeException("Couldn't figure address " + ex);
-      }
     catch (IOException ex)
       {
-	throw new RuntimeException("IO problem " + ex);
+	Ganymede.debug("DBLog.mailNotify(): mailer error " + ex);
       }
 
     if (debug)
@@ -357,10 +357,6 @@ public class DBLog {
 
   public synchronized void logSystemEvent(DBLogEvent event)
   {
-    systemEventType type;
-
-    /* -- */
-
     if (closed)
       {
 	throw new RuntimeException("log already closed.");
@@ -371,82 +367,14 @@ public class DBLog {
 	System.err.println("DBLog.logSystemEvent(): Writing log event " + event.eventClassToken);
       }
 
-    updateSysEventCodeHash();
-
     currentTime.setTime(System.currentTimeMillis());
 
     // We haven't augmented event with the mail targets here.. the log
     // won't record who gets notified for system events.  This is OK.
 
     event.writeEntry(logWriter, currentTime, null);
-    
-    type = (systemEventType) sysEventCodes.get(event.eventClassToken);
 
-    if (type == null)
-      {
-	return;
-      }
-
-    if (type.mail)
-      {
-	if (debug)
-	  {
-	    System.err.println("Attempting to email log event " + event.eventClassToken);
-	  }
-
-	// prepare our message, word wrap it
-
-	String message = type.description + "\n\n" + event.description + "\n\n";
-
-	message = arlut.csd.Util.WordWrap.wrap(message, 78);
-	
-	message = message + "\n\n" + signature;
-
-	// get our list of recipients
-
-	Vector emailList = new Vector();
-
-	if (event.notifyVect != null)
-	  {
-	    for (int i = 0; i < event.notifyVect.size(); i++)
-	      {
-		emailList.addElement(event.notifyVect.elementAt(i));
-	      }
-	  }
-
-	if (type.addressVect != null)
-	  {
-	    for (int i = 0; i < type.addressVect.size(); i++)
-	      {
-		emailList.addElement(type.addressVect.elementAt(i));
-	      }
-	  }
-
-	// and now..
-
-	try
-	  {
-	    // bombs away!
-
-	    mailer.sendmsg(Ganymede.returnaddrProperty,
-			   emailList,
-			   "Ganymede: " + type.name,
-			   message);
-	  }
-	catch (UnknownHostException ex)
-	  {
-	    throw new RuntimeException("Couldn't figure address " + ex);
-	  }
-	catch (IOException ex)
-	  {
-	    throw new RuntimeException("IO problem " + ex);
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("Completed emailing log event " + event.eventClassToken);
-	  }
-      }
+    sendSysEventMail(event, null);
   }
 
   /**
@@ -537,13 +465,20 @@ public class DBLog {
 
 	if (event.subject == null)
 	  {
+	    Vector sentTo = new Vector();
+
 	    // first, if we have a recognizable object-specific event
 	    // happening, send out the notification for it.  Note that by
 	    // doing so, we are doing this independently of the
 	    // transaction notification consolidation done by
 	    // appendMailOut()..
 	
-	    sendObjectMail(event, transdescrip);
+	    sentTo = VectorUtils.union(sentTo, sendObjectMail(event, transdescrip));
+
+	    // we may have a system event instead, in which case we handle
+	    // mailing it here
+
+	    sentTo = VectorUtils.union(sentTo, sendSysEventMail(event, transdescrip));
 	
 	    // now, go ahead and add to the mail buffers we are prepping
 	    // to describe this whole transaction
@@ -554,18 +489,43 @@ public class DBLog {
 	    // of the mail for this transaction, the mailOut logic handles
 	    // that.
 	
-	    // appendMailOut() takes care of calling calculateMailTargets()
-	    // on event, which handles calculating who needs to receive
-	    // email about this event.
+	    // appendMailOut() takes care of calling
+	    // calculateMailTargets() on event, which handles
+	    // calculating who needs to receive owner-group related
+	    // generic email about this event.
 	
-	    appendMailOut(event, mailOuts, transaction.session);
+	    sentTo = VectorUtils.union(sentTo, appendMailOut(event, mailOuts, transaction.session));
+
+	    // now we record who we actually sent the mail to, so it is logged
+	    // properly
+
+	    event.notifyVect = sentTo;
+
+	    // and write it to our log
+
 	    event.writeEntry(logWriter, currentTime, transactionID);
 	  }
 	else
 	  {
-	    // we've got a generic transactional mail event, process it.
+	    // we've got a generic transactional mail event, process
+	    // it.. note that we don't lump it with the transaction
+	    // summary.
 
 	    event.writeEntry(logWriter, currentTime, transactionID);
+
+	    String returnAddr = null;
+
+	    // who should we say the mail is from?
+
+	    if (event.admin != null)
+	      {
+		returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin, 
+									  transaction.session);
+	      }
+	    else
+	      {
+		returnAddr = Ganymede.returnaddrProperty;
+	      }
 
 	    try
 	      {
@@ -573,22 +533,18 @@ public class DBLog {
 
 		message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
-		message = message + "\n\n" + signature;
+		message = message + "\n" + signature;
 
 		// bombs away!
 		
-		mailer.sendmsg(Ganymede.returnaddrProperty,
+		mailer.sendmsg(returnAddr,
 			       event.notifyVect,
 			       "Ganymede: " + event.subject,
 			       message);
 	      }
-	    catch (UnknownHostException ex)
-	      {
-		throw new RuntimeException("Couldn't figure address " + ex);
-	      }
 	    catch (IOException ex)
 	      {
-		throw new RuntimeException("IO problem " + ex);
+		Ganymede.debug("DBLog.logTransaction(): mailer error " + ex);
 	      }
 	  }
       }
@@ -605,6 +561,20 @@ public class DBLog {
 
     // now, for each distinct set of recipients, mail them their summary
 
+    String returnAddr = null;
+
+    // who should we say the mail is from?
+    
+    if (admin != null)
+      {
+	returnAddr = adminPersonaCustom.convertAdminInvidToString(admin, 
+								  session.getSession());
+      }
+    else
+      {
+	returnAddr = Ganymede.returnaddrProperty;
+      }
+    
     enum = mailOuts.elements();
 
     while (enum.hasMoreElements())
@@ -612,8 +582,11 @@ public class DBLog {
 	MailOut mailout = (MailOut) enum.nextElement();
 	String description = "Transaction summary: User " + adminName + ":" + 
 	  currentTime.toString() + "\n\n" + 
-	  arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + 
-	  "\n" + signature;
+	  arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + signature;
+
+	// we don't want any \n's between wordwrap and signature above,
+	// since appendMailOut() adds "\n\n" at the end of each transaction
+	// summary segment
 
 	if (debug)
 	  {
@@ -622,18 +595,14 @@ public class DBLog {
 
 	try
 	  {
-	    mailer.sendmsg(Ganymede.returnaddrProperty,
+	    mailer.sendmsg(returnAddr,
 			   mailout.addresses,
-			   "Ganymede: Updates",
+			   "Ganymede: Transaction Log",
 			   description);
-	  }
-	catch (UnknownHostException ex)
-	  {
-	    throw new RuntimeException("Couldn't figure address " + ex);
 	  }
 	catch (IOException ex)
 	  {
-	    throw new RuntimeException("IO problem " + ex);
+	    Ganymede.debug("DBLog.logTransaction(): mailer error " + ex);
 	  }
       }
   }
@@ -818,24 +787,141 @@ public class DBLog {
   // -----
 
   /**
-   * <P>This mail sends out the 'auxiliary' type specific log information
+   * <P>This sends out system event mail to the appropriate users,
+   * based on the system event record's flags.</P>
+   *
+   * @return vector of email addresses this event was sent to for 
+   * system event notification
+   */
+
+  private Vector sendSysEventMail(DBLogEvent event, String transdescrip)
+  {
+    systemEventType type;
+    String returnAddr;
+    Vector emailList = new Vector();
+
+    /* -- */
+
+    updateSysEventCodeHash();
+    
+    type = (systemEventType) sysEventCodes.get(event.eventClassToken);
+
+    if (type == null)
+      {
+	return emailList;
+      }
+
+    if (type.mail)
+      {
+	if (debug)
+	  {
+	    System.err.println("Attempting to email log event " + event.eventClassToken);
+	  }
+
+	// prepare our message, word wrap it
+
+	String message = transdescrip + "\n\n" + 
+	  type.description + "\n\n" + event.description + "\n\n";
+
+	message = arlut.csd.Util.WordWrap.wrap(message, 78);
+	
+	message = message + signature;
+
+	// get our list of recipients
+
+	if (event.notifyVect != null)
+	  {
+	    for (int i = 0; i < event.notifyVect.size(); i++)
+	      {
+		VectorUtils.unionAdd(emailList, event.notifyVect.elementAt(i));
+	      }
+	  }
+
+	if (type.addressVect != null)
+	  {
+	    for (int i = 0; i < type.addressVect.size(); i++)
+	      {
+		VectorUtils.unionAdd(emailList, type.addressVect.elementAt(i));
+	      }
+	  }
+
+	if (type.ccToSelf)
+	  {
+	    String name = null;
+
+	    if (event.admin != null)
+	      {
+		name = adminPersonaCustom.convertAdminInvidToString(event.admin, session.getSession());
+	      }
+
+	    if (name != null)
+	      {
+		VectorUtils.unionAdd(emailList, name);
+	      }
+	  }
+
+	if (type.ccToOwners)
+	  {
+	    emailList = VectorUtils.union(emailList, calculateOwnerAddresses(event.objects,
+									     session.getSession()));
+	  }
+
+	// who should we say the mail is from?
+
+	if (event.admin != null)
+	  {
+	    returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin, 
+								      session.getSession());
+	  }
+	else
+	  {
+	    returnAddr = Ganymede.returnaddrProperty;
+	  }
+
+	// and now..
+
+	try
+	  {
+	    // bombs away!
+
+	    mailer.sendmsg(returnAddr,
+			   emailList,
+			   "Ganymede: " + type.name,
+			   message);
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("DBLog.sendSysEventMail(): mailer error " + ex);
+	    ex.printStackTrace();
+	    Ganymede.debug("\n\nwhile processing " + event);
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("Completed emailing log event " + event.eventClassToken);
+	  }
+      }
+
+    return emailList;
+  }
+
+  /**
+   * <P>This sends out the 'auxiliary' type specific log information mail
    * to designated users, using the object event objects in the Ganymede
    * database.  This mail is sent for a distinct eventcode/object type pair,
    * outside of the context of a transaction.</P>
+   *
+   * @return vector of email addresses this event was sent to for 
+   * system event notification
    */
 
-  private void sendObjectMail(DBLogEvent event, String transdescrip)
+  private Vector sendObjectMail(DBLogEvent event, String transdescrip)
   {
-    if (event == null || event.objects == null || event.objects.size() != 1)
-      {
-	return;
-      }
-
-    /* - */
-
+    String returnAddr;
+    Vector mailList = new Vector();
     Invid objectInvid = (Invid) event.objects.elementAt(0);
     String key = event.eventClassToken + ":" + objectInvid.getType();
-    objectEventType eventRec = (objectEventType) objEventCodes.get(key);
+    objectEventType type = (objectEventType) objEventCodes.get(key);
 
     /* -- */
 
@@ -844,79 +930,93 @@ public class DBLog {
 	System.err.println("DBLog.sendObjectMail(): processing object Event " + key);
       }
 
-    if (eventRec == null)
+    if (event == null || event.objects == null || event.objects.size() != 1)
+      {
+	return mailList;
+      }
+
+    if (type == null)
       {
 	if (debug)
 	  {
 	    System.err.println("DBLog.sendObjectMail(): couldn't find objectEventType " + key);
 	  }
 
-	return;
+	return mailList;
       }
 
     // ok.  now we've got an objectEventType, so we will want to send out
     // mail for this event.
 
-    Vector mailList = new Vector();
-
-    if (eventRec.ccToSelf)
+    if (type.ccToSelf)
       {
-	String name;
+	String name = null;
 
-	name = adminPersonaCustom.convertAdminInvidToString(event.admin, session.getSession());
-
-	if (name == null)
+	if (event.admin != null)
 	  {
-	    name = event.adminName;
+	    name = adminPersonaCustom.convertAdminInvidToString(event.admin, session.getSession());
 	  }
 
-	mailList.addElement(name);
+	if (name != null)
+	  {
+	    mailList.addElement(name);
+	  }
       }
 
-    if (eventRec.ccToOwners)
+    if (type.ccToOwners)
       {
 	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects,
 				     session.getSession()));
       }
 
-    mailList = VectorUtils.union(mailList, eventRec.addressVect);
+    mailList = VectorUtils.union(mailList, type.addressVect);
 
     // okay, we want to tell mailList about what happened.
 
     String title;
 
-    if (eventRec.name != null)
+    if (type.name != null)
       {
-	title = "Ganymede: " + eventRec.name;
+	title = "Ganymede: " + type.name;
       }
     else
       {
-	title = "Ganymede: " + eventRec.token;
+	title = "Ganymede: " + type.token;
       }
 
-    String message = transdescrip + "\n\n" + eventRec.description + "\n\n" + event.description;
+    String message = transdescrip + "\n\n" + type.description + "\n\n" + event.description;
 
     message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
-    message = message + "\n\n" + signature;
+    message = message + "\n" + signature;
+
+    // who should we say the mail is from?
+
+    if (event.admin != null)
+      {
+	returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin, 
+								  session.getSession());
+      }
+    else
+      {
+	returnAddr = Ganymede.returnaddrProperty;
+      }
 
     try
       {
 	// bombs away!
 
-	mailer.sendmsg(Ganymede.returnaddrProperty,
+	mailer.sendmsg(returnAddr,
 		       mailList,
 		       title,
 		       message);
       }
-    catch (UnknownHostException ex)
-      {
-	throw new RuntimeException("Couldn't figure address " + ex);
-      }
     catch (IOException ex)
       {
-	throw new RuntimeException("IO problem " + ex);
+	Ganymede.debug("DBLog.sendObjectMail(): mailer error " + ex);
       }
+
+    return mailList;
   }
 
   /**
@@ -952,6 +1052,20 @@ public class DBLog {
 
 	    return;
 	  }
+
+	// this method can be called during a transaction commit
+	// sequence, in which this thread may have already locked the
+	// object base we would otherwise need to query..
+
+	if (eventBase.isLocked())
+	  {
+	    if (debug)
+	      {
+		System.err.println("updateSysEventCodeHash(): exiting, sysEvent Base locked..");
+	      }
+
+	    return;
+	  }
       }
     
     if (debug)
@@ -960,6 +1074,8 @@ public class DBLog {
       }
 
     sysEventCodes.clear();
+
+    // this query would lock if eventBase is already locked on this thread 
 
     eventCodeVector = session.internalQuery(new Query(SchemaConstants.EventBase));
 
@@ -978,7 +1094,8 @@ public class DBLog {
 	
 	entry = (Result) eventCodeVector.elementAt(i);
 	
-	sysEventCodes.put(entry.toString(), new systemEventType(session.session.viewDBObject(entry.getInvid())));
+	sysEventCodes.put(entry.toString(), 
+			  new systemEventType(session.session.viewDBObject(entry.getInvid())));
       }
 
     // remember when we updated our local cache
@@ -1033,6 +1150,20 @@ public class DBLog {
 
 	    return;
 	  }
+
+	// this method can be called during a transaction commit
+	// sequence, in which this thread may have already locked the
+	// object base we would otherwise need to query..
+
+	if (eventBase.isLocked())
+	  {
+	    if (debug)
+	      {
+		System.err.println("updateObjEventCodeHash(): exiting, objEvent Base locked..");
+	      }
+
+	    return;
+	  }
       }
 
     if (debug)
@@ -1041,6 +1172,8 @@ public class DBLog {
       }
 
     objEventCodes.clear();
+
+    // would deadlock here if eventBase was locked on this thread
 
     eventCodeVector = session.internalQuery(new Query(SchemaConstants.ObjectEventBase));
 
@@ -1119,6 +1252,16 @@ public class DBLog {
 
     notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects,
 									     session));
+
+    // always include the email address for the admin who initiated the
+    // action.
+
+    if (event.admin != null)
+      {
+	VectorUtils.unionAdd(notifyVect, 
+			     adminPersonaCustom.convertAdminInvidToString(event.admin, 
+									  session));
+      }
 
     // now update notifyList
 
@@ -1326,9 +1469,12 @@ public class DBLog {
    * list to a running MailOut object which has the complete
    * text that will be mailed to that recipient when the
    * transaction's records are mailed out.</P>
+   *
+   * @return vector of email addresses this event was sent to for 
+   * system event notification
    */
 
-  private void appendMailOut(DBLogEvent event, Hashtable map, DBSession session)
+  private Vector appendMailOut(DBLogEvent event, Hashtable map, DBSession session)
   {
     Enumeration enum;
     String str;
@@ -1382,6 +1528,8 @@ public class DBLog {
 	    mailout.append(event.description);
 	  }
       }
+
+    return event.notifyVect;
   }
 
   /**
@@ -1441,6 +1589,7 @@ class systemEventType {
   String addresses;
   Vector addressVect;
   boolean ccToSelf;
+  boolean ccToOwners;
 
   private DBField f;
 
@@ -1452,8 +1601,13 @@ class systemEventType {
     name = getString(obj, SchemaConstants.EventName);
     description = getString(obj, SchemaConstants.EventDescription);
     mail = getBoolean(obj, SchemaConstants.EventMailBoolean);
-    addresses = getAddresses(obj);
     ccToSelf = getBoolean(obj, SchemaConstants.EventMailToSelf);
+    ccToOwners = getBoolean(obj, SchemaConstants.EventMailOwners);
+
+    // and calculate the addresses that always need to be notified
+    // of this type of system event
+
+    addresses = getAddresses(obj);
   }
 
   private String getString(DBObject obj, short fieldId)

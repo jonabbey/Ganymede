@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 1999/07/21 05:38:17 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 1999/07/22 03:52:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1079,7 +1079,20 @@ public class DBEditSet {
 				System.err.println("**** DIFF (" + eObj.getLabel() +
 						   "):" + diff + " : ENDDIFF****");
 			      }
-			
+			    
+			    Vector addresses = new Vector();
+			    
+			    // if a user is being edited, we'll want
+			    // the user to get a copy of the
+			    // mail.. hopefully just sending mail to
+			    // the user's name in our current
+			    // environment will work..
+
+			    if (eObj.getTypeID() == SchemaConstants.UserBase)
+			      {
+				addresses.addElement(eObj.getLabel());
+			      }
+			    
 			    logEvent("objectchanged",
 				     eObj.getTypeDesc() + " " + eObj.getLabel() +
 				     ", <" +  eObj.getInvid() + "> was modified.\n\n" +
@@ -1087,7 +1100,7 @@ public class DBEditSet {
 				     (gSession.personaInvid == null ?
 				      gSession.userInvid : gSession.personaInvid),
 				     gSession.username,
-				     invids, null);
+				     invids, addresses);
 			  }
 		    
 			break;
@@ -1200,8 +1213,9 @@ public class DBEditSet {
 		System.err.println(session.key + ": DBEditSet.commit(): transaction written to disk");
 	      }
 
-	    // log it.. note that we may mail out events created by
-	    // the commitPhase2() methods called above.
+	    // We've written the journal for this transaction out, go
+	    // ahead and log it.. note that we may mail out events
+	    // created by the commitPhase2() methods called above.
 
 	    if (Ganymede.log != null)
 	      {
@@ -1210,7 +1224,6 @@ public class DBEditSet {
 					     gSession.userInvid : gSession.personaInvid),
 					    this);
 	      }
-
 	  }
 	catch (Exception ex)
 	  {

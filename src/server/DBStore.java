@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 1999/07/21 05:38:20 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 1999/07/22 03:52:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.85 $ %D%
+ * @version $Revision: 1.86 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -123,8 +123,24 @@ public class DBStore {
 
   // type identifiers used in the object store
 
+  /**
+   * All ganymede.db and ganymede.schema files will start with this string
+   */
+
   static final String id_string = "Gstore";
+
+  /**
+   * Major file version id.. will be first byte in ganymede.db/ganymede.schema
+   * after id_string
+   */
+
   static final byte major_version = 1;
+
+  /**
+   * Minor file version id.. will be second byte in ganymede.db/ganymede.schema
+   * after id_string
+   */
+
   static final byte minor_version = 12;
 
   static boolean debug = false;
@@ -563,7 +579,8 @@ public class DBStore {
 
 		    if (!directory.isDirectory())
 		      {
-			throw new IOException("Error, couldn't find output directory to backup: " + directoryName);
+			throw new IOException("Error, couldn't find output directory to backup: " + 
+					      directoryName);
 		      }
 
 		    File oldDirectory = new File(directoryName + File.separator + "old");
@@ -577,7 +594,8 @@ public class DBStore {
 								java.util.Locale.US);
 		    String label = formatter.format(new Date());
 
-		    String zipFileName = directoryName + File.separator + "old" + File.separator + label + "db.zip";
+		    String zipFileName = directoryName + File.separator + "old" + File.separator +
+		      label + "db.zip";
 
 		    Vector fileNameVect = new Vector();
 		    fileNameVect.addElement(filename);
@@ -1856,6 +1874,7 @@ public class DBStore {
 	bf.loading = false;
 	bf.removable = false;
 	bf.editable = false;
+	bf.comment = "Name of this task, as shown in task monitor";
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
@@ -2038,25 +2057,54 @@ public class DBStore {
     // pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.RoleDefaultMatrix);
 
     createSysEventObj(session, "abnormallogout", "Unusual Logout", null, false);
-    createSysEventObj(session, "adminconnect", "Admin Console Attached", "Admin Console Attached", false);
-    createSysEventObj(session, "admindisconnect", "Admin Console Disconnected", "Admin Console Disconnected", false);
-    createSysEventObj(session, "badpass", "Failed login attempt", "Bad username and/or password", true);
-    createSysEventObj(session, "deleteobject", "Object Deleted", "This object has been deleted.", true);
+
+    createSysEventObj(session, "adminconnect", "Admin Console Attached", 
+		      "Admin Console Attached", false);
+
+    createSysEventObj(session, "admindisconnect", "Admin Console Disconnected", 
+		      "Admin Console Disconnected", false);
+
+    createSysEventObj(session, "badpass", "Failed login attempt", 
+		      "Bad username and/or password", true);
+
+    createSysEventObj(session, "deleteobject", "Object Deleted", 
+		      "This object has been deleted.", true);
+
     createSysEventObj(session, "dump", "Database Dump", "Database Dump", false);
-    createSysEventObj(session, "expirationwarn", "Expiration Warning", "This object is going to expire soon.", false);
-    createSysEventObj(session, "expirenotify", "Expiration Notification", "This object has been expired.", false);
+
+    createSysEventObj(session, "expirationwarn", "Expiration Warning", 
+		      "This object is going to expire soon.", false);
+
+    createSysEventObj(session, "expirenotify", "Expiration Notification", 
+		      "This object has been expired.", false);
+
     createSysEventObj(session, "finishtransaction", "transaction end", null, false);
+
     createSysEventObj(session, "goodlogin", "Successful login", null, false);
-    createSysEventObj(session, "inactivateobject", "Object Inactivation", "This object has been inactivated", true);
+
+    createSysEventObj(session, "inactivateobject", "Object Inactivation", 
+		      "This object has been inactivated", true);
+
     createSysEventObj(session, "journalreset", "Journal File Reset", "Journal file reset", false);
+
     createSysEventObj(session, "normallogout", "Normal Logout", null, false);
+
     createSysEventObj(session, "objectchanged", "Object Changed", "Object Changed", true);
+
     createSysEventObj(session, "objectcreated", "Object Created", "Object Created", true);
-    createSysEventObj(session, "reactivateobject", "Object Reactivation", "This object has been reactivated", true);
+
+    createSysEventObj(session, "reactivateobject", "Object Reactivation", 
+		      "This object has been reactivated", true);
+
     createSysEventObj(session, "removalwarn", "Removal Warning", "This object is going to be removed", false);
+
     createSysEventObj(session, "removenotify", "Removal Notification", "This object has been removed", false);
+
     createSysEventObj(session, "restart", "Server Restarted", "The Ganymede server was restarted", false);
-    createSysEventObj(session, "shutdown", "Server shutdown", "The Ganymede server was cleanly shut down", false);
+
+    createSysEventObj(session, "shutdown", "Server shutdown", 
+		      "The Ganymede server was cleanly shut down", false);
+
     createSysEventObj(session, "starttransaction", "transaction start", null, false);
 
     session.commitTransaction();
@@ -2128,7 +2176,13 @@ public class DBStore {
   void checkIn()
   {
     objectsCheckedOut--;
+
     GanymedeAdmin.updateCheckedOut();
+
+    if (objectsCheckedOut < 0)
+      {
+	throw new RuntimeException("Objects checked out has gone negative"); 
+      }
   }
 
   /**
@@ -2149,6 +2203,11 @@ public class DBStore {
   {
     locksHeld--;
     GanymedeAdmin.updateLocksHeld();
+
+    if (locksHeld < 0)
+      {
+	throw new RuntimeException("Locks held has gone negative"); 
+      }
   }
 
 }
