@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.15 $ %D%
+  Version: $Revision: 1.16 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.15 $ %D%
+ * @version $Revision: 1.16 $ %D%
  */
 
 public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
@@ -134,7 +134,8 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   Vector
     cols;			// header information, column attributes
 
-  PopupMenu 
+  PopupMenu
+    headerMenu,			// popup menu to appear in header row
     menu;			// popup menu attached to table as a whole
 
   int 
@@ -183,7 +184,8 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 		   String[] headers,
 		   boolean horizLines, boolean vertLines,
 		   boolean vertFill, boolean hVertFill,
-		   PopupMenu menu)
+		   PopupMenu menu,
+		   PopupMenu headerMenu)
   {
     // implicit super() call here creates the panel
 
@@ -203,6 +205,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
     this.vertFill = vertFill;
     this.hVertFill = hVertFill;
     this.menu = menu;
+    this.headerMenu = headerMenu;
 
     if (menu!= null)
       {
@@ -316,7 +319,7 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
    */
 
   public baseTable(int[] colWidths, String[] headers,
-		   PopupMenu menu)
+		   PopupMenu menu, PopupMenu headerMenu)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 			     Color.white, Color.blue, tableAttr.JUST_CENTER),
@@ -330,7 +333,8 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 	 Color.black,
 	 headers,
 	 false, true, true, false,
-	 menu);
+	 menu,
+	 headerMenu);
 
     if (debug)
       {
@@ -2859,7 +2863,22 @@ class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener 
       }
     else
       {
-	return;
+	// we've got a header column..
+
+	clickRow = -1;
+	rt.menuRow = -1;
+	rt.menuCol = clickCol;
+
+	if (rt.headerMenu != null)
+	  {
+	    rt.headerMenu.show(this,x,y);
+	    return;
+	  }
+	else
+	  {
+	    return;
+	  }
+
       }
 
     // remember what row and column we launched the popup from so 
