@@ -57,6 +57,7 @@ package arlut.csd.Util;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -136,38 +137,38 @@ public class VectorUtils {
 
 	HashMap workSet = new HashMap(vectA.size() + vectB.size());
 	Vector result = new Vector(threshold);
-	Enumeration en;
+	Iterator iter;
 	Object item;
 
 	/* -- */
 
 	if (vectA != null)
 	  {
-	    en = vectA.elements();
+	    iter = vectA.iterator();
 
-	    while (en.hasMoreElements())
+	    while (iter.hasNext())
 	      {
-		item = en.nextElement();
+		item = iter.next();
 		workSet.put(item, item);
 	      }
 	  }
     
 	if (vectB != null)
 	  {
-	    en = vectB.elements();
+	    iter = vectB.iterator();
 
-	    while (en.hasMoreElements())
+	    while (iter.hasNext())
 	      {
-		item = en.nextElement();
+		item = iter.next();
 		workSet.put(item, item);
 	      }
 	  }
 
-	en = workSet.elements();
+	iter = workSet.values().iterator();
 
-	while (en.hasMoreElements())
+	while (iter.hasNext())
 	  {
-	    result.addElement(en.nextElement());
+	    result.addElement(iter.next());
 	  }
 
 	// we're big enough to be over threshold, so lets go ahead and
@@ -271,38 +272,38 @@ public class VectorUtils {
       resultSet = new HashMap();
 
     Vector result = new Vector();
-    Enumeration en;
+    Iterator iter;
     Object item;
 
     /* -- */
 
     if (vectA != null)
       {
-	en = vectA.elements();
+	iter = vectA.iterator();
 
-	while (en.hasMoreElements())
+	while (iter.hasNext())
 	  {
-	    item = en.nextElement();
+	    item = iter.next();
 	    workSetA.put(item, item);
 	  }
       }
     
     if (vectB != null)
       {
-	en = vectB.elements();
+	iter = vectB.iterator();
 
-	while (en.hasMoreElements())
+	while (iter.hasNext())
 	  {
-	    item = en.nextElement();
+	    item = iter.next();
 	    workSetB.put(item, item);
 	  }
       }
 
-    en = workSetA.elements();
+    iter = workSetA.values().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	item = en.nextElement();
+	item = iter.next();
 
 	if (workSetB.containsKey(item))
 	  {
@@ -310,11 +311,11 @@ public class VectorUtils {
 	  }
       }
 
-    en = workSetB.elements();
+    iter = workSetB.values().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	item = en.nextElement();
+	item = iter.next();
 
 	if (workSetA.containsKey(item))
 	  {
@@ -322,11 +323,11 @@ public class VectorUtils {
 	  }
       }
 
-    en = resultSet.elements();
+    iter = resultSet.values().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	result.addElement(en.nextElement());
+	result.addElement(iter.next());
       }
 
     return result;
@@ -360,23 +361,23 @@ public class VectorUtils {
     if (vectA.size() + vectB.size() > 10) // ass
       {
 	HashMap workSetB = new HashMap(vectA.size() + vectB.size());
-	Enumeration en;
+	Iterator iter;
 
 	/* -- */
 
-	en = vectB.elements();
+	iter = vectB.iterator();
     
-	while (en.hasMoreElements())
+	while (iter.hasNext())
 	  {
-	    item = en.nextElement();
+	    item = iter.next();
 	    workSetB.put(item, item);
 	  }
 	
-	en = vectA.elements();
+	iter = vectA.iterator();
 	
-	while (en.hasMoreElements())
+	while (iter.hasNext())
 	  {
-	    item = en.nextElement();
+	    item = iter.next();
 	    
 	    if (!workSetB.containsKey(item))
 	      {
@@ -416,7 +417,7 @@ public class VectorUtils {
       }
 
     Vector result = null;
-    HashMAp found = new HashMap();
+    HashMap found = new HashMap();
 
     for (int i = 0; i < vector.size(); i++)
       {
@@ -450,7 +451,7 @@ public class VectorUtils {
   public static Vector minus(Vector vectA, Vector vectB)
   {
     Vector result = new Vector();
-    Enumeration en;
+    Iterator iter;
     Object item;
 
     /* -- */
@@ -464,11 +465,11 @@ public class VectorUtils {
 
     if (vectB != null)
       {
-	en = vectB.elements();
+	iter = vectB.iterator();
 
-	while (en.hasMoreElements())
+	while (iter.hasNext())
 	  {
-	    item = en.nextElement();
+	    item = iter.next();
 
 	    if (result.contains(item))
 	      {
