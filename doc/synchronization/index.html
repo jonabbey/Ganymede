@@ -135,7 +135,7 @@
     all at once before rebuilding their state ("pushing the maps" in
     NIS terminology, "rebuilding the BIND zone files" in DNS terms).</p>
 
-    <p>Ganymede's approach to supporting these services was to
+    <p>Ganymede's approach to supporting these services is to
     implement a two phase building approach, using the <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">arlut.csd.ganymede.server.GanymedeBuilderTask</a>
     class.  When a transaction is committed in Ganymede, the <a
@@ -913,10 +913,24 @@ builder script return until it is truly finished with its build.</p>
 <p>All of the rest of the class is dedicated to utility helper methods
 that are used to handle chores for the <a
 href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
-method.  Remember, in the end, a builder task is just a Java class,
-and you can write whatever methods and declare whatever member
-variables you like in order to implement your builder task's
-logic.</p>
+method.  One of the things you will notice about these methods are
+that they have been written to use the Ganymede <a
+href="../javadoc/arlut/csd/ganymede/server/DBObject.html">DBObject</a>
+class API to access data from objects in the Ganymede data store.  You
+will also notice that the calls to <a
+href="../javadoc/arlut/csd/ganymede/server/DBObject.html#getFieldValueLocal(short)">getFieldValueLocal()</a>
+are using numeric identifiers, in this case defined in the <code
+class="type">userSchema</code> and <code
+class="type">groupSchema</code> interfaces, to retrieve specific
+fields.</p>
+
+<p>In general, whenever you use the GanymedeBuilderTask model for
+handling synchronization, you will have to write Java code that uses
+low-level details of the internal Ganymede API and that is aware of
+the specific structure and details of your schema.  You're quite
+correct if you consider the necessity of coding at this level another
+disadvantage of using the GanymedeBuilderTask approach to creating
+synchronization from Ganymede to your target directory services.</p>
 
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
