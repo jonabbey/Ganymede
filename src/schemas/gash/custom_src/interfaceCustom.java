@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -306,7 +306,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // if this embedded interface is being removed, we won't try to get
     // fancy with the address/ipnet stuff.
 
-    if (deleting && value == null)
+    if (deleting)
       {
 	return true;
       }
