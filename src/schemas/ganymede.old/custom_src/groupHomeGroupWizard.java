@@ -1,12 +1,14 @@
 /*
- groupHomeGroupWizard.java
 
- A wizard to allow deletion of a user's home group from the group edit window.
+  groupHomeGroupWizard.java
 
- Created: 8 April 1998
- Module by: Mike Mulvaney
- Applied Research Laboratories, The University of Texas at Austin
+  A wizard to allow deletion of a user's home group from the group edit window.
 
+  Created: 8 April 1998
+  Version: $Revision: 1.4 $ %D%
+  Module by: Mike Mulvaney
+  Applied Research Laboratories, The University of Texas at Austin
+  
 */
 
 package arlut.csd.ganymede.custom;
@@ -17,6 +19,12 @@ import java.util.*;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JDialog.JDialogBuff;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                            groupHomeGroupWizard
+
+------------------------------------------------------------------------------*/
 
 public class groupHomeGroupWizard extends GanymediatorWizard implements groupSchema {
 
@@ -89,10 +97,14 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 	try
 	  {
 	    print("Getting values.");
+
 	    QueryResult values = ((invid_field)user.getField(userSchema.GROUPLIST)).encodedValues();
+
 	    print("Adding choices to dialog.");
+
 	    Vector labels = values.getLabels();
 	    String currentGroup = groupObject.getLabel();
+
 	    for (int i = 0; i < labels.size(); i++)
 	      {
 		if (currentGroup.equals((String)labels.elementAt(i)))
@@ -209,13 +221,14 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
     JDialogBuff dialog;
     ReturnVal retVal = null;
     
-    
     user = (userCustom)session.edit_db_object(userInvid);
+
     if (user == null)
       {
 	System.err.println("Could not get the user.");
 	state = ERROR;
-	return null;
+	return Ganymede.createErrorDialog("groupHomeGroupWizard error",
+					  "Could not get the user.");
       }
 
     if (debug)
@@ -235,9 +248,9 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
       }
 
     // If size is less than one, then there won't be any other groups to change to.
+
     if (size > 1)  
       {
-	
 	retVal = new ReturnVal(false);
 	dialog = new JDialogBuff("Home Group Change", 
 				 "In order to remove a user's home group, you must choose another home group for that user.",
@@ -263,15 +276,11 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 	
 	state = ERROR;
 	return retVal;
-
       }
-
-
   }
 
   private void print(String s)
   {
     System.err.println("groupHomeGroupWizard: " + s);
   }
-    
 }
