@@ -160,11 +160,11 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 
     classOptionS = new JstringField(50, 100, true, false, null, null);
     classOptionS.setCallback(this);
-    addRow(editPanel, classOptionS, "Class Option String:", 2);
+    addRow(editPanel, classOptionS, "Class Option String:", 3);
 
     labelC = new JComboBox();
     labelC.addItemListener(this);
-    addRow(editPanel, labelC, "Label:", 3);
+    addRow(editPanel, labelC, "Label:", 4);
 
     add(editPanel);
   }
