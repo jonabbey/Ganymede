@@ -5,7 +5,7 @@
    Description.
    
    Created: 18 November 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,6 +47,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
   perm_field permField;
   PermMatrix matrix, templateMatrix;
   Hashtable myHash, changeHash;
+  Vector rowVector;
 
   gclient gc;
 
@@ -55,18 +56,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 
   JButton OkButton = new JButton ("Ok");
   JButton CancelButton = new JButton("Cancel");
-  //JScrollPane edit_pane = new JScrollPane();
-  //JPanel edit_panel = new JPanel(); // this is where the table goes?
-  BPermTableModel myModel = new BPermTableModel();
-  JTable table = new JTable(myModel);
-  //table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-
-  //Create the scroll pane and add the table to it. 
-  JScrollPane edit_pane = new JScrollPane(table);
-
-  //Add the scroll pane to this window.
-  //setContentPane(scrollPane);
-
+ 
   int row = 0;
 
   boolean justShowUser = false;
@@ -76,7 +66,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
   JProgressBar progressBar;
   JDialog progressDialog;
   JButton cancelLoadingButton;
-
+  JScrollPane edit_pane;
   // * Layout Stuff *
 
   JPanel 
@@ -186,12 +176,6 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
     
     setBackground(Color.white); 
 
-    edit_pane.setBackground(Color.lightGray);
-    edit_pane.setViewportView(table);
-    
-    //edit_panel.setLayout(gbl);
-    //edit_panel.setBackground(Color.lightGray);
-
     if (debug)
       {
 	System.out.println("Starting Permissions Editor Initialization");
@@ -214,15 +198,15 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
     
     try 
       {
-	myHash = initHash();	// construct components
+	//	myHash = initHash();	// construct components
+	rowVector = initHash();
 
-	if (myHash == null)
+	if (rowVector == null)
 	  {
 	    this.dispose();
 	    return;
 	  }
 	
-	//	edit_panel.setVisible(true);
 	changeHash = new Hashtable();
 	
 	System.out.println("Hash initialized");
@@ -239,32 +223,52 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
     
     getContentPane().remove(waitPanel);
     getContentPane().setLayout(new BorderLayout());
-    getContentPane().add("Center", edit_pane);
     
+    BPermTableModel myModel = new BPermTableModel(rowVector);
+    JTable table = new JTable(myModel);
+    
+    TableColumn column = null;
+    for (int i = 0; i < 5; i++) {
+      column = table.getColumnModel().getColumn(i);
+      if (i == 0) {
+	column.setPreferredWidth(185); 
+      } else {
+	column.setPreferredWidth(15);
+      }
+    }
+
+    edit_pane = new JScrollPane(table);
+    
+    edit_pane.setBackground(Color.lightGray);
+    //    edit_pane.setViewportView(table);
+    getContentPane().add("Center", edit_pane);
     getContentPane().add("South", Choice_Buttons);
     gc.setWaitCursor();
-
+    
     progressDialog.setVisible(false);
-
+    
     progressDialog.dispose();
-
+    
     this.myshow(true);
     gc.setNormalCursor();
   }
-
+  
   /**
    * This method will create the hash table that will be used
    * to store the permissions values for the base and basefields
    * and their respective locations on the panel
    */
   
-  private Hashtable initHash() throws RemoteException 
+  //private Hashtable initHash() throws RemoteException 
+  private Vector initHash() throws RemoteException 
   {
     PermEntry entry, templateEntry;
     BaseDump base;
     FieldTemplate template;
     Hashtable results = new Hashtable(); 
     Component[] myAry;
+    PermRow myPermRow;
+    Vector rows = new Vector();
     boolean create, view, edit, delete;
     boolean createOK, viewOK, editOK, deleteOK;
     boolean baseCreate, baseView, baseEdit, baseDelete;
@@ -293,7 +297,8 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	  {
 	    // Cancel was pushed.
 	    stopLoading();
-	    return (Hashtable)null;
+	    //return (Hashtable)null;
+	    return (Vector)null;
 	  }
 
 	progressBar.setValue(i++);
@@ -367,7 +372,9 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	    createOK = viewOK = editOK = deleteOK = true;
 	  }
 
+	myPermRow = new PermRow(name,  viewOK, createOK, editOK, deleteOK, baseView, baseCreate, baseEdit, baseDelete );
 
+	rows.addElement(myPermRow);
 
 	fields = (Vector) gc.getTemplateVector(id);
 
@@ -439,11 +446,14 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 		createOK = viewOK = editOK = deleteOK = true;
 	      }
 
-
+	    myPermRow = new PermRow("     " + template.getName(), viewOK, createOK, editOK, deleteOK, view, create, edit, delete );
+	    
+	    rows.addElement(myPermRow);
 	  }
       }
     
-    return results;
+    //    return results;
+    return rows;
   }
 
   private void stopLoading()
@@ -519,19 +529,23 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 
 
 class BPermTableModel extends AbstractTableModel {
- 
-  Object[][] data = {
-    {"Base1", new Boolean(false), 
-     new Boolean(false), new Boolean(false), new Boolean(false)},
-    {"Base2", new Boolean(false), 
-     new Boolean(false), new Boolean(false), new Boolean(false)},
-    {"Base3", new Boolean(false), 
-     new Boolean(false), new Boolean(false), new Boolean(false)},
-    {"Base4", new Boolean(false), 
-     new Boolean(false), new Boolean(false), new Boolean(false)},
-    {"Base5",new Boolean(false), 
-new Boolean(false), new Boolean(false), new Boolean(false)},
-  };
+  Vector rows;
+
+  public BPermTableModel(Vector rowVector) {
+    this.rows = rowVector;
+  } 
+//   Object[][] data = {
+//     {"Base1", new Boolean(false), 
+//      new Boolean(false), new Boolean(false), new Boolean(false)},
+//     {"Base2", new Boolean(false), 
+//      new Boolean(false), new Boolean(false), new Boolean(false)},
+//     {"Base3", new Boolean(false), 
+//      new Boolean(false), new Boolean(false), new Boolean(false)},
+//     {"Base4", new Boolean(false), 
+//      new Boolean(false), new Boolean(false), new Boolean(false)},
+//     {"Base5",new Boolean(false), 
+// new Boolean(false), new Boolean(false), new Boolean(false)},
+//   };
   
   String[] columnNames = {"Name", 
 			  "Visible",
@@ -545,7 +559,8 @@ new Boolean(false), new Boolean(false), new Boolean(false)},
   }
   
   public int getRowCount() {
-    return data.length;
+    //   return data.length;
+     return rows.size();
   }
   
   public String getColumnName(int col) {
@@ -553,9 +568,32 @@ new Boolean(false), new Boolean(false), new Boolean(false)},
   }
   
   public Object getValueAt(int row, int col) {
-    return data[row][col];
-  }
+    //return data[row][col];
+
+    PermRow myRow = (PermRow)rows.elementAt(row);
+
+    switch(col) {
   
+    case 0:
+      return myRow.name;
+    
+    case 1:
+      return myRow.visible;
+    
+    case 2:
+      return myRow.creatable;
+    
+    case 3:
+      return myRow.editable;
+    
+    case 4:
+      return myRow.deletable;
+    
+    default:
+      return new Integer(col);
+        }
+    // return myRow.name;
+  }
   public Class getColumnClass(int c) {
     return getValueAt(0, c).getClass();
   }
@@ -579,6 +617,52 @@ new Boolean(false), new Boolean(false), new Boolean(false)},
    * data can change.
    */
   public void setValueAt(Object value, int row, int col) {
-    data[row][col] = value;
+    //data[row][col] = value;
+    if (col > 0) {
+      PermRow myRow = (PermRow)rows.elementAt(row);
+      switch(col) {
+	
+	//case 0:
+	// return myRow.name;
+	
+      case 1:
+	myRow.visible = (Boolean)value;
+	break;
+	
+      case 2:
+	myRow.creatable = (Boolean)value;
+	break;
+
+      case 3:
+	myRow.editable = (Boolean)value;
+	break;
+	
+      case 4:
+	myRow.deletable = (Boolean)value;
+	break;
+	
+      default:
+	// do nothing;
+      }
+      
+    }
   }
+}
+class PermRow {
+  String name;
+  BaseDump base;
+  FieldTemplate field;
+  Boolean creatable, visible, editable, deletable;
+  boolean changed;
+  boolean CreateOK, ViewOK, EditOK, DeleteOK;
+ 
+  public PermRow(String name, boolean canView, boolean canCreate, boolean canEdit, boolean canDelete, boolean visible, boolean creatable, boolean editable, boolean deletable) {
+    this.name = name;
+    this.visible = new Boolean(visible);
+    this.creatable = new Boolean(creatable);
+    this.editable = new Boolean(editable);
+    this.deletable = new Boolean(deletable);
+  }
+
+
 }
