@@ -182,7 +182,6 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     if (objects != null)
       {
 	// System.out.println("objects != null");
-	
 	int numberOfObjects = objects.size();
 
 	if (numberOfObjects > 0) 
@@ -206,7 +205,12 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 		    sf.setEditable(true);
 		    sf.setCallback(this); 
 		    addRow(panel, sf, st.getLabel(), i);
-		      
+		    
+		    if (i == 0)
+		      {
+			sf.requestFocus();
+		      }
+  
 		    componentHash.put(sf, st.getLabel());
 		    valueHash.put(st.getLabel(), "");
 		      
@@ -224,6 +228,11 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 		    sf.setEditable(true);
 		    sf.setCallback(this); 
 		    addRow(panel, sf, pt.getLabel(), i);
+
+		    if (i == 0)
+		      {
+			sf.requestFocus();
+		      }  
 		      
 		    componentHash.put(sf, pt.getLabel());
 		    valueHash.put(pt.getLabel(), "");
@@ -236,6 +245,11 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 		    cb.setSelected(bt.getDefault().booleanValue());
 		    addRow(panel, cb, bt.getLabel(), i);
 		      
+		    if (i == 0)
+		      {
+			cb.requestFocus();
+		      }
+  
 		    componentHash.put(cb, bt.getLabel());
 		    valueHash.put(bt.getLabel(), bt.getDefault());
 		      
@@ -263,6 +277,12 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 
 			ch.addItemListener(this);
 			addRow(panel, ch, ct.getLabel(), i);
+
+			if (i == 0)
+			  {
+			    ch.requestFocus();
+			  }
+  
 			  
 			componentHash.put(ch, ct.getLabel());
 			valueHash.put(ct.getLabel(), (String)items.elementAt(0));
