@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/06/15 02:48:26 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 1999/10/07 23:13:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1060,7 +1060,7 @@ public class IPDBField extends DBField implements ip_field {
 			result.append(", ");
 		      }
 
-		    x = (Byte[]) deleted.elementAt(i);
+		    x = (Byte[]) added.elementAt(i);
 
 		    if (x.length == 4)
 		      {
@@ -1116,11 +1116,11 @@ public class IPDBField extends DBField implements ip_field {
 
 	if (y.length == 4)
 	  {
-	    result.append(genIPV4string(x));
+	    result.append(genIPV4string(y));
 	  }
 	else 
 	  {
-	    result.append(genIPV6string(x));
+	    result.append(genIPV6string(y));
 	  }
 	
 	result.append("\n");
