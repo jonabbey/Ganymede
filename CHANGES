@@ -1,11 +1,11 @@
 Ganymede Release 1.0pre1
-August ??, 2000
+September ??, 2000
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
-RELEASE DATE: August ??
+RELEASE DATE: September ??
 
 1. [SERVER] Reworked server synchronization logic
 
@@ -823,6 +823,11 @@ By putting all the logic for this in DBEditSet, I've simplified a fair
 bit of code in InvidDBField, DBEditObject, and DBSession.
 
 I should have done this before.
+
+55. [CLIENT] Added count indicator to StringSelector
+
+The vector field GUI component now includes a count number, to make it
+easy to see how many items are in the field.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
