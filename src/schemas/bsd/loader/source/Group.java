@@ -3,10 +3,10 @@
    Group.java
 
    Class to load and store the data from a line in the
-   GASH group_info file
+   BSD 4.4 group file
    
    Created: 29 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,8 +41,6 @@ public class Group {
   String password;
   int gid;
   Vector users;
-  String contract;
-  String description;
 
   // instance constructor
 
@@ -122,9 +120,6 @@ public class Group {
 	
 	return (tokens.ttype == StreamTokenizer.TT_EOF);
       }
-
-    contract = getNextBit(tokens);
-    description = getNextBit(tokens);
 
     // get to the end of line
 
