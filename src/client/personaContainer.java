@@ -5,12 +5,27 @@
    a panel for handling User's personae.
    
    Created: 15 January 1999
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/01/16 01:27:24 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/01/16 04:03:50 $
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
 */
+
+
+package arlut.csd.ganymede.client;
+
+import arlut.csd.ganymede.*;
+
+import java.awt.*;
+import java.rmi.*;
+import java.util.*;
+
+import arlut.csd.JDataComponent.*;
+import arlut.csd.Util.*;
+
+import javax.swing.*;
+import javax.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
