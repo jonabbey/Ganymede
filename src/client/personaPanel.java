@@ -271,6 +271,12 @@ class personaContainer extends JScrollPane implements Runnable{
       {
 	if (createNew)
 	  {
+	    // Make sure the default owner is chosen
+	    if (! pp.fp.getgclient().defaultOwnerChosen())
+	      {
+		pp.fp.getgclient().chooseDefaultOwner(false);
+	      }
+
 	    // First set up the back linking
 	    db_object newObject = pp.fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase);
 	    Invid user = pp.fp.object.getInvid();
@@ -324,10 +330,11 @@ class personaContainer extends JScrollPane implements Runnable{
 	System.out.println("Done with thread in personaPanel");
       }
 
-    //invalidate();
+    this.invalidate();
     //validate();
 
-    this.notifyAll();
+    // oh man this takes a long time.
+    //this.notifyAll();
   }
 
   public synchronized void waitForLoad()
