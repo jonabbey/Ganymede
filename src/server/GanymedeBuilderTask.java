@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2001/03/27 07:30:31 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2001/07/23 21:51:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -669,6 +669,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * If the files have not yet been backed up this run time, openOutFile()
    * will cause the files in Ganymede's output directory to be zipped up
    * before overwriting any files.
+   *
+   * @param filename The name of the file to open
+   * @param taskName The name of the builder task that is writing this file.  Used
+   * to create a unique name (across tasks) for the backup copy of the file when
+   * we overwrite an existing file.
    *
    */
 
