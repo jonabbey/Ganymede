@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.20 $
-# $Date: 2000/12/05 23:52:24 $
+# $Revision: 1.21 $
+# $Date: 2001/01/31 10:14:58 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -590,7 +590,7 @@ sub canonify {
   if ($pathname =~ /^~\//) {
     $homedir = $ENV{'HOME'};
     &removelastslash($homedir);
-    $pathname = s/\~\//$homedir\//g;
+    $pathname =~ s/\~\//$homedir\//g;
   }
 
   return $pathname;

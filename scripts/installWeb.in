@@ -3,8 +3,8 @@
 # Install script for Ganymede web resources
 #
 # $Name:  $
-# $Revision: 1.11 $
-# $Date: 2001/01/09 19:04:50 $
+# $Revision: 1.12 $
+# $Date: 2001/01/31 10:14:59 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -308,7 +308,7 @@ sub canonify {
   if ($pathname =~ /^~\//) {
     $homedir = $ENV{'HOME'};
     &removelastslash($homedir);
-    $pathname = s/\~\//$homedir\//g;
+    $pathname =~ s/\~\//$homedir\//g;
   }
 
   return $pathname;
