@@ -1234,17 +1234,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (root == null || !root.matches("fielddef"))
       {
-	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): next element != open fielddef: " +
-					   root);
+	// "DBObjectBaseField.setXML(): next element != open fielddef: {0}"
+	throw new IllegalArgumentException(ts.l("setXML.bad_nextitem", root));
       }
 
     field_codeInt = root.getAttrInt("id");
 
     if (field_codeInt == null)
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef does not define id attr: \n" + 
-					  root.getTreeString());
+	// "XML"
+	// "fielddef does not define id attr:\n{0}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("setXML.no_id", root.getTreeString()));
       }
 
     // extract the short
@@ -1255,10 +1256,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (_fieldID < 100)
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef defines an id attr out of range.. " + 
-					  "must be >= 100 for custom fields:\n" + 
-					  root.getTreeString());
+	// "XML"
+	// "fielddef defines an id attr out of range.. must be >= 100 for custom fields:\n{0}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("setXML.bad_id", root.getTreeString()));
       }
 
     // we have to set the id before we do anything else, since most
@@ -1268,10 +1269,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not have its id set: \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not have its id set:\n{0}\n{1}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("setXML.id_failure", root.getTreeString(), retVal.getDialogText()));
       }
 
     // swap names if needed.. the DBObjectBase.setXML() will have checked for unique field
@@ -1281,10 +1282,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not have its name set: \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not have its name set:\n{0}\n{1}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("setXML.name_failure", root.getTreeString(), retVal.getDialogText()));
       }
 
     // look at the nodes under root, set up this field def based on
@@ -1312,9 +1313,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (commentChildren.length != 1)
 	      {
-		return Ganymede.createErrorDialog("xml",
-						  "unrecognized children in comment block: \n" + 
-						  root.getTreeString());
+		// "XML"
+		// "unrecognized children in comment block:\n{0}"
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+						  ts.l("setXML.bad_commentChild", root.getTreeString()));
 	      }
 
 	    _comment = commentChildren[0].getString();
@@ -1327,16 +1329,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    if (typeRead)
 	      {
-		return Ganymede.createErrorDialog("xml",
-						  "redundant type definition for this field: \n" + 
-						  root.getTreeString());
+		// "XML"
+		// "redundant type definition for this field:\n{0}"
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+						  ts.l("setXML.dup_type", root.getTreeString()));
 	      }
 
 	    if (item.getAttrStr("type") == null)
 	      {
-		return Ganymede.createErrorDialog("xml",
-						  "typedef tag does not contain type attribute: \n" + 
-						  root.getTreeString());
+		// "XML"
+		// "typedef tag does not contain type attribute:\n{0}"
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+						  ts.l("setXML.missing_type", root.getTreeString()));
 	      }
 
 	    if (item.getAttrStr("type").equals("float"))
@@ -1443,18 +1447,20 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("xml",
-						  "typedef tag does not contain type attribute: " +
-						  item + "\nin fielddef tree: \n" + root.getTreeString());
+		// "XML"
+		// "typedef tag does not contain recognizable type attribute: {0} in fielddef tree:\n{1}"
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+						  ts.l("setXML.unrecognized_type", item, root.getTreeString()));
 	      }
 
 	    typeRead = true;
 	  }
 	else
 	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "unrecognized XML item: " +
-					      item + "\nin fielddef tree: \n" + root.getTreeString());
+	    // "XML"
+	    // "unrecognized XML item: {0} in fielddef tree:\n{1}"
+	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					      ts.l("setXML.unrecognized_item", item, root.getTreeString()));
 	  }
       }
 
@@ -1464,20 +1470,20 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set class name: \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set class name:\n{0}\n{1}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("setXML.failed_field_class", root.getTreeString(), retVal.getDialogText()));
       }
     
     retVal = setComment(_comment);
     
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set comment: \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set comment:\n{0}\n{1}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("setXML.failed_field_comment", root.getTreeString(), retVal.getDialogText()));
       }
 
     visibility = _visibility;
@@ -1512,7 +1518,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (!root.getAttrStr("type").equals("string"))
       {
-	throw new IllegalArgumentException("bad XMLItem tree");
+	// "bad XMLItem tree:\n{0}"
+	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.STRING);
@@ -1585,9 +1592,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("xml",
-						  "Unrecognized string typedef entity: " + child +
-						  "\nIn field def:\n" + root.getTreeString());
+		// "XML"
+		// "Unrecognized string typedef entity: {0}\nIn field def:\n{1}"
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+						  ts.l("doStringXML.bad_string_typedef_item", child, root.getTreeString()));
 	      }
 	  }
       }
@@ -1598,10 +1606,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set vector bit to " + _vect + ": \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doStringXML.bad_vector_op", new Boolean(_vect), root.getTreeString(), retVal.getDialogText()));
       }
 		
     if (_vect)
@@ -1610,10 +1618,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "fielddef could not set vector maximum size: " + _maxSize + "\n" +
-					      root.getTreeString() + "\n" +
-					      retVal.getDialogText());
+	    // "XML"
+	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
+	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					      ts.l("doStringXML.bad_vector_limit", new Integer(_maxSize),
+						   root.getTreeString(), retVal.getDialogText()));
 	  }
       }
 
@@ -1621,80 +1630,82 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set min length: " + _minlength + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doStringXML.bad_min_length", new Integer(_minlength),
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setMaxLength(_maxlength);
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set max length: " + _maxlength + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doStringXML.bad_max_length", new Integer(_maxlength),
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setOKChars(_okChars);
     
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set ok chars: " + _okChars + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set ok chars: {0}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doStringXML.bad_ok_chars", _okChars, root.getTreeString(), retVal.getDialogText()));
       }
     
     retVal = setBadChars(_badChars);
     
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set bad chars: " + _badChars + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set bad chars: {0}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doStringXML.bad_bad_chars", _badChars, root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setRegexpPat(_regexp);
     
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set regular expression: " + _regexp + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set regular expression: {0}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doStringXML.bad_regexp", _regexp, root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setRegexpDesc(_regexp_desc);
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set regular expression description: " + _regexp_desc + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set regular expression description: {0}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doStringXML.bad_regexp_desc", _regexp_desc, root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setMultiLine(_multiline);
     
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set multiline: " + _multiline + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set multiline: {0}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doStringXML.bad_multiline", new Boolean(_multiline), root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setNameSpace(_namespace);
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set namespace: " + _namespace + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set namespace: {0}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doStringXML.bad_namespace", _namespace, root.getTreeString(), retVal.getDialogText()));					  
       }
 
     return null;
@@ -1720,7 +1731,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (!root.getAttrStr("type").equals("boolean"))
       {
-	throw new IllegalArgumentException("bad XMLItem tree");
+	// "bad XMLItem tree:\n{0}"
+	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.BOOLEAN);
@@ -1749,9 +1761,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("xml",
-						  "Unrecognized boolean typedef entity: " + child +
-						  "\nIn field def:\n" + root.getTreeString());
+		// "XML"
+		// "Unrecognized boolean typedef entity: {0}\nIn field def:\n{1}"
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+						  ts.l("doBooleanXML.bad_boolean_typedef_item", child, root.getTreeString()));
 	      }
 	  }
       }
@@ -1762,10 +1775,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not set labeled bit to " + _labeled + ": \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+	// "XML"
+	// "fielddef could not set labeled bit to {0}:\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doBooleanXML.bad_labeled_bit", new Boolean(_labeled), root.getTreeString(), retVal.getDialogText()));
       }
 		
     if (_labeled)
@@ -1774,20 +1787,20 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "fielddef could not set true label to: " + _trueLabel + "\n" +
-					      root.getTreeString() + "\n" +
-					      retVal.getDialogText());
+	    // "XML"
+	    // "fielddef could not set true label to {0}\n{1}\n{2}"
+	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					      ts.l("doBooleanXML.bad_true_label", _trueLabel, root.getTreeString(), retVal.getDialogText()));
 	  }
 
 	retVal = setFalseLabel(_falseLabel);
 	
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "fielddef could not set false label to: " + _falseLabel + "\n" +
-					      root.getTreeString() + "\n" +
-					      retVal.getDialogText());
+	    // "XML"
+	    // "fielddef could not set false label to {0}\n{1}\n{2}"
+	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					      ts.l("doBooleanXML.bad_false_label", _falseLabel, root.getTreeString(), retVal.getDialogText()));
 	  }
       }
 
@@ -1821,7 +1834,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (!root.getAttrStr("type").equals("password"))
       {
-	throw new IllegalArgumentException("bad XMLItem tree");
+	// "bad XMLItem tree:\n{0}"
+	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.PASSWORD);
@@ -1894,7 +1908,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "Unrecognized password typedef entity: " + child +
 						  "\nIn field def:\n" + root.getTreeString());
 	      }
@@ -1907,7 +1921,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set min length: " + _minlength + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -1917,7 +1931,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set max length: " + _maxlength + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -1927,7 +1941,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set ok chars: " + _okChars + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -1937,7 +1951,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set bad chars: " + _badChars + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -1947,7 +1961,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set crypted flag: " + _crypted + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -1957,7 +1971,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set md5 crypted flag: " + _md5crypted + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -1967,7 +1981,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set apache md5 crypted flag: " + _apachemd5crypted + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -1977,7 +1991,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set windows hashing flag: " + _winHashed + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -1988,7 +2002,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set SSHA hashing flag: " + _sshaHashed + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -1998,7 +2012,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set plaintext flag: " + _plaintext + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -2027,7 +2041,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (!root.getAttrStr("type").equals("ip"))
       {
-	throw new IllegalArgumentException("bad XMLItem tree");
+	// "bad XMLItem tree:\n{0}"
+	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.IP);
@@ -2065,7 +2080,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "Unrecognized ip typedef entity: " + child +
 						  "\nIn field def:\n" + root.getTreeString());
 	      }
@@ -2078,7 +2093,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set vector bit to " + _vect + ": \n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -2090,7 +2105,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    return Ganymede.createErrorDialog("xml",
+	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					      "fielddef could not set vector maximum size: " + _maxSize + "\n" +
 					      root.getTreeString() + "\n" +
 					      retVal.getDialogText());
@@ -2101,7 +2116,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set namespace: " + _namespace + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -2128,7 +2143,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (!root.getAttrStr("type").equals("numeric"))
       {
-	throw new IllegalArgumentException("bad XMLItem tree");
+	// "bad XMLItem tree:\n{0}"
+	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.NUMERIC);
@@ -2155,7 +2171,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "Unrecognized numeric typedef entity: " + child +
 						  "\nIn field def:\n" + root.getTreeString());
 	      }
@@ -2168,7 +2184,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set namespace: " + _namespace + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -2201,7 +2217,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (!root.getAttrStr("type").equals("invid"))
       {
-	throw new IllegalArgumentException("bad XMLItem tree");
+	// "bad XMLItem tree:\n{0}"
+	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.INVID);
@@ -2240,7 +2257,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    
 		if (_targetobjectStr == null && _targetobject == null)
 		  {
-		    return Ganymede.createErrorDialog("xml",
+		    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						      "targetobject item does not specify name or id: " + child + "\n" +
 						      root.getTreeString() + "\n" +
 						      retVal.getDialogText());
@@ -2253,7 +2270,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 		if (_targetfieldStr == null && _targetfield == null)
 		  {
-		    return Ganymede.createErrorDialog("xml",
+		    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						      "targetfield item does not specify name or id: " + child + "\n" +
 						      root.getTreeString() + "\n" +
 						      retVal.getDialogText());
@@ -2265,7 +2282,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "Unrecognized invid typedef entity: " + child +
 						  "\nIn field def:\n" + root.getTreeString());
 	      }
@@ -2278,7 +2295,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set vector bit to " + _vect + ": \n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
@@ -2290,7 +2307,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    return Ganymede.createErrorDialog("xml",
+	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					      "fielddef could not set vector maximum size: " + _maxSize + "\n" +
 					      root.getTreeString() + "\n" +
 					      retVal.getDialogText());
@@ -2314,7 +2331,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "fielddef could not set invid target base: " + _targetobjectStr + "\n" +
 						  root.getTreeString() + "\n" +
 						  retVal.getDialogText());
@@ -2326,7 +2343,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "fielddef could not set invid target base: " + _targetobject + "\n" +
 						  root.getTreeString() + "\n" +
 						  retVal.getDialogText());
@@ -2338,7 +2355,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "fielddef could not clear invid target base: \n" +
 						  root.getTreeString() + "\n" +
 						  retVal.getDialogText());
@@ -2353,7 +2370,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "fielddef could not set invid target field: " + _targetfieldStr + "\n" +
 						  root.getTreeString() + "\n" +
 						  retVal.getDialogText());
@@ -2365,7 +2382,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "fielddef could not set invid target field: " + _targetfield + "\n" +
 						  root.getTreeString() + "\n" +
 						  retVal.getDialogText());
@@ -2377,7 +2394,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		return Ganymede.createErrorDialog("xml",
+		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 						  "fielddef could not clear invid target field: \n" +
 						  root.getTreeString() + "\n" +
 						  retVal.getDialogText());
@@ -2389,7 +2406,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("xml",
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  "fielddef could not set embedded status: \n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
