@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2002/01/26 06:13:41 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2002/01/28 20:48:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.21 $ $Date: 2002/01/26 06:13:41 $
+ * @version $Revision: 1.22 $ $Date: 2002/01/28 20:48:51 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -422,6 +422,8 @@ public class serverAdminProxy implements Admin, Runnable {
 
 		if (errorCondition != null)
 		  {
+		    System.err.println("Second RMI exception calling " + this.toString());
+		    ex.printStackTrace();
 		    return;	// but see finally, below
 		  }
 		else
@@ -721,7 +723,7 @@ class adminEvent {
 	break;
 
       case CHANGESTATUS:
-	remoteConsole.changeStatus(((StringBuffer) param).toString());
+	remoteConsole.changeStatus((String) param);
 	break;
 
       case CHANGEADMINS:
