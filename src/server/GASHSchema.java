@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,14 +57,28 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     createObjectMI = null,
     deleteObjectMI = null,
     createNameMI = null,
-    deleteNameMI = null;
+    deleteNameMI = null,
+    createFieldMI = null,
+    deleteFieldMI = null;
+
+  CardLayout
+    card;
 
   Panel 
     displayPane,
     buttonPane,
     attribPane,
-    attribEditPane,
+    attribCardPane,
+    baseEditPane,
+    fieldEditPane,
+    namespaceEditPane,
     attribButtonPane;
+
+  BaseEditor
+    be;
+
+  BaseFieldEditor
+    fe;
 
   Button
     okButton, cancelButton, attribOkButton;
@@ -97,15 +111,41 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     attribPane.setBackground(Color.white);
     attribPane.setLayout(new BorderLayout());
 
-    attribEditPane = new Panel();
-    attribEditPane.setBackground(Color.white);
-    attribEditPane.setLayout(new BorderLayout());
+    card = new CardLayout();
+
+    attribCardPane = new Panel();
+    attribCardPane.setBackground(Color.white);
+    attribCardPane.setLayout(card);
+
+    baseEditPane = new Panel();
+    baseEditPane.setBackground(Color.white);
+    baseEditPane.setLayout(new BorderLayout());
+
+    // initialize the base editor
+
+    be = new BaseEditor(this);
+    baseEditPane.add("Center", be);
+
+    fieldEditPane = new Panel();
+    fieldEditPane.setBackground(Color.white);
+    fieldEditPane.setLayout(new BorderLayout());
+
+    fe = new BaseFieldEditor(this);
+    fieldEditPane.add("Center", fe);
+
+    namespaceEditPane = new Panel();
+    namespaceEditPane.setBackground(Color.white);
+    namespaceEditPane.setLayout(new BorderLayout());
+
+    attribCardPane.add("base", baseEditPane);
+    attribCardPane.add("field", fieldEditPane);
+    attribCardPane.add("name", namespaceEditPane);
 
     attribButtonPane = new Panel();
     attribButtonPane.setBackground(Color.white);
     attribButtonPane.setLayout(new RowLayout());
 
-    attribPane.add("Center", attribEditPane);
+    attribPane.add("Center", attribCardPane);
     attribPane.add("South", attribButtonPane);
 
     Box rightBox = new Box(attribPane, "Attributes");
@@ -179,8 +219,6 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     cancelButton = new Button("cancel");
     cancelButton.addActionListener(this);
 
-
-
     buttonPane.add(okButton);
     buttonPane.add(cancelButton);
 
@@ -190,6 +228,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     this.editor = editor;
     deleteObjectMI = new MenuItem("Delete Object");
     
+    createFieldMI = new MenuItem("Create Field");
     objectsRefresh();
 
     pack();
@@ -224,6 +263,11 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
       }
   }
 
+  /**
+   *
+   *
+   *
+   */
 
   void objectsRefresh()
   {
@@ -231,10 +275,12 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     treeNode parentNode, oldNode, newNode;
     boolean wasOpen;
     String baseName = null;
+    PopupMenu menu;
 
     /* -- */
 
-    PopupMenu menu = new PopupMenu();
+    menu = new PopupMenu(baseName);
+    menu.add(createFieldMI);
     menu.add(deleteObjectMI);
 
     wasOpen = objects.isOpen();
@@ -251,6 +297,9 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 
 	throw new RuntimeException("couldn't get bases" + ex);
       }
+
+    // editor.getBases() returns items in hash order.. sort
+    // them by baseID before adding them to tree
 
     (new QuickSort(bases,  this)).sort();
 
@@ -305,21 +354,36 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
 
   void editBase(Base base)
   {
-    BaseEditor be;
+    be.editBase(base);
+    card.show(attribCardPane,"base");
 
-    /* -- */
-
-    attribEditPane.removeAll();
-
-    be = new BaseEditor(this, base);
-    attribEditPane.add("Center", be);
+    // attach the button pane to the base editor
     
     attribButtonPane.removeAll();
     attribOkButton = new Button("ok");
     attribOkButton.addActionListener(be);
     attribButtonPane.add(attribOkButton);
+    validate();
+  }
 
-    displayPane.validate();
+  void editField(BaseField field)
+  {
+    System.err.println("in GASHSchema.editField");
+    fe.editField(field);
+    card.show(attribCardPane, "field");
+
+    // attach the button pane to the field editor
+    
+    attribButtonPane.removeAll();
+    attribOkButton = new Button("ok");
+    attribOkButton.addActionListener(fe);
+    attribButtonPane.add(attribOkButton);
+    validate();
+  }
+
+  void editNameSpace(NameSpace space)
+  {
+    //
   }
 
   // treeCallback methods
@@ -390,8 +454,12 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
   public void treeNodeMenuPerformed(treeNode node,
 				    java.awt.event.ActionEvent event)
   {
-    System.out.println("node " + node.getText() + ", action: " + event );
+    String nodeText;
 
+    nodeText = node.getText();
+
+    System.out.println("node " + nodeText + ", action: " + event );
+    
     if (event.getSource() == createObjectMI)
       {
 	try
@@ -405,6 +473,37 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
       }
     else if (event.getSource() == createNameMI)
       {
+      }
+    else if (event.getSource() == createFieldMI)
+      {
+	// find the base that asked for the field
+
+	Base editbase = null;
+	String tmp;
+	
+	try
+	  {
+	    for (int i = 0; i < bases.length; i++)
+	      {
+		tmp = bases[i].getName();
+		if (tmp.equals(nodeText))
+		  {
+		    editbase = bases[i];
+		    break;
+		  }
+	      }
+
+	    if (editbase != null)
+	      {
+		System.err.println("Calling editField");
+		editField(editbase.createNewField());
+		System.err.println("Called editField");
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    System.err.println("couldn't create new field" + ex);
+	  }
       }
   }
 
@@ -458,13 +557,8 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
 
   /* -- */
 
-  BaseEditor(GASHSchema owner, Base base)
+  BaseEditor(GASHSchema owner)
   {
-    if (base == null)
-      {
-	throw new IllegalArgumentException("base must not be null");
-      }
-
     if (owner == null)
       {
 	throw new IllegalArgumentException("owner must not be null");
@@ -472,7 +566,7 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
 
     System.err.println("BaseEditor constructed");
 
-    this.base = base;
+    base = null;
     this.owner = owner;
 
     editPanel = new Panel();
@@ -483,48 +577,40 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
 
     typeN = new numberField(20, ca, false, false, 0, 0);
     typeN.setCallback(this);
-    
-    try
-      {
-	typeN.setValue(base.getTypeID());
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("BaseEditor constructor: base.getTypeID failed: " + ex);
-      }
-
     editPanel.add(new FieldWrapper("Object Type ID:", typeN));
 
     nameS = new stringField(20, 100, ca, true, false, null, null);
     nameS.setCallback(this);
-
-    try
-      {
-	nameS.setText(base.getName());
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("BaseEditor constructor: base.getName failed: " + ex);
-      }
-
     editPanel.add(new FieldWrapper("Object Type:", nameS));
 
     classS = new stringField(20, 100, ca, true, false, null, null);
     classS.setCallback(this);
-
-    try
-      {
-	classS.setText(base.getClassName());
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("BaseEditor constructor: base.getClassName failed: " + ex);
-      }
-
     editPanel.add(new FieldWrapper("Class name:", classS));
 
     add(editPanel);
     //    doLayout();
+  }
+
+  /**
+   *
+   * This method is used to retarget the base editor to a new base
+   * without having to break down and reconstruct the panels.
+   */
+
+  public void editBase(Base base)
+  {
+    this.base = base;
+
+    try
+      {
+	typeN.setValue(base.getTypeID());
+	nameS.setText(base.getName());
+	classS.setText(base.getClassName());
+      }
+    catch (RemoteException ex)
+      {
+	System.err.println("editBase: accessor failed: " + ex);
+      }
   }
 
   public boolean setValuePerformed(ValueObject v)
@@ -533,6 +619,14 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
     String val;
 
     /* -- */
+
+    // we really shouldn't find ourselves called if
+    // base is null, but just in case..
+
+    if (base == null)
+      {
+	return false;
+      }
 
     System.err.println("setValuePerformed:" + v);
 
@@ -574,14 +668,306 @@ class BaseEditor extends ScrollPane implements setValueCallback, ActionListener 
 
 ------------------------------------------------------------------------------*/
 
-class BaseFieldEditor extends ScrollPane implements setValueCallback {
+class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionListener, ItemListener, TextListener {
 
-  BaseFieldEditor(BaseField fieldDef)
+  BaseField 
+    fieldDef;
+
+  CardLayout
+    card;
+
+  Panel 
+    editPanel,
+    cardPanel,
+    emptyPanel,
+    stringPanel,
+    booleanPanel,
+    invidPanel;
+
+  GASHSchema 
+    owner;
+
+  TextArea
+    commentT;			// all
+
+  stringField
+    nameS,			// all
+    classS,			// all
+    trueLabelS,			// boolean
+    falseLabelS,		// boolean
+    OKCharS,			// string
+    BadCharS;			// string
+
+  numberField
+    idN,			// all
+    maxArrayN,			// all
+    minLengthN,			// string
+    maxLengthN;			// string
+
+  checkboxField
+    vectorCF,			// all
+    labeledCF,			// boolean
+    targetLimitCF,		// invid
+    symmetryCF;			// invid
+
+  Choice
+    typeC,			// all
+    namespaceC,			// string
+    targetC,			// invid
+    fieldC;			// invid
+
+  componentAttr 
+    ca;
+
+  BaseFieldEditor(GASHSchema owner)
   {
+    fieldDef = null;
+    this.owner = owner;
+
+    editPanel = new Panel();
+    editPanel.setLayout(new ColumnLayout());
+
+    ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
+			   Color.black, Color.white);
+
+    idN = new numberField(20, ca, false, false, 0, 0);
+    idN.setCallback(this);
+    editPanel.add(new FieldWrapper("Field ID:", idN));
+
+    nameS = new stringField(20, 100, ca, true, false, null, null);
+    nameS.setCallback(this);
+    editPanel.add(new FieldWrapper("Field Name:", nameS));
+
+    classS = new stringField(20, 100, ca, true, false, null, null);
+    classS.setCallback(this);
+    editPanel.add(new FieldWrapper("Class name:", classS));
+
+    commentT = new TextArea(4, 20);
+    commentT.addTextListener(this);
+    editPanel.add(new FieldWrapper("Comment:", commentT));
+
+    vectorCF = new checkboxField("Vector:", false, ca, true);
+    vectorCF.setCallback(this);
+    editPanel.add(vectorCF);
+
+    maxArrayN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
+    maxArrayN.setCallback(this);
+    editPanel.add(new FieldWrapper("Max Array Size:", maxArrayN));
+
+    typeC = new Choice();
+    typeC.add("Boolean");
+    typeC.add("Numeric");
+    typeC.add("Date");
+    typeC.add("String");
+    typeC.add("Object Reference");
+    typeC.addItemListener(this);
+    editPanel.add(new FieldWrapper("Field Type:", typeC));
+
+    card = new CardLayout();
+    cardPanel = new Panel();
+    cardPanel.setLayout(card);
+
+    emptyPanel = new Panel();
+    cardPanel.add("empty", emptyPanel);
+
+    stringPanel = new Panel();
+    stringPanel.setLayout(new ColumnLayout());
+
+    minLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
+    minLengthN.setCallback(this);
+    stringPanel.add(new FieldWrapper("Minimum String Size:", minLengthN));
+
+    maxLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
+    maxLengthN.setCallback(this);
+    stringPanel.add(new FieldWrapper("Maximum String Size:", maxLengthN));
+
+    OKCharS = new stringField(20, 100, ca, true, false, null, null);
+    OKCharS.setCallback(this);
+    stringPanel.add(new FieldWrapper("Allowed Chars:", OKCharS));
+
+    BadCharS = new stringField(20, 100, ca, true, false, null, null);
+    BadCharS.setCallback(this);
+    stringPanel.add(new FieldWrapper("Disallowed Chars:", BadCharS));
+
+    namespaceC = new Choice();
+    namespaceC.addItemListener(this);
+    stringPanel.add(new FieldWrapper("Namespace:", namespaceC));
+
+    cardPanel.add("string", stringPanel);
+
+    booleanPanel = new Panel();
+    booleanPanel.setLayout(new ColumnLayout());
+
+    labeledCF = new checkboxField("Labeled:", false, ca, true);
+    labeledCF.setCallback(this);
+    booleanPanel.add(labeledCF);
+    
+    trueLabelS = new stringField(20, 100, ca, true, false, null, null);
+    trueLabelS.setCallback(this);
+    booleanPanel.add(new FieldWrapper("True Label:", trueLabelS));
+
+    falseLabelS = new stringField(20, 100, ca, true, false, null, null);
+    falseLabelS.setCallback(this);
+    booleanPanel.add(new FieldWrapper("False Label:", falseLabelS));
+
+    cardPanel.add("boolean", booleanPanel);
+
+    invidPanel = new Panel();
+    invidPanel.setLayout(new ColumnLayout());
+
+    targetLimitCF = new checkboxField("Restricted Target:", false, ca, true);
+    targetLimitCF.setCallback(this);
+    invidPanel.add(targetLimitCF);
+
+    targetC = new Choice();
+    targetC.addItemListener(this);
+    invidPanel.add(new FieldWrapper("Target Object:", namespaceC));
+
+    symmetryCF = new checkboxField("Maintain Symmetry:", false, ca, true);
+    symmetryCF.setCallback(this);
+    invidPanel.add(symmetryCF);
+
+    fieldC = new Choice();
+    fieldC.addItemListener(this);
+    invidPanel.add(new FieldWrapper("Target Field:", namespaceC));
+
+    cardPanel.add("invid", invidPanel);
+
+    editPanel.add(cardPanel);
+
+    add(editPanel);
   }
+
+  // edit the given field
+
+  public void editField(BaseField fieldDef)
+  {
+    System.err.println("in FieldEditor.editField()");
+    this.fieldDef = fieldDef;
+
+    try
+      {
+	idN.setValue(fieldDef.getID());
+	nameS.setText(fieldDef.getName());
+	classS.setText(fieldDef.getClassName());
+	commentT.setText(fieldDef.getComment());
+	if (fieldDef.isArray())
+	  {
+	    vectorCF.setState(true);
+	    maxArrayN.setEnabled(true);
+	  }
+	else
+	  {
+	    vectorCF.setState(false);
+	    maxArrayN.setEnabled(false);
+	  }
+
+	if (fieldDef.isString())
+	  {
+	    minLengthN.setValue(fieldDef.getMinLength());
+	    maxLengthN.setValue(fieldDef.getMaxLength());
+	    OKCharS.setText(fieldDef.getOKChars());
+	    BadCharS.setText(fieldDef.getBadChars());
+	    namespaceC.removeAll();
+	    namespaceC.add("<None>");
+	    // add all defined namespaces here
+	    card.show(cardPanel, "string");
+	  }
+	else if (fieldDef.isBoolean())
+	  {
+	    if (fieldDef.isLabeled())
+	      {
+		labeledCF.setState(true);
+		trueLabelS.setText(fieldDef.getTrueLabel());
+		trueLabelS.setEnabled(true);
+		falseLabelS.setText(fieldDef.getFalseLabel());
+		falseLabelS.setEnabled(true);
+	      }
+	    else
+	      {
+		labeledCF.setState(false);
+		trueLabelS.setText("");
+		trueLabelS.setEnabled(false);
+		falseLabelS.setText("");
+		falseLabelS.setEnabled(false);
+	      }
+	    
+	    card.show(cardPanel, "boolean");
+	  }
+	else if (fieldDef.isInvid())
+	  {
+	    if (fieldDef.isTargetRestricted())
+	      {
+		targetLimitCF.setState(true);
+		targetC.setEnabled(true);
+		targetC.removeAll();
+		// add object types
+
+		symmetryCF.setEnabled(true);
+
+		if (fieldDef.isSymmetric())
+		  {
+		    symmetryCF.setState(true);
+		    fieldC.setEnabled(true);
+		    fieldC.removeAll();
+		    // add field types
+		  }
+		else
+		  {
+		    symmetryCF.setState(false);
+		    fieldC.setEnabled(false);
+		    fieldC.removeAll();
+		  }
+	      }
+	    else
+	      {
+		targetLimitCF.setState(false);
+		targetC.setEnabled(false);
+		targetC.removeAll();
+		symmetryCF.setEnabled(false);
+		fieldC.setEnabled(false);
+		fieldC.removeAll();
+	      }
+
+	    card.show(cardPanel,"invid");
+	  }
+	else
+	  {
+	    card.show(cardPanel,"empty");
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	System.err.println("remote exception in FieldEditor.editField: " + ex);
+      }
+  }
+
+  // for string and numeric fields
 
   public boolean setValuePerformed(ValueObject v)
   {
     return true;
+  }
+
+  // for choice fields
+
+  public void itemStateChanged(ItemEvent e)
+  {
+  }
+
+  // for the multiline comment field
+
+  public void textValueChanged(TextEvent e)
+  {
+  }
+
+  // for ok/cancel buttons
+
+  public void actionPerformed(ActionEvent event)
+  {
+    if (event.getSource() == owner.attribOkButton)
+      {
+	owner.objectsRefresh();
+      }
   }
 }
