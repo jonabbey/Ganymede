@@ -2,7 +2,7 @@
    Ganymede Logo
    
                             Ganymede Upgrade Guide
-                        Release 1.0.9 - 4 December 2001
+                         Release 1.0.10 - 2 April 2002
                                        
      _________________________________________________________________
                                       
@@ -45,9 +45,19 @@ _Upgrading the Ganymede Server_
    dump a copy of your current database to an XML file for safekeeping,
    just in case.
    
-   Now, you'll want to take the new Ganymede distribution and unpack it,
-   configure it, and run installServer to install the new server code
-   into a scratch directory.
+   Note that it's very important to shut down your existing server
+   cleanly before performing an upgrade. The database file format may
+   change slightly between versions of the Ganymede server, and
+   Ganymede's data loading routines currently take more care at handling
+   version differences when reading the ganymede.db file than when
+   reading the transaction journal. Cleanly shutting down the server
+   gives the server an opportunity to coalesce all transactions into the
+   ganymede.db file, and will help avoid problems in the upgrade.
+   
+   Now, assuming you've done a clean shutdown of your old server and made
+   backup copies of everything, you'll want to take the new Ganymede
+   distribution and unpack it, configure it, and run installServer to
+   install the new server code into a scratch directory.
    
    Once you have installed the new server into a scratch directory, you
    can go ahead and copy the new ganymede.jar and ganymedeServer.jar from
@@ -192,4 +202,4 @@ _Upgrading the Ganymede Clients_
    
     Jonathan Abbey
     
-   Last modified: Tue Dec 4 01:12:16 CST 2001
+   Last modified: Tue Apr 2 19:30:47 CST 2002

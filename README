@@ -1,11 +1,11 @@
-Ganymede Release 1.0.9
-December 4, 2001
+Ganymede Release 1.0.10
+April 2, 2002
 README
 ---------------------------------------------
 
 Greetings.  Ganymede is a Java-based directory management software
 system we at the Computer Science Division of ARL:UT have been
-developing for the past 5 years.
+developing for the past 6 years.
 
 This release includes:
 
@@ -38,7 +38,7 @@ Things you will need:
   JDK 1.3 on UNIX thus far only seems to support 8 and 24 bit color
   displays and performs poorly on remote displays.  For this reason,
   the Ganymede client and admin console are designed to be able to
-  work with JDK 1.1.7 as well as 1.2, 1.3, or the 1.4 beta.
+  work with JDK 1.1.7 as well as 1.2, 1.3, or 1.4.
 
   If you intend to use the Ganymede clients with a 1.1 series JDK, you
   will need to download Swing 1.1 (or later) from Sun.  Swing 1.1.1
@@ -54,13 +54,13 @@ Things you will need:
   JDK 1.4 beta on Linux, and JDK 1.3 on Windows.
 
   Lots of bugs in Swing and JDK have been fixed in JDK 1.3.. get it
-  or the 1.4 beta if you can.
+  or 1.4 if you can.
 
   Perl 5 to run the install scripts.
 
   If you want to run the Ganymede client or admin console on a Win32
   machine, download the latest version of the Java Runtime Environment
-  (1.3.0 at this writing) from http://java.sun.com/products/plugin/.
+  (1.4.0 at this writing) from http://java.sun.com/products/plugin/.
   You can also use Sun's Java Web Start product at
   http://java.sun.com/products/javawebstart/ if you would prefer
   not to have to run the clients from within a web browser.

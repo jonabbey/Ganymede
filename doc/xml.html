@@ -881,14 +881,14 @@
 	<td>&lt;md5crypted/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>apachemd5crypted</td>
+	<td></td><td>apacheMd5crypted</td>
 	<td>
-	  <p>The <b>apachemd5crypted</b> element is an optional, empty
+	  <p>The <b>apacheMd5crypted</b> element is an optional, empty
 	  element.  If this element is present, the Ganymede server
 	  will store the contents of this password in Apache-style
 	  md5crypt() format.</p>
 	</td>
-	<td>&lt;apachemd5crypted/&gt;</td>
+	<td>&lt;apacheMd5crypted/&gt;</td>
       </tr>
       <tr>
 	<td></td><td>winHashed</td>
@@ -908,7 +908,7 @@
 	  element.  If this element is present, the Ganymede server
 	  will store the plaintext of passwords stored in this field
 	  to disk.  Normally, if the Ganymede server has either
-	  <b>crypted</b>, <b>md5crypted</b>, <b>apachemd5crypted</b>,
+	  <b>crypted</b>, <b>md5crypted</b>, <b>apacheMd5crypted</b>,
 	  or <b>winHashed</b> set, the server will never dump the
 	  plaintext of passwords in this field to disk, as it is
 	  capable of authenticating logins against any of the

@@ -1,5 +1,5 @@
 Ganymede Release 1.0.10
-February ?, 2002
+April 2, 2002
 KNOWNBUGS
 ----------------------------------------------
 
@@ -27,6 +27,14 @@ heap usage seems to increase over days and weeks of uptime and you
 have run the schema editor from an open console, trying quitting that
 admin console and waiting an hour or so and see if the memory usage
 drops back down to baseline.
+
+2) If you try building Ganymede from scratch using Java 1.4, you'll
+get a number of deprecation warnings having to do with the org.xml.sax
+classes.  The Ganymede distribution includes the public domain
+org.xml.sax classes for SAX version 1, but Sun incorporated the SAX
+version 2 classes into version 1.4 of the JDK, and marked several
+methods as deprecated.  Everything will work fine on 1.4 even with the
+built-in org.xml.sax classes, though, despite the warnings.
 
 Comments welcome.
 
