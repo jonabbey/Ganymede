@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.26 $
-# $Date: 2000/11/30 03:23:06 $
+# $Revision: 1.27 $
+# $Date: 2000/12/01 17:57:02 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -13,6 +13,7 @@
 use File::Copy;
 use English;
 
+$perlname = "<#PERLEXE#>";
 $homedir = $ENV{HOME};
 &removelastslash($homedir);
 
@@ -335,7 +336,7 @@ open OUTPUT, ">$installdir/bin/logscan.pl" or die "Couldn't write logscan";
 # logscan.pl is a perl script.. write out the name of our interpreter
 
 while (<INPUT>) {
-  s/\/opt\/bin\/perl5/$EXECUTABLE_NAME/g;
+  s/\/opt\/bin\/perl5/$perlname/g;
   s/<<LOGFILE>>/$installdir\/db\/log/g;
 
   print OUTPUT $_;

@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.53 $
-# $Date: 2000/11/14 06:02:13 $
+# $Revision: 1.54 $
+# $Date: 2000/12/01 17:57:01 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -245,6 +245,7 @@ sub write_install {
 	s/\/opt\/bin\/perl5/$perlname/g;
 	s/\<\#JAVADIR\#\>/$javadir/g;
 	s/\<\#SWINGDIR\#\>/$swingdir/g;
+	s/\<\#PERLEXE\#\>/$perlname/g;
 	print INSTOUT $_;
     }
 
