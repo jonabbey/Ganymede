@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 2002/01/26 20:14:45 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 2002/01/26 20:22:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.59 $ $Date: 2002/01/26 20:14:45 $
+ * @version $Revision: 1.60 $ $Date: 2002/01/26 20:22:05 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -797,6 +797,11 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * <p>No server-side code should call this method from a thread that
+   * is looping over the static GanymedeAdmin.consoles Vector, or else
+   * the Vector will be changed from within the loop, possibly
+   * resulting in an exception being thrown.</p>
    */
 
   public void logout()
@@ -811,6 +816,11 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * <p>No server-side code should call this method from a thread that
+   * is looping over the static GanymedeAdmin.consoles Vector, or else
+   * the Vector will be changed from within the loop, possibly
+   * resulting in an exception being thrown.</p>
    */
 
   public void logout(String reason)
