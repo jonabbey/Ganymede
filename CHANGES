@@ -135,20 +135,21 @@ class that handles communications to and from attached admin consoles.
 
 I substantially reworked this class for better encapsulation, and
 while doing so wound up removing an extra RMI call that the server was
-attempt to make to each admin console for every line of log
+attempting to make to each admin console for every line of log
 information sent to the console.  The serverAdminProxy was eliminating
 a lot of these calls if lines of logging information were being sent
-rapidly to the admin consoles, but there was no call for updating that
-information all the time.
+rapidly to the admin consoles, but there was no need to have the
+server attempt to send so much unnecessary data to the attached admin
+consoles.
 
 9. [SERVER] Shutdown sequence refinements
 
 In the process of doing work for #8, above, I introduced a class cast
 exception into some of the admin console code that resulted in the
 server getting stuck during shutdown.  In fixing this, I revised the
-shutdown sequence some to be more verbose and so arbitrary exceptions
-thrown during server shutdown won't prevent the server from
-terminating.
+shutdown sequence to be more verbose and to ensure that arbitrary
+exceptions thrown late in the server shutdown process won't prevent
+the server from exiting.
 
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
