@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -381,10 +381,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     enableButtons(true);
   }
 
-  public void stop() 
+  /**
+   *
+   * If the applet is no longer visible on the page, we exit.
+   *
+   */
+
+  public void destroy() 
   {
-    // If the applet is no longer visible on the page, we exit.
-    
     try 
       {
 	if (my_glogin.my_session != null)
@@ -395,8 +399,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     catch (RemoteException ex) 
       {
       }
-    
-    //System.exit(1);
   }
   
   public String getUserName()
