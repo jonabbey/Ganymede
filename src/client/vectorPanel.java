@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.29 $ %D%
+  Version: $Revision: 1.30 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -364,7 +364,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (compVector.size() > size)
       {
-	wp.gc.setStatus("There is already an empty, new field");
+	setStatus("There is already an empty, new field");
       }
     else
       {
@@ -430,28 +430,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    System.out.println("This type is not supported yet.");
 	  }
       }
-    }
 
-  /*
-  public void validate()
-  {
-    System.out.println("--Validate: vectorP: " + this);
-    super.validate();
+    container.frame.validate();
   }
-  public void invalidate()
-  {
-    System.out.println("--inValidate: vectorP: " + this);
-    super.invalidate();
-  }
-
-  public void doLayout()
-  {
-    System.out.println("[[doLayout vect: " + this);
-    super.doLayout();
-    System.out.println("]]doLayout vect");
-
-  }
-  */
 
   public void addElement(Component c)
   {
@@ -660,6 +641,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     if ((e.getSource() == addB) && editable)
       {
 	addNewElement();
+	wp.gc.somethingChanged();
       }
     else if (e.getSource() instanceof JMenuItem)
       {
@@ -858,38 +840,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
       }	    
   }
-
-  // What is this for?
-  
-  public Session getSession() 
-  {
-    return null;
-  }
-
-  /*
-   *
-   * This method does causes the hierarchy of containers above
-   * us to be recalculated from the bottom (us) on up.  Normally
-   * the validate process works from the top-most container down,
-   * which isn't what we want at all in this context.
-   *
-   *
-
-  public void invalidateRight()
-  {
-    Component c;
-
-    c = this;
-
-    while ((c != null) && !(c instanceof JViewport))
-      {
-	System.out.println("doLayout on " + c);
-
-	c.doLayout();
-	c = c.getParent();
-      }
-  }
-  */
 
   public final void setStatus(String status)
   {
