@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,7 +79,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   /**
    *
    * Creation constructor, is responsible for creating a new editable
-   * object with all fields defined in the DBObjectBaseField instantiated
+   * object with all fields listed in the DBObjectBaseField instantiated
    * but undefined.
    *
    * This constructor is not really intended to be overriden in subclasses.
