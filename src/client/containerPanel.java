@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.125 $
-   Last Mod Date: $Date: 2001/07/05 22:25:52 $
+   Version: $Revision: 1.126 $
+   Last Mod Date: $Date: 2001/07/27 05:18:31 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.125 $ $Date: 2001/07/05 22:25:52 $ $Name:  $
+ * @version $Revision: 1.126 $ $Date: 2001/07/27 05:18:31 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -3621,6 +3621,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	else if (j instanceof JInvidChooser)
 	  {
 	    ((JInvidChooser) j).removeItemListener(this);
+	  }
+	else if (j instanceof perm_button)
+	  {
+	    ((perm_button) j).cleanUp();
 	  }
       }
 

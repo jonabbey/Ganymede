@@ -6,8 +6,8 @@
    
    Created: 20 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/07/22 05:33:40 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/07/27 05:18:32 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -120,41 +120,48 @@ class perm_button extends JButton implements ActionListener {
    */
   
   public void actionPerformed(ActionEvent e)
-    {
-      if ((e.getSource() == this)) // && (tableView.isSelected()))
-	{
-	  if (debug)
-	    {
-	      System.out.println("Edit Button was pushed- table not selected");
-	    }
+  {
+    if ((e.getSource() == this)) // && (tableView.isSelected()))
+      {
+	if (debug)
+	  {
+	    System.out.println("Edit Button was pushed- table not selected");
+	  }
 	  
-	  // Need to take care of accidental double clicks resulting
-	  // in two or more instances of perm_editor being
-	  // created. Even though perm_editor is modal, there is a
-	  // small gap in time between clicking the perm button and
-	  // the modal state taking effect- enough time for multiple
-	  // clicks on the button to create multiple editors.
+	// Need to take care of accidental double clicks resulting
+	// in two or more instances of perm_editor being
+	// created. Even though perm_editor is modal, there is a
+	// small gap in time between clicking the perm button and
+	// the modal state taking effect- enough time for multiple
+	// clicks on the button to create multiple editors.
 
-	  if ((editor == null) || (!editor.isActiveEditor())) 
-	    { 
-	      Frame parent = new Frame();
-	      editor = new perm_editor(field, 
-				       enabled, gc, 
-				       parent, "Permissions Editor: " + title);
-	     
-	      if (debug)
-		{
-		  System.out.println("Editor Created by perm button");
-		}
-	    } 
-	  else 
-	    {
-	      if (debug)
-		{
-		  System.out.println("An editor already exists- new one not created");
-		}
-	    }
-	}
-      
-    }
+	if ((editor == null) || (!editor.isActiveEditor())) 
+	  { 
+	    Frame parent = new Frame();
+	    editor = new perm_editor(field, 
+				     enabled, gc, 
+				     parent, "Permissions Editor: " + title);
+	    
+	    if (debug)
+	      {
+		System.out.println("Editor Created by perm button");
+	      }
+	  } 
+	else 
+	  {
+	    if (debug)
+	      {
+		System.out.println("An editor already exists- new one not created");
+	      }
+	  }
+      }
+  }
+
+  public void cleanUp()
+  {
+    if (editor != null && editor.isActiveEditor())
+      {
+	editor.myshow(false);
+      }
+  }
 }
