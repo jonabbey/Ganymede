@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2001/06/26 17:46:10 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2001/06/28 05:09:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2244,6 +2244,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	    catch (NullPointerException ex)
 	      {
+		ex.printStackTrace();
 	      }
 	    catch (IOException ex)
 	      {
@@ -2255,6 +2256,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	    catch (NullPointerException ex)
 	      {
+		ex.printStackTrace();
 	      }
 	    catch (IOException ex)
 	      {
@@ -2266,6 +2268,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	    catch (NullPointerException ex)
 	      {
+		ex.printStackTrace();
 	      }
 	    catch (IOException ex)
 	      {
@@ -2349,6 +2352,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	    catch (NullPointerException ex)
 	      {
+		ex.printStackTrace();
 	      }
 	    catch (IOException ex)
 	      {
@@ -2360,6 +2364,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	    catch (NullPointerException ex)
 	      {
+		ex.printStackTrace();
 	      }
 	    catch (IOException ex)
 	      {
@@ -2371,10 +2376,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	    catch (NullPointerException ex)
 	      {
+		ex.printStackTrace();
 	      }
 	    catch (IOException ex)
 	      {
 	      }
+
+	    process.destroy();
 	  }
       }
     else
