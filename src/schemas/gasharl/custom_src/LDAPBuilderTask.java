@@ -7,8 +7,8 @@
    
    Created: 22 March 2004
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2004/03/24 03:50:47 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2004/03/24 03:54:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -321,22 +321,28 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
     Vector users = group.getFieldValuesLocal(groupSchema.USERS);
 
-    for (int i = 0; i < users.size(); i++)
+    if (users != null)
       {
-	DBObject user = getObject((Invid) users.elementAt(i));
-
-	writeLDIF(out, "memberUid", user.getLabel());
+	for (int i = 0; i < users.size(); i++)
+	  {
+	    DBObject user = getObject((Invid) users.elementAt(i));
+	    
+	    writeLDIF(out, "memberUid", user.getLabel());
+	  }
       }
 
     writeLDIF(out, "objectClass", "posixGroup");
     writeLDIF(out, "objectClass", "apple-group");
     writeLDIF(out, "objectClass", "extensibleObject");
 
-    for (int i = 0; i < users.size(); i++)
+    if (users != null)
       {
-	DBObject user = getObject((Invid) users.elementAt(i));
-
-	writeLDIF(out, "uniqueMember", "uid=" + user.getLabel() + ",cn=users,dc=xserve");
+	for (int i = 0; i < users.size(); i++)
+	  {
+	    DBObject user = getObject((Invid) users.elementAt(i));
+	    
+	    writeLDIF(out, "uniqueMember", "uid=" + user.getLabel() + ",cn=users,dc=xserve");
+	  }
       }
 
     writeLDIF(out, "cn", group.getLabel());
