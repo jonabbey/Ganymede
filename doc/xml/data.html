@@ -713,6 +713,29 @@ to the server, and will clear any pre-existing plain text or
 crypt() encoded password information stored in this field in the
 server.</dd>
 
+
+<dt><b>lanman</b></dt>
+
+<dd>This attribute, if present, contains a password string pre-hashed
+in the LANMAN encoding used by older versions of Windows networking.  This
+hash format is one of the two password encryption formats used by
+the Samba password file.  The client will transmit this password
+to the server, and will clear any pre-existing plain text or
+alternately hashed password information stored in this field in the
+server.  The lanman and ntmd4 hashes may be set as a pair, in which
+case all other hashes are cleared.</dd>
+
+<dt><b>ntmd4</b></dt>
+
+<dd>This attribute, if present, contains a password string pre-hashed
+in the Unicode-md4 encoding used by Windows NT and Windows 98 and later.  This
+hash format is one of the two password encryption formats used by
+the Samba password file.  The client will transmit this password
+to the server, and will clear any pre-existing plain text or
+alternately hashed password information stored in this field in the
+server. The lanman and ntmd4 hashes may be set as a pair, in which
+case all other hashes are cleared.</dd>
+
 </dl>
 </td>
 </tr>
@@ -876,7 +899,7 @@ object on the server, regardless of whatever other activity the
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 25 21:18:12 CDT 2000 -->
 <!-- hhmts start -->
-Last modified: Wed Jun  6 13:27:33 CDT 2001
+Last modified: Wed Jun  6 20:32:37 CDT 2001
 <!-- hhmts end -->
   </body>
 </html>
