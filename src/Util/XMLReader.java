@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2000/12/04 03:07:27 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2000/12/04 03:10:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -46,7 +46,6 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 package arlut.csd.Util;
@@ -111,6 +110,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private XMLElement halfElement;
   private boolean skipWhiteSpace;
   private PrintWriter err;
+  private CircleBuffer circleBuffer = new CircleBuffer(10);
 
   /* -- */
 
@@ -733,15 +733,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    ex.printStackTrace();
 	    System.err.println("XMLReader parse error: " + ex.getMessage());
 
-	    synchronized (buffer)
-	      {
-		System.err.println("Last " + buffer.size() + " items successfully parsed:");
+	    System.err.println(circleBuffer.getContents());
 
-		for (int i = 0; i < buffer.size(); i++)
-		  {
-		    System.err.println(buffer.elementAt(i));
-		  }
-	      }
 	    throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
 	  }
       }
@@ -763,6 +756,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private final void pourIntoBuffer(XMLItem item)
   {
     buffer.addElement(item);
+    circleBuffer.add(item);
 
     // if we have filled the buffer above the
     // high water mark, wake up the consumers
