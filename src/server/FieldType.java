@@ -6,8 +6,8 @@
    
    Created: 15 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:41 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/03/01 22:28:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -47,6 +47,15 @@
 */
 
 package arlut.csd.ganymede;
+
+/**
+ *
+ * Hackified enumeration of defined field types
+ *
+ * Ganymede classes can implement this interface to have access to
+ * these constants. 
+ *
+ */
 
 public interface FieldType {
   static final short FIRSTFIELD = 0;

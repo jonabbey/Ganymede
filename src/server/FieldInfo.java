@@ -7,8 +7,8 @@
    
    Created: 4 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/22 18:05:40 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/03/01 22:27:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -54,6 +54,13 @@ package arlut.csd.ganymede;
                                                                        FieldInfo
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This class is a serializable object to return all the information
+ * the container panel needs to render a field.
+ *
+ */
 
 public class FieldInfo implements java.io.Serializable {
 
