@@ -61,7 +61,7 @@ import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.FileOps;
 
-import net.iharder.xmlizable.Base64;
+import arlut.csd.crypto.Base64;
 
 import java.util.*;
 import java.text.*;
