@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2000/12/04 09:36:48 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2000/12/04 22:47:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -511,6 +511,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void cleanup()
   {
+    reader = null;
+
     objectTypes.clear();
     objectTypes = null;
 

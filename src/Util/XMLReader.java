@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2000/12/04 09:54:58 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2000/12/04 22:47:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -771,6 +771,11 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
     finally
       {
+	// we've got to the end and either used the circleBuffer or
+	// not.  clear our reference to make sure we don't get a
+	// lingering handle
+
+	circleBuffer = null;
 	close();
       }
   }
@@ -778,7 +783,30 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private final void pourIntoBuffer(XMLItem item)
   {
     buffer.addElement(item);
-    circleBuffer.add(item);
+
+    // the buffer needs all xml items, since whitespace
+    // is filtered out later in the processing chain,
+    // but we have to filter out whitespace from our
+    // debug trace buffer here
+
+    if (skipWhiteSpace)
+      {
+	if (!(item instanceof XMLCharData))
+	  {
+	    circleBuffer.add(item);
+	  }
+	else
+	  {
+	    if (((XMLCharData) item).containsNonWhitespace())
+	      {
+		circleBuffer.add(item);
+	      }
+	  }
+      }
+    else
+      {
+	circleBuffer.add(item);
+      }
 
     // if we have filled the buffer above the
     // high water mark, wake up the consumers
