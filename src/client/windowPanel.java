@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 1999/11/19 01:01:00 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 1999/11/19 01:18:29 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -80,7 +80,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.71 $ $Date: 1999/11/19 01:01:00 $ $Name:  $
+ * @version $Revision: 1.72 $ $Date: 1999/11/19 01:18:29 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -447,7 +447,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     int y_offset;
     int width = window.getBounds().width;
     int height = window.getBounds().height;
-
+    int stagger_offset = windowList.size() * 20;
+    
     Dimension d = this.getSize();
     java.util.Random randgen = new java.util.Random();
 
@@ -456,6 +457,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     if (width > d.width || height > d.height)
       {
 	window.setBounds(0,0, width, height);
+      }
+    else if (width + stagger_offset < d.width && height + stagger_offset < d.height)
+      {
+	window.setBounds(stagger_offset, stagger_offset, width, height);
       }
     else
       {
@@ -596,9 +601,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       {
 	rt.setLayer(new Integer(topLayer));
 	rt.setBounds(0, 0, 500,500);
-
-	placeWindow(rt);
-
 	rt.setResizable(true);
 	rt.setClosable(true);
 	rt.setMaximizable(true);
@@ -621,6 +623,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	rt.setTitle(title);
 
 	windowList.put(title, rt);
+
+	placeWindow(rt);
 	  
 	add(rt);
 	rt.setVisible(true);	// for Kestrel
