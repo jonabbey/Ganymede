@@ -413,7 +413,7 @@ public class DBQueryHandler {
 	    // should be handled. So if the field we're looking at is a vector field, we'll
 	    // assume that the operator should be used against each item in the field.
 
-	    if (field.isVector() && n.arrayOp == QueryDataNode.NONE)
+	    if (field != null && field.isVector() && n.arrayOp == QueryDataNode.NONE)
 	      {
 	      	n.arrayOp = QueryDataNode.CONTAINS;
 	      }
