@@ -7,7 +7,7 @@
    email..
    
    Created: 31 October 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -153,6 +153,8 @@ public class DBLogEvent {
    *
    * Constructor to construct a DBLogEvent from a log file line.
    *
+   * @param line A line from the Ganymede log file
+   *
    */
   
   public DBLogEvent(String line) throws IOException
@@ -164,11 +166,30 @@ public class DBLogEvent {
    *
    * Constructor to construct a DBLogEvent from a log file line.
    *
+   * @param line A line from the Ganymede log file
    * @param multibuffer A StringBuffer that this event can use to avoid an extra object create
    *
    */
 
   public DBLogEvent(String line, StringBuffer multibuffer) throws IOException
+  {
+    this.multibuffer = multibuffer;
+
+    if (this.multibuffer == null)
+      {
+	multibuffer = this.multibuffer = new StringBuffer();
+      }
+
+    loadLine(line);
+  }
+
+  /**
+   *
+   * This method sets the fields for this DBLogEvent from a logfile line
+   *
+   */
+
+  public void loadLine(String line) throws IOException
   {
     int i, j;
     String dateString;
@@ -177,22 +198,13 @@ public class DBLogEvent {
     String tmp;
 
     /* -- */
-    
+
     if (line == null || (line.trim().equals("")))
       {
 	throw new IOException("empty log line");
       }
 
-    this.multibuffer = multibuffer;
-
-    if (this.multibuffer == null)
-      {
-	multibuffer = this.multibuffer = new StringBuffer();
-      }
-    else
-      {
-	this.multibuffer.setLength(0);
-      }
+    multibuffer.setLength(0);
 
     //    System.out.println("Trying to create DBLogEvent: " + line);
 
@@ -210,7 +222,7 @@ public class DBLogEvent {
 	throw new IOException("couldn't parse time code");
       }
     
-    time = new Date(timeCode);
+    this.time = new Date(timeCode);
     
     j = i+1;
     i = scanSep(cary, j);	// find next |, skip human readable date
@@ -218,7 +230,7 @@ public class DBLogEvent {
     j = i+1;
     i = scanSep(cary, j);
     
-    eventClassToken = readNextField(cary, j);
+    this.eventClassToken = readNextField(cary, j);
     
     j = i+1;
     i = scanSep(cary, j);
@@ -227,33 +239,37 @@ public class DBLogEvent {
     
     if (!tmp.equals(""))
       {
-	admin = new Invid(tmp);	// get admin invid
+	this.admin = new Invid(tmp);	// get admin invid
+      }
+    else
+      {
+	this.admin = null;
       }
 
     j = i+1;
     i = scanSep(cary, j);
 
-    adminName = readNextField(cary, j); // get admin name
+    this.adminName = readNextField(cary, j); // get admin name
     
     j = i+1;
     i = scanSep(cary, j);
 
-    transactionID = readNextField(cary, j); // get transaction id
+    this.transactionID = readNextField(cary, j); // get transaction id
 
     j = i+1;
     i = scanSep(cary, j);
 
-    objects = readObjectVect(cary, j);
+    this.objects = readObjectVect(cary, j);
 
     j = i+1;
     i = scanSep(cary, j);
 
-    description = readNextField(cary, j); // get text description
+    this.description = readNextField(cary, j); // get text description
 
     j = i+1;
     i = scanSep(cary, j);
 
-    notifyVect = readNotifyVect(cary, j);
+    this.notifyVect = readNotifyVect(cary, j);
 
     if (notifyVect != null)
       {
@@ -272,7 +288,7 @@ public class DBLogEvent {
 	this.notifyList = multibuffer.toString();
       }
 
-    augmented = true;
+    this.augmented = true;
   }
 
   /**
@@ -708,6 +724,17 @@ public class DBLogEvent {
 	    multibuffer.append(ary[i]);
 	  }
       }
+
+    // grr.. wish we didn't have to dupe Strings here.. if we could
+    // only get access to StringBuffer.getValue(), we'd be able to
+    // reuse a single memory buffer in the StringBuffer, which is okay
+    // since we know we are properly synchronized and that the char[]
+    // array we'd get would be used and then immediately forgotten.
+
+    // Unfortunately, we'd have to use our own variant of StringBuffer
+    // to achieve that efficiency, and this code is (probably) not
+    // critical path enough to worry about that.  Let's just hope the
+    // garbage collector is nice and efficient.
 
     return multibuffer.toString();
   }
