@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 1999/03/24 03:29:29 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 1999/10/29 21:45:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -590,7 +590,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    return null;
 	  }
-
 
 	// Ok, we want to create a ReturnVal which will cause the
 	// field.setValue() call which triggered us to continue normal

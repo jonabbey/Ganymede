@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 1999/10/29 19:11:54 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 1999/10/29 21:45:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -315,6 +315,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
       case USERNAME:
       case UID:
+      case CATEGORY:		// would trigger wizard, otherwise
       case userSchema.PASSWORD:
       case HOMEDIR:
       case PERSONAE:
@@ -346,17 +347,30 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     StringBuffer resultBuf = new StringBuffer();
     ReturnVal retVal = super.cloneFromObject(session, origObj, local);
 
-    if (debug)
-      {
-	System.err.println("User " + origObj.getLabel() + " cloned, working on embeddeds");
-      }
-
     if (retVal != null && retVal.getDialog() != null)
       {
 	resultBuf.append("\n\n");
 	resultBuf.append(retVal.getDialog().getText());
 	
 	problem = true;
+      }
+
+    // we have the default canCloneField() refuse to clone
+    // userSchema.CATEGORY to avoid dealing or bypassing with the
+    // wizard.  If we are cloning a normal user, it is safe enough to
+    // copy that value.  Else we'll leave it blank for the user to
+    // set.
+
+    Invid category = (Invid) origObj.getFieldValue(userSchema.CATEGORY);
+	
+    if (session.getGSession().viewObjectLabel(category).equals("normal"))
+      {
+	((DBField) getField(userSchema.CATEGORY)).setValue(category, local, true);
+      }
+    
+    if (debug)
+      {
+	System.err.println("User " + origObj.getLabel() + " cloned, working on embeddeds");
       }
 
     // and clone the embedded objects
