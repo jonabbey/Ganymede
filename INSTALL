@@ -1,7 +1,7 @@
 
    Ganymede Logo
    
- Ganymede UNIX Installation Guide Release 1.0 pre-release 1 - 17 January 2001
+ Ganymede UNIX Installation Guide Release 1.0 pre-release 1 - 30 January 2001
                                        
      _________________________________________________________________
                                       
@@ -311,10 +311,22 @@ _4. Installing A Schema Kit_
        can import data from your existing environment and generate an XML
        file for use with the xmlclient.
        
-   The most important part at this point is the custom.jar file. Once
-   that file is in place, you can proceed to run the Ganymede server,
-   which will then start up and find the extra classes needed to run the
-   server with your schema kit.
+   The most important of these as far as the server is concerned is the
+   custom.jar file. Once that file is in place, you can proceed to run
+   the Ganymede server, which will then start up and find the extra
+   classes needed to run the server with your schema kit.
+   
+   The schema kit that you install should include a README that will talk
+   in great detail about the operational aspects of running the server
+   with that schema kit installed. This will include but is not limited
+   to what sort of data is written out to disk when transactions are
+   committed in the server, and how that data is integrated into the
+   network environment.
+   
+   For now, however, we are going to continue with a generic discussion
+   of how one runs the server, how one typically loads data into the
+   server, etc. For further details on all of this works with the schema
+   kit you choose to use, see the schema kit README file.
    
 _5. Running the Ganymede Server_
 
@@ -339,7 +351,7 @@ _5. Running the Ganymede Server_
 
    if you are running csh or tcsh, or
    
-      bash$ runServer > server.log 2>&1 &
+      bash$ bin/runServer > server.log 2>&1 &
 
    if you are running sh or bash.
    
@@ -635,4 +647,4 @@ _8. Prepare web access clients_
    
     Jonathan Abbey
     
-   Last modified: Wed Jan 24 20:24:52 CST 2001
+   Last modified: Wed Jan 31 03:05:17 CST 2001
