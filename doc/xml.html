@@ -1743,8 +1743,9 @@ As password fields are scalar in Ganymede, only one
 <b>&lt;password&gt;</b> element at a time may be contained in a field
 element.  The <b>&lt;password&gt;</b> element must be empty.  The
 <b>&lt;password&gt;</b> element must contain exactly one of three
-optional attributes, <b>plaintext</b>, <b>crypt</b>, or <b>md5crypt</b>, which
-are explained below.
+optional attributes, <b>plaintext</b>, <b>crypt</b>, or <b>md5crypt</b>, or
+both of <b>lanman</b> and <b>ntmd4</b>, if loading passwords from
+a Samba password file.  These options are explained below.
 <font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
 </td>
 </tr>
