@@ -136,7 +136,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 	mySession.enableOversight(false);
 	
-	ReturnVal retVal = mySession.openTransaction("expiration task");
+	ReturnVal retVal = mySession.openTransaction("expiration task", false);	// non-interactive
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
