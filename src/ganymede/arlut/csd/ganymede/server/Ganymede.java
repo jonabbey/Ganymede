@@ -75,6 +75,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteServer;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -329,6 +330,14 @@ public class Ganymede {
    */
 
   public static TranslationService ts = null;
+
+  /**
+   * <p>This upgradeClassMap is used to rewrite the standard task
+   * class names if we're loading an older (pre-DBStore 2.7 format)
+   * ganymede.db file at task registration time.</p>
+   */
+
+  private static Hashtable upgradeClassMap = null;
 
   /* -- */
 
@@ -1012,6 +1021,27 @@ public class Ganymede {
     **/
   }
 
+
+  /**
+   * <p>At DBStore version 2.7, we changed the package name for our
+   * built-in task classes.  This method creates a private Hashtable,
+   * {@link arlut.csd.ganymede.server.Ganymede#upgradeClassMap}, which holds
+   * a mapping of old class names to new ones for the built-in classes.</p>
+   */
+
+  static private void prepClassMap()
+  {
+    if (upgradeClassMap == null)
+      {
+	upgradeClassMap = new Hashtable();
+	upgradeClassMap.put("arlut.csd.ganymede.dumpAndArchiveTask", "arlut.csd.ganymede.server.dumpAndArchiveTask");
+	upgradeClassMap.put("arlut.csd.ganymede.dumpTask", "arlut.csd.ganymede.server.dumpTask");
+	upgradeClassMap.put("arlut.csd.ganymede.GanymedeExpirationTask", "arlut.csd.ganymede.server.GanymedeExpirationTask");
+	upgradeClassMap.put("arlut.csd.ganymede.GanymedeValidationTask", "arlut.csd.ganymede.server.GanymedeValidationTask");
+	upgradeClassMap.put("arlut.csd.ganymede.GanymedeWarningTask", "arlut.csd.ganymede.server.GanymedeWarningTask");
+      }
+  }
+
   /**
    * This method scans the database for valid BuilderTask entries and 
    * adds them to the builderTasks vector.
@@ -1034,6 +1064,36 @@ public class Ganymede {
 	for (int i = 0; i < objects.size(); i++)
 	  {
 	    object = (DBObject) objects.elementAt(i);
+
+	    // At DBStore version 2.7, we changed the package name for
+	    // our built-in task classes.  If loaded an older file and
+	    // we recognize one of the built-in task class names, go
+	    // ahead and rewrite it, hacking down into the
+	    // StringDBField in a most naughty way.
+
+	    if (Ganymede.db.isLessThan(2,7))
+	      {
+		prepClassMap();
+
+		StringDBField taskClassStrF = (StringDBField) object.getField(SchemaConstants.TaskClass);
+
+		if (taskClassStrF != null)
+		  {
+		    String taskClassStr = (String) taskClassStrF.value;
+
+		    if (upgradeClassMap.containsKey(taskClassStr))
+		      {
+			String newClassName = (String) upgradeClassMap.get(taskClassStr);
+
+			// "Rewriting old system task class {0} as {1}"
+			System.err.println(ts.l("registerTasks.rewritingClass", taskClassStr, newClassName));
+
+			// and here's where we force the value into place
+
+			taskClassStrF.value = newClassName.intern();
+		      }
+		  }
+	      }
 
 	    if (debug)
 	      {

@@ -157,6 +157,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   final static boolean debug2 = false;
   final static boolean xmldebug = false;
 
+  static Hashtable upgradeClassMap = null;
+
   public static void setDebug(boolean val)
   {
     System.err.println("DBObjectBase.setDebug(): " + val);
@@ -186,6 +188,29 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	  }
       }
   };
+
+  /**
+   * <p>If we are processing an older ganymede.db file, our built-in
+   * classes may be specified using the older packages.  This method
+   * initializes a static map upgradeClassMap from the old class names
+   * to the new ones, for use by the receive() method in this
+   * class.</p>
+   */
+
+  private synchronized static void prepClassMap()
+  {
+    if (upgradeClassMap == null)
+      {
+	upgradeClassMap = new Hashtable();
+	upgradeClassMap.put("arlut.csd.ganymede.eventCustom", "arlut.csd.ganymede.server.eventCustom");
+	upgradeClassMap.put("arlut.csd.ganymede.objectEventCustom", "arlut.csd.ganymede.server.objectEventCustom");
+	upgradeClassMap.put("arlut.csd.ganymede.objectEventCustom", "arlut.csd.ganymede.server.objectEventCustom");
+	upgradeClassMap.put("arlut.csd.ganymede.ownerCustom", "arlut.csd.ganymede.server.ownerCustom");
+	upgradeClassMap.put("arlut.csd.ganymede.adminPersonaCustom", "arlut.csd.ganymede.server.adminPersonaCustom");
+	upgradeClassMap.put("arlut.csd.ganymede.permCustom", "arlut.csd.ganymede.server.permCustom");
+	upgradeClassMap.put("arlut.csd.ganymede.taskCustom", "arlut.csd.ganymede.server.taskCustom");
+      }
+  }
 
   /* - */
 
@@ -697,6 +722,27 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
 
     classname = in.readUTF();
+
+    // if we're reading a ganymede.db file from before the DBStore 2.7
+    // rework, let's fix up our class names
+
+    if (store.isLessThan(2,7))
+      {
+	prepClassMap();
+	
+	if (upgradeClassMap.containsKey(classname))
+	  {
+	    String newclassname = (String) upgradeClassMap.get(classname);
+
+	    if (debug)
+	      {
+		// "DBObjectBase.receive(): Rewriting old system class name: {0} as {1}"
+		System.err.println(ts.l("receive.rewritingClassname", classname, newclassname));
+	      }
+
+	    classname = newclassname;
+	  }
+      }
 
     if (debug)
       {
