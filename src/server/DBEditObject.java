@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.163 $
-   Last Mod Date: $Date: 2002/01/20 18:47:34 $
+   Version: $Revision: 1.164 $
+   Last Mod Date: $Date: 2002/03/13 18:44:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,6 +57,7 @@ import java.rmi.*;
 import java.rmi.server.*;
 
 import arlut.csd.JDialog.*;
+import arlut.csd.Util.booleanSemaphore;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -113,7 +114,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.163 $ $Date: 2002/01/20 18:47:34 $ $Name:  $
+ * @version $Revision: 1.164 $ $Date: 2002/03/13 18:44:33 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -154,13 +155,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   protected DBObject original;
 
   /**
-   * true if this object has had its commitPhase1() method called,
-   * but has not yet had its commitPhase2() or release() methods
-   * called.  If committing is true, no editing will be allowed
-   * on this object.
+   * true if this object has had its commitPhase1() method called, but
+   * has not yet had its commitPhase2() or release() methods called.
+   * If commitSemaphore is true, the DBField.isEditable() method will
+   * always return false for fields in this object, and no editing
+   * will be allowed on this object.
    */
 
-  protected boolean committing;
+  private booleanSemaphore commitSemaphore = new booleanSemaphore(false);
 
   /**
    * true if the object is in the middle of carrying
@@ -237,7 +239,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     original = null;
     this.editset = editset;
     this.gSession = editset.getSession().getGSession();
-    committing = false;
+    commitSemaphore.set(false);
     stored = false;
     status = CREATING;
 
@@ -343,7 +345,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     /* -- */
 
     this.editset = editset;
-    committing = false;
+    commitSemaphore.set(false);
     stored = true;
     status = EDITING;
 
@@ -3150,9 +3152,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * processes in the full two-phase commit protocol, this
    * method should not be overridden.</p>
    *
-   * <p>If this method is overridden, be sure and set this.committing to
-   * true before doing anything else.  Failure to set committing to
-   * true in this method will cause the two phase commit mechanism to
+   * <p>If this method is overridden, be sure and call setCommitting(true)
+   * before doing anything else.  Failure to call setCommitting()
+   * in this method will cause the two phase commit mechanism to
    * behave unpredictably.</p>
    *
    * <p><B>WARNING!</B> this method is called at a time when portions
@@ -3173,7 +3175,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public synchronized ReturnVal commitPhase1()
   {
-    committing = true;
+    setCommitting(true);
 
     // if we have enableOversight turned on, let's check and see if
     // this object is currently consistent.  If it is not, and it was
@@ -3229,7 +3231,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public final boolean isCommitting()
   {
-    return committing;
+    return commitSemaphore.isSet();
+  }
+
+  /**
+   * <p>This method is intended to be used by subclasses to set the
+   * state of this object's committing flag.</p>
+   */
+
+  protected final void setCommitting(boolean state)
+  {
+    commitSemaphore.set(state);
   }
 
   /**
@@ -3317,10 +3329,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * <p>Customizers subclassing this method may want to keep a couple of
    * things in mind.  First, the default release method is not synchronized,
-   * and it basically just clear a boolean flag (this.committing) to
+   * and it basically just clear a boolean flag (call setCommitting(false)) to
    * indicate that edit methods on this object may once again go forward.
    * You may want to synchronize your release method if you do anything
-   * at all fancy.  More importantly, it is essential that you clear this.committing
+   * at all fancy.  More importantly, it is essential that you call setCommitting(false)
    * if &lt;finalAbort&gt; is false so that this object can be edited afterwards.</p>
    *
    * <p><B>WARNING!</B> this method is called at a time when portions
@@ -3339,7 +3351,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   {
     if (!finalAbort)
       {
-	this.committing = false;
+	setCommitting(false);
       }
   }
 

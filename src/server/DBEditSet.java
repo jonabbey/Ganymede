@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 2002/03/13 18:10:10 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 2002/03/13 18:44:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -930,13 +930,7 @@ public class DBEditSet {
 
     try
       {
-	baseSet = commit_lockBases();
-
-	if (isOversightOn())
-	  {
-	    commit_checkObjectsMissingFields();
-	  }
-
+	baseSet = commit_lockBases(); // may block
 	committedObjects = commit_handlePhase1();
 	commit_handlePhase2(committedObjects);
 	commit_createLogEvents(committedObjects);
@@ -947,9 +941,7 @@ public class DBEditSet {
 	DBDeletionManager.releaseSession(session);
 	commit_updateBases(baseSet);
 	releaseWriteLock();
-	this.deconstruct();
-
-	this.notifyAll();	// wake up any late checkpointers
+	this.deconstruct();	// gc, wake up sleepers
 
 	// we're going to return a ReturnVal with doNormalProcessing set to
 	// false to let everyone above us know that we've totally cleared
@@ -1045,63 +1037,6 @@ public class DBEditSet {
     return baseSet;
   }
 
-  /**
-   * <p>This private helper method for the commit() method runs a
-   * check looking for missing mandatory fields on all objects
-   * involved with this transaction.</p>
-   *
-   * <p>If one or more objects are missing fields, a
-   * CommitNonFatalException will be thrown.</p>
-   */
-
-  private final void commit_checkObjectsMissingFields() throws CommitNonFatalException
-  {
-    Enumeration enum;
-    DBEditObject eObj;
-    ReturnVal retVal;
-
-    /* -- */
-
-    enum = this.objects.elements();
-    
-    while (enum.hasMoreElements())
-      {
-	eObj = (DBEditObject) enum.nextElement();
-
-	if (eObj.getStatus() == ObjectStatus.DELETING ||
-	    eObj.getStatus() == ObjectStatus.DROPPING)
-	  {
-	    continue;
-	  }
-
-	Vector missingFields = eObj.checkRequiredFields();
-		    
-	if (missingFields != null)
-	  {
-	    StringBuffer errorBuf = new StringBuffer();
-	    
-	    errorBuf.append("Error, ");
-	    errorBuf.append(eObj.getTypeName());
-	    errorBuf.append(" object ");
-	    errorBuf.append(eObj.getLabel());
-	    errorBuf.append(" has not been completely filled out.  The following fields need ");
-	    errorBuf.append("to be filled in before this transaction can be committed:\n\n");
-	    
-	    for (int j = 0; j < missingFields.size(); j++)
-	      {
-		errorBuf.append((String) missingFields.elementAt(j));
-		errorBuf.append("\n");
-	      }
-	    
-	    retVal = Ganymede.createErrorDialog("Error, required fields not filled in",
-						errorBuf.toString());
-	    
-	    // let DBSession/the client know they can retry things.
-	    
-	    throw new CommitNonFatalException(retVal);
-	  }
-      }
-  }
 
   /**
    * <p>This private helper method for the commit() method handles
@@ -1127,15 +1062,30 @@ public class DBEditSet {
     while (enum.hasMoreElements())
       {
 	eObj = (DBEditObject) enum.nextElement();
-	
+
 	retVal = eObj.commitPhase1();
-	
+
+	// the object has now been locked to commit mode, and will not
+	// allow further modifications from the client
+
+	if (retVal == null || retVal.didSucceed())
+	  {
+	    try
+	      {
+		commit_checkObjectMissingFields(eObj);
+	      }
+	    catch (CommitNonFatalException ex)
+	      {
+		retVal = ex.getReturnVal();
+	      }
+	  }
+
 	if (retVal != null && !retVal.didSucceed())
 	  {
 	    for (int i = 0; i < committedObjects.size(); i++)
 	      {
 		eObj2 = (DBEditObject) committedObjects.elementAt(i);
-		eObj2.release(false);
+		eObj2.release(false); // unlock commit mode
 	      }
 
 	    // let DBSession/the client know they can retry things.
@@ -1149,6 +1099,60 @@ public class DBEditSet {
       }
 
     return committedObjects;
+  }
+
+  /**
+   * <p>This private helper method for the commit() method runs a
+   * check looking for missing mandatory fields on an object
+   * involved with this transaction.</p>
+   *
+   * <p>If the object is missing fields, a CommitNonFatalException
+   * will be thrown.</p>
+   */
+
+  private final void commit_checkObjectMissingFields(DBEditObject eObj) throws CommitNonFatalException
+  {
+    ReturnVal retVal;
+
+    /* -- */
+
+    if (!isOversightOn())
+      {
+	return;
+      }
+
+    if (eObj.getStatus() == ObjectStatus.DELETING ||
+	eObj.getStatus() == ObjectStatus.DROPPING)
+      {
+	return;
+      }
+
+    Vector missingFields = eObj.checkRequiredFields();
+		    
+    if (missingFields != null)
+      {
+	StringBuffer errorBuf = new StringBuffer();
+	    
+	errorBuf.append("Error, ");
+	errorBuf.append(eObj.getTypeName());
+	errorBuf.append(" object ");
+	errorBuf.append(eObj.getLabel());
+	errorBuf.append(" has not been completely filled out.  The following fields need ");
+	errorBuf.append("to be filled in before this transaction can be committed:\n\n");
+	    
+	for (int j = 0; j < missingFields.size(); j++)
+	  {
+	    errorBuf.append((String) missingFields.elementAt(j));
+	    errorBuf.append("\n");
+	  }
+	    
+	retVal = Ganymede.createErrorDialog("Error, required fields not filled in",
+					    errorBuf.toString());
+	    
+	// let DBSession/the client know they can retry things.
+	    
+	throw new CommitNonFatalException(retVal);
+      }
   }
 
   /**
@@ -1972,16 +1976,15 @@ public class DBEditSet {
     // and help out garbage collection some
 
     this.deconstruct();
-
-    // wake up any sleepy heads
-
-    this.notifyAll();
   }
 
   /**
    * <p>Private helper method for commit() and release(), which breaks apart
    * and nulls references to data structures maintained for this transaction
    * to aid GC.</p>
+   *
+   * <p>This method also does a notifyAll() to wake up any checkpoint threads
+   * that are blocking waiting for the ability to checkpoint.</p>
    */
 
   private void deconstruct()
@@ -2016,6 +2019,8 @@ public class DBEditSet {
       }
 
     currentCheckpointThread = null;
+
+    this.notifyAll();		// wake up any late checkpointers
   }
 
   /**

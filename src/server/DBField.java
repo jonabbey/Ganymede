@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 2001/08/15 03:47:17 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 2002/03/13 18:44:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -735,17 +735,17 @@ public abstract class DBField implements Remote, db_field {
 	return false;
       }
 
-    if (!local && !verifyWritePermission()) // *sync* possible on GanymedeSession
-      {
-	return false;
-      }
-
     eObj = (DBEditObject) owner;
 
     // if our owner has already started the commit process, we can't
     // allow any changes, local access or no
 
     if (eObj.isCommitting())
+      {
+	return false;
+      }
+
+    if (!local && !verifyWritePermission()) // *sync* possible on GanymedeSession
       {
 	return false;
       }
