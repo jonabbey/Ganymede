@@ -212,6 +212,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   Image errorImage = null;
 
   protected Image ganymede_logo;
+  protected Image ganymede_ssl_logo;
   protected JTextField username;
   protected JPasswordField passwd;
   protected JButton connector;
@@ -226,6 +227,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   private booleanSemaphore connected = new booleanSemaphore(false);
   private booleanSemaphore connecting = new booleanSemaphore(false);
   private boolean ssl = false;
+
+  private JLabel image = null;
 
   /* -- */
 
@@ -293,6 +296,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // Dowload the ganymede logo using the appropriate method
     
     ganymede_logo = PackageResources.getImageResource(this, "ganymede.jpg", getClass());
+    ganymede_ssl_logo = PackageResources.getImageResource(this, "ssl_ganymede.jpg", getClass());
     
     if (WeAreApplet)
       {
@@ -329,7 +333,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     loginBox.setLayout(gbl);
 
-    JLabel image = new JLabel(new ImageIcon(ganymede_logo));
+    image = new JLabel(new ImageIcon(ganymede_logo));
     image.setOpaque(true);
     image.setBackground(Color.black);
 
@@ -583,6 +587,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		if (my_client.getCipherSuite() != null)
 		  {
 		    ssl = true;
+		    image.setIcon(new ImageIcon(ganymede_ssl_logo));
 		  }
 
 		connected.set(true);
@@ -591,6 +596,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    catch (Throwable ex)
 	      {
 		connectError = ex.getMessage();
+		ex.printStackTrace();
 	      }
 
 	    try 
@@ -617,7 +623,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		public void run() {
 		  if (ssl)
 		    {
-		      connector.setText("Login to server (SSL)");
+		      connector.setText("Login to server");
 		    }
 		  else
 		    {
