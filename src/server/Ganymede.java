@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.122 $
-   Last Mod Date: $Date: 2001/08/18 06:16:27 $
+   Version: $Revision: 1.123 $
+   Last Mod Date: $Date: 2001/10/05 19:27:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -263,6 +263,14 @@ public class Ganymede {
 
   public static boolean firstrun = false;
 
+  /** 
+   * <p>This flag is true if the server was started with a -forcelocalhost
+   * command line argument, which will allow the server to run even if
+   * it will only be accessible to localhost.</p>
+   */
+
+  public static boolean forcelocalhost = false;
+
   /* -- */
 
   /**
@@ -291,6 +299,8 @@ public class Ganymede {
     debugFilename = ParseArgs.getArg("debug", argv);
 
     resetadmin = ParseArgs.switchExists("resetadmin", argv);
+
+    forcelocalhost = ParseArgs.switchExists("forcelocalhost", argv);
 
     if (!loadProperties(propFilename))
       {
@@ -528,11 +538,65 @@ public class Ganymede {
 	// registry is still running from a previous Ganymede server
 	// session.
 
-	// we assume the rmi registry is running on localhost.
+	String hostname = null;
 
-	Naming.rebind("rmi://" + 
-		      java.net.InetAddress.getLocalHost().getHostName() + ":" + 
-		      registryPortProperty + "/ganymede.server", server);
+	if (!java.net.InetAddress.getLocalHost().getHostAddress().equals("127.0.0.1"))
+	  {
+	    hostname = java.net.InetAddress.getLocalHost().getHostName();
+	  }
+	else
+	  {
+	    // we don't want to bind to a system name that will
+	    // resolve to 127.0.0.1, or else other the rmiregistry
+	    // will attempt to report our address as loopback, which
+	    // won't do anyone any good
+
+	    // try to use the name specified in our ganymede.properties file
+
+	    if (serverHostProperty != null && !serverHostProperty.equals(""))
+	      {
+		hostname = serverHostProperty;
+
+		if (java.net.InetAddress.getByName(hostname).getHostAddress().equals("127.0.0.1"))
+		  {
+		    // nope, give up
+
+		    if (forcelocalhost)
+		      {
+			Ganymede.debug("** Warning **");
+		      }
+		    else
+		      {
+			Ganymede.debug("** Error **");
+		      }
+
+		    Ganymede.debug("Both the system hostname (" + java.net.InetAddress.getLocalHost().getHostName() +
+				   ") and\nthe ganymede.serverhost definition (" + 
+				   serverHostProperty + ") resolve to the 127.0.0.1 loopback address");
+		    Ganymede.debug("The Ganymede server must have an externally accessible IP address or else clients");
+		    Ganymede.debug("will not be able to communicate with the Ganymede server from other than localhost.");
+
+		    if (!forcelocalhost)
+		      {
+			Ganymede.debug("\nIf you really want to be only useable for localhost, use the -forcelocalhost option.");
+			
+			Ganymede.debug("\nShutting down.");
+			
+			GanymedeServer.shutdown();
+		      }
+		  }
+	      }
+	    else
+	      {
+		Ganymede.debug("Avoiding loopback " + java.net.InetAddress.getLocalHost().getHostName() + 
+			       " definition, binding to " + hostname);
+	      }
+	  }
+
+	// tell the RMI registry where to find the server
+
+	Naming.rebind("rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server", 
+		      server);
       }
     catch (Exception ex)
       {
