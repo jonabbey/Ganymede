@@ -242,6 +242,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public DBEditObject(DBObjectBase base)
   {
+    super();
+
     this.objectBase = base;
     editset = null;		// this will be our cue to our static handle status for our methods
   }

@@ -218,8 +218,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   protected DBObjectBase objectBase;
 
   /**
+   * <p>Our fields, hashed into an array.</p>
    *
-   * Our fields, hashed into an array
+   * <p>This member variable will be null in the case where we are
+   * constructed as a DBEditObject subclass for use as a pseudo-static
+   * objectHook.</p>
    *
    * @see arlut.csd.ganymede.server.DBField
    *
@@ -268,10 +271,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /* -- */
 
   /**
-   *
-   * No param constructor, here to allow DBEditObject to have
-   * a no-param constructor for a static method handle
-   *
+   * <p>No param constructor, here to allow DBEditObject to
+   * super()-chain to us with a no-param constructor for the
+   * pseudo-static objectHook case.</p>
    */
 
   public DBObject()
@@ -280,14 +282,15 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Base constructor, used to create a new object of
+   * <p>Base constructor, used to create a new object of
    * type objectBase.  Note that DBObject itself is
    * a mere carrier of data and there is nothing application
    * type specific in a base DBObject.  The only type
    * information is represented by the DBObjectBase passed
-   * in to this constructor.
+   * in to this constructor.</p>
    *
+   * <p>This constructor is used through super() chaining
+   * by the DBEditObject check-out constructor.</p>
    */
 
   DBObject(DBObjectBase objectBase)
@@ -303,10 +306,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <p>Constructor to create an object of type objectBase
+   * with the specified object number.</p>
    *
-   * Constructor to create an object of type objectBase
-   * with the specified object number.
-   *
+   * <p>This is used through super() chaining by the DBEditObject
+   * create object constructor.</p>
    */
 
   DBObject(DBObjectBase objectBase, int id)
