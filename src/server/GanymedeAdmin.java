@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -659,6 +659,35 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     Ganymede.debug("Schema dumped");
 
     return true;
+  }
+
+  /**
+   *
+   * dump the current db schema to disk
+   *
+   */
+
+  public void runInvidTest()
+  {
+    if (!adminName.equals("supergash"))
+      {
+	return;
+      }
+
+    GanymedeAdmin.setState("Running Invid Test");
+	 
+    if (Ganymede.server.checkInvids())
+      {
+	Ganymede.debug("Invid Test completed successfully, no problems boss.");
+      }
+    else
+      {
+	Ganymede.debug("Invid Test encountered problems.  Oi, you're in the soup now, boss.");
+      }
+
+    GanymedeAdmin.setState("Normal Operation");
+
+    return;
   }
 
   /**
