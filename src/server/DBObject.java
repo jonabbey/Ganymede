@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.21 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.22 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -892,5 +892,110 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    out.println(field.key());
 	  }
       }    
+  }
+
+  /**
+   *
+   * Generate a dump row for the query processor, which
+   * includes a string representation of the Invid and
+   * the label of this object.
+   *
+   */
+
+  synchronized public String resultDump(DBSession session)
+  {
+    StringBuffer buffer = new StringBuffer();
+
+    /* -- */
+
+    // first thing you do is insert a representation for the Invid
+
+    buffer.append(getInvid().toString());
+    buffer.append("|");
+
+    char[] chars = getLabel().toCharArray();
+    
+    for (int j = 0; j < chars.length; j++)
+      {
+	if (chars[j] == '|')
+	  {
+	    buffer.append("\\|");
+	  }
+	else if (chars[j] == '\n')
+	  {
+	    buffer.append("\\\n");
+	  }
+	else if (chars[j] == '\\')
+	  {
+	    buffer.append("\\\\");
+	  }
+	else
+	  {
+	    buffer.append(chars[j]);
+	  }
+      }
+
+    buffer.append("\n");
+
+    return buffer.toString();
+	
+  }
+
+  /**
+   *
+   * Generate a dump row for the fast query processor
+   *
+   */
+
+  synchronized public String dump(DBSession session)
+  {
+    DBField field;
+    StringBuffer buffer = new StringBuffer();
+    char[] chars;
+    
+    /* -- */
+
+    // first thing you do is insert a representation for the Invid
+
+    buffer.append(getInvid().toString());
+    buffer.append("|");
+
+    for (int i = 0; i < objectBase.sortedFields.size(); i++)
+      {
+	field = (DBField) fields.get(((DBObjectBaseField)objectBase.sortedFields.elementAt(i)).getKey());
+
+	// need to do permissions checking right here
+
+	if (field != null)
+	  {
+	    chars = field.getValueString().toCharArray();
+	    
+	    for (int j = 0; j < chars.length; j++)
+	      {
+		if (chars[j] == '|')
+		  {
+		    buffer.append("\\|");
+		  }
+		else if (chars[j] == '\n')
+		  {
+		    buffer.append("\\\n");
+		  }
+		else if (chars[j] == '\\')
+		  {
+		    buffer.append("\\\\");
+		  }
+		else
+		  {
+		    buffer.append(chars[j]);
+		  }
+	      }
+	  }
+	
+	buffer.append("|");
+      }
+
+    buffer.append("\n");
+
+    return buffer.toString();
   }
 }
