@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.59 $ %D%
+   Version: $Revision: 1.60 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3730,7 +3730,15 @@ class PersonaListener implements ActionListener{
 	{
 	  StringDialog d = new StringDialog(resource);
 	  result = d.DialogShow();
-	  password = (String)result.get("Password:");
+
+	  if (result != null)
+	    {
+	      password = (String)result.get("Password:");
+	    }
+	  else
+	    {
+	      return;		// they canceled.
+	    }
 	}
       else
 	{
