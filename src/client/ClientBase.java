@@ -8,7 +8,7 @@
    what client is written.
    
    Created: 31 March 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,52 +79,67 @@ public class ClientBase extends UnicastRemoteObject implements Client {
    */
 
   public ClientBase(String serverURL, ClientListener listener) throws RemoteException
-  {
-    super();    // UnicastRemoteObject can throw RemoteException 
+    {
+      super();    // UnicastRemoteObject can throw RemoteException 
 
-    /* -- */
+      /* -- */
 
-    if (listener == null || serverURL == null || serverURL.length() == 0)
-      {
-	throw new IllegalArgumentException("bad argument");
-      }
+      if (listener == null || serverURL == null || serverURL.length() == 0)
+	{
+	  throw new IllegalArgumentException("bad argument");
+	}
+    
+      listeners.addElement(listener);
 
-    listeners.addElement(listener);
+      if (debug)
+	{
+	  System.err.println("Initializing BaseClient object");
+	}
 
-    if (debug)
-      {
-	System.err.println("Initializing BaseClient object");
-      }
-
-    try
-      {
-	connected = true;
-
-	Remote obj = Naming.lookup(serverURL);
-	  
-	if (obj instanceof Server)
-	  {
-	    server = (Server) obj;
-	  }
-      }
-    catch (NotBoundException ex)
-      {
-	connected = false;
+      try
+	{
+	  connected = true;
 	
-	System.err.println("RMI: Couldn't bind to server object\n" + ex );
-      }
-    catch (java.rmi.UnknownHostException ex)
-      {
-	connected = false;
+	  Remote obj = Naming.lookup(serverURL);
 	
-	System.err.println("RMI: Couldn't find server\n" + serverURL );
-      }
-    catch (java.net.MalformedURLException ex)
-      {
-	connected = false;
-	  	  
-	System.err.println("RMI: Malformed URL " + serverURL );
-      }
+	  if (obj instanceof Server)
+	    {
+	      server = (Server) obj;
+	    }
+	}
+      catch (NotBoundException ex)
+	{
+	  connected = false;
+	
+	  if (debug)
+	    {
+	      System.err.println("RMI: Couldn't bind to server object\n" + ex );
+	    }
+	
+	  sendErrorMessage("RMI: Couldn't bind to server object\n" + ex );
+	}
+      catch (java.rmi.UnknownHostException ex)
+	{
+	  connected = false;
+	
+	  if (debug)
+	    {
+	      System.err.println("RMI: Couldn't find server\n" + serverURL );
+	    }
+	
+	  sendErrorMessage("RMI: Couldn't find server\n" + serverURL );
+	}
+      catch (java.net.MalformedURLException ex)
+	{
+	  connected = false;
+	
+	  if (debug)
+	    {
+	      System.err.println("RMI: Malformed URL " + serverURL );
+	    }
+	
+	  sendErrorMessage("RMI: Malformed URL " + serverURL );
+    }
   }
 
   /**
