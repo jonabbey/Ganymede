@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 2002/03/13 18:44:33 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 2002/03/13 19:13:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -877,12 +877,12 @@ public class DBEditSet {
   }
 
   /**
-   * <p>commit is used to cause all changes in association with
-   * this DBEditSet to be performed.  If commit() cannot make
-   * the changes for any reason, commit() will return a ReturnVal
-   * indicating failure and the cause of the commit failure, and
-   * will leave the transaction open for a subsequent commit() attempt,
-   * or an abort().</p>
+   * <p>commit is used to cause all changes in association with this
+   * DBEditSet to be performed.  If commit() cannot make the changes
+   * for any reason, commit() will return a ReturnVal indicating
+   * failure and the cause of the commit failure.  Depending on the
+   * source of the failure, the transaction may be left open for a
+   * subsequent transaction commit or release.</p>
    *
    * <p>The returned {@link arlut.csd.ganymede.ReturnVal ReturnVal}
    * will have doNormalProcessing set to false if the transaction was
@@ -891,7 +891,8 @@ public class DBEditSet {
    * boolean as an indicator that the transaction was simply wiped out
    * and a new transaction should be opened for subsequent activity.
    * A true doNormalProcessing value indicates that the client can try
-   * the commit again at a later time, or manually cancel.</p>
+   * the commit again at a later time, perhaps after making changes to
+   * fix the commit problem.</p>
    *
    * <p>This method is synchronized and calls a synchronized method on
    * the DBSession which contains this DBEditSet.  Because of this,
