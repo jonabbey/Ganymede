@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,16 +22,11 @@ import java.rmi.*;
 import java.rmi.server.*;
 import java.util.*;
 
-import gjt.ImageCanvas;
-import gjt.Util;
-import gjt.Box;
-import gjt.RowLayout;
 import jdj.*;
 
 import arlut.csd.JDialog.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.DataComponent.*;
-import arlut.csd.ganymede.*;
 import arlut.csd.ganymede.client.*;
 import arlut.csd.Util.*;
 import arlut.csd.Tree.*;
@@ -76,6 +71,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   Session session;
   glogin _myglogin;
 
+  long lastClick = 0;
+
   // set up a bunch of borders
   public EmptyBorder
     emptyBorder5 = (EmptyBorder)BorderFactory.createEmptyBorder(5,5,5,5),
@@ -85,6 +82,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     raisedBorder = new BevelBorder(BevelBorder.RAISED),
     loweredBorder = new BevelBorder(BevelBorder.LOWERED);
       
+  public LineBorder
+    lineBorder = new LineBorder(Color.black);
 
   public CompoundBorder
     statusBorder = new CompoundBorder(loweredBorder, emptyBorder5),
@@ -105,6 +104,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
                                      // Create and Delete are pending on the Commit button. 
    
   protected Hashtable
+    templateHash,
     cachedLists = new Hashtable();
 
 
@@ -170,8 +170,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   JMenuItem 
     logoutMI,
     removeAllMI,
-    rebuildTreeMI,
+    rebuildTreeMI;
+
+
+  JMenuItem
     editObjectMI,
+    viewObjectMI,
+    cloneObjectMI,
+    deleteObjectMI,
+    inactivateObjectMI,
     menubarQueryMI = null;
 
   JMenuItem
@@ -179,6 +186,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     win95MI;
 
   JMenu 
+    actionMenu,
     windowMenu,
     fileMenu,
     LandFMenu,
@@ -190,20 +198,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   WindowBar
     windowBar;
 
-  JDialog
-    editObjectDialog = null;
-  
-  GridBagLayout
-    editObjectLayout;
-
-  GridBagConstraints
-    editObjectConstraint;
-
-  JTextField
-    editObjectText;
-
-  JComboBox
-    editObjectType;
+  openObjectDialog
+    openDialog;
 
   /* -- */
 
@@ -232,11 +228,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     mainPanel = new JPanel(true);
     mainPanel.setLayout(new BorderLayout());
 
-    setLayout(new BorderLayout());
-    add("Center", mainPanel);
+    getContentPane().setLayout(new BorderLayout());
+    getContentPane().add("Center", mainPanel);
 
     //BorderLayout layout = new BorderLayout();
     //setLayout( layout );
+
+    templateHash = new Hashtable();
 
     if (debug)
       {
@@ -245,7 +243,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // Make the menu bar
     menubar = new JMenuBar();    
-
+    menubar.setBorderPainted(true);
+    
     // File menu
     fileMenu = new JMenu("File");
     //fileMenu.setBackground(ClientColor.menu);
@@ -257,29 +256,54 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rebuildTreeMI = new JMenuItem("Rebuild Tree");
     rebuildTreeMI.addActionListener(this);
 
-    editObjectMI = new JMenuItem("Edit Object");
-    editObjectMI.addActionListener(this);
 
-    menubarQueryMI = new JMenuItem("Query");
-    menubarQueryMI.addActionListener(this);
-
-    fileMenu.add(menubarQueryMI);
-    fileMenu.add(editObjectMI);
-    fileMenu.addSeparator();
     fileMenu.add(rebuildTreeMI);
     fileMenu.add(removeAllMI);
     fileMenu.addSeparator();
     fileMenu.add(logoutMI);
 
-    // Window list menu
+    // Action menu
+    actionMenu = new JMenu("Actions");
+
+    editObjectMI = new JMenuItem("Edit Object");
+    editObjectMI.setActionCommand("open object for editing");
+    editObjectMI.addActionListener(this);
+
+    viewObjectMI = new JMenuItem("View Object");
+    viewObjectMI.setActionCommand("open object for viewing");
+    viewObjectMI.addActionListener(this);
+    
+    cloneObjectMI = new JMenuItem("Clone Object");
+    cloneObjectMI.setActionCommand("choose an object for cloning");
+    cloneObjectMI.addActionListener(this);
+
+    deleteObjectMI = new JMenuItem("Delete Object");
+    deleteObjectMI.setActionCommand("delete an object");
+    deleteObjectMI.addActionListener(this);
+
+    inactivateObjectMI = new JMenuItem("Inactivate Object");
+    inactivateObjectMI.setActionCommand("inactivate an object");
+    inactivateObjectMI.addActionListener(this);
+
+    menubarQueryMI = new JMenuItem("Query");
+    menubarQueryMI.addActionListener(this);
+
+    actionMenu.add(menubarQueryMI);
+    actionMenu.addSeparator();
+    actionMenu.add(editObjectMI);
+    actionMenu.add(cloneObjectMI);
+    actionMenu.add(viewObjectMI);
+    actionMenu.add(deleteObjectMI);
+    actionMenu.add(inactivateObjectMI);
+
+    
+
+    // windowMenu
+
     windowMenu = new JMenu("Windows");
-    //windowMenu.setBackground(ClientColor.menu);
-    //windowMenu.setForeground(ClientColor.menuText);
 
     // Look and Feel menu
     LandFMenu = new JMenu("Look");
-    //LandFMenu.setBackground(ClientColor.menu);
-    //LandFMenu.setForeground(ClientColor.menuText);
     roseMI = new JMenuItem("Rose");
     roseMI.addActionListener(this);
     win95MI = new JMenuItem("Win95");
@@ -296,10 +320,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    PersonaMenu = new JMenu("Persona");
 	    personaListener = new PersonaListener(session, this);
+	    ButtonGroup personaGroup = new ButtonGroup();
 	    
 	    for (int i = 0; i < personae.size(); i++)
 	      {
-		JMenuItem mi = new JMenuItem((String)personae.elementAt(i));
+		JRadioButtonMenuItem mi = new JRadioButtonMenuItem((String)personae.elementAt(i));
+		personaGroup.add(mi);
 		mi.addActionListener(personaListener);
 		PersonaMenu.add(mi);
 	      }
@@ -313,22 +339,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     menubar.add(fileMenu);
     menubar.add(LandFMenu);
+    menubar.add(actionMenu);
     menubar.add(windowMenu);
     if (personasExist)
       {
 	menubar.add(PersonaMenu);
       }
-    menubar.setBorder(emptyBorder5);
-    menubar.setBackground(ClientColor.menu);
-    menubar.setForeground(ClientColor.menuText);
-
-    JPanel mp = new JPanel(new BorderLayout());
-    mp.add("Center", menubar);
-    mp.setBorder(raisedBorder);
-    mp.setOpaque(true);
-    mp.setBackground(ClientColor.menu);
-    //setJMenuBar(menubar);
-    add("North", mp);
+    
+    setJMenuBar(menubar);
 
     // Create menus for the tree
 
@@ -461,24 +479,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rightTop.setBorder(statusBorderRaised);
     rightTop.setLayout(new BorderLayout());
     rightTop.add("West", rightL);
+    timerLabel = new JLabel("                                       ", JLabel.RIGHT);
 
-    timerLabel = new JLabel();
-    timerLabel.setMinimumSize(new Dimension(100,5));
     timer = new connectedTimer(timerLabel, 5000);
+    timerLabel.setMinimumSize(new Dimension(200,timerLabel.getPreferredSize().height));
     rightTop.add("East", timerLabel);
-
+    
     rightP.add("North", rightTop);
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
     JPanel bottomButtonP = new JPanel(false);
-    JPanel leftButtonP = new JPanel(false);
-    JPanel rightButtonP = new JPanel(false);
-    bottomButtonP.setLayout(new BorderLayout());
-    bottomButtonP.add("West", leftButtonP);
-    bottomButtonP.add("Center", rightButtonP);
+    //JPanel leftButtonP = new JPanel(false);
+    //bottomButtonP.setLayout(new BorderLayout());
+    //bottomButtonP.add("West", leftButtonP);
     rightP.add(bottomButtonP,"South");
-    leftButtonP.setLayout(new RowLayout());
-    rightButtonP.setLayout(new RowLayout());
 
     // Taskbar to track windows
     //WindowBar windowBar = new WindowBar(wp, rightP);
@@ -489,17 +503,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     commit.setBackground(Color.lightGray);
     commit.setForeground(Color.black);
     commit.setToolTipText("Click this to commit all changes to database");
+    commit.addActionListener(this);
+
     cancel = new JButton("Cancel");
     cancel.setOpaque(true);
     cancel.setBackground(Color.lightGray);
     cancel.setForeground(Color.black);
     cancel.setToolTipText("Click this to cancel all changes");
-    commit.addActionListener(this);
     cancel.addActionListener(this);
 
-    leftButtonP.add(commit);
-    leftButtonP.add(cancel);
-    //rightButtonP.add(windowBar);
+    bottomButtonP.add(commit);
+    bottomButtonP.add(cancel);
 
     sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftP, rightP);
    
@@ -550,6 +564,28 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     setSize(800, 600);
     show();
   }
+
+  /*
+  public void invalidate()
+  {
+    System.out.println("--Invalidate gclient");
+    super.invalidate();
+  }
+
+  public void validate()
+  {
+    System.out.println("--validate gclient");
+    super.validate();
+  }
+
+  public void doLayout()
+  {
+    System.out.println("{{doLayout gclient: ");
+    super.doLayout();
+    System.out.println("}}doLayout gclient over");
+  }
+
+  */
 
   public void update(Graphics g)
   {
@@ -1106,106 +1142,192 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    */
   void editObject()
   {
-    if (editObjectDialog == null)
+    if (openDialog == null)
       {
-	editObjectDialog = new JDialog(this, "Edit an object", false);
+	openDialog = new openObjectDialog(this);
+      }
 
-	editObjectLayout = new GridBagLayout();
-	editObjectConstraint = new GridBagConstraints();
-	
-	editObjectDialog.getContentPane().setLayout(new BorderLayout());
-	JPanel middle = new JPanel(editObjectLayout);
-	editObjectDialog.getContentPane().add(middle, BorderLayout.CENTER);
-	editObjectConstraint.insets = new Insets(4,4,4,4);
+    openDialog.setText("Open object for editing");
 
-	JLabel titleL = new JLabel("Choose and perish:", SwingConstants.CENTER);
-	titleL.setOpaque(true);
-	titleL.setBorder(emptyBorder5);
-	
-	editObjectConstraint.gridx = 0;
-	editObjectConstraint.gridy = 0;
-	editObjectConstraint.gridwidth = 4;
-	editObjectConstraint.fill = GridBagConstraints.HORIZONTAL;
-	editObjectLayout.setConstraints(titleL, editObjectConstraint);
-	middle.add(titleL);
+    Invid invid = openDialog.chooseInvid();
 
-	editObjectConstraint.fill = GridBagConstraints.NONE;
-
-	editObjectType = new JComboBox();
-	Vector bases = getBaseList();
-	Base thisBase = null;
+    if (invid == null)
+      {
+	System.out.println("Canceled");
+      }
+    else
+      {
 	try
 	  {
-	    for(int i = 0; i < bases.size(); i++)
+	    wp.addWindow(session.edit_db_object(invid), true);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not edit object: " + rx);
+	  }
+      }
+  
+
+  }
+  /**
+   * Open an object for viewing.
+   *
+   * This displays a window with a chooser for the base and field for the name.
+   *
+   */
+  void viewObject()
+  {
+    if (openDialog == null)
+      {
+	openDialog = new openObjectDialog(this);
+      }
+
+    openDialog.setText("Open object for viewing");
+
+    Invid invid = openDialog.chooseInvid();
+
+    if (invid == null)
+      {
+	System.out.println("Canceled");
+      }
+    else
+      {
+	try
+	  {
+	    wp.addWindow(session.view_db_object(invid), false);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not edit object: " + rx);
+	  }
+      }
+  
+
+  }
+
+  void cloneObject()
+  {
+    if (openDialog == null)
+      {
+	openDialog = new openObjectDialog(this);
+      }
+
+    openDialog.setText("Choose object to be cloned");
+
+    Invid invid = openDialog.chooseInvid();
+
+    if (invid == null)
+      {
+	System.out.println("Canceled");
+      }
+    else
+      {
+	try
+	  {
+	    wp.addWindow(session.clone_db_object(invid), true);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not edit object: " + rx);
+	  }
+      }
+  }
+
+  void inactivateObject()
+  {
+    if (openDialog == null)
+      {
+	openDialog = new openObjectDialog(this);
+      }
+
+    openDialog.setText("Choose object to be inactivated");
+
+    Invid invid = openDialog.chooseInvid();
+
+    if (invid == null)
+      {
+	System.out.println("Canceled");
+      }
+    else
+      {
+	try
+	  {
+	    StringDialog d = new StringDialog(this, "Verify invalidation", "Are you sure you want to inactivate " + session.viewObjectLabel(invid), "Yes", "No");
+	    Hashtable result = d.DialogShow();
+	    if (result == null)
 	      {
-		thisBase = (Base)bases.elementAt(i);
-		String name = thisBase.getName();
-		System.out.println("Checking: " + name);
-		if (name.startsWith("Embedded:"))
+		setStatus("Cancelled!");
+	      }
+	    else
+	      {
+		setStatus("inactivating " + invid);
+		boolean ok = session.inactivate_db_object(invid);
+		if (ok)
 		  {
-		    if (debug)
-		      {
-			System.out.println("Skipping embedded field: " + name);
-		      }
+		    setStatus("Object inactivated.");
 		  }
 		else
 		  {
-		    listHandle lh = new listHandle(name, new Short(thisBase.getTypeID()));
-		    editObjectType.addItem(lh);
+		    setStatus("Could not inactivate object.");
+		    arlut.csd.JDialog.JErrorDialog ed = new arlut.csd.JDialog.JErrorDialog(this, "Could not inactivate object: " + session.getLastError());
 		  }
 	      }
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Could not get base information");
+	    throw new RuntimeException("Could not verify invid to be inactivated: " + rx);
 	  }
-
-	editObjectConstraint.gridx = 0;
-	editObjectConstraint.gridy = 1;
-	editObjectConstraint.gridwidth = 2;
-	JLabel oType = new JLabel("Object Type:"); 
-	editObjectLayout.setConstraints(oType, editObjectConstraint);
-	middle.add(oType);
-	editObjectConstraint.gridx = 2;
-	editObjectLayout.setConstraints(editObjectType, editObjectConstraint);
-	middle.add(editObjectType);
-	
-	editObjectText = new JTextField(20);
-	JLabel editTextL = new JLabel("Object Name:");
-
-	editObjectConstraint.gridx = 0;
-	editObjectConstraint.gridy = 2;
-	editObjectLayout.setConstraints(editTextL, editObjectConstraint);
-	middle.add(editTextL);
-
-	editObjectConstraint.gridx = 2;
-	editObjectLayout.setConstraints(editObjectText, editObjectConstraint);
-	middle.add(editObjectText);
-	
-	editObjectConstraint.gridx = 2;
-	editObjectConstraint.gridy = 3;
-	editObjectConstraint.gridwidth = 1;
-	JButton ok = new JButton("Ok");
-	ok.setActionCommand("Find Object with this name");
-	ok.addActionListener(this);
-	editObjectLayout.setConstraints(ok, editObjectConstraint);
-	middle.add(ok);
-
-
-	JButton neverMind = new JButton("Cancel");
-	neverMind.setActionCommand("Nevermind finding this object");
-	neverMind.addActionListener(this);
-	editObjectConstraint.gridx = 3;
-	editObjectLayout.setConstraints(neverMind, editObjectConstraint);
-	middle.add(neverMind);
-
-
       }
-    
-    editObjectDialog.setBounds(150,100, 200,100);
-    editObjectDialog.pack();
-    editObjectDialog.setVisible(true);
   }
+
+  void deleteObject()
+  {
+    if (openDialog == null)
+      {
+	openDialog = new openObjectDialog(this);
+      }
+
+    openDialog.setText("Choose object to be deleted");
+
+    Invid invid = openDialog.chooseInvid();
+
+    if (invid == null)
+      {
+	System.out.println("Canceled");
+      }
+    else
+      {
+	try
+	  {
+	    StringDialog d = new StringDialog(this, "Verify deletion", "Are you sure you want to delete " + session.viewObjectLabel(invid), "Yes", "No");
+	    Hashtable result = d.DialogShow();
+	    if (result == null)
+	      {
+		setStatus("Cancelled!");
+	      }
+	    else
+	      {
+		setStatus("deleting " + invid);
+		
+		boolean ok = session.remove_db_object(invid);
+		if (ok)
+		  {
+		    setStatus("Object deleted.");
+		  }
+		else
+		  {
+		    setStatus("Could not delete object.");
+		    arlut.csd.JDialog.JErrorDialog ed = new arlut.csd.JDialog.JErrorDialog(this, "Could not delete object: " + session.getLastError());
+		  }
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not verify invid to be inactivated: " + rx);
+	  }
+      }
+  }
+
 
   void logout()
   {
@@ -1374,9 +1496,25 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	rebuildTree();
       }
-    else if (event.getSource() == editObjectMI)
+    else if (event.getActionCommand().equals("open object for editing"))
       {
 	editObject();
+      }
+    else if (event.getActionCommand().equals("open object for viewing"))
+      {
+	viewObject();
+      }
+    else if (event.getActionCommand().equals("choose an object for cloning"))
+      {
+	cloneObject();
+      }
+    else if (event.getActionCommand().equals("delete an object"))
+      {
+	deleteObject();
+      }
+    else if (event.getActionCommand().equals("inactivate an object"))
+      {
+	inactivateObject();
       }
     else if (event.getSource() == logoutMI)
       {
@@ -1405,72 +1543,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	setBasic();
       }
-    else if (event.getActionCommand().equals("Find Object with this name"))
-      {
-	System.out.println("Find it!");
-	String string = editObjectText.getText();
-	if (string == null)
-	  {
-	    setStatus("You are going to have to do better than that.");
-	    return;
-	  }
-
-	if (editObjectType == null)
-	  {
-	    System.out.println("edit object type = null");
-	  }
-
-	listHandle lh = (listHandle)editObjectType.getSelectedItem();
-	Short baseID = (Short)lh.getObject();
-
-	if (debug)
-	  {
-	    System.out.println("BaseID == " + baseID);
-	  }
-
-	//QueryDataNode node = new QueryDataNode(QueryDataNode.STARTSWITH, string);
-	System.out.println("Looking for: " + string);
-	QueryDataNode node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  //Can't access STARTSWITH outside of server package :( need to fix that
-	QueryResult edit_query = null;
-	try
-	  {
-	    edit_query = session.query(new Query(baseID.shortValue(), node, true));
-
-
-	    Vector edit_invids = edit_query.getListHandles();
-	    
-	    if (edit_invids.size() == 1)
-	      {
-		// I don't know if this is enough.  It needs to be added to the changedHash
-		// hash, but i don't know how to find the node right now.  Maybe that node
-		// hasn't even been added yet.  Maybe there should be another hash, of created
-		// nodes, or maybe there already is.
-		wp.addWindow(session.edit_db_object( (Invid)((listHandle)edit_invids.elementAt(0)).getObject()) , true);
-	      }
-	    else if (edit_invids.size() == 0)
-	      {
-		JErrorDialog d = new JErrorDialog(this, "Error finding object", "No object starts with that string.");
-	      }
-	    else
-	      {
-		System.out.println("Too many/too few for now: " + edit_invids.size());
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get query: " + rx);
-	  }
-      }
-    else if (event.getActionCommand().equals("Nevermind finding this object"))
-      {
-	editObjectDialog.setVisible(false);
-      }
     else
       {
 	System.err.println("Unknown action event generated");
       }
   }
-  
 
   // treeCallback methods
 
@@ -1873,21 +1950,21 @@ class PersonaListener implements ActionListener{
     resource = null;
 
   gclient
-    parent;
+    gc;
 
   PersonaListener(Session session, gclient parent)
     {
       this.session = session;
-      this.parent = parent;
+      this.gc = parent;
     }
 
   public void actionPerformed(ActionEvent event)
     {
 
-      if (parent.somethingChanged)
+      if (gc.somethingChanged)
 	{
 	  // need to ask: commit, cancel, abort?
-	  StringDialog d = new StringDialog(parent,
+	  StringDialog d = new StringDialog(gc,
 					    "Changing personas",
 					    "Before changing personas, the transaction must be closed.  Would you like to commit your changes?",
 					    "Commit",
@@ -1895,13 +1972,13 @@ class PersonaListener implements ActionListener{
 	  Hashtable result = d.DialogShow();
 	  if (result == null)
 	    {
-	      parent.setStatus("Persona change cancelled");
+	      gc.setStatus("Persona change cancelled");
 	      return;
 	    }
 	  else
 	    {
-	      parent.setStatus("Committing transaction.");
-	      parent.commitTransaction();
+	      gc.setStatus("Committing transaction.");
+	      gc.commitTransaction();
 	    }
 	}
 
@@ -1909,7 +1986,7 @@ class PersonaListener implements ActionListener{
       boolean personaChangeSuccessful = false;
       if (resource == null)
 	{
-	  resource = new DialogRsrc(parent, "Change Persona", "Enter the persona password:");
+	  resource = new DialogRsrc(gc, "Change Persona", "Enter the persona password:");
 	  resource.addPassword("Password:");
 	}
 
@@ -1937,18 +2014,18 @@ class PersonaListener implements ActionListener{
 	      
 	      if (personaChangeSuccessful)
 		{
-		  parent.setStatus("Successfully changed persona.");
-		  parent.setTitle("Ganymede Client: " + event.getActionCommand() + " logged in.");
-		  parent.commitTransaction();
+		  gc.setStatus("Successfully changed persona.");
+		  gc.setTitle("Ganymede Client: " + event.getActionCommand() + " logged in.");
+		  gc.commitTransaction();
 		}
 	      else
 		{
-		  parent.setStatus("Danger Danger!");
-		  (new StringDialog(parent, "Error: persona no changie", 
-				    "Could not change persona:\n" + parent.getSession().getLastError(),
+		  gc.setStatus("Danger Danger!");
+		  (new StringDialog(gc, "Error: persona no changie", 
+				    "Could not change persona:\n" + gc.getSession().getLastError(),
 				    false)).DialogShow();
 
-		  parent.setStatus("Persona change failed");
+		  gc.setStatus("Persona change failed");
 		}
 	    }
 	  catch (RemoteException rx)
