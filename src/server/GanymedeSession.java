@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.120 $
-   Last Mod Date: $Date: 1999/01/26 05:10:51 $
+   Version: $Revision: 1.121 $
+   Last Mod Date: $Date: 1999/01/26 05:30:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -85,7 +85,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.120 $ %D%
+ * @version $Revision: 1.121 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -2643,7 +2643,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     if (query.linkedQueries != null)
       {
-	DBObjectBase adjunctBase, adjunctContainingBase;
+	DBObjectBase adjunctBase = null;
+	DBObjectBase adjunctContainingBase = null;
 
 	for (int i = 0; i < query.linkedQueries.size(); i++)
 	  {
@@ -2892,7 +2893,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * 
    */
 
-  private final QueryResult intersectQueries(Query query, QueryResult temp_result, DBReadLock rLock)
+  private final QueryResult intersectQueries(Query query, QueryResult temp_result, DBLock rLock)
   {
     if (query.linkedQueries != null)
       {
