@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.117 $
-   Last Mod Date: $Date: 2002/03/14 22:37:17 $
+   Version: $Revision: 1.118 $
+   Last Mod Date: $Date: 2002/03/14 23:13:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -946,17 +946,17 @@ public class DBEditSet {
 	System.err.println(session.key + ": DBEditSet.commit(): entering");
       }
 
+    if (objects == null)
+      {
+	throw new RuntimeException("already committed or released");
+      }
+
     if (mustAbort)
       {
 	release();
 	return Ganymede.createErrorDialog("Forced Transaction Abort",
 					  "The server ran into a non-reversible error while processing this " +
 					  "transaction and forced an abort.");
-      }
-
-    if (objects == null)
-      {
-	throw new RuntimeException("already committed or released");
       }
 
     try
