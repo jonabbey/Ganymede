@@ -3,8 +3,8 @@
 # Ganymede Server RMI build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.7 $
-# Date: $Date: 1999/10/29 16:14:12 $
+# Version: $Revision: 1.8 $
+# Date: $Date: 2000/09/08 02:02:28 $
 #
 ############################################################
 
@@ -28,10 +28,10 @@ RMICOMPILER=$JAVADIR/rmic; export RMICOMPILER
 
 echo "Building rmi stubs and skeletons"
 
-$RMICOMPILER -d $TARGETDIR arlut.csd.ganymede.DBField arlut.csd.ganymede.DBNameSpace arlut.csd.ganymede.DBObject arlut.csd.ganymede.DBObjectBase arlut.csd.ganymede.DBObjectBaseField arlut.csd.ganymede.DBSchemaEdit arlut.csd.ganymede.iAdmin arlut.csd.ganymede.GanymedeAdmin arlut.csd.ganymede.GanymedeServer arlut.csd.ganymede.GanymedeSession 
+$RMICOMPILER -d $TARGETDIR arlut.csd.ganymede.DBField arlut.csd.ganymede.DBNameSpace arlut.csd.ganymede.DBObject arlut.csd.ganymede.DBObjectBase arlut.csd.ganymede.DBObjectBaseField arlut.csd.ganymede.DBSchemaEdit arlut.csd.ganymede.iAdmin arlut.csd.ganymede.GanymedeAdmin arlut.csd.ganymede.GanymedeServer arlut.csd.ganymede.GanymedeSession
 
 $RMICOMPILER -d $TARGETDIR arlut.csd.ganymede.PermissionMatrixDBField arlut.csd.ganymede.InvidDBField arlut.csd.ganymede.StringDBField arlut.csd.ganymede.BooleanDBField arlut.csd.ganymede.DateDBField arlut.csd.ganymede.NumericDBField arlut.csd.ganymede.PasswordDBField arlut.csd.ganymede.IPDBField arlut.csd.ganymede.FloatDBField arlut.csd.ganymede.GanymediatorWizard
 
-$RMICOMPILER -d $TARGETDIR arlut.csd.ganymede.DBBaseCategory arlut.csd.ganymede.stopServerAdmin
+$RMICOMPILER -d $TARGETDIR arlut.csd.ganymede.DBBaseCategory arlut.csd.ganymede.stopServerAdmin arlut.csd.ganymede.GanymedeXMLSession
 
 echo "Done"

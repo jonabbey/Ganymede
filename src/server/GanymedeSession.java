@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.196 $
-   Last Mod Date: $Date: 2000/08/25 21:54:11 $
+   Version: $Revision: 1.197 $
+   Last Mod Date: $Date: 2000/09/08 02:02:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.196 $ $Date: 2000/08/25 21:54:11 $
+ * @version $Revision: 1.197 $ $Date: 2000/09/08 02:02:25 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -492,6 +492,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   boolean remotelyAccessible = false;
 
+  /**
+   * <p>If this session is being driven by a GanymedeXMLSession, this reference
+   * will be non-null.</p>
+   */
+
+  GanymedeXMLSession xSession = null;
+
   /* -- */
 
   /**
@@ -706,6 +713,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   // Non-remote methods (for server-side code)
   //
   //************************************************************
+
+  public void setXSession(GanymedeXMLSession xSession)
+  {
+    this.xSession = xSession;
+  }
 
   public boolean isSuperGash()
   {
@@ -1140,6 +1152,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 							       username,
 							       objects,
 							       null));
+		  }
+	      }
+	    else
+	      {
+		// if we are forced off, and we're running under a GanymedeXMLSession,
+		// tell the GanymedeXMLSession to kick off
+
+		if (xSession != null)
+		  {
+		    xSession.abort();
 		  }
 	      }
 
@@ -6149,7 +6171,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  private void checklogin()
+  void checklogin()
   {
     if (!logged_in)
       {
@@ -6158,4 +6180,5 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     lastActionTime.setTime(System.currentTimeMillis());
   }
+
 }

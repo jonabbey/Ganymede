@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/08/09 02:22:20 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/09/08 02:02:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,4 +90,6 @@ public interface XMLSession extends java.rmi.Remote {
    */
 
   ReturnVal xmlEnd() throws RemoteException;
+
+  void abort() throws RemoteException;
 }

@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/08/31 03:51:12 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/09/08 02:02:28 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -73,7 +73,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2000/08/31 03:51:12 $ $Name:  $
+ * @version $Revision: 1.2 $ $Date: 2000/09/08 02:02:28 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -268,7 +268,7 @@ public class xmlfield implements FieldType {
 		// place, so we know that any value we found should be
 		// an <invid>
 
-		value = new xInvid(nextItem, owner);
+		value = new xInvid(nextItem);
 
 		// fall through to skipToEndField()
 	      }
@@ -303,7 +303,7 @@ public class xmlfield implements FieldType {
 
 	    while (!nextItem.matchesClose("permissions") && !(nextItem instanceof XMLEndDocument))
 	      {
-		xPerm permElement = new xPerm(nextItem, true, owner);
+		xPerm permElement = new xPerm(nextItem, true);
 
 		if (permElement != null)
 		  {
@@ -334,7 +334,7 @@ public class xmlfield implements FieldType {
 	  {
 	    try
 	      {
-		value = new xPassword(nextItem, owner);
+		value = new xPassword(nextItem);
 	      }
 	    catch (NullPointerException ex)
 	      {
@@ -515,7 +515,7 @@ public class xmlfield implements FieldType {
 		  }
 		else
 		  {
-		    newValue = new xInvid(nextItem, owner);
+		    newValue = new xInvid(nextItem);
 		  }
 	      }
 	    else if (fieldDef.getType() == FieldType.IP)
@@ -1525,29 +1525,20 @@ class xInvid {
 
   int num = -1;
 
-  /**
-   * <p>A reference to the xmlobject we were created by, for the purpose
-   * of obtaining a reference to our GanymedeXMLSession.</p>
-   */
-
-  xmlobject owner;
-
   /* -- */
 
-  public xInvid(XMLItem item, xmlobject owner)
+  public xInvid(XMLItem item)
   {
-    this.owner = owner;
-
     if (!item.matches("invid"))
       {
-	owner.xSession.err.println("Unrecognized XML item found when invid element expected: " + item);
+	getXSession().err.println("Unrecognized XML item found when invid element expected: " + item);
 
 	throw new NullPointerException("Bad item!");
       }
 
     if (!item.isEmpty())
       {
-	owner.xSession.err.println("Error, found a non-empty invid element: " + item);
+	getXSession().err.println("Error, found a non-empty invid element: " + item);
 
 	throw new NullPointerException("Bad item!");
       }
@@ -1556,7 +1547,7 @@ class xInvid {
 
     if (typeString == null)
       {
-	owner.xSession.err.println("Missing or malformed invid type in element: " + item);
+	getXSession().err.println("Missing or malformed invid type in element: " + item);
 
 	throw new NullPointerException("Bad item!");
       }
@@ -1573,18 +1564,18 @@ class xInvid {
 	  }
 	else
 	  {
-	    owner.xSession.err.println("Unknown object target in invid field element: " + item);
+	    getXSession().err.println("Unknown object target in invid field element: " + item);
 	    throw new NullPointerException("Bad item!");
 	  }
       }
 
     try
       {
-	typeId = owner.xSession.getTypeNum(typeString);
+	typeId = getXSession().getTypeNum(typeString);
       }
     catch (NullPointerException ex)
       {
-	owner.xSession.err.println("Unknown target type " + typeString + 
+	getXSession().err.println("Unknown target type " + typeString + 
 			   " in invid field element: " + item);
 	throw new NullPointerException("Bad item!");
       }
@@ -1600,7 +1591,7 @@ class xInvid {
   {
     if (objectId != null)
       {
-	return owner.xSession.getInvid(typeId, objectId);
+	return getXSession().getInvid(typeId, objectId);
       }
     else if (num != -1)
       {
@@ -1619,7 +1610,7 @@ class xInvid {
     /* -- */
 
     result.append("<invid type=\"");
-    result.append(owner.xSession.getTypeName(typeId));
+    result.append(getXSession().getTypeName(typeId));
     result.append("\" ");
     
     if (objectId != null)
@@ -1640,6 +1631,16 @@ class xInvid {
       }
 
     return result.toString();
+  }
+
+  private GanymedeXMLSession getXSession()
+  {
+    if (java.lang.Thread.currentThread() instanceof GanymedeXMLSession)
+      {
+	return (GanymedeXMLSession) java.lang.Thread.currentThread();
+      }
+
+    return null;
   }
 }
 
@@ -1662,17 +1663,17 @@ class xPassword {
 
   /* -- */
 
-  public xPassword(XMLItem item, xmlobject owner)
+  public xPassword(XMLItem item)
   {
     if (!item.matches("password"))
       {
-	owner.xSession.err.println("Unrecognized XML item found when password element expected: " + item);
+	getXSession().err.println("Unrecognized XML item found when password element expected: " + item);
 	throw new NullPointerException("Bad item!");
       }
 
     if (!item.isEmpty())
       {
-	owner.xSession.err.println("Error, found a non-empty password element: " + item);
+	getXSession().err.println("Error, found a non-empty password element: " + item);
       }
 
     plaintext = item.getAttrStr("plaintext");
@@ -1719,6 +1720,16 @@ class xPassword {
     result.append("/>");
 
     return result.toString();
+  }
+
+  private GanymedeXMLSession getXSession()
+  {
+    if (java.lang.Thread.currentThread() instanceof GanymedeXMLSession)
+      {
+	return (GanymedeXMLSession) java.lang.Thread.currentThread();
+      }
+
+    return null;
   }
 }
 
@@ -1773,12 +1784,12 @@ class xPerm {
    * object.</p>
    */
 
-  public xPerm(XMLItem item, boolean objectType, xmlobject owner) throws SAXException
+  public xPerm(XMLItem item, boolean objectType) throws SAXException
   {
     while (!(item instanceof XMLElement))
       {
-	owner.xSession.err.println("Unrecognized element encountered in xPerm constructor, skipping: " + item);
-	item = owner.xSession.getNextItem();
+	getXSession().err.println("Unrecognized element encountered in xPerm constructor, skipping: " + item);
+	item = getXSession().getNextItem();
       }
 
     label = ((XMLElement) item).getName();
@@ -1787,7 +1798,7 @@ class xPerm {
 
     if (permbits == null)
       {
-	owner.xSession.err.println("No perm attributes found for xPerm item " + item);
+	getXSession().err.println("No perm attributes found for xPerm item " + item);
       }
     else
       {
@@ -1800,14 +1811,14 @@ class xPerm {
     if (objectType && !item.isEmpty())
       {
 	fields = new Hashtable();
-	item = owner.xSession.getNextItem();
+	item = getXSession().getNextItem();
 
 	while (!item.matchesClose(label) && !(item instanceof XMLEndDocument))
 	  {
-	    xPerm fieldperm = new xPerm(item, false, owner);
+	    xPerm fieldperm = new xPerm(item, false);
 	    fields.put(fieldperm.getName(), fieldperm);
 
-	    item = owner.xSession.getNextItem();
+	    item = getXSession().getNextItem();
 	  }
 
 	if (item instanceof XMLEndDocument)
@@ -1825,5 +1836,15 @@ class xPerm {
   public PermEntry getPermEntry()
   {
     return new PermEntry(view, edit, create, delete);
+  }
+
+  private GanymedeXMLSession getXSession()
+  {
+    if (java.lang.Thread.currentThread() instanceof GanymedeXMLSession)
+      {
+	return (GanymedeXMLSession) java.lang.Thread.currentThread();
+      }
+
+    return null;
   }
 }
