@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,7 @@ import java.util.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
+import java.io.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -32,12 +33,19 @@ import java.rmi.server.Unreferenced;
 
 public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, SchemaEdit {
 
+  private final static boolean debug = true;
+
+  //
+
   private boolean locked;
   Admin console;
   DBStore store;
   Vector oldNameSpaces;
   Hashtable oldBases;
-  short oldMaxBaseId;
+  short maxId;
+  DBBaseCategory rootCategory;
+
+  Hashtable newBases;
 
   /* -- */
 
@@ -68,48 +76,14 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     synchronized (store)
       {
-	oldMaxBaseId = store.maxBaseId;
-	oldBases = new Hashtable();
+	// duplicate the existing category tree
 
-	enum = store.objectBases.elements();
+	maxId = store.maxBaseId;
+	newBases = new Hashtable();
 
-	if (enum == null)
-	  {
-	    System.err.println("DBSchemaEdit constructor: null enum 1");
-	  }
-	else
-	  {
-	    while (enum.hasMoreElements())
-	      {
-		base = (DBObjectBase) enum.nextElement();
-		oldBases.put(base.getKey(), base);
-	      }
-	  }
+	rootCategory = new DBBaseCategory(store, store.rootCategory, newBases, this);
 
-	// replace the bases in the DBStore's hash with
-	// copies.. this preserves the original state of the
-	// DBObjectBases, and will allow us to do the commit/revert
-	// when we finish up with this DBSchemaEdit
-
-	// we just have to be sure to clear the original field when
-	// we commit this schema edit so that garbage collection can
-	// clean up the old bases
-
-	enum = oldBases.elements();
-	if (enum == null)
-	  {
-	    System.err.println("DBSchemaEdit constructor: null enum 2");
-	  }
-	else
-	  {
-	    while (enum.hasMoreElements())
-	      {
-		base = (DBObjectBase) enum.nextElement();
-		store.setBase(new DBObjectBase(base, this));
-	      }
-	  }
-
-	// make copies of all of our namespace
+	// make copies of all of our namespaces.. 
 
 	oldNameSpaces = new Vector();
     
@@ -132,31 +106,112 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   /**
    *
-   * Returns an enumeration of Base references.
+   * Returns the root category node from the server
    *
-   * @see arlut.csd.ganymede.Base
    * @see arlut.csd.ganymede.SchemaEdit
    *
    */
 
-  public Base[] getBases()
+  public Category getRootCategory()
   {
-    Base[] bases;
-    Enumeration enum;
-    int i;
+    return rootCategory;
+  }
+
+  /**
+   *
+   * Method to get a category from the category list, by
+   * it's full path name.
+   *
+   */
+
+  public DBBaseCategory getCategory(String pathName)
+  {
+    DBBaseCategory 
+      bc;
+
+    int
+      tok;
 
     /* -- */
 
-    synchronized (store)
+    if (pathName == null)
       {
-	bases = new Base[store.objectBases.size()];
-	i = 0;
-	
-	enum = store.objectBases.elements();
-	while (enum.hasMoreElements())
+	throw new IllegalArgumentException("can't deal with null pathName");
+      }
+
+    StringReader reader = new StringReader(pathName);
+    StreamTokenizer tokens = new StreamTokenizer(reader);
+
+    tokens.wordChars(Integer.MIN_VALUE, Integer.MAX_VALUE);
+    tokens.ordinaryChar('/');
+
+    tokens.slashSlashComments(false);
+    tokens.slashStarComments(false);
+
+    try
+      {
+	tok = tokens.nextToken();
+
+	bc = rootCategory;
+
+	// The path is going to include the name of the root node
+	// itself (unlike in the UNIX filesystem, where the root node
+	// has no 'name' of its own), so we need to skip into the
+	// root node.
+
+	if (tok == '/')
 	  {
-	    bases[i++] = (Base) enum.nextElement();
+	    tok = tokens.nextToken();
 	  }
+
+	if (tok == StreamTokenizer.TT_WORD && tokens.sval.equals(rootCategory.getName()))
+	  {
+	    tok = tokens.nextToken();
+	  }
+
+	while (tok != StreamTokenizer.TT_EOF && bc != null)
+	  {
+	    // note that slashes are the only non-word token we
+	    // should ever get, so they are implicitly separators.
+	    
+	    if (tok == StreamTokenizer.TT_WORD)
+	      {
+		bc = (DBBaseCategory) bc.getNode(tokens.sval);
+	      }
+	    
+	    tok = tokens.nextToken();
+	  }
+      }
+    catch (IOException ex)
+      {
+	throw new RuntimeException("parse error in getCategory: " + ex);
+      }
+
+    return bc;
+  }
+
+  /**
+   *
+   * Returns a list of bases from the current (non-committed) state of the system.
+   *
+   * @see arlut.csd.ganymede.SchemaEdit
+   *
+   */
+
+  public synchronized Base[] getBases()
+  {
+    Base[] bases;
+    Enumeration enum;
+    int i = 0;
+
+    /* -- */
+
+    bases = new Base[newBases.size()];
+    enum = newBases.elements();
+
+    while (enum.hasMoreElements())
+      {
+	bases[i++] = (Base) enum.nextElement();
       }
 
     return bases;
@@ -174,7 +229,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public Base getBase(short id)
   {
-    return (Base) store.getObjectBase(id);
+    return (Base) newBases.get(new Short(id));
   }
 
   /**
@@ -187,9 +242,24 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    *
    */
 
-  public Base getBase(String baseName)
+  public synchronized Base getBase(String baseName)
   {
-    return (Base) store.getObjectBase(baseName);
+    Enumeration enum = newBases.elements();
+    DBObjectBase base;
+
+    /* -- */
+
+    while (enum.hasMoreElements())
+      {
+	base = (DBObjectBase) enum.nextElement();
+
+	if (base.getName().equals(baseName))
+	  {
+	    return (Base) base;
+	  }
+      }
+
+    return null;
   }
 
   /**
@@ -201,13 +271,18 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * @see arlut.csd.ganymede.SchemaEdit
    */
 
-  public synchronized Base createNewBase()
+  public synchronized Base createNewBase(Category category)
   {
     DBObjectBase base;
+    DBBaseCategory localCat = null;
+    String path;
 
     /* -- */
 
-    System.err.println("createNewBase");
+    if (debug)
+      {
+	Ganymede.debug("DBSchemaEdit: entered createNewBase()");
+      }
 
     if (!locked)
       {
@@ -215,22 +290,63 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new RuntimeException("already released/committed");
       }
 
-    synchronized (store)
+    try
       {
-	try
-	  {
-	    base = new DBObjectBase(store, store.getNextBaseID(), this);
-	  }
-	catch (RemoteException ex)
-	  {
-	    Ganymede.debug("createNewBase: couldn't initialize new ObjectBase" + ex);
-	    throw new RuntimeException("couldn't initialize new ObjectBase" + ex);
-	  }
-
-	Ganymede.debug("created base: " + base.getKey());
-
-	store.setBase(base);
+	base = new DBObjectBase(store, ++maxId, this);
       }
+    catch (RemoteException ex)
+      {
+	Ganymede.debug("createNewBase: couldn't initialize new ObjectBase" + ex);
+	throw new RuntimeException("couldn't initialize new ObjectBase" + ex);
+      }
+
+    if (debug)
+      {
+	Ganymede.debug("DBSchemaEdit: created new base, setting title");
+      }
+
+    String newName = "New Base";
+
+    int i = 2;
+
+    while (getBase(newName) != null)
+      {
+	newName = "New Base " + i++;
+      }
+
+    base.setName(newName);
+    base.setDisplayOrder(0);
+
+    try
+      {
+	path = category.getPath();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("should never happen " + ex);
+      }
+
+    if (debug)
+      {
+	Ganymede.debug("DBSchemaEdit: title is " + newName + ", working to add to category " + path);
+      }
+
+    localCat = getCategory(path);
+
+    if (localCat == null)
+      {
+	Ganymede.debug("DBScemaEdit: createNewBase couldn't find local copy of category object");
+	throw new RuntimeException("couldn't get local version of " + path);
+      }
+
+    localCat.addNode(base, false, true);
+    
+    if (debug)
+      {
+	Ganymede.debug("DBScemaEdit: created base: " + base.getKey());
+      }
+    
+    newBases.put(base.getKey(), base);
 
     return base;
   }
@@ -244,9 +360,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * @see arlut.csd.ganymede.SchemaEdit
    */
 
-  public void deleteBase(Base b)
+  public void deleteBase(Base b) throws RemoteException
   {
     DBObjectBase base;
+    Category parent;
     short id;
 
     /* -- */
@@ -267,10 +384,18 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	Ganymede.debug("deleteBase failure: already released/committed");
 	throw new RuntimeException("already released/committed");
       }
+    
+    base = (DBObjectBase) newBases.get(new Short(id));
 
-    synchronized (store)
+    if (base != null)
       {
-	store.objectBases.remove(new Short(id));
+	parent = base.getCategory();
+	parent.removeNode(base);
+	newBases.remove(new Short(id));
+      }
+    else
+      {
+	throw new IllegalArgumentException("couldn't delete base " + b.getName() + ", not in newBases");
       }
   }
 
@@ -394,7 +519,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * @see arlut.csd.ganymede.SchemaEdit
    */
 
-
   public synchronized boolean deleteNameSpace(String name)
   {
     DBNameSpace ns;
@@ -451,13 +575,14 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	Ganymede.debug("DBSchemaEdit: entered synchronized block");
 
-	enum = store.objectBases.elements();
+	enum = newBases.elements();
 
 	Ganymede.debug("DBSchemaEdit: established enum");
 
 	while (enum.hasMoreElements())
 	  {
 	    base = (DBObjectBase) enum.nextElement();
+
 	    if (base != null)
 	      {
 		Ganymede.debug("got base");
@@ -466,9 +591,16 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	      {
 		Ganymede.debug("did not got base");
 	      }
+
 	    base.clearEditor(this);
 	    base.updateBaseRefs();
 	  }
+
+	// ** need to unlink old objectBases / rootCategory for GC here? **
+
+	store.maxBaseId = maxId;
+	store.objectBases = newBases;
+	store.rootCategory = rootCategory;
 
 	Ganymede.debug("DBSchemaEdit: iterating over namespaces");
 
@@ -487,6 +619,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	store.schemaEditInProgress = false;
 
 	GanymedeAdmin.setState("Normal Operation");
+
+	store.notifyAll();
       }
 
     locked = false;
@@ -515,18 +649,15 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     synchronized (store)
       {
-	// first the object base hash
-	
-	store.maxBaseId = oldMaxBaseId;
-	store.objectBases = oldBases;
-	
-	// and then the namespace vector
+	// restore the namespace vector
 	
 	store.nameSpaces = oldNameSpaces;
 	
 	// unlock the server
 	
 	store.schemaEditInProgress = false;
+
+	store.notifyAll();
       }
 
     Ganymede.debug("DBSchemaEdit: released");
