@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.170 $
-   Last Mod Date: $Date: 2002/02/26 18:44:19 $
+   Version: $Revision: 1.171 $
+   Last Mod Date: $Date: 2002/03/13 05:29:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.170 $ %D%
+ * @version $Revision: 1.171 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2426,6 +2426,7 @@ public final class InvidDBField extends DBField implements invid_field {
     Invid oldRemote, newRemote;
     ReturnVal retVal = null, newRetVal;
     String checkkey = null;
+    boolean checkpointed = false;
 
     /* -- */
 
@@ -2485,76 +2486,85 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
-    // try to do the binding
+    checkpointed = true;
 
-    if (newRemote != null)
+    try
       {
-	newRetVal = bind(oldRemote, newRemote, local);
+	// try to do the binding
 
-	if (newRetVal != null && !newRetVal.didSucceed())
+	if (newRemote != null)
 	  {
-	    eObj.getSession().rollback(checkkey);
-
-	    return newRetVal;
+	    newRetVal = bind(oldRemote, newRemote, local);
+	    
+	    if (newRetVal != null && !newRetVal.didSucceed())
+	      {
+		return newRetVal;
+	      }
+	    
+	    if (retVal != null)
+	      {
+		retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		retVal = newRetVal;
+	      }
+	  }
+	else if (oldRemote != null)
+	  {
+	    newRetVal = unbind(oldRemote, local);
+	    
+	    if (newRetVal != null && !newRetVal.didSucceed())
+	      {
+		return newRetVal;
+	      }
+	    
+	    if (retVal != null)
+	      {
+		retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		retVal = newRetVal;
+	      }
 	  }
 
-	if (retVal != null)
-	  {
-	    retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    retVal = newRetVal;
-	  }
-      }
-    else if (oldRemote != null)
-      {
-	newRetVal = unbind(oldRemote, local);
+	// check our owner, do it.  Checking our owner should
+	// be the last thing we do.. if it returns true, nothing
+	// should stop us from running the change to completion
 	
-	if (newRetVal != null && !newRetVal.didSucceed())
+	newRetVal = eObj.finalizeSetValue(this, value);
+	
+	if (newRetVal == null || newRetVal.didSucceed())
+	  {
+	    this.value = value;
+	    qr = null;
+	    
+	    // success!
+
+	    eObj.getSession().popCheckpoint(checkkey);
+	    checkpointed = false;
+	    
+	    if (retVal != null)
+	      {
+		return retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		return newRetVal;
+	      }
+	  }
+	else
+	  {
+	    return newRetVal;
+	  }
+      }
+    finally
+      {
+	if (checkpointed)
 	  {
 	    eObj.getSession().rollback(checkkey);
-
-	    return newRetVal;
 	  }
-
-	if (retVal != null)
-	  {
-	    retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    retVal = newRetVal;
-	  }
-      }
-
-    // check our owner, do it.  Checking our owner should
-    // be the last thing we do.. if it returns true, nothing
-    // should stop us from running the change to completion
-
-    newRetVal = eObj.finalizeSetValue(this, value);
-
-    if (newRetVal == null || newRetVal.didSucceed())
-      {
-	this.value = value;
-	qr = null;
-
-	eObj.getSession().popCheckpoint(checkkey);
-
-	if (retVal != null)
-	  {
-	    return retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    return newRetVal;
-	  }
-      }
-    else
-      {
-	eObj.getSession().rollback(checkkey);
-
-	return newRetVal;
       }
   }
 
@@ -2591,6 +2601,7 @@ public final class InvidDBField extends DBField implements invid_field {
     Invid oldRemote, newRemote;
     ReturnVal retVal = null, newRetVal;
     String checkkey = null;
+    boolean checkpointed = false;
 
     /* -- */
 
@@ -2656,54 +2667,65 @@ public final class InvidDBField extends DBField implements invid_field {
     checkkey = "setElement" + getName() + owner.getLabel();
 
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpoint this transaction
-    
-    // try to do the binding
 
-    newRetVal = bind(oldRemote, newRemote, local);
+    checkpointed = true;
 
-    if (newRetVal != null && !newRetVal.didSucceed())
+    try
       {
-	eObj.getSession().rollback(checkkey);
+	// try to do the binding
 
-	return newRetVal;
-      }
-
-    if (retVal != null)
-      {
-	retVal.unionRescan(newRetVal);
-      }
-    else
-      {
-	retVal = newRetVal;
-      }
-
-    // check our owner, do it.  Checking our owner should
-    // be the last thing we do.. if it returns true, nothing
-    // should stop us from running the change to completion
-
-    newRetVal = eObj.finalizeSetElement(this, index, value);
-
-    if (newRetVal == null || newRetVal.didSucceed())
-      {
-	values.setElementAt(value, index);
-	qr = null;
-
-	eObj.getSession().popCheckpoint(checkkey);
-
+	newRetVal = bind(oldRemote, newRemote, local);
+	
+	if (newRetVal != null && !newRetVal.didSucceed())
+	  {
+	    return newRetVal;
+	  }
+	
 	if (retVal != null)
 	  {
-	    return retVal.unionRescan(newRetVal);
+	    retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    retVal = newRetVal;
+	  }
+	
+	// check our owner, do it.  Checking our owner should
+	// be the last thing we do.. if it returns true, nothing
+	// should stop us from running the change to completion
+	
+	newRetVal = eObj.finalizeSetElement(this, index, value);
+	
+	if (newRetVal == null || newRetVal.didSucceed())
+	  {
+	    values.setElementAt(value, index);
+	    qr = null;
+
+	    // success!
+	    
+	    eObj.getSession().popCheckpoint(checkkey);
+	    checkpointed = false;
+	    
+	    if (retVal != null)
+	      {
+		return retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		return newRetVal;
+	      }
 	  }
 	else
 	  {
 	    return newRetVal;
 	  }
       }
-    else
+    finally
       {
-	eObj.getSession().rollback(checkkey);
-
-	return newRetVal;
+	if (checkpointed)
+	  {
+	    eObj.getSession().rollback(checkkey);
+	  }
       }
   }
 
@@ -2736,6 +2758,7 @@ public final class InvidDBField extends DBField implements invid_field {
     Invid remote;
     ReturnVal retVal = null, newRetVal;
     String checkkey = null;
+    boolean checkpointed = false;
 
     /* -- */
 
@@ -2804,47 +2827,58 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj.getSession().checkpoint(checkkey); // may block if another thread has already checkpointed this transaction
 
-    newRetVal = bind(null, remote, local);
+    checkpointed = true;
 
-    if (newRetVal != null && !newRetVal.didSucceed())
+    try
       {
-	eObj.getSession().rollback(checkkey);
+	newRetVal = bind(null, remote, local);
 
-	return newRetVal;
-      }
-
-    if (retVal != null)
-      {
-	retVal.unionRescan(newRetVal);
-      }
-    else
-      {
-	retVal = newRetVal;
-      }
-
-    newRetVal = eObj.finalizeAddElement(this, value);
-
-    if (newRetVal == null || newRetVal.didSucceed())
-      {
-	values.addElement(value);
-	qr = null;
-
-	eObj.getSession().popCheckpoint(checkkey);
+	if (newRetVal != null && !newRetVal.didSucceed())
+	  {
+	    return newRetVal;
+	  }
 
 	if (retVal != null)
 	  {
-	    return retVal.unionRescan(newRetVal);
+	    retVal.unionRescan(newRetVal);
 	  }
+	else
+	  {
+	    retVal = newRetVal;
+	  }
+
+	newRetVal = eObj.finalizeAddElement(this, value);
+
+	if (newRetVal == null || newRetVal.didSucceed())
+	  {
+	    values.addElement(value);
+	    qr = null;
+
+	    // success!
+
+	    eObj.getSession().popCheckpoint(checkkey);
+	    checkpointed = false;
+
+	    if (retVal != null)
+	      {
+		return retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		return newRetVal;
+	      }
+	  } 
 	else
 	  {
 	    return newRetVal;
 	  }
-      } 
-    else
+      }
+    finally
       {
-	eObj.getSession().rollback(checkkey);
-
-	return newRetVal;
+	if (checkpointed)
+	  {
+	    eObj.getSession().rollback(checkkey);
+	  }
       }
   }
 
@@ -3338,10 +3372,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 	    else
 	      {
-		// crap, failure. rollback the checkpoint
-
-		session.rollback(ckp_label);
-
 		return retVal;
 	      }
 	  }
@@ -3477,6 +3507,7 @@ public final class InvidDBField extends DBField implements invid_field {
     Invid remote;
     ReturnVal retVal = null, newRetVal;
     String checkkey = null;
+    boolean checkpointed = false;
 
     /* -- */
 
@@ -3532,66 +3563,28 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
+    checkpointed = true;
+
     if (debug)
       {
 	System.err.println("][ InvidDBField.deleteElement() checkpointed " + checkkey);
       }
 
-    // if we are an edit in place object, we don't want to do an
-    // unbinding.. we'll do a deleteDBObject() below, instead.  The
-    // reason for this is that the deleteDBObject() code requires that
-    // the SchemaConstants.ContainerField field be intact to properly
-    // check permissions for embedded objects.
-
-    if (!getFieldDef().isEditInPlace())
+    try
       {
-	newRetVal = unbind(remote, local);
+	// if we are an edit in place object, we don't want to do an
+	// unbinding.. we'll do a deleteDBObject() below, instead.  The
+	// reason for this is that the deleteDBObject() code requires that
+	// the SchemaConstants.ContainerField field be intact to properly
+	// check permissions for embedded objects.
 
-	if (newRetVal != null && !newRetVal.didSucceed())
+	if (!getFieldDef().isEditInPlace())
 	  {
-	    return newRetVal;
-	  }
-
-	if (retVal != null)
-	  {
-	    retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    retVal = newRetVal;
-	  }
-      }
-
-    // finalizeDeleteElement() just gives the DBEditObject a chance to
-    // approve or disapprove deleting an element from this field
-    
-    newRetVal = eObj.finalizeDeleteElement(this, index);
-
-    if (newRetVal == null || newRetVal.didSucceed())
-      {
-	values.removeElementAt(index);
-
-	if (retVal != null)
-	  {
-	    retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    retVal = newRetVal;
-	  }
-
-	// if we are an editInPlace field, unlinking this object means
-	// that we should go ahead and delete the object.
-
-	if (getFieldDef().isEditInPlace())
-	  {
-	    newRetVal = eObj.getSession().deleteDBObject(remote);
+	    newRetVal = unbind(remote, local);
 
 	    if (newRetVal != null && !newRetVal.didSucceed())
 	      {
-		eObj.getSession().rollback(checkkey);
-
-		return newRetVal;	// go ahead and return our error code
+		return newRetVal;
 	      }
 
 	    if (retVal != null)
@@ -3604,25 +3597,72 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 	  }
 
-	// success
+	// finalizeDeleteElement() just gives the DBEditObject a chance to
+	// approve or disapprove deleting an element from this field
+    
+	newRetVal = eObj.finalizeDeleteElement(this, index);
 
-	eObj.getSession().popCheckpoint(checkkey);
-
-	return retVal;
-      }
-    else
-      {
-	eObj.getSession().rollback(checkkey);
-
-	if (newRetVal.getDialog() != null)
+	if (newRetVal == null || newRetVal.didSucceed())
 	  {
-	    return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
-					      "Couldn't finalize\n\n" + newRetVal.getDialog().getText());
+	    values.removeElementAt(index);
+
+	    if (retVal != null)
+	      {
+		retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		retVal = newRetVal;
+	      }
+
+	    // if we are an editInPlace field, unlinking this object means
+	    // that we should go ahead and delete the object.
+
+	    if (getFieldDef().isEditInPlace())
+	      {
+		newRetVal = eObj.getSession().deleteDBObject(remote);
+
+		if (newRetVal != null && !newRetVal.didSucceed())
+		  {
+		    return newRetVal;	// go ahead and return our error code
+		  }
+
+		if (retVal != null)
+		  {
+		    retVal.unionRescan(newRetVal);
+		  }
+		else
+		  {
+		    retVal = newRetVal;
+		  }
+	      }
+
+	    // success
+
+	    eObj.getSession().popCheckpoint(checkkey);
+	    checkpointed = false;
+
+	    return retVal;
 	  }
 	else
 	  {
-	    return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
-					      "Couldn't finalize element deletion\n");
+	    if (newRetVal.getDialog() != null)
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
+						  "Couldn't finalize\n\n" + newRetVal.getDialog().getText());
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
+						  "Couldn't finalize element deletion\n");
+	      }
+	  }
+      }
+    finally
+      {
+	if (checkpointed)
+	  {
+	    eObj.getSession().rollback(checkkey);
 	  }
       }
   }

@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 2002/01/26 04:49:27 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 2002/03/13 05:29:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.104 $ %D%
+ * @version $Revision: 1.105 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -352,9 +352,6 @@ final public class DBSession {
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
-		    rollback(ckp_label);
-		    checkpointed = false;
-
 		    try
 		      {
 			DBObject owner = viewDBObject((Invid) owners.elementAt(i));
@@ -386,9 +383,6 @@ final public class DBSession {
 
 	if (!editSet.addObject(e_object))
 	  {
-	    rollback(ckp_label);
-	    checkpointed = false;
-
 	    return Ganymede.createErrorDialog("Object creation failure",
 					      "Couldn't create the object, because it came pre-linked " +
 					      "to a deleted object.\nDon't worry, this wasn't your fault.\n" +
@@ -426,9 +420,6 @@ final public class DBSession {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		rollback(ckp_label);
-		checkpointed = false;
-
 		return retVal;
 	      }
 	  }
