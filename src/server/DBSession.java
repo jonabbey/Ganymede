@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,7 +32,7 @@ import java.util.*;
  * 
  */
 
-public class DBSession {
+final public class DBSession {
 
   static boolean debug = true;
 
@@ -208,7 +208,7 @@ public class DBSession {
    * @see arlut.csd.ganymede.DBObjectBase 
    */
 
-  public synchronized DBEditObject editDBObject(Invid invid)
+  public DBEditObject editDBObject(Invid invid)
   {
     return editDBObject(invid.getType(), invid.getNum());
   }
@@ -252,6 +252,7 @@ public class DBSession {
 
     if (obj == null)
       {
+	System.err.println("*** couldn't find object, base = " + baseID + ", obj = " + objectID);
 	return null;
       }
 
