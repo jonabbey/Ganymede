@@ -56,7 +56,7 @@
 
 package arlut.csd.ganymede.server;
 
-import arlut.csd.ganymede.common.DDParseException;
+import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
@@ -157,7 +157,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
   {
   }
 
-  public Query transmuteQueryString(String queryString) throws DDParseException
+  public Query transmuteQueryString(String queryString) throws GanyParseException
   {
     QueryLexer lexer = new QueryLexer(new StringReader(queryString));
     QueryParser parser = new QueryParser(lexer);
@@ -175,7 +175,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     if (ast == null)
       {
-	throw new DDParseException("I couldn't parse the query, bub.  Make sure you've parenthesized everything correctly.");
+	throw new GanyParseException("I couldn't parse the query, bub.  Make sure you've parenthesized everything correctly.");
       }
 
     QueryNode root = parse_tree(ast);
@@ -199,7 +199,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     return query;
   }
 
-  private QueryNode parse_tree(AST ast) throws DDParseException
+  private QueryNode parse_tree(AST ast) throws GanyParseException
   {
     this.objectBase = parse_from_tree(ast.getNextSibling());
     this.selectFields = parse_select_tree(ast);
@@ -210,20 +210,20 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     return where_tree;
   }
 
-  private DBObjectBase parse_from_tree(AST ast) throws DDParseException
+  private DBObjectBase parse_from_tree(AST ast) throws GanyParseException
   {
     String from_objectbase = StringUtils.dequote(ast.getFirstChild().getText());
     this.objectBase = Ganymede.db.getObjectBase(from_objectbase);
 
     if (objectBase == null)
       {
-	throw new DDParseException("The objectBase " + from_objectbase + " doesn't exist, bub.");
+	throw new GanyParseException("The objectBase " + from_objectbase + " doesn't exist, bub.");
       }
 
     return this.objectBase;
   }
 
-  private ArrayList parse_select_tree(AST ast) throws DDParseException
+  private ArrayList parse_select_tree(AST ast) throws GanyParseException
   {
     ArrayList selectFields = new ArrayList();
     AST select_node = ast.getFirstChild();
@@ -235,7 +235,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
 	if (field == null)
 	  {
-	    throw new DDParseException("Can't find field " + field_name + " in object base " + objectBase.getName());
+	    throw new GanyParseException("Can't find field " + field_name + " in object base " + objectBase.getName());
 	  }
 
 	selectFields.add(field);
@@ -245,7 +245,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     return selectFields;
   }
 
-  private QueryNode parse_where_clause(AST ast, DBObjectBase base) throws DDParseException
+  private QueryNode parse_where_clause(AST ast, DBObjectBase base) throws GanyParseException
   {
     int root_type;
     QueryNode child1 = null, child2 = null;
@@ -286,12 +286,12 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
 	    if (field == null)
 	      {
-		throw new DDParseException("Can't find field " + field_name + " in object base " + base.getName());
+		throw new GanyParseException("Can't find field " + field_name + " in object base " + base.getName());
 	      }
 	    
 	    if (field.getType() != FieldType.INVID)
 	      {
-		throw new DDParseException("You can only dereference an Invid field, which " + field_name + " isn't.");
+		throw new GanyParseException("You can only dereference an Invid field, which " + field_name + " isn't.");
 	      }
 
 	    short target_objectbase_id = field.getTargetBase();
@@ -331,7 +331,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	    
 	    if (field == null)
 	      {
-		throw new DDParseException("Can't find field " + field_name + " in object base " + base.getName());
+		throw new GanyParseException("Can't find field " + field_name + " in object base " + base.getName());
 	      }
 
 	    field_type = field.getType();
@@ -373,7 +373,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
               }
             else
               {
-              	throw new DDParseException(op + " is not an operation that I understand.");
+              	throw new GanyParseException(op + " is not an operation that I understand.");
               }
           }
         else
@@ -395,7 +395,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
                   }
                 else
                   {
-                    throw new DDParseException(op
+                    throw new GanyParseException(op
                         + " is not an operation that I understand.");
                   }
               }
@@ -412,7 +412,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	
 	if (base != null && scalar_operator != QueryDataNode.NONE && !valid_op(op, field_type))
 	  {
-	    throw new DDParseException("The " + op + " operation is not valid on a " +
+	    throw new GanyParseException("The " + op + " operation is not valid on a " +
 				       base.getName() + "'s " + field_name + " field, which is of type " +
 				       field.getTypeDesc());
 	  }
@@ -421,7 +421,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
       default:
 
-	throw new DDParseException("I couldn't process node type: " + root_type);
+	throw new GanyParseException("I couldn't process node type: " + root_type);
       }
   }
 
@@ -445,7 +445,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     return false;
   }
 
-  private Object parse_argument(String operator, String argument, int argument_type, DBObjectBaseField field) throws DDParseException
+  private Object parse_argument(String operator, String argument, int argument_type, DBObjectBaseField field) throws GanyParseException
   {
     if (field == null)
       {
@@ -461,7 +461,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	    return StringUtils.dequote(argument);
 
 	  default:
-	    throw new DDParseException("Unrecognized argument type parsing argument " + argument);
+	    throw new GanyParseException("Unrecognized argument type parsing argument " + argument);
 	  }
       }
 
@@ -508,11 +508,11 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	      }
 	    catch (ParseException ex)
 	      {
-		throw new DDParseException("I couldn't parse " + argument + " as a date value.");
+		throw new GanyParseException("I couldn't parse " + argument + " as a date value.");
 	      }
 	  }
       }
 
-    throw new DDParseException("The field " + field.getName() + " takes arguments of type " + field.getTypeDesc());
+    throw new GanyParseException("The field " + field.getName() + " takes arguments of type " + field.getTypeDesc());
   }
 }

@@ -80,7 +80,7 @@ import arlut.csd.Util.JythonMap;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
-import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.FieldType;
@@ -2044,7 +2044,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public Object getFieldValue(short fieldID) throws DDPermissionsException
+  public Object getFieldValue(short fieldID) throws GanyPermissionsException
   {
     DBField f = (DBField) getField(fieldID);
 
@@ -2126,7 +2126,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public Vector getFieldValues(short fieldID) throws DDPermissionsException
+  public Vector getFieldValues(short fieldID) throws GanyPermissionsException
   {
     DBField f = (DBField) getField(fieldID);
 

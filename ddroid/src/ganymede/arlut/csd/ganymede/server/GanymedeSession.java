@@ -92,7 +92,7 @@ import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.BaseListTransport;
 import arlut.csd.ganymede.common.CategoryTransport;
 import arlut.csd.ganymede.common.ClientMessage;
-import arlut.csd.ganymede.common.DDParseException;
+import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
@@ -2679,7 +2679,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public synchronized DumpResult dump(String queryString) throws NotLoggedInException, DDParseException
+  public synchronized DumpResult dump(String queryString) throws NotLoggedInException, GanyParseException
   {
     checklogin();
 
@@ -2926,7 +2926,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session 
    */
 
-  public QueryResult query(String queryString) throws NotLoggedInException, DDParseException
+  public QueryResult query(String queryString) throws NotLoggedInException, GanyParseException
   {
     checklogin();
 
@@ -2973,12 +2973,12 @@ final public class GanymedeSession implements Session, Unreferenced {
     return queryDispatch(query, false, true, null, perspectiveObject);
   }
 
-  public QueryResultContainer testQuery(String queryString) throws NotLoggedInException, DDParseException
+  public QueryResultContainer testQuery(String queryString) throws NotLoggedInException, GanyParseException
   {
     return testQuery(queryString, QueryResultContainer.ARRAYROWS);
   }
   
-  public QueryResultContainer testQuery(String queryString, int rowType) throws NotLoggedInException, DDParseException
+  public QueryResultContainer testQuery(String queryString, int rowType) throws NotLoggedInException, GanyParseException
   {
     checklogin();
 

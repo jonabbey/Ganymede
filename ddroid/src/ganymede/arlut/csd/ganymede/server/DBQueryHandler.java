@@ -56,7 +56,7 @@ package arlut.csd.ganymede.server;
 import java.util.Date;
 import java.util.Vector;
 
-import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryAndNode;

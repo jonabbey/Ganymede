@@ -64,7 +64,7 @@ import java.util.Vector;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.Invid;
@@ -886,16 +886,16 @@ public abstract class DBField implements Remote, db_field {
    *
    */
 
-  public Object getValue() throws DDPermissionsException
+  public Object getValue() throws GanyPermissionsException
   {
     if (!verifyReadPermission())
       {
-	throw new DDPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
+	throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (isVector())
       {
-	throw new DDPermissionsException(ts.l("global.oops_vector", getName(), owner.getLabel()));
+	throw new GanyPermissionsException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     return value;
@@ -1138,11 +1138,11 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public Vector getValues() throws DDPermissionsException
+  public Vector getValues() throws GanyPermissionsException
   {
     if (!verifyReadPermission())
       {
-	throw new DDPermissionsException("permission denied to read this field " + 
+	throw new GanyPermissionsException("permission denied to read this field " + 
 					 getName());
       }
 
@@ -1164,11 +1164,11 @@ public abstract class DBField implements Remote, db_field {
    *
    */
 
-  public Object getElement(int index) throws DDPermissionsException
+  public Object getElement(int index) throws GanyPermissionsException
   {
     if (!verifyReadPermission())
       {
-	throw new DDPermissionsException("permission denied to read this field " + getName());
+	throw new GanyPermissionsException("permission denied to read this field " + getName());
       }
 
     if (!isVector())
@@ -1217,7 +1217,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
   
-  public final ReturnVal setElement(int index, Object value) throws DDPermissionsException
+  public final ReturnVal setElement(int index, Object value) throws GanyPermissionsException
   {
     if (!isVector())
       {
@@ -1276,7 +1276,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	return setElement(index, value, true, false);
       }
-    catch (DDPermissionsException ex)
+    catch (GanyPermissionsException ex)
       {
 	throw new RuntimeException(ex);	// should not happen
       }
@@ -1293,7 +1293,7 @@ public abstract class DBField implements Remote, db_field {
    * needed to be passed back about side-effects.</p>
    */
 
-  public final ReturnVal setElement(int index, Object submittedValue, boolean local) throws DDPermissionsException
+  public final ReturnVal setElement(int index, Object submittedValue, boolean local) throws GanyPermissionsException
   {
     return setElement(index, submittedValue, local, false);
   }
@@ -1309,7 +1309,7 @@ public abstract class DBField implements Remote, db_field {
    * needed to be passed back about side-effects.</p>
    */
   
-  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards) throws DDPermissionsException
+  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1325,7 +1325,7 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible.
       {
-	throw new DDPermissionsException("don't have permission to change field /  non-editable object, field " +
+	throw new GanyPermissionsException("don't have permission to change field /  non-editable object, field " +
 					 getName());
       }
 
@@ -1454,7 +1454,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public final ReturnVal addElement(Object value) throws DDPermissionsException
+  public final ReturnVal addElement(Object value) throws GanyPermissionsException
   {
     return rescanThisField(addElement(value, false, false));
   }
@@ -1475,7 +1475,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	return addElement(value, true, false);
       }
-    catch (DDPermissionsException ex)
+    catch (GanyPermissionsException ex)
       {
 	throw new RuntimeException(ex);	// should never happen
       }
@@ -1494,7 +1494,7 @@ public abstract class DBField implements Remote, db_field {
    * @param local If true, permissions checking will be skipped
    */
 
-  public final ReturnVal addElement(Object submittedValue, boolean local) throws DDPermissionsException
+  public final ReturnVal addElement(Object submittedValue, boolean local) throws GanyPermissionsException
   {
     return addElement(submittedValue, local, false);
   }
@@ -1513,7 +1513,7 @@ public abstract class DBField implements Remote, db_field {
    * @param noWizards If true, wizards will be skipped
    */
 
-  public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws DDPermissionsException
+  public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1524,7 +1524,7 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	throw new DDPermissionsException("don't have permission to change field /  non-editable object " + 
+	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " + 
 					 getName());
       }
 
@@ -1639,7 +1639,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public final ReturnVal addElements(Vector values) throws DDPermissionsException
+  public final ReturnVal addElements(Vector values) throws GanyPermissionsException
   {
     return rescanThisField(addElements(values, false, false));
   }
@@ -1665,7 +1665,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	return addElements(values, true, false);
       }
-    catch (DDPermissionsException ex)
+    catch (GanyPermissionsException ex)
       {
 	throw new RuntimeException(ex);	// should never happen
       }
@@ -1700,7 +1700,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	return addElements(values, true, noWizards, partialSuccessOk);
       }
-    catch (DDPermissionsException ex)
+    catch (GanyPermissionsException ex)
       {
 	throw new RuntimeException(ex);	// should never happen
       }
@@ -1724,7 +1724,7 @@ public abstract class DBField implements Remote, db_field {
    * @param local If true, permissions checking will be skipped
    */
 
-  public final ReturnVal addElements(Vector submittedValues, boolean local) throws DDPermissionsException
+  public final ReturnVal addElements(Vector submittedValues, boolean local) throws GanyPermissionsException
   {
     return addElements(submittedValues, local, false);
   }
@@ -1749,7 +1749,7 @@ public abstract class DBField implements Remote, db_field {
    */
 
   public final ReturnVal addElements(Vector submittedValues, boolean local,
-				     boolean noWizards) throws DDPermissionsException
+				     boolean noWizards) throws GanyPermissionsException
   {
     return addElements(submittedValues, local, noWizards, false);
   }
@@ -1778,7 +1778,7 @@ public abstract class DBField implements Remote, db_field {
    */
 
   public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
-					    boolean noWizards, boolean partialSuccessOk) throws DDPermissionsException
+					    boolean noWizards, boolean partialSuccessOk) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1791,7 +1791,7 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	throw new DDPermissionsException("don't have permission to change field /  non-editable object " + 
+	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " + 
 					 getName());
       }
 
@@ -2003,7 +2003,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public final ReturnVal deleteElement(int index) throws DDPermissionsException
+  public final ReturnVal deleteElement(int index) throws GanyPermissionsException
   {
     return rescanThisField(deleteElement(index, false, false));
   }
@@ -2023,7 +2023,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	return deleteElement(index, true, false);
       }
-    catch (DDPermissionsException ex)
+    catch (GanyPermissionsException ex)
       {
 	throw new RuntimeException(ex);	// should never happen
       }
@@ -2038,7 +2038,7 @@ public abstract class DBField implements Remote, db_field {
    * encode an order to rescan this field.</p>
    */
 
-  public final ReturnVal deleteElement(int index, boolean local) throws DDPermissionsException
+  public final ReturnVal deleteElement(int index, boolean local) throws GanyPermissionsException
   {
     return deleteElement(index, local, false);
   }
@@ -2052,7 +2052,7 @@ public abstract class DBField implements Remote, db_field {
    * encode an order to rescan this field.</p>
    */
 
-  public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards) throws DDPermissionsException
+  public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -2062,7 +2062,7 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* GanymedeSession possible
       {
-	throw new DDPermissionsException("don't have permission to change field /  non-editable object " + 
+	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " + 
 					 getName());
       }
 
@@ -2143,7 +2143,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public final ReturnVal deleteElement(Object value) throws DDPermissionsException
+  public final ReturnVal deleteElement(Object value) throws GanyPermissionsException
   {
     return rescanThisField(deleteElement(value, false, false));
   }
@@ -2163,7 +2163,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	return deleteElement(value, true, false);
       }
-    catch (DDPermissionsException ex)
+    catch (GanyPermissionsException ex)
       {
 	throw new RuntimeException(ex);	// should never happen
       }
@@ -2178,7 +2178,7 @@ public abstract class DBField implements Remote, db_field {
    * encode an order to rescan this field.</p>
    */
 
-  public final ReturnVal deleteElement(Object value, boolean local) throws DDPermissionsException
+  public final ReturnVal deleteElement(Object value, boolean local) throws GanyPermissionsException
   {
     return deleteElement(value, local, false);
   }
@@ -2192,11 +2192,11 @@ public abstract class DBField implements Remote, db_field {
    * encode an order to rescan this field.</p>
    */
 
-  public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws DDPermissionsException
+  public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     if (!isEditable(local))	// *sync* GanymedeSession possible
       {
-	throw new DDPermissionsException("don't have permission to change field /  non-editable object " +
+	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " +
 					 getName());
       }
 
@@ -2239,7 +2239,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public ReturnVal deleteAllElements() throws DDPermissionsException
+  public ReturnVal deleteAllElements() throws GanyPermissionsException
   {
     return this.deleteElements(this.getValues());
   }
@@ -2262,7 +2262,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public final ReturnVal deleteElements(Vector values) throws DDPermissionsException
+  public final ReturnVal deleteElements(Vector values) throws GanyPermissionsException
   {
     return rescanThisField(deleteElements(values, false, false));
   }
@@ -2288,7 +2288,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	return deleteElements(values, true, false);
       }
-    catch (DDPermissionsException ex)
+    catch (GanyPermissionsException ex)
       {
 	throw new RuntimeException(ex);	// should never happen
       }
@@ -2309,7 +2309,7 @@ public abstract class DBField implements Remote, db_field {
    * <P>Server-side method only</P>
    */
 
-  public final ReturnVal deleteElements(Vector valuesToDelete, boolean local) throws DDPermissionsException
+  public final ReturnVal deleteElements(Vector valuesToDelete, boolean local) throws GanyPermissionsException
   {
     return deleteElements(valuesToDelete, local, false);
   }
@@ -2329,7 +2329,7 @@ public abstract class DBField implements Remote, db_field {
    * <P>Server-side method only</P>
    */
 
-  public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards) throws DDPermissionsException
+  public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -2342,7 +2342,7 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	throw new DDPermissionsException("don't have permission to change field /  non-editable object " + 
+	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " + 
 					 getName());
       }
 
@@ -2469,7 +2469,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public final boolean containsElement(Object value) throws DDPermissionsException
+  public final boolean containsElement(Object value) throws GanyPermissionsException
   {
     return containsElement(value, false);
   }
@@ -2490,7 +2490,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	return containsElement(value, true);
       }
-    catch (DDPermissionsException ex)
+    catch (GanyPermissionsException ex)
       {
 	throw new RuntimeException(ex);	// should never happen
       }
@@ -2506,11 +2506,11 @@ public abstract class DBField implements Remote, db_field {
    * @param local If false, read permissin is checked for this field
    */
 
-  public boolean containsElement(Object value, boolean local) throws DDPermissionsException
+  public boolean containsElement(Object value, boolean local) throws GanyPermissionsException
   {
     if (!local && !verifyReadPermission())
       {
-	throw new DDPermissionsException("permission denied to read this field " + getName());
+	throw new GanyPermissionsException("permission denied to read this field " + getName());
       }
 
     if (!isVector())

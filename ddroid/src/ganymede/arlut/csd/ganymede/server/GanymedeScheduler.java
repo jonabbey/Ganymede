@@ -61,7 +61,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.common.scheduleHandle;

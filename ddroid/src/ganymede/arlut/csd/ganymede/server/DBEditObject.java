@@ -61,7 +61,7 @@ import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.booleanSemaphore;
-import arlut.csd.ganymede.common.DDPermissionsException;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
@@ -2707,7 +2707,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			    finalResult.unionRescan(retVal);
 			  }
 		      }
-		    catch (DDPermissionsException ex)
+		    catch (GanyPermissionsException ex)
 		      {
 			editset.rollback("del" + label); // *sync*
 
