@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 1999/06/24 00:56:23 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 1999/06/25 02:23:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2233,6 +2233,10 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * <P>This method is not synchronized because all operations performed
    * by this method are either synchronized at a lower level or are
    * atomic.</P>
+   *
+   * <P>Called by {@link arlut.csd.ganymede.DBEditObject DBEditObject}'s
+   * {@link arlut.csd.ganymede.DBEditObject#checkpoint() checkpoint()}
+   * method.</P>
    */
 
   public Object checkpoint()
@@ -2253,6 +2257,10 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * <P>It is used to place a value or set of values that were known to
    * be good during the current transaction back into this field,
    * without creating or changing this DBField's object identity.</P>
+   *
+   * <P>Called by {@link arlut.csd.ganymede.DBEditObject DBEditObject}'s
+   * {@link arlut.csd.ganymede.DBEditObject#rollback(java.util.Hashtable) rollback()}
+   * method.</P>
    */
 
   public synchronized void rollback(Object oldval)

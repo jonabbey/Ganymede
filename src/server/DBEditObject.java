@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 1999/06/25 02:04:15 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 1999/06/25 02:23:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,15 +84,24 @@ import arlut.csd.JDialog.*;
  *
  * <P>There is one case, however, in which a DBEditObject will be
  * present in the server outside of a DBEditSet context, and that is
- * the DBEditObject instance used for the
- * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}'s
- * {@link arlut.csd.ganymede.DBObjectBase#objectHook objectHook} customization
- * object.  In this case, a DBEditObject of the appropriate subclass is
- * created using the
- * {@link arlut.csd.ganymede.DBEditObject#DBEditObject(arlut.csd.ganymede.DBObjectBase) first constructor variant}.
- * A wide variety of methods in the server will make method calls on 
- * the DBObjectBase objectHook to allow a custom DBEditObject subclass to customize
- * the server's behavior.</P>
+ * the DBEditObject instance used for the {@link
+ * arlut.csd.ganymede.DBObjectBase DBObjectBase}'s {@link
+ * arlut.csd.ganymede.DBObjectBase#objectHook objectHook}
+ * customization object.  In this case, a DBEditObject of the
+ * appropriate subclass is created using the {@link
+ * arlut.csd.ganymede.DBEditObject#DBEditObject(arlut.csd.ganymede.DBObjectBase)
+ * first constructor variant}.  A wide variety of methods in the
+ * server will make method calls on the DBObjectBase objectHook to
+ * allow a custom DBEditObject subclass to customize the server's
+ * behavior.  Such methods are labeled <B>*PSEUDOSTATIC*</B>, which
+ * means that those methods are designed not to examine or report on
+ * the internal state of the objectHook, but rather are meant to
+ * operate based only on parameters passed into the method.  These
+ * methods are PSEUDOSTATIC rather than static because if they were
+ * true static methods, every place in the server where such methods
+ * are called would have to use the relatively cumbersome Java
+ * Reflection API rather than being able to call methods on a
+ * DBEditObject instance.</P>
  *
  * <P>See the DBEditObject subclassing guide for more information generally on
  * DBEditObject customization.</P>
@@ -102,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.111 $ $Date: 1999/06/25 02:04:15 $ $Name:  $
+ * @version $Revision: 1.112 $ $Date: 1999/06/25 02:23:50 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -671,7 +680,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
      The following block of methods are intended to be used in static fashion..
      that is, a DBObjectBase can load in a class that extends DBEditObjectBase
      and hold an instance of such as DBObjectBase.objectHook.  The following
-     methods are used in a static fashion, that is they are primarily intended
+     methods are used in a static fashion, that is they are intended
      to perform actions on designated external DBObjects rather than on the
      per-DBObjectBase instance.
 
@@ -1332,6 +1341,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * that the Admin object's name field, if null, can have the owning
    * user's name interposed.</p>
    *
+   * <P>24 June 1999 - note.. the whole virtualized field thing was
+   * put into DBEditObject a long long time ago, to support 'fields'
+   * whose reported value would not actually come from Ganymede's
+   * internal database.  This code has in fact never been used, and
+   * is in its current state should probably not be depended on, as
+   * all the DBEditSet transaction commit / change logging stuff
+   * pays no attention to a virtualized field's value reporting.</P>
+   *
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
@@ -1344,6 +1361,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p>This method provides a hook to return interposed values for
    * fields that have their data massaged by a DBEditObject
    * subclass.</p>
+   *
+   * <P>24 June 1999 - note.. the whole virtualized field thing was
+   * put into DBEditObject a long long time ago, to support 'fields'
+   * whose reported value would not actually come from Ganymede's
+   * internal database.  This code has in fact never been used, and
+   * is in its current state should probably not be depended on, as
+   * all the DBEditSet transaction commit / change logging stuff
+   * pays no attention to a virtualized field's value reporting.</P>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
@@ -2550,6 +2575,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   //
   // ***
 
+  /**
+   * <P>Returns a hashtable mapping Short field id's to their current
+   * value, used by the {@link arlut.csd.ganymede.DBEditSet DBEditSet}
+   * intra-transaction checkpointing logic to capture this object's
+   * state at a given time.</P>
+   *
+   * <P>Each subclass of {@link arlut.csd.ganymede.DBField DBField}
+   * is responsible for implementing its own version of
+   * {@link arlut.csd.ganymede.DBField#checkpoint() checkpoint()} to
+   * stuff its state into an Object for inclusion in this method's
+   * hashtable.</P>
+   */
+
   synchronized final Hashtable checkpoint()
   {
     Enumeration enum;
@@ -2582,6 +2620,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     return result;
   }
+
+  /**
+   * <P>Reinstates this object's state from a hashtable returned
+   * by {@link arlut.csd.ganymede.DBEditObject#checkpoint() checkpoint()},
+   * used by the {@link arlut.csd.ganymede.DBEditSet DBEditSet}
+   * intra-transaction checkpoint rollback logic to restore this object's
+   * state at a given time.</P>
+   *
+   * <P>Each subclass of {@link arlut.csd.ganymede.DBField DBField}
+   * is responsible for implementing its own version of
+   * {@link arlut.csd.ganymede.DBField#rollback(java.lang.Object) rollback()} to
+   * restore its state.</P>
+   */
 
   synchronized final void rollback(Hashtable ckpoint)
   {
@@ -2795,6 +2846,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     Convenience methods for our customization subclasses
 
   ----------------------------------------------------------*/
+
+  /**
+   * <P>Convenience method for our customization subclasses, returns
+   * a reference to the server's internal 'supergash' session
+   * if a DBEditObject subclass needs to do queries, etc., on
+   * the server internally.</P>
+   */
 
   protected final GanymedeSession internalSession()
   {
