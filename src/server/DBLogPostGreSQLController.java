@@ -8,8 +8,8 @@
    
    Created: 26 February 2003
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2003/02/28 03:55:20 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/03/10 19:31:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.sql.Timestamp;
  * arlut.csd.ganymede.DBLog DBLog} class, using a PostGreSQL database
  * for the storage format.</p>
  *
- * @version $Revision: 1.5 $ $Date: 2003/02/28 03:55:20 $
+ * @version $Revision: 1.6 $ $Date: 2003/03/10 19:31:59 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -95,12 +95,10 @@ public class DBLogPostGreSQLController implements DBLogController {
   public synchronized static DBLogPostGreSQLController createController(String hostname,
 									String databaseName, 
 									String username,
-									String password) throws ClassNotFoundException, SQLException
+									String password) throws ResourceInitializationException
   {
-    DBLogPostGreSQLController controller = new DBLogPostGreSQLController(hostname, databaseName,
-									 username, password);
-
-    return controller;
+    return new DBLogPostGreSQLController(hostname, databaseName,
+					 username, password);
   }
 
   /**
@@ -113,15 +111,10 @@ public class DBLogPostGreSQLController implements DBLogController {
 									String databaseName, 
 									int port,
 									String username,
-									String password) throws ClassNotFoundException, SQLException
+									String password) throws ResourceInitializationException
   {
-    DBLogPostGreSQLController controller = new DBLogPostGreSQLController(hostname, 
-									 databaseName,
-									 port,
-									 username,
-									 password);
-
-    return controller;
+    return new DBLogPostGreSQLController(hostname, databaseName, port,
+					 username, password);
   }
 
   // ---
@@ -148,16 +141,27 @@ public class DBLogPostGreSQLController implements DBLogController {
    * arlut.csd.DBLogPostGreSQLController#createController(java.lang.String,
    * java.lang.String, java.lang.String, java.lang.String)
    * createController} method to create instances of this class.</p>
+   *
+   * <p>This constructor should only be called by a synchronized
+   * static method so that the hash of database urls opened is
+   * accessed with proper synchronization.</p>
    */
 
   private DBLogPostGreSQLController(String hostname,
 				    String databaseName,
 				    String username, 
-				    String password) throws ClassNotFoundException, SQLException
+				    String password) throws ResourceInitializationException
   {
     /* -- */
 
-    Class.forName("org.postgresql.Driver");
+    try
+      {
+	Class.forName("org.postgresql.Driver");
+      }
+    catch (ClassNotFoundException ex)
+      {
+	throw new ResourceInitializationException("Couldn't find org.postgresql.Driver class");
+      }
     
     if (hostname == null)
       {
@@ -170,25 +174,33 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     if (databases.containsKey(url))
       {
-	throw new IllegalArgumentException("already have a DBLogPostGreSQLController open on url " + url);
+	throw new ResourceInitializationException("already have a DBLogPostGreSQLController open on url " + url);
       }
     else
       {
 	databases.put(url, Boolean.TRUE);
       }
 
-    if (databases.containsKey(url))
+    try
       {
-	throw new IllegalArgumentException("already have a DBLogPostGreSQLController open on url " + url);
+	con = DriverManager.getConnection(url, username, password);
       }
-    else
+    catch (SQLException ex)
       {
-	databases.put(url, Boolean.TRUE);
+	throw new ResourceInitializationException("Couldn't get connection to database:\n" 
+						  + ex.getMessage());
       }
 
-    con = DriverManager.getConnection(url, username, password);
-    
-    primaryKey = getNextKey();
+    try
+      {
+	primaryKey = getNextKey();
+      }
+    catch (SQLException ex)
+      {
+	close();
+	throw new ResourceInitializationException("Couldn't successfully talk to database:\n"
+						  + ex.getMessage());
+      }
   } 
 
 
@@ -198,19 +210,30 @@ public class DBLogPostGreSQLController implements DBLogController {
    * arlut.csd.DBLogPostGreSQLController#createController(java.lang.String,
    * java.lang.String, int, java.lang.String, java.lang.String)
    * createController} method to create instances of this class.</p>
+   *
+   * <p>This constructor should only be called by a synchronized
+   * static method so that the hash of database urls opened is
+   * accessed with proper synchronization.</p>
    */
 
   private DBLogPostGreSQLController(String hostname,
 				    String databaseName,
 				    int port,
 				    String username, 
-				    String password) throws ClassNotFoundException, SQLException
+				    String password) throws ResourceInitializationException
   {
     String url;
 
     /* -- */
 
-    Class.forName("org.postgresql.Driver");
+    try
+      {
+	Class.forName("org.postgresql.Driver");
+      }
+    catch (ClassNotFoundException ex)
+      {
+	throw new ResourceInitializationException("Couldn't find org.postgresql.Driver class");
+      }
     
     if (hostname == null)
       {
@@ -221,9 +244,35 @@ public class DBLogPostGreSQLController implements DBLogController {
 	url = "jdbc:postgresql://" + hostname + ":" + port + "/" + databaseName;
       }
 
-    con = DriverManager.getConnection(url, username, password);
+    if (databases.containsKey(url))
+      {
+	throw new ResourceInitializationException("already have a DBLogPostGreSQLController open on url " + url);
+      }
+    else
+      {
+	databases.put(url, Boolean.TRUE);
+      }
 
-    primaryKey = getNextKey();
+    try
+      {
+	con = DriverManager.getConnection(url, username, password);
+      }
+    catch (SQLException ex)
+      {
+	throw new ResourceInitializationException("Couldn't get connection to database:\n" 
+						  + ex.getMessage());
+      }
+
+    try
+      {
+	primaryKey = getNextKey();
+      }
+    catch (SQLException ex)
+      {
+	close();
+	throw new ResourceInitializationException("Couldn't successfully talk to database:\n"
+						  + ex.getMessage());
+      }
   } 
 
   private synchronized int getNextKey() throws SQLException
