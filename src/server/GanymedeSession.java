@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1984,8 +1984,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Object Manager refused deletion for " + vObj.getLabel());
       }
     
-    session.deleteDBObject(invid);
-    return null;
+    return session.deleteDBObject(invid);
   }
 
   /**
