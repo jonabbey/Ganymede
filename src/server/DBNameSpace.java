@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2001/05/21 21:31:03 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2001/05/22 02:20:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1222,13 +1222,10 @@ class DBNameSpaceTransaction {
   {
     if (checkpointStack != null)
       {
-	DBNameSpaceCkPoint ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
-
-	while (ckpoint != null)
+	while (checkpointStack.size() != 0)
 	  {
+	    DBNameSpaceCkPoint ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
 	    ckpoint.cleanup();
-
-	    ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
 	  }
 
 	checkpointStack = null;
