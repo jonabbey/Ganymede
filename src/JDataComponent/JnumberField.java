@@ -3,8 +3,8 @@
 
    
    Created: 12 Jul 1996
-   Version: 1.1 97/07/16
-   Module By: Navin Manohar
+   Version: $Revision: 1.11 $ %D%
+   Module By: Navin Manohar, Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 */
 
@@ -15,9 +15,12 @@ import com.sun.java.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.Integer;
-/*******************************************************************
-                                                      JnumberField()
-*******************************************************************/
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                    JnumberField
+
+------------------------------------------------------------------------------*/
 
 /**
  * This class defines an entry field that is capable of handling
@@ -75,24 +78,25 @@ public class JnumberField extends JentryField {
   }
 
   /**
-   * Constructor which uses default fonts,no parent,
-   * default column size, and default foregound/background
-   * colors.
+   * Constructor which uses takes a number of columns, and everything
+   * else default.
    */
-  public JnumberField()
-  {
-    this(JnumberField.DEFAULT_COLS,
-	 true,
-	 false,
-	 0,Integer.MAX_VALUE);
-  }
 
   public JnumberField(int width)
   {
     this(width,
 	 true,
 	 false,
-	 0,0);
+	 0,Integer.MAX_VALUE);
+  }
+
+  /**
+   * Constructor which uses default everything.
+   */
+
+  public JnumberField()
+  {
+    this(JnumberField.DEFAULT_COLS);
   }
  
  /**
@@ -132,6 +136,7 @@ public class JnumberField extends JentryField {
    *
    * @param c the character to check
    */
+
   public boolean isAllowed(char c)
   {
     if (allowedChars.indexOf(c) == -1)
@@ -140,108 +145,85 @@ public class JnumberField extends JentryField {
 	  {
 	    System.err.println("JnumberField.isAllowed(): ruling NO WAY on char '" + c + "'");
 	  }
+
 	return false;
       }
 
     return true;
   }
 
-
   /**
    * returns the value of this JnumberField as an Integer object
+   *
+   * If this field is empty, will return null. If this field is
+   * not empty and has a non-numeric string, will throw a
+   * NumberFormatException.
+   *
    */
-  public Integer getValue()
+
+  public Integer getValue() throws NumberFormatException
   {
-    Integer i = null;
-    try
+    if (getText().equals(""))
       {
-	i = new Integer(getText());
-      }
-    catch (NumberFormatException e)
-      {
-	System.out.println("That's not a number.");
-	i = null;
+	return null;
       }
 
-    return i;
+    return new Integer(getText());
   }
 
   /**
    * sets the value of this JnumberField to num
    *
+   * This method does not trigger a callback to our container.. we
+   * only callback as a result of loss-of-focus brought on by the
+   * user.
+   *
    * @param num the number to use
    */ 
+
   public void setValue(int num)
   {
-    if (limited)
-      {
-	if (num > maxSize || num < minSize)
-	  {
-	    System.out.println("Invalid Parameter: number out of range");
-	    return;
-	  }
-      }
-    
     setValue(new Integer(num));
-
   }
 
   /**
-   * sets the value of this JnumberField using a String object
+   * sets the value of this JnumberField using an Integer object.
    *
-   * @param num the String object to use
-   */
-
-  public void setValue(String num)
-  {
-    if (num == null)
-      return;
-
-    if (num.equals(""))
-      return;
-
-    try
-      {
-	Integer number = new Integer(num);
-	setValue(number);
-      }
-    catch (NumberFormatException e)
-      {
-	System.out.println("That's not a number.");
-	if (allowCallback)
-	  {
-	    try
-	      {
-		my_parent.setValuePerformed(new JValueObject(this, 0,
-							     JValueObject.ERROR,
-							     "Invalid number format."));
-	      }
-	    catch (java.rmi.RemoteException rx)
-	      {
-		System.out.println("Could not send an error callback.");
-	      }
-	  }
-
-	setValue(oldvalue);
-	throw new IllegalArgumentException ("That String is not castable into an Integer. " + e);
-      }
-    
-    oldvalue = getValue();
-
-  }
-
-
-  /**
-   * sets the value of this JnumberField using an Integer object
+   * This method does not trigger a callback to our container.. we
+   * only callback as a result of loss-of-focus brought on by the
+   * user.
    *
    * @param num the Integer object to use
    */
+
   public void setValue(Integer num)
   {
-    if (num == null)
-      return;
+    if (limited)
+      {
+	if (num != null)
+	  {
+	    if (num.intValue() > maxSize || num.intValue() < minSize)
+	      {
+		System.out.println("Invalid Parameter: number out of range");
+		return;
+	      }
+	  }
+      }
 
-    setText(num.toString());
+    // remember the value that is being set.
+
+    oldvalue = num;
+
+    // and set the text field
+
+    if (num != null)
+      {
+	setText(num.toString());
+      }
+    else
+      {
+	setText("");
+      }
   }
 
   /**
@@ -252,6 +234,7 @@ public class JnumberField extends JentryField {
    *
    * @param bool true if a limit is to be set on the range of values
    */
+
   public void setLimited(boolean bool)
   {
     limited = bool;
@@ -317,31 +300,36 @@ public class JnumberField extends JentryField {
 
   public void sendCallback()
   {
-    Integer currentValue = getValue();
+    Integer currentValue;
 
-    if (currentValue == null)
+    try
       {
-	System.out.println("Invalid number format.");
-
+	currentValue = getValue();
+      }
+    catch (NumberFormatException ex)
+      {
 	if (allowCallback)
 	  {
 	    try
 	      {
 		my_parent.setValuePerformed(new JValueObject(this, 0,
 							     JValueObject.ERROR,
-							     "Invalid number format."));
+							     "Not a valid number: " + getText()));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
 		System.out.println("Could not send an error callback.");
 	      }
-
-	    setValue(oldvalue);
 	  }
+
+	// revert the text field
+
+	setValue(oldvalue);
 	return;
       }
 
-    if ((oldvalue != null) && oldvalue.equals(currentValue))
+    if ((currentValue == null && oldvalue == null) ||
+	(oldvalue != null && oldvalue.equals(currentValue)))
       {
 	if (debug)
 	  {
@@ -350,81 +338,80 @@ public class JnumberField extends JentryField {
 	return;
       }
 
-    changed = false;
-
-    int value = Integer.valueOf(getText()).intValue();
+    // check to see if it's in bounds, if we have bounds set.
 
     if (limited)
       {
+	int value = currentValue.intValue();
+
 	if ((value > maxSize) || (value < minSize))
 	  {
-	    setValue(oldvalue.intValue());
+	    // nope, revert.
+
+	    if (allowCallback)
+	      {
+		try
+		  {
+		    my_parent.setValuePerformed(new JValueObject(this, 0,
+								 JValueObject.ERROR,
+								 "Number out of range."));
+		  }
+		catch (java.rmi.RemoteException rx)
+		  {
+		    System.out.println("Could not send an error callback.");
+		  }
+	      }
+
+	    // revert
+
+	    setValue(oldvalue);
 	    return;
 	  }
       }
 
-    try
-      {
-	setValue(Integer.valueOf(getText()).intValue());
-      }
-    catch (NumberFormatException ex)
-      {
-	if (oldvalue == null)
-	  {
-	    setText("");
-	  }
-	else
-	  {
-	    setValue(oldvalue.intValue());
-	  }
-      }
-    catch (IllegalArgumentException iae)
-      {
-	if (oldvalue == null)
-	  {
-	    setText("");
-	  }
-	else
-	  setValue(oldvalue.intValue());
-      }
+    // now, tell somebody, if we need to.
 
-    if (currentValue != null && allowCallback)
+    if (allowCallback)
       {
-	//Do a callback
+	// Do a callback
 
-	System.out.println("Sending callback");
+	if (debug)
+	  {
+	    System.out.println("Sending callback");
+	  }
 
-	boolean b = false;
+	boolean success = false;
 	
-	try {
-
-	b = my_parent.setValuePerformed(new JValueObject(this,currentValue));
-
-	}
-	catch (java.rmi.RemoteException re) {
-
-	  
-	}
-
-	if (!b) 
+	try
 	  {
-	    
-	    if (oldvalue == null)
-	      {
-		setText("");
-	      }
-	    else
-	      {
-		setValue(oldvalue.intValue());
-	      }
+	    success = my_parent.setValuePerformed(new JValueObject(this,currentValue));
+	  }
+	catch (java.rmi.RemoteException re)
+	  {
+	    // success will still be false, that's good enough for us.
+	  }
+
+	if (!success)
+	  {
+	    // revert
+
+	    setValue(oldvalue);
 	  }
 	else
 	  {
+	    // good to go.  We've already got the text set in the text
+	    // field, the user did that for us.  Remember the value of
+	    // it, so we can revert if we need to later.
 
 	    oldvalue = currentValue;
-	    changed = false;
-
 	  }
       }
-    }
+    else
+      {
+	// no one to say no.  Odd, guess nobody cares.. remember our
+	// value anyway.
+
+	oldvalue = currentValue;
+      }
+  }
 }
