@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 2002/03/13 20:48:21 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 2002/03/14 21:45:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -972,13 +972,9 @@ public class DBEditSet {
 	DBDeletionManager.releaseSession(session);
 	commit_updateBases(baseSet);
 	releaseWriteLock();
-	this.deconstruct();	// gc, wake up sleepers
+	this.deconstruct();
 
-	// we're going to return a ReturnVal with doNormalProcessing set to
-	// false to let everyone above us know that we've totally cleared
-	// out this transaction, being as we were successful and all.
-
-	return new ReturnVal(true, false);
+	return null;
       }
     catch (CommitNonFatalException ex)
       {
@@ -1007,7 +1003,9 @@ public class DBEditSet {
   }
 
   /**
-   * <p>Obtain a write lock on all bases modified by this transaction.</p>
+   * <p>Obtain a write lock on all bases modified by this transaction.
+   * This method may block indefinitely, waiting on other transactions
+   * which are in the process of modifying the DBStore hashes.</p>
    *
    * <p>Returns a Vector of DBObjectBases that we have locked if we
    * succeed.</p>
