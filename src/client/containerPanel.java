@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.83 $ %D%
+    Version: $Revision: 1.84 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -620,6 +620,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   public void updateAll()
   {
     // View windows can't be updated.
+
     if (! editable)
       {
 	return;
@@ -686,11 +687,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     // If the containerPanel is not loaded, then we need to keep track
     // of all the fields that need to be updated, and call update on
     // them after the load is finished.
+
     if (!loaded)
       {
 	// If we are not loading yet, then we don't need to worry
 	// about keeping track of the fields.  They will current when
 	// they are first loaded.
+
 	if (loading)
 	  {
 	    for (int i = 0; i < fields.size(); i++)
@@ -706,7 +709,27 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     for (int i = 0; i < fields.size(); i++)
       {
-	c = (Component) shortToComponentHash.get(fields.elementAt(i));
+	Short fieldID = (Short) fields.elementAt(i);
+
+	// if we're not an embedded container panel, check to see if
+	// we should update either the expiration field or the removal
+	// field.
+
+	if (frame != null)
+	  {
+	    if (fieldID.shortValue() == SchemaConstants.ExpirationField)
+	      {
+		frame.refresh_expiration_date_panel();
+		continue;
+	      }
+	    else if (fieldID.shortValue() == SchemaConstants.RemovalField)
+	      {
+		frame.refresh_removal_date_panel();
+		continue;
+	      }
+	  }
+
+	c = (Component) shortToComponentHash.get(fieldID);
 
 	if (c == null)
 	  {
@@ -1287,6 +1310,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * Currently it just saves the labels, and it saves them in random
    * order(from the hash.)  May need another Vector to keep things in order.
    */
+
   public void save(File file)
   {
     FileOutputStream fos = null;
@@ -1354,7 +1378,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public boolean setValuePerformed(JValueObject v)
   {
-
     // Maybe check to see if gc.cancel has the focus?  That might
     // work.
 
@@ -2025,6 +2048,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	setRowVisible(comp, visible);
       }
   }
+
   /**
    *
    * This private method toggles the visibility of a field component
@@ -3284,7 +3308,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    * private helper method to instantiate an ip field in this
    * container panel
-   * */
+   * 
+   */
 
   private void addIPField(ip_field field, 
 			  FieldInfo fieldInfo, 
@@ -3337,9 +3362,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	   fieldInfo.isVisible());
   }
 
+  //
+  //
+  //  STATIC convenience methods
+  //
+  //
+
+
   public static boolean comboBoxContains(JComboBox combo, Object o)
   {
     boolean found = false;
+
+    /* -- */
+
     for (int i = 0; i < combo.getItemCount(); i++)
       {
 	if (combo.getItemAt(i).equals(o))
@@ -3348,9 +3383,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    break;
 	  }
       }
+
     return found;	
   }
 }
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                         stringComboNoneListener
+
+------------------------------------------------------------------------------*/
 
 /**
  * Simple item listener to remove the <none> from a JComboBox of strings
@@ -3359,7 +3401,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
  * be gone.
  * 
  */
+
 class stringComboNoneListener implements ItemListener {
+
   private final boolean debug = false;
 
   JComboBox combo;
