@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -99,7 +99,7 @@ public class directLoader {
     
     Ganymede.loadProperties(args[0]);
       
-    my_server = Ganymede.directInit("db/loader.db");
+    my_server = Ganymede.directInit(Ganymede.dbFilename);
 
     // now login
 
@@ -177,6 +177,8 @@ public class directLoader {
 
 	current_obj = my_client.session.create_db_object(SchemaConstants.PermBase);
 	gashadminPermInvid = current_obj.getInvid();
+
+	System.err.println("Trying to create a new GASHAdmin perm object: " + gashadminPermInvid.toString());
 
 	retVal = current_obj.setFieldValue(SchemaConstants.PermName, "GASH Admin");
 
@@ -371,7 +373,7 @@ public class directLoader {
 
 	    if (adminObj.name != null)
 	      {
-		if (adminObj.name.equals("supergash"))
+		if (adminObj.name.equals(Ganymede.rootname))
 		  {
 		    System.err.println("Skipping over supergash");
 		    continue;
@@ -1151,6 +1153,7 @@ public class directLoader {
     db_object current_obj;
     db_field current_field;
     pass_field p_field;
+    User userObj;
 
     /* -- */
 
@@ -1487,7 +1490,8 @@ public class directLoader {
     Enumeration enum;
     OwnerGroup ogRec;
     db_object current_obj;
-    db_field current_field;
+    db_field current_field, current_field2;
+    User userObj;
 
     /* -- */
 
@@ -1549,6 +1553,18 @@ public class directLoader {
 		else
 		  {
 		    System.err.println("null invid");
+		  }
+
+		// does this user have this group specified as his/her home group?
+		// if so, add him/her to the home users list as well.
+
+		userObj = (User) users.get(username);
+
+		if (userObj.gid == groupObj.gid)
+		  {
+		    System.err.println("-- home group add " + username);
+		    current_field2 = current_obj.getField((short) 262);
+		    current_field2.addElement(invid);
 		  }
 	      }
 	    else
@@ -2132,8 +2148,8 @@ public class directLoader {
 class directLoaderClient extends UnicastRemoteObject implements Client {
 
   protected Server server = null;
-  protected String username = "supergash";
-  protected String password = "dodo";
+  protected String username = Ganymede.rootname;
+  protected String password = Ganymede.defaultrootpassProperty;
   protected Session session = null;
 
   /* -- */
