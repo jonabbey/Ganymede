@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -54,10 +54,14 @@ public class DBJournal {
 
   static final String id_string = "GJournal";
   static final byte major_version = 0;
-  static final byte minor_version = 0;
+  static final byte minor_version = 1;
 
   static final String OPENTRANS = "open";
   static final String CLOSETRANS = "close";
+
+  static final byte CREATE = 1;
+  static final byte EDIT = 2;
+  static final byte DELETE = 3;
 
   // instance variables
 
@@ -74,7 +78,7 @@ public class DBJournal {
     out.writeUTF(DBJournal.id_string);
     out.writeShort(DBJournal.major_version);
     out.writeShort(DBJournal.minor_version);
-    out.writeLong((new Date()).getTime());
+    out.writeLong(System.currentTimeMillis());
   }
 
   /* -- */
@@ -227,9 +231,11 @@ public class DBJournal {
   public synchronized boolean load() throws IOException
   {
     long transaction_time = 0;
+    Date transactionDate = null;
     int object_count = 0;
     boolean EOFok = true;
     Vector entries = null;
+    byte operation;
     short obj_type, obj_id;
     DBObjectBase base;
     DBObject obj;
@@ -265,19 +271,20 @@ public class DBJournal {
 	EOFok = false;
 
 	transaction_time = jFile.readLong();
+	transactionDate = new Date(transaction_time);
 
 	if (debug)
 	  {
-	    System.err.println("Transaction: " + new Date(transaction_time));
+	    System.err.println("Transaction: " + transactionDate);
 	  }
 
-	// read newly created objects
+	// read object information
 
 	object_count = jFile.readInt();
 
 	if (debug)
 	  {
-	    System.err.println("Objects Created: " + object_count);
+	    System.err.println("Objects In Transaction: " + object_count);
 	  }
 
 	if (object_count > 0)
@@ -287,79 +294,57 @@ public class DBJournal {
 
 	for (int i = 0; i < object_count; i++)
 	  {
+	    operation = jFile.readByte();
 	    obj_type = jFile.readShort();
 	    base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
 
-	    obj = new DBObject(base, jFile);
-
-	    if (debug)
+	    switch (operation)
 	      {
-		obj.print(System.err);
+	      case CREATE:
+		
+		obj = new DBObject(base, jFile);
+		
+		if (debug)
+		  {
+		    System.err.print("Create: ");
+		    obj.print(System.err);
+		  }
+
+		entries.addElement(new JournalEntry(base, obj.id, obj));
+
+		break;
+
+	      case EDIT:
+
+		obj = new DBObject(base, jFile);
+
+		if (!base.objectHash.containsKey(new Integer(obj.id)))
+		  {
+		    System.err.println("DBJournal.load(): modified object in the journal does not previously exist in DBStore.");
+		  }
+
+		if (debug)
+		  {
+		    System.err.print("Edit: ");
+		    obj.print(System.err);
+		  }
+
+		entries.addElement(new JournalEntry(base, obj.id, obj));
+
+		break;
+
+	      case DELETE:
+
+		obj_id = jFile.readShort();
+
+		if (debug)
+		  {
+		    System.err.println("Delete: " + base.object_name + ":" + obj_id);
+		  }
+		
+		entries.addElement(new JournalEntry(base, obj_id, null));
+		break;
 	      }
-
-	    entries.addElement(new JournalEntry(base, obj.id, obj));
-	  }
-
-	// read modified objects
-
-	object_count = jFile.readInt();
-
-	if (debug)
-	  {
-	    System.err.println("Objects Modified: " + object_count);
-	  }
-
-	if (object_count > 0)
-	  {
-	    dirty = true;
-	  }
-
-	for (int i = 0; i < object_count; i++)
-	  {
-	    obj_type = jFile.readShort();
-	    base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
-
-	    obj = new DBObject(base, jFile);
-
-	    if (!base.objectHash.containsKey(new Integer(obj.id)))
-	      {
-		System.err.println("DBJournal.load(): modified object in the journal does not previously exist in DBStore.");
-	      }
-
-	    if (debug)
-	      {
-		obj.print(System.err);
-	      }
-
-	    entries.addElement(new JournalEntry(base, obj.id, obj));
-	  }
-
-	// read deleted objects
-
-	object_count = jFile.readInt();
-
-	if (debug)
-	  {
-	    System.err.println("Objects Deleted: " + object_count);
-	  }
-
-	if (object_count > 0)
-	  {
-	    dirty = true;
-	  }
-
-	for (int i = 0; i < object_count; i++)
-	  {
-	    obj_type = jFile.readShort();
-	    base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
-	    obj_id = jFile.readShort();
-
-	    if (debug)
-	      {
-		System.err.println(base.object_name + ":" + obj_id);
-	      }
-
-	    entries.addElement(new JournalEntry(base, obj_id, null));
 	  }
 
 	if ((jFile.readUTF().compareTo(CLOSETRANS) != 0) || 
@@ -370,7 +355,7 @@ public class DBJournal {
 
 	if (debug)
 	  {
-	    System.err.println("Transaction " + transaction_time + " successfully read from Journal.");
+	    System.err.println("Transaction " + transactionDate + " successfully read from Journal.");
 	    System.err.println("Integrating transaction into DBStore memory image.");
 	  }
 
@@ -423,7 +408,7 @@ public class DBJournal {
   public synchronized boolean writeTransaction(DBEditSet editset) throws IOException
   {
     Enumeration enum;
-    DBObject obj;
+    DBEditObject eObj;
     long transaction_time = 0;
     Date now;
 
@@ -440,92 +425,59 @@ public class DBJournal {
     jFile.writeUTF(OPENTRANS);
     jFile.writeLong(transaction_time);
 
-    if (editset.objectsCreated != null)
+    if (editset.objects != null)
       {
 	if (debug)
 	  {
-	    System.err.println("Objects Created : " + editset.objectsCreated.size());
+	    System.err.println("Objects in Transaction: " + editset.objects.size());
 	  }
 
-	jFile.writeInt(editset.objectsCreated.size());
+	jFile.writeInt(editset.object.size());
 
-	enum = editset.objectsCreated.elements();
+	enum = editset.objects.elements();
 
 	while (enum.hasMoreElements())
 	  {
-	    obj = (DBObject) enum.nextElement();
-	    jFile.writeShort(obj.objectBase.type_code);
-	    obj.emit(jFile);
+	    eObj = (DBEditObject) enum.nextElement();
 
-	    if (debug)
+	    switch (eObj.getStatus())
 	      {
-		obj.print(System.err);
-	      }
-	  }
+	      case DBEditObject.CREATING:
+		jFile.writeByte(CREATE);
+		jFile.writeShort(eObj.objectBase.type_code);
+		eObj.emit(jFile);
 
-	dirty = true;
-      }
-    else
-      {
-	jFile.writeInt(0);
-      }
+		if (debug)
+		  {
+		    obj.print(System.err);
+		  }
+		break;
 
-    // note that objectsChanged is actually a vector of
-    // shadowObjects.. we assume that writeTransaction is
-    // called before the shadows are replaced.  We actually
-    // don't care about whether or not objectsChanged are
-    // actually shadows, as long as they are what we want
-    // to be writing out
+	      case DBEditObject.EDITING:
+		jFile.writeByte(EDIT);
+		jFile.writeShort(eObj.objectBase.type_code);
+		eObj.emit(jFile);
+		
+		if (debug)
+		  {
+		    eObj.print(System.err);
+		  }
 
-    if (editset.objectsChanged != null)
-      {
-	if (debug)
-	  {
-	    System.err.println("Objects Changed : " + editset.objectsChanged.size());
-	  }
+		break;
 
-	jFile.writeInt(editset.objectsChanged.size());
+	      case DBEditObject.DELETING:
+		jFile.writeByte(DELETE);
+		jFile.writeShort(eObj.objectBase.type_code);
+		jFile.writeShort(eObj.id);
 
-	enum = editset.objectsChanged.elements();
+		if (debug)
+		  {
+		    System.err.println(obj.objectBase.object_name + " : " + obj.id);
+		  }
+		break;
 
-	while (enum.hasMoreElements())
-	  {
-	    obj = ((DBObject) enum.nextElement());
-	    jFile.writeShort(obj.objectBase.type_code);
-	    obj.emit(jFile);
-
-	    if (debug)
-	      {
-		obj.print(System.err);
-	      }
-	  }
-
-	dirty = true;
-      }
-    else
-      {
-	jFile.writeInt(0);
-      }
-
-    if (editset.objectsDeleted != null)
-      {
-	if (debug)
-	  {
-	    System.err.println("Objects Deleted : " + editset.objectsDeleted.size());
-	  }
-
-	jFile.writeInt(editset.objectsDeleted.size());
-
-	enum = editset.objectsDeleted.elements();
-
-	while (enum.hasMoreElements())
-	  {
-	    obj = (DBObject) enum.nextElement();
-	    jFile.writeShort(obj.objectBase.type_code);
-	    jFile.writeShort(obj.id);
-	    if (debug)
-	      {
-		System.err.println(obj.objectBase.object_name + " : " + obj.id);
+	      case DBEditObject.DROPPING:
+		break;
 	      }
 	  }
 
