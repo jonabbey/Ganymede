@@ -452,7 +452,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * direct access via RMI.</p>
    */
 
-  boolean remotelyAccessible = false;
+  boolean exportObjects = false;
 
   /**
    * <p>If this session is being driven by a GanymedeXMLSession, this reference
@@ -560,7 +560,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     supergashMode = true;
     beforeversupergash = true;
-    this.remotelyAccessible = false;
+    this.exportObjects = false;
 
     updatePerms(true);
   }
@@ -610,9 +610,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // record whether we should export our objects
 
-    this.remotelyAccessible = exportObjects;
+    this.exportObjects = exportObjects;
 
-    if (this.remotelyAccessible)
+    if (this.remoteClient)
       {
 	asyncPort = new serverClientAsyncResponder();
 
@@ -959,12 +959,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	Ganymede.debug("Forcing " + username + " off for " + reason);
 
-	try
+	if (asyncPort != null)
 	  {
-	    asyncPort.shutdown(reason);
-	  }
-	catch (RemoteException ex)
-	  {
+	    try
+	      {
+		asyncPort.shutdown(reason);
+	      }
+	    catch (RemoteException ex)
+	      {
+	      }
 	  }
 
 	logout(true);		// keep logout from logging a normal logout
@@ -1082,8 +1085,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    //	Ganymede.debug("User " + username + " logging off");
 
-	    this.asyncPort.shutdown();
-	    this.asyncPort = null;
+	    if (this.asyncPort != null)
+	      {
+		this.asyncPort.shutdown();
+		this.asyncPort = null;
+	      }
 
 	    // logout the client, abort any DBSession transaction going
 
@@ -4038,7 +4044,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	result.setInvid(((DBObject) objref).getInvid());
 
-	if (this.remotelyAccessible)
+	if (this.exportObjects)
 	  {
 	    // the exportObject call would fail if the object has
 	    // already been exported.  This should never be the case
@@ -4136,7 +4142,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    result = new ReturnVal(true);
 	    result.setInvid(((DBObject) objref).getInvid());
 
-	    if (this.remotelyAccessible)
+	    if (this.exportObjects)
 	      {
 		try
 		  {
@@ -4294,7 +4300,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	retVal.setInvid(newObj.getInvid());
 
-	if (this.remotelyAccessible)
+	if (this.exportObjects)
 	  {
 	    try
 	      {
@@ -4390,7 +4396,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	retVal.setInvid(newObj.getInvid());
 
-	if (this.remotelyAccessible)
+	if (this.exportObjects)
 	  {
 	    try
 	      {
@@ -6560,7 +6566,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // excessive communications with the admin console, but no point
     // in getting ourselves all worked up here.
 
-    if (!remotelyAccessible)
+    if (!exportObjects)
       {
 	return;
       }
