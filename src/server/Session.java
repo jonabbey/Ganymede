@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.27 $ %D%
+ * @version $Revision: 1.28 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -343,7 +343,10 @@ public interface Session extends Remote {
    * This method allows clients to cause mail to be sent from the
    * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
-   * sender.
+   * sender.<br><br>
+   *
+   * body and HTMLbody are StringBuffer's instead of Strings because RMI
+   * has a 64k serialization limit on the String class.
    *
    * @param address The addresses to mail to, may have more than one
    * address separated by commas or spaces.
@@ -354,6 +357,27 @@ public interface Session extends Remote {
    */
 
   void sendMail(String address, String subject, StringBuffer body) throws RemoteException;
+
+  /**
+   *
+   * This method allows clients to cause mail to be sent from the
+   * Ganymede server when they can't do it themselves.  The mail
+   * will have a From: header indicating the identity of the
+   * sender.<br><br>
+   *
+   * body and HTMLbody are StringBuffer's instead of Strings because RMI
+   * has a 64k serialization limit on the String class.
+   *
+   * @param address The addresses to mail to, may have more than one
+   * address separated by commas or spaces.
+   * @param subject The subject of this mail, will have 'Ganymede:' prepended
+   * by the server.
+   * @param body The plain-ASCII content of the message, or null if none.
+   * @param HTMLbody The HTML content of the message, or null if none.
+   *
+   */
+
+  void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody) throws RemoteException;
 
   /**
    *

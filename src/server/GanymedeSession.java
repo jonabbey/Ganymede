@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.88 $ %D%
+   Version: $Revision: 1.89 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1457,7 +1457,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * This method allows clients to cause mail to be sent from the
    * Ganymede server when they can't do it themselves.  The mail
    * will have a From: header indicating the identity of the
-   * sender.
+   * sender.<br><br>
+   *
+   * body and HTMLbody are StringBuffer's instead of Strings because RMI
+   * has a 64k serialization limit on the String class.
+   *
+   * @param address The addresses to mail to, may have more than one
+   * address separated by commas or spaces.
+   * @param subject The subject of this mail, will have 'Ganymede:' prepended
+   * by the server.
+   * @param body The content of the message.
    *
    */
 
@@ -1537,6 +1546,111 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	throw new RuntimeException("IO problem " + ex);
       }
 
+  }
+
+  /**
+   *
+   * This method allows clients to cause mail to be sent from the
+   * Ganymede server when they can't do it themselves.  The mail
+   * will have a From: header indicating the identity of the
+   * sender.<br><br>
+   *
+   * body and HTMLbody are StringBuffer's instead of Strings because RMI
+   * has a 64k serialization limit on the String class.
+   *
+   * @param address The addresses to mail to, may have more than one
+   * address separated by commas or spaces.
+   * @param subject The subject of this mail, will have 'Ganymede:' prepended
+   * by the server.
+   * @param body The plain-ASCII content of the message, or null if none.
+   * @param HTMLbody The HTML content of the message, or null if none.
+   *
+   */
+
+  public void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody)
+  {
+    Qsmtp mailer;
+    String returnAddr;
+    String mailsuffix;
+    StringBuffer asciiContent = new StringBuffer();
+    StringBuffer signature = new StringBuffer();
+    Vector addresses = new Vector();
+    StringTokenizer tokens = new StringTokenizer(address, ", ", false);
+
+    /* -- */
+
+    mailer = new Qsmtp(Ganymede.mailHostProperty);
+
+    while (tokens.hasMoreElements())
+      {
+	addresses.addElement(tokens.nextToken());
+      }
+
+    // do we have a real user name, or a persona name?
+
+    if (username.equals(Ganymede.rootname))
+      {
+	// supergash.. use the default return address
+
+	returnAddr = Ganymede.returnaddrProperty;
+      }
+    else
+      {
+	if (username.indexOf(':') == -1)
+	  {
+	    // real username, save it as is
+
+	    returnAddr = username;
+	  }
+	else
+	  {
+	    // persona, extract the user's name out of it
+	    returnAddr = username.substring(0, username.indexOf(':'));
+	  }
+    
+	mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
+
+	if (mailsuffix != null)
+	  {
+	    returnAddr += mailsuffix;
+	  }
+      }
+
+    // create the signature
+
+    if (body != null)
+      {
+	asciiContent.append(body);
+	asciiContent.append("\n\n");
+      }
+
+    signature.append("This message was sent by ");
+    signature.append(username);
+    signature.append(", who is running the Ganymede client on ");
+    signature.append(clienthost);
+    signature.append(".");
+
+    asciiContent.append("\n--------------------------------------------------------------------------------\n");
+    asciiContent.append(WordWrap.wrap(signature.toString(), 78, null));
+    asciiContent.append("\n--------------------------------------------------------------------------------\n");
+
+    try
+      {
+	mailer.sendHTMLmsg(returnAddr,
+			   addresses,
+			   "Ganymede: " + subject,
+			   (HTMLbody != null) ? HTMLbody.toString(): null,
+			   "greport.html",
+			   asciiContent.toString());
+      }
+    catch (ProtocolException ex)
+      {
+	throw new RuntimeException("Couldn't figure address " + ex);
+      }
+    catch (IOException ex)
+      {
+	throw new RuntimeException("IO problem " + ex);
+      }
   }
 
   /**
