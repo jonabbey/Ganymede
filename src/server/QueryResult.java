@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -87,7 +87,8 @@ public class QueryResult implements java.io.Serializable {
    *
    * This method is used to add an object's information to
    * the QueryResult's serializable buffer.  It is intended
-   * to be called on the server.  
+   * to be called on the server, but may also be called on
+   * the client for result augmentation.
    *
    */
 
@@ -100,7 +101,8 @@ public class QueryResult implements java.io.Serializable {
    *
    * This method is used to add an object's information to
    * the QueryResult's serializable buffer.  It is intended
-   * to be called on the server.  
+   * to be called on the server, but may also be called on
+   * the client for result augmentation.
    *
    */
 
@@ -115,7 +117,8 @@ public class QueryResult implements java.io.Serializable {
    *
    * This method is used to add an object's information to
    * the QueryResult's serializable buffer.  It is intended
-   * to be called on the server.  
+   * to be called on the server, but may also be called on
+   * the client for result augmentation.
    *
    */
 
