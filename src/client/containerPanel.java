@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.26 $ %D%
+    Version: $Revision: 1.27 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ import arlut.csd.JDataComponent.*;
 
 public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // -- 
   
