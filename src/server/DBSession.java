@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2001/02/16 06:09:23 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2001/06/01 01:35:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.99 $ %D%
+ * @version $Revision: 1.100 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -127,7 +127,7 @@ final public class DBSession {
    * objects at a time.  Only one writer lock is allowed at a time, however,
    * to avoid deadlock.</P>
    *
-   * <P>The DBStore's {@link arlut.csd.ganymede.DBStore#DBLockSync
+   * <P>The DBStore's {@link arlut.csd.ganymede.DBLockSync
    * DBLockSync} object is used, in conjunction with the {@link
    * arlut.csd.ganymede.DBLock#establish(java.lang.Object)
    * establish()} methods in the DBReadLock, {@link

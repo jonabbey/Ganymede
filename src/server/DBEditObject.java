@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.149 $
-   Last Mod Date: $Date: 2001/04/11 05:53:06 $
+   Version: $Revision: 1.150 $
+   Last Mod Date: $Date: 2001/06/01 01:35:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.149 $ $Date: 2001/04/11 05:53:06 $ $Name:  $
+ * @version $Revision: 1.150 $ $Date: 2001/06/01 01:35:00 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -725,8 +725,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * versions, but unless you maintain the version chaining yourself,
    * there's no point to implementing more than one of them.</P>
    *
-   * <P>Note that the {@link
-   * arlut.csd.ganymede.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.DBField)
+   * <P>Note that the {@link arlut.csd.ganymede.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.DBField)
    * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
    * with a null targetObject, to determine that the client should not
    * use its cache for an InvidDBField's choices.  Any overriding done
@@ -808,14 +807,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
    *
-   * <P>See {@link *
-   * arlut.csd.ganymede.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.DBObject,short,
+   * <P>See {@link arlut.csd.ganymede.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.DBObject,short,
    * arlut.csd.ganymede.DBObject,short,arlut.csd.ganymede.GanymedeSession)
    * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
    * anonymousLinkOK() method chaining.</P>
    *
-   * <P>Note that the {@link
-   * arlut.csd.ganymede.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.DBField)
+   * <P>Note that the {@link arlut.csd.ganymede.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.DBField)
    * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
    * with a null targetObject, to determine that the client should not
    * use its cache for an InvidDBField's choices.  Any overriding done
@@ -853,8 +850,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Overriding this method is only required when you want to DISallow
    * such unlinking.</p>
    *
-   * <P>See {@link *
-   * arlut.csd.ganymede.DBEditObject#anonymousUnlinkOK(arlut.csd.ganymede.DBObject,short,
+   * <P>See {@link arlut.csd.ganymede.DBEditObject#anonymousUnlinkOK(arlut.csd.ganymede.DBObject,short,
    * arlut.csd.ganymede.DBObject,short,arlut.csd.ganymede.GanymedeSession)
    * anonymousUnlinkOK(obj,short,obj,short,GanymedeSession)} for details on
    * anonymousUnlinkOK() method chaining.</P>
@@ -879,8 +875,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
    *
-   * <P>See {@link *
-   * arlut.csd.ganymede.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.DBObject,short,
+   * <P>See {@link arlut.csd.ganymede.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.DBObject,short,
    * arlut.csd.ganymede.DBObject,short,arlut.csd.ganymede.GanymedeSession)
    * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
    * anonymousLinkOK() method chaining.</P>
@@ -924,7 +919,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Overriding this method is only required when you want to DISallow
    * such unlinking.</p>
    *
-   * <P>See {@link *
+   * <P>See {@link 
    * arlut.csd.ganymede.DBEditObject#anonymousUnlinkOK(arlut.csd.ganymede.DBObject,short,
    * arlut.csd.ganymede.DBObject,short,arlut.csd.ganymede.GanymedeSession)
    * anonymousUnlinkOK(obj,short,obj,short,GanymedeSession)} for details on

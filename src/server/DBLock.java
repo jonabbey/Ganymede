@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2001/02/14 21:23:36 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/06/01 01:35:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,8 +107,8 @@ public abstract class DBLock {
   /**
    * <P>All DBLock's have an identifier key, which is used to
    * identify the lock in the {@link arlut.csd.ganymede.DBStore DBStore}'s
-   * {@link arlut.csd.ganymede.DBStore#lockHash DBStore.lockHash}.  The
-   * establish() methods in the DBLock subclasses consult the DBStore.lockHash
+   * {@link arlut.csd.ganymede.DBLockSync DBLockSync} object.  The
+   * establish() methods in the DBLock subclasses consult the DBStore.lockSync
    * to make sure that no {@link arlut.csd.ganymede.DBSession DBSession}
    * ever possesses more than one write lock,
    * to prevent deadlocks from occuring in the server.</P>

@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 2001/04/24 05:53:42 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 2001/06/01 01:35:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -300,7 +300,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * into the field will occur.</p>
    *
    * <p>NOTE: this method is mainly used in cloning objects, and
-   * {@link arlut.csd.ganymede.DBEditObject#cloneFromObject(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject) cloneFromObject}
+   * {@link arlut.csd.ganymede.DBEditObject#cloneFromObject(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject, boolean) cloneFromObject}
    * doesn't allow cloning of password fields by default.</p>
    *
    * @param target The DBField to copy this field's contents to.

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.186 $
-   Last Mod Date: $Date: 2001/05/31 05:39:50 $
+   Version: $Revision: 1.187 $
+   Last Mod Date: $Date: 2001/06/01 01:34:59 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.186 $ $Date: 2001/05/31 05:39:50 $ $Name:  $
+ * @version $Revision: 1.187 $ $Date: 2001/06/01 01:34:59 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/05/31 05:39:50 $";
+  static String release_date = "$Date: 2001/06/01 01:34:59 $";
   static String release_number = null;
 
   /**
@@ -1336,7 +1336,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.client.gclient#baseNames baseNames}.</p>
+   * <p>Returns a hash mapping {@link arlut.csd.ganymede.BaseDump BaseDump}
+   * references to their title.</p>
    *
    * <p>Checks to see if the baseNames was loaded, and if not, it loads it.
    * Always use this instead of trying to access baseNames directly.</p>
@@ -1348,7 +1349,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.client.gclient#baseList baseList}.</p>
+   * <p>Returns a Vector of {@link arlut.csd.ganymede.BaseDump BaseDump} objects,
+   * providing a local cache of {@link arlut.csd.ganymede.Base Base}
+   * references that the client consults during operations.</p>
    *
    * <p>Checks to see if the baseList was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseList
@@ -1361,7 +1364,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.client.gclient#baseMap baseMap}.</p>
+   * <p>Returns a hash mapping Short {@link arlut.csd.ganymede.Base Base} id's to
+   * {@link arlut.csd.ganymede.BaseDump BaseDump} objects.</p>
    *
    * <p>Checks to see if the baseMap was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseMap
@@ -1374,7 +1378,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.client.gclient#baseToShort baseToShort}.</p>
+   * <p>Returns a hashtable mapping {@link arlut.csd.ganymede.BaseDump BaseDump}
+   * references to their object type id in Short form.  This is
+   * a holdover from a time when the client didn't create local copies
+   * of the server's Base references.</p>
    *
    * <p>Checks to see if the basetoShort was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseToShort

@@ -18,8 +18,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/10/13 21:58:14 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2001/06/01 01:35:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -123,7 +123,7 @@ import arlut.csd.JDialog.JDialogBuff;
  * <p>Typically, a continueOn() will cause the wizard system to
  * proceed to the next highest processDialogXX() method.  If a wizard
  * needs to skip to a specific step, it can use the {@link
- * arlut.csd.ganymede.GanymediatorWizard#setNextState()
+ * arlut.csd.ganymede.GanymediatorWizard#setNextState(int)
  * setNextState()} method to set the number for the next processDialog
  * method before returning a continueOn() result.</p>
  *
@@ -155,7 +155,7 @@ import arlut.csd.JDialog.JDialogBuff;
  * @see arlut.csd.ganymede.ReturnVal
  * @see arlut.csd.ganymede.Ganymediator
  *
- * @version $Revision: 1.14 $ $Date: 2000/10/13 21:58:14 $ $Name:  $
+ * @version $Revision: 1.15 $ $Date: 2001/06/01 01:35:01 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 

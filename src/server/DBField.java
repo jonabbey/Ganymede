@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.103 $
-   Last Mod Date: $Date: 2001/04/16 04:54:24 $
+   Version: $Revision: 1.104 $
+   Last Mod Date: $Date: 2001/06/01 01:35:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -104,7 +104,7 @@ import arlut.csd.Util.*;
  * on command with the {@link
  * arlut.csd.ganymede.DBField#emit(java.io.DataOutput) emit()} method,
  * and reading its state in with the {@link
- * arlut.csd.ganymede.DBField#receive(java.io.DataInput) receive()}
+ * arlut.csd.ganymede.DBField#receive(java.io.DataInput, arlut.csd.ganymede.DBObjectBaseField) receive()}
  * method.  Each DBField subclass may also have extensive special
  * logic to handle special operations on fields of the appropriate
  * type.  For instance, the InvidDBField class has lots and lots of

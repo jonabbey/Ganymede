@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 2001/03/30 22:05:36 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 2001/06/01 01:35:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1038,7 +1038,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   /**
    * <p>This method is used by the
-   * {@link arlut.csd.ganymede.GanymedeAdmin#shutdown(boolean, java.lang.String) shutdown()}
+   * {@link arlut.csd.ganymede.GanymedeAdmin#shutdown(boolean) shutdown()}
    * method to put the server into 'shutdown soon' mode.</p>
    */
 

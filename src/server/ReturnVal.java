@@ -8,15 +8,16 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2000/08/25 21:54:15 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2001/06/01 01:35:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -44,7 +45,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -243,7 +245,7 @@ public class ReturnVal implements java.io.Serializable {
    * a the text of any encoded dialog box describing the problem.  This
    * method is intended for text-mode clients that do not support the
    * full callback/wizard features that the
-   * {@link arlut.csd.ganymede.JDataComponent.JDialogBuff JDialogBuff} 
+   * {@link arlut.csd.ganymede.JDialog.JDialogBuff JDialogBuff} 
    * class supports.</p>
    *
    * <p>This method (or getDialog() for GUI clients) should be checked
