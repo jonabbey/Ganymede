@@ -8,8 +8,8 @@
    
    Created: 2 October 2000
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/05/22 01:53:32 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/10/01 16:53:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -172,6 +172,40 @@ final public class NamedStack {
   public synchronized void removeAllElements()
   {
     stack.removeAllElements();
+  }
+
+  /**
+   * <p>This method returns the name associated with the last item pushed
+   * onto this name stack, without altering the stack.</p>
+   */
+
+  public synchronized String getTopName()
+  {
+    if (stack.size() == 0)
+      {
+	return null;
+      }
+
+    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(stack.size()-1);
+    
+    return handle.getName();
+  }
+
+  /**
+   * <p>This method returns the object associated with the last item pushed
+   * onto this name stack, without altering the stack.</p>
+   */
+
+  public synchronized Object getTopObject()
+  {
+    if (stack.size() == 0)
+      {
+	return null;
+      }
+
+    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(stack.size()-1);
+    
+    return handle.getData();
   }
 
   /**
