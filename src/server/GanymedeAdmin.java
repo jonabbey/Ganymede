@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2000/01/26 04:49:31 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2000/01/27 06:03:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.37 $ %D%
+ * @version $Revision: 1.38 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -881,27 +881,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
       Enumeration enum;
       DBObjectBase base;
 
-      synchronized (Ganymede.server)
-      {
-      if (GanymedeServer.loginCount != 0 || GanymedeServer.sessions.size() != 0)
-      {
-      return Ganymede.createErrorDialog("Can't reload classes",
-      "Can't reload classes, users logged in");
-      }
-      else if (!Ganymede.db.schemaEditInProgress)
-      {
-      Ganymede.db.setSchemaeditinprogress(true);
-      }
-      else
-      {
-      return Ganymede.createErrorDialog("Can't reload classes",
-      "Can't reload classes, schema edit already in progress");
-      }
-      }
       
       synchronized (Ganymede.db)
-      {
-      try
       {
       Ganymede.debug("entering reloadCustomClasses synchronization block");
       
@@ -919,15 +900,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
       }
       }
       }
-      finally
-      {
-      Ganymede.db.notifyAll(); // in case a DBLock caught on our sync
-      }
-      }
-      
-      synchronized (Ganymede.server)
-      {
-      Ganymede.db.setSchemaEditInProgress(false);
       }
 
       return null;
@@ -1106,28 +1078,28 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
     // synchronize on server so we don't get logins while we're checking
     // things out
 
-    synchronized (Ganymede.server)
+    try
       {
-	if (GanymedeServers.loginCount != 0 || GanymedeServer.sessions.size() != 0)
+	String semaphoreCondition = GanymedeServer.lSemaphore.disable("schema edit", true, 0);
+
+	if (semaphoreCondition != null)
 	  {
-	    Ganymede.debug("Can't edit Schema, users logged in");
+	    Ganymede.debug("Can't edit schema, semaphore error: " + semaphoreCondition);
 	    return null;
 	  }
-	else if (!Ganymede.db.isSchemaEditInProgress())
-	  {
-	    Ganymede.db.setSchemaEditInProgress(true);
-	  }
-	else
-	  {
-	     Ganymede.debug("Can't edit Schema, edit already in progress. ");
-	     return null;
-	  }
+      }
+    catch (InterruptedException ex)
+      {
+	ex.printStackTrace();
+	throw new RuntimeException(ex.getMessage());
       }
 
-    // okay at this point we've asserted our interest in editing the schema and
-    // ascertained that no one is logged on.  By setting Ganymede.db.schemaEditInProgress
-    // to true, we've preempted anyone else from logging in.  Check out the lock
-    // situation, then go forward.
+    // okay at this point we've asserted our interest in editing the
+    // schema and made sure that no one is logged in or can log in.
+
+    // All the DBLock establish methods synchronize on the Ganymede
+    // dbstore object, so we are safe against lock establish race
+    // conditions by synchronizing this section on Ganymede.db.
 
     synchronized (Ganymede.db)
       {
@@ -1144,7 +1116,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 		if (base.isLocked())
 		  {
 		    Ganymede.debug("Can't edit Schema, lock held on " + base.getName());
-		    Ganymede.db.setSchemaEditInProgress(false);
+		    GanymedeServer.lSemaphore.enable("schema edit");
 		    return null;
 		  }
 	      }
@@ -1163,6 +1135,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	   }
 	 catch (RemoteException ex)
 	   {
+	     GanymedeServer.lSemaphore.enable("schema edit");
 	     return null;
 	   }
       }

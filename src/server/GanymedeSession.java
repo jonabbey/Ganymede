@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.167 $
-   Last Mod Date: $Date: 2000/01/14 00:52:20 $
+   Version: $Revision: 1.168 $
+   Last Mod Date: $Date: 2000/01/27 06:03:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -125,7 +125,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.167 $ $Date: 2000/01/14 00:52:20 $
+ * @version $Revision: 1.168 $ $Date: 2000/01/27 06:03:23 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -143,6 +143,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
 
   Client client;
+
+  /**
+   * if this session is on the GanymedeServer's lSemaphore, this boolean
+   * will be true.
+   */
+
+  boolean semaphoreLocked = false;
 
   // client status tracking
 
@@ -496,6 +503,33 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     super();			// UnicastRemoteObject initialization
 
+    // handle the server login semaphore for this session, unless we have
+    // no session label, in which case we are the master internalSession,
+    // which we don't yet try to handle with the semaphore
+
+    if (!sessionLabel.equals("internal"))
+      {
+	try
+	  {
+	    String error = GanymedeServer.lSemaphore.increment(0);
+
+	    if (error != null)
+	      {
+		Ganymede.debug("Couldn't create " + sessionLabel +
+			       " GanymedeSession.. semaphore disabled: " + error);
+	    
+		throw new RuntimeException("semaphore error: " + error);
+	      }
+	  }
+	catch (InterruptedException ex)
+	  {
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
+	  }
+
+	semaphoreLocked = true;
+      }
+
     // construct our DBSession
 
     logged_in = true;
@@ -537,6 +571,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     super();			// UnicastRemoteObject initialization
 
     // --
+
+    // GanymedeServer will have already incremented our semaphore in the login()
+
+    semaphoreLocked = true;
 
     // record information about the client that we'll need
     // to have while the client is connected to us.
@@ -949,6 +987,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // Update the server's records, refresh the admin consoles.
 	    
 	    GanymedeServer.sessions.removeElement(this);
+
+	    // and the login semaphore
+
+	    if (semaphoreLocked)
+	      {
+		GanymedeServer.lSemaphore.decrement();
+	      }
 	    
 	    // update the admin consoles
 	    
@@ -1534,30 +1579,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* -- */
 
-    synchronized (Ganymede.db)
-      {
-	try
-	  {
-	    if (Ganymede.db.schemaEditInProgress)
-	      {
-		throw new RuntimeException("schemaEditInProgress");
-	      }
-	    
-	    enum = Ganymede.db.objectBases.elements();
+    enum = Ganymede.db.objectBases.elements();
 
-	    while (enum.hasMoreElements())
-	      {
-		DBObjectBase base = (DBObjectBase) enum.nextElement();
-		
-		if (getPerm(base.getTypeID(), true).isVisible())
-		  {
-		    result.addElement(base);
-		  }
-	      }
-	  }
-	finally
+    while (enum.hasMoreElements())
+      {
+	DBObjectBase base = (DBObjectBase) enum.nextElement();
+	
+	if (getPerm(base.getTypeID(), true).isVisible())
 	  {
-	    Ganymede.db.notifyAll(); // for lock code
+	    result.addElement(base);
 	  }
       }
 
@@ -1626,16 +1656,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (Ganymede.catTransport == null)
 	  {
-	    synchronized (Ganymede.db) // *sync* on DBStore
-	      {
-		// pass Ganymede.internalSession so that the master
-		// CategoryTransport object will correctly grant
-		// object creation privs for all object types
+	    // pass Ganymede.internalSession so that the master
+	    // CategoryTransport object will correctly grant
+	    // object creation privs for all object types
 
-		Ganymede.catTransport = new CategoryTransport(Ganymede.db.rootCategory, 
-							      Ganymede.internalSession); // *sync* possible on this
-		Ganymede.db.notifyAll(); // in case of locks
-	      }
+	    Ganymede.catTransport = new CategoryTransport(Ganymede.db.rootCategory, 
+							  Ganymede.internalSession); // *sync* possible on this
 	  }
 
 	if (debug)
@@ -1649,18 +1675,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	// not in supergash mode.. download a subset of the category tree to the user
 
-	CategoryTransport transport;
+	CategoryTransport transport = new CategoryTransport(Ganymede.db.rootCategory, 
+							    this, hideNonEditables);
 
-	synchronized (Ganymede.db)
+	if (debug)
 	  {
-	    transport = new CategoryTransport(Ganymede.db.rootCategory, this, hideNonEditables);
-
-	    if (debug)
-	      {
-		System.err.println("getCategoryTree(): generated custom category tree");
-	      }
-
-	    Ganymede.db.notifyAll(); // in case of locks
+	    System.err.println("getCategoryTree(): generated custom category tree");
 	  }
 
 	if (permsdebug)

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 2000/01/26 04:49:32 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 2000/01/27 06:03:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,29 +86,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   static boolean shutdown = false;
 
   /**
-   * <p>If true, the server is on the way down.</p>
+   * <p>Our handy, all purpose login semaphore</p>
    */
 
-  static boolean shuttingDown = false;
-
-  /**
-   * <p>How many users and/or admin consoles are currently in
-   * the process of being connected?</p>
-   */
-
-  static int loginCount = 0;
-
-  // ---
-
-  /**
-   * returns true if the server is not shutting down or otherwise
-   * forbidding logins at the moment
-   */
-
-  public static boolean loginsOk()
-  {
-    return (!GanymedeServer.shutdown && !GanymedeServer.shuttingDown);
-  }
+  static loginSemaphore lSemaphore = new loginSemaphore();
 
   /* -- */
 
@@ -164,6 +145,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     String clientName;
     String clientPass;
     boolean found = false;
+    boolean success = true;
     Query userQuery;
     QueryNode root;
     DBObject user = null, persona = null;
@@ -171,34 +153,26 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     /* -- */
 
-    synchronized (Ganymede.db)
+    try
       {
-	try
-	  {
-	    if (Ganymede.db.isSchemaEditInProgress())
-	      {
-		client.forceDisconnect("Schema Edit In Progress");
-		return null;
-	      }
-	  }
-	finally
-	  {
-	    Ganymede.db.notifyAll(); // for lock code
-	  }
+	String error = GanymedeServer.lSemaphore.increment(0);
 
-	GanymedeServer.loginCount++;
+	if (error != null)
+	  {
+	    client.forceDisconnect("Can't login to Ganymede server.. semaphore disabled: " + error);
+	    return null;
+	  }
+      }
+    catch (InterruptedException ex)
+      {
+	ex.printStackTrace();
+	throw new RuntimeException(ex.getMessage());
       }
 
     try
       {
 	synchronized (this)
 	  {
-	    if (!GanymedeServer.loginsOk())
-	      {
-		client.forceDisconnect("Login not allowed, the Ganymede server is being shut down.");
-		return null;
-	      }
-
 	    // force logins to lowercase so we can keep track of things
 	    // cleanly..  we do a case insensitive match against user/persona
 	    // name later on, but we want to have a canonical name to track
@@ -365,6 +339,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 							       null));
 		  }
 
+		success = true;
+
 		return (Session) session;
 	      }
 	    else
@@ -404,24 +380,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     finally
       {
-	GanymedeServer.loginCount--;
+	if (!success)
+	  {
+	    GanymedeServer.lSemaphore.decrement();
+	  }
       }
-  }
-
-  public synchronized boolean assertLoggingIn()
-  {
-  }
-
-  public synchronized boolean clearLoggingIn()
-  {
-  }
-
-  public synchronized boolean assertEditLock()
-  {
-  }
-
-  public synchronized boolean clearEditLock()
-  {
   }
 
   /**
@@ -691,9 +654,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     /* -- */
 
-    if (!GanymedeServer.loginsOk())
+    String error = GanymedeServer.lSemaphore.checkEnabled();
+
+    if (error != null)
       {
-	throw new RuntimeException("Can't connect admin console to server.. server going down.");
+	throw new RuntimeException("Can't connect admin console to server.. semaphore disabled: " + error);
       }
 
     clientName = admin.getName();
@@ -825,7 +790,16 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   public static void setShutdown()
   {
-    GanymedeServer.shutdown = true;
+    try
+      {
+	GanymedeServer.lSemaphore.disable("shutdown", false, 0);
+      }
+    catch (InterruptedException ex)
+      {
+	ex.printStackTrace();
+	throw new RuntimeException(ex.getMessage());
+      }
+
     GanymedeAdmin.setState("Server going down.. waiting for users to log out");
   }
 
@@ -840,9 +814,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     GanymedeAdmin atmp;
 
     /* -- */
-
-    GanymedeServer.shuttingDown = true;
-
+    
     GanymedeAdmin.setState("Server going down.. performing final dump");
 
     // dump, then shut down.  Our second dump parameter is false,
@@ -861,6 +833,28 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     // ok, we now are left holding a dump lock.  it should be safe to kick
     // everybody off and shut down the server
+
+    String semaphoreState = GanymedeServer.lSemaphore.checkEnabled();
+
+    if (!"shutdown".equals(semaphoreState))
+      {
+	try
+	  {
+	    semaphoreState = GanymedeServer.lSemaphore.disable("shutdown", false, 0); // no blocking
+	  }
+	catch (InterruptedException ex)
+	  {
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
+	  }
+
+	if (semaphoreState != null)
+	  {
+	    return Ganymede.createErrorDialog("Shutdown failure",
+					      "Shutdown failure.. couldn't shutdown the server, semaphore " +
+					      "already locked with condition " + semaphoreState);
+	  }
+      }
 
     // forceOff modifies GanymedeServer.sessions, so we need to copy our list
     // before we iterate over it.
@@ -991,22 +985,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     /* -- */
 
     // make sure we're ok to sweep
-    
-    synchronized (Ganymede.db)
-      {
-	try
-	  {
-	    if (Ganymede.db.isSchemaEditInProgress())
-	      {
-		Ganymede.debug("GanymedeServer.sweepInvids(): aborting.. schema edit in progress");
-		return false;
-	      }
-	  }
-	finally
-	  {
-	    Ganymede.db.notifyAll();
-	  }
-      }
 
     DBDumpLock lock = new DBDumpLock(Ganymede.db);
 
@@ -1016,6 +994,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     catch (InterruptedException ex)
       {
+	Ganymede.debug("sweepInvids couldn't proceed.");
+
+	return false;		// actually we just failed, but same difference
       }
 
     try
@@ -1179,21 +1160,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     /* -- */
     
-    synchronized (Ganymede.db)
-      {
-	try
-	  {
-	    if (Ganymede.db.isSchemaEditInProgress())
-	      {
-		return false;
-	      }
-	  }
-	finally
-	  {
-	    Ganymede.db.notifyAll(); // for lock code, probably unnecessary in this context
-	  }
-      }
-
     DBDumpLock lock = new DBDumpLock(Ganymede.db);
 
     try
@@ -1202,6 +1168,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     catch (InterruptedException ex)
       {
+	Ganymede.debug("checkInvids couldn't proceed.");
+
+	return false;		// actually we just failed, but same difference
       }
 
     try

@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2000/01/08 03:28:56 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2000/01/27 06:03:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -134,7 +135,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.84 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.85 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -984,6 +985,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	// DBObjectBase
 
 	fieldcode = in.readShort();
+
 	definition = objectBase.fieldTable.get(fieldcode);
 
 	if (definition == null)
@@ -1024,7 +1026,9 @@ public class DBObject implements db_object, FieldType, Remote {
 	  case INVID:
 	    tmp = new InvidDBField(this, in, definition);
 
-	    // at 1.17 we started ignoring back links field.
+	    // at 1.17 we started ignoring back links field, so we
+	    // don't want to actually retain such in memory if we find
+	    // one.
 
 	    if (fieldcode == SchemaConstants.BackLinksField)
 	      {

@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 1999/11/19 20:37:01 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2000/01/27 06:03:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -1002,13 +1003,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    System.err.println("DBObjectBaseField.receive(): " + field);
 	  }
 
-	// at file version 1.17, we stopped using the backlinks
-	// field.. don't register it in this object type.
-
-	if (field.getID() != SchemaConstants.BackLinksField)
-	  {
-	    addField(field);
-	  }
+	addField(field);
       }
 
     sortFields();

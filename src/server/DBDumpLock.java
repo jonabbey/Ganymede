@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/12/14 23:44:13 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/01/27 06:03:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -188,20 +189,13 @@ class DBDumpLock extends DBLock {
 		    throw new InterruptedException();
 		  }
 
-		if (lockManager.schemaEditInProgress)
+		for (int i = 0; okay && (i < baseSet.size()); i++)
 		  {
-		    okay = false;
-		  }
-		else
-		  {
-		    for (int i = 0; okay && (i < baseSet.size()); i++)
-		      {
-			base = (DBObjectBase) baseSet.elementAt(i);
+		    base = (DBObjectBase) baseSet.elementAt(i);
 
-			if (!base.isWriterEmpty() || base.dumpInProgress)
-			  {
-			    okay = false;
-			  }
+		    if (!base.isWriterEmpty() || base.dumpInProgress)
+		      {
+			okay = false;
 		      }
 		  }
 

@@ -6,15 +6,16 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2000/01/26 04:49:29 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2000/01/27 06:03:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -193,7 +194,17 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	developMode = Ganymede.developSchema;
       }
 
+    // the GanymedeAdmin editSchema() method should have disabled the
+    // login semaphore with a "schema edit" condition.  Check this
+    // just to be sure.
+
+    if (!"schema edit".equals(GanymedeServer.lSemaphore.checkEnabled()))
+      {
+	throw new RuntimeException("can't edit schema without lock");
+      }
+
     this.console = console;
+
     locked = true;
     
     store = Ganymede.db;
@@ -202,8 +213,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     synchronized (store)
       {
-	store.setSchemaEditInProgress(true);
-
 	// duplicate the existing category tree and all the contained
 	// bases
 
@@ -1012,27 +1021,27 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// all the bases already have containingHash pointing to
 	// newBases
 
-	store.objectBases = newBases; 
+	store.objectBases = newBases;
 	rootCategory.clearEditor();
 	store.rootCategory = rootCategory;
-
-	// and unlock the server
-
-	store.setSchemaEditInProgress(false);
-
-	// and update the serialized representation of the
-	// category/base structure.. note that we want it to be
-	// created with supergash privs.
-
-	Ganymede.catTransport = new CategoryTransport(store.rootCategory, Ganymede.internalSession);
-	Ganymede.baseTransport = new BaseListTransport(Ganymede.internalSession);
-
-	GanymedeAdmin.setState("Normal Operation");
       }
 
-    locked = false;
+    // update the serialized representation of the
+    // category/base structure.. note that we want it to be
+    // created with supergash privs.
+
+    Ganymede.catTransport = new CategoryTransport(store.rootCategory, Ganymede.internalSession);
+    Ganymede.baseTransport = new BaseListTransport(Ganymede.internalSession);
 
     Ganymede.debug("DBSchemaEdit: schema changes committed.");
+
+    // and unlock the server
+
+    GanymedeAdmin.setState("Normal Operation");
+
+    locked = false;
+    
+    GanymedeServer.lSemaphore.enable("schema edit");
 
     return;
   }
@@ -1234,17 +1243,17 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// restore the namespace vector
 	
 	store.nameSpaces = oldNameSpaces;
-	
-	// unlock the server
-	
-	store.setSchemaEditInProgress(false);
       }
 
+    // unlock the server
+	
     Ganymede.debug("DBSchemaEdit: released");
 
     GanymedeAdmin.setState("Normal Operation");
 
     locked = false;
+
+    GanymedeServer.lSemaphore.enable("schema edit");
 
     return;
   }

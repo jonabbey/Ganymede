@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/12/14 23:44:14 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/01/27 06:03:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -213,9 +214,14 @@ public class DBWriteLock extends DBLock {
 
 		okay = true;
 
-		if (lockManager.schemaEditInProgress)
+		// if the server is not allowing logins for some
+		// reason, we can't proceed (shutdown or schema edit)
+
+		String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
+
+		if (disabledMessage != null)
 		  {
-		    okay = false;
+		    throw new InterruptedException(disabledMessage);
 		  }
 		else
 		  {

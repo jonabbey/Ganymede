@@ -7,15 +7,16 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/12/14 23:44:15 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/01/27 06:03:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -93,9 +94,11 @@ public class GanymedeExpirationTask implements Runnable {
 
     Ganymede.debug("Expiration Task: Starting");
 
-    if (Ganymede.db.schemaEditInProgress)
+    String error = GanymedeServer.lSemaphore.checkEnabled();
+	
+    if (error != null)
       {
-	Ganymede.debug("Deferring expiration task - schema being edited");
+	Ganymede.debug("Deferring expiration task - semaphore disabled: " + error);
 	return;
       }
 

@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 2000/01/13 02:12:53 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 2000/01/27 06:03:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1380,16 +1380,20 @@ class dumpTask implements Runnable {
 	    return;
 	  }
 
-	if (Ganymede.server.activeUsers.size() > 0)
+	try
 	  {
-	    Ganymede.debug("Deferring dump task - users logged in");
-	    return;
+	    String error = GanymedeServer.lSemaphore.increment(0);
+	
+	    if (error != null)
+	      {
+		Ganymede.debug("Deferring dump task - semaphore disabled: " + error);
+		return;
+	      }
 	  }
-
-	if (Ganymede.db.schemaEditInProgress)
+	catch (InterruptedException ex)
 	  {
-	    Ganymede.debug("Deferring dump task - schema being edited");
-	    return;
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
 	  }
 
 	started = true;
@@ -1417,6 +1421,8 @@ class dumpTask implements Runnable {
 	  {
 	    Ganymede.debug("dumpTask forced to stop");
 	  }
+
+	GanymedeServer.lSemaphore.decrement();
       }
   }
 }
@@ -1447,16 +1453,20 @@ class dumpAndArchiveTask implements Runnable {
 
     try
       {
-	if (Ganymede.server.activeUsers.size() > 0)
+	try
 	  {
-	    Ganymede.debug("Deferring dump/archive task - users logged in");
-	    return;
+	    String error = GanymedeServer.lSemaphore.increment(0);
+	    
+	    if (error != null)
+	      {
+		Ganymede.debug("Deferring dump/archive task - semaphore disabled: " + error);
+		return;
+	      }
 	  }
-
-	if (Ganymede.db.schemaEditInProgress)
+	catch (InterruptedException ex)
 	  {
-	    Ganymede.debug("Deferring dump/archive task - schema being edited");
-	    return;
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
 	  }
 
 	started = true;
@@ -1484,6 +1494,8 @@ class dumpAndArchiveTask implements Runnable {
 	  {
 	    Ganymede.debug("dumpAndArchiveTask forced to stop");
 	  }
+
+	GanymedeServer.lSemaphore.decrement();
       }
   }
 }

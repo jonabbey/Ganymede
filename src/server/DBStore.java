@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2000/01/26 04:49:30 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2000/01/27 06:03:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -106,16 +107,9 @@ import arlut.csd.Util.zipIt;
  * <P>In addition to handling loads, dumps, and schema initialization
  * for cold server start-ups, DBStore also acts as a synchronization
  * monitor object for all {@link arlut.csd.ganymede.DBLock DBLock}
- * activity.  Because of this, it is critical that all synchronized
- * methods in this class do a this.notifyAll() on exiting a
- * synchronized block because the {@link arlut.csd.ganymede.DBLock
- * DBLock} classes wait on DBStore as their synchronization monitor.
- * Generally, whenever the DBLock classes wait on DBStore, they do so
- * in a loop with a timeout specified on the wait() to avoid accidental
- * thread-lock, but it is still important to do a notifyAll() to avoid
- * unnecessary delays.</P>
+ * activity.</p>
  *
- * @version $Revision: 1.99 $ %D%
+ * @version $Revision: 1.100 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -155,12 +149,6 @@ public class DBStore {
     All of the following should only be modified/accessed
     in a critical section synchronized on the DBStore object.
    */
-  
-  /**
-   * lock for schema revision
-   */
-
-  boolean schemaEditInProgress;
   
   /**
    * to keep track of what ID to assign to new user-space object types
@@ -299,18 +287,7 @@ public class DBStore {
 	throw new Error("couldn't initialize rootCategory");
       }
 
-    schemaEditInProgress = false;
     GanymedeAdmin.setState("Normal Operation");
-  }
-
-  public boolean isSchemaEditInProgress()
-  {
-    return schemaEditInProgress;
-  }
-
-  public void setSchemaEditInProgress(boolean b)
-  {
-    schemaEditInProgress = b;
   }
 
   /**
@@ -318,10 +295,6 @@ public class DBStore {
    *
    * <p>This method loads both the database type definition and database
    * contents from a single disk file.</p>
-   *
-   * <p>Note that this method does _not_ do a this.notifyAll() upon
-   * returning, this is acceptable because we are assuming we will
-   * never call load() on a DBStore with locks held.</p>
    *
    * @param filename Name of the database file
    * @param reallyLoad if true, we'll actually fully load the database.
@@ -339,10 +312,6 @@ public class DBStore {
    *
    * <p>This method loads both the database type definition and database
    * contents from a single disk file.</p>
-   *
-   * <p>Note that this method does _not_ do a this.notifyAll() upon
-   * returning, this is acceptable because we are assuming we will
-   * never call load() on a DBStore with locks held.</p>
    *
    * @param filename Name of the database file
    * @param reallyLoad if true, we'll actually fully load the database.
@@ -587,219 +556,207 @@ public class DBStore {
   public synchronized void dump(String filename, boolean releaseLock,
 				boolean archiveIt) throws IOException
   {
+    File dbFile = null;
+    FileOutputStream outStream = null;
+    BufferedOutputStream bufStream = null;
+    DataOutputStream out = null;
+    
+    FileOutputStream textOutStream = null;
+    PrintWriter textOut = null;
+    
+    Enumeration basesEnum;
+    short baseCount, namespaceCount, categoryCount;
+    DBDumpLock lock = null;
+    DBNameSpace ns;
+    DBBaseCategory bc;
+    
+    /* -- */
+    
+    if (debug)
+      {
+	System.err.println("DBStore: Dumping");
+      }
+
+    lock = new DBDumpLock(this);
+
     try
       {
-	if (schemaEditInProgress)
-	  {
-	    Ganymede.debug("DBStore.dump(): schema being edited, dump aborted");
-	  }
-
-	File dbFile = null;
-	FileOutputStream outStream = null;
-	BufferedOutputStream bufStream = null;
-	DataOutputStream out = null;
-
-	FileOutputStream textOutStream = null;
-	PrintWriter textOut = null;
-
-	Enumeration basesEnum;
-	short baseCount, namespaceCount, categoryCount;
-	DBDumpLock lock = null;
-	DBNameSpace ns;
-	DBBaseCategory bc;
-
-	/* -- */
-
-	if (debug)
-	  {
-	    System.err.println("DBStore: Dumping");
-	  }
-
-	lock = new DBDumpLock(this);
-
-	try
-	  {
-	    lock.establish("System");	// wait until we get our lock 
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
+	lock.establish("System");	// wait until we get our lock 
+      }
+    catch (InterruptedException ex)
+      {
+      }
     
-	// Move the old version of the file to a backup
+    // Move the old version of the file to a backup
     
-	try
+    try
+      {
+	dbFile = new File(filename);
+
+	// first thing we do is zip up the old ganymede.db file if
+	// archiveIt is true.
+
+	if (dbFile.exists())
 	  {
-	    dbFile = new File(filename);
-
-	    // first thing we do is zip up the old ganymede.db file if
-	    // archiveIt is true.
-
-	    if (dbFile.exists())
+	    if (archiveIt)
 	      {
-		if (archiveIt)
+		String directoryName = dbFile.getParent();
+
+		File directory = new File(directoryName);
+
+		if (!directory.isDirectory())
 		  {
-		    String directoryName = dbFile.getParent();
+		    throw new IOException("Error, couldn't find output directory to backup: " + 
+					  directoryName);
+		  }
 
-		    File directory = new File(directoryName);
-
-		    if (!directory.isDirectory())
-		      {
-			throw new IOException("Error, couldn't find output directory to backup: " + 
-					      directoryName);
-		      }
-
-		    File oldDirectory = new File(directoryName + File.separator + "old");
+		File oldDirectory = new File(directoryName + File.separator + "old");
 		    
-		    if (!oldDirectory.exists())
-		      {
-			oldDirectory.mkdir();
-		      }
-
-		    DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", 
-								java.util.Locale.US);
-		    String label = formatter.format(new Date());
-
-		    String zipFileName = directoryName + File.separator + "old" + File.separator +
-		      label + "db.zip";
-
-		    Vector fileNameVect = new Vector();
-		    fileNameVect.addElement(filename);
-
-		    zipIt.createZipFile(zipFileName, fileNameVect);
-		  }
-	      }
-
-	    // and dump the whole thing to ganymede.db.new
-
-	    outStream = new FileOutputStream(filename + ".new");
-	    bufStream = new BufferedOutputStream(outStream);
-	    out = new DataOutputStream(bufStream);
-
-	    out.writeUTF(id_string);
-	    out.writeByte(major_version);
-	    out.writeByte(minor_version);
-
-	    namespaceCount = (short) nameSpaces.size();
-
-	    out.writeShort(namespaceCount);
-
-	    for (int i = 0; i < namespaceCount; i++)
-	      {
-		ns = (DBNameSpace) nameSpaces.elementAt(i);
-		ns.emit(out);
-	      }
-
-	    if (major_version >= 1 && minor_version >= 3)
-	      {
-		rootCategory.emit(out);
-	      }
-
-	    baseCount = (short) objectBases.size();
-
-	    out.writeShort(baseCount);
-	
-	    basesEnum = objectBases.elements();
-
-	    while (basesEnum.hasMoreElements())
-	      {
-		((DBObjectBase) basesEnum.nextElement()).emit(out, true);
-	      } 
-
-	    out.close();
-	    out = null;
-
-	    // ok, we've successfully dumped to ganymede.db.new.. move
-	    // the old file to ganymede.db.bak
-
-	    dbFile.renameTo(new File(filename + ".bak"));
-
-	    // and move ganymede.db.new to ganymede.db.. note that we
-	    // do have a very slight vulnerability here if we are
-	    // interrupted between the above rename and this one.
-
-	    new File(filename + ".new").renameTo(dbFile);
-
-	    // and dump the schema out in a human readable form.. note
-	    // that this is far less critical than all of the above,
-	    // so if we get an exception above we won't worry about
-	    // completing this part.
-	
-	    if (Ganymede.htmlProperty != null)
-	      {
-		textOutStream = new FileOutputStream(Ganymede.htmlProperty);
-		textOut = new PrintWriter(textOutStream);
-		
-		printCategoryTreeHTML(textOut);
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("DBStore error dumping to " + filename);
-
-	    throw ex;
-	  }
-	finally
-	  {
-	    if (releaseLock)
-	      {
-		if (lock != null)
+		if (!oldDirectory.exists())
 		  {
-		    lock.release();
+		    oldDirectory.mkdir();
 		  }
-	      }
 
-	    if (out != null)
-	      {
-		out.close();
-	      }
+		DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", 
+							    java.util.Locale.US);
+		String label = formatter.format(new Date());
 
-	    if (bufStream != null)
-	      {
-		bufStream.close();
-	      }
-	   
-	    if (outStream != null)
-	      {
-		outStream.close();
-	      }
+		String zipFileName = directoryName + File.separator + "old" + File.separator +
+		  label + "db.zip";
 
-	    if (textOut != null)
-	      {
-		textOut.close();
-	      }
+		Vector fileNameVect = new Vector();
+		fileNameVect.addElement(filename);
 
-	    if (textOutStream != null)
-	      {
-		textOutStream.close();
+		zipIt.createZipFile(zipFileName, fileNameVect);
 	      }
 	  }
 
-	// if our thread was terminated above, we won't get here.  If
-	// we've got here, we had an ok dump, and we don't need to
-	// worry about the journal.. if it isn't truncated properly
-	// somebody can just remove it and ganymede will recover
-	// ok.
+	// and dump the whole thing to ganymede.db.new
 
-	if (journal != null)
+	outStream = new FileOutputStream(filename + ".new");
+	bufStream = new BufferedOutputStream(outStream);
+	out = new DataOutputStream(bufStream);
+
+	out.writeUTF(id_string);
+	out.writeByte(major_version);
+	out.writeByte(minor_version);
+
+	namespaceCount = (short) nameSpaces.size();
+
+	out.writeShort(namespaceCount);
+
+	for (int i = 0; i < namespaceCount; i++)
 	  {
-	    journal.reset();
+	    ns = (DBNameSpace) nameSpaces.elementAt(i);
+	    ns.emit(out);
 	  }
 
-	GanymedeAdmin.updateLastDump(new Date());
-
-	if (Ganymede.log != null)
+	if (major_version >= 1 && minor_version >= 3)
 	  {
-	    Ganymede.log.logSystemEvent(new DBLogEvent("dump",
-						       "Database dumped",
-						       null,
-						       null,
-						       null,
-						       null));
+	    rootCategory.emit(out);
 	  }
+
+	baseCount = (short) objectBases.size();
+
+	out.writeShort(baseCount);
+	
+	basesEnum = objectBases.elements();
+
+	while (basesEnum.hasMoreElements())
+	  {
+	    ((DBObjectBase) basesEnum.nextElement()).emit(out, true);
+	  } 
+
+	out.close();
+	out = null;
+
+	// ok, we've successfully dumped to ganymede.db.new.. move
+	// the old file to ganymede.db.bak
+
+	dbFile.renameTo(new File(filename + ".bak"));
+
+	// and move ganymede.db.new to ganymede.db.. note that we
+	// do have a very slight vulnerability here if we are
+	// interrupted between the above rename and this one.
+
+	new File(filename + ".new").renameTo(dbFile);
+
+	// and dump the schema out in a human readable form.. note
+	// that this is far less critical than all of the above,
+	// so if we get an exception above we won't worry about
+	// completing this part.
+	
+	if (Ganymede.htmlProperty != null)
+	  {
+	    textOutStream = new FileOutputStream(Ganymede.htmlProperty);
+	    textOut = new PrintWriter(textOutStream);
+		
+	    printCategoryTreeHTML(textOut);
+	  }
+      }
+    catch (IOException ex)
+      {
+	System.err.println("DBStore error dumping to " + filename);
+	
+	throw ex;
       }
     finally
       {
-	this.notifyAll();
+	if (releaseLock)
+	  {
+	    if (lock != null)
+	      {
+		lock.release();
+	      }
+	  }
+
+	if (out != null)
+	  {
+	    out.close();
+	  }
+
+	if (bufStream != null)
+	  {
+	    bufStream.close();
+	  }
+	   
+	if (outStream != null)
+	  {
+	    outStream.close();
+	  }
+
+	if (textOut != null)
+	  {
+	    textOut.close();
+	  }
+
+	if (textOutStream != null)
+	  {
+	    textOutStream.close();
+	  }
+      }
+
+    // if our thread was terminated above, we won't get here.  If
+    // we've got here, we had an ok dump, and we don't need to
+    // worry about the journal.. if it isn't truncated properly
+    // somebody can just remove it and ganymede will recover
+    // ok.
+    
+    if (journal != null)
+      {
+	journal.reset();
+      }
+    
+    GanymedeAdmin.updateLastDump(new Date());
+
+    if (Ganymede.log != null)
+      {
+	Ganymede.log.logSystemEvent(new DBLogEvent("dump",
+						   "Database dumped",
+						   null,
+						   null,
+						   null,
+						   null));
       }
   }
 
@@ -825,163 +782,151 @@ public class DBStore {
 
   public synchronized void dumpSchema(String filename, boolean releaseLock) throws IOException
   {
+    File dbFile = null;
+    FileOutputStream outStream = null;
+    BufferedOutputStream bufStream = null;
+    DataOutputStream out = null;
+    
+    FileOutputStream textOutStream = null;
+    PrintWriter textOut = null;
+    Enumeration basesEnum;
+    short baseCount, namespaceCount, categoryCount;
+    DBDumpLock lock = null;
+    DBNameSpace ns;
+    DBBaseCategory bc;
+    DBObjectBase base;
+    
+    /* -- */
+    
+    if (debug)
+      {
+	System.err.println("DBStore: Dumping");
+      }
+    
+    lock = new DBDumpLock(this);
+
     try
       {
-	if (isSchemaEditInProgress())
-	  {
-	    Ganymede.debug("DBStore.dumpSchema(): schema being edited, dump aborted");
-	  }
-
-	File dbFile = null;
-	FileOutputStream outStream = null;
-	BufferedOutputStream bufStream = null;
-	DataOutputStream out = null;
-
-	FileOutputStream textOutStream = null;
-	PrintWriter textOut = null;
-	Enumeration basesEnum;
-	short baseCount, namespaceCount, categoryCount;
-	DBDumpLock lock = null;
-	DBNameSpace ns;
-	DBBaseCategory bc;
-	DBObjectBase base;
-
-	/* -- */
-
-	if (debug)
-	  {
-	    System.err.println("DBStore: Dumping");
-	  }
-
-	lock = new DBDumpLock(this);
-
-	try
-	  {
-	    lock.establish("System");	// wait until we get our lock 
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug("DBStore.dumpSchema(): dump lock establish interrupted, schema not dumped");
-	    return;
-	  }
+	lock.establish("System");	// wait until we get our lock 
+      }
+    catch (InterruptedException ex)
+      {
+	Ganymede.debug("DBStore.dumpSchema(): dump lock establish interrupted, schema not dumped");
+	return;
+      }
     
-	// Move the old version of the file to a backup
+    // Move the old version of the file to a backup
     
-	try
+    try
+      {
+	dbFile = new File(filename);
+
+	if (dbFile.isFile())
 	  {
-	    dbFile = new File(filename);
+	    dbFile.renameTo(new File(filename + ".bak"));
+	  }
 
-	    if (dbFile.isFile())
-	      {
-		dbFile.renameTo(new File(filename + ".bak"));
-	      }
+	// and dump the whole thing
 
-	    // and dump the whole thing
+	outStream = new FileOutputStream(filename);
+	bufStream = new BufferedOutputStream(outStream);
+	out = new DataOutputStream(bufStream);
 
-	    outStream = new FileOutputStream(filename);
-	    bufStream = new BufferedOutputStream(outStream);
-	    out = new DataOutputStream(bufStream);
+	out.writeUTF(id_string);
+	out.writeByte(major_version);
+	out.writeByte(minor_version);
 
-	    out.writeUTF(id_string);
-	    out.writeByte(major_version);
-	    out.writeByte(minor_version);
+	namespaceCount = (short) nameSpaces.size();
 
-	    namespaceCount = (short) nameSpaces.size();
+	out.writeShort(namespaceCount);
 
-	    out.writeShort(namespaceCount);
+	for (int i = 0; i < namespaceCount; i++)
+	  {
+	    ns = (DBNameSpace) nameSpaces.elementAt(i);
+	    ns.emit(out);
+	  }
 
-	    for (int i = 0; i < namespaceCount; i++)
-	      {
-		ns = (DBNameSpace) nameSpaces.elementAt(i);
-		ns.emit(out);
-	      }
+	if (major_version >= 1 && minor_version >= 3)
+	  {
+	    rootCategory.emit(out);
+	  }
 
-	    if (major_version >= 1 && minor_version >= 3)
-	      {
-		rootCategory.emit(out);
-	      }
+	baseCount = (short) objectBases.size();
 
-	    baseCount = (short) objectBases.size();
-
-	    out.writeShort(baseCount);
+	out.writeShort(baseCount);
 	
-	    basesEnum = objectBases.elements();
+	basesEnum = objectBases.elements();
 
-	    while (basesEnum.hasMoreElements())
+	while (basesEnum.hasMoreElements())
+	  {
+	    base = (DBObjectBase) basesEnum.nextElement();
+
+	    if (base.type_code == SchemaConstants.OwnerBase ||
+		base.type_code == SchemaConstants.PersonaBase ||
+		base.type_code == SchemaConstants.RoleBase ||
+		base.type_code == SchemaConstants.EventBase)
 	      {
-		base = (DBObjectBase) basesEnum.nextElement();
+		base.partialEmit(out); // gotta retain admin login ability
+	      }
+	    else if (base.type_code == SchemaConstants.TaskBase)
+	      {
+		base.emit(out, true); // save the builder information
+	      }
+	    else
+	      {
+		base.emit(out, false); // just write out the schema info
+	      }
+	  } 
 
-		if (base.type_code == SchemaConstants.OwnerBase ||
-		    base.type_code == SchemaConstants.PersonaBase ||
-		    base.type_code == SchemaConstants.RoleBase ||
-		    base.type_code == SchemaConstants.EventBase)
-		  {
-		    base.partialEmit(out); // gotta retain admin login ability
-		  }
-		else if (base.type_code == SchemaConstants.TaskBase)
-		  {
-		    base.emit(out, true); // save the builder information
-		  }
-		else
-		  {
-		    base.emit(out, false); // just write out the schema info
-		  }
-	      } 
-
-	    // and dump the schema out in a human readable form
+	// and dump the schema out in a human readable form
 	
-	    if (Ganymede.htmlProperty != null)
-	      {
-		textOutStream = new FileOutputStream(Ganymede.htmlProperty);
-		textOut = new PrintWriter(textOutStream);
+	if (Ganymede.htmlProperty != null)
+	  {
+	    textOutStream = new FileOutputStream(Ganymede.htmlProperty);
+	    textOut = new PrintWriter(textOutStream);
 		
-		printCategoryTreeHTML(textOut);
-	      }
+	    printCategoryTreeHTML(textOut);
 	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("DBStore error dumping schema to " + filename);
-	    throw ex;
-	  }
-	finally
-	  {
-	    if (releaseLock)
-	      {
-		if (lock != null)
-		  {
-		    lock.release();
-		  }
-	      }
-
-	    if (out != null)
-	      {
-		out.close();
-	      }
-
-	    if (bufStream != null)
-	      {
-		bufStream.close();
-	      }
-	   
-	    if (outStream != null)
-	      {
-		outStream.close();
-	      }
-
-	    if (textOut != null)
-	      {
-		textOut.close();
-	      }
-
-	    if (textOutStream != null)
-	      {
-		textOutStream.close();
-	      }
-	  }
+      }
+    catch (IOException ex)
+      {
+	System.err.println("DBStore error dumping schema to " + filename);
+	throw ex;
       }
     finally
       {
-	this.notifyAll();
+	if (releaseLock)
+	  {
+	    if (lock != null)
+	      {
+		lock.release();
+	      }
+	  }
+
+	if (out != null)
+	  {
+	    out.close();
+	  }
+
+	if (bufStream != null)
+	  {
+	    bufStream.close();
+	  }
+	   
+	if (outStream != null)
+	  {
+	    outStream.close();
+	  }
+
+	if (textOut != null)
+	  {
+	    textOut.close();
+	  }
+
+	if (textOutStream != null)
+	  {
+	    textOutStream.close();
+	  }
       }
   }
 
@@ -991,14 +936,7 @@ public class DBStore {
 
   public synchronized void login(DBSession session)
   {
-    try
-      {
-	this.sessions.addElement(session);
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    this.sessions.addElement(session);
   }
 
   /**
@@ -1007,14 +945,7 @@ public class DBStore {
 
   public synchronized void logout(DBSession session)
   {
-    try
-      {
-	this.sessions.removeElement(session);
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    this.sessions.removeElement(session);
   }
 
   /**
@@ -1033,62 +964,55 @@ public class DBStore {
 	System.err.println("DBStore.okToDelete(" + Ganymede.internalSession.describe(invid) + ") entering");
       }
 
-    try
+    for (int i = 0; i < sessions.size(); i++)
       {
-	for (int i = 0; i < sessions.size(); i++)
-	  {
-	    DBSession session = (DBSession) sessions.elementAt(i);
+	DBSession session = (DBSession) sessions.elementAt(i);
 	
+	if (true)
+	  {
+	    System.err.println("DBStore.okToDelete() checking session " + session);
+	  }
+
+	// if mySession is equal to session, the fact that a deletion
+	// block is set won't really stop us, since that transaction
+	// can handle the blocking object in its own transaction
+	
+	if (session == mySession)
+	  {
 	    if (true)
 	      {
-		System.err.println("DBStore.okToDelete() checking session " + session);
+		System.err.println("DBStore.okToDelete() skipping session " + session);
+	      }
+	    continue;
+	  }
+
+	synchronized (session)
+	  {
+	    DBEditSet editSet = session.editSet;
+
+	    if (editSet == null)
+	      {
+		System.err.println("DBStore.okToDelete() session " + session + " has null editset");
 	      }
 
-	    // if mySession is equal to session, the fact that a deletion
-	    // block is set won't really stop us, since that transaction
-	    // can handle the blocking object in its own transaction
-	
-	    if (session == mySession)
+	    if (editSet != null && !editSet.canDelete(invid))
 	      {
 		if (true)
 		  {
-		    System.err.println("DBStore.okToDelete() skipping session " + session);
-		  }
-		continue;
-	      }
-
-	    synchronized (session)
-	      {
-		DBEditSet editSet = session.editSet;
-
-		if (editSet == null)
-		  {
-		    System.err.println("DBStore.okToDelete() session " + session + " has null editset");
+		    System.err.println("DBStore.okToDelete() refusing delete");
 		  }
 
-		if (editSet != null && !editSet.canDelete(invid))
-		  {
-		    if (true)
-		      {
-			System.err.println("DBStore.okToDelete() refusing delete");
-		      }
-
-		    return false;
-		  }
+		return false;
 	      }
 	  }
-
-	if (true)
-	  {
-	    System.err.println("DBStore.okToDelete() okaying delete");
-	  }
-
-	return true;
       }
-    finally
+
+    if (true)
       {
-	this.notifyAll();
+	System.err.println("DBStore.okToDelete() okaying delete");
       }
+    
+    return true;
   }
 
   /** 
@@ -1101,22 +1025,15 @@ public class DBStore {
 
   public synchronized void printCategoryTreeHTML(PrintWriter out)
   {
-    try
-      {
-	out.println("<HTML><HEAD><TITLE>Ganymede Schema Dump -- " + new Date() + "</TITLE></HEAD>");
-	out.println("<BODY BGCOLOR=\"#FFFFFF\"><H1>Ganymede Schema Dump -- " + new Date() + "</H1>");
-	out.println("<HR>");
+    out.println("<HTML><HEAD><TITLE>Ganymede Schema Dump -- " + new Date() + "</TITLE></HEAD>");
+    out.println("<BODY BGCOLOR=\"#FFFFFF\"><H1>Ganymede Schema Dump -- " + new Date() + "</H1>");
+    out.println("<HR>");
 
-	rootCategory.printHTML(out);
+    rootCategory.printHTML(out);
 
-	out.println("<HR>");
-	out.println("Emitted: " + new Date());
-	out.println("</BODY>");
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    out.println("<HR>");
+    out.println("Emitted: " + new Date());
+    out.println("</BODY>");
   }
 
   /** 
@@ -1130,14 +1047,7 @@ public class DBStore {
 
   public synchronized void printCategoryTree(PrintWriter out, boolean showBuiltIns)
   {
-    try
-      {
-	rootCategory.print(out, "", showBuiltIns);
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    rootCategory.print(out, "", showBuiltIns);
   }
 
   /**
@@ -1148,22 +1058,15 @@ public class DBStore {
 
   public synchronized void printBases(PrintWriter out)
   {
-    try
+    Enumeration enum;
+
+    /* -- */
+
+    enum = objectBases.elements();
+    
+    while (enum.hasMoreElements())
       {
-	Enumeration enum;
-
-	/* -- */
-
-	enum = objectBases.elements();
-
-	while (enum.hasMoreElements())
-	  {
-	    ((DBObjectBase) enum.nextElement()).print(out, "", true);
-	  }
-      }
-    finally
-      {
-	this.notifyAll();
+	((DBObjectBase) enum.nextElement()).print(out, "", true);
       }
   }
 
@@ -1175,26 +1078,18 @@ public class DBStore {
   public synchronized Vector getBaseNameList()
   {
     Vector result = new Vector();
+    Enumeration enum;
 
-    try
+    /* -- */
+
+    enum = objectBases.elements();
+    
+    while (enum.hasMoreElements())
       {
-	Enumeration enum;
-
-	/* -- */
-
-	enum = objectBases.elements();
-
-	while (enum.hasMoreElements())
-	  {
-	    result.addElement(((DBObjectBase) enum.nextElement()).getName());
-	  }
-
-	return result;
+	result.addElement(((DBObjectBase) enum.nextElement()).getName());
       }
-    finally
-      {
-	this.notifyAll();
-      }
+    
+    return result;
   }
 
   /**
@@ -1227,31 +1122,24 @@ public class DBStore {
 
   public synchronized DBObjectBase getObjectBase(String baseName)
   {
-    try
+    DBObjectBase base;
+    Enumeration enum;
+
+    /* -- */
+
+    enum = objectBases.elements();
+    
+    while (enum.hasMoreElements())
       {
-	DBObjectBase base;
-	Enumeration enum;
-
-	/* -- */
-
-	enum = objectBases.elements();
-
-	while (enum.hasMoreElements())
-	  {
-	    base = (DBObjectBase) enum.nextElement();
+	base = (DBObjectBase) enum.nextElement();
 	
-	    if (base.getName().equals(baseName))
-	      {
-		return base;
-	      }
+	if (base.getName().equals(baseName))
+	  {
+	    return base;
 	  }
+      }
 
-	return null;
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    return null;
   }
 
   /**
@@ -1262,14 +1150,7 @@ public class DBStore {
 
   public synchronized short getNextBaseID()
   {
-    try
-      {
-	return maxBaseId++;
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    return maxBaseId++;
   }
 
   /**
@@ -1281,16 +1162,9 @@ public class DBStore {
 
   public synchronized void releaseBaseID(short id)
   {
-    try
+    if (id == maxBaseId)
       {
-	if (id == maxBaseId)
-	  {
-	    maxBaseId--;
-	  }
-      }
-    finally
-      {
-	this.notifyAll();
+	maxBaseId--;
       }
   }
 
@@ -1302,14 +1176,7 @@ public class DBStore {
 
   public synchronized void setBase(DBObjectBase base)
   {
-    try
-      {
-	objectBases.put(base.getKey(), base);
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    objectBases.put(base.getKey(), base);
   }
 
   /**
@@ -1324,24 +1191,17 @@ public class DBStore {
 
     /* -- */
 
-    try
+    for (int i = 0; i < nameSpaces.size(); i++)
       {
-	for (int i = 0; i < nameSpaces.size(); i++)
-	  {
-	    namespace = (DBNameSpace) nameSpaces.elementAt(i);
+	namespace = (DBNameSpace) nameSpaces.elementAt(i);
 	    
-	    if (namespace.name.equals(name))
-	      {
-		return namespace;
-	      }
+	if (namespace.name.equals(name))
+	  {
+	    return namespace;
 	  }
+      }
 	
-	return null;
-      }
-    finally
-      {
-	this.notifyAll();
-      }
+    return null;
   }
 
   /**
@@ -1353,84 +1213,77 @@ public class DBStore {
 
   public synchronized DBBaseCategory getCategory(String pathName)
   {
+    DBBaseCategory 
+      bc;
+
+    int
+      tok;
+
+    /* -- */
+
+    if (pathName == null)
+      {
+	throw new IllegalArgumentException("can't deal with null pathName");
+      }
+
+    // System.err.println("DBStore.getCategory(): searching for " + pathName);
+    
+    StringReader reader = new StringReader(pathName);
+    StreamTokenizer tokens = new StreamTokenizer(reader);
+    
+    tokens.wordChars(Integer.MIN_VALUE, Integer.MAX_VALUE);
+    tokens.ordinaryChar('/');
+    
+    tokens.slashSlashComments(false);
+    tokens.slashStarComments(false);
+    
     try
       {
-	DBBaseCategory 
-	  bc;
+	tok = tokens.nextToken();
 
-	int
-	  tok;
+	bc = rootCategory;
 
-	/* -- */
+	// The path is going to include the name of the root node
+	// itself (unlike in the UNIX filesystem, where the root node
+	// has no 'name' of its own), so we need to skip into the
+	// root node.
 
-	if (pathName == null)
-	  {
-	    throw new IllegalArgumentException("can't deal with null pathName");
-	  }
-
-	// System.err.println("DBStore.getCategory(): searching for " + pathName);
-
-	StringReader reader = new StringReader(pathName);
-	StreamTokenizer tokens = new StreamTokenizer(reader);
-
-	tokens.wordChars(Integer.MIN_VALUE, Integer.MAX_VALUE);
-	tokens.ordinaryChar('/');
-
-	tokens.slashSlashComments(false);
-	tokens.slashStarComments(false);
-
-	try
+	if (tok == '/')
 	  {
 	    tok = tokens.nextToken();
-
-	    bc = rootCategory;
-
-	    // The path is going to include the name of the root node
-	    // itself (unlike in the UNIX filesystem, where the root node
-	    // has no 'name' of its own), so we need to skip into the
-	    // root node.
-
-	    if (tok == '/')
-	      {
-		tok = tokens.nextToken();
-	      }
-
-	    if (tok == StreamTokenizer.TT_WORD && tokens.sval.equals(rootCategory.getName()))
-	      {
-		tok = tokens.nextToken();
-	      }
-
-	    while (tok != StreamTokenizer.TT_EOF && bc != null)
-	      {
-		// note that slashes are the only non-word token we
-		// should ever get, so they are implicitly separators.
-	    
-		if (tok == StreamTokenizer.TT_WORD)
-		  {
-		    // System.err.println("DBStore.getCategory(): Looking for node " + tokens.sval);
-
-		    bc = (DBBaseCategory) bc.getNode(tokens.sval);
-
-		    if (bc == null)
-		      {
-			System.err.println("DBStore.getCategory(): found null");
-		      }
-		  }
-	    
-		tok = tokens.nextToken();
-	      }
 	  }
-	catch (IOException ex)
+
+	if (tok == StreamTokenizer.TT_WORD && tokens.sval.equals(rootCategory.getName()))
 	  {
-	    throw new RuntimeException("parse error in getCategory: " + ex);
+	    tok = tokens.nextToken();
 	  }
 
-	return bc;
+	while (tok != StreamTokenizer.TT_EOF && bc != null)
+	  {
+	    // note that slashes are the only non-word token we
+	    // should ever get, so they are implicitly separators.
+	    
+	    if (tok == StreamTokenizer.TT_WORD)
+	      {
+		// System.err.println("DBStore.getCategory(): Looking for node " + tokens.sval);
+
+		bc = (DBBaseCategory) bc.getNode(tokens.sval);
+
+		if (bc == null)
+		  {
+		    System.err.println("DBStore.getCategory(): found null");
+		  }
+	      }
+	    
+	    tok = tokens.nextToken();
+	  }
       }
-    finally
+    catch (IOException ex)
       {
-	this.notifyAll();
+	throw new RuntimeException("parse error in getCategory: " + ex);
       }
+    
+    return bc;
   }
 
   /**

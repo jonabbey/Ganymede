@@ -8,15 +8,16 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/12/14 23:44:16 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/01/27 06:03:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -91,10 +92,22 @@ public class GanymedeWarningTask implements Runnable {
 
     Ganymede.debug("Warning Task: Starting");
 
-    if (Ganymede.db.schemaEditInProgress)
+    String semaphoreCondition;
+
+    try
       {
-	Ganymede.debug("Deferring warning task - schema being edited");
-	return;
+	semaphoreCondition = GanymedeServer.lSemaphore.increment(0);
+	
+	if (semaphoreCondition != null)
+	  {
+	    Ganymede.debug("Deferring warning task - semaphore disabled: " + semaphoreCondition);
+	    return;
+	  }
+      }
+    catch (InterruptedException ex)
+      {
+	ex.printStackTrace();
+	throw new RuntimeException(ex.getMessage());
       }
 
     try

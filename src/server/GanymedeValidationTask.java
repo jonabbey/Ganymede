@@ -7,15 +7,16 @@
    
    Created: 26 January 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/12/14 23:44:16 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/01/27 06:03:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -98,9 +99,11 @@ public class GanymedeValidationTask implements Runnable {
 
     Ganymede.debug("Validation Task: Starting");
 
-    if (Ganymede.db.schemaEditInProgress)
+    String error = GanymedeServer.lSemaphore.checkEnabled();
+	
+    if (error != null)
       {
-	Ganymede.debug("Deferring validation task - schema being edited");
+	Ganymede.debug("Deferring validation task - semaphore disabled: " + error);
 	return;
       }
 
