@@ -99,12 +99,29 @@ supported (vs. the 8 character limit of traditional Unix Crypt).
 
 XXX - to be written.  Discuss DBEditObject subclasses, tasks.
 
-5. [SERVER] Java 5.0 fixes
+5. [SERVER, CLIENT] Java 5.0 fixes
 
-XXX - GUI threading stuff, use of FoxTrot for fire-and-wait GUI
-updates in the client.
+Sun, long may their name be praised, decided in Java 5.0 to
+arbitrarily make 'enum' a language keyword, despite never having put
+it on the reserved keyword list.  We had to go through the entire
+source code and replace 'enum' with 'en'.
 
-6. [SERVER] The return of passive password capture
+In a number of other places, we had to explicitly cast some parameters
+when making reflection calls to avoid confusion between an older
+method call that has null as the final parameter and the newer Java
+5.0 varargs versions of those methods.
+
+6. [CLIENT] Cleaned up some threading
+
+We're now using FoxTrot (http://foxtrot.sourceforge.net/) to allow
+some activity in the client to be synchronous in ordering but
+asynchronous in that we allow the GUI thread to continue redraw and
+processing further GUI events until certain server calls complete.
+
+This fire-and-wait support makes the GUI client feel much snappier in
+a few places.
+
+7. [SERVER] The return of passive password capture
 
 Thanks to Deepak, we have now re-enabled the passive password capture
 logic in the PasswordDBField class that was removed in 1.0.10.
@@ -120,7 +137,7 @@ capture is that it enables Ganymede to learn about plaintext from
 interacting with a user, while still allowing us to forego saving
 plaintext passwords persistently to our ganymede.db file.
 
-7. [SERVER] Made transaction commit more resilient to exceptions in commitPhase1
+8. [SERVER] Made transaction commit more resilient to exceptions in commitPhase1
 
 The DBEditSet's transaction commit logic was vulnerable to getting
 into a confused and broken state if an object's commitPhase1() method
@@ -130,7 +147,7 @@ consistent state, ready to try committing again (though it will
 probably fail if the error condition in the plugin classes is not
 fixed).
 
-8. [SERVER, CLIENT] Added SSL support, 1.4 requirement
+9. [SERVER, CLIENT] Added SSL support, 1.4 requirement
 
 Added the arlut.csd.ganymede.server.GanymedeRMIManager class to handle
 all RMI exports, which support for SSL encryption of client/server
@@ -146,12 +163,12 @@ The SSL support now present in Ganymede requires a minimum of Java 1.4
 to work.  We are therefore intending to make JDK 1.4 a minimum
 requirement of Ganymede 2.0.
 
-9. [SERVER, CLIENT] Changes to Query system (Deepak)
+10. [SERVER, CLIENT] Changes to Query system (Deepak)
 
 XXX - I forget exactly what Deepak did, but I think the whole
 QueryResults system got changed.. ? XXX
 
-10. [SERVER, CLIENT] Removed the OwnerObjectsOwned field from OwnerBase
+11. [SERVER, CLIENT] Removed the OwnerObjectsOwned field from OwnerBase
 
 With this change, Owner Group objects no longer include an
 InvidDBField tracking objects owned by that Owner Group.  Instead, it
@@ -172,7 +189,7 @@ pane back in, but it will be implemented with discrete query logic,
 rather than the old InvidDBField lookup, again for the benefit of
 avoiding owner group locking.
 
-11. [SERVER] Added a per-DBObjectBaseField lastChange variable
+12. [SERVER] Added a per-DBObjectBaseField lastChange variable
 
 For the entire history of Ganymede, the GanymedeBuilderTask has
 consulted a lastChange variable in each DBObjectBase to decide whether
@@ -190,6 +207,43 @@ builder task could do was check to see if any user had been edited in
 any way since it last ran.  This meant that editing the Notes field on
 a user would trigger unnecessary activity in all builder tasks that
 cared at all about user changes.
+
+13. [CLIENT] Numerous fixes in the client's query table logic
+
+Fixed a number of bugs in the client, including the bug that allowed
+an object to be deleted in the client then viewed in an empty state
+through the use of the query result table pop-up menu.  Now, all
+checks against an object being already marked as deleted are done at
+the proper place, rather than being done in the tree response code.
+                                                                                                                                                             
+Also, I fixed bugzilla bug #14, which caused the title of query
+windows not to be properly updated when a transaction is committed and
+the query windows are refreshed, possibly with a different number of
+entries (see 1.0.12, item 14, below).  While I was working on that, I
+shuffled some code around in the client for better thread safety when
+accessing some windowPanel data structures, as well as the use of a
+common windowPanel.setWindowTitle() method for picking and maintaining
+unique window names.
+
+14. [ADMIN CONSOLE] Significant fixes to bugs in console login process
+
+Improved the admin console login procedure.  The server now returns
+an explicit dialog refusing admin console login if the user provides
+an unprivileged or incorrect username and password.  The admin
+console now responds properly to a failure to login or to the
+Ganymede server being down.  The admin console will now also
+repeatedly test the server to see whether it has come up, and can be
+told to attempt a new connection if the server is believed to come
+back up.
+
+Much of the connection establishment threading has been improved in
+design.  The use of the arlut.csd.Util.booleanSemaphore also helps
+some, by allowing for proper exclusion of overlapping connection
+threads.  The connection thread now properly uses the SwingUtilities
+to handle proper issuance of gui updates in response to the
+connection thread.
+
+Good stuff, and long overdue.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
