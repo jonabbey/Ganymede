@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.64 $ %D%
+   Version: $Revision: 1.65 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2058,8 +2058,10 @@ public final class InvidDBField extends DBField implements invid_field {
     // container, the permissions system will fail if we don't bypass
     // it by using the local variant.
 
-    if (embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, // *sync* DBField
-				       owner.getInvid()) != null)
+    ReturnVal retVal = embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, // *sync* DBField
+						      owner.getInvid());
+
+    if (retVal != null && !retVal.didSucceed())
       {
 	setLastError("Couldn't bind reverse pointer");
 	return null;
