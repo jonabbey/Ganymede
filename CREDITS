@@ -53,29 +53,27 @@ without his support.
 
  Mike Mulvaney, mike@mulvaney.com
 
-Mike worked on Ganymede during his year and a half at the lab,
-from February of 1997 through September of 1998, before moving to the
-Washington D.C. area.  The client as it currently stands is primarily
-Mike's work.  In addition to the large bulk of client-side coding,
-Mike contributed significantly to the design of the system
-architecture as a whole.  Ganymede would be a far, far poorer
-thing were it not for Mike.
+Mike worked on Ganymede during his year and a half at the lab, from
+February of 1997 through September of 1998, before moving to the
+Washington D.C. area.  Significant amounts of the client remain
+primarily Mike's work.  In addition to the large bulk of client-side
+coding, Mike contributed significantly to the design of the system
+architecture as a whole.  Ganymede would be a far poorer thing were it
+not for Mike.
 
 --
 
  Brian O'Mara, bom@alumni.utexas.net
 
-Brian worked on Ganymede during his tenure as a student
-employee at ARL from February 1998 through August of 2000.  Brian
-created custom icons for the Ganymede client and rewrote the
-permissions editor to use more Swing classes, as well as creating the
-persona selection dialog introduced in Ganymede 0.98.  Brian
-also reworked the Query dialog to be more user-friendly.  During his
-last year at ARL, Brian did an enormous amount of work in preparing
-for the ultimate replacement of the old-style hosts_info DNS support
-with new code to convert BIND files into an XML representation and
-back again, which will be incorporated into a Ganymede schema
-kit sometime during 2001.
+Brian worked on Ganymede during his tenure as a student employee at
+ARL from February 1998 through August of 2000.  Brian created custom
+icons for the Ganymede client and rewrote the permissions editor to
+use more Swing classes, as well as creating the persona selection
+dialog introduced in Ganymede 0.98.  Brian also reworked the Query
+dialog to be more user-friendly.  During his last year at ARL, Brian
+did an enormous amount of work in preparing for the ultimate
+replacement of the old-style hosts_info DNS support with new code to
+convert BIND files into an XML representation and back again.
 
 --
 
