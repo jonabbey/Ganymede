@@ -87,8 +87,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   // - misc. variables
 
   int row = 0;
+  Query returnVal;
   boolean editOnly;
   Base defaultBase;
+  String baseName;
   Component[] myAry = new Component[MAXCOMPONENTS]; // stores a single row
   Vector Rows = new Vector(); // store the rows 
   Hashtable myHash = new Hashtable(); // allows you to look up a base with its
@@ -184,7 +186,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      currentBase = baseChoice.getSelectedItem();
 	      this.defaultBase = (Base) myHash.get(currentBase);
 	      defaultBase = this.defaultBase;
-	      String test = defaultBase.getName();
+	      this.baseName = defaultBase.getName();
 	    }
 	}
       catch (RemoteException ex)
@@ -369,12 +371,14 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	}
     }
   
-  public void myshow(boolean truth_value){
+  public Query myshow(){
     
     // Method to set the perm_editor to visible or invisible
     
     setSize(500,500);
-    setVisible(truth_value); 
+    setVisible(true); 
+    return this.returnVal; // once setVisible is set to false
+                           // the program executes this return line
   }
 
   public void removeRow(Component[] myRow, Panel myPanel){
@@ -393,10 +397,17 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   
 
   public Query createQuery(){
-
+    
+    // * -- * //
+    
     Query myQuery;
+    Object value;
+    byte opValue;
+
+    // -- //
+
     int allRows = this.Rows.size();
-    System.out.println("Look at How man Rows we have: " + allRows);
+    System.out.println("Look at How many Rows we have: " + allRows);
 
     if (allRows == 1)
       {
@@ -405,19 +416,44 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	Component[] tempAry = (Component[]) this.Rows.elementAt(allRows - 1);
 	Choice tempChoice1 = (Choice) tempAry[0];
 	String fieldName = tempChoice1.getSelectedItem();
-	Choice tempChoice2 =  (Choice) tempAry[4];
-	String operator = tempChoice2.getSelectedItem();
+	Choice tempChoice2 = (Choice) tempAry[2];
+	String notValue = tempChoice2.getSelectedItem();
+	Choice tempChoice3 =  (Choice) tempAry[4];
+	String operator = tempChoice3.getSelectedItem();
 	TextField tempText = (TextField) tempAry[6];
-	Object value = tempText.getText();
+	value = tempText.getText();
 
-	//QeuryDataNode singleData = 
+	// -- get the correct operator
+	
+	if (operator == "="){
+	  opValue = 1;
+	} else if (operator == "<"){
+	  opValue = 2;
+	} else if (operator == "<="){
+	  opValue = 3;
+	} else if (operator == ">") {
+	  opValue = 4;
+	} else if (operator == ">=") {
+	  opValue = 5;
+	} else {
+	  opValue = 7; // UNDEFINED
+	}    
+      
+	// -- if not is true then add a not node
+	
+	QueryDataNode returnNode = new QueryDataNode(fieldName, opValue, value);
 
-	myQuery = new Query("loser");
-
-
+	if (notValue == "is not"){
+	  QueryNotNode notNode = new QueryNotNode(returnNode);
+	  myQuery = new Query(baseName, notNode);
+	  
+	} else { // "NOT" not selected
+	  
+	  myQuery = new Query(baseName, returnNode);
+	  
+	}
       }
-
-    else 
+    else // Multiple Rows
       {
 	myQuery = new Query("loser");
 
@@ -441,13 +477,12 @@ class querybox extends Dialog implements ActionListener, ItemListener {
      
     if (e.getSource() == OkButton) {
       System.out.println("You will submit");      
-      createQuery();
-      myshow(false);
-      return;
+      this.returnVal = createQuery();
+      setVisible(false);
     } else if (e.getSource() == CancelButton){
       System.out.println("Cancel was pushed");
-      myshow(false);
-      return;
+      this.returnVal = null;
+      setVisible(false);
     } 
 
     if (e.getSource() == addButton){
@@ -494,6 +529,15 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  Base defaultBase = (Base) myHash.get(baseChoice.getSelectedItem());
 	  this.defaultBase = defaultBase;
 
+	  try
+	    {      
+	      this.baseName = defaultBase.getName();
+	    }
+	  catch (RemoteException ex)
+	    {
+	      throw new RuntimeException("caught remote exception: " + ex);	
+	    }
+	  
 	  // remove for all entries in vector of component arrays
 
 	  for (int i = this.row - 1; i > -1; i--)
