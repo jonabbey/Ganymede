@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -179,14 +179,21 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
   public QueryResult obtainChoiceList(DBField field)
   {
-    System.err.println("Entering adminPersona obtainChoiceList for field " + field.getName());
+    if (debug)
+      {
+	System.err.println("Entering adminPersona obtainChoiceList for field " + 
+			   field.getName());
+      }
 
     if (field.getID() != SchemaConstants.PersonaPrivs)
       {
 	return super.obtainChoiceList(field);
       }
 
-    System.err.println("Returning adminPersona restricted list");
+    if (debug)
+      {
+	System.err.println("Returning adminPersona restricted list");
+      }
 
     if (field.isEditable() && (field instanceof InvidDBField) && 
 	!field.isEditInPlace())
