@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 2001/07/27 02:42:34 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 2001/07/27 02:45:20 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.69 $ $Date: 2001/07/27 02:42:34 $ $Name:  $
+ * @version $Revision: 1.70 $ $Date: 2001/07/27 02:45:20 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -899,12 +899,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     if (editable)
       {
-	fileM.addSeparator();
+	boolean sepAdded = false;
 
 	try
 	  {
 	    if (expiration_Editable && getObject().canInactivate())
 	      {
+		fileM.addSeparator();
+		sepAdded = true;
+
 		JMenuItem setExpirationMI = new JMenuItem("Set Expiration Date");
 		setExpirationMI.setMnemonic('e');
 		setExpirationMI.addActionListener(this);
@@ -918,6 +921,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
 	if (removal_Editable)
 	  {
+	    if (!sepAdded)
+	      {
+		fileM.addSeparator();
+	      }
+
 	    JMenuItem setRemovalMI = new JMenuItem("Set Removal Date");
 	    setRemovalMI.setMnemonic('v');
 	    setRemovalMI.addActionListener(this);
