@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.52 $
-# $Date: 2000/10/10 05:10:00 $
+# $Revision: 1.53 $
+# $Date: 2000/11/14 06:02:13 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -144,24 +144,6 @@ classfiles:
 	./build
 	\@cd $rootdir/src
 	\@echo "Built Ganymede classes"
-
-kits:
-	\@echo "Building schemas"
-	\@echo "Compiling BSD schema kit"
-	\@cd $rootdir/src/schemas/bsd; \\
-	./build;
-	\@echo "Compiling GASH schema kit"
-	\@cd $rootdir/src/schemas/gash; \\
-	./build;
-	\@echo "Compiling GASHARL schema kit"
-	\@cd $rootdir/src/schemas/gasharl; \\
-	./build;
-	\@echo "Compiling LINUX schema kit"
-	\@cd $rootdir/src/schemas/linux; \\
-	./build;
-	\@echo "Compiling Solaris NIS schema kit"
-	\@cd $rootdir/src/schemas/nisonly; \\
-	./build;
 
 clean:
 	\@echo "Removing class files (except gnu-regexp files)"
@@ -451,26 +433,6 @@ while ($#configs > 0) {
     write_config(shift @configs, shift @configs, shift @configs);
 }
 
-@schemas=("$rootdir/src/schemas/bsd", "BSD",
-	  "$rootdir/src/schemas/gash", "GASH",
-	  "$rootdir/src/schemas/gasharl", "ARL GASH",
-	  "$rootdir/src/schemas/linux", "LINUX",
-	  "$rootdir/src/schemas/nisonly", "Solaris NIS",
-	  "$rootdir/src/schemas/ganymede.old", "Developmental Next-generation");
-
-print "Generating config.sh files for schema kits.\n";
-
-while ($#schemas > 0) {
-    $schemadir = shift @schemas;
-    $schemaname = shift @schemas;
-
-    write_config("$schemadir/custom_src", "$schemaname Schema Classes", 
-		 "$schemadir/custom_src/classes");
-
-    write_config("$schemadir/loader/source", "$schemaname Loader Classes", 
-		 "$schemadir/loader/classes");
-}
-
 # Now we need to write out the rebuild scripts.  The only reason we're
 # doing it here is that rebuild is written in perl, and we want to
 # rewrite the header to properly specify the location of perl on this
@@ -491,13 +453,7 @@ while ($#schemas > 0) {
 	   "$rootdir/src/JTree",
 	   "$rootdir/src/server",
 	   "$rootdir/src/client",
-	   "$rootdir/src/JDataComponent",
-	   "$rootdir/src/schemas/bsd/custom_src",
-	   "$rootdir/src/schemas/gash/custom_src",
-	   "$rootdir/src/schemas/gasharl/custom_src",
-	   "$rootdir/src/schemas/linux/custom_src",
-	   "$rootdir/src/schemas/nisonly/custom_src",
-	   "$rootdir/src/schemas/ganymede.old/custom_src");
+	   "$rootdir/src/JDataComponent");
 
 print "Generating rebuild files in source directories.\n";
 
