@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,6 +79,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     DBObjectBase base = Ganymede.db.getObjectBase((short) 272);	// system types
 
     /* -- */
+
+    if (field.getID() == 268)
+      {
+	return null;		// no choices for volumes
+      }
     
     if (field.getID() != 266)	// system type field
       {
@@ -105,6 +110,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public QueryResult obtainChoiceList(DBField field)
   {
+    if (field.getID() == 268)
+      {
+	return null;		// no choices for volumes
+      }
+
     if (field.getID() != 266)	// system type field
       {
 	return super.obtainChoiceList(field);
@@ -129,7 +139,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   {
     return (field.getID() == 266);
   }
-
   
   /**
    *
