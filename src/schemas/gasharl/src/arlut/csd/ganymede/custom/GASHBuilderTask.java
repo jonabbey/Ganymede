@@ -1003,7 +1003,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a single user netgroup out to disk,
+   * This method writes out a single system netgroup out to disk,
    * wrapping the netgroup if it gets too long.
    *
    * omg-s	csd-s (csdsun1.arlut.utexas.edu,-,) (ns1.arlut.utexas.edu,-,)
