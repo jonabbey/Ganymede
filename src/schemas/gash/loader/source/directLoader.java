@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2333,6 +2333,8 @@ public class directLoader {
 
 	current_obj.setFieldValueLocal(volumeSchema.LABEL, key); // volume name
 	current_obj.setFieldValueLocal(volumeSchema.PATH, v.path);	// path
+
+	v.hostName = SystemLoader.stripDomain(v.hostName);
 	
 	hostInvid = (Invid) systemInvid.get(v.hostName);
 
