@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 1999/01/27 21:45:12 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 1999/02/25 04:36:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -85,7 +85,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.100 $ %D%
+ * @version $Revision: 1.101 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -976,19 +976,21 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * sensitive check to see if this object feels like being
    * available for inactivating by the client.<br><br>
    *
-   * Note that unlike canRemove(), canInactivate() takes
-   * a DBEditObject instead of a DBObject.  This is because
-   * inactivating an object is based on editing the object,
-   * and so we have the GanymedeSession/DBSession classes
-   * go ahead and check the object out for editing before
-   * calling us.  This serves to force the session classes
-   * to check for write permission before attempting inactivation.
+   * Note that unlike canRemove(), canInactivate() takes a
+   * DBEditObject instead of a DBObject.  This is because inactivating
+   * an object is based on editing the object, and so we have the
+   * GanymedeSession/DBSession classes go ahead and check the object
+   * out for editing before calling us.  This serves to force the
+   * session classes to check for write permission before attempting
+   * inactivation.<br><br>
+   *
+   * Use canBeInactivated() to test for the presence of an inactivation
+   * protocol outside of an edit context if needed.
    *
    * To be overridden in DBEditObject subclasses.<br><br>
    *
    * <b>*PSEUDOSTATIC*</b>
-   *
-   */
+   * */
 
   public boolean canInactivate(DBSession session, DBEditObject object)
   {
@@ -1011,6 +1013,33 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public boolean canRemove(DBSession session, DBObject object)
   {
+    // our default behavior is that objects that can be inactivated
+    // should not be deleted except by supergash
+
+    if (this.canBeInactivated())
+      {
+	GanymedeSession myMaster = session.getGSession();
+
+	/* -- */
+	
+	if (myMaster == null)
+	  {
+	    // hm, not an end-user.. let it go
+	    
+	    return true;
+	  }
+
+	// only supergash can delete users.. everyone else can only
+	// inactivate.
+	
+	if (myMaster.isSuperGash())
+	  {
+	    return true;
+	  }
+
+	return false;
+      }
+    
     return true;
   }
 
