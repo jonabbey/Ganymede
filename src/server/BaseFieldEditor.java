@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -280,6 +280,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
   void checkVisibility()
   {
+    System.out.println(" Checking visibility");
     if (passwordShowing || booleanShowing)
       {
 	setRowVisible(vectorCF, false);
@@ -342,6 +343,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
     editPanel.doLayout();
     this.validate();
+    System.out.println(" Done checking visibility");
   }
 
   void refreshNamespaceChoice()
@@ -594,18 +596,18 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
    *
    */
 
-  void editField(FieldNode fieldNode)
+  void editField(FieldNode fieldNode, boolean forceRefresh)
   {
-    System.err.println("in FieldEditor.editField()");
+    System.err.println(" -in FieldEditor.editField()");
 
     clearFields();
 
-    this.fieldNode = fieldNode;
-
-    if (fieldDef == this.fieldDef)
+    if (!forceRefresh && (fieldNode == this.fieldNode))
       {
-	return;
+    	return;
       }
+
+    this.fieldNode = fieldNode;
 
     this.fieldDef = fieldNode.getField();
 
@@ -631,8 +633,10 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     referenceShowing = false;
     passwordShowing = false;
 
+    System.out.println(" before try");
     try
       {
+	System.out.println(" in try");
 	idN.setValue(fieldDef.getID());
 	nameS.setText(fieldDef.getName());
 	classS.setText(fieldDef.getClassName());
@@ -836,12 +840,15 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	targetC.setEnabled(isEditable);
 	fieldC.setEnabled(isEditable);
 	
+	System.out.println(" calling checkVisibility");
 	checkVisibility();
       }
     catch (RemoteException ex)
       {
 	System.err.println("remote exception in FieldEditor.editField: " + ex);
       }
+
+    System.out.println(" done in editField");
   }
 
   /**
@@ -852,7 +859,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
   public void refreshFieldEdit()
   {
-    this.editField(fieldNode);
+    this.editField(fieldNode, true);
   }
 
   /**
@@ -874,6 +881,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	    System.out.println("nameS");
 	    fieldDef.setName((String) v.getValue());
 	    fieldNode.setText((String) v.getValue());
+	    owner.tree.refresh();
 	  }
 	else if (comp == classS)
 	  {
