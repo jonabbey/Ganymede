@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.16 $ %D%
+ Version: $Revision: 1.17 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -245,6 +245,51 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
   }
 
+  /** Reload the list box.
+   */
+
+  public void reload(Vector items, boolean sorted)
+  {
+    model.removeAllElements();
+    if ((items != null) && (items.size() > 0))
+      {
+	if (items.elementAt(0) instanceof listHandle)
+	  {
+	    if (!sorted)
+	      {
+		items = sortListHandleVector(items);
+	      }
+
+	    for (int i = 0; i < items.size(); i++)
+	      {
+		insertHandleAt((listHandle)items.elementAt(i), i);
+	      }
+	  }
+	else  //It must be a string, or it will throw a ClassCastException
+	  {
+	    if (!sorted)
+	      {
+		items = sortStringVector(items);
+	      }
+
+	    for (int i = 0; i < items.size(); i++)
+	      {
+		String s = (String)items.elementAt(i);
+		insertHandleAt(new listHandle(s,s), i);
+	      }
+	  }
+	
+      }
+    else 
+      {
+	if (debug)
+	  {
+	    System.out.println("no items to add");
+	  }
+      }
+  }
+
+
   /**
    * Convenience method to set the size on the model.
    *
@@ -338,12 +383,20 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
     else if (o instanceof String)
       {
-	System.out.println("I am guessing you want me to remove a label...");
+	if (debug)
+	  {
+	    System.out.println("I am guessing you want me to remove a label...");
+	  }
+
 	removeLabel((String) o);
       }
     else
       {
-	System.out.println("Ok, i will look for this object in the listHnaldes.");
+	if (debug)
+	  {
+	    System.out.println("Ok, i will look for this object in the listHnaldes.");
+	  }
+
 	for (int i = 0; i < model.getSize(); i++)
 	  {
 	    if ((((listHandle)model.elementAt(i)).getObject()).equals(o))
@@ -570,7 +623,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
 	if (SwingUtilities.isLeftMouseButton(e))
 	  {
-	    System.out.println("mouse clicked");
 	    if (e.getClickCount() == 2)
 	      {
 		boolean ok = false;
@@ -633,12 +685,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public void actionPerformed(ActionEvent e)
   {
-    System.out.println("action perfomred");
     if (allowCallback)
       {
 	if (e.getSource() instanceof JMenuItem)
 	  {
-	    System.out.println("Sending parameter up.");
 	    String string = ((JMenuItem)e.getSource()).getActionCommand();
 	    try
 	      {
@@ -656,6 +706,80 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  }
 
       }
+  }
+
+  /**
+   * sort a vector of listHandles
+   *
+   * @param v Vector to be sorted
+   * @return Vector of sorted listHandles(sorted by label)
+   */
+  private Vector sortListHandleVector(Vector v)
+  {
+    (new VecQuickSort(v, 
+		      new arlut.csd.Util.Compare() {
+      public int compare(Object a, Object b) 
+	{
+	  listHandle aF, bF;
+	  
+	  aF = (listHandle) a;
+	  bF = (listHandle) b;
+	  int comp = 0;
+	  
+	  comp =  aF.toString().compareTo(bF.toString());
+	  
+	  if (comp < 0)
+	    {
+	      return -1;
+	    }
+	  else if (comp > 0)
+	    { 
+	      return 1;
+	    } 
+	  else
+	    { 
+	      return 0;
+	    }
+	}
+    })).sort();
+    
+    return v;
+  }
+  /**
+   * Sort a vector of Strings
+   *
+   * @return Vector of sorted Strings.
+   */
+  public Vector sortStringVector(Vector v)
+  {
+    (new VecQuickSort(v, 
+		      new arlut.csd.Util.Compare() {
+      public int compare(Object a, Object b) 
+	{
+	  String aF, bF;
+	  
+	  aF = (String) a;
+	  bF = (String) b;
+	  int comp = 0;
+	  
+	  comp =  aF.compareTo(bF);
+	  
+	  if (comp < 0)
+	    {
+	      return -1;
+	    }
+	  else if (comp > 0)
+	    { 
+	      return 1;
+	    } 
+	  else
+	    { 
+	      return 0;
+	    }
+	}
+    })).sort();
+    
+    return v;
   }
 
 }
