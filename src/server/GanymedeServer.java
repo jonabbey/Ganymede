@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -182,24 +182,38 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    persona = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
 	    
 	    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
-	    
-	    if (pdbf.matchPlainText(clientPass))
-	      {
-		found = true;
-	      }
-	  }
 
+	    if (pdbf == null)
+	      {
+		System.err.println("GanymedeServer.login(): Couldn't get password for persona " + persona.getLabel());
+	      }
+	    else
+	      {
+		if (clientPass == null)
+		  {
+		    System.err.println("GanymedeServer.login(): null clientpass.. ");
+		  }
+		else
+		  {
+		    if (pdbf.matchPlainText(clientPass))
+		      {
+			found = true;
+		      }
+		  }
+	      } 
+	  } 
+	
 	// okay, if the user logged in directly to his persona
 	// (broccol:GASH Admin, etc.), try to find his base user
 	// account.
-
+	
 	if (clientName.indexOf(':') != -1)
 	  {
 	    String userName = clientName.substring(0, clientName.indexOf(':'));
-
+	    
 	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, userName);
 	    userQuery = new Query(SchemaConstants.UserBase, root, false);
-	
+	    
 	    results = Ganymede.internalSession.internalQuery(userQuery);
 
 	    if (results.size() == 1)
