@@ -5,7 +5,7 @@
    Description.
    
    Created: 20 January 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -36,7 +36,6 @@ class perm_button extends JButton implements ActionListener {
   boolean enabled;
   Hashtable basehash;
   gclient gc;
-  boolean justShowUser;
   String title;
   JCheckBox tableView;
 
@@ -59,26 +58,30 @@ class perm_button extends JButton implements ActionListener {
 		      boolean justShowUser,
 		      String title)
   {
-    JLabel label = new JLabel("myLabel");
-    tableView = new JCheckBox("Table View",false);
-    label.setBorder(new BevelBorder(BevelBorder.RAISED));
+
+
+    // Commented out stuff is to allow access to "good" editor while testing another
+
+    //    JLabel label = new JLabel("myLabel");
+    //    tableView = new JCheckBox("Table View",false);
+    //    label.setBorder(new BevelBorder(BevelBorder.RAISED));
+
     if (enabled)
       {
-	label.setText("Edit Permissions");
+	setText("Edit Permissions");
       }
     else
       {
-	label.setText("View Permissions");
+	setText("View Permissions");
       }
 
-    this.setLayout(new BorderLayout());
-    this.add(label, "North");
-    this.add(tableView, "South");
+//     this.setLayout(new BorderLayout());
+//     this.add(label, "North");
+//     this.add(tableView, "South");
 
     this.field = field;
     this.enabled = enabled;
     this.gc = gc;
-    this.justShowUser = justShowUser;
     this.title = title;
     
     addActionListener(this);
@@ -91,28 +94,26 @@ class perm_button extends JButton implements ActionListener {
   
   public void actionPerformed(ActionEvent e)
   {
-    if ((e.getSource() == this) && (tableView.isSelected()))
+    if ((e.getSource() == this)) // && (tableView.isSelected()))
       {
-	System.out.println("Edit Button was pushed- table selected");
+// 	System.out.println("Edit Button was pushed- table selected");
 	
-	Frame parent = new Frame();
-	brian_editor editor = new brian_editor(field, 
-					     enabled, gc, 
-					     parent, "Permissions Editor: " + title,
-					     justShowUser);
+// 	Frame parent = new Frame();
+// 	perm_editor editor = new perm_editor(field, 
+// 					     enabled, gc, 
+// 					     parent, "Permissions Editor: " + title);
 
-	System.out.println("Editor Created by perm button");
-      }
+// 	System.out.println("Editor Created by perm button");
+//       }
  
-    else {
+//     else {
 
       System.out.println("Edit Button was pushed- table not selected");
       
       Frame parent = new Frame();
       perm_editor editor = new perm_editor(field, 
 					   enabled, gc, 
-					   parent, "Permissions Editor: " + title,
-					   justShowUser);
+					   parent, "Permissions Editor: " + title);
       
       System.out.println("Editor Created by perm button");
     }
