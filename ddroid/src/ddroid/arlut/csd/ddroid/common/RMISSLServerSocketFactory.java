@@ -77,6 +77,32 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
 
   private transient SSLServerSocketFactory ssf;
 
+  /* -- */
+
+  public RMISSLServerSocketFactory()
+  {
+  }
+
+  public ServerSocket createServerSocket(int port) throws IOException
+  { 
+    return getSSF().createServerSocket(port);
+  }
+
+  public boolean equals(Object object)
+  {
+    if (object instanceof arlut.csd.ddroid.common.RMISSLServerSocketFactory)
+      {
+	return true;
+      }
+
+    return false;
+  }
+
+  public int hashCode()
+  {
+    return _hashCode;
+  }
+
   private synchronized SSLServerSocketFactory getSSF()
   {
     if (ssf != null)
@@ -108,25 +134,5 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
       }
 
     return ssf;
-  }
-
-  public ServerSocket createServerSocket(int port) throws IOException
-  { 
-    return getSSF().createServerSocket(port);
-  }
-
-  public boolean equals(Object object)
-  {
-    if (object instanceof arlut.csd.ddroid.common.RMISSLServerSocketFactory)
-      {
-	return true;
-      }
-
-    return false;
-  }
-
-  public int hashCode()
-  {
-    return _hashCode;
   }
 }
