@@ -353,7 +353,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     if (passField == null)
       {
-	return;
+	return;			// no password, so inactive user.. skip
       }
 
     md5Crypt = passField.getMD5CryptText();
