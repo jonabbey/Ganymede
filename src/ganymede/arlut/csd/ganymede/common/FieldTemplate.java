@@ -371,6 +371,18 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
+   * 
+   * Returns true if this field is of field option type 
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public boolean isFieldOptions()
+  {
+    return (type == FIELDOPTIONS);
+  }
+
+  /**
    *
    * Returns true if this field is one of the standard
    * fields that are part of all objects held in

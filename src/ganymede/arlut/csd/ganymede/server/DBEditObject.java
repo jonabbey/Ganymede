@@ -307,6 +307,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      case FLOAT:
 		tmp = new FloatDBField(this, fieldDef);
 		break;
+
+	      case FIELDOPTIONS:
+		tmp = new FieldOptionDBField(this, fieldDef);
+		break;
 		
 	      case DATE:
 		tmp = new DateDBField(this, fieldDef);
@@ -401,6 +405,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    tmp = new FloatDBField(this, (FloatDBField) field);
 	    break;
 
+	  case FIELDOPTIONS:
+	    tmp = new FieldOptionDBField(this, (FieldOptionDBField) field);
+	    break;
+
 	  case DATE:
 	    tmp = new DateDBField(this, (DateDBField) field);
 	    break;
@@ -465,6 +473,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		  case FLOAT:
 		    tmp = new FloatDBField(this, fieldDef);
+		    break;
+
+		  case FIELDOPTIONS:
+		    tmp = new FieldOptionDBField(this, fieldDef);
 		    break;
 		
 		  case DATE:

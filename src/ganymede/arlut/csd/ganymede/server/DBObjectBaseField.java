@@ -921,6 +921,9 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       case FieldType.FLOAT:
 	xmlOut.attribute("type", "float");
 	break;
+      case FieldType.FIELDOPTIONS:
+	xmlOut.attribute("type", "options");
+	break;
       case FieldType.DATE:
 	xmlOut.attribute("type", "date");
 	break;
@@ -1334,6 +1337,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 		// do is attempt to do a setType
 
 		retVal = setType(FieldType.FLOAT);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+	      }
+	    else if (item.getAttrStr("type").equals("options"))
+	      {
+		//  has no subchildren, all we need to
+		// do is attempt to do a setType
+
+		retVal = setType(FieldType.FIELDOPTIONS);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
@@ -2695,6 +2710,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    *   static short PASSWORD = 6;
    *   static short IP = 7;
    *   static short FLOAT = 8;
+   *   static short FIELDOPTIONS = 9;
    * </pre>
    *
    * @see arlut.csd.ganymede.server.DBStore
@@ -2823,6 +2839,17 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   public boolean isFloat()
   {
     return (field_type == FLOAT);
+  }
+
+  /**
+   * <p>Returns true if this field is of float type</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public boolean isFieldOptions()
+  {
+    return (field_type == FIELDOPTIONS);
   }
 
   /**
@@ -5012,6 +5039,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	result = "float";
 	break;
 
+      case FIELDOPTIONS:
+	result = "field options";
+	break;
+
       case DATE:
 	result = "date";
 	break;
@@ -5188,6 +5219,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
       case FLOAT:
 	result = "<td>float</td>";
+	break;
+
+      case FIELDOPTIONS:
+	result = "<td>field options</td>";
 	break;
 
       case DATE:

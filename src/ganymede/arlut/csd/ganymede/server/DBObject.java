@@ -471,6 +471,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		
 		break;
 		
+	      case FIELDOPTIONS:
+		fieldAry[i] = new FieldOptionDBField(this, (FieldOptionDBField) field);
+		
+		break;
+
 	      case DATE:
 		fieldAry[i] = new DateDBField(this, (DateDBField) field);
 		
@@ -1086,6 +1091,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	  case FLOAT:
 	    tmp = new FloatDBField(this, in, definition);
+	    break;
+
+	  case FIELDOPTIONS:
+	    tmp = new FieldOptionDBField(this, in, definition);
 	    break;
 
 	  case DATE:

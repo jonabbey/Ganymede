@@ -185,6 +185,7 @@ public interface BaseField extends Remote {
    *   static short PASSWORD = 6;
    *   static short IP = 7;
    *   static short FLOAT = 8;
+   *   static short FIELDOPTIONS = 9;
    * </pre>
    */
 
@@ -207,6 +208,12 @@ public interface BaseField extends Remote {
    */
 
   public boolean isFloat() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of field options type</p>
+   */
+
+  public boolean isFieldOptions() throws RemoteException;
 
   /**
    * <p>Returns true if this field is of date type</p>

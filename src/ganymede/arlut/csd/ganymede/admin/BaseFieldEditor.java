@@ -165,6 +165,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     booleanShowing,
     numericShowing,
     floatShowing,
+    fieldOptionShowing,    
     dateShowing,
     stringShowing,
     referenceShowing,
@@ -228,6 +229,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     typeC.addItem("Boolean");
     typeC.addItem("Numeric");
+    typeC.addItem("Field Options");
     typeC.addItem("Float");
     typeC.addItem("Date");
     typeC.addItem("String");
@@ -329,6 +331,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     booleanShowing = true;
     numericShowing = false;
     floatShowing = false;
+    fieldOptionShowing = false;
     dateShowing = false;
     stringShowing = false;
     referenceShowing = false;
@@ -768,6 +771,19 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		floatShowing = true;
 	      }
 	  }
+	else if (selectedItem.equalsIgnoreCase("Field Options"))
+	  {
+	    if (handleReturnVal(fieldDef.setType(FieldType.FIELDOPTIONS)))
+	      {
+		refreshFieldEdit(true);
+		return;
+	      }
+	    else
+	      {
+		clearTypeChoice();
+		fieldOptionShowing = true;
+	      }
+	  }
 	else if (selectedItem.equalsIgnoreCase("Date"))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.DATE)))
@@ -870,6 +886,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     booleanShowing = false;
     numericShowing = false;
     floatShowing = false;
+    fieldOptionShowing = false;
     dateShowing = false;
     stringShowing = false;
     referenceShowing = false;
@@ -1305,6 +1322,11 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
  	  {
  	    typeC.getModel().setSelectedItem("Float");
  	    floatShowing = true;
+ 	  }
+ 	else if (fieldDef.isFieldOptions())
+ 	  {
+ 	    typeC.getModel().setSelectedItem("Field Options");
+ 	    fieldOptionShowing = true;
  	  }
 	else if (fieldDef.isPermMatrix())
 	  {

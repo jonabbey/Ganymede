@@ -71,5 +71,6 @@ public interface FieldType {
   static final short PASSWORD = 6;
   static final short IP = 7;
   static final short FLOAT = 8;
-  static final short LASTFIELD = 8;
+  static final short FIELDOPTIONS = 9;
+  static final short LASTFIELD = 9;
 }

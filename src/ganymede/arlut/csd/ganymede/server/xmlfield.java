@@ -84,6 +84,7 @@ import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.pass_field;
 import arlut.csd.ganymede.rmi.perm_field;
+import arlut.csd.ganymede.rmi.field_option_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -447,6 +448,45 @@ public class xmlfield implements FieldType {
 	    // fall through to skipToEndField()
 	  }
       }
+    else if (fieldDef.getType() == FieldType.FIELDOPTIONS)
+      {
+	nextItem = owner.xSession.getNextItem();
+
+	if (!nextItem.matches("options"))
+	  {
+	    owner.xSession.err.println("\nUnrecognized tag while parsing data for a field options field: " + nextItem);
+
+	    skipToEndField(elementName);
+
+	    throw new NullPointerException("void field def");	    
+	  }
+	else
+	  {
+	    setValues = new Vector();
+	    
+	    nextItem = owner.xSession.getNextItem();
+
+	    while (!nextItem.matchesClose("options") && !(nextItem instanceof XMLEndDocument))
+	      {
+		xOption optionElement = new xOption(nextItem, true);
+
+		if (optionElement != null)
+		  {
+		    setValues.addElement(optionElement);
+		  }
+
+		nextItem = owner.xSession.getNextItem();
+	      }
+
+	    if (nextItem instanceof XMLEndDocument)
+	      {
+		throw new RuntimeException("Ran into end of XML file while processing options field " + elementName);
+	      }
+
+	    // fall through to skipToEndField()
+	  }
+      }
+
 
     // if we get here, we haven't yet consumed the field close
     // element.. go ahead and eat everything up to and including the
@@ -1346,6 +1386,71 @@ public class xmlfield implements FieldType {
 		  }
 	      }
 	  }
+	else if (fieldDef.isFieldOptions())
+	  {
+	    field_option_field field = (field_option_field) owner.objref.getField(fieldDef.getID());
+
+	    if (setValues != null)
+	      {
+		// first, clear out any options set
+
+		field.resetOptions();
+
+		// now set the options
+		
+		for (int i = 0; i < setValues.size(); i++)
+		  {
+		    xOption option = (xOption) setValues.elementAt(i);
+
+		    short baseId = owner.xSession.getTypeNum(option.getName());
+
+		    result = field.setOption(baseId, option.getOption());
+
+		    if (result != null && !result.didSucceed())
+		      {
+			return result;
+		      }
+		    
+		    if (option.fields != null)
+		      {
+			Enumeration fieldOptions = option.fields.elements();
+
+			while (fieldOptions.hasMoreElements())
+			  {
+			    xOption fieldOption = (xOption) fieldOptions.nextElement();
+
+			    Hashtable fieldHash = owner.xSession.getFieldHash(option.getName());
+
+			    if (fieldHash == null)
+			      {
+				owner.xSession.err.println("Error, can't process field options for object base " + 
+						   XMLUtils.XMLDecode(option.getName()) + ", base not found.");
+				return new ReturnVal(false);
+			      }
+
+			    FieldTemplate optionFieldDef = owner.xSession.getObjectFieldType(fieldHash, fieldOption.getName());
+
+			    if (optionFieldDef == null)
+			      {
+				owner.xSession.err.println("Error, can't process field options for field " +
+						   XMLUtils.XMLDecode(fieldOption.getName()) + " in object base " + 
+						   XMLUtils.XMLDecode(option.getName()) + ", base not found.");
+				return new ReturnVal(false);
+			      }
+
+			    result = field.setOption(baseId, optionFieldDef.getID(), fieldOption.getOption());
+
+			    if (result != null && !result.didSucceed())
+			      {
+				return result;
+			      }
+			  }
+		      }
+		  }
+	      }
+
+	    return null;	// success!
+	  }
 	else if (fieldDef.isPermMatrix())
 	  {
 	    perm_field field = (perm_field) owner.objref.getField(fieldDef.getID());
@@ -2046,3 +2151,122 @@ class xPerm {
     return null;
   }
 }
+
+/**
+ * <p>This class is used by the Ganymede XML client to represent
+ * a permission field value.</p>
+ *
+ * <p>xOption are slightly recursive, in that a top-level xOption
+ * is used to represent the permissions for a type of object
+ * at the object level, and contain in turn xOption objects used
+ * for the individual fields defined within that object.</p>
+ */
+
+class xOption {
+
+  /**
+   * <p>String describing this xOption's contents.  This String
+   * is held in XMLEncoded form.  That is, spaces in the Ganymede
+   * object type and/or field name have been replaced with
+   * underscores.</p>
+   */
+
+  String label = null;
+
+  /**
+   * <p>If this xOption is representing an object type as a whole,
+   * fields will map field names to xOption objects.  If this
+   * xOption is representing permissions for a field, this variable
+   * will be null.</p>
+   */
+
+  Hashtable fields = null;
+
+  /**
+   * <p>The option for this xOption.</p>
+   */
+
+  String option;
+
+  /* -- */
+
+  /**
+   * <p>xOption constructor.  When the constructor is called, the
+   * xOption reads the next item from the xmlclient's 
+   * {@link arlut.csd.ganymede.client.xmlclient#getNextItem() getNextItem()}
+   * method and uses it to initialize the xOption.</p>
+   *
+   * <p>If objectType is true, the xOption constructor assumes that
+   * it is reading an entire object type's permission data.  In this
+   * case, it will load the permission data for the object, including
+   * all of the field permissions data contained within the top-level
+   * object.</p>
+   */
+
+  public xOption(XMLItem item, boolean objectType) throws SAXException
+  {
+    while (!(item instanceof XMLElement))
+      {
+	getXSession().err.println("Unrecognized element encountered in xOption constructor, skipping: " + item);
+	item = getXSession().getNextItem();
+      }
+
+    label = ((XMLElement) item).getName();
+
+    if (label != null)
+      {
+	label = label.intern();
+      }
+
+    String myOption = item.getAttrStr("option");
+
+    if (myOption == null)
+      {
+	getXSession().err.println("No perm attributes found for xOption item " + item);
+      }
+    else
+      {
+	this.option = myOption;
+      }
+
+    if (objectType && !item.isEmpty())
+      {
+	fields = new Hashtable();
+	item = getXSession().getNextItem();
+
+	while (!item.matchesClose(label) && !(item instanceof XMLEndDocument))
+	  {
+	    xOption fieldoption = new xOption(item, false);
+	    fields.put(fieldoption.getName(), fieldoption);
+
+	    item = getXSession().getNextItem();
+	  }
+
+	if (item instanceof XMLEndDocument)
+	  {
+	    throw new RuntimeException("Ran into end of XML file while parsing options object " + label);
+	  }
+      }
+  }
+
+  public String getName()
+  {
+    return label;
+  }
+
+  public String getOption()
+  {
+    return this.option;
+  }
+
+  private GanymedeXMLSession getXSession()
+  {
+    if (java.lang.Thread.currentThread() instanceof GanymedeXMLSession)
+      {
+	return (GanymedeXMLSession) java.lang.Thread.currentThread();
+      }
+
+    return null;
+  }
+}
+
