@@ -24,7 +24,7 @@ import com.sun.java.swing.border.*;
 
 ------------------------------------------------------------------------------*/
 
-public class StringDialog extends Dialog implements ActionListener, JsetValueCallback, ItemListener {
+public class StringDialog extends JDialog implements ActionListener, JsetValueCallback, ItemListener {
 
   static final boolean debug = false;
 
@@ -165,7 +165,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 
     mainPanel.setBorder(new EtchedBorder());
 
-    add(mainPanel);
+    getContentPane().add(mainPanel);
 
     // add stuff to panel here
 
@@ -322,7 +322,8 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     pack();
 
     repaint();
-    show();
+    //    show();
+    setVisible(true);		// thread will halt here
       
     this.dispose();
     
