@@ -438,7 +438,21 @@ resolved to be equivalent to 'admin@mailserver.com'.
 
 The DBLog code that handles system event mail will now truncate at the
 colon, so a bad login for 'pug:admin' will be sent to
-'pug@mailserver.com'.
+'pug@mailserver.com', as it should.
+
+28. [PASSWORD CLIENT] Fixed PasswordClient compatibility for 1.2
+
+The PasswordClient class used by the changePassword program attempted
+to set an RMISecurityManager, which is not allowed under Java 1.2.  As
+a result, running changePassword on a 1.2 JVM would cause a security
+exception to be thrown.
+
+Sun really makes it hard to be both 1.1 and 1.2 compatible, some
+times.  Fortunately, the Ganymede clients work acceptably well with
+the default security manager, since we package all of the RMI stub
+classes with the client jar.
+
+This was another bug reported by pug.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
