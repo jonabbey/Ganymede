@@ -4,8 +4,8 @@
    Handy, simple synchronized flag class
 
    Created: 29 March 2001
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2001/03/29 06:42:47 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/03/29 07:12:18 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -69,6 +69,8 @@ public class booleanSemaphore {
 
   private boolean state;
 
+  /* -- */
+
   public booleanSemaphore(boolean initialState)
   {
     this.state = initialState;
@@ -79,8 +81,22 @@ public class booleanSemaphore {
     return state;
   }
 
-  public synchronized void set(boolean b)
+  /**
+   * <p>Simple bidirectional test and set.</p>
+   *
+   * @return The value that the booleanSemaphore had 
+   * before set() was called.
+   */
+
+  public synchronized boolean set(boolean b)
   {
-    this.state = b;
+    boolean old;
+
+    /* -- */
+
+    old = state;
+    state = b;
+
+    return old;
   }
 }
