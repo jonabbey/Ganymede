@@ -531,6 +531,48 @@ permissions failures may now throw GanyPermissionException.  I'm not
 sure that this is entirely accounted for in the client code at this
 writing (10 February 2005).
 
+29. [SERVER] Added entirely new Sync Channel build system
+
+With Ganymede 2.0, the Ganymede server now has a second way of
+handling synchronization to target directory services.
+
+Previously, all builds were done through the use of the
+GanymedeBuilderTask and its subclasses, using a two phase process.  In
+phase one, portions of Ganymede's internal datastore was locked
+against changes while the builder task scanned the database and wrote
+data (usually text files) out to a specified directory.  In phase two,
+the database was unlocked, and the builder task ran an external
+synchronization process that used the data files written out by phase
+1.  When external build system finished, the task's execution was
+complete, and a new build could be scheduled and issued for that same
+task.
+
+All of that is still there, and it all works the same way that it ever
+did.  Now, though, there is a second system, based on the SyncRunner
+and syncChannelCustom classes.  I call it the 'Sync Channel' system.
+
+The Sync Channel system is based on tracking the changes made to the
+Ganymede data store.  When a change is made, the Ganymede transaction
+commit logic examines all Sync Channels registered in the server,
+looking to see if any of them are interested in the object and fields
+that have changed.  If any Sync Channel is so interested, that Sync
+Channel will write out an XML description of the transaction with
+respect to the objects and fields that the Sync Channel cares about.
+
+Each standardized transaction description is written out to a
+directory devoted to the Sync Channel, in a file whose name is the
+transaction's id number.  The Ganymede server then triggers the
+external service program specified for each Sync Channel, passing it
+the number of the highest transaction known to have been successfully
+written out at the time that the service program is run.
+
+The service program is intended to read all of the transactions up to
+and including the number given it, and to integrate those changes into
+whatever directory service the Sync Channel is intended to support.
+
+At this writing (14 February 2005), I still need to write
+documentation for the Sync Channel system.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
