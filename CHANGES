@@ -91,6 +91,20 @@ Things are a good bit cleaner in the client, now, and all popup
 permission editor windows should now be put away properly when the
 window that the permission editor was launched from is closed.
 
+6. [DISTRIB] Changed numbering scheme
+
+I realized that if I have more than 6 more 1.0x releases, I'll
+suddenly be at 1.1, which I don't want to do by accident.  So, we're
+going from 1.04 to 1.0.5.
+
+7. [DOCUMENTATION] Added an upgrade guide, improved XML docs
+
+I've written a short upgrade guide that explains how to go about
+upgrading the server, schema kit, and clients when a new version of
+Ganymede comes out.
+
+I've also done a fair amount of rework of the xmlclient documentation.
+
 -------------------- Changes from 1.03 to 1.04 -------------------
 
 RELEASE DATE: July 9, 2001
