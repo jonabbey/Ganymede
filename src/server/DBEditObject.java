@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -870,6 +870,52 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public boolean finalizeSetValue(DBField field, Object value)
   {
     return true;
+  }
+
+  public boolean excludeSelected(db_field field1, db_field field2)
+  {
+    return false;
+  }
+
+  /**
+   *
+   * This method returns a key that can be used by the client
+   * to cache the value returned by choices().  If the client
+   * already has the key cached on the client side, it
+   * can provide the choice list from its cache rather than
+   * calling choices() on this object again.
+   *
+   * If there is no caching key, this method will return null.
+   *
+   */
+
+  public Object obtainChoicesKey(DBField field)
+  {
+    // by default, we return a Short containing the base
+    // id for the field's target
+
+    if ((field instanceof InvidDBField) && 
+	!field.isEditInPlace())
+      {
+	DBObjectBaseField fieldDef;
+	short baseId;
+
+	/* -- */
+
+	fieldDef = field.getFieldDef();
+	
+	baseId = fieldDef.getTargetBase();
+
+	if (baseId < 0)
+	  {
+	    //	    Ganymede.debug("DBEditObject: Returning null 2 for choiceList for field: " + field.getName());
+	    return null;
+	  }
+
+	return new Short(baseId);
+      }
+
+    return null;
   }
 
   /**
