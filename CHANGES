@@ -66,6 +66,10 @@ dynamically updated.
 Voila, 'supergash' level power while still being able to 'drill down'
 on a reasonable subset of the server's data.
 
+This entails a slightly incompatible change in the RMI API between the
+client and the server, so the Ganymede 1.0.8 and later clients should
+not be used with a 1.0.7 or earlier server.
+
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
 RELEASE DATE: October 11, 2001

@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 2001/10/31 02:01:31 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 2001/10/31 02:54:04 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.73 $ $Date: 2001/10/31 02:01:31 $ $Name:  $
+ * @version $Revision: 1.74 $ $Date: 2001/10/31 02:54:04 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -195,6 +195,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    */
 
   JScrollPane owner;
+
+  /**
+   * <p>The ownerPanel held</p>
+   */
+
+  ownerPanel owner_panel;
 
   /**
    * holds a notePanel
@@ -1072,7 +1078,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	owner.getVerticalScrollBar().setUnitIncrement(15);
 
 	invid_field invf = (invid_field) getObject().getField(SchemaConstants.OwnerListField);
-	owner.setViewportView(new ownerPanel(invf, editable && invf.isEditable(), this));
+	
+	owner_panel = new ownerPanel(invf, editable && invf.isEditable(), this);
+	owner.setViewportView(owner_panel);
       }
     catch (RemoteException rx)
       {
@@ -1083,6 +1091,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     owner.invalidate();
     validate();
+  }
+
+  void updateOwnerPanel()
+  {
+    try
+      {
+	owner_panel.updateInvidStringSelector();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException(ex.getMessage());
+      }
   }
 
   void create_history_panel()

@@ -6,8 +6,8 @@
 
    Created: 14 November 1996
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2000/09/27 22:34:18 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2001/10/31 02:54:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -81,6 +81,7 @@ public interface invid_field extends db_field {
    */
 
   boolean mustChoose() throws RemoteException;
+  QueryResult choices(boolean applyFilter) throws RemoteException;
   QueryResult choices() throws RemoteException;
 
   /**

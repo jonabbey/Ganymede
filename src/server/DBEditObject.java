@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.154 $
-   Last Mod Date: $Date: 2001/09/24 21:47:43 $
+   Version: $Revision: 1.155 $
+   Last Mod Date: $Date: 2001/10/31 02:54:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.154 $ $Date: 2001/09/24 21:47:43 $ $Name:  $
+ * @version $Revision: 1.155 $ $Date: 2001/10/31 02:54:04 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2032,6 +2032,29 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public QueryResult obtainChoiceList(DBField field)
   {
+    return obtainChoiceList(field, true);
+  }
+
+  /**
+   * <p>This method provides a hook that can be used to generate
+   * choice lists for invid and string fields that provide
+   * such.  String and Invid DBFields will call their owner's
+   * obtainChoiceList() method to get a list of valid choices.</p>
+   *
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields.</p>
+   *
+   * <p>NOTE: This method does not need to be synchronized.  Making this
+   * synchronized can lead to DBEditObject/DBSession nested monitor
+   * deadlocks.</p>
+   *
+   * @param applyFilter If true, the list of choices provided for the
+   * given field will have owner filters applied to it if it is an
+   * Invid choice list.
+   */
+
+  public QueryResult obtainChoiceList(DBField field, boolean applyFilter)
+  {
     if (field.isEditable() && (field instanceof InvidDBField) && 
 	!field.isEditInPlace())
       {
@@ -2069,13 +2092,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	boolean editOnly = !choiceListHasExceptions(field);
 
-	// note that the query we are submitting here *will* be filtered by the
-	// current visibilityFilterInvid field in GanymedeSession.
-
-	return editset.getSession().getGSession().query(new Query(baseId, root, editOnly), this);
+	Query myQuery = new Query(baseId, root, editOnly);
+	myQuery.setFiltered(applyFilter);
+	return editset.getSession().getGSession().query(myQuery, this);
       }
     
     //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
+
     return null;
   }
 

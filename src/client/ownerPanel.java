@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2001/07/05 22:25:52 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2001/10/31 02:54:04 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.JDialog.*;
  * the client.  This panel is created in association with the "Owners"
  * tab in framePanel.</p>
  *
- * @version $Revision: 1.28 $ $Date: 2001/07/05 22:25:52 $ $Name:  $
+ * @version $Revision: 1.29 $ $Date: 2001/10/31 02:54:04 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -108,6 +108,12 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
   JPanel
     holdOnPanel;
+
+  /**
+   * The actual string selector
+   */
+
+  StringSelector ownerList;
 
   /* -- */
 
@@ -181,7 +187,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
 	try
 	  {
-	    StringSelector ownerList = createInvidSelector(field);
+	    ownerList = createInvidSelector(field);
 	    ownerList.setBorder(new LineBorder(Color.black));
 	    remove(holdOnPanel);
 	    add("Center", ownerList);
@@ -218,48 +224,13 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
     if (editable)
       {
-	if (debug)
+	QueryResult choices = field.choices(false);
+
+	if (choices != null)
 	  {
-	    System.out.println("ownerPanel: It's editable, I'm getting the list of choices.");
-	  }
-
-	Object key = field.choicesKey();
-	
-	if ((key != null) && (fp.getgclient().cachedLists.containsList(key)))
-	  {
-	    if (debug)
-	      {
-		System.out.println("Using cached copy...");
-	      }
-
-	    availableOwners = fp.getgclient().cachedLists.getListHandles(key, false);
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.out.println("Downloading copy");
-	      }
-
-	    QueryResult choices = field.choices();
-
-	    if (choices != null)
-	      {
-		list = new objectList(choices);
-	      
+	    list = new objectList(choices);
 		
-		availableOwners = list.getListHandles(false);
-		
-		if (key != null)
-		  {
-		    if (debug)
-		      {
-			System.out.println("Saving this under key: " + key);
-		      }
-		    
-		    fp.getgclient().cachedLists.putList(key, list);
-		  }
-	      }
+	    availableOwners = list.getListHandles(false);
 	  }
       }
 
@@ -318,6 +289,76 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
     ss.setCallback(this);
 
     return ss;
+  }
+
+  /**
+   * <p>Updates the contents of a vector {@link arlut.csd.ganymede.invid_field invid_field}
+   * value selector against the current contents of the field on the server.</p>
+   *
+   * @param ss The StringSelector GUI component being updated
+   * @param field The server-side invid_field attached to the StringSelector to be updated
+   */
+
+  public void updateInvidStringSelector() throws RemoteException
+  {
+    Vector available = null;
+    Vector chosen = null;
+    Object key = null;
+
+    /* -- */
+
+    // Only editable fields have available vectors
+
+    if (ownerList.isEditable())
+      {
+	QueryResult choicesV = field.choices(false);
+	    
+	// if we got a null result, assume we have no choices
+	// otherwise, we're going to cache this result
+	    
+	if (choicesV == null)
+	  {
+	    available = new Vector();
+	  }
+	else
+	  {
+	    available = choicesV.getListHandles();
+	  }
+
+	// hide the supergash object choice
+
+	if (available != null)
+	  {
+	    Invid supergash = new Invid((short)0, 1); // This is supergash
+	    
+	    for (int i = 0; i < available.size(); i++)
+	      {
+		listHandle l = (listHandle)available.elementAt(i);
+		
+		if (supergash.equals(l.getObject()))
+		  {
+		    available.removeElementAt(i);
+		    break;
+		  }
+	      }
+	  }
+      }
+    
+    QueryResult res = field.encodedValues();
+
+    if (res != null)
+      {
+	chosen = res.getListHandles();
+      }
+
+    try
+      {
+	ownerList.update(available, true, null, chosen, false, null);
+      }
+    catch (Exception e)
+      {
+	throw new RuntimeException(e.getMessage());
+      }
   }
 
   public boolean setValuePerformed(JValueObject o)
