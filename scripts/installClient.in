@@ -1,8 +1,10 @@
 #!/opt/bin/perl5
 #
-# Install script for Ganymede developer release 6
+# Install script for Ganymede
 #
-# 9 November 1998
+# $Name:  $
+# $Revision: 1.2 $
+# $Date: 1999/01/21 16:56:12 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -23,14 +25,14 @@ use File::Copy;
 
 @steps = ("JVM", "SWINGJARS", "SYSTEMNAME","CLIENTINSTALL", "SUPERNAME");
 
-%vars = ("JVM" => "/opt/bin",
+%vars = ("JVM" => "<#JAVADIR#>",
 	 "SWINGJARS" => "/opt/depot/swing-1.1beta3",
          "SYSTEMNAME" => "",
          "CLIENTINSTALL" => "",
          "SUPERNAME" => "supergash");
 
 %descrip = ("JVM" => "Where are the JDK 1.1 binaries installed?",
-	    "SWINGJARS" => "Where are the Swing 1.1 beta3+ jar files installed at?",
+	    "SWINGJARS" => "Where are the Swing 1.1 jar files installed at?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
             "CLIENTINSTALL" => "Where should the client binaries be installed?",
 	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?");

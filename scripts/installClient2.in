@@ -1,8 +1,10 @@
 #!/opt/bin/perl5
 #
-# Install script for Ganymede developer release 6
+# Install script for Ganymede
 #
-# 9 November 1998
+# $Name:  $
+# $Revision: 1.2 $
+# $Date: 1999/01/21 16:56:12 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -23,7 +25,7 @@ use File::Copy;
 
 @steps = ("JAVAHOME", "SYSTEMNAME","CLIENTINSTALL", "SUPERNAME");
 
-%vars = ("JAVAHOME" => "/opt/depot/java-1.2rc1",
+%vars = ("JAVAHOME" => "<#JAVADIR#>",
          "SYSTEMNAME" => "",
          "CLIENTINSTALL" => "",
          "SUPERNAME" => "supergash");
@@ -112,8 +114,16 @@ $success = 1; # Assume success until we find out otherwise
 
 if (!-e $vars{"JAVAHOME"}."/bin/java") {
   die "*Can't find the java command*\n\nAborting..";
-  $success = 0;
 } else {
+  $teststring=`$vars{"JAVAHOME"}/bin/java -version`;
+
+  if ($teststring =~ /\"1\.1\./) {
+
+      $teststring =~ /(\"[^\"]*\")/;
+
+      die "*Error, ".$vars{"JAVAHOME"}."/bin/java is version $1.\nWe need 1.2 or greater for this install script.*\n\nAborting..";
+  }
+
   print "Found the java command ok\n";
 }
 

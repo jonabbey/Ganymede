@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.24 $
-# $Date: 1999/01/20 18:47:27 $
+# $Revision: 1.25 $
+# $Date: 1999/01/21 16:56:11 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -221,6 +221,34 @@ sub write_syncjars {
 
 #########################################################################
 #
+#                                                           write_install
+#
+# input: $template - filename (no path) of the template to be copied
+#        $target - filename (no path) of the install script
+#
+#########################################################################
+
+sub write_install {
+
+    my ($template, $target) = @_;
+
+    open(INSTIN, "<$rootdir/scripts/$template") || die ("Can't read $rootdir/scripts/$template");
+    open(INSTOUT, ">$rootdir/$target") || die("Can't create the $target");
+
+    while (<INSTIN>){
+	s/\/opt\/bin\/perl5/$perlname/;
+	s/\<\#JAVADIR\#\>/$javadir/;
+	print INSTOUT $_;
+    }
+
+    close(INSTOUT);
+    close(INSTIN);
+
+    chmod 0755, "$target";
+}
+
+#########################################################################
+#
 #                                                            write_config
 #
 # input: $dir - absolute pathname directory to write config.sh into.
@@ -363,6 +391,12 @@ print "Generating $rootdir/src/Makefile\n\n";
 
 write_makefile("$rootdir/src");
 
-print "Done configuring build scripts.\n";
+print "Generating install scripts\n\n";
+
+write_install("installClient.in", "installClient");
+write_install("installClient2.in", "installClient2");
+write_install("installServer.in", "installServer");
+
+print "Done with configure.\n";
 
 exit;
