@@ -7,8 +7,8 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2001/06/25 21:12:52 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/07/31 18:18:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -277,12 +277,12 @@ public class PasswordAgingTask implements Runnable {
 	    continue;
 	  }
 
-	// then one day
+	// then one day before
 
 	lowerBound.setTime(currentTime);
-	lowerBound.add(Calendar.DATE, -1);
 
 	upperBound.setTime(currentTime);
+	upperBound.add(Calendar.DATE, 1);
 
 	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
@@ -372,6 +372,7 @@ public class PasswordAgingTask implements Runnable {
     String messageString = "The password for user account " + userObject.toString() + 
       " will expire soon.  You will need to change your password before " + passwordChangeTime +
       " or else your user account will be inactivated.\n\n" +
+      "From within the laboratory, you can change your password online by visiting http://www.arlut.utexas.edu/password.\n\n" +
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators.";
 
     Ganymede.log.sendMail(null, titleString, messageString, true, false, objVect);
@@ -395,6 +396,7 @@ public class PasswordAgingTask implements Runnable {
     String messageString = "The password for user account " + userObject.toString() + 
       " will expire very soon.  The password for this user account will need to be changed before " + passwordChangeTime +
       " or else the account will be inactivated.\n\n" +
+      "From within the laboratory, you can change your password online by visiting http://www.arlut.utexas.edu/password.\n\n" +
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
@@ -422,6 +424,7 @@ public class PasswordAgingTask implements Runnable {
       " the account will be inactivated.  If this account is inactivated, extension of the password" +
       " expiration deadline will be impossible, and a new password will need to be chosen to re-enable" +
       " this account.\n\n" +
+      "From within the laboratory, you can change your password online by visiting http://www.arlut.utexas.edu/password.\n\n" +
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
