@@ -243,7 +243,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
       }
     else
       {
-	Ganymede.debug(buildScript + " doesn't exist, not running external LDAP build script");
+	Ganymede.debug(buildScript + " doesn't exist, not running external IRIS build script");
       }
 
     Ganymede.debug("IRISBuilderTask builderPhase2 completed");
