@@ -18,7 +18,16 @@ use CGI;
 
 $query = new CGI;
 $xml_path = "<#XMLPATH#>";
-$xmlclient = $xml_path . "bin/xmlclient";
+$xmlclient = $xml_path . "/xmlclient";
+
+# Yes, the software is smarter than you, if you didn't include
+# bin when installClient asked you for the location of the
+# client utils.
+
+if (!-f $xmlclient) {
+  $xmlclient = $xml_path . "bin/xmlclient";
+}
+
 $tmpdir = "/tmp";
 
 #If this script is run from a different location from where the
