@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.67 $ %D%
+   Version: $Revision: 1.68 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2392,7 +2392,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 	    else
 	      {
-		label = Ganymede.db.getObjectBase(invid.getType()).getObjectHook().lookupLabel(object);
+		label = Ganymede.db.getObjectBase(owner.getType()).getObjectHook().lookupLabel(object);
 	      }
 	  }
 	else
