@@ -9,7 +9,7 @@
    preset.
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -56,19 +56,21 @@ public class JstringField extends JentryField implements KeyListener{
 
   private boolean 
     addedKeyListener = false, 
-    incrementalCallback = false;
+    incrementalCallback = false,
+    processingCallback = false;
 
   /* -- */
 
   /**  Constructors ***/
 
- /**
+  /**
    * Base constructor for JstringField
    * 
    * @param columns number of colums in the JstringField
    * @param valueAttr used to determine the foregoudn/background/font for this JstringField
    * @param is_editable true if this JstringField is editable
    */
+
   public JstringField(int columns,
 		      int maxstrlen,
 		      boolean is_editable,
@@ -261,11 +263,6 @@ public class JstringField extends JentryField implements KeyListener{
 
   public String getValue() 
   {
-    if (!(getText().equals(value)))
-      {
-	sendCallback();
-      }
-
     return value;
   }
 
@@ -393,6 +390,11 @@ public class JstringField extends JentryField implements KeyListener{
 
   public void sendCallback()
   {
+    if (processingCallback)
+      {
+	return;
+      }
+
     String str;
 
     /* -- */
@@ -446,7 +448,24 @@ public class JstringField extends JentryField implements KeyListener{
 	    System.err.println("JstringField.processFocusEvent: making callback");
 	  }
 	
-	b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
+	synchronized (this)
+	  {
+	    if (processingCallback)
+	      {
+		return;
+	      }
+
+	    processingCallback = true;
+	  }
+
+	try
+	  {
+	    b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
+	  }
+	finally
+	  {
+	    processingCallback = false;
+	  }
       }
     catch (RemoteException re)
       {

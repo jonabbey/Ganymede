@@ -3,7 +3,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -38,6 +38,8 @@ public class JnumberField extends JentryField {
   private Integer oldvalue;
 
   private boolean limited = false;
+
+  private boolean processingCallback = false;
 
   private int maxSize;
   private int minSize;
@@ -299,6 +301,11 @@ public class JnumberField extends JentryField {
 
   public void sendCallback()
   {
+    if (processingCallback)
+      {
+	return;
+      }
+
     Integer currentValue;
 
     try
@@ -309,6 +316,16 @@ public class JnumberField extends JentryField {
       {
 	if (allowCallback)
 	  {
+	    synchronized (this)
+	      {
+		if (processingCallback)
+		  {
+		    return;
+		  }
+
+		processingCallback = true;
+	      }
+
 	    try
 	      {
 		my_parent.setValuePerformed(new JValueObject(this, 0,
@@ -318,6 +335,10 @@ public class JnumberField extends JentryField {
 	    catch (java.rmi.RemoteException rx)
 	      {
 		System.out.println("Could not send an error callback.");
+	      }
+	    finally
+	      {
+		processingCallback = false;
 	      }
 	  }
 
@@ -349,6 +370,16 @@ public class JnumberField extends JentryField {
 
 	    if (allowCallback)
 	      {
+		synchronized (this)
+		  {
+		    if (processingCallback)
+		      {
+			return;
+		      }
+
+		    processingCallback = true;
+		  }
+
 		try
 		  {
 		    my_parent.setValuePerformed(new JValueObject(this, 0,
@@ -358,6 +389,10 @@ public class JnumberField extends JentryField {
 		catch (java.rmi.RemoteException rx)
 		  {
 		    System.out.println("Could not send an error callback.");
+		  }
+		finally
+		  {
+		    processingCallback = false;
 		  }
 	      }
 
@@ -380,7 +415,17 @@ public class JnumberField extends JentryField {
 	  }
 
 	boolean success = false;
-	
+
+	synchronized (this)
+	  {
+	    if (processingCallback)
+	      {
+		return;
+	      }
+
+	    processingCallback = true;
+	  }
+
 	try
 	  {
 	    success = my_parent.setValuePerformed(new JValueObject(this,currentValue));
@@ -388,6 +433,10 @@ public class JnumberField extends JentryField {
 	catch (java.rmi.RemoteException re)
 	  {
 	    // success will still be false, that's good enough for us.
+	  }
+	finally
+	  {
+	    processingCallback = false;
 	  }
 
 	if (!success)
