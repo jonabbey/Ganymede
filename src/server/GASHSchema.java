@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@ package arlut.csd.ganymede;
 
 import arlut.csd.Util.*;
 import arlut.csd.DataComponent.*;
+import arlut.csd.Dialog.*;
 
 import tablelayout.*;
 
@@ -33,7 +34,7 @@ import gjt.RowLayout;
 import gjt.ColumnLayout;
 
 import arlut.csd.Tree.*;
-// import arlut.csd.Dialog.YesNoDialog;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -652,6 +653,13 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
       }
     else if (event.getSource() == createNameMI)
       {
+	System.out.println("Create namespace chosen");
+	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namepace here", "Ok", "Cancel");
+
+	dialogResource.addString("Here is a string:");
+
+	StringDialog dialog = new StringDialog(dialogResource);
+	dialog.show();
       }
     else if (event.getSource() == deleteObjectMI)
       {
