@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.66 $ %D%
+   Version: $Revision: 1.67 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1177,16 +1177,15 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * associated with the editset defined in this DBEditObject.<br><br>
    *
    * If initialization fails for some reason, initializeNewObject()
-   * will return false.  Right now there is no infrastructure in
-   * Ganymede to allow the transaction to be aborted from
-   * within the DBSession's createDBObject() method.  As a result,
-   * if this method is to fail to properly initialize the object,
-   * it should be able to not leave an impact on the rest of the
-   * DBStore.. in other words, setting InvidField values that
-   * involve symmetry relationships could be problematic. <br><br>
+   * will return false.  DBSession.createDBObject() will checkpoint
+   * the transaction before calling this method.  If this method
+   * returns false, the calling method will rollback the
+   * transaction.  This method has no responsibility for undoing
+   * partial initialization, the checkpoint/rollback logic will take
+   * care of that.<br><br>
    *
    * This method should be overridden in subclasses.
-   * 
+   *  
    */
 
   public boolean initializeNewObject()
