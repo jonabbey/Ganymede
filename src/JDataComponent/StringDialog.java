@@ -33,7 +33,7 @@ import com.sun.java.swing.border.*;
  *
  * @see DialogRsrc
  */
-public class StringDialog extends JDialog implements ActionListener, JsetValueCallback, ItemListener {
+public class StringDialog extends JCenterDialog implements ActionListener, JsetValueCallback, ItemListener {
 
   static final boolean debug = false;
 
@@ -581,50 +581,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	System.out.println("null objects vector");
       }
     
-    // Having problems with setting the prefered size of the 
-    // table layout
-
-    if (Resource.frame != null)
-      {
-	Rectangle r = Resource.frame.getBounds();
-	
-	if (debug)
-	  {
-	    System.out.println("Bounds: " + r);
-	  }
-	
-	// Sometimes a new JFrame() is passed in, and it won't have
-	// anything interesting for bounds I don't think they are
-	// null, but they are all 0 or something.  Might as well make
-	// sure they are not null anyway.
-
-	if ((r != null) && ((r.width != 0) && (r.height != 0)))
-	  {
-	    int width = getPreferredSize().width;
-	    int height = getPreferredSize().height;
-	    
-	    setLocation(r.width/2 + r.x - width/2, r.height/2 + r.y - height/2);
-	    if (debug)
-	      {
-		int loc = r.width/2 + r.x - width/2;
-		int locy = r.height/2 = r.y - height/2;
-		System.out.println("Setting location to : " + loc + "," + locy);
-	      }
-	  }
-	else if (debug)
-	  {
-	    System.out.println("getBounds() returned null.");
-	  }
-      }
-    else if (debug)
-      {
-	System.out.println("Parent frame is null.");
-      }
-
-    // Add some blank space so the yellow box can eat it up.
-    //addSpace(panel, 10, (components == null) ? 1 : components.size() + 1);
-
-    pack(); // pack again?
+    pack();
   }
 
 
