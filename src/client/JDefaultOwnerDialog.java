@@ -1,11 +1,11 @@
 /*
 
-   file.java
+   JDefaultOwnerDialog.java
 
    A dialog to choose filtering options.
    
    Created: ??
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
