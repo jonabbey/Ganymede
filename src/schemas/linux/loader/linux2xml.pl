@@ -18,8 +18,8 @@
 # at http://www.megginson.com/Software/index.html.
 #
 # Release: $Name:  $
-# Version: $Revision: 1.3 $
-# Date: $Date: 2000/09/15 05:44:02 $
+# Version: $Revision: 1.4 $
+# Date: $Date: 2000/09/15 06:31:09 $
 #
 #=====================================================================
 
@@ -242,9 +242,19 @@ sub printXML {
     $writer->emptyTag("int", 'val' => $UsernameToUser{$user}{uid});
     $writer->endTag("UID");
 
+    # write out the password field.  If the password starts with $1$, it was
+    # encrypted with the md5 hash algorithm as used in FreeBSD, and we need
+    # to indicate that to Ganymede
+
     &xmlIndent();
     $writer->startTag("Password");
-    $writer->emptyTag("password", 'crypt' => $UsernameToUser{$user}{password});
+
+    if ($UsernameToUser{$user}{password} =~ /^\$1\$/) {
+      $writer->emptyTag("password", 'md5crypt' => $UsernameToUser{$user}{password});
+    } else {
+      $writer->emptyTag("password", 'crypt' => $UsernameToUser{$user}{password});
+    }
+
     $writer->endTag("Password");
 
     # We are only showing the user's home group in the <Groups> field, even
