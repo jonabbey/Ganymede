@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2001/09/25 01:44:08 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2001/12/05 18:38:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -311,7 +311,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		finalizeInactivate(true);
 	      }
 
-		return retVal;
+	    return retVal;
 	  }
 	else
 	  {
@@ -319,25 +319,43 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	    return new ReturnVal(false);
 	  }
       }
-    else
+    else			// not called by wizard
       {
-	try
+	if (getEditSet().isInteractive())
 	  {
-	    if (debug)
+	    try
 	      {
-		System.err.println("groupCustom.inactivate: Starting new groupInactivateWizard");
+		if (debug)
+		  {
+		    System.err.println("groupCustom.inactivate: Starting new groupInactivateWizard");
+		  }
+		
+		wiz = new groupInactivateWizard(this.gSession, this);
+		
+		return wiz.respond(null);
 	      }
-
-	    wiz = new groupInactivateWizard(this.gSession, this);
-	    
-	    return wiz.respond(null);
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not create groupInactivateWizard: " + rx);
+	      }	    
 	  }
-	catch (RemoteException rx)
+	else
 	  {
-	    throw new RuntimeException("Could not create groupInactivateWizard: " + rx);
+	    // non-interactive.  we can only inactivate if there are no home users
+	    // in this group
+
+	    InvidDBField homeField = (InvidDBField) getField(groupSchema.HOMEUSERS);
+
+	    if (homeField.size() == 0)
+	      {
+		return this.inactivate(true, true);
+	      }
+	    else
+	      {
+		return this.inactivate(false, true);
+	      }
 	  }
       }
-
   }
 
   /**
