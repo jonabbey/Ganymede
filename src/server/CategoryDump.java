@@ -13,7 +13,7 @@
    as we would if we were truly a remote object.
    
    Created: 12 February 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -159,6 +159,40 @@ public class CategoryDump implements Category, CategoryNode {
     else
       {
 	return "/" + name;
+      }
+  }
+
+  /**
+   *
+   * This method returns a vector of BaseDump objects, one for each
+   * base held under this base.
+   *
+   */
+
+  public synchronized Vector getBases()
+  {
+    Vector result = new Vector();
+
+    /* -- */
+
+    getBases(result);
+
+    return result;
+  }
+
+  private void getBases(Vector inout)
+  {
+    for (int i = 0; i < contents.size(); i++)
+      {
+	if (contents.elementAt(i) instanceof BaseDump)
+	  {
+	    inout.addElement(contents.elementAt(i));
+	  }
+	else
+	  {
+	    CategoryDump element = (CategoryDump) contents.elementAt(i);
+	    element.getBases(inout);
+	  }
       }
   }
 
