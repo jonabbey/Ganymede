@@ -5,7 +5,7 @@
    The tab that holds date information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -60,7 +60,8 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
     _myTimeZone = (SimpleTimeZone)(SimpleTimeZone.getDefault());
 
   SimpleDateFormat
-    dateformat;
+    dateformat,
+    timeformat;
 
   String
     label;
@@ -93,7 +94,7 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
     add(Box.createVerticalGlue());
 
     dateformat = new SimpleDateFormat("MMM dd, yyyy",Locale.getDefault());
-    
+    timeformat = new SimpleDateFormat("MMM dd, yyyy, at HH:mm a", Locale.getDefault());
 
     if (editable)
       {
@@ -198,6 +199,7 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
 	    {
 	      cal.clear();
 	      topLabel.setText(label + " will be cleared after commit.");
+	      parent.parent.getgclient().somethingChanged = true;
 	    }
 	  else
 	    {
@@ -234,6 +236,10 @@ public class datePanel extends JBufferedPane implements ActionListener, JsetValu
 	    {
 	      topLabel.setText(label + ": " + dateformat.format(d));
 	    }
+	}
+      if (ok)
+	{
+	  parent.parent.getgclient().somethingChanged = true;
 	}
       return ok;
     }
