@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.17 $ %D%
+  Version: $Revision: 1.18 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.17 $ %D%
+ * @version $Revision: 1.18 $ %D%
  */
 
 public class baseTable extends JBufferedPane implements AdjustmentListener, ActionListener {
@@ -384,7 +384,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
     if (row == null)
       {
-	row = new tableRow(cols.size());
+	row = new tableRow(this, cols.size());
 	rows.setElementAt(row, y);
       }
 
@@ -392,7 +392,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
     
     if (row.elementAt(x) == null)
       {
-	row.setElementAt(new tableCell(), x);
+	row.setElementAt(new tableCell(this, (tableCol)cols.elementAt(x)), x);
       }
 
     return row.elementAt(x);
@@ -409,7 +409,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
   public final void setCellText(tableCell cell, String cellText, boolean repaint)
   {
-    cell.text = cellText;
+    cell.setText(cellText);
 
     if (repaint)
       {
@@ -1165,6 +1165,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
   public void setRows(int numRows, boolean repaint)
   {
     rows.setSize(numRows);
+
     if (repaint)
       {
 	reShape();
@@ -1180,11 +1181,91 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
   public void addRow(boolean repaint)
   {
-    rows.addElement(new tableRow(cols.size()));
+    tableRow 
+      newRow,
+      oldRow;
+
+    /* -- */
+
+    newRow = new tableRow(this, cols.size());
+
+    if (rows.size() == 0)
+      {
+	newRow.setTopEdge(headerAttrib.height + (2 * hHeadLineThickness) + 1);
+      }
+    else
+      {
+	int newVal;
+
+	oldRow = (tableRow) rows.lastElement();
+	newVal = oldRow.getBottomEdge() + hRowLineThickness;
+
+	System.err.println("Setting topEdge for row " + rows.size() + " to " + newVal);
+	newRow.setTopEdge(newVal);
+      }
+
+    int bottom =  newRow.getTopEdge() + (newRow.getRowSpan() * (row_height + hRowLineThickness));
+
+    System.err.println("Setting bottomEdge for row " + rows.size() + " to " + bottom);
+
+    newRow.setBottomEdge(bottom);
+
+    rows.addElement(newRow);
+
     if (repaint)
       {
 	reShape();
 	refreshTable();
+      }
+  }
+
+  /**
+   *
+   * This method is used to recalculate the vertical position of all
+   * of the rows in the table below startRow.  If startRow is 0, all
+   * rows will be readjusted.
+   *
+   */
+
+  void reCalcRowPos(int startRow)
+  {
+    int
+      bottomEdge;
+
+    tableRow
+      row;
+
+    /* -- */
+
+    System.err.println("****************************************** reCalcRowPos ******");
+
+    if (startRow > rows.size() - 1)
+      {
+	return;
+      }
+
+    if (startRow == 0)
+      {
+	bottomEdge = headerAttrib.height + hHeadLineThickness; // 
+      }
+    else
+      {
+	bottomEdge = ((tableRow) rows.elementAt(startRow - 1)).getBottomEdge();
+      }
+
+    // each time through the loop, bottom edge is the y position
+    // of the bottom line of the cell above.  Our top edge is going
+    // to be below the separating line between the above cell's bottom
+    // edge and us.
+
+    for (int i = startRow; i < rows.size(); i++)
+      {
+	row = (tableRow) rows.elementAt(i);
+	row.setTopEdge(bottomEdge + hRowLineThickness);
+
+	bottomEdge = row.getTopEdge() + row.getRowSpan() * (row_height + hRowLineThickness) - hRowLineThickness;
+
+	row.setBottomEdge(bottomEdge);
       }
   }
 
@@ -1198,6 +1279,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
   public void deleteRow(int num, boolean repaint)
   {
     rows.removeElementAt(num);
+    reCalcRowPos(num);		// move everybody at and below the deleted row up
 
     if (repaint)
       {
@@ -1412,16 +1494,18 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
     // That is, how short can we be before we need to have a vertical
     // scrollbar?
 
-    vSize = headerAttrib.height + hHeadLineThickness * 2;
-
     if (debug)
       {
 	System.err.println("Number of rows defined (rows.size()) = " + rows.size());
       }
 
-    for (int i=0; i < rows.size(); i++)
+    if (rows.size() != 0)
       {
-	vSize += row_height + hRowLineThickness;
+	vSize = ((tableRow) rows.lastElement()).getBottomEdge() + hRowLineThickness;
+      }
+    else
+      {
+	vSize = 0;
       }
 
     if (debug)
@@ -1547,8 +1631,8 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	vbar.setValues(vbar.getValue(),
 		       canvas.getBounds().height - headerAttrib.height - (2 * hHeadLineThickness),
 		       0,
-		       (rows.size() * (row_height + hRowLineThickness)));
-	
+		       calcVSize());
+
 	vbar.setUnitIncrement(row_height + hRowLineThickness);    // we want the up/down buttons to go a line at a time
 	    
 	vbar.setBlockIncrement((canvas.getBounds().height - headerAttrib.height - 2 * hHeadLineThickness)/2);
@@ -1571,6 +1655,21 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	System.err.println("exiting adjustScrollbars()");
       }
 
+  }
+
+  // Internal method
+  //
+  // calculate the total vertical size of the rows only
+
+  int calcVSize()
+  {
+    if (rows.size() == 0)
+      {
+	return 0;
+      }
+
+    return ((tableRow) rows.lastElement()).getBottomEdge() - headerAttrib.height - 2 * hHeadLineThickness +
+      hRowLineThickness;
   }
 
   // Internal method
@@ -1777,6 +1876,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
     if ((old_rheight != row_height) || (old_rbline != row_baseline))
       {
+	reCalcRowPos(0);
 	reShape();
       }
   }
@@ -1925,6 +2025,12 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
     Rectangle
       cellRect = null;
 
+    tableRow
+      tr = null;
+
+    int
+      tempI;
+
     /* -- */
     
     /* ------------------------------------------------------------------------
@@ -2068,33 +2174,28 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	first_row = 0;
 	ypos = 0;
 
-	while (ypos + rt.row_height + rt.hRowLineThickness < v_offset)
+	tr = (tableRow) rt.rows.elementAt(first_row);
+
+	while (tr.getBottomEdge() < v_offset && first_row < rt.rows.size())
 	  {
-	    ypos += rt.row_height + rt.hRowLineThickness;
-	    first_row++;
+	    tr = (tableRow) rt.rows.elementAt(++first_row);
 	  }
+
+	System.err.println("Calculated first_row as " + first_row);
 
 	/* what is the last row we can see?  that is, the last row
 	   whose first line is < getBounds().height  */
 
 	last_row = first_row;
+
 	bottomedge = v_offset + getBounds().height - 1 - rt.headerAttrib.height - 2 * rt.hHeadLineThickness;
 
-	if (debug)
+	while (last_row < rt.rows.size() && ((tableRow) rt.rows.elementAt(last_row)).getTopEdge() < bottomedge)
 	  {
-	    System.err.println("bottomedge calculated as " + bottomedge);
-	  }
-
-	while (ypos + rt.row_height + rt.hRowLineThickness < bottomedge)
-	  {
-	    ypos += rt.row_height + rt.hRowLineThickness;
 	    last_row++;
 	  }
 
-	if (last_row >= rt.rows.size())
-	  {
-	    last_row = rt.rows.size() - 1;
-	  }
+	System.err.println("Calculated last_row as " + last_row);
       }
     else
       {
@@ -2107,17 +2208,27 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	  }
 	else
 	  {
-	    last_row = (getBounds().height - rt.headerAttrib.height - 2 * rt.hHeadLineThickness) /
-	    (rt.row_height + rt.hRowLineThickness);
-	  }
+	    // we'll have varying row sizes for the loaded rows,
+	    // followed by a series of rows of single row_height 
 
+	    last_row = rt.rows.size() + 
+	      (getBounds().height - rt.headerAttrib.height - 2 * rt.hHeadLineThickness - rt.calcVSize()) /
+	      (rt.row_height + rt.hRowLineThickness);
+
+	    if (debug)
+	      {
+		System.err.println("Precalc: last_row = " + last_row);
+	      }
+	  }
       }
 
     /* ------------------- okay, we've got our general parameters.
                            we can start doing our drawing. ------------------ */
 
     /* draw a column at a time, to take advantage of the fact that all cells
-       in a column are the same size */
+       in a column are even multiples of a single rowSpan block.. that is, we can
+       create an image the width of the column and the height of a single standard
+       row and use it to blit rows or parts of rows onto the backing image */
 
     if (debug)
       {
@@ -2165,180 +2276,53 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	  {
 	    System.err.println("Rendering rows: first_row = " + first_row + ", last_row = " + last_row);
 	  }
-	
+
+	int leftEdge = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset + rt.vLineThickness;
+
+	int topLine;
+
 	for (int i = first_row; i <= last_row; i++)
 	  {
-	    if (i < rt.rows.size())
+	    // loop through and blit each regular row slice of
+	    // this cell
+
+	    for (int k = 0; k < ((tableRow) rt.rows.elementAt(i)).getRowSpan(); k++)
 	      {
-		cell = rt.getCell(j,i);
+		topLine = ((tableRow) rt.rows.elementAt(i)).getTopEdge() - v_offset + k * (rt.row_height + rt.hRowLineThickness);
+
+		// if this is a multi-line cell, we need to wipe out the line between
+		// the two line chunks
+
+		if (k > 0)
+		  {
+		    if (i < rt.rows.size())
+		      {
+			cell = rt.getCell(j, i);
+
+			setCellBackColor(bg, cell, element);
+
+			//			System.err.println("Clearing midline");
+
+			bg.drawLine(leftEdge, topLine - 1, leftEdge+element.width, topLine - 1);
+		      }
+		  }
+
+		renderBlitCell(cellImage, g, j, i, k, element, cellRect);
+
+		// okay, we're done drawing into our cell.  Now we need to
+		// blit the cell into the main backing image.
+
+		if (debug)
+		  {
+		    System.err.println("Rendering row " + i + ", spanSect " + k + " leftEdge = " + leftEdge +
+				       " topLine = " + topLine);
+		  }
+
+		bg.drawImage(cellImage, 
+			     leftEdge,
+			     topLine,
+			     this);
 	      }
-	    else
-	      {
-		cell = null;	// if we are vertically filling
-	      }
-
-	    // fill in our backgruond
-
-	    if (cell != null)
-	      {
-		if ((cell.attr != null) && (cell.attr.bg != null) && (cell.attr.fg != null))
-		  {
-		    if (cell.selected)
-		      {
-			g.setColor(cell.attr.fg);
-		      }
-		    else
-		      {
-			g.setColor(cell.attr.bg);
-		      }
-		  }
-		else if ((element.attr != null) &&
-			 (element.attr.bg != null) &&
-			 (element.attr.fg != null))
-		  {
-		    if (cell.selected)
-		      {
-			g.setColor(element.attr.fg);
-		      }
-		    else
-		      {
-			g.setColor(element.attr.bg);
-		      }
-		  }
-		else
-		  {
-		    if (cell.selected)
-		      {
-			g.setColor(rt.tableAttrib.fg);
-		      }
-		    else
-		      {
-			g.setColor(rt.tableAttrib.bg);
-		      }
-		  }
-	      }
-	    else
-	      {
-		if ((element.attr != null) &&
-		    (element.attr.bg != null) &&
-		    (element.attr.fg != null))
-		  {
-		    g.setColor(element.attr.bg);
-		  }
-		else
-		  {
-		    g.setColor(rt.tableAttrib.bg);
-		  }
-	      }
-	    
-	    g.fillRect(0, 0, cellRect.width, cellRect.height);
-
-	    // render the contents of our cell if it is not empty
-
-	    if (cell != null)
-	      {
-		// set our font
-
-		if (cell.text != null)
-		  {
-		    if ((cell.attr != null) && (cell.attr.font != null))
-		      {
-			g.setFont(cell.attr.font);
-			strwidth = cell.attr.fontMetric.stringWidth(cell.text);
-		      }
-		    else if ((element.attr != null) &&
-			     (element.attr.font != null))
-		      {
-			g.setFont(element.attr.font);
-			strwidth = element.attr.fontMetric.stringWidth(cell.text);
-		      }
-		    else
-		      {
-			g.setFont(rt.tableAttrib.font);
-			strwidth = rt.tableAttrib.fontMetric.stringWidth(cell.text);
-		      }
-		    
-		    // set our color
-		    
-		    if ((cell.attr != null) && (cell.attr.fg != null) && (cell.attr.bg != null))
-		      {
-			if (cell.selected)
-			  {
-			    g.setColor(cell.attr.bg);
-			  }
-			else
-			  {
-			    g.setColor(cell.attr.fg);
-			  }
-		      }
-		    else if ((element.attr != null) &&
-			     (element.attr.fg != null) &&
-			     (element.attr.bg != null))
-		      {
-			if (cell.selected)
-			  {
-			    g.setColor(element.attr.bg);
-			  }
-			else
-			  {
-			    g.setColor(element.attr.fg);
-			  }
-		      }
-		    else
-		      {
-			if (cell.selected)
-			  {
-			    g.setColor(rt.tableAttrib.bg);
-			  }
-			else
-			  {
-			    g.setColor(rt.tableAttrib.fg);
-			  }
-		      }
-		    
-		    // and draw
-		    
-		    if ((cell.attr != null) && (cell.attr.align != tableAttr.JUST_INHERIT))
-		      {
-			just = cell.attr.align;
-		      }
-		    else if ((element.attr != null) &&
-			     (element.attr.align != tableAttr.JUST_INHERIT))
-		      {
-			just = element.attr.align;
-		      }
-		    else
-		      {
-			just = rt.tableAttrib.align;
-		      }
-		    
-		    switch (just)
-		      {
-		      case tableAttr.JUST_LEFT:
-			g.drawString(cell.text, 2, rt.row_baseline);
-			break;
-			
-		      case tableAttr.JUST_RIGHT:
-			g.drawString(cell.text, cellRect.width - strwidth - 2, 
-				     rt.row_baseline);
-			break;
-			
-		      case tableAttr.JUST_CENTER:
-			g.drawString(cell.text, cellRect.width / 2 - (strwidth/2),
-				     rt.row_baseline);
-			break;
-		      }
-		  }
-	      }
-
-	    // okay, we're done drawing into our cell.  Now we need to
-	    // blit the cell into the main backing image.
-
-	    bg.drawImage(cellImage, ((Integer) rt.colPos.elementAt(j)).intValue() -
-			 h_offset + rt.vLineThickness, 
-			 rt.headerAttrib.height + (2 * rt.hHeadLineThickness) + 
-			 ((rt.row_height + rt.hRowLineThickness) * i) - v_offset, 
-			 this);
 	  }
       }
 
@@ -2443,7 +2427,6 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	bg.drawLine(0, ypos, getBounds().width - 1, ypos);
       }
     
-
     // if rt.horizLines is true, draw the horizontal lines
     // in the body of the table
 
@@ -2452,22 +2435,44 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
     if (rt.horizLines)
       {
+	int topLine = rt.headerAttrib.height + 2 * rt.hHeadLineThickness;
+	int horizlinePos = topLine - v_offset - 1;
+
+	for (int i = 0; i < first_row; i++)
+	  {
+	    tr = (tableRow) rt.rows.elementAt(i);
+	    horizlinePos += (rt.row_height + rt.hRowLineThickness) * tr.getRowSpan();
+	  }
+
 	for (int i = first_row; i <= last_row; i++)
 	  {
-	    if ((i > rt.rows.size()) && !rt.hVertFill)
+	    if (i > rt.rows.size())
 	      {
-		bg.setColor(rt.tableAttrib.bg);
-	      }
+		if (rt.hVertFill)
+		  {
+		    horizlinePos += rt.row_height + rt.hRowLineThickness;
 
-	    ypos2 = rt.headerAttrib.height +  2 * rt.hHeadLineThickness +
-	      (rt.row_height + rt.hRowLineThickness) * i - v_offset - 1;
-	    
-	    if (ypos2 > rt.headerAttrib.height + 2 * rt.hHeadLineThickness)
+		    if (horizlinePos > topLine)
+		      {
+			bg.drawLine(0,
+				    horizlinePos,
+				    getBounds().width-1, 
+				    horizlinePos);
+		      }
+		  }
+	      }
+	    else
 	      {
-		bg.drawLine(0,
-			    ypos2,
-			    getBounds().width-1, 
-			    ypos2);
+		tr = (tableRow) rt.rows.elementAt(i);
+		horizlinePos += (rt.row_height + rt.hRowLineThickness) * tr.getRowSpan();
+
+		if (horizlinePos > topLine)
+		  {
+		    bg.drawLine(0,
+				horizlinePos,
+				getBounds().width-1, 
+				horizlinePos);
+		  }
 	      }
 	  }
       }
@@ -2493,6 +2498,226 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
       }
   }
 
+  private void setCellForeColor(Graphics g, tableCell cell, tableCol element)
+  {
+    if (cell != null)
+      {
+	if ((cell.attr != null) && (cell.attr.fg != null) && (cell.attr.bg != null))
+	  {
+	    if (cell.selected)
+	      {
+		g.setColor(cell.attr.bg);
+	      }
+	    else
+	      {
+		g.setColor(cell.attr.fg);
+	      }
+	  }
+	else if ((element.attr != null) &&
+		 (element.attr.fg != null) &&
+		 (element.attr.bg != null))
+	  {
+	    if (cell.selected)
+	      {
+		g.setColor(element.attr.bg);
+	      }
+	    else
+	      {
+		g.setColor(element.attr.fg);
+	      }
+	  }
+	else
+	  {
+	    if (cell.selected)
+	      {
+		g.setColor(rt.tableAttrib.bg);
+	      }
+	    else
+	      {
+		g.setColor(rt.tableAttrib.fg);
+	      }
+	  }
+      }
+    else
+      {
+	if ((element != null) &&
+	    (element.attr != null) &&
+	    (element.attr.bg != null) &&
+	    (element.attr.fg != null))
+	  {
+	    g.setColor(element.attr.fg);
+	  }
+	else
+	  {
+	    g.setColor(rt.tableAttrib.fg);
+	  }
+      }
+  }
+
+  private void setCellBackColor(Graphics g, tableCell cell, tableCol element)
+  {
+    if (cell != null)
+      {
+	if ((cell.attr != null) && (cell.attr.fg != null) && (cell.attr.bg != null))
+	  {
+	    if (cell.selected)
+	      {
+		g.setColor(cell.attr.fg);
+	      }
+	    else
+	      {
+		g.setColor(cell.attr.bg);
+	      }
+	  }
+	else if ((element.attr != null) &&
+		 (element.attr.fg != null) &&
+		 (element.attr.bg != null))
+	  {
+	    if (cell.selected)
+	      {
+		g.setColor(element.attr.fg);
+	      }
+	    else
+	      {
+		g.setColor(element.attr.bg);
+	      }
+	  }
+	else
+	  {
+	    if (cell.selected)
+	      {
+		g.setColor(rt.tableAttrib.fg);
+	      }
+	    else
+	      {
+		g.setColor(rt.tableAttrib.bg);
+	      }
+	  }
+      }
+    else
+      {
+	if ((element != null) &&
+	    (element.attr != null) &&
+	    (element.attr.bg != null) &&
+	    (element.attr.fg != null))
+	  {
+	    g.setColor(element.attr.bg);
+	  }
+	else
+	  {
+	    g.setColor(rt.tableAttrib.bg);
+	  }
+      }
+  }
+
+  /**
+   *
+   * This method handles rendering into the blit template for
+   * column <col>, row <row>, portion <spanSubset>.  That is,
+   * if a particular row is more than one standard row_height
+   * tall, spanSubset indicates what portion of the row
+   * should be rendered into the blitCell.
+   *
+   *
+   */
+
+  private void renderBlitCell(Image cellImage, Graphics g, 
+			      int col, int row, int spanSubset,
+			      tableCol element, Rectangle cellRect)
+  {
+    tableCell cell;
+
+    int 
+      strwidth,
+      just;
+
+    String
+      renderString;
+
+    /* -- */
+
+    if (row < rt.rows.size())
+      {
+	cell = rt.getCell(col, row);
+      }
+    else
+      {
+	cell = null;	// if we are vertically filling
+      }
+    
+    // fill in our background
+
+    setCellBackColor(g, cell, element);    
+	    
+    g.fillRect(0, 0, cellRect.width, cellRect.height);
+
+    // render the contents of our cell if it is not empty
+
+    if (cell != null)
+      {
+	// set our font
+	
+	renderString = cell.getText(spanSubset);
+
+	if (renderString != null)
+	  {
+	    if ((cell.attr != null) && (cell.attr.font != null))
+	      {
+		g.setFont(cell.attr.font);
+		strwidth = cell.attr.fontMetric.stringWidth(cell.text);
+	      }
+	    else if ((element.attr != null) &&
+		     (element.attr.font != null))
+	      {
+		g.setFont(element.attr.font);
+		strwidth = element.attr.fontMetric.stringWidth(cell.text);
+	      }
+	    else
+	      {
+		g.setFont(rt.tableAttrib.font);
+		strwidth = rt.tableAttrib.fontMetric.stringWidth(cell.text);
+	      }
+	    
+	    // set our color
+
+	    setCellForeColor(g, cell, element);
+
+	    // and draw
+		    
+	    if ((cell.attr != null) && (cell.attr.align != tableAttr.JUST_INHERIT))
+	      {
+		just = cell.attr.align;
+	      }
+	    else if ((element.attr != null) &&
+		     (element.attr.align != tableAttr.JUST_INHERIT))
+	      {
+		just = element.attr.align;
+	      }
+	    else
+	      {
+		just = rt.tableAttrib.align;
+	      }
+		    
+	    switch (just)
+	      {
+	      case tableAttr.JUST_LEFT:
+		g.drawString(renderString, 2, rt.row_baseline);
+		break;
+			
+	      case tableAttr.JUST_RIGHT:
+		g.drawString(renderString, cellRect.width - strwidth - 2, 
+			     rt.row_baseline);
+		break;
+			
+	      case tableAttr.JUST_CENTER:
+		g.drawString(renderString, cellRect.width / 2 - (strwidth/2),
+			     rt.row_baseline);
+		break;
+	      }
+	  }
+      }
+  }
+
   //
   // Our MouseListener Support
   //
@@ -2507,6 +2732,38 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
   public void mouseExited(MouseEvent e)
   {
+  }
+
+  /**
+   *
+   *
+   */
+  
+  int mapClickToRow(int vy)
+  {
+    int 
+      base,
+      row,
+      rowHeight;
+
+    tableRow
+      tr;
+
+    /* -- */
+    
+    base = rt.headerAttrib.height + 2 * rt.hHeadLineThickness;
+    
+    row = 0;
+
+    for (row = 0; row < rt.rows.size() && base < vy; row++)
+      {
+	tr = (tableRow) rt.rows.elementAt(row);
+	rowHeight = tr.getRowSpan() * (rt.row_height + rt.hRowLineThickness);
+
+	base += rowHeight;
+      }
+
+    return row - 1;
   }
 
   // initiate column dragging and/or select row
@@ -2603,8 +2860,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 	if ((y > rt.headerAttrib.height + 2 * rt.hHeadLineThickness))
 	  {
-	    clickRow = (vy - rt.headerAttrib.height - 2 * rt.hHeadLineThickness) / 
-	      (rt.row_height + rt.hRowLineThickness);
+	    clickRow = mapClickToRow(vy);
 
 	    // if the user clicked below the last defined row, unselect
 	    // anything selected and return.
@@ -2759,7 +3015,26 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 				   thisCol.origWidth);		
 	      }
 	  }
+
 	rt.calcCols();	// update colPos[] based on origColWidths[]
+
+	tableRow tr;
+	tableCell cl;
+	tableCol 
+	  priorCol = (tableCol) rt.cols.elementAt(colDrag-1),
+	  thisCol = (tableCol) rt.cols.elementAt(colDrag);
+
+	for (int i = 0; i < rt.rows.size(); i++)
+	  {
+	    tr = (tableRow) rt.rows.elementAt(i);
+	    cl = (tableCell) tr.elementAt(colDrag - 1);
+	    cl.wrap(priorCol.width);
+	    cl = (tableCell) tr.elementAt(colDrag);
+	    cl.wrap(thisCol.width);
+	  }
+
+	rt.reCalcRowPos(0);
+
 	render();
 	repaint();
       }
@@ -2851,8 +3126,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
     if ((y > rt.headerAttrib.height + 2 * rt.hHeadLineThickness))
       {
-	clickRow = (vy - rt.headerAttrib.height - 2 * rt.hHeadLineThickness) / 
-	  (rt.row_height + rt.hRowLineThickness);
+	clickRow = mapClickToRow(vy);
 	
 	// if the user clicked below the last defined row, ignore it
 	
@@ -3032,16 +3306,30 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 class tableCell {
 
+  static final boolean debug = false;
+
+  String origText;
   String text;
   tableAttr attr;
   boolean selected;
   PopupMenu menu;
   baseTable rt;
+  tableCol col;
 
-  public tableCell(baseTable rt, String text, tableAttr attr, PopupMenu menu)
+  int nominalWidth;		// width before any wrapping
+  int currentWidth;		// width of rightmost pixel of real text in this
+				// cell, after wrapping
+  int lastOfficialWidth = 0;
+
+  private int rowSpan;
+
+  /* -- */
+
+  public tableCell(baseTable rt, tableCol col, String text, tableAttr attr, PopupMenu menu)
   {
     this.rt = rt;
-    this.text = text;
+    this.col = col;
+    this.origText = this.text = text;
     this.attr = attr;
     this.selected = false;
 
@@ -3066,16 +3354,343 @@ class tableCell {
 	    rt.canvas.add(menu);
 	  }
       }
+
+    calcRowSpan();
   }
 
-  public tableCell(String text)
+  public tableCell(baseTable rt, tableCol col, String text)
   {
-    this(null, text, null, null);
+    this(rt, col, text, null, null);
   }
 
-  public tableCell()
+  public tableCell(baseTable rt, String text)
   {
-    this(null, null, null, null);
+    this(rt, null, text, null, null);
+  }
+
+  public tableCell(baseTable rt, tableCol col)
+  {
+    this(rt, col, null, null, null);
+  }
+
+  public tableCell(baseTable rt)
+  {
+    this(rt, null, null, null, null);
+  }
+
+  public void setText(String newText)
+  {
+    origText = text = newText;
+    nominalWidth = getMetrics().stringWidth(origText);
+    calcRowSpan();
+  }
+
+  public FontMetrics getMetrics()
+  {
+    if (attr != null && attr.fontMetric !=null)
+      {
+	return attr.fontMetric;
+      }
+    else if (col != null && col.attr != null && col.attr.fontMetric != null)
+      {
+	return col.attr.fontMetric;
+      }
+    else 
+      {
+	return rt.tableAttrib.fontMetric;
+      }
+  }
+
+  /**
+   *
+   * This method returns the nth row of this
+   * cell's text, where the first row is 0.
+   *
+   */
+
+  public String getText(int n)
+  {
+    if (n+1 > rowSpan)
+      {
+	return "";
+      }
+    else
+      {
+	int pos, oldpos = -1;
+
+	for (int i = 0; i < n; i++)
+	  {
+	    pos = text.indexOf('\n', oldpos + 1);
+
+	    if (pos != -1)
+	      {
+		oldpos = pos;
+	      }
+	  }
+
+	if (text.indexOf('\n', oldpos+1) == -1)
+	  {
+	    return text.substring(oldpos+1);
+	  }
+	else
+	  {
+	    return text.substring(oldpos+1, text.indexOf('\n', oldpos+1));
+	  }
+      }
+  }
+
+  /**
+   *
+   * This method wraps the contained text to a certain
+   * number of pixels.
+   *
+   */
+
+  public synchronized void wrap(int wrap_length)
+  {
+    char[] 
+      charAry;
+
+    int 
+      p,
+      p2,
+      offset = 0,
+      marker;
+
+    StringBuffer
+      result = new StringBuffer();
+
+    FontMetrics
+      fm;
+
+    /* -- */
+
+    if (wrap_length < 20)
+      {
+	throw new IllegalArgumentException("bad params");
+      }
+
+    // if the adjustment is a small enough reduction that it won't affect our
+    // line breaking, just return.  Likewise, if we were already unwrapped
+    // and our cell width just got bigger, we don't need to wrap.
+
+    if (((wrap_length > currentWidth) && (wrap_length <= lastOfficialWidth)) ||
+	((currentWidth == nominalWidth) && (wrap_length >= nominalWidth)))
+      {
+	return;
+      }
+    else
+      {
+	lastOfficialWidth = wrap_length;
+      }
+
+    fm = getMetrics();
+
+    if (debug)
+      {
+	System.err.println("String size = " + origText.length());
+      }
+
+    this.currentWidth = 0;
+    this.rowSpan = 1;
+
+    charAry = origText.toCharArray();
+
+    p = marker = 0;
+
+    // each time through the loop, p starts out pointing to the same char as marker
+
+    int localWidth;
+    
+    while (marker < charAry.length)
+      {
+	localWidth = 0;
+
+	while ((p < charAry.length) && (charAry[p] != '\n') && (localWidth < wrap_length))
+	  {
+	    localWidth += fm.charWidth(charAry[p++]);
+	  }
+
+	// now p points to the character that terminated the loop.. either
+	// the first character that extends past the desired wrap_length,
+	// or the first newline after marker, or it will have overflowed
+	// to be == charAry.length
+
+	if (localWidth > this.currentWidth)
+	  {
+	    this.currentWidth = localWidth;
+	  }
+	
+	if (p == charAry.length)
+	  {
+	    if (debug)
+	      {
+		System.err.println("At completion..");
+	      }
+
+	    result.append(origText.substring(marker, p));
+	    text = result.toString();
+
+	    return;
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("Step 1: p = " + p + ", marker = " + marker);
+	  }
+
+	if (charAry[p] == '\n')
+	  {
+	    /* We've got a newline.  This newline is bound to have
+	       terminated the while loop above.  Step p and marker past
+	       the newline and continue on with our loop. */
+
+	    result.append(origText.substring(marker, p));
+
+	    if (debug)
+	      {
+		System.err.println("found natural newline.. current result = " + result.toString());
+	      }
+
+	    p = marker = p+1;
+	    rowSpan++;
+
+	    continue;
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("Step 2: hit wrap length, back searching for whitespace break point");
+	  }
+
+	p2 = p;
+
+	/* We've either hit the end of the string, or we've
+	   gotten past the wrap_length.  Back p2 up to the last space
+	   before the wrap_length, if there is such a space.
+
+	   Note that if the next character in the string (the character
+	   immediately after the break point) is a space, we don't need
+	   to back up at all.  We'll just print up to our current
+	   location, do the newline, and skip to the next line. */
+	
+	if (p < charAry.length)
+	  {
+	    if (isspace(charAry[p]))
+	      {
+		offset = 1;	/* the next character is white space.  We'll
+				   want to skip that. */
+	      }
+	    else
+	      {
+		/* back p2 up to the last white space before the break point */
+
+		while ((p2 > marker) && !isspace(charAry[p2]))
+		  {
+ 		    p2--;
+		  }
+
+		offset = 0;
+	      }
+	  }
+
+	// now we're guaranteed that p2 points to our break character,
+	// or that p2 == marker, indicating no whitespace in this row
+	// to split on
+
+	/* If the line was completely filled (no place to break),
+	   we'll just copy the whole line out and force a break. */
+
+	if (p2 == marker)
+	  {
+	    p2 = p-1;
+
+	    if (debug)
+	      {
+		System.err.println("Step 3: no opportunity for break, forcing..");
+	      }
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.err.println("Step 3: found break at column " + p2);
+	      }
+	  }
+
+	if (!isspace(charAry[p2]))
+	  {
+	    /* If weren't were able to back up to a space, copy
+	       out the whole line, including the break character 
+	       (in this case, we'll be making the string one
+	       character longer by inserting a newline). */
+
+	    if (debug)
+	      {
+		System.err.println("appending: marker = " + marker + ", p2 = " + p2 + "+1");
+	      }
+	    
+	    result.append(origText.substring(marker, p2+1));
+	  }
+	else
+	  {
+	    /* The break character is whitespace.  We'll
+	       copy out the characters up to but not
+	       including the break character, which
+	       we will effectively replace with a
+	       newline. */
+
+	    if (debug)
+	      {
+		System.err.println("appending: marker = " + marker + ", p2 = " + p2);
+	      }
+
+	    result.append(origText.substring(marker, p2));
+	  }
+
+	/* If we have not reached the end of the string, newline */
+
+	if (p < charAry.length) 
+	  {
+	    result.append("\n");
+	    rowSpan++;
+	  }
+
+	p = marker = p2 + 1 + offset;
+      }
+
+    text = result.toString();
+  }
+
+  private boolean isspace(char c)
+  {
+    return (c == '\n' || c == ' ' || c == '\t');
+  }
+
+  private void calcRowSpan()
+  {
+    if (text == null)
+      {
+	rowSpan = 1;
+	return;
+      }
+
+    char[] cAry = text.toCharArray();
+
+    rowSpan = 1;
+
+    for (int i = 0; i < cAry.length; i++)
+      {
+	if (cAry[i] == '\n')
+	  {
+	    rowSpan++;
+	  }
+      }
+  }
+
+  public int getRowSpan()
+  {
+    return rowSpan;
   }
 }
 
@@ -3089,25 +3704,31 @@ class tableCell {
 
 class tableRow {
 
+  baseTable rt;
   Vector cells = new Vector();
+  int rowSpan = 1;
+  int topEdge = 0, bottomEdge = 0;
 
   /* -- */
 
-  tableRow(tableCell[] cells)
+  tableRow(baseTable rt, tableCell[] cells)
   {
+    this.rt = rt;
+
     for (int i = 0; i < cells.length; i++)
       {
 	this.cells.addElement(cells[i]);
       }
   }
 
-  tableRow(int size)
+  tableRow(baseTable rt, int size)
   {
+    this.rt = rt;
     this.cells = new Vector(size);
 
     for (int i = 0; i < size; i++)
       {
-	this.cells.addElement(new tableCell());
+	this.cells.addElement(new tableCell(rt));
       }
   }
 
@@ -3124,6 +3745,52 @@ class tableRow {
   void setElementAt(tableCell cell, int index)
   {
     cells.setElementAt(cell, index);
+
+    if (cell.getRowSpan() > rowSpan)
+      {
+	rowSpan = cell.getRowSpan();
+      }
+  }
+
+  void setRowSpan(int x)
+  {
+    rowSpan = x;
+  }
+
+  int getRowSpan()
+  {
+    rowSpan = 0;
+    tableCell cell;
+
+    for (int i = 0; i < cells.size(); i++)
+      {
+	cell = (tableCell) cells.elementAt(i);
+	if (cell.getRowSpan() > rowSpan)
+	  {
+	    rowSpan = cell.getRowSpan();
+	  }
+      }
+    return rowSpan;
+  }
+
+  void setTopEdge(int y)
+  {
+    topEdge = y;
+  }
+
+  int getTopEdge()
+  {
+    return topEdge;
+  }
+
+  void setBottomEdge(int y)
+  {
+    bottomEdge = y;
+  }
+  
+  int getBottomEdge()
+  {
+    return bottomEdge;
   }
 }
 
