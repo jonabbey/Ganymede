@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 2001/01/11 23:35:59 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 2001/02/08 17:03:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -633,7 +633,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   public void clearIdleSessions()
   {
     // clone the sessions Vector so any forceOff() resulting from a
-    // timeCheck() call won't disturb the loop
+    // timeCheck() call won't disturb the loop, and so that we won't
+    // have to synchronize on sessions and risk nested monitor
+    // deadlock
 
     Vector sessionsCopy = (Vector) sessions.clone();
 

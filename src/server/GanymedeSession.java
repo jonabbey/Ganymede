@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.227 $
-   Last Mod Date: $Date: 2001/02/08 08:56:26 $
+   Version: $Revision: 1.228 $
+   Last Mod Date: $Date: 2001/02/08 17:03:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.227 $ $Date: 2001/02/08 08:56:26 $
+ * @version $Revision: 1.228 $ $Date: 2001/02/08 17:03:14 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -965,6 +965,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   void forceOff(String reason)
   {
+    final GanymedeSession me = this;
     final String myReason = reason;
     final Client myClient = this.client;
 
@@ -982,47 +983,65 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     Ganymede.debug("Forcing " + username + " off for " + reason);
 
-    // Construct a vector of invid's to place in the log entry we
-    // are about to create.  This lets us search the log easily.
-
-    Vector objects = new Vector();
-	    
-    if (userInvid != null)
-      {
-	objects.addElement(userInvid);
-      }
-    
-    if (personaInvid != null)
-      {
-	objects.addElement(personaInvid);
-      }
-    
-    if (Ganymede.log != null)
-      {
-	Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
-						   "Abnormal termination for username: " + username + "\n" +
-						   myReason,
-						   userInvid,
-						   username,
-						   objects,
-						   null));
-      }
-
-    logout(true);		// keep logout from logging a normal logout
-
     // spawn a new thread to try to kill off this client.. that way,
-    // if the RMI call blocks indefinitely, we won't lock
+    // if we have to wait in logout or if the RMI call blocks
+    // indefinitely, we won't block or lock
     // GanymedeServer.clearIdleSessions(), or the like.
-
-    final String disconnectReason = reason;
 
     Thread forceThread = new Thread(new Runnable() {
       public void run() {
+
+	// let's sync to make sure that we don't let things get
+	// confused if the user attempts to log out at precisely the
+	// same moment that we are trying to force him off
+
+	// the logout() method synchronizes on GanymedeSession during
+	// its operations, so we have to be careful about a nested
+	// monitor deadlock.  It is safe here because there is no
+	// place that synchronizes first on this GanymedeSession and
+	// then on forceLock.  If forceOff was called from a section
+	// synchronized on this GanymedeSession, we could have a problem,
+	// though.
+
+	synchronized (forceLock)
+	  {
+	    if (logged_in)
+	      {
+		// Construct a vector of invid's to place in the log entry we
+		// are about to create.  This lets us search the log easily.
+
+		Vector objects = new Vector();
+	    
+		if (userInvid != null)
+		  {
+		    objects.addElement(userInvid);
+		  }
+		
+		if (personaInvid != null)
+		  {
+		    objects.addElement(personaInvid);
+		  }
+		
+		if (Ganymede.log != null)
+		  {
+		    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
+							       "Abnormal termination for username: " + username + "\n" +
+							       myReason,
+							       userInvid,
+							       username,
+							       objects,
+							       null));
+		  }
+	
+		me.logout(true);		// keep logout from logging a normal logout
+	      }
+	  }
+
 	if (myClient != null)
 	  {
 	    try
 	      {
-		myClient.forceDisconnect(disconnectReason);
+		myClient.forceDisconnect(myReason);
 	      }
 	    catch (RemoteException e)
 	      {
