@@ -5,8 +5,8 @@
    Ganymede admin console and the server, bidirectionally.
 
    Created: 28 May 1996
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2003/09/08 05:04:45 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2003/09/08 18:22:04 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -217,39 +217,54 @@ class GASHAdminDispatch implements Runnable {
 		switch (event.getMethod())
 		  {
 		  case adminAsyncMessage.SETSERVERSTART:
+		    setServerStart((Date) event.getParam(0));
 		    break;
 
 		  case adminAsyncMessage.SETLASTDUMPTIME:
+		    setLastDumpTime((Date) event.getParam(0));
 		    break;
 
 		  case adminAsyncMessage.SETTRANSACTIONS:
+		    setTransactionsInJournal(((Integer) event.getParam(0)).intValue());
 		    break;
 
 		  case adminAsyncMessage.SETOBJSCHECKOUT:
+		    setObjectsCheckedOut(((Integer) event.getParam(0)).intValue());
 		    break;
 
 		  case adminAsyncMessage.SETLOCKSHELD:
+		    setLocksHeld(((Integer) event.getParam(0)).intValue());
 		    break;
 
 		  case adminAsyncMessage.CHANGESTATE:
+		    changeState((String) event.getParam(0));
 		    break;
 
 		  case adminAsyncMessage.CHANGESTATUS:
+		    changeStatus((String) event.getParam(0));
 		    break;
 
 		  case adminAsyncMessage.CHANGEADMINS:
+		    changeAdmins((String) event.getParam(0));
 		    break;
 
 		  case adminAsyncMessage.CHANGEUSERS:
+		    changeUsers(event.getParams());
 		    break;
 
 		  case adminAsyncMessage.CHANGETASKS:
+		    changeTasks(event.getParams());
 		    break;
 
 		  case adminAsyncMessage.SETMEMORYSTATE:
+		    long freeMemory = ((Long) event.getParam(0)).longValue();
+		    long totalMemory = ((Long) event.getParam(1)).longValue();
+
+		    setMemoryState(freeMemory, totalMemory);
 		    break;
 
 		  case adminAsyncMessage.FORCEDISCONNECT:
+		    forceDisconnect((String) event.getParam(0));
 		    break;
 
 		  default:
@@ -521,7 +536,7 @@ class GASHAdminDispatch implements Runnable {
    * login description objects.
    */
 
-  public void changeUsers(Vector entries)
+  public void changeUsers(Object entries[])
   {
     if (debug)
       {
@@ -535,7 +550,7 @@ class GASHAdminDispatch implements Runnable {
 
     /* -- */
 
-    final Vector localEntries = entries;
+    final Object localEntries[] = entries;
 
     // And refresh our table.. we'll wait until this succeeds so we
     // don't get the server sending us more updates before the table
@@ -551,9 +566,9 @@ class GASHAdminDispatch implements Runnable {
     
 	    // Process entries from the server
 
-	    for (int i = 0; i < localEntries.size(); i++)
+	    for (int i = 0; i < localEntries.length; i++)
 	      {
-		e = (AdminEntry) localEntries.elementAt(i);
+		e = (AdminEntry) localEntries[i];
 
 		frame.table.newRow(e.username);
 
@@ -595,7 +610,7 @@ class GASHAdminDispatch implements Runnable {
    * objects describing the tasks registered in the Ganymede server.
    */
 
-  public void changeTasks(Vector tasks)
+  public void changeTasks(Object tasks[])
   {
     if (debug)
       {
@@ -621,40 +636,40 @@ class GASHAdminDispatch implements Runnable {
 	// the server-side hashes, and as they are shuffled
 	// from hash to hash
 	
-	(new VecQuickSort(tasks, 
-			  new arlut.csd.Util.Compare() 
-			  {
-			    public int compare(Object a, Object b) 
-			      {
-				scheduleHandle aH, bH;
+	(new QuickSort(tasks, 
+		       new arlut.csd.Util.Compare() 
+		       {
+			 public int compare(Object a, Object b) 
+			 {
+			   scheduleHandle aH, bH;
 				
-				aH = (scheduleHandle) a;
-				bH = (scheduleHandle) b;
+			   aH = (scheduleHandle) a;
+			   bH = (scheduleHandle) b;
 				
-				if (aH.incepDate.before(bH.incepDate))
-				  {
-				    return -1;
-				  }
-				else if (aH.incepDate.after(bH.incepDate))
-				  {
-				    return 1;
-				  }
-				else
-				  {
-				    return 0;
-				  }
-			      }
-			  }
-			  )).sort();
+			   if (aH.incepDate.before(bH.incepDate))
+			     {
+			       return -1;
+			     }
+			   else if (aH.incepDate.after(bH.incepDate))
+			     {
+			       return 1;
+			     }
+			   else
+			     {
+			       return 0;
+			     }
+			 }
+		       }
+		       )).sort();
       }
 
     Vector taskNames = new Vector();
 
     // now reload the table with the current stats
 
-    for (int i = 0; i < tasks.size(); i++)
+    for (int i = 0; i < tasks.length; i++)
       {
-	handle = (scheduleHandle) tasks.elementAt(i);
+	handle = (scheduleHandle) tasks[i];
 
 	taskNames.addElement(handle.name);
 
