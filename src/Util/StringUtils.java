@@ -4,8 +4,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/03/25 00:28:06 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/04/04 22:31:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,5 +88,88 @@ public class StringUtils {
       }
 
     return buffer.toString();
+  }
+
+  /**
+   * <P>This method takes a (possibly multiline) inputString 
+   * containing subsequences matching splitString and returns
+   * an array of Strings which contain the contents of the inputString
+   * between instances of the splitString.  The splitString divider
+   * will not be returned in the split strings.</P>
+   *
+   * <P>In particular, this can be used to split a multiline String
+   * into an array of Strings by using a splitString of "\n".  The
+   * resulting strings will not include their terminating newlines.</P>
+   */
+
+  public static String[] split(String inputString, String splitString)
+  {
+    int index = 0;
+    int count = 0;
+
+    while (index != -1)
+      {
+	count++;
+
+	index = inputString.indexOf(splitString, index);
+
+	if (index == -1)
+	  {
+	    break;
+	  }
+	else
+	  {
+	    index += splitString.length();
+	  }
+      }
+    
+    String results[] = new String[count];
+
+    index = 0;
+    int upperBound = inputString.length();
+    count = 0;
+
+    while (index < upperBound)
+      {
+	int nextIndex = inputString.indexOf(splitString, index);
+
+	if (nextIndex == -1)
+	  {
+	    results[count++] = inputString.substring(index);
+	    return results;
+	  }
+	else
+	  {
+	    results[count++] = inputString.substring(index, nextIndex);
+	  }
+
+	index = nextIndex + splitString.length();
+      }
+
+    // we should never get here
+
+    return results;
+  }
+
+  /**
+   * <p>Test rig</p>
+   */
+
+  public static void main(String argv[])
+  {
+    String test = "10.8.[100-21].[1-253]\n10.3.[4-8].[1-253]\n129.116.[224-227].[1-253]";
+
+    String results[] = StringUtils.split(test, "\n");
+
+    for (int i = 0; i < results.length; i++)
+      {
+	System.out.println(results[i]);
+	String results2[] = StringUtils.split(results[i], ".");
+
+	for (int j = 0; j < results2.length; j++)
+	  {
+	    System.out.println("\t" + results2[j]);
+	  }
+      }
   }
 }
