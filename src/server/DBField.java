@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1414,6 +1414,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * the permissions checking that getValues() does.
    *
    */
+
   public Vector getValuesLocal()
   {
     if (!isVector())
@@ -1433,6 +1434,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * the permissions checking that getValues() does.
    *
    */
+
   public Object getValueLocal()
   {
     if (isVector())
@@ -1443,4 +1445,85 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
     return value;
   }
 
+  // ***
+  //
+  // The following two methods implement checkpoint and rollback facilities for
+  // DBField.  These methods save the field's internal state and restore it
+  // on demand at a later time.  The intent is to allow checkpoint/restore
+  // without changing the object identity (memory address) of the DBField so
+  // that the DBEditSet checkpoint/restore logic can work.
+  //
+  // ***
+
+  /**
+   *
+   * This method is used to basically dump state out of this field
+   * so that the DBEditSet checkpoint() code can restore it later
+   * if need be.
+   *
+   */
+
+  public synchronized Object checkpoint()
+  {
+    if (isVector())
+      {
+	return values.clone();
+      }
+    else
+      {
+	return value;
+      }
+  }
+
+  /**
+   *
+   * This method is used to basically force state into this field.
+   *
+   * It is used to place a value or set of values that were known to
+   * be good during the current transaction back into this field,
+   * without creating or changing this DBField's object identity.
+   *
+   */
+
+  public synchronized void rollback(Object oldval)
+  {
+    if (!(owner instanceof DBEditObject))
+      {
+	throw new RuntimeException("Invalid rollback on field " + getName() + ", not in an editable context");
+      }
+
+    if (isVector())
+      {
+	if (!(oldval instanceof Vector))
+	  {
+	    throw new RuntimeException("Invalid vector rollback on field " + getName());
+	  }
+	else
+	  {
+	    this.values = (Vector) oldval;
+	  }
+      }
+    else
+      {
+	if (!verifyTypeMatch(oldval))
+	  {
+	    throw new RuntimeException("Invalid scalar rollback on field " + getName());
+	  }
+	else
+	  {
+	    this.value = oldval;
+	  }
+      }
+
+    // and we need to restore our defined bit.
+
+    if (oldval == null)
+      {
+	this.defined = false;
+      }
+    else
+      {
+	this.defined = true;
+      }
+  }
 }

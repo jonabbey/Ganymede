@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.17 $ %D%
+ * @version $Revision: 1.18 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -160,7 +160,55 @@ public interface Session extends Remote {
    * 
    */
 
-  ReturnVal     openTransaction(String description) throws RemoteException;
+  ReturnVal   openTransaction(String description) throws RemoteException;
+
+  /**
+   *
+   * This method call causes the server to checkpoint the current state
+   * of an open transaction on the server.  At any time thereafter,
+   * the server can be instructed to revert the transaction to the
+   * state at the time of this checkpoint by calling rollback()
+   * with the same key.
+   *
+   * Checkpointing only makes sense in the context of a transaction;
+   * it is an error to call either checkpoint() or rollback() if
+   * the server does not have a transaction open.
+   * 
+   */
+
+  void        checkpoint(String key) throws RemoteException;
+
+  /**
+   *
+   * This method call causes the server to roll back the state
+   * of an open transaction on the server.
+   *
+   * Checkpoints are held in a Stack on the server;  it is never
+   * permissible to try to 'rollforward' to a checkpoint that
+   * was itself rolled back.  That is, the following sequence is 
+   * not permissible.
+   *
+   * checkpoint("1");
+   * <changes>
+   * checkpoint("2");
+   * <changes>
+   * rollback("1");
+   * rollback("2");
+   *
+   * At the time that the rollback("1") call is made, the server
+   * forgets everything that has occurred in the transaction since
+   * checkpoint 1.  checkpoint 2 no longer exists, and so the second
+   * rollback call will return false.
+   *
+   * Checkpointing only makes sense in the context of a transaction;
+   * it is an error to call either checkpoint() or rollback() if
+   * the server does not have a transaction open.
+   *
+   * @return true if the rollback could be carried out successfully.
+   * 
+   */
+
+  boolean     rollback(String key) throws RemoteException;
 
   /**
    *
