@@ -6,8 +6,8 @@
 
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2001/07/06 06:37:05 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2001/09/17 20:19:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -225,8 +225,17 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
     retVal.getDialog().addChoice("Shell", 
 				 userObject.shellChoices.getLabels(),
 				 (String) stringfield.getValueLocal());
-    
-    retVal.getDialog().addString("Forwarding Address");
+
+    StringDBField addrField = (StringDBField) userObject.getField(EMAILTARGET);
+
+    if (addrField != null && addrField.size() > 0)
+      {
+	retVal.getDialog().addString("Forwarding Address", addrField.getValueString());
+      }
+    else
+      {
+	retVal.getDialog().addString("Forwarding Address");
+      }
     
     System.err.println("userReactivateWizard.respond(): state == 1, returning dialog");
     

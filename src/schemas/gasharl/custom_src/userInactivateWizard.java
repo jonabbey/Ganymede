@@ -6,8 +6,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/10/13 22:08:51 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2001/09/17 20:19:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -185,7 +185,16 @@ public class userInactivateWizard extends GanymediatorWizard {
 			"Cancel",
 			"question.gif");
 
-    retVal.getDialog().addString("Forwarding Address");
+    StringDBField addrField = (StringDBField) userObject.getFieldValueLocal(userSchema.EMAILTARGET);
+
+    if (addrField == null || addrField.size() == 0)
+      {
+	retVal.getDialog().addString("Forwarding Address");
+      }
+    else
+      {
+	retVal.getDialog().addString("Forwarding Address", addrField.getValueString());
+      }
     
     return retVal;
   }

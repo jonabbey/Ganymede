@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 2001/09/11 04:38:26 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 2001/09/17 20:19:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -863,19 +863,26 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return retVal;
 	  }
 
-	// set the shell to /bin/false
-	
-	stringfield = (StringDBField) getField(LOGINSHELL);
-	retVal = stringfield.setValueLocal("/bin/false");
+	// we're not going to set the shell to /bin/false
+	// anymore.. we'll depend on our builder task to write it out
+	// as /bin/false for us.
 
-	if (retVal != null && !retVal.didSucceed())
+	if (false)
 	  {
-	    if (calledByWizard)
+	    // set the shell to /bin/false
+	    
+	    stringfield = (StringDBField) getField(LOGINSHELL);
+	    retVal = stringfield.setValueLocal("/bin/false");
+	    
+	    if (retVal != null && !retVal.didSucceed())
 	      {
-		finalizeInactivate(false);
+		if (calledByWizard)
+		  {
+		    finalizeInactivate(false);
+		  }
+		
+		return retVal;
 	      }
-
-	    return retVal;
 	  }
 
 	// reset the forwarding address?
@@ -1133,7 +1140,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		  }
 	      }
 
-	    stringfield.addElement(reactivateWizard.forward);
+	    String[] strings = arlut.csd.Util.StringUtils.split(reactivateWizard.forward, ",");
+
+	    for (int i = 0; i < strings.length; i++)
+	      {
+		stringfield.addElement(strings[i]);
+	      }
 	  }
 
 	// make sure that the removal date is cleared..

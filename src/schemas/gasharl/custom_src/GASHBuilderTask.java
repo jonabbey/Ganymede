@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 2001/07/31 23:18:43 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 2001/09/17 20:19:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -416,6 +416,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Invid groupInvid;
     DBObject group;
 
+    boolean inactivated = false;
+
     /* -- */
 
     result.setLength(0);
@@ -430,6 +432,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
     else
       {
+	inactivated = true;
+
 	// System.err.println("GASHBuilder.writeUserLine(): null password for user " + username);
 	cryptedPass = "**Nopass**";
       }
@@ -465,7 +469,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     officePhone = (String) object.getFieldValueLocal(userSchema.OFFICEPHONE);
     homePhone = (String) object.getFieldValueLocal(userSchema.HOMEPHONE);
     directory = (String) object.getFieldValueLocal(userSchema.HOMEDIR);
-    shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
+
+    // force /bin/false if the user is inactivated
+
+    if (inactivated)
+      {
+	shell = "/bin/false";
+      }
+    else
+      {
+	shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
+      }
 
     // now build our output line
 
