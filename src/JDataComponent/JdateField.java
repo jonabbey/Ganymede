@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -496,54 +496,61 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	// up to the server object.
 	
 	Date d = null;
-      
-	try 
-	  {
-	    d = _dateformat.parse((String)obj);
-	  }
-	catch (Exception ex) 
-	  {
-	    // throw up an information dialog here
-	    
-	    InfoDialog _infoD = new InfoDialog(new JFrame(),true,"Date Field Error","The date you have typed is invalid!\n\nProper format:  MM/DD/YYYY   10/01/1997");
-	    
-	    _infoD.show();
-	    
-	    return retval;
-	  }
 
-	if (d != null) 
+	if (obj != null && !((String) obj).equals(""))
 	  {
-	    if (limited) 
+	    try 
 	      {
-		if (d.after(maxDate) || d.before(minDate))
+		d = _dateformat.parse((String)obj);
+	      }
+	    catch (Exception ex) 
+	      {
+		// throw up an information dialog here
+	    
+		InfoDialog _infoD = new InfoDialog(new JFrame(),true,"Date Field Error","The date you have typed is invalid!\n\nProper format:  MM/DD/YYYY   10/01/1997");
+	    
+		_infoD.show();
+	    
+		return retval;
+	      }
+
+	    if (d != null) 
+	      {
+		if (limited) 
 		  {
+		    if (d.after(maxDate) || d.before(minDate))
+		      {
 		    
-		    // This means that the date chosen was not within the limits specified by the
-		    // constructor.  Therefore, we just reset the selected Components of the chooser
-		    // to what they were before they were changed.
+			// This means that the date chosen was not within the limits specified by the
+			// constructor.  Therefore, we just reset the selected Components of the chooser
+			// to what they were before they were changed.
 		    
-		    InfoDialog _infoD = new InfoDialog(new JFrame(),true,
-						       "Date Field Error",
-						       "The date you have typed is out of range!\n\nValid Range: " + 
-						       _dateformat.format(minDate) + 
-						       " to " +
-						       _dateformat.format(maxDate));
-		    _infoD.show();
+			InfoDialog _infoD = new InfoDialog(new JFrame(),true,
+							   "Date Field Error",
+							   "The date you have typed is out of range!\n\nValid Range: " + 
+							   _dateformat.format(minDate) + 
+							   " to " +
+							   _dateformat.format(maxDate));
+			_infoD.show();
 		    
-		    return retval;
+			return retval;
+		      }
+		  }
+		else
+		  {
+		    setDate(d);
+		    _myCalendar.setTime(d);
+		    pCal.update();
 		  }
 	      }
-	    else
+	    else 
 	      {
-		setDate(d);
-		_myCalendar.setTime(d);
-		pCal.update();
+		return retval;
 	      }
 	  }
-	else 
+	else
 	  {
-	    return retval;
+	    d = null;
 	  }
 
 	// Now, the date value needs to be propogated up to the server
