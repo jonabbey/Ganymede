@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/11/04 04:13:54 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/11/04 04:22:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1061,6 +1061,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    XMLItem _entry = (XMLItem) spacesToEdit.elementAt(i);
 	    String _name = _entry.getAttrStr("name");
 	    boolean _val = _entry.getAttrBoolean("case-sensitive");
+
+	    err.println("\tFlipping " + _name);
 
 	    NameSpace _space = editor.getNameSpace(_name);
 
