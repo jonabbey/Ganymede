@@ -8,8 +8,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:04:09 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/05/07 05:19:39 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -66,30 +66,23 @@ package arlut.csd.ganymede.client;
 public interface ClientListener {
 
   /**
+   * <p>Called when the server forces a disconnect.</p>
    *
-   * Called when the server forces a disconnect.<br><br>
-   *
-   * Call getMessage() on the ClientEvent to get the
-   * reason for the disconnect.
-   *
-   * @see arlut.csd.ganymede.client.ClientEvent
-   *
+   * <p>Call getMessage() on the
+   * {@link arlut.csd.ganymede.client.ClientEvent ClientEvent} 
+   * to get the reason for the disconnect.</p>
    */
 
   public void disconnected(ClientEvent e);
 
-
   /**
-   *
-   * Called when the ClientBase needs to report something
+   * <p>Called when the ClientBase needs to report something
    * to the client.  The client is expected to then put
-   * up a dialog or do whatever else is appropriate.<br><br>
+   * up a dialog or do whatever else is appropriate.</p>
    *
-   * Call getMessage() on the ClientEvent to get the
-   * message.
-   *
-   * @see arlut.csd.ganymede.client.ClientEvent
-   *
+   * <p>Call getMessage() on the
+   * {@link arlut.csd.ganymede.client.ClientEvent ClientEvent} 
+   * to get the reason for the disconnect.</p>
    */
 
   public void messageReceived(ClientEvent e);
