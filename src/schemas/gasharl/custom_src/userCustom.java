@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 1999/08/02 21:49:40 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 1999/08/18 23:48:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -133,41 +133,45 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     super(original, editset);
   }
 
+
   /**
+   * <p>Initializes a newly created DBEditObject.</p>
    *
-   * Initialize a newly created DBEditObject.
-   *
-   * When this method is called, the DBEditObject has been created,
+   * <p>When this method is called, the DBEditObject has been created,
    * its ownership set, and all fields defined in the controlling
-   * DBObjectBase have been instantiated without defined
-   * values.<br><br>
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+   * have been instantiated without defined
+   * values.  If this DBEditObject is an embedded type, it will
+   * have been linked into its parent object before this method
+   * is called.</p>
    *
-   * This method is responsible for filling in any default
-   * values that can be calculated from the DBSession
-   * associated with the editset defined in this DBEditObject.<br><br>
+   * <p>This method is responsible for filling in any default
+   * values that can be calculated from the 
+   * {@link arlut.csd.ganymede.DBSession DBSession}
+   * associated with the editset defined in this DBEditObject.</p>
    *
-   * If initialization fails for some reason, initializeNewObject()
-   * will return false.  If the owning GanymedeSession is not in
-   * bulk-loading mode (i.e., enableOversight is true),
-   * DBSession.createDBObject() will checkpoint the transaction before
-   * calling this method.  If this method returns false, the calling
-   * method will rollback the transaction.  This method has no
+   * <p>If initialization fails for some reason, initializeNewObject()
+   * will return a ReturnVal with an error result..  If the owning
+   * GanymedeSession is not in bulk-loading mode (i.e.,
+   * GanymedeSession.enableOversight is true), {@link
+   * arlut.csd.ganymede.DBSession#createDBObject(short, arlut.csd.ganymede.Invid, java.util.Vector)
+   * DBSession.createDBObject()} will checkpoint the transaction
+   * before calling this method.  If this method returns a failure code, the
+   * calling method will rollback the transaction.  This method has no
    * responsibility for undoing partial initialization, the
-   * checkpoint/rollback logic will take care of that.<br><br>
+   * checkpoint/rollback logic will take care of that.</p>
    *
-   * If enableOversight is false, DBSession.createDBObject() will not
+   * <p>If enableOversight is false, DBSession.createDBObject() will not
    * checkpoint the transaction status prior to calling initializeNewObject(),
    * so it is the responsibility of this method to handle any checkpointing
-   * needed.<br><br>
+   * needed.</p>
    *
-   * This method should be overridden in subclasses.
-   *   
+   * <p>This method should be overridden in subclasses.</p> 
    */
 
-  public boolean initializeNewObject()
+  public ReturnVal initializeNewObject()
   {
     ReturnVal retVal;
-    boolean success = true;
     Integer uidVal = new Integer(1001);
 
     /* -- */
@@ -177,7 +181,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (!getGSession().enableOversight)
       {
-	return true;
+	return null;
       }
 
     // need to find a uid for this user
@@ -210,22 +214,22 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (numField == null)
       {
-	System.err.println("userCustom.initializeNewObject(): couldn't get uid field");
-	return false;
+	return Ganymede.createErrorDialog("User Initialization Failure",
+					  "Couldn't find the uid field.. schema problem?");
       }
 
     DBNameSpace namespace = numField.getNameSpace();
 
     if (namespace == null)
       {
-	System.err.println("userCustom.initializeNewObject(): couldn't get uid namespace");
-	return false;
+	return Ganymede.createErrorDialog("User Initialization Failure",
+					  "Couldn't find the uid namespace.. schema problem?");
       }
 
     // now, find a uid.. unfortunately, we have to use immutable Integers here.. not
     // the most efficient at all.
 
-    while (!namespace.testmark(editset, uidVal))
+    while (!namespace.reserve(editset, uidVal, true))
       {
 	uidVal = new Integer(uidVal.intValue()+1);
       }
@@ -236,7 +240,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (retVal != null && !retVal.didSucceed())
       {
-	success = false;
+	return retVal;
       }
 
     // create a volume entry for the user.
@@ -247,7 +251,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     
     if ((retVal == null) || (!retVal.didSucceed()))
       {
-	return false;
+	return retVal;
       }
     
     Invid invid = retVal.getInvid();
@@ -259,7 +263,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	Vector results = getGSession().internalQuery(new Query((short) 277, 
 							       new QueryDataNode(QueryDataNode.EQUALS,
 										 "auto.home.default")));
-    
+	
 	// if we found auto.home.default, set the new volume entry map
 	// field to point to auto.home.default.
     
@@ -274,7 +278,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		success = false;
+		return retVal;
 	      }
 	
 	    // we want the permissions system to reject edit privs
@@ -286,7 +290,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
-    return success;
+    return null;
   }
 
   /**

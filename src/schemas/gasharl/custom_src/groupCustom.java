@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/07/14 21:51:50 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/08/18 23:48:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -101,38 +101,43 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
     super(original, editset);
   }
 
+
   /**
+   * <p>Initializes a newly created DBEditObject.</p>
    *
-   * Initialize a newly created DBEditObject.
-   *
-   * When this method is called, the DBEditObject has been created,
+   * <p>When this method is called, the DBEditObject has been created,
    * its ownership set, and all fields defined in the controlling
-   * DBObjectBase have been instantiated without defined
-   * values.<br><br>
+   * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+   * have been instantiated without defined
+   * values.  If this DBEditObject is an embedded type, it will
+   * have been linked into its parent object before this method
+   * is called.</p>
    *
-   * This method is responsible for filling in any default
-   * values that can be calculated from the DBSession
-   * associated with the editset defined in this DBEditObject.<br><br>
+   * <p>This method is responsible for filling in any default
+   * values that can be calculated from the 
+   * {@link arlut.csd.ganymede.DBSession DBSession}
+   * associated with the editset defined in this DBEditObject.</p>
    *
-   * If initialization fails for some reason, initializeNewObject()
-   * will return false.  If the owning GanymedeSession is not in
-   * bulk-loading mode (i.e., enableOversight is true),
-   * DBSession.createDBObject() will checkpoint the transaction before
-   * calling this method.  If this method returns false, the calling
-   * method will rollback the transaction.  This method has no
+   * <p>If initialization fails for some reason, initializeNewObject()
+   * will return a ReturnVal with an error result..  If the owning
+   * GanymedeSession is not in bulk-loading mode (i.e.,
+   * GanymedeSession.enableOversight is true), {@link
+   * arlut.csd.ganymede.DBSession#createDBObject(short, arlut.csd.ganymede.Invid, java.util.Vector)
+   * DBSession.createDBObject()} will checkpoint the transaction
+   * before calling this method.  If this method returns a failure code, the
+   * calling method will rollback the transaction.  This method has no
    * responsibility for undoing partial initialization, the
-   * checkpoint/rollback logic will take care of that.<br><br>
+   * checkpoint/rollback logic will take care of that.</p>
    *
-   * If enableOversight is false, DBSession.createDBObject() will not
+   * <p>If enableOversight is false, DBSession.createDBObject() will not
    * checkpoint the transaction status prior to calling initializeNewObject(),
    * so it is the responsibility of this method to handle any checkpointing
-   * needed.<br><br>
+   * needed.</p>
    *
-   * This method should be overridden in subclasses.
-   *   
+   * <p>This method should be overridden in subclasses.</p> 
    */
 
-  public boolean initializeNewObject()
+  public ReturnVal initializeNewObject()
   {
     ReturnVal retVal;
     Integer gidVal = new Integer(1001);
@@ -144,7 +149,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     if (!getGSession().enableOversight)
       {
-	return true;
+	return null;
       }
 
     // need to find a gid for this group
@@ -177,22 +182,22 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     if (numField == null)
       {
-	System.err.println("groupCustom.initializeNewObject(): couldn't get gid field");
-	return false;
+	return Ganymede.createErrorDialog("Group Initialization Failure",
+					  "Couldn't find the gid field.. schema problem?");
       }
 
     DBNameSpace namespace = numField.getNameSpace();
 
     if (namespace == null)
       {
-	System.err.println("groupCustom.initializeNewObject(): couldn't get gid namespace");
-	return false;
+	return Ganymede.createErrorDialog("Group Initialization Failure",
+					  "Couldn't find the gid namespace.. schema problem?");
       }
 
     // now, find a gid.. unfortunately, we have to use immutable Integers here.. not
     // the most efficient at all.
 
-    while (!namespace.testmark(editset, gidVal))
+    while (!namespace.reserve(editset, gidVal, true))
       {
 	gidVal = new Integer(gidVal.intValue()+1);
       }
@@ -201,7 +206,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     retVal = numField.setValueLocal(gidVal);
 
-    return (retVal == null || retVal.didSucceed());
+    return retVal;
   }
 
   /**
