@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,11 +25,13 @@ import java.util.*;
 import jdj.*;
 
 import arlut.csd.JDialog.*;
+import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDataComponent.*;
-import arlut.csd.DataComponent.*;
+//import arlut.csd.DataComponent.*;
 import arlut.csd.ganymede.client.*;
 import arlut.csd.Util.*;
-import arlut.csd.Tree.*;
+import arlut.csd.JTree.*;
+
 
 import com.sun.java.swing.*;
 import com.sun.java.swing.border.*;
@@ -41,6 +43,8 @@ import com.sun.java.swing.border.*;
 ------------------------------------------------------------------------------*/
 
 public class gclient extends JFrame implements treeCallback,ActionListener {
+
+  public static gclient client;
   
   // Image numbers
   final int NUM_IMAGE = 12;
@@ -125,7 +129,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     filter = new Vector();    // List of owner groups to show, these are listHandles
 
   Vector
+    personae,
     ownerGroups = null;  // Vector of owner groups
+
+  JComboBox
+    personaCombo = null;  // ComboBox showing current persona on the toolbar
 
   JFilterDialog
     filterDialog = null;
@@ -216,6 +224,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     motifMI,
     win95MI;
 
+  String
+    my_username;
+
   JMenu 
     actionMenu,
     windowMenu,
@@ -247,6 +258,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   {
     super("Ganymede Client: "+g.my_client.getName()+" logged in");
 
+    client = this;
 
     System.out.println("Shortcut key mask: " + KeyEvent.getKeyText(Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
@@ -262,6 +274,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     session = s;
     _myglogin = g;
+    my_username = g.getUserName();
 
     System.out.println("Setting motif");
     setMotif();
@@ -367,29 +380,37 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // Personae menu
     boolean personasExist = false;
+
     try
       {
-	Vector personae = session.getPersonae();
-	if (personae != null)
-	  {
-	    PersonaMenu = new JMenu("Persona");
-	    personaListener = new PersonaListener(session, this);
-	    ButtonGroup personaGroup = new ButtonGroup();
-	    
-	    for (int i = 0; i < personae.size(); i++)
-	      {
-		JRadioButtonMenuItem mi = new JRadioButtonMenuItem((String)personae.elementAt(i));
-		personaGroup.add(mi);
-		mi.addActionListener(personaListener);
-		PersonaMenu.add(mi);
-	      }
-	    personasExist = true;
-	  }
+	personae = session.getPersonae();
       }
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not load personas: " + rx);
       }
+
+    personaListener = new PersonaListener(session, this);
+    if (personae != null)
+      {
+	PersonaMenu = new JMenu("Persona");
+	ButtonGroup personaGroup = new ButtonGroup();
+	
+	for (int i = 0; i < personae.size(); i++)
+	  {
+	    String p = (String)personae.elementAt(i);
+	    JCheckBoxMenuItem mi = new JCheckBoxMenuItem(p, false);
+	    if (p.equals(my_username))
+	      {
+		mi.setState(true);
+	      }
+	    personaGroup.add(mi);
+	    mi.addActionListener(personaListener);
+	    PersonaMenu.add(mi);
+	  }
+	personasExist = true;
+      }
+      
 
     // Help menu
     helpMenu = new JMenu("Help");
@@ -469,7 +490,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     leftP = new JPanel(false);
     leftP.setLayout(new BorderLayout());
     leftP.add("Center", tree);
-
+    
     leftTop = new JPanel(false);
     leftTop.setBorder(statusBorderRaised);
     
@@ -480,6 +501,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     leftTop.add("Center", leftL);
 
     leftP.add("North", leftTop);
+    
 
     if (debug)
       {
@@ -523,8 +545,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rightTop = new JPanel(false);
     rightTop.setBorder(statusBorderRaised);
     rightTop.setLayout(new BorderLayout());
-    //rightTop.add("West", rightL);
-    rightTop.add("West", createToolbar);
+    rightTop.add("West", rightL);
+    //rightTop.add("West", createToolbar());
     timerLabel = new JLabel("                                       ", JLabel.RIGHT);
 
     timer = new connectedTimer(timerLabel, 5000);
@@ -532,6 +554,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rightTop.add("East", timerLabel);
     
     rightP.add("North", rightTop);
+    //mainPanel.add("North", rightTop);
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
     JPanel bottomButtonP = new JPanel(false);
@@ -743,22 +766,31 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     return statusLabel.getText();
   }
   
-  public void setMotif()
+  public void setLAF(String look)
   {
     try 
       {
-	UIManager.setLookAndFeel("com.sun.java.swing.motif.MotifLookAndFeel");
+	UIManager.setLookAndFeel(look);
 	SwingUtilities.updateComponentTreeUI(this);
 	leftP.invalidate();
 	invalidate();
 	validate();
       } 
+    catch (com.sun.java.swing.UnsupportedLookAndFeelException e)
+      {
+	showErrorMessage("Change unsucessful", "That Look and Feel is unsupported on this platform.");
+      }
     catch (Exception e) 
       {
 	System.out.println(e);
       }
   }
   
+  public void setMotif()
+  {
+    setLAF("com.sun.java.swing.motif.MotifLookAndFeel");
+  }
+
   public void setBasic() 
   {
     try
@@ -809,29 +841,91 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  help.setVisible(true);
 	}
     }
+
+  public void showErrorMessage(String message)
+  {
+    showErrorMessage("Error", message);
+  }
+  /**
+   * Popup an error dialog.
+   */
+  public void showErrorMessage(String title, String message)
+  {
+    //JOptionPane.showInternalMessageDialog(mainPanel, message, title, JOptionPane.ERROR_MESSAGE);
+    JErrorDialog d = new JErrorDialog(this, title, message);
+  }
+
   // Private methods
 
-  void JToolBar createToolbar()
+  /**
+   * Note that this actually returns a JPanel.
+   *
+   * That's so I can put the ComboBox in.
+   */
+  JPanel createToolbar()
   {
+    JPanel panel = new JPanel(new FlowLayout());
     JToolBar toolBar = new JToolBar();
+    toolBar.setBorderPainted(false);
+    Insets insets = new Insets(0,0,0,0);
+    
+    toolBar.setMargin(insets);
 
-    JButton b = new JButton(pencil);
+    JButton b = new JButton(new ImageIcon(pencil));
     b.setActionCommand("open object for editing");
+    b.setToolTipText("Edit an object");
     b.addActionListener(this);
+    b.setMargin(insets);
     toolBar.add(b);
 
-    JButton b = new JButton(trash);
+    b = new JButton(new ImageIcon(trash));
     b.setActionCommand("delete an object");
+    b.setToolTipText("Delete an object");
     b.addActionListener(this);
+    b.setMargin(insets);
     toolBar.add(b);
 
-    JButton b = new JButton(search);
+    b = new JButton(new ImageIcon(search));
     b.setActionCommand("open object for viewing");
+    b.setToolTipText("View an object");
+    b.setMargin(insets);
     b.addActionListener(this);
     toolBar.add(b);
 
+    panel.add(toolBar);
+    
+    if ((personae != null)  && personae.size() > 0)
+      {
+	System.out.println("Adding persona stuff");
+	
+	personaCombo = new JComboBox();
+	for(int i =0; i< personae.size(); i++)
+	  {
+	    personaCombo.addItem((String)personae.elementAt(i));
+	  }
+	personaCombo.setSelectedItem(my_username);
 
-    return toolBar;
+	personaCombo.addActionListener(personaListener);
+
+	panel.add(new JLabel("Persona:"));
+	panel.add(personaCombo);
+
+      }
+    else
+      {
+	System.out.println("No personas.");
+      }
+    
+    return panel;
+  }
+
+  public void setPersonaCombo(String persona)
+  {
+    if (personaCombo != null)
+      {
+	personaCombo.setSelectedItem(persona);
+      }
+
   }
 
   /**
@@ -1349,6 +1443,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    *
    ********************************************************************************/
 
+  public void editObject(Invid invid)
+  {
+    editObject(invid, null);
+  }
+
   /**
    * open a new window to edit the object.
    *
@@ -1356,12 +1455,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    * and all the other dirty work.  This should be the only place windowPanel.addWindow
    * is called for editing purposes.
    */
-  public void editObject(Invid invid)
+  public void editObject(Invid invid, String objectType)
   {
     try
       {
 	db_object o = session.edit_db_object(invid);
-	wp.addWindow(o, true);
+	wp.addWindow(o, true, objectType);
 	InvidNode node = null;
 	if (invidNodeHash.containsKey(invid))
 	  {
@@ -1379,14 +1478,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
+  public void viewObject(Invid invid)
+  {
+    viewObject(invid, null);
+  }
+
   /**
    * Open a new window to view the current object.
    */
-  public void viewObject(Invid invid)
+  public void viewObject(Invid invid, String objectType)
   {
     try
       {
-	wp.addWindow(session.view_db_object(invid), false);
+	wp.addWindow(session.view_db_object(invid), false, objectType);
       }
     catch (RemoteException rx)
       {
@@ -1494,7 +1598,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else
       {
-	editObject(invid);
+	editObject(invid, openDialog.getTypeString());
       }
   
 
@@ -1592,7 +1696,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		else
 		  {
 		    setStatus("Could not inactivate object.");
-		    arlut.csd.JDialog.JErrorDialog ed = new arlut.csd.JDialog.JErrorDialog(this, "Could not inactivate object: " + session.getLastError());
+		    showErrorMessage("Error: no inactivate", "Could not inactivate object: " + session.getLastError());
 		  }
 	      }
 	  }
@@ -1964,128 +2068,120 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   // ActionListener Methods
   
   public void actionPerformed(java.awt.event.ActionEvent event)
-  {
-    Object source = event.getSource();
+    {
+      Object source = event.getSource();
+      String command = event.getActionCommand();
+      System.out.println("Action: " + command);
 
-    if (source instanceof JButton)
-      {
-	if (source == cancel)
-	  {
-	    if (debug)
-	      {
-		System.out.println("cancel button clicked");
-	      }
+      if (source == cancel)
+	{
+	  if (debug)
+	    {
+	      System.out.println("cancel button clicked");
+	    }
+	
+	  cancelTransaction();
+	}
+      else if (source == commit)
+	{
+	  if (debug)
+	    {
+	      System.out.println("commit button clicked");
+	    }
+	
+	  commitTransaction();	
+	}
+     
+      else if (source == menubarQueryMI)
+	{
 
-	    cancelTransaction();
-	  }
-	else if (source == commit)
-	  {
-	    if (debug)
-	      {
-		System.out.println("commit button clicked");
-	      }
+	  querybox box = new querybox(getBaseHash(), getBaseMap(), this, "Query Panel");
+	  Query q = box.myshow();
 
-	    commitTransaction();	
-	  }
-      }
-    else if (source instanceof JMenuItem)
-      {
-	if (source == menubarQueryMI)
-	  {
+	  if (q != null)
+	    {
+	      DumpResult buffer = null;
 
-	    querybox box = new querybox(getBaseHash(), getBaseMap(), this, "Query Panel");
-	    Query q = box.myshow();
+	      try
+		{
+		  buffer = session.dump(q);
+		}
+	      catch (RemoteException ex)
+		{
+		  throw new RuntimeException("caught remote: " + ex);
+		}
 
-	    if (q != null)
-	      {
-		DumpResult buffer = null;
+	      wp.addTableWindow(session, q, buffer, "Query Results");
+	    }
+	}
+      else if (source == removeAllMI)
+	{
+	  if (OKToProceed())
+	    {
+	      wp.closeAll();
+	    }
+	}
+      else if (source == rebuildTreeMI)
+	{
+	  rebuildTree();
+	}
+      else if (source == logoutMI)
+	{
+	  if (OKToProceed())
+	    {
+	      logout();
+	    }
+	}
+      else if (source == motifMI)
+	{
+	  setMotif();
+	}
+      else if (source == win95MI)
+	{
+	  setBasic();
+	}
+      else if (source == javaLFMI)
+	{
+	  setJavaLF();
+	}
+      else if (command.equals("open object for editing"))
+	{
+	  editObjectDialog();
+	}
+      else if (command.equals("open object for viewing"))
+	{
+	  viewObjectDialog();
+	}
+      else if (command.equals("choose an object for cloning"))
+	{
+	  cloneObjectDialog();
+	}
+      else if (command.equals("delete an object"))
+	{
+	  deleteObjectDialog();
+	}
+      else if (command.equals("inactivate an object"))
+	{
+	  inactivateObjectDialog();
+	}
+      else if (command.equals("Filter Query"))
+	{
+	  chooseFilter();
+	}
+      else if (command.equals("Set Default Owner"))
+	{
+	  chooseDefaultOwner(true);
+	}
+      else if (command.equals("Help"))
+	{
+	  showHelpWindow();
+	}
+      else
+	{
+	  System.err.println("Unknown action event generated");
+	}
+    }
 
-		try
-		  {
-		    buffer = session.dump(q);
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("caught remote: " + ex);
-		  }
-
-		wp.addTableWindow(session, q, buffer, "Query Results");
-	      }
-	  }
-	else if (source == removeAllMI)
-	  {
-	    if (OKToProceed())
-	      {
-		wp.closeAll();
-	      }
-	  }
-	else if (source == rebuildTreeMI)
-	  {
-	    rebuildTree();
-	  }
-	else if (source == logoutMI)
-	  {
-	    if (OKToProceed())
-	      {
-		logout();
-	      }
-	  }
-	else if (source == motifMI)
-	  {
-	    setMotif();
-	  }
-	else if (source == win95MI)
-	  {
-	    setBasic();
-	  }
-	else if (source == javaLFMI)
-	  {
-	    setJavaLF();
-	  }
-
-	// Now just look at the ones that have action commands.
-	else
-	  {
-	    String command = event.getActionCommand();
-	    if (command.equals("open object for editing"))
-	      {
-		editObjectDialog();
-	      }
-	    else if (command.equals("open object for viewing"))
-	      {
-		viewObjectDialog();
-	      }
-	    else if (command.equals("choose an object for cloning"))
-	      {
-		cloneObjectDialog();
-	      }
-	    else if (command.equals("delete an object"))
-	      {
-		deleteObjectDialog();
-	      }
-	    else if (command.equals("inactivate an object"))
-	      {
-		inactivateObjectDialog();
-	      }
-	    else if (command.equals("Filter Query"))
-	      {
-		chooseFilter();
-	      }
-	    else if (command.equals("Set Default Owner"))
-	      {
-		chooseDefaultOwner(true);
-	      }
-	    else if (command.equals("Help"))
-	      {
-		showHelpWindow();
-	      }
-	  }
-      }
-    else
-      {
-	System.err.println("Unknown action event generated");
-      }
-  }
 
   protected void processWindowEvent(WindowEvent e) 
   {
@@ -2326,7 +2422,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    InvidNode invidN = (InvidNode)node;
 	  
-	    viewObject(invidN.getInvid());
+	    viewObject(invidN.getInvid(), invidN.getTypeText());
 	  }
 	else
 	  {
@@ -2343,7 +2439,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  
 	    Invid invid = invidN.getInvid();
 		
-	    editObject(invid);
+	    editObject(invid, invidN.getTypeText());
 	  }
 	else
 	  {
@@ -2393,17 +2489,21 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
                                                        Class InvidNode
 ---------------------------------------------------------------------*/
 
-class InvidNode extends arlut.csd.Tree.treeNode {
+class InvidNode extends arlut.csd.JTree.treeNode {
 
   final static boolean debug = true;
 
   private Invid invid;
 
+  private String typeText;
+
   public InvidNode(treeNode parent, String text, Invid invid, treeNode insertAfter,
 		    boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
+
     this.invid = invid;
+    this.typeText = parent.getText();
 
     if (debug)
       {
@@ -2424,7 +2524,12 @@ class InvidNode extends arlut.csd.Tree.treeNode {
   {
     this.invid = invid;
   }
-    
+
+  public String getTypeText()
+  {
+    return typeText;
+
+  }  
 }
 
 
@@ -2434,7 +2539,7 @@ class InvidNode extends arlut.csd.Tree.treeNode {
 
 ------------------------------------------------------------------------------*/
 
-class BaseNode extends arlut.csd.Tree.treeNode {
+class BaseNode extends arlut.csd.JTree.treeNode {
 
   private Base base;
   private Query query;
@@ -2506,6 +2611,24 @@ class PersonaListener implements ActionListener{
   public void actionPerformed(ActionEvent event)
     {
       //Check to see if we need to commit the transaction first.
+      String newPersona = null;
+      if (event.getSource() instanceof JMenuItem)
+	{
+	  System.out.println("From menu");
+	  //JMenuItem good
+	  newPersona = event.getActionCommand();
+	}
+      else if (event.getSource() instanceof JComboBox)
+	{
+	  System.out.println("From box");
+	  //JComboBox bad
+	  newPersona = (String)((JComboBox)event.getSource()).getSelectedItem();
+	}
+      else
+	{
+	  System.out.println("Persona Listener doesn't understand that action.");
+	}
+
       if (gc.somethingChanged)
 	{
 	  // need to ask: commit, cancel, abort?
@@ -2535,12 +2658,15 @@ class PersonaListener implements ActionListener{
 	  resource.addPassword("Password:");
 	}
 
-      System.out.println("MenuItem action command: " + event.getActionCommand());
+      System.out.println("MenuItem action command: " + newPersona);
       
       Hashtable result = null;
       String password = null;
 
-      if (event.getActionCommand().indexOf(":") > 0)
+      //Hey, this is no good!
+
+      //if (newPersona.indexOf(":") > 0)
+      if (true)
 	{
 	  StringDialog d = new StringDialog(resource);
 	  result = d.DialogShow();
@@ -2548,19 +2674,21 @@ class PersonaListener implements ActionListener{
 	}
       else
 	{
-	  password = "yada";
+	  System.out.println("No :, no workie.");
+	  return;
 	}
 
       if (password != null)
 	{
 	  try
 	    {	      
-	      personaChangeSuccessful = session.selectPersona(event.getActionCommand(), password);
+	      personaChangeSuccessful = session.selectPersona(newPersona, password);
 	      
 	      if (personaChangeSuccessful)
 		{
 		  gc.setStatus("Successfully changed persona.");
-		  gc.setTitle("Ganymede Client: " + event.getActionCommand() + " logged in.");
+		  gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
+		  //gc.setPersonaCombo(newPersona);
 		  gc.ownerGroups = null;
 		  gc.clearCaches();
 		  gc.commitTransaction();
@@ -2578,7 +2706,7 @@ class PersonaListener implements ActionListener{
 	    }
 	  catch (RemoteException rx)
 	    {
-	      throw new RuntimeException("Could not set persona to " + event.getActionCommand() + ": " + rx);
+	      throw new RuntimeException("Could not set persona to " + newPersona + ": " + rx);
 	    }
 
 	}
@@ -2589,6 +2717,7 @@ class PersonaListener implements ActionListener{
 }
 
 //-------------------------------------------------------------------------
+// This may not be needed any more, since there are more hashes.
 class CacheInfo {
 
   private String
