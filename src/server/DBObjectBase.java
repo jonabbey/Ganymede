@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.67 $ %D%
+   Version: $Revision: 1.68 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1480,33 +1480,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
 
-  public synchronized BaseField getField(short id)
+  public BaseField getField(short id)
   {
-    BaseField bf;
-    Enumeration enum;
+    Short ID = new Short(id);
 
-    /* -- */
-
-    enum = fieldHash.elements();
-    
-    while (enum.hasMoreElements())
-      {
-	bf = (BaseField) enum.nextElement();
-
-	try
-	  {
-	    if (bf.getID() == id)
-	      {
-		return bf;
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    // pass through to return null below
-	  }
-      }
-
-    return null;
+    return (BaseField) fieldHash.get(ID);
   }
 
   /**
