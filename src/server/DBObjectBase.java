@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -642,7 +642,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public boolean isRemovable()
   {
-    return (getTypeID() > 1);
+    return (getTypeID() > SchemaConstants.FinalBase);
   }
 
 
