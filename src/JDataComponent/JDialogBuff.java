@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,7 @@ import java.awt.Frame;
 
 public class JDialogBuff implements java.io.Serializable {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
   
