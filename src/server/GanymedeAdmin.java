@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -517,7 +517,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     while (GanymedeServer.sessions.size() != 0)
       {
 	temp = (GanymedeSession) GanymedeServer.sessions.elementAt(0);
-	temp.forceOff("Admin console booting you off (loser)");
+	temp.forceOff("Admin console disconnecting you");
       }
 
     return true;
@@ -546,7 +546,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	  {
 	    if (temp.personaName.equals(user))
 	      {
-		temp.forceOff("Admin console booting you off (loser)");
+		temp.forceOff("Admin console disconnecting you");
 		return true;
 	      }
 	  }
@@ -554,7 +554,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	  {
 	    if (temp.username.equals(user))
 	      {
-		temp.forceOff("Admin console booting you off (loser)");
+		temp.forceOff("Admin console disconnecting you");
 		return true;
 	      }
 	  }
