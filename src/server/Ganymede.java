@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.134 $
-   Last Mod Date: $Date: 2002/06/14 01:32:09 $
+   Version: $Revision: 1.135 $
+   Last Mod Date: $Date: 2002/06/14 03:27:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1259,18 +1259,12 @@ public class Ganymede {
 	success = false;
       }
 
-    // if the subjectPrefixProperty is not defined or if it does not begin and
-    // end with single quote marks, use a default prefix
+    // if the subjectPrefixProperty is not defined, use a default
+    // prefix
 
-    if ((subjectPrefixProperty == null) ||
-	(subjectPrefixProperty.charAt(0) != '\'' ||
-	 subjectPrefixProperty.charAt(subjectPrefixProperty.length()-1) != '\''))
+    if (subjectPrefixProperty == null)
       {
 	subjectPrefixProperty = "Ganymede: ";
-      }
-    else
-      {
-	subjectPrefixProperty = subjectPrefixProperty.substring(1, subjectPrefixProperty.length()-1);
       }
 
     if (signatureFileProperty == null)
