@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.136 $
-   Last Mod Date: $Date: 2002/01/20 19:04:24 $
+   Version: $Revision: 1.137 $
+   Last Mod Date: $Date: 2002/06/27 21:54:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -151,7 +151,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.136 $ $Date: 2002/01/20 19:04:24 $
+ * @version $Revision: 1.137 $ $Date: 2002/06/27 21:54:36 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1892,7 +1892,6 @@ public class DBObject implements db_object, FieldType, Remote {
   public final Vector checkRequiredFields()
   {
     Vector localFields = new Vector();
-    DBObjectBaseField fieldDef;
     DBField field = null;
 
     /* -- */
@@ -1902,13 +1901,16 @@ public class DBObject implements db_object, FieldType, Remote {
 
     synchronized (fieldAry)
       {
-	// assume that the customFields will not be changed at a time when
-	// this method is called.  A reasonable assumption, as
-	// customFields is only altered when the schema is being edited.
+	// assume that the object type's fields will not be changed at a
+	// time when this method is called.  A reasonable assumption,
+	// as the objectbase field table is only altered when the
+	// schema is being edited.
 	
-	for (int i = 0; i < objectBase.customFields.size(); i++)
+	Vector fieldTemplates = objectBase.getFieldTemplateVector();
+
+	for (int i = 0; i < fieldTemplates.size(); i++)
 	  {
-	    fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
+	    FieldTemplate template = (FieldTemplate) fieldTemplates.elementAt(i);
 	    
 	    try
 	      {
@@ -1917,13 +1919,13 @@ public class DBObject implements db_object, FieldType, Remote {
 		// on how the fieldRequired method is written.  I
 		// think this is a low-level risk, but not zero.
 
-		if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
+		if (objectBase.getObjectHook().fieldRequired(this, template.getID()))
 		  {
-		    field = retrieveField(fieldDef.getID());
+		    field = retrieveField(template.getID());
 		    
 		    if (field == null || !field.isDefined())
 		      {
-			localFields.addElement(fieldDef.getName());
+			localFields.addElement(template.getName());
 		      }
 		  }
 	      }
