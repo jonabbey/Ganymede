@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.163 $
-   Last Mod Date: $Date: 1999/11/09 22:12:32 $
+   Version: $Revision: 1.164 $
+   Last Mod Date: $Date: 1999/11/19 01:00:59 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.163 $ $Date: 1999/11/09 22:12:32 $ $Name:  $
+ * @version $Revision: 1.164 $ $Date: 1999/11/19 01:00:59 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -127,7 +127,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 1999/11/09 22:12:32 $";
+  static String release_date = "$Date: 1999/11/19 01:00:59 $";
   static String release_number = null;
 
   // ---
@@ -403,6 +403,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     questionImage = null,
     search,
     queryIcon,
+    cloneIcon,
     pencil,
     personaIcon,
     inactivateIcon,
@@ -807,6 +808,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     
     search = PackageResources.getImageResource(this, "srchfol2.gif", getClass());
     queryIcon = PackageResources.getImageResource(this, "query.gif", getClass());
+    cloneIcon = PackageResources.getImageResource(this, "clone.gif", getClass());
     trash = PackageResources.getImageResource(this, "trash.gif", getClass());
     creation = PackageResources.getImageResource(this, "creation.gif", getClass());
     newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
@@ -2106,6 +2108,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.addActionListener(this);
     toolBarTemp.add(b);
 
+    b = new JButton("Clone", new ImageIcon(cloneIcon));
+    b.setMargin(insets);
+    b.setActionCommand("clone an object");
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
+    b.setToolTipText("Clone an object");
+    b.addActionListener(this);
+    toolBarTemp.add(b);
+
     b = new JButton("View", new ImageIcon(search));
     b.setMargin(insets);
     b.setActionCommand("open object for viewing");
@@ -2123,7 +2134,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.setToolTipText("Compose a query");
     b.addActionListener(this);
     toolBarTemp.add(b);
-
 
     // If we decide to have an inactivate-type button on toolbar...
 //     b = new JButton("Inactivate", new ImageIcon(inactivateIcon));
@@ -3708,6 +3718,51 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
+   * <p>Opens a dialog to let the user choose an object for cloning,
+   * and if cancel is not chosen, the object is opened for cloning.</p>
+   *
+   * <p>If a node is selected in the client's tree, the dialog will
+   * be pre-loaded with the type and name of the selected object.</p>
+   */
+
+  void cloneObjectDialog()
+  {
+    if (openDialog == null)
+      {
+	openDialog = new openObjectDialog(this);
+      }
+    else
+      {
+	// if we have a node selected, recreate the dialog so that it
+	// will get re-initialized.
+
+	if (selectedNode != null && selectedNode instanceof InvidNode)
+	  {
+	    openDialog.dispose();
+	    openDialog = new openObjectDialog(this);	    
+	  }
+      }
+
+    openDialog.setText("Choose object to be cloned");
+    openDialog.setIcon(new ImageIcon(cloneIcon));
+    openDialog.setReturnEditableOnly(true);
+
+    Invid invid = openDialog.chooseInvid();
+
+    if (invid == null)
+      {
+	if (debug)
+	  {
+	    System.out.println("Canceled");
+	  }
+      }
+    else
+      {
+	cloneObject(invid);
+      }
+  }
+
+  /**
    * <p>Creates and presents a dialog to let the user change their selected persona.</p>
    *
    * <p>gclient's personaListener reacts to events from the persona change
@@ -4441,6 +4496,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     else if (command.equals("delete an object"))
       {
 	deleteObjectDialog();
+      }
+    else if (command.equals("clone an object"))
+      {
+	cloneObjectDialog();
       }
     else if (command.equals("inactivate an object"))
       {

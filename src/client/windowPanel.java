@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 1999/10/29 16:12:26 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 1999/11/19 01:01:00 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -80,7 +80,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.70 $ $Date: 1999/10/29 16:12:26 $ $Name:  $
+ * @version $Revision: 1.71 $ $Date: 1999/11/19 01:01:00 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -105,21 +105,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    */
 
   final int topLayer = 0;
-
-  /**
-   * <p>windowCount is used to stagger internal windows as they are created
-   * and displayed in this windowPanel.  Each time a window is created and
-   * displayed, windowCount is incremented, which causes addWindow to stagger
-   * the next window created by a certain amount.</p>
-   * 
-   * <p>The 
-   * {@link arlut.csd.ganymede.client.windowPanel#resetWindowCount() resetWindowCount()} 
-   * method resets this variable so that the next window displayed in
-   * the client will be positioned at the top-left side of the
-   * windowPanel.  This is done when a transaction is committed or aborted.</p>
-   */
-
-  int windowCount = 0;
 
   /**
    * <p>Used to keep track of multiple 'guy working' internal wait windows
@@ -191,6 +176,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public windowPanel(gclient gc, JMenu windowMenu)
   {
+    //    setDesktopManager(new clientDesktopMgr());
+
     this.gc = gc;
 
     // are we running the client in debug mode?
@@ -434,17 +421,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     w.setOpaque(true);
 
     windowList.put(title, w);
-      
-    if (windowCount > 10)
-      {
-	windowCount = 0;
-      }
-    else
-      {
-	windowCount++;
-      }
 
-    w.setBounds(windowCount*20, windowCount*20, 500,400);
+    w.setBounds(0, 0, 500,400);
+    placeWindow(w);
 
     w.setLayer(new Integer(topLayer));
     
@@ -455,6 +434,36 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     updateMenu();
     
     gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+  }
+
+  /**
+   * <p>This method is responsible for setting the bounds for a new window
+   * so that windows are staggered somewhat.</p>
+   */
+
+  public void placeWindow(JInternalFrame window)
+  {
+    int x_offset;
+    int y_offset;
+    int width = window.getBounds().width;
+    int height = window.getBounds().height;
+
+    Dimension d = this.getSize();
+    java.util.Random randgen = new java.util.Random();
+
+    /* -- */
+
+    if (width > d.width || height > d.height)
+      {
+	window.setBounds(0,0, width, height);
+      }
+    else
+      {
+	x_offset = (int) ((d.width - width) * randgen.nextFloat());
+	y_offset = (int) ((d.height - height) * randgen.nextFloat());
+	
+	window.setBounds(x_offset, y_offset, width, height);
+      }
   }
 
   public void setSelectedWindow(JInternalFrame window)
@@ -532,18 +541,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>windowCount is used to stagger internal windows as they are created
-   * and displayed in this windowPanel.  resetWindowCount() resets this
-   * variable so that the next window displayed in the client will be
-   * positioned at the top-left side of the windowPanel.</p>
-   */
-
-  public void resetWindowCount()
-  {
-    windowCount = 0;
-  }
-
-  /**
    * <p>Create and add an internal query result table window.</p>
    *
    * @param session Reference to the server, used to refresh the query on command
@@ -598,22 +595,16 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     else
       {
 	rt.setLayer(new Integer(topLayer));
-	rt.setBounds(windowCount*20, windowCount*20, 500,500);
+	rt.setBounds(0, 0, 500,500);
+
+	placeWindow(rt);
+
 	rt.setResizable(true);
 	rt.setClosable(true);
 	rt.setMaximizable(true);
 	rt.setIconifiable(true);
 
 	rt.addInternalFrameListener(this);
-
-	if (windowCount > 10)
-	  {
-	    windowCount = 0;
-	  }
-	else
-	  {
-	    windowCount++;
-	  }
 
 	// Figure out the title
 
