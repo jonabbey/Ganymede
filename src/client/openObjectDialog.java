@@ -24,6 +24,9 @@ import arlut.csd.Util.VecQuickSort;
 public class openObjectDialog extends JDialog implements ActionListener, MouseListener{
   private final static boolean debug = false;
 
+  boolean 
+    editableOnly = false;
+
   long
     lastClick = 0;
 
@@ -203,6 +206,11 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     titleL.setText(text);
   }
 
+  public void setReturnEditableOnly(boolean editableOnly)
+  {
+    this.editableOnly = editableOnly;
+  }
+
   public String getTypeString()
   {
     listHandle lh = (listHandle)type.getSelectedItem();
@@ -325,7 +333,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		  System.out.println("Trying exact match...");
 		}
 
-		edit_query = client.session.query(new Query(baseID.shortValue(), node, true));
+		edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 		
 		if (edit_query != null)
 		  {
@@ -355,7 +363,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  
 		    edit_query = null;
 		    
-		    edit_query = client.session.query(new Query(baseID.shortValue(), node, true));
+		    edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 		    
 		    
 		    edit_invids = edit_query.getListHandles();
@@ -368,7 +376,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		    else if (edit_invids.size() == 0)
 		      {
 			client.showErrorMessage("Error finding object",
-						"No object starts with that string.");
+						editableOnly ? "No editable object starts with that string." : "No viewable object starts with that string.");
 			return;
 		      }
 		    else
