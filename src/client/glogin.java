@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -477,7 +477,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	setWaitCursor();
 
 	String uname = username.getText().trim();
-	String pword = passwd.getText();
+	String pword = new String(passwd.getPassword());
 
 	my_username = uname;
 	my_passwd = pword;

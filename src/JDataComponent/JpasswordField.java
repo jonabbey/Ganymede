@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -242,7 +242,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 
   public char getCharAt(int n)
   {
-    return this.getText().charAt(n);
+    return this.getPassword()[n];
   }
 
   /**
@@ -406,7 +406,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
     // if nothing in the JpasswordField has changed,
     // we don't need to worry about this event.
     
-    str = getText();
+    str = new String(getPassword());
     
     if (value != null)
       {
@@ -504,7 +504,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
       {
 	try
 	  {
-	    my_parent.setValuePerformed(new JValueObject(this, getText(), JValueObject.ADD));
+	    my_parent.setValuePerformed(new JValueObject(this, new String(getPassword()), JValueObject.ADD));
 	  }
 	catch (RemoteException rx)
 	  {

@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1475,7 +1475,7 @@ public class GASHAdmin extends JApplet implements ActionListener {
       }
     else if (e.getSource() == loginButton)
       {
-	iAdmin admin = applet.login(username.getText(), password.getText());
+	iAdmin admin = applet.login(username.getText(), new String(password.getPassword()));
 
 	if (admin != null)
 	  {

@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -731,7 +731,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	      {
 		JpasswordField pf = (JpasswordField) c;
 	    
-		valueHash.put(label, pf.getText());
+		valueHash.put(label, new String(pf.getPassword()));
 	      }
 	    else if (c instanceof JdateField)
 	      {
