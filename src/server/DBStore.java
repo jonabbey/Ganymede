@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -348,6 +348,9 @@ public class DBStore {
     DBNameSpace ns;
     DBBaseCategory bc;
 
+    boolean movedFile = false;
+    boolean completed = false;
+
     /* -- */
 
     if (debug)
@@ -370,10 +373,13 @@ public class DBStore {
     try
       {
 	dbFile = new File(filename);
+
 	if (dbFile.isFile())
 	  {
 	    dbFile.renameTo(new File(filename + ".bak"));
 	  }
+
+	movedFile = true;
 
 	// and dump the whole thing
 
@@ -410,6 +416,8 @@ public class DBStore {
 	  {
 	    ((DBObjectBase) basesEnum.nextElement()).emit(out, true);
 	  } 
+
+	completed = true;	// we don't care as much about our schema dump
 
 	// and dump the schema out in a human readable form
 	
@@ -458,7 +466,27 @@ public class DBStore {
 	  {
 	    textOutStream.close();
 	  }
+
+	// in case of thread dump
+
+	if (movedFile && !completed)
+	  {
+	    dbFile = new File(filename + ".bak");
+	    
+	    if (dbFile.isFile())
+	      {
+		dbFile.renameTo(new File(filename));
+	      }
+
+	    Ganymede.debug("dump aborted, undoing dump.");
+	  }
       }
+
+    // if our thread was terminated above, we won't get here.  If
+    // we've got here, we had an ok dump, and we don't need to
+    // worry about the journal.. if it isn't truncated properly
+    // somebody can just remove it and ganymede will recover
+    // ok.
 
     if (journal != null)
       {
