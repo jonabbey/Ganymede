@@ -177,7 +177,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  if (defaultBase != null)
 	    {
 	      baseChoice.select(defaultBase.getName()) ; 
-	      System.out.println("Default base given: " + defaultBase);
+	      this.baseName = defaultBase.getName();
 	    }
 	  else 
 	    { 
@@ -347,14 +347,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	}
 
       this.row ++;
-      //this.Rows.setSize(this.row);
       this.Rows.insertElementAt(myRow, Row); // add component array to vector
-      System.out.println("Vector Element Set at Index: " + Row);
-
       inner_choice.invalidate();
       inner_choice.validate();
      
-      System.out.println("++ Current Size: " + this.Rows.size());
     }
   
   void setRowVisible (Component[] myAry, boolean b)
@@ -384,23 +380,14 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   public void removeRow(Component[] myRow, Panel myPanel, int Row){
   
-
-    System.out.println("---preparing to remove row: " + Row);
-
     for (int n = 0; n < myRow.length ; n++)
       {
 	myPanel.remove(myRow[n]);
       }  
-
-
-System.out.println("Removed the Row!!!");
   
     this.Rows.removeElementAt(Row); // remove row from vector of rows
-    System.out.println(" --Vector removed at Index: " + Row);
     this.row--;
 
-    //this.Rows.setSize(this.row);
-    System.out.println("-- Current Size: " + this.Rows.size());
   }
   
 
@@ -409,69 +396,139 @@ System.out.println("Removed the Row!!!");
     // * -- * //
     
     Query myQuery;
+    QueryNode myNode, tempNode;
+    QueryNotNode notNode;
+    QueryDataNode dataNode;
+    QueryAndNode andNode;
     Object value;
     byte opValue;
+    Component[] tempAry;
+    Choice tempChoice1,
+           tempChoice2,
+           tempChoice3;
+    String notValue,
+           fieldName,
+           operator;
+    TextField tempText;
 
     // -- //
 
     int allRows = this.Rows.size();
-    System.out.println("Look at How many Rows we have: " + allRows);
+    System.out.println("NUMBER OF ROWS: " + allRows);
+       
+    tempAry = (Component[]) this.Rows.elementAt(0); // This is the first row in the Vector
+    tempChoice1 = (Choice) tempAry[0];
+    fieldName = tempChoice1.getSelectedItem();
+    tempChoice2 = (Choice) tempAry[2];
+    notValue = tempChoice2.getSelectedItem();
+    tempChoice3 =  (Choice) tempAry[4];
+    operator = tempChoice3.getSelectedItem();
+    tempText = (TextField) tempAry[6];
+    value = tempText.getText();
+    
+    // -- get the correct operator
+    
+    if (operator == "="){
+      opValue = 1;
+    } else if (operator == "<"){
+      opValue = 2;
+    } else if (operator == "<="){
+      opValue = 3;
+    } else if (operator == ">") {
+      opValue = 4;
+    } else if (operator == ">=") {
+      opValue = 5;
+    } else {
+      opValue = 7; // UNDEFINED
+    }    
+    
+    // -- if not is true then add a not node
+    
+    dataNode = new QueryDataNode(fieldName, opValue, value);
+    
+    if (notValue == "is not")
+      {
+	notNode = new QueryNotNode(dataNode); // if NOT then add NOT node
+	myNode = notNode;
+      } 
+    else 
+      {
+	myNode = dataNode;
+      }
 
     if (allRows == 1)
       {
 	// Special case -- return only a single query node
-
-	Component[] tempAry = (Component[]) this.Rows.elementAt(allRows - 1);
-	Choice tempChoice1 = (Choice) tempAry[0];
-	String fieldName = tempChoice1.getSelectedItem();
-	Choice tempChoice2 = (Choice) tempAry[2];
-	String notValue = tempChoice2.getSelectedItem();
-	Choice tempChoice3 =  (Choice) tempAry[4];
-	String operator = tempChoice3.getSelectedItem();
-	TextField tempText = (TextField) tempAry[6];
-	value = tempText.getText();
-
-	// -- get the correct operator
-	
-	if (operator == "="){
-	  opValue = 1;
-	} else if (operator == "<"){
-	  opValue = 2;
-	} else if (operator == "<="){
-	  opValue = 3;
-	} else if (operator == ">") {
-	  opValue = 4;
-	} else if (operator == ">=") {
-	  opValue = 5;
-	} else {
-	  opValue = 7; // UNDEFINED
-	}    
-      
-	// -- if not is true then add a not node
-	
-	QueryDataNode returnNode = new QueryDataNode(fieldName, opValue, value);
-
-	if (notValue == "is not"){
-	  QueryNotNode notNode = new QueryNotNode(returnNode);
-	  myQuery = new Query(baseName, notNode);
-	  
-	} else { // "NOT" not selected
-	  
-	  myQuery = new Query(baseName, returnNode);
-	  
-	}
-      }
-    else // Multiple Rows
-      {
-	myQuery = new Query("loser");
-
-	for (int i = 1; i > allRows; i ++)
+	    
+	if (notValue == "is not")
 	  {
-	    // create the query
-
+	    myQuery = new Query(baseName, myNode); // Use the NOT node (see above)
+	  
+	  } else { // "NOT" not selected
+	  
+	    myQuery = new Query(baseName, myNode); // just use the DATA node (see above)
+	  
 	  }
       }
+    
+    else // Multiple Rows
+      
+      {
 
+	/* we have the first node already, so we can simply use AND nodes to 
+	 * attach the query nodes to one another
+	 */
+
+	for (int i = 1; i < allRows; i ++) 
+	  {
+	    System.out.println("HEre we are in the for loop! Number: " + i);
+	    tempAry = (Component[]) this.Rows.elementAt(i);
+	    tempChoice1 = (Choice) tempAry[0];
+	    fieldName = tempChoice1.getSelectedItem();
+	    tempChoice2 = (Choice) tempAry[2];
+	    notValue = tempChoice2.getSelectedItem();
+	    tempChoice3 =  (Choice) tempAry[4];
+	    operator = tempChoice3.getSelectedItem();
+	    tempText = (TextField) tempAry[6];
+	    value = tempText.getText();
+    
+	    // -- get the correct operator
+    
+	    if (operator == "="){
+	      opValue = 1;
+	    } else if (operator == "<"){
+	      opValue = 2;
+	    } else if (operator == "<="){
+	      opValue = 3;
+	    } else if (operator == ">") {
+	      opValue = 4;
+	    } else if (operator == ">=") {
+	      opValue = 5;
+	    } else {
+	      opValue = 7; // UNDEFINED
+	    }     
+ 
+	    // -- if not is true then add a not node
+	    
+	    dataNode = new QueryDataNode(fieldName, opValue, value);
+	    
+	    if (notValue == "is not")
+	      {
+		notNode = new QueryNotNode(dataNode); // if NOT then add NOT node
+		tempNode = notNode;
+	      } 
+	    else 
+	      {
+		tempNode = dataNode;
+	      }    
+	    
+	    andNode = new QueryAndNode(myNode, tempNode);
+	    myNode = andNode;
+	  }
+	
+	myQuery = new Query( baseName, myNode);
+      }
+    
     return myQuery;
     
   }
