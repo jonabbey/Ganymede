@@ -1,11 +1,11 @@
 Ganymede Release 1.0.7
-September ??, 2001
+October ??, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
-RELEASE DATE: September ??, 2001
+RELEASE DATE: October ??, 2001
 
 1. [SERVER] Deleted objects now have all of their fields logged
 
@@ -41,6 +41,25 @@ This change shouldn't have any effect on any code provided with the
 Ganymede distribution or the userKit, but might force an error in
 custom code if the customizers were doing some sort of dangerous
 activities during the commit process.
+
+4. [SERVER] Amended wizard shutdown process
+
+The GanymediatorWizard class had a loophole that would cause wizards
+to not be unregistered from a GanymedeSession if the wizard's state
+had been forced to DONE outside of the GanymediatorWizard.unregister()
+method.  This has been fixed so that any time a wizard goes through
+returns a success() or fail() result it will be unregistered.
+
+This fix took care of a bug in the laboratory's GASHARL schema kit
+operations, but is very unlikely to be affecting anyone out there
+unless you've done just the right (wrong) kind of custom schema
+coding.
+
+5. [SERVER] Put loopback binding check into server startup
+
+The server now checks to make sure that it is not being bound
+to a loopback address on startup, which would prevent clients from
+being able to communicate with the server from remote systems.
 
 -------------------- Changes from 1.0.5 to 1.0.6 -------------------
 
