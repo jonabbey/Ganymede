@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: Before May 7, 1998
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,19 +34,15 @@ import java.util.Vector;
  * buttons on the sides.
  */
 
-public class JInvidChooser extends JPanelCombo implements ActionListener {
+public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener {
 
   private final static boolean debug = false;
 
-  JMenuItem
+  // ---
+
+  JButton
     view,
     create;
-
-  JMenu
-    menu;
-
-  JMenuBar
-    menuBar;
 
   containerPanel
     cp;
@@ -61,6 +57,8 @@ public class JInvidChooser extends JPanelCombo implements ActionListener {
   private listHandle
     noneHandle = new listHandle("<none>", null);
 
+  /* -- */
+
   public JInvidChooser(containerPanel parent, short objectType)
   {
     this(null, parent, objectType);
@@ -70,35 +68,47 @@ public class JInvidChooser extends JPanelCombo implements ActionListener {
   {
     super(objects);
 
+    getCombo().addItemListener(this);
+
     cp = parent;
     type = objectType;
 
-    //super();
+    JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout(new BorderLayout());
 
-    //Insets insets = new Insets(0,0,0,0);
-    menu = new JMenu("click");
-    menuBar = new JMenuBar();
-    menuBar.add(menu);
-
-    view = new JMenuItem("View");
+    view = new JButton("View");
     view.addActionListener(this);
 
-    menu.add(view);
-
-    if (objectType > -1) // If it is -1, then it doesn't have a target
+    if (getSelectedInvid() == null)
       {
-	create = new JMenuItem("New");
-	create.addActionListener(this);
-	menu.add(create);
+	view.setEnabled(false);
       }
 
-    add("Center", getCombo());
-    add("East", menuBar);
+    // If the target type is unspecified, then it doesn't have a target
+
+    if (objectType > -1) 
+      {
+	create = new JButton("New");
+	create.addActionListener(this);
+      }
+
+    buttonPanel.add("West", view);
+    buttonPanel.add("East", create);
+
+    // JPanelCombo already added the combo to the west.
+
+    add("East", buttonPanel);
   }
 
   public Invid getSelectedInvid()
   {
     listHandle lh = (listHandle) getSelectedItem();
+
+    if (lh == null)
+      {
+	return null;
+      }
+
     return (Invid) lh.getObject();
   }
 
@@ -110,6 +120,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener {
    * chooser.  If it is false, <none> will only be included in the
    * beginning if nothing is set; it will be removed as soon as
    * anything is chosen.  
+   *
    */
 
   public void setAllowNone(boolean allow)
@@ -206,15 +217,45 @@ public class JInvidChooser extends JPanelCombo implements ActionListener {
   {
     return allowNone;
   }
+
+  /**
+   *
+   * ItemListener method
+   *
+   */
+
+  public void itemStateChanged(ItemEvent e)
+  {
+    if (e.getStateChange() != ItemEvent.SELECTED)
+      {
+	return;
+      }
+
+    if (e.getItem() == null || e.getItem() == noneHandle)
+      {
+	view.setEnabled(false);
+      }
+    else
+      {
+	view.setEnabled(true);
+      }
+  }
+
+  /**
+   *
+   * ActionListener method
+   *
+   */
+
   public void actionPerformed(ActionEvent e)
   {
     if (e.getSource() == view)
       {
-	listHandle lh = (listHandle)getSelectedItem();
+	listHandle lh = (listHandle) getSelectedItem();
 
 	if (lh != null)
 	  {
-	    Invid invid = (Invid)lh.getObject();
+	    Invid invid = (Invid) lh.getObject();
 	
 	    if (invid == null)
 	      {
@@ -255,7 +296,8 @@ public class JInvidChooser extends JPanelCombo implements ActionListener {
 	  }
 	catch (RuntimeException re)
 	  {
-	    showErrorMessage("Something when wrong creating the new object.  Perhaps you don't have the permission to creat objects of that type.");
+	    showErrorMessage("Something when wrong creating the new object. " +
+			     "Perhaps you don't have the permission to creat objects of that type.");
 	    return;
 	  }
 	catch (java.rmi.RemoteException rx)
@@ -267,9 +309,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener {
 	  {
 	    cp.gc.showNewlyCreatedObject(object, null, new Short(type));
 	  }
-
       }
-
   }
   
   private final void  showErrorMessage(String message) {
@@ -279,5 +319,4 @@ public class JInvidChooser extends JPanelCombo implements ActionListener {
   private final void  showErrorMessage(String title, String message) {
     cp.getgclient().showErrorMessage(title,message);
   }
-
 }
