@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -66,65 +66,69 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     // make editable copies of the object bases
 
-    oldMaxBaseId = store.maxBaseId;
-    oldBases = new Hashtable();
-
-    enum = store.objectBases.elements();
-
-    if (enum == null)
+    synchronized (store)
       {
-	System.err.println("DBSchemaEdit constructor: null enum 1");
-      }
-    else
-      {
-	while (enum.hasMoreElements())
+	oldMaxBaseId = store.maxBaseId;
+	oldBases = new Hashtable();
+
+	enum = store.objectBases.elements();
+
+	if (enum == null)
 	  {
-	    base = (DBObjectBase) enum.nextElement();
-	    oldBases.put(base.getKey(), base);
+	    System.err.println("DBSchemaEdit constructor: null enum 1");
 	  }
-      }
-
-    // replace the bases in the DBStore's hash with
-    // copies.. this preserves the original state of the
-    // DBObjectBases, and will allow us to do the commit/revert
-    // when we finish up with this DBSchemaEdit
-
-    // we just have to be sure to clear the original field when
-    // we commit this schema edit so that garbage collection can
-    // clean up the old bases
-
-    enum = oldBases.elements();
-    if (enum == null)
-      {
-	System.err.println("DBSchemaEdit constructor: null enum 2");
-      }
-    else
-      {
-	while (enum.hasMoreElements())
+	else
 	  {
-	    base = (DBObjectBase) enum.nextElement();
-	    store.objectBases.put(base.getKey(),
-				  new DBObjectBase(base, this));
+	    while (enum.hasMoreElements())
+	      {
+		base = (DBObjectBase) enum.nextElement();
+		oldBases.put(base.getKey(), base);
+	      }
 	  }
-      }
 
-    // make copies of all of our namespace
+	// replace the bases in the DBStore's hash with
+	// copies.. this preserves the original state of the
+	// DBObjectBases, and will allow us to do the commit/revert
+	// when we finish up with this DBSchemaEdit
 
-    oldNameSpaces = new Vector();
+	// we just have to be sure to clear the original field when
+	// we commit this schema edit so that garbage collection can
+	// clean up the old bases
+
+	enum = oldBases.elements();
+	if (enum == null)
+	  {
+	    System.err.println("DBSchemaEdit constructor: null enum 2");
+	  }
+	else
+	  {
+	    while (enum.hasMoreElements())
+	      {
+		base = (DBObjectBase) enum.nextElement();
+		store.objectBases.put(base.getKey(),
+				      new DBObjectBase(base, this));
+	      }
+	  }
+
+	// make copies of all of our namespace
+
+	oldNameSpaces = new Vector();
     
-    for (int i=0; i < store.nameSpaces.size(); i++)
-      {
-	ns = (DBNameSpace) store.nameSpaces.elementAt(i);
-	oldNameSpaces.addElement(ns);
-      }
+	for (int i=0; i < store.nameSpaces.size(); i++)
+	  {
+	    ns = (DBNameSpace) store.nameSpaces.elementAt(i);
+	    oldNameSpaces.addElement(ns);
+	  }
 
-    store.nameSpaces.removeAllElements();
+	store.nameSpaces.removeAllElements();
 
-    for (int i=0; i < oldNameSpaces.size(); i++)
-      {
-	ns = (DBNameSpace) oldNameSpaces.elementAt(i);
-	store.nameSpaces.addElement(new DBNameSpace(this, ns));
-      }
+	for (int i=0; i < oldNameSpaces.size(); i++)
+	  {
+	    ns = (DBNameSpace) oldNameSpaces.elementAt(i);
+	    store.nameSpaces.addElement(new DBNameSpace(this, ns));
+	  }
+
+      } // end synchronized (store)
   }
 
   /**
@@ -144,12 +148,12 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     /* -- */
 
-    synchronized (Ganymede.db)
+    synchronized (store)
       {
-	bases = new Base[Ganymede.db.objectBases.size()];
+	bases = new Base[store.objectBases.size()];
 	i = 0;
 	
-	enum = Ganymede.db.objectBases.elements();
+	enum = store.objectBases.elements();
 	while (enum.hasMoreElements())
 	  {
 	    bases[i++] = (Base) enum.nextElement();
@@ -182,19 +186,22 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new RuntimeException("already released/committed");
       }
 
-    try
+    synchronized (store)
       {
-	base = new DBObjectBase(Ganymede.db, Ganymede.db.getNextBaseID(), this);
-      }
-    catch (RemoteException ex)
-      {
-	Ganymede.debug("createNewBase: couldn't initialize new ObjectBase" + ex);
-	throw new RuntimeException("couldn't initialize new ObjectBase" + ex);
-      }
+	try
+	  {
+	    base = new DBObjectBase(store, store.getNextBaseID(), this);
+	  }
+	catch (RemoteException ex)
+	  {
+	    Ganymede.debug("createNewBase: couldn't initialize new ObjectBase" + ex);
+	    throw new RuntimeException("couldn't initialize new ObjectBase" + ex);
+	  }
 
-    Ganymede.debug("created base: " + base.getKey());
+	Ganymede.debug("created base: " + base.getKey());
 
-    Ganymede.db.objectBases.put(base.getKey(), base);
+	store.objectBases.put(base.getKey(), base);
+      }
 
     return base;
   }
@@ -207,12 +214,12 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     /* -- */
 
-    synchronized (Ganymede.db)
+    synchronized (store)
       {
-	spaces = new NameSpace[Ganymede.db.nameSpaces.size()];
+	spaces = new NameSpace[store.nameSpaces.size()];
 	i = 0;
 	
-	enum = Ganymede.db.nameSpaces.elements();
+	enum = store.nameSpaces.elements();
 	while (enum.hasMoreElements())
 	  {
 	    spaces[i] = (NameSpace) enum.nextElement();
@@ -245,9 +252,9 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     try
       {
 	ns = new DBNameSpace(this, name, caseInsensitive);
-	synchronized (Ganymede.db)
+	synchronized (store)
 	  {
-	    Ganymede.db.nameSpaces.addElement(ns);
+	    store.nameSpaces.addElement(ns);
 	  }
       }
     catch (RemoteException ex)
@@ -269,14 +276,14 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new RuntimeException("already released/committed");
       }
 
-    synchronized (Ganymede.db)
+    synchronized (store)
       {
-	for (int i = 0; i < Ganymede.db.nameSpaces.size(); i++)
+	for (int i = 0; i < store.nameSpaces.size(); i++)
 	  {
-	    ns = (DBNameSpace) Ganymede.db.nameSpaces.elementAt(i);
+	    ns = (DBNameSpace) store.nameSpaces.elementAt(i);
 	    if (ns.getName().equals(name))
 	      {
-		Ganymede.db.nameSpaces.removeElementAt(i);
+		store.nameSpaces.removeElementAt(i);
 		return true;
 	      }
 	  }
