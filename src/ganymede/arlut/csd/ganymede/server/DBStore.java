@@ -2121,7 +2121,7 @@ public final class DBStore implements JythonMap {
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.SyncChannelDirectory;
 	bf.field_type = FieldType.STRING;
-	bf.field_name = "Directory Path";
+	bf.field_name = "Queue Directory";
 	bf.comment = "Location of the sync channel directory on disk";
 	b.addFieldToEnd(bf);
 
@@ -2211,7 +2211,7 @@ public final class DBStore implements JythonMap {
 	    bf = new DBObjectBaseField(b);
 	    bf.field_code = SchemaConstants.SyncChannelDirectory;
 	    bf.field_type = FieldType.STRING;
-	    bf.field_name = "Directory Path";
+	    bf.field_name = "Queue Directory";
 	    bf.comment = "Location of the sync channel directory on disk";
 	    b.addFieldToEnd(bf);
 
