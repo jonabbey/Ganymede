@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,7 +45,7 @@ public class directLoader {
   static Hashtable personaMap = new Hashtable();
 
   static Hashtable users = new Hashtable();
-  static Hashtable userInvid = new Hashtable();
+  static Hashtable userInvids = new Hashtable();
 
   static Vector externalAliases = new Vector();
   static Vector mailGroups = new Vector();
@@ -62,7 +62,17 @@ public class directLoader {
   static Hashtable systemTypes = new Hashtable();
   static Hashtable systemTypeInvids = new Hashtable();
 
-  static Invid permMatrix;		// the standard GASH admin privileges
+  static Hashtable systemInvid = new Hashtable();
+
+  static Hashtable volumes = new Hashtable(); // map volume name -> Volume object
+  static Hashtable volumeInvids = new Hashtable(); // map volume name -> invid
+
+  static Vector maps = new Vector();
+  static Hashtable mapInvids = new Hashtable();	// map map name -> invid
+
+  static Vector mapEntries = new Vector();
+
+  static Invid gashadminPermInvid;		// the standard GASH admin privileges
 
   static FileInputStream inStream = null;
   static boolean done = false;
@@ -73,7 +83,6 @@ public class directLoader {
   static SystemNetgroup sNetObj;
 
   static SystemLoader sysLoader;
-  static Hashtable systemInvid = new Hashtable();
 
   // --
 
@@ -120,6 +129,8 @@ public class directLoader {
 	System.err.println("heck.");
       }
 
+    System.err.println("---------------------------------------- Initiating GASH file scan --------------------");
+
     scanOwnerGroups();
     scanUsers();
     scanEmail();
@@ -128,6 +139,9 @@ public class directLoader {
     scanSystemTypes();
     scanSystems();
     scanSystemNetgroups();
+    scanAutomounter();
+
+    System.err.println("\n---------------------------------------- Completed GASH file scan --------------------\n");
 
     // Okay.. at this point we've scanned the files we need to scan..
     // now we initialize the database module and create the objects
@@ -138,40 +152,80 @@ public class directLoader {
 
 	String key;
 	Invid invid, objInvid;
-	Enumeration enum; 
+	Enumeration enum;
 	OwnerGroup ogRec;
 	db_object current_obj;
 	db_field current_field;
 	pass_field p_field;
 	DBObjectBase base;
+	ReturnVal retVal;
 
 	/* -- */
 
 	System.err.println("\nCreating GASH standard permission matrix");
 
+	my_client.session.checkpoint("GASHAdmin");
+
 	current_obj = my_client.session.create_db_object(SchemaConstants.PermBase);
-	permMatrix = current_obj.getInvid();
+	gashadminPermInvid = current_obj.getInvid();
 
-	perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
+	retVal = current_obj.setFieldValue(SchemaConstants.PermName, "GASH Admin");
 
-	PermEntry defPerm = new PermEntry(true, true, true);
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    // the gash privilege matrix object is already in the schema.. rollback
+
+	    my_client.session.rollback("GASHAdmin");
+
+	    // note that QueryDataNode uses the label as the
+	    // comparator if you don't provide a field id
+
+	    Query q = new Query(SchemaConstants.PermBase, 
+				new QueryDataNode(QueryDataNode.EQUALS, "GASH Admin"),
+				false);
+
+	    QueryResult results = my_client.session.query(q);
+	    
+	    if (results != null && results.size() != 1)
+	      {
+		// didn't find it
+		System.err.println("Could neither create a new GASH Admin permission matrix, nor find the old one.");
+		System.exit(0);
+	      }
+
+	    gashadminPermInvid = results.getInvid(0);
+
+	    // We'll get a null pointer exception here if it didn't work out
+
+	    System.err.println("Using pre-existing gash privilege matrix: " + gashadminPermInvid.toString());
+	  }
+	else
+	  {
+	    System.err.println("\n***Default permissions matrix is " + gashadminPermInvid.toString());
+
+	    perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
+
+	    PermEntry defPerm = new PermEntry(true, true, true);
 	
-	pf.setPerm(SchemaConstants.UserBase, defPerm);
-	pf.setPerm((short) 257, defPerm); // group privs
-	pf.setPerm((short) 263, defPerm); // systems privs
-	pf.setPerm((short) 267, defPerm); // I.P. network
-	pf.setPerm((short) 268, defPerm); // DNS domain
-	pf.setPerm((short) 264, defPerm); // DNS record
-	pf.setPerm((short) 265, defPerm); // System Interface
-	pf.setPerm((short) 266, defPerm); // I.P. Record
-	pf.setPerm((short) 271, defPerm); // Systems Netgroups
-	pf.setPerm((short) 270, defPerm); // User Netgroups
-	pf.setPerm((short) 269, defPerm); // room
-	pf.setPerm((short) 258, defPerm); // shell
+	    pf.setPerm(SchemaConstants.UserBase, defPerm);
+	    pf.setPerm((short) 257, defPerm); // group privs
+	    pf.setPerm((short) 263, defPerm); // systems privs
+	    pf.setPerm((short) 267, defPerm); // I.P. network
+	    pf.setPerm((short) 268, defPerm); // DNS domain
+	    pf.setPerm((short) 264, defPerm); // DNS record
+	    pf.setPerm((short) 265, defPerm); // System Interface
+	    pf.setPerm((short) 266, defPerm); // I.P. Record
+	    pf.setPerm((short) 271, defPerm); // Systems Netgroups
+	    pf.setPerm((short) 270, defPerm); // User Netgroups
+	    pf.setPerm((short) 269, defPerm); // room
+	    pf.setPerm((short) 258, defPerm); // shell
+	  }
+
+	// now, the ownerGroups Vector has been loaded for us by the scanOwnerGroups() method.
+	// go ahead and register owner groups for the set of differentiable owner prefixes
+	// from the GASH admin_info file
 
 	System.err.println("\nCreating ownergroups in server: ");
-
-	current_obj.setFieldValue(SchemaConstants.PermName, "GASH Admin");
 
 	enum = ownerGroups.elements();
 
@@ -191,10 +245,6 @@ public class directLoader {
 	      {
 		System.err.println("**** Complain!");
 	      }
-	    else
-	      {
-		System.err.println("Setting invid to " + invid.toString());
-	      }
 
 	    ogRec.setInvid(invid);
 
@@ -206,6 +256,9 @@ public class directLoader {
 
 	    current_obj.setFieldValue(SchemaConstants.OwnerNameField, ogRec.prefix);
 	  }
+
+	my_client.session.commitTransaction(); // lock in perm object
+	my_client.session.openTransaction("GASH directLoader");
 
 	System.out.println("\nRegistering users\n");
 
@@ -239,6 +292,11 @@ public class directLoader {
 	System.out.println("\nRegistering system netgroups\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystemNetgroups();
+	my_client.session.commitTransaction();
+
+	System.out.println("\nRegistering automounter configuration\n");
+	my_client.session.openTransaction("GASH directLoader");
+	registerAutomounter();
 	my_client.session.commitTransaction();
       }
     catch (RemoteException ex)
@@ -302,6 +360,12 @@ public class directLoader {
 	    adminObj = new Admin();
 	    done = adminObj.loadLine(tokens);
 
+	    if (adminObj.name.equals("supergash"))
+	      {
+		System.err.println("Skipping over supergash");
+		continue;
+	      }
+
 	    if (adminObj.name != null)
 	      {
 		boolean found = false;
@@ -325,7 +389,7 @@ public class directLoader {
 		
 		if (!found)
 		  {
-		    // we need to create a new owner group
+		    // create a new owner group
 
 		    ogRec = new OwnerGroup(adminObj);
 		    ogRec.addAdmin(adminObj.name, adminObj.password);
@@ -793,6 +857,130 @@ public class directLoader {
    *
    */
 
+  private static void scanAutomounter()
+  {
+    BufferedReader in = null;
+    String line;
+    Volume v;
+    MapEntry m;
+
+    /* -- */
+
+    try
+      {
+	in = new BufferedReader(new FileReader("input/auto.vol"));
+	done = false;
+      }
+    catch (FileNotFoundException ex)
+      {
+	System.err.println("Couldn't find input/auto.vol");
+	done = true;
+      }
+
+    System.out.println("Scanning input/auto.vol");
+
+    while (!done)
+      {
+	try
+	  {
+	    line = in.readLine();
+
+	    if (line == null)
+	      {
+		done = true;
+	      }
+	    else
+	      {
+		v = new Volume(line);
+		volumes.put(v.volumeName, v);
+
+		System.err.println("Created: " + v);
+	      }
+	  }
+	catch (EOFException ex)
+	  {
+	    done = true;
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("unknown IO exception caught: " + ex);
+	  }
+      }
+
+    System.out.println("\nDone scanning auto.vol");
+
+    System.out.println("\nScanning directory for auto.home.* files\n");
+
+    File dir = new File("input");
+
+    if ((dir == null) || !dir.isDirectory())
+      {
+	throw new RuntimeException("Couldn't open input directory");
+      }
+
+    String[] sAry = dir.list(new FilenameFilter()
+			     {
+			       public boolean accept(File dir,
+						     String name)
+				 {
+				   return (name.startsWith("auto.home."));
+				 }
+			     }
+			     );
+
+    for (int i = 0; i < sAry.length; i++)
+      {
+	System.out.println("Scanning " + sAry[i]);
+
+	maps.addElement(sAry[i]);
+
+	try
+	  {
+	    in = new BufferedReader(new FileReader("input/" + sAry[i]));
+	    done = false;
+	  }
+	catch (FileNotFoundException ex)
+	  {
+	    System.err.println("Couldn't open input/" + sAry[i]);
+	    done = true;
+	  }
+
+	while (!done)
+	  {
+	    try
+	      {
+		line = in.readLine();
+
+		if (line == null)
+		  {
+		    done = true;
+		  }
+		else
+		  {
+		    m = new MapEntry(sAry[i], line);
+		    mapEntries.addElement(m);
+
+		    System.err.println("Created: " + m);
+		  }
+	      }
+	    catch (EOFException ex)
+	      {
+		done = true;
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("unknown IO exception caught: " + ex);
+	      }
+	  }
+
+	System.out.println("\nDone scanning " + sAry[i]);
+      }
+  }
+
+  /**
+   *
+   */
+
   private static void registerUserNetgroups() throws RemoteException
   {
     String key;
@@ -802,6 +990,7 @@ public class directLoader {
     db_object current_obj;
     db_field current_field;
     Hashtable netHash = new Hashtable();
+    ReturnVal retVal;
 
     /* -- */
 
@@ -842,7 +1031,7 @@ public class directLoader {
 
 	    if (username != null)
 	      {
-		invid = (Invid) userInvid.get(username);
+		invid = (Invid) userInvids.get(username);
 
 		if (invid != null)
 		  {
@@ -917,7 +1106,9 @@ public class directLoader {
 
 		    if (!ok)
 		      {
-			ok = current_field.addElement(invid);
+			retVal = current_field.addElement(invid);
+
+			ok = (retVal == null || retVal.didSucceed());
 		      }
 		  }
 		else
@@ -970,7 +1161,7 @@ public class directLoader {
 
 	System.out.print(" [" + invid + "] ");
 
-	userInvid.put(userObj.name, invid);
+	userInvids.put(userObj.name, invid);
 
 	// set the username
 	    
@@ -1082,7 +1273,10 @@ public class directLoader {
 
 	    newPersona.setFieldValue(SchemaConstants.PersonaNameField, key + ":GASH Admin");
 
-	    newPersona.setFieldValue(SchemaConstants.PersonaPasswordField,ogRec.password(key));
+	    pass_field passField = (pass_field) newPersona.getField(SchemaConstants.PersonaPasswordField);
+	    passField.setCryptPass(ogRec.password(key));
+
+	    //	    newPersona.setFieldValue(SchemaConstants.PersonaPasswordField,ogRec.password(key));
 
 	    newPersona.setFieldValue(SchemaConstants.PersonaAdminConsole, new Boolean(true));
 
@@ -1094,7 +1288,7 @@ public class directLoader {
 	    // this is a GASH admininstrator, so give it the GASH perm matrix
 
 	    personaField = newPersona.getField(SchemaConstants.PersonaPrivs);
-	    personaField.addElement(permMatrix);
+	    personaField.addElement(gashadminPermInvid);
 	  }
       }
   }
@@ -1256,7 +1450,7 @@ public class directLoader {
 		  }
 		else
 		  {
-		    targetInvid = (Invid) userInvid.get(temp.toLowerCase());
+		    targetInvid = (Invid) userInvids.get(temp.toLowerCase());
 
 		    if (targetInvid != null)
 		      {
@@ -1336,7 +1530,7 @@ public class directLoader {
 
 	    if (username != null)
 	      {
-		invid = (Invid) userInvid.get(username);
+		invid = (Invid) userInvids.get(username);
 
 		if (invid != null)
 		  {
@@ -1523,7 +1717,7 @@ public class directLoader {
 
 	if (sysObj.user != null && !sysObj.user.equals(""))
 	  {
-	    Invid userInv = (Invid) userInvid.get(sysObj.user);
+	    Invid userInv = (Invid) userInvids.get(sysObj.user);
 
 	    if (userInv != null)
 	      {
@@ -1699,7 +1893,7 @@ public class directLoader {
 	key = (String) enum.nextElement();
 	sNetObj = (SystemNetgroup) systemNetgroup.get(key);
 
-	System.out.print("Creating " + key);
+	System.out.print("\nCreating " + key);
 
 	current_obj = my_client.session.create_db_object((short) 271);	// base 271 is for system netgroups
 	objInvid = current_obj.getInvid();
@@ -1814,6 +2008,104 @@ public class directLoader {
       }
   }
 
+  /**
+   *
+   */
+
+  private static void registerAutomounter() throws RemoteException
+  {
+    Volume v;
+    MapEntry m;
+    Enumeration enum;
+    String key;
+    db_object current_obj, user_obj, embed_obj;
+    db_field current_field;
+    invid_field embed_field;
+    Invid objInvid, hostInvid, userInvid;
+
+    /* -- */
+
+    // step 1: create the volumes, cache the name->invid mapping
+
+    System.out.println("\nCreating automounter volumes\n");
+
+    enum = volumes.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+	v = (Volume) volumes.get(key);
+
+	System.out.print("Creating " + key + " on host: " + v.hostName);
+	
+	current_obj = my_client.session.create_db_object((short) 276); // nfs volume
+	objInvid = current_obj.getInvid();
+
+	System.out.println(" [" + objInvid + "]");
+
+	volumeInvids.put(key, objInvid); // save the invid in our hashtable
+
+	current_obj.setFieldValue((short) 256, key); // volume name
+	current_obj.setFieldValue((short) 258, v.path);	// path
+	
+	hostInvid = (Invid) systemInvid.get(v.hostName);
+
+	current_obj.setFieldValue((short) 257, hostInvid);
+
+	current_obj.setFieldValue((short) 260, v.mountOptions);
+      }
+
+    // step 2: create all automounter maps
+
+    System.out.println("\nCreating automounter maps\n");
+
+    enum = maps.elements();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	current_obj = my_client.session.create_db_object((short) 277); // automounter map
+
+	current_obj.setFieldValue((short) 256, key); // set the name of the map
+
+	objInvid = current_obj.getInvid();
+
+	mapInvids.put(key, objInvid);
+      }
+
+    // step 3: create all automounter map entries
+
+    System.out.println("\nCreating automounter map entries\n");
+
+    enum = mapEntries.elements();
+
+    while (enum.hasMoreElements())
+      {
+	m = (MapEntry) enum.nextElement();
+
+	System.out.println("Creating " + m.toString());
+
+	userInvid = (Invid) userInvids.get(m.userName);
+
+	// need to edit this user, create an imbedded object
+
+	user_obj = my_client.session.edit_db_object(userInvid);
+
+	embed_field = (invid_field) user_obj.getField((short) 271); // Map Entries
+
+	embed_obj = my_client.session.edit_db_object(embed_field.createNewEmbedded());
+
+	// we've got the new map entry, load 'er up
+
+	embed_obj.setFieldValue((short) 256, mapInvids.get(m.mapName));	// map invid
+
+	embed_obj.setFieldValue((short) 257, volumeInvids.get(m.volName)); // volume invid
+      }
+    
+    System.out.println("\nFinished creating automounter map entries\n");
+  }
+
 }  
 
 /*------------------------------------------------------------------------------
@@ -1860,6 +2152,12 @@ class directLoaderClient extends UnicastRemoteObject implements Client {
 
 	    System.exit(0);
 	  }
+
+	//	Vector invids = new Vector();
+	//
+	//	invids.addElement(new Invid((short)0,0)); // supergash owner group object
+	//
+	//	session.setDefaultOwner(invids);
 
 	System.out.println("logged in");
       }
