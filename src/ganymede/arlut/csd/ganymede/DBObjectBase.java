@@ -172,6 +172,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * <P>Fully qualified package and class name for a custom 
    * {@link arlut.csd.ganymede.DBEditObject DBEditObject} subclass
    * to be dynamically loaded to manage operations on this DBObjectBase.</P>
+   *
+   * <p>Note that this needs not to be private because {@link
+   * arlut.csd.ganymede.DBStore#initializeSchema()} uses it to
+   * initialize class definitions when bootstrapping.  If we ever
+   * revise the initializeSchema code (tricky, given that
+   * setClassName() automatically sets the classdef and creates the
+   * objectHook, which we aren't necessarily ready to do during
+   * initializeSchema until the very end) , we can think about making
+   * this private.</p>
    */
 
   String classname;
@@ -182,7 +191,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * dynamically loaded to manage operations on this DBObjectBase.</P>
    */
 
-  Class classdef;
+  private Class classdef;
 
   /**
    * which field represents our label?
@@ -264,7 +273,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * purposes.</P>
    */
 
-  DBLock currentLock;
+  private DBLock currentLock;
 
   /**
    * <P>Set of {@link arlut.csd.ganymede.DBWriteLock DBWriteLock}s
@@ -329,11 +338,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   private Vector dumpLockList;
 
   /**
-   * <P>Boolean flag monitoring whether or not this DBObjectBase is
-   * currently locked for writing.</P>
+   * <P>Boolean semaphore monitoring whether or not this DBObjectBase
+   * is currently locked for writing.  We use a booleanSemaphore here
+   * rather than a simple boolean so that we can force a memory barrier
+   * for access on multiple CPU systems.</P>
    */
 
-  boolean writeInProgress;
+  private booleanSemaphore writeInProgress = new booleanSemaphore(false);
 
   /**
    * Used to keep track of schema editing
@@ -381,7 +392,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * more details on the use of DBEditObjects as objectHooks.</P>
    */
 
-  DBEditObject objectHook;	
+  private DBEditObject objectHook;	
 
   /* -- */
 
@@ -2775,8 +2786,49 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     synchronized (store.lockSync)
       {
-	return (!isReaderEmpty() || writeInProgress || !isDumpLockListEmpty());
+	return (!isReaderEmpty() || writeInProgress.isSet() || !isDumpLockListEmpty());
       }
+  }
+
+  /**
+   * <p>Returns true if we have a writer lock locking us.</p>
+   */
+
+  boolean isWriteInProgress()
+  {
+    return writeInProgress.isSet();
+  }
+
+  /**
+   * <p>Used by {@link arlut.csd.ganymede.DBWriteLock DBWriteLock} to establish or clear a lock.</p>
+   */
+
+  void setWriteInProgress(boolean state)
+  {
+    if (writeInProgress.set(state) == state)
+      {
+	// assert
+
+	if (state)
+	  {
+	    throw new RuntimeException("ASSERT: double write lock in DBObjectBase");
+	  }
+	else
+	  {
+	    throw new RuntimeException("ASSERT: double write unlock in DBObjectBase");
+	  }
+      }
+  }
+
+  /**
+   * <p>Used by {@link arlut.csd.ganymede.DBWriteLock DBWriteLock} to
+   * set a possibly informative lock reference, so that a debugger can
+   * show a reference to the DBWriteLock locking us down.</p>
+   */
+
+  void setCurrentLock(DBWriteLock lock)
+  {
+    this.currentLock = lock;
   }
 
   /**

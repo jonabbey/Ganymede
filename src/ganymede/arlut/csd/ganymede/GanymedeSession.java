@@ -4716,7 +4716,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 					      vObj.getLabel());
 	  }
 
-	ReturnVal retVal = objBase.objectHook.canRemove(session, vObj);
+	ReturnVal retVal = objBase.getObjectHook().canRemove(session, vObj);
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -4725,7 +4725,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		return retVal;
 	      }
 
-	    if (!isSuperGash() && objBase.objectHook.canBeInactivated())
+	    if (!isSuperGash() && objBase.getObjectHook().canBeInactivated())
 	      {
 		return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
 						  "You do not have permission to remove " + vObj.getTypeName() + " " + vObj +

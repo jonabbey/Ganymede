@@ -1720,7 +1720,7 @@ final public class DBSession {
     DBObjectBase base;
 
     base = Ganymede.db.getObjectBase(invid.getType());
-    return base.objectHook;
+    return base.getObjectHook();
   }
 
   public String toString()

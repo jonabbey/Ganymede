@@ -225,7 +225,7 @@ public class DBReadLock extends DBLock {
 		    // we're being very polite, for we are a lowly
 		    // read lock
 		    
-		    if (!base.isWriterEmpty() || base.writeInProgress)
+		    if (!base.isWriterEmpty() || base.isWriteInProgress())
 		      {
 			if (debug)
 			  {
