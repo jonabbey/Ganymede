@@ -6,10 +6,12 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.79 $ %D%
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 1999/01/20 18:09:27 $
+   Release: $Name:  $
+
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
-
 */
 
 package arlut.csd.ganymede;
@@ -30,8 +32,6 @@ import java.awt.event.*;
 
 import java.rmi.*;
 import java.rmi.server.*;
-
-import jdj.PackageResources;
 
 /*------------------------------------------------------------------------------
                                                                            class

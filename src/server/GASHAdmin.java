@@ -5,10 +5,12 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 1999/01/20 18:09:26 $
+   Release: $Name:  $
+
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
-
 */
 
 package arlut.csd.ganymede;
@@ -37,8 +39,6 @@ import javax.swing.border.*;
 import arlut.csd.JTable.*;
 import arlut.csd.JDialog.*;
 import arlut.csd.Util.*;
-
-import jdj.PackageResources;
 
 /*------------------------------------------------------------------------------
                                                                            class
