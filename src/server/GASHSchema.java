@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2000/11/21 12:57:27 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2000/11/22 01:50:31 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -85,6 +85,9 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   public static final boolean debug = false;
 
   // --
+
+  GASHAdminFrame
+    frame;
 
   SchemaEdit 
     editor;
@@ -179,10 +182,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   /* -- */
 
-  public GASHSchema(String title, SchemaEdit editor)
+  public GASHSchema(String title, SchemaEdit editor, GASHAdminFrame frame)
   {
     super(title);
 
+    this.frame = frame;
     this.editor = editor;
 
     questionImage = PackageResources.getImageResource(this, "question.gif", getClass());
@@ -1365,6 +1369,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new RuntimeException("Couldn't commit: " + ex);
 	  }
 
+	frame.schemaMI.setEnabled(true);
 	setVisible(false);
       }
     else if (event.getSource() == cancelButton)
@@ -1378,6 +1383,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new RuntimeException("Couldn't release: " + ex);
 	  }
 
+	frame.schemaMI.setEnabled(true);
 	setVisible(false);
       }
     else
@@ -1463,6 +1469,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       {
 	if (!(targetNode instanceof CatTreeNode))
 	  {
+	    if (debug)
+	      {
+		System.err.println("iconDragOver(): failing " + dragNode.getText() + 
+				   "over " + targetNode.getText() + " because can't drag category over non-category");
+	      }
+
 	    return false;
 	  }
 	
@@ -1471,13 +1483,36 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	try
 	  {
-	    return (!cNode1.getCategory().isUnder(cNode.getCategory()));
+	    if (!cNode1.getCategory().isUnder(cNode.getCategory()))
+	      {
+		if (debug)
+		  {
+		    System.err.println("iconDragOver(): succeeding " + dragNode.getText() + 
+				       " over " + targetNode.getText());
+		  }
+
+		return true;
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
+				       " over " + targetNode.getText() +
+				       " because move category into its own subcategory");
+		  }
+
+		return false;
+	      }
 	  }
 	catch (RemoteException ex)
 	  {
 	    throw new RuntimeException("caught remote: " + ex);
 	  }
       }
+
+    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
+		       "over " + targetNode.getText() + ", don't recognize the drag node type");
     
     return false;
   }
@@ -1969,7 +2004,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		  }
 	      }
 
-	    newCategory.moveCategoryNode(category.getPath(), previousNode.getText());
+	    if (previousNode == null)
+	      {
+		newCategory.moveCategoryNode(category.getPath(), null);
+	      }
+	    else
+	      {
+		newCategory.moveCategoryNode(category.getPath(), previousNode.getText());
+	      }
 
 	    if (debug)
 	      {

@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2000/11/21 12:57:24 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2000/11/22 01:50:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -303,7 +303,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	    newBase = new DBObjectBase(oldBase, editor); 
 	    baseHash.put(newBase.getKey(), newBase);
 
-	    if (debug)
+	    if (false)
 	      {
 		Ganymede.debug("Created newBase " + newBase.getName() + 
 			       " in recursive category tree duplication");
@@ -313,7 +313,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
 	    addNodeAfter(newBase, null);
 
-	    if (debug)
+	    if (false)
 	      {
 		Ganymede.debug("Added " + newBase.getName() + " to new category tree");
 	      }
@@ -324,7 +324,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	    newCategory = (DBBaseCategory) newSubCategory(oldCategory.getName());
 	    newCategory.editor = editor;
 
-	    if (debug)
+	    if (false)
 	      {
 		Ganymede.debug("Created newCategory " + newCategory.getName() + 
 			       " in recursive category tree duplication");
@@ -1100,7 +1100,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 		if (cNode.getName().equals(prevNodeName))
 		  {
 		    contents.insertElementAt(categoryNode, i+1);
-		    break;
+		    return;
 		  }
 	      }
 	    catch (RemoteException ex)

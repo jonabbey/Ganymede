@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.18 $ %D%
+  Version: $Revision: 1.19 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -56,7 +56,7 @@ import javax.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.18 $ %D%
+ * @version $Revision: 1.19 $ %D%
  *
  * @see arlut.csd.JTree.treeCallback
  * @see arlut.csd.JTree.treeNode
@@ -68,7 +68,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
   static final int borderSpace = 0;
 
-  // drag mode codes.
+  // drag mode codes, used as bit masks
 
   public static final int DRAG_NONE = 0;
   public static final int DRAG_ICON = 1;
@@ -2407,10 +2407,10 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
 	if ((ctrl.dragMode & ctrl.DRAG_ICON) != 0)
 	  {
-	    // we only want to do the drag test if we're not over
+	    // we only want to do the drag over test if we're not over
 	    // the same node we were last time
 
-	    if (ctrl.oldNode != n)
+	    if (!dragSelected || ctrl.oldNode != n)
 	      {
 		if (ctrl.dCallback.iconDragOver(ctrl.dragNode, n))
 		  {
@@ -2537,8 +2537,8 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 		    System.err.println("Setting hiBound/loBound");
 		  }
 
-		hiBound = n.row * ctrl.row_height + (ctrl.row_height / 4) - v_offset;
-		loBound = (n.row + 1) * ctrl.row_height - (ctrl.row_height / 4) - v_offset;
+		hiBound = n.row * ctrl.row_height + (ctrl.row_height / 6) - v_offset;
+		loBound = (n.row + 1) * ctrl.row_height - (ctrl.row_height / 6) - v_offset;
 
 		ctrl.dragAboveNode = aboveNode;
 		ctrl.dragBelowNode = belowNode;
@@ -2576,7 +2576,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 		      }
 
 		    drawLine = true;
-		    //		    dragSelected = false;
+		    dragSelected = false;
 
 		    if (ctrl.dragOverNode != null)
 		      {
@@ -2603,6 +2603,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	  {
 	    System.err.println("treeControl: ** Rendering");
 	  }
+
 	render();
       }
 

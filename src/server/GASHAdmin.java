@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 2000/11/02 22:39:07 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 2000/11/22 01:50:30 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1312,6 +1312,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
     else if (event.getSource() == schemaMI)
       {
+	schemaMI.setEnabled(false);
+
 	try
 	  {
 	    admin.pullSchema();
@@ -2050,7 +2052,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	    System.err.println("Got SchemaEdit handle");
 	  }
 	
-	schemaFrame = new GASHSchema("Schema Editor", editor);
+	schemaFrame = new GASHSchema("Schema Editor", editor, frame);
       }
 
     // the GASHSchema constructor pops itself up at the end of
