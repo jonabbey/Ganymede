@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.121 $
-   Last Mod Date: $Date: 2001/05/11 00:56:08 $
+   Version: $Revision: 1.122 $
+   Last Mod Date: $Date: 2001/05/11 01:15:45 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.121 $ $Date: 2001/05/11 00:56:08 $ $Name:  $
+ * @version $Revision: 1.122 $ $Date: 2001/05/11 01:15:45 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -2861,7 +2861,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     else if (fieldTemplate.isMultiLine())
       {
-	JstringArea sa = new JstringArea(6, 40);
+	JstringArea sa = new JstringArea(6, FIELDWIDTH);
 	sa.setEditable(editable && fieldInfo.isEditable());		
 	sa.setAllowedChars(fieldTemplate.getOKChars());
 	sa.setDisallowedChars(fieldTemplate.getBadChars());
@@ -3076,7 +3076,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
  
     nf.setEditable(editable && fieldInfo.isEditable());
-    nf.setColumns(40);
+    nf.setColumns(FIELDWIDTH);
  
     String comment = fieldTemplate.getComment();
  
