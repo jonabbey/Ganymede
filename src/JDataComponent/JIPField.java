@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -266,7 +266,25 @@ public class JIPField extends JentryField {
 		    System.err.println("JIPField.processFocusEvent: setValue accepted");
 		  }
 
-		value = str;
+		if (bytes == null)
+		  {
+		    value = "";
+		    setText(value);
+		  }
+		else if (bytes.length == 4)
+		  {
+		    value = genIPV4string(bytes);
+		    setText(value);
+		  }
+		else if (bytes.length == 16)
+		  {
+		    value = genIPV6string(bytes);
+		    setText(value);
+		  }
+		else
+		  {
+		    throw new RuntimeException("JIPField: bad bytes calculated");
+		  }
 		
 		changed = true;
 	      }
