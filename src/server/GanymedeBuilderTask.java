@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2000/12/09 01:40:02 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2001/01/25 02:16:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -608,7 +608,6 @@ public abstract class GanymedeBuilderTask implements Runnable {
     return null;
   }
 
-  
   /**
    *
    * This method opens the specified file for writing out a text stream.
@@ -620,6 +619,21 @@ public abstract class GanymedeBuilderTask implements Runnable {
    */
 
   protected synchronized PrintWriter openOutFile(String filename) throws IOException
+  {
+    return openOutFile(filename, null);
+  }
+
+  /**
+   *
+   * This method opens the specified file for writing out a text stream.
+   *
+   * If the files have not yet been backed up this run time, openOutFile()
+   * will cause the files in Ganymede's output directory to be zipped up
+   * before overwriting any files.
+   *
+   */
+
+  protected synchronized PrintWriter openOutFile(String filename, String taskName) throws IOException
   {
     String backupFileName = null;
     File file, backupFile;
@@ -657,7 +671,14 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 		String label = formatter.format(oldTime);
 
-		backupFileName = directory + File.separator + label + "_" + file.getName();
+		if (taskName != null)
+		  {
+		    backupFileName = directory + File.separator + taskName + "_" + label + "_" + file.getName();
+		  }
+		else
+		  {
+		    backupFileName = directory + File.separator + label + "_" + file.getName();
+		  }
 
 		backupFile = new File(backupFileName);
 
