@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,7 +27,7 @@ import java.rmi.*;
 public class userCustom extends DBEditObject implements SchemaConstants {
   
   static final boolean debug = false;
-  static StringBuffer shellChoices = new StringBuffer();
+  static QueryResult shellChoices = new QueryResult();
   static Date shellChoiceStamp = null;
 
   /**
@@ -121,7 +121,7 @@ public class userCustom extends DBEditObject implements SchemaConstants {
    * 
    */
 
-  public StringBuffer obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field)
   {
     if (!field.getName().equals("Login Shell"))
       {
@@ -136,15 +136,16 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if (shellChoiceStamp == null || shellChoiceStamp.before(base.getTimeStamp()))
 	  {
-	    shellChoices.setLength(0);
-	    shellChoices.append(DBEditObject.objectDumpHeader(false)); // non-invid bearing string
-
+	    shellChoices = new QueryResult();
 	    Query query = new Query("Shell Choice", null, false);
+
+	    // internalQuery doesn't care if the query has its filtered bit set
+
 	    Vector results = internalSession().internalQuery(query);
 	
 	    for (int i = 0; i < results.size(); i++)
 	      {
-		shellChoices.append(stringDump(((Result) results.elementAt(i)).toString())); // no invid
+		shellChoices.addRow(null, results.elementAt(i).toString()); // no invid
 	      }
 
 	    if (shellChoiceStamp == null)
@@ -164,6 +165,74 @@ public class userCustom extends DBEditObject implements SchemaConstants {
       }
 
     return shellChoices;
+  }
+
+  public boolean finalizeSetValue(DBField field, Object value)
+  {
+    InvidDBField inv;
+    Vector personaeInvids;
+    Vector oldNames = new Vector();
+    DBSession session = editset.getSession();
+    DBEditObject eobj;
+    String oldName, suffix;
+    StringDBField sf;
+    boolean okay = true;
+
+    /* -- */
+
+    if (field.getID() == SchemaConstants.UserUserName)
+      {
+	inv = (InvidDBField) getField(SchemaConstants.UserAdminPersonae);
+	
+	if (inv == null)
+	  {
+	    return true;
+	  }
+
+	// rename all the associated persona with the new user name
+
+	personaeInvids = inv.getValues();
+	
+	for (int i = 0; i < personaeInvids.size(); i++)
+	  {
+	    eobj = session.editDBObject((Invid) personaeInvids.elementAt(i));
+
+	    sf = (StringDBField) eobj.getField(SchemaConstants.PersonaNameField);
+	    oldName = (String) sf.getValue();
+	    oldNames.addElement(oldName);
+	    suffix = oldName.substring(oldName.indexOf(':'));
+	    
+	    if (!sf.setValue(value + ":" + suffix))
+	      {
+		if (okay)
+		  {
+		    return false;
+		  }
+		else
+		  {
+		    // crap.  we've changed at least one persona
+		    // object, but we can't change all of them.  So,
+		    // let's try our best to undo what we did.
+
+		    for (int j = 0; j < i; j++)
+		      {
+			eobj = session.editDBObject((Invid) personaeInvids.elementAt(j));
+
+			sf = (StringDBField) eobj.getField(SchemaConstants.PersonaNameField);
+			sf.setValue(oldNames.elementAt(j));
+		      }
+		    
+		    return false;
+		  }
+	      }
+	    else
+	      {
+		okay = false;	// we've made a change, and we can't just return false
+	      }
+	  }
+      }
+
+    return true;
   }
 
 }
