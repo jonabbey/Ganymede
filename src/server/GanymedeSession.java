@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.229 $
-   Last Mod Date: $Date: 2001/02/09 03:30:33 $
+   Version: $Revision: 1.230 $
+   Last Mod Date: $Date: 2001/02/09 03:36:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.229 $ $Date: 2001/02/09 03:30:33 $
+ * @version $Revision: 1.230 $ $Date: 2001/02/09 03:36:19 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -6604,6 +6604,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   private void setLastEvent(String text)
   {
+    // if we are being driven by the xml client or by an otherwise
+    // internal session, we don't want to spam the admin console with
+    // status messages.  The serverAdminProxy class will limit
+    // excessive communications with the admin console, but no point
+    // in getting ourselves all worked up here.
+
+    if (!remotelyAccessible)
+      {
+	return;
+      }
+
     this.lastEvent = text;
     this.userInfo = null;
     GanymedeAdmin.refreshUsers();
