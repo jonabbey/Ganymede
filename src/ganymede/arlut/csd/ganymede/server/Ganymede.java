@@ -917,7 +917,7 @@ public class Ganymede {
     ReturnVal retVal = new ReturnVal(true,true); // success ok, doNormalProcessing ok
     retVal.setDialog(new JDialogBuff(title,
 				     body,
-				     "OK",
+				     ts.l("createInfoDialog.ok"),
 				     null,
 				     "ok.gif"));
 
@@ -938,6 +938,32 @@ public class Ganymede {
   {
     ReturnVal retVal = new ReturnVal(false);
     retVal.setDialog(new JDialogBuff(title,
+				     body,
+				     ts.l("createErrorDialog.ok"),
+				     null,
+				     "error.gif"));
+
+    if (logErrorDialogs)
+      {
+	System.err.println(ts.l("createErrorDialog.log_error", body));
+      }
+
+    return retVal;
+  }
+
+  /**
+   * <p>This is a convenience method used by the server to return a
+   * standard error dialog without a custom title.  This is primarily
+   * useful for returning errors from {@link
+   * arlut.csd.ganymede.server.GanymedeXMLSession} in which the errors
+   * will be reported through a purely textual interface, but may be
+   * used anywhere where a default title is acceptable.</p>
+   */
+
+  static public ReturnVal createErrorDialog(String body)
+  {
+    ReturnVal retVal = new ReturnVal(false);
+    retVal.setDialog(new JDialogBuff(ts.l("createErrorDialog.default_title"),
 				     body,
 				     ts.l("createErrorDialog.ok"),
 				     null,
