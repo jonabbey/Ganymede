@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2004/02/05 23:09:34 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2004/02/06 15:17:57 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -283,15 +283,15 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     JPanel labelPanel = new JPanel();
     labelPanel.setLayout(new BorderLayout());
 
-    JLabel label = new JLabel("Ganymede Admin on: ");
-    labelPanel.add("West", label);
+    JLabel label = new JLabel("Ganymede Server on: ");
+    labelPanel.add("North", label);
 
-    JLabel hostLabel = new JLabel(serverhost + ":" + registryPortProperty);
+    JLabel hostLabel = new JLabel(serverhost + ", port " + registryPortProperty);
     Font x = new Font("Courier", Font.ITALIC, 14);
     hostLabel.setFont(x);
     hostLabel.setForeground(Color.black);
 
-    labelPanel.add("Center", hostLabel);
+    labelPanel.add("South", hostLabel);
 
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weighty = 0.0;
@@ -310,7 +310,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     gbl.setConstraints(ul, gbc);
     panel.add(ul);
     
-    username = new JTextField(20);
+    username = new JTextField(15);
     gbc.gridx = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -328,7 +328,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     gbl.setConstraints(pl, gbc);
     panel.add(pl);
 
-    password = new JPasswordField(20);
+    password = new JPasswordField(15);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
@@ -339,7 +339,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     
     gbc.gridx = 0;
     gbc.gridy = 4;
-
+    gbc.ipady = 0;
     gbc.gridwidth = 2;
     JPanel buttonPanel = new JPanel(new BorderLayout());
     gbl.setConstraints(buttonPanel, gbc);
