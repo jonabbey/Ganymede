@@ -59,6 +59,7 @@ import arlut.csd.ddroid.rmi.*;
 
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.NamedStack;
+import arlut.csd.Util.TranslationService;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
@@ -132,6 +133,12 @@ import java.rmi.*;
 public class DBEditSet {
 
   static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
+   */
+
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBEditSet");
 
   /**
@@ -1668,14 +1675,14 @@ public class DBEditSet {
 	if (!dbStore.journal.writeTransaction(getObjectList()))
 	  {
 	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.error"),
-								      ts.l("commit_persistTransaction.error_text"));
+								      ts.l("commit_persistTransaction.error_text")));
 	  }
       }
     catch (IOException ex)
       {
 	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
 								  ts.l("commit_persistTransaction.exception_text",
-								       ex.getMessage()));
+								       ex.getMessage())));
       }
   }
 

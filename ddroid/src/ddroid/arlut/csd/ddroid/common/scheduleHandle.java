@@ -486,7 +486,7 @@ public class scheduleHandle implements java.io.Serializable {
 
     if (interval == 0)
       {
-	intervalString = "n/a";
+	intervalString = "";
 	return;
       }
 

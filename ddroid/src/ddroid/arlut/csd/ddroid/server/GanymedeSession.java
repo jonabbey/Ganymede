@@ -142,6 +142,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   static final boolean debug = false;
   static final boolean permsdebug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
+   */
+
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.GanymedeSession");
 
   // ---
@@ -892,11 +898,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
 	  {
-	    forceOff(ts.l("timeCheck.forceOffNoObjs", Ganymede.timeoutIdleNoObjs));
+	    forceOff(ts.l("timeCheck.forceOffNoObjs", new Integer(Ganymede.timeoutIdleNoObjs)));
 	  }
 	else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
 	  {
-	    forceOff(ts.l("timeCheck.forceOffWithObjs", Ganymede.timeoutIdleWithObjs));
+	    forceOff(ts.l("timeCheck.forceOffWithObjs", new Integer(Ganymede.timeoutIdleWithObjs)));
 	  }
 
 	return;
@@ -904,11 +910,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0)
       {
-	forceOff(ts.l("timeCheck.forceOffNoObjs", Ganymede.timeoutIdleNoObjs));
+	forceOff(ts.l("timeCheck.forceOffNoObjs", new Integer(Ganymede.timeoutIdleNoObjs)));
       }
     else if (minutesIdle > Ganymede.timeoutIdleWithObjs)
       {
-	forceOff(ts.l("timeCheck.forceOffWithObjs", Ganymede.timeoutIdleWithObjs));
+	forceOff(ts.l("timeCheck.forceOffWithObjs", new Integer(Ganymede.timeoutIdleWithObjs)));
       }
   }
 
@@ -4288,7 +4294,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (base == null)
 	  {
-	    error = ts.l("create_db_object.invalid_type", type);
+	    error = ts.l("create_db_object.invalid_type", new Integer(type));
 	  }
 	else
 	  {
@@ -5057,7 +5063,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	try
 	  {
-	    throw new RuntimeException(ts.l("getObjects.no_base", baseid));
+	    throw new RuntimeException(ts.l("getObjects.no_base", new Integer(baseid)));
 	  }
 	catch (RuntimeException ex)
 	  {

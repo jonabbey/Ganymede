@@ -424,12 +424,12 @@ final public class DBSession {
       {
 	try
 	  {
-	    Ganymede.debug(ts.l("createDBObject.created", e_object.getLabel(), e_object.getInvid().toString());
+	    Ganymede.debug(ts.l("createDBObject.created", e_object.getLabel(), e_object.getInvid().toString()));
 	    db_field[] fields = e_object.listFields();
 	    
 	    for (int i = 0; i < fields.length; i++)
 	      {
-		Ganymede.debug(ts.l("createDBObject.field_report", i, fields[i].getID(), fields[i].getName());
+		Ganymede.debug(ts.l("createDBObject.field_report", new Integer(i), new Integer(fields[i].getID()), fields[i].getName()));
 	      }
 	  }
 	catch (java.rmi.RemoteException ex)
@@ -593,7 +593,7 @@ final public class DBSession {
 
     if (obj == null)
       {
-	System.err.println(ts.l("editDBObject.noobject", baseID, objectID));
+	System.err.println(ts.l("editDBObject.noobject", new Integer(baseID), new Integer(objectID)));
 	return null;
       }
 
@@ -1146,7 +1146,7 @@ final public class DBSession {
 
 	rollback(key);
 
-	return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error")
+	return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
 					  ts.l("reactivateDBObject.error_text3", eObj.toString(), ex.getMessage()));
       }
 

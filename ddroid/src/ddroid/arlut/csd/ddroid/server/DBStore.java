@@ -165,6 +165,13 @@ public final class DBStore {
   static DBStore db = null;
 
   /**
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBStore");
+
+  /**
    * <p>Convenience function to find and return objects from the database
    * without having to go through the GanymedeSession and DBSession layers.</p>
    *

@@ -1601,7 +1601,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	synchronized (Ganymede.db.backPointers)
 	  {
 	    Ganymede.debug(ts.l("checkInvids.backpointers"));
-	    Ganymede.debug(ts.l("checkInvids.backpointers2", Ganymede.db.backPointers.size()));
+	    Ganymede.debug(ts.l("checkInvids.backpointers2", new Integer(Ganymede.db.backPointers.size())));
 
 	    Enumeration keys = Ganymede.db.backPointers.keys();
 

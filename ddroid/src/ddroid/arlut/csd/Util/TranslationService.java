@@ -91,6 +91,14 @@ public class TranslationService {
    * later on of tracking the TranslationService objects we create and
    * possibly supporting some kind of reload functionality, howsomever
    * primitive.</p>
+   *
+   * @param resourceName The package-qualified resource class name to
+   * load.  We automatically support the use of properties files here.
+   *
+   * @param locale A Locale object controlling the particular region we're
+   * going to try and get translations for, though we'll fallback to our
+   * generic translation classes (i.e., the English ones) if we don't have
+   * any localization classes for the given Locale.
    */
 
   public static TranslationService getTranslationService(String resourceName, Locale locale) throws MissingResourceException
@@ -104,6 +112,9 @@ public class TranslationService {
    * later on of tracking the TranslationService objects we create and
    * possibly supporting some kind of reload functionality, howsomever
    * primitive.</p>
+   *
+   * @param resourceName The package-qualified resource class name to
+   * load.  We automatically support the use of properties files here.
    */
 
   public static TranslationService getTranslationService(String resourceName) throws MissingResourceException
@@ -123,6 +134,19 @@ public class TranslationService {
 
   /* -- */
 
+  /**
+   * <p>We've declared the constructor private so as to force use of
+   * the static factory method.</p>
+   *
+   * @param resourceName The package-qualified resource class name to
+   * load.  We automatically support the use of properties files here.
+   *
+   * @param locale A Locale object controlling the particular region we're
+   * going to try and get translations for, though we'll fallback to our
+   * generic translation classes (i.e., the English ones) if we don't have
+   * any localization classes for the given Locale.
+   */
+
   private TranslationService(String resourceName, Locale locale) throws MissingResourceException
   {
     if (locale != null)
@@ -141,6 +165,7 @@ public class TranslationService {
     this.singleArgs = new Object[1];
     this.doubleArgs = new Object[2];
     this.tripleArgs = new Object[3];
+    this.quadArgs = new Object[4];
   }
 
   /**
@@ -177,7 +202,7 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
+   * Directory Droid without concern.</p>
    */
 
   public String l(String key)
@@ -211,39 +236,10 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
+   * Directory Droid without concern.</p>
    */
 
-  public synchronized String l(String key, String param)
-  {
-    String pattern = null;
-
-    /* -- */
-
-    try
-      {
-	pattern = bundle.getString(key);
-      }
-    catch (MissingResourceException ex)
-      {
-	return null;
-      }
-
-    this.singleArgs[0] = param; 
-
-    return this.format(pattern, singleArgs);
-  }
-
-  /**
-   * <p>This method takes a localization key and a parameter and
-   * creates a localized string out of them.</p>
-   *
-   * <p>This heavily overloaded method is called 'l' for localize, and
-   * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
-   */
-
-  public synchronized String l(String key, int param)
+  public synchronized String l(String key, Object param)
   {
     String pattern = null;
     String result;
@@ -259,7 +255,7 @@ public class TranslationService {
 	return null;
       }
 
-    this.singleArgs[0] = new Integer(param); 
+    this.singleArgs[0] = param;
 
     result = this.format(pattern, singleArgs);
 
@@ -274,10 +270,10 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
+   * Directory Droid without concern.</p>
    */
 
-  public synchronized String l(String key, String param, String param2)
+  public synchronized String l(String key, Object param, Object param2)
   {
     String pattern = null;
     String result;
@@ -310,46 +306,10 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
+   * Directory Droid without concern.</p>
    */
 
-  public synchronized String l(String key, String param, int param2)
-  {
-    String pattern = null;
-    String result;
-
-    /* -- */
-
-    try
-      {
-	pattern = bundle.getString(key);
-      }
-    catch (MissingResourceException ex)
-      {
-	return null;
-      }
-
-    this.doubleArgs[0] = param; 
-    this.doubleArgs[1] = new Integer(param2); 
-
-    result = this.format(pattern, doubleArgs);
-
-    this.doubleArgs[0] = null;
-    this.doubleArgs[1] = null;
-
-    return result;
-  }
-
-  /**
-   * <p>This method takes a localization key and parameters and
-   * creates a localized string out of them.</p>
-   *
-   * <p>This heavily overloaded method is called 'l' for localize, and
-   * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
-   */
-
-  public synchronized String l(String key, String param, String param2, String param3)
+  public synchronized String l(String key, Object param, Object param2, Object param3)
   {
     String pattern = null;
     String result;
@@ -384,37 +344,8 @@ public class TranslationService {
    *
    * <p>This heavily overloaded method is called 'l' for localize, and
    * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
+   * Directory Droid without concern.</p>
    */
-
-  public synchronized String l(String key, String param, String param2, int param3)
-  {
-    String pattern = null;
-    String result;
-
-    /* -- */
-
-    try
-      {
-	pattern = bundle.getString(key);
-      }
-    catch (MissingResourceException ex)
-      {
-	return null;
-      }
-    
-    this.tripleArgs[0] = param; 
-    this.tripleArgs[1] = param2; 
-    this.tripleArgs[2] = new Integer(param3); 
-
-    result = this.format(pattern, tripleArgs);
-
-    this.tripleArgs[0] = null;
-    this.tripleArgs[1] = null; 
-    this.tripleArgs[2] = null; 
-
-    return result;
-  }
 
   public synchronized String l(String key, Object param, Object param2, Object param3, Object param4)
   {
@@ -443,6 +374,81 @@ public class TranslationService {
     this.quadArgs[1] = null;
     this.quadArgs[2] = null;
     this.quadArgs[3] = null;
+
+    return result;
+  }
+
+  /**
+   * <p>This method takes a localization key and parameters and
+   * creates a localized string out of them.</p>
+   *
+   * <p>This heavily overloaded method is called 'l' for localize, and
+   * it has such a short name so that I can use it everywhere in
+   * Directory Droid without concern.</p>
+   */
+
+  public synchronized String l(String key, Object param, Object param2, Object param3, Object param4, Object param5)
+  {
+    String pattern = null;
+    String result;
+    Object quintArgs[] = new Object[5];
+
+    /* -- */
+
+    try
+      {
+	pattern = bundle.getString(key);
+      }
+    catch (MissingResourceException ex)
+      {
+	return null;
+      }
+    
+    quintArgs[0] = param;
+    quintArgs[1] = param2;
+    quintArgs[2] = param3;
+    quintArgs[3] = param4;
+    quintArgs[4] = param5;
+
+    result = this.format(pattern, quintArgs);
+
+    return result;
+  }
+
+  /**
+   * <p>This method takes a localization key and parameters and
+   * creates a localized string out of them.</p>
+   *
+   * <p>This heavily overloaded method is called 'l' for localize, and
+   * it has such a short name so that I can use it everywhere in
+   * Directory Droid without concern.</p>
+   */
+
+  public synchronized String l(String key, Object param, Object param2, Object param3, Object param4, Object param5, Object param6)
+  {
+    String pattern = null;
+    String result;
+    Object sextArgs[] = new Object[6];
+
+    /* -- */
+
+    try
+      {
+	pattern = bundle.getString(key);
+      }
+    catch (MissingResourceException ex)
+      {
+	return null;
+      }
+    
+    sextArgs[0] = param;
+    sextArgs[1] = param2;
+    sextArgs[2] = param3;
+    sextArgs[3] = param4;
+    sextArgs[4] = param5;
+    sextArgs[5] = param6;
+
+    result = this.format(pattern, sextArgs);
 
     return result;
   }
