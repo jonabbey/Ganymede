@@ -91,7 +91,7 @@ import arlut.csd.ganymede.rmi.db_object;
 
 public class xmlobject {
 
-  final static boolean debug = false;
+  final static boolean debug = true;
 
   /**
    * <p>The local identifier string for this object</p>
