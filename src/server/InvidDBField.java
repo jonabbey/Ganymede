@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.52 $ %D%
+   Version: $Revision: 1.53 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -755,10 +755,13 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // editDBObject() will create undefined fields for all fields defined
 	    // in the DBObjectBase, so if we got a null result we have a schema
 	    // corruption problem.
+
+	    String tempString = "InvidDBField.bind: target field not defined <" + owner.getLabel() +
+	      ":" + getName() + "> in schema:" + targetField;
 	    
-	    setLastError("InvidDBField.bind: target field not defined in schema:" + targetField);
+	    setLastError(tempString);
 	    
-	    throw new RuntimeException("target field not defined in schema:" + targetField);
+	    throw new RuntimeException(tempString);
 	  }
       }
 
