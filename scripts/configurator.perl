@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.44 $
-# $Date: 2000/02/17 20:05:34 $
+# $Revision: 1.45 $
+# $Date: 2000/02/17 20:20:58 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -120,8 +120,8 @@ sub write_makefile {
 
 classfiles:
 	\@echo "Building Ganymede sources"
-        \@cd $rootdir/src/xml; \\
-        ./build
+	\@cd $rootdir/src/xml; \\
+	./build
 	\@cd $rootdir/src/Util; \\
 	./build
 	\@cd $rootdir/src/Qsmtp; \\
