@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.145 $
-   Last Mod Date: $Date: 1999/03/29 22:56:26 $
+   Version: $Revision: 1.146 $
+   Last Mod Date: $Date: 1999/03/31 00:06:54 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -79,7 +79,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * is run and a user logs in to the server, a single instance of this class
  * is created to handle all client GUI and networking operations for the user.</p>
  *
- * @version $Revision: 1.145 $ $Date: 1999/03/29 22:56:26 $ $Name:  $
+ * @version $Revision: 1.146 $ $Date: 1999/03/31 00:06:54 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -2787,16 +2787,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    *
    ********************************************************************************/
 
-  /**
-   * <p>Opens a new window to allow the user to edit an object.</p>
+  /** 
+   * <p>Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel} 
+   * window to allow the user to edit an object.</p>
    *
    * <p>Use this to edit objects, so gclient can keep track of the
    * caches, tree nodes, and all the other dirty work.  This should be
    * the only place windowPanel.addWindow() is called for editing
    * purposes.</p>
    *
-   * @param invid id for the object to be edited in the new window.
-   */
+   * @param invid id for the object to be edited in the new window.  */
 
   public void editObject(Invid invid)
   {
@@ -2804,7 +2804,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Opens a new window to allow the user to edit an object.</p>
+   * <p>Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel}
+   * window to allow the user to edit an object.</p>
    *
    * <p>Use this to edit objects, so gclient can keep track of the
    * caches, tree nodes, and all the other dirty work.  This should be
@@ -2865,7 +2866,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /** 
    * <p>Creates a new object on the server and opens a new
-   * client window to allow the user to edit the new object.</p>
+   * client {@link arlut.csd.ganymede.client.framePanel framePanel}
+   * window to allow the user to edit the new object.</p>
    *
    * @param type Type of object to be created
    */
@@ -2976,8 +2978,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Opens a new window to view the object corresponding to the
-   * given invid.</p>
+   * <p>Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel} 
+   * window to view the object corresponding to the given invid.</p>
    */
 
   public void viewObject(Invid invid)
@@ -2986,8 +2988,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Opens a new window to view the object corresponding to the
-   * given invid.</p>
+   * <p>Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel}
+   * window to view the object corresponding to the given invid.</p>
    *
    * @param objectType Type of the object to be viewed.. if this is
    * null, the server will be queried to determine the type of object

@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 1999/03/29 22:56:24 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 1999/03/31 00:06:53 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -71,13 +71,34 @@ import arlut.csd.Util.VecQuickSort;
 ------------------------------------------------------------------------------*/
 
 /**
- * ContainerPanel is the basic building block of the ganymede client.
- * Each containerPanel displays a single db_object, and allows the
- * user to edit or view each db_field in the object.  containerPanel
- * loops through the fields of the object, adding the appropriate type
- * of input for each field.  This includes text fields, number fields,
- * boolean fields, and string selector fields(fields that can have
- * multiple values.  
+ * <p>One of the basic building blocks of the ganymede client, a containerPanel is
+ * a GUI panel which allows the user to view and/or edit all the custom fields
+ * for an object in the Ganymede database.</p>
+ *
+ * <p>Each containerPanel displays a single
+ * {@link arlut.csd.ganymede.db_object db_object}, and allows the
+ * user to edit or view each {@link arlut.csd.ganymede.db_field db_field} in the
+ * object.  On loading, containerPanel loops through the fields of the object, adding the
+ * appropriate type of input for each field.  This includes text fields,
+ * number fields, boolean fields, and string selector fields(fields that can have
+ * multiple values).</p>
+ *
+ * <p>containerPanel handles the connection between GUI components and server
+ * fields, translating GUI activity to attempted changes to server fields.  Any
+ * attempted change that the server refuses will cause a dialog to be popped up via
+ * gclient's
+ * {@link arlut.csd.ganymede.client.gclient.handleReturnVal(arlut.csd.ganymede.ReturnVal) handleReturnVal()}
+ * method, and the GUI component that caused the change will be reverted to its pre-change
+ * status.</p>
+ *
+ * <p>The gclient's handleReturnVal() method also supports extracting a list of objects
+ * and fields that need to be refreshed when one change on the server is reflected
+ * across more than one object.  This is handled by containerPanel's
+ * {@link arlut.csd.ganymede.client.containerPanel.update(java.util.Vector) update()}
+ * method.</p>
+ *
+ * @version $Revision: 1.100 $ $Date: 1999/03/31 00:06:53 $ $Name:  $
+ * @author Mike Mulvaney
  */
 
 public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener {
@@ -86,53 +107,137 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   static final boolean debug_persona = false;
 
   // ---
+
+  /**
+   * Used to tell the load() method to stop populating a panel if the window
+   * we are in is closed.
+   */
   
   private boolean 
     keepLoading = true;
 
+  /**
+   * Reference to the client's main class, used for some utility functions.
+   */
+
   gclient
-    gc;				// our interface to the server
+    gc;
+
+  /**
+   * Remote reference to the server-side object we are viewing or editing.
+   */
 
   private db_object
-    object;			// the object we're editing
+    object;
 
-  private Invid                 // the object we're editing/viewing's invid
+  /**
+   * Database id for the object we are viewing or editing
+   */
+
+  private Invid
     invid;
 
+  /**
+   * Reference to the desktop pane containing the client's internal windows.  Used to access
+   * some GUI resources.
+   */
+
   windowPanel
-    winP;			// for interacting with our containing context
+    winP;
+
+  /**
+   * The window we are contained in, may be null if we are embedded in a 
+   * {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}.
+   */
 
   protected framePanel
     frame;
 
-  Vector
-    updatesWhileLoading = new Vector(),
-    vectorPanelList = new Vector();
+  /**
+   * <p>Vector of Short field id's used to track fields for which
+   * we receive update requests while we are still loading.  After
+   * we finish loading this panel, we'll go back and refresh any fields
+   * whose field id's are listed in this vector.</p>
+   */
+
+  Vector updatesWhileLoading = new Vector();
+
+  /**
+   * <p>Vector used to list vectorPanels embedded in this object window.  This
+   * variable is used by
+   * {@link arlut.csd.ganymede.client.vectorPanel.expandAllLevels() vectorPanel.expandAllLevels()}
+   * to do recursive expansion of embedded objects.</p>
+   */
+
+  Vector vectorPanelList = new Vector();
 
   JComponent 
     currentlyChangingComponent = null;
 
-  Hashtable
-    shortToComponentHash = new Hashtable(),	// maps field id's to AWT/Swing component
-    rowHash = new Hashtable(), 
-    invidChooserHash = new Hashtable(),
-    objectHash = new Hashtable();
-  
-  GridBagLayout
-    gbl = new GridBagLayout();
-  
-  GridBagConstraints
-    gbc = new GridBagConstraints();
-  
-  Vector 
-    infoVector = null,
-    templates = null;
+  /**
+   * <p>Hashtable mapping Short field id's to the AWT/Swing GUI component managing
+   * that database field.</p>
+   */
 
-  //int row = 0;			// we'll use this to keep track of rows added as we go along
+  Hashtable shortToComponentHash = new Hashtable();
+
+  /**
+   * <p>Hashtable mapping the active GUI components to their labels.  This
+   * is used so that when the containerPanel update() method decides to hide
+   * a field, the associated label can be hid too.</p>
+   */
+
+  Hashtable rowHash = new Hashtable();
+
+  /**
+   * <p>Hashtable mapping GUI components to their associated
+   * {@link arlut.csd.ganymede.db_field db_field}'s.
+   */
+
+  Hashtable objectHash = new Hashtable();
+
+  /**
+   * <p>Hashtable mapping the combo boxes contained within
+   * {@link arlut.csd.ganymede.client.JInvidChooser JInvidChooser}
+   * GUI components to their associated
+   * {@link arlut.csd.ganymede.db_field db_field}'s.</p>
+   *
+   * <p>This is required because while we want to hide or reveal the JInvidChooser
+   * as a whole, we'll get itemStateChanged() calls from the combo
+   * box within the JInvidChooser.</p>
+   */
+
+  Hashtable invidChooserHash = new Hashtable();
+
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.FieldInfo FieldInfo} objects
+   * holding the values for fields in this object.  Used during loading
+   * and update.</p>
+   */
+
+  Vector infoVector = null;
+
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}
+   * objects holding the constant field type information for fields in
+   * this object.</p>
+   */
+
+  Vector templates = null;
 
   boolean
     isCreating,
     editable;
+
+  boolean
+    isEmbedded,
+    loading = false,
+    loaded = false;
+
+  /**
+   * If progressBar is not null, the load() method for containerPanel will
+   * update this progressBar as the panel is loaded from the server.
+   */
 
   JProgressBar
     progressBar;
@@ -140,22 +245,47 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   int
     vectorElementsAdded = 0;
 
-  boolean
-    isEmbedded,
-    loading = false,
-    loaded = false,
-    isPersonaPanel = false;
+  /**
+   * Object type id for this object.. should be equal to invid.getType().
+   */
 
-  short 
-    type;
+  short type;
 
-  Object
-    context;
+  /**
+   * <p>This variable is used as a hack so that containerPanel can tell what
+   * sort of context it is being embedded in.  In particular, if context
+   * is a {@link arlut.csd.ganymede.client.personaContainer personaContainer},
+   * the isPersonaPanel variable will be set to true, and the associated
+   * user field will be hid from the user.</p>
+   *
+   * <p>This is a hack to support showing a user's personas in a personas tabbed
+   * pane when viewing or editing that user normally.</p>
+   */
+
+  Object context;
+
+  /**
+   * <p>If true, this containerPanel is being displayed in a persona pane in
+   * a frame panel, and we'll hide the associated user field, which is implicit
+   * when we embedded a persona panel in a framePanel showing a user object.</p>
+   *
+   * <p>This is a dirty hack to make the client a little extra smart about one
+   * particular kind of mandatory Ganymede server object.</p>
+   */
+
+   boolean isPersonaPanel = false;
+
+  GridBagLayout
+    gbl = new GridBagLayout();
+  
+  GridBagConstraints
+    gbc = new GridBagConstraints();
 
   /* -- */
 
   /**
-   * Constructor for containerPanel
+   * <p>Constructor with default values for progressBar set to false, loadNow
+   * set to true, and isCreating set to false.</p>
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
@@ -176,8 +306,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     this(object, editable, gc, window, frame, null, true, context);
   }
 
-  /**
-   * Constructor for containerPanel
+  /** 
+   * <p>Constructor with default values for loadNow set to true, and
+   * isCreating set to false.</p>
+   *
+   * <p>The &lt;progressBar&gt; parameter is used so that
+   * containerpanel can increment an external JProgressBar as
+   * infromation on the fields for this object are loaded from
+   * the server.  progressBar should be null if this containerPanel
+   * is not serving as the main panel for a framePanel.</p>
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
@@ -186,7 +323,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param frame    framePanel holding this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
    * @param context An object that can be provided to identify the context in
-   * which this containerPanel is being created.
+   * which this containerPanel is being created.  
    */
 
   public containerPanel(db_object object, 
@@ -201,7 +338,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * Main constructor for containerPanel
+   * <p>Constructor with default value for isCreating set to false.</p>
+   *
+   * <p>The &lt;progressBar&gt; parameter is used so that
+   * containerpanel can increment an external JProgressBar as
+   * infromation on the fields for this object are loaded from
+   * the server.</p>
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
@@ -226,7 +368,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * primary constructor for containerPanel
+   * <p>Primary constructor for containerPanel</p>
+   *
+   * <p>The &lt;progressBar&gt; parameter is used so that
+   * containerpanel can increment an external JProgressBar as
+   * infromation on the fields for this object are loaded from
+   * the server.  progressBar should be null if this containerPanel
+   * is not serving as the main panel for a framePanel.</p>
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
@@ -236,7 +384,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param loadNow  If true, container panel will be loaded immediately
    * @param isCreating  
    * @param context An object that can be provided to identify the context in
-   * which this containerPanel is being created.
+   * which this containerPanel is being created.  
    */
 
   public containerPanel(db_object object,
@@ -262,9 +410,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (object == null)
       {
-	printErr("null object passed to containerPanel");
-	setStatus("Could not get object.  Someone else might be editing it.  Try again at a later time.");
-	return;
+	throw new NullPointerException("null object passed to containerPanel constructor");
       }
 
     this.winP = window;
@@ -708,7 +854,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public void update(Vector fields)
   {
-    if (! editable)
+    if (!editable)
       {
 	return;
       }
@@ -1825,7 +1971,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     // Find the field that is associated with this combo box.  Some
-    // combo boxes are all by themselves, and they will be inthe
+    // combo boxes are all by themselves, and they will be in the
     // objectHash.  Other comboBoxes are part of JInvidChoosers, and
     // they will be in the invidChooserHash
 
