@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/02/29 09:35:07 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/02/29 10:25:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -562,7 +562,17 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  {
 	    if (in.readBoolean())
 	      {
-		addNodeAfter(new DBObjectBase(in, store, true), null);
+		DBObjectBase tempBase = new DBObjectBase(in, store, true);
+
+		store.setBase(tempBase); // register in DBStore objectBases hash
+
+		addNodeAfter(tempBase, null);
+
+		if (store.debug)
+		  {
+		    System.err.println("loaded base " + tempBase.getTypeID() + 
+				       ", obj count loaded = " + tempBase.objectTable.size());
+		  }
 	      }
 	    else
 	      {

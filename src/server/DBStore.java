@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 2000/02/29 09:35:14 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 2000/02/29 10:25:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.106 $ %D%
+ * @version $Revision: 1.107 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -397,7 +397,7 @@ public class DBStore {
 	    System.err.println("DBStore load(): loading  category definitions");
 	  }
 
-	if (file_major >= 1 && file_minor >= 3)
+	if (file_major > 1 || (file_major == 1 && file_minor >= 3))
 	  {
 	    rootCategory = new DBBaseCategory(this, in);
 	  }

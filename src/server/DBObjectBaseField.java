@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 2000/02/29 09:35:11 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 2000/02/29 10:25:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -364,10 +364,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     out.writeUTF(classname);
     out.writeUTF(comment);
 
-    if ((base.store.major_version >= 1) || (base.store.minor_version >= 6))
-      {
-	out.writeBoolean(visibility); // added at file version 1.6
-      }
+    out.writeBoolean(visibility); // added at file version 1.6
 
     out.writeBoolean(array);
 
@@ -540,7 +537,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     // at file version 1.7, we introduced an explicit built-in flag
-    // we took it out at 1.18
+    // we took it out at 2.0
 
     if (base.store.file_major == 1 && 
 	base.store.file_minor >= 7 && 

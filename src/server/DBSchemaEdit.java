@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2000/02/29 09:35:13 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2000/02/29 10:25:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -974,7 +974,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     synchronized (store)
       {
 	// restore the namespace vector
-	
+	store.nameSpaces.setSize(0);
 	store.nameSpaces = oldNameSpaces;
       }
 
@@ -990,9 +990,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     newBases.clear();
     newBases = null;
-
-    oldNameSpaces.setSize(0);
-    oldNameSpaces = null;
 
     GanymedeServer.lSemaphore.enable("schema edit");
 
