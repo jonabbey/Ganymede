@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.12 $
-# Date: $Date: 1999/04/15 23:07:50 $
+# Version: $Revision: 1.13 $
+# Date: $Date: 1999/07/22 03:51:30 $
 #
 ############################################################
 
@@ -61,10 +61,13 @@ ln -s ../jcrypt.class .
 rm -f Qsmtp.class
 ln -s ../Qsmtp.class .
 
+rm -f messageObject.class
+ln -s ../messageObject.class .
+
 ./sync_tree
 ./sync_tree.gnu
 
-$JAVADIR/jar -cf ../ganymedeServer.jar arlut gnu jcrypt.class Qsmtp.class
+$JAVADIR/jar -cf ../ganymedeServer.jar arlut gnu jcrypt.class Qsmtp.class messageObject.class
 
 cd ..
 
