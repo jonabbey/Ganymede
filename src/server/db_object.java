@@ -8,7 +8,7 @@ import java.rmi.RemoteException;
  *
  * Base class for GANYMEDE client-visible objects.
  *
- * @version $Revision: 1.10 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.11 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -98,18 +98,6 @@ public interface db_object extends java.rmi.Remote {
 
   public boolean isEmbedded() throws RemoteException;
 
-  /**
-   *
-   * <p>Returns true if the last field change peformed on this
-   * object necessitates the client rescanning this object to
-   * reveal previously invisible fields or to hide previously
-   * visible fields.</p>
-   *
-   * <p>shouldRescan() will reset itself after returning true.</p>
-   *
-   */
-
-  public boolean shouldRescan() throws RemoteException;
 
   /**
    *
@@ -163,7 +151,7 @@ public interface db_object extends java.rmi.Remote {
    *
    */
 
-  public boolean setFieldValue(short fieldID, Object value) throws RemoteException;
+  public ReturnVal setFieldValue(short fieldID, Object value) throws RemoteException;
 
   /**
    *

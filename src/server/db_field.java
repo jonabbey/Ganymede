@@ -6,7 +6,7 @@
    or a scalar.  
 
    Created: 10 April 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,7 +41,7 @@ public interface db_field extends java.rmi.Remote {
   // for scalars
 
   Object getValue() throws RemoteException;
-  boolean setValue(Object value) throws RemoteException;
+  ReturnVal setValue(Object value) throws RemoteException;
 
   // for vectors
 
@@ -49,8 +49,8 @@ public interface db_field extends java.rmi.Remote {
 
   Vector getValues() throws RemoteException;
   Object getElement(int index) throws RemoteException;
-  boolean setElement(int index, Object value) throws RemoteException;
-  boolean addElement(Object value) throws RemoteException;
-  boolean deleteElement(int index) throws RemoteException;
-  boolean deleteElement(Object value) throws RemoteException;
+  ReturnVal setElement(int index, Object value) throws RemoteException;
+  ReturnVal addElement(Object value) throws RemoteException;
+  ReturnVal deleteElement(int index) throws RemoteException;
+  ReturnVal deleteElement(Object value) throws RemoteException;
 }

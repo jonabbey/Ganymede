@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,8 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import jcrypt;
+
+import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -490,7 +492,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    */
 
-  public boolean setValue(Object value)
+  public ReturnVal setValue(Object value)
   {
     throw new IllegalArgumentException("can't directly set the value on a password field");
   }
@@ -504,15 +506,21 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    */
 
-  public boolean setPlainTextPass(String text)
+  public ReturnVal setPlainTextPass(String text)
   {
+    ReturnVal retVal = null;
     String cryptedText = null;
 
     /* -- */
 
     if (!verifyNewValue(text))
       {
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Invalid password value\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
 
     if (((DBEditObject)owner).finalizeSetValue(this, text))
@@ -545,11 +553,16 @@ public class PasswordDBField extends DBField implements pass_field {
 	    defined = true;
 	  }
 
-	return true;
+	return null;
       }
     else
       {
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Could not finalize password value\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
   }
 
@@ -563,17 +576,32 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    */
 
-  public boolean setCryptPass(String text)
+  public ReturnVal setCryptPass(String text)
   {
+    ReturnVal retVal = null;
+
+    /* -- */
+
     if (!definition.isCrypted())
       {
 	owner.editset.session.setLastError("can't set a pre-crypted value into a plaintext password field");
-	return false;
+
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "can't set a pre-crypted value into a plaintext password field",
+					 "OK",
+					 null));
+	return retVal;
       }
 
     if (!verifyNewValue(text))
       {
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Invalid crypted password value\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
 
     if (((DBEditObject)owner).finalizeSetValue(this, text))
@@ -588,11 +616,17 @@ public class PasswordDBField extends DBField implements pass_field {
 	    this.value = text;
 	    defined = true;
 	  }
-	return true;
+
+	return null;
       }
     else
       {
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Could not finalize crypted password value\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
   }
 

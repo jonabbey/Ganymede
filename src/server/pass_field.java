@@ -5,7 +5,7 @@
    Remote interface definition.
 
    Created: 21 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -97,7 +97,7 @@ public interface pass_field extends db_field {
    *
    */
 
-  boolean setPlainTextPass(String text) throws RemoteException;
+  ReturnVal setPlainTextPass(String text) throws RemoteException;
 
   /**
    *
@@ -107,5 +107,5 @@ public interface pass_field extends db_field {
    *
    */
 
-  boolean setCryptPass(String text) throws RemoteException;
+  ReturnVal setCryptPass(String text) throws RemoteException;
 }

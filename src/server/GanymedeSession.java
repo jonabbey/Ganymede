@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,8 @@ package arlut.csd.ganymede;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.*;
+
+import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -629,21 +631,27 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public void setDefaultOwner(Vector ownerInvids)
+  public ReturnVal setDefaultOwner(Vector ownerInvids)
   {
     if (ownerInvids == null)
       {
 	newObjectOwnerInvids = ownerInvids;
-	return;
+	return null;
       }
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
-	throw new IllegalArgumentException("Error.. ownerInvids contains invid that the persona is not a member of.");
+	ReturnVal result = new ReturnVal(false);
+	result.setDialog(new JDialogBuff("Error",
+					 "Error.. ownerInvids contains invid that the persona is not a member of.",
+					 "OK",
+					 null));
+	return result;
       }
     else
       {
 	newObjectOwnerInvids = ownerInvids;
+	return null;
       }
   }
 
@@ -666,21 +674,27 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public void filterQueries(Vector ownerInvids)
+  public ReturnVal filterQueries(Vector ownerInvids)
   {
     if (ownerInvids == null)
       {
 	visibilityFilterInvids = ownerInvids;
-	return;
+	return null;
       }
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
-	throw new IllegalArgumentException("Error.. ownerInvids contains invid that the persona is not a member of.");
+	ReturnVal result = new ReturnVal(false);
+	result.setDialog(new JDialogBuff("Error",
+					 "Error.. ownerInvids contains invid that the persona is not a member of.",
+					 "OK",
+					 null));
+	return result;
       }
     else
       {
 	visibilityFilterInvids = ownerInvids;
+	return null;
       }
   }
 
@@ -793,14 +807,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public void openTransaction(String describe)
+  public ReturnVal openTransaction(String describe)
   {
     if (session.editSet != null)
       {
-	throw new IllegalArgumentException("transaction already opened");
+	ReturnVal result = new ReturnVal(false);
+	result.setDialog(new JDialogBuff("Error",
+					 "Error.. transaction already opened",
+					 "OK",
+					 null));
+	return result;
       }
 
     session.openTransaction(describe);
+
+    return null;
   }
 
   /**
@@ -815,18 +836,22 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * commitTransaction() will instead abort the transaction.  In any
    * case, calling commitTransaction() will close the transaction.
    *
-   * @returns false if the transaction could not be committed.  
-   *                getLastError() can be called to obtain an explanation
-   *                of commit failure.
+   * @return a ReturnVal object if the transaction could not be committed,
+   *            or null if there were no problems
    * 
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized boolean commitTransaction()
+  public synchronized ReturnVal commitTransaction()
   {
     if (session.editSet == null)
       {
-	throw new IllegalArgumentException("no transaction in progress");
+	ReturnVal result = new ReturnVal(false);
+	result.setDialog(new JDialogBuff("Error",
+					 "Error.. no transaction in progress",
+					 "OK",
+					 null));
+	return result;
       }
 
     return session.commitTransaction();
@@ -837,17 +862,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * This method causes all changes made by the client to be thrown out
    * by the database, and the transaction is closed.
    *
+   * @return a ReturnVal object if the transaction could not be committed,
+   *         or null if there were no problems
+   *
    * @see arlut.csd.ganymede.Session
    */
 
-  public void abortTransaction()
+  public ReturnVal abortTransaction()
   {
     if (session.editSet == null)
       {
 	throw new IllegalArgumentException("no transaction in progress");
       }
 
-    session.abortTransaction();
+    return session.abortTransaction();
   }
 
   /**
@@ -1893,13 +1921,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * to have time to do accounting, clean up, etc., before a user id or
    * network address is re-used.
    *
+   * @return a ReturnVal object if the object could not be inactivated,
+   *         or null if there were no problems
+   *
    * @see arlut.csd.ganymede.Session
    */
   
-  public synchronized boolean inactivate_db_object(Invid invid) 
+  public synchronized ReturnVal inactivate_db_object(Invid invid) 
   {
-    setLastError("inactivate_db_object is not yet implemented.");
-    return false;
+    ReturnVal retVal = new ReturnVal(false);
+    retVal.setDialog(new JDialogBuff("Error",
+				     "Error.. inactivate_db_object is not yet implemented on the server",
+				     "OK",
+				     null));
+    return retVal;
   }
 
   /**
@@ -1909,14 +1944,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * simply removed on demand.  The active permissions for the client
    * may determine whether a particular type of object may be removed.
    *
-   * @return true if the object was removed, if false, check
-   * getLastError()
+   * @return a ReturnVal object if the object could not be inactivated,
+   *         or null if there were no problems
    *
    * @see arlut.csd.ganymede.Session
    */
   
-  public synchronized boolean remove_db_object(Invid invid) 
+  public synchronized ReturnVal remove_db_object(Invid invid) 
   {
+    ReturnVal retVal = null;
+
+    /* -- */
+
     if (debug)
       {
 	Ganymede.debug("Attempting to delete object: " + invid);
@@ -1925,15 +1964,29 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if ((invid.getType() == SchemaConstants.PermBase) &&
 	(invid.getNum() == SchemaConstants.PermDefaultObj))
       {
-	setLastError("Can't delete default permissions definitions");
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Error.. can't delete default permissions definitions",
+					 "OK",
+					 null));
+
+	setLastError("Can't delete default permissions definitions"); // for logging
+
+	return retVal;
       }
 
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
 	(invid.getNum() == 0))
       {
-	setLastError("Can't delete supergash persona");
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Error.. can't delete supergash persona",
+					 "OK",
+					 null));
+
+	setLastError("Can't delete supergash persona");	// for logging
+
+	return retVal;
       }
 
     DBObjectBase objBase = Ganymede.db.getObjectBase(invid.getType());
@@ -1941,24 +1994,43 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (vObj == null)
       {
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Can't delete non-existent object",
+					 "OK",
+					 null));
+
 	setLastError("Can't delete non-existent object");
-	return false;
+
+	return retVal;
       }
 
     if (!getPerm(vObj).isEditable())
       {
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Don't have permission to delete object" + vObj.getLabel(),
+					 "OK",
+					 null));
+
 	setLastError("Don't have permission to delete object" + vObj.getLabel());
-	return false;
+	return retVal;
       }
 
     if (!objBase.objectHook.canRemove(session, vObj))
       {
-	setLastError("object manager refused deletion");
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Object Manager refused deletion for" + vObj.getLabel(),
+					 "OK",
+					 null));
+
+	setLastError("object manager refused deletion" + vObj.getLabel());
+	return retVal;
       }
     
     session.deleteDBObject(invid);
-    return true;
+    return null;
   }
 
   /**

@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -344,8 +344,10 @@ public class Ganymede {
 	  {
 	    System.err.println("Not Creating the PermSelfUserObj");
 	  }
+
+	ReturnVal retVal = internalSession.commitTransaction();
     
-	if (internalSession.commitTransaction())
+	if (retVal == null || retVal.didSucceed())
 	  {
 	    System.err.println("Ganymede.startupHook() succeeded");
 	  }

@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.16 $ %D%
+ * @version $Revision: 1.17 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -43,7 +43,12 @@ public interface Session extends Remote {
 
   // Client/server interface operations
 
+  /**
+   * @deprecated
+   */
+
   String      getLastError() throws RemoteException;
+
   void        logout() throws RemoteException;
 
   /**
@@ -85,7 +90,7 @@ public interface Session extends Remote {
    *
    */
 
-  void        setDefaultOwner(Vector ownerInvids) throws RemoteException;
+  ReturnVal        setDefaultOwner(Vector ownerInvids) throws RemoteException;
 
   /**
    *
@@ -106,7 +111,7 @@ public interface Session extends Remote {
    *
    */
 
-  void        filterQueries(Vector ownerInvids) throws RemoteException;
+  ReturnVal        filterQueries(Vector ownerInvids) throws RemoteException;
 
   //  Database operations
 
@@ -155,7 +160,7 @@ public interface Session extends Remote {
    * 
    */
 
-  void     openTransaction(String description) throws RemoteException;
+  ReturnVal     openTransaction(String description) throws RemoteException;
 
   /**
    *
@@ -170,22 +175,24 @@ public interface Session extends Remote {
    * commitTransaction() will instead abort the transaction.  In any
    * case, calling commitTransaction() will close the transaction.
    *
-   * @return false if the transaction could not be committed.
-   *               getLastError() can be called to obtain an explanation
-   *               of commit failure.
+   * @return null if the transaction was committed successfully,
+   *         a non-null ReturnVal if there was a commit failure.
    * 
    */
 
-  boolean  commitTransaction() throws RemoteException;
+  ReturnVal  commitTransaction() throws RemoteException;
 
   /**
    *
    * This method causes all changes made by the client to be thrown out
    * by the database, and the transaction is closed.
    *
+   * @return null if the transaction was cleared successfully,
+   *         a non-null ReturnVal if there was some kind of abnormal condition.
+   *
    */
   
-  void     abortTransaction() throws RemoteException;
+  ReturnVal     abortTransaction() throws RemoteException;
 
   /**
    *
@@ -321,7 +328,7 @@ public interface Session extends Remote {
    *
    */
 
-  boolean     inactivate_db_object(Invid invid) throws RemoteException;
+  ReturnVal     inactivate_db_object(Invid invid) throws RemoteException;
 
   /**
    *
@@ -335,6 +342,6 @@ public interface Session extends Remote {
    *
    */
 
-  boolean     remove_db_object(Invid invid) throws RemoteException;
+  ReturnVal     remove_db_object(Invid invid) throws RemoteException;
 }
 

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,8 @@ package arlut.csd.ganymede;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
+
+import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -266,8 +268,9 @@ public class IPDBField extends DBField implements ip_field {
    *
    */
 
-  public boolean setValue(Object value)
+  public ReturnVal setValue(Object value)
   {
+    ReturnVal retVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
     Byte[] bytes;
@@ -308,7 +311,12 @@ public class IPDBField extends DBField implements ip_field {
 
     if (!verifyNewValue(bytes))
       {
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Invalid ip value\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
 
     eObj = (DBEditObject) owner;
@@ -330,7 +338,13 @@ public class IPDBField extends DBField implements ip_field {
 	      }
 
 	    setLastError("value " + bytes + " already taken in namespace");
-	    return false;
+
+	    retVal = new ReturnVal(false);
+	    retVal.setDialog(new JDialogBuff("Error",
+					     "IP address already in use\n" + getLastError(),
+					     "OK",
+					     null));
+	    return retVal;
 	  }
       }
 
@@ -351,7 +365,7 @@ public class IPDBField extends DBField implements ip_field {
 	    defined = false;	// the key
 	  }
 
-	return true;
+	return null;
       }
     else
       {
@@ -365,7 +379,12 @@ public class IPDBField extends DBField implements ip_field {
 	    mark(this.value);
 	  }
 
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Could not finalize IP address\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
   }
 
@@ -382,8 +401,9 @@ public class IPDBField extends DBField implements ip_field {
    *
    */
   
-  public boolean setElement(int index, Object value)
+  public ReturnVal setElement(int index, Object value)
   {
+    ReturnVal retVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
     Byte[] bytes;
@@ -429,7 +449,12 @@ public class IPDBField extends DBField implements ip_field {
 
     if (!verifyNewValue(bytes))
       {
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Improper IP address\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
 
     eObj = (DBEditObject) owner;
@@ -447,7 +472,13 @@ public class IPDBField extends DBField implements ip_field {
 	    mark(values.elementAt(index)); // we aren't clearing the old value after all
 
 	    setLastError("value " + value + " already taken in namespace");
-	    return false;
+
+	    retVal = new ReturnVal(false);
+	    retVal.setDialog(new JDialogBuff("Error",
+					     "IP address already in use\n" + getLastError(),
+					     "OK",
+					     null));
+	    return retVal;
 	  }
       }
 
@@ -461,7 +492,7 @@ public class IPDBField extends DBField implements ip_field {
 
 	defined = true;
 	
-	return true;
+	return null;
       }
     else
       {
@@ -475,7 +506,12 @@ public class IPDBField extends DBField implements ip_field {
 	    mark(values.elementAt(index));
 	  }
 
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Could not finalize IP address\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
   }
 
@@ -492,8 +528,9 @@ public class IPDBField extends DBField implements ip_field {
    *
    */
 
-  public boolean addElement(Object value)
+  public ReturnVal addElement(Object value)
   {
+    ReturnVal retVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
     Byte[] bytes;
@@ -536,13 +573,24 @@ public class IPDBField extends DBField implements ip_field {
 
     if (!verifyNewValue(bytes))
       {
-	return false;
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("IPDBField.addElement() Error",
+					 "Improper IP address\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
 
     if (size() >= getMaxArraySize())
       {
 	setLastError("Field " + getName() + " already at or beyond array size limit");
-	return false;
+
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("IPDBField.addElement() Error",
+					 "Field " + getName() + " already at or beyond array size limit",
+					 "OK",
+					 null));
+	return retVal;
       }
 
     eObj = (DBEditObject) owner;
@@ -554,7 +602,13 @@ public class IPDBField extends DBField implements ip_field {
 	if (!mark(bytes))
 	  {
 	    setLastError("value " + value + " already taken in namespace");
-	    return false;
+
+	    retVal = new ReturnVal(false);
+	    retVal.setDialog(new JDialogBuff("IPDBField.addElement() Error",
+					     "IP address already in use\n" + getLastError(),
+					     "OK",
+					     null));
+	    return retVal;
 	  }
       }
 
@@ -562,7 +616,7 @@ public class IPDBField extends DBField implements ip_field {
       {
 	values.addElement(bytes);
 	defined = true;
-	return true;
+	return null;
       } 
     else
       {
@@ -570,7 +624,13 @@ public class IPDBField extends DBField implements ip_field {
 	  {
 	    unmark(bytes);
 	  }
-	return false;
+
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("IPDBField.addElement() Error",
+					 "Could not finalize IP address\n" + getLastError(),
+					 "OK",
+					 null));
+	return retVal;
       }
   }
 

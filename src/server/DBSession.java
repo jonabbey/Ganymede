@@ -1,11 +1,11 @@
-/*
+ /*
 
    DBSession.java
 
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,6 +15,8 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+
+import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -647,11 +649,17 @@ final public class DBSession {
    * incompatible change is made with respect to any checked out objects
    * while the Bases are unlocked.
    *
+   *
+   * @return null if the transaction was committed successfully,
+   *         a non-null ReturnVal if there was a commit failure.
+   *
    * @see arlut.csd.ganymede.DBEditObject
+   *
    */
 
-  public synchronized boolean commitTransaction()
+  public synchronized ReturnVal commitTransaction()
   {
+    ReturnVal retVal = null;
     boolean result;
 
     /* -- */
@@ -699,11 +707,17 @@ final public class DBSession {
     else
       {
 	Ganymede.debug(key + ": commitTransaction(): editset failed to commit: transaction aborted");
+
+	retVal = new ReturnVal(false);
+	retVal.setDialog(new JDialogBuff("Error",
+					 "Error.. transaction could not commit: transaction canceled",
+					 "OK",
+					 null));
       }
 
     editSet = null;
 
-    return result;
+    return retVal;		// later on we'll figure out how to do this right
   }
 
   /**
@@ -717,11 +731,19 @@ final public class DBSession {
    * Calling abortTransaction has no affect on any locks held by this session, but
    * generally no locks should be held here.
    *
+   *
+   * @return null if the transaction was committed successfully,
+   *         a non-null ReturnVal if there was a commit failure.
+   *
    * @see arlut.csd.ganymede.DBEditObject
    */
 
-  public synchronized void abortTransaction()
+  public synchronized ReturnVal abortTransaction()
   {
+    ReturnVal retVal = null;
+
+    /* -- */
+
     if (editSet == null)
       {
 	throw new RuntimeException("abortTransaction called outside of a transaction");
@@ -741,7 +763,13 @@ final public class DBSession {
 	else
 	  {
 	    Ganymede.debug("abortTransaction() for " + key + ", can't safely dump writeLock.. can't kill it off");
-	    return;
+
+	    retVal = new ReturnVal(false);
+	    retVal.setDialog(new JDialogBuff("Error",
+					     "Error.. transaction could not abort: can't safely dump writeLock",
+					     "OK",
+					     null));
+	    return retVal;
 	  }
       }
 
@@ -763,6 +791,8 @@ final public class DBSession {
 
     editSet.release();
     editSet = null;
+
+    return retVal;
   }
 
   /**

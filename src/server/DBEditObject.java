@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,8 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.*;
+
+import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -470,7 +472,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @see arlut.csd.ganymede.db_object
    */
 
-  public boolean setFieldValue(short fieldID, Object value)
+  public ReturnVal setFieldValue(short fieldID, Object value)
   {
     try
       {
@@ -1236,7 +1238,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    while (field.size() > 0)
 	      {
-		if (!field.deleteElement(0))
+		if (field.deleteElement(0) != null)
 		  {
 		    session = editset.getSession();
 		    
@@ -1253,7 +1255,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    if (field.getType() != PERMISSIONMATRIX)
 	      {
-		if (!field.setValue(null))
+		if (field.setValue(null) != null)
 		  {
 		    session = editset.getSession();
 		    

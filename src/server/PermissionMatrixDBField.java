@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,8 @@ package arlut.csd.ganymede;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
+
+import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -210,9 +212,14 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   // direct setting of the entire matrix.. just use the get() and set()
   // methods below.
 
-  public boolean setValue(Object value)
+  public ReturnVal setValue(Object value)
   {
-    return false;
+    ReturnVal retVal = new ReturnVal(false);
+    retVal.setDialog(new JDialogBuff("Error",
+				     "Error.. can't call setValue() on a PermissionMatrixDBField",
+				     "OK",
+				     null));
+    return retVal;
   }
 
   public Object clone()
