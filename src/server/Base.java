@@ -5,7 +5,7 @@
    Client side interface to the object type dictionary
    
    Created: 17 April 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,7 +29,7 @@ import java.util.*;
  *
  */
 
-public interface Base extends Remote {
+public interface Base extends CategoryNode, Remote {
 
   public boolean isRemovable() throws RemoteException;
 
@@ -54,6 +54,8 @@ public interface Base extends Remote {
 
   public void setLabelField(String fieldName) throws RemoteException;
   public void setLabelField(short fieldID) throws RemoteException;
+ 
+  public Category getCategory() throws RemoteException;
 
   public BaseField createNewField() throws RemoteException;
   public boolean deleteField(BaseField bF) throws RemoteException;
