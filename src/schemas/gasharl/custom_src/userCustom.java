@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 2001/06/25 21:12:52 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2001/06/25 21:18:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1511,12 +1511,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// won't try and restrict the forward date when the date
 		// set operation cascades forward through our maxDate()
 		// method
+
+		ReturnVal result;
 		
 		amChangingExpireDate = true;
-		
-		ReturnVal result = dateField.setValueLocal(passwordDate);
-		
-		amChangingExpireDate = false;
+
+		try
+		  {
+		    result = dateField.setValueLocal(passwordDate);
+		  }
+		finally
+		  {
+		    amChangingExpireDate = false;
+		  }
 		
 		if (result != null)
 		  {
