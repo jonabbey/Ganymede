@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -63,14 +63,7 @@ public class BooleanDBField extends DBField implements boolean_field {
     defined = false;
     value = null;
 
-    if (isVector())
-      {
-	values = new Vector();
-      }
-    else
-      {
-	values = null;
-      }
+    values = null;
   }
 
   /**
@@ -84,20 +77,11 @@ public class BooleanDBField extends DBField implements boolean_field {
     this.owner = owner;
     definition = field.definition;
     
-    if (isVector())
-      {
-	values = (Vector) field.values.clone();
-	value = null;
-      }
-    else
-      {
-	value = field.value;
-	values = null;
-      }
+    value = field.value;
+    values = null;
 
     defined = true;
   }
-
 
   /**
    *
@@ -107,11 +91,6 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public BooleanDBField(DBObject owner, boolean value, DBObjectBaseField definition) throws RemoteException
   {
-    if (definition.isArray())
-      {
-	throw new IllegalArgumentException("scalar constructor called on vector field");
-      }
-
     this.owner = owner;
     this.definition = definition;
     this.value = new Boolean(value);
@@ -128,27 +107,7 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public BooleanDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
   {
-    if (!definition.isArray())
-      {
-	throw new IllegalArgumentException("vector constructor called on scalar field");
-      }
-
-    this.owner = owner;
-    this.definition = definition;
-    
-    if (values == null)
-      {
-	this.values = new Vector();
-	defined = false;
-      }
-    else
-      {
-	this.values = (Vector) values.clone();
-	defined = true;
-      }
-
-    value = null;
-    defined = true;
+    throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
   public Object clone()
@@ -165,39 +124,13 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   void emit(DataOutput out) throws IOException
   {
-    if (isVector())
-      {
-	out.writeShort(values.size());
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    out.writeBoolean(value(i));
-	  }
-      }
-    else
-      {
-	out.writeBoolean(value());
-      }
+    out.writeBoolean(value());
   }
 
   void receive(DataInput in) throws IOException
   {
-    int count;
-
-    /* -- */
-
-    if (isVector())
-      {
-	count = in.readShort();
-	values = new Vector(count);
-	for (int i = 0; i < count; i++)
-	  {
-	    values.addElement(new Boolean(in.readBoolean()));
-	  }
-      }
-    else
-      {
-	value = new Boolean(in.readBoolean());
-      }
+    value = new Boolean(in.readBoolean());
+    defined = true;
   }
 
   // ****
@@ -208,22 +141,12 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public boolean value()
   {
-    if (isVector())
-      {
-	throw new IllegalArgumentException("scalar accessor called on vector");
-      }
-
     return ((Boolean) value).booleanValue();
   }
 
   public boolean value(int index)
   {
-    if (!isVector())
-      {
-	throw new IllegalArgumentException("vector accessor called on scalar");
-      }
-
-    return ((Boolean) values.elementAt(index)).booleanValue();
+    throw new IllegalArgumentException("vector accessor called on scalar");
   }
 
   public synchronized String getValueString()
@@ -233,31 +156,24 @@ public class BooleanDBField extends DBField implements boolean_field {
 	throw new IllegalArgumentException("permission denied to read this field");
       }
 
-
-    if (!isVector())
+    if (value == null)
       {
-	if (value == null)
-	  {
-	    return "null";
-	  }
-
-	return (this.value() ? "True" : "False");
+	return "null";
       }
+    
+    return (this.value() ? "True" : "False");
+  }
 
-    String result = "";
-    int size = size();
+  /**
+   *
+   * The normal boolean getValueString() encoding is adequate.
+   *
+   *
+   */
 
-    for (int i = 0; i < size; i++)
-      {
-	if (!result.equals(""))
-	  {
-	    result = result + ", ";
-	  }
-
-	result = result + (this.value(i) ? "True" : "False");
-      }
-
-    return result;
+  public String getEncodingString()
+  {
+    return getValueString();
   }
 
   // ****
