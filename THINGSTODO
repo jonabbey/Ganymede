@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.96
-January 29, 1999
+Ganymede Developer Release 0.97
+February ??, 1999
 THINGSTODO
 ---------------------------------------------
 
@@ -65,6 +65,17 @@ anytime soon, but it really should be done.
 All of the loader code for the included shema kits is pretty
 unpleasant.  We recently incorporated GNU regexp into the server, and
 the NIS/GASH loader code should probably take advantage of it.
+
+5) Internationalization
+
+It would be a really good thing for the client and server to be
+internationalized.  After getting the Ganymede announce posted in
+Linux Weekly News and seeing all of the hits from Japan, Italy,
+Austria, Russia, China, the Netherlands, France, Spain, Portugal,
+etc., my fantasy that internationalization was something I could just
+sort of pretend I'd never heard of seems to be evaporating.  I don't
+think I'll be able to dedicate time to it anytime in the foreseeable
+future, but someone is going to have to at some point.
 
 ---
 
