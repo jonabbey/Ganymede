@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.155 $
-   Last Mod Date: $Date: 1999/10/21 16:01:25 $
+   Version: $Revision: 1.156 $
+   Last Mod Date: $Date: 1999/10/29 16:14:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.155 $ %D%
+ * @version $Revision: 1.156 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3829,10 +3829,42 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public ReturnVal clone_db_object(Invid invid)
   {
+    DBObject vObj;
+    DBEditObject newObj;
+    ReturnVal retVal;
+
+    /* -- */
+
     checklogin();
 
-    return Ganymede.createErrorDialog("Invalid operation",
-				      "clone_db_object is not yet implemented.");	      
+    retVal = view_db_object(invid); // get a copy customized for per-field visibility
+
+    if (!retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    vObj = (DBObject) retVal.getObject();
+
+    retVal = create_db_object(invid.getType());
+
+    if (!retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    newObj = (DBEditObject) retVal.getObject();
+
+    retVal = newObj.cloneFromObject(session, vObj, false);
+
+    if (!retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    retVal.setObject(newObj);
+
+    return retVal;
   }
 
   /**

@@ -5,8 +5,8 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/08/05 22:08:43 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/10/29 16:14:03 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -246,7 +246,7 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 	    try
 	      {
 		if (currentField.isString() || currentField.isNumeric() ||
-		    currentField.isIP())
+		    currentField.isIP() || currentField.isFloat())
 		  {
 		    labelC.addItem(currentField.getName());
 		  }

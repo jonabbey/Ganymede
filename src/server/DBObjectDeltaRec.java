@@ -10,8 +10,8 @@
    
    Created: 11 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/01/22 18:05:36 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/10/29 16:14:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -336,6 +336,18 @@ public class DBObjectDeltaRec implements FieldType {
 		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
 							   new NumericDBField(null, in, fieldDef)));
 		    break;
+
+ 		  case FLOAT:
+ 		    status = "Reading float field (" + fieldName + ":" + fieldcode + ") for field " + i;
+ 
+ 		    if (debug)
+ 		      {
+ 			System.err.println(status);
+ 		      }
+		    
+ 		    fieldRecs.addElement(new fieldDeltaRec(fieldcode, 
+ 							   new FloatDBField(null, in, fieldDef)));
+ 		    break;
 
 		  case DATE:
 		    status = "Reading date field (" + fieldName + ":" + fieldcode + ") for field " + i;

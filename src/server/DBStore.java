@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 1999/10/26 15:26:35 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 1999/10/29 16:14:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.94 $ %D%
+ * @version $Revision: 1.95 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -141,7 +141,7 @@ public class DBStore {
    * after id_string
    */
 
-  static final byte minor_version = 14;
+  static final byte minor_version = 15;
 
   static boolean debug = false;
 
@@ -374,6 +374,12 @@ public class DBStore {
 	  {
 	    System.err.println("DBStore initialization error: major version mismatch");
 	    throw new Error("DBStore initialization error (" + filename + ")");
+	  }
+
+	if (file_minor > minor_version)
+	  {
+	    System.err.println("*** Error, this ganymede.db file is too new for this version of the Ganymede server.");
+	    System.err.println("*** There may be errors in loading the data.");
 	  }
 
 	// read in the namespace definitions

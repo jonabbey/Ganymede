@@ -7,8 +7,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/09/22 22:27:53 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/10/29 16:14:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -214,6 +214,7 @@ public interface BaseField extends Remote {
    *   static short PERMISSIONMATRIX = 5;
    *   static short PASSWORD = 6;
    *   static short IP = 7;
+   *   static short FLOAT = 8;
    * </pre>
    */
 
@@ -230,6 +231,12 @@ public interface BaseField extends Remote {
    */
 
   public boolean isNumeric() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of float type</p>
+   */
+
+  public boolean isFloat() throws RemoteException;
 
   /**
    * <p>Returns true if this field is of date type</p>

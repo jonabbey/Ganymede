@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 1999/06/19 03:53:18 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 1999/10/29 16:14:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -706,6 +706,43 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
     
     return true;
+  }
+
+  /**
+   * <p>This method copies the current value of this DBField
+   * to target.  The target DBField must be contained within a
+   * checked-out DBEditObject in order to be updated.  Any actions
+   * that would normally occur from a user manually setting a value
+   * into the field will occur.</p>
+   *
+   * @param target The DBField to copy this field's contents to.
+   * @param local If true, permissions checking is skipped.
+   */
+
+  public synchronized ReturnVal copyFieldTo(PermissionMatrixDBField target, boolean local)
+  {
+    if (!local)
+      {
+	if (!verifyReadPermission())
+	  {
+	    return Ganymede.createErrorDialog("Copy field error", 
+					      "Can't copy field " + getName() + ", no read privileges");
+	  }
+      }
+	
+    if (!target.isEditable(local))
+      {
+	return Ganymede.createErrorDialog("Copy field error", 
+					  "Can't copy field " + getName() + ", no write privileges");
+      }
+
+    // doing a simple clone of the hashtable is okay, since both the
+    // keys and values of the matrix are treated as immutable (they
+    // are replaced, not changed in-place)
+
+    target.matrix = (Hashtable) this.matrix.clone();
+
+    return null;
   }
 
   /**

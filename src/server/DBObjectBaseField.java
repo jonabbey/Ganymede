@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 1999/10/21 16:01:24 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 1999/10/29 16:14:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -919,6 +919,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    *   static short PERMISSIONMATRIX = 5;
    *   static short PASSWORD = 6;
    *   static short IP = 7;
+   *   static short FLOAT = 8;
    * </pre>
    *
    * @see arlut.csd.ganymede.DBStore
@@ -988,6 +989,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   public boolean isNumeric()
   {
     return (field_type == NUMERIC);
+  }
+
+  /**
+   * <p>Returns true if this field is of float type</p>
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isFloat()
+  {
+    return (field_type == FLOAT);
   }
 
   /**
@@ -2251,6 +2263,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	result = "numeric";
 	break;
 
+      case FLOAT:
+	result = "float";
+	break;
+
       case DATE:
 	result = "date";
 	break;
@@ -2408,6 +2424,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
       case NUMERIC:
 	result = "<td>numeric</td>";
+	break;
+
+      case FLOAT:
+	result = "<td>float</td>";
 	break;
 
       case DATE:

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 1999/10/12 18:56:08 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 1999/10/29 16:14:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -275,7 +275,7 @@ public class DBEditSet {
 	// indicate that this object's base is involved in the
 	// transaction.
 
-	basesModified.put(object.objectBase, this);	
+	basesModified.put(object.objectBase, this);
       }
   }
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 1999/10/07 21:04:06 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 1999/10/29 16:14:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.79 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.80 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -337,15 +337,13 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
-   *
-   * This is a view-copy constructor, designed to make a view-only
+   * <p>This is a view-copy constructor, designed to make a view-only
    * duplicate of an object from the database.  This view-only object
    * knows who is looking at it through its GanymedeSession reference,
-   * and so can properly enforce field access permissions.<br><br>
+   * and so can properly enforce field access permissions.</p>
    *
-   * &lt;gSession&gt; may be null, in which case the returned DBObject
-   * will be simply an un-linked fresh copy of &lt;original&gt;.
-   *
+   * <p>&lt;gSession&gt; may be null, in which case the returned DBObject
+   * will be simply an un-linked fresh copy of &lt;original&gt;.</p>
    */
 
   public DBObject(DBObject original, GanymedeSession gSession)
@@ -390,6 +388,14 @@ public class DBObject implements db_object, FieldType, Remote {
 	    fields.putNoSyncNoRemove(copy);
 
 	    break;
+
+ 	  case FLOAT:
+ 	    copy = new FloatDBField(this, (FloatDBField) field);
+ 
+ 	    copy.setOwner(this);
+ 	    fields.putNoSyncNoRemove(copy);
+ 
+ 	    break;
 
 	  case DATE:
 	    copy = new DateDBField(this, (DateDBField) field);
@@ -1015,6 +1021,10 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	  case NUMERIC:
 	    tmp = new NumericDBField(this, in, definition);
+	    break;
+
+	  case FLOAT:
+	    tmp = new FloatDBField(this, in, definition);
 	    break;
 
 	  case DATE:

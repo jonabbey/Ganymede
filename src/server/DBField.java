@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 1999/06/25 02:23:51 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 1999/10/29 16:14:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -82,6 +82,7 @@ import arlut.csd.JDialog.*;
  * <LI>{@link arlut.csd.ganymede.StringDBField StringDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.BooleanDBField BooleanDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.NumericDBField NumericDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.FloatDBField FloatDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.DateDBField DateDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.InvidDBField InvidDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.IPDBField IPDBField}</LI>
@@ -349,6 +350,76 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
 	return true;
       }
+  }
+
+  /**
+   * <p>This method copies the current value of this DBField
+   * to target.  The target DBField must be contained within a
+   * checked-out DBEditObject in order to be updated.  Any actions
+   * that would normally occur from a user manually setting a value
+   * into the field will occur.</p>
+   *
+   * <p>Note that the default implementation of copyFieldTo() does
+   * not cleanly handle problems that occur during field copying.  In
+   * particular, if there is a failure while copying a vector field,
+   * the target field may be left with a partially copied vector.</p>
+   *
+   * @param target The DBField to copy this field's contents to.
+   * @param local If true, permissions checking is skipped.
+   */
+
+  public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
+  {
+    ReturnVal retVal;
+
+    /* -- */
+
+    if (!local)
+      {
+	if (!verifyReadPermission())
+	  {
+	    return Ganymede.createErrorDialog("Copy field error", 
+					      "Can't copy field " + getName() + ", no read privileges");
+	  }
+      }
+	
+    if (!target.isEditable(local))
+      {
+	return Ganymede.createErrorDialog("Copy field error",
+					  "Can't copy field " + getName() + ", no write privileges");
+      }
+
+    if (!isVector())
+      {
+	return target.setValue(getValue(), local);
+      }
+    else
+      {
+	Vector valuesToCopy;
+
+	/* -- */
+
+	if (!local)
+	  {
+	    valuesToCopy = getValues();
+	  }
+	else
+	  {
+	    valuesToCopy = getValuesLocal();
+	  }
+
+	for (int i = 0; i < valuesToCopy.size(); i++)
+	  {
+	    retVal = target.addElement(valuesToCopy.elementAt(i), local);
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return retVal;
+	      }
+	  }
+      }
+
+    return null;
   }
 
   // ****
@@ -922,7 +993,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * @param local If true, permissions checking will be skipped
    */
 
-  public synchronized ReturnVal setValue(Object value, boolean local)
+  public synchronized ReturnVal setValue(Object submittedValue, boolean local)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -943,12 +1014,12 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	throw new IllegalArgumentException("scalar method called on a vector field for field " + getName());
       }
 
-    if (this.value == value)
+    if (this.value == submittedValue)
       {
-	return retVal;		// no change
+	return retVal;		// no change (useful for null)
       }
 
-    retVal = verifyNewValue(value);
+    retVal = verifyNewValue(submittedValue);
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -961,7 +1032,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       {
 	// Wizard check
 	
-	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, submittedValue, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
@@ -983,37 +1054,40 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	// if we're not being told to clear this field, try to mark the
 	// new value
 
-	if (value != null)
+	if (submittedValue != null)
 	  {
-	    if (!mark(value))
+	    if (!mark(submittedValue))
 	      {
 		if (this.value != null)
 		  {
 		    mark(this.value); // we aren't clearing the old value after all
 		  }
 		
-		setLastError("value " + value + " already taken in namespace");
+		setLastError("value " + newValue + " already taken in namespace");
 
 		return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
-						  "value " + value +
+						  "value " + newValue +
 						  " already taken in namespace");
 	      }
 	  }
       }
 
+    // record the new value we are proposing so the logging code
+    // can compare before/after
+
+    this.newValue = submittedValue;
+
     // check our owner, do it.  Checking our owner should
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    this.newValue = value;
-
-    newRetVal = eObj.finalizeSetValue(this, value);
+    newRetVal = eObj.finalizeSetValue(this, newValue);
 
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	if (value != null)
 	  {
-	    this.value = value;
+	    this.value = newValue;
 	  }
 	else
 	  {
@@ -1046,7 +1120,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
 	if (ns != null)
 	  {
-	    unmark(value);
+	    unmark(submittedValue);
 	    mark(this.value);
 	  }
 
@@ -1195,7 +1269,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * needed to be passed back about side-effects.</p>
    */
   
-  public synchronized ReturnVal setElement(int index, Object value, boolean local)
+  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1210,7 +1284,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					   getName());
       }
 
-    retVal = verifyNewValue(value);
+    retVal = verifyNewValue(submittedValue);
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -1223,7 +1297,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
+	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), submittedValue);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
@@ -1242,14 +1316,14 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       {
 	unmark(values.elementAt(index));
 
-	if (!mark(value))
+	if (!mark(submittedValue))
 	  {
 	    mark(values.elementAt(index)); // we aren't clearing the old value after all
 
-	    setLastError("value " + value + " already taken in namespace");
+	    setLastError("value " + submittedValue + " already taken in namespace");
 
 	    return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
-					      "value " + value +
+					      "value " + submittedValue +
 					      " already taken in namespace");
 	  }
       }
@@ -1258,11 +1332,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    newRetVal = eObj.finalizeSetElement(this, index, value);
+    newRetVal = eObj.finalizeSetElement(this, index, submittedValue);
 
     if (newRetVal == null || newRetVal.didSucceed())
       {
-	values.setElementAt(value, index);
+	values.setElementAt(submittedValue, index);
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
@@ -1286,7 +1360,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
 	if (ns != null)
 	  {
-	    unmark(value);
+	    unmark(submittedValue);
 	    mark(values.elementAt(index));
 	  }
 
@@ -1338,7 +1412,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * pass back a dialog.</P>
    */
 
-  public synchronized ReturnVal addElement(Object value, boolean local)
+  public synchronized ReturnVal addElement(Object submittedValue, boolean local)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1361,7 +1435,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     // verifyNewValue should setLastError for us.
 
-    retVal = verifyNewValue(value);
+    retVal = verifyNewValue(submittedValue);
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -1381,7 +1455,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, submittedValue, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
@@ -1395,21 +1469,21 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     if (ns != null)
       {
-	if (!mark(value))	// *sync* DBNameSpace
+	if (!mark(submittedValue))	// *sync* DBNameSpace
 	  {
-	    setLastError("value " + value + " already taken in namespace");
+	    setLastError("value " + submittedValue + " already taken in namespace");
 
 	    return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
-					      "value " + value + 
+					      "value " + submittedValue + 
 					      " already taken in namespace");
 	  }
       }
 
-    newRetVal = eObj.finalizeAddElement(this, value);
+    newRetVal = eObj.finalizeAddElement(this, submittedValue);
 
     if (newRetVal == null || newRetVal.didSucceed()) 
       {
-	values.addElement(value);
+	values.addElement(submittedValue);
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
@@ -1429,7 +1503,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       {
 	if (ns != null)
 	  {
-	    unmark(value);	// *sync* DBNameSpace
+	    unmark(submittedValue);	// *sync* DBNameSpace
 	  }
 
 	// return the error dialog created by finalizeAddElement

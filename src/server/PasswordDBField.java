@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 1999/08/05 22:08:46 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 1999/10/29 16:14:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -195,7 +195,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
 
     return Ganymede.createErrorDialog("Permissions Error",
-				      "Don't have permission to clear this permission matrix field\n" +
+				      "Don't have permission to clear this password field\n" +
 				      getName());
   }
 
@@ -217,6 +217,41 @@ public class PasswordDBField extends DBField implements pass_field {
     PasswordDBField f = (PasswordDBField) obj;
 
     return f.key().equals(this.key());
+  }
+
+  /**
+   * <p>This method copies the current value of this DBField
+   * to target.  The target DBField must be contained within a
+   * checked-out DBEditObject in order to be updated.  Any actions
+   * that would normally occur from a user manually setting a value
+   * into the field will occur.</p>
+   *
+   * @param target The DBField to copy this field's contents to.
+   * @param local If true, permissions checking is skipped.
+   */
+
+  public synchronized ReturnVal copyFieldTo(PasswordDBField target, boolean local)
+  {
+    if (!local)
+      {
+	if (!verifyReadPermission())
+	  {
+	    return Ganymede.createErrorDialog("Copy field error",
+					      "Can't copy field " + getName() + ", no read privileges");
+	  }
+      }
+	
+    if (!target.isEditable(local))
+      {
+	return Ganymede.createErrorDialog("Copy field error",
+					  "Can't copy field " + getName() + ", no write privileges");
+      }
+
+    target.cryptedPass = cryptedPass;
+    target.md5Pass = md5Pass;
+    target.uncryptedPass = uncryptedPass;
+
+    return null;
   }
 
   /**

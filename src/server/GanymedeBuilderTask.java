@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/10/26 15:26:36 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/10/29 16:14:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -228,9 +228,15 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
    * obtain a list of DBObject references of the requested
    * type.</P>
    *
+   * <P>Note that the Enumeration returned by this method MUST NOT
+   * be used after builderPhase1() returns.  This Enumeration is
+   * only valid while the base in question is locked with the
+   * global dumpLock obtained before builderPhase1() is run and
+   * which is released after builderPhase1() returns.</P>
+   *
    * @param baseid The id number of the base to be listed
    *
-   * @return A Vector of {@link arlut.csd.ganymede.DBObject DBObject} references
+   * @return An Enumeration of {@link arlut.csd.ganymede.DBObject DBObject} references
    */
 
   protected final Enumeration enumerateObjects(short baseid)
@@ -288,7 +294,12 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
    * <P>This method runs with a dumpLock obtained for the builder task.</P>
    *
    * <P>Code run in builderPhase1() can call enumerateObjects() and
-   * baseChanged().</P>
+   * baseChanged().  Note that the Enumeration of objects returned
+   * by enumerateObjects() is only valid and should only be consulted
+   * while builderPhase1 is running.. as soon as builderPhase1 returns,
+   * the dumpLock used to make the enumerateObjects() call safe to
+   * use is relinquished, and any Enumerations obtained will then
+   * be unsafe to depend on.</P>
    *
    * @return true if builderPhase1 made changes necessitating the
    * execution of builderPhase2.

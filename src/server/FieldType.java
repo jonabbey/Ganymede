@@ -6,8 +6,8 @@
    
    Created: 15 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/05/26 23:17:27 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/10/29 16:14:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,5 +66,6 @@ public interface FieldType {
   static final short PERMISSIONMATRIX = 5;
   static final short PASSWORD = 6;
   static final short IP = 7;
-  static final short LASTFIELD = 7;
+  static final short FLOAT = 8;
+  static final short LASTFIELD = 8;
 }

@@ -8,8 +8,8 @@
    
    Created: 25 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/01/22 18:05:40 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/10/29 16:14:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -566,6 +566,27 @@ public class DumpResult implements java.io.Serializable {
 		      }
 		  }
 		break;
+
+ 	      case FieldType.FLOAT:
+ 
+ 		if (tempString.toString().equals("null") ||
+ 		    tempString.toString().equals(""))
+ 		  {
+ 		    rowVect.addElement(null);
+ 		  }
+ 		else
+ 		  {
+ 		    try
+ 		      {
+ 			rowVect.addElement(new Double(tempString.toString()));
+ 		      }
+ 		    catch (NumberFormatException ex)
+ 		      {
+ 			throw new RuntimeException("couldn't parse float encoding for string *" + 
+ 						   tempString.toString() + "* :" + ex);
+ 		      }
+ 		  }
+ 		break;
 
 	      default:
 		rowVect.addElement(tempString.toString());

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.118 $
-   Last Mod Date: $Date: 1999/08/19 00:41:01 $
+   Version: $Revision: 1.119 $
+   Last Mod Date: $Date: 1999/10/29 16:14:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.118 $ $Date: 1999/08/19 00:41:01 $ $Name:  $
+ * @version $Revision: 1.119 $ $Date: 1999/10/29 16:14:04 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -280,6 +280,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      case NUMERIC:
 		tmp = new NumericDBField(this, fieldDef);
 		break;
+
+	      case FLOAT:
+		tmp = new FloatDBField(this, fieldDef);
+		break;
 		
 	      case DATE:
 		tmp = new DateDBField(this, fieldDef);
@@ -379,6 +383,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		tmp = new NumericDBField(this, (NumericDBField) field);
 		break;
 
+	      case FLOAT:
+		tmp = new FloatDBField(this, (FloatDBField) field);
+		break;
+
 	      case DATE:
 		tmp = new DateDBField(this, (DateDBField) field);
 		break;
@@ -437,6 +445,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		    
 		  case NUMERIC:
 		    tmp = new NumericDBField(this, fieldDef);
+		    break;
+
+		  case FLOAT:
+		    tmp = new FloatDBField(this, fieldDef);
 		    break;
 		
 		  case DATE:
@@ -1281,22 +1293,27 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public boolean canClone(DBSession session, DBObject object)
   {
-    return false;
+    return !object.isEmbedded();
   }
 
   /**
-   * <p>Hook to allow the cloning of an object.  If this object type
-   * supports cloning (which should be very much customized for this
-   * object type.. creation of the ancillary objects, which fields to
-   * clone, etc.), this customization method will actually do the work.</p>
+   * <p>Customization method to verify whether a specific field
+   * in object should be cloned using the basic field-clone
+   * logic.</p>
+   *
+   * <p>To be overridden in DBEditObject subclasses.</p>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public DBEditObject cloneObject(DBSession session, DBObject object)
+  public boolean canCloneField(DBSession session, DBObject object, DBField field)
   {
-    return null;
+    // don't clone the built-in fields, but do clone
+    // anything else
+
+    return !field.getFieldDef().isBuiltIn();
   }
+
 
   /**
    * <p>Customization method to verify whether the user has permission
@@ -1445,6 +1462,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   */
 
+
   /**
    * <p>Initializes a newly created DBEditObject.</p>
    *
@@ -1519,6 +1537,67 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public boolean instantiateNewField(short fieldID)
   {
     return gSession.getPerm(getTypeID(), fieldID, true).isCreatable(); // *sync* GanymedeSession
+  }
+
+  /**
+   * <p>Hook to allow the cloning of an object.  If this object type
+   * supports cloning (which should be very much customized for this
+   * object type.. creation of the ancillary objects, which fields to
+   * clone, etc.), this customization method will actually do the work.</p>
+   */
+
+  public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
+  {
+    ReturnVal retVal;
+    Enumeration origFields;
+    DBField origField;
+    DBField newField;
+    boolean problem = false;
+    StringBuffer resultBuf = new StringBuffer();
+
+    /* -- */
+
+    if ((origObj.getTypeID() != getTypeID()))
+      {
+	return Ganymede.createErrorDialog("Clone Error", 
+					  "Can't clone an object of the wrong type.  This is an internal error.");
+      }
+
+    origFields = origObj.fields.elements();
+
+    while (origFields.hasMoreElements())
+      {
+	origField = (DBField) origFields.nextElement();
+
+	if (canCloneField(session, origObj, origField))
+	  {
+	    newField = (DBField) getField(origField.getID());
+
+	    if (!newField.isDefined() && !newField.isEditInPlace() && 
+		(newField.getNameSpace() == null))
+	      {
+		retVal = origField.copyFieldTo(newField, local);
+
+		if (retVal != null && retVal.getDialog() != null)
+		  {
+		    resultBuf.append("\n\n");
+		    resultBuf.append(retVal.getDialog().getText());
+		    
+		    problem = true;
+		  }
+	      }
+	  }
+      }
+
+    retVal = new ReturnVal(true, !problem);
+
+    if (problem)
+      {
+	retVal.setDialog(new JDialogBuff("Possible Clone Problem", resultBuf.toString(),
+					 "Ok", null, "ok.gif"));
+      }
+    
+    return retVal;
   }
 
   /**
@@ -2013,6 +2092,40 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   {
     return Integer.MAX_VALUE;
   }
+
+   /**
+    * This method provides a hook that a DBEditObject subclass
+    * can use to indicate that a given
+    * {@link arlut.csd.ganymede.FloatDBField FloatDBField}
+    * has a restricted range of possibilities.
+    */
+ 
+   public boolean isFloatLimited(DBField field)
+   {
+     return false;
+   }
+ 
+   /**
+    * This method is used to specify the minimum acceptable value
+    * for the specified
+    * {@link arlut.csd.ganymede.FloatDBField FloatDBField}.
+    */
+ 
+   public double minFloat(DBField field)
+   {
+     return Double.MIN_VALUE;
+   }
+ 
+   /**
+    * This method is used to specify the maximum acceptable value
+    * for the specified    
+    * {@link arlut.csd.ganymede.FloatDBField FloatDBField}.
+    */
+ 
+   public double maxFloat(DBField field)
+   {
+     return Double.MAX_VALUE;
+   }
 
   /**
    * <p>This method handles inactivation logic for this object type.  A

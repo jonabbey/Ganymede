@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 1999/09/22 23:15:21 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 1999/10/29 16:14:04 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -138,6 +138,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
   boolean
     booleanShowing,
     numericShowing,
+    floatShowing,
     dateShowing,
     stringShowing,
     referenceShowing,
@@ -206,6 +207,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     typeC = new JComboBox();
     typeC.addItem("Boolean");
     typeC.addItem("Numeric");
+    typeC.addItem("Float");
     typeC.addItem("Date");
     typeC.addItem("String");
     typeC.addItem("Object Reference");
@@ -282,6 +284,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     booleanShowing = true;
     numericShowing = false;
+    floatShowing = false;
     dateShowing = false;
     stringShowing = false;
     referenceShowing = false;
@@ -362,7 +365,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	System.out.println(" Checking visibility");
       }
 
-    if (passwordShowing || booleanShowing || numericShowing || dateShowing)
+    if (passwordShowing || booleanShowing || numericShowing || dateShowing || floatShowing)
       {
 	setRowVisible(vectorCF, false);
 	setRowVisible(maxArrayN, false);
@@ -708,6 +711,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
   {
     booleanShowing = false;
     numericShowing = false;
+    floatShowing = false;
     dateShowing = false;
     stringShowing = false;
     referenceShowing = false;
@@ -726,6 +730,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    numericShowing = true;
 	    fieldDef.setType(FieldType.NUMERIC);
+	  }
+	else if (selectedItem.equalsIgnoreCase("Float"))
+	  {
+	    floatShowing = true;
+	    fieldDef.setType(FieldType.FLOAT);
 	  }
 	else if (selectedItem.equalsIgnoreCase("Date"))
 	  {
@@ -1195,6 +1204,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		  }
 	      }
 	  }
+ 	else if (fieldDef.isFloat())
+ 	  {
+ 	    typeC.getModel().setSelectedItem("Float");
+ 	    floatShowing = true;
+ 	  }
 	else if (fieldDef.isPermMatrix())
 	  {
 	    typeC.addItem("Permission Matrix");
@@ -1527,7 +1541,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	boolean okToChange = true;
 	item = (String)typeC.getModel().getSelectedItem();
 
-	if (!item.equals("Numeric") && !item.equals("String"))
+	if (!item.equals("Numeric") && !item.equals("Float") && !item.equals("String"))
 	  {
 	    // Now it can't be a label.. was it a label before?
 
@@ -1598,13 +1612,17 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 			  {
 			    typeC.getModel().setSelectedItem("Numeric");
 			  }
+			else if (fieldDef.isFloat())
+			  {
+			    typeC.getModel().setSelectedItem("Float");
+			  }
 			else if (fieldDef.isString())
 			  {
 			    typeC.getModel().setSelectedItem("String");
 			  }
 			else
 			  {
-			    System.err.println("Field is not String or Numeric, not changing type choice");
+			    System.err.println("Field is not String, Float or Numeric, not changing type choice");
 			  }
 		      }
 		    catch (RemoteException rx)

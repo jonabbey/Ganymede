@@ -7,8 +7,8 @@
    
    Created: 5 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/08/19 02:13:05 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/10/29 16:14:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ package arlut.csd.ganymede;
  * <p>The {@link arlut.csd.ganymede.FieldInfo FieldInfo} object is used to return
  * the value information associated with an actual instance of a field.</p>
  *
- * @version $Revision: 1.11 $ $Date: 1999/08/19 02:13:05 $ $Name:  $
+ * @version $Revision: 1.12 $ $Date: 1999/10/29 16:14:08 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -336,6 +336,18 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   }
 
   /**
+   * 
+   * Returns true if this field is of float type 
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isFloat()
+  {
+    return (type == FLOAT);
+  }
+
+  /**
    *
    * Returns true if this field is one of the standard
    * fields that are part of all objects held in
@@ -548,6 +560,10 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
     else if (isIP())
       {
 	result.append(" ip");
+      }
+    else if (isFloat())
+      {
+	result.append(" float");
       }
 
     return result.toString();

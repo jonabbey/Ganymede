@@ -8,8 +8,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/07/28 23:11:13 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 1999/10/29 16:14:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -128,11 +128,12 @@ public class ReturnVal implements java.io.Serializable {
   Invid newObjectInvid = null;
 
   /**
-   * <p>A Remote handle to a db_object on the server returned for use by
-   * the client.</p>
+   * <p>An associated object to be returned with the ReturnVal, often
+   * a remote handle to a {@link arlut.csd.ganymede.db_object db_object}
+   * on the server returned for use by the client.</p>
    */
 
-  db_object remoteObjectRef = null;
+  Object assocObject = null;
 
   /**
    * <p>A Serializable StringBuffer representation of objects and fields
@@ -209,18 +210,20 @@ public class ReturnVal implements java.io.Serializable {
     return newObjectInvid;
   }
 
-  /**
-   * <p>This method is used to get a remote db_object reference that the
-   * server wants to return to the client.  Used particularly for
+  /** 
+   * <p>This method is used to get an attached object passed back
+   * with this ReturnVal, often a remote {@link
+   * arlut.csd.ganymede.db_object db_object} reference that the server
+   * wants to return to the client.  Used particularly for
    * Session.create_db_object() / Session.edit_db_object(), or null if
    * no db_object was returned.</p>
    *
-   * @see arlut.csd.ganymede.Session
+   * @see arlut.csd.ganymede.Session 
    */
 
-  public db_object getObject()
+  public Object getObject()
   {
-    return remoteObjectRef;
+    return assocObject;
   }
 
   /**
@@ -500,7 +503,7 @@ public class ReturnVal implements java.io.Serializable {
     callback = null;
     status = NONE;
     newObjectInvid = null;
-    remoteObjectRef = null;
+    assocObject = null;
   }
 
   /**
@@ -691,16 +694,18 @@ public class ReturnVal implements java.io.Serializable {
     this.newObjectInvid = invid;
   }
 
-  /**
-   * <p>This method is used to set a db_object reference that the client
+  /** 
+   * <p>This method is used to set an associated object with this
+   * ReturnVal to be passed back to the client.  Often a {@link
+   * arlut.csd.ganymede.db_object db_object} reference that the client
    * can retrieve from us in those cases where a method on the server
    * really does need to return a db_object _and_ a return val.</p>
    *
-   * <p>For use on the server-side.</p>
+   * <p>For use on the server-side.</p> 
    */
 
-  public void setObject(db_object object)
+  public void setObject(Object object)
   {
-    this.remoteObjectRef = object;
+    this.assocObject = object;
   }
 }
