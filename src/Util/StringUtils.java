@@ -4,8 +4,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2001/04/05 04:23:17 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2001/04/05 06:13:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -89,6 +89,41 @@ public class StringUtils {
       }
 
     return buffer.toString();
+  }
+
+  /**
+   * <P>This method tests to see if inputString consists of only characters
+   * contained within the legalChars string.  If inputString contains
+   * no characters not contained within legalChars, containsOnly() will
+   * return true, otherwise it will return false.</P>
+   *
+   * <P>Note that containsOnly will always return true if inputString is
+   * null.</P>
+   */
+
+  public static boolean containsOnly(String inputString, String legalChars)
+  {
+    if (inputString == null)
+      {
+	return true;
+      }
+
+    if (legalChars == null)
+      {
+	return false;
+      }
+
+    for (int i = 0; i < inputString.length(); i++)
+      {
+	char c = inputString.charAt(i);
+
+	if (legalChars.indexOf(c) == -1)
+	  {
+	    return false;
+	  }
+      }
+
+    return true;
   }
 
   /**
@@ -176,6 +211,9 @@ public class StringUtils {
     String test = "10.8.[100-21].[1-253]\n10.3.[4-8].[1-253]\n129.116.[224-227].[1-253]";
     //String test = "10.8.[100-21].[1-253]";
 
+    System.out.println("split() test");
+    System.out.println("------------------------------------------------------------\n");
+
     String results[] = StringUtils.split(test, "\n");
 
     for (int i = 0; i < results.length; i++)
@@ -187,6 +225,27 @@ public class StringUtils {
 	  {
 	    System.out.println("\t" + results2[j]);
 	  }
+      }
+
+    System.out.println("\ncontainsOnly() test");
+    System.out.println("------------------------------------------------------------\n");
+
+    if (StringUtils.containsOnly(test, "0123456789.[-]\n"))
+      {
+	System.out.println("Pass test 1");
+      }
+    else
+      {
+	System.out.println("Fail test 1");
+      }
+
+    if (!StringUtils.containsOnly(test, "0123456789"))
+      {
+	System.out.println("Pass test 2");
+      }
+    else
+      {
+	System.out.println("Fail test 2");
       }
   }
 }
