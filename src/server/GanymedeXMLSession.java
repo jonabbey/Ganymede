@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/09/13 06:06:55 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/09/14 23:15:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1048,6 +1048,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     boolean success = true;
     ReturnVal attempt;
+    Hashtable editCount = new Hashtable();
+    Hashtable createCount = new Hashtable();
+    Hashtable deleteCount = new Hashtable();
+    Hashtable inactivateCount = new Hashtable();
 
     /* -- */
 
@@ -1081,7 +1085,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (!newObject.forceCreate && newObject.getInvid() != null)
 	  {
-	    err.println("Editing " + newObject);
+	    incCount(editCount, newObject.typeString);
 
 	    attempt = newObject.editOnServer(session);
 
@@ -1104,7 +1108,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
 	else
 	  {
-	    err.println("Creating " + newObject);
+	    incCount(createCount, newObject.typeString);
 
 	    attempt = newObject.createOnServer(session);
 
@@ -1188,7 +1192,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	xmlobject object = (xmlobject) editedObjects.elementAt(i);
 
-	err.println("Editing " + object);
+	incCount(editCount, object.typeString);
 
 	attempt = object.editOnServer(session);
 
@@ -1259,7 +1263,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	xmlobject object = (xmlobject) inactivatedObjects.elementAt(i);
 
-	err.println("Inactivating " + object);
+	incCount(inactivateCount, object.typeString);
 	    
 	Invid target = object.getInvid();
 
@@ -1297,7 +1301,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	xmlobject object = (xmlobject) deletedObjects.elementAt(i);
 
-	err.println("Deleting " + object);
+	incCount(deleteCount, object.typeString);
 	    
 	Invid target = object.getInvid();
 
@@ -1333,7 +1337,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     
     if (success)
       {	
-	err.println("Committing transaction");
+	err.println("Committing transaction\n");
 
 	attempt = session.commitTransaction(true);
 
@@ -1360,8 +1364,63 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    this.success = true;
 	  }
 
-	err.println("Transaction successfully committed.");
-	err.println("Done.");
+	if (createCount.size() > 0)
+	  {
+	    err.println("Objects created:");
+
+	    Enumeration enum = createCount.keys();
+
+	    while (enum.hasMoreElements())
+	      {
+		String key = (String) enum.nextElement();
+
+		err.println("\t" + key + ": " + createCount.get(key));
+	      }
+	  }
+
+	if (editCount.size() > 0)
+	  {
+	    err.println("Objects edited:");
+
+	    Enumeration enum = editCount.keys();
+
+	    while (enum.hasMoreElements())
+	      {
+		String key = (String) enum.nextElement();
+
+		err.println("\t" + key + ": " + editCount.get(key));
+	      }
+	  }
+
+	if (deleteCount.size() > 0)
+	  {
+	    err.println("Objects deleted:");
+
+	    Enumeration enum = deleteCount.keys();
+
+	    while (enum.hasMoreElements())
+	      {
+		String key = (String) enum.nextElement();
+
+		err.println("\t" + key + ": " + deleteCount.get(key));
+	      }
+	  }
+
+	if (inactivateCount.size() > 0)
+	  {
+	    err.println("Objects inactivated:");
+
+	    Enumeration enum = inactivateCount.keys();
+
+	    while (enum.hasMoreElements())
+	      {
+		String key = (String) enum.nextElement();
+
+		err.println("\t" + key + ": " + inactivateCount.get(key));
+	      }
+	  }
+
+	err.println("\nTransaction successfully committed.");
       }
     else
       {
@@ -1371,6 +1430,20 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
 
     return success;
+  }
+
+  private void incCount(Hashtable table, String type)
+  {
+    Integer x = (Integer) table.get(type);
+
+    if (x == null)
+      {
+	table.put(type, new Integer(1));
+      }
+    else
+      {	
+	table.put(type, new Integer(x.intValue() + 1));
+      }
   }
 
   /**

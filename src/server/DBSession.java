@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 2000/09/13 06:06:51 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 2000/09/14 23:15:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.90 $ %D%
+ * @version $Revision: 1.91 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -303,9 +303,10 @@ final public class DBSession {
     // it needs to go into
 
     String ckp_label = "createX" + base.getName();
-    
-    checkpoint(ckp_label);
 
+    checkpoint(ckp_label);
+    boolean checkpointed = true;
+    
     try
       {
 	// set ownership for this new object if it is not an embedded object
@@ -338,6 +339,7 @@ final public class DBSession {
 		if (retVal != null && !retVal.didSucceed())
 		  {
 		    rollback(ckp_label);
+		    checkpointed = false;
 
 		    try
 		      {
@@ -371,6 +373,7 @@ final public class DBSession {
 	if (!editSet.addObject(e_object))
 	  {
 	    rollback(ckp_label);
+	    checkpointed = false;
 
 	    return Ganymede.createErrorDialog("Object creation failure",
 					      "Couldn't create the object, because it came pre-linked " +
@@ -410,6 +413,7 @@ final public class DBSession {
 	    if (retVal != null && !retVal.didSucceed())
 	      {
 		rollback(ckp_label);
+		checkpointed = false;
 
 		return retVal;
 	      }
@@ -419,10 +423,18 @@ final public class DBSession {
 	// Clear out the checkpoint and continue
 
 	popCheckpoint(ckp_label);
+	checkpointed = false;
       }
     finally
       {
-	rollback(ckp_label);
+	// just in case we had an exception thrown.. all standard
+	// returns from the above try clause should have taken care of
+	// the checkpoint
+  
+	if (checkpointed)
+	  {
+	    rollback(ckp_label);
+	  }
       }
 
     // set the following false to true to view the initial state of the object

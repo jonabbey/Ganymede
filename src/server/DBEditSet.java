@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 2000/09/13 06:06:50 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2000/09/14 23:15:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -598,6 +598,16 @@ public class DBEditSet {
     if (!interactive)
       {
 	setMustAbort();
+
+	try
+	  {
+	    throw new RuntimeException("rollback called in non-interactive transaction");
+	  }
+	catch (RuntimeException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+
 	return true;
       }
 
