@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 1999/03/27 12:27:40 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 1999/03/27 12:46:40 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -480,6 +480,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	loaded = true;
 	loading = false;
+
+	// frame will synchronize on frame.containerPanels for the duration
+	// of an attempt to stop all containerPanels within from loading,
+	// so if we did get told to stop loading (by having keepLoading set
+	// to false above), we may wind up blocking here for a bit.
+
+	frame.containerPanels.removeElement(this);
+
+	if (!keepLoading)
+	  {
+	    return;
+	  }
 	
 	// If update(Vector) was called during the load, then any
 	// fields to be updated were added to the updatesWhileLoading

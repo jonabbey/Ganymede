@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 1999/03/25 08:17:05 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 1999/03/27 12:46:41 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -502,19 +502,20 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	println("Stopping all the containerPAnels.");
       }
 
-    final Vector finalCPS = containerPanels;
-
     Runnable r = new Runnable() {
       public void run() {
-	for (int i = 0; i < containerPanels.size(); i++)
+	synchronized (containerPanels)
 	  {
-	    if (debug)
+	    for (int i = 0; i < containerPanels.size(); i++)
 	      {
-		println("Telling a containerPanel to stop loading.");
+		if (debug)
+		  {
+		    println("Telling a containerPanel to stop loading.");
+		  }
+		
+		containerPanel cp = (containerPanel)containerPanels.elementAt(i);
+		cp.stopLoading();
 	      }
-	    
-	    containerPanel cp = (containerPanel)containerPanels.elementAt(i);
-	    cp.stopLoading();
 	  }
       }};
 
@@ -954,7 +955,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       }
     
     containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar, false, isCreating, null);
-    containerPanels.addElement(cp);
     cp.load();
     cp.setBorder(wp.emptyBorder10);
     
