@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -164,7 +164,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       progressPanel.add(new JLabel("Loading..."));
       progressPanel.add(progressBar);
       progressPanel.setForeground(Color.black);
-      progressPanel.setForeground(Color.gray);
+      progressPanel.setBackground(Color.lightGray);
 
       setContentPane(progressPanel);
 
@@ -296,7 +296,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       createPanel(general_index);
       showTab(general_index);
       pane.setForeground(Color.black);
-      pane.setForeground(Color.white);
+      pane.setBackground(Color.lightGray);
       setContentPane(pane);
 
 
