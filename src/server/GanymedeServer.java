@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -153,7 +153,8 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     else
       {
-	throw new RemoteException("No such user or bad password, couldn't log in");
+	Ganymede.debug("Bad login attempt: " + clientName);
+	return null;
       }
   }
 
