@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -95,12 +95,6 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
   Button
     okButton, cancelButton, attribOkButton;
 
-  GridBagLayout 
-    gbl;
-
-  GridBagConstraints
-    gbc;
-
   Toolkit
     toolkit;
 
@@ -119,9 +113,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     setLayout(new BorderLayout());
 
     displayPane = new Panel();
-    gbl = new GridBagLayout();
-    gbc = new GridBagConstraints();
-    displayPane.setLayout(gbl);
+    displayPane.setLayout(new BorderLayout());
 
     attribPane = new Panel();
     attribPane.setBackground(Color.white);
@@ -210,25 +202,9 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 
     Box leftBox = new Box(tree, "Schema Objects");
 
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbc.weightx = 1.0;
-    gbc.weighty = 1.0;
-    gbl.setConstraints(leftBox, gbc);
+    displayPane.add("West", leftBox);
 
-    displayPane.add(leftBox);
-
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridx = 1;
-    gbc.gridy = 0;
-    gbc.weightx = 1.0;
-    gbc.weighty = 1.0;
-    gbl.setConstraints(rightBox, gbc);
-
-    displayPane.add(rightBox);
+    displayPane.add("Center", rightBox);
 
     buttonPane = new Panel();
     buttonPane.setLayout(new RowLayout());
