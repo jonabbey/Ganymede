@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.67 $ %D%
+   Version: $Revision: 1.68 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1988,7 +1988,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		// nope, go ahead and return the object as we found it in the
 		// main hash
 		
-		result.addRow(obj, perm.isEditable());
+		result.addRow(obj.getInvid(), obj.getLabel(), perm.isEditable());
 	      }
 	    else
 	      {
@@ -2003,7 +2003,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    
 		    if (DBQueryHandler.matches(query, x))
 		      {
-			result.addRow(x, true);	// we must be able to edit it, since it's checked out
+			result.addRow(x.getInvid(), x.getLabel(), true);
+			// we must be able to edit it, since it's checked out
 		      }
 		  }
 	      }
@@ -2014,7 +2015,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // about us having a different version of the object open
 	    // in our transaction
 	    
-	    result.addRow(obj, perm.isEditable());
+	    result.addRow(obj.getInvid(), obj.getLabel(), perm.isEditable());
 	  }
       }
   }
