@@ -1,7 +1,47 @@
-Ganymede Release 0.99.4
-July 8, 1999
+Ganymede Release 0.99.5
+July ??, 1999
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 0.99.4 to 0.99.5 -------------------
+
+RELEASE DATE: July ??, 1999
+
+1. [SCHEMA] gasharl schema modified to call user rename, dir create scripts
+
+The commitPhase2() method in userCustom for the gasharl schema now
+calls out to 'directory_namer' and 'directory_maker' to handle
+external actions when users are renamed or created.
+
+2. [CLIENT] Fixed client behavior on catastrophic transaction commit failure
+
+The client wasn't properly getting rid of any edit windows if a
+transaction commit failed catastophically.  This was occuring during
+development and test of changes in 1.) above.. a NullPointerException
+was causing the transaction to be aborted rather than committed, and
+the client wasn't properly resetting its state to reflect this.
+
+3. [DOCUMENTATION] Put a warning about deadlock possibilities into DBEditObject guide
+
+The DBEditObject commitPhase1(), commitPhase2(), and release() methods
+are called by the server while portions of the database are locked.
+Using the GanymedeSession query mechanism will very likely bring the
+server into deadlock, as I discovered.  Documented this in the DBEditObject
+subclassing guide, as well as the javadocs for those methods.
+
+4. [SCHEMA] Fixed a lingering wizard registration bug in gasharl schema
+
+The gasharl schema's userCategoryWizard was not properly unregistering
+itself from the client's GanymedeSession when it determined that it
+did not need to run in getStartDialog(), which caused other wizards
+(such as the user rename wizard) to refuse to run, thinking that an
+incompatible active wizard was in progress.
+
+It is critical that GanymediatorWizard subclasses' getStartDialog()
+methods unregister() themselves if they decide that they do not wish
+to interact with the user after wizard construction.  I added a
+comment to GanymediatorWizard's getStartDialog() method header to this
+effect.
 
 -------------------- Changes from 0.99.3 to 0.99.4 -------------------
 
