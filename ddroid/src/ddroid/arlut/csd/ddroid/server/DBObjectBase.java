@@ -190,6 +190,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   Class classdef;
 
   /**
+   * <P>Option string to be available to custom classes.  The purpose of
+   * this field is to allow the use of Jython custom classes, and to be
+   * able to define a single Jython class which can consult this string
+   * to find the Jython program text for this object base.</p>
+   */
+
+  String classOptionString;
+
+  /**
    * which field represents our label?
    */
 
@@ -568,6 +577,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	out.writeUTF(classname);
       }
 
+    if (classOptionString == null) // added at file version 2.6
+      {
+	out.writeUTF("");
+      }
+    else
+      {
+	out.writeUTF(classOptionString);
+      }
+
     out.writeShort(type_code);
 
     out.writeShort((short) customFields.size()); // should have no more than 32k fields
@@ -633,6 +651,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (debug)
       {
 	System.err.println("DBObjectBase.receive(): class name: " + classname);
+      }
+
+    if (store.isAtLeast(2,6))
+      {
+	classOptionString = in.readUTF();
+      }
+    else
+      {
+	classOptionString = null;
       }
 
     type_code = in.readShort();	// read our index for the DBStore's objectbase hash
@@ -941,6 +968,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	xmlOut.startElementIndent("classdef");
 	xmlOut.attribute("name", classname);
+
+	if (classOptionString != null)
+	  {
+	    xmlOut.attribute("optionString", classOptionString);
+	  }
+
 	xmlOut.endElement("classdef");
       }
 
@@ -985,6 +1018,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     Hashtable nameTable = new Hashtable();
     Hashtable idTable = new Hashtable();
     String _classStr = null;
+    String _classOptionStr = null;
     Integer _labelInt = null;
     boolean _embedded = false;
     boolean classSet = false;
@@ -1166,6 +1200,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	    _classStr = item.getAttrStr("name");
 
+	    _classOptionStr = item.getAttrStr("optionString");
+
 	    classSet = true;
 	  }
 	else if (item.matches("embedded"))
@@ -1265,6 +1301,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     
     retVal = setClassName(_classStr);
     
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    retval = setClassOptionString(_classOptionStr);
+
     if (retVal != null && !retVal.didSucceed())
       {
 	return retVal;
@@ -1843,6 +1886,19 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>Returns the option string for the class definition.. see {@link
+   * arlut.csd.ganymede.DBObjectBase#classOptionString} for more
+   * details.</p>
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+  
+  public String getClassOptionString()
+  {
+    return classOptionString;
+  }
+
+  /**
    * <p>Sets the fully qualified classname of the class 
    * managing this object type</p>
    *
@@ -1909,6 +1965,30 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	Ganymede.debug("DBObjectBase.setClassName(): local rmi error constructing object hook");
 	objectHook = null;
       }
+
+    return null;
+  }
+
+  /**
+   * <p>Sets the option string for the class definition.. see {@link
+   * arlut.csd.ganymede.DBObjectBase#classOptionString} for more
+   * details.</p>
+   *
+   * <p>This method is only valid when the Base reference is obtained
+   * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public synchronized ReturnVal setClassOptionString(String newOptionString)
+  {
+    if (!store.loading && editor == null)
+      {
+	throw new IllegalArgumentException("not in a schema editing context");
+      }
+
+    this.classOptionString = newOptionString;
 
     return null;
   }

@@ -100,7 +100,8 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 
   JstringField 
     nameS, 
-    classS;
+    classS,
+    classOptionS;
 
   JComboBox
     labelC;
@@ -157,6 +158,10 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     classS.setCallback(this);
     addRow(editPanel, classS, "Class name:", 2);
 
+    classOptionS = new JstringField(50, 100, true, false, null, null);
+    classOptionS.setCallback(this);
+    addRow(editPanel, classOptionS, "Class Option String:", 2);
+
     labelC = new JComboBox();
     labelC.addItemListener(this);
     addRow(editPanel, labelC, "Label:", 3);
@@ -183,6 +188,7 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 	typeN.setValue(base.getTypeID());
 	nameS.setText(base.getName());
 	classS.setText(base.getClassName());
+	classOptionS.setText(base.getClassOptionString());
 	refreshLabelChoice();
       }
     catch (RemoteException ex)
@@ -419,6 +425,10 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 	  {
 	    owner.handleReturnVal(base.setClassName(val));
 	  }
+	else if (source == classOptionS)
+	  {
+	    owner.handleReturnVal(base.setClassOptionString(val));
+	  }
       }
     catch (RemoteException ex)
       {
@@ -461,6 +471,7 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     this.typeN = null;
     this.nameS = null;
     this.classS = null;
+    this.classOptionS = null;
     this.labelC = null;
     this.editPanel = null;
     this.owner = null;

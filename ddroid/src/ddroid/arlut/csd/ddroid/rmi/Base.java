@@ -121,6 +121,14 @@ public interface Base extends CategoryNode, Remote {
   public String getClassName() throws RemoteException;
 
   /**
+   * Returns the option string for the class definition.. see {@link
+   * arlut.csd.ganymede.DBObjectBase#classOptionString} for more
+   * details.
+   */
+
+  public String getClassOptionString() throws RemoteException;
+
+  /**
    * Returns the invid type id for this object definition
    */
 
@@ -216,6 +224,14 @@ public interface Base extends CategoryNode, Remote {
    */
 
   public ReturnVal setClassName(String newName) throws RemoteException;
+
+  /**
+   * Sets the option string for the class definition.. see {@link
+   * arlut.csd.ganymede.DBObjectBase#classOptionString} for more
+   * details.
+   */
+
+  public ReturnVal setClassOptionString(String newOptionString) throws RemoteException;
 
   /**
    * <p>This method is used to adjust the ordering of a custom field

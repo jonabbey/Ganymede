@@ -95,7 +95,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   JMenuItem schemaMI;
 
-  SchemaEdit 
+  SchemaEdit			// remote reference
     editor;
 
   java.awt.Image
@@ -105,7 +105,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   treeControl 
     tree;
 
-  Category
+  Category			// remote reference
     rootCategory;
 
   CatTreeNode
@@ -149,16 +149,16 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     baseEditPane;
 
   BaseEditor
-    be;
+    be;				// contains remote ref
 
   BaseFieldEditor
-    fe;
+    fe;				// contains remote ref
 
   NameSpaceEditor
-    ne;
+    ne;				// contains remote ref
 
   CategoryEditor
-    ce;
+    ce;				// contains remote ref
   
   boolean
     showingBase,
@@ -1510,6 +1510,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     this.rootCategory = null;
     this.objects = null;
+
+    this.tree.clearTree();	// let's ditch the fucking RMI
+				// references in the tree's nodes,
+				// please
+
     this.tree = null;
     this.schemaMI = null;
 

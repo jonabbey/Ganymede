@@ -65,7 +65,7 @@ import java.awt.*;
 
 class FieldNode extends arlut.csd.JTree.treeNode {
 
-  private BaseField field;
+  private BaseField field;	// remote reference
 
   /* -- */
 
@@ -84,5 +84,10 @@ class FieldNode extends arlut.csd.JTree.treeNode {
   public void setField(BaseField field)
   {
     this.field = field;
+  }
+
+  public void cleanup()
+  {
+    this.field = null;
   }
 }
