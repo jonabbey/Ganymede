@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.8 $
-# $Date: 1999/07/05 20:58:50 $
+# $Revision: 1.9 $
+# $Date: 1999/07/08 04:25:19 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -23,17 +23,15 @@ use File::Copy;
 #
 # Everything else can be reasonably derived from the above.
 
-@steps = ("JAVAHOME", "SYSTEMNAME","CLIENTINSTALL", "SUPERNAME");
+@steps = ("JAVAHOME", "SYSTEMNAME","CLIENTINSTALL");
 
 %vars = ("JAVAHOME" => "<#JAVADIR#>",
          "SYSTEMNAME" => "",
-         "CLIENTINSTALL" => "",
-         "SUPERNAME" => "supergash");
+         "CLIENTINSTALL" => "");
 
 %descrip = ("JAVAHOME" => "Where are the JDK 1.2 binaries installed?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
-            "CLIENTINSTALL" => "Where should the client binaries be installed?",
-	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?");
+            "CLIENTINSTALL" => "Where should the client binaries be installed?");
 
 ####################
 
@@ -159,7 +157,7 @@ copydir("password", "$installdir/password"); print ".";
 # Copy and process the properties file into place
 
 %clientconvert = ("ganymede.serverhost" => $vars{"SYSTEMNAME"},
-		  "ganymede.rootname" => $vars{"SUPERNAME"});
+		  "ganymede.registryPort" => $vars{"REGISTRYPORT"});
 
 open INPUT, $template or die "Couldn't open client properties template!";
 open OUTPUT, ">$installdir/client.properties" or die "Couldn't write client.properties";

@@ -3,8 +3,8 @@
 # Install script for Ganymede web resources
 #
 # $Name:  $
-# $Revision: 1.5 $
-# $Date: 1999/07/07 02:10:52 $
+# $Revision: 1.6 $
+# $Date: 1999/07/08 04:25:19 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -21,17 +21,15 @@ use File::Copy;
 #
 # Everything else can be reasonably derived from the above.
 
-@steps = ("SYSTEMNAME","REGISTRYPORT", "HTMLINSTALL", "SUPERNAME");
+@steps = ("SYSTEMNAME","REGISTRYPORT", "HTMLINSTALL");
 
 %vars = ("SYSTEMNAME" => "",
          "REGISTRYPORT" => "1099",
-         "HTMLINSTALL" => "/sample/apache/html/ganymede",
-         "SUPERNAME" => "supergash");
+         "HTMLINSTALL" => "/sample/apache/html/ganymede");
 
 %descrip = ("SYSTEMNAME" => "What is the name of the system that the server will run on?",
 	    "REGISTRYPORT" => "What port is the RMI registry supporting Ganymede running on?",
-            "HTMLINSTALL" => "Where should the web access files be installed?",
-	    "SUPERNAME" => "What name does the Ganymede superuser account have?");
+            "HTMLINSTALL" => "Where should the web access files be installed?");
 
 ####################
 
@@ -199,7 +197,6 @@ sub install_file{
 
   while (<INPUT>) {
       s/#SERVERHOST/$vars{"SYSTEMNAME"}/g;
-      s/#SUPERNAME/$vars{"SUPERNAME"}/g;
       s/#REGISTRYPORT/$vars{"REGISTRYPORT"}/g;
       print OUTPUT $_;
   }

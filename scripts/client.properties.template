@@ -24,12 +24,3 @@ ganymede.serverhost=www.arlut.utexas.edu
 # Used by the client, server, and admin console
 
 ganymede.registryPort=1099
-
-# ganymede.rootname
-#
-# The name of the root-privileged account.
-#
-# Used by the server and admin console
-
-ganymede.rootname=supergash
-

@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.8 $
-# $Date: 1999/07/05 20:58:50 $
+# $Revision: 1.9 $
+# $Date: 1999/07/08 04:25:18 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -23,21 +23,19 @@ use File::Copy;
 #
 # Everything else can be reasonably derived from the above.
 
-@steps = ("JVM", "SWINGJARS", "SYSTEMNAME","REGISTRYPORT", "CLIENTINSTALL", "SUPERNAME");
+@steps = ("JVM", "SWINGJARS", "SYSTEMNAME","REGISTRYPORT", "CLIENTINSTALL");
 
 %vars = ("JVM" => "<#JAVADIR#>",
 	 "SWINGJARS" => "<#SWINGDIR#>",
          "SYSTEMNAME" => "",
          "REGISTRYPORT" => "1099",
-         "CLIENTINSTALL" => "",
-         "SUPERNAME" => "supergash");
+         "CLIENTINSTALL" => "");
 
 %descrip = ("JVM" => "Where are the JDK 1.1 binaries installed?",
 	    "SWINGJARS" => "Where are the Swing 1.1 jar files installed at?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
 	    "REGISTRYPORT" => "What port is the RMI registry supporting Ganymede running on?",
-            "CLIENTINSTALL" => "Where should the client binaries be installed?",
-	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?");
+            "CLIENTINSTALL" => "Where should the client binaries be installed?");
 
 $template = "scripts/client.properties.template";
 
@@ -160,7 +158,6 @@ copydir("password", "$installdir/password"); print ".";
 # Copy and process the properties file into place
 
 %clientconvert = ("ganymede.serverhost" => $vars{"SYSTEMNAME"},
-		  "ganymede.rootname" => $vars{"SUPERNAME"},
 		  "ganymede.registryPort" => $vars{"REGISTRYPORT"});
 
 open INPUT, $template or die "Couldn't open client properties template!";

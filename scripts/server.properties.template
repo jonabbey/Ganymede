@@ -134,7 +134,7 @@ ganymede.registryPort=1099
 #
 # The name of the root-privileged account.
 #
-# Used by the server and admin console
+# Used by the server
 
 ganymede.rootname=supergash
 

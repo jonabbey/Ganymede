@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.9 $
-# $Date: 1999/06/19 03:23:13 $
+# $Revision: 1.10 $
+# $Date: 1999/07/08 04:25:19 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -13,8 +13,8 @@
 
 # What classes in the ganymede package are necessary for the admin console?
 
-# We need Client and GanymedeScheduler here so that the RMI class loader will resolve
-# things properly.. weirdness.
+# We need Client and GanymedeScheduler here so that the RMI class
+# loader will resolve things properly.. weirdness.
 
 @ganymede_classes = ("Admin", "AdminEntry", "Client", "GanymedeScheduler",
 		     "Base", "BaseEditor", "BaseField", "BaseFieldEditor", "BaseNode",
@@ -26,7 +26,7 @@
 		     "Server", "Session", "SpaceNode",
 		     "ObjectHandle", "Ganymediator", "GanymediatorWizard",
 		     "GanymedeConfig", "adminSession",
-		     "SchemaEdit", "scheduleHandle",
+		     "SchemaEdit", "scheduleHandle", "ReturnVal", "db_object",
 		     "GASHSchema", "iAdmin", "iAdmin_Skel");
 
 # What directory are we handling?
