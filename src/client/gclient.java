@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1110,7 +1110,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     else if (event.getSource() == menubarQueryMI)
       {
 	querybox box = new querybox(baseHash, this, "Query Panel");
-	box.myshow(true);
+	Query q = box.myshow();
+
+	if (q != null)
+	  {
+	    StringBuffer buffer = null;
+
+	    try
+	      {
+		buffer = session.dump(q);
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("caught remote: " + ex);
+	      }
+
+	    wp.addTableWindow(session, q, buffer.toString(), "Query Results");
+	  }
       }
     else if (event.getSource() == removeAllMI)
       {
@@ -1319,7 +1335,24 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    Base base = ((BaseNode) node).getBase();
 
 	    querybox box = new querybox(base, baseHash, this, "Query Panel");
-	    box.myshow(true);
+
+	    Query q = box.myshow();
+
+	    if (q != null)
+	      {
+		StringBuffer buffer = null;
+
+		try
+		  {
+		    buffer = session.dump(q);
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("caught remote: " + ex);
+		  }
+
+		wp.addTableWindow(session, q, buffer.toString(), "Query Results");
+	      }
 	  }
       }
     else if (event.getSource() == objViewMI)
