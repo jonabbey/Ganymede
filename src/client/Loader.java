@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,11 @@ public class Loader extends Thread {
     baseMap,
     baseHash;
 
+  private Vector
+    baseList;
+ 
   private boolean
+    baseListLoaded = false,
     baseMapLoaded = false,
     baseHashLoaded = false;
 
@@ -61,6 +65,7 @@ public class Loader extends Thread {
 
     try
       {
+	loadBaseList();
 	loadBaseHash();
 	loadBaseMap();
       }
@@ -73,8 +78,41 @@ public class Loader extends Thread {
       {
 	System.out.println("Done with thread in loader.");
       }
-
     this.notifyAll();
+
+  }
+
+  public Vector getBaseList()
+  {
+    while (! baseListLoaded)
+      {
+	synchronized (this)
+	  {
+	    try
+	      {
+		this.wait();
+	      }
+	    catch (InterruptedException x)
+	      {
+		throw new RuntimeException("Interrupted while waiting for base list to load: " + x);
+	      }
+	  }
+      }
+
+    if (debug)
+      {
+	if (baseList == null)
+	  {
+	    System.out.println("baseList is null");
+	  }
+	else
+	  {
+	    System.out.println("returning baseList");
+	  }
+      }
+
+    return baseList;
+    
   }
 
   public synchronized Hashtable getBaseHash()
@@ -139,6 +177,27 @@ public class Loader extends Thread {
 
   /* -- Private methods  --  */
 
+  /** 
+   *
+   * loadBaseList gets the list of types from the server.  This is
+   * used in loadBaseHash to get the rest of the BaseHash, but is
+   * also used in a few places in the client where the whole list
+   * of fields in the baseHash isn't needed.
+   *
+   */
+
+  private synchronized void loadBaseList() throws RemoteException
+  {
+    
+    baseList = session.getTypes();
+
+    if (debug)
+      {
+	System.out.println("Finished loading base list");
+      }
+
+    baseListLoaded = true;
+  }
   /**
    *
    * loadBaseHash is used to prepare a hash table mapping Bases to
@@ -157,7 +216,7 @@ public class Loader extends Thread {
 
     /* -- */
 
-    typesV = session.getTypes();
+    typesV = getBaseList();
 
     if (baseHash != null)
       {
