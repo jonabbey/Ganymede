@@ -5,7 +5,7 @@
    This file is a management class for Automounter map entry objects in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,6 +32,8 @@ import java.rmi.*;
  */
 
 public class mapEntryCustom extends DBEditObject implements SchemaConstants, mapEntrySchema {
+
+  PermEntry noEditPerm = new PermEntry(true, false, false, false);
 
   /**
    *
@@ -65,6 +67,44 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
   public mapEntryCustom(DBObject original, DBEditSet editset) throws RemoteException
   {
     super(original, editset);
+  }
+
+  /**
+   *
+   * Customization method to allow this Ganymede object type to
+   * override the default permissions mechanism for special
+   * purposes.<br><br>
+   *
+   * If this method returns null, the default permissions mechanism
+   * will be followed.  If not, the permissions system will grant
+   * the permissions specified by this method for access to the
+   * given field, and no further elaboration of the permission
+   * will be performed.  Note that this override capability does
+   * not apply to operations performed in supergash mode.<br><br>
+   *
+   * This method should be used very sparingly.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public PermEntry permOverride(GanymedeSession session, DBObject object, short fieldid)
+  {
+    if (fieldid != mapEntrySchema.MAP)
+      {
+	return null;
+      }
+
+    DBField field = (DBField) object.getField(fieldid);
+
+    String label = field.getValueString();
+
+    if (label.equals("auto.home.default"))
+      {
+	return noEditPerm;
+      }
+
+    return null;
   }
 
   /**
@@ -108,11 +148,17 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 	return super.obtainChoiceList(field);
       }
 
+    InvidDBField invf = (InvidDBField) getField(mapEntrySchema.MAP);
+
+    if (invf.getValueString().equals("auto.home.default"))
+      {
+	return new QueryResult(); // can't change a map reference set to auto.home.default
+      }
+
     // ok, we are returning the list of choices for what
     // map to put this entry into.  We don't want it
     // to include any maps that already have an entry
     // for this user.
-
 
     // first, get the list of map entries contained in this
     // object.
@@ -165,6 +211,14 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 	return null;		// by default, we just ok whatever
       }
 
+    InvidDBField invf = (InvidDBField) getField(mapEntrySchema.MAP);
+
+    if (invf.getValueString().equals("auto.home.default"))
+      {
+	return Ganymede.createErrorDialog("Error, auto.home.default is required",
+					  "Sorry, it is mandatory to have a directory entry on the auto.home.default map.");
+      }
+
     // ok, we want to go ahead and approve the operation,
     // but we want to cause the client to rescan the MAP
     // field in all of our siblings so that their choice
@@ -187,13 +241,11 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
     for (int i = 0; i < entries.size(); i++)
       {
-	result.addRescanObject((Invid) entries.elementAt(i),
-			       rescanPlease);
+	result.addRescanObject((Invid) entries.elementAt(i), rescanPlease);
       }
 
     return result;
   }
-
 
   /**
    *
