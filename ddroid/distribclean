@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Directory Droid distribution cleaner
+# Ganymede distribution cleaner
 #
 # Last Revision Changed: $Rev$
 # Last Changed By: $Author$
@@ -9,9 +9,9 @@
 #
 # This script is intended to be used to clean out files
 # used during the build process, in preparation of tar'ing
-# up a Directory Droid release.
+# up a Ganymede release.
 #
-# I.e., to build Directory Droid, export Directory Droid from the SVN
+# I.e., to build Ganymede, export Ganymede from the SVN
 # archive to get a clean distrib copy, then do
 #
 # ./configure
@@ -20,14 +20,14 @@
 # cd ..
 # ./distribclean
 #
-# this will leave you with a copy of the Directory Droid tree with
+# this will leave you with a copy of the Ganymede tree with
 # the class and jar files necessary to allow someone to install
-# and run Directory Droid directly from a download without having
+# and run Ganymede directly from a download without having
 # to build the source themselves.
 #
 ############################################################
 
-echo "Directory Droid distribution cleaner"
+echo "Ganymede distribution cleaner"
 echo
 
 prog=$0

@@ -1,4 +1,4 @@
-Directory Droid Release 1.0.13
+Ganymede Release 1.0.13
 ?? ?, 2004
 README.first
 
@@ -10,21 +10,21 @@ SVN URL: $HeadURL$
 ---------------------------------------------
 
 Welcome.  This thing that you just downloaded is version 1.0.13 of the
-Directory Droid network directory management system.
+Ganymede network directory management system.
 
-This archive contains the Directory Droid server, clients, and documentation.
+This archive contains the Ganymede server, clients, and documentation.
 
-This archive does not contain customization code to make Directory
-Droid useful in any specific context.  You will want to download (or
-create) a schema kit that provides a database schema, custom plug-in
-Java classes to intelligently manage objects in your database, and
-both Java code and external scripts to take data from the Directory
-Droid database and to propagate it into your network environment.  We
-have published a 'userKit' package which customizes Directory Droid
-for user and group account management on UNIX, Windows NT, and Samba.
+This archive does not contain customization code to make Ganymede
+useful in any specific context.  You will want to download (or create)
+a schema kit that provides a database schema, custom plug-in Java
+classes to intelligently manage objects in your database, and both
+Java code and external scripts to take data from the Ganymede database
+and to propagate it into your network environment.  We have published
+a 'userKit' package which customizes Ganymede for user and group
+account management on UNIX, Windows NT, and Samba.
 
 You should read the following documents to get oriented with the
-Directory Droid system, in roughly this order:
+Ganymede system, in roughly this order:
 
 1. README
 2. FAQ

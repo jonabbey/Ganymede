@@ -1,4 +1,4 @@
-Directory Droid Release 1.0.13
+Ganymede Release 2.0
 ?? ?, 2004
 CHANGES
 
@@ -9,27 +9,22 @@ SVN URL: $HeadURL$
 
 ---------------------------------------------
 
--------------------- Changes from 1.0.12 to 1.0.13 -------------------
+-------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
 RELEASE DATA: ?? ?, 2004
 
-1. [EVERYTHING] Ganymede Rebooted.. Directory Droid, Subversion, Ant
+1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
 Went through everything in the old Ganymede tree and did lots of
-surgery, completely restructuring the source tree, changing the
-package for the Ganymede code from arlut.csd.ganymede to
-arlut.csd.ddroid.  Created sub packages arlut.csd.ddroid.server,
-arlut.csd.ddroid.common, arlut.csd.ddroid.rmi, arlut.csd.ddroid.admin,
-to make clear the different roles various classes in the old
-arlut.csd.ganymede package play.
+surgery, completely restructuring the source tree, moving files into
+new packages.  Created sub packages arlut.csd.ganymede.server,
+arlut.csd.ganymede.common, arlut.csd.ganymede.rmi,
+arlut.csd.ganymede.admin, to make clear the different roles various
+classes in the old arlut.csd.ganymede package play.
 
-Renamed Ganymede to Directory Droid, involving changes in most
-classes, replacing instances of the Ganymede name with Directory
-Droid.
-
-Deepak created a very nice Ant-based build system for Directory Droid,
-and restructured the source code into a package structure to make
-builds with Ant convenient.
+Deepak created a very nice Ant-based build system for Ganymede, and
+restructured the source code into a package structure to make builds
+with Ant convenient.
 
 We imported the old Ganymede CVS repository into Subversion.  I went
 through all of the source files and replaced the old CVS keywords with
@@ -41,8 +36,8 @@ Here at ARL, we're working to move from NIS to LDAP for our Unix and
 Mac OS X systems.  Since the OpenLDAP server doesn't support md5Crypt
 and since traditional Unix crypt is just too inadequate in the face of
 John the Ripper and other brute force dictionary attacks, I've
-implemented support for encoding passwords entered into Directory
-Droid using the Netscape Salted SHA-1 hash algorithm.
+implemented support for encoding passwords entered into Ganymede using
+the Netscape Salted SHA-1 hash algorithm.
 
 See http://www.openldap.org/faq/data/cache/347.html for more details
 on the SSHA hash format.
@@ -61,7 +56,8 @@ XXX - to be written.  Discuss DBEditObject subclasses, tasks.
 
 4. [SERVER] Java 5.0 fixes
 
-XXX - GUI threading stuff.
+XXX - GUI threading stuff, use of FoxTrot for fire-and-wait GUI
+updates in the client.
 
 5. [SERVER] The return of passive password capture
 
@@ -88,6 +84,22 @@ an exception report and the transaction unwinds itself back to a
 consistent state, ready to try committing again (though it will
 probably fail if the error condition in the plugin classes is not
 fixed).
+
+7. [SERVER, CLIENT] Added SSL support, 1.4 requirement
+
+Added the arlut.csd.ganymede.server.GanymedeRMIManager class to handle
+all RMI exports, which support for SSL encryption of client/server
+communications through the
+arlut.csd.ganymede.common.RMISSLClientSocketFactory and
+arlut.csd.ganymede.common.RMISSLServerSocketFactory classes.
+
+The Ant build process now incorporates automatic generation and
+distribution of key and certificate material into the appropriate jar
+files when the jar files are built.
+
+The SSL support now present in Ganymede requires a minimum of Java 1.4
+to work.  We are therefore intending to make JDK 1.4 a minimum
+requirement of Ganymede 2.0.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 

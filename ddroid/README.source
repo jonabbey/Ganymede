@@ -1,4 +1,4 @@
-Directory Droid Release 1.0.13
+Ganymede Release 1.0.13
 ?? ?, 2004
 README.source
 
@@ -9,8 +9,8 @@ SVN URL: $HeadURL$
 
 ---------------------------------------------
 
-This release of Directory Droid includes full sources for everything.
-By default, the compiled classes for the Directory Droid server,
+This release of Ganymede includes full sources for everything.
+By default, the compiled classes for the Ganymede server,
 client, and admin console are held in the top-level jars directory.
 If you want to rebuild the jars from scratch, here's what you do.
 
@@ -19,7 +19,7 @@ If you want to rebuild the jars from scratch, here's what you do.
 3. Run 'ant'.  This will compile the classes for all of the
    source code in the source tree.  Once this completes, you
    can set your CLASSPATH to <install>/src/build/classes and run
-   the Directory Droid tools.
+   the Ganymede tools.
 
    You shouldn't see any errors or warnings during the make, with
    the exception of some deprecation warnings having to do with
@@ -29,12 +29,12 @@ If you want to rebuild the jars from scratch, here's what you do.
 4. Run 'ant jars'.  This will recreate the 4 jar files used by
    the installation scripts.
 
-5. Finally, if you haven't already, run 'configure' from the Directory
-   Droid distribution directory to create the install scripts that you will
+5. Finally, if you haven't already, run 'configure' from the Ganymede
+   distribution directory to create the install scripts that you will
    use to install the software.
 
 Because Ant is smart about rebuilds, you can easily bring the whole
 system up to date by repeating steps 3 and 4 after modifying any
-Directory Droid code.
+Ganymede code.
 
 Obviously, you can see the src/build.xml file for more details.

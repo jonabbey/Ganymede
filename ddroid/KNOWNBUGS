@@ -1,4 +1,4 @@
-Directory Droid Release 1.0.13
+Ganymede Release 1.0.13
 ?? ?, 2004
 KNOWNBUGS
 
@@ -9,7 +9,7 @@ SVN URL: $HeadURL$
 
 ----------------------------------------------
 
-Directory Droid release 1.0.13 requires Swing 1.1 or later, as it is
+Ganymede release 1.0.13 requires Swing 1.1 or later, as it is
 built to expect the Swing libraries to be in the package javax.swing,
 rather than com.sun.java.swing, as it was in prior versions.  Use of
 Java JRE 1.3 or later for the clients is highly recommended, as many
@@ -17,10 +17,10 @@ Swing bugs are fixed in this release.
 
 --
 
-0) The Directory Droid admin console will fail with security
+0) The Ganymede admin console will fail with security
 exceptions when run in a browser with any Java 1.2 plugin prior to
 version 1.2.2, due to a bug in thread permission allocations in early
-1.2 JDK's.  If you see problems with the Directory Droid admin
+1.2 JDK's.  If you see problems with the Ganymede admin
 console, try the latest 1.4 plugin.
 
 1) Running the schema editor in the admin console and then not
@@ -28,15 +28,15 @@ shutting the console down and reconnecting still seems to be pinning
 some memory in the server.  Worse, over time, the amount of memory
 effectively pinned seems to increase over time after the schema editor
 has been run, until the admin console that edited the schema has
-exited.  To avoid this problem, if you see that the Directory Droid
+exited.  To avoid this problem, if you see that the Ganymede
 server's heap usage seems to increase over days and weeks of uptime
 and you have run the schema editor from an open console, trying
 quitting that admin console and waiting an hour or so and see if the
 memory usage drops back down to baseline.
 
-2) If you try building Directory Droid from scratch using Java 1.4,
+2) If you try building Ganymede from scratch using Java 1.4,
 you'll get a number of deprecation warnings having to do with the
-org.xml.sax classes.  The Directory Droid distribution includes the
+org.xml.sax classes.  The Ganymede distribution includes the
 public domain org.xml.sax classes for SAX version 1, but Sun
 incorporated the SAX version 2 classes into version 1.4 of the JDK,
 and marked several methods as deprecated.  Everything will work fine

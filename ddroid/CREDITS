@@ -1,4 +1,4 @@
-Directory Droid Release 1.0.13
+Ganymede Release 1.0.13
 ?? ?, 2004
 CREDITS
 
@@ -9,58 +9,58 @@ SVN URL: $HeadURL$
 
 ---------------------------------------------
 
-Directory Droid has been under development for over 6 years now, in
+Ganymede has been under development for over 6 years now, in
 both planning and execution.  The work has primarily been performed in
 the Computer Science Division of The Applied Research Laboratories,
 The University of Texas at Austin, with support from CSD and ARL
 management.
 
-The development of Directory Droid has benefited from the direct
+The development of Ganymede has benefited from the direct
 development contributions of the following individuals:
 
 --
 
  Jonathan Abbey, jonabbey@arlut.utexas.edu
 
-Primary architect and coder on the project.  Developed the Directory
-Droid server and admin console, the table and tree GUI components used
-in both the admin console and the primary client, the great bulk of
-the project documentation (or lack thereof) as well as all of the CVS
-and build script work.  Answers e-mail.
+Primary architect and coder on the project.  Developed the Ganymede
+server and admin console, the table and tree GUI components used in
+both the admin console and the primary client, the great bulk of the
+project documentation (or lack thereof) as well as all of the CVS and
+build script work.  Answers e-mail.
 
 --
 
  Mike Mulvaney, mike@mulvaney.com
 
-Mike worked on Directory Droid during his year and a half at the lab,
+Mike worked on Ganymede during his year and a half at the lab,
 from February of 1997 through September of 1998, before moving to the
 Washington D.C. area.  The client as it currently stands is primarily
 Mike's work.  In addition to the large bulk of client-side coding,
 Mike contributed significantly to the design of the system
-architecture as a whole.  Directory Droid would be a far, far poorer
+architecture as a whole.  Ganymede would be a far, far poorer
 thing were it not for Mike.
 
 --
 
  Brian O'Mara, bom@alumni.utexas.net
 
-Brian worked on Directory Droid during his tenure as a student
+Brian worked on Ganymede during his tenure as a student
 employee at ARL from February 1998 through August of 2000.  Brian
-created custom icons for the Directory Droid client and rewrote the
+created custom icons for the Ganymede client and rewrote the
 permissions editor to use more Swing classes, as well as creating the
-persona selection dialog introduced in Directory Droid 0.98.  Brian
+persona selection dialog introduced in Ganymede 0.98.  Brian
 also reworked the Query dialog to be more user-friendly.  During his
 last year at ARL, Brian did an enormous amount of work in preparing
 for the ultimate replacement of the old-style hosts_info DNS support
 with new code to convert BIND files into an XML representation and
-back again, which will be incorporated into a Directory Droid schema
+back again, which will be incorporated into a Ganymede schema
 kit sometime during 2001.
 
 --
 
  Navin Manohar, navin.manohar@ac.com
 
-Navin worked on Directory Droid from its inception in late 1995
+Navin worked on Ganymede from its inception in late 1995
 through his departure from the lab in April of 1997.  Navin
 contributed to initial architecture design decisions during this time,
 as well as the initial development of the client, including the basic
@@ -73,7 +73,7 @@ for data entry, back in the Java 1.0 days.
 
  Erik Grostic, butcher@auschron.com
 
-Erik worked on Directory Droid from mid 1997 through his departure
+Erik worked on Ganymede from mid 1997 through his departure
 from the lab in December of 1997.  Erik developed the GUI code for the
 permissions editor and the query submission dialog, helping bring the
 client into fruition.
@@ -82,9 +82,9 @@ client into fruition.
 
  Deepak Giridharagopal, deepak@arlut.utexas.edu
 
-Deepak is contributing Java coding and development to the Directory
-Droid system.  Deepak just started at ARL, but he has already made
-noticeable improvements to the Directory Droid client's GUI.
+Deepak is contributing Java coding and development to the Ganymede
+system.  Deepak just started at ARL, but he has already made
+noticeable improvements to the Ganymede client's GUI.
 
 --
 
@@ -93,32 +93,32 @@ noticeable improvements to the Directory Droid client's GUI.
 Dan originated the GASH project, providing strategic vision and
 architectural design to solve the essential problem of shared group
 control over the lab's master NIS and DNS databases.  Dan has
-contributed greatly to the higher level design issues in Directory
-Droid, as well as providing invaluable user interface design feedback
-and bug reporting.  Neither Directory Droid nor GASH could have been
-developed at all without his support.
+contributed greatly to the higher level design issues in Ganymede, as
+well as providing invaluable user interface design feedback and bug
+reporting.  Neither Ganymede nor GASH could have been developed at all
+without his support.
 
 ------
 
 Within ARL, Gil Kloepfer provided design assistance on the networking
-issues that Directory Droid is going to need to address as the lab moves into
+issues that Ganymede is going to need to address as the lab moves into
 the 21st century.  Jay Scott contributed work on a new version of the
-GASH schema's build kit (which is not yet included with the Directory Droid
+GASH schema's build kit (which is not yet included with the Ganymede
 distribution).  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
 Gramann, Andrew Helyer, Richard Mach, and others made helpful reports
-on gaps and problems with Directory Droid.
+on gaps and problems with Ganymede.
 
 John Knutson has provided bug reports and code contributions in the
-course of evaluating the Directory Droid code for use on an SGL
-project.  Directory Droid's support of floating point data fields came
+course of evaluating the Ganymede code for use on an SGL
+project.  Ganymede's support of floating point data fields came
 from John.
 
-A lot of Directory Droid is based on the experience and design work
+A lot of Ganymede is based on the experience and design work
 that went into GASH.  In addition to the aforementioned names, Dean
 Kennedy and Pug Bainter should be credited for their design work on
 GASH.  Pug Bainter authored the original GASH makefiles that the
-Directory Droid GASH schema uses to propagate information from
-Directory Droid into NIS and DNS.
+Ganymede GASH schema uses to propagate information from
+Ganymede into NIS and DNS.
 
 Outside ARL, we have gotten very helpful bug reports and feedback
 from:
@@ -145,7 +145,7 @@ Glen Joseph, gjoseph@us.ibm.com - installServer bug report
 Chris McCraw, fool@dfw.net - bugzilla testing
 Ido Dubrawsky, ido@globeset.com - testing
 Michael Houle, michael.houle@atcoitek.com - many bug reports
-Miklos Muller, mmuller@lbcons.net - many wonderful bug reports for Directory Droid 1.0
+Miklos Muller, mmuller@lbcons.net - many wonderful bug reports for Ganymede 1.0
 Gaurav Bhargava, gaurav.bhargava@villanova.edu - Bug reports, schema development
 Martin Vogt <vogt@itwm.uni-kl.de> - bug reports
 Steve Lemons, steve.lemons@arrisi.com - bug reports
@@ -162,18 +162,18 @@ http://www.cacas.org/java/gnu/regexp/.
 The Java implementation of the standard UNIX crypt() function was
 converted from C by John Dumas, jdumas@zgs.com, whose code can be
 found at http://208.223.9.21/jfd/crypt.html.  jcrypt is included in
-Directory Droid by permission of the author.
+Ganymede by permission of the author.
 
 The Qsmtp class was originally written by James Driscoll
 (maus@io.com), and placed into the public domain.  See
 http://www.io.com/~maus/JavaPage.html for details and additional free
-Java code. Note that the version of Qstmp packaged with Directory Droid has
+Java code. Note that the version of Qstmp packaged with Ganymede has
 been significantly modified, to provide more convenient use in a
 threaded context, and to provide rudimentary MIME file attachment
 support.
 
 Some of the MD5 classes used in the server were written by Santeri
-Paavolainen, and are included in Directory Droid under the terms of
+Paavolainen, and are included in Ganymede under the terms of
 the GNU General Public License.  See
 http://www.cs.hut.fi/~santtu/java/ for more information.  The MD5Crypt
 class used to support FreeBSD-style md5 passwords was originally
@@ -197,15 +197,15 @@ released under the GPL as part of the Samba source code, and was
 ported to Java by Jonathan Abbey, using Harry's MD4 code to perform
 the fundamental cryptographic hash function.
 
-The XML SAX reference classes and interfaces used by the Directory Droid
+The XML SAX reference classes and interfaces used by the Ganymede
 server's XML parsing routines were written and released into the
 public domain by David Meggison <david@megginson.com>.  More
 information on the SAX standard for XML parsing can be found at the
 SAX home page at http://www.megginson.com/SAX/.
 
-The Directory Droid server uses James Clark's excellent XMLWriter and XP
+The Ganymede server uses James Clark's excellent XMLWriter and XP
 parser class libraries for XML generation and parsing.  Both are
-copyright 1997, 1998 by James Clark, and are included in Directory Droid in
+copyright 1997, 1998 by James Clark, and are included in Ganymede in
 accordance with his stated licensing terms.  See
 http://www.jclark.com/xml/xp/index.html for information on the XP
 parser.
@@ -213,7 +213,7 @@ parser.
 The Java UUID Generator code used by ARL custom code to generate RFC
 and DCE-compliant globally unique identifiers for our Macintosh LDAP
 synchronization was written by Tatu Saloranta, tatu.saloranta@iki.fi,
-and is included in Directory Droid under the Lesser General Public License.
+and is included in Ganymede under the Lesser General Public License.
 See http://www.doomdark.org/doomdark/proj/jug/ for more information.
 
 The Java implementation of the SHA-1 hashing algorithm (here

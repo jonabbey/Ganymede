@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# This is the bootstrapping configuration script for Directory Droid. The
+# This is the bootstrapping configuration script for Ganymede. The
 # only thing we count on to run this script is that /bin/sh works.
 #
 # Get enough information from the user to be able to find Perl 5 and
@@ -14,7 +14,7 @@
 #
 ###############################################################################
 
-echo "Directory Droid configure script"
+echo "Ganymede configure script"
 echo
 
 # 
