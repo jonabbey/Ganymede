@@ -6,8 +6,8 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.4 $ %D%
-   Module By: Navin Manohar
+   Version: $Revision: 1.5 $ %D%
+   Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
 */
