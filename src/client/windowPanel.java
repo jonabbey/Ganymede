@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -328,7 +328,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	windowCount++;
       }
 
-    w.setBounds(windowCount*20, windowCount*20, 500,350);
+    w.setBounds(windowCount*20, windowCount*20, 500,400);
 
     w.setLayer(new Integer(topLayer));
     
