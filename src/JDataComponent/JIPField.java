@@ -6,8 +6,8 @@
    
    Created: 13 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2001/04/27 21:19:18 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2002/10/05 05:38:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -89,9 +89,8 @@ public class JIPField extends JentryField {
 
   // --
 
-  String value;
-  boolean allowV6;
-
+  private String storedValue;
+  private boolean allowV6;
   private boolean processingCallback = false;
 
   /**  Constructors ***/
@@ -176,7 +175,7 @@ public class JIPField extends JentryField {
       {
 	setText("");
 
-	value = null;
+	storedValue = null;
 	return;
       }
     
@@ -189,7 +188,7 @@ public class JIPField extends JentryField {
 	setText(genIPV6string(bytes));
       }
 
-    value = getText();
+    storedValue = getText();
 
     return;
   }
@@ -232,9 +231,14 @@ public class JIPField extends JentryField {
    * When the JIPField looses focus, any changes made to 
    * the value in the JIPField need to be propogated to the
    * server.  This method will handle that functionality.
+   *
+   * sendCallback is called when focus is lost, or when we are otherwise
+   * triggered.
+   *
+   * @returns -1 on change rejected, 0 on no change required, 1 on change approved
    */
 
-  public void sendCallback()
+  public int sendCallback()
   {
     String str;
     Byte[] bytes;
@@ -245,7 +249,7 @@ public class JIPField extends JentryField {
       {
 	if (processingCallback)
 	  {
-	    return;
+	    return -1;
 	  }
 	
 	processingCallback = true;
@@ -258,116 +262,84 @@ public class JIPField extends JentryField {
     
 	str = getText();
     
-	if (value == null || !value.equals(str))
+	if ((storedValue != null && storedValue.equals(str)) || 
+	    (storedValue == null && (str == null || str.equals(""))))
 	  {
-	    try
+	    return 0;
+	  }
+
+	try
+	  {
+	    if (str.indexOf(':') != -1)
 	      {
-		if (str.indexOf(':') != -1)
+		if (allowV6)
 		  {
-		    if (allowV6)
-		      {
-			bytes = genIPV6bytes(str);
-		      }
-		    else
-		      {
-			throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
-		      }
+		    bytes = genIPV6bytes(str);
 		  }
 		else
 		  {
-		    bytes = genIPV4bytes(str);
+		    throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
 		  }
 	      }
-	    catch (IllegalArgumentException ex)
+	    else
 	      {
-		reportError(ex.getMessage());
-		return;
+		bytes = genIPV4bytes(str);
 	      }
 	  }
-	else
+	catch (IllegalArgumentException ex)
+	  {
+	    reportError(ex.getMessage());
+	    return -1;
+	  }
+
+	try 
 	  {
 	    if (debug)
 	      {
-		System.err.println("JIPField.processFocusEvent: no change, ignoring");
+		System.err.println("JIPField.processFocusEvent: making callback");
 	      }
-	
-	    return;
-	  }
-    
-	if (allowCallback) 
-	  {
-	    boolean b = false;
-	
-	    try 
-	      {
-		if (debug)
-		  {
-		    System.err.println("JIPField.processFocusEvent: making callback");
-		  }
 	    
-		b = my_parent.setValuePerformed(new JValueObject(this, bytes));
-	      }
-	    catch (RemoteException re)
+	    if (!allowCallback || my_parent.setValuePerformed(new JValueObject(this, bytes)))
 	      {
-		throw new RuntimeException("failure in callback dispatch: " + re); 
-	      }
-	
-	    if (!b) 
-	      {
-		if (debug)
-		  {
-		    System.err.println("JIPField.processFocusEvent: setValue rejected");
-		
-		    if (value == null)
-		      {
-			System.err.println("JIPField.processFocusEvent: resetting to empty string");
-		      }
-		    else
-		      {
-			System.err.println("JIPField.processFocusEvent: resetting to " + value);
-		      }
-		  }
-	    
-		if (value == null)
-		  {
-		    setText("");
-		  }
-		else
-		  {
-		    setText(value);
-		  }
-	    
-		changed = false;
-	      }
-	    else 
-	      {
-		if (debug)
-		  {
-		    System.err.println("JIPField.processFocusEvent: setValue accepted");
-		  }
-	    
 		if (bytes == null)
 		  {
-		    value = "";
-		    setText(value);
+		    storedValue = "";
+		    setText(storedValue);
 		  }
 		else if (bytes.length == 4)
 		  {
-		    value = genIPV4string(bytes);
-		    setText(value);
+		    storedValue = genIPV4string(bytes);
+		    setText(storedValue);
 		  }
 		else if (bytes.length == 16)
 		  {
-		    value = genIPV6string(bytes);
-		    setText(value);
+		    storedValue = genIPV6string(bytes);
+		    setText(storedValue);
 		  }
 		else
 		  {
 		    throw new RuntimeException("JIPField: bad bytes calculated");
 		  }
-	    
-		changed = true;
+		
+		return 1;
 	      }
+	    else
+	      {
+		if (storedValue == null)
+		  {
+		    setText("");
+		  }
+		else
+		  {
+		    setText(storedValue);
+		  }
+		
+		return -1;
+	      }
+	  }
+	catch (RemoteException re)
+	  {
+	    throw new RuntimeException("failure in callback dispatch: " + re); 
 	  }
       }
     finally
