@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.58 $ %D%
+   Version: $Revision: 1.59 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -229,13 +229,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       field, 
       tmp = null;
 
-    synchronized (original)
-      {
-	this.original = original;
-	this.id = original.id;
-	this.myInvid = original.myInvid;
-	this.objectBase = original.objectBase;
-      }
+    /* -- */
 
     shadowObject = null;
     this.editset = editset;
@@ -243,9 +237,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     stored = true;
     status = EDITING;
 
+    fields = new Hashtable();
+
     gSession = getSession().getGSession();
 
-    fields = new Hashtable();
+    synchronized (original)
+      {
+	this.original = original;
+	this.id = original.id;
+	this.myInvid = original.myInvid;
+	this.objectBase = original.objectBase;
+      }
 
     // clone the fields from the original object
     // since we own these, the field-modifying
@@ -380,6 +382,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
+   * Returns the GanymedeSession that this object is checked out in
+   * care of.
+   *
+   * @see arlut.csd.ganymede.GanymedeSession
+   * 
+   */
+
+  protected GanymedeSession getGSession()
+  {
+    return getSession().getGSession();
+  }
+
+  /**
    *
    * Returns a code indicating whether this object
    * is being created, edited, or deleted.
@@ -503,9 +518,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * Shortcut method to set a field's value.  Using this
    * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.
+   * particularly useful in database loading.<br><br>
    *
-   * @see arlut.csd.ganymede.db_object
+   * This method cannot be used on permission fields or password
+   * fields.
+   *
+   * @see arlut.csd.ganymede.db_object 
    */
 
   public ReturnVal setFieldValue(short fieldID, Object value)
@@ -518,6 +536,34 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       {
 	throw new RuntimeException("caught remote on a local op: " + ex);
       }
+  }
+
+  /**
+   *
+   * Shortcut method to set a field's value.  This version bypasses
+   * permission checking and is only intended for server-side
+   * use.<br><br>
+   *
+   * This method cannot be used on permission fields or password
+   * fields.
+   *
+   */
+
+  public ReturnVal setFieldValueLocal(short fieldID, Object value)
+  {
+    ReturnVal retval;
+    DBField field = (DBField) getField(fieldID);
+
+    /* -- */
+
+    if (field != null)
+      {
+	return field.setValueLocal(value);
+      }
+
+    return Ganymede.createErrorDialog("DBEditObject.setFieldValueLocal() error",
+				      "DBEditObject.setFieldValueLocal() couldn't find field " + fieldID + 
+				      " in object " + getLabel());
   }
 
   /**
@@ -1261,7 +1307,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	// note that the query we are submitting here *will* be filtered by the
 	// current visibilityFilterInvid field in GanymedeSession.
 
-	return editset.getSession().getGSession().query(new Query(baseId, root, true));
+	return editset.getSession().getGSession().query(new Query(baseId, root, true), this);
       }
     
     //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
@@ -1567,19 +1613,21 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * any external actions related to object removal when
    * the transaction is committed..<br><br>
    *
-   * finalizeremove() returns true if the internal removal bookkeeping
-   * was successful, and false if not.  A false return value will
-   * cause the DBSession to rollback the transaction to the state
-   * prior to any removal actions for this object were attempted.<br><br>
+   * finalizeremove() returns a ReturnVal indicating whether the
+   * internal removal bookkeeping was successful.  A failure result
+   * will cause the DBSession to rollback the transaction to the state
+   * prior to any removal actions for this object were
+   * attempted.<br><br>
    *
    * remove() is intended for subclassing, whereas finalizeRemove() is
    * not.  finalizeRemove() provides the standard logic for wiping out
    * fields and what not to cause the object to be unlinked from
    * other objects.<br><br>
    *
-   * @param success If true, this method will clean up all fields and
-   * do logging.  If false, this method will return an error condition
-   * to the code that called us, which should take care of rollback.
+   * @param success If true, finalizeRemove() will clear all fields,
+   * thereby unlinking invid fields and relinquishing namespace claims.
+   * If false, finalizeRemove() will rollback to the state the system
+   * was in before DBSession.deleteDBObject() was entered.
    *
    * @see #commitPhase1()
    * @see #commitPhase2() 
@@ -1595,110 +1643,211 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     /* -- */
 
-    if (success)
+    if (!success)
       {
-	// we want to delete / null out all fields.. this will take care
-	// of invid links, embedded objects, and namespace allocations.
+	editset.rollback("del" + label); // *sync*
+	return Ganymede.createErrorDialog("Object Removal Failure",
+					  "Could not delete object " + label +
+					  ", custom code rejected this operation.");
+      }
 
-	// set the deleting flag to true so that our subclasses won't
-	// freak about values being set to null.
+    // we want to delete / null out all fields.. this will take care
+    // of invid links, embedded objects, and namespace allocations.
+    
+    // set the deleting flag to true so that our subclasses won't
+    // freak about values being set to null.
 
-	this.deleting = true;
+    if (debug)
+      {
+	System.err.println("++ Attempting to delete object " + label);
 
-	try
+	if (isEmbedded())
 	  {
-	    enum = fields.elements();
+	    InvidDBField invf = (InvidDBField) getField(SchemaConstants.ContainerField);
 
-	    while (enum.hasMoreElements())
+	    if (invf == null)
 	      {
-		field = (DBField) enum.nextElement();
+		System.err.println("++ Argh, no container field in embedded!");
+	      }
+	    else
+	      {
+		System.err.println("++ We are embedded in object " + invf.getValueString());
+	      }
+	  }
+      }
 
-		if (field.isVector())
+    this.deleting = true;
+
+    try
+      {
+	enum = fields.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    field = (DBField) enum.nextElement();
+
+	    // we can't clear field 0 yet, since we need that
+	    // for permissions verifications for other fields
+	    
+	    if (field.getID() == 0)
+	      {
+		continue;
+	      }
+	    
+	    if (field.isVector())
+	      {
+		if (debug)
 		  {
-		    while (field.size() > 0)
+		    System.err.println("++ Attempting to clear vector field " + field.getName());
+		  }
+
+		while (field.size() > 0)
+		  {
+		    retVal = field.deleteElement(0); // *sync*
+
+		    if (retVal != null && !retVal.didSucceed())
 		      {
-			retVal = field.deleteElement(0); // *sync*
-
-			if (retVal != null && !retVal.didSucceed())
-			  {
-			    session = editset.getSession();
+			session = editset.getSession();
 		    
-			    if (session != null)
-			      {
-				session.setLastError("DBEditObject disapproved of deleting element from field " + 
-						     field.getName());
-			      }
-
-			    editset.rollback("del" + label); // *sync*
-
-			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							      "DBEditObject disapproved of deleting element from field " + 
-							      field.getName());
+			if (session != null)
+			  {
+			    session.setLastError("DBEditObject disapproved of deleting element from field " + 
+						 field.getName());
 			  }
+
+			editset.rollback("del" + label); // *sync*
+
+			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							  "DBEditObject disapproved of deleting element from field " + 
+							  field.getName());
+		      }
+		  }
+	      }
+	    else
+	      {
+		// permission matrices and passwords don't allow us to
+		// call set value directly.  We're mainly concerned
+		// with invid's (for linking) and strings (for the
+		// namespace) here anyway.
+
+		if (debug)
+		  {
+		    System.err.println("++ Attempting to clear scalar field " + field.getName());
+		  }
+
+		if (field.getType() != PERMISSIONMATRIX &&
+		    field.getType() != PASSWORD)
+		  {
+		    retVal = field.setValue(null); // *sync*
+
+		    if (retVal != null && !retVal.didSucceed())
+		      {
+			session = editset.getSession();
+		    
+			if (session != null)
+			  {
+			    session.setLastError("DBEditObject could not clear field " + 
+						 field.getName());
+			  }
+
+			editset.rollback("del" + label); // *sync*
+
+			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							  "DBEditObject could not clear field " + 
+							  field.getName());
 		      }
 		  }
 		else
 		  {
-		    // permission matrices and passwords don't
-		    // allow us to call set value directly.
+		    field.defined = false;
+		  }
+	      }
+	  }
 
-		    if (field.getType() != PERMISSIONMATRIX &&
-			field.getType() != PASSWORD)
+	// ok, we've cleared all fields but field 0.. clear that to finish up.
+
+	field = (DBField) getField((short) 0);
+
+	if (field != null)
+	  {
+	    if (field.isVector())
+	      {
+		// if we're deleting elements out of vector field 0 (the list
+		// of owner groups), we'll want to deleteElementLocal.. this
+		// will simplify things and will prevent us from losing permission
+		// to write to this field in midstream (although the new DBField
+		// permCache would actually obviate this problem as well).
+
+		while (field.size() > 0)
+		  {
+		    retVal = field.deleteElementLocal(0); // *sync*
+
+		    if (retVal != null && !retVal.didSucceed())
 		      {
-			retVal = field.setValue(null); // *sync*
-
-			if (retVal != null && !retVal.didSucceed())
-			  {
-			    session = editset.getSession();
+			session = editset.getSession();
 		    
-			    if (session != null)
-			      {
-				session.setLastError("DBEditObject could not clear field " + 
-						     field.getName());
-			      }
-
-			    editset.rollback("del" + label); // *sync*
-
-			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							      "DBEditObject could not clear field " + 
-							      field.getName());
+			if (session != null)
+			  {
+			    session.setLastError("DBEditObject disapproved of deleting element from field " + 
+						 field.getName());
 			  }
-		      }
-		    else
-		      {
-			field.defined = false;
+
+			editset.rollback("del" + label); // *sync*
+
+			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							  "DBEditObject disapproved of deleting element from field " + 
+							  field.getName());
 		      }
 		  }
 	      }
+	    else
+	      {
+		// scalar field 0 is the ContainerField for an embedded
+		// object.  Note that setting this field to null will
+		// not unlink us from the the container object, since
+		// the ContainerField pointer is a generic one.
 
-	    // ok, we should be successful if we get here.  log the object deletion.
+		retVal = field.setValueLocal(null); // *sync*
 
-	    Vector invids = new Vector();
-	    invids.addElement(this.getInvid());
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    session = editset.getSession();
+		    
+		    if (session != null)
+		      {
+			session.setLastError("DBEditObject could not clear field " + 
+					     field.getName());
+		      }
 
-	    editset.logEvents.addElement(new DBLogEvent("deleteobject",
-							getTypeDesc() + ":" + label,
-							(gSession.personaInvid == null ?
-							 gSession.userInvid : gSession.personaInvid),
-							gSession.username,
-							invids,
-							null));
+		    editset.rollback("del" + label); // *sync*
 
-	    return retVal;
+		    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+						      "DBEditObject could not clear field " + 
+						      field.getName());
+		  }
+	      }
 	  }
-	finally
-	  {
-	    // make sure we clear deleting before we return
 
-	    deleting = false;
-	  }
+	// ok, we should be successful if we get here.  log the object deletion.
+
+	Vector invids = new Vector();
+	invids.addElement(this.getInvid());
+
+	editset.logEvents.addElement(new DBLogEvent("deleteobject",
+						    getTypeDesc() + ":" + label,
+						    (gSession.personaInvid == null ?
+						     gSession.userInvid : gSession.personaInvid),
+						    gSession.username,
+						    invids,
+						    null));
+
+	return retVal;
       }
-    else
+    finally
       {
-	editset.rollback("del" + label); // *sync*
-
-	return Ganymede.createErrorDialog("DBEditObject.finalizeRemove() error",
-					  "Custom object logic could not do the remove properly");
+	// make sure we clear deleting before we return
+	
+	deleting = false;
       }
   }
 
