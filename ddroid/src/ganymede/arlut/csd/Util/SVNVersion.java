@@ -59,12 +59,12 @@ package arlut.csd.Util;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class records the SVN branching information for Directory
- * Droid, and may be referenced by server or client code.</p>
+ * <p>This class records the SVN branching information for Ganymede,
+ * and may be referenced by server or client code.</p>
  *
  * <p>This class should be recompiled after SVN export in order for
  * the version information to be accurate.  The logic in this class
- * looks for a HeadURL branch substring of the form ddroid_001001013
+ * looks for a HeadURL branch substring of the form ganymede_001001013
  * for version 1.0.13, and uses that string to provide the release
  * number information provided by this class's static methods.</p>
  */
@@ -120,10 +120,10 @@ public class SVNVersion {
     release_date = SVN_release_date.substring(6, SVN_release_date.length()-1);
     release_date = release_date.trim();
 	
-    // we use ddroid_XXXYYYZZZ for our SVN release tags/branches, so
-    // we'll see if we can find "ddroid_" in our HeadURL path
+    // we use ganymede_XXXYYYZZZ for our SVN release tags/branches, so
+    // we'll see if we can find "ganymede_" in our HeadURL path
 
-    int branch_match = release_name.indexOf("ddroid_");
+    int branch_match = release_name.indexOf("ganymede_");
 
     if (branch_match != -1)
       {
@@ -155,7 +155,7 @@ public class SVNVersion {
 	catch (NumberFormatException ex)
 	  {
 	    // we weren't able to parse the numeric string, probably
-	    // we had a malformed ddroid_ path element in our SVN
+	    // we had a malformed ganymede path element in our SVN
 	    // HeadURL.. so we'll also leave our release_number set to
 	    // "version unknown".
 	  }
