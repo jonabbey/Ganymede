@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.35 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.36 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -326,6 +326,118 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   public String getTypeDesc()
   {
     return objectBase.object_name;
+  }
+
+  /**
+   *
+   * The partialEmit() method is used when the server is doing
+   * a limited schema dump.  partialEmit() will look at the
+   * type of the object represented by this DBObject object and
+   * will choose how to restrict the fields emitted in order
+   * to not leave spare invid links in place that are typically
+   * not to be emitted in a schema dump.
+   *
+   * This method is really of a piece with DBObjectBase.partialEmit().
+   *
+   * And, this method is really a hack.  I intend to ditch this as
+   * soon as possible and replace it with a separate cleaner executable
+   * which will load a schema file and delete any invid's that refer
+   * to objects not present in the schema file.  Even that would be
+   * something of a hack, given that we could have some other object
+   * deletion tasks that would logically need to be carried out, but
+   * I'm not yet ready to commit to having the schema dump routine
+   * actually delete all objects not desired for the schema dump.
+   * 
+   * @param out A DBStore writing stream.
+   * 
+   */
+
+  synchronized void partialEmit(DataOutput out) throws IOException
+  {
+    Enumeration enum;
+    Short key;
+
+    int counter = 0;
+    Vector fieldsToEmit = new Vector();
+
+    /* -- */
+
+    //    System.err.println("Partial Emitting " + objectBase.getName() + " <" + id + ">");
+
+    out.writeInt(id);
+
+    if (objectBase.getTypeID() == SchemaConstants.OwnerBase)
+      {
+	fieldsToEmit.addElement(new Short(SchemaConstants.OwnerNameField));
+	fieldsToEmit.addElement(new Short(SchemaConstants.OwnerMembersField));
+
+	// omit OwnerObjectsOwned
+      }
+
+    enum = fields.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (Short) enum.nextElement();
+
+	if (fieldsToEmit.contains(key))
+	  {
+	    counter++;
+	  }
+      }
+    
+    out.writeShort(counter);    
+
+    //    System.err.println("emitting fields");
+   
+    enum = fields.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (Short) enum.nextElement();
+
+	if (fieldsToEmit.contains(key))
+	  {
+	    out.writeShort(key.shortValue());
+
+	    if (key.shortValue() == SchemaConstants.OwnerMembersField)
+	      {
+		// only want to emit the persona objects we're keeping,
+		// which would be supergash and monitor
+
+		DBField oldF = (DBField) fields.get(key);
+
+		if (!(oldF instanceof InvidDBField))
+		  {
+		    Ganymede.debug("Error in DBObject.partialEmit(): expected SchemaConstants.OwnerMembersField to be invidfield");
+		    ((DBField) fields.get(key)).emit(out);
+		  }
+		else
+		  {
+		    InvidDBField invF = new InvidDBField(this, (InvidDBField) oldF);
+
+		    if (!invF.isVector())
+		      {
+			Ganymede.debug("Error in DBObject.partialEmit(): expected SchemaConstants.OwnerMembersField to be vector");
+			((DBField) fields.get(key)).emit(out);
+		      }
+		    else
+		      {
+			invF.values = new Vector();
+
+			invF.values.addElement(new Invid(SchemaConstants.PersonaBase, 0)); // 0 is supergash
+			invF.values.addElement(new Invid(SchemaConstants.PersonaBase, 1)); // 1 monitor
+
+			invF.emit(out);
+		      }
+		  }
+	      }
+	    else
+	      {
+		((DBField) fields.get(key)).emit(out);
+	      }
+	  }
+      }
   }
   
   /**
@@ -1074,52 +1186,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    out.println(field.key());
 	  }
       }    
-  }
-
-  /**
-   *
-   * Generate a dump row for the query processor, which
-   * includes a string representation of the Invid and
-   * the label of this object.
-   *
-   */
-
-  synchronized public String resultDump()
-  {
-    StringBuffer buffer = new StringBuffer();
-
-    /* -- */
-
-    // first thing you do is insert a representation for the Invid
-
-    buffer.append(getInvid().toString());
-    buffer.append("|");
-
-    char[] chars = getLabel().toCharArray();
-    
-    for (int j = 0; j < chars.length; j++)
-      {
-	if (chars[j] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (chars[j] == '\n')
-	  {
-	    buffer.append("\\\n");
-	  }
-	else if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
-      }
-
-    buffer.append("\n");
-
-    return buffer.toString();
   }
 
   /**
