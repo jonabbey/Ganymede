@@ -50,8 +50,10 @@ odd cases.  The notion of an explicitly recorded default permission
 set for fields that differed from the permissions on an object type
 itself has been removed.  In keeping with this, the
 setDefaultFieldPerms() methods on both PermissionMatrixDBField and
-perm_field have been taken away.  The permissions logic has been
-simplified, and better documented in the javadocs.
+perm_field have been taken away, in favor of setFieldPerms(), which
+sets permissions for all existing fields in an object type, but
+doesn't involve the complex default logic.  The permissions logic has
+been simplified, and better documented in the javadocs.
 
 Now, when new fields are added to object types through the
 schema editor, all Role objects will grant the permission for the

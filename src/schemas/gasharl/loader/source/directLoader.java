@@ -11,8 +11,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 1999/06/19 03:53:16 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 1999/06/19 04:10:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -324,16 +324,16 @@ public class directLoader {
 	PermEntry fieldPerm = new PermEntry(true, false, false, false);
 
 	pf.setPerm((short) 269, defPerm); // room
-	pf.setFieldsPerm((short) 269, fieldPerm, false);
+	pf.setFieldPerms((short) 269, fieldPerm, false);
 
 	pf.setPerm((short) 276, defPerm); // automounter volume
-	pf.setFieldsPerm((short) 276, fieldPerm, false);
+	pf.setFieldPerms((short) 276, fieldPerm, false);
 
 	pf.setPerm((short) 267, defPerm); // network
-	pf.setFieldsPerm((short) 267, fieldPerm, false);
+	pf.setFieldPerms((short) 267, fieldPerm, false);
 
 	pf.setPerm((short) 272, defPerm); // system type
-	pf.setFieldsPerm((short) 272, fieldPerm, false);
+	pf.setFieldPerms((short) 272, fieldPerm, false);
 
 	// now, the ownerGroups Vector has been loaded for us by the
 	// scanOwnerGroups() method.  go ahead and register owner
