@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.259 $
-   Last Mod Date: $Date: 2002/08/21 06:58:51 $
+   Version: $Revision: 1.260 $
+   Last Mod Date: $Date: 2002/11/01 02:24:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.259 $ $Date: 2002/08/21 06:58:51 $
+ * @version $Revision: 1.260 $ $Date: 2002/11/01 02:24:04 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -449,17 +449,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
 
   Vector visibilityFilterInvids = null;
-
-  /** 
-   * <P>This variable caches the results of the {@link
-   * arlut.csd.ganymede.GanymedeSession#getOwnerGroups()
-   * getOwnerGroups()} method.  It stores the list of owner groups
-   * that the current persona has any kind of membership in, either
-   * through direct membership or by being a member of a group that
-   * owns other owner groups.</P> 
-   */
-
-  QueryResult ownerList = null;
 
   /**
    * <P>This variable caches the {@link arlut.csd.ganymede.AdminEntry AdminEntry}
@@ -1243,7 +1232,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    defaultObj = null;
 	    newObjectOwnerInvids = null;
 	    visibilityFilterInvids = null;
-	    ownerList = null;
 	    userInfo = null;
 	    xSession = null;
 	  }
@@ -1557,7 +1545,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaInvid = null;
 	personaName = null;
 	updatePerms(true);
-	ownerList = null;
 	visibilityFilterInvids = null;
 	userInfo = null;	// null our admin console cache
 	setLastEvent("selectPersona: " + persona);
@@ -1629,7 +1616,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	personaInvid = personaObject.getInvid();
 	updatePerms(true);
-	ownerList = null;
 	userInfo = null;	// null our admin console cache
 	visibilityFilterInvids = null;
 	setLastEvent("selectPersona: " + persona);
@@ -1645,10 +1631,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * the list of owner groups in the current persona.  That is, the
    * list includes all the owner groups in the current persona along
    * with all of the owner groups those owner groups own, and so on.</p>
-   *
-   * <p>Note that getOwnerGroups caches its owner group list in the object
-   * member {@link arlut.csd.ganymede.GanymedeSession#ownerList ownerList}
-   * for efficiency.</p>
    */
 
   public synchronized QueryResult getOwnerGroups()
@@ -1657,118 +1639,46 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* - */
 
+    Query q;
     QueryResult result = new QueryResult();
-    InvidDBField inf;
-    Vector groups, children, temp;
-    Hashtable seen = new Hashtable();
+    QueryResult fullOwnerList;
+    Vector alreadySeen = new Vector();
     Invid inv;
-    DBObject owner;
 
     /* -- */
-
-    if (ownerList != null)
-      {
-	return ownerList;
-      }
 
     if (personaInvid == null)
       {
 	return result;		// End users don't have any owner group access
       }
 
-    // if we're in supergash mode, return all the owner groups
-    // defined
+    q = new Query(SchemaConstants.OwnerBase);
+    q.setFiltered(false);
+
+    fullOwnerList = query(q);
+
+    // if we're in supergash mode, return a complete list of owner groups
 
     if (supergashMode)
       {
-	Query q = new Query(SchemaConstants.OwnerBase);
-	q.setFiltered(false);
-
-	ownerList = query(q);	// save for our cache
-
-	return ownerList;
+	return fullOwnerList;
       }
 
     // otherwise, we've got to do a very little bit of legwork
 
-    inf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
-
-    if (inf == null)
+    for (int i = 0; i < fullOwnerList.size(); i++)
       {
-	return result;		// empty list
-      }
+	alreadySeen.removeAllElements();
 
-    // do a breadth-first search of the owner groups
+	inv = fullOwnerList.getInvid(i);
 
-    groups = inf.getValuesLocal();
-
-    // *** Caution!  getValuesLocal() does not clone the field's contents..
-    // 
-    // DO NOT modify groups here!
-
-    while (groups != null && (groups.size() > 0))
-      {
-	children = new Vector();
-
-	for (int i = 0; i < groups.size(); i++)
+	if (recursePersonaMatch(inv, alreadySeen))
 	  {
-	    inv = (Invid) groups.elementAt(i);
-
-	    if (seen.containsKey(inv))
-	      {
-		continue;
-	      }
-
-	    // it's okay to use session.viewDBObject here because we
-	    // are always going to be doing this operation for supergash's
-	    // benefit.  Objects that are pulled directly from the hashes
-	    // don't have owners, and so will always grant us access.
-
-	    owner = session.viewDBObject(inv);
-
-	    if (owner == null)
-	      {
-		continue;
-	      }
-	    else
-	      {
-		seen.put(inv, inv);
-	      }
-
-	    result.addRow(inv, owner.getLabel(), false);
-
-	    // got the parent.. now add any ownerbase objects owned by it
-
-	    inf = (InvidDBField) owner.getField(SchemaConstants.OwnerObjectsOwned);
-
-	    if (inf != null)
-	      {
-		temp = inf.getValuesLocal();
-
-		// *** Caution!  getValuesLocal() does not clone the field's contents..
-		// 
-		// DO NOT modify temp here!
-
-		// it's okay to loop on this field since we should be looking
-		// at a DBObject and not a DBEditObject
-
-		for (int j = 0; j < temp.size(); j++)
-		  {
-		    inv = (Invid) temp.elementAt(j);
-		    
-		    if (inv.getType() == SchemaConstants.OwnerBase)
-		      {
-			children.addElement(inv);
-		      }
-		  }
-	      }
+	    result.addRow(inv, session.viewDBObject(inv).getLabel(), false);
 	  }
-
-	groups = children;
       }
     
-    ownerList = result;
-    return ownerList;
+    return result;
   }
 
   /**
@@ -4360,6 +4270,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     DBObject newObj;
     ReturnVal retVal;
+    QueryResult ownerList;
 
     /* -- */
 
@@ -4434,12 +4345,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	Vector ownerInvids = new Vector();
 
-	if (newObjectOwnerInvids == null)
+	if (newObjectOwnerInvids != null)
 	  {
-	    if (ownerList == null)
+	    for (int i = 0; i < newObjectOwnerInvids.size(); i++)
 	      {
-		getOwnerGroups(); // *sync*
+		ownerInvids.addElement(newObjectOwnerInvids.elementAt(i));
 	      }
+	  }
+	else
+	  {
+	    ownerList = getOwnerGroups();
 
 	    // if we have only one group possible, we'll assume we're
 	    // putting it in that, otherwise since the client hasn't
@@ -4456,23 +4371,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 						  "Can't create new object, no way of knowing which " +
 						  "owner group to place it in");
 	      }
-	  }
 
-	// calculate ownership for this object
-
-	// we may have either a vector of Invids in
-	// newObjectOwnerInvids, or a query result containing a list
-	// of a single Invid
-	
-	if (newObjectOwnerInvids != null)
-	  {
-	    for (int i = 0; i < newObjectOwnerInvids.size(); i++)
-	      {
-		ownerInvids.addElement(newObjectOwnerInvids.elementAt(i));
-	      }
-	  }
-	else if (ownerList != null)
-	  {
 	    // if we've only got one possible owner group, set
 	    // that.  otherwise, if we're not supergashmode, go
 	    // ahead and just pick one so the creator has
@@ -6430,7 +6329,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
       }
 
-    boolean result = recursePersonaMatch(owners, new Vector());
+    boolean result = recursePersonasMatch(owners, new Vector());
 
     if (showit)
       {
@@ -6455,15 +6354,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * 
    */
 
-  private boolean recursePersonaMatch(Vector owners, Vector alreadySeen)
+  private boolean recursePersonasMatch(Vector owners, Vector alreadySeen)
   {
-    Invid owner;
-    DBObject ownerObj;
-    InvidDBField inf;
-    Vector members;
-
-    /* -- */
-
     // *** It is critical that this method not modify the owners parameter passed
     // *** in, as it is 'live' in a DBField.
 
@@ -6474,70 +6366,71 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     for (int i = 0; i < owners.size(); i++)
       {
-	owner = (Invid) owners.elementAt(i);
-
-	if (alreadySeen.contains(owner))
+	if (recursePersonaMatch((Invid) owners.elementAt(i), alreadySeen))
 	  {
-	    return false;
+	    return true;
 	  }
-	else
+      }
+    
+    return false;
+  }
+
+  /**
+   *
+   * Recursive helper method for personaMatch.. this method does a
+   * depth first search up the owner tree for the owner Invid to
+   * see if personaInvid is a member of any of the containing owner groups.
+   *
+   * @param owners An Invid pointing to an OwnerBase object
+   * @param alreadySeen A vector of owner group Invid's that have
+   * already been checked.  (For infinite loop avoidance).
+   *
+   * @return true if a match is found
+   * 
+   */
+
+  private boolean recursePersonaMatch(Invid owner, Vector alreadySeen)
+  {
+    DBObject ownerObj;
+    InvidDBField inf;
+
+    /* -- */
+
+    if (owner == null)
+      {
+	throw new IllegalArgumentException("Null owner passed to recursePersonaMatch");
+      }
+
+    if (alreadySeen.contains(owner))
+      {
+	return false;
+      }
+    else
+      {
+	alreadySeen.addElement(owner);
+      }
+    
+    ownerObj = session.viewDBObject(owner);
+    
+    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
+    
+    if (inf != null)
+      {
+	if (inf.getValuesLocal().contains(personaInvid))
 	  {
-	    alreadySeen.addElement(owner);
+	    return true;
 	  }
-
-	ownerObj = session.viewDBObject(owner);
-
-	if (ownerObj == null)
+      }
+    
+    // didn't find, recurse up
+    
+    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
+    
+    if (inf != null)
+      {
+	if (recursePersonasMatch(inf.getValuesLocal(), alreadySeen))
 	  {
-	    continue;
-	  }
-
-	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
-
-	if (inf == null)
-	  {
-	    continue;
-	  }
-
-	members = inf.getValuesLocal();
-
-	// *** Caution!  getValuesLocal() does not clone the field's contents..
-	// 
-	// DO NOT modify members here!
-
-	// it's okay to loop on this field since we should be looking
-	// at a DBObject and not a DBEditObject
-
-	for (int j = 0; j < members.size(); j++)
-	  {
-	    if (personaInvid.equals((Invid) members.elementAt(j)))
-	      {
-		return true;
-	      }
-	  }
-
-	// didn't find, recurse up
-
-	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
-
-	if (inf != null)
-	  {
-	    if (inf.isVector())
-	      {
-		// using getValuesLocal() here is safe only because
-		// recursePersonaMatch() never tries to modify the
-		// owners value passed in.  Otherwise, we'd have to
-		// clone the results from getValuesLocal().
-
-		if (recursePersonaMatch(inf.getValuesLocal(), alreadySeen))
-		  {
-		    return true;
-		  }
-	      }
-	    else
-	      {
-		throw new RuntimeException("Owner field not a vector!!");
-	      }
+	    return true;
 	  }
       }
 
@@ -6550,7 +6443,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * vector and checks to see if the current personaInvid is a
    * member of all of the groups through either direct membership
    * or through membership of an owning group.  This method 
-   * depends on recursePersonaMatch().
+   * depends on recursePersonasMatch().
    *
    */
 
@@ -6559,7 +6452,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     Invid owner;
     DBObject ownerObj;
     InvidDBField inf;
-    Vector members;
     boolean found;
 
     /* -- */
@@ -6588,35 +6480,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	ownerObj = session.viewDBObject(owner);
 
-	if (ownerObj == null)
-	  {
-	    return false;	// we expect to find it
-	  }
-
 	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
 
 	if (inf == null)
 	  {
-	    return false;	// we expect to find it
+	    return false;	// no owner members of this owner object
 	  }
 
 	// see if we are a member of this particular owner group
 
-	members = inf.getValuesLocal();
-
-	// *** Caution!  getValuesLocal() does not clone the field's contents..
-	// 
-	// DO NOT modify members here!
-
-	// it's okay to loop on this field since we should be looking
-	// at a DBObject and not a DBEditObject
-
-	for (int j = 0; j < members.size(); j++)
+	if (inf.getValuesLocal().contains(personaInvid))
 	  {
-	    if (personaInvid.equals((Invid) members.elementAt(j)))
-	      {
-		found = true;
-	      }
+	    found = true;
 	  }
 
 	// didn't find, recurse up
@@ -6628,11 +6503,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    if (inf.isVector())
 	      {
 		// using getValuesLocal() here is safe only because
-		// recursePersonaMatch() never tries to modify the
+		// recursePersonasMatch() never tries to modify the
 		// owners value passed in.  Otherwise, we'd have to
 		// clone the results from getValuesLocal().
 
-		if (recursePersonaMatch(inf.getValuesLocal(), new Vector()))
+		if (recursePersonasMatch(inf.getValuesLocal(), new Vector()))
 		  {
 		    found = true;
 		  }
