@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.52 $ %D%
+   Version: $Revision: 1.53 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -117,6 +117,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     baseToShort = null;              // Map of Base to Short
    
   protected Hashtable
+    shortToBaseNodeHash = new Hashtable(),
     invidNodeHash = new Hashtable(),
     templateHash,
     cachedLists = new Hashtable();
@@ -1132,6 +1133,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 			       OPEN_BASE, 
 			       CLOSED_BASE,
 			       pMenu);
+	shortToBaseNodeHash.put(new Short(base.getTypeID()), newNode);
       }
     else if (node instanceof Category)
       {
@@ -1559,6 +1561,97 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     catch(RemoteException rx)
       {
 	throw new RuntimeException("Could not edit object: " + rx);
+      }
+  }
+
+  public db_object createObject(short type, boolean showNow)
+  {
+    Invid invid = null;
+    db_object obj = null;
+
+    /* -- */
+
+    if (!defaultOwnerChosen)
+      {
+	chooseDefaultOwner(false);
+      }
+    try
+      {
+	obj = session.create_db_object(type);
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Exception creating new object: " + rx);
+      }
+
+    if (obj == null)
+      {
+	throw new RuntimeException("Could not create object for some reason.  Check the Admin console.");
+      }
+
+    if (showNow)
+      {
+	showNewlyCreatedObject(obj, invid, new Short(type));
+      }
+
+    somethingChanged();
+
+    return obj;
+  }
+
+  /**
+   * Add a new window and everything for a new object.
+   *
+   * obj can be null!  If it is, then this will create a new object of the type.
+   *
+   * @obj the object created, can be null.  If you give a non-null object, then this method will not create a new object.
+   * @type The type of the object, used in creating.
+   */
+  public void showNewlyCreatedObject(db_object obj, Invid invid, Short type)
+  {
+       
+    wp.addWindow(obj, true);
+    
+    if (invid == null)
+      {
+	try
+	  {
+	    invid = obj.getInvid();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get invid: " + rx);
+	  }
+      }
+
+    if (cachedLists.containsKey(type))
+      {
+	Vector list = (Vector)cachedLists.get(type);
+	list.addElement(new listHandle("New Object", invid));
+      }
+    
+    // If the base node is open, deal with the node.
+    BaseNode baseN = null;
+    if (shortToBaseNodeHash.containsKey(type))
+      {
+	baseN = (BaseNode)shortToBaseNodeHash.get(type);
+	if (baseN.isLoaded())
+	  {
+	    InvidNode objNode = new InvidNode(baseN, 
+					      "New Object", 
+					      invid,
+					      null, false,
+					      OPEN_FIELD_CREATE,
+					      CLOSED_FIELD_CREATE,
+					      objectPM);
+	    
+	    createHash.put(invid, new CacheInfo(type, "New Object", null));
+	    
+	    invidNodeHash.put(invid, objNode);
+	    setIconForNode(invid);
+	    
+	    tree.insertNode(objNode, true);
+	  }
       }
   }
 
@@ -2451,45 +2544,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    try
 	      {
-		Short id = new Short(baseN.getBase().getTypeID());
+		short id = baseN.getBase().getTypeID();
+		createObject(id, true);
 
-		if (!defaultOwnerChosen)
-		  {
-		    chooseDefaultOwner(false);
-		  }
-
-		db_object obj = session.create_db_object(baseN.getBase().getTypeID());
-		wp.addWindow(obj, true);
-
-		Invid invid = obj.getInvid();
-
-		if (cachedLists.containsKey(id))
-		  {
-		    Vector list = (Vector)cachedLists.get(id);
-		    list.addElement(new listHandle("New Object", invid));
-		  }
-
-		// If the base node is open, deal with the node.
-
-		if (baseN.isLoaded())
-		  {
-		    InvidNode objNode = new InvidNode(baseN, 
-						      "New Object", 
-						      invid,
-						      null, false,
-						      OPEN_FIELD_CREATE,
-						      CLOSED_FIELD_CREATE,
-						      objectPM);
-
-		    createHash.put(obj.getInvid(), new CacheInfo(id, "New Object", null));
-
-		    invidNodeHash.put(invid, objNode);
-		    setIconForNode(invid);
-
-		    tree.insertNode(objNode, true);
-		  }
-
-		somethingChanged = true;
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -2688,7 +2745,77 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
+
+  // Utilities
+
+  Vector sortListHandleVector(Vector v)
+  {
+    (new VecQuickSort(v, 
+		      new arlut.csd.Util.Compare() {
+      public int compare(Object a, Object b) 
+	{
+	  listHandle aF, bF;
+	  
+	  aF = (listHandle) a;
+	  bF = (listHandle) b;
+	  int comp = 0;
+	  
+	  comp =  aF.toString().compareTo(bF.toString());
+	  
+	  if (comp < 0)
+	    {
+	      return -1;
+	    }
+	  else if (comp > 0)
+	    { 
+	      return 1;
+	    } 
+	  else
+	    { 
+	      return 0;
+	    }
+	}
+    })).sort();
+    
+    return v;
+  }
+
+  Vector sortStringVector(Vector v)
+  {
+    (new VecQuickSort(v, 
+		      new arlut.csd.Util.Compare() {
+      public int compare(Object a, Object b) 
+	{
+	  String aF, bF;
+	  
+	  aF = (String) a;
+	  bF = (String) b;
+	  int comp = 0;
+	  
+	  comp =  aF.compareTo(bF);
+	  
+	  if (comp < 0)
+	    {
+	      return -1;
+	    }
+	  else if (comp > 0)
+	    { 
+	      return 1;
+	    } 
+	  else
+	    { 
+	      return 0;
+	    }
+	}
+    })).sort();
+    
+    return v;
+  }
+
+
   // why is this here, Mike??
+
+  // Hey, don't blame me.  -Mike
 
   public void start() throws Exception 
   {
