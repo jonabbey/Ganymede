@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.83 $ %D%
+   Version: $Revision: 1.84 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1019,6 +1019,11 @@ public final class InvidDBField extends DBField implements invid_field {
 					  "this field.");
       }
 
+    // okay, at this point we should have oldRefField pointing to the
+    // old target field, and newRefField pointing to the new target field.
+
+    // Do our job.
+
     if (oldRefField != null)
       {
         retVal = oldRefField.dissolve(owner.getInvid(), (anonymous||local));
@@ -1933,18 +1938,6 @@ public final class InvidDBField extends DBField implements invid_field {
     if (!isEditable(local))
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object: " +
-					   getName() + " in object " + owner.getLabel());
-      }
-
-    if (!isVector())
-      {
-	throw new IllegalArgumentException("vector accessor called on scalar field: " +
-					   getName() + " in object " + owner.getLabel());
-      }
-
-    if ((index < 0) || (index > values.size()))
-      {
-	throw new IllegalArgumentException("invalid index " + (index) + 
 					   getName() + " in object " + owner.getLabel());
       }
 
