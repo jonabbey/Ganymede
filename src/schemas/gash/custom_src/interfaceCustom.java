@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -116,7 +116,13 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	return field.getValueString();
       }
 
-    ipObj = (DBObject) Ganymede.internalSession.view_db_object(invid);
+    // okay to use DBSession.viewDBObject() here, as we are basically just looking
+    // to get label information
+    //
+    // Note that we have to use Ganymede.internalSession here because we are
+    // getting label information for another object, and not for ourself
+
+    ipObj = Ganymede.internalSession.getSession().viewDBObject(invid);
 
     if (ipObj == null)
       {
@@ -143,7 +149,13 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	return field.getValueString();
       }
 
-    dnsObj = (DBObject) Ganymede.internalSession.view_db_object(invid);
+    // okay to use DBSession.viewDBObject() here, as we are basically just looking
+    // to get label information
+    //
+    // Note that we have to use Ganymede.internalSession here because we are
+    // getting label information for another object, and not for ourself
+
+    dnsObj = (DBObject) Ganymede.internalSession.getSession().viewDBObject(invid);
 
     if (dnsObj == null)
       {
@@ -198,8 +210,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	
 	if (fieldDef.getTargetBase() > -1)
 	  {
-	    targetBase = Ganymede.db.getObjectBase(fieldDef.getTargetBase());
-	    newObject = targetBase.createNewObject(editset);
+	    newObject = getSession().createDBObject(fieldDef.getTargetBase(), null, null);
 
 	    // link it in
 

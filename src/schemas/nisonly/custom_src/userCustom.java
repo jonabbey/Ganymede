@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -78,6 +78,73 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
   /**
    *
+   * Initialize a newly created DBEditObject.
+   *
+   * When this method is called, the DBEditObject has
+   * been created and all fields defined in the
+   * controlling DBObjectBase have been instantiated
+   * without defined values.<br><br>
+   *
+   * This method is responsible for filling in any default
+   * values that can be calculated from the DBSession
+   * associated with the editset defined in this DBEditObject.<br><br>
+   *
+   * If initialization fails for some reason, initializeNewObject()
+   * will return false.  Right now there is no infrastructure in
+   * Ganymede to allow the transaction to be aborted from
+   * within the DBSession's createDBObject() method.  As a result,
+   * if this method is to fail to properly initialize the object,
+   * it should be able to not leave an impact on the rest of the
+   * DBStore.. in other words, setting InvidField values that
+   * involve symmetry relationships could be problematic. <br><br>
+   *
+   * This method should be overridden in subclasses.
+   *
+   */
+
+  public boolean initializeNewObject()
+  {
+    ReturnVal retVal;
+
+    /* -- */
+
+    // need to find a uid for this user
+
+    NumericDBField numField = (NumericDBField) getField((short) 256);
+
+    if (numField == null)
+      {
+	System.err.println("userCustom.initializeNewObject(): couldn't get uid field");
+	return false;
+      }
+
+    DBNameSpace namespace = numField.getNameSpace();
+
+    if (namespace == null)
+      {
+	System.err.println("userCustom.initializeNewObject(): couldn't get uid namespace");
+	return false;
+      }
+
+    // now, find a uid.. unfortunately, we have to use immutable Integers here.. not
+    // the most efficient at all.
+
+    Integer uidVal = new Integer(1001);
+
+    while (!namespace.testmark(editset, uidVal))
+      {
+	uidVal = new Integer(uidVal.intValue()+1);
+      }
+
+    // we use setValueLocal so we can set a value that the user can't edit.
+
+    retVal = numField.setValueLocal(uidVal);
+
+    return (retVal == null || retVal.didSucceed());
+  }
+
+  /**
+   *
    * Hook to have this object create a new embedded object
    * in the given field.  
    *
@@ -97,14 +164,17 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if (fieldDef.getTargetBase() > -1)
 	  {
-	    targetBase = Ganymede.db.getObjectBase(fieldDef.getTargetBase());
-	    newObject = targetBase.createNewObject(editset);
-	    return newObject.getInvid(); // just creating, not initializing at current
+	    newObject = getSession().createDBObject(fieldDef.getTargetBase(), null, null);
+
+	    // link it in
+
+	    newObject.setFieldValue(SchemaConstants.ContainerField, getInvid());
+	    
+	    return newObject.getInvid();
 	  }
 	else
 	  {
-	    editset.getSession().setLastError("error in schema.. imbedded object type not restricted..");
-	    return null;
+	    throw new RuntimeException("error in schema.. interface field target base not restricted..");
 	  }
       }
     else
