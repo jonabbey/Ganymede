@@ -7,8 +7,8 @@
    
    Created: 26 January 1999
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/02/21 19:50:24 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2001/12/05 19:47:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -157,6 +157,14 @@ public class GanymedeValidationTask implements Runnable {
 		  {
 		    Ganymede.debug(base.getName() + ":" + object.getLabel() + " is missing fields " +
 				   VectorUtils.vectorString(missingFields));
+		    everythingsfine = false;
+		  }
+
+		ReturnVal retVal = object.getBase().getObjectHook().consistencyCheck(object);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    Ganymede.debug(base.getName() + ":" + object.getLabel() + " failed consistency check");
 		    everythingsfine = false;
 		  }
 	      }
