@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -85,6 +85,15 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     /* -- */
 
     System.err.println("DBSchemaEdit constructor entered");
+
+    // if we haven't been forced into schema development mode, check
+    // with the Ganymede class to see whether the command line parameter
+    // set developMode on.
+
+    if (!developMode)
+      {
+	developMode = Ganymede.developSchema;
+      }
 
     this.console = console;
     locked = true;
