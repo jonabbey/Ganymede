@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -475,6 +475,16 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     aSession.runInvidTest();
   }
 
+  void runInvidSweep() throws RemoteException
+  {
+    if (!adminName.equals(GASHAdmin.rootname))
+      {
+	return;
+      }
+
+    aSession.runInvidSweep();
+  }
+
   void pullSchema() throws RemoteException
   {
     SchemaEdit editor = null;
@@ -543,6 +553,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JMenuItem schemaMI = null;
   JMenuItem shutdownMI = null;
   JMenuItem runInvidTestMI = null;
+  JMenuItem runInvidSweepMI = null;
   JMenuItem killAllMI = null;
 
   JPopupMenu popMenu = null;
@@ -647,6 +658,9 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     runInvidTestMI = new JMenuItem("Run Invid Test");
     runInvidTestMI.addActionListener(this);
 
+    runInvidSweepMI = new JMenuItem("Run Invid Sweep");
+    runInvidSweepMI.addActionListener(this);
+
     quitMI = new JMenuItem("Close Console");
     quitMI.addActionListener(this);
 
@@ -655,6 +669,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     controlMenu.add(schemaMI);
     controlMenu.add(reloadClassesMI);
     controlMenu.add(runInvidTestMI);
+    controlMenu.add(runInvidSweepMI);
     controlMenu.addSeparator();
     controlMenu.add(dumpMI);
     controlMenu.add(dumpSchemaMI);
@@ -1038,7 +1053,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	if (invidTestDialog == null)
 	  {
 	    invidTestDialog = new StringDialog(this,
-					       "Invid Test",
+					       "Invid Sweep/Test",
 					       "Are you sure you want to trigger a full invid sweep?  It'll take forever.",
 					       "Yes", "No", question);
 	  }
@@ -1050,6 +1065,30 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	    try
 	      {
 		admin.runInvidTest();
+	      }
+	    catch (RemoteException ex)
+	      {
+		admin.forceDisconnect("Couldn't talk to server" + ex);
+	      }
+	  }
+      }
+    else if (event.getSource() == runInvidSweepMI)
+      {
+	if (invidTestDialog == null)
+	  {
+	    invidTestDialog = new StringDialog(this,
+					       "Invid Sweep/Test",
+					       "Are you sure you want to trigger a full invid sweep?  It'll take forever.",
+					       "Yes", "No", question);
+	  }
+
+	if (invidTestDialog.DialogShow() != null)
+	  {
+	    System.err.println("Affirmative invid sweep request");
+
+	    try
+	      {
+		admin.runInvidSweep();
 	      }
 	    catch (RemoteException ex)
 	      {

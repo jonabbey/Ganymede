@@ -8,7 +8,7 @@
    Ganymede adminSession object holds the state for the Ganymede Admin console.
 
    Created: 28 May 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,6 +40,7 @@ public interface adminSession extends Remote {
   boolean     dumpSchema() throws RemoteException;
   boolean     reloadCustomClasses() throws RemoteException;
   void        runInvidTest() throws RemoteException;
+  void        runInvidSweep() throws RemoteException;
 
   boolean     runTaskNow(String name) throws RemoteException;
   boolean     stopTask(String name) throws RemoteException;
