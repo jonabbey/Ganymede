@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -125,6 +125,49 @@ public interface SchemaConstants {
 
   final static short EventMailToSelf = 105;
 
+  /* mail/log event classes */
+
+  final static short ObjectEventBase = 6;
+
+				// single-word token for this event class (String field)
+
+  final static short ObjectEventToken = 100;
+
+				// Short name for this event class, suitable for an email message title (String field)
+
+  final static short ObjectEventName = 101;
+  
+				// fuller description of this event class, suitable for an email body (String field)
+
+  final static short ObjectEventDescription = 102; 
+
+				// if true, events of this type should be mailed (Boolean field)
+
+  final static short ObjectEventMailBoolean = 103; 
+
+				// list of email addresses to send this to, in addition to any specifically
+				// requested by the code (Invid vector field)
+
+  final static short ObjectEventMailList = 104;
+
+				// if true, the admin performing the action will get a copy of any mail (Boolean field)
+
+  final static short ObjectEventMailToSelf = 105;
+
+				// the name of the object type that this event category applies to
+
+  final static short ObjectEventObjectName = 106;
+
+				// if true, the owner groups owning objects affected by this event will get
+				// a copy of the mail
+  
+  final static short ObjectEventMailOwners = 107;
+
+				// the short id of the object type that this event category applies to
+
+  final static short ObjectEventObjectType = 108;
+  
+
   /* builder classes */
 
   final static short BuilderBase = 5; // Records of GanymedeBuilderTask classes we want to attach to the server
@@ -134,5 +177,5 @@ public interface SchemaConstants {
 
   /* what's the last base we currently have defined as a mandatory base? */
 
-  final static short FinalBase = BuilderBase;
+  final static short FinalBase = ObjectEventBase;
 }
