@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2208,6 +2208,7 @@ public class directLoader {
 
 	    if (systemname != null)
 	      {
+		systemname = SystemLoader.stripDomain(systemname);
 		invid = (Invid) systemInvid.get(systemname);
 
 		if (invid != null)
