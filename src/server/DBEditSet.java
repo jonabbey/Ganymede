@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.125 $
-   Last Mod Date: $Date: 2002/08/07 02:23:07 $
+   Version: $Revision: 1.126 $
+   Last Mod Date: $Date: 2002/10/09 02:05:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -990,7 +990,7 @@ public class DBEditSet {
       }
     catch (Throwable ex)
       {
-	ex.printStackTrace();
+	Ganymede.debug(Ganymede.stackTrace(ex));
 
 	release();
 	return Ganymede.createErrorDialog("Transaction commit failure", 
@@ -1268,7 +1268,7 @@ public class DBEditSet {
 
 	    // just show the trace, don't throw it up
 
-	    ex.printStackTrace();
+	    Ganymede.debug(Ganymede.stackTrace(ex));
 	  }
       }
   }
@@ -1408,7 +1408,7 @@ public class DBEditSet {
 		    // fatal, as we'll just leave
 		    // logNormal true and handle it below
 
-		    ex.printStackTrace();
+		    Ganymede.debug(Ganymede.stackTrace(ex));
 		  }
 	      }
 
@@ -1490,7 +1490,7 @@ public class DBEditSet {
 		    // fatal, as we'll just leave
 		    // logNormal true and handle it below
 
-		    ex.printStackTrace();
+		    Ganymede.debug(Ganymede.stackTrace(ex));
 		  }
 	      }
 
@@ -1541,7 +1541,7 @@ public class DBEditSet {
 	  }
 	catch (NullPointerException ex)
 	  {
-	    ex.printStackTrace();
+	    Ganymede.debug(Ganymede.stackTrace(ex));
 	  }
 
 	if (oldVals != null)
@@ -1573,7 +1573,7 @@ public class DBEditSet {
 		    // fatal, as we'll just leave
 		    // logNormal true and handle it below
 
-		    ex.printStackTrace();
+		    Ganymede.debug(Ganymede.stackTrace(ex));
 		  }
 	      }
 
@@ -1615,7 +1615,7 @@ public class DBEditSet {
 		    // fatal, as we'll just leave
 		    // logNormal true and handle it below
 
-		    ex.printStackTrace();
+		    Ganymede.debug(Ganymede.stackTrace(ex));
 		  }
 	      }
 
