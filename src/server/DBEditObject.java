@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.169 $
-   Last Mod Date: $Date: 2003/03/12 02:53:04 $
+   Version: $Revision: 1.170 $
+   Last Mod Date: $Date: 2003/05/19 20:15:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -114,7 +114,7 @@ import arlut.csd.Util.booleanSemaphore;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.169 $ $Date: 2003/03/12 02:53:04 $ $Name:  $
+ * @version $Revision: 1.170 $ $Date: 2003/05/19 20:15:06 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2544,7 +2544,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       }
     else
       {
-	editset.rollback("reactivate" + getLabel());
+	editset.rollback("reactivate" + getLabel()); // see DBSession.reactivateDBObject() for checkpoint
       }
   }
 

@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.128 $
-   Last Mod Date: $Date: 2003/05/06 16:52:14 $
+   Version: $Revision: 1.129 $
+   Last Mod Date: $Date: 2003/05/19 20:15:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -515,7 +515,7 @@ public class DBEditSet {
       it was due to a coding problem elsewhere.
     */
 
-    if (true)
+    if (false)
       {
 	Thread thisThread = java.lang.Thread.currentThread();
 
