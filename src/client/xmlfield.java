@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2000/07/11 04:57:36 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/07/11 05:04:02 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.17 $ $Date: 2000/07/11 04:57:36 $ $Name:  $
+ * @version $Revision: 1.18 $ $Date: 2000/07/11 05:04:02 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -182,6 +182,8 @@ public class xmlfield implements FieldType {
 
 	if (nextItem.matchesClose(elementName))
 	  {
+	    // <field></field> == clear the value
+
 	    value = null;
 	    return;
 	  }
@@ -191,6 +193,10 @@ public class xmlfield implements FieldType {
 
 	    Date dValue = parseDate(nextItem);
 
+	    // parseDate will always return a non-null value, or
+	    // a RuntimeException if the date element couldn't
+	    // be parsed
+	    
 	    if (dValue != null)
 	      {
 		value = dValue;
@@ -601,7 +607,7 @@ public class xmlfield implements FieldType {
 	// 2 = UNIX date output, with timezone
 	// 3 = UNIX date output, without timezone
 	// 4 = no-comma style 0
-	// 4 = no-comma style 1
+	// 5 = no-comma style 1
 
 	formatters[0] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 	formatters[1] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
@@ -613,8 +619,7 @@ public class xmlfield implements FieldType {
 
     if (!item.matches("date"))
       {
-	System.err.println("\nUnrecognized XML item found when date expected: " + item);
-	return null;
+	throw new RuntimeException("\nUnrecognized XML item found when date expected: " + item);
       }
 
     if (!item.isEmpty())
