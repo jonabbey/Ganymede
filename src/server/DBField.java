@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 2002/11/01 02:24:38 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 2003/11/08 01:51:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1077,9 +1077,7 @@ public abstract class DBField implements Remote, db_field {
 		    mark(this.value); // we aren't clearing the old value after all
 		  }
 		
-		return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
-						  "value " + submittedValue +
-						  " already taken in namespace");
+		return getConflictDialog("DBField.setValue()", submittedValue);
 	      }
 	  }
       }
@@ -1372,9 +1370,7 @@ public abstract class DBField implements Remote, db_field {
 	  {
 	    mark(values.elementAt(index)); // we aren't clearing the old value after all
 
-	    return Ganymede.createErrorDialog("Server: Error in DBField.setElement()",
-					      "value " + submittedValue +
-					      " already taken in namespace");
+	    return getConflictDialog("DBField.setElement()", submittedValue);
 	  }
       }
 
@@ -1558,9 +1554,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	if (!mark(submittedValue))	// *sync* DBNameSpace
 	  {
-	    return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
-					      "value " + submittedValue + 
-					      " already taken in namespace");
+	    return getConflictDialog("DBField.addElement()", submittedValue);
 	  }
       }
 
@@ -1836,9 +1830,7 @@ public abstract class DBField implements Remote, db_field {
 	      {
 		if (!ns.testmark(editset, approvedValues.elementAt(i)))
 		  {
-		    return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
-						      "value " + approvedValues.elementAt(i) + 
-						      " already taken in namespace");
+		    return getConflictDialog("DBField.addElements()", approvedValues.elementAt(i));
 		  }
 	      }
 	
@@ -3029,5 +3021,37 @@ public abstract class DBField implements Remote, db_field {
   public String toString()
   {
     return "[" + owner.toString() + ":" + getName() + "]";
+  }
+
+  /**
+   * <p>Handy utility method for reporting namespace conflict.  This
+   * method will work to identify the object and field which is in conflict,
+   * and will return an appropriate {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+   * with an appropriate error dialog.</p>
+   */
+
+  public ReturnVal getConflictDialog(String methodName, String actionString, Object conflictValue)
+  {
+    DBNameSpace ns = getNameSpace();
+
+    try
+      {
+	DBField conflictField = ns.lookup(conflictValue);
+	DBObject conflictObject = conflictField.getOwner();
+	String conflictLabel = conflictObject.getLabel();
+	String conflictClassName = conflictObject.getTypeName();
+
+	return Ganymede.createErrorDialog("Server: Error in " + methodName,
+					  "I could not complete this action" +
+					  " because \"" + conflictValue + "\" is already taken " +
+					  " in the " + conflictLabel + " " + conflictClassName + "'s " +
+					  conflictField.getName() + " field.");
+      }
+    catch (NullPointerException ex)
+      {
+	return Ganymede.createErrorDialog("Server: Error in " + methodName,
+					  "value " + conflictValue +
+					  " already taken in namespace");
+      }
   }
 }
