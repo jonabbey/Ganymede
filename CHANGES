@@ -1,11 +1,11 @@
 Ganymede Release 1.0.6
-July 27, 2001
+August 13, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.0.5 to 1.0.6 -------------------
 
-RELEASE DATE: August ??, 2001
+RELEASE DATE: August 13, 2001
 
 1. [SERVER, ADMIN CONSOLE] Fixed delayed memory release for schema editing
 
