@@ -1,12 +1,11 @@
 /*
-
    GASHAdmin.java
 
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 2001/03/28 05:16:30 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2001/05/23 03:55:02 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -15,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -253,6 +252,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	  }
       }
   }
+
 
   public JPanel createLoginPanel()
   {
@@ -631,6 +631,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   static final boolean debug = false;
   static String debugFilename = null;
 
+  static String release_name = "$Name:  $";
+  static String release_date = "$Date: 2001/05/23 03:55:02 $";
+  static String release_number = null;
+
   // ---
 
   Image question = null;
@@ -649,6 +653,9 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JMenuItem runInvidSweepMI = null;
   JMenuItem runEmbeddedTestMI = null;
   JMenuItem runEmbeddedSweepMI = null;
+
+  JMenu helpMenu = null;
+  JMenuItem showAboutMI = null;
 
   JPopupMenu popMenu = null;
   JMenuItem killUserMI = null;
@@ -717,6 +724,12 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   
   GASHAdmin adminPanel;
 
+  String
+    aboutMessage = null;
+
+  messageDialog
+    about = null;
+
   /* -- */
 
   /**
@@ -729,27 +742,60 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   {
     super(title);
 
+    if (release_number == null)
+      {
+	// cut off leading $Name:  $, clean up whitespace
+
+	if (release_name.length() > 9)
+	  {
+	    release_name = release_name.substring(6, release_name.length()-1);
+	    release_name.trim();
+
+	    // we use ganymede_XXX for our CVS tags
+
+	    if (release_name.indexOf('_') != -1)
+	      {
+		release_number = release_name.substring(release_name.indexOf('_') + 1, 
+							release_name.length());
+	      }
+	  }
+
+	if (release_number == null)
+	  {
+	    release_number = "version unknown";
+	  }
+    
+	release_number = release_number + " - " + release_date;
+      }
+
     this.adminPanel = adminPanel;
 
     mbar = new JMenuBar();
     controlMenu = new JMenu("Control", false); // no tear-off
+    controlMenu.setMnemonic('c');
 
     dumpMI = new JMenuItem("Dump Database");
+    dumpMI.setMnemonic('d');
     dumpMI.addActionListener(this);
 
     shutdownMI = new JMenuItem("Shutdown Ganymede");
+    shutdownMI.setMnemonic('s');
     shutdownMI.addActionListener(this);
 
     killAllMI = new JMenuItem("Kill Off All Users");
+    killAllMI.setMnemonic('k');
     killAllMI.addActionListener(this);
 
     schemaMI = new JMenuItem("Edit Schema");
+    schemaMI.setMnemonic('e');
     schemaMI.addActionListener(this);
 
     forceBuildMI = new JMenuItem("Force Build");
+    forceBuildMI.setMnemonic('f');
     forceBuildMI.addActionListener(this);
 
-    quitMI = new JMenuItem("Close Console");
+    quitMI = new JMenuItem("Quit Console");
+    quitMI.setMnemonic('q');
     quitMI.addActionListener(this);
 
     controlMenu.add(forceBuildMI);
@@ -763,6 +809,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     controlMenu.add(quitMI);
 
     debugMenu = new JMenu("Debug", false); // no tear-off
+    debugMenu.setMnemonic('d');
 
     runInvidTestMI = new JMenuItem("Test Invid Integrity");
     runInvidTestMI.addActionListener(this);
@@ -781,8 +828,18 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     debugMenu.add(runEmbeddedTestMI);
     debugMenu.add(runEmbeddedSweepMI);
 
+    helpMenu = new JMenu("Help");
+    helpMenu.setMnemonic('h');
+    
+    showAboutMI = new JMenuItem("About Ganymede");
+    showAboutMI.setMnemonic('a');
+    showAboutMI.addActionListener(this);
+    helpMenu.add(showAboutMI);
+
     mbar.add(controlMenu);
     mbar.add(debugMenu);
+    mbar.add(Box.createGlue());
+    mbar.add(helpMenu);
 
     setJMenuBar(mbar);
 
@@ -1383,10 +1440,51 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	    exceptionHandler(ex);
 	  }
       }
+    else if (event.getSource() == showAboutMI)
+      {
+	showAboutMessage();
+      }
     else if (event.getSource() == clearLogButton)
       {
 	statusArea.setText("");
       }
+  }
+
+  /**
+   * Shows the About... dialog.
+   */
+
+  public void showAboutMessage()
+  {
+    if (about == null)
+      {
+	if (aboutMessage == null)
+	  {
+	    StringBuffer buffer = new StringBuffer();
+
+	    buffer.append("<head></head>");
+	    buffer.append("<body>");
+	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
+	    buffer.append("Release number: ");
+	    buffer.append(release_number);
+	    buffer.append("<p>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 The University of Texas at Austin.</p>");
+	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
+	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
+	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
+	    buffer.append("under the conditions of the GNU General Public License.</p>");
+	    buffer.append("<p>Written by Jonathan Abbey, Michael Mulvaney, Navin Manohar, ");
+	    buffer.append("Brian O'Mara, and Erik Grostic.</p>");
+	    buffer.append("<br><p>Visit the Ganymede web site at http://www.arlut.utexas.edu/gash2/</p>");
+	    buffer.append("</body>");
+
+	    aboutMessage = buffer.toString();
+	  }
+
+	about = new messageDialog(this, "About Ganymede",  null);
+	about.setHtmlText(aboutMessage);
+      }
+
+    about.setVisible(true);
   }
 
   // methods for the rowSelectCallback

@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 2001/03/29 08:34:40 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 2001/05/23 03:55:00 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.65 $ $Date: 2001/03/29 08:34:40 $ $Name:  $
+ * @version $Revision: 1.66 $ $Date: 2001/05/23 03:55:00 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -864,12 +864,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     JMenuBar menuBar = new JMenuBar();
     menuBar.setBorderPainted(true);
     
-    JMenu fileM = new JMenu("File");
+    JMenu fileM = new JMenu("Object");
     menuBar.add(fileM);
 
     if (!editable)
       {
 	JMenuItem refreshMI = new JMenuItem("Refresh");
+	refreshMI.setMnemonic('r');
 	refreshMI.addActionListener(this);
 	refreshMI.setToolTipText("Update this window with the current state of this object in the database");
 	fileM.add(refreshMI);
@@ -878,12 +879,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     if (!gc.isApplet())
       {
 	JMenuItem saveMI = new JMenuItem("Save");
+	saveMI.setMnemonic('s');
 	saveMI.addActionListener(this);
 	saveMI.setToolTipText("Saves a text dump of this object's state and history to disk");
 	fileM.add(saveMI);
       }
 
     JMenuItem mailMI = new JMenuItem("Mail to...");
+    mailMI.setMnemonic('m');
     mailMI.addActionListener(this);
     mailMI.setToolTipText("Mails a text dump of this object's state and history");
     fileM.add(mailMI);
@@ -897,6 +900,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    if (getObject().canInactivate())
 	      {
 		JMenuItem setExpirationMI = new JMenuItem("Set Expiration Date");
+		setExpirationMI.setMnemonic('e');
 		setExpirationMI.addActionListener(this);
 		setExpirationMI.setToolTipText("Set a date for this object to be inactivated");
 		fileM.add(setExpirationMI);
@@ -907,6 +911,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  }
 
         JMenuItem setRemovalMI = new JMenuItem("Set Removal Date");
+	setRemovalMI.setMnemonic('v');
 	setRemovalMI.addActionListener(this);
 	setRemovalMI.setToolTipText("Set a date for this object to be removed from the database");
 	fileM.add(setRemovalMI);
