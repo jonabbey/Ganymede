@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -692,7 +692,14 @@ final public class DBSession {
 
     result = editSet.commit();
 
-    Ganymede.debug(key + ": commitTransaction(): editset committed");
+    if (result)
+      {
+	Ganymede.debug(key + ": commitTransaction(): editset committed");
+      }
+    else
+      {
+	Ganymede.debug(key + ": commitTransaction(): editset failed to commit: transaction aborted");
+      }
 
     editSet = null;
 
