@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.180 $
-   Last Mod Date: $Date: 2000/04/12 05:21:53 $
+   Version: $Revision: 1.181 $
+   Last Mod Date: $Date: 2000/04/19 07:55:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.180 $ $Date: 2000/04/12 05:21:53 $
+ * @version $Revision: 1.181 $ $Date: 2000/04/19 07:55:52 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4097,9 +4097,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     retVal = newObj.cloneFromObject(session, vObj, false);
     
-    if (!retVal.didSucceed())
+    if (retVal != null && !retVal.didSucceed())
       {
 	return retVal;
+      }
+    else if (retVal == null)
+      {
+	retVal = new ReturnVal(true, true);
       }
     
     retVal.setObject(newObj);

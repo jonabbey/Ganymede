@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.127 $
-   Last Mod Date: $Date: 2000/02/29 09:35:08 $
+   Version: $Revision: 1.128 $
+   Last Mod Date: $Date: 2000/04/19 07:55:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.127 $ $Date: 2000/02/29 09:35:08 $ $Name:  $
+ * @version $Revision: 1.128 $ $Date: 2000/04/19 07:55:49 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1562,6 +1562,15 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * a lack of read permissions in a dialog in the ReturnVal.  Such a problem will
    * not result in a failure code being returned, however.. the clone will succeed,
    * but an informative dialog will be provided to the user.</p>
+   *
+   * @param session The DBSession that the new object is to be created in
+   * @param origObj The object we are cloning
+   * @param local If true, fields that have choice lists will not be checked against
+   * those choice lists and read permissions for each field will not be consulted.
+   * The canCloneField() method will still be consulted, however.
+   *
+   * @return A standard ReturnVal status object.  May be null on success, or
+   * else may carry a dialog with information on problems and a success flag.
    */
 
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
@@ -1605,7 +1614,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		if (retVal != null && retVal.getDialog() != null)
 		  {
-		    resultBuf.append("\n\n");
+		    if (resultBuf.length() != 0)
+		      {
+			resultBuf.append("\n\n");
+		      }
+
 		    resultBuf.append(retVal.getDialog().getText());
 		    
 		    problem = true;

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2000/03/25 05:36:40 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2000/04/19 07:55:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -407,7 +407,9 @@ public abstract class DBField implements Remote, db_field {
 	    valuesToCopy = getValuesLocal();
 	  }
 
-	retVal = target.addElements(valuesToCopy, local, true);	// inhibit wizards
+	// we want to inhibit wizards and allow partial failure
+
+	retVal = target.addElements(valuesToCopy, local, true, true);
 
 	// the above operation could fail if we don't have write
 	// privileges for the target field, so we'll return an
@@ -1627,13 +1629,44 @@ public abstract class DBField implements Remote, db_field {
    * @param noWizards If true, wizards will be skipped
    */
 
-  public synchronized ReturnVal addElements(Vector submittedValues, boolean local, boolean noWizards)
+  public final ReturnVal addElements(Vector submittedValues, boolean local,
+				     boolean noWizards)
+  {
+    return addElements(submittedValues, local, noWizards, false);
+  }
+
+  /**
+   * <p>Adds a set of elements to the end of this field, if a
+   * vector.  Using addElements() to add a sequence of items
+   * to a field may be many times more efficient than calling
+   * addElement() repeatedly, as addElements() can do a single
+   * server checkpoint before attempting to add all the values.</p>
+   *
+   * <P>Server-side method only</P>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog. If a success code is returned,
+   * all values were added.  If failure is returned, no values
+   * were added.</p>
+   *
+   * @param submittedValues Values to be added
+   * @param local If true, permissions checking will be skipped
+   * @param noWizards If true, wizards will be skipped
+   * @param partialSuccessOk If true, addElements will add any values that
+   * it can, even if some values are refused by the server logic.  Any
+   * values that are skipped will be reported in a dialog passed back
+   * in the returned ReturnVal
+   */
+
+  public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
+					    boolean noWizards, boolean partialSuccessOk)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
     DBEditSet editset;
+    Vector approvedValues = new Vector();
 
     /* -- */
 
@@ -1670,7 +1703,10 @@ public abstract class DBField implements Remote, db_field {
       }
 
     // check to see if all of the submitted values are acceptable in
-    // kind
+    // type and in identity.  if partialSuccessOk, we won't complain
+    // unless none of the submitted values are acceptable
+
+    StringBuffer errorBuf = new StringBuffer();
 
     for (int i = 0; i < submittedValues.size(); i++)
       {
@@ -1678,8 +1714,33 @@ public abstract class DBField implements Remote, db_field {
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    return retVal;
+	    if (!partialSuccessOk)
+	      {
+		return retVal;
+	      }
+	    else
+	      {
+		if (retVal.getDialog() != null)
+		  {
+		    if (errorBuf.length() != 0)
+		      {
+			errorBuf.append("\n\n");
+		      }
+
+		    errorBuf.append(retVal.getDialog().getText());
+		  }
+	      }
 	  }
+	else
+	  {
+	    approvedValues.addElement(submittedValues.elementAt(i));
+	  }
+      }
+
+    if (approvedValues.size() == 0)
+      {
+	return Ganymede.createErrorDialog("AddElements Error",
+					  errorBuf.toString());
       }
 
     // see if our container wants to intercede in the adding operation
@@ -1691,7 +1752,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, submittedValues, null);
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, approvedValues, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
@@ -1710,19 +1771,19 @@ public abstract class DBField implements Remote, db_field {
       {
 	synchronized (ns)
 	  {
-	    for (int i = 0; i < submittedValues.size(); i++)
+	    for (int i = 0; i < approvedValues.size(); i++)
 	      {
-		if (!ns.testmark(editset, submittedValues.elementAt(i)))
+		if (!ns.testmark(editset, approvedValues.elementAt(i)))
 		  {
 		    return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
-						      "value " + submittedValues.elementAt(i) + 
+						      "value " + approvedValues.elementAt(i) + 
 						      " already taken in namespace");
 		  }
 	      }
 	
-	    for (int i = 0; i < submittedValues.size(); i++)
+	    for (int i = 0; i < approvedValues.size(); i++)
 	      {
-		if (!ns.mark(editset, submittedValues.elementAt(i), this))
+		if (!ns.mark(editset, approvedValues.elementAt(i), this))
 		  {
 		    throw new RuntimeException("error: testmark / mark inconsistency");
 		  }
@@ -1733,15 +1794,15 @@ public abstract class DBField implements Remote, db_field {
     // okay, see if the DBEditObject is willing to allow all of these
     // elements to be added
 
-    newRetVal = eObj.finalizeAddElements(this, submittedValues);
+    newRetVal = eObj.finalizeAddElements(this, approvedValues);
 
     if (newRetVal == null || newRetVal.didSucceed()) 
       {
 	// okay, we're allowed to do it, so we add them all
 
-	for (int i = 0; i < submittedValues.size(); i++)
+	for (int i = 0; i < approvedValues.size(); i++)
 	  {
-	    getVectVal().addElement(submittedValues.elementAt(i));
+	    getVectVal().addElement(approvedValues.elementAt(i));
 	  }
 
 	// if the return value from the wizard was not null,
@@ -1751,12 +1812,28 @@ public abstract class DBField implements Remote, db_field {
 
 	if (retVal != null)
 	  {
-	    return retVal.unionRescan(newRetVal);
+	    newRetVal = retVal.unionRescan(newRetVal);
 	  }
-	else
+
+	if (newRetVal == null)
 	  {
-	    return newRetVal;		// success
+	    newRetVal = new ReturnVal(true, true);
 	  }
+
+	// if we were not able to copy some of the values (and we
+	// had partialSuccessOk set), encode a description of what
+	// happened along with the success code
+	
+	if (errorBuf.length() != 0)
+	  {
+	    newRetVal.setDialog(new JDialogBuff("Warning",
+						errorBuf.toString(),
+						"Ok",
+						null,
+						"ok.gif"));
+	  }
+
+	return newRetVal;
       } 
     else
       {
@@ -1781,11 +1858,11 @@ public abstract class DBField implements Remote, db_field {
 	    // for each item we were submitted, unmark it in our
 	    // namespace if we don't have it left in our vector.
 
-	    for (int i = 0; i < submittedValues.size(); i++)
+	    for (int i = 0; i < approvedValues.size(); i++)
 	      {
-		if (!valuesLeft.containsKey(submittedValues.elementAt(i)))
+		if (!valuesLeft.containsKey(approvedValues.elementAt(i)))
 		  {
-		    ns.unmark(editset, submittedValues.elementAt(i));
+		    ns.unmark(editset, approvedValues.elementAt(i));
 		  }
 	      }
 	  }

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 2000/03/27 21:54:41 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 2000/04/19 07:55:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.94 $ $Date: 2000/03/27 21:54:41 $
+ * @version $Revision: 1.95 $ $Date: 2000/04/19 07:55:50 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -624,9 +624,9 @@ public class DBObject implements db_object, FieldType, Remote {
 		// without bothering with permission checking
 		// for this common case.
 
-		if (f.value instanceof String)
+		if (!f.isDefined())
 		  {
-		    return (String) f.value;
+		    return "<" + getTypeDesc() + ":" + getID() + ">";
 		  }
 		else
 		  {

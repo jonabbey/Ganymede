@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.128 $
-   Last Mod Date: $Date: 2000/04/04 08:29:33 $
+   Version: $Revision: 1.129 $
+   Last Mod Date: $Date: 2000/04/19 07:55:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.128 $ %D%
+ * @version $Revision: 1.129 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2690,9 +2690,15 @@ public final class InvidDBField extends DBField implements invid_field {
    * @param submittedValues Values to be added
    * @param local If true, permissions checking will be skipped
    * @param noWizards If true, wizards will be skipped
+   * @param partialSuccessOk If true, addElements will add any values that
+   * it can, even if some values are refused by the server logic.  Any
+   * values that are skipped will be reported in a dialog passed back
+   * in the returned ReturnVal
    */
 
-  public synchronized ReturnVal addElements(Vector submittedValues, boolean local, boolean noWizards)
+  public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
+					    boolean noWizards,
+					    boolean partialSuccessOk)
   {
     boolean checkpoint = false;
     boolean success = false;
@@ -2701,6 +2707,7 @@ public final class InvidDBField extends DBField implements invid_field {
     ReturnVal newRetVal = null;
     DBEditObject eObj;
     Vector values;
+    Vector approvedValues = new Vector();
 
     /* -- */
 
@@ -2756,16 +2763,46 @@ public final class InvidDBField extends DBField implements invid_field {
       }
 
     // check to see if all of the submitted values are acceptable in
-    // type
+    // type and in identity.  if partialSuccessOk, we won't complain
+    // unless none of the submitted values are acceptable
+
+    StringBuffer errorBuf = new StringBuffer();
 
     for (int i = 0; i < submittedValues.size(); i++)
       {
-	retVal = verifyNewValue(submittedValues.elementAt(i));
+	retVal = verifyNewValue(submittedValues.elementAt(i), local);
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    return retVal;
+	    if (!partialSuccessOk)
+	      {
+		return retVal;
+	      }
+	    else
+	      {
+		if (retVal.getDialog() != null)
+		  {
+		    if (errorBuf.length() != 0)
+		      {
+			errorBuf.append("\n\n");
+		      }
+
+		    errorBuf.append(retVal.getDialog().getText());
+		  }
+	      }
 	  }
+	else
+	  {
+	    approvedValues.addElement(submittedValues.elementAt(i));
+	  }
+      }
+
+    // if we weren't able to get any copied, report
+
+    if (approvedValues.size() == 0)
+      {
+	return Ganymede.createErrorDialog("AddElements Error",
+					  errorBuf.toString());
       }
 
     // see if our container wants to intercede in the adding operation
@@ -2776,7 +2813,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, submittedValues, null);
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, approvedValues, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
@@ -2815,9 +2852,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	    System.err.println("InvidDBField.addElements(): binding");
 	  }
 
-	for (int i = 0; i < submittedValues.size(); i++)
+	for (int i = 0; i < approvedValues.size(); i++)
 	  {
-	    Invid remote = (Invid) submittedValues.elementAt(i);
+	    Invid remote = (Invid) approvedValues.elementAt(i);
 
 	    newRetVal = bind(null, remote, local); // bind us to the target field
 
@@ -2844,7 +2881,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	// okay, see if the DBEditObject is willing to allow all of these
 	// elements to be added
 
-	newRetVal = eObj.finalizeAddElements(this, submittedValues);
+	newRetVal = eObj.finalizeAddElements(this, approvedValues);
 
 	if (newRetVal == null || newRetVal.didSucceed()) 
 	  {
@@ -2853,9 +2890,9 @@ public final class InvidDBField extends DBField implements invid_field {
 		System.err.println("InvidDBField.addElements(): finalize approved");
 	      }
 
-	    for (int i = 0; i < submittedValues.size(); i++)
+	    for (int i = 0; i < approvedValues.size(); i++)
 	      {
-		values.addElement(submittedValues.elementAt(i));
+		values.addElement(approvedValues.elementAt(i));
 	      }
 
 	    qr = null;
@@ -2868,16 +2905,32 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (retVal != null)
 	      {
-		return retVal.unionRescan(newRetVal);
+		newRetVal = retVal.unionRescan(newRetVal);
 	      }
-	    else
+
+	    if (newRetVal == null)
 	      {
-		return newRetVal;
+		newRetVal = new ReturnVal(true, true);
 	      }
+
+	    // if we were not able to copy some of the values (and we
+	    // had partialSuccessOk set), encode a description of what
+	    // happened along with the success code
+
+	    if (errorBuf.length() != 0)
+	      {
+		newRetVal.setDialog(new JDialogBuff("Warning",
+						    errorBuf.toString(),
+						    "Ok",
+						    null,
+						    "ok.gif"));
+	      }
+
+	    return newRetVal;
 	  }
 	else
 	  {
-	    return newRetVal;
+	    return newRetVal;	// failure code
 	  }
       }
     finally
@@ -3844,6 +3897,22 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.print("InvidDBField.verifyNewValue(");
+
+	if (o instanceof Invid)
+	  {
+	    System.err.print(Ganymede.internalSession.viewObjectLabel((Invid) o));
+	  }
+	else
+	  {
+	    System.err.print(o);
+	  }
+	
+	System.err.println(")");
+      }
+
     if (!isEditable(true))
       {
 	return Ganymede.createErrorDialog("Invid Field Error",
@@ -3898,11 +3967,19 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (!qr.containsInvid(inv))
 		  {
+		    String invLabel = Ganymede.internalSession.viewObjectLabel(inv);
+
+		    if (debug)
+		      {
+			System.err.println("InvidDBField.verifyNewValue(" + invLabel + "): didn't match against");
+			System.err.println(qr);
+		      }
+
 		    return Ganymede.createErrorDialog("Invid Field Error",
-						      "invid value " + inv + 
+						      invLabel + 
 						      " is not a valid choice for field " +
 						      getName() + " in object " + owner.getLabel() +
-						      ".  Serious client error?");
+						      ".");
 		  }
 	      }
 	  }
