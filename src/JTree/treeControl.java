@@ -29,8 +29,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.21 $
-  Last Mod Date: $Date: 2001/05/23 03:53:42 $
+  Version: $Revision: 1.22 $
+  Last Mod Date: $Date: 2002/03/01 22:28:55 $
   Release: $Name:  $
 
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
@@ -60,7 +60,7 @@ import javax.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.21 $ %D%
+ * @version $Revision: 1.22 $ %D%
  *
  * @see arlut.csd.JTree.treeCallback
  * @see arlut.csd.JTree.treeNode
@@ -1689,7 +1689,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
       System.err.println("Called render");
     }
 
-    if (!isVisible() || getBounds().width == 0 || getBounds().height == 0)
+    if (!isVisible() || getBounds().width <= 0 || getBounds().height <= 0)
       {
 	return;
       }
