@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.113 $
+   Version: $Revision$
    Last Mod Date: $Date$
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ddroid.common.DDPermissionsException;
 import arlut.csd.ddroid.common.FieldInfo;
@@ -167,6 +168,15 @@ import arlut.csd.ddroid.rmi.db_field;
 public abstract class DBField implements Remote, db_field {
 
   /**
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBField");
+
+  // ---
+
+  /**
    * the object's current value.  May be a Vector for vector fields, in
    * which case getVectVal() may be used to perform the cast.
    */
@@ -233,7 +243,7 @@ public abstract class DBField implements Remote, db_field {
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector field " + getName());
+	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     return value;
@@ -250,7 +260,7 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     return getVectVal().elementAt(index);
@@ -388,15 +398,16 @@ public abstract class DBField implements Remote, db_field {
       {
 	if (!verifyReadPermission())
 	  {
-	    return Ganymede.createErrorDialog("Copy field error", 
-					      "Can't copy field " + getName() + ", no read privileges");
+	    return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
+					      ts.l("copyFieldTo.no_read", getName(), owner.getLabel()));
 	  }
       }
 	
     if (!target.isEditable(local))
       {
-	return Ganymede.createErrorDialog("Copy field error",
-					  "Can't copy field " + getName() + ", no write privileges");
+	return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
+					  ts.l("copyFieldTo.no_write",
+					       target.getName(), target.owner.getLabel()));
       }
 
     if (!isVector())
@@ -661,10 +672,8 @@ public abstract class DBField implements Remote, db_field {
       {
 	if (!isEditable(local))	// *sync* GanymedeSession possible
 	  {
-	    return Ganymede.createErrorDialog("Couldn't clear field",
-					      "DBField.setUndefined(): couldn't " +
-					      "clear a vector element from field " +
-					      getName());
+	    return Ganymede.createErrorDialog(ts.l("setUndefined.perm_subject"),
+					      ts.l("setUndefined.no_perm_vect", getName(), owner.getLabel()));
 	  }
 
 	// we have to clone our values Vector in order to use
@@ -881,12 +890,12 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!verifyReadPermission())
       {
-	throw new DDPermissionsException("permission denied to read this field " + getName());
+	throw new DDPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (isVector())
       {
-	throw new DDPermissionsException("scalar accessor called on vector " + getName());
+	throw new DDPermissionsException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     return value;
@@ -999,14 +1008,13 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* possible
       {
-	return Ganymede.createErrorDialog("Field Permissions Error",
-					  "don't have permission to change field /  non-editable object for field " +
-					  getName() + " in object " + owner.getLabel());
+	return Ganymede.createErrorDialog(ts.l("global.perms_sub"),
+					  ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar method called on a vector field for field " + getName());
+	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     if (this.value == submittedValue || (this.value != null && this.value.equals(submittedValue)))
