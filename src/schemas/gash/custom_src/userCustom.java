@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -325,7 +325,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// the removal track now.
 
 	date = (DateDBField) getField(SchemaConstants.ExpirationField);
-	retVal = date.setValue(null);
+	retVal = date.setValueLocal(null);
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -342,7 +342,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// and set the removal date
 
 	date = (DateDBField) getField(SchemaConstants.RemovalField);
-	retVal = date.setValue(cal.getTime());
+	retVal = date.setValueLocal(cal.getTime());
 
 	finalizeInactivate(true);
 	return retVal;
@@ -517,7 +517,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// make sure that the removal date is cleared..
 
 	date = (DateDBField) getField(SchemaConstants.RemovalField);
-	retVal = date.setValue(null);
+	retVal = date.setValueLocal(null);
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -783,7 +783,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    System.err.println("trying to rename admin persona " + oldName + " to "+ tempString);
 
-	    ReturnVal retVal = sf.setValue(tempString);
+	    ReturnVal retVal = sf.setValueLocal(tempString);
 
 	    if ((retVal != null) && (!retVal.didSucceed()))
 	      {
@@ -802,7 +802,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			eobj = session.editDBObject((Invid) personaeInvids.elementAt(j));
 
 			sf = (StringDBField) eobj.getField(SchemaConstants.PersonaNameField);
-			sf.setValue(oldNames.elementAt(j));
+			sf.setValueLocal(oldNames.elementAt(j));
 		      }
 
 		    return false;
