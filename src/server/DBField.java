@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.58 $ %D%
+   Version: $Revision: 1.59 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -898,6 +898,23 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   
   public final ReturnVal setElement(int index, Object value)
   {
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+      }
+
+    if (value == null)
+      {
+	return Ganymede.createErrorDialog("Error, bad value",
+					  "Null value passed to " + owner.getLabel() + ":" + 
+					  getName() + ".setElement()");
+      }
+
+    if ((index < 0) || (index > values.size()))
+      {
+	throw new IllegalArgumentException("invalid index " + index);
+      }
+
     return rescanThisField(setElement(index, value, false));
   }
 
@@ -917,14 +934,31 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   
   public final ReturnVal setElementLocal(int index, Object value)
   {
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+      }
+
+    if (value == null)
+      {
+	return Ganymede.createErrorDialog("Error, bad value",
+					  "Null value passed to " + owner.getLabel() + ":" + 
+					  getName() + ".setElement()");
+      }
+
+    if ((index < 0) || (index > values.size()))
+      {
+	throw new IllegalArgumentException("invalid index " + index);
+      }
+
     return setElement(index, value, true);
   }
 
   /**
    *
-   * Sets the value of an element of this field, if a vector.
+   * Sets the value of an element of this field, if a vector.<br><br>
    *
-   * Server-side method only
+   * Server-side method only<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -945,16 +979,6 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object, field " +
 					   getName());
-      }
-
-    if (!isVector())
-      {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
-      }
-
-    if ((index < 0) || (index > values.size()))
-      {
-	throw new IllegalArgumentException("invalid index " + index);
       }
 
     if (!verifyNewValue(value))
