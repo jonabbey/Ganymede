@@ -2952,11 +2952,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	if (state)
 	  {
-	    throw new RuntimeException("ASSERT: double write lock in DBObjectBase");
+	    Ganymede.logAssert("double write lock in DBObjectBase");
 	  }
 	else
 	  {
-	    throw new RuntimeException("ASSERT: double write unlock in DBObjectBase");
+	    Ganymede.logAssert("double write unlock in DBObjectBase");
 	  }
       }
   }

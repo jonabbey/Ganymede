@@ -752,6 +752,24 @@ public class Ganymede {
   }
 
   /**
+   * <p>This is a convenience method to allow arbitrary Directory
+   * Droid code to generate a stack trace on the server's log and
+   * admin consoles.</p>
+   */
+
+  static public void logAssert(String string)
+  {
+    try
+      {
+	throw new RuntimeException("ASSERT: " + string);
+      }
+    catch (RuntimeException ex)
+      {
+	Ganymede.debug(Ganymede.stackTrace(ex));
+      }
+  }
+
+  /**
    * This is a convenience method used by the server to return a
    * standard informative dialog.
    */
