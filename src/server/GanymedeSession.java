@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.75 $ %D%
+   Version: $Revision: 1.76 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -854,7 +854,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    inv = (Invid) groups.elementAt(i);
 
-	    if (seen.contains(inv))
+	    if (seen.containsKey(inv))
 	      {
 		continue;
 	      }
