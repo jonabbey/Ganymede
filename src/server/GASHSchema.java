@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.56 $ %D%
+   Version: $Revision: 1.57 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,8 +15,11 @@
 package arlut.csd.ganymede;
 
 import arlut.csd.Util.*;
-import arlut.csd.DataComponent.*;
-import arlut.csd.Dialog.*;
+import arlut.csd.JDataComponent.*;
+import arlut.csd.JDialog.*;
+import arlut.csd.JDialog.JInsetPanel;
+
+import com.sun.java.swing.*;
 
 import tablelayout.*;
 
@@ -33,7 +36,7 @@ import jdj.PackageResources;
 import gjt.Box;
 import gjt.Util;
 import gjt.RowLayout;
-import gjt.ColumnLayout;
+
 
 import arlut.csd.JTree.*;
 
@@ -45,7 +48,7 @@ import com.sun.java.swing.*;
 
 ------------------------------------------------------------------------------*/
 
-public class GASHSchema extends Frame implements treeCallback, treeDragDropCallback, ActionListener {
+public class GASHSchema extends JFrame implements treeCallback, treeDragDropCallback, ActionListener {
 
   public static final boolean debug = false;
 
@@ -99,15 +102,18 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
   CardLayout
     card;
 
-  Panel 
+  JPanel 
     buttonPane,
     attribPane,
     attribCardPane,
     emptyPane,
-    baseEditPane,
+    categoryEditPane;
+
+  JScrollPane
     fieldEditPane,
     namespaceEditPane,
-    categoryEditPane;
+    baseEditPane;
+
 
   BaseEditor
     be;
@@ -125,7 +131,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     showingBase,
     showingField;
 
-  Button
+  JButton
     okButton, cancelButton;
 
   Color
@@ -156,48 +162,45 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     //
     //
     
-    setLayout(new BorderLayout());
+    getContentPane().setLayout(new BorderLayout());
 
-    attribPane = new Panel();
+    attribPane = new JPanel();
     attribPane.setBackground(bgColor);
     attribPane.setLayout(new BorderLayout());
 
     card = new CardLayout();
 
-    attribCardPane = new Panel();
+    attribCardPane = new JPanel();
     attribCardPane.setBackground(bgColor);
     attribCardPane.setLayout(card);
 
     // set up the base editor
 
-    baseEditPane = new Panel();
+    baseEditPane = new JScrollPane();
     baseEditPane.setBackground(bgColor);
-    baseEditPane.setLayout(new BorderLayout());
 
     be = new BaseEditor(this);
-    baseEditPane.add("Center", be);
+    baseEditPane.setViewportView(be);
 
     // set up the base field editor
 
-    fieldEditPane = new Panel();
+    fieldEditPane = new JScrollPane();
     fieldEditPane.setBackground(bgColor);
-    fieldEditPane.setLayout(new BorderLayout());
 
     fe = new BaseFieldEditor(this);
-    fieldEditPane.add("Center", fe);
+    fieldEditPane.setViewportView(fe);
 
     // set up the name space editor
 
-    namespaceEditPane = new Panel();
+    namespaceEditPane = new JScrollPane();
     namespaceEditPane.setBackground(bgColor);
-    namespaceEditPane.setLayout(new BorderLayout());
 
     ne = new NameSpaceEditor(this);
-    namespaceEditPane.add("Center", ne);
+    namespaceEditPane.setViewportView(ne);
 
     // set up the category editor
 
-    categoryEditPane = new Panel();
+    categoryEditPane = new JPanel();
     categoryEditPane.setBackground(bgColor);
     categoryEditPane.setLayout(new BorderLayout());
 
@@ -206,7 +209,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     // set up the empty card
 
-    emptyPane = new Panel();
+    emptyPane = new JPanel();
     emptyPane.setBackground(bgColor);
 
     // Finish attribPane setup
@@ -219,27 +222,27 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     attribPane.add("Center", attribCardPane);
 
-    Box rightBox = new Box(attribPane, "Attributes");
+    gjt.Box rightBox = new gjt.Box(attribPane, "Attributes");
 
-    InsetPanel rightPanel = new InsetPanel(5, 5, 5, 10);
-    rightPanel.setLayout(new BorderLayout());
-    rightPanel.add("Center", rightBox);
+    JInsetPanel rightJPanel = new JInsetPanel(5, 5, 5, 10);
+    rightJPanel.setLayout(new BorderLayout());
+    rightJPanel.add("Center", rightBox);
 
     // Set up button pane
 
-    buttonPane = new Panel();
+    buttonPane = new JPanel();
     buttonPane.setLayout(new RowLayout());
 
-    okButton = new Button("ok");
+    okButton = new JButton("ok");
     okButton.addActionListener(this);
 
-    cancelButton = new Button("cancel");
+    cancelButton = new JButton("cancel");
     cancelButton.addActionListener(this);
 
     buttonPane.add(okButton);
     buttonPane.add(cancelButton);
 
-    add("South", buttonPane);
+    getContentPane().add("South", buttonPane);
 
     //
     //
@@ -267,19 +270,19 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     //
     //
 
-    Box leftBox = new Box(tree, "Schema Objects");
+    gjt.Box leftBox = new gjt.Box(tree, "Schema Objects");
 
-    InsetPanel leftPanel = new InsetPanel(5, 10, 5, 5);
-    leftPanel.setLayout(new BorderLayout());
-    leftPanel.add("Center", leftBox);
+    JInsetPanel leftJPanel = new JInsetPanel(5, 10, 5, 5);
+    leftJPanel.setLayout(new BorderLayout());
+    leftJPanel.add("Center", leftBox);
 
-    //    displayPane.add("West", leftPanel);
+    //    displayPane.add("West", leftJPanel);
 
     //    add("Center", displayPane);
 
-    JSplitPane sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
+    JSplitPane sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftJPanel, rightJPanel);
 
-    add("Center", sPane);
+    getContentPane().add("Center", sPane);
 
     //
     //
@@ -2300,15 +2303,15 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
 ------------------------------------------------------------------------------*/
 
-class NameSpaceEditor extends ScrollPane implements ActionListener {
+class NameSpaceEditor extends JPanel implements ActionListener {
   
   SpaceNode node;
   NameSpace space;
-  stringField nameS;
-  List spaceL;
-  Checkbox caseCB;
-  Panel namePanel;
-  componentAttr ca;
+  JstringField nameS;
+  JList spaceL;
+  JCheckBox caseCB;
+  JPanel nameJPanel;
+  JcomponentAttr ca;
   GASHSchema owner;
   String currentNameSpaceLabel = null;
   
@@ -2325,24 +2328,25 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
 
     this.owner = owner;
 
-    namePanel = new InsetPanel(10,10,10,10);
-    namePanel.setLayout(new TableLayout(false));
+    nameJPanel = new JInsetPanel(10,10,10,10);
+    nameJPanel.setLayout(new TableLayout(false));
 
-    ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
+    ca = new JcomponentAttr(this, new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, Color.white);
       
-    nameS = new stringField(20, 100, ca, false, false, null, null);
-    addRow(namePanel, nameS, "Namespace:", 0);
+    nameS = new JstringField(20, 100, ca, false, false, null, null);
+    addRow(nameJPanel, nameS, "Namespace:", 0);
       
-    caseCB = new Checkbox();
+    caseCB = new JCheckBox();
     caseCB.setEnabled(false);
-    addRow(namePanel, caseCB, "Case insensitive:", 1);
+    addRow(nameJPanel, caseCB, "Case insensitive:", 1);
     
-    spaceL = new List(5);
+    spaceL = new JList();
     //spaceL.setEnabled(false);
-    addRow(namePanel, spaceL, "Fields in this space:", 2);
-    
-    add(namePanel);
+    addRow(nameJPanel, spaceL, "Fields in this space:", 2);
+
+    setLayout(new BorderLayout());
+    add("Center", nameJPanel);
   }
 
   public void editNameSpace(SpaceNode node)
@@ -2353,7 +2357,7 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
     try
       {
 	nameS.setText(space.getName());
-	caseCB.setState(space.isCaseInsensitive());
+	caseCB.setSelected(space.isCaseInsensitive());
 	currentNameSpaceLabel = space.getName();
 	refreshSpaceList();
       }
@@ -2384,6 +2388,7 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
       }
 
     Vector fields = null;
+    Vector spaceV = new Vector();
     BaseField currentField = null;
     String thisBase = null;
     String thisField = null;
@@ -2427,8 +2432,8 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
 
 			    if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
 			      {
-				System.out.println("Adding to spaceL: " + thisBase + ":" + currentField.getName());;
-				spaceL.addItem(thisBase + ":" + currentField.getName());
+				System.out.println("Adding to spaceV: " + thisBase + ":" + currentField.getName());;
+				spaceV.addElement(thisBase + ":" + currentField.getName());
 			      }
 			  }
 		      }
@@ -2436,15 +2441,17 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
 		      {
 			throw new IllegalArgumentException("Exception generating spaceL: " + rx);
 		      }
+		    
 		  }
+		spaceL.setListData(spaceV);
 	      }
 	  }
       }
   }
 
-  void addRow(Panel parent, Component comp,  String label, int row)
+  void addRow(JPanel parent, Component comp,  String label, int row)
   {
-    Label l = new Label(label);
+    JLabel l = new JLabel(label);
 
     parent.add("0 " + row + " lhwHW", l);
     parent.add("1 " + row + " lhwHW", comp);
@@ -2457,11 +2464,11 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
 
 ------------------------------------------------------------------------------*/
 
-class CategoryEditor extends ScrollPane implements setValueCallback {
+class CategoryEditor extends JPanel implements JsetValueCallback {
 
   GASHSchema owner;  
-  Panel catPanel;
-  stringField catNameS;
+  JPanel catJPanel;
+  JstringField catNameS;
   CatTreeNode catNode;
   Category category;
 
@@ -2469,7 +2476,7 @@ class CategoryEditor extends ScrollPane implements setValueCallback {
 
   CategoryEditor(GASHSchema owner)
   {
-    componentAttr ca;
+    JcomponentAttr ca;
 
     /* -- */
 
@@ -2482,16 +2489,17 @@ class CategoryEditor extends ScrollPane implements setValueCallback {
 
     this.owner = owner;
     
-    catPanel = new InsetPanel(10,10,10,10);
-    catPanel.setLayout(new TableLayout(false));
+    catJPanel = new JInsetPanel(10,10,10,10);
+    catJPanel.setLayout(new TableLayout(false));
     
-    ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
+    ca = new JcomponentAttr(this, new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, Color.white);
     
-    catNameS = new stringField(20, 100, ca, true, false, null, null, this);
-    addRow(catPanel, catNameS, "Category Label:", 0);
+    catNameS = new JstringField(20, 100, ca, true, false, null, null, this);
+    addRow(catJPanel, catNameS, "Category Label:", 0);
     
-    add(catPanel);
+    setLayout(new BorderLayout());
+    add("Center", catJPanel);
   }
 
   void editCategory(CatTreeNode catNode)
@@ -2509,7 +2517,7 @@ class CategoryEditor extends ScrollPane implements setValueCallback {
       }
   }
 
-  public boolean setValuePerformed(ValueObject v)
+  public boolean setValuePerformed(JValueObject v)
   {
     if (v.getSource() == catNameS)
       {
@@ -2535,9 +2543,9 @@ class CategoryEditor extends ScrollPane implements setValueCallback {
     return true;		// what the?
   }
 
-  void addRow(Panel parent, Component comp,  String label, int row)
+  void addRow(JPanel parent, Component comp,  String label, int row)
   {
-    Label l = new Label(label);
+    JLabel l = new JLabel(label);
     
     parent.add("0 " + row + " lhwHW", l);
     parent.add("1 " + row + " lhwHW", comp);
