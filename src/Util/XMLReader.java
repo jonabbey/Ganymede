@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2002/08/02 08:43:19 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2002/08/02 08:49:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1357,8 +1357,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   }
 
   /**
-   * private enqueue method.  assumes that the calling code will check
-   * bounds.
+   * private enqueue method.  Will block on the internal XMLItem
+   * buffer if the circular buffer is full.
    */
 
   private void enqueue(XMLItem item) throws InterruptedException
