@@ -35,7 +35,7 @@
     <mkdir dir="${build.lib}"/>
     <mkdir dir="${build.doc}"/>
     <tstamp/>
-	<ant dir="../../" inheritall="false"/>
+	<ant dir="../../" inheritall="false" target="main"/>
     <echo message="${TSTAMP}"/>
   </target>
 
