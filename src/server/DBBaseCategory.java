@@ -6,7 +6,7 @@
    category hierarchy.
    
    Created: 11 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   private DBBaseCategory parent;
   private DBStore store;
   private Vector contents;
+
+  private DBSchemaEdit editor;
 
   /* -- */
 
@@ -104,7 +106,28 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     this.store = store;
     contents = new Vector();
-    receive(in);
+    receive(in, null);
+  }
+
+
+  /**
+   *
+   * Receive constructor.
+   *
+   * @param store DBStore that is managing us.  We'll ask it to look up parents
+   * for us.
+   *
+   * @param in DataInput stream to load the db representation of this category from
+   *
+   */
+
+  public DBBaseCategory(DBStore store, DataInput in, DBBaseCategory parent) throws RemoteException, IOException
+  {
+    super();			// UnicastRemoteObject initialization
+
+    this.store = store;
+    contents = new Vector();
+    receive(in, parent);
   }
 
   /**
@@ -118,10 +141,12 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   public DBBaseCategory(DBStore store, DBBaseCategory rootCategory,
 			Hashtable baseHash, DBSchemaEdit editor) throws RemoteException
   {
+    this.editor = editor;
     this.store = store;
+    contents = new Vector();
+
     setName(rootCategory.getName());
     setDisplayOrder(rootCategory.getDisplayOrder());
-    contents = new Vector();
     
     recurseDown(rootCategory, baseHash, editor);
   }
@@ -207,7 +232,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       }
   }
 
-  synchronized void receive(DataInput in) throws IOException
+  synchronized void receive(DataInput in, DBBaseCategory parent) throws IOException
   {
     String 
       pathName,
@@ -233,9 +258,14 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     // and get our parent
 
-    parent = store.getCategory(path);
+    this.parent = parent;
 
     count = in.readInt();
+
+    if (false)
+      {
+	System.err.println("DBBaseCategory.receive(): reading in " + count + " subcategories");
+      }
 
     for (int i = 0; i < count; i++)
       {
@@ -313,7 +343,16 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	throw new IllegalArgumentException("DBBaseCategory name can't include /");
       }
 
-    // need to check for unique name (under parent) ?
+    if (parent != null)
+      {
+	if (!newName.equals(name))
+	  {
+	    if (parent.contains(newName))
+	      {
+		throw new IllegalArgumentException("DBBaseCategory name conflicts with existing name in this category");
+	      }
+	  }
+      }
 
     this.name = newName;
 
@@ -358,7 +397,55 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
   public void setCategory(Category category)
   {
-    parent = (DBBaseCategory) category;
+    DBBaseCategory cat;
+    String path;
+
+    /* -- */
+
+    if (category == null)
+      {
+	parent = null;
+	return;
+      }
+
+    if (!(category instanceof DBBaseCategory))
+      {
+	// we need a local reference
+
+	try
+	  {
+	    path = category.getPath();
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("couldn't get path of remote category: " + ex);
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("** Attempting to find local copy of category " + path);
+	  }
+
+	if (editor == null)
+	  {
+	    cat = store.getCategory(path);
+	  }
+	else
+	  {
+	    cat = editor.getCategory(path);
+	  }
+
+	if (cat == null)
+	  {
+	    throw new RuntimeException("setCategory: couldn't find local parent category");
+	  }
+
+	parent = cat;
+      }
+    else
+      {
+	parent = (DBBaseCategory) category;
+      }
   }
 
   /**
@@ -440,6 +527,18 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	throw new IllegalArgumentException("Can't add a null node");
       }
 
+    try
+      {
+	if (this.contains(node.getName()))
+	  {
+	    throw new IllegalArgumentException("Can't add this node.. name already registered " + node.getName());
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote " + ex);
+      } 
+
     // find our insertion point
 
     for (i = 0; !found && i < contents.size(); i++)
@@ -490,7 +589,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  {
 	    if (node instanceof DBObjectBase)
 	      {
-		if (node.getDisplayOrder() > contents.size())
+		if (node.getDisplayOrder() >= contents.size())
 		  {
 		    contents.addElement(node);
 		  }
@@ -512,7 +611,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 		    throw new RuntimeException("caught bad remote " + ex);
 		  }
 
-		if (node.getDisplayOrder() > contents.size())
+		if (node.getDisplayOrder() >= contents.size())
 		  {
 		    contents.addElement(newBase);
 		  }
@@ -521,16 +620,22 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 		    contents.insertElementAt(newBase, newBase.getDisplayOrder());
 		  }
 	      }
-	    else
+	    else if (node instanceof Category)
 	      {
-		if (node.getDisplayOrder() > contents.size())
+		// presumably we've got a Category here..
+
+		if (node.getDisplayOrder() >= contents.size())
 		  {
 		    contents.addElement(node);
 		  }
 		else
 		  {
-		    contents.insertElementAt((DBObjectBase) node, node.getDisplayOrder());
+		    contents.insertElementAt(node, node.getDisplayOrder());
 		  }
+	      }
+	    else
+	      {
+		throw new IllegalArgumentException("don't recognize node");
 	      }
 	  }
 	catch (RemoteException ex)
@@ -604,11 +709,13 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     // find our deletion point
 
+    Ganymede.debug("Searching for " + node);
+
     for (i = 0; i < contents.size(); i++)
       {
 	if (debug)
 	  {
-	    Ganymede.debug("Examining " + contents.elementAt(i));
+	    Ganymede.debug(" examining: " + contents.elementAt(i));
 	  }
 
 	if (contents.elementAt(i).equals(node))
@@ -646,28 +753,115 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
   /**
    *
+   * This method is used to remove a Category Node from under us.
+   *
+   * Note that removeNode assumes that it can recalculate the
+   * displayOrder values for other nodes in this category.  This
+   * method should not be called if other nodes with prefixed
+   * displayOrder values are still to be added to this category, as
+   * from the DBStore file.
+   *
+   * @see arlut.csd.ganymede.Category
+   * 
+   */
+
+  public synchronized void removeNode(String name) throws RemoteException
+  {
+    int
+      i,
+      index = -1;
+
+    CategoryNode 
+      node = null;
+
+    /* -- */
+
+    if (name == null)
+      {
+	throw new IllegalArgumentException("Can't remove a null name");
+      }
+
+    // find our deletion point
+
+    Ganymede.debug("Searching for " + name);
+
+    for (i = 0; i < contents.size() && (index == -1); i++)
+      {
+	if (debug)
+	  {
+	    Ganymede.debug(" examining: " + contents.elementAt(i));
+	  }
+
+	node = (CategoryNode) contents.elementAt(i);
+
+	try
+	  {
+	    if (node.getName().equals(name))
+	      {
+		index = i;
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote: " + ex);
+	  }
+      }
+
+    if (index == -1)
+      {
+	throw new IllegalArgumentException("can't delete a name that's not in the category");
+      }
+
+    // remove our node from our content list
+
+    contents.removeElementAt(index);
+
+    // now pull up the other nodes.. note that we assume that when
+    // removeNode is called, no nodes will be added with stored
+    // displayOrder's from a DBStore file, say.
+
+    for (i = index; i < contents.size(); i++)
+      {
+	( (CategoryNode) contents.elementAt(i)).setDisplayOrder(i);
+      }
+
+    // tell our node what it's display order is.
+
+    node.setDisplayOrder(0);
+
+    // Sorry, kid, yer on your own now!
+
+    node.setCategory(null);
+  }
+
+  /**
+   *
    * Returns a subcategory of name <name>.
    *
    * @see arlut.csd.ganymede.Category
    *
    */
 
-  public Category getNode(String name)
+  public CategoryNode getNode(String name)
   {
-    DBBaseCategory candidate;
+    CategoryNode candidate;
 
     /* -- */
 
     for (int i = 0; i < contents.size(); i++)
       {
-	if (contents.elementAt(i) instanceof DBBaseCategory)
+	candidate = (CategoryNode) contents.elementAt(i);
+	
+	try
 	  {
-	    candidate = (DBBaseCategory) contents.elementAt(i);
-
 	    if (candidate.getName().equals(name))
 	      {
 		return candidate;
 	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote: " + ex);
 	  }
       }
 
@@ -790,5 +984,31 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       {
 	return parent.isUnder(cat);
       }
+  }
+
+  public synchronized boolean contains(String name)
+  {
+    CategoryNode node;
+
+    /* -- */
+
+    for (int i = 0; i < contents.size(); i++)
+      {
+	node = (CategoryNode) contents.elementAt(i);
+
+	try
+	  {
+	    if (node.getName().equals(name))
+	      {
+		return true;
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote: " + ex);
+	  }
+      }
+
+    return false;
   }
 }
