@@ -1005,10 +1005,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	    try
 	      {
-		ok = my_callback.setValuePerformed(new JValueObject(this, 
-								  0, // we are not giving a true index
-								  JValueObject.DELETEVECTOR,
-								  objVector));
+		ok = my_callback.setValuePerformed(new JDeleteVectorValueObject(this, objVector));
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -1039,10 +1036,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  {
 	    try
 	      {
-		ok = my_callback.setValuePerformed(new JValueObject(this, 
-								  0, // we are not giving a true index
-								  JValueObject.DELETE,
-								  ((listHandle)handles.elementAt(0)).getObject()));
+		ok = my_callback.setValuePerformed(new JDeleteValueObject(this, 
+									  ((listHandle)handles.elementAt(0)).getObject()));
 	      }
 	    catch (RemoteException rx)
 	      {
