@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/03/01 22:01:11 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/07/05 22:02:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -185,7 +185,30 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 
 	if (success1)
 	  {
-	    success2 = this.builderPhase2();
+	    boolean shutdownblock = false;
+
+	    try
+	      {
+		if (GanymedeServer.shutdownSemaphore.increment(0) != null)
+		  {
+		    Ganymede.debug("Aborting builder task build");
+		    return;
+		  }
+	      }
+	    catch (InterruptedException ex)
+	      {
+		// will never happen, since we are giving 0 to
+		// increment
+	      }
+
+	    try
+	      {
+		success2 = this.builderPhase2();
+	      }
+	    finally
+	      {
+		GanymedeServer.shutdownSemaphore.decrement();
+	      }
 	  }
       }
     finally

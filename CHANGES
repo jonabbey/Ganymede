@@ -737,6 +737,14 @@ objects checked out and for idle sessions with objects checked out for
 editing) are now configurable in the server's ganymede.properties
 file.
 
+47. [SERVER] Added shutdown semaphore to keep shutdown from breaking builds
+
+I have added an additional semaphore to the server so that when an
+admin initiates a shutdown of the server from the admin console, the
+server will wait for any builder tasks waiting on phase 2 (execution
+of external scripts for NIS/DNS/etc. builds) to complete before
+shutting down.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

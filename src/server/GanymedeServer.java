@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 2000/06/02 21:12:08 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 2000/07/05 22:02:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -139,6 +139,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    */
 
   static loginSemaphore lSemaphore = new loginSemaphore();
+
+  /**
+   * <p>Another handy semaphore, this time used to defer
+   * shutdowns from build processes</p>
+   */
+
+  static loginSemaphore shutdownSemaphore = new loginSemaphore();
 
   /* -- */
 
@@ -988,7 +995,20 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
       }
     
-    GanymedeAdmin.setState("Server going down.. performing final dump");
+    // wait for any phase 2 builder tasks to complete
+
+    Ganymede.debug("Server going down.. waiting for any builder tasks to finish phase 2");
+
+    try
+      {
+	shutdownSemaphore.disable("shutdown", true, -1);
+      }
+    catch (InterruptedException ex)
+      {
+	// not much that we can do at this point
+      }
+
+    Ganymede.debug("Server going down.. performing final dump");
 
     // dump, then shut down.  Our second dump parameter is false, so
     // that we are guaranteed that no internal client can get a
