@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/02/10 04:58:00 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/03/12 21:06:48 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -115,6 +115,8 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
   protected Font todayFont = new Font("sansserif", Font.BOLD, 12);
   protected Font notTodayFont = new Font("serif", Font.PLAIN, 12);
 
+  protected boolean editable;
+
   int
     current_day,
     current_year;
@@ -149,9 +151,9 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
    *
    */
 
-  public JpanelCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback)
+  public JpanelCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback, boolean editable)
   {
-    this(parentCalendar, callback, true, false);
+    this(parentCalendar, callback, true, false, editable);
   }
 
   /**
@@ -160,19 +162,23 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
    * @param showTime If true, then the "Choose a time" part will be there.  Also, if true, time will appear in date at top.
    *
    */
-  public JpanelCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback, boolean showTime)
+  public JpanelCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback, 
+			boolean showTime, boolean editable)
   {
-    this(parentCalendar, callback, showTime, false);
+    this(parentCalendar, callback, showTime, false, editable);
   }
 
-  public JpanelCalendar(JpopUpCalendar pC,GregorianCalendar parentCalendar, JsetValueCallback callback) 
+  public JpanelCalendar(JpopUpCalendar pC,GregorianCalendar parentCalendar, 
+			JsetValueCallback callback, boolean editable) 
   {
-    this(pC, parentCalendar, callback, true, false);
+    this(pC, parentCalendar, callback, true, false, editable);
   }
 
-  public JpanelCalendar(JpopUpCalendar pC,GregorianCalendar parentCalendar, JsetValueCallback callback, boolean showTime) 
+  public JpanelCalendar(JpopUpCalendar pC,GregorianCalendar parentCalendar, 
+			JsetValueCallback callback, boolean showTime, 
+			boolean editable) 
   {
-    this(pC, parentCalendar, callback, showTime, false);
+    this(pC, parentCalendar, callback, showTime, false, editable);
   }
 
   /**
@@ -184,9 +190,10 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
   public JpanelCalendar(JpopUpCalendar pC,
 			GregorianCalendar parentCalendar, 
 			JsetValueCallback callback, 
-			boolean showTime, boolean compact) 
+			boolean showTime, boolean compact,
+			boolean editable) 
   {
-    this(parentCalendar,callback, showTime, compact);
+    this(parentCalendar,callback, showTime, compact, editable);
 
     if (pC == null)
       {
@@ -203,7 +210,8 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
   public JpanelCalendar(GregorianCalendar parentCalendar, 
 			JsetValueCallback callback,  
-			boolean showTime, boolean compact)
+			boolean showTime, boolean compact,
+			boolean editable)
   {
     if (parentCalendar == null)
       {
@@ -217,6 +225,16 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
     this.showTime = showTime;
     this.compact = compact;
+    this.editable = editable;
+
+    if (editable)
+      {
+	System.err.println("JpanelCalendar.editable == true!");
+      }
+    else
+      {
+	System.err.println("JpanelCalendar.editable == false!");
+      }
 
     parent = callback;
     
@@ -664,6 +682,11 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 	System.err.println("buttonPressed");
       }
 
+    if (!editable)
+      {
+	return;
+      }
+
     if (_bttn == null) 
       {
 	throw new IllegalArgumentException("The dateButton parameter is null");
@@ -733,6 +756,11 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
   public void timeChanged(String _field,int _value)
   {
+    if (!editable)
+      {
+	return;
+      }
+
     if (_field == null)
       {
 	throw new IllegalArgumentException("_field is null");
@@ -786,7 +814,7 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
   {
     JFrame frame = new JFrame();
 
-    frame.getContentPane().add(new JpanelCalendar(new GregorianCalendar(), null));
+    frame.getContentPane().add(new JpanelCalendar(new GregorianCalendar(), null, true));
 
     frame.setSize(300,200);
     frame.pack();
@@ -926,6 +954,13 @@ class JTimePanel extends JPanel implements JsetValueCallback {
     _hour = new JnumberField(3,true,true,0,23,this);
     _min = new JnumberField(3,true,true,0,59,this);
     _sec = new JnumberField(3,true,true,0,59,this);
+
+    if (!parent.editable)
+      {
+	_hour.setEditable(false);
+	_min.setEditable(false);
+	_sec.setEditable(false);
+      }
 
     GridLayout g = new GridLayout(1,1);
     g.setHgap(0);
