@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 2000/01/27 06:03:16 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 2000/01/29 02:32:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -135,7 +135,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.85 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.86 $ $Date: 2000/01/29 02:32:54 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -531,7 +531,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * care of.</p>
    */
 
-  public GanymedeSession getGSession()
+  public final GanymedeSession getGSession()
   {
     return gSession;
   }
@@ -2097,6 +2097,33 @@ public class DBObject implements db_object, FieldType, Remote {
 		  {
 		    results = VectorUtils.union(results, invField.getValuesLocal());
 		  }
+	      }
+	  }
+      }
+
+    return results;
+  }
+
+  /**
+   * <p>This method returns a Vector of Invids that point to this object via
+   * asymmetric link fields.</p>
+   */
+
+  public Vector getBackLinks()
+  {
+    Vector results = new Vector();
+
+    synchronized (Ganymede.db.backPointers)
+      {
+	Hashtable table = (Hashtable) Ganymede.db.backPointers.get(this.getInvid());
+
+	if (table != null)
+	  {
+	    Enumeration enum = table.elements();
+
+	    while (enum.hasMoreElements())
+	      {
+		results.addElement(enum.nextElement());
 	      }
 	  }
       }

@@ -7,15 +7,16 @@
    
    Created: 3 February 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/03/17 20:13:48 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/01/29 02:32:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -57,6 +58,7 @@ public class AdminEntry implements java.io.Serializable {
 
   String
     username,
+    personaName,
     hostname,
     status,
     connecttime,
@@ -65,11 +67,15 @@ public class AdminEntry implements java.io.Serializable {
   int
     objectsCheckedOut;
 
-  public AdminEntry(String username, String hostname, String status,
+  /* -- */
+
+  public AdminEntry(String username, String personaName,
+		    String hostname, String status,
 		    String connecttime, String event,
 		    int objectsCheckedOut)
   {
     this.username = username;
+    this.personaName = personaName;
     this.hostname = hostname;
     this.status = status;
     this.connecttime = connecttime;

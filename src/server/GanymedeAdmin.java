@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2000/01/27 06:03:20 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2000/01/29 02:32:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.38 $ %D%
+ * @version $Revision: 1.39 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -511,7 +511,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 		// note that we really should do something a bit more sophisticated
 		// than using toString on connecttime.
 		
-		entries.addElement(new AdminEntry((session.personaName == null) ? session.username : session.personaName,
+		entries.addElement(new AdminEntry(session.username,
+						  session.personaName,
 						  session.clienthost,
 						  (session.status == null) ? "" : session.status,
 						  session.connecttime.toString(),

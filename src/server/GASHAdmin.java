@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 1999/10/13 20:02:13 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 2000/01/29 02:32:55 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -15,7 +15,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -1634,7 +1635,16 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	e = (AdminEntry) entries.elementAt(i);
 
 	frame.table.newRow(e.username);
-	frame.table.setCellText(e.username, 0, e.username, false);
+
+	if (e.personaName == null || e.personaName.equals(""))
+	  {
+	    frame.table.setCellText(e.username, 0, e.username, false);
+	  }
+	else
+	  {
+	    frame.table.setCellText(e.username, 0, e.personaName, false);
+	  }
+
 	frame.table.setCellText(e.username, 1, e.hostname, false);
 	frame.table.setCellText(e.username, 2, e.status, false);
 	frame.table.setCellText(e.username, 3, e.connecttime, false);

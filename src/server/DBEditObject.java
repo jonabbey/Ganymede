@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.124 $
-   Last Mod Date: $Date: 2000/01/08 03:28:55 $
+   Version: $Revision: 1.125 $
+   Last Mod Date: $Date: 2000/01/29 02:32:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.124 $ $Date: 2000/01/08 03:28:55 $ $Name:  $
+ * @version $Revision: 1.125 $ $Date: 2000/01/29 02:32:53 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -347,7 +347,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     fields = new DBFieldTable(objectBase.fieldTable.size(), (float) 1.0);
 
-    gSession = getSession().getGSession();
+    this.gSession = getSession().getGSession();
 
     synchronized (original)
       {
@@ -489,18 +489,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final DBSession getSession()
   {
     return editset.getSession();
-  }
-
-  /**
-   * <p>Returns the GanymedeSession that this object is checked out in
-   * care of.</p>
-   *
-   * @see arlut.csd.ganymede.GanymedeSession
-   */
-
-  public final GanymedeSession getGSession()
-  {
-    return getSession().getGSession();
   }
 
   /**

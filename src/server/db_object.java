@@ -7,15 +7,16 @@
    
    Created: 11 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/06/18 22:43:27 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/01/29 02:32:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -65,7 +66,7 @@ import java.rmi.RemoteException;
  * client to get information about and/or make changes to a object held
  * in the Ganymede server.</p>
  *
- * @version $Revision: 1.20 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.21 $ $Date: 2000/01/29 02:32:59 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

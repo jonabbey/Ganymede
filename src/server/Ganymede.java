@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2000/01/27 06:03:20 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2000/01/29 02:32:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1369,6 +1369,7 @@ class dumpTask implements Runnable {
   {
     boolean started = false;
     boolean completed = false;
+    boolean gotSemaphore = false;
 
     /* -- */
 
@@ -1388,6 +1389,10 @@ class dumpTask implements Runnable {
 	      {
 		Ganymede.debug("Deferring dump task - semaphore disabled: " + error);
 		return;
+	      }
+	    else
+	      {
+		gotSemaphore = true;
 	      }
 	  }
 	catch (InterruptedException ex)
@@ -1422,7 +1427,10 @@ class dumpTask implements Runnable {
 	    Ganymede.debug("dumpTask forced to stop");
 	  }
 
-	GanymedeServer.lSemaphore.decrement();
+	if (gotSemaphore)
+	  {
+	    GanymedeServer.lSemaphore.decrement();
+	  }
       }
   }
 }

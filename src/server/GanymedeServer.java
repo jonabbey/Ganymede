@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 2000/01/27 06:03:22 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 2000/01/29 02:32:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -429,21 +429,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
 
-	    if (session.personaName != null)
+	    if (session.username.equals(username))
 	      {
-		if (session.personaName.equals(username))
-		  {
-		    session.forceOff(reason);
-		    return true;
-		  }
-	      }
-	    else
-	      {
-		if (session.username.equals(username))
-		  {
-		    session.forceOff(reason);
-		    return true;
-		  }
+		session.forceOff(reason);
+		return true;
 	      }
 	  }
       }
