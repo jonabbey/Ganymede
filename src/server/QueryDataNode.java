@@ -4,8 +4,8 @@
 
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/01/22 18:05:52 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/03/23 06:22:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,8 @@ public class QueryDataNode extends QueryNode {
   static public final byte ENDSWITH = 8;
   static public final byte DEFINED = 9;
   static public final byte MATCHES = 10;
-  static public final byte LAST = 10;
+  static public final byte NOCASEMATCHES = 11;
+  static public final byte LAST = 11;
 
   static public final byte FIRSTVECOP = 0;
   
@@ -305,6 +306,10 @@ public class QueryDataNode extends QueryNode {
 
 	  case MATCHES:
 	    result.append("MATCHES");
+	    break;
+
+	  case NOCASEMATCHES:
+	    result.append("NOCASEMATCHES");
 	    break;
 	  }
       }

@@ -6,8 +6,8 @@
    
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/03/22 22:38:26 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/03/23 06:22:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -70,7 +70,7 @@ import gnu.regexp.*;
  * @see QueryNode
  * @see Query
  *
- * @version $Revision: 1.20 $ $Date: 1999/03/22 22:38:26 $ $Name:  $
+ * @version $Revision: 1.21 $ $Date: 1999/03/23 06:22:13 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -703,6 +703,55 @@ public class DBQueryHandler {
 	  }
 	
 	return (match != null);
+
+      case QueryDataNode.NOCASEMATCHES:
+
+	if (n.regularExpression == null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("DBQueryHandler: trying to build case-insensitive regexp: /" + n.value + "/");
+	      }
+	    
+	    try
+	      {
+		n.regularExpression = new gnu.regexp.RE(n.value, gnu.regexp.RE.REG_ICASE);
+	      }
+	    catch (gnu.regexp.REException ex)
+	      {
+		System.err.println("DBQueryHandler: REException construction regexp: " + ex.getMessage());
+		
+		return false;
+	      }
+	    
+	    if (debug)
+	      {
+		System.err.println("DBQueryHandler: case insensitive regexp built successfully: " + n.regularExpression);
+	      }
+	  }
+	
+	gnu.regexp.RE nocaseregexp = (gnu.regexp.RE) n.regularExpression;
+	
+	if (debug)
+	  {
+	    System.err.println("DBQueryHandler: Trying to match case insensitive regexp against " + string2);
+	  }
+	
+	gnu.regexp.REMatch nocasematch = nocaseregexp.getMatch(string2);
+	
+	if (debug)
+	  {
+	    if (nocasematch == null)
+	      {
+		System.err.println("DBQueryHandler: Failed case insensitive match regexp against " + string2);
+	      }
+	    else
+	      {
+		System.err.println("DBQueryHandler: Found case insensitive match regexp against " + string2);
+	      }
+	  }
+	
+	return (nocasematch != null);
 
       case QueryDataNode.EQUALS:
 	return string1.equals(string2);

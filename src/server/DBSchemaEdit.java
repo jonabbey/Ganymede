@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 1999/03/15 22:55:53 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 1999/03/23 06:22:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -966,8 +966,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	  {
 	    base = (DBObjectBase) enum.nextElement();
 
-	    if (debug)
+	    if (false)		// debug
 	      {
+		// hm, why do i have such a strange test here?  What was I thinking?
+
 		if (base != null)
 		  {
 		    Ganymede.debug("got base");
