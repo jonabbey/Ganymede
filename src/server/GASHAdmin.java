@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 2002/03/02 00:10:50 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 2002/03/02 00:37:11 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -764,7 +764,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     forceBuildMI.setMnemonic('f');
     forceBuildMI.addActionListener(this);
 
-    clearLogMI = new JMenuItem("Clear Log");
+    clearLogMI = new JMenuItem("Clear Log Panel");
     clearLogMI.setMnemonic('l');
     clearLogMI.addActionListener(this);
 
