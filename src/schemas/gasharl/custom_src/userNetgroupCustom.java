@@ -7,8 +7,8 @@
    
    Created: 3 April 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2001/07/13 19:46:45 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/07/13 20:02:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -360,7 +360,7 @@ public class userNetgroupCustom extends DBEditObject implements SchemaConstants,
 		    System.err.println("handleGroupRename: blocking");
 		  }
 
-		int result = Execer.exec(execLine);
+		int result = FileOps.runProcess(execLine);
 
 		if (debug)
 		  {

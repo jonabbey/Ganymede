@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 2001/07/13 19:46:44 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 2001/07/13 20:02:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -54,7 +54,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.Util.Execer;
+import arlut.csd.Util.FileOps;
 
 import java.util.*;
 import java.io.*;
@@ -2235,7 +2235,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	finally
 	  {
-	    Execer.cleanup(process);
+	    FileOps.cleanupProcess(process);
 	  }
       }
     else
@@ -2300,7 +2300,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	finally
 	  {
-	    Execer.cleanup(process);
+	    FileOps.cleanupProcess(process);
 	  }
       }
     else
@@ -2546,7 +2546,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			System.err.println("createUserExternals: blocking ");
 		      }
 
-		    int result = Execer.exec(execLine);
+		    int result = FileOps.runProcess(execLine);
 
 		    if (debug)
 		      {
@@ -2836,7 +2836,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			System.err.println("handleUserDelete: blocking");
 		      }
 
-		    int result = Execer.exec(execLine);
+		    int result = FileOps.runProcess(execLine);
 
 		    if (debug)
 		      {
@@ -3227,7 +3227,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			System.err.println("handleUserRename: blocking");
 		      }
 
-		    int result = Execer.exec(execLine);
+		    int result = FileOps.runProcess(execLine);
 
 		    if (debug)
 		      {

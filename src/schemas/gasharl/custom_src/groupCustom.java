@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2001/07/13 19:46:44 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2001/07/13 20:02:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -682,7 +682,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		    System.err.println("handleGroupDelete: blocking");
 		  }
 
-		int result = Execer.exec(execLine);
+		int result = FileOps.runProcess(execLine);
 
 		if (debug)
 		  {
@@ -770,7 +770,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		    System.err.println("handleGroupRename: blocking");
 		  }
 
-		int result = Execer.exec(execLine);
+		int result = FileOps.runProcess(execLine);
 
 		if (debug)
 		  {

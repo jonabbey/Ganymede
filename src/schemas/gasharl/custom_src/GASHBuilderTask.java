@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 2001/07/13 19:46:44 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2001/07/13 20:02:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,7 +55,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.Util.Execer;
+import arlut.csd.Util.FileOps;
 
 import java.util.*;
 import java.text.*;
@@ -352,7 +352,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    Execer.exec(buildScript);
+	    FileOps.runProcess(buildScript);
 	  }
 	catch (IOException ex)
 	  {
