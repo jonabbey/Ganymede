@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.60 $ %D%
+   Version: $Revision: 1.61 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1330,7 +1330,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	if (showingField)
 	  {
-	    fe.refreshFieldEdit();
+	    fe.refreshFieldEdit(true);
 	  }
 	
       }
@@ -1362,7 +1362,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	    if (showingField)
 	      {
-		fe.refreshFieldEdit();
+		fe.refreshFieldEdit(true);
 	      }
 	  }
       }
