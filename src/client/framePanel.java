@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 1999/03/19 06:15:21 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 1999/03/19 19:02:38 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -275,9 +275,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     setIconifiable(true);
     setTitle(title);
 
-    // we want to be able to take control of closing ourselves.
+    /*
+      we want to be able to take control of closing ourselves.
 
-    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+      Unfortunately, the setDefaultCloseOperation() method is useless
+      on JInternalFrames in Swing 1.1.  We'll use a VetoableChangeListener
+      instead.
+
+      // setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+      */
 
     // gah!  we need to work around a bug in JDK 1.2/Swing 1.1.1.. bug parade #4176136
 
