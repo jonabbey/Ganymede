@@ -2,10 +2,10 @@
 
    userSchema.java
 
-   An interface defining constants to be used by the BSD user code.
+   An interface defining constants to be used by the Linux user code.
    
    Created: 12 March 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,6 @@ public interface userSchema {
   final static short UID=256;
   final static short HOMEGROUP=265;
   final static short GROUPLIST=264;
-  final static short CLASSIFICATION=266;
   final static short FULLNAME=257;
   final static short ROOM=259;
   final static short OFFICEPHONE=260;
@@ -45,5 +44,4 @@ public interface userSchema {
   final static short LOGINSHELL=263;
   final static short HOMEDIR=262;
   final static short PERSONAE=102;
-
 }

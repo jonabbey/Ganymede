@@ -5,13 +5,13 @@
 
    This module is intended to be bound to the bulk of the Ganymede
    server and automatically create a whole bunch of objects
-   to initialize the database from a pair of BSD 4.4 compatible
-   master.passwd/group files.
+   to initialize the database from a pair of Linux compatible
+   passwd/group files.
 
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -116,19 +116,19 @@ public class directLoader {
 	System.err.println("heck.");
       }
 
-    System.err.println("---------------------------------------- Initiating BSD file scan --------------------");
+    System.err.println("---------------------------------------- Initiating Linux file scan --------------------");
 
     scanUsers();
     scanGroups();
 
-    System.err.println("\n---------------------------------------- Completed BSD file scan --------------------\n");
+    System.err.println("\n---------------------------------------- Completed Linux file scan --------------------\n");
     
     // Okay.. at this point we've scanned the files we need to scan..
     // now we initialize the database module and create the objects
 
     try
       {
-	my_client.session.openTransaction("BSD directLoader");
+	my_client.session.openTransaction("Linux directLoader");
 
 	String key;
 	Invid invid, objInvid;
@@ -194,7 +194,7 @@ public class directLoader {
 	  }
 
 	commitTransaction();
-	my_client.session.openTransaction("BSD directLoader");
+	my_client.session.openTransaction("Linux directLoader");
 
 	System.out.println("\nRegistering users\n");
 
@@ -202,7 +202,7 @@ public class directLoader {
 	commitTransaction();
 
 	System.out.println("\nRegistering groups\n");
-	my_client.session.openTransaction("BSD directLoader");
+	my_client.session.openTransaction("Linux directLoader");
 	registerGroups();
 	commitTransaction();
       }
@@ -244,7 +244,7 @@ public class directLoader {
   /*----------------------------------------------------------------------------*/
 
   //
-  // the following methods handle the parsing of a particular BSD file
+  // the following methods handle the parsing of a particular Linux file
   //
 
   /*----------------------------------------------------------------------------*/
@@ -259,12 +259,12 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("input/master.passwd");
+	inStream = new FileInputStream("input/passwd");
 	done = false;
       }
     catch (FileNotFoundException ex)
       {
-	System.err.println("Couldn't find master.passwd in the input directory");
+	System.err.println("Couldn't find passwd in the input directory");
 	done = true;
       }
 
@@ -441,10 +441,6 @@ public class directLoader {
 	// set the fullname
 
 	current_obj.setFieldValueLocal(userSchema.FULLNAME, userObj.fullname);
-
-	// set the division
-
-	current_obj.setFieldValueLocal(userSchema.CLASSIFICATION, userObj.classification);
 
 	// set the room
 
