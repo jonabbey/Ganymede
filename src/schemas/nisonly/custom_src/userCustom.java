@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -632,7 +632,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
   }
 
-  public synchronized boolean finalizeSetValue(DBField field, Object value)
+  public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
   {
     InvidDBField inv;
     Vector personaeInvids;
@@ -673,13 +673,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    
 		    if (!dir.equals(expected))
 		      {
-			return false;
+			return Ganymede.createErrorDialog("Schema Error",
+							  "Home directory should be " + expected + ".\n" +
+							  "This is a restriction encoded in userCustom.java.");
 		      }
 		  }
 	      }
 	  }
 
-	return true;
+	return null;
       }
 
     if (field.getID() == USERNAME)
@@ -690,19 +692,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	if (deleting && (value == null))
 	  {
-	    return true;
+	    return null;
 	  }
-
-	inv = (InvidDBField) getField(PERSONAE);
-	
-	if (inv == null)
-	  {
-	    return true;
-	  }
-
-	sf = (StringDBField) getField(USERNAME); // old user name
-
-	oldName = (String) sf.getValueLocal();
 
 	// update the home directory location.. we assume that if
 	// the user has permission to rename the user, they can
@@ -721,56 +712,28 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	// rename all the associated persona with the new user name
 
+	inv = (InvidDBField) getField(PERSONAE);
+	
+	if (inv == null)
+	  {
+	    return null;
+	  }
+
+	sf = (StringDBField) getField(USERNAME); // old user name
+
+	oldName = (String) sf.getValueLocal();
+
 	personaeInvids = inv.getValues();
 
-	String tempString;
-	
 	for (int i = 0; i < personaeInvids.size(); i++)
 	  {
-	    eobj = session.editDBObject((Invid) personaeInvids.elementAt(i));
+	    adminPersonaCustom adminObj = (adminPersonaCustom) session.editDBObject((Invid) personaeInvids.elementAt(i));
 
-	    sf = (StringDBField) eobj.getField(SchemaConstants.PersonaNameField);
-	    oldName = (String) sf.getValue();
-	    oldNames.addElement(oldName);
-	    suffix = oldName.substring(oldName.indexOf(':')+1);
-	    
-	    tempString = value + ":" + suffix;
-
-	    System.err.println("trying to rename admin persona " + oldName + " to "+ tempString);
-
-	    ReturnVal retVal = sf.setValueLocal(tempString);
-
-	    if ((retVal != null) && (!retVal.didSucceed()))
-	      {
-		if (okay)
-		  {
-		    return false;
-		  }
-		else
-		  {
-		    // crap.  we've changed at least one persona
-		    // object, but we can't change all of them.  So,
-		    // let's try our best to undo what we did.
-
-		    for (int j = 0; j < i; j++)
-		      {
-			eobj = session.editDBObject((Invid) personaeInvids.elementAt(j));
-
-			sf = (StringDBField) eobj.getField(SchemaConstants.PersonaNameField);
-			sf.setValueLocal(oldNames.elementAt(j));
-		      }
-
-		    return false;
-		  }
-	      }
-	    else
-	      {
-		okay = false;	// we've made a change, and we can't just return false
-	      }
+	    adminObj.refreshLabelField(null, null, (String) value);
 	  }
       }
 
-    return true;
+    return null;
   }
 
   /**
