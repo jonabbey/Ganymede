@@ -1,15 +1,14 @@
 /*
 
-   copyFile.java
+   FileOps.java
 
-   This utility class allows the Ganymede server to conveniently store
-   a bunch of pre-existing files into a zip archive for the purposes
-   of backups.
+   This utility class provides a number of static methods for doing
+   file operations.
    
    Created: 2 December 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/12/02 09:49:01 $
+   Version: $Revision: 1.1 $
+   Last Mod Date: $Date: 2000/12/02 10:30:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -56,18 +55,18 @@ import java.io.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                        copyFile
+                                                                         FileOps
 
 ------------------------------------------------------------------------------*/
 
 /**
  *
- * This utility class allows the Ganymede server to copy files that builder
- * tasks are overwriting for the purpose of making a backup archive.
+ * This utility class provides a number of static methods for doing
+ * file operations.
  *
  */
 
-public class copyFile {
+public class FileOps {
 
   /**
    *
@@ -116,6 +115,84 @@ public class copyFile {
       }
   }
 
+  public static boolean deleteFile(String filename) throws IOException
+  {
+    File file = new File(filename);
+    file.delete();
+
+    return true;
+  }
+
+  public static boolean deleteDirectory(String directoryName) throws IOException
+  {
+    boolean success = true;
+    String filenames[];
+    File file;
+
+    /* -- */
+
+    file = new File(directoryName);
+
+    if (!file.isDirectory())
+      {
+	throw new IOException("Error, deleteDirectory called on non-directory " + directoryName);
+      }
+
+    filenames = file.list();
+
+    if (filenames == null)
+      {
+	return success;
+      }
+
+    directoryName = PathComplete.completePath(directoryName);
+
+    for (int i = 0; i < filenames.length; i++)
+      {
+	File subfile = new File(directoryName, filenames[i]);
+
+	if (subfile.isDirectory())
+	  {
+	    try
+	      {
+		if (!deleteDirectory(directoryName + filenames[i]))
+		  {
+		    success = false;
+		  }
+	      }
+	    catch (IOException ex)
+	      {
+		ex.printStackTrace();
+		success = false;
+	      }
+	  }
+	else
+	  {
+	    try
+	      {
+		if (!deleteFile(directoryName + filenames[i]))
+		  {
+		    success = false;
+		  }
+	      }
+	    catch (IOException ex)
+	      {
+		ex.printStackTrace();
+		success = false;
+	      }
+	  }
+      }
+
+    // all sub files should be deleted, delete the directory
+
+    if (success)
+      {
+	file.delete();
+      }
+
+    return success;
+  }
+
   /**
    *
    * Test rig
@@ -125,19 +202,42 @@ public class copyFile {
   public static void main (String args[])
   {
     boolean result = false;
-    String inName = args[0];
-    String outName = args[1];
 
-    try
+    /*
+      File x = new File(args[0]);
+      
+      try
       {
-	result = copyFile(inName, outName);
-      }
-    catch (IOException ex)
+      if (x.isDirectory())
       {
-	ex.printStackTrace();
+      result = deleteDirectory(args[0]);
       }
+      else
+      {
+      result = deleteFile(args[0]);
+      }
+      }
+      catch (IOException ex)
+      {
+      ex.printStackTrace();
+      }
+    */
 
-    if (result)
+    /*
+      String inName = args[0];
+      String outName = args[1];
+
+      try
+      {
+      result = FileOps.copyFile(inName, outName);
+      }
+      catch (IOException ex)
+      {
+      ex.printStackTrace();
+      }
+    */
+      
+     if (result)
       {
 	System.exit(0);
       }
