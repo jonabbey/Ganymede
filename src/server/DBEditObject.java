@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 1999/04/07 01:14:25 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 1999/04/14 19:07:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,7 +86,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.105 $ $Date: 1999/04/07 01:14:25 $ $Name:  $
+ * @version $Revision: 1.106 $ $Date: 1999/04/14 19:07:10 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -150,10 +150,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   /* -- */
 
   /**
-   *
-   * Dummy constructor, is responsible for creating a DBEditObject strictly
-   * for the purpose of having a handle to call customization methods on.
-   *
+   * <p>Dummy constructor, is responsible for creating a DBEditObject strictly
+   * for the purpose of having a handle to call customization methods on.</p>
    */
 
   public DBEditObject(DBObjectBase base)
@@ -163,7 +161,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   *
    * <p>Creation constructor, is responsible for creating a new editable
    * object with all fields listed in the DBObjectBaseField instantiated
    * but undefined.</p>
@@ -265,10 +262,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   *
-   * Check-out constructor, used by DBObject.createShadow()
-   * to pull out an object for editing.
-   *
+   * <p>Check-out constructor, used by
+   * {@link arlut.csd.ganymede.DBObject#createShadow(arlut.csd.ganymede.DBEditSet) DBObject.createShadow()}
+   * to pull out an object for editing.</p>
    */
 
   public DBEditObject(DBObject original, DBEditSet editset)
@@ -423,12 +419,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   *
-   * Returns the DBSession that this object is checked out in
-   * care of.
+   * <p>Returns the DBSession that this object is checked out in
+   * care of.</p>
    *
    * @see arlut.csd.ganymede.DBSession
-   *
    */
 
   public final DBSession getSession()
@@ -437,11 +431,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * Returns the GanymedeSession that this object is checked out in
-   * care of.
+   * <p>Returns the GanymedeSession that this object is checked out in
+   * care of.</p>
    *
    * @see arlut.csd.ganymede.GanymedeSession
-   * 
    */
 
   public final GanymedeSession getGSession()
@@ -450,11 +443,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   *
-   * Returns the original version of the object that we were created
+   * <p>Returns the original version of the object that we were created
    * to edit.  If we are a newly created object, this method will
-   * return null.
-   * 
+   * return null.</p>
    */
 
   public final DBObject getOriginal()
@@ -463,15 +454,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   *
-   * Returns a code indicating whether this object
-   * is being created, edited, or deleted.
+   * <p>Returns a code indicating whether this object
+   * is being created, edited, or deleted.</p>
    *
    * @see arlut.csd.ganymede.ObjectStatus#CREATING
    * @see arlut.csd.ganymede.ObjectStatus#EDITING
    * @see arlut.csd.ganymede.ObjectStatus#DELETING
    * @see arlut.csd.ganymede.ObjectStatus#DROPPING
-   *
    */
 
   public final byte getStatus()
@@ -487,7 +476,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p>This method checks with instantiateNewField() if the field id is
    * not one of those that is needfull.  If instantiateNewField() approves
    * the creation of a new field, checkNewField() will check to see if
-   * the GanymedeSession's permissions permit the field creation.</p>
+   * the {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * permissions permit the field creation.</p>
    */
 
   public final boolean checkNewField(short fieldID)
@@ -501,14 +491,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   *
-   * Sets this object's status code
+   * <p>Sets this object's status code</p>
    *
    * @see arlut.csd.ganymede.ObjectStatus#CREATING
    * @see arlut.csd.ganymede.ObjectStatus#EDITING
    * @see arlut.csd.ganymede.ObjectStatus#DELETING
    * @see arlut.csd.ganymede.ObjectStatus#DROPPING
-   *
    */
 
   final void setStatus(byte new_status)
@@ -578,9 +566,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 				      " in object " + getLabel());
   }
 
-  /**
-   * Returns true if the object has ever been stored in the DBStore under the
-   * current invid.
+  /** 
+   * <p>Returns true if the object has ever been stored in the 
+   * {@link arlut.csd.ganymede.DBStore DBStore} under the
+   * current invid.</p>
    */
 
   public final boolean isStored()
@@ -589,8 +578,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * Clears out any non-valued fields, used to clean out any fields that remained
-   * undefined after editing is done.
+   * <p>Clears out any non-valued fields, used to clean out any fields 
+   * that remained undefined after editing is done.</p>
    */
 
   final synchronized void clearTransientFields()
@@ -646,8 +635,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    * <p>This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this DBObject type when the
-   * user only has editing access for the source InvidDBField and not
+   * make a link to the given field in this 
+   * {@link arlut.csd.ganymede.DBObject DBObject} type when the
+   * user only has editing access for the source 
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
@@ -664,8 +655,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    * <p>This method is used to control whether or not it is acceptable to
-   * rescind a link to the given field in this DBObject type when the
-   * user only has editing access for the source InvidDBField and not
+   * rescind a link to the given field in this 
+   * {@link arlut.csd.ganymede.DBObject DBObject} type when the
+   * user only has editing access for the source 
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
@@ -682,8 +675,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    * <p>This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this DBObject type when the
-   * user only has editing access for the source InvidDBField and not
+   * make a link to the given field in this 
+   * {@link arlut.csd.ganymede.DBObject DBObject} type when the
+   * user only has editing access for the source
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
@@ -699,8 +694,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    * <p>This method is used to control whether or not it is acceptable to
-   * rescind a link to the given field in this DBObject type when the
-   * user only has editing access for the source InvidDBField and not
+   * rescind a link to the given field in this 
+   * {@link arlut.csd.ganymede.DBObject DBObject} type when the
+   * user only has editing access for the source
+   * {@link arlut.csd.ganymede.InvidDBField InvidDBField} and not
    * the target.</p>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
@@ -817,9 +814,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * a DBObject.  While default code has not yet been
    * written for this method, it may need to have its
    * parameter list modified to include the controlling
-   * DBSession to allow coordination of DBLock and the
-   * the use of DBEditSet.findObject() to get a transaction
-   * consistent view of related objects.</p>
+   * {@link arlut.csd.ganymede.DBSession DBSession}
+   * to allow coordination of {@link arlut.csd.ganymede.DBLock DBLock}
+   * and the the use of 
+   * {@link arlut.csd.ganymede.DBEditSet#findObject(arlut.csd.ganymede.DBObject) DBEditSet.findObject()}
+   * to get a transaction-consistent view of related objects.</p>
    *
    * <p>To be overridden in DBEditObject subclasses.</p>
    *
@@ -1154,7 +1153,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <p>If initialization fails for some reason, initializeNewObject()
    * will return false.  If the owning GanymedeSession is not in
    * bulk-loading mode (i.e., enableOversight is true),
-   * DBSession.createDBObject() will checkpoint the transaction before
+   * {@link arlut.csd.ganymede.DBSession#createDBObject(short, arlut.csd.ganymede.Invid, java.util.Vector) 
+   * DBSession.createDBObject()} will checkpoint the transaction before
    * calling this method.  If this method returns false, the calling
    * method will rollback the transaction.  This method has no
    * responsibility for undoing partial initialization, the
@@ -1225,7 +1225,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * order to maintain a consistent view of the database.</p>
    *
    * <p>If server-local code has called
-   * {@link arlut.csd.ganymede.GanymedeSession#enableOversight(boolean) enableOversight(false)},
+   * {@link arlut.csd.ganymede.GanymedeSession#enableOversight(boolean) 
+   * enableOversight(false)},
    * this method will never be
    * called.  This mode of operation is intended only for initial
    * bulk-loading of the database.</p>
@@ -1292,8 +1293,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	
 	    if (retVal == null)
 	      {
-		throw new RuntimeException("error in server, createNewEmbeddedObject could not " +
-					   "get a useful result from create_db_object");
+		throw new RuntimeException("error in server, createNewEmbeddedObject " +
+					   "could not get a useful result from " +
+					   "create_db_object");
 	      }
 	
 	    if (!retVal.didSucceed())
@@ -1313,7 +1315,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       }
     else
       {
-	throw new RuntimeException("error in schema.. createNewEmbeddedObject called without a valid target..");
+	throw new RuntimeException("error in schema.. createNewEmbeddedObject " +
+				   "called without a valid target..");
       }
   }
 

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/01/22 18:05:34 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/04/14 19:07:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -471,7 +471,6 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   ----------------------------------------------------------------------------*/
 
   /**
-   *
    * <p>This method reserves a value so that the given editSet is
    * assured of being able to use this value at some point before the
    * transaction is commited or canceled.  reserve() is different from
@@ -481,20 +480,47 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
    * transaction, the transaction code can mark the value at any time
    * with assurance that they will be able to do so.</p>
    *
-   * <p>If a transaction attempts to reserve() a value that is already
-   * being held by an object in the transaction, reserve() will return
-   * true, even though a subsequent mark() attempt would fail.  reserve()
-   * only guarantees that the transaction can use that value someplace,
-   * not that it hasn't already been used in the transaction.</p>
+   * <p>If a transaction attempts to reserve() a
+   * value that is already being held by an object in the transaction,
+   * reserve() will return true, even though a subsequent mark()
+   * attempt would fail.</p>
    *
    * @param editset The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
    *
-   * @return true if the value could be reserved in the given editSet.
-   *
+   * @return true if the value could be reserved in the given editSet.  
    */
 
-  synchronized public boolean reserve(DBEditSet editSet, Object value)
+  public boolean reserve(DBEditSet editSet, Object value)
+  {
+    return reserve(editSet, value, false);
+  }
+
+  /**
+   * <p>This method reserves a value so that the given editSet is
+   * assured of being able to use this value at some point before the
+   * transaction is commited or canceled.  reserve() is different from
+   * mark() in that there is no field specified to be holding the
+   * value, and that when the transaction is committed or canceled,
+   * the value will be returned to the available list.  During the
+   * transaction, the transaction code can mark the value at any time
+   * with assurance that they will be able to do so.</p>
+   *
+   * <p>If onlyUsed is false and a transaction attempts to reserve() a
+   * value that is already being held by an object in the transaction,
+   * reserve() will return true, even though a subsequent mark()
+   * attempt would fail.</p>
+   *
+   * @param editset The transaction claiming the unique value <value>
+   * @param value The unique value that transaction editset is attempting to claim
+   * @param onlyUnused If true, reserve() will return false if the value is already
+   * attached to a field connected to this namespace, even if in an object attached
+   * to the editSet provided.
+   *
+   * @return true if the value could be reserved in the given editSet.  
+   */
+
+  synchronized public boolean reserve(DBEditSet editSet, Object value, boolean onlyUnused)
   {
     DBNameSpaceHandle handle;
     
@@ -538,6 +564,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	  {
 	    // we own it.. it may or may not be in use in an object
 	    // already, but it's ours, at least
+
+	    if (onlyUnused && handle.inuse)
+	      {
+		return false;
+	      }
 
 	    return true;
 	  }

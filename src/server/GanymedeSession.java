@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.129 $
-   Last Mod Date: $Date: 1999/04/01 22:17:50 $
+   Version: $Revision: 1.130 $
+   Last Mod Date: $Date: 1999/04/14 19:07:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.JDialog.*;
  *
  * @see arlut.csd.ganymede.DBSession
  * 
- * @version $Revision: 1.129 $ %D%
+ * @version $Revision: 1.130 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -485,7 +485,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
     catch (ServerNotActiveException ex)
       {
-	clienthost = "unknown";
+	clienthost = "local (unknown)";
       }
 
     // record our login time
