@@ -5,7 +5,7 @@
    This class holds the basic per-object / per-field access control bits.
    
    Created: 27 June 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -199,13 +199,28 @@ public class PermEntry implements java.io.Serializable {
 
   public String toString()
   {
-    String result;
+    StringBuffer result = new StringBuffer();
 
-    result = "visible : " + (visible ? "true" : "false");
-    result += " editable : " + (editable ? "true" : "false");
-    result += " create : " + (create ? "true" : "false");
-    result += " deletable : " + (delete ? "true" : "false");
+    if (visible)
+      {
+	result.append("visible ");
+      }
 
-    return result;
+    if (editable)
+      {
+	result.append("editable ");
+      }
+
+    if (create)
+      {
+	result.append("create ");
+      }
+
+    if (delete)
+      {
+	result.append("delete ");
+      }
+
+    return result.toString();
   }
 }
