@@ -6,7 +6,7 @@
    from a field.
    
    Created: 17 April 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -62,6 +62,7 @@ public interface BaseField extends Remote {
   public boolean isString() throws RemoteException;
   public boolean isInvid() throws RemoteException;
   public boolean isPermMatrix() throws RemoteException;
+  public boolean isPassword() throws RemoteException;
 
   public void setType(short type) throws RemoteException;
 
@@ -111,6 +112,11 @@ public interface BaseField extends Remote {
   public void setTargetBase(String baseName) throws RemoteException;
   public void setTargetField(short val) throws RemoteException;
   public void setTargetField(String fieldName) throws RemoteException;
+
+  // password
+
+  public boolean isCrypted() throws RemoteException;
+  public void setCrypted(boolean b) throws RemoteException;
   
   // convenience methods
 
