@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.20 $
-# $Date: 1999/01/19 23:45:40 $
+# $Revision: 1.21 $
+# $Date: 1999/01/20 00:33:14 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -195,6 +195,34 @@ sub write_rebuild {
 
 #########################################################################
 #
+#                                                          write_syncjars
+#
+# input: $template - filename (no path) of the template to be copied
+#        $target - absolute pathname of the target
+#
+#########################################################################
+
+sub write_syncjars {
+
+    my ($template, $target) = @_;
+
+    open(SYNCIN, "<$rootdir/scripts/$template") || die ("Can't read $rootdir/scripts/$template");
+    open(SYNCOUT, ">$target") || die("Can't create the $target");
+
+    while (<SYNCIN>){
+	s/\/opt\/bin\/perl5/$perlname/;
+	s/\<\#CLASSDIR\#\>/$rootdir/src/classes/;
+	print SYNCOUT $_;
+    }
+
+    close(SYNCOUT);
+    close(SYNCIN);
+
+    chmod 0755, "$target";
+}
+
+#########################################################################
+#
 #                                                            write_config
 #
 # input: $dir - absolute pathname directory to write config.sh into.
@@ -266,7 +294,8 @@ $javadir = $ENV{GJAVA};
 	  "$rootdir/src/JTree", "Ganymede Tree Classes", "$rootdir/src/classes",
 	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes", "$rootdir/src/classes",
 	  "$rootdir/src/server", "Ganymede Server Classes", "$rootdir/src/classes",
-	  "$rootdir/src/client", "Ganymede Client Classes", "$rootdir/src/classes");
+	  "$rootdir/src/client", "Ganymede Client Classes", "$rootdir/src/classes",
+	  "$rootdir/src/classes", "Ganymede Jars", "$rootdir/src/classes");
 
 print "Generating config.sh files in source directories.\n\n";
 
@@ -319,6 +348,20 @@ while ($#rebuilds > 0) {
     write_rebuild(shift @rebuilds);
 }
 
+@sync=("sync_tree.admin.in",
+       "$rootdir/src/classes/admin_classes/sync_tree",
+       "sync_tree.client.in",
+       "$rootdir/src/classes/client_classes/sync_tree",
+       "sync_tree.server.in",
+       "$rootdir/src/classes/server_classes/sync_tree",
+       "sync_tree.gnu.server.in",
+       "$rootdir/src/classes/server_classes/sync_tree.gnu");
+
+print "Generating jar generation scripts.\n\n";
+
+while ($#sync > 0) {
+    write_syncjars(shift @sync, shift @sync);
+}
 
 print "Generating $rootdir/src/Makefile\n\n";
 
