@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/10/13 20:01:14 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/10/20 22:11:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1615,9 +1615,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    // ok, we've got a user with valid plaintext password
 	    // info.  Write it.
 
-	    rshNT.print(user.getLabel());
+	    rshNT.print(escapeString(user.getLabel()));
 	    rshNT.print("::");
-	    rshNT.print(password);
+	    rshNT.print(escapeString(password));
 
 	    String fullname = (String) user.getFieldValueLocal((short) 257); // FULLNAME
 	    String room = (String) user.getFieldValueLocal((short) 259); // ROOM
@@ -1625,7 +1625,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    String workphone = (String) user.getFieldValueLocal((short) 260);	// OFFICEPHONE
 	    String homephone = (String) user.getFieldValueLocal((short) 261);	// HOMEPHONE
 
-	    String composite = fullname + ":" + room + " " + div + "," + workphone + "," + homephone;
+	    String composite = escapeString(fullname) + ":" + 
+	      escapeString(room + " " + div + "," + workphone + "," + homephone);
 
 	    rshNT.print(":");
 	    rshNT.println(composite);
@@ -1648,13 +1649,46 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     return true;
   }
 
+  /** 
+   * We can't have any : characters in passwords in the rshNT.txt
+   * file we generate, since we use : chars as field separators in
+   * this file.  Make sure that we backslash any such chars.
+   */
+
+  private String escapeString(String in)
+  {
+    StringBuffer buffer = new StringBuffer();
+    char[] ary = in.toCharArray();
+
+    /* -- */
+
+    // do it
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	if (ary[i] == ':')
+	  {
+	    buffer.append("\\:");
+	  }
+	else if (ary[i] == '\\')
+	  {
+	    buffer.append("\\\\");
+	  }
+	else
+	  {
+	    buffer.append(ary[i]);
+	  }
+      }
+
+    return buffer.toString();
+  }
+
   /**
    *
    * This method generates a hosts_info file.  This method must be run during
    * builderPhase1 so that it has access to the enumerateObjects() method
    * from our superclass.
-   *
-   */
+   * */
 
   private boolean writeSysFile()
   {

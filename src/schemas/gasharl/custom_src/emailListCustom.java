@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/06/25 01:46:30 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/10/20 22:11:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -265,6 +265,31 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
     return super.anonymousLinkOK(targetObject, targetFieldID,
 				 sourceObject, sourceFieldID, gsession);
+  }
+
+  /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
+   *
+   * <p>To be overridden in DBEditObject subclasses.</p>
+   *
+   * <p>Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    // the email list name is required
+
+    if (fieldid == 256)
+      {
+	return true;
+      }
+
+    return super.fieldRequired(object, fieldid);
   }
 
 }
