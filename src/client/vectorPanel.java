@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.34 $ %D%
+  Version: $Revision: 1.35 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -216,10 +216,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    
 	    for (int i=0;i < size;i++) 
 	      {
-		JIPField ipf = new JIPField(new JcomponentAttr(null,
-							       new Font("Helvetica",Font.PLAIN,12),
-							       Color.black,Color.white),
-					    editable,
+		JIPField ipf = new JIPField(editable,
 					    ipfield.v6Allowed());
 		
 		ipf.setValue((Byte[]) ipfield.getElement(i));
