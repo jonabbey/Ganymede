@@ -4,8 +4,8 @@
 
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2003/09/08 18:28:18 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2003/09/08 21:27:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,15 +67,15 @@ import java.rmi.server.Unreferenced;
  * calls {@link arlut.csd.ganymede.serverClientAsyncResponder#getNextMsg()} to
  * receive asynchonous notifications from the server.</p>
  *
- * @version $Revision: 1.4 $ $Date: 2003/09/08 18:28:18 $
+ * @version $Revision: 1.5 $ $Date: 2003/09/08 21:27:54 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class clientAsyncMessage {
 
   static final int FIRST = 0;
-  static final int SENDMESSAGE = 1;
-  static final int SHUTDOWN = 2;
+  static public final int SENDMESSAGE = 1;
+  static public final int SHUTDOWN = 2;
   static final int LAST = 2;
 
   /* --- */

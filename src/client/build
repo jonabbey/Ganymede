@@ -3,8 +3,8 @@
 # Ganymede client build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.8 $
-# Date: $Date: 2000/09/17 08:14:51 $
+# Version: $Revision: 1.9 $
+# Date: $Date: 2003/09/08 21:27:53 $
 #
 ############################################################
 
@@ -32,7 +32,6 @@ $JAVAC -J-mx128m -deprecation -d $TARGETDIR *.java
 
 echo "Building rmi stubs and skeletons"
 
-$JAVADIR/rmic -d $TARGETDIR arlut.csd.ganymede.client.ClientBase
 $JAVADIR/rmic -d $TARGETDIR arlut.csd.ganymede.client.FileReceiverBase
 
 # Return to our last directory

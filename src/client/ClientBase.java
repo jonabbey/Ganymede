@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2003/03/11 20:27:44 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2003/09/08 21:27:53 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -71,11 +71,11 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.19 $ $Date: 2003/03/11 20:27:44 $ $Name:  $
+ * @version $Revision: 1.20 $ $Date: 2003/09/08 21:27:53 $ $Name:  $
  * @author Mike Mulvaney
  */
 
-public class ClientBase extends UnicastRemoteObject implements Client {
+public class ClientBase implements Runnable {
 
   private final static boolean debug = false;
 
@@ -94,16 +94,27 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   private Session session = null;
 
   /**
+   * RMI reference to an asynchronous message port on the Ganymede
+   * server
+   */
+
+  private ClientAsyncResponder asyncPort = null;
+
+  /**
+   * Thread that we'll create to continuously do a blocking poll on
+   * the Ganymede server for asynchronous messages.
+   */
+
+  private Thread asyncThread = null;
+
+  /**
    * RMI reference to a client XMLSession on a Ganymede server
    */
 
   private XMLSession xSession = null;
  
-  private String username = null;
-  private String password = null;
   private boolean connected = false;
   private Vector listeners = new Vector();
-  private String loginRefuseMessage = null;
 
   /* -- */
 
@@ -119,10 +130,6 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 
   public ClientBase(String serverURL, ClientListener listener) throws RemoteException
   {
-    super();    // UnicastRemoteObject can throw RemoteException 
-
-    /* -- */
-    
     if (listener == null || serverURL == null || serverURL.length() == 0)
       {
 	throw new IllegalArgumentException("bad argument");
@@ -202,34 +209,45 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 					   "new ClientBase if you need to login again");
       }
 
-    this.username = username;
-    this.password = password;
-
     try
       {
 	// the server may send us a message using our
 	// forceDisconnect() method during the login process
 
-	loginRefuseMessage = null;
-	session = server.login(this, username, password);
+	ReturnVal retVal = server.login(username, password);
 
-	if (session == null)
+	if (retVal.didSucceed())
 	  {
-	    if (loginRefuseMessage != null)
+	    session = retVal.getSession();
+	  }
+
+	if (!retVal.didSucceed() || session == null)
+	  {
+	    String error = retVal.getDialogText();
+
+	    if (error != null && !error.equals(""))
 	      {
-		sendErrorMessage(loginRefuseMessage);
+		sendErrorMessage(error);
 	      }
 	    else
 	      {
 		sendErrorMessage("Couldn't login to server... bad username/password?");
 	      }
+
+	    return null;
 	  }
-	else
+
+	if (debug)
 	  {
-	    if (debug)
-	      {
-		System.out.println("logged in");
-	      }
+	    System.out.println("logged in");
+	  }
+
+	asyncPort = session.getAsyncPort();
+
+	if (asyncPort != null)
+	  {
+	    asyncThread = new Thread(this, "Ganymede Async Reader");
+	    asyncThread.start();
 	  }
       }
     catch (NullPointerException ex)
@@ -278,35 +296,49 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 					   "new ClientBase if you need to login again");
       }
 
-    this.username = username;
-    this.password = password;
-
     try
       {
 	// the server may send us a message using our
 	// forceDisconnect() method during the login process
 
-	loginRefuseMessage = null;
-	xSession = server.xmlLogin(this, username, password);
+	ReturnVal retVal = server.xmlLogin(username, password);
 
-	if (xSession == null)
+	if (retVal.didSucceed())
 	  {
-	    if (loginRefuseMessage != null)
+	    xSession = retVal.getXMLSession();
+	  }
+
+	if (!retVal.didSucceed() || xSession == null)
+	  {
+	    String error = retVal.getDialogText();
+
+	    if (error != null && !error.equals(""))
 	      {
-		sendErrorMessage(loginRefuseMessage);
+		sendErrorMessage(error);
 	      }
 	    else
 	      {
 		sendErrorMessage("Couldn't login to server... bad username/password?");
 	      }
+
+	    return null;
 	  }
-	else
+
+	if (debug)
 	  {
-	    if (debug)
-	      {
-		System.out.println("logged in");
-	      }
+	    System.out.println("logged in");
 	  }
+
+	session = xSession.getSession();
+	asyncPort = session.getAsyncPort();
+
+	if (asyncPort != null)
+	  {
+	    asyncThread = new Thread(this, "Ganymede Async Reader");
+	    asyncThread.start();
+	  }
+	
+	session = null;	// avoid lingering reference we don't need for xmlclient
       }
     catch (NullPointerException ex)
       {
@@ -440,39 +472,14 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   // **
 
   /**
-   * <p>Allows the server to retrieve the username.</p>
-   *
-   * @see arlut.csd.ganymede.Client
-   */
-
-  public String getName() 
-  {
-    return username;
-  }
-
-  /**
-   * <p>Allows the server to retrieve the password.</p>
-   *
-   * @see arlut.csd.ganymede.Client
-   */
-
-  public String getPassword()
-  {
-    return password;
-  }
-
-  /**
-   * <p>Allows the server to force us off when it goes down.</p>
-   *
-   * @see arlut.csd.ganymede.Client
+   * <p>Allows the server to force us off when it goes down, by way of
+   * a message sent us through the asyncPort.</p>
    */
 
   public void forceDisconnect(String reason)
   {
     connected = false;
     session = null;
-
-    loginRefuseMessage = reason;
 
     ClientEvent e = new ClientEvent("Server forced disconect: " + reason);
 
@@ -488,8 +495,6 @@ public class ClientBase extends UnicastRemoteObject implements Client {
    * <p>Allows the server to send an asynchronous message to the
    * client..  Used by the server to tell the client when a build
    * is/is not being performed on the server.</P> 
-   *
-   * @see arlut.csd.ganymede.Client
    */
 
   public void sendMessage(int messageType, String status)
@@ -501,6 +506,55 @@ public class ClientBase extends UnicastRemoteObject implements Client {
     for (int i = 0; i < myVect.size(); i++)
       {
 	((ClientListener)myVect.elementAt(i)).messageReceived(e);
+      }
+  }
+
+  /**
+   * <p>We continuously query the server so that any asynchronous
+   * messages can be passed back to us without us having to be open
+   * for a callback.</p>
+   */
+
+  public void run()
+  {
+    clientAsyncMessage event = null;
+
+    /* -- */
+
+    if (asyncPort == null)
+      {
+	return;
+      }
+
+    try
+      {
+	while (true)
+	  {
+	    event = asyncPort.getNextMsg(); // will block on server
+
+	    if (event == null)
+	      {
+		return;
+	      }
+
+	    switch (event.getMethod())
+	      {
+	      case clientAsyncMessage.SHUTDOWN:
+		forceDisconnect(event.getString(0));
+		return;
+
+	      case clientAsyncMessage.SENDMESSAGE:
+		sendMessage(event.getInt(0), event.getString(1));
+		break;
+	      }
+	  }
+      }
+    catch (RemoteException ex)
+      {
+      }
+    finally
+      {
+	asyncPort = null;
       }
   }
 
