@@ -7,8 +7,8 @@
    
    Created: 4 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/07/12 04:41:02 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2002/03/02 01:43:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ package arlut.csd.ganymede;
  * the invariant (during the client's connection) type information associated
  * with the field generically across all objects of the type containing this field.</p>
  *
- * @version $Revision: 1.10 $ $Date: 2000/07/12 04:41:02 $ $Name:  $
+ * @version $Revision: 1.11 $ $Date: 2002/03/02 01:43:20 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -98,7 +98,11 @@ public class FieldInfo implements java.io.Serializable {
   {
     this.field = (db_field) field;
 
-    if (!field.isVector())
+    if (field instanceof PasswordDBField)
+      {
+	value = field.getValueString() // this doesn't check permissions!
+      }
+    else if (!field.isVector())
       {
 	value = field.getValue(); // can throw IllegalArgumentException on perms failure
       }

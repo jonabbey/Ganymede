@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 2001/12/05 21:51:36 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 2002/03/02 01:43:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -665,6 +665,24 @@ public class PasswordDBField extends DBField implements pass_field {
   // type specific value accessors
   //
   // ****
+
+  /**
+   * <P>This method returns a text encoded value for this DBField
+   * without checking permissions.</P>
+   *
+   * <P>This method avoids checking permissions because it is used on
+   * the server side only and because it is involved in the 
+   * {@link arlut.csd.ganymede.DBObject#getLabel() getLabel()}
+   * logic for {@link arlut.csd.ganymede.DBObject DBObject}, 
+   * which is invoked from {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.GanymedeSession#getPerm(arlut.csd.ganymede.DBObject) getPerm()} 
+   * method.</P>
+   *
+   * <P>If this method checked permissions and the getPerm() method
+   * failed for some reason and tried to report the failure using
+   * object.getLabel(), as it does at present, the server could get
+   * into an infinite loop.</P>
+   */
 
   public synchronized String getValueString()
   {
