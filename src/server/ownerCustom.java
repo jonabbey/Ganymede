@@ -5,7 +5,7 @@
    This file is a management class for owner-group records in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,7 +79,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
    *
    */
 
-  public boolean anonymousLinkOK(short fieldID)
+  public boolean anonymousLinkOK(DBObject object, short fieldID)
   {
     // We want users to be able to do remote link/unlink operations
     // to our objects owned field
