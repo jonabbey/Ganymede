@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/10/27 18:35:49 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/10/29 16:11:14 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -94,7 +94,7 @@ import arlut.csd.Util.PackageResources;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.20 $ $Date: 1999/10/27 18:35:49 $ $Name:  $
+ * @version $Revision: 1.21 $ $Date: 1999/10/29 16:11:14 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey 
  */
 
@@ -500,6 +500,81 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 							     }
 							 }
 						     });
+	  }
+
+	// if we know they can only type things from the list,
+	// implement choice completion
+
+	if (mustChoose)
+	  {
+	    custom.addKeyListener(new KeyAdapter()
+				  {
+				    public void keyReleased(KeyEvent ke)
+				      {
+					int curLen;
+					String curVal;
+
+					curVal = custom.getText();
+    
+					if (curVal != null)
+					  {
+					    curLen = curVal.length();
+					  }
+					else
+					  {
+					    curLen = 0;
+					  }
+
+					int keyCode = ke.getKeyCode();
+
+					switch (keyCode)
+					  {
+					  case KeyEvent.VK_UP:
+					  case KeyEvent.VK_DOWN:
+					  case KeyEvent.VK_LEFT:
+					  case KeyEvent.VK_RIGHT:
+					  case KeyEvent.VK_SHIFT:
+
+					  case KeyEvent.VK_DELETE:
+					  case KeyEvent.VK_BACK_SPACE:
+					    return;
+					  }
+
+					if (curLen > 0)
+					  {
+					    listHandle item;
+
+					    int matching = 0;
+					    String matchingItem = null;
+
+					    Enumeration enum = out.model.elements();
+
+					    while (enum.hasMoreElements())
+					      {
+						item = (listHandle) enum.nextElement();
+
+						if (item.toString().equals(curVal))
+						  {
+						    // they've typed the full thing here, stop.
+
+						    return;
+						  }
+						else if (item.toString().startsWith(curVal))
+						  {
+						    matching++;
+						    matchingItem = item.toString();
+						  }
+					      }
+
+					    if (matching == 1)
+					      {
+						custom.setText(matchingItem);
+						custom.select(curLen, matchingItem.length());
+						return;
+					      }
+					  }
+				      }
+				    });
 	  }
 
 	add("South", customP);
@@ -1249,6 +1324,5 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     return false;  // should never really get here.
   }
-
 }
 
