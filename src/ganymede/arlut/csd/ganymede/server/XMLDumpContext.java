@@ -197,7 +197,7 @@ public class XMLDumpContext {
   /**
    * <p>Returns true if the kind of DBField passed in needs to be
    * synced to the sync channel attached to this XMLDumpContext.  This
-   * version of shouldInclude() treats the field as always changed,
+   * version of mayInclude() treats the field as always changed,
    * and is intended for doing full dumps, rather than delta
    * dumps.</p>
    *
