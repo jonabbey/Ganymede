@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 2001/02/08 22:52:13 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 2001/02/09 00:04:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -924,6 +924,9 @@ public class Ganymede {
 				1,
 				new memoryStatusTask(),
 				"Memory Status Updater");
+
+    scheduler.addActionOnDemand(new gcTask(),
+				"Garbage Collection Task");
   }
 
   static void registerBuilderTask(String taskName)
@@ -1467,7 +1470,7 @@ class gcTask implements Runnable {
  * run every minute.</p>
  */
 
-class timeOutTask implements Runnable {
+class timeOutTask implements Runnable, silentTask {
 
   public timeOutTask()
   {
@@ -1495,7 +1498,7 @@ class timeOutTask implements Runnable {
  * run every minute.</p> 
  */
 
-class memoryStatusTask implements Runnable {
+class memoryStatusTask implements Runnable, silentTask {
 
   public memoryStatusTask()
   {

@@ -7,15 +7,16 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/12/05 23:10:18 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2001/02/09 00:04:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -935,7 +936,7 @@ public class GanymedeScheduler extends Thread {
     if ((currentlyScheduled.remove(handle.name) != null) ||
 	(onDemand.remove(handle.name) != null))
       {
-	if (logStuff && !handle.name.equals("Idle Timer"))
+	if (logStuff && !(handle.task instanceof silentTask))
 	  {
 	    System.err.println("Ganymede Scheduler: running " + handle.name);
 	  }
@@ -958,7 +959,7 @@ public class GanymedeScheduler extends Thread {
   {
     if (currentlyRunning.remove(handle.name) != null)
       {
-	if (logStuff && !handle.name.equals("Idle Timer"))
+	if (logStuff && !(handle.task instanceof silentTask))
 	  {
 	    System.err.println("Ganymede Scheduler: " + handle.name + " completed");
 	  }
@@ -977,7 +978,7 @@ public class GanymedeScheduler extends Thread {
 	  {
 	    if (handle.reschedule())
 	      {
-		if (logStuff && !handle.name.equals("Idle Timer"))
+		if (logStuff && !(handle.task instanceof silentTask))
 		  {
 		    System.err.println("Ganymede Scheduler: rescheduling task " + 
 				       handle.name + " for " + handle.startTime);

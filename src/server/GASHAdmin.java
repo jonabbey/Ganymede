@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 2001/02/08 22:52:12 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 2001/02/09 00:04:43 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -686,9 +686,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JLabel locksLabel = null;
   JTextField locksField = null;
 
-  JLabel freeMemLabel = null;
-  JTextField freeMemField = null;
-  JTextField totalMemField = null;
+  JLabel memLabel = null;
+  JTextField memField = null;
 
   JButton clearLogButton;
   JTextArea statusArea = null;
@@ -922,37 +921,27 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     /* Free / Total Memory on Server */
 
-    freeMemLabel = new JLabel("Free / Total Memory on Server: ");
+    memLabel = new JLabel("Free / Total Memory on Server: ");
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
     gbc.gridheight = 1;
-    gbl.setConstraints(freeMemLabel, gbc);
-    topPanel.add(freeMemLabel);
+    gbl.setConstraints(memLabel, gbc);
+    topPanel.add(memLabel);
 
     gbc.anchor = GridBagConstraints.WEST;
 
-    JPanel memPanel = new JPanel();
-    memPanel.setLayout(new BorderLayout());
-
-    freeMemField = new JTextField("", 20);
-    freeMemField.setEditable(false);
-
-    totalMemField = new JTextField("", 20);
-    totalMemField.setEditable(false);
-
-    memPanel.add("West", freeMemField);
-    memPanel.add("Center", new JLabel("/"));
-    memPanel.add("East", totalMemField);
+    memField = new JTextField("", 40);
+    memField.setEditable(false);
 
     gbc.weightx = 100;
     gbc.fill = GridBagConstraints.BOTH;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = 1;
-    gbl.setConstraints(memPanel, gbc);
-    topPanel.add(memPanel);
+    gbl.setConstraints(memField, gbc);
+    topPanel.add(memField);
 
     /* Transactions in Journal */
 
@@ -1787,8 +1776,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.freeMemField.setText("" + lFreeMemory);
-	frame.totalMemField.setText("" + lTotalMemory);
+	frame.memField.setText(lFreeMemory + " / " + lTotalMemory);
       }
     });
   }
