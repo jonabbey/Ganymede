@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.11 $
-# Date: $Date: 1999/04/06 20:56:13 $
+# Version: $Revision: 1.12 $
+# Date: $Date: 1999/04/15 23:07:50 $
 #
 ############################################################
 
@@ -24,7 +24,7 @@ cd $builddir
 
 echo "Building server jar"
 
-cd $CLASSDIR
+cd $TARGETDIR
 
 mv -f ganymedeServer.jar ganymedeServer.jar.old > /dev/null 2>&1
 
@@ -34,7 +34,7 @@ cd server_classes
 
 cd arlut/csd
 rm -f Util
-ln -s $CLASSDIR/arlut/csd/Util .
+ln -s $TARGETDIR/arlut/csd/Util .
 cd ../..
 
 # We need one thing from JDataComponent
@@ -44,7 +44,7 @@ mkdir arlut/csd/JDataComponent
 
 cd arlut/csd/JDataComponent
 rm -f listHandle.class
-ln -s $CLASSDIR/arlut/csd/JDataComponent/listHandle.class .
+ln -s $TARGETDIR/arlut/csd/JDataComponent/listHandle.class .
 cd ../../..
 
 # And we need the JDialog package for the serializable
@@ -52,7 +52,7 @@ cd ../../..
 
 cd arlut/csd
 rm -f JDialog
-ln -s $CLASSDIR/arlut/csd/JDialog .
+ln -s $TARGETDIR/arlut/csd/JDialog .
 cd ../..
 
 rm -f jcrypt.class
