@@ -155,7 +155,7 @@ refresh the jar files.
     </copy>
 
     <!-- Build the client jar file -->
-    <jar jarfile="${build.lib}/ddroid.jar">
+    <jar jarfile="${build.lib}/ddroid.jar" duplicate="preserve">
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JCalendar/**/*.class"/>
@@ -175,7 +175,7 @@ refresh the jar files.
     </jar>
 
     <!-- Build the server jar file -->
-    <jar jarfile="${build.lib}/ddroidServer.jar">
+    <jar jarfile="${build.lib}/ddroidServer.jar" duplicate="preserve">
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/crypto/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/listHandle.class"/>
@@ -196,7 +196,7 @@ refresh the jar files.
     </jar>
 
     <!-- Build the admin jar file -->
-    <jar jarfile="${build.lib}/ddroidAdmin.jar">
+    <jar jarfile="${build.lib}/ddroidAdmin.jar" duplicate="preserve">
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
