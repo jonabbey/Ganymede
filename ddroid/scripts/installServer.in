@@ -107,9 +107,12 @@ if (!-f "jars/ddroidServer.jar") {
 
 $vars{"SYSTEMNAME"} = `hostname`; # default hostname
 chop $vars{"SYSTEMNAME"}; # take off trailing newline
-$vars{"MAILHOST"} = $vars{"SYSTEMNAME"};
 
 foreach $step (@steps) {
+
+  if ($step eq "RETURNADDR" && $vars{"MAILHOST"} eq "") {
+    next;
+  }
 
   $success = 0;
 
@@ -125,7 +128,7 @@ foreach $step (@steps) {
       $vars{$step} = $inp;
     }
 
-    if ($vars{$step}eq "") {
+    if ($vars{$step}eq "" && $step ne "MAILHOST") {
       $success = 0;
       print "*You must provide a value for this field*\n";
     } else {
@@ -177,7 +180,7 @@ if (!-d $vars{"SERVERINSTALL"}) {
 
 # Make sure the return address is fully qualified
 
-if ($vars{"RETURNADDR"} !~ /@/) {
+if ($vars{'MAILHOST'} ne "" && $vars{"RETURNADDR"} !~ /@/) {
   $vars{"RETURNADDR"}.="@".$vars{"MAILHOST"};
 
   print "** No machine/domain name specified in return address..\n";
