@@ -256,6 +256,19 @@ highlighted in blue during the drag operation, in addition to the icon
 drag that the tree has had.  Made right-clicking on nodes select the
 node before popping up the pop-up menu, as a visual reference point.
 
+19. [SERVER] Fixed DBObject synchronization
+
+The server ran into a deadlock race condition where logins could not
+be processed while a database dump was in progress at a certain point.
+
+This arose out of the conversion to a packed array hash structure
+for field storage in the DBObject class within the last year.  There
+were a number of places in which I was sloppy with nested monitor
+synchronization.
+
+I have thoroughly reworked the DBObject synchronization logic
+to avoid all such problems.
+
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
 RELEASE DATE: January 30, 2001
