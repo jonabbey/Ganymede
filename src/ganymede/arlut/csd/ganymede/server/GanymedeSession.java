@@ -3858,17 +3858,18 @@ final public class GanymedeSession implements Session, Unreferenced {
    * viewed for some reason, the ReturnVal will carry an encoded error
    * dialog for the client to display.</p>
    *
-   * <p>view_db_object() can be done at any time, outside of the bounds of
-   * any transaction.  view_db_object() returns a snapshot of the object's
-   * state at the time the view_db_object() call is processed, and will
-   * be transaction-consistent internally.</p>
+   * <p>view_db_object() can be done at any time, outside of the
+   * bounds of any transaction.  view_db_object() returns a read-only
+   * snapshot of the object's state at the time the view_db_object()
+   * call is processed, and will be transaction-consistent
+   * internally.</p>
    *
    * <p>If view_db_object() is called during a transaction, the object
    * will be returned as it stands during the transaction.. that is,
-   * if the object has been changed during the transaction, that
-   * changed object will be returned, even if the transaction has
-   * not yet been committed, and other clients would not be able to
-   * see that version of the object.</p>
+   * if the object has been changed during the transaction, a
+   * read-only view of that changed object will be returned, even if
+   * the transaction has not yet been committed, and other clients
+   * would not be able to see that version of the object.</p>
    *
    * <p>NOTE: It is critical that any code that looks at the values of
    * fields in a {@link arlut.csd.ganymede.server.DBObject DBObject}
