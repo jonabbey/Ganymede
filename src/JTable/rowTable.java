@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.4 $ %D% 
+ * @version $Revision: 1.5 $ %D% 
  */
 
 public class rowTable extends baseTable {
@@ -428,6 +428,17 @@ public class rowTable extends baseTable {
   public final void setCellBackColor(Object key, int col, Color color, boolean repaint)
   {
     setCellBackColor(getCell(key,col),color,repaint);
+  }
+
+  /**
+   * Returns true if a key is already in use in the table
+   *
+   * @param key key to look for in the table
+   */
+
+  public boolean containsKey(Object key)
+  {
+    return index.containsKey(key);
   }
 
 
