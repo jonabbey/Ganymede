@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 1999/01/22 18:04:19 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 1999/03/16 20:30:24 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -59,13 +59,12 @@ package arlut.csd.ganymede.client;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
+import arlut.csd.Util.*;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.rmi.RemoteException;
-
-import arlut.csd.JDataComponent.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -119,17 +118,20 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     CancelButton = new JButton("Cancel"),
     addButton = new JButton("Add Choices"),
     removeButton = new JButton("Remove Choices");
+  
 
   GridBagLayout gbl = new GridBagLayout();
   GridBagConstraints gbc = new GridBagConstraints();
 
   JPanel 
     titledPanel,
+    returnedPanel,
+    query_Buttons,
     card_panel,
     query_panel = new JPanel();
   JPanel inner_choice = new JPanel();
-  JCheckBox editBox = new JCheckBox("Return Only Editable Objects");
-  JCheckBox allBox = new JCheckBox("Return all objects of this type");
+  JCheckBox editBox = new JCheckBox("Only objects which are editable");
+  JCheckBox allBox = new JCheckBox("All objects of type selected above");
   JComboBox baseChoice = new JComboBox();
 
   // This is so we can hind the middle panel when the show all button is clicked
@@ -153,6 +155,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   Query
     returnVal;
 
+  Image queryIcon;
   /* -- */
 
   /**
@@ -176,13 +179,13 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     super(parent, DialogTitle, true); // the boolean value is to make the dialog modal
 
     // ---
-      
     JPanel Choice_Buttons = new JPanel();
     JPanel base_panel = new JPanel();
     JPanel outer_choice = new JPanel();
-    JPanel query_Buttons = new JPanel();
+    query_Buttons = new JPanel();
     JScrollPane choice_pane = new JScrollPane();
     JPanel contentPane = new JPanel();
+ 
 
     /* -- */
 
@@ -197,8 +200,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     this.getContentPane().add("Center", tabPane);
     this.getContentPane().add("South", Choice_Buttons);
 
-    tabPane.addTab("Query", null, contentPane);
-
+    tabPane.addTab("Search Criteria", null, contentPane);
+ 
     // Main constructor for the querybox window
     
     this.gc = gc;
@@ -212,7 +215,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     
     OkButton.addActionListener(this);
     CancelButton.addActionListener(this);
-    Choice_Buttons.setLayout(new FlowLayout ());
+    Choice_Buttons.setLayout(new FlowLayout (FlowLayout.RIGHT));
     Choice_Buttons.add(OkButton);
     Choice_Buttons.add(CancelButton);
     
@@ -229,10 +232,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     addButton.addActionListener(this);
     removeButton.addActionListener(this);
+    removeButton.setEnabled(false);
+
     query_Buttons.setLayout(new FlowLayout());
     query_Buttons.add(addButton);
     query_Buttons.add(removeButton);
-    query_panel.add("South", query_Buttons);  
 
     // - Define the two inner choice windows
 
@@ -240,6 +244,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     GridBagConstraints bp_gbc = new GridBagConstraints();
 
     base_panel.setLayout(bp_gbl);
+
      
     // - Create the choice window containing the fields 
 
@@ -299,19 +304,18 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     bp_gbc.anchor = bp_gbc.WEST;
     bp_gbc.weightx = 1.0;
-
     bp_gbc.gridx = 0;
     bp_gbl.setConstraints(baseChoice, bp_gbc);
     base_panel.add(baseChoice);
 
+    queryIcon = PackageResources.getImageResource(this, "query.gif", getClass());
+    JLabel queryPic = new JLabel(new ImageIcon(queryIcon));
+    queryPic.setBorder(new EmptyBorder(new Insets(0,0,10,10)));
+    
     bp_gbc.anchor = bp_gbc.EAST;
     bp_gbc.gridx = 1;
-    bp_gbl.setConstraints(allBox, bp_gbc);
-    base_panel.add(allBox);
-
-    bp_gbc.gridx = 2;
-    bp_gbl.setConstraints(editBox, bp_gbc);
-    base_panel.add(editBox);
+    bp_gbl.setConstraints(queryPic, bp_gbc);
+    base_panel.add(queryPic);
 
     inner_choice.setLayout(gbl);
     
@@ -319,23 +323,35 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     outer_choice.add(inner_choice);
 
     choice_pane.setViewportView(outer_choice);
+    choice_pane.setBorder(new EmptyBorder(new Insets(0,0,0,0)));    
 
     card_layout = new CardLayout();
     card_panel = new JPanel(card_layout);
     card_panel.add(choice_pane, "main");
     card_panel.add(new JPanel(), "blank");
-
     card_layout.show(card_panel, "main");
 
     // hack for Swing 1.0.2 to prevent TitledBorder from trying to
     // be clever with colors when surrounding a scrollpane
     titledPanel = new JPanel();
-    titledPanel.setBorder(new TitledBorder("Query Fields"));
+    titledPanel.setBorder(new TitledBorder(new EtchedBorder(),"Match"));
     titledPanel.setLayout(new BorderLayout());
     titledPanel.add("Center", card_panel);
-    titledPanel.add("North", base_panel);
+    titledPanel.add("South", query_Buttons);
+
+    returnedPanel = new JPanel();
+    returnedPanel.setBorder(new EmptyBorder(new Insets(0,5,5,0)));
+    returnedPanel.setLayout(new FlowLayout());
+    returnedPanel.add(allBox);
+    returnedPanel.add(Box.createHorizontalStrut(20));
+    returnedPanel.add(editBox);
+
+    getContentPane().add("North", base_panel);
+
+    base_panel.setBorder(new TitledBorder(new EtchedBorder(),"Choose Object Type"));
 
     query_panel.add("Center", titledPanel);
+    titledPanel.add("North", returnedPanel);
 
     resetFieldChoices();
     addRow();
@@ -343,6 +359,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     optionsPanel = new OptionsPanel(this);
 
     tabPane.addTab("Fields Returned", null, optionsPanel);
+
     this.pack();
   }
 
@@ -782,8 +799,13 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     if (e.getSource() == addButton)
       {
 	addRow();
+	// If delete button is disabled b/c there's only one row,
+	// enable it 'cause there is now something to delete.
+	if (!removeButton.isEnabled()) {
+	  removeButton.setEnabled(true);
+	}
       }
-
+    
     if (e.getSource() == removeButton)
       {
 	if (Rows.size() <= 1)
@@ -794,6 +816,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	else
 	  {
 	    removeRow();
+	    // If only one row left then disable delete button
+	    if (Rows.size() <= 1) {
+	      removeButton.setEnabled(false);
+	    }
 	  }
       }
   } 
@@ -872,6 +898,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	      }
 
 	    card_layout.show(card_panel, "blank");
+	    query_Buttons.setVisible(false);
 	  }
 	else
 	  {
@@ -881,7 +908,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	      }
 
 	    card_layout.show(card_panel, "main");
+	    query_Buttons.setVisible(true);
 	  }
+	getContentPane().invalidate();
+	getContentPane().validate();
       }
     else if (e.getSource() == baseChoice)
       {
@@ -1909,7 +1939,7 @@ class OptionsPanel extends JPanel {
     gbc.weightx = 1.0;
     gbc.weighty = 1.0;
 
-    builtInPanel.setBorder(new TitledBorder("Built-In Fields"));
+    builtInPanel.setBorder(new TitledBorder(new EtchedBorder(),"Built-In Fields"));
     builtInPanel.setLayout(new FlowLayout());
 
     gbc.gridy = 0;
@@ -1917,7 +1947,7 @@ class OptionsPanel extends JPanel {
 
     add(builtInPanel);
 
-    customPanel.setBorder(new TitledBorder("Custom Fields"));
+    customPanel.setBorder(new TitledBorder(new EtchedBorder(),"Custom Fields"));
     customPanel.setLayout(new FlowLayout());
 
     gbc.gridy = 1;
