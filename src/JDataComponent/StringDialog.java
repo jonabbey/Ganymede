@@ -285,6 +285,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		    passwordThing pt = (passwordThing)element;
 		    if (pt.isNew())
 		      {
+			System.out.println("This password is new.");
 			JpassField sf = new JpassField(null, true, 10,100,true);
 			
 			sf.setCallback(this); 
@@ -294,9 +295,12 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		      }
 		    else
 		      {
+			System.out.println("This password is not new.");
 			JpasswordField sf = new JpasswordField();
-			sf.setCallback(this); 
 			sf.setEditable(true);
+
+			sf.setCallback(this); 
+
 			if (i == (numberOfObjects - 1)) // This is the last object
 			  {
 			    if (debug)
@@ -328,9 +332,10 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		      }
 
 		    booleanThing bt = (booleanThing)element;
-		    JcheckboxField cb = new JcheckboxField();
-		    cb.setCallback(this);
+		    JCheckBox cb = new JCheckBox();
 		    cb.setSelected(bt.getValue());
+		    cb.addItemListener(this);
+
 		    addRow(panel, cb, bt.getLabel(), i);
 		      
 		    componentHash.put(cb, bt.getLabel());
@@ -508,14 +513,10 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     int height = getPreferredSize().height;
 
     setLocation(r.width/2 - r.x - width/2, r.height/2 - r.y - height/2);
-    pack();
+    // I pack in DialogShow, so I don't think it is needed here.
+    //pack();
   }
 
-
-  public void setVisible(boolean b)
-  {
-    super.setVisible(b);
-  }
 
   /**
    * Display the dialog box.
@@ -529,6 +530,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 
   public Hashtable DialogShow()
   {
+    /*
     SwingUtilities.invokeLater(new Runnable() 
 			       {
 				 public void run()
@@ -536,13 +538,18 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 				     firstComp.requestFocus();
 				   }
 			       });
+    */
 
     pack();
 
     repaint();
     //    show();
-    setVisible(true);		// thread will halt here
-      
+
+    //setVisible(true);		// thread will halt here
+    show();
+
+    System.out.println("Done invoking.");
+
     return valueHash;
   }
 
@@ -572,13 +579,34 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
       {
 	String label = (String)componentHash.get(obj);
 	JComboBox ch = (JComboBox) obj;
-	valueHash.put(label, ch.getSelectedItem());
+	if (valueHash != null)
+	  {
+	    valueHash.put(label, ch.getSelectedItem());
+	  }
 	
 	if (debug)
 	  {
 	    System.out.println(ch.getSelectedItem() + " chosen");
 	  }
       }
+    else if (obj instanceof JCheckBox)
+      {
+	String label = (String)componentHash.get(obj);
+
+	if (label == null)
+	  {
+	    System.out.println("in setValuePerformed from JcheckboxField: label = null");
+	    return;
+	  }
+
+	JCheckBox cb = (JCheckBox)obj;
+	Boolean answer = new Boolean(cb.isSelected());
+	if (valueHash != null)
+	  {
+	    valueHash.put(label, answer);
+	  }
+      }
+
     else
       {
 	System.out.println("Unknown item type generated action");
@@ -593,11 +621,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
       {
 	String label = (String)componentHash.get(comp);
 	JstringField sf = (JstringField)comp;
-	if (sf.getText() == null)
-	  {
-	    valueHash.put(label, "");
-	  }
-	else
+	if (valueHash != null)
 	  {
 	    valueHash.put(label, sf.getText());
 	  }
@@ -613,11 +637,9 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	String label = (String)componentHash.get(comp);
 	JpasswordField sf = (JpasswordField)comp;
 
-	if (sf.getText() == null)
-	  {
-	    valueHash.put(label, "");
-	  }
-	else
+	System.out.println("label is " + label);
+	
+	if (valueHash != null)
 	  {
 	    valueHash.put(label, sf.getText());
 	  }
@@ -627,19 +649,22 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	    System.out.println("Setting " + label + " to " + sf.getText());
 	  }
       }
-    else if (comp instanceof JcheckboxField)
+    else if (comp instanceof JpassField)
       {
 	String label = (String)componentHash.get(comp);
+	JpassField sf = (JpassField)comp;
 
-	if (label == null)
+	System.out.println("label is " + label);
+	
+	if (valueHash != null)
 	  {
-	    System.out.println("in setValuePerformed from JcheckboxField: label = null");
-	    return true;
+	    valueHash.put(label, (String)v.getValue());
 	  }
 
-	JcheckboxField cbf = (JcheckboxField)comp;
-	Boolean answer = new Boolean(cbf.getValue());
-	valueHash.put(label, answer);
+	if (debug)
+	  {
+	    System.out.println("Setting " + label + " to " + (String)v.getValue());
+	  }
       }
     return true;
   }
@@ -648,7 +673,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
   {
     components.addElement(comp);
 
-    Label l = new Label(label);
+    JLabel l = new JLabel(label);
     
     parent.add("0 " + row + " rhwHW", l);
     parent.add("1 " + row + " lhH", comp);
