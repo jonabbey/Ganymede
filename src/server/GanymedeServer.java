@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -151,10 +151,31 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (!found)
       {
-	root = new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName);
+	// we want to match against either the persona name field or
+	// the new persona label field.  This lets us work with old
+	// versions of the database or new.  Going forward we'll
+	// want to match here against the PersonaLabelField.
+
+	root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName),
+			       new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName));
+
 	userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
 	results = Ganymede.internalSession.internalQuery(userQuery);
+
+	// find the entry with the matching name and the matching
+	// password.  We no longer expect the PersonaNameField to be
+	// managed by a namespace, so we could conceivably get
+	// multiple matches back from our query.  This is particularly
+	// true if the user tries to log in as 'GASH Admin', which
+	// might be the "name" of many persona accounts.  In this case
+	// we'll depend on the password telling us which to match
+	// against.
+
+	// once we get all the ganymede.db files transitioned over to
+	// the new persona format, we'll probably want to just match
+	// against PersonaLabelField to avoid the possibility of
+	// ambiguous admin selection here.
 
 	for (int i = 0; !found && (i < results.size()); i++)
 	  {
@@ -447,7 +468,14 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     clientName = admin.getName();
     clientPass = admin.getPassword();
 
-    root = new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName);
+    // we want to match against either the persona name field or
+    // the new persona label field.  This lets us work with old
+    // versions of the database or new.  Going forward we'll
+    // want to match here against the PersonaLabelField.
+
+    root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName),
+			   new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName));
+
     userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
     Vector results = Ganymede.internalSession.internalQuery(userQuery);
