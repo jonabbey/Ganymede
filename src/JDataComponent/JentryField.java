@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import com.sun.java.swing.*;
+import com.sun.java.swing.text.*;
 
 //---------------------------------------------------------------------
 //                                                 class JentryField
@@ -43,6 +44,12 @@ abstract public class JentryField extends JTextField {
     enableEvents(AWTEvent.KEY_EVENT_MASK);
     setEnabled(true);
     setEditable(true);
+
+    // disable tab insertion
+
+    Keymap binding = getKeymap();
+    binding.addActionForKeyStroke(KeyStroke.getKeyStroke('\t'),
+				  new DefaultAction("null action"));
   }
 
   ///////////////////
