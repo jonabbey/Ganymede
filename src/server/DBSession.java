@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -409,9 +409,9 @@ final public class DBSession {
    * 
    */
 
-  public synchronized void deleteDBObject(Invid invid)
+  public synchronized ReturnVal deleteDBObject(Invid invid)
   {
-    deleteDBObject(invid.getType(), invid.getNum());
+    return deleteDBObject(invid.getType(), invid.getNum());
   }
 
   /**
@@ -431,7 +431,7 @@ final public class DBSession {
    *  
    */
 
-  public synchronized void deleteDBObject(short baseID, int objectID)
+  public synchronized ReturnVal deleteDBObject(short baseID, int objectID)
   {
     DBObject obj;
     DBEditObject eObj;
@@ -454,7 +454,7 @@ final public class DBSession {
 	eObj = obj.createShadow(editSet);
       }
 
-    deleteDBObject(eObj);
+    return deleteDBObject(eObj);
   }
 
   /**
@@ -471,11 +471,15 @@ final public class DBSession {
    * transaction is aborted, the object remains in the database
    * unchanged.
    *
+   * Note that this method does not check to see whether permission
+   * has been obtained to delete the object.. that's done in
+   * GanymedeSession.delete_db_object().
+   *
    * @param eObj An object checked out in the current transaction to be deleted
-   * 
+   *  
    */
 
-  public synchronized void deleteDBObject(DBEditObject eObj)
+  public synchronized ReturnVal deleteDBObject(DBEditObject eObj)
   {
     switch (eObj.getStatus())
       {
@@ -488,11 +492,13 @@ final public class DBSession {
 	break;
 
       case DBEditObject.DELETING:
-	return;
+	return null;
 
       case DBEditObject.DROPPING:
-	return;
+	return null;
       }
+
+    return null;
   }
 
   /**
