@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,14 +18,15 @@ import java.rmi.server.*;
 
 //import java.awt.*;
 
+import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.PopupMenu;
-import java.awt.SystemColor;
-import java.awt.MenuItem;
+//import java.awt.PopupMenu;
+//import java.awt.SystemColor;
+//import java.awt.MenuItem;
 import java.awt.event.*;
 import java.applet.*;
 import java.util.*;
@@ -58,11 +59,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   private adminSession aSession = null;
   private String adminName = null;
   private String adminPass = null;
-
-  private DialogRsrc permResrc;
-  private StringDialog permDialog;
+  private StringDialog permDialog = null;
 
   JFrame schemaFrame;
+
+  Date serverStart;
 
   /* -- */
 
@@ -75,29 +76,58 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     this.adminName = name;
     this.adminPass = pass;
 
+    System.out.println("adminName = " + adminName + " adminPass = " + adminPass);
+
     try
       {
 	aSession = server.admin(this);
       }
-    catch (RemoteException ex)
-      {
-	System.err.println("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
-	System.exit(0);
-      }
     catch (NullPointerException ex)
       {
 	System.err.println("Error: Didn't get server reference.  Exiting now.");
-	System.exit(0);
+	return;
       }
 
-    DialogRsrc loginResrc;
-    StringDialog loginDialog;
-
-    permResrc = new DialogRsrc(frame, "Permissions Error", "You don't have permission to perform that operation",
-			       "OK", null, "error.gif");
-    permDialog = new StringDialog(permResrc);
+    //DialogRsrc loginResrc;
+    //StringDialog loginDialog;
 
     System.err.println("Got Admin");
+  }
+
+  private StringDialog getDialog()
+  {
+    if (permDialog == null)
+      {
+	if (frame == null)
+	  {
+	    DialogRsrc permResrc = new DialogRsrc(new JFrame(), "Permissions Error", "You don't have permission to perform that operation",
+						  "OK", null);
+	    permDialog = new StringDialog(permResrc);
+
+
+	  }
+	else
+	  {
+	    DialogRsrc permResrc = new DialogRsrc(frame, "Permissions Error", "You don't have permission to perform that operation",
+						  "OK", null, "error.gif");
+	    permDialog = new StringDialog(permResrc);
+
+	  }
+      }
+
+    return permDialog;
+  }
+
+  public void setFrame(GASHAdminFrame f)
+  {
+    if (frame == null)
+      {
+	frame = f;
+      }
+    else
+      {
+	System.err.println("I already have a frame, thank you very much.");
+      }
   }
 
   public String getName()
@@ -112,54 +142,100 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void setServerStart(Date date)
   {
-    frame.startField.setText(date.toString());
+    serverStart = date;
+    if (frame != null)
+      {
+	frame.startField.setText(date.toString());
+      }
   }
 
   public void setLastDumpTime(Date date)
   {
-    if (date == null)
+    if (frame != null)
       {
-	frame.dumpField.setText("no dump since server start");
+	if (date == null)
+	  {
+	    frame.dumpField.setText("no dump since server start");
+	  }
+	else
+	  {
+	    frame.dumpField.setText(date.toString());
+	  }
       }
     else
       {
-	frame.dumpField.setText(date.toString());
+	System.out.println("frame is null");
       }
   }
 
   public void setTransactionsInJournal(int trans)
   {
-    frame.journalField.setText("" + trans);
+    if (frame != null)
+      {
+	frame.journalField.setText("" + trans);
+      }
+    else
+      {
+	System.out.println("frame is null");
+      }
   }
 
   public void setObjectsCheckedOut(int objs)
   {
-    frame.checkedOutField.setText("" + objs);
+    if (frame != null)
+      {
+	frame.checkedOutField.setText("" + objs);
+      }
+    else
+      {
+	System.out.println("frame is null");
+      }
   }
 
   public void setLocksHeld(int locks)
   {
-    frame.locksField.setText("" + locks);
+    if (frame != null)
+      {
+	frame.locksField.setText("" + locks);
+      }
+    else
+      {
+	System.out.println("frame is null");
+      }
   }
 
   public void changeStatus(String status)
   {
-    frame.statusArea.append(new Date() + " " + status + "\n");
-    frame.statusArea.setCaretPosition(frame.statusArea.getText().length());
+    if (frame != null)
+      {
+	frame.statusArea.append(new Date() + " " + status + "\n");
+	frame.statusArea.setCaretPosition(frame.statusArea.getText().length());
+      }
   }
 
   public void changeAdmins(String adminStatus)
   {
-    frame.adminField.setText(adminStatus);
+    if (frame != null)
+      {
+	frame.adminField.setText(adminStatus);
+      }
   }
 
   public void changeState(String state)
   {
-    frame.stateField.setText(state);
+    if (frame != null)
+      {
+	frame.stateField.setText(state);
+      }
   }
 
   public void changeUsers(Vector entries)
   {
+    if (frame == null)
+      {
+	return;
+      }
+
     AdminEntry e;
 
     /* -- */
@@ -187,6 +263,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   public void changeTasks(Vector tasks)
   {
+    if (frame == null)
+      {
+	return;
+      }
+
     scheduleHandle handle;
     String intervalString;
 
@@ -300,6 +381,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   // convenience methods for our GASHAdminFrame
   // ------------------------------------------------------------
 
+  void refreshMe() throws RemoteException
+  {
+    aSession.refreshMe();
+  }
+
   void kill(String username) throws RemoteException
   {
     aSession.kill(username);
@@ -309,7 +395,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   {
     if (!adminName.equals(GASHAdmin.rootname))
       {
-	permDialog.DialogShow();
+	getDialog().DialogShow();
 	return;
       }
 
@@ -320,7 +406,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   {
     if (!adminName.equals(GASHAdmin.rootname))
       {
-	permDialog.DialogShow();
+	getDialog().DialogShow();
 	return;
       }
 
@@ -331,7 +417,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   {
     if (!adminName.equals(GASHAdmin.rootname))
       {
-	permDialog.DialogShow();
+	getDialog().DialogShow();
 	return;
       }
 
@@ -342,7 +428,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   {
     if (!adminName.equals(GASHAdmin.rootname))
       {
-	permDialog.DialogShow();
+	getDialog().DialogShow();
 	return;
       }
 
@@ -465,7 +551,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
   Image question = null;
 
-  Server server = null;
+  //Server server = null;
 
   JMenuBar mbar = null;
   JMenu controlMenu = null;
@@ -541,6 +627,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JMenuItem disableTaskMI = null;
   JMenuItem enableTaskMI = null;
   
+  GASHAdmin adminPanel;
+
   /* -- */
 
   /**
@@ -549,11 +637,15 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
    *
    */
 
-  public GASHAdminFrame(String title, boolean WeAreApplet)
+  public GASHAdminFrame(String title, boolean WeAreApplet, iAdmin admin, GASHAdmin adminPanel)
   {
     super(title);
 
+    this.admin = admin;
     this.WeAreApplet = WeAreApplet;
+    this.adminPanel = adminPanel;
+
+    admin.setFrame(this);
 
     mbar = new JMenuBar();
     controlMenu = new JMenu("Control", false);
@@ -708,6 +800,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     startLabel = new JLabel("Server Start Time:");
 
     startField = new JTextField("", 40);
+    startField.setText(admin.serverStart.toString());
     startField.setEditable(false);
 
     gbc.anchor = GridBagConstraints.EAST;
@@ -891,13 +984,17 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     getContentPane().add(tabPane);
 
     // pack and load
+    try
+      {
+	admin.refreshMe();
+      }
+    catch (RemoteException rx)
+      {
+	System.out.println("Problem trying to refresh: " + rx);
+      }
 
     pack();
     show();
-
-    /* RMI initialization stuff. We do this for our iClient object. */
-
-    System.setSecurityManager(new RMISecurityManager());
 
     if (debugFilename != null)
       {
@@ -911,84 +1008,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
       }
 
-    /* Get a reference to the server */
-
-    try
-      {
-	Remote obj = Naming.lookup(GASHAdmin.url);
-
-	if (obj instanceof Server)
-	  {
-	    server = (Server) obj;
-	  }
-      }
-    catch (NotBoundException ex)
-      {
-	System.err.println("RMI: Couldn't bind to server object\n" + ex );
-      }
-    catch (java.rmi.UnknownHostException ex)
-      {
-	System.err.println("RMI: Couldn't find server\n" + GASHAdmin.url );
-      }
-    catch (RemoteException ex)
-      {
-	ex.printStackTrace();
-	System.err.println("RMI: RemoteException during lookup.\n" + ex);
-      }
-    catch (java.net.MalformedURLException ex)
-      {
-	System.err.println("RMI: Malformed URL " + GASHAdmin.url );
-      }
-
-    System.err.println("Bound to server object");
 
 
-    /* Get our client hooked up to our server */
-
-    DialogRsrc loginResrc;
-    StringDialog loginDialog;
-
-    loginResrc = new DialogRsrc(this, "Admin Login", "Enter your administrator account name & password");
-    loginResrc.addString("Account:");
-    loginResrc.addPassword("Password:");
-    
-    loginDialog = new StringDialog(loginResrc);
-    Hashtable results = loginDialog.DialogShow();
-
-    if (results == null)
-      {
-	System.out.println("Good bye.");
-	quitMI.doClick();
-	return;
-      }
-
-    if (!results.get("Account:").equals(GASHAdmin.rootname))
-      {
-	controlMenu.remove(dumpMI);
-	controlMenu.remove(dumpSchemaMI);
-	controlMenu.remove(shutdownMI);
-	controlMenu.remove(reloadClassesMI);
-	controlMenu.remove(runInvidTestMI);
-	controlMenu.remove(schemaMI);
-	controlMenu.remove(killAllMI);
-      }
-
-    try
-      {
-	admin = new iAdmin(this, server, 
-			   (String) results.get("Account:"),
-			   (String) results.get("Password:"));
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
-	return;
-      }
-    catch (NullPointerException ex)
-      {
-	System.err.println("Error: Didn't get server reference.  Exiting now.");
-	return;
-      }
   }
 
   // our button / dialog handler
@@ -1008,7 +1029,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
 	finally
 	  {
-	    System.exit(0);
+	    adminPanel.quitButton.setEnabled(true);
+	    setVisible(false);
 	  }
       }
     else if (event.getSource() == dumpMI)
@@ -1232,7 +1254,15 @@ public class GASHAdmin extends JApplet {
   static String rootname = null;
   static String serverhost = null;
   static String url = null;
+
+  static Server server = null;
   
+  static Image admin_logo = null;
+
+  final private JTextField username = new JTextField();
+  final private JPasswordField password = new JPasswordField();
+  final public JButton quitButton = new JButton("Quit");
+
   /* -- */
 
   // Our primary constructor.  This will always be called, either
@@ -1240,7 +1270,7 @@ public class GASHAdmin extends JApplet {
 
   public GASHAdmin() 
   {
-
+    admin_logo = PackageResources.getImageResource(this, "admin.jpg", getClass());
   }
   
   public void init()
@@ -1264,39 +1294,204 @@ public class GASHAdmin extends JApplet {
 	rootname = "supergash";
       }
 
-    frame = new GASHAdminFrame("Ganymede Admin Console", true);
+    applet = this;
+
+    admin_logo = PackageResources.getImageResource(this, "admin.jpg", getClass());
+
+    setLayout(new BorderLayout());
+    getContentPane().add("Center", createLoginPanel());
+
   }
 
   public static void main(String[] argv)
+    {
+      if (argv.length < 1)
+	{
+	  System.err.println("Error, no properties file specified.");
+	  return;
+	}
+      else
+	{
+	  if (!loadProperties(argv[0]))
+	    {
+	      System.err.println("Error, couldn't successfully load properties from file " + argv[0]);
+	      return;
+	    }
+	  else
+	    {
+	      System.out.println("Successfully loaded properties from file " + argv[0]);
+	    }
+	}
+
+      if (argv.length > 1)
+	{
+	  GASHAdminFrame.debugFilename = argv[1];
+	}
+
+      applet = new GASHAdmin();
+
+      // the frame constructor shows itself, and the gui thread takes
+      // care of keeping us going.
+      JFrame loginFrame = new JFrame("Admin console login");
+      java.awt.Container c = loginFrame.getContentPane();
+
+      c.setLayout(new BorderLayout());
+      c.add("Center", applet.createLoginPanel());
+
+      /* RMI initialization stuff. We do this for our iClient object. */
+
+      System.setSecurityManager(new RMISecurityManager());
+
+      loginFrame.pack();
+      loginFrame.show();      
+    }
+
+  public JPanel createLoginPanel()
   {
-    if (argv.length < 1)
-      {
-	System.err.println("Error, no properties file specified.");
-	return;
-      }
-    else
-      {
-	if (!loadProperties(argv[0]))
-	  {
-	    System.err.println("Error, couldn't successfully load properties from file " + argv[0]);
-	    return;
-	  }
-	else
-	  {
-	    System.out.println("Successfully loaded properties from file " + argv[0]);
-	  }
-      }
+    JPanel panel = new JPanel();
 
-    if (argv.length > 1)
+    GridBagLayout gbl = new GridBagLayout();
+    GridBagConstraints gbc = new GridBagConstraints();
+    panel.setLayout(gbl);
+
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+
+    if (admin_logo != null)
       {
-	GASHAdminFrame.debugFilename = argv[1];
+	gbc.fill = GridBagConstraints.BOTH;
+	gbc.gridwidth = 2;
+	JLabel image = new JLabel(new ImageIcon(admin_logo));
+	gbl.setConstraints(image, gbc);
+	panel.add(image);
       }
 
-    // the frame constructor shows itself, and the gui thread takes
-    // care of keeping us going.
+    gbc.fill = GridBagConstraints.NONE;
+    JLabel ul = new JLabel("Username:");
+    gbc.gridy = 1;
+    gbc.gridwidth = 1;
+    gbl.setConstraints(ul, gbc);
+    panel.add(ul);
+    
+    gbc.gridx = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(username, gbc);
+    panel.add(username);
 
-    frame = new GASHAdminFrame("Ganymede Admin Console", false);
+    JLabel pl = new JLabel("Password:");
+    gbc.gridy = 2;
+    gbc.gridx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbl.setConstraints(pl, gbc);
+    panel.add(pl);
+
+    gbc.gridx = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(password, gbc);
+    panel.add(password);
+    
+
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+
+    gbc.gridwidth = 2;
+    JPanel buttonPanel = new JPanel(new BorderLayout());
+    gbl.setConstraints(buttonPanel, gbc);
+    panel.add(buttonPanel);
+    
+    JButton loginButton = new JButton("Connect");
+    loginButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e)
+	{
+	  iAdmin admin = applet.login(username.getText(), password.getText());      
+	  if (admin != null)
+	    {
+	      username.setText("");
+	      password.setText("");
+	      quitButton.setEnabled(false);
+	      frame = new GASHAdminFrame("Ganymede Admin Console", false, admin, applet);
+	    }
+	  else
+	    {
+	      password.setText("");
+	      System.out.println("Could not get admin.");
+	    }
+	}});
+
+    
+
+    quitButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e)
+	{
+	  System.exit(0);
+	}});
+
+    buttonPanel.add("Center", loginButton);    
+    buttonPanel.add("East", quitButton);
+   
+    return panel;
   }
+
+  public iAdmin login(String username, String password)
+    {
+      iAdmin admin = null;
+
+      /* -- */
+
+      /* Get a reference to the server */
+
+      try
+	{
+	  Remote obj = Naming.lookup(GASHAdmin.url);
+
+	  if (obj instanceof Server)
+	    {
+	      server = (Server) obj;
+	    }
+	}
+      catch (NotBoundException ex)
+	{
+	  System.err.println("RMI: Couldn't bind to server object\n" + ex );
+	  return null;
+	}
+      catch (java.rmi.UnknownHostException ex)
+	{
+	  System.err.println("RMI: Couldn't find server\n" + GASHAdmin.url );
+	  return null;
+	}
+      catch (RemoteException ex)
+	{
+	  ex.printStackTrace();
+	  System.err.println("RMI: RemoteException during lookup.\n" + ex);
+	  return null;
+	}
+      catch (java.net.MalformedURLException ex)
+	{
+	  System.err.println("RMI: Malformed URL " + GASHAdmin.url );
+	  return null;
+	}
+
+      System.err.println("Bound to server object");
+
+      System.out.println("name = " + username + " pass=" + password);
+
+      try
+	{
+	  if (frame == null)
+	    {
+	      System.out.println("Frame is null.");
+	    }
+	  admin = new iAdmin(frame, server, username, password);
+	}
+      catch ( RemoteException rx)
+	{
+	  System.err.println("Error: Didn't get server reference.  Exiting now." + rx);
+	  return null;
+	}
+    
+      return admin;
+    
+    }
 
   private static boolean loadProperties(String filename)
   {
