@@ -85,8 +85,8 @@ issues that Ganymede is going to need to address as the lab moves into
 the 21st century.  Jay Scott contributed work on a new version of the
 GASH schema's build kit (which is not yet included with the Ganymede
 distribution).  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
-Gramann and others made helpful reports on gaps and problems with
-Ganymede.
+Gramann, Andrew Helyer and others made helpful reports on gaps and
+problems with Ganymede.
 
 John Knutson has provided bug reports and code contributions the
 course of evaluating the Ganymede code for use on an SGL project.
@@ -100,8 +100,10 @@ schema uses to propagate information from Ganymede into NIS and DNS.
 Outside ARL, we have gotten very helpful bug reports and feedback
 from:
 
+Pug Bainter, pug@pug.net - lots of really good bug reports
+Martin Schneider, martin@ira.uka.de - server customization bug reports
+Michael McEniry, mmceniry@itsc.uah.edu - linux localhost patch
 Curtis King, curtis.king@cul.ca - detailed bug reports
-Pug Bainter, pug@pug.net - install script bug reports, gash schema bug reports
 Doug Floyd, dfloyd@io.com - bug reports and AIX testing
 Matt Knopp, mhat@vorlon.com - FreeBSD testing, Sesame Chicken
 Mike Clay, mclay@weareb.org - FreeBSD testing
@@ -116,15 +118,14 @@ Andy Johnson, andyjohnson@engineer.com - build script bug reports
 Charles Adams, charles.adams@central.sun.com - bug reports, debugging
 Darrell Tippe, Darrell.Tippe@atcoitek.com - bug reports
 Glen Joseph, gjoseph@us.ibm.com - installServer bug report
-Martin Schneider, martin@ira.uka.de - server customization bug reports
-Michael McEniry, mmceniry@itsc.uah.edu - linux localhost patch
 
 --
 
 The regular expression class library used in the server to provide regexp
 search support is from the Free Software Foundation, and was written by
-Wes Biggs <wes@cacas.org>.  See the gnu-regexp-1.0.8/README and
-gnu-regexp-1.0.8/LICENSE for more details.
+Wes Biggs <wes@cacas.org>.  The gnu-regexp-1.0.8.tar.gz archive included
+in the src directory contains the complete distribution of this software.
+See README and LICENSE files in this archive for more details.
 
 The Java implementation of the standard UNIX crypt() function was
 converted from C by John Dumas, jdumas@zgs.com, whose code can be
@@ -141,4 +142,20 @@ rudimentary MIME support.
 The MD5 classes used in the server were written by Santeri
 Paavolainen, and is included in Ganymede under the terms of the GNU
 General Public License.  See http://www.cs.hut.fi/~santtu/java/ for
-more information.
+more information.  The MD5Crypt class used to support FreeBSD-style
+md5 passwords was originally written by phk@login.dknet.dk in C, and
+was translated into Java by Jonathan Abbey.
+
+The XML SAX reference classes and interfaces used by the Ganymede
+server's XML parsing routines was written and released into the public
+domain by David Meggison <david@megginson.com>.  More information on
+the SAX standard for XML parsing can be found at the SAX home page at
+http://www.megginson.com/SAX/.
+
+The Ganymede server uses James Clark's excellent XMLWriter and XP
+parser class libraries for XML generation and parsing.  Both are
+copyright 1997, 1998 by James Clark, and are included in Ganymede in
+accordance with his stated licensing terms.  See
+http://www.jclark.com/xml/xp/index.html for information on the XP
+parser.
+

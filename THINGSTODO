@@ -137,6 +137,33 @@ be a persistent error someplace that can sometimes make fields appear
 out of order despite dragging them into proper position in the schema
 editor.
 
+7) Two phase commit for client access
+
+The Ganymede server internally uses a two-phase commit protocol for
+handling its transactions, but it does not provide a two-phase
+interface for clients that may be coordinating transaction commits for
+an external system.  As a result, while Ganymede can be used to master
+cross-database transaction commits using the DBEditObject
+commitPhase1() and commitPhase2() methods, it doesn't support a client
+attempting to verify transactional consistency without performing an
+actual commit.
+
+No one has asked about this yet, but at some point I may need to
+expand the client API to allow some sort of 'verify ok to commit'
+method call which, if it returns a successful result, will guarantee
+that a later commit would proceed to completion successfully.  This
+will involve a good bit of reworking of the server's internal commit
+operations, and there may be issues of deadlock and timeouts to be
+considered as well.  At present, transactions lock all portions of the
+database involved in the transaction while the commit logic is being
+processed, but if there might be an indefinite delay between phases 1
+and 2 of an externally-accessible two phase protocol, we have to
+either risk unlocking the server and then hoping we can re-lock the
+server in a timely fashion later, or risk leaving those portions of
+the server locked until such time as a phase 2 order arrives.
+
+I'm not sure how folks handle this problem, generally.
+
 ---
 
 Jonathan Abbey, jonabbey@arlut.utexas.edu
