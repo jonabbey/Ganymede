@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 2002/06/29 01:44:46 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2002/12/13 23:02:52 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.79 $ $Date: 2002/06/29 01:44:46 $ $Name:  $
+ * @version $Revision: 1.80 $ $Date: 2002/12/13 23:02:52 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -658,6 +658,21 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   }
 
   /**
+   * <p>Returns the type name of the object contained in this frame panel.</p>
+   *
+   * <p>If the invid has not been loaded, this method will load it first.</p>
+   *
+   * @return The name of the type of the object in this frame panel.  
+   */
+
+  public String getObjectTypeName()
+  {
+    getObjectInvid();
+
+    return gc.getObjectType(invid);
+  }
+
+  /**
    * <p>Used by gclient.commitTransaction to get access to our notes panel.
    * gclient does this so that it can survey any open notes panels to make
    * sure that the contents are updated to the server.  This is ugly as
@@ -912,6 +927,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     menuBar.setBorderPainted(true);
     
     JMenu fileM = new JMenu("Object");
+    fileM.setMnemonic('o');
     menuBar.add(fileM);
 
     if (!editable)
@@ -973,6 +989,31 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    setRemovalMI.setToolTipText("Set a date for this object to be removed from the database");
 	    fileM.add(setRemovalMI);
 	  }
+      }
+
+    if (!editable)
+      {
+	fileM.addSeparator();
+
+	String typeName = getObjectTypeName();
+
+	JMenuItem editObjMI = new JMenuItem("Edit this " + typeName);
+	editObjMI.setMnemonic('e');
+	editObjMI.setActionCommand("edit_obj");
+	editObjMI.addActionListener(this);
+	fileM.add(editObjMI);
+
+	JMenuItem delObjMI = new JMenuItem("Delete this " + typeName);
+	delObjMI.setMnemonic('d');
+	delObjMI.setActionCommand("del_obj");
+	delObjMI.addActionListener(this);
+	fileM.add(delObjMI);
+
+	JMenuItem cloneObjMI = new JMenuItem("Clone this " + typeName);
+	cloneObjMI.setMnemonic('c');
+	cloneObjMI.setActionCommand("clone_obj");
+	cloneObjMI.addActionListener(this);
+	fileM.add(cloneObjMI);
       }
 
     if (debug)
@@ -1399,6 +1440,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	addRemovalDatePanel();
 	showTab(removal_date_index);
+      }
+    else if (e.getActionCommand().equals("edit_obj"))
+      {
+	gc.editObject(getObjectInvid());
+      }
+    else if (e.getActionCommand().equals("del_obj"))
+      {
+	gc.deleteObject(getObjectInvid(), true);
+      }
+    else if (e.getActionCommand().equals("clone_obj"))
+      {
+	gc.cloneObject(getObjectInvid());
       }
     else
       {

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.208 $
-   Last Mod Date: $Date: 2002/10/05 06:56:13 $
+   Version: $Revision: 1.209 $
+   Last Mod Date: $Date: 2002/12/13 23:02:52 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.208 $ $Date: 2002/10/05 06:56:13 $ $Name:  $
+ * @version $Revision: 1.209 $ $Date: 2002/12/13 23:02:52 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -1422,6 +1422,17 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   public String getObjectType(Invid objId)
   {
     return loader.getObjectType(objId);
+  }
+
+  /**
+   * <p>This method returns a concatenated string made up of the object type
+   * and object name.</p>
+   */
+
+  public String getObjectTitle(Invid objId)
+  {
+    ObjectHandle h = getObjectHandle(objId, null);
+    return getObjectType(objId) + " " + h.getLabel();
   }
 
   /**
@@ -2932,17 +2943,26 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public void editObject(Invid invid, String objectType)
   {
+    if (deleteHash.containsKey(invid))
+      {
+	showErrorMessage("Client Warning",
+			 getObjectTitle(invid) + " has already been deleted.\n\n" +
+			 "Cancel this transaction if you do not wish to delete this object after all.",
+			 getErrorImage());
+	return;
+      }
+
     if (wp.isOpenForEdit(invid))
       {
-	showErrorMessage("That object is already open for editing.");
+	showErrorMessage("Object already being edited", 
+			 "You already have a window open to edit " + getObjectTitle(invid) + ".", 
+			 getErrorImage());
 	return;
       }
 
     if (objectType == null || objectType.equals(""))
       {
-	Short baseType = new Short(invid.getType());
-	BaseDump bd = (BaseDump) getBaseMap().get(baseType);
-	objectType = bd.getName();
+	objectType = getObjectType(invid);
       }
 
     ObjectHandle handle = getObjectHandle(invid);
@@ -2953,7 +2973,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	DialogRsrc rsrc = new DialogRsrc(this,
 					 "Edit or Reactivate?", 
-					 "Warning, " + objectType + " " + handle.toString() + 
+					 "Warning, " + getObjectTitle(invid) + 
 					 " is currently inactivated.  If you are seeking to reactivate this object, " +
 					 "it is recommended that you use the server's reactivation wizard rather " +
 					 "than manually editing it.\n\nCan I go ahead and shift you over " +
@@ -3016,12 +3036,21 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * @param type Type of object to be created
    */
 
-  public db_object cloneObject(Invid origInvid)
+  public void cloneObject(Invid origInvid)
   {
     Invid invid = null;
     db_object obj = null;
 
     /* -- */
+
+    if (deleteHash.containsKey(origInvid))
+      {
+	showErrorMessage("Can't clone a deleted object",
+			 getObjectTitle(origInvid) + " has already been deleted.\n\n" +
+			 "Cancel this transaction if you do not wish to delete this object after all.",
+			 getErrorImage());
+	return; 
+      }
 
     // if the admin is a member of more than one owner group, ask what
     // owner groups they want new objects to be placed in
@@ -3050,7 +3079,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	if (obj == null)
 	  {
-	    return null;
+	    return;
 	  }
 
 	try
@@ -3117,8 +3146,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	setNormalCursor();
       }
-
-    return obj;
   }
 
   /** 
@@ -3284,36 +3311,50 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    *
    * <p>This method does a fair amount of internal bookkeeping to manage
    * the client's tree display, status caching, etc.</p>
+   *
+   * @param invid The object invid identifier to be deleted
+   * @param showDialog If true, we'll show a dialog box asking the user
+   * if they are sure they want to delete the object in question.
    */
 
-  public boolean deleteObject(Invid invid, boolean showDialog)
+  public void deleteObject(Invid invid, boolean showDialog)
   {
     ReturnVal retVal;
     boolean ok = false;
 
     /* -- */
 
+    if (deleteHash.containsKey(invid))
+      {
+	showErrorMessage("Object already deleted",
+			 getObjectTitle(invid) + " has already been marked as deleted.\n\n" +
+			 "You can hit the commit button to permanently get rid of this object, or you can hit " +
+			 "the cancel button to undo everything.",
+			 getErrorImage());
+	return; 
+      }
+
+    if (wp.isOpenForEdit(invid))
+      {	
+	showErrorMessage("Object being edited",
+			 "You are currently editing " + getObjectTitle(invid) + ".  I can't delete this object while you are editing it.",
+			 getErrorImage());
+	return;
+      }
+
     if (showDialog)
       {
-	try
+	StringDialog d = new StringDialog(this, "Verify deletion", 
+					  "Are you sure you want to delete " + 
+					  getObjectTitle(invid) + "?",
+					  "Yes", "No", getQuestionImage());
+	Hashtable result = d.DialogShow();
+	
+	if (result == null)
 	  {
-	    StringDialog d = new StringDialog(this, "Verify deletion", 
-					      "Are you sure you want to delete " + 
-					      getObjectType(invid) + " " +
-					      session.viewObjectLabel(invid) + "?", 
-					      "Yes", "No", getQuestionImage());
-	    Hashtable result = d.DialogShow();
+	    setStatus("Cancelled!");
 	    
-	    if (result == null)
-	      {
-		setStatus("Cancelled!");
-
-		return false;
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not verify invid to be inactivated: " + rx);
+	    return;
 	  }
       }
 
@@ -3409,7 +3450,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	setNormalCursor();
       }
 
-    return ok;
+    return;
   }
 
   /** 
@@ -3979,7 +4020,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if (ownerGroups.size() == 0)
       {
-	showErrorMessage("You don't have access to \nany owner groups.");
+	showErrorMessage("Permissions Error",
+			 "You don't have access to \nany owner groups.",
+			 getErrorImage());
 	return;
       }
     else if (ownerGroups.size() == 1)
@@ -4206,18 +4249,24 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    // the server cancelled our transaction.  We don't need to
 	    // call cancelTransaction ourselves.
 
-	    showErrorMessage("Error: commit failed", "Could not commit your changes.");
+	    showErrorMessage("Error: commit failed", 
+			     "Could not commit your changes.",
+			     getErrorImage());
 	  }
       }
     catch (RemoteException rx)
       {
 	rx.printStackTrace();
-	showErrorMessage("Remote Exception during commit:\n\n" + stackTrace(rx));
+	showErrorMessage("Server Error",
+			 "Remote Exception during commit:\n\n" + stackTrace(rx),
+			 getErrorImage());
       }
     catch (Exception e)
       {
 	e.printStackTrace();
-	showErrorMessage("Local Exception during commit:\n\n" + stackTrace(e));
+	showErrorMessage("Client Error",
+			 "Local Exception during commit:\n\n" + stackTrace(e),
+			 getErrorImage());
       }
     finally
       {
@@ -4442,7 +4491,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	handleReturnVal(rv);
 	if ((rv != null) && (!rv.didSucceed()))
 	  {
-	    showErrorMessage("Could not open new transaction.");
+	    showErrorMessage("Server Error",
+			     "Could not open new transaction.",
+			     getErrorImage());
 	  }
 	
 	tree.refresh();
@@ -4735,7 +4786,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     if (o.getOperationType() == JValueObject.ERROR)
       {
-	showErrorMessage((String)o.getValue());
+	showErrorMessage("Client Error",
+			 (String)o.getValue(),
+			 getErrorImage());
       }
     else
       {
@@ -5046,7 +5099,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    if (deleteHash.containsKey(invidN.getInvid()))
 	      {
 		// This one has been deleted
-		showErrorMessage("This object has already been deleted.");
+		showErrorMessage("Client Warning",
+				 "This object has already been deleted.\n\n" +
+				 "Cancel this transaction if you do not wish to delete this object after all.",
+				 getErrorImage());
 	      }
 	    else
 	      {
@@ -5071,7 +5127,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    if (deleteHash.containsKey(invidN.getInvid()))
 	      {
-		showErrorMessage("This object has already been deleted.");
+		showErrorMessage("Client Warning",
+				 "This object has already been deleted.\n\n" +
+				 "Cancel this transaction if you do not wish to delete this object after all.",
+				 getErrorImage());
 	      }
 	    else
 	      {
@@ -5098,7 +5157,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    if (deleteHash.containsKey(invidN.getInvid()))
 	      {
-		showErrorMessage("This object has already been deleted.");
+		showErrorMessage("Client Warning",
+				 "This object has already been deleted.\n\n" +
+				 "Cancel this transaction if you do not wish to delete this object after all.",
+				 getErrorImage());
 	      }
 	    else
 	      {
