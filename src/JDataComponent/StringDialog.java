@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 2001/09/17 20:58:45 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 2002/06/29 01:24:21 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.55 $ $Date: 2001/09/17 20:58:45 $ $Name:  $
+ * @version $Revision: 1.56 $ $Date: 2002/06/29 01:24:21 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -428,7 +428,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 		    
 	    dateThing dt = (dateThing) element;
 
-	    JdateField dateField;
+	    JcalendarField dateField;
 	    Date currentDate;
 	    Date minDate = new Date();
 
@@ -458,13 +458,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
 	    if (dt.getMaxDate() != null)
 	      {
-		dateField = new JdateField(currentDate, true, true,
-					   minDate, dt.getMaxDate());
+		dateField = new JcalendarField(currentDate, true, true,
+					       minDate, dt.getMaxDate());
 	      }
 	    else
 	      {
-		dateField = new JdateField(currentDate, true, false,
-					   null, null);
+		dateField = new JcalendarField(currentDate, true, false,
+					       null, null);
 	      }
 
 	    addRow(panel, dateField, dt.getLabel(), i);
@@ -792,9 +792,9 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	    
 		valueHash.put(label, new String(pf.getPassword()));
 	      }
-	    else if (c instanceof JdateField)
+	    else if (c instanceof JcalendarField)
 	      {
-		JdateField dF = (JdateField) c;
+		JcalendarField dF = (JcalendarField) c;
 
 		valueHash.put(label, dF.getDate());
 	      }
