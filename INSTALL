@@ -370,9 +370,9 @@ _5. Running the Ganymede Server_
    may see what looks like a very large number of Java processes running.
    This is perfectly normal. In current versions of Linux, the ps and top
    commands will show you a separate entry for each thread that is
-   running in a given process. Both the rmiregistry and, especially, the
-   Ganymede server are heavily multithreaded, so you should expect to see
-   dozens of Java threads running on a Linux system.
+   running in a given process. Both the rmiregistry and the Ganymede
+   server are heavily multithreaded, so you should expect to see dozens
+   of Java threads running on a Linux system.
    
    When you want to shut the server down, you'll just need to order it to
    shut down from the Ganymede admin console (which we'll talk about
@@ -574,4 +574,4 @@ _8. Prepare web access clients_
    
     Jonathan Abbey
     
-   Last modified: Thu Dec 14 22:57:46 CST 2000
+   Last modified: Thu Dec 14 22:59:48 CST 2000
