@@ -73,11 +73,13 @@
 		Java Web Start is also capable of caching the applets
 		on your system, to improve subsequent startup time.</p>
 
-                <p>If Java Web Start does not work for you, the 'Native' option
-                should, at least on any sort of modern web browser.  If you
-                have a very old version of Netscape or IE, you might try
-                'Java Plug In' as a last resort.  If that doesn't work, your
-                system needs to have Java 1.4 or better installed.</p>
+                <p>If Java Web Start does not work for you, the
+                'Native' option should, at least on any sort of modern
+                web browser.  If you have a very old version of
+                Netscape or IE, you might try 'Java Plug In' as a last
+                resort.  If that doesn't work, check to make sure your
+                system has Java 1.4 or better installed.</p>
+
 	    </font>
 	    </td>
 	  </tr>
@@ -216,7 +218,7 @@
           }
           remote.opener.name = "opener";
         } else if (URLsuffix == ".jnlp") {
-          open(URL);
+          load(URL);
         }
       }
       // end script hiding -->
