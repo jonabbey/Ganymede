@@ -54,6 +54,7 @@
 package arlut.csd.JDialog;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -249,6 +250,25 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     this.resource = Resource;
 
     create();
+  }
+
+  public Dimension getPreferredSize()
+  {
+    // Let's make sure we don't try to get too big by default.
+
+    Dimension size = super.getPreferredSize();
+
+    if (size.width > 800)
+      {
+	size.width = 800;
+      }
+
+    if (size.height > 600)
+      {
+	size.height = 600;
+      }
+
+    return size;
   }
 
   private void create()

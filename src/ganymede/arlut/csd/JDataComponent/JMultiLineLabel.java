@@ -80,18 +80,6 @@ public class JMultiLineLabel extends JTextArea {
   public final static int RIGHT = SwingConstants.RIGHT;
   public final static int CENTER = SwingConstants.CENTER;
 
-  int 
-    margin_height = 5,
-    margin_width = 5,
-    alignment,
-    num_lines,
-    line_ascent,
-    line_height,
-    max_width;
-
-  boolean
-    haveMeasured = false;
-
   /**
    * Controls the default word wrap length.  The default value of 96
    * columns should hopefully be wide enough to handle exception
@@ -133,17 +121,6 @@ public class JMultiLineLabel extends JTextArea {
     columns = val;
     revalidate();
   }
-
-  public int getAlignment()
-  {
-    return alignment;
-  }
-  
-  public void setAlignment(int a)
-  {
-    alignment = a;
-    repaint();
-  } 
 
   public Dimension getPreferredSize()
   {
