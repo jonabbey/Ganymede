@@ -545,7 +545,7 @@ public class xmlobject {
 	      {
 		if (debug)
 		  {
-		    xSession.err.println("xmlobject.getInvid() deciding known non existent on " type + ":" + id);
+		    xSession.err.println("xmlobject.getInvid() deciding known non existent on " + type + ":" + id);
 		  }
 
 		knownNonExistent = true;
