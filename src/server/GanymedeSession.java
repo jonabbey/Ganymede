@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.101 $ %D%
+   Version: $Revision: 1.102 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3792,6 +3792,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   *
    * This method returns the generic permissions for a object type.
    * This is currently used primarily to check to see whether a user
    * has privileges to create an object of a specific type.<br><br>
@@ -3801,11 +3802,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * permission bits for the given base, and returns the effective
    * permission entry.<br><br>
    * 
-   * @param includeOwnedPerms If true, this method will return the permission
-   * that the current persona would have for an object that was owned
-   * by the current persona.  If false, this method will return the default
-   * permissions that apply to objects not owned by the persona.
-   *
+   * @param includeOwnedPerms If true, this method will return the
+   * permission that the current persona would have for an object that
+   * was owned by the current persona.  If false, this method will
+   * return the default permissions that apply to objects not owned by
+   * the persona.
+   * 
    */
 
   final PermEntry getPerm(short baseID, boolean includeOwnedPerms)
@@ -4364,21 +4366,25 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return false;
       }
     
-    return recursePersonaMatch(inf.getValuesLocal());
+    return recursePersonaMatch(inf.getValuesLocal(), new Vector());
   }
 
   /**
    *
-   * Recursive helper method for personaMatch.. this method
-   * does a depth first search up the owner tree for each
-   * Invid contained in the invids Vector to see if personaInvid
-   * is a member of any of the containing owner groups.
+   * Recursive helper method for personaMatch.. this method does a
+   * depth first search up the owner tree for each Invid contained in
+   * the invids Vector to see if personaInvid is a member of any of
+   * the containing owner groups.
    *
    * @param owners A vector of invids pointing to OwnerBase objects
+   * @param alreadySeen A vector of owner group Invid's that have
+   * already been checked.  (For infinite loop avoidance).
    *
+   * @return true if a match is found
+   * 
    */
 
-  private final boolean recursePersonaMatch(Vector owners)
+  private final boolean recursePersonaMatch(Vector owners, Vector alreadySeen)
   {
     Invid owner;
     DBObject ownerObj;
@@ -4395,6 +4401,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     for (int i = 0; i < owners.size(); i++)
       {
 	owner = (Invid) owners.elementAt(i);
+
+	if (alreadySeen.contains(owner))
+	  {
+	    return false;
+	  }
+	else
+	  {
+	    alreadySeen.addElement(owner);
+	  }
 
 	ownerObj = session.viewDBObject(owner);
 
@@ -4428,7 +4443,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    if (inf.isVector())
 	      {
-		if (recursePersonaMatch(inf.getValuesLocal()))
+		if (recursePersonaMatch(inf.getValuesLocal(), alreadySeen))
 		  {
 		    return true;
 		  }
@@ -4448,7 +4463,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * This helper method iterates through the owners
    * vector and checks to see if the current personaInvid is a
    * member of all of the groups through either direct membership
-   * or through membership of an owning group.  This method is
+   * or through membership of an owning group.  This method 
    * depends on recursePersonaMatch().
    *
    */
@@ -4519,7 +4534,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    if (inf.isVector())
 	      {
-		if (recursePersonaMatch(inf.getValuesLocal()))
+		if (recursePersonaMatch(inf.getValuesLocal(), new Vector()))
 		  {
 		    found = true;
 		  }
