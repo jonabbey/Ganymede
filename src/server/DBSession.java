@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -769,4 +769,20 @@ final public class DBSession {
   {
     return GSession;
   }
+
+  /**
+   *
+   * This method returns a handle to the objectHook for
+   * a particular Invid.
+   *
+   */
+
+  public DBEditObject getObjectHook(Invid invid)
+  {
+    DBObjectBase base;
+
+    base = store.getObjectBase(invid.getType());
+    return base.objectHook;
+  }
+  
 }
