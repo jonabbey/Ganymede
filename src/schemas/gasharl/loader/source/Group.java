@@ -6,7 +6,7 @@
    GASH group_info file
    
    Created: 29 August 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,6 +53,8 @@ public class Group {
   String contract = "";
   String description = "";
 
+  boolean valid = false;
+
   // instance constructor
 
   public Group()
@@ -66,18 +68,41 @@ public class Group {
 
     if (parser.EOFnext())
       {
+	valid = false;
 	return true;
       }
 
     name = parser.getNextBit();
     password = parser.getNextBit(); 
-    gid = parser.getNextInt();
+
+    try
+      {
+	gid = parser.getNextInt();
+      }
+    catch (NumberFormatException ex)
+      {
+	parser.skipToEndLine();
+	valid = false;
+	return parser.atEOF();
+      }
 
     // skip the : before the user list
 
-    tokens.nextToken();
+    if (parser.checkNextToken() != ':')
+      {
+	valid = false;
+	return parser.atEOF();
+      }
+    else
+      {
+	// skip it
 
-    while (parser.checkNextToken() != ':' && !parser.atEOF() && !parser.atEOL())
+	tokens.nextToken();
+      }
+
+    // read in the users
+
+    while (parser.checkNextToken() != ':' && !parser.EOFnext() && !parser.EOLnext())
       {
 	users.addElement(parser.getNextBit());
       }
@@ -93,6 +118,8 @@ public class Group {
       }
 
     parser.skipToEndLine();
+
+    valid = true;
 
     return parser.atEOF();
   }

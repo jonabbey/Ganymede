@@ -6,7 +6,7 @@
    GASH user_info file
    
    Created: 22 August 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -63,6 +63,8 @@ public class User {
   String category;
   String expiration;
 
+  boolean valid;
+
   // instance constructor
 
   public User()
@@ -75,13 +77,28 @@ public class User {
 
     if (parser.EOFnext())
       {
+	valid = false;
 	return true;
       }
 
     name = parser.getNextBit();
     password = parser.getNextBit();
-    uid = parser.getNextInt();
-    gid = parser.getNextInt();
+
+    try
+      {
+	uid = parser.getNextInt();
+	gid = parser.getNextInt();
+      }
+    catch (NumberFormatException ex)
+      {
+	System.err.println("** Warning, bad uid or gid field for user " + name);
+	System.err.println("** Skipping user_info entry for user " + name);
+
+	parser.skipToEndLine();
+	valid = false;
+	return parser.atEOF();
+      }
+
     fullname = parser.getNextBit();
 
     /* now we need to get the next bit..  in the ARL user_info format,
@@ -95,20 +112,22 @@ public class User {
 	// no space in the string.. maybe we got
 	// a comma where we shouldn't have?
 
-	room = parser.getNextBit();
+	System.err.println("Warning, possible bad room/division field for user " + name);
+
+	room = tmp;
+	division = "";
       }
     else
       {
 	room = tmp.substring(0, index); 
+	division = tmp.substring(index+1); 
       }
-
-    division = tmp.substring(index+1); 
 
     /* and some more : or , separated fields... */
 
     officePhone = parser.getNextBit();
 
-    /* home phone is optional in the ARL user_info file.. */
+    /* home phone is optional in the ARL user_info gcos file.. */
 
     if (parser.checkNextToken() == ',')
       {
@@ -132,6 +151,8 @@ public class User {
       }
 
     parser.skipToEndLine();
+
+    valid = true;
 
     return parser.atEOF();
   }
