@@ -177,7 +177,18 @@ public class PasswordDBField extends DBField implements pass_field {
 
   /**
    * <p>SSHA hash, for LDAP.  Good for validating up to 2^64 bits of
-   * plaintext.. effectively indefinite in extent.</p>
+   * plaintext.. effectively indefinite in extent.  Probably the
+   * strongest hash here in terms of difficulty of finding collisions,
+   * but it's very quick to evaluate, so a dictionary attack against
+   * this hash can proceed rapidly.</p>
+   *
+   * <p>Note that we keep the sshaHash string here in the same form
+   * as would be used in an LDAP store.</p>
+   *
+   * <p>This is Netscape's salted variant of the FIPS SHA-1 standard.
+   * SHA-1 is described at http://en.wikipedia.org/wiki/SHA-1, while
+   * SSHA is described at
+   * http://www.openldap.org/faq/data/cache/347.html.</p>
    */
 
   private String sshaHash;
