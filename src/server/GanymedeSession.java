@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.213 $
-   Last Mod Date: $Date: 2000/11/10 05:04:58 $
+   Version: $Revision: 1.214 $
+   Last Mod Date: $Date: 2000/11/14 06:19:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.213 $ $Date: 2000/11/10 05:04:58 $
+ * @version $Revision: 1.214 $ $Date: 2000/11/14 06:19:49 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3212,18 +3212,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 			  {
 			    System.err.println("Error, didn't find the right kind of field");
 			    System.err.println("Found: " + resultfield.getFieldDef());
-
-			    if (resultfield.getFieldDef().IAmACopy)
-			      {
-				System.err.println("\t**COPY**");
-			      }
-
 			    System.err.println("Wanted: " + fieldDef);
-
-			    if (fieldDef.IAmACopy)
-			      {
-				System.err.println("\t**COPY**");
-			      }
 			  }
 
 			return intersectQueries(query, result, null);
