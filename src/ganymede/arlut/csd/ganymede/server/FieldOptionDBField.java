@@ -106,8 +106,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   // ---
 
-  boolean defined = false;
-
   /**
    *
    * Returns true if this field has a value associated
@@ -119,24 +117,35 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public boolean isDefined()
   {
-    return defined;
+    return this.matrix.size() > 0;
   }
 
   /**
-   * <P>This method is used to mark a field as undefined when it is
-   * checked out for editing.  Different subclasses of
-   * {@link arlut.csd.ganymede.server.DBField DBField} may
-   * implement this in different ways, if simply setting the field's
-   * value member to null is not appropriate.  Any namespace values claimed
-   * by the field will be released, and when the transaction is
-   * committed, this field will be released.</P>
+   * <p>This method is used to mark a field as undefined when it is
+   * checked out for editing.  Different subclasses of {@link
+   * arlut.csd.ganymede.server.DBField DBField} may implement this in
+   * different ways, if simply setting the field's value member to
+   * null is not appropriate.  Any namespace values claimed by the
+   * field will be released, and when the transaction is committed,
+   * this field will be released.</p>
+   *
+   * <p>Note that this method is really only intended for those fields
+   * which have some significant internal structure to them, such as
+   * permission matrix, field option matrix, and password fields.</p>
+   *
+   * <p>NOTE: There is, at present, no defined DBEditObject callback
+   * method that tracks generic field nullification.  This means that
+   * if your code uses setUndefined on a PermissionMatrixDBField,
+   * FieldOptionDBField, or PasswordDBField, the plugin code is not
+   * currently given the opportunity to review and refuse that
+   * operation.  Caveat Coder.</p>
    */
 
   public synchronized ReturnVal setUndefined(boolean local)
   {
     if (isEditable(local))
       {
-	defined = false;
+	matrix.clear();
 	return null;
       }
 
@@ -275,7 +284,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * not a field within a DBObjectBase.</P>
    */
 
-  private static boolean isBase(String matrixEntry)
+  public static boolean isBase(String matrixEntry)
   {
     return (matrixEntry.indexOf("::") != -1);
   }
@@ -480,7 +489,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     this.fieldcode = definition.getID();
     
     matrix = new Hashtable();
-    defined = false;
     value = null;
   }
 
@@ -523,8 +531,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
 	this.matrix.put(key, option);
       }
-
-    defined = true;
   }
 
   // we never allow setValue
@@ -768,8 +774,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	option = in.readUTF().intern();
 	matrix.put(key, option);
       }
-
-    defined = true;
   }
 
   /**
@@ -1177,11 +1181,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	    System.err.println("FieldOptionDBField: base " + 
 			       baseID + ", field " + fieldID + " cleared.");
 	  }
-
-	if (matrix.size() == 0)
-	  {
-	    defined = false;
-	  }
       }
     else
       {
@@ -1192,8 +1191,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	    System.err.println("FieldOptionDBField: base " + 
 			       baseID + ", field " + fieldID + " set to \"" + option + "\"");
 	  }
-
-	defined = true;
       }
 
     return null;
@@ -1252,11 +1249,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	    System.err.println("FieldOptionDBField: base " + 
 			       baseID + " cleared.");
 	  }
-
-	if (matrix.size() == 0)
-	  {
-	    defined = false;
-	  }
       }
     else
       {
@@ -1267,8 +1259,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	    System.err.println("FieldOptionDBField: base " + 
 			       baseID + " set to \"" + option + "\"");
 	  }
-	
-	defined = true;
       }
 
     return null;
@@ -1320,25 +1310,25 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>Private method to generate a key for use in our internal
+   * <P>Method to generate a key for use in our internal
    * Hashtable, used to encode the option for a given {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and {@link
    * arlut.csd.ganymede.server.DBObjectBaseField
    * DBObjectBaseField}.</P>
    */
 
-  private String matrixEntry(short baseID, short fieldID)
+  public static String matrixEntry(short baseID, short fieldID)
   {
     return (baseID + ":" + fieldID);
   }
 
   /**
-   * <P>Private method to generate a key for use in our internal
+   * <P>Method to generate a key for use in our internal
    * Hashtable, used to encode the option for a given {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.</P>
    */
   
-  private String matrixEntry(short baseID)
+  public static String matrixEntry(short baseID)
   {
     return (baseID + "::");
   }
@@ -1387,12 +1377,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (oldval == null)
       {
-	this.defined = false;
+	this.setUndefined(true);
       }
     else
       {
 	this.matrix = ((FieldOptionMatrixCkPoint) oldval).matrix;
-	this.defined = true;
       }
   }
 
