@@ -7,8 +7,8 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2001/08/06 15:36:44 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2002/02/01 06:34:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -234,12 +234,20 @@ public class PasswordAgingTask implements Runnable {
 
 	// first, check for one month into the future
 
+	// note: we used to try and do month add, but we can't do this
+	// cleanly if the next month has fewer days than this month
+	// does, i.e., if someone's password expires on February 28th
+	// and it is January 29th, Java considers January 29th + 1
+	// month to be February 28th.  Ditto January 30th + 1 month,
+	// ditto January 31st + 1 month.
+	//
+	// so, we just go for four weeks of notice
+
 	lowerBound.setTime(currentTime);
-	lowerBound.add(Calendar.MONTH, 1);
-	lowerBound.add(Calendar.DATE, -1);
+	lowerBound.add(Calendar.DATE, 27);
 
 	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.MONTH, 1);
+	upperBound.add(Calendar.DATE, 28);
 
 	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
@@ -248,13 +256,16 @@ public class PasswordAgingTask implements Runnable {
 	  }
 
 	// then two weeks
+	//
+	// likewise, Java's week calculations for WEEK_OF_MONTH, etc.,
+	// are very squirrely, so we'll just stick to simple date
+	// incrementing.
 
 	lowerBound.setTime(currentTime);
-	lowerBound.add(Calendar.WEEK_OF_MONTH, 2);
-	lowerBound.add(Calendar.DATE, -1);
+	lowerBound.add(Calendar.DATE, 13);
 
 	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.WEEK_OF_MONTH, 2);
+	upperBound.add(Calendar.DATE, 14);
 
 	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
@@ -265,11 +276,10 @@ public class PasswordAgingTask implements Runnable {
 	// then one week
 
 	lowerBound.setTime(currentTime);
-	lowerBound.add(Calendar.WEEK_OF_MONTH, 1);
-	lowerBound.add(Calendar.DATE, -1);
+	lowerBound.add(Calendar.DATE, 6);
 
 	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.WEEK_OF_MONTH, 1);
+	upperBound.add(Calendar.DATE, 7);
 
 	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
