@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -190,6 +190,84 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   /**
    *
+   * Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of DBField will
+   * wind up calling up to here to let us override the normal visibility
+   * process.<br><br>
+   *
+   * Note that it is permissible for session to be null, in which case
+   * this method will always return the default visiblity for the field
+   * in question.<br><br>
+   *
+   * If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   * 
+   */
+
+  public boolean canSeeField(DBSession session, DBField field)
+  {
+    // if we only have a single interface in this system, we don't
+    // want the name field to be visible
+
+    if (field.getID() == interfaceSchema.NAME)
+      {
+	Vector siblings = getSiblingInvids();
+
+	if (siblings.size() == 0)
+	  {
+	    return false;
+	  }
+	else
+	  {
+	    return true;
+	  }
+      }
+
+    return super.canSeeField(session, field);
+  }
+
+  /**
+   *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    switch (fieldid)
+      {
+      case interfaceSchema.NAME:
+
+	// the name is required if and only if the parent
+	// object has more than one interface
+	
+	Vector siblings = getSiblingInvids();
+
+	if (siblings.size() == 0)
+	  {
+	    return false;
+	  }
+	else
+	  {
+	    return true;
+	  }
+
+      case interfaceSchema.ADDRESS:
+      case interfaceSchema.ETHERNETINFO:
+      case interfaceSchema.IPNET:
+	return true;
+      }
+
+    return false;
+  }
+
+  /**
+   *
    * This method allows the DBEditObject to have executive approval
    * of any scalar set operation, and to take any special actions
    * in reaction to the set.. if this method returns true, the
@@ -355,9 +433,50 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * This method is the hook that DBEditObject subclasses use to interpose
+   * wizards when a field's value is being changed.<br><br>
    *
-   * This is the hook that DBEditObject subclasses use to interpose wizards when
-   * a field's value is being changed.
+   * Whenever a field is changed in this object, this method will be
+   * called with details about the change. This method can refuse to
+   * perform the operation, it can make changes to other objects in
+   * the database in response to the requested operation, or it can
+   * choose to allow the operation to continue as requested.<br><br>
+   *
+   * In the latter two cases, the wizardHook code may specify a list
+   * of fields and/or objects that the client may need to update in
+   * order to maintain a consistent view of the database.<br><br>
+   *
+   * If server-local code has called
+   * GanymedeSession.enableOversight(false), this method will never be
+   * called.  This mode of operation is intended only for initial
+   * bulk-loading of the database.<br><br>
+   *
+   * This method may also be bypassed when server-side code uses
+   * setValueLocal() and the like to make changes in the database.<br><br>
+   *
+   * This method is called before the finalize*() methods.. the finalize*()
+   * methods is where last minute cascading changes should be performed..
+   * the finalize*() methods have no power to set object/field rescan
+   * or return dialogs to the client, however.. in cases where such
+   * is necessary, a custom plug-in class must have wizardHook() and
+   * finalize*() configured to work together to both provide proper field
+   * rescan notification and to check the operation being performed and
+   * make any changes necessary to other fields and/or objects.<br><br>
+   *
+   * Note as well that wizardHook() is called before the namespace checking
+   * for the proposed value is performed, while the finalize*() methods are
+   * called after the namespace checking.
+   *
+   * @return a ReturnVal object indicated success or failure, objects and
+   * fields to be rescanned by the client, and a doNormalProcessing flag
+   * that will indicate to the field code whether or not the operation
+   * should continue to completion using the field's standard logic.
+   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
+   * if the wizardHook wishes to simply specify rescan information while
+   * having the field perform its standard operation.</b>  wizardHook() may
+   * return new ReturnVal(true, false) if the wizardHook performs the operation
+   * (or a logically related operation) itself.  The same holds true for the
+   * respond() method in GanymediatorWizard subclasses.
    *
    */
 
