@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,6 @@ public class Loader extends Thread {
     baseMap,
     baseNames,
     baseHash,
-    baseHashNoBuiltIns,
     baseToShort;
 
   private Vector
@@ -43,8 +42,7 @@ public class Loader extends Thread {
     baseNamesLoaded = false,
     baseListLoaded = false,
     baseMapLoaded = false,
-    baseHashLoaded = false,
-    baseHashNoBuiltInsLoaded = false;
+    baseHashLoaded = false;
 
   private Session
     session;
@@ -74,7 +72,6 @@ public class Loader extends Thread {
 	loadBaseList();
 	loadBaseNames();
 	loadBaseHash();
-	loadBaseHashNoBuiltIns();
 	loadBaseMap();
       }
     catch (RemoteException rx)
@@ -227,42 +224,6 @@ public class Loader extends Thread {
     
   }
 
-  public Hashtable getBaseHashNoBuiltIns()
-  {
-    while (! baseHashNoBuiltInsLoaded)
-      {
-	System.out.println("Loader: waiting for base hash no built ins");
-
-	synchronized (this)
-	  {
-	    try
-	      {
-		this.wait();
-	      }
-	    catch (InterruptedException x)
-	      {
-		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
-	      }
-	  }
-      }
-
-    if (debug)
-      {
-	if (baseHashNoBuiltIns == null)
-	  {
-	    System.out.println("baseHashNoBuiltIns is null");
-	  }
-	else
-	  {
-	    System.out.println("returning baseHashNoBuiltIns");
-	  }
-      }
-
-    return baseHashNoBuiltIns;
-    
-  }
-
-
   public Hashtable getBaseMap()
   {
     while (! baseMapLoaded)
@@ -347,7 +308,6 @@ public class Loader extends Thread {
 
   private synchronized void loadBaseList() throws RemoteException
   {
-    
     baseList = session.getTypes();
 
     if (debug)
@@ -419,9 +379,11 @@ public class Loader extends Thread {
     for (int i = 0; i < typesV.size(); i++)
       {
 	base = (Base) typesV.elementAt(i);
+
 	if (base != null)
 	  {
-	    baseHash.put(base, base.getFields(true));
+	    baseHash.put(base, base.getFields());
+
 	    if (debug)
 	      {
 		System.out.println("Putting another base on the old baseHash");
@@ -436,52 +398,6 @@ public class Loader extends Thread {
     baseHashLoaded = true;
     notifyAll();
   }
-
-
-  private synchronized void loadBaseHashNoBuiltIns() throws RemoteException
-  {
-    Base base;
-    Vector typesV;
-
-    /* -- */
-
-    typesV = getBaseList();
-
-    if (typesV == null)
-      {
-	throw new RuntimeException("typesV is null in Loader!");
-      }
-
-    if (baseHashNoBuiltIns != null)
-      {
-	baseHashNoBuiltIns.clear();
-      }
-    else
-      {
-	baseHashNoBuiltIns = new Hashtable(typesV.size());
-      }
-    
-    for (int i = 0; i < typesV.size(); i++)
-      {
-	base = (Base) typesV.elementAt(i);
-	if (base != null)
-	  {
-	    baseHashNoBuiltIns.put(base, base.getFields(false));
-	    if (debug)
-	      {
-		System.out.println("Putting another base on the old baseHashNoBuiltIns");
-	      }
-	  }
-	else
-	  {
-	    System.out.println("Base was null");
-	  }
-      }
-
-    baseHashNoBuiltInsLoaded = true;
-    notifyAll();
-  }
-
 
   /**
    *
