@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 1999/07/26 22:19:51 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 1999/08/26 23:05:32 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -87,7 +87,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.57 $ $Date: 1999/07/26 22:19:51 $ $Name:  $
+ * @version $Revision: 1.58 $ $Date: 1999/08/26 23:05:32 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -109,6 +109,26 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    */
 
   boolean closingApproved = false;
+
+  /**
+   * <p>Used with internalFrameClosed() to make our JInternalFrame close
+   * interception hack from Swing 1.1 work with Kestrel.</p>
+   *
+   * <p>If this variable is set to true, internalFrameClosed() will
+   * not attempt to call dispose().
+   */
+
+  private boolean closed = false;
+
+  /**
+   * <p>Used with internalFrameClosed() to make our JInternalFrame close
+   * interception hack from Swing 1.1 work with Kestrel.</p>
+   *
+   * <p>If this variable is set to true, stopLoading() will
+   * not do anything.
+   */
+
+  private boolean loadingStopped = false;
 
   // Indexes for the tabs in the JTabbedPane These numbers have to
   // correspond to the order they are added as tabs, so they are set
@@ -546,15 +566,25 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * <p>This will not make the window go away, it simply tells all the
    * containerPanels inside to stop loading.</p>
    *
-   * <p>windowPanel(the porpertyChangeListener/InternalFrameListener)
+   * <p>windowPanel(the propertyChangeListener/InternalFrameListener)
    * calls this when a frame is closed.</p>
    */
 
   public void stopLoading()
   {
+    if (loadingStopped)
+      {
+	if (debug)
+	  {
+	    println("framePanel.stopLoading(): loading already stopped, doing nothing.");
+	  }
+
+	return;
+      }
+
     if (debug)
       {
-	println("Stopping all the containerPAnels.");
+	println("framePanel.stopLoading(): Stopping all the containerPanels.");
       }
 
     Runnable r = new Runnable() {
@@ -576,6 +606,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     Thread t = new Thread(r);
     t.start();
+    this.loadingStopped = true;
   }
 
   /**
@@ -1466,6 +1497,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	System.err.println("framePanel.internalFrameClosed(): frame closed");
       }
 
+    if (this.closed)
+      {
+	if (debug)
+	  {
+	    System.err.println("framePanel.internalFrameClosed(): frame already closed, doing nothing.");
+	  }
+
+	return;
+      }
+
     for (int i = 0; i < containerPanels.size(); i++)
       {
 	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
@@ -1478,11 +1519,35 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	history_panel.unregister();
       }
 
+    this.closed = true;
+
+    if (debug)
+      {
+	System.err.println("framePanel.internalFrameClosed(): going invisible");
+      }
+
+    this.setVisible(false);
+
+    if (debug)
+      {
+	System.err.println("framePanel.internalFrameClosed(): disposing");
+      }
+
     this.dispose();
+
+    if (debug)
+      {
+	System.err.println("framePanel.internalFrameClosed(): disposed");
+      }
   }
 
   public void internalFrameClosing(InternalFrameEvent event)
   {
+    if (debug)
+      {
+	System.err.println("framePanel.internalFrameClosing(): Called");
+      }
+
     if (!closingApproved)
       {
 	return;
@@ -1520,6 +1585,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public void vetoableChange(PropertyChangeEvent pce) throws PropertyVetoException
   {
+    if (debug)
+      {
+	System.err.println("framePanel.vetoableChange()");
+      }
+
     if (pce.getPropertyName().equals(IS_CLOSED_PROPERTY) &&
 	pce.getOldValue().equals(Boolean.FALSE) &&
 	pce.getNewValue().equals(Boolean.TRUE))
@@ -1567,6 +1637,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    if (isCreating)
 	      {
 		gclient.client.deleteObject(getObjectInvid());
+	      }
+
+	    if (debug)
+	      {
+		System.err.println("framePanel.vetoableChange(): setting closingApproved true");
 	      }
 
 	    closingApproved = true;

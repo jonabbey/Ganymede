@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 1999/05/26 23:17:17 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 1999/08/26 23:05:32 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -80,7 +80,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.68 $ $Date: 1999/05/26 23:17:17 $ $Name:  $
+ * @version $Revision: 1.69 $ $Date: 1999/08/26 23:05:32 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -449,6 +449,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     w.setLayer(new Integer(topLayer));
     
     add(w);
+    w.setVisible(true);		// for Kestrel
     setSelectedWindow(w);
 
     updateMenu();
@@ -631,6 +632,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	windowList.put(title, rt);
 	  
 	add(rt);
+	rt.setVisible(true);	// for Kestrel
 	setSelectedWindow(rt);
 
 	updateMenu();
@@ -665,6 +667,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     waitWindowHash.put(key, frame);
 
     add(frame);
+    frame.setVisible(true);	// for Kestrel
     setSelectedWindow(frame);
   }
 
@@ -1019,7 +1022,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     if (debug)
       {
-	System.out.println("Closing an internal frame");
+	System.out.println("windowPanel.internalFrameClosed(): Closing an internal frame");
       }
     
     if (event.getSource() instanceof framePanel)
@@ -1040,6 +1043,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	windowList.remove(oldTitle);
 	
 	updateMenu();
+      }
+
+    if (debug)
+      {
+	System.out.println("windowPanel.internalFrameClosed(): exiting");
       }
   }
 
