@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1136,54 +1136,5 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       }
     
     return null;
-  }
-
-  /**
-   *
-   * Hook to have this object create a new embedded object
-   * in the given field.  
-   *
-   */
-
-  public Invid createNewEmbeddedObject(InvidDBField field)
-  {
-    DBEditObject newObject;
-    DBObjectBase targetBase;
-    DBObjectBaseField fieldDef;
-
-    /* -- */
-
-    if (field.getID() == systemSchema.INTERFACES) // interface field
-      {
-	fieldDef = field.getFieldDef();
-	
-	if (fieldDef.getTargetBase() > -1)
-	  {
-	    ReturnVal retVal = getGSession().create_db_object(fieldDef.getTargetBase());
-
-	    if (retVal == null)
-	      {
-		throw new RuntimeException("error in server, systemCustom object got " +
-					   "nothing back from creating an interface");
-	      }
-
-	    if (!retVal.didSucceed())
-	      {
-		return null;	// failure
-	      }
-
-	    newObject = (DBEditObject) retVal.getObject();
-
-	    return newObject.getInvid();
-	  }
-	else
-	  {
-	    throw new RuntimeException("error in schema.. interface field target base not restricted..");
-	  }
-      }
-    else
-      {
-	return null;		// default
-      }
   }
 }

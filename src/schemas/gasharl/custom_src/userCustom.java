@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -220,56 +220,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     return success;
-  }
-
-  /**
-   *
-   * Hook to have this object create a new embedded object
-   * in the given field.  
-   *
-   */
-
-  public Invid createNewEmbeddedObject(InvidDBField field)
-  {
-    DBEditObject newObject;
-    DBObjectBase targetBase;
-    DBObjectBaseField fieldDef;
-    ReturnVal retVal;
-
-    /* -- */
-
-    if (field.getID() == VOLUMES)	// auxiliary volume mappings
-      {
-	fieldDef = field.getFieldDef();
-
-	if (fieldDef.getTargetBase() > -1)
-	  {
-	    retVal = getGSession().create_db_object(fieldDef.getTargetBase());
-
-	    if (retVal == null)
-	      {
-		throw new RuntimeException("error in server, userCustom object got " +
-					   "nothing back from creating an automounter map entry");
-	      }
-
-	    if (!retVal.didSucceed())
-	      {
-		return null;	// failure
-	      }
-
-	    newObject = (DBEditObject) retVal.getObject();
-
-	    return newObject.getInvid();
-	  }
-	else
-	  {
-	    throw new RuntimeException("error in schema.. interface field target base not restricted..");
-	  }
-      }
-    else
-      {
-	return null;		// default
-      }
   }
 
   /**
