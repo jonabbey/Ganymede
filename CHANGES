@@ -15,6 +15,12 @@ would return an object of class SimpleTimeZone.
 Fixed the jar packaging to satisfy Java 1.4's slightly pickier
 serialization logic.
 
+2. [DISTRIB] Added support for using Java Web Start to launch clients
+
+Sun's excellent Java Web Start provides the best way yet to launch the
+Ganymede clients on Windows.  I have made changes to installWeb to
+support the Java Web Start option in the Ganymede launcher.
+
 -------------------- Changes from 1.03 to 1.04 -------------------
 
 RELEASE DATE: July 9, 2001
