@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.78 $ %D%
+   Version: $Revision: 1.79 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -202,6 +202,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     mainPanel;   //Everything is in this, so it is double buffered
 
   Image
+    errorImage = null,
     search,
     pencil,
     trash,
@@ -907,6 +908,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   {
     return session;
   }
+
+  /**
+   * Returns the error Image.
+   */
+  public final Image getErrorImage()
+  {
+    if (errorImage == null)
+      {
+	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
+      }
+    
+    return errorImage;
+  }
   
   /**
    * Returns the base hash.
@@ -1082,8 +1096,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   /**
    * Popup an error dialog.
    */
-
   public final void showErrorMessage(String title, String message)
+  {
+    showErrorMessage(title, message, null);
+  }
+
+  /** 
+   * Show an error dialog.
+   *
+   * @param title title of dialog.
+   * @param message Text of dialog.
+   * @param icon optional icon to display.
+   */
+
+  public final void showErrorMessage(String title, String message, Image icon)
   {
     if (debug)
       {
@@ -1093,12 +1119,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     final gclient gc = this;
     final String Title = title;
     final String Message = message;
+    final Image fIcon = icon;
+    
     SwingUtilities.invokeLater(new Runnable() 
 			       {
 				 public void run()
 				   {
 				     
-				     JErrorDialog d = new JErrorDialog(gc, Title, Message);
+				     JErrorDialog d = new JErrorDialog(gc, Title, Message, fIcon);
 				     /*
 				     final JDialog d = new JDialog(gc, Title, true);
 				     JPanel p = new JPanel();
@@ -2771,7 +2799,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     openDialog.setText("Open object for editing");
-
+    openDialog.setReturnEditableOnly(true);
     Invid invid = openDialog.chooseInvid();
 
     if (invid == null)
@@ -2802,6 +2830,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     openDialog.setText("Open object for viewing");
+    openDialog.setReturnEditableOnly(false);
 
     Invid invid = openDialog.chooseInvid();
 
@@ -2829,6 +2858,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     openDialog.setText("Choose object to be cloned");
+    openDialog.setReturnEditableOnly(false);
+    
 
     Invid invid = openDialog.chooseInvid();
 
@@ -2867,6 +2898,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     openDialog.setText("Choose object to be inactivated");
+    openDialog.setReturnEditableOnly(true);
 
     Invid invid = openDialog.chooseInvid();
     
@@ -2886,6 +2918,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     openDialog.setText("Choose object to be deleted");
+    openDialog.setReturnEditableOnly(true);
 
     Invid invid = openDialog.chooseInvid();
 
@@ -4613,7 +4646,7 @@ class PersonaListener implements ActionListener{
 	  else
 	    {
 	      gc.showErrorMessage("Error: could not change persona", 
-				  "Could not change persona.  Perhaps the password was wrong.");
+				  "Perhaps the password was wrong.", gc.getErrorImage());
 
 	      gc.setStatus("Persona change failed");
 	    }
