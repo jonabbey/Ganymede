@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2001/11/05 20:58:39 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2001/11/05 22:38:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -183,14 +183,13 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    *
    * This method will provide a reasonable default for targetted
    * invid fields.
-   * 
    */
 
-  public QueryResult obtainChoiceList(DBField field, boolean applyFilter)
+  public QueryResult obtainChoiceList(DBField field)
   {
     if (field.getID() != emailListSchema.MEMBERS)
       {
-	return super.obtainChoiceList(field, applyFilter);
+	return super.obtainChoiceList(field);
       }
 
     if (membersChoice == null)
@@ -201,14 +200,11 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 	// for the MEMBERS field.
 
 	Query query1 = new Query(SchemaConstants.UserBase, null, false); // list all users
-	query1.setFiltered(applyFilter);
 
 	Query query2 = new Query((short) 275, null, false); // list all external email targets
-	query2.setFiltered(applyFilter);
 	
 	QueryNode root3 = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.getInvid()));
 	Query query3 = new Query((short) 274, root3, false); // list all other email groups, but not ourselves
-	query3.setFiltered(applyFilter);
 	
 	QueryResult result = editset.getSession().getGSession().query(query1, this);
 
