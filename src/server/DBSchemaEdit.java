@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 1999/01/22 18:05:38 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 1999/03/09 20:15:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -921,6 +921,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	if (developMode && !synchronizeBuiltInFields())
 	  {
 	    release();
+	    Ganymede.debug("DBSchemaEdit: couldn't synchronize built-in fields.. abandoning commit.");
 	    return;
 	  }
 
@@ -1033,6 +1034,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	if (fieldDef.isBuiltIn())
 	  {
+	    //	    Ganymede.debug("Builtins " + i + ": " + fieldDef);
 	    builtInFields.addElement(fieldDef);
 	  }
       }
@@ -1063,7 +1065,41 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    
 	    if (fieldDef.isBuiltIn())
 	      {
+		if (debug)
+		  {
+		    Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): deleting field " + 
+				   fieldDef.getName() + " in " + base.getName());
+		    
+		    Ganymede.debug("*** before delete:");
+		    
+		    Enumeration nowFields = base.fieldTable.elements();
+		    
+		    while (nowFields.hasMoreElements())
+		      {
+			Ganymede.debug("* " + nowFields.nextElement());
+		      }
+		  }
+
 		base.deleteField(fieldDef);
+
+		if (debug)
+		  {
+		    Ganymede.debug("*** after delete:");
+		    
+		    Enumeration nowFields = base.fieldTable.elements();
+		    
+		    while (nowFields.hasMoreElements())
+		      {
+			Ganymede.debug("* " + nowFields.nextElement());
+		      }
+		    
+		    Ganymede.debug("*** that's it:");
+		  }
+	      }
+	    else if (debug)
+	      {
+		Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): not deleting field " + fieldDef.getName() +
+			       " in " + base.getName());
 	      }
 	  }
 
@@ -1077,8 +1113,17 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    // make sure that the base doesn't already have a field with
 	    // the same name
 
+	    if (debug)
+	      {
+		Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): adding back built-in " + j +
+			       ", " + fieldDef.getName());
+	      }
+
 	    if (base.getField(fieldDef.getName()) != null)
 	      {
+		Ganymede.debug("DBSchemaEdit.synchronizeBuiltInFields(): already have a " + fieldDef.getName() +
+			       " field in " + base.getName());
+
 		return false;
 	      }
 	    

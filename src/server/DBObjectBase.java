@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 1999/01/27 21:45:14 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 1999/03/09 20:15:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -194,7 +194,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.array = false;
 	    bf.visibility = false;	// we don't want the client to show the owner link
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    /* And our 8 field, the backlinks field */
 
@@ -212,7 +212,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.array = true;
 	    bf.visibility = false;	// we don't want the client to show the backlinks field
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    // note that we won't have an expiration date or removal date
 	    // for an embedded object
@@ -234,7 +234,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.builtIn = true;	// this isn't optional
 	    bf.array = true;
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    /* And our 1 field, the expiration date. */
 
@@ -248,7 +248,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.removable = false;
 	    bf.builtIn = true;	// this isn't optional
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    /* And our 2 field, the expiration date. */
 
@@ -262,7 +262,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.removable = false;
 	    bf.builtIn = true;	// this isn't optional
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    /* And our 3 field, the notes field */
 
@@ -276,7 +276,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.removable = false;
 	    bf.builtIn = true;	// this isn't optional
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    // And our 4 field, the creation date field */
 
@@ -290,7 +290,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.removable = false;
 	    bf.builtIn = true;	// this isn't optional
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    /* And our 5 field, the Creator field */
 
@@ -304,7 +304,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.removable = false;
 	    bf.builtIn = true;	// this isn't optional
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    // And our 6 field, the modification date field */
 
@@ -318,7 +318,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.removable = false;
 	    bf.builtIn = true;	// this isn't optional
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    /* And our 7 field, the Modifier field */
 
@@ -332,7 +332,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.removable = false;	
 	    bf.builtIn = true;	// this isn't optional
 
-	    fieldTable.put(bf);
+	    addField(bf);
 
 	    /* And our 8 field, the backlinks field */
 
@@ -350,7 +350,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf.array = true;
 	    bf.visibility = false;	// we don't want the client to show the backlinks field
 
-	    fieldTable.put(bf);
+	    addField(bf);
 	  }
       }
 
@@ -381,8 +381,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public DBObjectBase(DataInput in, DBStore store) throws IOException, RemoteException
   {
-    this(store, false);		// assume not embedded, we'll correct that in receive()
-				// if we have to
+    /* assume not embedded, we'll correct that in receive()
+       if we have to
+
+       we don't want to add in the built-in fields.. we assume that they
+       are properly registered on disk. */
+
+    this(store, false, false);	
     receive(in);
 
     // need to recreate objectHook now that we have loaded our classdef info
@@ -400,7 +405,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public DBObjectBase(DBObjectBase original, DBSchemaEdit editor) throws RemoteException
   {
-    this(original.store, original.embedded);
+    this(original.store, original.embedded, false);
     this.editor = editor;
 
     DBObjectBaseField bf;
@@ -737,6 +742,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     for (int i = 0; i < size; i++)
       {
 	field = new DBObjectBaseField(in, this);
+
+	if (debug2)
+	  {
+	    System.err.println("DBObjectBaseField.receive(): " + field);
+	  }
+
 	addField(field);
       }
 
@@ -1857,12 +1868,21 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	// no such field.
 
+	try
+	  {
+	    Ganymede.debug("DBObjectBase.deleteField(): couldn't really delete " + getName() + ":" + bF.getName());
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("couldn't remove field due to remote error: " + ex);
+	  }
+
 	return false;
       }
 
     removeField(field);
 
-    if (debug2)
+    if (debug)
       {
 	Ganymede.debug("field definition " + getName() + ":" + field.getName() + " removed");
       }
@@ -2328,7 +2348,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   synchronized void removeField(DBObjectBaseField field)
   {
     fieldTable.remove(field.getID());
-    sortedFields.removeElement(field);
+
+    if (!sortedFields.removeElement(field))
+      {
+	Ganymede.debug("DBObject.removeField(): Couldn't find field " + field.getName());
+      }
   }
 
   /**

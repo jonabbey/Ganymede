@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 1999/01/22 18:05:36 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 1999/03/09 20:15:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2370,5 +2370,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     out.print(indent + field_name + "(" + field_code + "):");
     out.print(indent + getTypeDesc());
     out.println();
+  }
+
+  public String toString()
+  {
+    return field_name;
   }
 }
