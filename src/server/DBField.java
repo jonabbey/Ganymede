@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -966,17 +966,19 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (!isEditable())
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
+					   getName());
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field");
+	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
       }
 
     if ((index < 0) || (index >= values.size()))
       {
-	throw new IllegalArgumentException("invalid index " + index);
+	throw new IllegalArgumentException("invalid index " + index + 
+					   " in deleting element in field " + getName());
       }
 
     eObj = (DBEditObject) owner;
