@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1049,21 +1049,20 @@ final public class DBSession {
 	//	throw new IllegalArgumentException(key + ": commitTransaction(): holding a lock");
       }
 
-    result = editSet.commit();
+    retVal = editSet.commit();
 
-    if (result)
+    if (retVal == null || retVal.didSucceed())
       {
 	Ganymede.debug(key + ": commitTransaction(): editset committed");
+	editSet = null;
       }
     else
       {
-	Ganymede.debug(key + ": commitTransaction(): editset failed to commit: transaction aborted");
-
-	retVal = Ganymede.createErrorDialog("Server: Error in DBSession.commitTransaction()",
-					    "Error.. transaction could not commit: transaction canceled");
+	if (!retVal.doNormalProcessing)
+	  {
+	    editSet = null;
+	  }
       }
-
-    editSet = null;
 
     return retVal;		// later on we'll figure out how to do this right
   }
