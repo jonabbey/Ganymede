@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.58 $
-# $Date: 2001/06/27 19:33:10 $
+# $Revision: 1.59 $
+# $Date: 2002/04/03 01:55:55 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -491,6 +491,7 @@ write_install("installClient.in", "installClient");
 write_install("installWeb.in", "installWeb");
 write_install("installServer.in", "installServer");
 
+if (-f "$rootdir/jars/ganymedeServer.jar") {
 print <<ENDCODA;
 Done.
 
@@ -499,4 +500,14 @@ installServer, installClient, and installWeb scripts to install the
 Ganymede software.
 
 ENDCODA
+} else {
+print <<ENDCODA2;
+Done.
+
+The Ganymede distribution directory is now configured for compilation.
+You can now cd to the src directory and run 'make' followed by 'make
+jars' to compile Ganymede.
+
+ENDCODA2
+}
 exit;
