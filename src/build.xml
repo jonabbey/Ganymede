@@ -153,6 +153,9 @@ refresh the jar files.
          or ant build. -->
 
     <mkdir dir="${build.classes}"/>
+
+    <echo>Building, java.home is ${java.home}
+</echo>
     
     <javac destdir="${build.classes}"
            debug="${debug.flags}"
