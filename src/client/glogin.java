@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 2002/06/14 00:50:56 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 2002/06/14 01:15:53 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -90,7 +90,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.71 $ $Date: 2002/06/14 00:50:56 $ $Name:  $
+ * @version $Revision: 1.72 $ $Date: 2002/06/14 01:15:53 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -381,10 +381,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     labelPanel.add("West", label);
 
     JLabel hostLabel = new JLabel(serverhost + ":" + registryPortProperty);
-    Font x = new Font("Courier", Font.ITALIC, 12);
+    Font x = new Font("Courier", Font.ITALIC, 14);
     hostLabel.setFont(x);
+    hostLabel.setForeground(Color.black);
 
-    labelPanel.add("East", hostLabel);
+    labelPanel.add("Center", hostLabel);
 
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weighty = 0.0;
@@ -915,7 +916,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.71 $ $Date: 2002/06/14 00:50:56 $ $Name:  $
+ * @version $Revision: 1.72 $ $Date: 2002/06/14 01:15:53 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1009,7 +1010,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.71 $ $Date: 2002/06/14 00:50:56 $ $Name:  $
+ * @version $Revision: 1.72 $ $Date: 2002/06/14 01:15:53 $ $Name:  $
  * @author Jonathan Abbey
  */
 
