@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -409,7 +409,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // The right panel which will contain the windowPanel
 
-    JBufferedPane rightP = new JBufferedPane();
+    JBufferedPane rightP = new JBufferedPane(false);
 
     rightP.setLayout(new BorderLayout());
 
@@ -418,9 +418,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rightP.add("Center", wp);
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
-    JBufferedPane bottomButtonP = new JBufferedPane();
-    JBufferedPane leftButtonP = new JBufferedPane();
-    JBufferedPane rightButtonP = new JBufferedPane();
+    JBufferedPane bottomButtonP = new JBufferedPane(false);
+    JBufferedPane leftButtonP = new JBufferedPane(false);
+    JBufferedPane rightButtonP = new JBufferedPane(false);
     bottomButtonP.setLayout(new BorderLayout());
     bottomButtonP.add("West", leftButtonP);
     bottomButtonP.add("Center", rightButtonP);
@@ -447,7 +447,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    
     add("Center",sPane);
 
-    JBufferedPane statusBar = new JBufferedPane();
+    JBufferedPane statusBar = new JBufferedPane(false);
     statusBar.setLayout(new BorderLayout());
     statusLabel = new TextField();
     statusLabel.setEditable(false);
