@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,6 +22,7 @@ import java.util.*;
 public class Ganymede {
   
   public static GanymedeServer server;
+  public static GanymedeSession internalSession;
   public static DBStore db;
   public static String dbFilename;
   public static final boolean debug = true;
@@ -129,6 +130,16 @@ public class Ganymede {
       {
 	debug("Couldn't establish server binding: " + ex);
 	return;
+      }
+
+    try
+      {
+	debug("Creating internal Ganymede Session");
+	internalSession = new GanymedeSession();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("Couldn't establish internal session: " + ex);
       }
 
     if (debug)
