@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,7 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.*;
+import java.lang.reflect.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -49,7 +50,7 @@ import java.rmi.server.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.15 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.16 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -229,10 +230,9 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   /**
    *
-   * Returns the primary label of this object.. this will be
-   * subclassed by subclasses of DBEditObject to provide
-   * identification of the primary label of an object from
-   * one of the fields in the object.
+   * Returns the primary label of this object.. 
+   * calls DBEditObject.getLabelHook() to get the
+   * label for this object.
    *
    * This base implementation just gives a generic
    * label for the object.
@@ -243,7 +243,74 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   public String getLabel()
   {
-    return getTypeDesc() + ":" + getID();
+    if (objectBase.classdef == null)
+      {
+	// no class for this object.. just go
+	// ahead and use the default label
+	// obtaining bit
+
+	short val = objectBase.getLabelField();
+
+	if (val == -1)
+	  {
+	    //	    Ganymede.debug("val == -1");
+	    return "<" + getTypeDesc() + ":" + getID() + ">";
+	  }
+	else
+	  {
+
+	    // Ganymede.debug("Getting field " + val + " for label");
+
+	    DBField f = (DBField) getField(val);
+
+	    if (f != null)
+	      {
+		// Ganymede.debug("Got field " + f);
+		return (String) f.getValue();
+	      }
+	    else
+	      {
+		// Ganymede.debug("Couldn't find field " + val);
+		return "<" + getTypeDesc() + ":" + getID() + ">";
+	      }
+	  }
+      }
+    else
+      {
+	Method m;
+	String S;
+	Object objs[];
+	
+	objs = new Object[1];
+	objs[0] = this;
+
+	try
+	  {
+	    m = objectBase.classdef.getDeclaredMethod("getLabelHook", null);
+	    S = (String) m.invoke(null, objs);
+	    return S;
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+	catch (SecurityException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+	catch (IllegalAccessException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+	catch (InvocationTargetException ex)
+	  {
+	    throw new RuntimeException("couldn't call class method" + ex);
+	  }
+      }
   }
 
   /**
