@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -82,6 +82,8 @@ public class DBWriteLock extends DBLock {
 	    base = (DBObjectBase) enum.nextElement();
 	    baseSet.addElement(base);
 	  }
+
+	lockManager.notifyAll();
       }
   }
 
@@ -141,7 +143,7 @@ public class DBWriteLock extends DBLock {
 	      }
 	    else
 	      {
-		lockManager.wait();	// we might have to wait for multiple readers on our key to release
+		lockManager.wait(500);	// we might have to wait for multiple readers on our key to release
 	      }
 	  }
 
@@ -181,6 +183,7 @@ public class DBWriteLock extends DBLock {
 		for (int i = 0; okay && (i < baseSet.size()); i++)
 		  {
 		    base = (DBObjectBase) baseSet.elementAt(i);
+
 		    if (!base.isDumperEmpty())
 		      {
 			if (debug)
@@ -199,7 +202,7 @@ public class DBWriteLock extends DBLock {
 	      {
 		try
 		  {
-		    lockManager.wait();
+		    lockManager.wait(500);
 		  }
 		catch (InterruptedException ex)
 		  {
@@ -304,7 +307,7 @@ public class DBWriteLock extends DBLock {
 	      {
 		try
 		  {
-		    lockManager.wait();
+		    lockManager.wait(500);
 		  }
 		catch (InterruptedException ex)
 		  {
@@ -354,7 +357,7 @@ public class DBWriteLock extends DBLock {
 	  {
 	    try
 	      {
-		lockManager.wait();
+		lockManager.wait(500);
 	      } 
 	    catch (InterruptedException ex)
 	      {

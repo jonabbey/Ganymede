@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -63,6 +63,8 @@ public class DBReadLock extends DBLock {
 	    base = (DBObjectBase) enum.nextElement();
 	    baseSet.addElement(base);
 	  }
+
+	lockManager.notifyAll();
       }
   }
 
@@ -221,7 +223,7 @@ public class DBReadLock extends DBLock {
 
 		try
 		  {
-		    lockManager.wait(); // an InterruptedException here gets propagated up
+		    lockManager.wait(500); // an InterruptedException here gets propagated up
 
 		    Ganymede.debug("DBReadLock (" + key + "):  done waiting on lockManager");
 		  }
@@ -284,7 +286,7 @@ public class DBReadLock extends DBLock {
 
 	    try
 	      {
-		lockManager.wait();
+		lockManager.wait(500);
 	      } 
 	    catch (InterruptedException ex)
 	      {
@@ -297,6 +299,8 @@ public class DBReadLock extends DBLock {
 	      {
 		Ganymede.debug("DBReadLock (" + key + "):  release() not locked, returning");
 	      }
+
+	    lockManager.notifyAll();
 
 	    return;
 	  }
