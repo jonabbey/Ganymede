@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 2000/08/18 05:13:47 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 2000/08/25 21:21:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -359,9 +359,23 @@ public class Ganymede {
 
     try
       {
-	Naming.lookup("rmi://" + 
-		      java.net.InetAddress.getLocalHost().getHostName() + ":" + 
-		      registryPortProperty + "/ganymede.server");
+	String rmiServerURL = "rmi://" + 
+	  java.net.InetAddress.getLocalHost().getHostName() + ":" + 
+	  registryPortProperty + "/ganymede.server";
+
+	Remote obj = Naming.lookup(rmiServerURL); // hopefully we'll throw an exception here
+
+	if (obj instanceof Server)
+	  {
+	    Server serv = (Server) obj;
+	    
+	    if (serv.up())
+	      {
+		System.err.println("*\n*\n* Error, another Ganymede server is already running at: " + rmiServerURL);
+		System.err.println("* I can't startup until it is gone.\n*\n*");
+		System.exit(1);
+	      }
+	  }
       }
     catch (NotBoundException ex)
       {
@@ -379,6 +393,11 @@ public class Ganymede {
       {
 	System.out.println("Remote:" + ex);
       }
+
+    // inUse can be true if we were able to lookup an RMI object by
+    // name, yet not able to actually talk to it, which would happen
+    // if an old server bound on this system had died/been killed
+    // without restarting the rmi registry process
 
     if (inUse)
       {
