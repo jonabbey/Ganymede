@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/05/04 04:17:43 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/05/09 02:28:56 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -61,8 +61,9 @@ import java.io.*;
 import java.util.*;
 
 import arlut.csd.ganymede.*;
-import arlut.csd.Util.ParseArgs;
-import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.*;
+
+import org.xml.sax.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -77,17 +78,65 @@ import arlut.csd.Util.PackageResources;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2000/05/04 04:17:43 $ $Name:  $
+ * @version $Revision: 1.2 $ $Date: 2000/05/09 02:28:56 $ $Name:  $
  * @author Jonathan Abbey
  */
 
 public class xmlclient implements ClientListener {
 
-  public static String serverHostProperty = null;
-  public static int    registryPortProperty = 1099;
-  public static String username = null;
-  public static String password = null;
-  public static boolean disconnectNow = false;
+  /**
+   * <p>This major version number is compared with the "major"
+   * attribute in the Ganymede XML document element.  xmlclient won't
+   * try to read Ganymede XML files whose major and/or minor numbers
+   * are too high.</p> 
+   */
+
+  public static final int majorVersion = 1;
+
+  /**
+   * <p>This minor version number is compared with the "minor"
+   * attribute in the Ganymede XML document element.  xmlclient won't
+   * try to read Ganymede XML files whose major and/or minor numbers
+   * are too high.</p> 
+   */
+
+  public static final int minorVersion = 0;
+
+  // ---
+
+  public String serverHostProperty = null;
+  public int    registryPortProperty = 1099;
+  public String server_url = null;
+  public String propFilename = null;
+  public String xmlFilename = null;
+  public String username = null;
+  public String password = null;
+  public boolean disconnectNow = false;
+
+  /**
+   * <p>Remote session interface to the Ganymede server, used while
+   * loading data objects into the server.</p>
+   */
+
+  public Session session = null;
+
+  /**
+   * <p>The default buffer size in the {@link arlut.csd.Util.XMLReader XMLReader}.
+   * This value determines how far ahead the XMLReader's i/o thread can get in
+   * reading from the XML file.  Higher or lower values of this variable may
+   * give better performance, depending on the characteristics of the JVM with
+   * regards threading, etc.</p>
+   */
+
+  public int bufferSize = 20;
+
+  /**
+   * <p>Streaming XML reader.  xmlclient creates one of these on startup,
+   * and from that point on, all XML reading is done through this
+   * object.</p>
+   */
+
+  public XMLReader reader = null;
 
   /**
    * <P>Hashtable mapping object type names to
@@ -96,33 +145,45 @@ public class xmlclient implements ClientListener {
    * records.</P>
    */
 
-  public static Hashtable objectTypes = new Hashtable();
+  public Hashtable objectTypes = new Hashtable();
 
   /**
    * <P>The loader is a thread that obtains information from
    * the server on object type definitions present in the
    * server.  This is used to help guide the interpretation
-   * of the XML file.</P>
+   * of the XML file when handling the &lt;ganydata&gt; element.</P>
    */
 
-  public static Loader loader;
+  public Loader loader;
 
   /**
    * <P>RMI object to handle getting us logged into the server, and to
-   * handle asynchronous callbacks from the server on our behalf.</P> 
+   * handle asynchronous callbacks from the server on our behalf.  xmlclient
+   * implements the
+   * {@link arlut.csd.ganymede.client.ClientListener ClientListener} interface
+   * in order to receive these callbacks.</P> 
    */
 
-  private static ClientBase my_client;
+  private ClientBase my_client;
 
   // ---
 
+  /**
+   *
+   * main
+   *
+   */
+
   public static void main(String argv[])
   {
-    String propFilename = null;
-    String server_url;
-    String input = null;
-    Session session = null;
-    ReturnVal attempt = null;
+    xmlclient xclient = new xmlclient(argv);
+    xclient.processXML();
+  }
+  
+  public xmlclient(String argv[])
+  {
+    boolean ok = true;
+    File xmlFile = null;
 
     /* -- */
 
@@ -132,19 +193,311 @@ public class xmlclient implements ClientListener {
 
     if (propFilename == null)
       {
-	System.err.println("Ganymede xmlclient: Error, invalid command line parameters");
- 	System.err.println("Usage: java xmlclient properties=<property file>");
-	System.exit(1);
+	System.err.println("Ganymede xmlclient: Error, must specify properties");
+	ok = false;
       }
 
-    if (!loadProperties(propFilename))
+    String bufferString = ParseArgs.getArg("bufsize", argv);
+
+    if (bufferString != null)
       {
-	System.out.println("Ganymede xmlclient: Error, couldn't successfully load properties from file " + 
-			   propFilename + ".");
-	System.exit(1);
+	try
+	  {
+	    bufferSize = Integer.parseInt(bufferString);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't recognize bufsize argument: " + bufferString);
+	    ok = false;
+	  }
       }
 
-    server_url = "rmi://" + serverHostProperty + ":" + registryPortProperty + "/ganymede.server";
+    xmlFilename = argv[argv.length-1];
+
+    xmlFile = new File(xmlFilename);
+
+    if (!xmlFile.exists())
+      {
+	System.err.println("Ganymede xmlclient: Error, file " + xmlFilename + " does not exist");
+	ok = false;
+      }
+
+    if (!ok)
+      {
+ 	System.err.println("Usage: java xmlclient properties=<property file> [bufsize=<buffer size>] <xmlfile>");
+	System.exit(1);
+      }
+  }
+
+  /**
+   * <p>This method handles the actual XML processing, once the
+   * command line arguments have been parsed and handled by the
+   * xmlclient constructor.</p>
+   */
+
+  public void processXML()
+  {
+    try
+      {
+	reader = new XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
+
+	XMLItem startDocument = getNextItem();
+
+	if (!(startDocument instanceof XMLStartDocument))
+	  {
+	    System.err.println("XML parser error: first element " + startDocument + 
+			       " not XMLStartDocument");
+	    return;
+	  }
+
+	XMLItem docElement = getNextItem();
+
+	if (!docElement.matches("ganymede"))
+	  {
+	    System.err.println("Error, " + xmlFilename + " does not contain a Ganymede XML file.");
+	    System.err.println("Unrecognized XML element: " + docElement);
+	    return;
+	  }
+
+	Integer majorI = docElement.getAttrInt("major");
+	Integer minorI = docElement.getAttrInt("minor");
+
+	if (majorI == null || majorI.intValue() > majorVersion)
+	  {
+	    System.err.println("Error, the ganymede document element " + docElement +
+			       " does not contain a compatible major version number");
+	    return;
+	  }
+	
+	if (majorI.intValue() == majorVersion && 
+	    (minorI == null || minorI.intValue() > minorVersion))
+	  {
+	    System.err.println("Error, the ganymede document element " + docElement +
+			       " does not contain a compatible minor version number");
+	    return;
+	  }
+
+	// okay, we're good to go
+
+	XMLItem nextElement = getNextItem();
+
+	if (nextElement.matches("ganyschema"))
+	  {
+	    processSchema();
+
+	    nextElement = getNextItem();
+	  }
+
+	if (nextElement.matches("ganydata"))
+	  {
+	    processData();
+
+	    nextElement = getNextItem();
+	  }
+
+	while (!nextElement.matchesClose("ganymede") && !(nextElement instanceof XMLCloseElement))
+	  {
+	    System.err.println("Skipping unrecognized element: " + nextElement);
+	    nextElement = getNextItem();
+	  }
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+      }
+    catch (SAXException ex)
+      {
+	ex.printStackTrace();
+      }
+    finally
+      {
+	System.err.println("XML parsing ended");
+
+	if (reader != null)
+	  {
+	    reader.close();
+	  }
+	
+	System.exit(0);
+      }
+  }
+
+  /**
+   * <p>This method loads properties from the ganymede.properties
+   * file.</p>
+   *
+   * <p>This method is public so that loader code linked with the
+   * Ganymede server code can initialize the properties without
+   * going through Ganymede.main().</p>
+   */
+
+  public boolean loadProperties(String filename)
+  {
+    Properties props = new Properties(System.getProperties());
+    boolean success = true;
+
+    /* -- */
+
+    try
+      {
+	props.load(new BufferedInputStream(new FileInputStream(filename)));
+      }
+    catch (IOException ex)
+      {
+	return false;
+      }
+
+    // make the combined properties file accessible throughout our
+    // code.
+
+    System.setProperties(props);
+
+    serverHostProperty = System.getProperty("ganymede.serverhost");
+
+    if (serverHostProperty == null)
+      {
+	System.err.println("Couldn't get the server host property");
+	success = false;
+      }
+
+    // get the registry port number
+
+    String registryPort = System.getProperty("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
+			       registryPort);
+	  }
+      }
+
+    if (success)
+      {
+	server_url = "rmi://" + serverHostProperty + ":" + registryPortProperty + "/ganymede.server";
+      }
+
+    return success;
+  }
+
+  /**
+   * <p>Private helper method to process events from
+   * the {@link arlut.csd.Util.XMLReader XMLReader}.  By using
+   * this method, the rest of the code in the xmlclient doesn't
+   * have to check for error and warning conditions.</p>
+   */
+
+  private XMLItem getNextItem() throws SAXException
+  {
+    XMLItem item = null;
+
+    while (item == null)
+      {
+	item = reader.getNextItem();
+
+	if (item instanceof XMLError)
+	  {
+	    System.err.println(item);
+	    throw new SAXException(item.toString());
+	  }
+
+	if (item instanceof XMLWarning)
+	  {
+	    System.err.println(item);
+	    item = reader.getNextItem();
+	  }
+      }
+
+    return item;
+  }
+
+  /**
+   * <p>This method is called after the &lt;ganyschema&gt; element has been
+   * read and consumes everything up to and including the matching
+   * &lt;/ganyschema&gt; element, if such is to be found.  Eventually,
+   * this method will actually process the contents of the 
+   * &lt;ganyschema&gt; element and transmit the schema change information
+   * to the server.</p>
+   */
+
+  public void processSchema() throws SAXException
+  {
+    System.err.println("processSchema");
+
+    XMLItem item = getNextItem();
+
+    while (!item.matchesClose("ganyschema") && !(item instanceof XMLEndDocument))
+      {
+	item = getNextItem();
+      }
+
+    System.err.println("/processSchema");
+  }
+
+  /**
+   * <p>This method is called after the &lt;ganydata&gt; element has been
+   * read and consumes everything up to and including the matching
+   * &lt;/ganydata&gt; element, if such is to be found.</p>
+   *
+   * <p>Before starting to read data from the &lt;ganydata&gt; element,
+   * this method attempts to connect to the Ganymede server through the
+   * normal client {@link arlut.csd.ganymede.Session Session} interface.
+   * Once connected, this method will download schema information from
+   * the server in order to interpret tags in the &lt;ganydata&gt;
+   * element.</p>
+   *
+   * <p>Assuming that login and schema download was successful, the
+   * contents of &lt;ganydata&gt; are scanned, and an in-memory datastructure
+   * is constructed in the xmlclient.  All objects are organized in
+   * memory by type and id, and inter-object invid references are resolved
+   * to the extent possible.</p>
+   *
+   * <p>If all of that succeeds, processData() will start a transaction
+   * on the server, and will start transferring the data from the XML
+   * file's &lt;ganydata&gt; element to the server.  If any errors
+   * are reported, the returned error message is printed and processData
+   * aborts.  If no errors are reported at this stage, a transaction
+   * commit is attempted.  Once again, if there are any errors reported
+   * from the server, they are printed and processData aborts.  Otherwise,
+   * success!</p>
+   */
+
+  public void processData() throws SAXException
+  {
+    System.err.println("processData");
+
+    ReturnVal attempt = null;
+    XMLItem item;
+
+    /* -- */
+
+    item = getNextItem();
+
+    while (!item.matchesClose("ganydata") && !(item instanceof XMLEndDocument))
+      {
+	//	System.err.println(item);
+	item = getNextItem();
+      }
+
+    System.err.println("/processData");
+  }
+
+  /**
+   * <p>This private helper method handles logging on to the server as
+   * a normal client, and sets up the {@link
+   * arlut.csd.ganymede.client.xmlclient#session session} variable.</p>
+   */
+
+  private void connectAsClient()
+  {
+    ReturnVal attempt = null;
+
+    /* -- */
 
     // after the ClientBase is constructed, we'll be an active RMI
     // server, so we need to always do System.exit() to shut down the
@@ -152,7 +505,7 @@ public class xmlclient implements ClientListener {
 
     try
       {
-	my_client = new ClientBase(server_url, new xmlclient());
+	my_client = new ClientBase(server_url, this);
       }
     catch (RemoteException ex)
       {
@@ -249,63 +602,6 @@ public class xmlclient implements ClientListener {
       }
   }
 
-  /**
-   * <p>This method loads properties from the ganymede.properties
-   * file.</p>
-   *
-   * <p>This method is public so that loader code linked with the
-   * Ganymede server code can initialize the properties without
-   * going through Ganymede.main().</p>
-   */
-
-  public static boolean loadProperties(String filename)
-  {
-    Properties props = new Properties(System.getProperties());
-    boolean success = true;
-
-    /* -- */
-
-    try
-      {
-	props.load(new BufferedInputStream(new FileInputStream(filename)));
-      }
-    catch (IOException ex)
-      {
-	return false;
-      }
-
-    // make the combined properties file accessible throughout our
-    // code.
-
-    System.setProperties(props);
-
-    serverHostProperty = System.getProperty("ganymede.serverhost");
-
-    if (serverHostProperty == null)
-      {
-	System.err.println("Couldn't get the server host property");
-	success = false;
-      }
-
-    // get the registry port number
-
-    String registryPort = System.getProperty("ganymede.registryPort");
-
-    if (registryPort != null)
-      {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-			       registryPort);
-	  }
-      }
-
-    return success;
-  }
 
   /**
    * <p>Called when the server forces a disconnect.</p>
@@ -331,17 +627,6 @@ public class xmlclient implements ClientListener {
    */
 
   public void messageReceived(ClientEvent e)
-  {
-  }
-
-  /**
-   * <p>This method is responsible for processing the XML filename
-   * given and building up a hashtable which maps object type
-   * names to hashes which map the local identifier to the
-   * {@link arlut.csd.ganymede.client.xmlobject xmlobject}.</p>
-   */
-
-  public void loadFromXML(String filename)
   {
   }
 }
