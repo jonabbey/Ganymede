@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -112,8 +112,23 @@ public class PasswordDBField extends DBField implements pass_field {
 
   void emit(DataOutput out) throws IOException
   {
-    out.writeUTF(cryptedPass);
-    out.writeUTF(uncryptedPass);
+    if (cryptedPass == null)
+      {
+	out.writeUTF("");
+      }
+    else
+      {
+	out.writeUTF(cryptedPass);
+      }
+
+    if (uncryptedPass == null)
+      {
+	out.writeUTF("");
+      }
+    else
+      {
+	out.writeUTF(uncryptedPass);
+      }
   }
 
   void receive(DataInput in) throws IOException
@@ -121,7 +136,18 @@ public class PasswordDBField extends DBField implements pass_field {
     if ((Ganymede.db.file_major > 1) || (Ganymede.db.file_minor >= 10))
       {
 	cryptedPass = in.readUTF();
+
+	if (cryptedPass.equals(""))
+	  {
+	    cryptedPass = null;
+	  }
+	
 	uncryptedPass = in.readUTF();
+
+	if (uncryptedPass.equals(""))
+	  {
+	    uncryptedPass = null;
+	  }
       }
     else
       {
@@ -341,7 +367,7 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	if (debug)
 	  {
-	    System.err.println("present crypted text == " + value);
+	    System.err.println("present crypted text == " + cryptedPass);
 
 	    System.err.println("getSalt() == '" + getSalt() + "'");
 	  }
