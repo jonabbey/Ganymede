@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 2002/08/20 02:37:44 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 2002/08/21 04:47:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,6 +52,7 @@ package arlut.csd.ganymede.custom;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.VectorUtils;
 
 import java.util.*;
 
@@ -87,7 +88,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * another interface is moved onto that network.</p>
    */
 
-  Hashtable ipAddresses = new Hashtable();
+  Vector ipAddresses = new Vector();
 
   /**
    * <p>If this system is associated with a system type that
@@ -407,25 +408,17 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   /**
    * <p>Called when an interface has its network changed, or when an
-   * address on an interface is changed within a network.  saveAddress()
-   * pushes the address onto a stack in association with the specified
-   * network's netInvid.  Future getAddress() calls on the same netInvid
-   * will return addresses pushed on the stack with saveAddress() before
-   * scanning for new addresses from the network's IPv4Range.</p>
+   * address on an interface is changed within a network.
+   * saveAddress() records the address as one previously connected
+   * with this system.  Future getAddress() calls on netInvid's with
+   * overlapping ranges will return addresses saved with saveAddress()
+   * before scanning for new addresses from the network's
+   * IPv4Range.</p>
    */
 
-  public synchronized boolean saveAddress(Invid netInvid, Byte[] address)
+  public synchronized boolean saveAddress(Byte[] address)
   {
-    Stack s = (Stack) ipAddresses.get(netInvid);
-
-    if (s == null)
-      {
-	s = new Stack();
-
-	ipAddresses.put(netInvid, s);
-      }
-
-    s.push(address);
+    VectorUtils.unionAdd(ipAddresses, address);
     
     return true;		// we're probably freeing a net from an old room
   }
@@ -439,22 +432,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public synchronized Byte[] getAddress(Invid netInvid)
   {
-    Stack s = (Stack) ipAddresses.get(netInvid);
-
-    if (s != null)
-      {
-	Byte[] address = (Byte[]) s.pop();
-
-	if (s.size() == 0)
-	  {
-	    // remove the empty stack so we won't try to pop from it
-
-	    ipAddresses.remove(netInvid);
-	  }
-
-	return address;
-      }
-
     return getIPAddress(netInvid, startSearchRange, stopSearchRange);
   }
 
@@ -658,6 +635,23 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	if (debug)
 	  {
 	    System.err.println("systemCustom.getIPAddress(): created range from net number: " + IPDBField.genIPString(netNum) + ": " + range);
+	  }
+      }
+
+    // look for pre-existing address
+
+    for (int i = 0; i < ipAddresses.size(); i++)
+      {
+	address = (Byte[]) ipAddresses.elementAt(i);
+
+	if (range.matches(address))
+	  {
+	    ipAddresses.removeElementAt(i);
+	    break;
+	  }
+	else
+	  {
+	    address = null;
 	  }
       }
 
@@ -1015,7 +1009,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	if (oldNet != null && address != null)
 	  {
-	    saveAddress(oldNet, address);
+	    saveAddress(address);
 	  }
 
 	// if we have less than or more than 2 interfaces, we don't

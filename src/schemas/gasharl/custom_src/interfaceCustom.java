@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2001/08/15 02:49:09 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2002/08/21 04:47:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -445,7 +445,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	if (field.getValueLocal() != null)
 	  {
-	    getParentObj().saveAddress((Invid) field.getValueLocal(), address);
+	    getParentObj().saveAddress(address);
 	  }
 
 	if (value == null)

@@ -4,8 +4,8 @@
    IPv4Range.java
 
    Created: 4 April 2001
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/04/24 06:05:51 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2002/08/21 04:47:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -544,9 +544,43 @@ public class IPv4Range {
    * <p>This method returns true if address is a member of
    * the collection of IPv4 addresses represented by this
    * IPv4Range object, false otherwise.</p>
+   *
+   * <p>If start and stop are not equal to -1, matches will
+   * only return true if the last octet of the address in
+   * question is between start and stop.  This is an additional
+   * restriction on top of that specified in this IPv4Range
+   * object.</p>
+   */
+
+  public boolean matches(String address, int start, int stop)
+  {
+    return matches(genIPV4bytes(address), start, stop);
+  }
+
+  /**
+   * <p>This method returns true if address is a member of
+   * the collection of IPv4 addresses represented by this
+   * IPv4Range object, false otherwise.</p>
    */
 
   public boolean matches(Byte address[])
+  {
+    return matches(address, -1, -1);
+  }
+
+  /**
+   * <p>This method returns true if address is a member of
+   * the collection of IPv4 addresses represented by this
+   * IPv4Range object, false otherwise.</p>
+   *
+   * <p>If start and stop are not equal to -1, matches will
+   * only return true if the last octet of the address in
+   * question is between start and stop.  This is an additional
+   * restriction on top of that specified in this IPv4Range
+   * object.</p>
+   */
+
+  public boolean matches(Byte address[], int start, int stop)
   {
     if (address.length != 4)
       {
@@ -560,7 +594,7 @@ public class IPv4Range {
 	temp[i] = address[i].byteValue();
       }
 
-    return matches(temp);
+    return matches(temp, start, stop);
   }
 
   /**
@@ -571,6 +605,23 @@ public class IPv4Range {
 
   public synchronized boolean matches(byte address[])
   {
+    return matches(address, -1, -1);
+  }
+
+  /**
+   * <p>This method returns true if address is a member of
+   * the collection of IPv4 addresses represented by this
+   * IPv4Range object, false otherwise.</p>
+   *
+   * <p>If start and stop are not equal to -1, matches will
+   * only return true if the last octet of the address in
+   * question is between start and stop.  This is an additional
+   * restriction on top of that specified in this IPv4Range
+   * object.</p>
+   */
+
+  public synchronized boolean matches(byte address[], int start, int stop)
+  {
     if (address.length != 4)
       {
 	throw new IllegalArgumentException("bad number of bytes in address");
@@ -580,7 +631,7 @@ public class IPv4Range {
 
     for (int i = 0; !found && i < range.length; i++)
       {
-	if (stanzaMatch(range[i], address))
+	if (stanzaMatch(range[i], address, start, stop))
 	  {
 	    found = true;
 	  }
@@ -593,9 +644,14 @@ public class IPv4Range {
    * <p>This method compares a given 4 signed byte address against
    * a specific stanza and returns true if the address could be generated
    * by the stanza array passed in as _range.</p>
+   *
+   * <p>If start and stop are not each equal to -1, stanzaMatch will
+   * only return true if the last octet of the address in
+   * question is between start and stop.  This is an additional
+   * restriction on top of that specified in the _range parameter.</p>
    */
 
-  private boolean stanzaMatch(byte _range[][], byte address[])
+  private boolean stanzaMatch(byte _range[][], byte address[], int start, int stop)
   {
     for (int i = 0; i < 4; i++)
       {
@@ -603,6 +659,24 @@ public class IPv4Range {
 	    (address[i] > _range[i][0] && address[i] > _range[i][1]))
 	  {
 	    return false;
+	  }
+      }
+
+    if (start != -1 || stop != -1)
+      {
+	if (start > stop)
+	  {
+	    if (address[4] < stop || address[4] > start)
+	      {
+		return false;
+	      }
+	  }
+	else
+	  {
+	    if (address[4] < start || address[4] > stop)
+	      {
+		return false;
+	      }
 	  }
       }
 
