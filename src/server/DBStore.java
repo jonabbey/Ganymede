@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.117 $
-   Last Mod Date: $Date: 2000/04/14 01:49:48 $
+   Version: $Revision: 1.118 $
+   Last Mod Date: $Date: 2000/04/14 01:54:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.117 $ %D%
+ * @version $Revision: 1.118 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2262,8 +2262,11 @@ public class DBStore {
 		throw new RuntimeException("Couldn't edit supergash admin persona.");
 	      }
 
-	    s = (StringDBField) eObj.getField("Name");
-	    s.setValueLocal(Ganymede.rootname);
+	    if (Ganymede.rootname != null && !Ganymede.rootname.equals(""))
+	      {
+		s = (StringDBField) eObj.getField("Name");
+		s.setValueLocal(Ganymede.rootname);
+	      }
         
 	    if (Ganymede.resetadmin)
 	      {

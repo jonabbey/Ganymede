@@ -472,6 +472,19 @@ consolidate the transaction journal into the ganymede.db file, will
 now announce the number of transactions in the journal to the log and
 admin console when it runs.
 
+31. [SERVER] Fixed supergash admin persona renaming in DBStore.initializeObjects().
+
+The Ganymede server wasn't properly renaming the supergash admin
+persona on startup if the ganymede.properties file specified an
+alternate name for the supergash persona.
+
+I've fixed this.. the server will now always reset the supergash
+persona name to that specified in the server's ganymede.properties
+file.
+
+Thanks to Alex Robinson (Alex_robinson@bigfoot.com) for reporting
+this.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
