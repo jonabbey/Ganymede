@@ -58,7 +58,7 @@ given list of owner groups would appear in the tree.
 It works now, but it's a touch inelegant.  Ultimately, the answer to
 overloading in the tree is to force a hierarchical data
 representation, but until such time as we can rework the Ganymede data
-model around that deeply, you can apply and clear owner filters using
+model that deeply, you can apply and clear owner filters using
 the "Set Owner Filter" menu item from the client's File menu, and the
 tree and object choice lists in objects being edited will be
 dynamically updated.
