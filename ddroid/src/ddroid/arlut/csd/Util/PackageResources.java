@@ -106,22 +106,30 @@ public class PackageResources {
     
     /* -- */
 
-    cl = refClass.getClassLoader();
-    strPackageName = refClass.getName();
-    i = strPackageName.lastIndexOf('.' );
-
-    if (i == -1)
+    if (refClass != null)
       {
-	strPackageName = "";
+	cl = refClass.getClassLoader();
+	strPackageName = refClass.getName();
+	i = strPackageName.lastIndexOf('.' );
+
+	if (i == -1)
+	  {
+	    strPackageName = "";
+	  }
+	else
+	  {
+	    strPackageName = strPackageName.substring(0,i);
+	  }
+
+	filePackageName = strPackageName.replace('.','/');
+
+	str = (filePackageName.length() > 0 ? filePackageName + "/" : "") + strResource;
       }
     else
       {
-	strPackageName = strPackageName.substring(0,i);
+	cl = null;
+	str = strResource;
       }
-
-    filePackageName = strPackageName.replace('.','/');
-
-    str = (filePackageName.length() > 0 ? filePackageName + "/" : "") + strResource;
 
     if (debug)
       {
@@ -157,28 +165,36 @@ public class PackageResources {
     
     /* -- */
 
-    cl = refClass.getClassLoader();
-    strPackageName = refClass.getName();
-    i = strPackageName.lastIndexOf('.' );
-
-    if (i == -1)
+    if (refClass != null)
       {
-	strPackageName = "";
+	cl = refClass.getClassLoader();
+	strPackageName = refClass.getName();
+	i = strPackageName.lastIndexOf('.' );
+
+	if (i == -1)
+	  {
+	    strPackageName = "";
+	  }
+	else
+	  {
+	    strPackageName = strPackageName.substring(0,i);
+	  }
+
+	filePackageName = strPackageName.replace('.','/');
+
+	str = (filePackageName.length() > 0 ? filePackageName + "/" : "") + strResource;
       }
     else
       {
-	strPackageName = strPackageName.substring(0,i);
+	cl = null;
+	str = strResource;
       }
-
-    filePackageName = strPackageName.replace('.','/');
-
-    str = (filePackageName.length() > 0 ? filePackageName + "/" : "") + strResource;
 
     if (debug)
       {
 	System.err.println("PackageResources: trying to get str " + str);
       }
-
+    
     if (cl == null)
       {
 	stream = ClassLoader.getSystemResourceAsStream(str);
@@ -187,10 +203,10 @@ public class PackageResources {
       {
 	stream = cl.getResourceAsStream(str);
       }
-
+    
     return stream;
   }
-
+  
   /**
    * <p>Loads an image by its filename from either CLASSPATH or a jar file,
    * depending on how the code calling this method was run.</p>
