@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 2003/03/13 00:51:08 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 2003/09/06 03:52:54 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -86,11 +86,7 @@ import arlut.csd.Util.*;
  * <P>GASHAdmin connects to a running
  * {@link arlut.csd.ganymede.GanymedeServer GanymedeServer} using the 
  * {@link arlut.csd.ganymede.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin()}
- * method.  In order to get logged into the server, GASHAdmin 
- * itself publishes an {@link arlut.csd.ganymede.iAdmin iAdmin}
- * object via RMI implementing the {@link arlut.csd.ganymede.Admin Admin}
- * interface so that the server can dynamically update us as things happen on
- * the server.</P>
+ * method.</P>
  */
 
 public class GASHAdmin extends JApplet implements Runnable, ActionListener {
@@ -111,11 +107,11 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   static GASHAdminFrame frame = null;
 
   /**
-   * The iAdmin object is the remote reference to the Ganymede server
-   * used by the admin console.
+   * The GASHAdminDispatch object is an event switcher and hook interface
+   * which we use to propagate events from the server.
    */
 
-  static iAdmin admin = null;
+  static GASHAdminDispatch adminDispatch = null;
 
   /**
    * If true, we are running as an applet and are limited by the Java sandbox.
@@ -222,11 +218,11 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	System.err.println("applet stop()");
       }
 
-    if (admin != null)
+    if (adminDispatch != null)
       {
 	try
 	  {
-	    admin.disconnect();
+	    adminDispatch.disconnect();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -241,11 +237,11 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	System.err.println("applet destroy()");
       }
 
-    if (admin != null)
+    if (adminDispatch != null)
       {
 	try
 	  {
-	    admin.disconnect();
+	    adminDispatch.disconnect();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -461,11 +457,19 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	    return;
 	  }
 
+	boolean success = false;
+
 	try
 	  {
-	    admin = new iAdmin(server,
-			       username.getText(),
-			       new String(password.getPassword()));
+	    adminDispatch = new GASHAdminDispatch(server);
+	    success = adminDispatch.connect(username.getText(), 
+					    new String(password.getPassword()));
+
+	    if (!success)
+	      {
+		password.setText("");
+		return;
+	      }
 	  }
 	catch (RemoteException rx)
 	  {
@@ -496,15 +500,24 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
 	frame = new GASHAdminFrame("Ganymede Admin Console", applet);
 	
-	// Now that the frame is completely initialized, tie the iAdmin object
-	// to the frame, and vice-versa.
+	// Now that the frame is completely initialized, tie the
+	// GASHAdminDispatch object to the frame, and vice-versa.
 	
-	frame.admin = admin;
-	admin.setFrame(frame);
-	
+	frame.setDispatch(adminDispatch);
+	adminDispatch.setFrame(frame);
+
 	try
 	  {
-	    admin.refreshMe();
+	    adminDispatch.startAsyncPoller();
+	  }
+	catch (RemoteException rx)
+	  {
+	    System.err.println("Problem trying to start poll thread: " + rx);
+	  }
+
+	try
+	  {
+	    adminDispatch.refreshMe();
 	  }
 	catch (RemoteException rx)
 	  {
@@ -639,7 +652,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
 class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
 
-  static iAdmin admin = null;
+  static GASHAdminDispatch adminDispatch = null;
   static final boolean debug = false;
   static String debugFilename = null;
 
@@ -1169,6 +1182,11 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
   }
 
+  public void setDispatch(GASHAdminDispatch ad)
+  {
+    GASHAdminFrame.adminDispatch = ad;
+  }
+
   /**
    * local convenience method to handle disconnecting the admin console
    */
@@ -1177,7 +1195,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   {
     try
       {
-	admin.disconnect();
+	adminDispatch.disconnect();
       }
     catch (RemoteException ex)
       {
@@ -1206,7 +1224,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       {
 	try
 	  {
-	    admin.forceBuild();
+	    adminDispatch.forceBuild();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1241,7 +1259,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	    try
 	      {
-		admin.dumpDB();
+		adminDispatch.dumpDB();
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -1266,7 +1284,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	    try
 	      {
-		admin.runInvidTest();
+		adminDispatch.runInvidTest();
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -1291,7 +1309,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	    try
 	      {
-		admin.runInvidSweep();
+		adminDispatch.runInvidSweep();
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -1315,7 +1333,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	    try
 	      {
-		admin.runEmbeddedTest();
+		adminDispatch.runEmbeddedTest();
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -1339,7 +1357,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	    try
 	      {
-		admin.runEmbeddedSweep();
+		adminDispatch.runEmbeddedSweep();
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -1369,11 +1387,11 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	try
 	  {
-	    success = admin.shutdown(waitForUsers);
+	    success = adminDispatch.shutdown(waitForUsers);
 	  }
 	catch (RemoteException ex)
 	  {
-	    admin.forceDisconnect("Couldn't talk to server" + ex);
+	    adminDispatch.forceDisconnect("Couldn't talk to server" + ex);
 	  }
 
 	// if we are going to delay shutting down until all users log
@@ -1414,7 +1432,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	try
 	  {
-	    admin.killAll();
+	    adminDispatch.killAll();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1427,7 +1445,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	try
 	  {
-	    admin.pullSchema();
+	    adminDispatch.pullSchema();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1525,7 +1543,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	      {
 		try
 		  {
-		    admin.kill(killVictim);
+		    adminDispatch.kill(killVictim);
 		  }
 		catch (RemoteException ex)
 		  {
@@ -1547,7 +1565,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       {
 	try
 	  {
-	    admin.runTaskNow((String) key);
+	    adminDispatch.runTaskNow((String) key);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1558,7 +1576,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       {
 	try
 	  {
-	    admin.stopTask((String) key);
+	    adminDispatch.stopTask((String) key);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1569,7 +1587,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       {
 	try
 	  {
-	    admin.disableTask((String) key);
+	    adminDispatch.disableTask((String) key);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1580,7 +1598,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       {
 	try
 	  {
-	    admin.enableTask((String) key);
+	    adminDispatch.enableTask((String) key);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1609,885 +1627,19 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
   private void exceptionHandler(Throwable ex)
   {
-    admin.changeStatus("******************** " +
-		       "Error occurred while communicating with the server " +
-		       "********************\n");
+    adminDispatch.changeStatus("******************** " +
+			       "Error occurred while communicating with the server " +
+			       "********************\n");
     StringWriter stringTarget = new StringWriter();
     PrintWriter writer = new PrintWriter(stringTarget);
     
     ex.printStackTrace(writer);
     writer.close();
 
-    admin.changeStatus(stringTarget.toString());
+    adminDispatch.changeStatus(stringTarget.toString());
 
-    admin.changeStatus("****************************************" +
-		       "****************************************\n");
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                          iAdmin
-
-------------------------------------------------------------------------------*/
-
-/**
- * <P>RMI communications class for the admin console.  Handles login and 
- * update duties for {@link arlut.csd.ganymede.GASHAdmin GASHAdmin}.</P>
- */
-
-class iAdmin extends UnicastRemoteObject implements Admin {
-
-  static final boolean debug = false;
-
-  private GASHAdminFrame frame = null;
-  private Server server = null;
-  private adminSession aSession = null;
-  private String adminName = null;
-  private String adminPass = null;
-  private StringDialog permDialog = null;
-
-  private boolean tasksLoaded = false;
-  private Vector tasksKnown = null;
-
-  Date serverStart;
-
-  /* -- */
-
-  public iAdmin(Server server, String name, String pass) throws RemoteException
-  {
-    // UnicastRemoteServer can throw RemoteException 
-
-    this.server = server;
-    this.adminName = name;
-    this.adminPass = pass;
-
-    try
-      {
-	aSession = server.admin(this);
-      }
-    catch (NullPointerException ex)
-      {
-	System.err.println("Error: Didn't get server reference.  Exiting now.");
-	return;
-      }
-
-    if (aSession == null)
-      {
-	throw new IllegalArgumentException();
-      }
-
-    if (debug)
-      {
-	System.err.println("Got Admin");
-      }
-  }
-
-  private StringDialog getDialog()
-  {
-    if (permDialog == null)
-      {
-	if (frame == null)
-	  {
-	    DialogRsrc permResrc = new DialogRsrc(new JFrame(), 
-						  "Permissions Error", 
-						  "You don't have permission to perform that operation",
-						  "OK", null);
-	    permDialog = new StringDialog(permResrc);
-	  }
-	else
-	  {
-	    DialogRsrc permResrc = new DialogRsrc(frame, 
-						  "Permissions Error", 
-						  "You don't have permission to perform that operation",
-						  "OK", null, "error.gif");
-	    permDialog = new StringDialog(permResrc);
-	  }
-      }
-
-    return permDialog;
-  }
-
-  public void setFrame(GASHAdminFrame f)
-  {
-    if (frame == null)
-      {
-	frame = f;
-      }
-    else
-      {
-	System.err.println("I already have a frame, thank you very much.");
-      }
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to obtain the username
-   * given when the admin console was started.</p>
-   */
-
-  public String getName()
-  {
-    return adminName;
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to obtain the password
-   * given when the admin console was started.</p>
-   */
-
-  public String getPassword()
-  {
-    return adminPass;
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to set the server start
-   * date in the admin console.</p>
-   */
-
-  public void setServerStart(Date date)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.setServerStart()");
-      }
-
-    serverStart = date;
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    final Date lDate = date;
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	frame.startField.setText(lDate.toString());
-      }
-    });
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to set the last dump
-   * date in the admin console.</p>
-   */
-
-  public void setLastDumpTime(Date date)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.setLastDumpTime()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    final Date lDate = date;
-    
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	if (lDate == null)
-	  {
-	    frame.dumpField.setText("no dump since server start");
-	  }
-	else
-	  {
-	    frame.dumpField.setText(lDate.toString());
-	  }
-      }
-    });
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to set the number of
-   * transactions in the server's journal in the admin console.</p>
-   */
-
-  public void setTransactionsInJournal(int trans)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.setTransactionsInJournal()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    final int lTrans = trans;
-    
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	frame.journalField.setText("" + lTrans);
-      }
-    });
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to set the number of
-   * objects checked out in the admin console.</p>
-   */
-
-  public void setObjectsCheckedOut(int objs)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.setObjectsCheckedOut()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    final int lObjs = objs;
-    
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	frame.checkedOutField.setText("" + lObjs);
-      }
-    });
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to set the number of
-   * locks held in the admin console.</p>
-   */
-
-  public void setLocksHeld(int locks)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.setLocksHeld()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    final int lLocks = locks;
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	frame.locksField.setText("" + lLocks);
-      }
-    });
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * memory statistics display in the admin console.</p>
-   */
-
-  public void setMemoryState(long freeMemory, long totalMemory)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.setMemoryState()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    final long lFreeMemory = freeMemory;
-    final long lTotalMemory = totalMemory;
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	frame.memField.setText((lTotalMemory - lFreeMemory) + " / " + lFreeMemory + " / " + lTotalMemory);
-      }
-    });
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to add to the
-   * admin console's log display.</p>
-   *
-   * @param status A string to add to the console's log display, with the
-   * trailing newline included.
-   */
-
-  public void changeStatus(String status)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.changeStatus()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    final String lStatus = status;
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	frame.statusArea.append(lStatus);
-	frame.statusArea.setCaretPosition(frame.statusArea.getText().length());
-      }
-    });
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * number of admin consoles attached to the server.</p>
-   */
-
-  public void changeAdmins(String adminStatus)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.changeAdmins()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    final String lAdminStatus = adminStatus;
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	frame.adminField.setText(lAdminStatus);
-      }
-    });
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * admin console's server state display.</p>
-   */
-
-  public void changeState(String state)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.changeState()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    final String lState = state;
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-	frame.stateField.setText(lState);
-      }
-    });
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * admin console's connected user table.</p>
-   *
-   * @param entries a Vector of {@link arlut.csd.ganymede.AdminEntry AdminEntry}
-   * login description objects.
-   */
-
-  public void changeUsers(Vector entries)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.changeUsers()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    /* -- */
-
-    final Vector localEntries = entries;
-
-    // And refresh our table.. we'll wait until this succeeds so we
-    // don't get the server sending us more updates before the table
-    // finishes drawing
-
-    try
-      {
-	SwingUtilities.invokeAndWait(new Runnable() {
-	  public void run() {
-
-	    AdminEntry e;
-	    frame.table.clearCells();
-    
-	    // Process entries from the server
-
-	    for (int i = 0; i < localEntries.size(); i++)
-	      {
-		e = (AdminEntry) localEntries.elementAt(i);
-
-		frame.table.newRow(e.username);
-
-		if (e.personaName == null || e.personaName.equals(""))
-		  {
-		    frame.table.setCellText(e.username, 0, e.username, false);
-		  }
-		else
-		  {
-		    frame.table.setCellText(e.username, 0, e.personaName, false);
-		  }
-
-		frame.table.setCellText(e.username, 1, e.hostname, false);
-		frame.table.setCellText(e.username, 2, e.status, false);
-		frame.table.setCellText(e.username, 3, e.connecttime, false);
-		frame.table.setCellText(e.username, 4, e.event, false);
-		frame.table.setCellText(e.username, 5, Integer.toString(e.objectsCheckedOut), false);
-	      }
-
-	    frame.table.refreshTable();
-	  }
-	});
-      }
-    catch (InvocationTargetException ite)
-      {
-	ite.printStackTrace();
-      }
-    catch (InterruptedException ie)
-      {
-	ie.printStackTrace();
-      }
-  }
-
-  /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * admin console's task table.</p>
-   *
-   * @param tasks a Vector of {@link arlut.csd.ganymede.scheduleHandle scheduleHandle}
-   * objects describing the tasks registered in the Ganymede server.
-   */
-
-  public void changeTasks(Vector tasks)
-  {
-    if (debug)
-      {
-	System.err.println("GASHAdmin.changeTasks()");
-      }
-
-    if (frame == null)
-      {
-	return;
-      }
-
-    scheduleHandle handle;
-    String intervalString;
-
-    /* -- */
-
-    if (!tasksLoaded)
-      {
-	// System.err.println("changeTasks: tasks size = " + tasks.size());
-    
-	// Sort entries according to their incep date,
-	// to prevent confusion if new tasks are put into
-	// the server-side hashes, and as they are shuffled
-	// from hash to hash
-	
-	(new VecQuickSort(tasks, 
-			  new arlut.csd.Util.Compare() 
-			  {
-			    public int compare(Object a, Object b) 
-			      {
-				scheduleHandle aH, bH;
-				
-				aH = (scheduleHandle) a;
-				bH = (scheduleHandle) b;
-				
-				if (aH.incepDate.before(bH.incepDate))
-				  {
-				    return -1;
-				  }
-				else if (aH.incepDate.after(bH.incepDate))
-				  {
-				    return 1;
-				  }
-				else
-				  {
-				    return 0;
-				  }
-			      }
-			  }
-			  )).sort();
-      }
-
-    Vector taskNames = new Vector();
-
-    // now reload the table with the current stats
-
-    for (int i = 0; i < tasks.size(); i++)
-      {
-	handle = (scheduleHandle) tasks.elementAt(i);
-
-	taskNames.addElement(handle.name);
-
-	if (!frame.taskTable.containsKey(handle.name))
-	  {
-	    frame.taskTable.newRow(handle.name);
-	  }
-
-	frame.taskTable.setCellText(handle.name, 0, handle.name, false); // task name
-
-	if (handle.isRunning)
-	  {
-	    frame.taskTable.setCellText(handle.name, 1, "Running", false);
-	    frame.taskTable.setCellColor(handle.name, 1, Color.blue, false);
-	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
-	  }
-	else if (handle.suspend)
-	  {
-	    frame.taskTable.setCellText(handle.name, 1, "Suspended", false);
-	    frame.taskTable.setCellColor(handle.name, 1, Color.red, false);
-	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
-	  }
-	else if (handle.startTime != null)
-	  {
-	    frame.taskTable.setCellText(handle.name, 1, "Scheduled", false);
-	    frame.taskTable.setCellColor(handle.name, 1, Color.black, false);
-	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
-	  }
-	else
-	  {
-	    frame.taskTable.setCellText(handle.name, 1, "Waiting", false);
-	    frame.taskTable.setCellColor(handle.name, 1, Color.black, false);
-	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
-	  }
-
-	if (handle.lastTime != null)
-	  {
-	    frame.taskTable.setCellText(handle.name, 2, handle.lastTime.toString(), false);
-	  }
-
-	if (handle.startTime != null)
-	  {
-	    frame.taskTable.setCellText(handle.name, 3, handle.startTime.toString(), false);
-	  }
-	else
-	  {
-	    frame.taskTable.setCellText(handle.name, 3, "On Demand", false);
-	  }
-
-	frame.taskTable.setCellText(handle.name, 4, handle.intervalString, false);
-      }
-
-    // and take any rows out that are gone
-
-    if (tasksKnown == null)
-      {
-	tasksKnown = taskNames;
-      }
-    else
-      {
-	Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
-
-	for (int i = 0; i < removedTasks.size(); i++)
-	  {
-	    frame.taskTable.deleteRow(removedTasks.elementAt(i), false);
-	  }
-
-	tasksKnown = taskNames;
-      }
-
-    // And refresh our table.. we'll wait until this succeeds so we
-    // don't get the server sending us more updates before the table
-    // finishes drawing
-
-    try
-      {
-	SwingUtilities.invokeAndWait(new Runnable() {
-	  public void run() {
-	    frame.taskTable.refreshTable();
-	  }
-	});
-      }
-    catch (InvocationTargetException ite)
-      {
-	ite.printStackTrace();
-      }
-    catch (InterruptedException ie)
-      {
-	ie.printStackTrace();
-      }
-  }
-
-  /**
-   * <p>This method is called by admin console code to force
-   * a complete rebuild of all external builds.  This means that
-   * all databases will have their last modification timestamp
-   * cleared and all builder tasks will be scheduled for immediate
-   * execution.</p>
-   */
-
-  public void forceBuild() throws RemoteException
-  {
-    handleReturnVal(aSession.forceBuild());
-  }
-
-  public void disconnect() throws RemoteException
-  {
-    aSession.logout();
-  }
-
-  /**
-   *
-   * Callback: The server can tell us to disconnect if the server is 
-   * going down.
-   *
-   */
-
-  public void forceDisconnect(String reason)
-  {
-    changeStatus("Disconnected: " + reason + "\n");
-    server = null;
-  }
-
-  // ------------------------------------------------------------
-  // convenience methods for our GASHAdminFrame
-  // ------------------------------------------------------------
-
-  void refreshMe() throws RemoteException
-  {
-    aSession.refreshMe();
-  }
-
-  void kill(String username) throws RemoteException
-  {
-    handleReturnVal(aSession.kill(username));
-  }
-
-  void runTaskNow(String taskName) throws RemoteException
-  {
-    handleReturnVal(aSession.runTaskNow(taskName));
-  }
-
-  void stopTask(String taskName) throws RemoteException
-  {
-    handleReturnVal(aSession.stopTask(taskName));
-  }
-
-  void disableTask(String taskName) throws RemoteException
-  {
-    handleReturnVal(aSession.disableTask(taskName));
-  }
-
-  void enableTask(String taskName) throws RemoteException
-  {
-    handleReturnVal(aSession.enableTask(taskName));
-  }
-
-  // ------------------------------------------------------------
-  // convenience methods for our GASHAdminFrame
-  // ------------------------------------------------------------
-
-  void killAll() throws RemoteException
-  {
-    handleReturnVal(aSession.killAll());
-  }
-
-  boolean shutdown(boolean waitForUsers) throws RemoteException
-  {
-    ReturnVal retVal = handleReturnVal(aSession.shutdown(waitForUsers));
-
-    return (retVal == null || retVal.didSucceed());
-  }
-
-  void dumpDB() throws RemoteException
-  {
-    handleReturnVal(aSession.dumpDB());
-  }
-
-  void runInvidTest() throws RemoteException
-  {
-    handleReturnVal(aSession.runInvidTest());
-  }
-
-  void runInvidSweep() throws RemoteException
-  {
-    handleReturnVal(aSession.runInvidSweep());
-  }
-
-  void runEmbeddedTest() throws RemoteException
-  {
-    handleReturnVal(aSession.runEmbeddedTest());
-  }
-
-  void runEmbeddedSweep() throws RemoteException
-  {
-    handleReturnVal(aSession.runEmbeddedSweep());
-  }
-
-  void pullSchema() throws RemoteException
-  {
-    SchemaEdit editor = null;
-
-    /* -- */
-
-    if (debug)
-      {
-	System.err.println("Trying to get SchemaEdit handle");
-      }
-
-    try
-      {
-	editor = aSession.editSchema();
-      }
-    catch (RemoteException ex)
-      {
-	System.err.println("editSchema() exception: " + ex);
-      }
-
-    if (editor == null)
-      {
-	System.err.println("null editor handle");
-      }
-    else
-      {
-	if (debug)
-	  {
-	    System.err.println("Got SchemaEdit handle");
-	  }
-	
-	new GASHSchema("Schema Editor", editor, frame.schemaMI);
-      }
-
-    // the GASHSchema constructor pops itself up at the end of
-    // initialization, and has its own methods for closing itself
-    // down.
-  }
-
-  /**
-   * <p>This method takes a ReturnVal object from the server and, if necessary,
-   * runs through a wizard interaction sequence, possibly displaying several
-   * dialogs before finally returning a final result code.</p>
-   *
-   * <p>Use the ReturnVal returned from this function after this function is
-   * called to determine the ultimate success or failure of any operation
-   * which returns ReturnVal, because a wizard sequence may determine the
-   * ultimate result.</p>
-   *
-   * <p>This method should not be synchronized, since handleReturnVal
-   * may pop up modal (thread-blocking) dialogs, and if we we
-   * synchronize this, some Swing or AWT code seems to block on our
-   * synchronization when we do pop-up dialogs.  It's not any of my
-   * code, so I assume that AWT tries to synchronize on the frame when
-   * parenting a new dialog.</p> 
-   */
-
-  public ReturnVal handleReturnVal(ReturnVal retVal)
-  {
-    Hashtable dialogResults;
-
-    /* -- */
-
-    if (debug)
-      {
-	System.err.println("iAdmin.handleReturnVal(): Entering");
-      }
-
-    while ((retVal != null) && (retVal.getDialog() != null))
-      {
-	if (debug)
-	  {
-	    System.err.println("iAdmin.handleReturnVal(): retrieving dialog");
-	  }
-
-	JDialogBuff jdialog = retVal.getDialog();
-
-	if (debug)
-	  {
-	    System.err.println("iAdmin.handleReturnVal(): extracting dialog");
-	  }
-
-	DialogRsrc resource = jdialog.extractDialogRsrc(frame);
-
-	if (debug)
-	  {
-	    System.err.println("iAdmin.handleReturnVal(): constructing dialog");
-	  }
-
-	StringDialog dialog = new StringDialog(resource);
-
-	if (debug)
-	  {
-	    System.err.println("iAdmin.handleReturnVal(): displaying dialog");
-	  }
-
-	// display the Dialog sent to us by the server, get the
-	// result of the user's interaction with it.
-	    
-	dialogResults = dialog.DialogShow();
-
-	if (debug)
-	  {
-	    System.err.println("iAdmin.handleReturnVal(): dialog done");
-	  }
-
-	if (retVal.getCallback() != null)
-	  {
-	    try
-	      {
-		if (debug)
-		  {
-		    System.err.println("iAdmin.handleReturnVal(): Sending result to callback: " + dialogResults);
-		  }
-
-		// send the dialog results to the server
-
-		retVal = retVal.getCallback().respond(dialogResults);
-
-		if (debug)
-		  {
-		    System.err.println("iAdmin.handleReturnVal(): Received result from callback.");
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("Caught remote exception: " + ex.getMessage());
-	      }
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("iAdmin.handleReturnVal(): No callback, breaking");
-	      }
-
-	    break;		// we're done
-	  }
-      }
-
-    if (debug)
-      {
-	if (retVal != null)
-	  {
-	    if (retVal.didSucceed())
-	      {
-		System.err.println("iAdmin.handleReturnVal(): returning success code");
-	      }
-	    else
-	      {
-		System.err.println("iAdmin.handleReturnVal(): returning failure code");
-	      }
-	  }
-	else
-	  {
-	    System.err.println("iAdmin.handleReturnVal(): returning null retVal (success)");
-	  }
-      }
-
-    return retVal;
+    adminDispatch.changeStatus("****************************************" +
+			       "****************************************\n");
   }
 }
 

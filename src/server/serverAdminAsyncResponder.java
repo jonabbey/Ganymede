@@ -1,23 +1,24 @@
 /*
 
-   serverClientAsyncResponder.java
+   serverAdminAsyncResponder.java
 
-   serverClientAsyncResponder is a partial server-side Client proxy object
-   which buffers async client updates, coalescing update events as
-   needed to maximize server efficiency.  The client is responsible for
-   calling the getNextMsg() method on serverClientAsyncResponder
-   in a loop.  At each call from the client, the getNextMsg() method
-   will block until one or more async messages from the server are queued,
-   whereupon getNextMsg() will return them to the client.
+   serverAdminAsyncResponder is a partial server-side Admin proxy
+   object which buffers async admin console updates, coalescing update
+   events as needed to maximize server efficiency.  Consoles are
+   responsible for calling the getNextMsgs() method on
+   serverAdminAsyncResponder in a loop.  At each call from the console,
+   the getNextMsgs() method will block until one or more async messages
+   from the server are queued, whereupon getNextMsgs() will return them
+   to the console.
 
    This makes it possible for the server to provide asynchronous
-   notification to the client, even if the client is running behind a
-   system-level firewall.
+   notification to the admin consoles, even if the consoles are
+   running behind a system-level firewall.
    
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/09/05 21:18:45 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/09/06 03:52:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -69,15 +70,15 @@ import java.rmi.server.Unreferenced;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                      serverClientAsyncResponder
+                                                       serverAdminAsyncResponder
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>serverClientAsyncResponder is a partial server-side Client proxy object
+ * <p>serverAdminAsyncResponder is a partial server-side Client proxy object
  * which buffers async client updates, coalescing update events as
  * needed to maximize server efficiency.  The client is responsible for
- * calling the getNextMsg() method on serverClientAsyncResponder
+ * calling the getNextMsg() method on serverAdminAsyncResponder
  * in a loop.  At each call from the client, the getNextMsg() method
  * will block until one or more async messages from the server are queued,
  * whereupon getNextMsg() will return them to the client.</p>
@@ -88,17 +89,17 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientAsyncMessage
  *
- * @version $Revision: 1.1 $ $Date: 2003/09/05 21:18:45 $
+ * @version $Revision: 1.2 $ $Date: 2003/09/06 03:52:55 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class serverClientAsyncResponder implements ClientAsyncResponder, Remote {
+public class serverAdminAsyncResponder implements AdminAsyncResponder, Remote {
 
   /**
-   * <p>Our queue of {@link arlut.csd.ganymede.clientAsyncMessage clientAsyncMessage} objects.</p>
+   * <p>Our queue of {@link arlut.csd.ganymede.adminAsyncMessage adminAsyncMessage} objects.</p>
    */
 
-  private final clientAsyncMessage[] eventBuffer;
+  private final adminAsyncMessage[] eventBuffer;
 
   /**
    * <p>Index pointer to the slot for the next item to be place in</p>
@@ -145,14 +146,14 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
    * <p>Handy direct look-up table for events in eventBuffer</p>
    */
 
-  private clientAsyncMessage lookUp[];
+  private adminAsyncMessage lookUp[];
 
   /* -- */
 
-  public serverClientAsyncResponder()
+  public serverAdminAsyncResponder()
   {
-    eventBuffer = new clientAsyncMessage[maxBufferSize];
-    lookUp = new clientAsyncMessage[clientAsyncMessage.LAST - clientAsyncMessage.FIRST + 1];
+    eventBuffer = new adminAsyncMessage[maxBufferSize];
+    lookUp = new adminAsyncMessage[adminAsyncMessage.LAST - adminAsyncMessage.FIRST + 1];
   }
 
   /**
@@ -166,7 +167,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
 
   /**
    * <p>This method is used to submit a message to be sent to the
-   * client.  If the serverClientAsyncResponder has already had its shutdown()
+   * client.  If the serverAdminAsyncResponder has already had its shutdown()
    * method called, sendMessage() will silently fail, and the message
    * will not be queued.</p>
    */
@@ -182,7 +183,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
     params[0] = new Integer(type);
     params[1] = message;
 
-    addEvent(new clientAsyncMessage(clientAsyncMessage.SENDMESSAGE, params));
+    addEvent(new adminAsyncMessage(adminAsyncMessage.SENDMESSAGE, params));
   }
 
   /**
@@ -207,7 +208,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
   /**
    * <p>This method is used to send a shutdown command to the client.
    * This method will also set done to true, causing the
-   * serverClientAsyncResponder to refuse any more event
+   * serverAdminAsyncResponder to refuse any more event
    * submissions.</p>
    */
 
@@ -218,7 +219,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
 	return;
       }
 
-    addEvent(new clientAsyncMessage(clientAsyncMessage.SHUTDOWN, message));
+    addEvent(new adminAsyncMessage(adminAsyncMessage.SHUTDOWN, message));
 
     synchronized (eventBuffer)
       {
@@ -232,9 +233,9 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
    * server.  Returns null if isAlive() is false.</p>
    */
 
-  public clientAsyncMessage getNextMsg()
+  public adminAsyncMessage getNextMsg()
   {
-    clientAsyncMessage event;
+    adminAsyncMessage event;
 
     /* -- */
 
@@ -269,17 +270,201 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
   }
 
   /**
-   * <p>private helper method in serverClientAsyncResponder, used to add an event to
+   *
+   * Callback: The server can tell us to disconnect if the server is 
+   * going down.
+   *
+   */
+
+  public void forceDisconnect(String reason) throws RemoteException
+  {
+    try
+      {
+	remoteConsole.forceDisconnect(reason);
+      }
+    catch (RemoteException ex)
+      {
+      }
+
+    shutdown();
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to set the server start
+   * date in the admin console.</p>
+   */
+
+  public void setServerStart(Date date) throws RemoteException
+  {
+    replaceEvent(adminAsyncMessage.SETSERVERSTART, date);
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to set the last dump
+   * date in the admin console.</p>
+   */
+
+  public void setLastDumpTime(Date date) throws RemoteException
+  {
+    replaceEvent(adminAsyncMessage.SETLASTDUMPTIME, date);
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to set the number of
+   * transactions in the server's journal in the admin console.</p>
+   */
+
+  public void setTransactionsInJournal(int trans) throws RemoteException
+  {
+    replaceEvent(adminAsyncMessage.SETTRANSACTIONS, new Integer(trans));
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to set the number of
+   * objects checked out in the admin console.</p>
+   */
+
+  public void setObjectsCheckedOut(int objs) throws RemoteException
+  {
+    replaceEvent(adminAsyncMessage.SETOBJSCHECKOUT, new Integer(objs));
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to set the number of
+   * locks held in the admin console.</p>
+   */
+
+  public void setLocksHeld(int locks) throws RemoteException
+  {
+    replaceEvent(adminAsyncMessage.SETLOCKSHELD, new Integer(locks));
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to update the memory
+   * status display in the admin console.</p>
+   */
+
+  public void setMemoryState(long freeMem, long totalMem) throws RemoteException
+  {
+    long[] parmAry = new long[2];
+
+    parmAry[0] = freeMem;
+    parmAry[1] = totalMem;
+
+    replaceEvent(adminAsyncMessage.SETMEMORYSTATE, parmAry);
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to update the
+   * admin console's server state display.</p>
+   */
+
+  public void changeState(String state) throws RemoteException
+  {
+    replaceEvent(adminAsyncMessage.CHANGESTATE, state);
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to add to the
+   * admin console's log display.</p>
+   */
+
+  public void changeStatus(String status) throws RemoteException
+  {
+    adminAsyncMessage newLogEvent;
+
+    /* -- */
+
+    if (done)
+      {
+	// we have to throw a remote exception, since that's what
+	// the GanymedeAdmin code expects to receive as a signal
+	// that an admin console needs to be dropped
+	
+	throw new RemoteException("serverAdminProxy: console disconnected");
+      }
+
+    synchronized (eventBuffer)
+      {
+	// if we have another changeStatus event in the eventBuffer,
+	// go ahead and append the new log entry directly to its
+	// StringBuffer
+
+	if (lookUp[adminAsyncMessage.CHANGESTATUS] != null)
+	  {
+	    // coalesce this append to the log message
+
+	    StringBuffer buffer = (StringBuffer) lookUp[adminAsyncMessage.CHANGESTATUS].param;
+	    buffer.append(status);
+	    return;
+	  }
+
+	// if we didn't find an event to append to, go ahead and add a
+	// new CHANGESTATUS log update event to the eventBuffer
+
+	newLogEvent = new adminAsyncMessage(adminAsyncMessage.CHANGESTATUS, new StringBuffer().append(status));
+
+	// queue the log evennt
+
+	addEvent(newLogEvent);
+
+	// if we didn't get an exception on the addEvent call, save a
+	// pointer to the newLogEvent so that later calls to
+	// changeStatus can directly append more text until such time
+	// as our commThread can send the log event to the console
+
+	lookUp[adminAsyncMessage.CHANGESTATUS] = newLogEvent;
+      }
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to update the
+   * number of admin consoles attached to the server.</p>
+   */
+
+  public void changeAdmins(String adminStatus) throws RemoteException
+  {
+    replaceEvent(adminAsyncMessage.CHANGEADMINS, adminStatus);
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to update the
+   * admin console's connected user table.</p>
+   *
+   * @param entries a Vector of {@link arlut.csd.ganymede.AdminEntry AdminEntry}
+   * login description objects.
+   */
+
+  public void changeUsers(Vector entries) throws RemoteException
+  {
+    replaceEvent(adminAsyncMessage.CHANGEUSERS, entries);
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to update the
+   * admin console's task table.</p>
+   *
+   * @param tasks a Vector of {@link arlut.csd.ganymede.scheduleHandle scheduleHandle}
+   * objects describing the tasks registered in the Ganymede server.
+   */
+
+  public void changeTasks(Vector tasks) throws RemoteException
+  {
+    replaceEvent(adminAsyncMessage.CHANGETASKS, tasks);
+  }
+
+  /**
+   * <p>private helper method in serverAdminAsyncResponder, used to add an event to
    * the proxy's event buffer.  If the buffer already contains an event
    * of the same type as newEvent, both events will be sent to the
    * Client, in chronological order.</p>
    */
 
-  private void addEvent(clientAsyncMessage newEvent) throws RemoteException
+  private void addEvent(adminAsyncMessage newEvent) throws RemoteException
   {
     if (done)
       {
-	throw new RemoteException("serverClientAsyncResponder: console disconnected");
+	throw new RemoteException("serverAdminAsyncResponder: console disconnected");
       }
 
     synchronized (eventBuffer)
@@ -296,18 +481,18 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
   }
 
   /**
-   * <p>private helper method in serverClientAsyncResponder, used to add an
+   * <p>private helper method in serverAdminAsyncResponder, used to add an
    * event to the proxy's event buffer.  If the buffer already
    * contains an event of the same type as newEvent, the old event's
    * contents will be replaced with the new, and the remote client
    * will never be notified of the old event's contents.</p>
    */
 
-  private void replaceEvent(clientAsyncMessage newEvent) throws RemoteException
+  private void replaceEvent(adminAsyncMessage newEvent) throws RemoteException
   {
     if (done)
       {
-	throw new RemoteException("serverClientAsyncResponder: console disconnected");
+	throw new RemoteException("serverAdminAsyncResponder: console disconnected");
       }
 
     synchronized (eventBuffer)
@@ -372,14 +557,14 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
 	  }
       }
     
-    throw new RemoteException("serverClientAsyncResponder buffer overflow:" + buffer.toString());
+    throw new RemoteException("serverAdminAsyncResponder buffer overflow:" + buffer.toString());
   }
 
   /**
    * private enqueue method.
    */
 
-  private void enqueue(clientAsyncMessage item)
+  private void enqueue(adminAsyncMessage item)
   {
     synchronized (eventBuffer)
       {
@@ -399,11 +584,11 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
    * bounds.
    */
 
-  private clientAsyncMessage dequeue()
+  private adminAsyncMessage dequeue()
   {
     synchronized (eventBuffer)
       {
-	clientAsyncMessage result = eventBuffer[dequeuePtr];
+	adminAsyncMessage result = eventBuffer[dequeuePtr];
 	eventBuffer[dequeuePtr] = null;
 	
 	if (++dequeuePtr >= maxBufferSize)

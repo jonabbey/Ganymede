@@ -4,8 +4,8 @@
 
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/09/05 21:18:45 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/09/06 03:52:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,16 +67,25 @@ import java.rmi.server.Unreferenced;
  * calls {@link arlut.csd.ganymede.serverClientAsyncResponder#getNextMsgs()} to
  * receive asynchonous notifications from the server.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2003/09/05 21:18:45 $
+ * @version $Revision: 1.2 $ $Date: 2003/09/06 03:52:55 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class adminAsyncMessage {
 
   static final int FIRST = 0;
-  static final int SENDMESSAGE = 1;
-  static final int SHUTDOWN = 2;
-  static final int LAST = 2;
+  static final int SETSERVERSTART = 0;
+  static final int SETLASTDUMPTIME = 1;
+  static final int SETTRANSACTIONS = 2;
+  static final int SETOBJSCHECKOUT = 3;
+  static final int SETLOCKSHELD = 4;
+  static final int CHANGESTATE = 5;
+  static final int CHANGESTATUS = 6;
+  static final int CHANGEADMINS = 7;
+  static final int CHANGEUSERS = 8;
+  static final int CHANGETASKS = 9;
+  static final int SETMEMORYSTATE = 10;
+  static final int LAST = 10;
 
   /* --- */
 
@@ -124,13 +133,48 @@ public class adminAsyncMessage {
 
     switch (method)
       {
-      case SENDMESSAGE:
-	result.append("sendMessage");
+      case SETSERVERSTART: 
+	result.append("setServerStart");
+	break;
+	
+      case SETLASTDUMPTIME:
+	result.append("setLastDumpTime");
 	break;
 
-      case SHUTDOWN:
-	result.append("shutdown");
+      case SETTRANSACTIONS:
+	result.append("setTransactionsInJournal");
 	break;
+
+      case SETOBJSCHECKOUT:
+	result.append("setObjectsCheckedOut");
+	break;
+
+      case SETLOCKSHELD:
+	result.append("setLocksHeld");
+	break;
+
+      case CHANGESTATE:
+	result.append("changeState");
+	break;
+
+      case CHANGESTATUS:
+	result.append("changeStatus");
+	break;
+
+      case CHANGEADMINS:
+	result.append("changeAdmins");
+	break;
+
+      case CHANGEUSERS:
+	result.append("changeUsers");
+	break;
+
+      case CHANGETASKS:
+	result.append("changeTasks");
+	break;
+
+      case SETMEMORYSTATE:
+	result.append("setMemoryState");
 	
       default:
 	result.append("??");
