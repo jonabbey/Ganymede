@@ -5,9 +5,16 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.12 $ %D%
+ Version: $Revision: 1.13 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
+
+
+
+ Note:
+   There needs to be a new version of this, JhandleListBox maybe, that
+   just uses listHandles.  That would make it A LOT cleaner, and easier
+   for the StringSelector.  That is the task for Monday.
 
 */
 
@@ -74,7 +81,7 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
       {	
 	if (items.elementAt(0) instanceof String)
 	  {
-	    if (sorted)
+	    if (!sorted)
 	      {
 		if (debug)
 		  {
@@ -128,7 +135,7 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
 	  }
 	else if (items.elementAt(0) instanceof listHandle)
 	  {
-	    if (sorted)
+	    if (!sorted)
 	      {
 		if (debug)
 		  {
@@ -196,8 +203,6 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     setPrototypeCellValue("This is just used to calculate cell height");
     setFixedCellWidth(-1);
 
-    System.err.println("cell height is " + getFixedCellHeight());
-    System.err.println("cell width is " + getFixedCellWidth());
   }
 
   public void setSize(int size)
@@ -309,6 +314,11 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     return model.getSize();
   }
 
+  public boolean containsLabel(String string)
+  {
+    return containsString(string);
+  }
+
   public boolean containsString(String string)
   {
     for (int i = 0; i < model.getSize(); i++)
@@ -332,7 +342,71 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
       }
     return false;
   }
-  
+
+  public boolean contains(Object o)
+  {
+    if (o instanceof listHandle)
+      {
+	return containsHandle((listHandle)o);
+      }
+    else if (o instanceof String)
+      {
+	return containsString((String) o);
+      }
+
+    return false;
+
+  }
+
+  public void setSelectedHandle(listHandle l)
+  {
+    setSelectedValue(l, true);
+
+  }
+
+  public void setSelectedString(String s)
+  {
+    setSelectedLabel(s);
+  }
+
+  /**
+   * This selects the item with the given label.
+   *
+   */
+
+  public void setSelectedLabel(String s)
+  {
+    int size = model.getSize();
+    listHandle lh = null;
+    for (int i = 0; i < size; i++)
+      {
+	lh = (listHandle)model.getElementAt(i);
+	if (lh.getLabel().equals(s))
+	  {
+	    setSelectedValue(lh, true);
+	    break;
+	  }
+      }
+
+  }
+
+  public void setSelected(Object o)
+  {
+    if (o instanceof listHandle)
+      {
+	setSelectedHandle((listHandle)o);
+      }
+    else if (o instanceof String)
+      {
+	setSelectedString((String)o);
+      }
+    else
+      {
+	System.out.println("What kinf od object? " + o);
+      }
+
+  }
+
   public String getSelectedString()
   {
     return ((listHandle)model.elementAt(getSelectedIndex())).getLabel();
@@ -341,6 +415,11 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
   public listHandle getSelectedHandle()
   {
     return (listHandle)model.elementAt(getSelectedIndex());
+  }
+
+  public Object getSelectedItem()
+  {
+    return model.elementAt(getSelectedIndex());
   }
 
   // For the ListSelectionListener
@@ -381,29 +460,32 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
 
   public void mouseClicked(MouseEvent e)
   {
-    if (e.getClickCount() == 2)
+    if (allowCallback)
       {
-	boolean ok = false;
-
-	int index = locationToIndex(e.getPoint());
-	if (debug)
+	if (e.getClickCount() == 2)
 	  {
-	    System.out.println("Double clicked on Item " + index);
-	  }
-	try
-	  {
-	    ok = my_parent.setValuePerformed(new JValueObject(this, 
-							      index,
-							      JValueObject.INSERT));
-	  }
-	catch (java.rmi.RemoteException rx)
-	  {
-	    throw new RuntimeException("Double click produced: " + rx);
-	  }
-
-	if (debug)
-	  {
-	    System.out.println("setValue from JstringListBox=" + ok);
+	    boolean ok = false;
+	    
+	    int index = locationToIndex(e.getPoint());
+	    if (debug)
+	      {
+		System.out.println("Double clicked on Item " + index);
+	      }
+	    try
+	      {
+		ok = my_parent.setValuePerformed(new JValueObject(this, 
+								  index,
+								  JValueObject.INSERT));
+	      }
+	    catch (java.rmi.RemoteException rx)
+	      {
+		throw new RuntimeException("Double click produced: " + rx);
+	      }
+	    
+	    if (debug)
+	      {
+		System.out.println("setValue from JstringListBox=" + ok);
+	      }
 	  }
       }
   }
