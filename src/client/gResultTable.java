@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 1999/10/29 18:43:16 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2001/05/30 22:56:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import javax.swing.*;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
- * @version $Revision: 1.32 $ $Date: 1999/10/29 18:43:16 $ $Name:  $
+ * @version $Revision: 1.33 $ $Date: 2001/05/30 22:56:57 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -407,7 +407,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     
     if (table == null)
       {
-	table = new rowTable(colWidths, headers, this, popMenu);
+	table = new rowTable(colWidths, headers, this, popMenu, true);
 	contentPane.add("Center", table);
       }
     else
