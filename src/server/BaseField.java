@@ -6,7 +6,7 @@
    from a field.
    
    Created: 17 April 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,6 +31,8 @@ import java.rmi.*;
  */
 
 public interface BaseField extends Remote {
+
+  public boolean isEditable() throws RemoteException;
 
   // general
 

@@ -5,7 +5,7 @@
    Client side interface to the object type dictionary
    
    Created: 17 April 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,6 +30,9 @@ import java.util.*;
  */
 
 public interface Base extends Remote {
+
+  public boolean isEditable() throws RemoteException;
+
   public String getName() throws RemoteException;
   public String getClassName() throws RemoteException;
   public short getTypeID() throws RemoteException;
