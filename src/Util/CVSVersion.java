@@ -4,8 +4,8 @@
 
    Created: 16 November 2001
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2001/11/17 02:26:51 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/11/17 02:32:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,22 +66,38 @@ package arlut.csd.Util;
 public class CVSVersion {
 
   static String CVS_release_name = "$Name:  $";
-  static String CVS_release_date = "$Date: 2001/11/17 02:26:51 $";
+  static String CVS_release_date = "$Date: 2001/11/17 02:32:15 $";
   static String release_string = null;
 
   // ---
 
-  public static String getReleaseNumber()
+  /**
+   * <p>Returns a composite string containing release information based on the
+   * last CVS export and compile of the CVSVersion class.</p>
+   */
+
+  public static String getReleaseString()
   {
     if (release_string != null)
       {
 	return release_string;
       }
 
+    release_string = CVSVersion.parseRelease(CVS_release_name, CVS_release_date);
+
+    return release_string;
+  }
+  
+  /**
+   * <p>This method parses CVS Name and Date tokens and returns a string which
+   * describes the release number and date.</p>
+   */
+
+  public static String parseRelease(String CVS_release_name, String CVS_release_date)
+  {
     if (CVS_release_name.length () <= 9)
       {
-	release_string = "version unknown" + " - " + CVS_release_date; 
-	return release_string;
+	return "version unknown" + " - " + CVS_release_date; 
       }
 
     String release_name = null;
@@ -142,7 +158,6 @@ public class CVSVersion {
 	release_number = ia + "." + ib + "." + ic;
       }
 
-    release_string = release_number + " - " + CVS_release_date;
-    return release_string;
+    return release_number + " - " + CVS_release_date;
   }
 }
