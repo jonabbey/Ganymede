@@ -7,8 +7,8 @@
 
    Created: 15 March 2002
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2002/03/15 22:33:23 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2002/03/15 22:43:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,9 +52,7 @@
 
 package arlut.csd.ganymede;
 
-import java.io.*;
 import java.util.*;
-import java.text.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -64,7 +62,9 @@ import java.text.*;
 
 /**
  * <P>This class coordinates lock activity for a server-side
- * {@link arlut.csd.ganymede.DBSession DBSession} object.</P>
+ * {@link arlut.csd.ganymede.DBSession DBSession} object.  This class handles
+ * the logic to make sure that a session does not grant a new lock that would
+ * conflict with a lock already held by the same session.</P>
  */
 
 public class DBSessionLockManager {
@@ -102,7 +102,7 @@ public class DBSessionLockManager {
   }
 
   /**
-   * <p>Establishes a read lock for the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}s
+   * <p>Establishes a read lock for the {@link arlut.csd.ganymede.DBObjectBase DBObjectBases}
    * in bases.</p>
    *
    * <p>The thread calling this method will block until the read lock 
@@ -128,8 +128,6 @@ public class DBSessionLockManager {
 
     if (lockHash.size() != 0)
       {
-	boolean lockOK;
-
 	Enumeration enum = lockHash.keys();
 
 	while (enum.hasMoreElements())
@@ -208,7 +206,7 @@ public class DBSessionLockManager {
   }
 
   /**
-   * <p>Establishes a write lock for the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}s
+   * <p>Establishes a write lock for the {@link arlut.csd.ganymede.DBObjectBase DBObjectBases}
    * in bases.</p>
    *
    * <p>The thread calling this method will block until the write lock
