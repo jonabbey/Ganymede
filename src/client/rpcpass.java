@@ -9,18 +9,20 @@
 
    Created: 6 May 1999
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/10/29 16:12:25 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/03/29 00:55:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -112,7 +114,7 @@ public class rpcpass implements ClientListener {
       {
 	System.out.println("Ganymede rpcpass: Error, invalid command line parameters");
  	System.out.println("Usage: java rpcpass properties=<property file>");
-	return;
+	System.exit(1);
       }
 
     try
@@ -209,17 +211,21 @@ public class rpcpass implements ClientListener {
 	(cryptedpass == null && shell == null && gecos == null))
       {
 	System.out.println("Ganymede rpcpass: Error, information missing.");
-	return;
+	System.exit(1);
       }
 
     if (!loadProperties(propFilename))
       {
 	System.out.println("Ganymede rpcpass: Error, couldn't successfully load properties from file " + 
 			   propFilename + ".");
-	return;
+	System.exit(1);
       }
 
     server_url = "rmi://" + serverHostProperty + ":" + registryPortProperty + "/ganymede.server";
+
+    // after the ClientBase is constructed, we'll be an active RMI
+    // server, so we need to always do System.exit() to shut down the
+    // VM.
 
     try
       {
@@ -228,7 +234,7 @@ public class rpcpass implements ClientListener {
     catch (RemoteException ex)
       {
 	System.out.println("Could not connect to server" + ex.getMessage());
-	return;
+	System.exit(1);
       }
 
     try
@@ -238,7 +244,7 @@ public class rpcpass implements ClientListener {
     catch (RemoteException ex)
       {
 	System.out.println("Ganymede rpcpass: couldn't log in for username " + username);
-	return;
+	System.exit(1);
       }
 
     try
