@@ -13,7 +13,7 @@
    as we would if we were truly a remote object.
    
    Created: 12 February 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -197,6 +197,11 @@ public class BaseDump implements Base, CategoryNode {
   {
     return labelFieldName;
   }
+
+  public Vector getFields(boolean includeBuiltIns)
+  {
+    throw new RuntimeException("this method not supported in BaseDump");
+  }  
 
   public Vector getFields()
   {
