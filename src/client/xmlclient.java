@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/05/09 02:28:56 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/05/09 04:11:05 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -78,7 +78,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.2 $ $Date: 2000/05/09 02:28:56 $ $Name:  $
+ * @version $Revision: 1.3 $ $Date: 2000/05/09 04:11:05 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -469,12 +469,18 @@ public class xmlclient implements ClientListener {
 
   public void processData() throws SAXException
   {
-    System.err.println("processData");
-
     ReturnVal attempt = null;
     XMLItem item;
 
     /* -- */
+
+    System.err.println("processData");
+
+    System.err.println("Connecting to server");
+
+    connectAsClient();
+
+    System.err.println("Reading object data");
 
     item = getNextItem();
 
@@ -523,23 +529,70 @@ public class xmlclient implements ClientListener {
 	System.exit(1);
       }
 
-    // from this point on, we'll exit via the finally clause
-    // below, so that we do a proper logout from the server
+    // Loader is inherited from java.lang.Thread, so we can just
+    // create one and start it running so that it will talk to the
+    // server and download type and mapping information from the
+    // server, in the background
+    
+    loader = new Loader(session, true);
+    loader.start();
 
+    Vector baseList = loader.getBaseList();
+
+    for (int i = 0; i < baseList.size(); i++)
+      {
+	BaseDump base = (BaseDump) baseList.elementAt(i);
+
+	Vector templates = loader.getTemplateVector(base.getTypeID());
+
+	Hashtable fieldHash = new Hashtable();
+	
+	for (int j = 0; j < templates.size(); j++)
+	  {
+	    FieldTemplate tmpl = (FieldTemplate) templates.elementAt(j);
+
+	    fieldHash.put(tmpl.getName(), tmpl);
+	  }
+
+	objectTypes.put(base.getName(), fieldHash);
+      }
+  }
+
+  /**
+   * <p>This private helper method returns a hash of field names to
+   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate} based
+   * on the underscore-for-space XML encoded objec type name.</p>
+   *
+   * <p>The Hashtable returned by this method is intended to be used
+   * with the getObjectFieldType method.</p>
+   */
+
+  private Hashtable getFieldHash(String objectTypeName)
+  {
+    return (Hashtable) objectTypes.get(XMLUtils.XMLDecode(objectTypeName));
+  }
+
+  /**
+   * <p>This private helper method takes a hash of field names to
+   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate} and an
+   * underscore-for-space XML encoded field name and returns the
+   * FieldTemplate for that field, if known.  If not, null is
+   * returned.</p> 
+   */
+
+  private FieldTemplate getObjectFieldType(Hashtable fieldHash, String fieldName)
+  {
+    return (FieldTemplate) fieldHash.get(XMLUtils.XMLDecode(fieldName));
+  }
+
+  private void transmitData()
+  {
     try
       {
-	// Loader is inherited from java.lang.Thread, so we can just
-	// create one and start it running so that it will talk to the
-	// server and download type and mapping information from the
-	// server, in the background
-
-	loader = new Loader(session, true);
-	loader.start();
-
 	try
 	  {
 	    attempt = session.openTransaction("xmlclient client (" + username + ")");
-
+	    
 	    if (attempt != null && !attempt.didSucceed())
 	      {
 		if (attempt.getDialog() != null)
@@ -595,21 +648,15 @@ public class xmlclient implements ClientListener {
 	catch (RemoteException ex)
 	  {
 	  }
-	finally
-	  {
-	    System.exit(0);
-	  }
       }
   }
-
-
+  
   /**
    * <p>Called when the server forces a disconnect.</p>
    *
    * <p>Call getMessage() on the
    * {@link arlut.csd.ganymede.client.ClientEvent ClientEvent} 
-   * to get the reason for the disconnect.</p>
-   */
+   * to get the reason for the disconnect.</p> */
 
   public void disconnected(ClientEvent e)
   {
@@ -628,5 +675,8 @@ public class xmlclient implements ClientListener {
 
   public void messageReceived(ClientEvent e)
   {
+    // this is mostly used so the server can asynchronously notify the
+    // client about the server's build activity.  for now we're just
+    // ignoring any such messages
   }
 }

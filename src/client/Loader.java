@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2000/05/04 04:17:42 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2000/05/09 04:11:05 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.17 $ $Date: 2000/05/04 04:17:42 $ $Name:  $
+ * @version $Revision: 1.18 $ $Date: 2000/05/09 04:11:05 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -130,7 +130,6 @@ public class Loader extends Thread {
 
   public synchronized void run()
   {
-
     if (debug)
       {
 	System.out.println("Starting thread in loader");
@@ -175,7 +174,6 @@ public class Loader extends Thread {
 	    baseMapLoaded = true;
 	    this.notifyAll();
 	  }
-
       }
     catch (RemoteException rx)
       {
@@ -371,7 +369,6 @@ public class Loader extends Thread {
 
     return baseNames;
   }
-
 
   /**
    * <p>Returns a hash mapping Short {@link arlut.csd.ganymede.Base Base} id's to
