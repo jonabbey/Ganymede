@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -380,7 +380,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
   /**
    *
    * This method provides the hook for doing a
-   * fast database dump to a string form.
+   * fast, full or partial, database dump to a string form.
    *
    * @see arlut.csd.ganymede.Query
    * @see arlut.csd.ganymede.Result
@@ -440,7 +440,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     Ganymede.debug("Query: " + username + " : got read lock");
 
-    buffer.append(base.dump());
+    buffer.append(base.dump(this, query.permitList));
 
     enum = base.objectHash.keys();
 
@@ -454,7 +454,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	if (DBQueryHandler.matches(query, obj))
 	  {
 	    //    Ganymede.debug("Dump Query: " + username + " : adding element " + obj.getLabel());
-	    buffer.append(obj.dump(session));
+	    buffer.append(obj.dump(this, query.permitList));
 	  }
       }
 
@@ -474,8 +474,8 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
   /**
    *
    * This method provides the hook for doing all
-   * manner of object listing for the Ganymede
-   * database.
+   * manner of simple object listing for the Ganymede
+   * database.  
    *
    * @see arlut.csd.ganymede.Query
    * @see arlut.csd.ganymede.Result
