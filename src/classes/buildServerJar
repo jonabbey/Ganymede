@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.21 $
-# Date: $Date: 2002/03/16 03:09:34 $
+# Version: $Revision: 1.22 $
+# Date: $Date: 2004/03/20 02:33:08 $
 #
 ############################################################
 
@@ -94,6 +94,8 @@ echo "Syncing xml subtree"
 
 rm -f com
 ln -s ../com .
+
+# Get everything from org as well.
 
 rm -f org
 ln -s ../org .
