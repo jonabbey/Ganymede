@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -185,8 +185,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
   {
     switch (fieldid)
       {
-      case userSchema.GROUPNAME:
-      case userSchema.GID:
+      case groupSchema.GROUPNAME:
+      case groupSchema.GID:
 	return true;
       }
 
