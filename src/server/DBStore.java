@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.58 $ %D%
+   Version: $Revision: 1.59 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -629,6 +629,10 @@ public class DBStore {
 		    base.type_code == SchemaConstants.EventBase)
 		  {
 		    base.partialEmit(out); // gotta retain admin login ability
+		  }
+		else if (base.type_code == SchemaConstants.BuilderBase)
+		  {
+		    base.emit(out, true); // save the builder information
 		  }
 		else
 		  {
