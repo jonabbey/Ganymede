@@ -5,7 +5,7 @@
    A 1.1 compatible YesNoDialog box
    
    Created: 6 February 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,7 @@ import com.sun.java.swing.*;
 
 ------------------------------------------------------------------------------*/
 
-public class YesNoDialog extends JDialog implements ActionListener {
+public class YesNoDialog extends JCenterDialog implements ActionListener {
 
   JButton yesButton;
   JButton noButton;
