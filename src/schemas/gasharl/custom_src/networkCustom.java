@@ -5,7 +5,7 @@
    This file is a management class for IP network objects in Ganymede.
    
    Created: 20 May 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,16 +25,6 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 public class networkCustom extends DBEditObject {
-
-  /**
-   *
-   * This method provides a hook that can be used to indicate that a
-   * particular field's value should be filtered by a particular
-   * subclass of DBEditObject.  This is intended to allow, for instance,
-   * that the Admin object's name field, if null, can have the owning
-   * user's name interposed.
-   *
-   */
 
   /**
    *
