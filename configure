@@ -8,8 +8,8 @@
 # for configurator.perl to use to do its thing.
 #
 # Release: $Name:  $
-# Version: $Revision: 1.11 $
-# Last Mod Date: $Date: 2000/10/10 05:09:59 $
+# Version: $Revision: 1.12 $
+# Last Mod Date: $Date: 2000/11/16 05:21:01 $
 #
 ###############################################################################
 
@@ -39,15 +39,19 @@ guessperl=`which perl5`
   guessperl=`which perl`
  fi
 
-echo "Where is perl5 installed? [$guessperl] \c" 
-
-read userperl
-
-if  test ! -z "$userperl"; then
-	GPERL=$userperl
-    else
+ if `$guessperl $GROOTDIR/scripts/versiontest.pl > /dev/null 2>&1`; then
 	GPERL=$guessperl
-fi
+    else
+	echo "Where is perl 5 installed? [$guessperl] \c" 
+
+	read userperl
+
+	if  test ! -z "$userperl"; then
+	    GPERL=$userperl
+	else
+	    GPERL=$guessperl
+	fi
+ fi
 
 export GPERL
 
