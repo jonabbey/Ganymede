@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1443,10 +1443,26 @@ public class DBStore {
     eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase, null);
 
     s = (StringDBField) eO.getField("Name");
-    s.setValue("monitor");
+
+    if (Ganymede.monitornameProperty != null)
+      {
+	s.setValue(Ganymede.monitornameProperty);
+      }
+    else
+      {
+	throw new NullPointerException("monitor name property not loaded, can't initialize monitor account");
+      }
     
     p = (PasswordDBField) eO.getField("Password");
-    p.setPlainTextPass(GanymedeConfig.newMonpass); // default monitor password
+
+    if (Ganymede.defaultmonitorpassProperty != null)
+      {
+	p.setPlainTextPass(Ganymede.defaultmonitorpassProperty); // default monitor password
+      }
+    else
+      {
+	throw new NullPointerException("monitor password property not loaded, can't initialize monitor account");
+      }
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminConsole);
     b.setValue(new Boolean(true));
