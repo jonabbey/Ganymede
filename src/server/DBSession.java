@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,13 +24,14 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * DBSession is the DBStore session class.  All normal database
- * interactions are performed through a DBSession object.  The DBSession object
- * provides a handle for monitoring the operations on the database.. who holds
- * what lock, what actions are performed during a lock / transaction / session.
  * 
- *
- */
+ * <p>DBSession is the DBStore session class.  All normal database
+ * interactions are performed through a DBSession object.  The
+ * DBSession object provides a handle for monitoring the operations on
+ * the database.. who holds what lock, what actions are performed
+ * during a lock / transaction / session.</p>
+ * 
+ * */
 
 public class DBSession {
   
@@ -41,19 +42,22 @@ public class DBSession {
   Object key;
 
   /* -- */
-   
-  //     Constructor for DBSession.
-   
-  //     The key passed to the DBSession constructor is intended to be used
-  //     to allow code to save an identifier in the DBSession.. this might be
-  //     a thread object or a higher level session object or whatever.  Eventually
-  //     I expect I'll replace this generic key with some sort of reporting 
-  //     Interface object.
-  //
-  //     This constructor is intended to be called by the DBStore login() method.
-  //
-  //     @param store The DBStore database this session belongs to.
-  //     @param key An identifying key with meaning to whatever code is using csd.DBStore
+
+  /**   
+   * <p>Constructor for DBSession.</p>
+   * 
+   * <p>The key passed to the DBSession constructor is intended to be used
+   * to allow code to save an identifier in the DBSession.. this might be
+   * a thread object or a higher level session object or whatever.  Eventually
+   * I expect I'll replace this generic key with some sort of reporting 
+   * Interface object.</p>
+   *
+   * <p>This constructor is intended to be called by the DBStore login() method.</p>
+   *
+   * @param store The DBStore database this session belongs to.
+   * @param key An identifying key with meaning to whatever code is using csd.DBStore
+   *
+   */
    
   DBSession(DBStore store, Object key)
   {
@@ -97,7 +101,7 @@ public class DBSession {
 	throw new RuntimeException("createDBObject called outside of a transaction");
       }
 
-    base = (DBObjectBase) store.objectBases.get(new Integer(object_type));
+    base = (DBObjectBase) store.objectBases.get(new Short(object_type));
 
     object = new DBObject(base, base.getNextId());
     
@@ -210,12 +214,12 @@ public class DBSession {
   {
     DBObjectBase base;
     DBObject     obj;
-    Integer      baseKey;
+    Short      baseKey;
     Integer      objKey;
 
     /* -- */
 
-    baseKey = new Integer(baseID);
+    baseKey = new Short(baseID);
     objKey = new Integer(objectID);
 
     base = (DBObjectBase) store.objectBases.get(baseKey);
