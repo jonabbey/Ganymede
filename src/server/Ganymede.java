@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.54 $ %D%
+   Version: $Revision: 1.55 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -215,6 +215,8 @@ public class Ganymede {
       }
 
     debug("Creating DBStore structures");
+
+    // And how can this be!?  For he IS the kwizatch-haderach!!
 
     db = new DBStore();
 
