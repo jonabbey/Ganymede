@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -91,7 +91,7 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
     boolean found = false;
     Query userQuery;
     QueryNode root;
-    DBObject obj;
+    DBObject obj = null;
     PasswordDBField pdbf;
 
     /* -- */
@@ -147,7 +147,7 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (found)
       {
-	GanymedeSession session = new GanymedeSession(client);
+	GanymedeSession session = new GanymedeSession(client, obj);
  	Ganymede.debug("Client logged in: " + session.username);
 	return (Session) session;
       }
