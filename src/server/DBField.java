@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 1999/11/16 08:00:57 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 1999/11/19 01:01:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2372,7 +2372,17 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    *
    * <P>It is used to place a value or set of values that were known to
    * be good during the current transaction back into this field,
-   * without creating or changing this DBField's object identity.</P>
+   * without creating or changing this DBField's object identity, and
+   * without doing any of the checking or side effects that calling
+   * setValue() will typically do.</P>
+   *
+   * <P>In particular, it is not necessary to subclass this method for
+   * use with {@link arlut.csd.ganymede.InvidDBField InvidDBField}, since
+   * the {@link arlut.csd.ganymede.DBEditSet#rollback(java.lang.String) rollback()}
+   * method will always rollback all objects in the transaction at the same
+   * time.  It is not necessary to have the InvidDBField subclass handle
+   * binding/unbinding during rollback, since all objects which could conceivably 
+   * be involved in a link will also have their own states rolled back.</P>
    *
    * <P>Called by {@link arlut.csd.ganymede.DBEditObject DBEditObject}'s
    * {@link arlut.csd.ganymede.DBEditObject#rollback(java.util.Hashtable) rollback()}

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 1999/11/16 08:01:03 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 1999/11/19 01:01:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -54,6 +54,7 @@ import java.util.*;
 import java.rmi.*;
 
 import arlut.csd.JDialog.*;
+import arlut.csd.Util.VectorUtils;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -84,7 +85,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.</P>
  *
- * @version $Revision: 1.113 $ %D%
+ * @version $Revision: 1.114 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2297,7 +2298,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar method called on a vector field: " + getName() +
+ 	throw new IllegalArgumentException("scalar method called on a vector field: " + getName() +
 					   " in object " + owner.getLabel());
       }
 

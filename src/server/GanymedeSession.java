@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.162 $
-   Last Mod Date: $Date: 1999/11/16 08:01:02 $
+   Version: $Revision: 1.163 $
+   Last Mod Date: $Date: 1999/11/19 01:01:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.162 $ %D%
+ * @version $Revision: 1.163 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4884,8 +4884,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    personaPerms = new PermMatrix(defaultPerms).union(selfPerm);
 	    delegatablePersonaPerms = new PermMatrix(defaultPerms).union(selfPerm);
 
-	    System.err.println("GanymedeSession.updatePerms(): returning.. no persona obj for " + 
-			       (personaName == null ? username : personaName));
+	    if (permsdebug)
+	      {
+		System.err.println("GanymedeSession.updatePerms(): returning.. no persona obj for " + 
+				   (personaName == null ? username : personaName));
+	      }
 
 	    // remember the last time we pulled personaPerms / defaultPerms
 
