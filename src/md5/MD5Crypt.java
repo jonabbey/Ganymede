@@ -4,8 +4,8 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/11/04 21:38:02 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/11/04 21:47:12 $
    Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
    ----------------------------------------------------------------------------
@@ -67,8 +67,8 @@ import MD5;
  *
  * <p>Created: 3 November 1999</p>
  * <p>Release: $Name:  $</p>
- * <p>Version: $Revision: 1.4 $</p>
- * <p>Last Mod Date: $Date: 1999/11/04 21:38:02 $</p>
+ * <p>Version: $Revision: 1.5 $</p>
+ * <p>Last Mod Date: $Date: 1999/11/04 21:47:12 $</p>
  * <p>Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
  * <p>Original C Version:<pre>
  * ----------------------------------------------------------------------------
@@ -153,7 +153,7 @@ public final class MD5Crypt {
    * @return An OpenBSD/FreeBSD/Linux-compatible md5-hashed password field.
    */
 
-  static final String crypt(String password, String salt)
+  static public final String crypt(String password, String salt)
   {
     /* This string is magic for this algorithm.  Having it this way,
      * we can get get better later on */
