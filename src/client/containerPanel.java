@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.73 $ %D%
+    Version: $Revision: 1.74 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -2779,7 +2779,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	sa.setEditable(editable && fieldInfo.isEditable());
 
-	sa.setToolTipText(fieldTemplate.getComment());
+	String comment = fieldTemplate.getComment();
+
+	if (comment != null && !comment.equals(""))
+	  {
+	    sa.setToolTipText(comment);
+	  }
 
 	addRow( sa, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
       }
@@ -2809,7 +2814,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	sf.setEditable(editable && fieldInfo.isEditable());
 
-	sf.setToolTipText(fieldTemplate.getComment());
+	String comment = fieldTemplate.getComment();
+
+	if (comment != null && !comment.equals(""))
+	  {
+	    sf.setToolTipText(comment);
+	  }
 
 	addRow( sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
       }
@@ -2862,7 +2872,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      
 	sf.setEditable(false);
 
-	sf.setToolTipText(fieldTemplate.getComment());
+	String comment = fieldTemplate.getComment();
+
+	if (comment != null && !comment.equals(""))
+	  {
+	    sf.setToolTipText(comment);
+	  }
 	
 	addRow( sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	
@@ -2908,8 +2923,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     nf.setEditable(editable && fieldInfo.isEditable());
     nf.setColumns(40);
-    
-    nf.setToolTipText(fieldTemplate.getComment());
+
+    String comment = fieldTemplate.getComment();
+
+    if (comment != null && !comment.equals(""))
+      {
+	nf.setToolTipText(comment);
+      }
     
     addRow( nf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
   
@@ -3327,7 +3347,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	
     ipf.setCallback(this);
 
-    ipf.setToolTipText(fieldTemplate.getComment());
+    String comment = fieldTemplate.getComment();
+
+    if (comment != null && !comment.equals(""))
+      {
+	ipf.setToolTipText(comment);
+      }
 		
     addRow(ipf,
 	   templates.indexOf(fieldTemplate), 
