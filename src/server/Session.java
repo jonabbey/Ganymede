@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.18 $ %D%
+ * @version $Revision: 1.19 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -135,6 +135,17 @@ public interface Session extends Remote {
    */
 
   Category    getRootCategory() throws RemoteException;
+
+  /**
+   *
+   * Returns a serialized representation of the basic category
+   * and base structure on the server.
+   *
+   * @see arlut.csd.ganymede.Category
+   *
+   */
+
+  CategoryTransport    getCategoryTree() throws RemoteException;
 
   /**
    *
@@ -330,7 +341,7 @@ public interface Session extends Remote {
    * value is null, getLastError() should be called for a description
    * of the problem. 
    *
-   * @return the object for editing
+   * @return the object for editing, if null, check getLastError()
    *
    */
 
@@ -341,7 +352,7 @@ public interface Session extends Remote {
    * Create a new object of the given type. If the return value is null,
    * getLastError() should be called for a description of the problem. 
    *
-   * @return the newly created object for editing
+   * @return the newly created object for editing, if null, check getLastError()
    *
    */
 
@@ -371,12 +382,27 @@ public interface Session extends Remote {
    * server for a defined period of time, to allow other network systems
    * to have time to do accounting, clean up, etc., before a user id or
    * network address is re-used.
-   *
-   * @return true if the object was inactivated, if false, check getLastError()
-   *
+   * 
    */
 
   ReturnVal     inactivate_db_object(Invid invid) throws RemoteException;
+
+  /**
+   *
+   * Reactivates an inactivated object in the database
+   *
+   * This method is only applicable to inactivated objects.  For such,
+   * the object will be reactivated if possible, and the removal date
+   * will be cleared.  The object may retain an expiration date,
+   * however.
+   *
+   * The client should check the returned ReturnVal's
+   * getObjectStatus() method to see whether the re-activated object
+   * has an expiration date set.
+   * 
+   */
+
+  ReturnVal     reactivate_db_object(Invid invid) throws RemoteException;
 
   /**
    *
@@ -385,8 +411,6 @@ public interface Session extends Remote {
    * Certain objects cannot be inactivated, but must instead be
    * simply removed on demand.  The active permissions for the client
    * may determine whether a particular type of object may be removed.
-   *
-   * @return true if the object was removed, if false, check getLastError()
    *
    */
 
