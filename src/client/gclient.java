@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.116 $ %D%
+   Version: $Revision: 1.117 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3257,7 +3257,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     _myglogin.logout();
 
-    this.dispose();
+    try {
+      
+      this.dispose();
+      
+    } catch (NullPointerException e) {
+      
+      System.err.println(e + " - logout() tried to remove something that wasn't there.");
+      
+    }
+    
   }
 
   /**
