@@ -3183,17 +3183,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * {@link arlut.csd.ganymede.server.DBEditObject#release(boolean) release()}
    * method.</p>
    *
-   * <p>This method is intended to be subclassed by application
-   * objects that need to include extra-Ganymede processes
-   * in the two-phase commit protocol.  If a particular
-   * subclass of DBEditObject does not need to involve outside
-   * processes in the full two-phase commit protocol, this
-   * method should not be overridden.</p>
+   * <p>This method may be subclassed by application objects that need
+   * to include extra-Ganymede processes in the two-phase commit
+   * protocol.  If a particular subclass of DBEditObject does not need
+   * to involve outside processes in the full two-phase commit
+   * protocol, this method should not be overridden.</p>
    *
-   * <p>If this method is overridden, be sure and call setCommitting(true)
-   * before doing anything else.  Failure to call setCommitting()
-   * in this method will cause the two phase commit mechanism to
-   * behave unpredictably.</p>
+   * <p>If this method is overridden, be sure and call
+   * setCommitting(true) before doing anything else.  Failure to call
+   * setCommitting() in this method will cause the two phase commit
+   * mechanism to behave unpredictably.</p>
    *
    * <p><B>WARNING!</B> this method is called at a time when portions
    * of the database are locked for the transaction's integration into
@@ -3214,6 +3213,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public synchronized ReturnVal commitPhase1()
   {
     setCommitting(true);
+
+    // if we are deleting or dropping this user, don't bother to check
+    // for consistency
+
+    switch (this.getStatus())
+      {
+      case ObjectStatus.DELETING:
+      case ObjectStatus.DROPPING:
+	return null;
+      }
 
     // if we have enableOversight turned on, let's check and see if
     // this object is currently consistent.  If it is not, and it was
