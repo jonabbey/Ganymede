@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 1999/10/06 21:52:29 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 1999/10/06 22:09:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2567,7 +2567,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    buffer.append("The user's main home directory has been renamed.  You may need ");
 	    buffer.append("to take some action to make sure that the user's account name change ");
-	    buffer.append("doesn't cause problems in your local scripts, etc.\n");
+	    buffer.append("doesn't cause problems in your local scripts, etc.\n\n");
 	  }
 	else
 	  {
@@ -2576,7 +2576,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    buffer.append("main server to make sure his or her home directory is renamed properly.\n\n");
 	    buffer.append("In addition, you may need ");
 	    buffer.append("to take some action to make sure that the user's account name change ");
-	    buffer.append("doesn't cause problems in your local scripts, etc.\n");
+	    buffer.append("doesn't cause problems in your local scripts, etc.\n\n");
 	  }
 
 	editset.logEvent("userrenamed",

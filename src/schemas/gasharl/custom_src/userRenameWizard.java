@@ -6,8 +6,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/07/28 22:05:42 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/10/06 22:09:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -266,6 +266,9 @@ public class userRenameWizard extends GanymediatorWizard {
 			 "Thanks",
 			 null,
 			 "ok.gif");
+
+	retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
+	retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
       }
     else if (retVal.didSucceed())
       {
@@ -274,8 +277,11 @@ public class userRenameWizard extends GanymediatorWizard {
 					 "Thanks",
 					 null,
 					 "ok.gif"));
+
+	retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
+	retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
       }
-    
+
     return retVal;
   }
 
