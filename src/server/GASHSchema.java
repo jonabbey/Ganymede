@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -734,10 +734,31 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     else if (event.getSource() == createNameMI)
       {
 	System.out.println("Create namespace chosen");
-	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namespace", "Create", "Cancel");
+
+	//toolkit = Toolkit.getDefaultToolkit();
+
+	Image image = null;
+
+	try
+	  {
+	    image = toolkit.getImage(new URL("http://www.arlut.utexas.edu/~mulvaney/question.gif"));
+	    Util.waitForImage(this, image);
+	  }
+	
+	catch (MalformedURLException e)
+	  {
+	    System.err.println("Bad URL");
+	  }
+
+	
+
+
+	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namespace", "Create", "Cancel", image);
 
 	dialogResource.addString("Namespace:");
 	dialogResource.addBoolean("Case Insensitive:");
+
+	
 
 	StringDialog dialog = new StringDialog(dialogResource);
 	Hashtable results = dialog.DialogShow();
