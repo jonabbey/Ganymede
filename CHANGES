@@ -148,7 +148,10 @@ guide.
 
 All of the code for this came from John Knutson.
 
-This bumps the DBStore version numbers to major: 1, minor: 15.
+This change bumps the DBStore revision numbers to
+
+	major: 1
+	minor: 15
 
 13. [CLIENT] Improved speed for object editing
 
@@ -170,7 +173,10 @@ Ganymede's PasswordDBField class now supports these fancy MD5
 passwords, and the old support for a simple MD5 password hash has been
 removed.
 
-This bumps the DBStore version numbers to major: 1, minor: 16.
+This change bumps the DBStore revision numbers to
+
+	major: 1
+	minor: 16
 
 -------------------- Changes from 0.99.6 to 0.99.7 -------------------
 
