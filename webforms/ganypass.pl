@@ -131,7 +131,7 @@ sub print_default {
     <table border=0>
       <tr>
 	<td align=left>
-	  <A HREF="http://www.arlut.utexas.edu/~broccol/gash2/"><img src="$web_loc/ganymede_title2_sm.gif" border=0></a>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><img src="$web_loc/ganymede_title2_sm.gif" border=0></a>
 	</td>
 	<td width="100%" align=center>
 	  <h1>Ganymede Password Changing Utility</h1>
@@ -143,13 +143,13 @@ sub print_default {
 
       <tr>
 	<td align=center>
-	  <A HREF="http://www.arlut.utexas.edu/~broccol/gash2/"><small>[Ganymede Home]</small></A>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></A>
 	</td>
 	<td width="100%" align=center>
-	  <small>[Click <a href="http://csdsun9.arlut.utexas.edu/ganymede/" target="_top">here</a> to go directly to the Ganymede login page]</small>
+	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Ganymede login page]</small>
 	</td>
 	<td align=center>
-	  <a href="/"><small>[ARL:UT Home]</small></a>
+	  <a href="http://www.arlut.utexas.edu/"><small>[ARL:UT Home]</small></a>
 	</td>
       </tr>
 </table>
@@ -171,7 +171,7 @@ notifying you of the success of your password change request.</p>
     </center>
 
     <center>
-      <FORM METHOD="POST" ACTION="http://arlut.utexas.edu/cgi-bin/usercgi/~robbie/ganypass.pl"> 
+      <FORM METHOD="POST" ACTION="ganypass.pl"> 
 	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
 	  <tr bgcolor="#663366">
 	    <td colspan=2 align=center>
@@ -235,7 +235,7 @@ sub print_success {
     <table border=0>
       <tr>
 	<td align=left>
-	  <A HREF="http://www.arlut.utexas.edu/~broccol/gash2/"><img src="http://www.arlut.utexas.edu/gash2/ganymede_title2_sm.gif" border=0></a>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><img src="$web_loc/ganymede_title2_sm.gif" border=0></a>
 	</td>
 	<td width="100%" align=center>
 	  <h1>Password Changed Successfully</h1>
@@ -247,10 +247,10 @@ sub print_success {
 
       <tr>
 	<td align=center>
-	  <A HREF="http://www.arlut.utexas.edu/~broccol/gash2/"><small>[Ganymede Home]</small></A>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></A>
 	</td>
 	<td width="100%" align=center>
-	  <small>[Click <a href="http://csdsun9.arlut.utexas.edu/ganymede/" target="_top">here</a> to go directly to the Ganymede login page]</small>
+	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Ganymede login page]</small>
 	</td>
 	<td align=center>
 	  <a href="/"><small>[ARL:UT Home]</small></a>
@@ -321,22 +321,22 @@ sub print_failure {
     <table border=0>
       <tr>
 	<td align=left>
-	  <A HREF="http://www.arlut.utexas.edu/~broccol/gash2/"><img src="http://www.arlut.utexas.edu/gash2/ganymede_title2_sm.gif" border=0></a>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><img src="$web_loc/ganymede_title2_sm.gif" border=0></a>
 	</td>
 	<td width="100%" align=center>
 	  <h1>Password not changed<br>Check username and password</h1>
 	</td>
 	<td align=right>
-	  <a href="/"><img src="/graphics/arlbw.jpg" border=0></a>
+	  <a href="/"><img src="$web_loc/graphics/arlbw.jpg" border=0></a>
 	</td>
       </tr>
 
       <tr>
 	<td align=center>
-	  <A HREF="http://www.arlut.utexas.edu/~broccol/gash2/"><small>[Ganymede Home]</small></A>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></A>
 	</td>
 	<td width="100%" align=center>
-	  <small>[Click <a href="http://csdsun9.arlut.utexas.edu/ganymede/" target="_top">here</a> to go directly to the Ganymede login page]</small>
+	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Ganymede login page]</small>
 	</td>
 	<td align=center>
 	  <a href="/"><small>[ARL:UT Home]</small></a>
@@ -363,7 +363,7 @@ make a change in Ganymede on your behalf.</p></tr>
     </center>
 
     <center>
-      <FORM METHOD="POST" ACTION="http://arlut.utexas.edu/cgi-bin/usercgi/~robbie/ganypass.pl"> 
+      <FORM METHOD="POST" ACTION="ganypass.pl"> 
 	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
 	  <tr bgcolor="#663366">
 	    <td colspan=2 align=center>
@@ -423,22 +423,22 @@ sub print_nomatch {
     <table border=0>
       <tr>
 	<td align=left>
-	  <A HREF="http://www.arlut.utexas.edu/~broccol/gash2/"><img src="http://www.arlut.utexas.edu/gash2/ganymede_title2_sm.gif" border=0></a>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><img src="$web_loc/ganymede_title2_sm.gif" border=0></a>
 	</td>
 	<td width="100%" align=center>
 	  <h1>Password not changed<br>password verification failed</h1>
 	</td>
 	<td align=right>
-	  <a href="/"><img src="/graphics/arlbw.jpg" border=0></a>
+	  <a href="/"><img src="$web_loc/arlbw.jpg" border=0></a>
 	</td>
       </tr>
 
       <tr>
 	<td align=center>
-	  <A HREF="http://www.arlut.utexas.edu/~broccol/gash2/"><small>[Ganymede Home]</small></A>
+	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></A>
 	</td>
 	<td width="100%" align=center>
-	  <small>[Click <a href="http://csdsun9.arlut.utexas.edu/ganymede/" target="_top">here</a> to go directly to the Ganymede login page]</small>
+	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Ganymede login page]</small>
 	</td>
 	<td align=center>
 	  <a href="/"><small>[ARL:UT Home]</small></a>
@@ -459,7 +459,7 @@ consistently.  Please try again.</tr>
 
 
     <center>
-      <FORM METHOD="POST" ACTION="http://arlut.utexas.edu/cgi-bin/usercgi/~robbie/ganypass.pl"> 
+      <FORM METHOD="POST" ACTION="ganypass.pl"> 
 	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
 	  <tr bgcolor="#663366">
 	    <td colspan=2 align=center>
