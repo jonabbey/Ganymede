@@ -77,9 +77,7 @@ import arlut.csd.ganymede.rmi.XMLSession;
 
 /**
  * <p>The core of a client.  Provides all the logic necessary to
- * establish a connection to the server and get logged in.  By using
- * this class, the server will only need an RMI stub for this class,
- * regardless of what client is written.</p>
+ * establish a connection to the server and get logged in.</p>
  *
  * @version $Id$
  * @author Mike Mulvaney
@@ -149,7 +147,7 @@ public class ClientBase implements Runnable {
     
     if (debug)
       {
-	System.err.println("Initializing BaseClient object");
+	System.err.println("Initializing ClientBase object");
       }
     
     try
