@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.80 $ %D%
+   Version: $Revision: 1.81 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -559,6 +559,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public ReturnVal setFieldValue(short fieldID, Object value)
   {
+    // note! this *must* be setValue(), not setValueLocal(), as this
+    // is a method that the client calls directly.
+
     try
       {
 	return getField(fieldID).setValue(value);
@@ -1977,7 +1980,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		if (field.getType() != PERMISSIONMATRIX &&
 		    field.getType() != PASSWORD)
 		  {
-		    retVal = field.setValue(null); // *sync*
+		    retVal = field.setValueLocal(null); // *sync*
 
 		    if (retVal != null && !retVal.didSucceed())
 		      {
