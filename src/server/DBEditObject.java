@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.129 $
-   Last Mod Date: $Date: 2000/06/29 03:44:41 $
+   Version: $Revision: 1.130 $
+   Last Mod Date: $Date: 2000/06/29 04:39:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.129 $ $Date: 2000/06/29 03:44:41 $ $Name:  $
+ * @version $Revision: 1.130 $ $Date: 2000/06/29 04:39:26 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2118,6 +2118,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public boolean isDateLimited(DBField field)
   {
+    if ((field.getID() == SchemaConstants.ExpirationField) ||
+	(field.getID() == SchemaConstants.RemovalField))
+      {
+	return true; // no values in the past, thanks
+      }
+
     return false;
   }
 
