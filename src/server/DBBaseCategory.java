@@ -6,7 +6,7 @@
    category hierarchy.
    
    Created: 11 August 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -639,6 +639,12 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("DBBaseCategory<" + getName() + ">.addNode(" + 
+			   node + "," + sort + "," + adjustNodes +")");
+      }
+
     if (node == null)
       {
 	throw new IllegalArgumentException("Can't add a null node");
@@ -657,6 +663,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       } 
 
     // find our insertion point
+
+    if (debug)
+      {
+	System.err.println("DBBaseCategory.addNode(): searching to see if node is already in this category");
+      }
 
     for (i = 0; !found && i < contents.size(); i++)
       {
@@ -682,15 +693,28 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     // put our node into our content list
 
-    // note that we *don't* want to put in a rmi stub here for Bases
-    // here.. we'd much rather have the full-access local object so
-    // that we can do full direct DBObjectBase operations as the
-    // category tree is managed by the Schema editor.
+    // if adjustNodes is false, we're just going to add this node to the
+    // end of our category list.
 
     if (!adjustNodes)
       {
+	if (debug)
+	  {
+	    System.err.println("DBBaseCategory.addNode(): adjustNodes is false");
+	  }
+
+	// note that we *don't* want to put in a rmi stub here for Bases
+	// here.. we'd much rather have the full-access local object so
+	// that we can do full direct DBObjectBase operations as the
+	// category tree is managed by the Schema editor.
+
 	if (node instanceof Base)
 	  {
+	    if (debug)
+	      {
+		System.err.println("DBBaseCategory.addNode(): inserting base");
+	      }
+
 	    DBObjectBase testBase = getBaseFromBase((Base) node);
 
 	    if (testBase != null)
@@ -730,15 +754,27 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  }
 	else
 	  {
+	    // something else.. presumably a Category
+
 	    contents.addElement(node);
 	  }
       }
     else
       {
+	if (debug)
+	  {
+	    System.err.println("DBBaseCategory.addNode(): adjustNodes is true");
+	  }
+
 	try
 	  {
 	    if (node instanceof Base)
 	      {
+		if (debug)
+		  {
+		    System.err.println("DBBaseCategory.addNode(): inserting base");
+		  }
+	    
 		DBObjectBase newBase = getBaseFromBase((Base) node);
 
 		if (newBase == null)
@@ -782,6 +818,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	      }
 	    else if (node instanceof Category)
 	      {
+		if (debug)
+		  {
+		    System.err.println("DBBaseCategory.addNode(): inserting Category");
+		  }
+	    
 		// presumably we've got a Category here..
 
 		if (node.getDisplayOrder() >= contents.size())
@@ -808,11 +849,21 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     if (sort)
       {
+	if (debug)
+	  {
+	    System.err.println("DBBaseCategory.addNode(): resorting category nodes");
+	  }
+
 	resort();
       }
 
     if (adjustNodes)
       {
+	if (debug)
+	  {
+	    System.err.println("DBBaseCategory.addNode(): adjusting category node display orders");
+	  }
+
 	for (i = 0; i < contents.size(); i++)
 	  {
 	    cNode = (CategoryNode) contents.elementAt(i);
@@ -832,11 +883,95 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     try
       {
+	if (debug)
+	  {
+	    System.err.println("DBBaseCategory.addNode(): setting category for node");
+	  }
+
 	node.setCategory(this);
       }
     catch (RemoteException ex)
       {
 	throw new RuntimeException("caught remote exception " + ex);
+      }
+  }
+
+  /**
+   *
+   * This method can be used to move a Category from another Category to this Category,
+   * or to move a Category around within this Category.
+   *
+   * @param catPath the fully specified path of the node to be moved
+   * @param displayOrder where to place this node within this category.
+   *
+   * @see arlut.csd.ganymede.Category
+   */
+
+  public synchronized void moveCategoryNode(String catPath, int displayOrder)
+  {
+    DBBaseCategory categoryNode = editor.getCategory(catPath);
+    DBBaseCategory oldCategory = (DBBaseCategory) categoryNode.getCategory();
+
+    if (debug)
+      {
+	System.err.println("DBBaseCategory.moveNode(" + catPath + "," + displayOrder + ")");
+      }
+
+    if (oldCategory == this)
+      {
+	if (debug)
+	  {
+	    System.err.println("DBBaseCategory.moveNode(): moving node within category");
+	  }
+
+	contents.removeElement(categoryNode);
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.err.println("DBBaseCategory.moveNode(): moving node from " + 
+			       oldCategory.getPath() + " to " + getPath());
+	  }
+
+	try
+	  {
+	    oldCategory.removeNode(categoryNode);
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Local category threw a remote exception.. ? " + ex);
+	  }
+      }
+
+    categoryNode.setCategory(this);
+
+    if (displayOrder >= contents.size())
+      {
+	contents.addElement(categoryNode);
+      }
+    else
+      {
+	contents.insertElementAt(categoryNode, displayOrder);
+      }
+
+    if (debug)
+      {
+	System.err.println("DBBaseCategory.moveNode(): adjusting category node display orders");
+      }
+    
+    for (int i = 0; i < contents.size(); i++)
+      {
+	CategoryNode cNode = (CategoryNode) contents.elementAt(i);
+	
+	try
+	  {
+	    cNode.setDisplayOrder(i);
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("this should not happen " + ex);
+	  }
       }
   }
 
@@ -869,7 +1004,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     // find our deletion point
 
-    Ganymede.debug("Searching for " + node);
+    if (debug)
+      {
+	Ganymede.debug("DBBaseCategory (" + getName() + ").removeNode(" + node + ")");
+      }
 
     for (i = 0; i < contents.size(); i++)
       {
@@ -1027,10 +1165,12 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     for (i = index; i < contents.size(); i++)
       {
-	( (CategoryNode) contents.elementAt(i)).setDisplayOrder(i);
+	((CategoryNode) contents.elementAt(i)).setDisplayOrder(i);
       }
 
     // tell our node what it's display order is.
+
+    // XXX why?
 
     node.setDisplayOrder(0);
 
