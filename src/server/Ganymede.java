@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -102,7 +102,7 @@ public class Ganymede {
 
 	try 
 	  {
-	    db.journal = new DBJournal(db, "journal"); // need to parametrize filename
+	    db.journal = new DBJournal(db, GanymedeConfig.journal);
 	  }
 	catch (IOException ex)
 	  {

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -251,7 +251,7 @@ public class DBStore {
 
     try 
       {
-	journal = new DBJournal(this, "journal"); // need to parametrize filename
+	journal = new DBJournal(this, GanymedeConfig.journal);
       }
     catch (IOException ex)
       {
