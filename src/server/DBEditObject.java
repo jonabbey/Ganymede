@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -97,7 +97,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * Creation constructor, is responsible for creating a new editable
    * object with all fields listed in the DBObjectBaseField instantiated
-   * but undefined.
+   * but undefined.<br><br>
    *
    * This constructor is not really intended to be overriden in subclasses.
    * Creation time field value initialization is to be handled by
@@ -614,14 +614,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Customization method to verify whether the user should be able to
    * see a specific field in a given object.  Instances of DBField will
    * wind up calling up to here to let us override the normal visibility
-   * process.
+   * process.<br><br>
    *
    * Note that it is permissible for session to be null, in which case
    * this method will always return the default visiblity for the field
-   * in question.
+   * in question.<br><br>
    *
    * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.
+   * an exception will be thrown.<br><br>
    *
    * To be overridden in DBEditObject subclasses.
    * 
@@ -659,7 +659,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   /**
    *
    * Customization method to verify whether this object type has an inactivation
-   * mechanism.
+   * mechanism.<br><br>
    *
    * To be overridden in DBEditObject subclasses.
    *
@@ -749,7 +749,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Customization method to verify whether the user has permission
    * to create an instance of this object type.  The client's DBSession object
    * will call the canCreate method in the DBObjectBase for this object type
-   * to determine whether creation is allowed to the user.
+   * to determine whether creation is allowed to the user.<br><br>
    *
    * To be overridden in DBEditObject subclasses.
    *
@@ -793,7 +793,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   /**
    * This method is used to make sure that the built-in fields that
    * the server assumes will always be present in any editable object
-   * will be in place.
+   * will be in place.<br><br>
    * 
    * This method checks with instantiateNewField() if the field id is
    * not one of those that is needfull.  If instantiateNewField() approves
@@ -823,19 +823,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * This method provides a hook that can be used to indicate whether
    * a field that is defined in this object's field dictionary
-   * should be newly instantiated in this particular object.
+   * should be newly instantiated in this particular object.<br><br>
    *
    * This method does not affect those fields which are actually present
    * in the object's record in the DBStore.  What this method allows
    * you to do is have a subclass decide whether it wants to instantiate
    * a potential field (one that is declared in the field dictionary for
    * this object, but which doesn't happen to be presently defined in
-   * this object) in this particular object.
+   * this object) in this particular object.<br><br>
    *
    * A concrete example will help here.  The Permissions Object type
    * (base number SchemaConstants.PermBase) holds a permission
    * matrix, a descriptive title, and a list of admin personae that hold
-   * those permissions for objects they own.
+   * those permissions for objects they own.<br><br>
    *
    * There are a few specific instances of SchemaConstants.PermBase
    * that don't properly need the list of admin personae, as their
@@ -958,11 +958,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * DBField that called us will proceed to make the change to
    * its vector.  If this method returns false, the DBField
    * that called us will not make the change, and the field
-   * will be left unchanged.
+   * will be left unchanged.<br><br>
    *
    * The DBField that called us will take care of all possible checks
    * on the operation (including vector bounds, etc.).  Under normal
-   * circumstances, we won't need to do anything here.
+   * circumstances, we won't need to do anything here.<br><br>
    *
    * If we do return false, we should set editset.setLastError to
    * provide feedback to the client about what we disapproved of.
@@ -982,13 +982,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * DBField that called us will proceed to make the change to
    * its vector.  If this method returns false, the DBField
    * that called us will not make the change, and the field
-   * will be left unchanged.
+   * will be left unchanged.<br><br>
    *
    * The DBField that called us will take care of all possible
    * checks on the operation (including vector bounds, etc.),
    * acceptable values as appropriate (including a call to our
    * own verifyNewValue() method).  Under normal circumstances,
-   * we won't need to do anything here.
+   * we won't need to do anything here.<br><br>
    *
    * If we do return false, we should set editset.setLastError to
    * provide feedback to the client about what we disapproved of.
@@ -1008,13 +1008,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * DBField that called us will proceed to make the change to
    * it's vector.  If this method returns false, the DBField
    * that called us will not make the change, and the field
-   * will be left unchanged.
+   * will be left unchanged.<br><br>
    *
    * The DBField that called us will take care of all possible
    * checks on the operation (including vector bounds, etc.),
    * acceptable values as appropriate (including a call to our
    * own verifyNewValue() method.  Under normal circumstances,
-   * we won't need to do anything here.
+   * we won't need to do anything here.<br><br>
    *
    * If we do return false, we should set editset.setLastError to
    * provide feedback to the client about what we disapproved of.
@@ -1034,12 +1034,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * DBField that called us will proceed to make the change to
    * it's value.  If this method returns false, the DBField
    * that called us will not make the change, and the field
-   * will be left unchanged.
+   * will be left unchanged.<br><br>
    *
    * The DBField that called us will take care of all possible checks
    * on the operation (including a call to our own verifyNewValue()
    * method.  Under normal circumstances, we won't need to do anything
-   * here.
+   * here.<br><br>
    *
    * If we do return false, we should set editset.setLastError to
    * provide feedback to the client about what we disapproved of.
@@ -1050,6 +1050,18 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   {
     return true;
   }
+
+  /**
+   * This method returns true if field1 should not show any choices
+   * that are currently selected in field2, where both field1 and
+   * field2 are fields in this object.<br><br>
+   * 
+   * The purpose of this method is to allow mutual exclusion between
+   * a pair of fields with mandatory choices.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   * 
+   */
 
   public boolean excludeSelected(db_field field1, db_field field2)
   {
@@ -1062,7 +1074,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
+   * calling choices() on this object again.<br><br>
    *
    * If there is no caching key, this method will return null.
    *
@@ -1102,7 +1114,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
+   * obtainChoiceList() method to get a list of valid choices.<br><br>
    *
    * This method will provide a reasonable default for targetted
    * invid fields.
@@ -1214,7 +1226,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    *
-   * This method is used to specify the earliest acceptable date
+   * This method is used to specify the latest acceptable date
    * for the specified field.
    *
    */
@@ -1272,24 +1284,24 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * inactive() is designed to run synchronously with the user's
    * request for inactivation.  It can return a wizard reference
    * in the ReturnVal object returned, to guide the user through
-   * a set of interactive dialogs to inactive the object.
+   * a set of interactive dialogs to inactive the object.<br><br>
    *
    * The inactive() method can cause other objects to be deleted, can cause
-   * strings to be removed from fields in other objects, whatever.
+   * strings to be removed from fields in other objects, whatever.<br><br>
    *
    * If inactivate() returns a ReturnVal that has its success flag set to false
    * and does not include a JDialogBuff for further interaction with the
    * user, then DBSEssion.inactivateDBObject() method will rollback any changes
-   * made by this method.
+   * made by this method.<br><br>
    *
    * IMPORTANT NOTE: If a custom object's inactivate() logic decides
    * to enter into a wizard interaction with the user, that logic is
    * responsible for calling finalizeInactivate() with a boolean
-   * indicating ultimate success of the operation.
+   * indicating ultimate success of the operation.<br><br>
    *
    * Finally, it is up to commitPhase1() and commitPhase2() to handle
    * any external actions related to object inactivation when
-   * the transaction is committed..
+   * the transaction is committed..<br><br>
    *
    * @param interactive If true, the inactivate() logic can present
    * a wizard to the client to customize the inactivation logic.
@@ -1308,7 +1320,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * This method is to be called by the custom DBEditObject inactivate()
    * logic when the inactivation is performed so that logging can be
-   * done.
+   * done.<br><br>
    *
    * If inactivation of an object causes the label to be null, this
    * won't work as well as we'd really like.
@@ -1357,7 +1369,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * reactive() is designed to run synchronously with the user's
    * request for inactivation.  It can return a wizard reference
    * in the ReturnVal object returned, to guide the user through
-   * a set of interactive dialogs to reactive the object.<br>
+   * a set of interactive dialogs to reactive the object.<br><br>
    *
    * If reactivate() returns a ReturnVal that has its success flag set to false
    * and does not include a JDialogBuff for further interaction with the
@@ -1423,20 +1435,20 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   /**
    *
    * This method handles removal logic for this object type.  This method
-   * will be called immediately from DBSession.deleteDBObject().
+   * will be called immediately from DBSession.deleteDBObject().<br><br>
    *
    * The remove() method can cause other objects to be deleted, can cause
-   * strings to be removed from fields in other objects, whatever.
+   * strings to be removed from fields in other objects, whatever.<br><br>
    *
    * If remove() returns a ReturnVal that has its success flag set to false
    * and does not include a JDialogBuff for further interaction with the
    * user, the DBSEssion.deleteDBObject() method will rollback any changes
-   * made by this method.
+   * made by this method.<br><br>
    *
    * remove() is intended for subclassing, whereas finalizeRemove() is
    * not.  finalizeRemove() provides the standard logic for wiping out
    * fields and what not to cause the object to be unlinked from
-   * other objects.
+   * other objects.<br><br>
    *
    * IMPORTANT NOTE: If a custom object's remove() logic decides to
    * enter into a wizard interaction with the user, that logic is
@@ -1463,12 +1475,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * finalizeremove() returns true if the internal removal bookkeeping
    * was successful, and false if not.  A false return value will
    * cause the DBSession to rollback the transaction to the state
-   * prior to any removal actions for this object were attempted.
+   * prior to any removal actions for this object were attempted.<br><br>
    *
    * remove() is intended for subclassing, whereas finalizeRemove() is
    * not.  finalizeRemove() provides the standard logic for wiping out
    * fields and what not to cause the object to be unlinked from
-   * other objects.
+   * other objects.<br><br>
    *
    * @param success If true, this method will clean up all fields and
    * do logging.  If false, this method will return an error condition
