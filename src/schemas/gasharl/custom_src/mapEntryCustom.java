@@ -6,8 +6,8 @@
    
    Created: 9 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/07/21 05:40:38 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2002/08/21 07:07:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -299,6 +299,22 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
       }
 
     return result;
+  }
+
+  /**
+   * <p>This method should be defined to return true in DBEditObject subclasses
+   * which provide a getLabelHook() method.</p>
+   *
+   * <p>If this method is not redefined to return true in any subclasses which
+   * define a getLabelHook() method, then searches on objects of this type
+   * may not properly reflect the desired label.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean useLabelHook()
+  {
+    return true;
   }
 
   /**

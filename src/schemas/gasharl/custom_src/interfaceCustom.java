@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2002/08/21 04:47:24 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2002/08/21 07:07:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,6 +106,22 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   public interfaceCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
+  }
+
+  /**
+   * <p>This method should be defined to return true in DBEditObject subclasses
+   * which provide a getLabelHook() method.</p>
+   *
+   * <p>If this method is not redefined to return true in any subclasses which
+   * define a getLabelHook() method, then searches on objects of this type
+   * may not properly reflect the desired label.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean useLabelHook()
+  {
+    return true;
   }
 
   /**
