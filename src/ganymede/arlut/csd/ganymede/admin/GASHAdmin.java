@@ -407,6 +407,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	    if (obj instanceof Server)
 	      {
 		server = (Server) obj;
+		server.up();	// RMI call to verify our connection
 	      }
 
 	    connected = true;
@@ -427,6 +428,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	catch (java.net.MalformedURLException ex)
 	  {
 	    System.err.println("RMI: Malformed URL " + GASHAdmin.url );
+	  }
+	catch (Throwable ex)
+	  {
+	    ex.printStackTrace();
 	  }
 	
 	try 
