@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2000/12/04 09:36:35 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2000/12/04 09:54:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -713,15 +713,18 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	buffer.notifyAll();	// to wake up any sleepers if the buffer is full
       }
 
-    // bounce a runtime exception to get our stack trace
-
-    try
+    if (false)			// XXX debug XXX
       {
-	throw new RuntimeException("XMLReader.close() called");
-      }
-    catch (RuntimeException ex)
-      {
-	ex.printStackTrace();
+	// bounce a runtime exception to get our stack trace
+	
+	try
+	  {
+	    throw new RuntimeException("XMLReader.close() called");
+	  }
+	catch (RuntimeException ex)
+	  {
+	    ex.printStackTrace();
+	  }
       }
   }
 
