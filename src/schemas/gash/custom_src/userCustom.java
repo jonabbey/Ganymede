@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,7 +22,7 @@ import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     userCustom
+                                                                      userCustom
 
 ------------------------------------------------------------------------------*/
 
@@ -46,6 +46,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   static final boolean debug = false;
   static QueryResult shellChoices = new QueryResult();
   static Date shellChoiceStamp = null;
+
+  static String mailsuffix = null;
+  static String homedir = null;
 
   // ---
 
@@ -114,6 +117,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   public boolean initializeNewObject()
   {
     ReturnVal retVal;
+    boolean success = true;
 
     /* -- */
 
@@ -149,7 +153,51 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     retVal = numField.setValueLocal(uidVal);
 
-    return (retVal == null || retVal.didSucceed());
+    if (retVal != null && !retVal.didSucceed())
+      {
+	success = false;
+      }
+
+    // create a volume entry for the user.
+
+    InvidDBField invf = (InvidDBField) getField(userSchema.VOLUMES);
+    Invid invid = invf.createNewEmbedded(true);
+
+    if (invid != null)
+      {
+	// find the auto.home.default map, if we can.
+
+	Vector results = getGSession().internalQuery(new Query((short) 277, 
+							       new QueryDataNode(QueryDataNode.EQUALS,
+										 "auto.home.default")));
+    
+	// if we found auto.home.default, set the new volume entry map
+	// field to point to auto.home.default.
+    
+	if (results != null && results.size() == 1)
+	  {
+	    Result objid = (Result) results.elementAt(0);
+	
+	    DBEditObject eObj = getSession().editDBObject(invid);
+	    invf = (InvidDBField) eObj.getField(mapEntrySchema.MAP);
+	
+	    retVal = invf.setValueLocal(objid.getInvid());
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		success = false;
+	      }
+	
+	    // we want the permissions system to reject edit privs
+	    // on this now.. by setting permCache to null, we allow
+	    // the mapEntryCustom permOverride method to get a chance
+	    // to refuse edit privileges.
+	
+	    invf.clearPermCache();	// *sync*
+	  }
+      }
+
+    return success;
   }
 
   /**
@@ -164,6 +212,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     DBEditObject newObject;
     DBObjectBase targetBase;
     DBObjectBaseField fieldDef;
+    ReturnVal retVal;
 
     /* -- */
 
@@ -173,12 +222,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (fieldDef.getTargetBase() > -1)
 	  {
-	    newObject = getSession().createDBObject(fieldDef.getTargetBase(), null, null);
-
-	    // link it in
-
-	    newObject.setFieldValue(SchemaConstants.ContainerField, getInvid());
-	    
+	    newObject = getSession().createDBObject(fieldDef.getTargetBase(),
+						    null, null);
 	    return newObject.getInvid();
 	  }
 	else
@@ -190,6 +235,48 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	return null;		// default
       }
+  }
+
+  /**
+   *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    if (isInactivated())
+      {
+	switch (fieldid)
+	  {
+	  case userSchema.USERNAME:
+	  case userSchema.UID:
+	  case userSchema.LOGINSHELL:
+	  case userSchema.HOMEDIR:
+	  case userSchema.VOLUMES:
+	    return true;
+	  }
+      }
+    else
+      {
+	switch (fieldid)
+	  {
+	  case userSchema.USERNAME:
+	  case userSchema.PASSWORD:
+	  case userSchema.SIGNATURE:
+	  case userSchema.EMAILTARGET:
+	  case userSchema.UID:
+	  case userSchema.LOGINSHELL:
+	  case userSchema.HOMEDIR:
+	  case userSchema.VOLUMES:
+	    return true;
+	  }
+      }
+
+    return false;
   }
 
   /**
@@ -234,20 +321,20 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * inactive() is designed to run synchronously with the user's
    * request for inactivation.  It can return a wizard reference
    * in the ReturnVal object returned, to guide the user through
-   * a set of interactive dialogs to inactive the object.
+   * a set of interactive dialogs to inactive the object.<br><br>
    *
    * The inactive() method can cause other objects to be deleted, can cause
-   * strings to be removed from fields in other objects, whatever.
+   * strings to be removed from fields in other objects, whatever.<br><br>
    *
    * If remove() returns a ReturnVal that has its success flag set to false
    * and does not include a JDialogBuff for further interaction with the
    * user, then DBSEssion.inactivateDBObject() method will rollback any changes
-   * made by this method.
+   * made by this method.<br><br>
    *
    * IMPORTANT NOTE: If a custom object's inactivate() logic decides
    * to enter into a wizard interaction with the user, that logic is
    * responsible for calling finalizeInactivate() with a boolean
-   * indicating ultimate success of the operation.
+   * indicating ultimate success of the operation.<br><br>
    *
    * Finally, it is up to commitPhase1() and commitPhase2() to handle
    * any external actions related to object inactivation when
@@ -293,7 +380,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// set the shell to /bin/false
 	
 	stringfield = (StringDBField) getField(LOGINSHELL);
-	retVal = stringfield.setValue("/bin/false");
+	retVal = stringfield.setValueLocal("/bin/false");
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -353,7 +440,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	try
 	  {
-	    System.err.println("userCustom: creating inactivation wizard");
+	    if (debug)
+	      {
+		System.err.println("userCustom: creating inactivation wizard");
+	      }
 
 	    theWiz = new userInactivateWizard(this.gSession, this);
 	  }
@@ -362,7 +452,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex); 
 	  }
 
-	System.err.println("userCustom: returning inactivation wizard");
+	if (debug)
+	  {
+	    System.err.println("userCustom: returning inactivation wizard");
+	  }
 
 	return theWiz.getStartDialog();
       }
@@ -410,7 +503,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     try
       {
-	System.err.println("userCustom: creating reactivation wizard");
+	if (debug)
+	  {
+	    System.err.println("userCustom: creating reactivation wizard");
+	  }
 	
 	theWiz = new userReactivateWizard(this.gSession, this);
       }
@@ -419,7 +515,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex); 
       }
 
-    System.err.println("userCustom: returning reactivation wizard");
+    if (debug)
+      {
+	System.err.println("userCustom: returning reactivation wizard");
+      }
     
     return theWiz.getStartDialog();
   }
@@ -461,6 +560,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	else
 	  {
 	    retVal = new ReturnVal(false);
+
 	    JDialogBuff dialog = new JDialogBuff("Reactivate User",
 						 "You must set a password",
 						 "OK",
@@ -572,7 +672,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public boolean mustChoose(DBField field)
   {
-    return (field.getID() == SIGNATURE); // we want to force signature alias choosing
+    if (field.getID() == SIGNATURE)
+      {
+	// we want to force signature alias choosing
+
+	return true;
+      }
+
+    return super.mustChoose(field);
   }
 
   /**
@@ -589,7 +696,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * 
    */
 
-  public synchronized QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field)
   {
     switch (field.getID())
       {
@@ -682,19 +789,28 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (shellChoiceStamp == null || shellChoiceStamp.before(base.getTimeStamp()))
 	  {
-	    System.err.println("userCustom - updateShellChoiceList()");
+	    if (debug)
+	      {
+		System.err.println("userCustom - updateShellChoiceList()");
+	      }
 
 	    shellChoices = new QueryResult();
 
 	    Query query = new Query("Shell Choice", null, false);
 
 	    // internalQuery doesn't care if the query has its filtered bit set
-
-	    System.err.println("userCustom - issuing query");
+	    
+	    if (debug)
+	      {
+		System.err.println("userCustom - issuing query");
+	      }
 
 	    Vector results = internalSession().internalQuery(query);
-
-	    System.err.println("userCustom - processing query results");
+	    
+	    if (debug)
+	      {
+		System.err.println("userCustom - processing query results");
+	      }
 	
 	    for (int i = 0; i < results.size(); i++)
 	      {
@@ -713,6 +829,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
   }
 
+  /**
+   *
+   * This method is called after the set value operation has been ok'ed
+   * by any appropriate wizard code.
+   *
+   */
+
   public synchronized boolean finalizeSetValue(DBField field, Object value)
   {
     InvidDBField inv;
@@ -725,6 +848,47 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     boolean okay = true;
 
     /* -- */
+
+    // we don't want to allow the home directory to be changed
+    // except by when the username field is being changed.
+
+    if (field.getID() == HOMEDIR)
+      {
+	String dir = (String) value;
+
+	/* -- */
+
+	if (homedir == null)
+	  {
+	    homedir = System.getProperty("ganymede.homedirprefix");
+	  }
+
+	// we will only check against a defined prefix if
+	// we have set one in our properties file.
+	
+	if (homedir != null && homedir.length() != 0)
+	  {
+	    sf = (StringDBField) getField(USERNAME);
+
+	    if (sf != null)
+	      {
+		if (sf.getNewValue() != null)
+		  {
+		    String expected = homedir + (String) sf.getNewValue();
+		    
+		    if (!dir.equals(expected))
+		      {
+			return false;
+		      }
+		  }
+	      }
+	  }
+
+	return true;
+      }
+
+    // when we rename a user, we have lots to do.. a number of other
+    // fields in this object and others need to be updated to match.
 
     if (field.getID() == USERNAME)
       {
@@ -753,10 +917,66 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		
 	    if (oldName.equals((String) sf.getValueLocal()))
 	      {
-		sf.setValue(value);	// set the signature alias to the user's new name
+		sf.setValueLocal(value); // set the signature alias to the user's new name
 	      }
 	  }
 
+	// update the home directory location.. we assume that if
+	// the user has permission to rename the user, they can
+	// automatically execute this change to the home directory.
+
+	if (homedir == null)
+	  {
+	    homedir = System.getProperty("ganymede.homedirprefix");
+	  }
+
+	// do we have a homedir prefix?  if so, set the home dir here
+
+	if (homedir != null && homedir.length() != 0)
+	  {
+	    sf = (StringDBField) getField(HOMEDIR);
+
+	    sf.setValueLocal(homedir + (String) value);	// ** ARL
+	  }
+
+	// if we don't have a signature set, set it to the username.
+
+	sf = (StringDBField) getField(SIGNATURE);
+
+	String sigVal = (String) sf.getValueLocal();
+
+	if (sigVal == null || sigVal.equals(oldName))
+	  {
+	    sf.setValueLocal(value);
+	  }
+
+	// update the email target field.  We want to look for
+	// oldName@arlut.utexas.edu and replace it if we find it.
+
+	sf = (StringDBField) getField(EMAILTARGET);
+
+	if (mailsuffix == null)
+	  {
+	    mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
+	  }
+
+	if (mailsuffix == null)
+	  {
+	    Ganymede.debug("Error in userCustom: couldn't find property ganymede.defaultmailsuffix!");
+	  }
+
+	String oldMail = oldName + mailsuffix;
+
+	if (sf.containsElement(oldMail))
+	  {
+	    sf.deleteElement(oldMail);
+	    sf.addElement(value + mailsuffix);
+	  }
+	else if (sf.size() == 0)
+	  {
+	    sf.addElement(value + mailsuffix);
+	  }
+	
 	inv = (InvidDBField) getField(PERSONAE);
 	
 	if (inv == null)
@@ -764,7 +984,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return true;
 	  }
 
-	// rename all the associated persona with the new user name
+	// rename all the associated personae with the new user name
 
 	personaeInvids = inv.getValues();
 
@@ -781,7 +1001,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    
 	    tempString = value + ":" + suffix;
 
-	    System.err.println("trying to rename admin persona " + oldName + " to "+ tempString);
+	    if (debug)
+	      {
+		System.err.println("trying to rename admin persona " + oldName + " to "+ tempString);
+	      }
 
 	    ReturnVal retVal = sf.setValueLocal(tempString);
 
@@ -835,7 +1058,23 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     // if the groups field is being changed, we may need to intervene
 
-    System.err.println("userCustom ** entering wizardHook, field = " + field.getName() + ", op= " + operation);
+    if (debug)
+      {
+	System.err.println("userCustom ** entering wizardHook, field = " + 
+			   field.getName() + ", op= " + operation);
+      }
+
+    // if we are changing the list of email aliases, we'll want
+    // to update the list of choices for the signature field.
+
+    if (field.getID() == ALIASES)
+      {
+	result = new ReturnVal(true, true);
+	    
+	result.addRescanField(userSchema.SIGNATURE);
+
+	return result;
+      }
 
     if (field.getID() == GROUPLIST)
       {
@@ -846,7 +1085,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // ok, no big deal, but we will need to have the client
 	    // rescan the choice list for the home group field
 
-	    result = new ReturnVal(true);
+	    result = new ReturnVal(true, true);
 	    result.addRescanField(HOMEGROUP);
 	    groupChoices = null;
 	    return result;
@@ -862,7 +1101,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    Vector valueAry = getFieldValuesLocal(GROUPLIST);
 	    Invid delVal = (Invid) valueAry.elementAt(index);
 
-	    System.err.println("userCustom: deleting group element " + gSession.viewObjectLabel(delVal));
+	    if (debug)
+	      {
+		System.err.println("userCustom: deleting group element " + 
+				   gSession.viewObjectLabel(delVal));
+	      }
 
 	    if (!delVal.equals(getFieldValueLocal(HOMEGROUP)))
 	      {
@@ -870,16 +1113,21 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// home group.  The client will need to rescan,
 		// but no biggie.
 
-		System.err.println("userCustom: I don't think " + gSession.viewObjectLabel(delVal) + 
-				   " is the home group");
+		if (debug)
+		  {
+		    System.err.println("userCustom: I don't think " + 
+				       gSession.viewObjectLabel(delVal) + 
+				       " is the home group");
+		  }
 
-		result = new ReturnVal(true);
+		result = new ReturnVal(true, true);
 		result.addRescanField(HOMEGROUP);
 		groupChoices = null;
 		return result;
 	      }
 
-	    if (gSession.isWizardActive() && gSession.getWizard() instanceof userHomeGroupDelWizard)
+	    if (gSession.isWizardActive() && 
+		gSession.getWizard() instanceof userHomeGroupDelWizard)
 	      {
 		groupWizard = (userHomeGroupDelWizard) gSession.getWizard();
 		
@@ -901,7 +1149,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    
 		    if (groupWizard.getState() != groupWizard.DONE)
 		      {
-			System.err.println("userCustom.wizardHook(): bad state: " + groupWizard.getState());
+			System.err.println("userCustom.wizardHook(): bad state: " + 
+					   groupWizard.getState());
 		      }
 
 		    groupWizard.unregister();
@@ -911,7 +1160,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 						      "a user object with an active wizard.");
 		  }
 	      }
-	    else if (gSession.isWizardActive() && !(gSession.getWizard() instanceof userHomeGroupDelWizard))
+	    else if (gSession.isWizardActive() && 
+		     !(gSession.getWizard() instanceof userHomeGroupDelWizard))
 	      {
 		return Ganymede.createErrorDialog("User Object Error",
 						  "The client is attempting to do an operation on " +
@@ -947,9 +1197,20 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return null;		// by default, we just ok whatever else
       }
 
-    if (field.getValue() == null)
+    // ok, we're doing a user rename.. check to see if we need to do a
+    // wizard
+
+    if ((field.getValue() == null) || (getStatus() == ObjectStatus.CREATING))
       {
-	return null;
+	result = new ReturnVal(true, true); // have setValue() do the right thing
+
+	result.addRescanField(userSchema.HOMEDIR);
+	result.addRescanField(userSchema.ALIASES);
+	result.addRescanField(userSchema.SIGNATURE);
+	result.addRescanField(userSchema.VOLUMES);
+	result.addRescanField(userSchema.EMAILTARGET);
+
+	return result;
       }
 
     if (!gSession.enableWizards)
@@ -957,7 +1218,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return null;		// no wizards if the user is non-interactive.
       }
 
-    // looks like we're renaming this user
+    // Huh!  Wizard time!  We'll check here to see if there is a
+    // registered userRenameWizard in the system taking care of us.
 
     if (gSession.isWizardActive() && gSession.getWizard() instanceof userRenameWizard)
       {
@@ -968,10 +1230,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    (renameWizard.userObject == this) &&
 	    (renameWizard.newname == param1))
 	  {
-	    // ok, assume the wizard has taken care of getting everything prepped and
-	    // approved for us.  An active wizard has approved the operation
+	    // ok, assume the wizard has taken care of getting
+	    // everything prepped and approved for us.  An active
+	    // wizard has approved the operation
 		
 	    renameWizard.unregister();
+
+	    // note that we don't have to return the rescan fields
+	    // directive here.. the active wizard is what is going to
+	    // respond directly to the user, we are presumably just
+	    // here because the wizard task-completion code went ahead
+	    // and called setValue on the user's name.. we'll trust
+	    // that code to return the rescan indicators.
 		
 	    return null;
 	  }
@@ -994,7 +1264,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (renameWizard.getState() != renameWizard.DONE)
 	      {
-		System.err.println("userCustom.wizardHook(): bad state: " + renameWizard.getState());
+		System.err.println("userCustom.wizardHook(): bad state: " + 
+				   renameWizard.getState());
 	      }
 
 	    renameWizard.unregister();
@@ -1024,6 +1295,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	try
 	  {
+	    // Mike Jittlov is the Wizard of Speed and Time
+
 	    renameWizard = new userRenameWizard(this.gSession,
 						this,
 						field,
