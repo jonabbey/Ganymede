@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -65,6 +65,9 @@ import arlut.csd.ganymede.common.QueryDataNode;
 import arlut.csd.ganymede.common.QueryNode;
 import arlut.csd.ganymede.common.QueryNotNode;
 import arlut.csd.ganymede.common.QueryOrNode;
+import arlut.csd.ganymede.common.RegexpException;
+
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -95,6 +98,13 @@ import arlut.csd.ganymede.common.QueryOrNode;
 public class DBQueryHandler {
 
   final static boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBQueryHandler");
 
   /**
    *
@@ -931,11 +941,10 @@ public class DBQueryHandler {
 	      }
 	    catch (gnu.regexp.REException ex)
 	      {
-		System.err.println("DBQueryHandler: REException construction regexp: " + ex.getMessage());
-		
-		return false;
+		// "Error, invalid pattern matching regular expression provided.  The Regular Expression parser reported the following error:\n{0}"
+		throw new RegexpException(ts.l("compareString.bad_regexp", ex.getMessage()));
 	      }
-	    
+
 	    if (debug)
 	      {
 		System.err.println("DBQueryHandler: regexp built successfully: " + n.regularExpression);
@@ -985,9 +994,8 @@ public class DBQueryHandler {
 	      }
 	    catch (gnu.regexp.REException ex)
 	      {
-		System.err.println("DBQueryHandler: REException construction regexp: " + ex.getMessage());
-		
-		return false;
+		// "Error, invalid pattern matching regular expression provided.  The Regular Expression parser reported the following error:\n{0}"
+		throw new RegexpException(ts.l("compareString.bad_regexp", ex.getMessage()));
 	      }
 	    
 	    if (debug)
