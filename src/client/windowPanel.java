@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -55,6 +55,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     windowCount = 0;
 
   Hashtable
+    waitWindowHash = new Hashtable(),
     menuItems = new Hashtable(),
     windowList = new Hashtable();
   
@@ -219,7 +220,8 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	    
 	    if (editable)
 	      {
-		object = gc.getSession().edit_db_object(i);
+		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(i));
+		object = rv.getObject();
 		if (object == null)
 		  {
 		    throw new RuntimeException("Could not call edit_db_object on the parent of this embedded object.");
@@ -227,7 +229,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	      }
 	    else
 	      {
-		object = gc.getSession().view_db_object(i);
+		object = (gc.handleReturnVal(gc.getSession().view_db_object(i))).getObject();
 		if (object == null)
 		  {
 		    throw new RuntimeException("Could not call view_db_object on the parent of this embedded object.");
@@ -498,6 +500,38 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	setStatus("Done.");
       }
     
+  }
+
+  public void addWaitWindow(Runnable key)
+  {
+    JInternalFrame frame = new JInternalFrame("Query loading");
+    frame.setOpaque(true);
+    ImageIcon icon = new ImageIcon(getWaitImage());
+    frame.setBounds(10,10,icon.getIconWidth() + 180,icon.getIconHeight() + 35);
+    
+    frame.setIconifiable(true);
+    frame.getContentPane().add(new JLabel("Waiting for query", icon, SwingConstants.CENTER));
+    frame.setLayer(new Integer(topLayer));
+    System.out.println("Adding window");
+    waitWindowHash.put(key, frame);
+
+    add(frame);
+    
+  }
+
+  public void removeWaitWindow(Runnable key)
+  {
+    JInternalFrame frame = (JInternalFrame)waitWindowHash.get(key);
+    if (frame == null)
+      {
+	System.out.println("Couldn't find window to remove.");
+	return;
+      }
+    System.out.println("Removing window");
+
+    remove(frame);
+    waitWindowHash.remove(frame);
+
   }
 
   /**
