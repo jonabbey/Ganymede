@@ -7,7 +7,7 @@
    used to extract the results  out of the dump.
    
    Created: 25 September 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -316,7 +316,7 @@ public class DumpResult implements java.io.Serializable {
   {
     char[] chars;
     String results = buffer.toString();
-    StringBuffer tempString = new StringBuffer();
+    arlut.csd.Util.SharedStringBuffer tempString = new arlut.csd.Util.SharedStringBuffer();
     int index = 0;
     Vector rowVect;
     short currentFieldType = -1;
