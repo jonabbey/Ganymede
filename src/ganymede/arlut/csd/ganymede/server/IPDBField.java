@@ -513,21 +513,26 @@ public class IPDBField extends DBField implements ip_field {
     // check to see if we can do the namespace manipulations implied by this
     // operation
 
-    unmark(this.value);	// our old value
+    ns = getNameSpace();
 
-    if (bytes != null)
+    if (ns != null)
       {
-	if (!mark(bytes))
-	  {
-	    if (this.value != null)
-	      {
-		mark(this.value); // we aren't clearing the old value after all
-	      }
+	unmark(this.value);	// our old value
 
-	    // "Server: Error in IPDBField.setValue()"
-	    // "IP address {0} already in use in the server"
-	    return Ganymede.createErrorDialog(ts.l("setValue.oops"),
-					      ts.l("global.already_in_use", genIPString(bytes)));
+	if (bytes != null)
+	  {
+	    if (!mark(bytes))
+	      {
+		if (this.value != null)
+		  {
+		    mark(this.value); // we aren't clearing the old value after all
+		  }
+
+		// "Server: Error in IPDBField.setValue()"
+		// "IP address {0} already in use in the server"
+		return Ganymede.createErrorDialog(ts.l("setValue.oops"),
+						  ts.l("global.already_in_use", genIPString(bytes)));
+	      }
 	  }
       }
 
@@ -568,8 +573,11 @@ public class IPDBField extends DBField implements ip_field {
 	// undo the namespace manipulations, if any,
 	// and finish up.
 
-	unmark(bytes);
-	mark(this.value);
+	if (ns != null)
+	  {
+	    unmark(bytes);
+	    mark(this.value);
+	  }
 
 	return newRetVal;
       }
@@ -671,18 +679,23 @@ public class IPDBField extends DBField implements ip_field {
     // check to see if we can do the namespace manipulations implied by this
     // operation
 
-    unmark(values.elementAt(index));
+    ns = getNameSpace();
 
-    if (bytes != null)
+    if (ns != null)
       {
-	if (!mark(bytes))
+	unmark(values.elementAt(index));
+
+	if (bytes != null)
 	  {
-	    mark(values.elementAt(index)); // we aren't clearing the old value after all
+	    if (!mark(bytes))
+	      {
+		mark(values.elementAt(index)); // we aren't clearing the old value after all
 	    
-	    // "Server: Error in IPDBField.setElement()"
-	    // "IP address {0} already in use in the server"
-	    return Ganymede.createErrorDialog(ts.l("setElement.oops"),
-					      ts.l("global.already_in_use", genIPString(bytes)));
+		// "Server: Error in IPDBField.setElement()"
+		// "IP address {0} already in use in the server"
+		return Ganymede.createErrorDialog(ts.l("setElement.oops"),
+						  ts.l("global.already_in_use", genIPString(bytes)));
+	      }
 	  }
       }
 
@@ -716,8 +729,11 @@ public class IPDBField extends DBField implements ip_field {
 	// undo the namespace manipulations, if any,
 	// and finish up.
 
-	unmark(bytes);
-	mark(values.elementAt(index));
+	if (ns != null)
+	  {
+	    unmark(bytes);
+	    mark(values.elementAt(index));
+	  }
 
 	return newRetVal;
       }
@@ -808,12 +824,17 @@ public class IPDBField extends DBField implements ip_field {
 	  }
       }
 
-    if (!mark(bytes))
+    ns = getNameSpace();
+
+    if (ns != null)
       {
-	// "Server: Error in IPDBField.addElement()"
-	// "IP address {0} already in use in the server"
-	return Ganymede.createErrorDialog(ts.l("addElement.oops"),
-					  ts.l("global.already_in_use", genIPString(bytes)));
+	if (!mark(bytes))
+	  {
+	    // "Server: Error in IPDBField.addElement()"
+	    // "IP address {0} already in use in the server"
+	    return Ganymede.createErrorDialog(ts.l("addElement.oops"),
+					      ts.l("global.already_in_use", genIPString(bytes)));
+	  }
       }
 
     newRetVal = eObj.finalizeAddElement(this, bytes);
@@ -838,7 +859,10 @@ public class IPDBField extends DBField implements ip_field {
       } 
     else
       {
-	unmark(bytes);
+	if (ns != null)
+	  {
+	    unmark(bytes);
+	  }
 
 	return newRetVal;
       }
