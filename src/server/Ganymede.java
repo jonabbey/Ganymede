@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.144 $
-   Last Mod Date: $Date: 2003/03/12 02:53:05 $
+   Version: $Revision: 1.145 $
+   Last Mod Date: $Date: 2003/03/13 00:51:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -844,6 +844,21 @@ public class Ganymede {
       }
 
     return retVal;
+  }
+
+  /**
+   * This is a convenience method used by the server to return a
+   * very standard error dialog.
+   *
+   * The Exception parameter is ignored for now, so that this method
+   * can do something with it later if necessary without having to go
+   * through all the code which calls this method.
+   */
+
+  static public ReturnVal loginError(Exception ex)
+  {
+    return Ganymede.createErrorDialog("Error",
+				      "Not logged in");
   }
 
   /**

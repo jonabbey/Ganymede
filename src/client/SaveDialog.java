@@ -5,8 +5,8 @@
    Dialog for saving or mailing a table from dialog.
    
    Created: ??
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/10/20 04:34:25 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2003/03/13 00:51:07 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney
@@ -15,7 +15,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -43,7 +44,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.ganymede.client;
@@ -167,7 +170,7 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 
     // Row 3 is for the format choices
 
-    arlut.csd.JDataComponent.JSeparator sep = new arlut.csd.JDataComponent.JSeparator();
+    JSeparator sep = new JSeparator();
     gbc.gridwidth = 3;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridy = 4;

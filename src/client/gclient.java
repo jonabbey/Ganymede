@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.212 $
-   Last Mod Date: $Date: 2003/03/11 20:27:44 $
+   Version: $Revision: 1.213 $
+   Last Mod Date: $Date: 2003/03/13 00:51:08 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.212 $ $Date: 2003/03/11 20:27:44 $ $Name:  $
+ * @version $Revision: 1.213 $ $Date: 2003/03/13 00:51:08 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -535,7 +535,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not talk to server: " + rx);
+	processRemoteException(rx);
       }
 
     client = this;
@@ -659,7 +659,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not load personas: " + rx);
+	processRemoteException(rx, "Could not load personas");
       }
 
     personaListener = new PersonaListener(session, this);
@@ -888,7 +888,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote exception in buildTree: " + ex);
+	processRemoteException(ex, "caught remote exception in buildTree");
       }
 
     // The right panel which will contain the windowPanel
@@ -1057,7 +1057,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not open transaction: " + rx);
+	processRemoteException(rx, "Could not open transaction");
       }
 
     // If user has multiple personas, ask which to start with.
@@ -1116,7 +1116,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch ( RemoteException rx)
 	  {
-	    throw new RuntimeException("Could not get motd: " + rx);
+	    processRemoteException(rx, "Could not get motd");
 	  }
       }
     });
@@ -1254,7 +1254,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      }
 	    catch (RemoteException rx)
 	      {
-		throw new RuntimeException("Could not do the query: " + rx);
+		processRemoteException(rx, "Could not do the query");
 	      }
 	    
 	    cachedLists.putList(id, objectlist);
@@ -1285,7 +1285,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Could not get dump: " + rx);
+	    processRemoteException(rx, "Could not get dump");
 	  }
       }
 
@@ -1497,6 +1497,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException ex)
       {
+	processRemoteException(ex);
       }
 
     return handle;
@@ -1759,7 +1760,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not get motd: " + rx);
+	processRemoteException(rx, "Could not get motd");
       }
   }
 
@@ -1788,6 +1789,52 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     motd.setVisible(true);
+  }
+
+  public final void processRemoteException(RemoteException ex)
+  {
+    processRemoteException(ex, null);
+  }
+
+  public final void processRemoteException(RemoteException ex, String message)
+  {
+    String text = null;
+    StringWriter stringTarget = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringTarget);
+    
+    ex.printStackTrace(writer);
+    writer.close();
+
+    if (message != null)
+      {
+	text = message + "\n" + ex.getMessage() + "\n" + stringTarget.toString();
+      }
+    else
+      {
+	text = ex.getMessage() + "\n" + stringTarget.toString();
+      }
+
+    // i really want to be able to get at an embedded exception and do
+    // an instanceof on it, but we can't do that until 1.3 or 1.4, so
+    // hack hack hack
+
+    if (text.indexOf("NotLoggedInException") != -1)
+      {
+	showNotLoggedIn();
+      }
+    else
+      {
+	showErrorMessage("Remote Exception", text);
+      }
+
+    setNormalCursor();
+
+    throw new RuntimeException(text);
+  }
+
+  public final void showNotLoggedIn()
+  {
+    showErrorMessage("Error", "Not logged in to the server");
   }
 
   /**
@@ -2012,7 +2059,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		  }
 		catch (RemoteException ex)
 		  {
-		    throw new RuntimeException("Caught remote exception: " + ex.getMessage());
+		    processRemoteException(ex);
 		  }
 	      }
 	    else
@@ -2229,7 +2276,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not rebuild tree: " + rx);
+	processRemoteException(rx, "Could not rebuild tree");
       }
   }
 
@@ -2748,7 +2795,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException ex)
       {
-	setStatus("Couldn't get object handle vector refresh");
+	processRemoteException(ex, "Couldn't get object handle vector refresh");
       }
 
     if (afterCommit)
@@ -3044,7 +3091,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch(RemoteException rx)
       {
-	throw new RuntimeException("Could not edit object: " + rx);
+	processRemoteException(rx, "Could not edit object");
       }
   }
 
@@ -3091,7 +3138,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Exception creating new object: " + rx);
+	    processRemoteException(rx, "Exception creating new object");
 	  }
 
 	// we'll depend on handleReturnVal() above showing the user a rejection
@@ -3108,7 +3155,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Could not get invid: " + rx);
+	    processRemoteException(rx, "Could not get invid");
 	  }
 
 	ObjectHandle handle = new ObjectHandle("New Object", invid, false, false, false, true);
@@ -3202,7 +3249,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Exception creating new object: " + rx);
+	    processRemoteException(rx, "Exception creating new object");
 	  }
 
 	// we'll depend on handleReturnVal() above showing the user a rejection
@@ -3219,7 +3266,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Could not get invid: " + rx);
+	    processRemoteException(rx, "Could not get invid");
 	  }
 
 	ObjectHandle handle = new ObjectHandle("New Object", invid, false, false, false, true);
@@ -3320,7 +3367,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not edit object: " + rx);
+	processRemoteException(rx, "Could not edit object");
       }
   }
 
@@ -3463,7 +3510,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch(RemoteException rx)
       {
-	throw new RuntimeException("Could not delete base: " + rx);
+	processRemoteException(rx, "Could not delete object");
       }
     finally
       {
@@ -3559,7 +3606,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not verify invid to be inactivated: " + rx);
+	processRemoteException(rx, "Could not inactivate object");
       }
     finally
       {
@@ -3613,7 +3660,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not reactivate object: " + rx);
+	processRemoteException(rx, "Could not reactivate object");
       }
 
     if (ok)
@@ -4002,7 +4049,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		  }
 		catch (RemoteException ex)
 		  {
-		    throw new RuntimeException("oops, couldn't refresh base" + ex);
+		    processRemoteException(ex, "Could not refresh base");
 		  }
 	      }
 
@@ -4035,8 +4082,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch (RemoteException rx)
 	  {
-	    throw new RuntimeException("Can't figure out owner groups: " + rx);
+	    processRemoteException(rx, "Couldn't load owner groups");
 	  }
+
 	if (ownerGroups == null)
 	  {
 	    throw new RuntimeException("Whoa!  groups is null");
@@ -4067,7 +4115,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      }
 	    catch (RemoteException rx)
 	      {
-		throw new RuntimeException("Could not set default owner: " + rx);
+		processRemoteException(rx, "Could not set default owner");
 	      }
 	    return;
 	  }
@@ -4281,10 +4329,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	rx.printStackTrace();
-	showErrorMessage("Server Error",
-			 "Remote Exception during commit:\n\n" + stackTrace(rx),
-			 getErrorImage());
+	processRemoteException(rx, "Remote exception during commit");
       }
     catch (Exception e)
       {
@@ -4371,7 +4416,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not talk to server: " + rx);
+	processRemoteException(rx, "Error while cancelling transaction");
       }
 
     cleanUpAfterCancel();
@@ -4525,7 +4570,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not open new transaction: " + rx);
+	processRemoteException(rx, "Could not open new transaction");
       }
 
     setSomethingChanged(false);
@@ -4853,8 +4898,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch (RemoteException ex)
 	  {
-	    setStatus("Remote exception loading objects for base " + node.getText());
-	    throw new RuntimeException("remote exception in trying to fill this base " + ex);
+	    processRemoteException(ex, "Remote exception loading objects for base " + node.getText());
 	  }
 
 	setStatus("Done loading objects for base " + node.getText());
@@ -4986,7 +5030,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		      }
 		    catch (RemoteException ex)
 		      {
-			throw new RuntimeException("caught remote: " + ex);
+			processRemoteException(ex);
 		      }
 		    catch (Error ex)
 		      {
@@ -5074,7 +5118,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		  }
 		catch (RemoteException ex)
 		  {
-		    throw new RuntimeException("oops, couldn't refresh base" + ex);
+		    processRemoteException(ex);
 		  }
 	      }
 	  }
@@ -5111,7 +5155,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      }
 	    catch (RemoteException ex)
 	      {
-		throw new RuntimeException("oops, couldn't refresh base" + ex);
+		processRemoteException(ex);
 	      }
 	  }
       }

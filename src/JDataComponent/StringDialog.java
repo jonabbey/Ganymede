@@ -6,15 +6,16 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 2002/10/05 05:38:25 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 2003/03/13 00:51:07 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -77,7 +78,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.58 $ $Date: 2002/10/05 05:38:25 $ $Name:  $
+ * @version $Revision: 1.59 $ $Date: 2003/03/13 00:51:07 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -86,6 +87,8 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
   static final boolean debug = false;
 
   // --
+
+  DialogRsrc resource = null;
 
   Hashtable
     componentHash,
@@ -201,6 +204,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
   public StringDialog(DialogRsrc Resource) 
   {
     super(Resource.frame, Resource.title, true);
+    this.resource = Resource;
+
+    create();
+  }
+
+  private void create()
+  {
     this.addWindowListener(this);
 
     if (debug)
@@ -208,100 +218,25 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	System.err.println("StringDialog constructor");
       }
       
-    componentHash = new Hashtable();
-    valueHash = new Hashtable();
-
-    objects = Resource.getObjects();
-    components = new Vector(objects.size());
-
-    gbl = new GridBagLayout();
-    gbc = new GridBagConstraints();
-
-    gbc.insets = new Insets(4,4,4,4);
-
     mainPanel = new JPanel();
     mainPanel.setBorder(new CompoundBorder(new EtchedBorder(),
 					   new EmptyBorder(10, 10, 10, 10)));
-    mainPanel.setLayout(gbl);
+    mainPanel.setLayout(new BorderLayout());
     setContentPane(mainPanel);
 
     //
     // Title at top of dialog
     //
 
-    JLabel titleLabel = new JLabel(Resource.title, SwingConstants.CENTER);
+    JLabel titleLabel = new JLabel(resource.title, SwingConstants.CENTER);
     titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
-
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbc.gridwidth = 2;
-    gbc.gridheight = 1;
-    gbl.setConstraints(titleLabel, gbc);
-    mainPanel.add(titleLabel);
-
-    //
-    // Text message under title
-    //
-
-    textLabel = new JMultiLineLabel(Resource.getText());
-    
-    gbc.gridy = 1;
-    gbc.gridx = 1;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbl.setConstraints(textLabel, gbc);
-    mainPanel.add(textLabel);
-
-    //
-    // Separator goes all the way accross
-    // 
-
-    arlut.csd.JDataComponent.JSeparator sep = new arlut.csd.JDataComponent.JSeparator();
-
-    gbc.gridx = 0;
-    gbc.gridy = 3;
-    gbc.gridwidth = 2;
-    gbc.gridheight = 1;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbl.setConstraints(sep, gbc);
-    mainPanel.add(sep);
-
-    //
-    // ButtonPanel takes up the bottom of the dialog
-    //
-
-    buttonPanel = new JPanel();
-
-    OKButton = new JButton(Resource.OKText);
-    OKButton.addActionListener(this);
-    buttonPanel.add(OKButton);
-
-    // if cancel is null, don't put it on there
-
-    if (Resource.CancelText != null)
-      {
-	CancelButton = new JButton(Resource.CancelText);
-	CancelButton.addActionListener(this);
-	buttonPanel.add(CancelButton);
-      }
-
-    //
-    // buttonPanel goes underneath
-    //
-
-    gbc.gridx = 0;
-    gbc.gridy = 4;
-    gbc.gridwidth = 2;
-    gbc.gridheight = 1;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbl.setConstraints(buttonPanel, gbc);
-    mainPanel.add(buttonPanel);
+    mainPanel.add(titleLabel, "North");
 
     //
     // Image on left hand side
     //
 
-    image = Resource.getImage();
+    image = resource.getImage();
     JPanel imagePanel = new JPanel();
 
     if (image != null)
@@ -314,56 +249,110 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	imagePanel.add(Box.createGlue());
       }
 
+    mainPanel.add(imagePanel, "West");
+
+    //
+    // Text message under title
+    //
+
+    textLabel = new JMultiLineLabel(resource.getText());
+    JScrollPane pane = new JScrollPane(textLabel);
+    pane.setBorder(null);
+
+    mainPanel.add(pane, "Center");
+
+    // now we need to create our south panel
+
+    JPanel southPanel = new JPanel();
+    mainPanel.add(southPanel, "South");
+
+    gbl = new GridBagLayout();
+    southPanel.setLayout(gbl);
+
+    gbc = new GridBagConstraints();
+    //    gbc.insets = new Insets(4,4,4,4);
+
+    //
+    // Separator goes all the way accross
+    // 
+
+    JSeparator sep = new JSeparator();
+
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(sep, gbc);
+    southPanel.add(sep);
+
+    //
+    // Now for our data object panel
+    //
+
+    panel = createElementPanel();
+
     gbc.gridx = 0;
     gbc.gridy = 1;
     gbc.gridwidth = 1;
-    gbc.gridheight = 2;
-    gbc.weightx = 0.0;
-    gbc.fill = GridBagConstraints.NONE;
-    gbl.setConstraints(imagePanel, gbc);
-    mainPanel.add(imagePanel);
+    gbc.gridheight = 1;
+    gbc.weighty = 1.0;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(panel, gbc);
+    southPanel.add(panel);
 
-    if (debug)
+    //
+    // ButtonPanel takes up the bottom of the dialog
+    //
+
+    buttonPanel = new JPanel();
+
+    OKButton = new JButton(resource.OKText);
+    OKButton.addActionListener(this);
+    buttonPanel.add(OKButton);
+
+    // if cancel is null, don't put it on there
+
+    if (resource.CancelText != null)
       {
-	System.err.println("StringDialog: adding objects");
+	CancelButton = new JButton(resource.CancelText);
+	CancelButton.addActionListener(this);
+	buttonPanel.add(CancelButton);
       }
 
-    // We have to make the panel, even if it is empty.  This is
-    // because we have to add space to to it for the stupid activator.
+    //
+    // buttonPanel goes underneath
+    //
 
-    panel = new JPanel();
-    panel.setBorder(null);
-
-    gbc.gridx = 1;
+    gbc.gridx = 0;
     gbc.gridy = 2;
     gbc.gridwidth = 1;
     gbc.gridheight = 1;
-    gbc.weightx = 1.0;
-    //    gbc.weighty = 1.0;
+    gbc.weighty = 0.0;
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbl.setConstraints(panel, gbc);
-    mainPanel.add(panel);
+    gbl.setConstraints(buttonPanel, gbc);
+    southPanel.add(buttonPanel);
 
-    // The panel uses its own grid bag stuff
+    registerCallbacks();
+    pack();
+  }
+
+  private JPanel createElementPanel()
+  {
+    JPanel panel = new JPanel();
+    panel.setBorder(null);
 
     compgbc = new GridBagConstraints();
     compgbl = new GridBagLayout();
 
     compgbc.insets = new Insets(0,4,0,4);
     panel.setLayout(compgbl);
-    
-    // add stuff to panel here
 
-    if (objects == null)
-      {
-	if (debug)
-	  {
-	    System.err.println("null objects vector");
-	  }
+    componentHash = new Hashtable();
+    valueHash = new Hashtable();
 
-	pack();
-	return;
-      }
+    objects = resource.getObjects();
+    components = new Vector(objects.size());
 
     int numberOfObjects = objects.size();
 	
@@ -374,8 +363,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	    System.err.println("no fields to add to StringDialog");
 	  }
 
-	pack();
-	return;
+	return panel;
       }
 
     for (int i = 0; i < numberOfObjects; ++i) 
@@ -595,9 +583,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	  }
       }
 
-    registerCallbacks();
-    
-    pack();
+    return panel;
   }
 
   /**

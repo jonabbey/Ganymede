@@ -6,15 +6,16 @@
    
    Created: 17 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/06/30 04:24:42 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2003/03/13 00:51:07 $
    Module By: Brian O'Mara
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -42,7 +43,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -65,7 +67,7 @@ import arlut.csd.JDataComponent.JMultiLineLabel;
 /**
  * <p>Persona selection dialog</p>
  *
- * @version $Revision: 1.9 $ $Date: 2000/06/30 04:24:42 $ $Name:  $
+ * @version $Revision: 1.10 $ $Date: 2003/03/13 00:51:07 $ $Name:  $
  * @author Brian O'Mara
  */
 

@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2003/03/11 02:30:22 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2003/03/13 00:51:08 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -2586,7 +2586,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
     // Separator goes all the way accross
     // 
 
-    arlut.csd.JDataComponent.JSeparator sep = new arlut.csd.JDataComponent.JSeparator();
+    JSeparator sep = new JSeparator();
 
     gbc.gridx = 0;
     gbc.gridy = 3;
