@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 2000/10/29 09:23:20 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 2000/10/29 20:36:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1062,7 +1062,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 					   root);
       }
 
-    retVal = setName(root.getAttrStr("name"));
+    // swap names if needed.. the DBObjectBase.setXML() will have checked for unique field
+    // names before calling us
+
+    retVal = setName(root.getAttrStr("name"), true);
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -1083,7 +1086,18 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     // extract the short
 
-    retVal = setID(field_codeInt.shortValue());
+    short _fieldID = field_codeInt.shortValue();
+
+    // we don't allow the xml file to specify global fields
+
+    if (_fieldID < 100)
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef defines an id attr out of range.. must be >= 100 for custom fields: \n" + 
+					  root.getTreeString());
+      }
+
+    retVal = setID(_fieldID);
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -2215,11 +2229,33 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   /**
    * <p>Sets the name of this field</p>
    *
+   * @param name The new name to put in this field
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized ReturnVal setName(String name)
+  public ReturnVal setName(String name)
   {
+    return setName(name, false);
+  }
+
+  /**
+   * <p>Sets the name of this field</p>
+   *
+   * @param name The new name to put in this field
+   * @param swapIfNeeded If true, attempting to set this field's name
+   * to a name that is already taken in the object will result in this
+   * field's taking the new name from the other field and giving that
+   * other field its own name.  Only intended for use by setXML(), which
+   * has higher-level code to check for uniqueness of names in an XML
+   * schema definition.
+   */
+
+  public synchronized ReturnVal setName(String name, boolean swapIfNeeded)
+  {
+    ReturnVal retVal;
+
+    /* -- */
+
     if (!base.store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not in an schema editing context");
@@ -2256,10 +2292,33 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     try
       {
-	if (getBase().getField(name) != null)
+	DBObjectBaseField otherField = (DBObjectBaseField) getBase().getField(name);
+
+	if (otherField != null)
 	  {
-	    return Ganymede.createErrorDialog("Schema Editing Error",
-					      "That name is already taken.");
+	    if (!swapIfNeeded)
+	      {
+		return Ganymede.createErrorDialog("Schema Editing Error",
+						  "That name is already taken.");
+	      }
+	    else
+	      {
+		// the xml schema code is setting this name, and it will have checked
+		// to make sure the name is unique.. we'll give the field that already
+		// has the name we want our name in trade, and then take the new name
+		// ourselves.  the xml schema code will fix it up when it goes to
+		// set the name on the other.
+
+		String oldName = this.field_name;
+		this.field_name = name;
+
+		retVal = otherField.setName(oldName);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+	      }
 	  }
       }
     catch (RemoteException ex)

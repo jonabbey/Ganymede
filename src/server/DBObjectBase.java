@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.116 $
-   Last Mod Date: $Date: 2000/10/29 09:09:45 $
+   Version: $Revision: 1.117 $
+   Last Mod Date: $Date: 2000/10/29 20:36:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -414,7 +414,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     object_name = "";
     classname = "";
     classdef = null;
-    type_code = 0;
+    type_code = -1;
     label_id = -1;
     category = null;
     customFields = new Vector();
@@ -444,8 +444,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		      DBSchemaEdit editor) throws RemoteException
   {
     this(store, embedded);
-    type_code = id;
     this.editor = editor;
+    setTypeID(id);
   }
 
   /**
@@ -1040,32 +1040,60 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * DBObjectBase from an XMLItem &lt;objectdef&gt; tree.</P>
    */
 
-  synchronized void setXML(XMLItem root)
+  synchronized ReturnVal setXML(XMLItem root)
   {
     XMLItem item;
-    Integer idInt;
+    String _objectName = null;
+    Integer _idInt;
     DBObjectBaseField newField;
-
+    Hashtable nameTable = new Hashtable();
+    Hashtable idTable = new Hashtable();
+    String _classStr = null;
+    Integer _labelInt = null;
+    boolean _embedded = false;
+    boolean classSet = false;
+    boolean labelSet = false;
+    Vector fieldsInXML = new Vector(); // vector of Integer id's
+    Vector fieldsInBase = new Vector(); // vector of Integer id's
+    ReturnVal retVal;
     /* -- */
-
-    this.label_id = -1;
-    this.classname = null;
-    this.embedded = false;
 
     if (root == null || !root.matches("objectdef"))
       {
 	throw new IllegalArgumentException("DBObjectBase.setXML(): root element != open objectdef: " + root);
       }
 
-    object_name = root.getAttrStr("name");
-    idInt = root.getAttrInt("id");
+    // GanymedeXMLSession.processSchema does a handleBaseRenaming up
+    // front, but if we are a newly created base we might not have had
+    // our name set yet.. go ahead and try to do it here
+    
+    _objectName = root.getAttrStr("name");
 
-    if (idInt == null)
+    if (_objectName == null || _objectName.equals(""))
       {
-	throw new IllegalArgumentException("DBObjectBase.setXML(): objectdef missing id attribute: " + root);
+	return Ganymede.createErrorDialog("xml",
+					  "DBObjectBase.setXML(): objectdef missing name attribute:\n " + root.getTreeString());
       }
 
-    type_code = idInt.shortValue();
+    // we call setName() at the bottom, after we know for sure what our
+    // embedded status is going to be
+
+    _idInt = root.getAttrInt("id");
+
+    if (_idInt == null)
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "DBObjectBase.setXML(): objectdef missing id attribute:\n " + root.getTreeString());
+      }
+
+    retVal = setTypeID(_idInt.shortValue());
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    // first scan the children nodes, make sure all fields have unique names and id's
 
     XMLItem children[] = root.getChildren();
 
@@ -1073,45 +1101,156 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	item = children[i];
 
+	if (item.matches("fielddef"))
+	  {
+	    String _fieldNameStr = item.getAttrStr("name");
+	    Integer _fieldIDInt = item.getAttrInt("id");
+
+	    if (_fieldNameStr == null || _fieldIDInt == null)
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "Field definition missing name and/or id: " + item.getTreeString());
+	      }
+
+	    if (nameTable.containsKey(_fieldNameStr))
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "More than one field in objectdef: " + root.getTreeString() + 
+						  "\ncontains field name " + _fieldNameStr);
+	      }
+
+	    DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldNameStr);
+
+	    if (_field != null && _field.isBuiltIn())
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "Can't set a field:\n " + item.getTreeString() + 
+						  "\nwith the same name as a pre-existing built-in field in objectdef:\n" +
+						  root.getTreeString());
+	      }
+
+	    nameTable.put(_fieldNameStr, item);
+
+	    if (idTable.containsKey(_fieldIDInt))
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "More than one field in objectdef: " + root.getTreeString() + 
+						  "\ncontains field id " + _fieldIDInt);
+	      }
+
+	    idTable.put(_fieldIDInt, item);
+
+	    fieldsInXML.addElement(_fieldIDInt);
+	  }
+      }
+
+    // okay, we know all field names and fields are unique.. go ahead
+    // and load the data in
+
+    for (int i = 0; i < children.length; i++)
+      {
+	item = children[i];
+
 	if (item.matches("classdef"))
 	  {
-	    classname = item.getAttrStr("name");
+	    if (classSet)
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "Objectdef contains more than one classdef element:\n" +
+						  root.getTreeString());
+	      }
+
+	    _classStr = item.getAttrStr("name");
+
+	    classSet = true;
 	  }
 	else if (item.matches("embedded"))
 	  {
-	    embedded = true;
+	    _embedded = true;
 	  }
 	else if (item.matches("label"))
 	  {
-	    Integer labelInt = item.getAttrInt("fieldid");
-
-	    if (labelInt != null)
+	    if (labelSet)
 	      {
-		label_id = labelInt.shortValue();
+		return Ganymede.createErrorDialog("xml",
+						  "Objectdef contains more than one label element:\n" +
+						  root.getTreeString());
 	      }
+
+	    _labelInt = item.getAttrInt("fieldid");
+
+	    labelSet = true;
 	  }
 	else if (item.matches("fielddef"))
 	  {
-	    try
+	    newField = (DBObjectBaseField) getField(item.getAttrInt("id").shortValue());
+
+	    if (newField == null)
 	      {
-		newField = new DBObjectBaseField(this);
-	      }
-	    catch (RemoteException ex)
-	      {
-		ex.printStackTrace();
-		throw new RuntimeException("UnicastRemoteObject initialization error " + ex.getMessage());
+		try
+		  {
+		    newField = new DBObjectBaseField(this);
+		  }
+		catch (RemoteException ex)
+		  {
+		    ex.printStackTrace();
+		    throw new RuntimeException("UnicastRemoteObject initialization error " + ex.getMessage());
+		  }
+
+		addFieldToEnd(newField);
 	      }
 
-	    newField.setXML(item, false); // don't do invid linking on first pass
+	    retVal = newField.setXML(item, false); // don't do invid linking on first pass
 
-	    addFieldToEnd(newField);
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return retVal;
+	      }
 	  }
 	else
 	  {
-	    System.err.println("DBObjectBase.setXML(): unrecognized XML item in objectdef: " + 
-			       item);
+	    return Ganymede.createErrorDialog("xml",
+					      "Unrecognized XML item: " + item + " in objectdef:\n" +
+					      root.getTreeString());
 	  }
       }
+
+    // and set or clear the label and class options
+
+    if (_labelInt == null)
+      {
+	retVal = setLabelField(null);
+      }
+    else
+      {
+	retVal = setLabelField(_labelInt.shortValue());
+      }
+    
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+    
+    retVal = setClassName(_classStr);
+    
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    // we have to set embedded before calling setName() so that
+    // setName() can enforce the embedded object naming convention
+
+    embedded = _embedded;	// XXX need to work on this
+    
+    retVal = setName(_objectName);
+    
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    return null;
   }
 
   /**
@@ -1562,6 +1701,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	myNewName = newName;
       }
 
+    // no change, no harm
+
+    if (myNewName.equals(object_name))
+      {
+	return null;
+      }
+
     // check to make sure another object type isn't using the proposed
     // new name
 
@@ -1810,6 +1956,35 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   public short getTypeID()
   {
     return type_code;
+  }
+
+  /**
+   * <p>Sets the object ID code for this object type</p>
+   */
+
+  public synchronized ReturnVal setTypeID(short objectId)
+  {
+    if (!store.loading && editor == null)
+      {
+	throw new IllegalArgumentException("not in an schema editing context");
+      }
+
+    if ((objectId != type_code) && (type_code != -1))
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "Can't change the type_code for an existing object base");
+      }
+
+    if (store.getObjectBase(objectId) != null)
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "Can't set the type_code for object base " + toString() +
+					  " to that of an existing object base");
+      }
+
+    type_code = objectId;
+
+    return null;
   }
 
   /**
