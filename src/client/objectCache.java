@@ -7,7 +7,7 @@
    can use it wherever.
    
    Created: 7 February 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,6 +47,24 @@ public class objectCache {
   public objectList getList(Object key)
   {
     return (objectList) idMap.get(key);
+  }
+
+  /**
+   * This method returns true if the specified list contains any
+   * non-editable handles.
+   * 
+   */
+
+  public boolean containsNonEditable(Object key)
+  {
+    objectList list = getList(key);
+
+    if (list == null)
+      {
+	throw new IllegalArgumentException("no such list in cache: " + key);
+      }
+
+    return list.containsNonEditable();
   }
 
   /**
