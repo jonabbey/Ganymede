@@ -48,7 +48,7 @@ Ganymede XML file format when loading data.  This support has now been
 added, and it should now be possible to write scripts to load user
 accounts, passwords included, from a Samba password file.
 
-5. [SERVER] Fixed query filtering in Ganymede client and server
+5. [CLIENT/SERVER] Fixed query filtering in Ganymede client and server
 
 The Ganymede client has for a long time had a 'Filter Query' menu
 option that was intended to allow users in many owner groups
