@@ -8,8 +8,8 @@
    
    Created: 2 October 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/10/02 20:18:29 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/10/02 21:12:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -145,6 +145,11 @@ public class NamedStack {
   public int size()
   {
     return stack.size();
+  }
+
+  public synchronized void removeAllElements()
+  {
+    stack.removeAllElements();
   }
 
   /**
