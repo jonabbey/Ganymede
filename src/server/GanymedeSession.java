@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.122 $
-   Last Mod Date: $Date: 1999/01/26 05:38:47 $
+   Version: $Revision: 1.123 $
+   Last Mod Date: $Date: 1999/02/25 05:19:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -85,7 +85,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.122 $ %D%
+ * @version $Revision: 1.123 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -3819,6 +3819,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
 					  "Error.. can't delete non-existent object");
+      }
+
+    // we call canRemove() here so that adopters can override
+    // canRemove() in DBEditObject subclasses and by-pass this check
+
+    if (objBase.objectHook.canBeInactivated() && !isSuperGash() && !objBase.objectHook.canRemove(session, vObj))
+      {
+	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+					  "You do not have permission to remove " + vObj +
+					  ".\n\nOnly supergash-level admins can remove objects of this type," +
+					  "other admins must use inactivate.");
       }
 
     if (!getPerm(vObj).isDeletable())
