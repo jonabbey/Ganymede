@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.35 $ %D%
+  Version: $Revision: 1.36 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -392,10 +392,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    
 	try
 	  {
-	    JIPField ipf = new JIPField(new JcomponentAttr(null,
-							   new Font("Helvetica",Font.PLAIN,12),
-							   Color.black,Color.white),
-					true,
+	    JIPField ipf = new JIPField(true,
 					ipfield.v6Allowed());
 	    ipf.setCallback(this);
 	    addElement(ipf);
@@ -655,20 +652,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  }
 		else
 		  {
-		    /*
-		     * See above.
-		    JIPField ipf = new JIPField(new JcomponentAttr(null,
-								   new Font("Helvetica",Font.PLAIN,12),
-								   Color.black,Color.white),
-						editable,
-						((ip_field)o).v6Allowed());
-		
-		    ipf.setValue((Byte[]) ((ip_field)o).getElement(i));
-		    ipf.setCallback(this);
-		    
-		    compVector.insertElementAt(ipf, i);
-		    addElement(ipf, false);
-		    */
+
 		    System.out.println("Skpping non-loaded IPField.");
 
 		  }
