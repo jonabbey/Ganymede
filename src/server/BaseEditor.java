@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,10 @@ import arlut.csd.JTree.*;
 ------------------------------------------------------------------------------*/
 
 class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
+
+  static final boolean debug = false;
+
+  // ---
 
   boolean 
     listenToCallbacks = true;
@@ -75,7 +79,10 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 	throw new IllegalArgumentException("owner must not be null");
       }
 
-    System.err.println("BaseEditor constructed");
+    if (debug)
+      {
+	System.err.println("BaseEditor constructed");
+      }
 
     base = null;
     this.owner = owner;
@@ -157,7 +164,10 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 
     if (base == null)
       {
-	System.out.println("base is null, not refreshing labelC");
+	if (debug)
+	  {
+	    System.out.println("base is null, not refreshing labelC");
+	  }
 	return;
       }
 
@@ -174,7 +184,10 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     
     if (fields == null)
       {
-	System.out.println("No fields to add");
+	if (debug)
+	  {
+	    System.out.println("No fields to add");
+	  }
 	return;
       }
 
@@ -210,14 +223,22 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 
     if (labelField == null)
       {
-	System.out.println("selecting <none>");
+	if (debug)
+	  {
+	    System.out.println("selecting <none>");
+	  }
+
 	labelC.getModel().setSelectedItem("<none>");
       }
     else
       {
 	try
 	  {
-	    System.out.println("selecting label: " + labelField);
+	    if (debug)
+	      {
+		System.out.println("selecting label: " + labelField);
+	      }
+
 	    labelC.getModel().setSelectedItem(labelField);
 	  }
 	catch (NullPointerException ex)
@@ -232,7 +253,10 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
   {
     if (!listenToCallbacks)
       {
-	System.out.println("I'm not listening, go away.");
+	if (debug)
+	  {
+	    System.out.println("I'm not listening, go away.");
+	  }
 	return;
       }
 
@@ -240,7 +264,10 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 
     /* -- */
 
-    System.out.println("itemStateChanged");
+    if (debug)
+      {
+	System.out.println("itemStateChanged");
+      }
 
     if (e.getItemSelectable() == labelC)
       {
@@ -248,16 +275,27 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 	  {
 	    label = (String)labelC.getModel().getSelectedItem();
 
-	    System.out.println("setting label to " + label);
+	    if (debug)
+	      {
+		System.out.println("setting label to " + label);
+	      }
 
 	    if ((label == null) || (label.equals("<none>")))
 	      {
-		System.out.println("Setting label field to null");
+		if (debug)
+		  {
+		    System.out.println("Setting label field to null");
+		  }
+
 		base.setLabelField(null);
 	      }
 	    else
 	      {
-		System.out.println("Setting label field to " + label);
+		if (debug)
+		  {
+		    System.out.println("Setting label field to " + label);
+		  }
+
 		base.setLabelField(label);
 	      }
 	  }
@@ -272,7 +310,11 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
   {
     if (!listenToCallbacks)
       {
-	System.out.println("Not listening");
+	if (debug)
+	  {
+	    System.out.println("Not listening");
+	  }
+
 	return true;
       }
 
@@ -289,7 +331,10 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 	return false;
       }
 
-    System.err.println("setValuePerformed:" + v);
+    if (debug)
+      {
+	System.err.println("setValuePerformed:" + v);
+      }
 
     source = v.getSource();
     val = (String) v.getValue();

@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.61 $ %D%
+   Version: $Revision: 1.62 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -358,7 +358,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	objects = new CatTreeNode(null, rootCategory.getName(), rootCategory,
 				  null, true, 0, 1, categoryMenu);
 
-	System.err.println("Created rootCategory node: " + rootCategory.getName());
+	if (debug)
+	  {
+	    System.err.println("Created rootCategory node: " + rootCategory.getName());
+	  }
       }
     catch (RemoteException ex)
       {
@@ -400,7 +403,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     setSize(800, 600);
     show();
 
-    System.out.println("GASHSchema created");
+    if (debug)
+      {
+	System.out.println("GASHSchema created");
+      }
   }
 
   /**
@@ -884,7 +890,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   void editField(FieldNode node)
   {
-    System.err.println("in GASHSchema.editField");
+    if (debug)
+      {
+	System.err.println("in GASHSchema.editField");
+      }
+
     fe.editField(node, false);
     card.show(attribCardPane, "field");
     showingBase = false;
@@ -978,7 +988,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
     else if (node instanceof SpaceNode)
       {
-	System.out.println("namespacenode selected");
+	if (debug)
+	  {
+	    System.out.println("namespacenode selected");
+	  }
+
 	editNameSpace((SpaceNode) node);
       }
     else if (node instanceof CatTreeNode)
@@ -1005,7 +1019,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	card.show(attribCardPane, "empty");
       }
 
-    System.out.println("node " + node.getText() + " unselected");
+    if (debug)
+      {
+	System.out.println("node " + node.getText() + " unselected");
+      }
   }
 
   /**
@@ -1031,7 +1048,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     nodeText = node.getText();
 
-    System.out.println("node " + nodeText + ", action: " + event );
+    if (debug)
+      {
+	System.out.println("node " + nodeText + ", action: " + event );
+      }
 
     if (event.getSource() == createCategoryMI)
       {
@@ -1207,7 +1227,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
     else if (event.getSource() == createNameMI)
       {
-	System.out.println("Create namespace chosen");
+	if (debug)
+	  {
+	    System.out.println("Create namespace chosen");
+	  }
 
 	DialogRsrc dialogResource = new DialogRsrc(this, 
 						   "Create new namespace", 
@@ -1223,28 +1246,38 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	String newNameSpace = null;
 	Boolean insensitive = null;
 	
-	//Now check the hash
+	// Now check the hash
 
 	if (results == null)
 	  {
-	    System.out.println("null hashtable, no action taken");
+	    if (debug)
+	      {
+		System.out.println("null hashtable, no action taken");
+	      }
 	  }
 	else 
 	  {
-	    System.out.println("Printing the hash:");
+	    if (debug)
+	      {
+		System.out.println("Printing the hash:");
+	      }
+
 	    Enumeration enum = results.keys();
 
 	    while (enum.hasMoreElements()) 
 	      {
-		//String label = (String)enum.nextElement();
-		String label = (String)enum.nextElement();
+		String label = (String) enum.nextElement();
 		Object ob = results.get(label);
 
 		if (ob instanceof String) 
 		  {
 		    if (label == "Namespace:")
 		      {
-			System.out.println("Namespace is " + (String)ob);
+			if (debug)
+			  {
+			    System.out.println("Namespace is " + (String)ob);
+			  }
+
 			newNameSpace = (String)ob;
 		      }
 		    else
@@ -1258,7 +1291,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 		    if (label == "Case Insensitive:")
 		      {
-			System.out.println("Sensitivity set to: " + bool);
+			if (debug)
+			  {
+			    System.out.println("Sensitivity set to: " + bool);
+			  }
+
 			insensitive = bool;
 		      }
 		    else 
@@ -1276,7 +1313,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      {
 		try
 		  {
-		    System.out.println("Adding new NameSpace: " + newNameSpace);
+		    if (debug)
+		      {
+			System.out.println("Adding new NameSpace: " + newNameSpace);
+		      }
 		    editor.createNewNameSpace(newNameSpace, insensitive.booleanValue());
 		  }
 		catch (java.rmi.RemoteException e)
@@ -1290,7 +1330,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	NameSpace[] spaces  = null;
 
-	System.out.println("Actual NameSpaces:");
+	if (debug)
+	  {
+	    System.out.println("Actual NameSpaces:");
+	  }
 
 	try
 	  {
@@ -1316,13 +1359,16 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		System.out.println("Exception while listing NameSpace: " + e);
 	      }
 
-	    if (Insensitive)
+	    if (debug)
 	      {
-		System.out.println("   " + name + " is case insensitive.");
-	      }
-	    else
-	      {
-		System.out.println("   " + name + " is not case insensitive.");
+		if (Insensitive)
+		  {
+		    System.out.println("   " + name + " is case insensitive.");
+		  }
+		else
+		  {
+		    System.out.println("   " + name + " is not case insensitive.");
+		  }
 	      }
 	  }
 
@@ -1336,7 +1382,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
     else if (event.getSource() == deleteNameMI)
       {
-	System.out.println("deleting Namespace");
+	if (debug)
+	  {
+	    System.out.println("deleting Namespace");
+	  }
+
 	treeNode tNode = (treeNode)node;
 
 	DialogRsrc dialogResource = new DialogRsrc(this,
@@ -1394,13 +1444,19 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				 "Confirm",
 				 "Cancel").DialogShow() == null)
 	      {
-		System.out.println("Deletion canceled");
+		if (debug)
+		  {
+		    System.out.println("Deletion canceled");
+		  }
 	      }
 	    else //Returned confirm
 	      {	    
 		try
 		  {
-		    System.err.println("Deleting base " + b.getName());
+		    if (debug)
+		      {
+			System.err.println("Deleting base " + b.getName());
+		      }
 		    editor.deleteBase(b);
 		  }
 		catch (RemoteException ex)
@@ -1428,7 +1484,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	try
 	  {
 	    BaseNode bNode = (BaseNode) node;
-	    System.err.println("Calling editField");
+
+	    if (debug)
+	      {
+		System.err.println("Calling editField");
+	      }
 
 	    // create a name for the new field
 
@@ -1509,7 +1569,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    tree.expandNode(node, true);
 
 	    editField(newNode);
-	    System.err.println("Called editField");
+
+	    if (debug)
+	      {
+		System.err.println("Called editField");
+	      }
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1545,7 +1609,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	    if (isEditable || developMode)
 	      {
-		System.err.println("deleting field node");
+		if (debug)
+		  {
+		    System.err.println("deleting field node");
+		  }
 
 		DialogRsrc dialogResource = new DialogRsrc(this,
 							   "Confirm Field Deletion",
@@ -1640,7 +1707,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    tree.expandNode(node, true);
 
 	    editField(newNode);
-	    System.err.println("Called editField");
+
+	    if (debug)
+	      {
+		System.err.println("Called editField");
+	      }
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1653,7 +1724,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   public void actionPerformed(ActionEvent event)
   {
-    System.out.println("event: " + event);
+    if (debug)
+      {
+	System.out.println("event: " + event);
+      }
 
     if (event.getSource() == okButton)
       {
@@ -1798,27 +1872,42 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 		newCategory = ((CatTreeNode) targetNode).getCategory();
 
-		System.err.println("Dropping base " + base.getName() + " from " +
-				   oldCategory.getName() + " onto " + newCategory.getName());
+		if (debug)
+		  {
+		    System.err.println("Dropping base " + base.getName() + " from " +
+				       oldCategory.getName() + " onto " + newCategory.getName());
+		  }
 
 		base.setDisplayOrder(0);
 
-		System.err.println("Removing " + base.getName() + " from " + oldCategory.getName());
+		if (debug)
+		  {
+		    System.err.println("Removing " + base.getName() + " from " + oldCategory.getName());
+		  }
 
 		oldCategory.removeNode(base.getName());
 
-		System.err.println("Adding " + base.getName() + " to " + newCategory.getName());
+		if (debug)
+		  {
+		    System.err.println("Adding " + base.getName() + " to " + newCategory.getName());
+		  }
 
 		newCategory.addNode((CategoryNode) base, false, true);
 
 		BaseNode newNode = new BaseNode(targetNode, base.getName(), base,
 						null, true, 2, 2, baseMenu);
 
-		System.err.println("Deleting dragNode: " + dragNode.getText());
+		if (debug)
+		  {
+		    System.err.println("Deleting dragNode: " + dragNode.getText());
+		  }
 
 		tree.deleteNode(dragNode, false);
 
-		System.err.println("Inserting newNode: " + newNode.getText());
+		if (debug)
+		  {
+		    System.err.println("Inserting newNode: " + newNode.getText());
+		  }
 
 		tree.insertNode(newNode, false);
 
@@ -1855,8 +1944,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 		newCategory = ((CatTreeNode) targetNode).getCategory();
 
-		System.err.println("Dropping category " + category.getName() + " from " +
-				   oldCategory.getName() + " onto " + newCategory.getName());
+		if (debug)
+		  {
+		    System.err.println("Dropping category " + category.getName() + " from " +
+				       oldCategory.getName() + " onto " + newCategory.getName());
+		  }
 
 		category.setDisplayOrder(0);
 
@@ -1983,13 +2075,19 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   public void dragLineRelease(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
   {
-    System.out.println("dragNode = " + dragNode.getText());
-    System.out.println("aboveNode = " + aboveNode.getText());
-    System.out.println("belowNode = " + belowNode.getText());
+    if (debug)
+      {
+	System.out.println("dragNode = " + dragNode.getText());
+	System.out.println("aboveNode = " + aboveNode.getText());
+	System.out.println("belowNode = " + belowNode.getText());
+      }
 
     if (aboveNode.equals(dragNode) || belowNode.equals(dragNode))
       {
-	System.err.println("No change necessary");
+	if (debug)
+	  {
+	    System.err.println("No change necessary");
+	  }
 	return;
       }
 
@@ -1997,7 +2095,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       {
 	FieldNode oldNode = (FieldNode)dragNode;
 	BaseNode parentNode = (BaseNode)oldNode.getParent();
-	System.out.println("parent = " + parentNode);
+
+	if (debug)
+	  {
+	    System.out.println("parent = " + parentNode);
+	  }
 	
 	if (aboveNode instanceof FieldNode)
 	  {
@@ -2015,7 +2117,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		    fe.fieldNode = newNode;
 		  }
 	      }
-	    else
+	    else if (debug)
 	      {
 		System.out.println("aboveNode == dragNode, Not moving it");
 	      }
@@ -2036,7 +2138,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		    fe.fieldNode = newNode;
 		  }
 	      }
-	    else
+	    else if (debug)
 	      {
 		System.out.println("belowNode == dragNode, Not moving it");
 	      }
@@ -2063,7 +2165,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		    currentNode.getField().setDisplayOrder(++i);
 		    currentNode = (FieldNode)currentNode.getNextSibling();
 		  }
-		System.out.println("Reordered " + i + " fields");
+
+		if (debug)
+		  {
+		    System.out.println("Reordered " + i + " fields");
+		  }
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -2077,7 +2183,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
     else if (dragNode instanceof BaseNode)
       {
-	System.err.println("Releasing baseNode");
+	if (debug)
+	  {
+	    System.err.println("Releasing baseNode");
+	  }
 
 	try
 	  {
@@ -2197,7 +2306,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
     else if (dragNode instanceof CatTreeNode)
       {
-	System.err.println("Releasing CatTreeNode");
+	if (debug)
+	  {
+	    System.err.println("Releasing CatTreeNode");
+	  }
 
 	try
 	  {
@@ -2323,6 +2435,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 ------------------------------------------------------------------------------*/
 
 class NameSpaceEditor extends JPanel implements ActionListener {
+
+  static final boolean debug = false;
   
   SpaceNode node;
   NameSpace space;
@@ -2343,7 +2457,10 @@ class NameSpaceEditor extends JPanel implements ActionListener {
 	throw new IllegalArgumentException("owner must not be null");
       }
 
-    System.err.println("NameSpaceEditor constructed");
+    if (debug)
+      {
+	System.err.println("NameSpaceEditor constructed");
+      }
 
     this.owner = owner;
 
@@ -2388,7 +2505,10 @@ class NameSpaceEditor extends JPanel implements ActionListener {
 
   public void actionPerformed(ActionEvent e)
   {
-    System.out.println("action Performed in NameSpaceEditor");
+    if (debug)
+      {
+	System.out.println("action Performed in NameSpaceEditor");
+      }
   }
 
   public void refreshSpaceList()
@@ -2419,7 +2539,10 @@ class NameSpaceEditor extends JPanel implements ActionListener {
       }
     else
       {
-	System.out.println("currentNameSpaceLabel= " + currentNameSpaceLabel);
+	if (debug)
+	  {
+	    System.out.println("currentNameSpaceLabel= " + currentNameSpaceLabel);
+	  }
 	  
 	for (int i = 0; i < bases.length; i++)
 	  {
@@ -2435,7 +2558,10 @@ class NameSpaceEditor extends JPanel implements ActionListener {
 
 	    if (fields == null)
 	      {
-		System.out.println("fields == null");
+		if (debug)
+		  {
+		    System.out.println("fields == null");
+		  }
 	      }
 	    else
 	      {
@@ -2451,7 +2577,12 @@ class NameSpaceEditor extends JPanel implements ActionListener {
 
 			    if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
 			      {
-				System.out.println("Adding to spaceV: " + thisBase + ":" + currentField.getName());;
+				if (debug)
+				  {
+				    System.out.println("Adding to spaceV: " + thisBase +
+						       ":" + currentField.getName());;
+				  }
+
 				spaceV.addElement(thisBase + ":" + currentField.getName());
 			      }
 			  }
@@ -2485,6 +2616,10 @@ class NameSpaceEditor extends JPanel implements ActionListener {
 
 class CategoryEditor extends JPanel implements JsetValueCallback {
 
+  static final boolean debug = false;
+
+  // ---
+
   GASHSchema owner;  
   JPanel catJPanel;
   JstringField catNameS;
@@ -2504,7 +2639,10 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
 	throw new IllegalArgumentException("owner must not be null");
       }
     
-    System.err.println("CategoryEditor constructed");
+    if (debug)
+      {
+	System.err.println("CategoryEditor constructed");
+      }
 
     this.owner = owner;
     

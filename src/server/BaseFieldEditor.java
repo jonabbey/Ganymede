@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,10 @@ import arlut.csd.JTree.*;
 ------------------------------------------------------------------------------*/
 
 class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener, TextListener {
+
+  static final boolean debug = false;
+
+  // ---
 
   boolean
     listenToCallbacks = true;
@@ -284,7 +288,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
   void checkVisibility()
   {
-    System.out.println(" Checking visibility");
+    if (debug)
+      {
+	System.out.println(" Checking visibility");
+      }
+
     if (passwordShowing || booleanShowing || numericShowing || dateShowing)
       {
 	setRowVisible(vectorCF, false);
@@ -347,7 +355,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     editPanel.doLayout();
     this.validate();
-    System.out.println(" Done checking visibility");
+
+    if (debug)
+      {
+	System.out.println(" Done checking visibility");
+      }
   }
 
   void refreshNamespaceChoice()
@@ -361,8 +373,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
      SchemaEdit test = owner.getSchemaEdit();
 
      if (test == null)
-       {	
-	 System.err.println("owner.editor is null");
+       {
+	 if (debug)
+	   {
+	     System.err.println("owner.editor is null");
+	   }
        }
      
      try
@@ -378,7 +393,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
      if ( (nameSpaces.length == 0) || (nameSpaces == null) )
        {
-	 System.err.println("No other namespaces to add");
+	 if (debug)
+	   {
+	     System.err.println("No other namespaces to add");
+	   }
        }
      else
        {
@@ -481,7 +499,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	if (targetBase == null)
 	  {
-	    System.out.println("targetBase is null");
+	    if (debug)
+	      {
+		System.out.println("targetBase is null");
+	      }
 	  }
 	else
 	  {
@@ -498,7 +519,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     
     if (fields == null)
       {
-	System.out.println("fields == null");
+	if (debug)
+	  {
+	    System.out.println("fields == null");
+	  }
 
 	// By default, the Choice item will keep the
 	// first item added.. the following line is
@@ -520,7 +544,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		throw new IllegalArgumentException("Exception getting type description " + rx);
 	      }
 
-	    System.out.println("checking type: " + type);
+	    if (debug)
+	      {
+		System.out.println("checking type: " + type);
+	      }
 
 	    try
 	      {
@@ -540,7 +567,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		      {
 			try
 			  {
-			    System.out.println("adding " + bf.getName());
+			    if (debug)
+			      {
+				System.out.println("adding " + bf.getName());
+			      }
+
 			    fieldC.addItem(bf.getName());
 			  }
 			catch (RemoteException rx)
@@ -649,7 +680,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
   void editField(FieldNode fieldNode, boolean forceRefresh, boolean updateTargetC)
   {
-    System.err.println(" -in FieldEditor.editField()");
+    if (debug)
+      {
+	System.err.println(" -in FieldEditor.editField()");
+      }
 
     listenToCallbacks = false;
     owner.setWaitCursor();
@@ -697,11 +731,18 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     passwordShowing = false;
     ipShowing = false;
 
-    System.out.println(" before try");
+    if (debug)
+      {
+	System.out.println(" before try");
+      }
 
     try
       {
-	System.out.println(" in try");
+	if (debug)
+	  {
+	    System.out.println(" in try");
+	  }
+
 	idN.setValue(fieldDef.getID());
 	nameS.setText(fieldDef.getName());
 	classS.setText(fieldDef.getClassName());
@@ -731,17 +772,28 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	    refreshNamespaceChoice();
 
-	    System.out.println(fieldDef.getNameSpaceLabel());
+	    if (debug)
+	      {
+		System.out.println(fieldDef.getNameSpaceLabel());
+	      }
 
 	    if (fieldDef.getNameSpaceLabel() == null)
 	      {
 		namespaceC.getModel().setSelectedItem("<none>");
-		System.out.println("selecting <none> for NameSpace");
+
+		if (debug)
+		  {
+		    System.out.println("selecting <none> for NameSpace");
+		  }
 	      }
 	    else
 	      {
 		namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
-		System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+
+		if (debug)
+		  {
+		    System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+		  }
 	      }
 	  }
 	else if (fieldDef.isPassword())
@@ -765,17 +817,28 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	    refreshNamespaceChoice();
 
-	    System.out.println(fieldDef.getNameSpaceLabel());
+	    if (debug)
+	      {
+		System.out.println(fieldDef.getNameSpaceLabel());
+	      }
 
 	    if (fieldDef.getNameSpaceLabel() == null)
 	      {
 		namespaceC.getModel().setSelectedItem("<none>");
-		System.out.println("selecting <none> for NameSpace");
+
+		if (debug)
+		  {
+		    System.out.println("selecting <none> for NameSpace");
+		  }
 	      }
 	    else
 	      {
 		namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
-		System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+
+		if (debug)
+		  {
+		    System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+		  }
 	      }
 	  }
 	else if (fieldDef.isBoolean())
@@ -822,7 +885,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		
 	    if (targetB == -1)
 	      {
-		System.out.println("unknown target base");
+		if (debug)
+		  {
+		    System.out.println("unknown target base");
+		  }
 		
 		if (updateTargetC)
 		  {
@@ -841,7 +907,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		    // the 'owner list' field.. we'll just pick the field from
 		    // the current fieldDef and go with it.
 			
-		    System.out.println("new 'alltarget' base");
+		    if (debug)
+		      {
+			System.out.println("new 'alltarget' base");
+		      }
 		    
 		    if (updateTargetC)
 		      {
@@ -859,10 +928,13 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 			
 		    if (targetBase == null)
 		      {
-			System.err.println("targetbase is null when it shouldn't be: server error : base id " + 
-					   targetB);
+			if (debug)
+			  {
+			    System.err.println("targetbase is null when it shouldn't be: server error : base id " + 
+					       targetB);
 			    
-			System.out.println("Choosing <any>");
+			    System.out.println("Choosing <any>");
+			  }
 			    
 			// we want to clear this bad reference
 			    
@@ -884,7 +956,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		      {
 			string = targetBase.getName();
 			    
-			System.out.println("Choosing " + string);
+			if (debug)
+			  {
+			    System.out.println("Choosing " + string);
+			  }
 
 			if (updateTargetC)
 			  {
@@ -906,7 +981,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		    
 		if (targetF == -1)
 		  {
-		    System.out.println("unknown target field");
+		    if (debug)
+		      {
+			System.out.println("unknown target field");
+		      }
+
 		    fieldC.getModel().setSelectedItem("<none>");
 		  }
 		else
@@ -925,7 +1004,12 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 			    if (targetField != null)
 			      {
 				string = targetField.getName();
-				System.out.println("selecting " + string);
+
+				if (debug)
+				  {
+				    System.out.println("selecting " + string);
+				  }
+
 				fieldC.getModel().setSelectedItem(string);
 			      }
 			  }
@@ -936,9 +1020,12 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		      }
 		    else
 		      {
-			System.err.println("targetbase is null, clearing targetField.");
+			if (debug)
+			  {
+			    System.err.println("targetbase is null, clearing targetField.");
 			
-			System.out.println("Choosing <none>");
+			    System.out.println("Choosing <none>");
+			  }
 			
 			// we want to clear this bad reference
 			
@@ -973,17 +1060,28 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	    refreshNamespaceChoice();
 
-	    System.out.println(fieldDef.getNameSpaceLabel());
+	    if (debug)
+	      {
+		System.out.println(fieldDef.getNameSpaceLabel());
+	      }
 
 	    if (fieldDef.getNameSpaceLabel() == null)
 	      {
 		namespaceC.getModel().setSelectedItem("<none>");
-		System.out.println("selecting <none> for NameSpace");
+
+		if (debug)
+		  {
+		    System.out.println("selecting <none> for NameSpace");
+		  }
 	      }
 	    else
 	      {
 		namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
-		System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+		
+		if (debug)
+		  {
+		    System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+		  }
 	      }
 	  }
 	else if (fieldDef.isPermMatrix())
@@ -994,7 +1092,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	// Here is where the editability is checked.
 
-	System.out.println("+Setting enabled to: " + isEditable);
+	if (debug)
+	  {
+	    System.out.println("+Setting enabled to: " + isEditable);
+	  }
 
 	commentT.setEditable(isEditable);
 	nameS.setEditable(isEditable);
@@ -1017,14 +1118,19 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	namespaceC.setEnabled(isEditable);
 	targetC.setEnabled(isEditable);
 	fieldC.setEnabled(isEditable);
-	
-	System.out.println(" calling checkVisibility");
+
+	if (debug)
+	  {
+	    System.out.println(" calling checkVisibility");
+	  }
+
 	checkVisibility();
       }
     catch (RemoteException ex)
       {
 	System.err.println("remote exception in FieldEditor.editField: " + ex);
       }
+
     /*
     typeC.addItemListener(this);
     fieldC.addItemListener(this);
@@ -1035,7 +1141,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     owner.setNormalCursor();
     listenToCallbacks = true;
 
-    System.out.println(" done in editField");
+    if (debug)
+      {
+	System.out.println(" done in editField");
+      }
   }
 
   /**
@@ -1061,7 +1170,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
   {
     if (!listenToCallbacks)
       {
-	System.out.println("I'm not listening!");
+	if (debug)
+	  {
+	    System.out.println("I'm not listening!");
+	  }
 	return true;  //return true because we want to component to change, just don't act on callback
       }
 
@@ -1071,78 +1183,135 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
       {
 	if (comp == nameS)
 	  {
-	    System.out.println("nameS");
+	    if (debug)
+	      {
+		System.out.println("nameS");
+	      }
+
 	    fieldDef.setName((String) v.getValue());
 	    fieldNode.setText((String) v.getValue());
 	    owner.tree.refresh();
 	  }
 	else if (comp == classS)
 	  {
-	    System.out.println("classS");
+	    if (debug)
+	      {
+		System.out.println("classS");
+	      }
+
 	    fieldDef.setClassName((String) v.getValue());
 	  }
 	else if (comp == idN)
 	  {
-	    System.out.println("idN");
+	    if (debug)
+	      {
+		System.out.println("idN");
+	      }
+
 	    fieldDef.setID(((Integer)v.getValue()).shortValue());
 	  }
 	else if (comp == maxArrayN)
 	  {
-	    System.out.println("maxArrayN");
+	    if (debug)
+	      {
+		System.out.println("maxArrayN");
+	      }
+
 	    fieldDef.setMaxArraySize(((Integer)v.getValue()).shortValue());
 	  }
 	else if (comp == vectorCF)
 	  {
 	    //setRowVisible(maxArrayN, vectorCF.getValue());
-	    System.out.println("vectorCF");
+
+	    if (debug)
+	      {
+		System.out.println("vectorCF");
+	      }
+
 	    fieldDef.setArray(vectorCF.isSelected());
 	    checkVisibility();
 	  }
 	else if (comp == OKCharS)
 	  {
-	    System.out.println("OkCharS");
+	    if (debug)
+	      {
+		System.out.println("OkCharS");
+	      }
+
 	    fieldDef.setOKChars((String) v.getValue());
 	  }
 	else if (comp == BadCharS)
 	  {
-	    System.out.println("BadCharS");
+	    if (debug)
+	      {
+		System.out.println("BadCharS");
+	      }
+
 	    fieldDef.setBadChars((String) v.getValue());
 	  }
 	else if (comp == minLengthN)
 	  {
-	    System.out.println("minLengthN");
+	    if (debug)
+	      {
+		System.out.println("minLengthN");
+	      }
+
 	    fieldDef.setMinLength(((Integer)v.getValue()).shortValue());
 	  }
 	else if (comp == maxLengthN)
 	  {
-	    System.out.println("maxLengthN");
+	    if (debug)
+	      {
+		System.out.println("maxLengthN");
+	      }
+
 	    fieldDef.setMaxLength(((Integer)v.getValue()).shortValue());
 	  }
 	else if (comp == trueLabelS)
 	  {
-	    System.out.println("trueLabelS");
+	    if (debug)
+	      {
+		System.out.println("trueLabelS");
+	      }
+
 	    fieldDef.setTrueLabel((String) v.getValue());
 	  }
 	else if (comp == falseLabelS)
 	  {
-	    System.out.println("falseLabelS");
+	    if (debug)
+	      {
+		System.out.println("falseLabelS");
+	      }
+
 	    fieldDef.setFalseLabel((String) v.getValue());
 	  }
 	else if (comp == labeledCF)
 	  {
-	    System.out.println("labeledCF");
+	    if (debug)
+	      {
+		System.out.println("labeledCF");
+	      }
+
 	    fieldDef.setLabeled(labeledCF.isSelected());
 	    checkVisibility();
 	  }
 	else if (comp == editInPlaceCF)
 	  {
-	    System.out.println("editInPlaceCF");
+	    if (debug)
+	      {
+		System.out.println("editInPlaceCF");
+	      }
+
 	    fieldDef.setEditInPlace(editInPlaceCF.isSelected());
 	    editField(fieldNode, true);	// force full recalc and refresh
 	  }
 	else if (comp == cryptedCF)
 	  {
-	    System.out.println("cryptedCF");
+	    if (debug)
+	      {
+		System.out.println("cryptedCF");
+	      }
+
 	    fieldDef.setCrypted(cryptedCF.isSelected());
 	  }
 	return true;
@@ -1163,7 +1332,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
   {
     if (!listenToCallbacks)
       {
-	System.out.println("I'm not listening to callbacks right now.");
+	if (debug)
+	  {
+	    System.out.println("I'm not listening to callbacks right now.");
+	  }
 	return;
       }
     String item = null;
@@ -1228,7 +1400,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		  {
 		    try
 		      {
-			System.out.println(" clicked ok");
+			if (debug)
+			  {
+			    System.out.println(" clicked ok");
+			  }
 			currentBase.setLabelField(null); // we're making this field unacceptable as a label
 		      }
 		    catch (RemoteException rx)
@@ -1238,7 +1413,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 		  }
 		else
 		  {
-		    System.out.println(" Canceled, not changing field type");
+		    if (debug)
+		      {
+			System.out.println(" Canceled, not changing field type");
+		      }
 		    okToChange = false;
 
 		    try 
@@ -1278,8 +1456,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
       {
 	item = (String)namespaceC.getModel().getSelectedItem();
 
-	System.out.println("Namespace: " + item);
-	System.out.println("Setting namespace to " + item);
+	if (debug)
+	  {
+	    System.out.println("Namespace: " + item);
+	    System.out.println("Setting namespace to " + item);
+	  }
 
 	try 
 	  {
@@ -1346,7 +1527,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	      {
 		try
 		  {
-		    System.out.println("Setting target base to " + item);
+		    if (debug)
+		      {
+			System.out.println("Setting target base to " + item);
+		      }
 
 		    fieldDef.setTargetBase(item);
 
@@ -1374,7 +1558,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
       {
 	item = (String)fieldC.getSelectedItem();
 
-	System.out.println("Setting field to " + item);
+	if (debug)
+	  {
+	    System.out.println("Setting field to " + item);
+	  }
 
 	try
 	  {
