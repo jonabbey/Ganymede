@@ -45,6 +45,21 @@ go to click on 'commit'.  Now object creation windows will not be
 closeable, so that it's not possible to 'lose' object windows that you
 need to do further editing on.
 
+4. [CLIENT] Modified the list editor GUI component
+
+The 'list editor' GUI component used in the client may have a text
+field at the bottom to allow the user to simply type in something
+to add to the list.  Previously, the 'Add' button connected to the
+text field was enabled all the time, confusing users manipulating
+the component.  Now the 'Add' button will only be enabled when the
+user has entered something into the text button.
+
+5. [SCHEMA] Lots of refinements to gasharl schema
+
+The server no longer allows users to be deleted by non-supergash
+admins.  The gasharl schema is designed so that users are inactivated
+instead, with removal done automatically at a later point.
+
 -------------------- Changes from 0.96 to 0.97 -------------------
 
 RELEASE DATE: February 11, 1999
