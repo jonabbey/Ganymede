@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.101 $
-   Last Mod Date: $Date: 2001/10/26 21:48:55 $
+   Version: $Revision: 1.102 $
+   Last Mod Date: $Date: 2001/10/26 21:58:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2592,7 +2592,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Integer id = (Integer) getFieldValueLocal(userSchema.UID);
     Invid homegroupInvid = (Invid) getFieldValueLocal(userSchema.HOMEGROUP);
 
-    Vector ownerInvids = (Vector) entryObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+    Vector ownerInvids = (Vector) this.getFieldValuesLocal(SchemaConstants.OwnerListField);
     String ownerName;
 
     if (ownerInvids != null && ownerInvids.size() > 0)
