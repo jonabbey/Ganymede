@@ -6,6 +6,7 @@ import java.rmi.RemoteException;
 import java.util.*;
 
 import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.tree.*;
 import javax.swing.table.*;
 import javax.swing.border.*;
@@ -93,7 +94,7 @@ class fieldoption_editor extends JDialog
     UIManager.put("Tree.closedIcon", new ImageIcon(PackageResources.getImageResource(this, "folder.gif", getClass())));
     UIManager.put("Tree.expandedIcon", new ImageIcon(PackageResources.getImageResource(this, "minus.gif", getClass())));
     UIManager.put("Tree.collapsedIcon", new ImageIcon(PackageResources.getImageResource(this, "plus.gif", getClass())));
-
+    
     /* Group the OK and Cancel buttons together */
     Choice_Buttons = new JPanel(); 
     Choice_Buttons.setLayout(new GridLayout(1,2));
@@ -132,8 +133,11 @@ class fieldoption_editor extends JDialog
     TreeTableModel model = new FieldOptionModel(rowRootNode);
     treeTable = new JTreeTable(model);
     tree = treeTable.getTree();
-    treeTable.setDefaultRenderer(Integer.class, new DelegateRenderer((TreeTableModelAdapter)treeTable.getModel(), editable));
-    treeTable.setDefaultEditor(Integer.class, new DelegateEditor((TreeTableModelAdapter)treeTable.getModel(), editable));
+
+    treeTable.setDefaultRenderer(Integer.class, 
+        new DelegateRenderer((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
+    treeTable.setDefaultEditor(Integer.class, 
+        new DelegateEditor((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
 
     /* Expand all visible base nodes on startup */
     expandAllNodes();
@@ -384,7 +388,7 @@ class fieldoption_editor extends JDialog
           
                 try
                   { 
-                    gc.handleReturnVal(opField.setOption(baseid, labels[value]));
+                    gc.handleReturnVal(opField.setOption(baseid, String.valueOf(value)));
                   }
                 catch (RemoteException ex)
                   {
@@ -405,7 +409,7 @@ class fieldoption_editor extends JDialog
           
                 try
                   {
-                    gc.handleReturnVal(opField.setOption(template.getBaseID(), template.getID(), labels[value]));
+                    gc.handleReturnVal(opField.setOption(template.getBaseID(), template.getID(), String.valueOf(value)));
                   }
                 catch (RemoteException ex)
                   {
@@ -608,7 +612,18 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
   public void setValueAt(Object value, Object node, int col) 
   {
     FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
-    int newVal = ((Integer)value).intValue();
+    int newVal;
+
+    if (((String)value).equals("Never"))
+    {
+      newVal = 0;
+    }
+    else if (((String)value).equals("When changed"))
+    {
+      newVal = 1;
+    }
+    else
+      newVal = 2;
     
     switch(col) 
       {
@@ -655,10 +670,14 @@ class DelegateRenderer implements TableCellRenderer
    * our FieldOptionRow objects attached to various nodes in the tree. */
   TreeTableModelAdapter model;
 
-  public DelegateRenderer(TreeTableModelAdapter model, boolean editable)
+  /* Reference to the main treetable */
+  JTreeTable treetable;
+
+  public DelegateRenderer(TreeTableModelAdapter model, boolean editable, JTreeTable treetable)
   {
     this.editable = editable;
     this.model = model;
+    this.treetable = treetable;
   }
 
   /* This implements the TableCellRenderer interface */
@@ -673,30 +692,17 @@ class DelegateRenderer implements TableCellRenderer
     DefaultMutableTreeNode node = (DefaultMutableTreeNode) (model.nodeForRow(row));
     FieldOptionRow qrow = (FieldOptionRow) (node.getUserObject());
     int opvalue = qrow.getOptionValue();
-    Component renderer;
 
     /* ObjectBases are rendered as checkboxes */
     if (qrow.isBase())
     {
-      CheckBoxRenderer cbr = new CheckBoxRenderer(editable);
-      if (opvalue == 0)
-      {
-        cbr.setSelected(false);
-      }
-      else
-      {
-        cbr.setSelected(true);
-      }
-      renderer = cbr;
+      return new CheckBoxRenderer(editable, this.treetable, opvalue);
     }
     /* Fields are rendered as combo boxes */
     else
     {
-      ComboRenderer lr = new ComboRenderer(editable);
-      lr.setSelectedIndex(opvalue);
-      renderer = lr;
+      return new ComboRenderer(editable, this.treetable, opvalue);
     }
-    return renderer;
   }
 }
 
@@ -707,7 +713,7 @@ class DelegateRenderer implements TableCellRenderer
  * ObjectBases are handled with a checkbox, and Fields are handled with
  * a combo box.
  */
-class DelegateEditor extends AbstractCellEditor implements TableCellEditor
+class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCellEditor
 {
   /* Is the renderer read-only? */
   boolean editable;
@@ -716,11 +722,39 @@ class DelegateEditor extends AbstractCellEditor implements TableCellEditor
    * our FieldOptionRow objects attached to various nodes in the tree. */
   TreeTableModelAdapter model;
 
-  public DelegateEditor(TreeTableModelAdapter model, boolean editable)
+  /* The component that's actually represents the edited cell */
+  Component delegate;
+
+  /* Quick-access reference to our main JTreeTable */
+  JTreeTable treetable;
+
+  public DelegateEditor(TreeTableModelAdapter model, boolean editable, JTreeTable treetable)
   {
     this.editable = editable;
     this.model = model;
+    this.treetable = treetable;
   }
+  
+  /**
+   * Implementing the TableCellEditor interface
+   */
+
+  public Object getCellEditorValue()
+  {
+    if (this.delegate instanceof JCheckBox)
+    {
+      boolean selected = ((JCheckBox)this.delegate).isSelected();
+      if (selected)
+        return "When changed";
+      else
+        return "Never";
+    }
+    else
+    {
+      return ((JComboBox)this.delegate).getSelectedItem();
+    }
+  }
+
 
   public Component getTableCellEditorComponent(JTable table,
                                                Object value,
@@ -732,26 +766,19 @@ class DelegateEditor extends AbstractCellEditor implements TableCellEditor
     FieldOptionRow qrow = (FieldOptionRow) (node.getUserObject());
     int opvalue = qrow.getOptionValue();
 
+    /* Object bases are rendered as checkboxes */
     if (qrow.isBase())
     {
-      CheckBoxEditor cbe = new CheckBoxEditor(editable);
-      JCheckBox cb = (JCheckBox) cbe.getComponent();
-      if (opvalue == 0)
-      {
-        cb.setSelected(false);
-      }
-      else
-      {
-        cb.setSelected(true);
-      }
+      CheckBoxRenderer cb = new CheckBoxRenderer(editable, this.treetable, opvalue);
+      this.delegate = cb;
       return cb;
     }
+    /* Fields are rendered as combo boxes */
     else
     {
-      ComboEditor ce = new ComboEditor(editable);
-      JComboBox cb = (JComboBox) ce.getComponent();
-      cb.setSelectedIndex(opvalue);
-      return cb;
+      ComboRenderer cr = new ComboRenderer(editable, this.treetable, opvalue);
+      this.delegate = cr;
+      return cr;
     }
   }
 }
@@ -761,11 +788,24 @@ class DelegateEditor extends AbstractCellEditor implements TableCellEditor
 /**
  * Renders the field options for an ObjectBase.
  */
-class CheckBoxRenderer extends JCheckBox implements TableCellRenderer
+class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionListener
 {
-  public CheckBoxRenderer(boolean editable)
+  /* Reference to the main JTreeTable */
+  JTreeTable treetable;
+
+  public CheckBoxRenderer(boolean editable, JTreeTable treetable, int onOrOff)
   {
+    this.treetable = treetable;
+
     setEnabled(editable);
+
+    /* Set the inital state of the checkbox */
+    if (onOrOff == 0)
+      setSelected(false);
+    else
+      setSelected(true);
+
+    this.addActionListener(this);
   }
 
   /**
@@ -791,36 +831,11 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer
     setSelected(convertValueToBoolean(value));
     return this;
   }
-}
 
-
-
-/**
- * Presents an editor for the field options for a DBObjectBase.
- *
- * In reality, this just defers the task of editing to a CheckBoxRenderer
- * component, which is just an extension of JCheckBox.
- */
-class CheckBoxEditor extends DefaultCellEditor implements TableCellEditor
-{
-  public CheckBoxEditor(boolean editable)
+  public void actionPerformed(ActionEvent e)
   {
-    /* DefaultCellEditor requires you give it a Component to handle the
-     * cell editing chores. We'll give it an uber-JCheckBox. */
-    super(new CheckBoxRenderer(editable));
-  }
-
-  public Component getTableCellEditorComponent(JTable table,
-                                               Object value,
-                                               boolean isSelected,
-                                               int row,
-                                               int column)
-  {
-    /* getComponent() returns the CheckBoxRenderer we used in the
-     * constructor */
-    CheckBoxRenderer cbr = (CheckBoxRenderer) getComponent();
-    cbr.setSelected(cbr.convertValueToBoolean(value));
-    return cbr;
+    /* Tell the tree table to call "setValueAt", since we've been edited */
+    this.treetable.editingStopped(new ChangeEvent(this));
   }
 }
 
@@ -829,16 +844,25 @@ class CheckBoxEditor extends DefaultCellEditor implements TableCellEditor
 /** 
  * Renders the field options for a DBObjectBaseField
  */
-class ComboRenderer extends JComboBox implements TableCellRenderer
+class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
 {
-  public ComboRenderer(boolean editable)
+  /* Reference to the main JTreeTable */
+  JTable treetable;
+
+  /* Sort of a hack; used to hold onto the previous selection index */
+  int selindex;
+  
+  public ComboRenderer(boolean editable, JTreeTable treetable, int selectionIndex)
   {
     /* Pass in the list of Strings to display in the combo box */
     super(fieldoption_editor.labels);
-    setEnabled(editable);
+    this.treetable = treetable;
+    this.selindex = selectionIndex;
 
-    /* Disallow free-form text entry */
+    setEnabled(editable);
     setEditable(false);
+    addItemListener(this);
+    setSelectedIndex(selectionIndex);
   }
   
   public Component getTableCellRendererComponent(JTable table, 
@@ -850,34 +874,23 @@ class ComboRenderer extends JComboBox implements TableCellRenderer
   {
     int labelIndex = ((Integer)value).intValue();
     setSelectedIndex(labelIndex);
+    this.selindex = labelIndex;
     return this;
   }
-}
 
-
-
-/**
- * Presents an editor for the field options for a DBObjectBaseField.
- *
- * In reality, this just defers the task of editing to a ComboBoxEditor
- * component, which is just an extension of JComboBox.
- */
-class ComboEditor extends DefaultCellEditor implements TableCellEditor
-{
-  public ComboEditor(boolean editable)
+  public void itemStateChanged(ItemEvent e)
   {
-    super(new ComboRenderer(editable));
-  }
-
-  public Component getTableCellEditorComponent(JTable table,
-                                               Object value,
-                                               boolean isSelected,
-                                               int row,
-                                               int column)
-  {
-    ComboRenderer cr = (ComboRenderer) getComponent();
-    int labelIndex = ((Integer)value).intValue();
-    cr.setSelectedIndex(labelIndex);
-    return cr;
+    if (e.getStateChange() == ItemEvent.SELECTED)
+    {
+      /* Tell the tree table to call "setValueAt", since we've been edited.
+       * Now, we'll only do this if the new item we've selected is different
+       * from the originally selected item. Swing fires this even either way,
+       * but we need to be more discriminating. */
+      if (this.selindex != getSelectedIndex())
+      {
+        this.treetable.editingStopped(new ChangeEvent(this));
+        this.selindex = getSelectedIndex();
+      }
+    }
   }
 }
