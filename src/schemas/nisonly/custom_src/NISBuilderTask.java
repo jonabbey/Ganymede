@@ -6,8 +6,8 @@
    
    Created: 18 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/01/22 18:05:20 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/02/04 01:26:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,6 +78,7 @@ public class NISBuilderTask extends GanymedeBuilderTask {
   // ---
 
   private Date now = null;
+  private boolean backedup = false;
 
   /* -- */
 
@@ -99,6 +100,8 @@ public class NISBuilderTask extends GanymedeBuilderTask {
     boolean result = false;
 
     /* -- */
+
+    backedup = false;
 
     if (path == null)
       {
@@ -256,13 +259,13 @@ public class NISBuilderTask extends GanymedeBuilderTask {
    *
    * This method opens the specified file for writing out a text stream.
    *
-   * If there already exists a file by that name in the system, the old
-   * version will be moved to a backup before the file is recreated for
-   * writing.
+   * If the files have not yet been backed up this run time, openOutFile()
+   * will cause the files in Ganymede's output directory to be zipped up
+   * before overwriting any files.
    *
    */
 
-  private PrintWriter openOutFile(String filename) throws IOException
+  private synchronized PrintWriter openOutFile(String filename) throws IOException
   {
     File
       file,
@@ -270,15 +273,13 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    file = new File(filename);
-
-    // back up the file if it exists.
-
-    if (file.exists())
+    if (!backedup)
       {
+	String label;
+
 	if (lastRunTime != null)
 	  {
-	    oldFile = new File(filename + lastRunTime.toString());
+	    label = lastRunTime.toString();
 	  }
 	else
 	  {
@@ -287,10 +288,19 @@ public class NISBuilderTask extends GanymedeBuilderTask {
 		now = new Date();
 	      }
 
-	    oldFile = new File(filename + now.toString());
+	    label = now.toString();
 	  }
 
-	file.renameTo(oldFile);
+	backupFiles(label);
+
+	backedup = true;
+      }
+
+    file = new File(filename);
+
+    if (file.exists())
+      {
+	file.delete();
       }
 
     return new PrintWriter(new BufferedWriter(new FileWriter(file)));

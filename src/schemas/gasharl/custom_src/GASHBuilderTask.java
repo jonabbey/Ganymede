@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/01/22 18:05:00 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/02/04 01:26:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,6 +52,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.Util.PathComplete;
 
 import java.util.*;
+import java.text.*;
 import java.io.*;
 
 /*------------------------------------------------------------------------------
@@ -79,6 +80,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   // ---
 
   private Date now = null;
+  private boolean backedup = false;
   private StringBuffer result = new StringBuffer();
 
   /* -- */
@@ -101,6 +103,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     boolean success = false;
 
     /* -- */
+
+    backedup = false;
 
     if (path == null)
       {
@@ -319,13 +323,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * This method opens the specified file for writing out a text stream.
    *
-   * If there already exists a file by that name in the system, the old
-   * version will be moved to a backup before the file is recreated for
-   * writing.
+   * If the files have not yet been backed up this run time, openOutFile()
+   * will cause the files in Ganymede's output directory to be zipped up
+   * before overwriting any files.
    *
    */
 
-  private PrintWriter openOutFile(String filename) throws IOException
+  private synchronized PrintWriter openOutFile(String filename) throws IOException
   {
     File
       file,
@@ -333,15 +337,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    file = new File(filename);
-
-    // back up the file if it exists.
-
-    if (file.exists())
+    if (!backedup)
       {
+	String label;
+	Date labelDate;
+
 	if (lastRunTime != null)
 	  {
-	    oldFile = new File(filename + lastRunTime.toString());
+	    labelDate = lastRunTime;
 	  }
 	else
 	  {
@@ -350,10 +353,23 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		now = new Date();
 	      }
 
-	    oldFile = new File(filename + now.toString());
+	    labelDate = now;
 	  }
 
-	file.renameTo(oldFile);
+	DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", 
+						    java.util.Locale.US);
+	label=formatter.format(labelDate);
+
+	backupFiles(label);
+
+	backedup = true;
+      }
+
+    file = new File(filename);
+
+    if (file.exists())
+      {
+	file.delete();
       }
 
     return new PrintWriter(new BufferedWriter(new FileWriter(file)));
