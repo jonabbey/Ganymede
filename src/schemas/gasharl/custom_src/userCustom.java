@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 2003/07/16 23:00:09 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 2003/07/17 02:07:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -427,6 +427,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case SIGNATURE:
       case EMAILTARGET:
       case PASSWORDCHANGETIME:
+      case SOCIALSECURITY:
 	return false;
       }
     
@@ -766,8 +767,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // Whether or not the Badge number field is required depends on
     // the user category.
 
-    if (fieldid == userSchema.BADGE)
+    if (fieldid == userSchema.BADGE || fieldid == userSchema.SOCIALSECURITY)
       {
+	boolean needIdentifier = false;
+
 	try
 	  {
 	    Invid catInvid = (Invid) object.getFieldValueLocal(userSchema.CATEGORY);
@@ -777,7 +780,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    
 	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
 
-	    return category.isSet(userCategorySchema.SSREQUIRED);
+	    needIdentifier = category.isSet(userCategorySchema.SSREQUIRED);
 	  }
 	catch (NullPointerException ex)
 	  {
@@ -788,6 +791,31 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // and we can make the proper determination at that point.
 
 	    return false;
+	  }
+
+	// if we think we need an identifier, only require this one if
+	// the other one isn't set
+
+	if (needIdentifier)
+	  {
+	    if (fieldid == userSchema.BADGE)
+	      {
+		String x = (String) object.getFieldValueLocal(userSchema.SOCIALSECURITY);
+
+		if (x == null || x.equals(""))
+		  {
+		    return true;
+		  }
+	      }
+	    else
+	      {
+		String x = (String) object.getFieldValueLocal(userSchema.BADGE);
+
+		if (x == null || x.equals(""))
+		  {
+		    return true;
+		  }
+	      }
 	  }
       }
 
