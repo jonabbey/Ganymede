@@ -3,10 +3,10 @@
    DBFieldTable.java
 
    A customized variant of the java.util.Hashtable class that is
-   tuned for use as Ganymede's field hashes.
+   tuned for use in managing fields in a Ganymede DBObject.
    
    Created: 9 June 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,9 +19,19 @@ import java.util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                   DBFieldTable
+                                                                    DBFieldTable
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * A customized variant of the java.util.Hashtable class that is
+ * tuned for use in managing fields in a Ganymede DBObject.
+ * 
+ * @version $Revision: 1.3 $ %D%, Created: 9 June 1998
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ *
+ */
 
 public class DBFieldTable {
 
