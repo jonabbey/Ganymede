@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.160 $
-   Last Mod Date: $Date: 1999/11/05 00:31:36 $
+   Version: $Revision: 1.161 $
+   Last Mod Date: $Date: 1999/11/05 21:07:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.160 $ %D%
+ * @version $Revision: 1.161 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -891,7 +891,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	delegatablePersonaPerms = null;
 	delegatableDefaultPerms = null;
 
-	Ganymede.debug("User " + username + " logged off");
+	Ganymede.debug(username + " logged off");
 
 	this.lastError = null;
       }
