@@ -1,11 +1,11 @@
-Ganymede Release 1.0pre1 beta 3
+Ganymede Release 1.0pre1 beta 4
 October 5, 2000
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
-RELEASE DATE: September ??
+RELEASE DATE: October ??
 
 1. [SERVER] Reworked server synchronization logic
 
@@ -943,6 +943,13 @@ definition in xml format, using xmlclient -dumpschema, and to dump the
 server's database in its entirety in xml format, using xmlclient
 -dumpdata..  Due to this, I have removed the old hackish decodeDB and
 permdecodeDB front ends to the Ganymede server.
+
+63. [SERVER, ADMIN CONSOLE] Added runEmbeddedTest, runEmbeddedSweep
+
+Bug 59 above, the deletion rollback bug, allowed some inconsistencies
+into our database, wherein embedded objects were left in the database
+when their owners had been deleted.  I added test features to the
+server and the admin console to detect and repair this condition.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
