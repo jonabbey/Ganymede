@@ -54,11 +54,7 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.io.*;
-import java.util.*;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -93,11 +89,6 @@ class DBDumpLock extends DBLock {
 
   public DBDumpLock(DBStore store)
   {
-    Enumeration en;
-    DBObjectBase base;
-
-    /* -- */
-
     this.lockSync = store.lockSync;
     baseSet = store.getBases();
 

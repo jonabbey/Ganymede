@@ -56,12 +56,14 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Vector;
 
-import java.util.*;
-import java.io.*;
-import java.rmi.RemoteException;
+import arlut.csd.ddroid.common.FieldType;
+import arlut.csd.ddroid.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -216,7 +218,6 @@ public final class DBObjectDeltaRec implements FieldType {
 
   public DBObjectDeltaRec(DataInput in) throws IOException
   {
-    int num;
     short fieldcode;
     short typecode;
     boolean scalar;

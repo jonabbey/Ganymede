@@ -55,21 +55,24 @@
 
 package arlut.csd.ddroid.gasharl;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-import arlut.csd.ddroid.server.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Vector;
 
+import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
-import arlut.csd.Util.VectorUtils;
-import arlut.csd.Util.FileOps;
-
 import arlut.csd.crypto.Base64;
-
-import java.util.*;
-import java.text.*;
-import java.io.*;
-import java.rmi.*;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.server.DBObject;
+import arlut.csd.ddroid.server.Ganymede;
+import arlut.csd.ddroid.server.GanymedeBuilderTask;
+import arlut.csd.ddroid.server.PasswordDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -329,10 +332,6 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	    runtime = Runtime.getRuntime();
 	  }
 
-	Process process = null;
-
-	/* -- */
-
 	try
 	  {
 	    FileOps.runProcess(buildScript);
@@ -491,8 +490,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
   {
     String 
       name,
-      membername,
-      attrvalue;
+      membername;
     
     Vector
       contents, 

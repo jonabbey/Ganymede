@@ -53,21 +53,20 @@
 
 package arlut.csd.JDataComponent;
 
-import java.util.*;
-import java.lang.String;
-import java.awt.*;
-import java.text.*;
-import java.net.*;
-import java.rmi.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-import arlut.csd.Util.PackageResources;
-
-import arlut.csd.JCalendar.*;
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JDialog.*;
+import arlut.csd.JCalendar.JpanelCalendar;
+import arlut.csd.JDialog.JErrorDialog;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -383,10 +382,9 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
 	      {
 		// throw up an information dialog here
 		
-		JErrorDialog _infoD = new JErrorDialog(new JFrame(),
-						       "Date Field Error",
-						       "There was an error communicating with the server!\n"+
-						       re.getMessage());
+	      new JErrorDialog(new JFrame(), "Date Field Error",
+                    "There was an error communicating with the server!\n"
+                        + re.getMessage());
 	      }
 
 	    if (!retval)

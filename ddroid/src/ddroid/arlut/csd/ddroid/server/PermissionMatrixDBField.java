@@ -54,16 +54,21 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import arlut.csd.JDialog.*;
-
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.PermMatrix;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.BaseField;
+import arlut.csd.ddroid.rmi.perm_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -205,7 +210,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     int sepIndex;
     short basenum;
     DBObjectBase base;
-    String basename;
     
     String fieldId;
     short fieldnum;
@@ -712,7 +716,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     Enumeration keys;
     PermEntry pe;
     String key;
-    Vector removals = null;
 
     /* -- */
 

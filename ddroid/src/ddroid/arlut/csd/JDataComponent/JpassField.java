@@ -50,12 +50,13 @@
 
 package arlut.csd.JDataComponent;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.rmi.RemoteException;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 /*------------------------------------------------------------------------------
                                                                            class 

@@ -63,9 +63,11 @@
 
 package arlut.csd.JDataComponent;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
 
-import java.awt.*;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /*------------------------------------------------------------------------------
                                                                            class

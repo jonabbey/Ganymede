@@ -1,6 +1,5 @@
 package com.jclark.xml.parse;
 
-import com.jclark.util.Hashtable;
 import java.util.Enumeration;
 
 /**

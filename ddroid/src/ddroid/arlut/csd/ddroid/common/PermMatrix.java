@@ -53,12 +53,13 @@
 
 package arlut.csd.ddroid.common;
 
-import arlut.csd.ddroid.server.PermissionMatrixDBField;
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
-import java.util.*;
-import java.rmi.*;
-import java.io.*;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.BaseField;
+import arlut.csd.ddroid.server.PermissionMatrixDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class

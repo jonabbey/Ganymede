@@ -50,11 +50,14 @@
 
 package arlut.csd.JCalendar;
 
-import arlut.csd.JDataComponent.*;
-import java.awt.*;
-import java.util.*;
+import java.awt.FlowLayout;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
 
 /**************************************************************/      
 

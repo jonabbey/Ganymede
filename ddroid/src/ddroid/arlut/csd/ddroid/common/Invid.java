@@ -57,7 +57,9 @@
 
 package arlut.csd.ddroid.common;
 
-import java.io.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -63,19 +63,47 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.IOException;
+import java.io.PipedOutputStream;
+import java.net.ProtocolException;
+import java.rmi.RemoteException;
+import java.rmi.server.ServerNotActiveException;
+import java.rmi.server.UnicastRemoteObject;
+import java.rmi.server.Unreferenced;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-import java.util.*;
-import java.rmi.*;
-import java.rmi.server.*;
-import java.lang.reflect.*;
-import java.net.*;
-import java.io.*;
-
-import Qsmtp.*;
-import arlut.csd.Util.*;
-import arlut.csd.JDialog.*;
+import Qsmtp.Qsmtp;
+import arlut.csd.Util.BigPipedInputStream;
+import arlut.csd.Util.TranslationService;
+import arlut.csd.Util.VectorUtils;
+import arlut.csd.Util.WordWrap;
+import arlut.csd.Util.booleanSemaphore;
+import arlut.csd.ddroid.common.AdminEntry;
+import arlut.csd.ddroid.common.BaseListTransport;
+import arlut.csd.ddroid.common.CategoryTransport;
+import arlut.csd.ddroid.common.ClientMessage;
+import arlut.csd.ddroid.common.DumpResult;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.ObjectHandle;
+import arlut.csd.ddroid.common.ObjectStatus;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.PermMatrix;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.QueryDataNode;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.Result;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ddroid.rmi.ClientAsyncResponder;
+import arlut.csd.ddroid.rmi.FileReceiver;
+import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ddroid.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -2633,9 +2661,7 @@ final public class GanymedeSession implements Session, Unreferenced {
      */
 
     DBObjectBase containingBase = null;
-    DBObject obj;
 
-    DBField dbf;
     boolean embedded;
 
     /* -- */
@@ -2917,7 +2943,6 @@ final public class GanymedeSession implements Session, Unreferenced {
     QueryResult internalResult = queryDispatch(query, true, false, null, null);
     Invid key;
     String val;
-    Vector invids;
 
     /* -- */
 
@@ -4054,7 +4079,6 @@ final public class GanymedeSession implements Session, Unreferenced {
     ReturnVal result;
     db_object objref;
     DBObject obj;
-    PermEntry perm;
 
     /* -- */
 
@@ -4148,16 +4172,15 @@ final public class GanymedeSession implements Session, Unreferenced {
   public synchronized ReturnVal edit_db_object(Invid invid) throws NotLoggedInException
   {
     ReturnVal result;
-    db_object objref;
+    db_object objref = null;
     DBObject obj;
-    boolean newCopy = false;
+
 
     /* -- */
 
     checklogin();
 
     obj = session.viewDBObject(invid);
-    newCopy = true;
 
     if (obj == null)
       {
@@ -4184,7 +4207,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    setLastEvent("edit " + obj.getTypeName() + ":" + obj.getLabel());
 	  }
 
-	objref = session.editDBObject(invid);
+	try
+          {
+            objref = session.editDBObject(invid);
+          }
+        catch (DDroidManagementException ex)
+          {
+            return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
+                                              ts.l("edit_db_object.custom_class_load_error_text"));
+          }
 
 	if (objref != null)
 	  {
@@ -4299,7 +4330,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   public synchronized ReturnVal create_db_object(short type, boolean embedded) throws NotLoggedInException
   {
     DBObject newObj;
-    ReturnVal retVal;
+    ReturnVal retVal = null;
     QueryResult ownerList = null;
     boolean randomOwner = false;
 
@@ -4333,7 +4364,15 @@ final public class GanymedeSession implements Session, Unreferenced {
     
     if (embedded)
       {
-	retVal = session.createDBObject(type, null); // *sync* DBSession
+	try
+          {
+            retVal = session.createDBObject(type, null); // *sync* DBSession
+          }
+        catch (DDroidManagementException ex)
+          {
+            return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+                                              ts.l("create_db_object.custom_class_load_error_text"));
+          }
 
 	if (retVal == null)
 	  {
@@ -4419,7 +4458,16 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      }
 	  }
 
-	retVal = session.createDBObject(type, null, ownerInvids); // *sync* DBSession
+	try
+          {
+            retVal = session.createDBObject(type, null, ownerInvids); // *sync*
+                                                                      // DBSession
+          }
+        catch (DDroidManagementException ex)
+          {
+            return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+                                              ts.l("create_db_object.custom_class_load_error_text"));
+          }
 
 	if (retVal == null)
 	  {
@@ -5989,10 +6037,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 		// make sure that defaultPerms is reset to the
 		// baseline, and initialize personaPerms from it.
-
-		PermMatrix selfPerm = null;
-
-		/* -- */
 
 		resetDefaultPerms();
 

@@ -54,25 +54,49 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.awt.*;
-import java.io.*;
-import java.awt.event.*;
-import java.rmi.*;
-import java.util.*;
-import java.beans.*;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.InternalFrameListener;
 
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
-
+import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.booleanSemaphore;
-
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JDialog.*;
+import arlut.csd.ddroid.common.BaseDump;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.date_field;
+import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ddroid.rmi.invid_field;
+import arlut.csd.ddroid.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -895,7 +919,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 						  Date startDate)
   {
     StringBuffer buffer = new StringBuffer();
-    db_field field;
 
     try
       {
@@ -1315,8 +1338,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	println("Creating personae panel()");
       }
-    
-    invid_field p = null;
       
     personae.setLayout(new BorderLayout());
     personae.add("Center", new personaPanel(persona_field, editable, this));

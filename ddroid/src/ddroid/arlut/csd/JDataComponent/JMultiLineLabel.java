@@ -53,9 +53,13 @@
 
 package arlut.csd.JDataComponent;
 
-import java.awt.*;
-import java.util.*;
-import javax.swing.*;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.util.StringTokenizer;
+
+import javax.swing.JFrame;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 
 import arlut.csd.Util.WordWrap;
 
@@ -206,6 +210,6 @@ public class JMultiLineLabel extends JTextArea {
     JFrame frame = new JFrame();
     frame.getContentPane().add(new JMultiLineLabel("This is a break.  bunch of lines all over the place, should be pretty long, i don't know, but I think it should wrap now."));
     frame.pack();
-    frame.show();
+    frame.setVisible(true);
   }
 }

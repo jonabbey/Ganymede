@@ -11,13 +11,17 @@
 
 package arlut.csd.JDataComponent;
 
-import javax.swing.*;
-
-import java.awt.*;
-import java.util.Hashtable;
+import java.awt.Insets;
+import java.awt.PopupMenu;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Enumeration;
-import java.lang.String;
-import java.awt.event.*;
+import java.util.Hashtable;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
 

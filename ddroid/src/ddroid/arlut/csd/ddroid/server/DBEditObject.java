@@ -53,16 +53,28 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import java.rmi.server.*;
-
-import arlut.csd.JDialog.*;
+import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.booleanSemaphore;
+import arlut.csd.ddroid.common.FieldType;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.ObjectStatus;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.QueryDataNode;
+import arlut.csd.ddroid.common.QueryNode;
+import arlut.csd.ddroid.common.QueryNotNode;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ddroid.rmi.db_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -345,8 +357,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     DBField 
       field, 
       tmp = null;
-
-    Short key;
 
     /* -- */
 
@@ -632,8 +642,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    */
 
   public final ReturnVal setFieldValue(short fieldID, Object value)
-  {
-    ReturnVal retval;
+  { 
     DBField field = retrieveField(fieldID);
 
     /* -- */
@@ -659,7 +668,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public final ReturnVal setFieldValueLocal(short fieldID, Object value)
   {
-    ReturnVal retval;
     DBField field = retrieveField(fieldID);
 
     /* -- */
@@ -1367,50 +1375,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * <p>This method provides a hook that can be used to indicate that a
-   * particular field's value should be filtered by a particular
-   * subclass of DBEditObject.  This is intended to allow, for instance,
-   * that the Admin object's name field, if null, can have the owning
-   * user's name interposed.</p>
-   *
-   * <P>24 June 1999 - note.. the whole virtualized field thing was
-   * put into DBEditObject a long long time ago, to support 'fields'
-   * whose reported value would not actually come from Ganymede's
-   * internal database.  This code has in fact never been used, and
-   * is in its current state should probably not be depended on, as
-   * all the DBEditSet transaction commit / change logging stuff
-   * pays no attention to a virtualized field's value reporting.</P>
-   *
-   * <p><b>*PSEUDOSTATIC*</b></p>
-   */
-
-  public boolean virtualizeField(short fieldID)
-  {
-    return false;
-  }
-
-  /**
-   * <p>This method provides a hook to return interposed values for
-   * fields that have their data massaged by a DBEditObject
-   * subclass.</p>
-   *
-   * <P>24 June 1999 - note.. the whole virtualized field thing was
-   * put into DBEditObject a long long time ago, to support 'fields'
-   * whose reported value would not actually come from Ganymede's
-   * internal database.  This code has in fact never been used, and
-   * is in its current state should probably not be depended on, as
-   * all the DBEditSet transaction commit / change logging stuff
-   * pays no attention to a virtualized field's value reporting.</P>
-   *
-   * <p><b>*PSEUDOSTATIC*</b></p>
-   */
-
-  public Object getVirtualValue(DBField field)
-  {
-    return null;
-  }
-
-  /**
    * <p>This method provides a hook to allow custom DBEditObject subclasses to
    * indicate that the given object is interested in receiving notification
    * when changes involving it occur, and can provide one or more addresses for
@@ -1784,7 +1748,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public ReturnVal createNewEmbeddedObject(InvidDBField field) throws NotLoggedInException
   {    
     DBEditObject newObject;
-    DBObjectBase targetBase;
     DBObjectBaseField fieldDef;
     ReturnVal retVal;
 
@@ -2946,7 +2909,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     short targetField;
 
     DBEditObject 
-      eObj = null,
       oldRef = null;
 
     DBObject
@@ -2964,9 +2926,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     Vector
       fieldsToUnbind = new Vector();
-
-    Vector
-      targets;
 
     /* -- */
 
@@ -3461,7 +3420,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     Enumeration en;
     Short key;
     Object value;
-    Hashtable result = new Hashtable();
     DBField field;
 
     /* -- */

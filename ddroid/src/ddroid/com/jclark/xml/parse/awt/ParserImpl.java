@@ -1,8 +1,14 @@
 package com.jclark.xml.parse.awt;
 
-import java.io.IOException;
 import java.awt.AWTException;
-import com.jclark.xml.parse.*;
+import java.io.IOException;
+
+import com.jclark.xml.parse.ApplicationException;
+import com.jclark.xml.parse.DocumentParser;
+import com.jclark.xml.parse.EntityManagerImpl;
+import com.jclark.xml.parse.NotWellFormedException;
+import com.jclark.xml.parse.OpenEntity;
+import com.jclark.xml.parse.ParserBase;
 
 /**
  *

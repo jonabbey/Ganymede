@@ -56,9 +56,13 @@
 
 package arlut.csd.Util;
 
-import java.net.*;
-import java.awt.*;
-import java.applet.*;
+import java.applet.Applet;
+import java.applet.AppletContext;
+import java.awt.Component;
+import java.awt.Image;
+import java.awt.MediaTracker;
+import java.awt.Toolkit;
+import java.net.URL;
 
 /*------------------------------------------------------------------------------
                                                                            class

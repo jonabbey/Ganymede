@@ -54,7 +54,7 @@
 
 package arlut.csd.Util;
 
-import java.util.*;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -52,10 +52,9 @@
 
 package arlut.csd.ddroid.common;
 
-import arlut.csd.ddroid.rmi.*;
-
-import arlut.csd.JTree.*;
-import java.awt.*;
+import arlut.csd.JTree.treeMenu;
+import arlut.csd.JTree.treeNode;
+import arlut.csd.ddroid.rmi.Category;
 
 /*------------------------------------------------------------------------------
                                                                            class

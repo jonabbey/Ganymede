@@ -51,8 +51,11 @@
 
 package arlut.csd.JDataComponent;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.List;
+import java.awt.Panel;
+import java.awt.event.ActionEvent;
 
 /**********************************************************************
 JchoiceList

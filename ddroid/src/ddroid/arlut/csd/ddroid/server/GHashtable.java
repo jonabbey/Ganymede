@@ -53,10 +53,8 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /*------------------------------------------------------------------------------
                                                                            class

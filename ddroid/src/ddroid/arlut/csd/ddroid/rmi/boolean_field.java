@@ -52,9 +52,7 @@
 
 package arlut.csd.ddroid.rmi;
 
-import arlut.csd.ddroid.common.*;
-
-import java.rmi.*;
+import java.rmi.RemoteException;
 
 public interface boolean_field extends db_field {
   boolean labeled() throws RemoteException;

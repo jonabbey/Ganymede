@@ -53,14 +53,43 @@
 
 package arlut.csd.JDialog;
 
-import arlut.csd.JDataComponent.*;
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import arlut.csd.JDataComponent.JMultiLineLabel;
+import arlut.csd.JDataComponent.JcalendarField;
+import arlut.csd.JDataComponent.JpassField;
+import arlut.csd.JDataComponent.JpasswordField;
+import arlut.csd.JDataComponent.JstringArea;
+import arlut.csd.JDataComponent.JstringField;
+import arlut.csd.JDataComponent.TimedKeySelectionManager;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -681,7 +710,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
   public Hashtable DialogShow()
   {
     mainPanel.revalidate();
-    show();
+    this.setVisible(true);
 
     // at this point we're frozen, since we're a modal dialog.. we'll continue
     // at this point when the ok or cancel buttons are pressed.

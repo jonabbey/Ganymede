@@ -53,20 +53,32 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.rmi.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import javax.swing.border.TitledBorder;
 
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JCalendar.*;
+import arlut.csd.JCalendar.JpopUpCalendar;
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.ddroid.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class

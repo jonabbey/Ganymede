@@ -52,11 +52,18 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
+import java.util.Vector;
 
-import java.util.*;
-import java.rmi.*;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.QueryDataNode;
+import arlut.csd.ddroid.common.QueryNode;
+import arlut.csd.ddroid.common.QueryNotNode;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -84,8 +91,6 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   static public String convertAdminInvidToString(Invid adminInvid, DBSession session)
   {
     DBObject admin;
-    String address;
-    int colondex;
 
     /* -- */
 
@@ -221,15 +226,6 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
   {
-    String str, name;
-    DBSession session = editset.getSession();
-    DBObject obj;
-    StringDBField sf;
-    InvidDBField inv;
-    Invid invid;
-
-    /* -- */
-
     if (field.getID() == SchemaConstants.PersonaNameField)
       {
 	if (debug)

@@ -55,8 +55,7 @@
 
 package arlut.csd.Util;
 
-import org.xml.sax.*;
-import com.jclark.xml.sax.*;
+import org.xml.sax.SAXParseException;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -54,18 +54,15 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
 
-import java.awt.*;
-import java.rmi.*;
-import java.util.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 
-import arlut.csd.JDataComponent.*;
-import arlut.csd.Util.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -118,7 +115,6 @@ class personaContainer extends JScrollPane implements Runnable{
     this.pp = pp;
     gc = pp.gc;
     this.editable = editable;
-    this.createNew = createNew;
 
     progressBar = new JProgressBar();
     progressPane = new JPanel();

@@ -53,28 +53,79 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.AWTEvent;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.applet.*;
-import java.net.*;
-import java.rmi.*;
-import java.rmi.server.*;
-import java.io.*;
-import java.util.*;
-import java.beans.PropertyVetoException;
-
-import arlut.csd.JDialog.*;
-import arlut.csd.JDialog.JErrorDialog;
-import arlut.csd.JDataComponent.*;
-import arlut.csd.Util.*;
-import arlut.csd.JTree.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicToolBarUI;
+
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.JDataComponent.LAFMenu;
+import arlut.csd.JDataComponent.listHandle;
+import arlut.csd.JDialog.DialogRsrc;
+import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.JDialog.messageDialog;
+import arlut.csd.JTree.treeCallback;
+import arlut.csd.JTree.treeControl;
+import arlut.csd.JTree.treeMenu;
+import arlut.csd.JTree.treeNode;
+import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.VecQuickSort;
+import arlut.csd.ddroid.common.BaseDump;
+import arlut.csd.ddroid.common.CatTreeNode;
+import arlut.csd.ddroid.common.CategoryDump;
+import arlut.csd.ddroid.common.CategoryTransport;
+import arlut.csd.ddroid.common.DumpResult;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ObjectHandle;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ddroid.rmi.CategoryNode;
+import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ddroid.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -654,8 +705,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
    // Personae init
 
-    boolean personasExist = false;
-
     try
       {
 	personae = session.getPersonae();
@@ -674,7 +723,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	changePersonaMI.setActionCommand("change persona");
 	changePersonaMI.addActionListener(this);
 	actionMenu.add(changePersonaMI);
-	personasExist = true;
       }
 
     actionMenu.add(menubarQueryMI);
@@ -982,7 +1030,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     pack();
     setSize(800, 600);
-    show();
+    this.setVisible(true);
 
     // Adjust size of toolbar buttons to that of largest button
     // Must be done after components are displayed. Otherwise, 
@@ -1885,7 +1933,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 			       {
 				 public void run()
 				   {
-				     JErrorDialog d = new JErrorDialog(gc, Title, Message, fIcon);
+				     new JErrorDialog(gc, Title, Message, fIcon); // implicit show
 				   }
 			       });
 
@@ -2456,12 +2504,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   
   void refreshObjects(BaseNode node, boolean doRefresh) throws RemoteException
   {
-    Base base;
     Invid invid = null;
     String label = null;
-    Vector vect;
     InvidNode oldNode, newNode, fNode;
-    Query _query = null;
 
     ObjectHandle handle = null;
     Vector objectHandles;
@@ -2471,7 +2516,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     /* -- */
 
-    base = node.getBase();    
     Id = node.getTypeID();
 
     // get the object list.. this call will automatically handle
@@ -2730,7 +2774,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public void refreshChangedObjectHandles(Vector paramVect, boolean afterCommit)
   {
-    Enumeration en;
     Invid invid;
     Short objectTypeKey = null;
 
@@ -3079,13 +3122,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 
 	wp.addWindow(invid, o, true, objectType);
-
-	InvidNode node = null;
-
-	if (invidNodeHash.containsKey(invid))
-	  {
-	    node = (InvidNode)invidNodeHash.get(invid);
-	  }
 	  
 	changedHash.put(invid, invid);
 
@@ -3592,9 +3628,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	if (ok)
 	  {
-	    Short type = new Short(invid.getType());
-	    ObjectHandle handle = getObjectHandle(invid, type);
-
 	    // remember that we changed this object for the refreshChangedObjectHandles
 
 	    changedHash.put(invid, invid);
@@ -4371,7 +4404,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public synchronized void cancelTransaction()
   {
-    ObjectHandle handle;
     ReturnVal retVal;
 
     /* -- */
@@ -5097,8 +5129,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     else if (event.getActionCommand().equals("Show Non-Editables"))
       {
 	BaseNode bn = (BaseNode) node;
-	Base base = bn.getBase();
-	Short id;
 
 	/* -- */
 
@@ -5111,7 +5141,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	
 	try
 	  {
-	    id = bn.getTypeID();
 	    bn.showAll(true);
 	    node.setMenu(((BaseNode)node).canCreate() ? pMenuAllCreatable : pMenuAll);
 
@@ -5140,12 +5169,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     else if (event.getActionCommand().equals("Hide Non-Editables"))
       {
 	BaseNode bn = (BaseNode) node;
-	Base base = bn.getBase();
-	Short id;
 
 	/* -- */
-
-	id = bn.getTypeID();
 
 	bn.showAll(false);
 	bn.setMenu(((BaseNode)node).canCreate() ? pMenuEditableCreatable : pMenuEditable);

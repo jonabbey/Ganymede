@@ -54,11 +54,11 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.util.*;
-import arlut.csd.Util.*;
+import arlut.csd.Util.VectorUtils;
+import arlut.csd.ddroid.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -54,11 +54,7 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.io.*;
-import java.util.*;
+import java.util.Vector;
 
 
 /*------------------------------------------------------------------------------
@@ -103,11 +99,6 @@ public class DBReadLock extends DBLock {
 
   public DBReadLock(DBStore store)
   {
-    Enumeration en;
-    DBObjectBase base;
-
-    /* -- */
-
     key = null;
     this.lockSync = store.lockSync;
     baseSet = store.getBases();
@@ -138,8 +129,6 @@ public class DBReadLock extends DBLock {
   {
     boolean done = false, okay = false, added = false;
     DBObjectBase base;
-    Vector vect;
-    Object obj;
 
     /* -- */
 

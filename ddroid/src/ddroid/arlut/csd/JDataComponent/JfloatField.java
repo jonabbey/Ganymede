@@ -51,11 +51,6 @@
 
 package arlut.csd.JDataComponent;
 
-import javax.swing.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.lang.Double;
 
 /*-----------------------------------------------------------------------------
                                                                           class

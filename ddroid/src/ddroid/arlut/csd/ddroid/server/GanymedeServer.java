@@ -56,14 +56,33 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-import arlut.csd.Util.TranslationService;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.rmi.server.ServerNotActiveException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import java.rmi.server.*;
+import arlut.csd.Util.TranslationService;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.QueryAndNode;
+import arlut.csd.ddroid.common.QueryDataNode;
+import arlut.csd.ddroid.common.QueryNode;
+import arlut.csd.ddroid.common.QueryNotNode;
+import arlut.csd.ddroid.common.QueryOrNode;
+import arlut.csd.ddroid.common.Result;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Server;
+import arlut.csd.ddroid.rmi.adminSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -1131,7 +1150,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   {
     Vector tempList;
     GanymedeSession temp;
-    GanymedeAdmin atmp;
 
     /* -- */
 
@@ -1235,6 +1253,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	Ganymede.debug(ts.l("shutdown.consoles"));
 
 	GanymedeAdmin.closeAllConsoles(ts.l("shutdown.byeconsoles"));
+	
+	// disconnect the Jython server
+  
+	Ganymede.debug(ts.l("shutdown.jython"));
+	
+	Ganymede.jythonServer.shutdown();
 
 	// log our shutdown and close the log
 
@@ -1312,7 +1336,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   public boolean sweepInvids()
   {
     Enumeration
-      enum1, enum2, enum3, enum4;
+      enum1, enum2, enum3;
 
     DBObjectBase
       base;
@@ -1414,11 +1438,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 			    // iterate over the invid's held in this vector
 		    
-			    enum4 = tempVector.elements();
+			    enum3 = tempVector.elements();
 
-			    while (enum4.hasMoreElements())
+			    while (enum3.hasMoreElements())
 			      {
-				invid = (Invid) enum4.nextElement();
+				invid = (Invid) enum3.nextElement();
 
 				if (session.viewDBObject(invid) != null)
 				  {
@@ -1506,7 +1530,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   public boolean checkInvids()
   {
     Enumeration
-      enum1, enum2, enum3, enum4;
+      enum1, enum2;
 
     DBObjectBase
       base;
@@ -1519,9 +1543,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     InvidDBField
       iField;
-
-    Invid
-      invid;
 
     boolean
       ok = true;
@@ -1659,7 +1680,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       base;
 
     DBObject
-      object, topObject;
+      object;
 
     boolean
       ok = true;
@@ -1717,7 +1738,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		try
 		  {
-		    topObject = gSession.getContainingObj(object);
+		    gSession.getContainingObj(object);
 		  }
 		catch (IntegrityConstraintException ex)
 		  {
@@ -1753,7 +1774,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       base;
 
     DBObject
-      object, topObject;
+      object;
 
     Vector invidsToDelete = new Vector();
 
@@ -1809,7 +1830,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		try
 		  {
-		    topObject = gSession.getContainingObj(object);
+		    gSession.getContainingObj(object);
 		  }
 		catch (IntegrityConstraintException ex)
 		  {

@@ -52,18 +52,27 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.rmi.RemoteException;
+import java.util.Vector;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.rmi.*;
-import java.util.*;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import arlut.csd.JDialog.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.border.*;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ddroid.rmi.invid_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -364,8 +373,6 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 	try
 	  {
-	    Invid user = fp.getObjectInvid();
-
 	    retVal = fp.getObject().getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
 
 	    removed = (retVal == null) ? true : retVal.didSucceed();

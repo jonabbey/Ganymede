@@ -61,18 +61,33 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.rmi.*;
-import java.rmi.registry.*;
-import java.rmi.server.*;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RMISecurityManager;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.server.RemoteServer;
+import java.util.Date;
+import java.util.Properties;
+import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.ParseArgs;
 import arlut.csd.Util.TranslationService;
+import arlut.csd.ddroid.common.BaseListTransport;
+import arlut.csd.ddroid.common.CategoryTransport;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Server;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -198,6 +213,12 @@ public class Ganymede {
    */
 
   public static GanymedeScheduler scheduler;
+
+  /**
+   * <p>The Jython debug console server.</p>
+   */
+  
+  public static JythonServer jythonServer;
 
   /**
    *
@@ -713,6 +734,9 @@ public class Ganymede {
 	debug(ts.l("main.info_setup_okay"));
       }
 
+    jythonServer = new JythonServer();
+    jythonServer.run();
+    
     debug(ts.l("main.info_ready"));
   }
 
@@ -844,13 +868,7 @@ public class Ganymede {
     DBEditObject e_object;
 
     PasswordDBField p;
-
-    Invid defaultInv;
-    StringDBField s;
-    PermissionMatrixDBField pm;
-
-    ReturnVal retVal;
-    
+     
     /* -- */
 
     // check to make sure the datastructures for supergash in the
@@ -906,6 +924,24 @@ public class Ganymede {
 	      }
 	  }
       }
+      
+    /** Used to add Task option strings to an existing database
+    DBObjectBase b = Ganymede.db.getObjectBase(SchemaConstants.TaskBase);
+    try
+      {
+        DBObjectBaseField bf = new DBObjectBaseField(b);
+        bf.field_code = SchemaConstants.TaskOptionStrings;
+        bf.field_type = FieldType.STRING;
+        bf.array = true;
+        bf.field_name = "Option Strings";
+        bf.comment = "Optional task parameters, interpreted by specific tasks if needed";
+        b.addFieldToEnd(bf);
+      }
+    catch (RemoteException rex)
+      {
+        Ganymede.stackTrace(rex);
+      }
+    **/
   }
 
   /**
@@ -915,11 +951,8 @@ public class Ganymede {
 
   static private void registerTasks() throws NotLoggedInException
   {
-    String builderName;
-    String builderClass;
     Vector objects = internalSession.getObjects(SchemaConstants.TaskBase);
     DBObject object;
-    Class classdef;
 
     /* -- */
 

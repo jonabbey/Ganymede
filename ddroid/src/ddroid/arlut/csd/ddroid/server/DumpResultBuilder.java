@@ -53,9 +53,9 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
+import java.util.Vector;
 
-import java.util.*;
+import arlut.csd.ddroid.common.DumpResult;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -92,7 +92,6 @@ public class DumpResultBuilder {
   {
     DBObjectBaseField field;
     char[] chars;
-    Vector typeList = new Vector();
     StringBuffer buffer = null;
 
     /* -- */

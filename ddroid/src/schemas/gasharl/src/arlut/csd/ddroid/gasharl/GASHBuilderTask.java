@@ -53,19 +53,28 @@
 
 package arlut.csd.ddroid.gasharl;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-import arlut.csd.ddroid.server.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
+import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.Util.FileOps;
-
-import java.util.*;
-import java.text.*;
-import java.io.*;
-import java.rmi.*;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.server.DBField;
+import arlut.csd.ddroid.server.DBObject;
+import arlut.csd.ddroid.server.Ganymede;
+import arlut.csd.ddroid.server.GanymedeBuilderTask;
+import arlut.csd.ddroid.server.IPDBField;
+import arlut.csd.ddroid.server.InvidDBField;
+import arlut.csd.ddroid.server.PasswordDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -364,10 +373,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    runtime = Runtime.getRuntime();
 	  }
 
-	Process process = null;
-
-	/* -- */
-
 	try
 	  {
 	    FileOps.runProcess(buildScript);
@@ -428,7 +433,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String category;
 
     PasswordDBField passField;
-    Vector invids;
     Invid groupInvid;
     DBObject group;
 
@@ -611,8 +615,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    String badgeNum = (String) user.getFieldValueLocal(userSchema.BADGE);
 	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
 
-	    StringBuffer socBuffer = new StringBuffer();
-		
 	    if (normalCategory == null)
 	      {
 		if (category != null)
@@ -696,7 +698,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     int gid;
     Vector users = new Vector();
 
-    PasswordDBField passField;
     Vector invids;
     Invid userInvid;
     String userName;
@@ -1249,7 +1250,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private boolean writeAutoMounterFiles()
   {
     PrintWriter autoFile = null;
-    DBObject map, obj, user;
+    DBObject map, obj;
     Enumeration vols, maps, entries;
     SharedStringBuffer buf = new SharedStringBuffer();
     String mountopts, mapname;
@@ -2632,8 +2633,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private boolean writeSysDataFile()
   {
     PrintWriter sys_dataFile = null;
-    DBObject system, interfaceObj;
-    Enumeration systems, interfaces;
+    DBObject system;
+    Enumeration systems;
 
     /* -- */
 

@@ -51,7 +51,10 @@
 
 package arlut.csd.JDataComponent;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -56,15 +56,19 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.util.*;
-import java.io.*;
-import java.rmi.*;
+import java.io.IOException;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.AdminAsyncResponder;
+import arlut.csd.ddroid.rmi.SchemaEdit;
+import arlut.csd.ddroid.rmi.adminSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -972,10 +976,6 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   public ReturnVal killAll()
   {
-    GanymedeSession temp;
-
-    /* -- */
-
     if (!fullprivs)
       {
 	return Ganymede.createErrorDialog("Permissions Denied",

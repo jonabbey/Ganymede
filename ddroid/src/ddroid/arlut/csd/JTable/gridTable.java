@@ -36,10 +36,10 @@
 
 package arlut.csd.JTable;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Font;
 
-import javax.swing.*;
+import javax.swing.JPopupMenu;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -56,11 +56,12 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.rmi.server.Unreferenced;
 
-import java.rmi.*;
-import java.rmi.server.*;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.FileReceiver;
 
 /*------------------------------------------------------------------------------
                                                                            class

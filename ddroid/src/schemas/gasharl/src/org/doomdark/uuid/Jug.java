@@ -10,9 +10,14 @@
 
 package org.doomdark.uuid;
 
-import java.io.*;
-import java.security.*;
-import java.util.*;
+import java.io.PrintStream;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Class that implements command-line interface to UUIDGenerator.

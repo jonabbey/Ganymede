@@ -54,17 +54,16 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-
-import arlut.csd.JDialog.*;
-
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.ip_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -1349,9 +1348,6 @@ public class IPDBField extends DBField implements ip_field {
   public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
-    Date d, d2;
-    Vector v;
-    boolean ok = true;
 
     /* -- */
 
@@ -1878,8 +1874,6 @@ public class IPDBField extends DBField implements ip_field {
     StringBuffer result = new StringBuffer();
     int[] stanzas;
     String[] stanzaStrings;
-    char[] charAry;
-    StringBuffer temp;
     int i, j;
     int loCompress, hiCompress;
     Short absoctets[];

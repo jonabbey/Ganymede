@@ -51,27 +51,39 @@
 
 package arlut.csd.ddroid.admin;
 
-import arlut.csd.ddroid.rmi.*;
-import arlut.csd.ddroid.common.*;
+import java.awt.AWTEvent;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.Properties;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.ImageIcon;
+import javax.swing.JApplet;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.applet.*;
-
-import java.rmi.*;
-import java.rmi.server.*;
-
-import java.lang.reflect.InvocationTargetException;
-import java.io.*;
-import java.util.*;
-
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JTable.*;
-import arlut.csd.JDialog.*;
-import arlut.csd.Util.*;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.PackageResources;
+import arlut.csd.ddroid.rmi.Server;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -194,7 +206,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
     loginFrame.pack();
     loginFrame.setSize(265,380);
-    loginFrame.show();
+    loginFrame.setVisible(true);
 
     applet.init();
     applet.getContentPane().getLayout().layoutContainer(applet);

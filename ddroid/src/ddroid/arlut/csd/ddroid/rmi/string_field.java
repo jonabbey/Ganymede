@@ -52,10 +52,9 @@
 
 package arlut.csd.ddroid.rmi;
 
-import arlut.csd.ddroid.common.*;
-
 import java.rmi.RemoteException;
-import java.util.*;
+
+import arlut.csd.ddroid.common.QueryResult;
 
 /*------------------------------------------------------------------------------
                                                                        interface

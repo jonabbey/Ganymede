@@ -55,8 +55,9 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.Util.*;
-import java.io.*;
+import java.io.IOException;
+
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class

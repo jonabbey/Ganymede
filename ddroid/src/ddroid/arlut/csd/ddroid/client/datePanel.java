@@ -53,22 +53,31 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.rmi.*;
-import java.util.*;
-import java.text.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.border.EmptyBorder;
 
-import javax.swing.*;
-import javax.swing.border.*;
-
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JCalendar.*;
-
-import arlut.csd.JDialog.*;
+import arlut.csd.JCalendar.JpanelCalendar;
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.date_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -487,8 +496,6 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     try
       {
 	Date date = ((Date)field.getValue());
-	int type = template.getType();
-	Invid invid = fp.getObjectInvid();
 
 	if (debug)
 	  {

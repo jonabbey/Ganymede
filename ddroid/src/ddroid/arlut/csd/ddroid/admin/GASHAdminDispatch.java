@@ -52,27 +52,29 @@
 
 package arlut.csd.ddroid.admin;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.applet.*;
-
-import java.rmi.*;
-import java.rmi.server.*;
-
+import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
-import java.io.*;
-import java.util.*;
+import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JTable.*;
-import arlut.csd.JDialog.*;
-import arlut.csd.Util.*;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
+import arlut.csd.JDialog.DialogRsrc;
+import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.QuickSort;
+import arlut.csd.Util.VectorUtils;
+import arlut.csd.ddroid.common.AdminEntry;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.adminAsyncMessage;
+import arlut.csd.ddroid.common.scheduleHandle;
+import arlut.csd.ddroid.rmi.AdminAsyncResponder;
+import arlut.csd.ddroid.rmi.SchemaEdit;
+import arlut.csd.ddroid.rmi.Server;
+import arlut.csd.ddroid.rmi.adminSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -625,7 +627,6 @@ class GASHAdminDispatch implements Runnable {
       }
 
     scheduleHandle handle;
-    String intervalString;
 
     /* -- */
 

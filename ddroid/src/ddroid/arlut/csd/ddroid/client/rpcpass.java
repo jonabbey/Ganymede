@@ -56,15 +56,20 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import java.rmi.server.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.rmi.RemoteException;
+import java.util.Properties;
 
 import arlut.csd.Util.ParseArgs;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ddroid.rmi.pass_field;
+import arlut.csd.ddroid.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -1,7 +1,7 @@
 package com.jclark.xml.parse;
 
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Information about character data.

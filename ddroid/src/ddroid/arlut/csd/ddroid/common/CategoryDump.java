@@ -61,10 +61,11 @@
 
 package arlut.csd.ddroid.common;
 
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
+import java.util.Vector;
 
-import java.rmi.*;
-import java.util.*;
+import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ddroid.rmi.CategoryNode;
 
 /*------------------------------------------------------------------------------
                                                                            class

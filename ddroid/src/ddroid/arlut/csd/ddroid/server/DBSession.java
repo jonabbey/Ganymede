@@ -53,15 +53,15 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.util.Date;
+import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
-
-import java.io.*;
-import java.util.*;
-
-import arlut.csd.JDialog.*;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ObjectStatus;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.db_field;
 
 /*------------------------------------------------------------------------------
                                                                            class

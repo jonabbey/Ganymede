@@ -1,7 +1,13 @@
 package com.jclark.xml.parse.base;
 
 import java.io.IOException;
-import com.jclark.xml.parse.*;
+
+import com.jclark.xml.parse.ApplicationException;
+import com.jclark.xml.parse.DocumentParser;
+import com.jclark.xml.parse.EntityManagerImpl;
+import com.jclark.xml.parse.NotWellFormedException;
+import com.jclark.xml.parse.OpenEntity;
+import com.jclark.xml.parse.ParserBase;
 
 /**
  *

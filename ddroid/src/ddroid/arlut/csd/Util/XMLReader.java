@@ -55,10 +55,17 @@
 
 package arlut.csd.Util;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PipedOutputStream;
+import java.io.PrintWriter;
 import java.util.Vector;
-import java.io.*;
-import org.xml.sax.*;
-import com.jclark.xml.sax.*;
+
+import org.xml.sax.AttributeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /*------------------------------------------------------------------------------
                                                                            class

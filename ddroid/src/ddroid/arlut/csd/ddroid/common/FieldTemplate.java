@@ -54,11 +54,10 @@
 
 package arlut.csd.ddroid.common;
 
-import arlut.csd.ddroid.server.DBObjectBase;
-import arlut.csd.ddroid.server.DBObjectBaseField;
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
 
-import java.rmi.*;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.server.DBObjectBaseField;
 
 /*------------------------------------------------------------------------------
                                                                            class

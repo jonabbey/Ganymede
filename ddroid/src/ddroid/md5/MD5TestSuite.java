@@ -53,7 +53,10 @@
 
 package md5;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 class MD5TestSuite {
   private static void printHex (byte b) {

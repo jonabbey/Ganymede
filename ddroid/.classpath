@@ -4,5 +4,6 @@
 	<classpathentry kind="src" path="src/schemas/gasharl/src"/>
 	<classpathentry kind="lib" path="src/lib/gnu-regexp-1.1.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="src/lib/jython.jar"/>
 	<classpathentry kind="output" path="src/build/eclipse"/>
 </classpath>

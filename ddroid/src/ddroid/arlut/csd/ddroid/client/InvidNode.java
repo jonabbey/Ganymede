@@ -52,10 +52,10 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import arlut.csd.JTree.*;
+import arlut.csd.JTree.treeMenu;
+import arlut.csd.JTree.treeNode;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ObjectHandle;
 
 /*---------------------------------------------------------------------
                                                                   class 

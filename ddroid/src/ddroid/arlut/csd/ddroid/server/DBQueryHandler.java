@@ -53,11 +53,16 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.util.Date;
+import java.util.Vector;
 
-import java.util.*;
-import gnu.regexp.*;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.QueryAndNode;
+import arlut.csd.ddroid.common.QueryDataNode;
+import arlut.csd.ddroid.common.QueryNode;
+import arlut.csd.ddroid.common.QueryNotNode;
+import arlut.csd.ddroid.common.QueryOrNode;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -55,17 +55,23 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.rmi.RemoteException;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-import java.rmi.*;
-
-import arlut.csd.JDataComponent.*;
+import arlut.csd.JDataComponent.JIPField;
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.ddroid.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class

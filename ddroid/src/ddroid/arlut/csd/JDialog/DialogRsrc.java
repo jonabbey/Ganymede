@@ -52,10 +52,11 @@
 
 package arlut.csd.JDialog;
 
-import java.util.*;
-import java.awt.*;
-
-import javax.swing.*;
+import java.awt.Frame;
+import java.awt.Image;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -53,22 +53,61 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
-import java.io.*;
-import java.awt.*;
-import java.beans.*;
-import java.awt.event.*;
-import java.rmi.*;
-import java.util.*;
-
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JDialog.*;
+import arlut.csd.JDataComponent.JIPField;
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JdateField;
+import arlut.csd.JDataComponent.JfloatField;
+import arlut.csd.JDataComponent.JnumberField;
+import arlut.csd.JDataComponent.JpassField;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.JDataComponent.JstringArea;
+import arlut.csd.JDataComponent.JstringField;
+import arlut.csd.JDataComponent.StringSelector;
+import arlut.csd.JDataComponent.TimedKeySelectionManager;
+import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.Util.VecSortInsert;
+import arlut.csd.ddroid.common.FieldInfo;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.FieldType;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ddroid.rmi.invid_field;
+import arlut.csd.ddroid.rmi.ip_field;
+import arlut.csd.ddroid.rmi.pass_field;
+import arlut.csd.ddroid.rmi.perm_field;
+import arlut.csd.ddroid.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -2169,9 +2208,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 				 FieldTemplate fieldTemplate) throws RemoteException
   {
     short fieldType;
-    String name = null;
     boolean isVector;
-    boolean isEditInPlace;
 
     /* -- */
 
@@ -2426,10 +2463,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			      FieldInfo fieldInfo, 
 			      FieldTemplate fieldTemplate) throws RemoteException
   {
-    QueryResult
-      valueResults = null,
-      choiceResults = null;
-
     Vector
       valueHandles = null,
       choiceHandles = null;
@@ -2725,7 +2758,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    println("You can choose");
 	  }
 	    
-	Vector choiceHandles = null;
 	Vector choices = null;
 
 	Object key = field.choicesKey();
@@ -2766,12 +2798,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		list = gc.cachedLists.getList(key);
 	      }
 
-	    choiceHandles = list.getListHandles(false);
 	    choices = list.getLabels(false);
 	  }    
 
 	String currentChoice = (String) fieldInfo.getValue();
-	boolean found = false;
 	    
 	JComboBox combo = new JComboBox(choices);
 	combo.setKeySelectionManager(new TimedKeySelectionManager());
@@ -3177,8 +3207,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     // note that the permissions editor does its own callbacks to
     // the server, albeit using our transaction / session.
-
-    Invid invid = object.getInvid(); // server call
 
     perm_button pb = new perm_button((perm_field) field,
 				     editable && fieldInfo.isEditable(),

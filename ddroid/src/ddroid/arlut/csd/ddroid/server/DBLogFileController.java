@@ -55,13 +55,18 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.Vector;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import arlut.csd.Util.*;
+import arlut.csd.Util.WordWrap;
+import arlut.csd.ddroid.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -232,7 +237,6 @@ public class DBLogFileController implements DBLogController {
     String dateString;
     long sinceLong = 0;
     long timeCode;
-    Date time;
 
     BufferedReader in = null;
     FileReader reader = null;
@@ -326,7 +330,6 @@ public class DBLogFileController implements DBLogController {
 		    continue;	// don't even bother parsing the rest of the line
 		  }
 		
-		time = new Date(timeCode);
 		afterSinceTime = true;
 	      }
 
@@ -461,8 +464,6 @@ public class DBLogFileController implements DBLogController {
       {
 	throw new IOException("empty log line");
       }
-
-    StringBuffer buf = new StringBuffer();
 
     //    System.out.println("Trying to create DBLogEvent: " + line);
 

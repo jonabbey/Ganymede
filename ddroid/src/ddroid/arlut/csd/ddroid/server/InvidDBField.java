@@ -54,18 +54,25 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-
-import arlut.csd.JDialog.*;
+import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.VectorUtils;
-
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import arlut.csd.Util.XMLUtils;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.ObjectStatus;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ddroid.rmi.invid_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -698,7 +705,6 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     StringBuffer result = new StringBuffer();
     InvidDBField origI;
-    DBObject object;
     GanymedeSession gsession = null;
 
     /* -- */
@@ -739,8 +745,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  element = null;
 
 	Invid
-	  elementA = null,
-	  elementB = null;
+	  elementA = null;
 
 	boolean found = false;
 
@@ -4047,8 +4052,7 @@ public final class InvidDBField extends DBField implements invid_field {
   public ReturnVal verifyNewValue(Object o, boolean local)
   {
     DBEditObject eObj;
-    Invid inv, inv2;
-    boolean ok;
+    Invid inv;
 
     /* -- */
 
@@ -4106,8 +4110,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (!local && mustChoose())
 	  {
-	    ok = false;
-
 	    if (qr == null && eObj.getSession().isInteractive())
 	      {
 		try

@@ -53,21 +53,53 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Vector;
 
-import arlut.csd.Util.PackageResources; 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.JTree;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.table.*;
-import javax.swing.tree.*;
-import javax.swing.plaf.*;
+import arlut.csd.Util.PackageResources;
+import arlut.csd.ddroid.common.BaseDump;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.PermMatrix;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ddroid.rmi.perm_field;
 
 /*------------------------------------------------------------------------------
                                                                            class 
@@ -140,7 +172,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
     // Main constructor for the perm_editor window      
 
-    this.session = session;
     this.permField = permField;
     this.enabled = enabled;
     this.gc = gc;

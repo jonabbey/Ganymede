@@ -54,15 +54,13 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.boolean_field;
 
 /*------------------------------------------------------------------------------
                                                                            class

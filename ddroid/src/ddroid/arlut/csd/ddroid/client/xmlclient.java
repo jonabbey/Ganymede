@@ -59,18 +59,26 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.Properties;
 
-import java.net.*;
-import java.rmi.*;
-import java.rmi.server.*;
-import java.io.*;
-import java.util.*;
+import org.xml.sax.SAXException;
 
-import arlut.csd.Util.*;
-
-import org.xml.sax.*;
+import arlut.csd.Util.ParseArgs;
+import arlut.csd.Util.XMLEndDocument;
+import arlut.csd.Util.XMLError;
+import arlut.csd.Util.XMLItem;
+import arlut.csd.Util.XMLStartDocument;
+import arlut.csd.Util.XMLWarning;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.FileReceiver;
+import arlut.csd.ddroid.rmi.Server;
+import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ddroid.rmi.XMLSession;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -53,21 +53,40 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.rmi.RemoteException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.rmi.*;
-import java.io.*;
-import java.util.*;
-import java.text.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JInternalFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JToolBar;
 
-import arlut.csd.JTable.*;
-import arlut.csd.JDialog.*;
-import arlut.csd.Util.*;
-
-import javax.swing.*;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.JTable.rowSelectCallback;
+import arlut.csd.JTable.rowTable;
+import arlut.csd.Util.PackageResources;
+import arlut.csd.ddroid.common.DumpResult;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -330,8 +349,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     /* -- */
 
-    Vector results = null;
-
     setStatus("Querying server", 0);
 
     if (query != null)
@@ -558,8 +575,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     Vector headers = table.getTableHeaders();
     int colcount = headers.size();
     int size = table.getRowCount();
-    Enumeration en = table.keys();
-    Object rowKey;
     String cellText;
     String date = (new Date()).toString();
 
@@ -599,8 +614,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       {
 	result.append("<TR>\n");
 
-	rowKey = en.nextElement();
-
 	for (int j = 0; j < colcount; j++)
 	  {
 	    result.append("<TD>");
@@ -637,7 +650,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     Vector headers = table.getTableHeaders();
     int colcount = headers.size();
     int size = table.getRowCount();
-    Object rowKey;
     String cellText;
 
     /* -- */

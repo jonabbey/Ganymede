@@ -52,21 +52,54 @@
 
 package arlut.csd.ddroid.gasharl;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-import arlut.csd.ddroid.server.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.rmi.RemoteException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Hashtable;
+import java.util.Random;
+import java.util.Vector;
 
+import org.doomdark.uuid.EthernetAddress;
+import org.doomdark.uuid.UUIDGenerator;
 
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.Util.FileOps;
-
-import org.doomdark.uuid.*;
-
-import java.util.*;
-import java.io.*;
-import java.rmi.*;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.ObjectStatus;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.QueryDataNode;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.Result;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.server.DBEditObject;
+import arlut.csd.ddroid.server.DBEditSet;
+import arlut.csd.ddroid.server.DBField;
+import arlut.csd.ddroid.server.DBLog;
+import arlut.csd.ddroid.server.DBNameSpace;
+import arlut.csd.ddroid.server.DBObject;
+import arlut.csd.ddroid.server.DBObjectBase;
+import arlut.csd.ddroid.server.DBSession;
+import arlut.csd.ddroid.server.DBStore;
+import arlut.csd.ddroid.server.DateDBField;
+import arlut.csd.ddroid.server.Ganymede;
+import arlut.csd.ddroid.server.GanymedeSession;
+import arlut.csd.ddroid.server.InvidDBField;
+import arlut.csd.ddroid.server.NumericDBField;
+import arlut.csd.ddroid.server.PasswordDBField;
+import arlut.csd.ddroid.server.StringDBField;
+import arlut.csd.ddroid.server.adminPersonaCustom;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -230,9 +263,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	// see if we have an owner set, check it for our starting uid
 
-	Vector owners = getFieldValuesLocal(SchemaConstants.OwnerListField);
-
 	/*
+	 * 
+	Vector owners = getFieldValuesLocal(SchemaConstants.OwnerListField);
 
 	if (owners != null && owners.size() > 0)
 	{
@@ -1559,7 +1592,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (object.getFieldValueLocal(UID) != null)
       {
-	return new PermEntry(true, false, true, false);
+	return PermEntry.getPermEntry(true, false, true, false);
       }
     else
       {
@@ -1686,12 +1719,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   {
     InvidDBField inv;
     Vector personaeInvids;
-    Vector oldNames = new Vector();
     DBSession session = editset.getSession();
-    DBEditObject eobj;
-    String oldName, suffix;
+    String oldName;
     StringDBField sf;
-    boolean okay = true;
 
     /* -- */
 
@@ -2494,7 +2524,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public ReturnVal savePasswordChoice(String password)
   {
-    String resultString = null;
     String saverName = "/opt/bin/ganypassSave";
 
     String username = (String) getFieldValueLocal(USERNAME);
@@ -2662,10 +2691,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void createUserExternals()
   {
-    boolean success = false;
-
-    /* -- */
-
     // if the system log is null, we're running in the direct loader, and we
     // don't want to create anything external.
 
@@ -3181,7 +3206,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     DBObject mapEntryObj;
     mapEntryCustom mapEntry;
     String mapName;
-    String volName;
 
     Vector oldEntries = original.getFieldValuesLocal(userSchema.VOLUMES);
 

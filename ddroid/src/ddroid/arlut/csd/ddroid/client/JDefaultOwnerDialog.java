@@ -52,18 +52,22 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JDialog.JErrorDialog;
-
-import javax.swing.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.rmi.RemoteException;
 import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.JDataComponent.StringSelector;
+import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.ddroid.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -161,7 +165,7 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
       {
 	if (chosen.size() == 0)
 	  {
-	    JErrorDialog d = new JErrorDialog(gc, "You must choose a default owner group.");
+	    new JErrorDialog(gc, "You must choose a default owner group.");
 	    return;
 	  }
 

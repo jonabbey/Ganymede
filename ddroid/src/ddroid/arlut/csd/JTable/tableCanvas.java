@@ -36,10 +36,16 @@
 
 package arlut.csd.JTable;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+
+import javax.swing.JComponent;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -171,11 +177,9 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
   synchronized void render()
   {
     int strwidth;
-    int just;
     int xpos;
     int leftedge;
     int ypos;
-    int ypos2;
     int bottomedge;
 
     /**
@@ -213,20 +217,11 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     int last_visible_row;
 
-    tableCell
-      cell = null;		// make compiler happy
-
-    String
-      cellText = null;
-
     Rectangle
       cellRect = new Rectangle();
 
     tableRow
       tr = null;
-
-    int
-      tempI;
 
     /* -- */
     
@@ -1307,9 +1302,6 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       clickRow,
       clickCol;
 
-    tableCell
-      cell;
-
     tableCol
       col;
 
@@ -1423,8 +1415,6 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	System.err.println("Base table: menuRow = " + rt.menuRow + ", menuCol = " + rt.menuCol);
       }
 
-    cell = ((tableRow) rt.rows.elementAt(clickRow)).elementAt(clickCol);
-
     col = (tableCol) rt.cols.elementAt(clickCol);
 
     if (col.menu != null)
@@ -1519,12 +1509,11 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
   public synchronized void mouseDragged(MouseEvent e)
   {
     int 
-      x, y;
+      x;
 
     /* -- */
 
     x = e.getX();
-    y = e.getY();
     
     if (rt.hbar_visible)
       {

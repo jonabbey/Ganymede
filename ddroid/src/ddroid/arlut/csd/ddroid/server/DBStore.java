@@ -54,16 +54,45 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.rmi.RemoteException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import java.rmi.*;
+import arlut.csd.Util.JythonMap;
+import arlut.csd.Util.TranslationService;
+import arlut.csd.Util.zipIt;
+import arlut.csd.ddroid.common.FieldType;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.CategoryNode;
 
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import com.jclark.xml.output.UTF8XMLWriter;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -116,7 +145,7 @@ import arlut.csd.Util.*;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
-public final class DBStore {
+public final class DBStore implements JythonMap {
 
   // type identifiers used in the object store
 
@@ -434,9 +463,7 @@ public final class DBStore {
     DataInputStream in;
 
     DBObjectBase tempBase;
-    short baseCount, namespaceCount, categoryCount;
-    String namespaceID;
-    boolean caseInsensitive;
+    short baseCount, namespaceCount;
     String file_id;
 
     /* -- */
@@ -694,10 +721,9 @@ public final class DBStore {
     FileOutputStream textOutStream = null;
     PrintWriter textOut = null;
     
-    short baseCount, namespaceCount, categoryCount;
+    short namespaceCount;
     DBDumpLock lock = null;
     DBNameSpace ns;
-    DBBaseCategory bc;
     
     /* -- */
     
@@ -987,11 +1013,9 @@ public final class DBStore {
   {
     XMLDumpContext xmlOut = null;
     
-    Enumeration basesEnum;
     DBDumpLock lock = null;
     DBNameSpace ns;
-    DBBaseCategory bc;
-    
+
     /* -- */
     
     if (debug)
@@ -1313,6 +1337,17 @@ public final class DBStore {
   public synchronized void setBase(DBObjectBase base)
   {
     objectBases.put(base.getKey(), base);
+  }
+
+  /**
+   * Method to obtain the object from the DBStore represented by the given
+   * Invid. NOTE: this method will give you a direct reference to the actual
+   * DBObject, not a clone. So be careful, and treat the returned objects as
+   * "read only".
+   */
+  public DBObject getObject(Invid invid)
+  {
+    return getObjectBase(invid.getType()).getObject(invid.getNum());
   }
 
   /**
@@ -2505,5 +2540,174 @@ public final class DBStore {
     // not very worried about deadlocks here
 
     return Ganymede.internalSession.describe(x);
+  }
+
+  
+  
+  
+
+  /* *************************************************************************
+   *
+   * The following methods are for Jython/Map support
+   * 
+   * For this object, the Map interface allows for indexing based on either
+   * the name or the type ID of a DBObjectBase. Indexing by type id, however,
+   * is only supported for "direct" access to the Map; the type id numbers
+   * won't appear in the list of keys for the Map.
+   *
+   * EXAMPLE:
+   * MyDBStoreObject.get("Users") will return the DBObjectBase with the label
+   * of "Users".
+   *
+   */
+
+  public boolean containsKey(Object key)
+  {
+    return keySet().contains(key);
+  }
+  
+  public boolean has_key(Object key)
+  {
+    return containsKey(key);
+  }
+  
+  public boolean containsValue(Object value)
+  {
+    return getBases().contains(value);
+  }
+
+  public Set entrySet()
+  {
+    Vector bases = getBases();
+    DBObjectBase currentBase;
+    Set entrySet = new HashSet();
+    
+    for (Iterator iter = bases.iterator(); iter.hasNext();)
+      {
+        currentBase = (DBObjectBase) iter.next();
+        entrySet.add(new Entry(currentBase));
+      }
+    return entrySet;
+  }
+
+  public Object get(Object key)
+  {
+    if (key instanceof Short)
+      {
+        return getObjectBase((Short) key);
+      }
+    else if (key instanceof String)
+      {
+        return getObjectBase((String) key);
+      }
+    else
+      {
+        return null;
+      }
+  }
+
+  public Set keySet()
+  {
+    return (new HashSet(getBaseNameList()));
+  }
+
+  public Set keys()
+  {
+    return keySet();
+  }
+  
+  public List items()
+  {
+    List list = new ArrayList();
+    Vector bases = getBases();
+    DBObjectBase currentBase;
+    Object[] tuple;
+    
+    for (Iterator iter = bases.iterator(); iter.hasNext();)
+      {
+        currentBase = (DBObjectBase) iter.next();
+        tuple = new Object[2];
+        tuple[0] = currentBase.getName();
+        tuple[1] = currentBase;
+        list.add(tuple);
+      }
+    
+    return list;
+  }
+  
+  public int size()
+  {
+    return getBaseNameList().size();
+  }
+
+  public Collection values()
+  {
+    return new ArrayList(getBases());
+  }
+
+  public String toString()
+  {
+    return keySet().toString();
+  }
+  
+  /**
+   * Implements key/value pairs for use in a 
+   * {@link java.util.Map Map}'s {@link java.util.map.entrySet entrySet}
+   * method.
+   */
+  static class Entry implements Map.Entry
+  {
+    Object key, value;
+    
+    public Entry( DBObjectBase base )
+    {
+      key = base.getName();
+      value = base;
+    }
+    
+    public Object getKey()
+    {
+      return key;
+    }
+
+    public Object getValue()
+    {
+      return value;
+    }
+
+    public Object setValue(Object value)
+    {
+      return null;
+    }
+  }
+
+  /* 
+   * These methods are are no-ops since we don't want this object
+   * messed with via the Map interface.
+   */
+    
+  public Object put(Object key, Object value)
+  {
+    return null;
+  }
+  
+  public void putAll(Map t)
+  {
+    return;
+  }
+  
+  public Object remove(Object key)
+  {
+    return null;
+  }
+  
+  public void clear()
+  {
+    return;
+  }
+  
+  public boolean isEmpty()
+  {
+    return getBaseNameList().isEmpty();
   }
 }

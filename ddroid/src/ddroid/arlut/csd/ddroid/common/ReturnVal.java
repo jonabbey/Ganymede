@@ -54,14 +54,17 @@
 
 package arlut.csd.ddroid.common;
 
-import arlut.csd.ddroid.rmi.*;
-
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.Enumeration;
 import java.rmi.Remote;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import arlut.csd.JDialog.*;
+import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.ddroid.rmi.Ganymediator;
+import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ddroid.rmi.XMLSession;
+import arlut.csd.ddroid.rmi.adminSession;
+import arlut.csd.ddroid.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -53,9 +53,8 @@
 
 package arlut.csd.JDataComponent;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import javax.swing.ComboBoxModel;
+import javax.swing.JComboBox;
 
 /*------------------------------------------------------------------------------
                                                                            class

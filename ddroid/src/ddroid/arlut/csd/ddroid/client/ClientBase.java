@@ -56,12 +56,18 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.rmi.*;
-import java.rmi.server.*;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.Vector;
+
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.clientAsyncMessage;
+import arlut.csd.ddroid.rmi.ClientAsyncResponder;
+import arlut.csd.ddroid.rmi.Server;
+import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ddroid.rmi.XMLSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -155,7 +161,7 @@ public class ClientBase implements Runnable {
 	if (obj instanceof Server)
 	  {
 	    server = (Server) obj;
-	    boolean test = server.up();
+	    server.up();
 	  }
       }
     catch (NotBoundException ex)
@@ -417,11 +423,9 @@ public class ClientBase implements Runnable {
 	return false;
       }
 
-    boolean test = false;
-
     try
       {
-	test = server.up();
+	server.up();
       }
     catch (Exception ex)
       {

@@ -1,10 +1,15 @@
 package org.doomdark.uuid;
 
-import java.io.*;
-import java.security.NoSuchAlgorithmException;
+import java.io.PrintStream;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 /* JUG Java Uuid Generator
  *

@@ -54,17 +54,42 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import java.rmi.server.*;
-import java.lang.reflect.*;
-import arlut.csd.Util.*;
-import arlut.csd.JDialog.*;
-import com.jclark.xml.output.*;
+import org.python.core.PyInteger;
+
+import arlut.csd.Util.JythonMap;
+import arlut.csd.Util.VectorUtils;
+import arlut.csd.Util.XMLUtils;
+import arlut.csd.ddroid.common.FieldInfo;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.FieldType;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.ObjectStatus;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ddroid.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -161,7 +186,7 @@ import com.jclark.xml.output.*;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBObject implements db_object, FieldType, Remote {
+public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   static boolean debug = false;
   final static boolean debugEmit = false;
@@ -655,7 +680,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public String toString()
   {
-    return getLabel();
+    return getLabel() + " (" + getInvid() + ")";
   }
 
   /**
@@ -1085,11 +1110,6 @@ public class DBObject implements db_object, FieldType, Remote {
 
   synchronized public void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    boolean useObjLabel = false;
-    String label;
-
-    /* -- */
-
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
 
@@ -1198,77 +1218,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	return null;
       }
 
-    // if we are a customized object type, dynamically invoke
-    // the proper check-out constructor for the DBEditObject
-    // subtype.
-
-    if (objectBase.getClassDef() != null)
-      {
-	Constructor c;
-	Class classArray[];
-	Object parameterArray[];
-
-	classArray = new Class[2];
-
-	classArray[0] = this.getClass();
-	classArray[1] = editset.getClass();
-
-	parameterArray = new Object[2];
-
-	parameterArray[0] = this;
-	parameterArray[1] = editset;
-
-	String error_code = null;
-
-	try
-	  {
-	    c = objectBase.getClassDef().getDeclaredConstructor(classArray);
-	    shadowObject = (DBEditObject) c.newInstance(parameterArray);
-	  }
-	catch (NoSuchMethodException ex)
-	  {
-	    error_code = "NoSuchMethod Exception";
-	  }
-	catch (SecurityException ex)
-	  {
-	    error_code = "Security Exception";
-	  }
-	catch (IllegalAccessException ex)
-	  {
-	    error_code = "Illegal Access Exception";
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    error_code = "Illegal Argument Exception";
-	  }
-	catch (InstantiationException ex)
-	  {
-	    error_code = "Instantiation Exception";
-	  }
-	catch (InvocationTargetException ex)
-	  {
-	    InvocationTargetException tex = (InvocationTargetException) ex;
-
-	    tex.getTargetException().printStackTrace();
-
-	    error_code = "Invocation Target Exception " + tex.getTargetException();
-	  }
-
-	if (error_code != null)
-	  {
-	    // note that we know editset is set here, so we find our GanymedeSession
-	    // instance through the editset since we may not be explicitly checked out
-	    // for viewing
-
-	    Ganymede.debug("createNewObject failure: " + error_code +
-			   " in trying to check out custom object");
-	    return null;
-	  }
-      }
-    else
-      {
-	shadowObject = new DBEditObject(this, editset);
-      }
+    shadowObject = objectBase.createNewObject(this, editset);
 
     // if this object currently points to an object that
     // is being deleted by way of an asymmetric InvidDBField,
@@ -2639,7 +2589,6 @@ public class DBObject implements db_object, FieldType, Remote {
 
   private void appendObjectInfo(StringBuffer buffer, String prefix, boolean local)
   {
-    String name;
     DBObjectBaseField fieldDef;
     DBField field;
 
@@ -2772,5 +2721,174 @@ public class DBObject implements db_object, FieldType, Remote {
 	      }
 	  }
       }
+  }
+
+  
+  
+  
+  
+
+  /* *************************************************************************
+  *
+  * The following methods are for Jython/Map support
+  *    
+  * For this object, the Map interface allows for indexing based on either
+  * the name or the numeric ID of a DBField. Indexing by numeric id, however,
+  * is only supported for "direct" access to the Map; the numeric id numbers
+  * won't appear in the list of keys for the Map.
+  *
+  * EXAMPLE:
+  * MyDBObject.get("field_x") will return the DBField with the label
+  * of "field_x".
+  */
+  
+  public boolean has_key(Object key)
+  {
+    return keys().contains(key);
+  }
+
+  public List items()
+  {
+    List list = new ArrayList();
+    DBField field;
+    Object[] tuple;
+    
+    for (Iterator iter = getFieldVect().iterator(); iter.hasNext();)
+      {
+        field = (DBField) iter.next();
+        tuple = new Object[2];
+        tuple[0] = field.getName();
+        tuple[1] = field;
+        list.add(tuple);
+      }
+    
+    return list;    
+  }
+
+  public Set keys()
+  {
+    Set keys = new HashSet();
+    DBField field;
+    for (Iterator iter = getFieldVect().iterator(); iter.hasNext();)
+      {
+        field = (DBField) iter.next();
+        keys.add(field.getName());
+      }
+    return keys;
+  }
+  
+  public boolean containsKey(Object key)
+  {
+    return has_key(key);
+  }
+
+  public boolean containsValue(Object value)
+  {
+    return getFieldVect().contains(value);
+  }
+
+  public Set entrySet()
+  {
+    Set entrySet = new HashSet();
+    DBField field;
+    for (Iterator iter = getFieldVect().iterator(); iter.hasNext();)
+      {
+        field = (DBField) iter.next();
+        entrySet.add(new Entry(field));
+      }
+    return entrySet;
+  }
+
+  public Object get(Object key)
+  {
+    if (key instanceof PyInteger)
+      {
+        PyInteger pi = (PyInteger) key;
+        return (DBField) getField(new Integer(pi.getValue()).shortValue());
+      }
+    else if (key instanceof Integer)
+      {
+        return (DBField) getField(((Integer) key).shortValue());
+      }
+    else if (key instanceof Short)
+      {
+        return (DBField) getField(((Short) key).shortValue());
+      }
+    else if (key instanceof String)
+      {
+        return (DBField) getField((String) key);
+      }
+    return null;
+  }
+
+  public boolean isEmpty()
+  {
+    return getFieldVect().isEmpty();
+  }
+
+  public Set keySet()
+  {
+    return keys();
+  }
+
+  public int size()
+  {
+    return getFieldVect().size();
+  }
+
+  public Collection values()
+  {
+    return getFieldVect();
+  }
+
+  static class Entry implements Map.Entry
+  {
+    Object key, value;
+    
+    public Entry( DBField obj )
+    {
+      key = obj.getName();
+      value = obj;
+    }
+    
+    public Object getKey()
+    {
+      return key;
+    }
+
+    public Object getValue()
+    {
+      return value;
+    }
+
+    public Object setValue(Object value)
+    {
+      return null;
+    }
+  }   
+  
+  /* 
+   * These methods are are no-ops since we don't want this object
+   * messed with via the Map interface.
+   */
+   
+  public void clear()
+  {
+    return;
+  }
+
+  public Object put(Object key, Object value)
+  {
+    return null;
+  }
+
+  public void putAll(Map t)
+  {
+    return;
+  }
+
+  public Object remove(Object key)
+  {
+    return null;
   }
 }

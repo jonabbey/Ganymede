@@ -51,18 +51,18 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.rmi.server.Unreferenced;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import arlut.csd.Util.XMLUtils;
 import arlut.csd.Util.NamedStack;
-import com.jclark.xml.output.*;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.rmi.NameSpace;
 
 /*------------------------------------------------------------------------------
                                                                            class

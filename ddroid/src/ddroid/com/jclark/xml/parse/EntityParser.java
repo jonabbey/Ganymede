@@ -4,17 +4,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.ResourceBundle;
-import java.util.MissingResourceException;
-import java.util.Locale;
 import java.text.MessageFormat;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.Vector;
 
 import com.jclark.util.Hashtable;
-
 import com.jclark.xml.parse.base.Application;
-import com.jclark.xml.tok.*;
+import com.jclark.xml.tok.Buffer;
+import com.jclark.xml.tok.ContentToken;
+import com.jclark.xml.tok.EmptyTokenException;
+import com.jclark.xml.tok.Encoding;
+import com.jclark.xml.tok.EndOfPrologException;
+import com.jclark.xml.tok.ExtensibleTokenException;
+import com.jclark.xml.tok.InvalidTokenException;
+import com.jclark.xml.tok.PartialTokenException;
+import com.jclark.xml.tok.Position;
+import com.jclark.xml.tok.PrologParser;
+import com.jclark.xml.tok.PrologSyntaxException;
+import com.jclark.xml.tok.StringConversionCache;
+import com.jclark.xml.tok.TextDecl;
+import com.jclark.xml.tok.Token;
+import com.jclark.xml.tok.TokenException;
+import com.jclark.xml.tok.XmlDecl;
 
 /**
  * Parses a single entity.

@@ -36,8 +36,7 @@
 
 package arlut.csd.JTree;
 
-import java.awt.PopupMenu;
-import java.util.*;
+import java.util.Stack;
 
 /*------------------------------------------------------------------------------
                                                                            class

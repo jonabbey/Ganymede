@@ -6,9 +6,6 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
 import java.awt.Color;
 import java.awt.SystemColor;
 

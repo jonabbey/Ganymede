@@ -51,11 +51,6 @@
 
 package arlut.csd.ddroid.common;
 
-import java.util.*;
-import java.io.*;
-import java.rmi.*;
-import java.rmi.server.UnicastRemoteObject;
-import java.rmi.server.Unreferenced;
 
 /*------------------------------------------------------------------------------
                                                                            class

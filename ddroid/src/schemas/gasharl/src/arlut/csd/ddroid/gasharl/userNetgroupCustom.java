@@ -53,15 +53,18 @@
 
 package arlut.csd.ddroid.gasharl;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-import arlut.csd.ddroid.server.*;
+import java.io.File;
+import java.io.IOException;
 
-import arlut.csd.Util.*;
-
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
+import arlut.csd.Util.FileOps;
+import arlut.csd.Util.PathComplete;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.server.DBEditObject;
+import arlut.csd.ddroid.server.DBEditSet;
+import arlut.csd.ddroid.server.DBObject;
+import arlut.csd.ddroid.server.DBObjectBase;
+import arlut.csd.ddroid.server.Ganymede;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -176,7 +179,6 @@ public class userNetgroupCustom extends DBEditObject implements SchemaConstants,
   {
     String deleteFilename;
     File deleteHandler = null;
-    boolean success = false;
 
     /* -- */
 
@@ -249,8 +251,6 @@ public class userNetgroupCustom extends DBEditObject implements SchemaConstants,
 				   "\n" + deleteFilename + 
 				   " returned a non-zero result: " + result);
 		  }
-
-		success = true;
 	      }
 	    catch (InterruptedException ex)
 	      {

@@ -1,6 +1,8 @@
 package com.jclark.xml.sax;
 
-import com.jclark.xml.parse.*;
+import com.jclark.xml.parse.CommentEvent;
+import com.jclark.xml.parse.ParseLocation;
+import com.jclark.xml.parse.ProcessingInstructionEvent;
 
 /**
  * An special version of the SAX driver that reports comments

@@ -53,13 +53,20 @@
 
 package arlut.csd.ddroid.client.password;
 
-import arlut.csd.ddroid.client.*;
-import arlut.csd.ddroid.rmi.*;
-import arlut.csd.ddroid.common.*;
-
-import java.applet.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.applet.Applet;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -239,6 +246,6 @@ public class PasswordApplet extends Applet implements ActionListener{
     
     d.pack();
     
-    d.show();
+    d.setVisible(true);
   }
 }

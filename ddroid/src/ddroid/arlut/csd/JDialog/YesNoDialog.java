@@ -53,10 +53,15 @@
 
 package arlut.csd.JDialog;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Frame;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 /*------------------------------------------------------------------------------
                                                                            class

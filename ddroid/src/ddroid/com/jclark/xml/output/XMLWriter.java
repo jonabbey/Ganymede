@@ -1,7 +1,7 @@
 package com.jclark.xml.output;
 
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
 
 /**
  * An extension of <code>Writer</code> for writing XML documents.

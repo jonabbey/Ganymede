@@ -54,12 +54,11 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.IOException;
 
-import java.io.*;
-import com.jclark.xml.output.*;
 import arlut.csd.Util.XMLUtils;
+
+import com.jclark.xml.output.XMLWriter;
 
 /*------------------------------------------------------------------------------
                                                                            class

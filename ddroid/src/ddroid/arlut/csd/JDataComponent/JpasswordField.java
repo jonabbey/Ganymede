@@ -52,12 +52,13 @@
 
 package arlut.csd.JDataComponent;
 
-import javax.swing.*;
-import javax.swing.text.*;
-
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.AWTEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.rmi.RemoteException;
+
+import javax.swing.JPasswordField;
 
 /*******************************************************************
                                                     JpasswordField()

@@ -55,10 +55,13 @@
 
 package arlut.csd.ddroid.common;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import arlut.csd.JDataComponent.listHandle;
-import arlut.csd.Util.*;
+import arlut.csd.Util.Compare;
+import arlut.csd.Util.VecSortInsert;
 
 /*------------------------------------------------------------------------------
                                                                            class

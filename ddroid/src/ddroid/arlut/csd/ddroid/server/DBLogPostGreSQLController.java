@@ -56,21 +56,17 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import arlut.csd.Util.WordWrap;
-
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import java.sql.*;
-import java.io.*;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.Timestamp;
+import arlut.csd.ddroid.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -467,7 +463,6 @@ public class DBLogPostGreSQLController implements DBLogController {
       }
 
     StringBuffer buffer = new StringBuffer();
-    DBLogEvent event = null;
 
     java.util.Date transDate = null;
     String prevTransID = null;

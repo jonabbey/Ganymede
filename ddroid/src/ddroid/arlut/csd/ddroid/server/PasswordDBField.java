@@ -55,20 +55,16 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import md5.*;
-import jcrypt.*;
-import arlut.csd.crypto.*;
-
-import arlut.csd.JDialog.*;
-
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import jcrypt.jcrypt;
+import md5.MD5Crypt;
+import arlut.csd.crypto.SSHA;
+import arlut.csd.crypto.smbencrypt;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.pass_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -1964,10 +1960,8 @@ public class PasswordDBField extends DBField implements pass_field {
   public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
-    String s, s2;
-    Vector v;
-    boolean ok = true;
-
+    String s;
+    
     /* -- */
 
     if (!isEditable(true))

@@ -1,8 +1,8 @@
 package com.jclark.xml.sax;
 
-import java.io.Reader;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
 /**
  * An InputStream of the UTF-16 encoding of a Reader.

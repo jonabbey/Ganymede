@@ -54,25 +54,55 @@
 
 package arlut.csd.ddroid.admin;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.AWTEvent;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import arlut.csd.Util.*;
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JDialog.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.JDataComponent.JstringField;
+import arlut.csd.JDialog.DialogRsrc;
+import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.JInsetPanel;
-import arlut.csd.JTree.*;
-
-import java.util.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
-
-import java.awt.*;
-import java.awt.event.*;
-
-import java.rmi.*;
-import java.rmi.server.*;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.JTree.treeCallback;
+import arlut.csd.JTree.treeControl;
+import arlut.csd.JTree.treeDragDropCallback;
+import arlut.csd.JTree.treeMenu;
+import arlut.csd.JTree.treeNode;
+import arlut.csd.Util.PackageResources;
+import arlut.csd.ddroid.common.CatTreeNode;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.BaseField;
+import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ddroid.rmi.CategoryNode;
+import arlut.csd.ddroid.rmi.NameSpace;
+import arlut.csd.ddroid.rmi.SchemaEdit;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -425,7 +455,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     pack();
     setSize(800, 600);
-    show();
+    this.setVisible(true);
 
     if (debug)
       {
@@ -478,7 +508,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       cNode;
 
     treeNode 
-      thisNode,
       prevNode;
 
     /* -- */
@@ -492,7 +521,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     children = c.getNodes();
 
     prevNode = null;
-    thisNode = node.getChild();
 
     for (int i = 0; i < children.size(); i++)
       {
@@ -811,11 +839,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   public void treeNodeSelected(treeNode node)
   {
-    String a, b;
-    treeNode n;
-
-    /* -- */
-
     if (node == null)
       {
 	throw new IllegalArgumentException("null node");
@@ -867,7 +890,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (!otherNode)
       {
-	card.show(attribCardPane, "empty");
+	if (attribCardPane != null)
+	  {
+	    card.show(attribCardPane, "empty");
+	  }
       }
 
     if (debug)
@@ -1196,8 +1222,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    System.out.println("deleting Namespace");
 	  }
 
-	treeNode tNode = (treeNode)node;
-
 	DialogRsrc dialogResource = new DialogRsrc(this,
 						   "Confirm Name Space Deletion",
 						   "Confirm Name Space Deletion",
@@ -1341,7 +1365,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     else if (event.getSource() == deleteFieldMI)
       {
 	FieldNode fNode = (FieldNode) node;
-	BaseField field = fNode.getField();
 
 	String label = fNode.getText();
 	String parentLabel = fNode.getParent().getText();
@@ -1991,7 +2014,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    BaseNode bn = (BaseNode) dragNode;
 	    Base base = bn.getBase();
-	    Category oldCategory = base.getCategory();
 
 	    Category newCategory = null;
 	    CatTreeNode newParent = null;
@@ -2094,7 +2116,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    CatTreeNode cn = (CatTreeNode) dragNode;
 	    Category category = cn.getCategory();
-	    Category oldCategory = category.getCategory();
 
 	    Category newCategory = null;
 	    CatTreeNode newParent = null;
@@ -2415,7 +2436,6 @@ class NameSpaceEditor extends JPanel implements ActionListener {
     Vector spaceV = new Vector();
     BaseField currentField = null;
     String thisBase = null;
-    String thisField = null;
     String thisSpace = null;
 
     if ((bases == null) || (currentNameSpaceLabel == null))

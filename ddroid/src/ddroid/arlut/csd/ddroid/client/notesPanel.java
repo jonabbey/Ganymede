@@ -53,20 +53,19 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.rmi.RemoteException;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.rmi.*;
-import java.util.*;
-import java.text.SimpleDateFormat;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 
-import javax.swing.*;
-import javax.swing.border.*;
-
-import arlut.csd.Util.PackageResources;
-import arlut.csd.JDataComponent.*;
+import arlut.csd.ddroid.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class

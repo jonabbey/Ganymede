@@ -54,14 +54,9 @@
 
 package arlut.csd.ddroid.rmi;
 
-import arlut.csd.ddroid.common.*;
+import java.rmi.RemoteException;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import java.rmi.*;
-
-import arlut.csd.Util.*;
+import arlut.csd.ddroid.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                            class

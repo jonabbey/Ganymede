@@ -58,15 +58,32 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Stack;
+import java.util.Vector;
 
-import arlut.csd.Util.*;
-import org.xml.sax.*;
-import java.util.*;
-import java.text.*;
-import java.rmi.*;
-import java.rmi.server.*;
+import org.xml.sax.SAXException;
+
+import arlut.csd.Util.VectorUtils;
+import arlut.csd.Util.XMLCharData;
+import arlut.csd.Util.XMLElement;
+import arlut.csd.Util.XMLEndDocument;
+import arlut.csd.Util.XMLItem;
+import arlut.csd.Util.XMLUtils;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.FieldType;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.pass_field;
+import arlut.csd.ddroid.rmi.perm_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -1458,7 +1475,6 @@ public class xmlfield implements FieldType {
   private Vector getExtantObjects(Vector values) throws NotLoggedInException
   {
     Vector objects = new Vector();
-    Invid invid;
 
     /* -- */
 

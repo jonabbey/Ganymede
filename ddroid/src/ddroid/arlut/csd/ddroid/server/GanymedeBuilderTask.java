@@ -54,18 +54,25 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.zip.*;
-import java.io.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.Hashtable;
+import java.util.Vector;
 
+import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.zipIt;
-import arlut.csd.Util.FileOps;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -185,8 +192,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
     String label = null;
     Thread currentThread = java.lang.Thread.currentThread();
     boolean
-      success1 = false,
-      success2 = false;
+      success1 = false;
     boolean alreadyDecdCount = false;
 
     /* -- */
@@ -325,8 +331,6 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	    if (success1)
 	      {
-		boolean shutdownblock = false;
-		
 		try
 		  {
 		    shutdownState = GanymedeServer.shutdownSemaphore.increment(0);
@@ -344,13 +348,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		    // increment
 		  }
 		
-		// guess what?  we're going to capture the return value of
-		// builderPhase2 and just not do anything with it!  that's
-		// how wacky we're going to be!
-		
 		try
 		  {
-		    success2 = this.builderPhase2();
+		    this.builderPhase2();
 		  }
 		finally
 		  {
@@ -902,7 +902,6 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	(System.currentTimeMillis() > rolloverTime) ||
 	(System.currentTimeMillis() < rollunderTime))
       {
-	Date currentTime = new Date();
 	Calendar nowCal = new GregorianCalendar();
 
 	int year = nowCal.get(Calendar.YEAR);

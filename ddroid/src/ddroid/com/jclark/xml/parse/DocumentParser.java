@@ -2,6 +2,7 @@ package com.jclark.xml.parse;
 
 import java.io.IOException;
 import java.util.Locale;
+
 import com.jclark.xml.parse.base.Application;
 
 /**

@@ -26,9 +26,6 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
 import javax.swing.tree.TreeModel;
 
 /**

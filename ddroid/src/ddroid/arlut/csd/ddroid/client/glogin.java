@@ -58,24 +58,40 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.AWTEvent;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.rmi.RemoteException;
+import java.util.Properties;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JApplet;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.applet.*;
-import java.net.*;
-import java.rmi.*;
-import java.rmi.server.*;
-import java.io.*;
-import java.util.*;
-
-import arlut.csd.JDialog.*;
-import arlut.csd.Util.ParseArgs;
+import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.ParseArgs;
+import arlut.csd.ddroid.rmi.Server;
+import arlut.csd.ddroid.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -288,7 +304,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     my_frame.pack();
     my_frame.setSize(265,380);    
-    my_frame.show();
+    my_frame.setVisible(true);
 
     my_glogin.init();
     my_glogin.getContentPane().getLayout().layoutContainer(my_glogin);
@@ -745,10 +761,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  }
 	catch (Exception ex)
 	  {
-	    JErrorDialog d = new JErrorDialog(my_frame,
-					      "Couldn't log into server: \n" +
-					      ex.getMessage(),
-					      getErrorImage());
+	    new JErrorDialog(my_frame, "Couldn't log into server: \n"
+                + ex.getMessage(), getErrorImage());
 	    
 	    enableButtons(true);
 	  }
@@ -846,7 +860,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     if (e.getType() == e.ERROR)
       {
-	JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage(), getErrorImage());
+	new JErrorDialog(new JFrame(), e.getMessage(), getErrorImage());
       }
     else if (e.getType() == e.BUILDSTATUS)
       {

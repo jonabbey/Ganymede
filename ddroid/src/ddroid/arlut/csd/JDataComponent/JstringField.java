@@ -56,11 +56,6 @@
 
 package arlut.csd.JDataComponent;
 
-import javax.swing.*;
-import javax.swing.text.*;
-
-import java.awt.*;
-import java.awt.event.*;
 import java.rmi.RemoteException;
 
 

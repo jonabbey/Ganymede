@@ -1,6 +1,6 @@
 package org.doomdark.uuid;
 
-import java.util.*;
+import java.util.Calendar;
 
 /* JUG Java Uuid Generator
  *

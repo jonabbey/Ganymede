@@ -52,9 +52,11 @@
 
 package arlut.csd.ddroid.rmi;
 
-import arlut.csd.ddroid.common.*;
+import java.rmi.RemoteException;
 
-import java.rmi.*;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.PermMatrix;
+import arlut.csd.ddroid.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface

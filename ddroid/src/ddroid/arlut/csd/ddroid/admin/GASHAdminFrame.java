@@ -51,27 +51,57 @@
 
 package arlut.csd.ddroid.admin;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.AWTEvent;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.rmi.RemoteException;
+import java.rmi.server.RemoteServer;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.applet.*;
-
-import java.rmi.*;
-import java.rmi.server.*;
-
-import java.lang.reflect.InvocationTargetException;
-import java.io.*;
-import java.util.*;
-
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JTable.*;
-import arlut.csd.JDialog.*;
-import arlut.csd.Util.*;
+import arlut.csd.JDataComponent.JFocusRootPanel;
+import arlut.csd.JDataComponent.JMultiLineLabel;
+import arlut.csd.JDialog.DialogRsrc;
+import arlut.csd.JDialog.JCenterDialog;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.JDialog.messageDialog;
+import arlut.csd.JTable.rowSelectCallback;
+import arlut.csd.JTable.rowTable;
+import arlut.csd.Util.PackageResources;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -600,7 +630,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     getContentPane().add(splitterPane);
 
     pack();
-    show();
+    this.setVisible(true);
 
     // along with processWindowEvent(), this method allows us
     // to properly handle window system close events.
@@ -1273,7 +1303,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
   public int DialogShow()
   {
     mainPanel.revalidate();
-    show();
+    this.setVisible(true);
 
     // at this point we're frozen, since we're a modal dialog.. we'll continue
     // at this point when the ok or cancel buttons are pressed.

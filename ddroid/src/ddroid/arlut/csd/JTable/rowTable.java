@@ -36,12 +36,18 @@
 
 package arlut.csd.JTable;
 
-import arlut.csd.Util.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -424,10 +430,6 @@ public class rowTable extends baseTable implements ActionListener {
 
   public synchronized void selectRow(Object key, boolean refreshTable)
   {
-    Object rowKey;
-
-    /* -- */
-
     // unselect the currently selected row, if any.  Note that we
     // are currently only supporting single row selection.
 

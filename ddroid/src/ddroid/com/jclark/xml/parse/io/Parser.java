@@ -3,7 +3,9 @@ package com.jclark.xml.parse.io;
 import java.io.IOException;
 import java.util.Locale;
 
-import com.jclark.xml.parse.*;
+import com.jclark.xml.parse.EntityManager;
+import com.jclark.xml.parse.NotWellFormedException;
+import com.jclark.xml.parse.OpenEntity;
 
 /**
  * An XML Parser.

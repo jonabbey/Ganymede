@@ -25,11 +25,10 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import javax.swing.tree.*;
-import javax.swing.event.*;
+import javax.swing.event.EventListenerList;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
+import javax.swing.tree.TreePath;
  
 /**
  * An abstract implementation of the TreeTableModel interface, handling 

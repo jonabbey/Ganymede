@@ -54,16 +54,17 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import gnu.regexp.*;
-
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ddroid.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -819,9 +820,8 @@ public class StringDBField extends DBField implements string_field {
   public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
-    String s, s2;
+    String s;
     QueryResult qr;
-    boolean ok = true;
 
     /* -- */
 
@@ -943,7 +943,6 @@ public class StringDBField extends DBField implements string_field {
       {
 	if (mustChoose())
 	  {
-	    ok = false;
 	    qr = choices();
 	    
 	    if (!qr.containsLabel(s))

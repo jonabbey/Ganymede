@@ -54,18 +54,33 @@
 
 package arlut.csd.JDataComponent;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import arlut.csd.Util.Compare;
-
-import java.awt.event.*;
-import java.awt.*;
-
-import java.util.*;
-import java.rmi.*;
-import java.net.*;
-
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -980,7 +995,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   private void removeItems()
   {
     Vector handles;
-    listHandle handle;
     boolean ok;
 
     /* -- */

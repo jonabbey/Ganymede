@@ -56,21 +56,38 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.awt.event.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 
-import arlut.csd.JDataComponent.*;
-import arlut.csd.Util.PackageResources;
-
-import java.util.*;
-import java.rmi.*;
-import java.net.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
+import arlut.csd.JDataComponent.JIPField;
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.ddroid.common.FieldInfo;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ddroid.rmi.invid_field;
+import arlut.csd.ddroid.rmi.ip_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -992,8 +1009,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	    for (int i = 0; i < size; i++)
 	      {
-		Object o = my_field.getElement(i);
-
 		if (i < compVector.size())
 		  {
 		    JIPField ipf = (JIPField) compVector.elementAt(i);

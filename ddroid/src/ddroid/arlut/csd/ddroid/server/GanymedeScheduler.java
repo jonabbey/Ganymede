@@ -53,13 +53,17 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.util.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.common.scheduleHandle;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -119,7 +123,7 @@ public class GanymedeScheduler extends Thread {
     GanymedeScheduler scheduler = new GanymedeScheduler(false);
     scheduler.start();
 
-    Date time, currentTime;
+    Date currentTime;
 
     currentTime = new Date();
 

@@ -1,7 +1,6 @@
 package com.jclark.xml.parse;
 
 import java.util.Enumeration;
-import java.net.URL;
 
 /**
  * Information about a DTD.

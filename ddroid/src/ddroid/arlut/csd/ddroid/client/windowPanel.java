@@ -53,22 +53,43 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.rmi.RemoteException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JDesktopPane;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.InternalFrameListener;
 
-import java.awt.*;
-import java.beans.*;
-import java.awt.event.*;
-import java.rmi.*;
-import java.util.*;
-
-import arlut.csd.Util.PackageResources;
-import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.PackageResources;
+import arlut.csd.ddroid.common.DumpResult;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ddroid.rmi.invid_field;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -54,7 +54,8 @@
 
 package arlut.csd.ddroid.common;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class

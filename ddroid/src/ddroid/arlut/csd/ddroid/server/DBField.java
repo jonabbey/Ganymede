@@ -51,19 +51,24 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.rmi.Remote;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
-import java.rmi.server.*;
-
-import arlut.csd.JDialog.*;
+import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.VectorUtils;
-
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import arlut.csd.ddroid.common.FieldInfo;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.PermEntry;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.db_field;
 
 /*------------------------------------------------------------------------------
                                                                   abstract class
@@ -890,14 +895,6 @@ public abstract class DBField implements Remote, db_field {
 	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
       }
 
-    // if this field is virtualized, let our customizer provide the
-    // value
-
-    if (owner.objectBase.getObjectHook().virtualizeField(getID()))
-      {
-	return owner.objectBase.getObjectHook().getVirtualValue(this);
-      }
-
     return value;
   }
 
@@ -924,11 +921,6 @@ public abstract class DBField implements Remote, db_field {
 	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
       }
 
-    if (virtualize && owner.objectBase.getObjectHook().virtualizeField(getID()))
-      {
-	return owner.objectBase.getObjectHook().getVirtualValue(this);
-      }
-
     return value;
   }
 
@@ -950,7 +942,7 @@ public abstract class DBField implements Remote, db_field {
 
   public final ReturnVal setValue(Object value)
   {
-    ReturnVal result, rescan;
+    ReturnVal result;
 
     /* -- */
 
@@ -1987,7 +1979,6 @@ public abstract class DBField implements Remote, db_field {
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
-    DBNameSpace ns;
     DBEditObject eObj;
 
     /* -- */
@@ -2119,11 +2110,6 @@ public abstract class DBField implements Remote, db_field {
 
   public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards)
   {
-    DBNameSpace ns;
-    DBEditObject eObj;
-
-    /* -- */
-
     if (!isEditable(local))	// *sync* GanymedeSession possible
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " +
@@ -2996,13 +2982,9 @@ public abstract class DBField implements Remote, db_field {
 
   public final ReturnVal rescanThisField(ReturnVal original)
   {
-    ReturnVal rescan;
-
-    /* -- */
-
     if (original != null && !original.didSucceed())
       {
-	return original;
+        return original;
       }
 
     if (original == null)
@@ -3061,4 +3043,68 @@ public abstract class DBField implements Remote, db_field {
 					  " already taken in namespace");
       }
   }
+
+  /**
+   * <p>
+   * This method is for use primarily within a Jython context and accessed by
+   * calling ".val" on a {@link arlut.csd.ddroid.server.DBField DBField} object,
+   * but it can theoretically be used in Java code in lieu of calling
+   * {@link arlut.csd.ddroid.server.DBField.getValue getValue} or
+   * {@link arlut.csd.ddroid.server.DBField.getValues getValues} (but <b>there
+   * are some subtle differences </b>!).
+   * </p>
+   * <p>
+   * This method will return this field's value, be it vector or scalar.
+   * However, when it encounters an {@link arlut.csd.ddroid.common.Invid Invid}
+   * object (either as the value proper or as a member of this fields value
+   * vector), it will instead return the
+   * {@link arlut.csd.ddroid.server.DBObject DBObject} that the Invid points to.
+   * </p>
+   * 
+   * @return This field's value. This can take the form of scalar types,
+   *         {@link arlut.csd.ddroid.server.DBObject DBObjects}, or a
+   *         {@link java.util.Vector Vector}containing either.
+   */
+  public Object getVal()
+  {
+    if (isVector())
+      {
+        Vector values = getValuesLocal();
+        
+        /* Dereference each Invid object in the values vector */
+        List returnList = new ArrayList(values.size());
+        for (Iterator iter = values.iterator(); iter.hasNext();)
+          {
+            returnList.add(dereferenceObject(iter.next()));
+          }
+          
+        return returnList;
+      }
+    else
+      {
+        /* Return the field value, and dereference it if it is an Invid */
+        return dereferenceObject(getValueLocal());
+      }
+  }
+  
+  /**
+   * If the argument is an Invid, this method will return a reference to the
+   * actual DBObject the Invid points to. Otherwise, it returns the same object
+   * that was passed in.
+   *
+   * @param obj 
+   * @return a DBObject if <b>obj</b> is an Invid, otherwise return <b>obj</b>
+   */
+  private Object dereferenceObject(Object obj)
+  {
+    if (obj instanceof Invid)
+      {
+        return Ganymede.db.getObject((Invid) obj);
+      }
+    else
+      {
+        return obj;
+      }
+  }
+  
 }

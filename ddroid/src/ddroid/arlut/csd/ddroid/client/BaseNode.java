@@ -52,12 +52,12 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
 
-import arlut.csd.JTree.*;
-
-import java.rmi.*;
+import arlut.csd.JTree.treeMenu;
+import arlut.csd.JTree.treeNode;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.rmi.Base;
 
 /*------------------------------------------------------------------------------
                                                                            Class

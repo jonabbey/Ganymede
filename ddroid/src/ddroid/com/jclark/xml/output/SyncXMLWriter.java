@@ -1,6 +1,5 @@
 package com.jclark.xml.output;
 
-import java.io.Writer;
 import java.io.IOException;
 
 public class SyncXMLWriter extends XMLWriter {

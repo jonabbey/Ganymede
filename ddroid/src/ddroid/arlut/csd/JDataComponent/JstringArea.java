@@ -49,12 +49,17 @@
 
 package arlut.csd.JDataComponent;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.rmi.*;
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.rmi.RemoteException;
 
-import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /*------------------------------------------------------------------------------
                                                                            class

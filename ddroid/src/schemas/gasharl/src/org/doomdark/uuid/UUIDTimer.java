@@ -1,7 +1,6 @@
 package org.doomdark.uuid;
 
-import java.io.*;
-import java.util.*;
+import java.util.Random;
 
 /* JUG Java Uuid Generator
  *

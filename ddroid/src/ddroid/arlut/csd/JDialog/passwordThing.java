@@ -53,7 +53,6 @@
 
 package arlut.csd.JDialog;
 
-import java.lang.String;
 
 /*------------------------------------------------------------------------------
                                                                            class

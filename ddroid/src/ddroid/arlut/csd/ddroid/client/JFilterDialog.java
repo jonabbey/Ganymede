@@ -53,17 +53,21 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import arlut.csd.JDataComponent.*;
-
-import javax.swing.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.rmi.RemoteException;
 import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.JDataComponent.StringSelector;
+import arlut.csd.ddroid.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -127,7 +131,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
     setBounds(50,50,50,50);
     pack();
-    show();
+    this.setVisible(true);
   }
 
   public boolean setValuePerformed(JValueObject e)

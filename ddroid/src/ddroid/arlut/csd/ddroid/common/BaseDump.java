@@ -61,10 +61,13 @@
 
 package arlut.csd.ddroid.common;
 
-import arlut.csd.ddroid.rmi.*;
+import java.util.Vector;
 
-import java.rmi.*;
-import java.util.*;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.BaseField;
+import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ddroid.rmi.CategoryNode;
+import arlut.csd.ddroid.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -118,11 +121,7 @@ public class BaseDump implements Base, CategoryNode {
 
   public BaseDump(CategoryDump parent, char[] src, int index)
   {
-    String token;
-
-    /* -- */
-
-    // assume whoever called us already extracted the 'cat' chunk.
+     // assume whoever called us already extracted the 'cat' chunk.
 
     this.parent = parent;
     this.name = getChunk(src, index);
@@ -166,8 +165,6 @@ public class BaseDump implements Base, CategoryNode {
 
   public BaseDump(BaseListTransport baselist, char[] src, int index)
   {
-    String token;
-
     /* -- */
 
     // assume whoever called us already extracted the 'base' chunk.

@@ -57,7 +57,8 @@
 
 package arlut.csd.Util;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.StreamTokenizer;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -282,16 +283,15 @@ public class Parser {
   
   public String getNextBit(StreamTokenizer tokens, boolean skipleading, boolean includeCommas) throws IOException
   {
-    int token;
     String result;
 
     /* -- */
 
-    token = tokens.nextToken();
+    tokens.nextToken();
 
     if (atEOL())
       {
-	token = tokens.nextToken();
+	tokens.nextToken();
       }
 
     if (atEOF())
@@ -316,7 +316,7 @@ public class Parser {
 
 	    if (tokens.ttype == ':' || tokens.ttype == ',')
 	      {
-		token = tokens.nextToken();
+		tokens.nextToken();
 	      }
 	  }
 	else
@@ -325,7 +325,7 @@ public class Parser {
 
 	    while (tokens.ttype == ':' || tokens.ttype == ',')
 	      {
-		token = tokens.nextToken();
+		tokens.nextToken();
 	      }
 	  }
 

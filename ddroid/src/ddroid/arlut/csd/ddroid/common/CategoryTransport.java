@@ -55,9 +55,6 @@
 
 package arlut.csd.ddroid.common;
 
-import arlut.csd.ddroid.rmi.*;
-
-import java.util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class

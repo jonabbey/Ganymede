@@ -55,8 +55,9 @@
 
 package arlut.csd.Util;
 
-import java.io.*;
-import com.jclark.xml.output.*;
+import java.io.IOException;
+
+import com.jclark.xml.output.XMLWriter;
 
 /*------------------------------------------------------------------------------
                                                                            class

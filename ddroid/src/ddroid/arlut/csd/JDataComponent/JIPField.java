@@ -53,14 +53,8 @@
 
 package arlut.csd.JDataComponent;
 
-import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
-
-import java.rmi.*;
-
-import javax.swing.*;
-import javax.swing.text.*;
+import java.rmi.RemoteException;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -868,8 +862,6 @@ public class JIPField extends JentryField {
     StringBuffer result = new StringBuffer();
     int[] stanzas;
     String[] stanzaStrings;
-    char[] charAry;
-    StringBuffer temp;
     int i, j;
     int loCompress, hiCompress;
     Short absoctets[];

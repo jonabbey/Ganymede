@@ -53,22 +53,34 @@
 
 package arlut.csd.ddroid.admin;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.rmi.RemoteException;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import arlut.csd.Util.*;
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JDialog.*;
+import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
-import javax.swing.*;
-
-import java.rmi.*;
-import java.rmi.server.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-
-import arlut.csd.JTree.*;
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JcheckboxField;
+import arlut.csd.JDataComponent.JnumberField;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.JDataComponent.JstringArea;
+import arlut.csd.JDataComponent.JstringField;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.ddroid.common.FieldType;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.BaseField;
+import arlut.csd.ddroid.rmi.NameSpace;
+import arlut.csd.ddroid.rmi.SchemaEdit;
 
 /*------------------------------------------------------------------------------
                                                                            class

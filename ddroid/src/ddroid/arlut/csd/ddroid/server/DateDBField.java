@@ -54,17 +54,16 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.io.*;
-import java.util.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.rmi.*;
+import java.util.Date;
+import java.util.Vector;
 
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.date_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -398,8 +397,6 @@ public class DateDBField extends DBField implements date_field {
   {
     DBEditObject eObj;
     Date d, d2;
-    Vector v;
-    boolean ok = true;
 
     /* -- */
 

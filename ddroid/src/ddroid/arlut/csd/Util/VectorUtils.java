@@ -55,7 +55,9 @@
 
 package arlut.csd.Util;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -447,9 +449,6 @@ public class VectorUtils {
 
   public static Vector minus(Vector vectA, Vector vectB)
   {
-    Hashtable 
-      workSetB = new Hashtable();
-
     Vector result = new Vector();
     Enumeration en;
     Object item;

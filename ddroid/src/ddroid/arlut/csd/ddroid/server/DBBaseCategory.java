@@ -54,16 +54,20 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import arlut.csd.Util.*;
-
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import com.jclark.xml.output.*;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import arlut.csd.Util.VecQuickSort;
+import arlut.csd.ddroid.common.CategoryTransport;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ddroid.rmi.CategoryNode;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -471,8 +475,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   synchronized void receive(DataInput in, DBBaseCategory parent) throws IOException
   {
     String 
-      pathName,
-      path;
+      pathName;
 
     int 
       count,
@@ -499,7 +502,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     // now parse our path name to get our path
 
     lastSlash = pathName.lastIndexOf('/');
-    path = pathName.substring(0, lastSlash);
     
     // and take our leaf's name
 
@@ -566,10 +568,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    boolean lastCategory = false;
-
-    /* -- */
-
     xmlOut.startElementIndent("category");
     xmlOut.attribute("name", getName());
     xmlOut.skipLine();		// skip line after category start
@@ -583,12 +581,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	    ((DBBaseCategory) contents.elementAt(i)).emitXML(xmlOut);
 
 	    xmlOut.skipLine();
-	    lastCategory = true;
 	  }
 	else if (contents.elementAt(i) instanceof DBObjectBase)
 	  {
 	    ((DBObjectBase) contents.elementAt(i)).emitXML(xmlOut);
-	    lastCategory = false;
 	  }
       }
 

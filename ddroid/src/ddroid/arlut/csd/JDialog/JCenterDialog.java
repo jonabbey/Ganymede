@@ -53,8 +53,10 @@
 
 package arlut.csd.JDialog;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Frame;
+import java.awt.Rectangle;
+
+import javax.swing.JDialog;
 
 /*------------------------------------------------------------------------------
                                                                            class

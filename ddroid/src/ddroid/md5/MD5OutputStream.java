@@ -43,7 +43,9 @@
 
 package md5;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * MD5OutputStream is a subclass of FilterOutputStream adding MD5

@@ -62,20 +62,63 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import arlut.csd.JDataComponent.*;
-import arlut.csd.Util.*;
-import arlut.csd.JDialog.JErrorDialog;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.rmi.RemoteException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+
+import arlut.csd.JDataComponent.JIPField;
+import arlut.csd.JDataComponent.JdateField;
+import arlut.csd.JDataComponent.JfloatField;
+import arlut.csd.JDataComponent.JnumberField;
+import arlut.csd.JDataComponent.JstringField;
+import arlut.csd.JDataComponent.StringSelector;
+import arlut.csd.JDataComponent.TimedKeySelectionManager;
+import arlut.csd.JDataComponent.listHandle;
+import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.Util.FixedListCompare;
+import arlut.csd.Util.PackageResources;
+import arlut.csd.ddroid.common.BaseDump;
+import arlut.csd.ddroid.common.DumpResult;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.QueryAndNode;
+import arlut.csd.ddroid.common.QueryDataNode;
+import arlut.csd.ddroid.common.QueryNode;
+import arlut.csd.ddroid.common.QueryNotNode;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Base;
 
 /*------------------------------------------------------------------------------
                                                                            class 
@@ -419,7 +462,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
   private void resetFieldChoices()
   {
-    Base tempBase;                            // Used when handling embedded objs
     FieldTemplate template;
     Vector EIPfields = new Vector(); // edit-in-place
     Vector Embedded = new Vector();
@@ -1733,7 +1775,6 @@ class QueryRow implements ItemListener {
   {
     QueryNode myNode;
     Object value = null;
-    Short baseID;
 
     String localFieldName = parent.getFieldFromEmbedded(fieldName);
 
@@ -2141,14 +2182,6 @@ class OptionsPanel extends JPanel {
     Vector
       builtInItems_Vect = new Vector(),
       customItems_Vect = new Vector();
-
-    JList 
-      builtIn_List,
-      custom_List;
-
-    JScrollPane
-      builtIn_Scroll,
-      custom_Scroll;
 
     /* -- */
 

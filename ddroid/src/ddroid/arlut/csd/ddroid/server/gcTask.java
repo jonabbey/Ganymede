@@ -56,7 +56,7 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.Util.*;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class

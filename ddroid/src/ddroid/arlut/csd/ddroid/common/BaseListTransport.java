@@ -55,7 +55,7 @@
 
 package arlut.csd.ddroid.common;
 
-import java.util.*;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class

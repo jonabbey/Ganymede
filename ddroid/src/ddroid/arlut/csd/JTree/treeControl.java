@@ -43,10 +43,30 @@
 
 package arlut.csd.JTree;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.util.Stack;
+import java.util.Vector;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -2110,7 +2130,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
   public void mouseClicked(MouseEvent e)
   {
-    treeNode node, tempNode;
+    treeNode node;
     int row;
     int x, y;
 
@@ -2195,7 +2215,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
   public void mousePressed(MouseEvent e)
   {
-    treeNode node, tempNode;
+    treeNode node;
     int row;
     int x, y;
     
@@ -2315,7 +2335,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
   public void mouseReleased(MouseEvent e)
   {
-    treeNode node, tempNode;
+    treeNode node;
     int row;
     
     /* -- */

@@ -52,18 +52,29 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Insets;
+import java.rmi.RemoteException;
+import java.util.Vector;
 
-import java.awt.*;
-import java.rmi.*;
-import java.util.*;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
-import javax.swing.*;
-import javax.swing.border.*;
-
-import arlut.csd.JDataComponent.*;
-import arlut.csd.JDialog.*;
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.JDataComponent.StringSelector;
+import arlut.csd.JDataComponent.listHandle;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.invid_field;
 
 /**
  * <p>GUI panel for displaying the list of owners for a given object in
@@ -209,10 +220,6 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
   private StringSelector createInvidSelector(invid_field field) throws RemoteException
   {
-    QueryResult
-      results,
-      choiceResults = null;
-
     Vector
       currentOwners = null,
       availableOwners = null;
@@ -308,7 +315,6 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
   {
     Vector available = null;
     Vector chosen = null;
-    Object key = null;
 
     /* -- */
 

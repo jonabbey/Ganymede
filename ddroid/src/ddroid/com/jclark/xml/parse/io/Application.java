@@ -1,7 +1,20 @@
 package com.jclark.xml.parse.io;
 
 import java.io.IOException;
-import com.jclark.xml.parse.*;
+
+import com.jclark.xml.parse.CharacterDataEvent;
+import com.jclark.xml.parse.CommentEvent;
+import com.jclark.xml.parse.EndCdataSectionEvent;
+import com.jclark.xml.parse.EndDocumentTypeDeclarationEvent;
+import com.jclark.xml.parse.EndElementEvent;
+import com.jclark.xml.parse.EndEntityReferenceEvent;
+import com.jclark.xml.parse.EndPrologEvent;
+import com.jclark.xml.parse.MarkupDeclarationEvent;
+import com.jclark.xml.parse.ProcessingInstructionEvent;
+import com.jclark.xml.parse.StartCdataSectionEvent;
+import com.jclark.xml.parse.StartDocumentTypeDeclarationEvent;
+import com.jclark.xml.parse.StartElementEvent;
+import com.jclark.xml.parse.StartEntityReferenceEvent;
 
 /**
  * An extension of <code>Application</code> that restricts

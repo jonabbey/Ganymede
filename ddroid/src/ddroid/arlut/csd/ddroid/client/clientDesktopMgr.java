@@ -54,12 +54,10 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.Rectangle;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import javax.swing.DefaultDesktopManager;
+import javax.swing.JComponent;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -57,10 +57,18 @@
 
 package arlut.csd.ddroid.rmi;
 
-import arlut.csd.ddroid.common.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.Date;
+import java.util.Vector;
 
-import java.rmi.*;
-import java.util.*;
+import arlut.csd.ddroid.common.BaseListTransport;
+import arlut.csd.ddroid.common.CategoryTransport;
+import arlut.csd.ddroid.common.DumpResult;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ddroid.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface

@@ -55,9 +55,16 @@
 
 package arlut.csd.Util;
 
-import java.util.*;
-import java.util.zip.*;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /*------------------------------------------------------------------------------
                                                                            class

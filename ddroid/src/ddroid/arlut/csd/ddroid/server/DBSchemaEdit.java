@@ -53,14 +53,23 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.util.*;
-import java.rmi.*;
+import java.io.IOException;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
-import java.io.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import arlut.csd.ddroid.common.NotLoggedInException;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ddroid.rmi.CategoryNode;
+import arlut.csd.ddroid.rmi.NameSpace;
+import arlut.csd.ddroid.rmi.SchemaEdit;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -404,7 +413,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     Base[] bases;
     Enumeration en;
     int i = 0;
-    Base base;
 
     /* -- */
 

@@ -55,7 +55,6 @@
 
 package arlut.csd.ddroid.common;
 
-import java.rmi.RemoteException;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -56,7 +56,6 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class

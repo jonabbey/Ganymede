@@ -53,16 +53,14 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Hashtable;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import java.rmi.RemoteException;
+import javax.swing.JButton;
 
-import javax.swing.*;
-import javax.swing.border.*;
+import arlut.csd.ddroid.rmi.perm_field;
 
 /*------------------------------------------------------------------------------
                                                                            class 

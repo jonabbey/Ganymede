@@ -38,9 +38,10 @@
 
 package arlut.csd.JTree;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Component;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 /*------------------------------------------------------------------------------
                                                                            class

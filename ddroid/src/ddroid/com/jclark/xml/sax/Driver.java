@@ -1,14 +1,29 @@
 package com.jclark.xml.sax;
 
-import com.jclark.xml.parse.*;
-import com.jclark.xml.parse.base.*;
-import java.net.URL;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Enumeration;
+
 import org.xml.sax.SAXException;
+
+import com.jclark.xml.parse.ApplicationException;
+import com.jclark.xml.parse.CharacterDataEvent;
+import com.jclark.xml.parse.DTD;
+import com.jclark.xml.parse.EndElementEvent;
+import com.jclark.xml.parse.EndPrologEvent;
+import com.jclark.xml.parse.Entity;
+import com.jclark.xml.parse.EntityManager;
+import com.jclark.xml.parse.LocatedEvent;
+import com.jclark.xml.parse.NotWellFormedException;
+import com.jclark.xml.parse.OpenEntity;
+import com.jclark.xml.parse.ProcessingInstructionEvent;
+import com.jclark.xml.parse.StartElementEvent;
+import com.jclark.xml.parse.base.ApplicationImpl;
+import com.jclark.xml.parse.base.Parser;
+import com.jclark.xml.parse.base.ParserImpl;
 
 /**
  * An implementation of SAX 1.0 on top of the com.jclark.xml.parse package.

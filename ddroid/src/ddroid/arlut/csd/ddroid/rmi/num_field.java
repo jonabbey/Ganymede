@@ -52,8 +52,6 @@
 
 package arlut.csd.ddroid.rmi;
 
-import arlut.csd.ddroid.common.*;
-
 import java.rmi.RemoteException;
 
 public interface num_field extends db_field {

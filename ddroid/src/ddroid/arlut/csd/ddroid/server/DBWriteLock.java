@@ -54,11 +54,7 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.io.*;
-import java.util.*;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -103,11 +99,6 @@ public class DBWriteLock extends DBLock {
 
   public DBWriteLock(DBStore store)
   {
-    Enumeration en;
-    DBObjectBase base;
-
-    /* -- */
-
     this.key = null;
     this.lockSync = store.lockSync;
     baseSet = store.getBases();

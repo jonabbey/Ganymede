@@ -54,10 +54,10 @@
 
 package arlut.csd.ddroid.common;
 
-import arlut.csd.ddroid.server.PasswordDBField;
-import arlut.csd.ddroid.rmi.db_field;
+import java.rmi.RemoteException;
 
-import java.rmi.*;
+import arlut.csd.ddroid.rmi.db_field;
+import arlut.csd.ddroid.server.PasswordDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class

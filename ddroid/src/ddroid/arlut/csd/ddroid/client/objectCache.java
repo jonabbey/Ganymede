@@ -54,16 +54,12 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.util.*;		// vector, hashtable
-
+import arlut.csd.ddroid.common.Invid;
 import arlut.csd.ddroid.common.ObjectHandle;
 import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.JDataComponent.listHandle;
-import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class

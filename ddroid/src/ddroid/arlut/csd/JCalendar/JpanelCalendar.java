@@ -52,19 +52,42 @@
 
 package arlut.csd.JCalendar;
 
-import arlut.csd.JDialog.*;
-import arlut.csd.JDataComponent.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.rmi.RemoteException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.TitledBorder;
+
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JnumberField;
+import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.JDataComponent.TimedKeySelectionManager;
+import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.Util.PackageResources;
-
-import java.awt.*;
-import java.util.*;
-import java.text.*;
-
-import java.awt.event.*;
-import java.rmi.*;
-
-import javax.swing.*;
-import javax.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -894,7 +917,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     frame.setSize(300,200);
     frame.pack();
-    frame.show();
+    frame.setVisible(true);
   }
 }
 

@@ -1,8 +1,7 @@
 package com.jclark.xml.output;
 
-import java.io.Writer;
-import java.io.IOException;
 import java.io.CharConversionException;
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**

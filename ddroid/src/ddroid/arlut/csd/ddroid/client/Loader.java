@@ -53,13 +53,16 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.util.*;
-import java.rmi.*;
+import java.rmi.RemoteException;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import arlut.csd.Util.VecQuickSort;
+import arlut.csd.ddroid.common.BaseDump;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -854,7 +857,6 @@ public class Loader extends Thread {
   private synchronized void loadBaseMap() throws RemoteException
   {
     Base base;
-    Enumeration en;
     int size;
     Vector myBaseList;
 

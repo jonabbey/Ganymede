@@ -57,15 +57,21 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-
-import Qsmtp.*;
-import arlut.csd.Util.*;
+import Qsmtp.Qsmtp;
+import arlut.csd.Util.VectorUtils;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ObjectStatus;
+import arlut.csd.ddroid.common.Query;
+import arlut.csd.ddroid.common.Result;
+import arlut.csd.ddroid.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -503,7 +509,6 @@ public class DBLog {
   {
     String transactionID;
     String transdescrip = transaction.description;
-    boolean found;
     DBLogEvent event;
     Enumeration en;
     Hashtable mailOuts = new Hashtable(); // maps address to MailOut objects
@@ -963,7 +968,6 @@ public class DBLog {
 
     // --
 
-    String returnAddr;
     Vector mailList = new Vector();
     Invid objectInvid = (Invid) event.objects.elementAt(0);
     String key = event.eventClassToken + ":" + objectInvid.getType();
@@ -1343,8 +1347,7 @@ public class DBLog {
 				    boolean mailToOwners)
   {
     Vector 
-      notifyVect,
-      appendVect;
+      notifyVect;
 
     /* -- */
 
@@ -1550,8 +1553,8 @@ public class DBLog {
   {
     Enumeration objectsEnum, ownersEnum;
     Invid invid, ownerInvid;
-    InvidDBField ownersField, invidField2;
-    DBObject object, object2;
+    InvidDBField ownersField;
+    DBObject object;
     Vector vect;
     Vector results = new Vector();
     Hashtable seenOwners = new Hashtable();
@@ -1807,11 +1810,7 @@ class systemEventType {
   private String getAddresses(DBObject obj)
   {
     StringBuffer result = new StringBuffer();
-    InvidDBField invF;
     StringDBField strF;
-    Enumeration en;
-    Invid tmpI;
-    String tmpS;
 
     /* -- */
 
@@ -1934,12 +1933,8 @@ class objectEventType {
   private String getAddresses(DBObject obj)
   {
     StringBuffer result = new StringBuffer();
-    InvidDBField invF;
     StringDBField strF;
-    Enumeration en;
-    Invid tmpI;
-    String tmpS;
-
+ 
     /* -- */
 
     addressVect = new Vector();

@@ -53,16 +53,25 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-import java.util.*;
-import arlut.csd.JDataComponent.*;
+import arlut.csd.JDataComponent.JMultiLineLabel;
+import arlut.csd.JDataComponent.TimedKeySelectionManager;
+import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDialog.JCenterDialog;
+import arlut.csd.ddroid.rmi.Base;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -54,18 +54,49 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.lang.reflect.*;
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import org.python.core.PyInteger;
+
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.JythonMap;
+import arlut.csd.Util.StringUtils;
+import arlut.csd.Util.VecQuickSort;
+import arlut.csd.Util.VectorUtils;
+import arlut.csd.Util.XMLItem;
+import arlut.csd.Util.XMLUtils;
+import arlut.csd.Util.booleanSemaphore;
+import arlut.csd.ddroid.common.BaseListTransport;
+import arlut.csd.ddroid.common.CategoryTransport;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.FieldType;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.BaseField;
+import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ddroid.rmi.CategoryNode;
+import arlut.csd.ddroid.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -108,7 +139,7 @@ import arlut.csd.JDialog.JDialogBuff;
  * of this type, as well as by the schema editor when the schema is being edited.</p>
  */
 
-public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryNode {
+public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryNode, JythonMap {
 
   static boolean debug = true;
 
@@ -1438,6 +1469,58 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
   }
 
+  /**
+   * <p>
+   * This method will attempt to invoke an apppropriate <i>factory</i> method
+   * on this object base's specified custom class. This adds a layer of 
+   * indirection to DDroid's custom class loading behaviour. Instead of trying
+   * to invoke a constructor directly on the custom class, we instead look for
+   * a method called "factory" in the custom class that takes the same
+   * parameters.
+   * </p>
+   * 
+   * <p>
+   * This allows programmers to define a custom class that can do fancy tricks
+   * before constructing a new {@link arlut.csd.ddroid.server DBEditObject
+   * DBEditObject} like, say, loading the class from a Jython interpreter, or
+   * doing code-generation from an external class descriptor file.
+   * </p>
+   * 
+   * @param classParams the list of parameter types
+   * @param methodParams the parameters to pass to the factory method
+   * @return a new {@link arlut.csd.ddroid.server.DBEditObject DBEditObject}
+   * @throws SecurityException
+   * @throws InvocationTargetException
+   * @throws IllegalAccessException
+   */
+  
+  protected DBEditObject invokeFactory(Class[] classParams,
+      Object[] methodParams) throws SecurityException,
+      InvocationTargetException, IllegalAccessException
+  {
+    /*
+     * Deepak sez: This is sort of a hack. Sun, in its wisdom, decided to make
+     * Class.searchMethods() private. So now if I want to see if a class has a
+     * particular method, I have to do a getMethods() and iterate through the
+     * results. Instead, I've decided to cheat and use the fact that when you
+     * call Class.getMethod(), a NoSuchMethodException is thrown if that method
+     * isn't defined.
+     */
+    try
+      {
+        Method factory = classdef.getMethod("factory", classParams);
+        return (DBEditObject) factory.invoke(null, methodParams);
+      }
+    catch (NoSuchMethodException ex)
+      {
+        /*
+         * Don't panic...if there's no factory method defined, we'll just return
+         * null in the end.
+         */
+      }
+    return null;
+  }
+
   /** 
    * <p>This method is used to create a DBEditObject subclass handle
    * ({@link arlut.csd.ddroid.server.DBObjectBase#objectHook objectHook}),
@@ -1487,8 +1570,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     try
       {
-	c = classdef.getDeclaredConstructor(cParams); // DBObjectBase constructor
-	e_object = (DBEditObject) c.newInstance(params);
+        /* First, try to use classdef's factory method to create the object.
+         * If that doesn't work (if the classdef has no factory methods, for
+         * example), then use a default constructor. */
+
+	e_object = invokeFactory(cParams, params);
+
+	if (e_object == null)
+	  {
+	    c = classdef.getDeclaredConstructor(cParams); // DBObjectBase constructor
+	    e_object = (DBEditObject) c.newInstance(params);
+	  }
       }
     catch (NoSuchMethodException ex)
       {
@@ -1529,7 +1621,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     return e_object;
   }
-
+  
   /**
    * <p>Factory method to create a new DBEditObject of this
    * type.  The created DBEditObject will be connected
@@ -1640,8 +1732,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	try
 	  {
-	    c = classdef.getDeclaredConstructor(classArray);
-	    e_object = (DBEditObject) c.newInstance(parameterArray);
+	    /* First, try to use classdef's factory method to create the object. If
+	     * that doesn't work (if the classdef has no factory methods, for
+	     * example), then use a default constructor. */
+
+            e_object = invokeFactory(classArray, parameterArray);
+            if (e_object == null)
+              {
+                c = classdef.getDeclaredConstructor(classArray); 
+                e_object = (DBEditObject) c.newInstance(parameterArray);
+              } 
 	  }
 	catch (NoSuchMethodException ex)
 	  {
@@ -1669,16 +1769,121 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      ex.getTargetException() + "\n" + 
 	      ex.getMessage() + "\n\n" +
 	      Ganymede.stackTrace(ex) + "\n";
-	  }
-
-	if (error_code != null)
+          }
+	finally
 	  {
-	    Ganymede.debug("createNewObject failure: " + 
-			   error_code + " in trying to construct custom object");
+	    if (e_object == null)
+	      {
+		if (error_code != null)
+		  {
+		    String errormsg = "createNewObject failure: " + 
+		      error_code + " in trying to construct custom object";
+		    Ganymede.debug(errormsg);
+		    throw new DDroidManagementException(errormsg);
+		  }
+		else
+		  {
+		    throw new DDroidManagementException();
+		  }
+	      }
 	  }
       }
 
     return e_object;
+  }
+  
+  /**
+  *
+  * Check-out constructor, used by DBObject.createShadow()
+  * to pull out an object for editing.
+  *
+  * @param original the object to create the shadow of
+  * @param editset the transaction this object is to be created in
+  */
+  
+  public DBEditObject createNewObject(DBObject original, DBEditSet editset)
+  {
+    // if we are a customized object type, dynamically invoke
+    // the proper check-out constructor for the DBEditObject
+    // subtype.
+
+    if (classdef != null)
+      {
+        Constructor c;
+        Class classArray[];
+        Object parameterArray[];
+
+        classArray = new Class[2];
+
+        classArray[0] = original.getClass();
+        classArray[1] = editset.getClass();
+
+        parameterArray = new Object[2];
+
+        parameterArray[0] = original;
+        parameterArray[1] = editset;
+
+        String error_code = null;
+        DBEditObject shadowObject = null;
+
+        try
+          {
+            c = classdef.getDeclaredConstructor(classArray);
+            shadowObject = (DBEditObject) c.newInstance(parameterArray);
+          }
+        catch (NoSuchMethodException ex)
+          {
+            error_code = "NoSuchMethod Exception";
+          }
+        catch (SecurityException ex)
+          {
+            error_code = "Security Exception";
+          }
+        catch (IllegalAccessException ex)
+          {
+            error_code = "Illegal Access Exception";
+          }
+        catch (IllegalArgumentException ex)
+          {
+            error_code = "Illegal Argument Exception";
+          }
+        catch (InstantiationException ex)
+          {
+            error_code = "Instantiation Exception";
+          }
+        catch (InvocationTargetException ex)
+          {
+            InvocationTargetException tex = (InvocationTargetException) ex;
+
+            tex.getTargetException().printStackTrace();
+
+            error_code = "Invocation Target Exception "
+                + tex.getTargetException();
+          }
+	finally
+	  {
+	    if (shadowObject == null)
+	      {
+		if (error_code != null)
+		  {
+		    String errormsg = "createNewObject failure: " + error_code
+		      + " in trying to check out custom object";
+		    Ganymede.debug(errormsg);
+		    throw new DDroidManagementException(errormsg);
+		  }
+		else
+		  {
+		    throw new DDroidManagementException();
+		  }
+	      }
+	  }
+
+	return shadowObject;
+      }
+    else
+      {
+        return new DBEditObject(original, editset);
+      }
   }
 
   /**
@@ -2765,6 +2970,18 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>This server-side routing provides a convenient accessor to retrieve
+   * the entire member-object hashtable for this DBObjectBase.</p>
+   * 
+   * @return The internal object table
+   */
+   
+  public final DBObjectTable getObjectTable()
+  {
+    return objectTable;
+  }
+
+  /**
    * <p>Clear the editing flag.  This disables the DBObjectBase set
    * methods on this ObjectBase and all dependent field definitions.
    * This method also updates the FieldTemplate for each field in this
@@ -3191,14 +3408,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     return dumpLockList.size();
   }
 
-  /**
-   * <p>Let's get our name here.</p>
-   */
-
-  public String toString()
-  {
-    return object_name;
-  }
 
   /**
    * <p>Returns a vector of field definition templates, in display order.</p>
@@ -3340,4 +3549,208 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	customFields.removeElement(field);
       }
   }
+
+  
+  
+  
+
+  /* *************************************************************************
+   *
+   * The following methods are for Jython/Map support
+   *    
+   * For this object, the Map interface allows for indexing based on either
+   * the name or the numeric ID of a DBObject. Indexing by numeric id, however,
+   * is only supported for "direct" access to the Map; the numeric id numbers
+   * won't appear in the list of keys for the Map.
+   *
+   * EXAMPLE:
+   * MyDBObjectBaseVariable.get("foo") will return the DBObject with the label
+   * of "foo".
+   */
+
+  
+  public boolean has_key(Object key)
+  {
+    return keys().contains(key);
+  }
+
+  public List items()
+  {
+    List list = new ArrayList();
+    DBObject obj;
+    Object[] tuple;
+    
+    for (Iterator iter = getIterationSet().iterator(); iter.hasNext();)
+      {
+        obj = (DBObject) iter.next();
+        tuple = new Object[2];
+        tuple[0] = obj.getLabel();
+        tuple[1] = obj;
+        list.add(tuple);
+      }
+    
+    return list;    
+  }
+
+  public Set keys()
+  {
+    DBObject obj;
+    Set keys = new HashSet(objectTable.size());
+    
+    for(Iterator iter = getIterationSet().iterator(); iter.hasNext();)
+      {
+        obj = (DBObject) iter.next();
+        keys.add(obj.getLabel());
+      }
+    
+    return keys;
+  }
+
+  public boolean containsKey(Object key)
+  {
+    return has_key(key);
+  }
+
+  public boolean containsValue(Object value)
+  {
+    for(Iterator iter = getIterationSet().iterator(); iter.hasNext();)
+      {
+        if (iter.next().equals(value))
+          {
+            return true;
+          }
+      }
+    return false;
+  }
+
+  public Set entrySet()
+  {
+    Set entrySet = new HashSet(objectTable.size());
+    DBObject obj;
+    
+    for (Iterator iter = getIterationSet().iterator(); iter.hasNext();)
+      {
+        obj = (DBObject) iter.next();
+        entrySet.add(new Entry(obj));
+      }
+    
+    return entrySet;
+  }
+
+  public Object get(Object key)
+  {
+    if (key instanceof PyInteger)
+      {
+        PyInteger pi = (PyInteger) key;
+        return objectTable.get(pi.getValue());
+      }
+    else if (key instanceof Integer)
+      {
+        return objectTable.get(((Integer) key).intValue());
+      }
+    else if (key instanceof String)
+      {
+        /* Snag this object's label field */
+        String labelFieldName = getLabelFieldName();
+        if (labelFieldName == null)
+          {
+            return null;
+          }
+        
+        /* Now we'll check to see if there's a namespace on this field */
+        DBNameSpace namespace = ((DBObjectBaseField) getField(labelFieldName)).getNameSpace();
+        if (namespace == null)
+          {
+            return null;
+          }
+        
+        DBField field = namespace.lookup(key);
+        if (field.getObjTypeID() == getTypeID())
+          {
+            return field.getOwner();
+          }
+        else
+          {
+            return null;
+          }
+      }
+    return null;
+  }
+
+  public boolean isEmpty()
+  {
+    return objectTable.isEmpty();
+  }
+
+  public Set keySet()
+  {
+    return keys();
+  }
+  
+  public int size()
+  {
+    return objectTable.size();
+  }
+
+  public Collection values()
+  {
+    return getIterationSet();
+  }
+  
+  public String toString()
+  {
+    return keys().toString();
+  }
+  
+  static class Entry implements Map.Entry
+  {
+    Object key, value;
+    
+    public Entry( DBObject obj )
+    {
+      key = obj.getLabel();
+      value = obj;
+    }
+    
+    public Object getKey()
+    {
+      return key;
+    }
+
+    public Object getValue()
+    {
+      return value;
+    }
+
+    public Object setValue(Object value)
+    {
+      return null;
+    }
+  }  
+  
+  /* 
+   * These methods are are no-ops since we don't want this object
+   * messed with via the Map interface.
+   */
+      
+  public void clear()
+  {
+    return;
+  }
+
+  public Object put(Object key, Object value)
+  {
+    return null;
+  }
+
+  public void putAll(Map t)
+  {
+    return;
+  }
+
+  public Object remove(Object key)
+  {
+    return null;
+  }
+
 }

@@ -55,18 +55,28 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Date;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JTextField;
 
-import java.awt.*;
-import java.awt.event.*;
-
-import java.util.*;
-
-import arlut.csd.JCalendar.*;
-import arlut.csd.JDataComponent.*;
+import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDialog.JCenterDialog;
 
 /*------------------------------------------------------------------------------

@@ -57,12 +57,14 @@
 
 package arlut.csd.JDataComponent;
 
-import javax.swing.*;
-import javax.swing.event.*;
-
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.event.ItemListener;
 import java.util.Vector;
+
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -49,12 +49,11 @@
 
 package arlut.csd.ddroid.gasharl;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-import arlut.csd.ddroid.server.*;
+import java.util.Enumeration;
+import java.util.NoSuchElementException;
+import java.util.Vector;
 
 import arlut.csd.Util.StringUtils;
-import java.util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -357,7 +356,6 @@ public class IPv4Range {
   public synchronized String toString()
   {
     StringBuffer result = new StringBuffer();
-    boolean started;
 
     /* -- */
 

@@ -54,18 +54,24 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import java.io.*;
-import java.util.*;
-import java.rmi.*;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Enumeration;
 
-import gnu.regexp.*;
-import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.StringUtils;
+import arlut.csd.Util.XMLItem;
+import arlut.csd.Util.XMLUtils;
+import arlut.csd.ddroid.common.FieldTemplate;
+import arlut.csd.ddroid.common.FieldType;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ddroid.rmi.BaseField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -1165,7 +1171,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   synchronized ReturnVal setXML(XMLItem root, boolean doLinkResolve, PrintWriter err)
   {
-    XMLItem item, nextItem;
+    XMLItem item;
     Integer field_codeInt;
     boolean typeRead = false;
     boolean _visibility = true;

@@ -56,7 +56,7 @@
 
 package arlut.csd.JDataComponent;
 
-import java.awt.*;
+import java.awt.Component;
 
 /*------------------------------------------------------------------------------
                                                                            class

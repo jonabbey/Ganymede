@@ -49,10 +49,11 @@
 
 package arlut.csd.JDataComponent;
 
-import javax.swing.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
-import java.awt.event.*;
-import java.awt.*;
+import javax.swing.JCheckBox;
 
 /*------------------------------------------------------------------------------
                                                                            class

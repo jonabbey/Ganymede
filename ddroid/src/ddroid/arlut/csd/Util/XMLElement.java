@@ -55,10 +55,7 @@
 
 package arlut.csd.Util;
 
-import java.util.*;
-
-import org.xml.sax.*;
-import com.jclark.xml.sax.*;
+import org.xml.sax.AttributeList;
 
 /*------------------------------------------------------------------------------
                                                                            class

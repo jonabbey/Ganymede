@@ -52,14 +52,13 @@
 
 package arlut.csd.ddroid.server;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
+import java.rmi.RemoteException;
+import java.util.Vector;
 
-import arlut.csd.Util.*;
-
-import java.util.*;
-import java.rmi.*;
-import java.io.*;
+import arlut.csd.Util.VectorUtils;
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ddroid.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -80,7 +79,6 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   {
     DBObject ownerGroup;
     Vector result = new Vector();
-    InvidDBField emailInvids;
     StringDBField externalAddresses;
 
     /* -- */

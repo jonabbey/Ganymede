@@ -53,14 +53,26 @@
 
 package arlut.csd.ddroid.client;
 
-import arlut.csd.ddroid.common.*;
-import arlut.csd.ddroid.rmi.*;
-
-import arlut.csd.JDataComponent.*;
-import javax.swing.*;
-import java.awt.event.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Vector;
+
+import javax.swing.ComboBoxEditor;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+import arlut.csd.JDataComponent.JPanelCombo;
+import arlut.csd.JDataComponent.listHandle;
+import arlut.csd.ddroid.common.Invid;
 
 
 /*------------------------------------------------------------------------------

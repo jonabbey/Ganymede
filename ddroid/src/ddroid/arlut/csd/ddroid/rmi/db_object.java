@@ -53,11 +53,12 @@
 
 package arlut.csd.ddroid.rmi;
 
-import arlut.csd.ddroid.common.*;
-
+import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Vector;
-import java.rmi.RemoteException;
+
+import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ddroid.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                        interface
