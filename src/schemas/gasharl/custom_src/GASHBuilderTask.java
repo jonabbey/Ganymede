@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/10/09 08:12:32 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/10/10 05:45:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -180,6 +180,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 
 	writeMailDirect();
+	writeNTfile();
 
 	success = true;
       }
@@ -1320,25 +1321,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	// we don't include the username in the list of aliases,
 	// but the build/gash stuff requires that it be included
-	// in aliases_info
-
-	boolean appendComma = false;
+	// in aliases_info, so if we didn't write it out as the
+	// signature, make it the second alias.  The ordering
+	// doesn't matter past the first, so this is ok.
 
 	if (!signature.equals(username))
 	  {
 	    result.append(", ");
 	    result.append(username);
-
-	    appendComma = true;
 	  }
 
 	for (int i = 0; i < aliases.size(); i++)
 	  {
-	    if (appendComma)
-	      {
-		result.append(", ");
-	      }
-
 	    alias = (String) aliases.elementAt(i);
 	    
 	    if (alias.equals(signature))
@@ -1346,8 +1340,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		continue;
 	      }
 
+	    result.append(", ");
 	    result.append(alias);
-	    appendComma = true;
 	  }
       }
 
@@ -1528,6 +1522,96 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
+   * 
+   * This method generates a file that can be used to synchronize passwords
+   * and accounts to an NT system.
+   *
+   */
+
+  private boolean writeNTfile()
+  {
+    PrintWriter rshNT = null;
+    DBObject user;
+    Enumeration users;
+    Vector inactives = new Vector();
+
+    try
+      {
+	rshNT = openOutFile(path + "rshNT.txt");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeSysFile(): couldn't open rshNT.txt file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	rshNT.println("[Create/Update]");
+
+	users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+
+	    if (user.isInactivated())
+	      {
+		inactives.addElement(user.getLabel());
+		continue;
+	      }
+
+	    PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+
+	    if (passField == null)
+	      {
+		continue;
+	      }
+	    
+	    String password = passField.getPlainText();
+
+	    if (password == null || password.equals(""))
+	      {
+		continue;
+	      }
+
+	    // ok, we've got a user with valid plaintext password
+	    // info.  Write it.
+
+	    rshNT.print(user.getLabel());
+	    rshNT.print("::");
+	    rshNT.print(password);
+
+	    String fullname = (String) user.getFieldValueLocal((short) 257); // FULLNAME
+	    String room = (String) user.getFieldValueLocal((short) 259); // ROOM
+	    String div = (String) user.getFieldValueLocal((short) 258);	// DIVISION
+	    String workphone = (String) user.getFieldValueLocal((short) 260);	// OFFICEPHONE
+	    String homephone = (String) user.getFieldValueLocal((short) 261);	// HOMEPHONE
+
+	    String composite = fullname + ":" + room + " " + div + "," + workphone + "," + homephone;
+
+	    rshNT.print(":");
+	    rshNT.println(composite);
+	  }
+
+	rshNT.println("[Inactivate]");
+
+	for (int i = 0; i < inactives.size(); i++)
+	  {
+	    rshNT.println(inactives.elementAt(i));
+	  }
+
+	rshNT.println("[Delete]");
+      }
+    finally
+      {
+	rshNT.close();
+      }
+
+    return true;
+  }
+
+  /**
    *
    * This method generates a hosts_info file.  This method must be run during
    * builderPhase1 so that it has access to the enumerateObjects() method
@@ -1550,6 +1634,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     catch (IOException ex)
       {
 	System.err.println("GASHBuilderTask.writeSysFile(): couldn't open hosts_info file: " + ex);
+	return false;
       }
 
     try

@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 1999/10/06 22:09:06 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 1999/10/10 05:45:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -94,6 +94,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   static String createFilename = null;
   static File createHandler = null;
+
+  static String deleteFilename = null;
+  static File deleteHandler = null;
+
 
   // ---
 
@@ -1900,7 +1904,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // make sure we've got the path separator at the end of
 	    // createFilename, add our script name
 
-	    createFilename = PathComplete.completePath(createFilename) + "directory_maker";
+	    createFilename = PathComplete.completePath(createFilename) + "/scripts/directory_maker";
 
 	    if (debug)
 	      {
@@ -2080,6 +2084,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	System.err.println("userCustom: " + getLabel() + ", in deleteUserExternals().");
       }
 
+    handleUserDelete(getLabel());
+
     // get the volumes defined for the user on auto.home.default
 
     InvidDBField mapEntries = (InvidDBField) getOriginal().getField(userSchema.VOLUMES);
@@ -2163,6 +2169,125 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     subject = "User " + getLabel() + " needs to be removed on " + sysName;
 
     editset.logMail(addresses, subject, buffer.toString());
+  }
+
+  /**
+   * This method handles external actions for deleting a user.
+   */
+
+  private void handleUserDelete(String name)
+  {
+    boolean success = false;
+
+    /* -- */
+
+    // if the system log is null, we're running in the direct loader, and we
+    // don't want to create anything external.
+
+    // This would be unusual for a delete, but..
+
+    if (Ganymede.log == null)
+      {
+	return;
+      }
+
+    if (debug)
+      {
+	System.err.println("userCustom.handleUserDelete(): user " + name +
+			   "is being deleted");
+      }
+
+    try
+      {
+	if (deleteHandler == null)
+	  {
+	    deleteFilename = System.getProperty("ganymede.builder.scriptlocation");
+
+	    if (deleteFilename != null)
+	      {
+		// make sure we've got the path separator at the end of
+		// deleteFilename, add our script name
+	    
+		deleteFilename = PathComplete.completePath(deleteFilename) + "/scripts/user_deleter";
+	    
+		deleteHandler = new File(deleteFilename);
+	      }
+	    else
+	      {
+		Ganymede.debug("userCustom.handleUserDelete(): Couldn't find " +
+			       "ganymede.builder.scriptlocation property");
+	      }
+	  }
+
+	if (deleteHandler.exists())
+	  {
+	    try
+	      {
+		String execLine = deleteFilename + " " + name;
+
+		if (debug)
+		  {
+		    System.err.println("handleUserDelete: running " + execLine);
+		  }
+
+		int result;
+		Process p = java.lang.Runtime.getRuntime().exec(execLine);
+
+		try
+		  {
+		    if (debug)
+		      {
+			System.err.println("handleUserDelete: blocking");
+		      }
+
+		    p.waitFor();
+
+		    if (debug)
+		      {
+			System.err.println("handleUserDelete: done");
+		      }
+
+		    result = p.exitValue();
+
+		    if (result != 0)
+		      {
+			Ganymede.debug("Couldn't handle externals for deleting user " + name + 
+				       "\n" + deleteFilename + 
+				       " returned a non-zero result: " + result);
+		      }
+
+		    success = true;
+		  }
+		catch (InterruptedException ex)
+		  {
+		    Ganymede.debug("Couldn't handle externals for deleting user " + name + 
+				   ex.getMessage());
+		  }
+	      }
+	    catch (IOException ex)
+	      {
+		Ganymede.debug("Couldn't handle externals for deleting user " + name + 
+			       ex.getMessage());
+	      }
+	  }
+      }
+    finally
+      {
+	Invid admin = getGSession().getPersonaInvid();
+	String adminName = getGSession().getMyUserName();
+	Vector objects = new Vector();
+	objects.addElement(getInvid());
+
+	StringBuffer buffer = new StringBuffer();
+
+	buffer.append("User ");
+	buffer.append(name);
+	buffer.append(" has been expunged from the Ganymede database.\n\n");
+
+	editset.logEvent("userdeleted",
+			 buffer.toString(),
+			 admin, adminName, objects, null);
+      }
   }
 
   /**
@@ -2481,7 +2606,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// make sure we've got the path separator at the end of
 		// renameFilename, add our script name
 	    
-		renameFilename = PathComplete.completePath(renameFilename) + "directory_namer";
+		renameFilename = PathComplete.completePath(renameFilename) + "/scripts/directory_namer";
 	    
 		renameHandler = new File(renameFilename);
 	      }
@@ -2584,4 +2709,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			 admin, adminName, objects, null);
       }
   }
+
+
 }
