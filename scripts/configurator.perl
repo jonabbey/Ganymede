@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.10 $
-# $Date: 1999/01/16 05:30:08 $
+# $Revision: 1.11 $
+# $Date: 1999/01/16 05:52:43 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -116,8 +116,6 @@ classfiles:
 	\@cd $rootdir/src/JTable; \\
 	build
 	\@cd $rootdir/src/server; \\
-	build
-	\@cd $rootdir/src/JCalendar; \\
 	build
 	\@cd $rootdir/src/client; \\
 	build
@@ -250,8 +248,6 @@ $javadir = $ENV{GJAVA};
 	  "$rootdir/src/classes", "$rootdir/src/classes/jdj",
 	  "$rootdir/src/Util", "Ganymede Utility Classes",
 	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/Util",
-	  "$rootdir/src/JCalendar", "Ganymede Calendar Classes",
-	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/JCalendar",
 	  "$rootdir/src/JDialog", "Ganymede Dialog Classes",
 	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/JDialog",
 	  "$rootdir/src/JTable", "Ganymede Table Classes",
@@ -296,11 +292,10 @@ while ($#configs > 0) {
 
 @rebuilds=("$rootdir/src/jdj",
 	   "$rootdir/src/Util",
-	   "$rootdir/src/JCalendar",
+	   "$rootdir/src/JDataComponent",
 	   "$rootdir/src/JDialog",
 	   "$rootdir/src/JTable",
 	   "$rootdir/src/JTree",
-	   "$rootdir/src/JDataComponent",
 	   "$rootdir/src/server",
 	   "$rootdir/src/client",
 	   "$rootdir/src/schemas/bsd/custom_src",
