@@ -109,3 +109,13 @@ The regular expression class library used in the server to provide regexp
 search support is from the Free Software Foundation, and was written by
 Wes Biggs <wes@cacas.org>.  See the gnu-regexp-1.0.5/README and
 gnu-regexp-1.0.5/LICENSE for more details.
+
+The Java implementation of the standard UNIX crypt() function was
+converted from C by John Dumas, jdumas@zgs.com, whose code can be
+found at http://208.223.9.21/jfd/crypt.html.  jcrypt is included in
+Ganymede by permission of the author.
+
+The Qsmtp class was written by James Driscoll (maus@io.com), and
+placed into the public domain.  See
+http://www.io.com/~maus/JavaPage.html for details and additional
+free Java code.
