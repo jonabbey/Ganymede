@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2000/02/14 20:44:58 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2000/02/15 02:59:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.42 $ $Date: 2000/02/14 20:44:58 $
+ * @version $Revision: 1.43 $ $Date: 2000/02/15 02:59:43 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -437,34 +437,15 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   public static void refreshUsers()
   {
     GanymedeAdmin temp;
-    Vector entries = new Vector();
-    GanymedeSession session;
+    Vector entries;
 
     /* -- */
 
     // figure out the vector we want to pass along
 
-    synchronized (GanymedeServer.sessions)
-      {
-	for (int j = 0; j < GanymedeServer.sessions.size(); j++)
-	  {
-	    session = (GanymedeSession) GanymedeServer.sessions.elementAt(j);
-	    
-	    if (session.logged_in)
-	      {
-		// note that we really should do something a bit more sophisticated
-		// than using toString on connecttime.
-		
-		entries.addElement(new AdminEntry(session.username,
-						  session.personaName,
-						  session.clienthost,
-						  (session.status == null) ? "" : session.status,
-						  session.connecttime.toString(),
-						  (session.lastEvent == null) ? "" : session.lastEvent,
-						  session.objectsCheckedOut));
-	      }
-	  }
-      }
+    entries = GanymedeServer.getUserTable();
+
+    // update the consoles
 
     synchronized (GanymedeAdmin.consoles)
       {

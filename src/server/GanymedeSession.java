@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.170 $
-   Last Mod Date: $Date: 2000/02/03 04:59:34 $
+   Version: $Revision: 1.171 $
+   Last Mod Date: $Date: 2000/02/15 02:59:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -125,7 +125,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.170 $ $Date: 2000/02/03 04:59:34 $
+ * @version $Revision: 1.171 $ $Date: 2000/02/15 02:59:44 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -460,6 +460,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   QueryResult ownerList = null;
 
+  /**
+   * <P>This variable caches the {@link arlut.csd.ganymede.AdminEntry AdminEntry}
+   * object which is reported to admin consoles connected to the
+   * server when the console is updated.</P>
+   */
+
+  AdminEntry userInfo = null;
+
   /* -- */
 
   /**
@@ -626,10 +634,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     session = new DBSession(Ganymede.db, this, username);
 
-    // Let the GanymedeServer know that this session is
-    // now active.
+    // Let the GanymedeServer know that this session is now active for
+    // purposes of admin console updating.
 
-    GanymedeServer.sessions.addElement(this);
+    GanymedeServer.addRemoteUser(this);
 
     // update status, update the admin consoles
 
@@ -671,6 +679,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public synchronized void checkOut()
   {
     objectsCheckedOut++;
+    this.userInfo = null;	// clear admin console info cache
+
     GanymedeAdmin.refreshUsers();
   }
 
@@ -697,7 +707,42 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
       }
 
+    this.userInfo = null;	// clear admin console info cache
+
     GanymedeAdmin.refreshUsers();
+  }
+
+  /**
+   * <P>This method is used to generate a serializable
+   * {@link arlut.csd.ganymede.AdminEntry AdminEntry}
+   * object summarizing this GanymedeSession's state for
+   * the admin console.</P>
+   *
+   * <P>Used by code in
+   * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin}.</P>
+   */
+
+  public AdminEntry getAdminEntry()
+  {
+    AdminEntry info = userInfo;
+
+    if (info == null)
+      {
+	info = new AdminEntry(username,
+			      personaName,
+			      clienthost,
+			      (status == null) ? "" : status,
+			      connecttime.toString(),
+			      (lastEvent == null) ? "" : lastEvent,
+			      objectsCheckedOut);
+	userInfo = info;
+      }
+
+    // userInfo might have been set null again by another
+    // thread.. return the local variable to insure we return
+    // something useful
+
+    return info;
   }
 
   /** 
@@ -713,6 +758,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   void setLastError(String status)
   {
     lastError = status;
+    userInfo = null;		// clear admin console info cache
     Ganymede.debug("GanymedeSession [" + username + "]: setLastError (" + lastError + ")");
   }
 
@@ -988,7 +1034,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    // Update the server's records, refresh the admin consoles.
 	    
-	    GanymedeServer.sessions.removeElement(this);
+	    GanymedeServer.removeRemoteUser(this);
 
 	    // update the admin consoles
 	    
@@ -1266,6 +1312,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaName = null;
 	updatePerms(true);
 	ownerList = null;
+	userInfo = null;	// null our admin console cache
 	setLastEvent("selectPersona: " + persona);
 	return true;
       }
@@ -1308,6 +1355,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaInvid = personaObject.getInvid();
 	updatePerms(true);
 	ownerList = null;
+	userInfo = null;	// null our admin console cache
 	setLastEvent("selectPersona: " + persona);
 	return true;
       }
@@ -5702,6 +5750,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   private void setLastEvent(String text)
   {
     this.lastEvent = text;
+    this.userInfo = null;
     GanymedeAdmin.refreshUsers();
   }
 

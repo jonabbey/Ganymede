@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 2000/02/10 04:35:38 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 2000/02/15 02:59:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -105,7 +105,7 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.102 $ %D%
+ * @version $Revision: 1.103 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -164,7 +164,7 @@ public class DBStore {
    * given Invid.</p>
    *
    * <p>That is, backPointers.get(anInvid) returns a hashtable whose keys
-   * are the Invid's that point to anInvid via an asymmetric link.</p>
+   * are the Invid's that point to an Invid via an asymmetric link.</p>
    */
 
   Hashtable backPointers;
@@ -173,7 +173,7 @@ public class DBStore {
    * <p>Vector of {@link arlut.csd.ganymede.DBSession DBSession} objects.</p>
    */
 
-  Vector sessions;
+  private Vector sessions;
 
   /** 
    * A collection of {@link arlut.csd.ganymede.DBNameSpace

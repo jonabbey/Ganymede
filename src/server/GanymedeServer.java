@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 2000/02/14 20:44:58 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 2000/02/15 02:59:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -74,9 +74,44 @@ import java.rmi.server.*;
 
 public class GanymedeServer extends UnicastRemoteObject implements Server {
 
+  /**
+   * <P>Singleton server object.  A running Ganymede Server will have one
+   * instance of GanymedeServer active and bound into the RMI registry,
+   * and this field will point to it.</P>
+   */
+
   static GanymedeServer server = null;
-  static Vector sessions = new Vector();
+
+  /**
+   * <P>Vector of {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+   * objects for users that are logged into the Ganymede server remotely.</P>
+   *
+   * <P>Note that there may be GanymedeSession objects active that are
+   * not listed in this sessions Vector; GanymedeSession objects used for
+   * server-side internal operations are not counted here.  This Vector is
+   * primarily used to keep track of things for the admin console code in
+   * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin}.</P>
+   */
+
+  static private Vector sessions = new Vector();
+
+  /**
+   * <P>A hashtable mapping session names to identity.  Used by the login
+   * process to insure that each active remote session will be given a unique
+   * identifying name.</P>
+   */
+
   static Hashtable activeUsers = new Hashtable();
+
+  /**
+   * <P>A hashtable mapping user Invids a java.lang.Date object representing
+   * the last time that user logged into Ganymede.  This data structure is
+   * used to check to see if the server's motd.html file has changed since
+   * the user last logged in.  This hash of timestamps is not preserved
+   * in the ganymede.db file, so whenever the server is restarted, all users
+   * are presumed to need to see the motd.html file on their next login.</P>
+   */
+
   static Hashtable userLogOuts = new Hashtable();
 
   /**
@@ -386,6 +421,69 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    GanymedeServer.lSemaphore.decrement();
 	  }
       }
+  }
+
+  /**
+   * <P>This method is called to add a remote user's
+   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+   * object to the GanymedeServer's static
+   * {@link arlut.csd.ganymede.GanymedeServer#sessions sessions}
+   * field, which is used by the admin console code to iterate
+   * over connected users when logging user actions to the
+   * Ganymede admin console.</P>
+   */
+
+  public static void addRemoteUser(GanymedeSession session)
+  {
+    sessions.addElement(session);
+  }
+
+  /**
+   * <P>This method is called to remove a remote user's
+   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+   * object from the GanymedeServer's static
+   * {@link arlut.csd.ganymede.GanymedeServer#sessions sessions}
+   * field, which is used by the admin console code to iterate
+   * over connected users when logging user actions to the
+   * Ganymede admin console.</P>
+   */
+
+  public static void removeRemoteUser(GanymedeSession session)
+  {
+    sessions.removeElement(session);
+  }
+
+  /**
+   * <P>This method is used by the
+   * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin}
+   * refreshUsers() method to get a summary of the state of the
+   * remotely connected users.</P>
+   */
+
+  public static Vector getUserTable()
+  {
+    GanymedeSession session;
+    Vector entries = new Vector();
+
+    /* -- */
+
+    synchronized (sessions)
+      {
+	for (int i = 0; i < sessions.size(); i++)
+	  {
+	    session = (GanymedeSession) GanymedeServer.sessions.elementAt(i);
+	    
+	    if (session.logged_in)
+	      {
+		// note that we really should do something a bit more sophisticated
+		// than using toString on connecttime.
+		
+		entries.addElement(session.getAdminEntry());
+	      }
+	  }
+      }
+
+    return entries;
   }
 
   /**
