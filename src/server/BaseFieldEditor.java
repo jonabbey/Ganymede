@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -336,18 +336,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	  {
 	    setRowVisible(fieldC, true);
 	  }
-
-	try
-	  {
-	    if (fieldDef.isEditInPlace())
-	      {
-		setRowVisible(fieldC, false);
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote: " + ex);
-	  }
       }
     else
       {
@@ -424,7 +412,18 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
     try
       {
-	baseList = owner.getSchemaEdit().getBases(fieldDef.isEditInPlace());
+
+	// if this field is edit in place, we only want to list embeddable
+	// object types
+	
+	if (fieldDef.isEditInPlace())
+	  {
+	    baseList = owner.getSchemaEdit().getBases(fieldDef.isEditInPlace());
+	  }
+	else
+	  {
+	    baseList = owner.getSchemaEdit().getBases();
+	  }
       }
     catch (RemoteException rx)
       {
@@ -522,17 +521,37 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
 	    System.out.println("checking type: " + type);
 
-	    if (type == FieldType.INVID)
+	    try
 	      {
-		try
+		if (fieldDef.isEditInPlace())
 		  {
-		    System.out.println("adding " + bf.getName());
-		    fieldC.add(bf.getName());
+		    // in an edit in place field, we can only
+		    // be linked to a target object's container link field
+		
+		    if (bf.getID() == SchemaConstants.ContainerField)
+		      {
+			fieldC.add(bf.getName());
+		      }
 		  }
-		catch (RemoteException rx)
+		else
 		  {
-		    throw new IllegalArgumentException("Exception getting base field name " + rx);
+		    if (type == FieldType.INVID)
+		      {
+			try
+			  {
+			    System.out.println("adding " + bf.getName());
+			    fieldC.add(bf.getName());
+			  }
+			catch (RemoteException rx)
+			  {
+			    throw new IllegalArgumentException("Exception getting base field name " + rx);
+			  }
+		      }
 		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new IllegalArgumentException("Exception getting base field edit in place status " + ex);
 	      }
 	  }
       }
@@ -655,6 +674,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     ipShowing = false;
 
     System.out.println(" before try");
+
     try
       {
 	System.out.println(" in try");
@@ -971,6 +991,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	  {
 	    System.out.println("editInPlaceCF");
 	    fieldDef.setEditInPlace(editInPlaceCF.getState());
+	    editField(fieldNode, true);	// force full recalc and refresh
 	  }
 	else if (comp == cryptedCF)
 	  {
