@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -316,8 +316,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  throw new RuntimeException("Could not get date fields: " + rx);
 	}
 
-     
-
       pane.addChangeListener(this);
 
       createPanel(general_index);
@@ -330,13 +328,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       // into the menu items before the tabbed pane is all set up
 
       JMenuBar mb = createMenuBar(editable);
+
       try
 	{
 	  setJMenuBar(mb);
 	}
-      catch (Exception e)
+      catch (Error ex)
 	{
-	  // Swing 1.0.3 doesn't have this method, it is only in 1.1beta
+	  // Swing 1.0.2 doesn't have this method, it is only in 1.0.3 and later
+
+	  System.err.println("Not running recent version of swing.. no setJMenuBar method.");
 	}
 
       pane.invalidate();
@@ -745,6 +746,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     JMenuItem setExpirationMI = null;
     JMenuItem setRemovalMI = null;
+
     if (editable)
       {
 	setExpirationMI = new JMenuItem("Set Expiration Date");
