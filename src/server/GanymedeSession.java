@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.140 $
-   Last Mod Date: $Date: 1999/07/06 21:20:38 $
+   Version: $Revision: 1.141 $
+   Last Mod Date: $Date: 1999/07/14 04:46:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.140 $ %D%
+ * @version $Revision: 1.141 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2130,6 +2130,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * <p>If the user does not have permission to view the object, null will
    * be returned even if an object by that name does exist.</p>
    *
+   * <p>This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.</p>
+   *
    * @param name Label for an object
    * @param type Object type id number
    */
@@ -2160,6 +2164,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * {@link arlut.csd.ganymede.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
+   *
+   * <p>This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.</p>
    *
    * @see arlut.csd.ganymede.Query
    * @see arlut.csd.ganymede.Session
@@ -2367,11 +2375,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * This method provides the hook for doing all
+   * <p>This method provides the hook for doing all
    * manner of simple object listing for the Ganymede
-   * database.  
+   * database.</p>
    *
-   * @see arlut.csd.ganymede.Session
+   * <p>This method may not be called from a DBEditObject's
+   * commitPhase1/2() methods without risking deadlock.</p>
+   *
+   * @see arlut.csd.ganymede.Session 
    */
 
   public QueryResult query(Query query)
@@ -2381,9 +2392,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * Server-side method for doing object listing with support for DBObject's
+   * <p>Server-side method for doing object listing with support for DBObject's
    * {@link arlut.csd.ganymede.DBObject#lookupLabel(arlut.csd.ganymede.DBObject) lookupLabel}
-   * method.
+   * method.</p>
+   *
+   * <p>This method may not be called from a DBEditObject's
+   * commitPhase1/2() methods without risking deadlock.</p>
    */
 
   public QueryResult query(Query query, DBEditObject perspectiveObject)

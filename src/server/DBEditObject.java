@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 1999/06/25 02:23:50 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 1999/07/14 04:45:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.112 $ $Date: 1999/06/25 02:23:50 $ $Name:  $
+ * @version $Revision: 1.113 $ $Date: 1999/07/14 04:45:59 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2459,6 +2459,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * true in this method will cause the two phase commit mechanism to
    * behave unpredictably.</p>
    *
+   * <p><B>WARNING!</B> this method is called at a time when portions
+   * of the database are locked for the transaction's integration into
+   * the database.  You must not call methods that seek to gain a lock
+   * on the Ganymede database (such as the GanymedeSession query
+   * calls, including {@link
+   * arlut.csd.ganymede.GanymedeSession#findLabeledObject(java.lang.String,
+   * short) findLabeledObject()}), or else you will lock the server.</p>
+   *
    * @see arlut.csd.ganymede.DBEditSet 
    */
 
@@ -2498,6 +2506,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * <p>Subclasses that override this method may wish to make this method 
    * synchronized.</p>
+   *
+   * <p><B>WARNING!</B> this method is called at a time when portions
+   * of the database are locked for the transaction's integration into
+   * the database.  You must not call methods that seek to gain a lock
+   * on the Ganymede database (such as the GanymedeSession query
+   * calls, including {@link
+   * arlut.csd.ganymede.GanymedeSession#findLabeledObject(java.lang.String,
+   * short) findLabeledObject()}), or else you will lock the server.</p>
    */
 
   public void commitPhase2()
@@ -2556,6 +2572,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * You may want to synchronize your release method if you do anything
    * at all fancy.  More importantly, it is essential that you clear this.committing
    * if &lt;finalAbort&gt; is false so that this object can be edited afterwards.</p>
+   *
+   * <p><B>WARNING!</B> this method is called at a time when portions
+   * of the database are locked for the transaction's integration into
+   * the database.  You must not call methods that seek to gain a lock
+   * on the Ganymede database (such as the GanymedeSession query
+   * calls, including {@link
+   * arlut.csd.ganymede.GanymedeSession#findLabeledObject(java.lang.String,
+   * short) findLabeledObject()}), or else you will lock the server.</p>
    *
    * @param finalAbort If true, this object is being dropped, either due to an
    * aborted transaction or a checkpoint rollback.  

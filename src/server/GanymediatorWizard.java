@@ -18,8 +18,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/04/07 01:14:26 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/07/14 04:46:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,12 +90,26 @@ import arlut.csd.JDialog.JDialogBuff;
  * another ReturnVal which requests the client present another dialog and
  * call back this GanymediatorWizard to continue along the process.</p>
  *
+ * <p>The {@link
+ * arlut.csd.ganymede.GanymediatorWizard#getStartDialog()
+ * getStartDialog()} method is the starting place for the user's
+ * interaction with Ganymede wizards.  Server-side code will construct
+ * a GanymediatorWizard and return the wizard's getStartDialog()
+ * return value to start the process rolling.  It is critical that
+ * getStartDialog() call {@link
+ * arlut.csd.ganymede.GanymediatorWizard#unregister() unregister()} if
+ * no further interaction is desired.  The processDialogXX methods are
+ * called by the {@link
+ * arlut.csd.ganymede.GanymediatorWizard#respond(java.util.Hashtable)
+ * respond()} method, which handles unregistering the wizard if needed,
+ * but getStartDialog() is responsible for handling its own de-linking
+ * if no interaction needs to take place.</p>
+ *
  * @see arlut.csd.ganymede.ReturnVal
  * @see arlut.csd.ganymede.Ganymediator
  *
- * @version $Revision: 1.11 $ $Date: 1999/04/07 01:14:26 $ $Name:  $
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
- */
+ * @version $Revision: 1.12 $ $Date: 1999/07/14 04:46:01 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
 
 public abstract class GanymediatorWizard extends UnicastRemoteObject implements Ganymediator {
 
@@ -441,13 +455,14 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
   }
 
   /**
+   * <P>This method starts off the wizard process.</P>
    *
-   * This method starts off the wizard process
-   *
+   * <P>This method will always be overridden in GanymediatorWizard
+   * subclasses.  It is critical that if this method returns null
+   * (indicating that the wizard doesn't need to interact with
+   * the client), that this method calls unregister() to clear the
+   * wizard from the GanymedeSession.</P>
    */
 
-  public ReturnVal getStartDialog()
-  {
-    return null;
-  }
+  public abstract ReturnVal getStartDialog();
 }
