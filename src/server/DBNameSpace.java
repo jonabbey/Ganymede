@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -653,8 +653,15 @@ final class DBNameSpace extends UnicastRemoteObject implements NameSpace {
 
     if (currentVals == null)
       {
-	System.err.println("DBNameSpace.rollback(): no values held for transaction in namespace");
-	return false;
+	if (point.values.size() != 0)
+	  {
+	    System.err.println("DBNameSpace.rollback(): no values held for transaction in namespace");
+	    return false;
+	  }
+	else
+	  {
+	    return true;	// no work to be done here
+	  }
       }
 
     // ok, now we need to take the state of currentVals and roll it back
@@ -982,7 +989,15 @@ class DBNameSpaceCkPoint {
 
     tempVect = (Vector) space.reserved.get(transaction);
 
-    values = (Vector) tempVect.clone();
+    // if we got a non-null value, we'll go ahead and
+    // clone the vector preparatory to making a copy
+    // of the relevant subset of space.uniqueHash,
+    // else we'll leave it as an empty vector
+    
+    if (tempVect != null)
+      {
+	values = (Vector) tempVect.clone();
+      }
 
     // now copy our hash to preserve the namespace handles
     
