@@ -184,8 +184,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   private static boolean WeAreApplet = true;
 
-  private static Container appletContentPane = null;
-
   /**
    * Background thread to handle force disconnect commands from the server.
    * We need this thread because jdk 1.2 has a bug where RMI callbacks are
@@ -239,75 +237,27 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	throw new IllegalArgumentException("Usage error: glogin [-debug] properties=properties_file\n\n");
       }
 
+    try
+      {
+	loadProperties(properties_file);
+      }
+    catch (Exception ex)
+      {
+	System.err.println("Error, couldn't successfully load properties from file " + properties_file);
+	return;
+      }
+
     my_glogin = new glogin();
-
-    if (properties_file != null)
-      {
-	ganymedeProperties = new Properties();
-	
-	if (debug)
-	  {
-	    System.out.println("Starting up in debug mode.");
-	    System.out.println("Loading properties from: " + properties_file);
-	  }
-
-	try
-	  {
-	    ganymedeProperties.load(new BufferedInputStream(new FileInputStream(properties_file)));
-	  }
-	catch (java.io.FileNotFoundException e)
-	  {
-	    throw new RuntimeException("File not found: " + e);
-	  }
-	catch (java.io.IOException e)
-	  {
-	    throw new RuntimeException("Whoa, io exception: " + e);
-	  }
-      }
-
-    if (ganymedeProperties != null)
-      {
-	serverhost = ganymedeProperties.getProperty("ganymede.serverhost");
-
-	// get the registry port number
-
-	String registryPort = ganymedeProperties.getProperty("ganymede.registryPort");
-
-	if (registryPort != null)
-	  {
-	    try
-	      {
-		registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	      }
-	    catch (NumberFormatException ex)
-	      {
-		System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-				   registryPort);
-	      }
-	  }
-      }
-
-    if ((serverhost == null) || (serverhost.equals("")))
-      {
-	throw new RuntimeException("Trouble:  couldn't load server host from " + properties_file);
-      }
-
-    my_glogin.getContentPane().setLayout(new BorderLayout());
 
     my_frame = new gloginFrame("Directory Droid Client", my_glogin);
 
-    appletContentPane = my_frame.getContentPane();
+    my_frame.getContentPane().setLayout(new BorderLayout());
+    my_frame.getContentPane().add("Center", my_glogin);
 
-    appletContentPane.setLayout(new BorderLayout());
-   
-    appletContentPane.add(my_glogin,"Center");
+    my_glogin.init();		// init before we setVisible(), so startup is smoother
 
-    my_frame.pack();
-    my_frame.setSize(265,380);    
     my_frame.setVisible(true);
-
-    my_glogin.init();
-    my_glogin.getContentPane().getLayout().layoutContainer(my_glogin);
+    my_frame.pack();		// pack after setting visible so that we fit everything properly
   }
 
   /**
@@ -331,50 +281,37 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	System.out.println("init in glogin");
       }
 
-    my_glogin = this;
-    
     // Dowload the ganymede logo using the appropriate method
     
     ganymede_logo = PackageResources.getImageResource(this, "ddroid.jpg", getClass());
     
     if (WeAreApplet)
       {
-	my_frame = new JFrame();
-	serverhost = getParameter("ganymede.serverhost");
-
-	if (serverhost == null || serverhost.equals(""))
-	  {
-	    throw new RuntimeException("Trouble:  Couldn't get ganymede.serverhost PARAM");
-	  }
-
-	String registryPort = getParameter("ganymede.registryPort");
-
-	if (registryPort != null)
-	  {
-	    try
-	      {
-		registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	      }
-	    catch (NumberFormatException ex)
-	      {
-		System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-				   registryPort);
-	      }
-	  }
+	my_glogin = this;
+	my_frame = new JFrame(); // we need an invisible frame to attach pop-up dialogs to
+	loadParameters();
       }
 
-    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
+    getContentPane().setLayout(new BorderLayout());
+    getContentPane().add("Center", createLoginPanel());
 
-    appletContentPane = getContentPane();
-    appletContentPane.setLayout(new BorderLayout());
-
-    JPanel loginBox = new JPanel();
-    //    loginBox.setBorder(new BevelBorder(BevelBorder.RAISED));
-    loginBox.setBorder(BorderFactory.createEtchedBorder());
-    appletContentPane.add(loginBox, "Center");
+    // The Login GUI has been set up.  Now the server connection needs
+    // to be properly established.
     
+    /* Get a reference to the server */
+
+    my_thread.start();
+  }
+
+  public JPanel createLoginPanel()
+  {
+    JPanel loginBox = new JPanel();
+
+    loginBox.setBorder(BorderFactory.createEtchedBorder());
+
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
+
     gbc.anchor = GridBagConstraints.WEST;
     gbc.gridheight = 1;
     gbc.insets = new Insets(1,1,0,0);
@@ -383,12 +320,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     JLabel image = new JLabel(new ImageIcon(ganymede_logo));
     image.setOpaque(true);
-    image.setBackground(new Color(111,207,247));
+    image.setBackground(Color.black);
 
     gbc.fill = GridBagConstraints.BOTH;
     gbc.gridx = 0;
     gbc.gridy = 0;
-    gbc.gridwidth = 3;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.weighty = 1.0;
     gbc.weightx = 1.0;
     gbl.setConstraints(image, gbc);
@@ -407,8 +344,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     labelPanel.add("South", hostLabel);
 
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weighty = 0.0;
+    gbc.weightx = 1.0;
     gbc.gridy = 1;
     gbl.setConstraints(labelPanel, gbc);
     loginBox.add(labelPanel);
@@ -485,19 +424,98 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     _quitButton.addActionListener(this);
 
-    // frames like to be packed
+    return loginBox;
+  }
 
-    if (!WeAreApplet)
+  /**
+   * <P>Private method to load the Directory Droid client's parameters
+   * from a file.  Used when glogin is run from the command line..
+   * {@link arlut.csd.ddroid.client.glogin#loadParameters() loadParameters()}
+   * is for use in an applet context.</P>
+   */ 
+
+  static private void loadProperties(String properties_file)
+  {
+    ganymedeProperties = new Properties();
+	
+    if (debug)
       {
-	my_frame.pack();
+	System.out.println("Starting up in debug mode.");
+	System.out.println("Loading properties from: " + properties_file);
       }
 
-    // The Login GUI has been set up.  Now the server connection needs
-    // to be properly established.
-    
-    /* Get a reference to the server */
+    try
+      {
+	ganymedeProperties.load(new BufferedInputStream(new FileInputStream(properties_file)));
+      }
+    catch (java.io.FileNotFoundException e)
+      {
+	throw new RuntimeException("File not found: " + e);
+      }
+    catch (java.io.IOException e)
+      {
+	throw new RuntimeException("Whoa, io exception: " + e);
+      }
 
-    my_thread.start();
+    serverhost = ganymedeProperties.getProperty("ganymede.serverhost");
+
+    if ((serverhost == null) || (serverhost.equals("")))
+      {
+	throw new RuntimeException("Trouble:  couldn't load server host from " + properties_file);
+      }
+
+    // get the registry port number
+
+    String registryPort = ganymedeProperties.getProperty("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
+			       registryPort);
+	  }
+      }
+
+    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
+  }
+
+  /**
+   * <P>Private method to load the Directory Droid client's parameters
+   * from an applet's HTML parameters.  Used when glogin is run as an applet..
+   * {@link arlut.csd.ddroid.client.glogin#loadProperties(java.lang.String) loadProperties()}
+   * is for use in an application context.</P>
+   */ 
+
+  private void loadParameters()
+  {
+    serverhost = getParameter("ganymede.serverhost");
+
+    if (serverhost == null || serverhost.equals(""))
+      {
+	throw new RuntimeException("Trouble:  Couldn't get ganymede.serverhost PARAM");
+      }
+
+    String registryPort = getParameter("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from Directory Droid applet parameters: " + 
+			       registryPort);
+	  }
+      }
+
+    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
   }
 
   /**
@@ -860,7 +878,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     if (e.getType() == e.ERROR)
       {
-	new JErrorDialog(new JFrame(), e.getMessage(), getErrorImage());
+	new JErrorDialog(my_frame, e.getMessage(), getErrorImage());
       }
     else if (e.getType() == e.BUILDSTATUS)
       {
