@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2001/06/29 21:28:00 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2001/06/29 22:00:34 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -93,7 +93,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.38 $ $Date: 2001/06/29 21:28:00 $ $Name:  $
+ * @version $Revision: 1.39 $ $Date: 2001/06/29 22:00:34 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -361,7 +361,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inTitle.setText( org_in.concat(" : " + inVector.size()) );
     inTitle.setHorizontalAlignment( SwingConstants.LEFT );
     inTitle.setMargin( new Insets(0,0,0,0) );
-    inTitle.addActionListener( new SelectAllListener( in, out ) );
+    inTitle.addActionListener(this);// new SelectAllListener( in, out ) );
 
     inPanel.add("North", inTitle);
 
@@ -454,7 +454,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	add.addActionListener(this);
 
 	out = new JstringListBox();
-	outTitle.addActionListener( new SelectAllListener( out, in ) );
+	outTitle.addActionListener(this); // ( new SelectAllListener( out, in ) );
 	out.registerPopupMenu(outPopup);
 	out.load(outVector, rowWidth, true, null);
 	out.setCallback(this);
@@ -834,6 +834,18 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     if (!editable)
       {
 	return;
+      }
+
+    if (e.getSource() == inTitle)
+      {
+	in.setSelectionInterval( 0, in.getModel().getSize()-1 );
+	out.clearSelection();
+      }
+
+    if (e.getSource() == outTitle)
+      {
+	out.setSelectionInterval( 0, out.getModel().getSize()-1 );
+	in.clearSelection();
       }
 
     if (e.getActionCommand().equals("Add"))
@@ -1502,34 +1514,4 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     frame.pack();
     frame.setVisible(true);
   }
-
-  class SelectAllListener
-    implements ActionListener
-  {
-    JstringListBox 
-      thisBox,
-      otherBox;
-
-    public SelectAllListener( JstringListBox thisB, JstringListBox otherB ) 
-    {
-      thisBox = thisB;
-      otherBox = otherB;
-    }
-
-    public void actionPerformed( ActionEvent e )
-    {
-      /* Hilight all of the items in this list */
-      if (thisBox != null)
-	{
-	  thisBox.setSelectionInterval( 0, thisBox.getModel().getSize()-1 );
-	}
-
-      /* De-select all of the items in the companion list */
-      if (otherBox != null )
-	{
-	  otherBox.clearSelection();
-	}
-    }
-  }
-
 }

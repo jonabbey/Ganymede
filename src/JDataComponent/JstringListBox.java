@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2001/06/29 20:05:08 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2001/06/29 22:00:33 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.33 $ $Date: 2001/06/29 20:05:08 $ $Name:  $
+ * @version $Revision: 1.34 $ $Date: 2001/06/29 22:00:33 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
@@ -381,13 +381,22 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  }
 	    
 	insertHandleAt(lh, i);
+
+	addSelectionInterval(i, i);
+	ensureIndexIsVisible(i);
       }
     else
       {
+	int topIndex = model.getSize();
+
 	model.addElement(lh);
+
+	addSelectionInterval(topIndex, topIndex);
+
+	ensureIndexIsVisible(topIndex);
       }
     
-    setSelectedValue(lh, true);
+    //    setSelectedValue(lh, true);
   }
 
   /**
