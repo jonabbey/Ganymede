@@ -313,7 +313,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
 	    return retVal;
 	  }
-	else
+	else			// not succeeded
 	  {
 	    finalizeInactivate(false);
 	    return new ReturnVal(false);
