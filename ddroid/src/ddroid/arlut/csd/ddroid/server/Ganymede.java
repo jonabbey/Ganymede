@@ -73,6 +73,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RMISecurityManager;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.rmi.server.LogStream;
 import java.rmi.server.RemoteServer;
 import java.util.Date;
 import java.util.Properties;
@@ -373,7 +374,7 @@ public class Ganymede {
     
     if (ParseArgs.getArg("logrmi", argv) != null)
       {
-	debugFilename = ParseArgs.getArg("debug", argv);
+	debugFilename = ParseArgs.getArg("logrmi", argv);
       }
 
     if (propFilename == null)
@@ -435,6 +436,7 @@ public class Ganymede {
       }
     catch (RemoteException ex)
       {
+	ex.printStackTrace();
 	// we expect to see a RemoteException if we had an old
 	// server bound
       }
@@ -447,6 +449,49 @@ public class Ganymede {
     if (inUse)
       {
 	System.err.println(ts.l("main.info_reusing_registry"));
+      }
+
+    // Create our GanymedeRMIManager to handle RMI exports.  We need
+    // to create this before creating our DBStore, as some of the
+    // components of DBStore are to be made accessible through RMI
+
+    Ganymede.rmi = new GanymedeRMIManager(0, true);
+
+    // if debug=<filename> was specified on the command line, tell the
+    // RMI system to log RMI calls and exceptions that occur in
+    // response to RMI calls.
+
+    if (debugFilename != null)
+      {
+	// RMI Logging to {0}
+	System.err.println(ts.l("main.info_rmilogging", debugFilename));
+
+	try
+	  {
+	    RemoteServer.setLog(new FileOutputStream(debugFilename));
+
+	    System.getProperties().put("java.rmi.server.logCalls", "true");
+
+	    System.getProperties().put("java.rmi.server.proxy.logLevel", "verbose");
+	    FileOutputStream fos1 = new FileOutputStream(debugFilename + ".proxy");
+	    LogStream.log("proxy").setOutputStream(fos1);
+
+	    System.getProperties().put("java.rmi.server.tcp.logLevel", "verbose");
+	    FileOutputStream fos2 = new FileOutputStream(debugFilename + ".tcp");
+	    LogStream.log("tcp").setOutputStream(fos2);
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println(ts.l("main.error_fail_debug", ex.toString()));
+	  }
+      }
+    else
+      {
+	// Make RMI log any exceptions thrown in response to client calls
+	// to stderr.. XXX not sure this should always be done if the debug
+	// file is not specified on the command line XXX
+
+	System.getProperties().setProperty("sun.rmi.server.exceptionTrace", "true");
       }
 
     // create the database 
@@ -504,42 +549,16 @@ public class Ganymede {
 
     if (false)
       {
+	// Initializing Security Manager
 	debug(ts.l("main.info_init_security"));
 
 	System.setSecurityManager(new RMISecurityManager());
       }
     else
       {
+	// Not Initializing RMI Security Manager.. not supporting classfile transfer
 	debug(ts.l("main.info_no_security"));
       }
-
-    // if debug=<filename> was specified on the command line, tell the
-    // RMI system to log RMI calls and exceptions that occur in
-    // response to RMI calls.
-
-    if (debugFilename != null)
-      {
-	try
-	  {
-	    RemoteServer.setLog(new FileOutputStream(debugFilename));
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println(ts.l("main.error_fail_debug") + ex);
-	  }
-      }
-    else
-      {
-	// Make RMI log any exceptions thrown in response to client calls
-	// to stderr.. XXX not sure this should always be done if the debug
-	// file is not specified on the command line XXX
-
-	System.getProperties().setProperty("sun.rmi.server.exceptionTrace", "true");
-      }
-
-    // Create our GanymedeRMIManager to handle RMI exports
-
-    Ganymede.rmi = new GanymedeRMIManager(0, false);
 
     // Create a GanymedeServer object to support the logging
     // code... the GanymedeServer's main purpose (to allow logins)
@@ -816,6 +835,23 @@ public class Ganymede {
     writer.close();
 
     return stringTarget.toString();
+  }
+
+  /**
+   * This is a convenience method used by the server to generate a
+   * stack trace print from a server code.
+   */
+
+  static public void printCallStack()
+  {
+    try
+      {
+	throw new RuntimeException("TRACE");
+      }
+    catch (RuntimeException ex)
+      {
+	ex.printStackTrace();
+      }
   }
 
   /**
