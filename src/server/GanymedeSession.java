@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.rmi.server.*;
  *
  */
 
-final public class GanymedeSession extends UnicastRemoteObject implements Session {
+final public class GanymedeSession extends UnicastRemoteObject implements Session, Unreferenced {
 
   static final boolean debug = false;
 
@@ -257,6 +257,22 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     forced_off = true;		// keep logout from logging a normal logout
 
     this.logout();
+  }
+
+  /**
+   *
+   * This method is called when the Java RMI system detects that this
+   * remote object is no longer referenced by any remote objects.
+   *
+   * This method handles abnormal logouts.
+   *
+   * @see java.rim.server.Unreferenced
+   *
+   */
+
+  public void unreferenced()
+  {
+    forceOff("dead client");
   }
 
   //************************************************************
@@ -2177,7 +2193,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return false;
       }
 
-    inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField);
+    inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField); // owner or container
 
     if (inf == null)
       {
@@ -2185,6 +2201,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return false;
       }
     
+    if (obj.isEmbedded())
+      {
+	return personaMatch((DBObject) view_db_object((Invid) inf.getValueLocal()));
+      }
+
     return recursePersonaMatch(inf.getValuesLocal());
   }
 
