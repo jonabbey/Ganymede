@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,7 @@ import java.rmi.server.*;
 import java.awt.*;
 import java.applet.*;
 import java.util.*;
+import ReportTable;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -79,22 +80,15 @@ class iAdmin extends UnicastRemoteServer implements Admin {
 
   public void changeUsers(Vector users, Vector status)
   {
-    StringBuffer sb = new StringBuffer();
-
-    /* -- */
+    applet.table.clearCells();
 
     for (int i = 0; i < users.size(); i++)
       {
-	sb.append((String)users.elementAt(i));
-	sb.append(" -- ");
-	if (status.elementAt(i) != null)
-	  {
-	    sb.append((String)status.elementAt(i));
-	  }
-	sb.append("\n");
+	applet.table.setCellText(0, i, (String)users.elementAt(i), false);
+	applet.table.setCellText(1, i, (String)status.elementAt(i), false);
       }
 
-    applet.displayArea.setText(sb.toString());
+    applet.table.repaint();
   }
 
 }
@@ -114,78 +108,18 @@ public class GASHAdmin extends Applet {
   Button quitButton = null;
   TextArea displayArea = null;
   TextField statusField = null;
+  ReportTable table = null;
+
+  String headers[] = {"User", "Status"};
+  int colWidths[] = {100,100};
+  int colJust[] = {ReportTable.JUST_LEFT,ReportTable.JUST_CENTER};
+
+  Font headerFont = null;
+  Font tableFont = null;
 
   /* -- */
   
   public void init() 
-  {
-  }
-
-
-  public void resize() 
-  {
-    resize(300,300);
-  }
-
-  public void paint(Graphics g) 
-  {
-  }
-
-  public void setStatus(String status)
-  {
-
-  }
-
-  public boolean action(Event event, Object obj)
-  {
-    if (event.target instanceof Button)
-      {
-	if (event.target == quitButton)
-	  {
-	    System.err.println("Quitting");
-	    try
-	      {
-		admin.disconnect();
-	      }
-	    catch (RemoteException ex)
-	      {
-		System.err.println("Couldn't logout cleanly: " + ex);
-	      }
-	    finally
-	      {
-		System.exit(0);
-	      }
-
-	    return true;	// we handled the event
-	  }
-      }
-    return false;
-  }
-
-  public GASHAdmin() 
-  {
-    setLayout(new BorderLayout());
-    displayArea = new TextArea(6, 40);
-    displayArea.setEditable(false);
-    displayArea.setBackground(Color.blue);
-    displayArea.setForeground(Color.white);
-    add("Center", displayArea);
-
-    statusField = new TextField(40);
-    statusField.setEditable(false);
-    statusField.setBackground(Color.red);
-    statusField.setForeground(Color.white);
-    add("North", statusField);
-
-    p1 = new Panel();
-    p1.setLayout(new FlowLayout());
-    add("South", p1);
-
-    quitButton = new Button("Quit");
-    p1.add(quitButton);
-  }
-
-  public static void main(String[] argv)
   {
     String url = "rmi://csdsun1.arlut.utexas.edu:7211/gash.server";
     Server server = null;
@@ -237,16 +171,12 @@ public class GASHAdmin extends Applet {
 
     System.err.println("Bound to server object");
 
-    /* Define the applet */
-
-    Frame frame = new Frame("GASH2 Admin Console");
-    applet = new GASHAdmin();
 
     /* Get our client hooked up to our server */
 
     try
       {
-	admin = new iAdmin(applet, server);
+	admin = new iAdmin(this, server);
       }
     catch (RemoteException ex)
       {
@@ -258,6 +188,85 @@ public class GASHAdmin extends Applet {
 	System.err.println("Error: Didn't get server reference.  Exiting now.");
 	return;
       }
+  }
+
+
+  public void resize() 
+  {
+    resize(600,300);
+  }
+
+  public void paint(Graphics g) 
+  {
+  }
+
+  public void setStatus(String status)
+  {
+
+  }
+
+  public boolean action(Event event, Object obj)
+  {
+    if (event.target instanceof Button)
+      {
+	if (event.target == quitButton)
+	  {
+	    System.err.println("Quitting");
+	    try
+	      {
+		admin.disconnect();
+	      }
+	    catch (RemoteException ex)
+	      {
+		System.err.println("Couldn't logout cleanly: " + ex);
+	      }
+	    finally
+	      {
+		System.exit(0);
+	      }
+
+	    return true;	// we handled the event
+	  }
+      }
+    return false;
+  }
+
+  public GASHAdmin() 
+  {
+    setLayout(new BorderLayout());
+
+    displayArea = new TextArea(6, 40);
+    displayArea.setEditable(false);
+    displayArea.setBackground(Color.blue);
+    displayArea.setForeground(Color.white);
+//     add("Center", displayArea);
+
+    headerFont = new Font("Helvetica", Font.BOLD, 14);
+    tableFont = new Font("Helvetica", Font.PLAIN, 12);
+    table = new ReportTable(headers, colWidths, colJust,
+			    headerFont, tableFont);
+    add("Center", table);
+
+    statusField = new TextField(40);
+    statusField.setEditable(false);
+    statusField.setBackground(Color.red);
+    statusField.setForeground(Color.white);
+    add("North", statusField);
+
+    p1 = new Panel();
+    p1.setLayout(new FlowLayout());
+    add("South", p1);
+
+    quitButton = new Button("Quit");
+    p1.add(quitButton);
+  }
+
+  public static void main(String[] argv)
+  {
+    /* Define the applet */
+
+    Frame frame = new Frame("GASH2 Admin Console");
+    applet = new GASHAdmin();
 
     /* present the applet */
 
