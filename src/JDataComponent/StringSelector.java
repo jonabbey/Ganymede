@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2001/06/26 20:34:26 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2001/06/27 19:24:40 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -93,7 +93,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.32 $ $Date: 2001/06/26 20:34:26 $ $Name:  $
+ * @version $Revision: 1.33 $ $Date: 2001/06/27 19:24:40 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -1422,7 +1422,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * objects corresponding to the currently selected members.</p>
    */
 
-  public Vector getChosen()
+  public Vector getChosenHandles()
   {
     if (inVector == null)
       {
@@ -1430,6 +1430,30 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     return (Vector) inVector.clone();
+  }
+
+  /**
+   * <p>Returns a Vector of Strings corresponding to the currently
+   * selected members.</p> 
+   */
+
+  public Vector getChosenStrings()
+  {
+    Vector result = new Vector();
+
+    if (inVector == null)
+      {
+	return result;
+      }
+
+    for (int i = 0; i < inVector.size(); i++)
+      {
+	listHandle handle = (listHandle) inVector.elementAt(i);
+
+	result.addElement(handle.toString());
+      }
+    
+    return result;
   }
 }
 
