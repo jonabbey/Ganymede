@@ -1,14 +1,12 @@
 <!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html>
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="GENERATOR" content="Mozilla/4.5 [en] (WinNT; I) [Netscape]">
+   <link rel="stylesheet" type="text/css" href="stylesheets/ganymede.css"/>
    <title>Ganymede Server Overview</title>
 </head>
-<body bgcolor="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede Server Overview<br>Release 1.0.12 - 1 March 2004</FONT></h1>
+<h1>Ganymede Server Overview<br/>Release 2.0 dev - ? ? 2005<br/>$Rev$</h1>
 
 <hr>
 
@@ -19,12 +17,7 @@ intelligent management of network schema objects.</p>
 <p>In the sections below, we discuss the primary design attributes of the
 server.</p>
 
-<A NAME="objectdatabase">
-<table border="1" cellpadding="3" cellspacing="0" width="100%">
- <tr BGCOLOR="#CCFFCC">
-  <td colspan="1"><h2><b>Object Store</b></h2></td>
- </tr>
-</table>
+<h2 id="objectdatabase">Object Store</h2>
 
 <p>The Ganymede server has a built-in object database implemented
 using Java hashtables. This gives the server high performance and
@@ -97,12 +90,7 @@ unique parent, and can only be embedded into a single object at a time.
 This mechanism is used whenever the needs of a particular schema design
 can not be met by a simple set of atomic fields.</p>
 
-<A NAME="transactions">
-<table border="1" cellpadding="3" cellspacing="0" width="100%">
- <tr BGCOLOR="#CCFFCC">
-  <td colspan="1"><h2><b>Transaction Support</b></h2></td>
- </tr>
-</table>
+<h2 id="transactions">Transaction Support</h2>
 
 <p>The Ganymede server is built around a transactional model wherein clients
 connected to the server check-out objects for editing. There may be many
@@ -130,33 +118,20 @@ be propagated to the external environment in bulk, depending on the rate
 that transactions are committed and the time necessary to complete an external
 build.</p>
 
-<table border="1" cellpadding="3" cellspacing="0" width="100%">
- <tr BGCOLOR="#CCFFCC">
-  <td colspan="1"><h2><b>Permissions and ownership management</b></h2></td>
- </tr>
-</table>
+<h2 id="permissions">Permissions and ownership management</h2>
 
 <p>See <a href="permissions/privs.html">the
 permissions document</a> for a discussion of the Ganymede permissions and
 ownership model.</p>
 
-<table border="1" cellpadding="3" cellspacing="0" width="100%">
- <tr BGCOLOR="#CCFFCC">
-  <td colspan="1"><h2><b>Schema editing</b></h2></td>
- </tr>
-</table>
+<h2 id="schema">Schema editing</h2>
 
 <p>The server has built-in support for redefining the object type/field schema.
 See <a href="customization.html">the
 customization document</a> for a preliminary discussion of the schema editor
 and the customization possibilities provided by the server.</p>
 
-<A NAME="client">
-<table border="1" cellpadding="3" cellspacing="0" width="100%">
- <tr BGCOLOR="#CCFFCC">
-  <td colspan="1"><h2><b>Client communications</b></h2></td>
- </tr>
-</table>
+<h2 id="client">Client communications</h2>
 
 <p>The Ganymede system depends on the Java RMI system for all client/server
 communications. All services provided by the Ganymede server to its clients
@@ -168,19 +143,15 @@ that need to be refreshed. The server object linking code uses this ability
 to keep client windows synchronized with changes made that affect multiple
 objects.</p>
 
-<A NAME="servertasks">
-<table border="1" cellpadding="3" cellspacing="0" width="100%">
- <tr BGCOLOR="#CCFFCC">
-  <td colspan="1"><h2><b>Server Tasks</b></h2></td>
- </tr>
-</table>
+<h2 id="servertasks">Server Tasks</h2>
 
-<p>The Ganymede server has a built-in cron-like facility for scheduling various
-tasks. As of release 0.97, Ganymede adopters can register tasks for execution
-on demand from the admin console, on periodic intervals, and on transaction
-commit. These transactional commit-time tasks emit source files and run
-scripts on the computer hosting the server to propagate changes to the
-NIS and DNS maps into the network environment.</p>
+<p>The Ganymede server has a built-in cron-like facility for
+scheduling various tasks. Ganymede adopters can register tasks for
+execution on demand from the admin console, on periodic intervals, and
+on transaction commit. These transactional commit-time tasks emit
+source files and run scripts on the computer hosting the server to
+propagate changes to the NIS and DNS maps into the network
+environment.</p>
 
 <p>Tasks are registered with the Ganymede Scheduler by creating and editing
 Task objects in the database, under 'Admin-Level Objects'. Each task object
@@ -246,12 +217,29 @@ task every day at noon.<br><br>If the Period Anchor is not set on a periodic tas
 set to the server's startup time, and the task will be first run (period count * period unit) after
 startup.</td>
 </tr>
+
+<tr>
+<td>Option Strings</td>
+<td>String Vector</td>
+
+<td><p>This field is used to record information that you may not wish
+to hard-code into your task.  Builder tasks subclassed from <a
+href="javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
+can use the <a
+href="javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#getOptionValue(java.lang.String)">getOptionValue()</a>
+and <a
+href="javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask#isOptionSet(java.lang.String)">isOptionSet()</a>
+methods to retrieve configuration information from this Vector.  The
+Javadocs for these methods describe how Strings in this field should
+be formatted.</p>
+</td>
+</tr>
 </table>
 
 <p>Here is an example of a registered periodic task, set to run every day at midnight:</p>
 <IMG SRC="gifs/task.gif">
 
-<p>By default, a Ganymede 0.97 server comes with the following tasks pre-registered:</p>
+<p>By default, a Ganymede 2.0 server comes with the following tasks pre-registered:</p>
 
 <ul>
 <li>
