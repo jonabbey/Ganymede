@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2000/11/07 09:30:09 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2000/11/09 03:47:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,6 +88,23 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private org.xml.sax.Locator locator;
   private Vector buffer;
   private int bufferSize;
+
+  /**
+   * Set the lowWaterMark to something low on a single processor
+   * system, to something high (equal to bufferSize?) on a
+   * multi-processor native threads system.  
+   */
+
+  private int lowWaterMark;
+
+  /**
+   * Set the highWaterMark to something high if on a single processor
+   * system, to something high (equal to 0) on a multi-processor
+   * native threads system.  
+   */
+
+  private int highWaterMark;
+
   private Thread inputThread;
   private boolean done = false;
   private XMLItem pushback;
@@ -130,7 +147,25 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     inputSource = new InputSource(inStream);
 
     buffer = new Vector();
+
+    if (bufferSize < 20)
+      {
+	bufferSize = 20;
+      }
+
     this.bufferSize = bufferSize;
+
+    if (false) // optimize for single processor
+      {
+	this.highWaterMark = bufferSize - 5;
+	this.lowWaterMark = 5;
+      }
+    else // optimize for multi-processor
+      {
+	this.highWaterMark = 0;
+	this.lowWaterMark = bufferSize;
+      }
+
     this.skipWhiteSpace = skipWhiteSpace;
     this.err = err;
 
@@ -242,7 +277,15 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      {
 		value = (XMLItem) buffer.elementAt(0);
 		buffer.removeElementAt(0);
-		buffer.notifyAll();
+
+		// if we have drained the buffer below the low water
+		// mark, wake up the SAX parser thread and let it
+		// start filling us up again
+
+		if (buffer.size() <= lowWaterMark)
+		  {
+		    buffer.notifyAll();
+		  }
 	      }
 
 	    if (skipWhiteSpaceChars)
@@ -707,6 +750,20 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
   }
 
+  private final void pourIntoBuffer(XMLItem item)
+  {
+    buffer.addElement(item);
+
+    // if we have filled the buffer above the
+    // high water mark, wake up the consumers
+    // and let them start draining
+
+    if (buffer.size() >= highWaterMark)
+      {
+	buffer.notifyAll();
+      }
+  }
+
   /**
    * <p>This is a private helper method used to move a completed
    * halfElement XMLElement (which stays half-completed until we know
@@ -720,11 +777,10 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     if (halfElement != null)
       {
-	buffer.addElement(halfElement);
-
+	XMLItem _item = halfElement;
 	halfElement = null;
-	
-	buffer.notifyAll();
+
+	pourIntoBuffer(_item);
       }
   }
 
@@ -787,8 +843,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    throw ex;
 	  }
 	
-	buffer.addElement(new XMLStartDocument());
-	buffer.notifyAll();
+	pourIntoBuffer(new XMLStartDocument());
       }
   }
 
@@ -833,10 +888,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
 	    throw ex;
 	  }
-	
-	buffer.addElement(new XMLEndDocument());
-	done = true;
-	buffer.notifyAll();
+
+	done = true;	
+	pourIntoBuffer(new XMLEndDocument());
       }
   }
 
@@ -944,8 +998,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    throw ex;
 	  }
 	
-	buffer.addElement(new XMLCloseElement(name));
-	buffer.notifyAll();
+	pourIntoBuffer(new XMLCloseElement(name));
       }
   }
 
@@ -1001,8 +1054,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    throw ex;
 	  }
 	
-	buffer.addElement(new XMLCharData(ch, start, length));
-	buffer.notifyAll();
+	pourIntoBuffer(new XMLCharData(ch, start, length));
       }
   }
 
@@ -1057,8 +1109,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    throw ex;
 	  }
 	
-	buffer.addElement(new XMLCharData(ch, start, length));
-	buffer.notifyAll();
+	pourIntoBuffer(new XMLCharData(ch, start, length));
       }
   }
 
@@ -1128,8 +1179,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    throw ex;
 	  }
 	
-	buffer.addElement(new XMLWarning(exception, locator));
-	buffer.notifyAll();
+	pourIntoBuffer(new XMLWarning(exception, locator));
       }
   }
 
@@ -1183,8 +1233,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	  }
 
 	err.println("XML parsing error: " + exception.getMessage());
-	buffer.addElement(new XMLError(exception, locator, false));
-	buffer.notifyAll();
+	pourIntoBuffer(new XMLError(exception, locator, false));
       }
   }
 
@@ -1235,10 +1284,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	    throw ex;
 	  }
 	
-	buffer.addElement(new XMLError(exception, locator, true));
-	err.println(exception.getMessage());
 	done = true;
-	buffer.notifyAll();
+	err.println(exception.getMessage());
+	pourIntoBuffer(new XMLError(exception, locator, true));
       }
   }
 }

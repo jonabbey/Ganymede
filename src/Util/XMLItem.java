@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/10/28 08:12:11 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/11/09 03:47:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -50,8 +50,6 @@
 */
 
 package arlut.csd.Util;
-
-import java.util.Enumeration;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -179,13 +177,21 @@ public abstract class XMLItem {
   }
 
   /**
-   * <P>This method returns an enumeration of attribute names
-   * present in this element.  getAttrStr() can be used on these
-   * keys in order to get the raw string values associated with
-   * the attribute names.</P>
+   * <p>This method returns the name for a given attribute
+   * in this XMLItem.</p>
    */
 
-  public Enumeration getAttrKeysEnum()
+  public String getAttrKey(int index)
+  {
+    throw new IllegalArgumentException("not an XMLElement.");
+  }
+
+  /**
+   * <p>This method returns the value for a given attribute
+   * in this XMLItem.</p>
+   */
+
+  public String getAttrVal(int index)
   {
     throw new IllegalArgumentException("not an XMLElement.");
   }

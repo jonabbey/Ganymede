@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/10/28 08:12:10 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/11/09 03:47:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -71,7 +71,8 @@ public class XMLElement extends XMLItem {
 
   public XMLItem[] children;
   String name;
-  Hashtable attributes;
+  String attrKeys[];
+  String attrVals[];
   boolean empty;
 
   /* -- */
@@ -79,8 +80,6 @@ public class XMLElement extends XMLItem {
   XMLElement(String name, AttributeList atts)
   {
     int length;
-    String label;
-    String value;
 
     /* -- */
 
@@ -90,14 +89,13 @@ public class XMLElement extends XMLItem {
       {
 	length = atts.getLength();
 
-	attributes = new Hashtable(length + 1, (float) 1.0);
+	attrKeys = new String[length];
+	attrVals = new String[length];
 
 	for (int i = 0; i < atts.getLength(); i++)
 	  {
-	    label = atts.getName(i);
-	    value = atts.getValue(i);
-
-	    attributes.put(label, value);
+	    attrKeys[i] = atts.getName(i);
+	    attrVals[i] = atts.getValue(i);
 	  }
       }
   }
@@ -201,33 +199,34 @@ public class XMLElement extends XMLItem {
 
   public int getAttrCount()
   {
-    if (attributes == null)
+    if (attrKeys == null)
       {
 	return 0;
       }
     else
       {
-	return attributes.size();
+	return attrKeys.length;
       }
   }
 
   /**
-   * <P>This method returns an enumeration of attribute names
-   * present in this element.  getAttrStr() can be used on these
-   * keys in order to get the raw string values associated with
-   * the attribute names.</P>
+   * <p>This method returns the name for a given attribute
+   * in this XMLItem.</p>
    */
 
-  public Enumeration getAttrKeysEnum()
+  public String getAttrKey(int index)
   {
-    if (attributes == null)
-      {
-	return null;
-      }
-    else
-      {
-	return attributes.keys();
-      }
+    return attrKeys[index];
+  }
+
+  /**
+   * <p>This method returns the value for a given attribute
+   * in this XMLItem.</p>
+   */
+
+  public String getAttrVal(int index)
+  {
+    return attrVals[index];
   }
 
   /**
@@ -238,12 +237,20 @@ public class XMLElement extends XMLItem {
 
   public String getAttrStr(String name)
   {
-    if (attributes == null)
+    if (attrKeys == null)
       {
 	return null;
       }
 
-    return (String) attributes.get(name);
+    for (int i = 0; i < attrKeys.length; i++)
+      {
+	if (attrKeys[i].equals(name))
+	  {
+	    return attrVals[i];
+	  }
+      }
+
+    return null;
   }
 
   /**
@@ -256,23 +263,24 @@ public class XMLElement extends XMLItem {
 
   public boolean getAttrBoolean(String name)
   {
-    if (attributes == null)
+    if (attrKeys == null)
       {
 	return false;
       }
 
-    String val = (String) attributes.get(name);
-
-    if (val == null)
+    for (int i = 0; i < attrKeys.length; i++)
       {
-	return false;
+	if (attrKeys[i].equals(name))
+	  {
+	    return (attrVals[i].equals("1") || 
+		    attrVals[i].equalsIgnoreCase("true") || 
+		    attrVals[i].equalsIgnoreCase("t") ||
+		    attrVals[i].equalsIgnoreCase("yes") ||
+		    attrVals[i].equalsIgnoreCase("y"));
+	  }
       }
 
-    return (val.equals("1") || 
-	    val.equalsIgnoreCase("true") || 
-	    val.equalsIgnoreCase("t") ||
-	    val.equalsIgnoreCase("yes") ||
-	    val.equalsIgnoreCase("y"));
+    return false;
   }
 
   /**
@@ -284,32 +292,31 @@ public class XMLElement extends XMLItem {
 
   public Integer getAttrInt(String name)
   {
-    if (attributes == null)
+    if (attrKeys == null)
       {
 	return null;
       }
 
-    String val = (String) attributes.get(name);
-
-    if (val == null || val.equals(""))
+    for (int i = 0; i < attrKeys.length; i++)
       {
-	return null;
+	if (attrKeys[i].equals(name))
+	  {
+	    try
+	      {
+		return new Integer(attrVals[i]);
+	      }
+	    catch (NumberFormatException ex)
+	      {
+		return null;
+	      }
+	  }
       }
 
-    try
-      {
-	return new Integer(val);
-      }
-    catch (NumberFormatException ex)
-      {
-	return null;
-      }
+    return null;
   }
 
   public String toString()
   {
-    Object key, value;
-    int i = 0;
     StringBuffer buffer = new StringBuffer();
 
     /* -- */
@@ -317,20 +324,15 @@ public class XMLElement extends XMLItem {
     buffer.append("XML Open Element <");
     buffer.append(name);
     
-    if (attributes != null)
+    if (attrKeys != null)
       {
-	Enumeration keys = attributes.keys();
-
-	while (keys.hasMoreElements())
+	for (int i = 0; i < attrKeys.length; i++)
 	  {
 	    buffer.append(" ");
 
-	    key = keys.nextElement();
-	    value = attributes.get(key);
-
-	    buffer.append(key);
+	    buffer.append(attrKeys[i]);
 	    buffer.append("=\"");
-	    buffer.append(value);
+	    buffer.append(attrVals[i]);
 	    buffer.append("\"");
 
 	    i++;
