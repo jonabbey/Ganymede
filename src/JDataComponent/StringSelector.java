@@ -213,7 +213,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	if (available == null)
 	  {
-	    System.out.println(" HEY!  You tried to make a canChoose StringSelector with a null available vector.  That's ok, we forgive you.");
+	    if (debug)
+	      {
+		System.out.println(" HEY!  You tried to make a canChoose StringSelector with a null available vector.  That's ok, we forgive you.");
+	      }
 	  }
 	else
 	  {
@@ -330,25 +333,32 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (available == null)
       {
-	// The whole thing should be blank.
-	in.model.removeAllElements();
 	if (out != null)
 	  {
 	    out.model.removeAllElements();
 	  }
-
-	return;
       }
 
     // If there is no out box, then we don't need to worry about available stuff
     if (out != null)
       {
-	if (chosen != null) // If's it null, nothing is chosen.
+	if ((chosen != null) && (available != null)) // If's it null, nothing is chosen.
 	  {
 	    for (int i = 0; i < chosen.size(); i++)
 	      {
 		// What whill this do if it is not in available?  I don't know.
-		available.removeElement(chosen.elementAt(i));
+		try
+		  {
+		    available.removeElement(chosen.elementAt(i));
+		  }
+		catch (Exception e)
+		  {
+		    if (debug)
+		      {
+			System.out.println("Could not remove Element: " + chosen.elementAt(i) + ", not in available vector?");
+		      }
+		  }
+
 	      }
 	  }
 
@@ -380,7 +390,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    */
   public void setVisibleRowCount(int numRows)
   {
-    System.out.println("I don't know how to setVisibleRowCount yet.");
+    if (debug)
+      {
+	System.out.println("I don't know how to setVisibleRowCount yet.");
+      }
   }
 
   /**
@@ -519,10 +532,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
 
-	if (mustChoose) {
-	    // Check to see if it is in there
-	    System.out.println("Checking to see if this is a viable option");
-
+	if (mustChoose) 
+	  {	    // Check to see if it is in there
+	    if (debug)
+	      {
+		System.out.println("Checking to see if this is a viable option");
+	      }
+	    
 	    if (out != null)
 	      {
 		if (out.containsLabel(item)) {
@@ -647,7 +663,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  }
 		else
 		  {
-		    System.err.println("setValuePerformed returned false.");
+		    if (debug)
+		      {
+			System.err.println("setValuePerformed returned false.");
+		      }
 		  }
 	      }
 	    
@@ -759,7 +778,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      }
 	    else
 	      {
-		System.err.println("setValuePerformed returned false.");
+		if (debug)
+		  {
+		    System.err.println("setValuePerformed returned false.");
+		  }
 	      }
 	  }
 	else // no callback
@@ -831,15 +853,21 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	out.addItem(item);
       }
 
-    // This should scroll to the new selected item
-    //    
-    //    if (out != null)
-    //      {
-    //	out.setSelectedValue(item, true);
-    //      }
-
+    in.invalidate();
+    if (out != null)
+      {
+	out.invalidate();
+      }
     invalidate();
-    parent.validate();
+    //parent.validate();
+    if (parent.getParent() != null)
+      {
+	parent.getParent().validate();
+      }
+    else
+      {
+	parent.validate();
+      }
   }
 
   public boolean setValuePerformed(JValueObject o)
@@ -870,6 +898,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("could not setValuePerformed from StringSelector: " + rx);
 	      }
+
 	    return true;
 	  }	
       }
