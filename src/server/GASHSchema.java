@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2274,17 +2274,17 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	  }
 
 	//Here is where the editability is checked.
-	commentT.setEnabled(isEditable);
-	nameS.setEnabled(isEditable);
-	classS.setEnabled(isEditable);
-	trueLabelS.setEnabled(isEditable);
-	falseLabelS.setEnabled(isEditable);
-	OKCharS.setEnabled(isEditable);
-	BadCharS.setEnabled(isEditable);
-	idN.setEnabled(isEditable);
-	maxArrayN.setEnabled(isEditable);
-	minLengthN.setEnabled(isEditable);
-	maxLengthN.setEnabled(isEditable);
+	commentT.setEditable(isEditable);
+	nameS.setEditable(isEditable);
+	classS.setEditable(isEditable);
+	trueLabelS.setEditable(isEditable);
+	falseLabelS.setEditable(isEditable);
+	OKCharS.setEditable(isEditable);
+	BadCharS.setEditable(isEditable);
+	idN.setEditable(isEditable);
+	maxArrayN.setEditable(isEditable);
+	minLengthN.setEditable(isEditable);
+	maxLengthN.setEditable(isEditable);
 	vectorCF.setEnabled(isEditable);
 	labeledCF.setEnabled(isEditable);
 	editInPlaceCF.setEnabled(isEditable);
@@ -2457,7 +2457,8 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 		throw new IllegalArgumentException("exception getting field name: " + rx);
 	      }
 
-	    if ((currentFieldName != null) && currentLabel.equals(currentFieldName))
+	    if ((currentFieldName != null) && (currentLabel != null)  &&
+		currentLabel.equals(currentFieldName))
 	      {
 		changeLabelTypeDialog = new StringDialog(owner, 
 							 "Warning: changing object type",
