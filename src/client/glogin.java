@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 2000/02/16 11:31:13 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 2000/06/02 21:12:05 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -88,7 +88,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.63 $ $Date: 2000/02/16 11:31:13 $ $Name:  $
+ * @version $Revision: 1.64 $ $Date: 2000/06/02 21:12:05 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -501,7 +501,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	    SwingUtilities.invokeLater(new Runnable() {
 	      public void run() {
-		connector.setEnabled(true);
+		enableButtons(true);
 		connector.setText("Attempt to reconnect");
 		connector.paintImmediately(connector.getVisibleRect());
 	      }
@@ -520,7 +520,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    SwingUtilities.invokeLater(new Runnable() {
 	      public void run() {
 		connector.setText("Login to server");
-		connector.setEnabled(true);
+		enableButtons(true);
 		connector.paintImmediately(connector.getVisibleRect());
 		setNormalCursor();
 		
@@ -719,13 +719,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 					      "Couldn't log into server: \n" +
 					      ex.getMessage(),
 					      getErrorImage());
+	    
+	    enableButtons(true);
 	  }
 	    
-	connector.setEnabled(false);
-	_quitButton.setEnabled(false);
-
 	if (my_session != null) 
 	  {
+	    enableButtons(false);
 	    startSession(my_session);
 	  }
 	else 
@@ -749,8 +749,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		// re-enable the "Login to server" button so that the
 		// user can try again.
 
-		connector.setEnabled(true);
-		_quitButton.setEnabled(true);
+		enableButtons(true);
 	      }
 	  }
 
@@ -881,7 +880,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.63 $ $Date: 2000/02/16 11:31:13 $ $Name:  $
+ * @version $Revision: 1.64 $ $Date: 2000/06/02 21:12:05 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -974,7 +973,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.63 $ $Date: 2000/02/16 11:31:13 $ $Name:  $
+ * @version $Revision: 1.64 $ $Date: 2000/06/02 21:12:05 $ $Name:  $
  * @author Jonathan Abbey
  */
 

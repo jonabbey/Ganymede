@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/03/29 01:29:47 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2000/06/02 21:12:05 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -71,7 +71,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.15 $ $Date: 2000/03/29 01:29:47 $ $Name:  $
+ * @version $Revision: 1.16 $ $Date: 2000/06/02 21:12:05 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -97,6 +97,7 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   private String password = null;
   private boolean connected = false;
   private Vector listeners = new Vector();
+  private String loginRefuseMessage = null;
 
   /* -- */
 
@@ -200,11 +201,22 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 
     try
       {
+	// the server may send us a message using our
+	// forceDisconnect() method during the login process
+
+	loginRefuseMessage = null;
 	session = server.login(this);
-	
+
 	if (session == null)
 	  {
-	    sendErrorMessage("Couldn't log in to server... bad username/password?");
+	    if (loginRefuseMessage != null)
+	      {
+		sendErrorMessage(loginRefuseMessage);
+	      }
+	    else
+	      {
+		sendErrorMessage("Couldn't login to server... bad username/password?");
+	      }
 	  }
 	else
 	  {
@@ -366,6 +378,8 @@ public class ClientBase extends UnicastRemoteObject implements Client {
   {
     connected = false;
     session = null;
+
+    loginRefuseMessage = reason;
 
     ClientEvent e = new ClientEvent("Server forced disconect: " + reason);
 

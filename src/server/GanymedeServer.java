@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 2000/03/20 22:10:58 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 2000/06/02 21:12:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -209,7 +209,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	if (error != null)
 	  {
-	    client.forceDisconnect("Can't login to Ganymede server.. semaphore disabled: " + error);
+	    if (error.equals("shutdown"))
+	      {
+		client.forceDisconnect("The server is currently waiting to shutdown.  No logins will be " +
+				       "accepted until the server has restarted.");
+	      }
+	    else
+	      {
+		client.forceDisconnect("Can't login to Ganymede server.. semaphore disabled: " + error);
+	      }
 	    return null;
 	  }
       }
@@ -218,6 +226,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	ex.printStackTrace();
 	throw new RuntimeException(ex.getMessage());
       }
+
+    // massive try so we decrement our loginSemaphore if the login
+    // doesn't go through cleanly
 
     try
       {
@@ -937,6 +948,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	ex.printStackTrace();
 	throw new RuntimeException(ex.getMessage());
       }
+
+    shutdown = true;
 
     GanymedeAdmin.setState("Server going down.. waiting for users to log out");
   }

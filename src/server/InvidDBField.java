@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.132 $
-   Last Mod Date: $Date: 2000/05/27 02:35:56 $
+   Version: $Revision: 1.133 $
+   Last Mod Date: $Date: 2000/06/02 21:12:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.132 $ %D%
+ * @version $Revision: 1.133 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1246,12 +1246,58 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
     
+    // if we couldn't check out the object, we need to see why.
+
     if (newRef == null)
       {
-	return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
-					  "Your operation could not succeed because " + this.toString() +
-					  " could not be linked to " + remobj.toString() + 
-					  ".  This could be due to a lack of permissions.");
+	// this check is not truly thread safe, as the shadowObject
+	// might be cleared by another thread while we're working..
+	// this isn't a grave risk, but we'll wrap all of this in
+	// a NullPointerException catch just in case
+
+	try
+	  {
+	    String edit_username, edit_hostname;
+	    DBEditObject editing = remobj.shadowObject;
+
+	    if (editing != null)
+	      {
+		if (editing.gSession != null)
+		  {
+		    edit_username = editing.gSession.username;
+		    edit_hostname = editing.gSession.clienthost;
+		    
+		    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
+						      "Field " + this.toString() +
+						      " could not be linked to the " + remobj.toString() + 
+						      " " + remobj.getTypeName() + " object, which is busy " +
+						      "being edited by " + edit_username + " on system " +
+						      edit_hostname);
+		  }
+		
+		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
+						  "Field " + this.toString() +
+						  " could not be linked to the " + remobj.toString() + 
+						  " " + remobj.getTypeName() + " object, which is busy " +
+						  "being edited by another user.");
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
+						  "Field " + this.toString() +
+						  " could not be linked to the " + remobj.toString() + 
+						  " " + remobj.getTypeName() + " object.  This is probably a temporary "+
+						  "condition due to other user activity on the Ganymede server.");
+	      }
+	  }
+	catch (NullPointerException ex)
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
+					      "Field " + this.toString() +
+					      " could not be linked to the " + remobj.toString() + 
+					      " " + remobj.getTypeName() + " object.  This is probably a temporary "+
+					      "condition due to other user activity on the Ganymede server.");
+	  }
       }
 
     try

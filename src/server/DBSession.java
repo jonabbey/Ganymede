@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 2000/04/14 01:49:48 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 2000/06/02 21:12:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.82 $ %D%
+ * @version $Revision: 1.83 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -598,6 +598,9 @@ final public class DBSession {
    * objectID&gt; is part of the current transaction, the transactional
    * copy will be returned, and no readLock is strictly necessary in
    * that case.</P>
+   *
+   * <P>This method doesn't do permission checking.. that is performed at the
+   * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} level.</P>
    *
    * @param baseID The short id number of the
    * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} containing the object to
