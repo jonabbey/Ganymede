@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.34 $ %D%
+    Version: $Revision: 1.35 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -1678,7 +1678,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     perm_button pb = new perm_button(gc, 
 				     (perm_field) field,
 				     editable,
-				     gc.getBaseHash());
+				     gc.getBaseHash(),
+				     object.getID() == SchemaConstants.PermSelfUserObj);
     
     addRow( pb, fieldTemplate.getName(), fieldInfo.isVisible());
     
