@@ -17,7 +17,7 @@
    call back this GanymediatorWizard to continue along the process.
    
    Created: 29 January 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -134,6 +134,11 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
     ReturnVal result;
 
     /* -- */
+
+    // clear stateSet, so that the custom wizard code
+    // can call setNextState() in getStartDialog().
+
+    stateSet = false;
 
     if (returnHash != null)
       {
