@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 1999/04/02 02:30:00 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 1999/04/06 04:17:01 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -87,7 +87,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.54 $ $Date: 1999/04/02 02:30:00 $ $Name:  $
+ * @version $Revision: 1.55 $ $Date: 1999/04/06 04:17:01 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -207,9 +207,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   historyPanel
     history_panel;
 
-  /**
-   * contains all of the containerPanels.  This is used to tell the
-   * containerPanels to stop loading.
+  /** 
+   * A vector of {@link arlut.csd.ganymede.client.containerPanel}s,
+   * used to allow the gclient to refresh containerPanels on demand,
+   * and to allow the gclient to order any containerPanels contained
+   * in this framePanel to stop loading on a transaction cancel.  
    */
 
   Vector containerPanels = new Vector();
@@ -1629,7 +1631,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   public void internalFrameClosed(InternalFrameEvent event)
   {
-    System.err.println("frame closed");
+    if (debug)
+      {
+	System.err.println("framePanel.internalFrameClosed(): frame closed");
+      }
 
     for (int i = 0; i < containerPanels.size(); i++)
       {
@@ -1653,7 +1658,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	return;
       }
 
-    System.err.println("Ok, closing the created window");
+    if (debug)
+      {
+	System.err.println("framePanel.internalFrameClosing(): Ok, closing the created window");
+      }
   }
 
   public void internalFrameDeactivated(InternalFrameEvent event)

@@ -9,8 +9,8 @@
    or edit in place (composite) objects.
 
    Created: 17 Oct 1996
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 1999/03/27 12:27:42 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 1999/04/06 04:17:02 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
@@ -95,7 +95,7 @@ import javax.swing.border.*;
  * @see arlut.csd.ganymede.invid_field
  * @see arlut.csd.ganymede.ip_field
  * 
- * @version $Revision: 1.49 $ $Date: 1999/03/27 12:27:42 $ $Name:  $
+ * @version $Revision: 1.50 $ $Date: 1999/04/06 04:17:02 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -120,8 +120,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   private Boolean
     myFieldIsEditable = null;
 
-  String 
-    name = null;
+  /**
+   * The name of the invid field we are managing
+   */
+
+  String name = null;
 
   /**
    * Hash mapping GUI components added to this vectorPanel to the
@@ -808,6 +811,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public void refresh()
   {
+    if (debug)
+      {
+	System.err.println("vectorPanel.refresh(" + name + ")");
+      }
+
     int size;
 
     Hashtable serverInvids = new Hashtable();
@@ -832,6 +840,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    // as we sync this vector panel 
 
 	    Vector serverValues = my_field.getValues();
+
+	    if (debug)
+	      {
+		System.err.println("vectorPanel.refresh(): serverValues.size = " + serverValues.size());
+	      }
 
 	    for (int i = 0; i < serverValues.size(); i++)
 	      {
@@ -896,6 +909,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    localInvids.remove(invid);
 
 		    localIndex++;
+
+		    if (debug)
+		      {
+			System.err.println("vectorPanel.refresh(): updated " + ew.titleText);
+		      }
 		  }
 		else
 		  {
@@ -903,12 +921,23 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    // we need to take it out of this vector panel
 
 		    compVector.removeElement(cp);
+
+		    // and let the frame know not to keep it in its
+		    // records anymore
+
+		    container.frame.containerPanels.removeElement(cp);
+
 		    elementWrapper ew = (elementWrapper) ewHash.get(cp);
 		    centerPanel.remove(ew);
 		    ewHash.remove(cp);
 
 		    needFullRefresh = true;
 		    localInvids.remove(invid);
+
+		    if (debug)
+		      {
+			System.err.println("vectorPanel.refresh(): removed " + ew.titleText);
+		      }
 		  }
 	      }
 
@@ -1014,6 +1043,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	invalidate();
 	container.frame.validate();
+
+	if (debug)
+	  {
+	    System.err.println("vectorPanel.refresh(): executed fullRefresh");
+	  }
+      }
+    else if (debug)
+      {
+	System.err.println("vectorPanel.refresh(): skipped fullRefresh");
       }
   }
 

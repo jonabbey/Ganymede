@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 1999/04/02 02:29:59 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 1999/04/06 04:17:00 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.102 $ $Date: 1999/04/02 02:29:59 $ $Name:  $
+ * @version $Revision: 1.103 $ $Date: 1999/04/06 04:17:00 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -622,13 +622,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	loaded = true;
 	loading = false;
 
-	// frame will synchronize on frame.containerPanels for the duration
-	// of an attempt to stop all containerPanels within from loading,
-	// so if we did get told to stop loading (by having keepLoading set
-	// to false above), we may wind up blocking here for a bit.
-
-	frame.containerPanels.removeElement(this);
-
 	if (!keepLoading)
 	  {
 	    return;
@@ -990,6 +983,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   private void updateComponent(Component comp)
   {
+    if (debug)
+      {
+	System.err.println("containerPanel.updateComponent(" + comp + ")");
+      }
+
     try
       {
 	db_field field = (db_field) objectHash.get(comp);
