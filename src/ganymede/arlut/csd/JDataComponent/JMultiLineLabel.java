@@ -53,7 +53,9 @@
 
 package arlut.csd.JDataComponent;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.util.StringTokenizer;
@@ -61,6 +63,7 @@ import java.util.StringTokenizer;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 
 import arlut.csd.Util.WordWrap;
 
@@ -87,8 +90,6 @@ public class JMultiLineLabel extends JTextArea {
   int 
     columns = 128;
 
-
-
   /*
    * Constructors
    */
@@ -107,6 +108,12 @@ public class JMultiLineLabel extends JTextArea {
     setWrapStyleWord(true);
 
     setText(label);
+
+    /*
+    this.setBackground((Color)UIManager.get("Label.background"));
+    this.setForeground((Color)UIManager.get("Label.foreground"));
+    this.setFont((Font)UIManager.get("Label.font"));
+    */
   }
 
   // Public functions
@@ -192,13 +199,14 @@ public class JMultiLineLabel extends JTextArea {
     int maxLength = 0;
     StringTokenizer tk = new StringTokenizer(wrappedText, "\n");
 
-    FontMetrics metric = getFontMetrics(getFont());
+    Font myFont = getFont();
+    FontMetrics myFontMetrics = getFontMetrics(myFont);
 
     while (tk.hasMoreElements())
       {
 	String nextToken = WordWrap.deTabify((String) tk.nextElement());
 
-	length = metric.stringWidth(nextToken);
+	length = myFontMetrics.getStringBounds(nextToken, getGraphics()).getBounds().width;
 
 	if (length > maxLength)
 	  {
@@ -211,9 +219,17 @@ public class JMultiLineLabel extends JTextArea {
 
   public static void main(String[] argv)
   {
+    JMultiLineLabel x = new JMultiLineLabel("This is a break.  This string is so long that I expect to see it broken up, and the size demanded be based on the specified wrap length.  Blah blah blah bunch of lines all over the place, should be pretty long, i don't know, but I think it should wrap now.");
+
+    System.err.println("The dimensions of x are " + x.getPreferredSize());
     JFrame frame = new JFrame();
-    frame.getContentPane().add(new JMultiLineLabel("This is a break.  bunch of lines all over the place, should be pretty long, i don't know, but I think it should wrap now."));
+    frame.getContentPane().add(x);
     frame.pack();
     frame.setVisible(true);
+    System.err.println("The new dimensions of x are " + x.getPreferredSize());
+    x.setWrapLength(40);
+    System.err.println("The new new dimensions of x are " + x.getPreferredSize());
+    x.setWrapLength(400);
+    System.err.println("The new new new dimensions of x are " + x.getPreferredSize());
   }
 }
