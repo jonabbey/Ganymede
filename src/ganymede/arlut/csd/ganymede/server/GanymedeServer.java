@@ -1327,6 +1327,8 @@ public class GanymedeServer implements Server {
       {
 	System.err.println();
 	System.err.println(ts.l("shutdown.finally"));
+
+	arlut.csd.ganymede.common.Invid.printCount();
 	
 	System.exit(0);
 	

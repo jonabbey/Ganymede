@@ -88,6 +88,7 @@ public final class Invid implements java.io.Serializable {
 
   static final long serialVersionUID = 5357151693275369893L;
   static private InvidAllocator allocator = null;
+  static private int counter = 0;
 
   /**
    * <p>Receive Factory method for Invid's.  Can do caching/object reuse if
@@ -96,6 +97,8 @@ public final class Invid implements java.io.Serializable {
 
   static final public Invid createInvid(short type, int num)
   {
+    counter++;
+
     if (allocator == null)
       {
 	return new Invid(type, num);
@@ -112,6 +115,11 @@ public final class Invid implements java.io.Serializable {
 	allocator.storeInvid(result);
 	return result;
       }
+  }
+
+  static final public void printCount()
+  {
+    System.err.println("I've seen " + counter + " invids created.");
   }
 
   /**
