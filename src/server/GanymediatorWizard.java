@@ -17,7 +17,7 @@
    call back this GanymediatorWizard to continue along the process.
    
    Created: 29 January 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -106,7 +106,15 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
   /**
    *
    * This method is used to provide feedback to the server from a client
-   * in response to a specific request. 
+   * in response to a specific request.  Calls to this method drive the
+   * wizard from state to state.<br><br>
+   *
+   * This method is not final, and adopters are free to totally
+   * override this method in their wizard classes to provide custom
+   * logic.  Generally, though, adopters are encouraged to take
+   * advantage of the state machine implemented in this method and use
+   * methods called processDialog1(), processDialog2(), and so on to
+   * handle the dialogs at each stage of a wizard sequence.
    *
    * @param returnHash a hashtable mapping strings to values.  The strings
    * are titles of fields specified in a dialog that was provided to the
@@ -115,8 +123,7 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
    *
    * @see arlut.csd.ganymede.Ganymediator
    * @see arlut.csd.ganymede.ReturnVal
-   *
-   */
+   * */
 
   public ReturnVal respond(Hashtable returnHash)
   {
@@ -296,6 +303,14 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
   {
     return returnHash.elements();
   }
+
+  /**
+   *
+   * This method uses the Java Reflection API to call a method named
+   * processDialogX() in the derived class, where X is a positive integer
+   * corresponding to &lt;state&gt;.
+   * 
+   */
 
   public ReturnVal callDialog(int state)
   {
