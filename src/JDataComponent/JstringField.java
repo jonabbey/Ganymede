@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -117,6 +117,23 @@ public class JstringField extends JentryField {
 	 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
 			    Color.black,Color.white),
 	 true,
+	 false,
+	 null,
+	 null);
+  }
+
+  /**
+   * Simple constructor.
+   *
+   *
+   */
+
+  public JstringField(int cols, boolean is_editable)
+  {
+    this(cols,JstringField.DEFAULT_SIZE,
+	 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
+			    Color.black,Color.white),
+	 is_editable,
 	 false,
 	 null,
 	 null);
