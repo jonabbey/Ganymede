@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.130 $
-   Last Mod Date: $Date: 2002/02/26 19:30:48 $
+   Version: $Revision: 1.131 $
+   Last Mod Date: $Date: 2002/02/28 00:20:41 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.130 $ $Date: 2002/02/26 19:30:48 $ $Name:  $
+ * @version $Revision: 1.131 $ $Date: 2002/02/28 00:20:41 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -111,13 +111,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   static final int FIELDWIDTH = 25;
 
   // ---
-
-  /**
-   * Used to tell the load() method to stop populating a panel if the window
-   * we are in is closed.
-   */
-  
-  private boolean keepLoading = true;
 
   /**
    * Reference to the client's main class, used for some utility functions.
@@ -640,7 +633,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	loaded = true;
 	loading = false;
 
-	if (!keepLoading)
+	if (!keepLoading())
 	  {
 	    return;
 	  }
@@ -768,25 +761,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * <p>This method allows the gclient that contains us to set a flag
-   * that will interrupt the load() method.</p>
-   *
-   * <p>Note that this method must not be synchronized.</p>
-   */
-
-  public void stopLoading()
-  {
-    keepLoading = false;
-  }
-
-  /**
    * This method returns false when the containerPanel loading has
    * been interupted.  The vectorPanel checks this.  
    */
 
   public boolean keepLoading()
   {
-    return keepLoading;
+    return !frame.isStopped();
   }
 
   /** 
@@ -898,6 +879,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	for (int i = 0; i < fields.size(); i++)
 	  {
+	    if (!keepLoading())
+	      {
+		return;
+	      }
+
 	    Short fieldID = (Short) fields.elementAt(i);
 
 	    // if we're not an embedded container panel, check to see if
@@ -2177,6 +2163,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     /* -- */
 
+    if (!keepLoading())
+      {
+	return;
+      }
+
     if (field == null)
       {
 	throw new IllegalArgumentException("null field");
@@ -3299,7 +3290,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    println("key is null, not using cache.  Downloading choice list.");
 	  }
-	
+
+	if (!keepLoading())
+	  {
+	    return;		// we were told to cancel
+	  }
+
 	list = new objectList(field.choices());
 
 	if (debug)

@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 2002/02/27 22:47:17 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 2002/02/28 00:20:41 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.76 $ $Date: 2002/02/27 22:47:17 $ $Name:  $
+ * @version $Revision: 1.77 $ $Date: 2002/02/28 00:20:41 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -127,6 +127,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   private booleanSemaphore closed = new booleanSemaphore(false);
   private booleanSemaphore running = new booleanSemaphore(false);
+  private booleanSemaphore stopped = new booleanSemaphore(false);
 
   // Indexes for the tabs in the JTabbedPane These numbers have to
   // correspond to the order they are added as tabs, so they are set
@@ -384,8 +385,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     setContentPane(progressPanel);
     
-    Thread thread = new Thread(this);
-    thread.start();
+    Thread loadingThread = new Thread(this);
+    loadingThread.start();
   }
 
   /**
@@ -435,6 +436,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	pane.addTab("Owner", null, owner);
 	owner_index = current++;
     
+	if (stopped.isSet())
+	  {
+	    return;
+	  }
+
 	// Check to see if this gets an objects_owned panel
 	//
 	// Only OwnerBase objects get an objects_owned panel.  The
@@ -459,6 +465,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 		  }
 		else
 		  {
+		    if (stopped.isSet())
+		      {
+			return;
+		      }
+
 		    objects_owned = new JScrollPane();
 		    pane.addTab("Objects Owned", null, objects_owned);
 		    objects_owned_index = current++;
@@ -474,6 +485,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
 		if (persona_field != null)
 		  {
+		    if (stopped.isSet())
+		      {
+			return;
+		      }
+
 		    personae = new JPanel(false);
 		    pane.addTab("Personae", null, personae);
 		    personae_index = current++;
@@ -493,6 +509,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
 	// Add the notes panel
 
+	if (stopped.isSet())
+	  {
+	    return;
+	  }
+
 	try
 	  {
 	    notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
@@ -504,6 +525,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
 	notes = new JScrollPane();
 	addNotesPanel();
+
+	if (stopped.isSet())
+	  {
+	    return;
+	  }
 
 	// Add the history tab
 
@@ -520,6 +546,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
 	// Only add the date panels if the date has been set.  In order
 	// to set the date, use the menu items.
+
+	if (stopped.isSet())
+	  {
+	    return;
+	  }
 
 	try
 	  {
@@ -545,6 +576,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  }
     
 	pane.addChangeListener(this);
+
+	if (stopped.isSet())
+	  {
+	    return;
+	  }
 
 	createPanel(general_index);
 	showTab(general_index);
@@ -1786,24 +1822,27 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * event that the user has pressed the transaction cancel button in the gclient.</p>
    */
 
-  public final synchronized void stopNow()
+  public final void stopNow()
   {
-    if (containerPanels != null)
-      {
-	synchronized (containerPanels)
-	  {
-	    for (int i = 0; i < containerPanels.size(); i++)
-	      {
-		if (debug)
-		  {
-		    println("Telling a containerPanel to stop loading.");
-		  }
-		
-		containerPanel cp = (containerPanel)containerPanels.elementAt(i);
-		cp.stopLoading();
-	      }
-	  }
-      }
+    // try to interrupt the loading thread, and also turn off any
+    // loading methods that might run in any container panels in this
+    // window
+
+    stopped.set(true);
+
+    // block until we are sure this window has stopped loading
+
+    running.waitForCleared();
+  }
+
+  /**
+   * <p>This method may be called by objects of other classes who want to check to
+   * see if this framePanel has asserted a stop on all loading activities.</p>
+   */
+
+  public final boolean isStopped()
+  {
+    return stopped.isSet();
   }
 
   /**
@@ -1820,6 +1859,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	System.err.println("framePanel.cleanUp()");
       }
+
+    // let everyone know that we'll do no more loading in this window
+    
+    stopNow();
 
     this.removeVetoableChangeListener(this);
     this.removeInternalFrameListener(this);
@@ -1851,13 +1894,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	for (int i = 0; i < containerPanels.size(); i++)
 	  {
-	    if (debug)
-	      {
-		println("Telling a containerPanel to stop loading.");
-	      }
-	    
 	    containerPanel cp = (containerPanel)containerPanels.elementAt(i);
-	    cp.stopLoading();
 	    cp.cleanUp();
 	  }
 
