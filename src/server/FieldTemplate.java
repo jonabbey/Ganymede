@@ -6,7 +6,7 @@
    information defining a field.
    
    Created: 5 November 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,6 +29,10 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   short type;
   short fieldID;
   boolean vector;
+
+  // perm_editor needs us to store this for it
+
+  short baseID;
 
   // built in?
 
@@ -67,6 +71,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
     comment = fieldDef.getComment();
     type = fieldDef.getType();
     fieldID = fieldDef.getID();
+    baseID = fieldDef.base.getTypeID();
 
     vector = fieldDef.isArray();
 
@@ -114,6 +119,11 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   public short getID()
   {
     return fieldID;
+  }
+
+  public short getBaseID()
+  {
+    return baseID;
   }
 
   public String getName()
