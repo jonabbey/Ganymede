@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,6 +21,7 @@ import javax.swing.*;
 
 import java.rmi.*;
 import java.rmi.server.*;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
