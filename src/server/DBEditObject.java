@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -98,6 +98,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	throw new NullPointerException("null editset");
       }
 
+    original = null;
+    this.editset = editset;
+    committing = false;
+    stored = false;
+    status = CREATING;
+
+    /* -- */
+
     Enumeration 
       enum;
 
@@ -110,11 +118,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     DBField 
       tmp = null;
 
-    original = null;
-    this.editset = editset;
-    committing = false;
-    stored = false;
-    status = CREATING;
+    /* -- */
 
     fields = new Hashtable();
 
@@ -169,7 +173,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		fields.put(key, tmp);
 	      }
 	  }
-      }    
+      }        
   }
 
   /**
