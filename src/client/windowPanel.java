@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,9 +37,14 @@ import arlut.csd.JDataComponent.*;
 
 ------------------------------------------------------------------------------*/
 
+/** 
+ * windowPanel is the top level window controlling the framePanels.  There is one
+ * windowPanel for each client.  windowPanel is responsible for adding new windows,
+ * and maintaining the window list in the menubar.  
+ */
 
 public class windowPanel extends JDesktopPane implements PropertyChangeListener, ActionListener{  
-  static final boolean debug = true;
+  boolean debug = true;
   
   // --
 
@@ -57,9 +62,6 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   JMenu
     windowMenu;
-
-  WindowBar 
-    windowBar = null;
 
   // Load images for other packages
   ImageIcon
@@ -101,6 +103,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
       }
 
     this.gc = gc;
+    debug = gc.debug;
     this.windowMenu = windowMenu;
 
     setBackground(ClientColor.background);
@@ -118,17 +121,6 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   /**
    *
-   * Attach a WindowBar object to this windowPanel
-   *
-   */
-
-  public void addWindowBar(WindowBar windowBar)
-  {
-    this.windowBar = windowBar;
-  }
-
-  /**
-   *
    * Create a new view-only window in this windowPanel.
    *
    * @param object an individual object from the server to show
@@ -140,6 +132,16 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   {
     this.addWindow(object, false, null);
   }
+
+
+  /**
+   *
+   * Create a new window in this windowPanel.
+   *
+   * @param object an individual object from the server to show
+   * in this window
+   * @param editable If true, the new window will be editable
+   */
 
   public void addWindow(db_object object, boolean editable)
   {
@@ -153,6 +155,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
    * @param object an individual object from the server to show
    * in this window
    * @param editable if true, the object will be presented as editable
+   * @param objectType Used for the title of the new window
    *
    */
 
@@ -162,8 +165,13 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
     if (object == null)
       {
-	System.err.println("null object passed to addWindow.");
+	gc.showErrorMessage("null object passed to addWindow.");
 	return;
+      }
+
+    if (editable)
+      {
+	gc.cancel.setEnabled(true);
       }
 
     gc.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -201,8 +209,11 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	  {
 	    title = "View: " + title;
 	  }
-	
-	System.out.println("Setting title to: " + title);
+
+	if (debug)
+	  {
+	    System.out.println("Setting title to: " + title);
+	  }
 
       }
     catch (RemoteException rx)
@@ -224,11 +235,6 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
     windowList.put(title, w);
       
-    if (windowBar != null)
-      {
-	windowBar.addButton(title);
-      }
-
     if (windowCount > 10)
       {
 	windowCount = 0;
@@ -269,15 +275,22 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
 
     window.moveToFront();
+    
     try
       {
+	getDesktopManager().deiconifyFrame(window);
 	window.setSelected(true);
+	window.toFront();
       }
     catch (java.beans.PropertyVetoException e)
       {
 	System.out.println("Could not set selected false.  sorry.");
       }
   }
+
+  /**
+   * Calls gclient.setStatus
+   */
 
   public final void setStatus(String s)
   {
@@ -288,6 +301,10 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   {
     windowCount = 0;
   }
+
+  /**
+   * Add a table window.  Usually the output of a query.
+   */
 
   public void addTableWindow(Session session, Query query, DumpResult results, String title)
   {
@@ -316,7 +333,11 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
     if (rt == null)
       {
-	System.out.println("rt == null");
+	if (debug)
+	  {
+	    System.out.println("rt == null");
+	  }
+
 	setStatus("Could not get the result table.");
       }
     else
@@ -354,10 +375,6 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	rt.setTitle(title);
 
 	windowList.put(title, rt);
-	if (windowBar != null)
-	  {
-	    windowBar.addButton(title);
-	  }
 	  
 	add(rt);
 	setSelectedWindow(rt);
@@ -458,7 +475,10 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     editM.add(queryMI);
     editM.add(editMI);
 
-    System.out.println("Returning menubar.");
+    if (debug)
+      {
+	System.out.println("Returning menubar.");
+      }
     
     return menuBar;
   }
@@ -530,7 +550,6 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   public void closeEditables()
   {
-    JInternalFrame w;
     Enumeration windows;
 
     /* -- */
@@ -539,25 +558,23 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
     while (windows.hasMoreElements())
       {
-	w = (JInternalFrame)windowList.get(windows.nextElement());
-	  
-	// This seems backwards, but only non-editable windows are closable.
-	// So if isClosable is false, then it is editable, and we should
-	// close it.
+	Object o  = windowList.get(windows.nextElement());
+	if (o instanceof framePanel)
+	  {
 
-	if (w.isClosable())
-	  {
-	    //This is a view window
-	  }
-	else
-	  {
-	    try
+	    
+	    framePanel w = (framePanel)o;
+	    
+	    if (w.editable)
 	      {
-		w.setClosed(true);
-	      }
-	    catch (java.beans.PropertyVetoException ex)
-	      {
-		throw new RuntimeException("beans? " + ex);
+		try
+		  {
+		    w.setClosed(true);
+		  }
+		catch (java.beans.PropertyVetoException ex)
+		  {
+		    throw new RuntimeException("beans? " + ex);
+		  }
 	      }
 	  }
       }
@@ -634,35 +651,6 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     setStatus("Done");
   }
 
-  public void maxWindow(String title)
-  { 
-    JInternalFrame w;
-    Enumeration windows;
-      
-    /* -- */
-    
-    setStatus("Maxing window");
-    
-    windows = windowList.keys();
-      
-    while (windows.hasMoreElements())
-      {
-	w = (JInternalFrame)windowList.get(windows.nextElement());
-	  
-	if (w.getTitle().equals(title))
-	  {
-	    try
-	      {
-		w.setMaximum(true);
-	      }
-	    catch (java.beans.PropertyVetoException ex)
-	      {
-		throw new RuntimeException("beans? " + ex);
-	      }
-	  }
-      }
-  }
-
   public JMenu updateMenu()
   {
     Enumeration windows;
@@ -681,12 +669,20 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
 	if (obj instanceof framePanel)
 	  {
-	    System.out.println("Adding menu item(fp): " + ((framePanel)obj).getTitle());
+	    if (debug)
+	      {
+		System.out.println("Adding menu item(fp): " + ((framePanel)obj).getTitle());
+	      }
+
 	    MI = new JMenuItem(((framePanel)obj).getTitle());
 	  }
 	else if (obj instanceof gResultTable)
 	  {
-	    System.out.println("Adding menu item: " + ((gResultTable)obj).getTitle());
+	    if (debug)
+	      {
+		System.out.println("Adding menu item: " + ((gResultTable)obj).getTitle());
+	      }
+
 	    MI = new JMenuItem(((gResultTable)obj).getTitle());
 	  }
 
@@ -759,13 +755,13 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() instanceof MenuItem)
+    if (e.getSource() instanceof JMenuItem)
       {
-	System.out.println("There shouldn't be any MenuItems (not J)");
-      }
-    else if (e.getSource() instanceof JMenuItem)
-      {
-	System.out.println("Menu item action: " + e.getActionCommand());
+	if (debug)
+	  {
+	    System.out.println("Menu item action: " + e.getActionCommand());
+	  }
+
 	JMenuItem MI = (JMenuItem)e.getSource();
 
 	if (e.getActionCommand().equals("showWindow"))
@@ -865,7 +861,27 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	  }
       	else if (e.getActionCommand().equals("Inactivate"))
 	  {
-	    System.out.println("Can't inactivate yet, right?");
+	    framePanel fp = (framePanel)Windows.get(MI);
+
+	    boolean success = gc.inactivateObject(fp.invid);
+
+	    if (success)
+	      {
+		try
+		  {
+		    ((JInternalFrame)Windows.get(MI)).setClosed(true);
+		    
+		  }
+		catch (PropertyVetoException ex)
+		  {
+		    throw new RuntimeException("JInternalFrame will not close: " + ex);
+		  }		
+	      }
+	    else
+	      {
+		gc.showErrorMessage("Could not inactivate object.");
+	      }
+
 	  }
 	else if (e.getActionCommand().equals("Query"))
 	  {
@@ -915,9 +931,17 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
     if ((event.getPropertyName().equals("isClosed")) && ((Boolean)event.getNewValue()).booleanValue())
       {
-	//System.out.println("It's isClosed and true");
 	if (event.getSource() instanceof JInternalFrame)
 	  {
+	    if (debug)
+	      {
+		System.out.println("Closing an internal frame");
+	      }
+
+	    if (event.getSource() instanceof framePanel)
+	      {
+		((framePanel)event.getSource()).stopLoading();
+	      }
 	    //System.out.println("It's a JInternalFrame");
 	    String oldTitle = ((JInternalFrame)event.getSource()).getTitle();
 	      
@@ -930,10 +954,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 		//System.out.println(" Removing button- " + oldTitle);
 		  
 		windowList.remove(oldTitle);
-		if (windowBar != null)
-		  {
-		    windowBar.removeButton(oldTitle);
-		  }
+
 		updateMenu();
 	      }
 	  }

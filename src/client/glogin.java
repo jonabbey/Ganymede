@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -427,6 +427,25 @@ public class glogin extends JApplet implements Runnable {
       _quitButton.setEnabled(enabled);
 
     }
+
+  /**
+   * Set the cursor to a wait cursor(usually a watch.)
+   */
+  public void setWaitCursor()
+  {
+    this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+  }
+
+  /**
+   * Set the cursor to the normal cursor(usually a pointer.)
+   *
+   * This is dependent on the operating system.
+   */
+
+  public void setNormalCursor()
+  {
+    this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+  }
 }  
 
 /**
@@ -467,6 +486,8 @@ class LoginHandler implements ActionListener {
     
     else if (e.getSource() == my_glogin.connector)
       {
+	my_glogin.setWaitCursor();
+
 	String uname = my_glogin.username.getText().trim();
 	String pword = my_glogin.passwd.getText();
 
@@ -486,7 +507,7 @@ class LoginHandler implements ActionListener {
 	    my_glogin.connector.setEnabled(true);
 	    my_glogin._quitButton.setEnabled(true);
 
-
+	    my_glogin.setNormalCursor();
 	    return;
 	  }
 	catch (NullPointerException ex)
@@ -497,7 +518,8 @@ class LoginHandler implements ActionListener {
 	    
 	    my_glogin.connector.setEnabled(true);
 	    my_glogin._quitButton.setEnabled(true);
-	    
+
+	    my_glogin.setNormalCursor();	    
 	    return;
 	  }
 	catch (Exception ex) 
@@ -508,6 +530,7 @@ class LoginHandler implements ActionListener {
 	    my_glogin.connector.setEnabled(true);
 	    my_glogin._quitButton.setEnabled(true);
 
+	    my_glogin.setNormalCursor();
 	    return;
 	  }
 
@@ -530,6 +553,7 @@ class LoginHandler implements ActionListener {
 	    // Why is this line here? I'm commenting it out.
 	    //my_glogin.connector.setEnabled(false);
 	  }
+	my_glogin.setNormalCursor();
       }
     else if (e.getSource() == my_glogin._quitButton)
       {
@@ -577,5 +601,7 @@ class LoginHandler implements ActionListener {
 	System.err.println("Error starting client: " + e);
       }
   }
+
+
 }
 

@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.28 $ %D%
+  Version: $Revision: 1.29 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -49,11 +49,11 @@ import com.sun.java.swing.border.*;
 
 public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener, Runnable {
 
-  private final static boolean debug = false;
+  boolean debug = false;
 
   // class variables
 
-  static JcomponentAttr ca = new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),Color.black,Color.white);
+  //static JcomponentAttr ca = new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),Color.black,Color.white);
 
   // --
 
@@ -122,11 +122,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public vectorPanel(db_field field, windowPanel parent, boolean editable, boolean isEditInPlace, containerPanel container)
   {
-    if (debug)
-      {
-	System.out.println("Adding new vectorPanel");
-      }
-
     // Took out some checking for null stuff
 
     my_field = field;
@@ -137,6 +132,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     this.container = container;
     
     gc = container.gc;
+
+    debug = gc.debug;
+
+    if (debug)
+      {
+	System.out.println("Adding new vectorPanel");
+      }
 
     centerPanel = new JPanel(false);
 
@@ -287,6 +289,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 							   wp.gc,
 							   wp, container.frame,
 							   null, false);
+		    container.frame.containerPanels.addElement(cp);
 		    cp.setBorder(wp.lineEmptyBorder);
 		    
 		    //		    addElement(object.getLabel(), cp);
@@ -361,7 +364,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (compVector.size() > size)
       {
-	System.err.println("There is already an empty, new field");
+	wp.gc.setStatus("There is already an empty, new field");
       }
     else
       {
@@ -386,6 +389,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						       my_field.isEditable() && editable,
 						       wp.gc,
 						       wp, container.frame);
+		
+		container.frame.containerPanels.addElement(cp);
 
 		cp.setBorder(wp.lineEmptyBorder);
 
@@ -550,7 +555,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	compVector.removeElement(c);	  
 	centerPanel.remove((elementWrapper)ewHash.get(c));
 
-	invalidateRight();
+	//invalidateRight();
+	invalidate();
+	container.frame.validate();
       }
     catch (RemoteException rx)
       {
@@ -577,7 +584,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	
 	if (comp instanceof containerPanel)
 	  {
-	    System.out.println("Aye, it's a containerPanel");
+	    if (debug)
+	      {
+		System.out.println("Aye, it's a containerPanel");
+	      }
+
 	    containerPanel cp = (containerPanel)comp;
 	    
 	    for (int i = 0; i < cp.vectorPanelList.size(); i++)
@@ -652,7 +663,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
     else if (e.getSource() instanceof JMenuItem)
       {
-	System.out.println("JMenuItem: " + e.getActionCommand());
+	if (debug)
+	  {
+	    System.out.println("JMenuItem: " + e.getActionCommand());
+	  }
 
 	if (e.getActionCommand().equals("Expand all elements"))
 	  {
@@ -712,8 +726,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	if (editable)
 	  {
 	    short index = (short)compVector.indexOf(v.getSource());
-	    System.out.println(" index = " + index);
-	    
 	
 	    if (v.getOperationType() == JValueObject.ERROR)
 	      {
@@ -776,7 +788,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (index >= my_field.size())
       {
-	System.out.println("Adding new element");
+	if (debug)
+	  {
+	    System.out.println("Adding new element");
+	  }
 
 	retVal = my_field.addElement(obj);
 
@@ -789,19 +804,30 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	if (succeeded)
 	  {
-	    System.out.println("Add Element returned true");
-	    System.out.println("There are now " + my_field.size() + " elements in the field");
+	    if (debug)
+	      {
+		System.out.println("Add Element returned true");
+		System.out.println("There are now " + my_field.size() + " elements in the field");
+	      }
+
 	    return true;
 	  }
 	else
 	  {
-	    System.out.println("Add Element returned false");
+	    if (debug)
+	      {
+		System.out.println("Add Element returned false");
+	      }
+
 	    return false;
 	  }
       }
     else
       {
-	System.out.println("Changing element " + index);
+	if (debug)
+	  {
+	    System.out.println("Changing element " + index);
+	  }
 
 	retVal = my_field.setElement(index, obj);
 
@@ -814,12 +840,20 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	if (succeeded)
 	  {
-	    System.out.println("set Element returned true");
+	    if (debug)
+	      {
+		System.out.println("set Element returned true");
+	      }
+
 	    return true;
 	  }
 	else
 	  {
-	    System.out.println("set Element returned false");
+	    if (debug)
+	      {
+		System.out.println("set Element returned false");
+	      }
+
 	    return false;
 	  }
       }	    
@@ -832,14 +866,14 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     return null;
   }
 
-  /**
+  /*
    *
    * This method does causes the hierarchy of containers above
    * us to be recalculated from the bottom (us) on up.  Normally
    * the validate process works from the top-most container down,
    * which isn't what we want at all in this context.
    *
-   */
+   *
 
   public void invalidateRight()
   {
@@ -855,6 +889,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	c = c.getParent();
       }
   }
+  */
 
   public final void setStatus(String status)
   {
