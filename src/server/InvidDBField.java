@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.56 $ %D%
+   Version: $Revision: 1.57 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -630,7 +630,7 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * This method is used to link the remote invid to this checked-out invid
-   * in accordance with this field's defined symmetry constraints.
+   * in accordance with this field's defined symmetry constraints.<br><br>
    *
    * This method will extract the objects referenced by the old and new
    * remote parameters, and will cause the appropriate invid dbfields in
@@ -638,15 +638,19 @@ public final class InvidDBField extends DBField implements invid_field {
    * operation can not be completed, bind will return the system to its
    * pre-bind status and return false.  One or both of the specified
    * remote objects may remain checked out in the current editset until
-   * the transaction is committed or released.
+   * the transaction is committed or released.<br><br>
    *
    * It is an error for newRemote to be null;  if you wish to undo an
    * existing binding, use the unbind() method call.  oldRemote may
    * be null if this currently holds no value, or if this is a vector
-   * field and newRemote is being added.
+   * field and newRemote is being added.<br><br>
+   *
+   * This method should only be called from synchronized methods.
    *
    * @param oldRemote the old invid to be replaced
    * @param newRemote the new invid to be linked
+   * @param local if true, this operation will be performed without regard
+   * to permissions limitations.
    *
    * @return null on success, or a ReturnVal with an error dialog encoded on failure
    *
@@ -908,6 +912,8 @@ public final class InvidDBField extends DBField implements invid_field {
    * invid in accordance with this field's defined symmetry constraints.
    *
    * @param remote An invid for an object to be checked out and unlinked
+   * @param local if true, this operation will be performed without regard
+   * to permissions limitations.
    *
    * @return null on success, or a ReturnVal with an error dialog encoded on failure
    *
@@ -1073,15 +1079,20 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * This method is used to effect the remote side of an unbind operation.
+   * This method is used to effect the remote side of an unbind operation.<br><br>
    *
    * An InvidDBField being manipulated with the standard editing accessors
    * (setValue, addElement, deleteElement, setElement) will call this method
    * on another InvidDBField in order to unlink a pair of symmetrically bound
-   * InvidDBFields.
+   * InvidDBFields.<br><br>
    *
    * This method will return false if the unbinding could not be performed for
    * some reason.
+   *
+   * @param oldInvid The invid to be unlinked from this field.  If this
+   * field is not linked to the invid specified, nothing will happen.
+   * @param local if true, this operation will be performed without regard
+   * to permissions limitations.
    *
    */
 
@@ -1180,15 +1191,19 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * This method is used to effect the remote side of an bind operation.
+   * This method is used to effect the remote side of an bind operation.<br><br>
    *
    * An InvidDBField being manipulated with the standard editing accessors
    * (setValue, addElement, deleteElement, setElement) will call this method
    * on another InvidDBField in order to link a pair of symmetrically bound
-   * InvidDBFields.
+   * InvidDBFields.<br><br>
    *
    * This method will return false if the binding could not be performed for
    * some reason.
+   *
+   * @param newInvid The invid to be linked to this field.
+   * @param local if true, this operation will be performed without regard
+   * to permissions limitations.
    *
    */
 
@@ -1517,17 +1532,21 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * Sets the value of this field, if a scalar.
+   * Sets the value of this field, if a scalar.<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.
+
+   * @param value the value to set this field to.
+   * @param local if true, this operation will be performed without regard
+   * to permissions limitations.
    *
    * @see arlut.csd.ganymede.DBSession
    *
    */
 
-  public ReturnVal setValue(Object value, boolean local)
+  public synchronized ReturnVal setValue(Object value, boolean local)
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
@@ -1646,17 +1665,25 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * Sets the value of an element of this field, if a vector.
+   * Sets the value of an element of this field, if a vector.<br><br>
    *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
+   * The ReturnVal object returned encodes success or failure, and may
+   * optionally pass back a dialog.<br><br>
+   *
+   * It is an error to call this method on an edit in place vector,
+   * or on a scalar field.  An IllegalArgumentException will be thrown
+   * in these cases.
+   *
+   * @param index The index of the element in this field to change.
+   * @param value The value to put into this vector.
+   * @param local if true, this operation will be performed without regard
+   * to permissions limitations.
    *
    * @see arlut.csd.ganymede.DBSession
    *
    */
   
-  public ReturnVal setElement(int index, Object value, boolean local)
+  public synchronized ReturnVal setElement(int index, Object value, boolean local)
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
@@ -1751,15 +1778,22 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * Adds an element to the end of this field, if a vector.
+   * Adds an element to the end of this field, if a vector.<br><br>
    *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
+   * The ReturnVal object returned encodes success or failure, and may
+   * optionally pass back a dialog.<br><br>
    *
+   * It is an error to call this method on an edit in place vector,
+   * or on a scalar field.  An IllegalArgumentException will be thrown
+   * in these cases.
+   *
+   * @param value The value to put into this vector.
+   * @param local if true, this operation will be performed without regard
+   * to permissions limitations.
+   * 
    */
 
-  public ReturnVal addElement(Object value, boolean local)
+  public synchronized ReturnVal addElement(Object value, boolean local)
   {
     DBEditObject eObj;
     Invid remote;
@@ -1773,7 +1807,7 @@ public final class InvidDBField extends DBField implements invid_field {
 					   getName() + " in object " + owner.getLabel());
       }
 
-    if (!isEditable(local))
+    if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
 	setLastError("don't have permission to change field /  non-editable object");
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " +
@@ -1798,7 +1832,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	setLastError("Field " + getName() + " already at or beyond array size limit");
 
 	return Ganymede.createErrorDialog("InvidDBField.addElement() - vector overflow",
-					  "Field " + getName() + " already at or beyond array size limit");
+					  "Field " + getName() +
+					  " already at or beyond array size limit");
       }
 
     remote = (Invid) value;
@@ -1853,7 +1888,7 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * Creates and adds a new embedded object in this
-   * field, if it is an edit-in-place vector.
+   * field, if it is an edit-in-place vector.<br><br>
    *
    * Returns an Invid pointing to the newly created
    * and appended embedded object, or null if
@@ -1865,7 +1900,25 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public Invid createNewEmbedded()
   {
-    if (!isEditable(true))
+    return createNewEmbedded(false);
+  }
+
+  /**
+   *
+   * Creates and adds a new embedded object in this
+   * field, if it is an edit-in-place vector.<br><br>
+   *
+   * Returns an Invid pointing to the newly created and appended
+   * embedded object, or null if creation / addition was not possible.
+   *
+   * @param local If true, we don't check permission to edit this
+   * field before creating the new object.
+   * 
+   */
+
+  public synchronized Invid createNewEmbedded(boolean local)
+  {
+    if (!isEditable(local))
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object: " +
 					   getName() + " in object " + owner.getLabel());
@@ -1885,7 +1938,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (size() >= getMaxArraySize())
       {
-	setLastError("Field " + getName() + " already at or beyond array size limit");
+	setLastError("Field " + getName() + 
+		     " already at or beyond array size limit");
 	return null;
       }
 
@@ -1905,20 +1959,35 @@ public final class InvidDBField extends DBField implements invid_field {
     // note that we assume that we don't need to verify the
     // new value
 
-    DBEditObject embeddedObj = (DBEditObject) owner.editset.getSession().editDBObject(newObj);
+    DBEditObject embeddedObj = (DBEditObject) owner.editset.getSession().editDBObject(newObj); // *sync* DBSession DBObject
 
     if (embeddedObj == null)
       {
 	throw new NullPointerException("gah, null embedded obj!");
       }
 
-    if (embeddedObj.setFieldValue((short) 0, owner.getInvid()) != null)
+    // bind the object to its container.. note that ContainerField
+    // is a standard built-in field for embedded objects and as
+    // such it doesn't have the specific details as to the containing
+    // object's binding recorded.  We'll have to do the bidirectional
+    // binding ourselves, in two steps.
+
+    if (embeddedObj.setFieldValue(SchemaConstants.ContainerField, // *sync* DBField
+				  owner.getInvid()) != null)
       {
 	setLastError("Couldn't bind reverse pointer");
 	return null;
       }
 
-    if (eObj.finalizeAddElement(this, newObj)) 
+    // finish the binding.  Note that we are directly modifying values
+    // here rather than going to this.addElement().  If we did
+    // this.addElement(), we might get a redundant attempt to do the
+    // invid binding, as the containing field may indeed have the
+    // reverse pointer in the object's container field specified in
+    // the schema.  Doing it this way, we don't have to worry about
+    // whether the admins got this part of the schema right.
+
+    if (eObj.finalizeAddElement(this, newObj))
       {
 	values.addElement(newObj);
 
@@ -1933,7 +2002,7 @@ public final class InvidDBField extends DBField implements invid_field {
       } 
     else
       {
-	embeddedObj.setFieldValue((short) 0, null);
+	embeddedObj.setFieldValue(SchemaConstants.ContainerField, null); // *sync* DBField
 	return null;
       }
   }
@@ -1956,9 +2025,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * Deletes an element of this field, if a vector.
+   * Deletes an element of this field, if a vector.<br><br>
    *
-   * Returns null on success, non-null on failure.
+   * Returns null on success, non-null on failure.<br><br>
    *
    * If non-null is returned, the ReturnVal object
    * will include a dialog specification that the
@@ -1966,7 +2035,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public ReturnVal deleteElement(int index, boolean local)
+  public synchronized ReturnVal deleteElement(int index, boolean local)
   {
     DBEditObject eObj;
     Invid remote;
@@ -2100,7 +2169,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public QueryResult encodedValues()
+  public synchronized QueryResult encodedValues()
   {
     QueryResult results = new QueryResult();
     Invid invid;
