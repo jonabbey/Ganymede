@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,6 +53,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   String classname;
   Class classdef;
   short type_code;
+  short label_id;		// which field represents our label?
 
   // runtime data
 
@@ -200,6 +201,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       {
 	((DBObjectBaseField) enum.nextElement()).emit(out);
       }
+    
+    if ((store.major_version >= 1) && (store.minor_version >= 1))
+      {
+	out.writeShort(label_id);	// added at file version 1.1
+      }
 
     out.writeInt(objectHash.size());
    
@@ -276,6 +282,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       {
 	field = new DBObjectBaseField(in, this);
 	fieldHash.put(new Short(field.field_code), field);
+      }
+
+    // at file version 1.1, we introduced label_id's.
+
+    if ((store.file_major >= 1) && (store.file_minor >= 1))
+      {
+	label_id = in.readShort();
+      }
+    else
+      {
+	label_id = 0;
       }
 
     // read in the objects belonging to this ObjectBase
@@ -645,6 +662,43 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 
   /**
    *
+   * Returns the short type id for the field designated as this object's
+   * primary label field.
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public short getLabelField()
+  {
+    return label_id;
+  }
+
+  /**
+   *
+   * Returns the field namefor the field designated as this object's
+   * primary label field.
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public String getLabelFieldName()
+  {
+    BaseField bf;
+    
+    bf = getField(label_id);
+
+    try
+      {
+	return bf.getName();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote: " + ex);
+      }
+  }
+
+  /**
+   *
    * Returns the invid type id for this object definition as
    * a Short, suitable for use in a hash.
    *
@@ -760,6 +814,63 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       }
 
     return null;
+  }
+
+  /**
+   *
+   *
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public void setLabelField(String fieldName)
+  {
+    BaseField bF;
+
+    /* -- */
+
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("can't call in a non-edit context");
+      }
+
+    bF = getField(fieldName);
+
+    if (bF == null)
+      {
+	throw new IllegalArgumentException("unrecognized field name");
+      }
+
+    try
+      {
+	label_id = bF.getID();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("runtime except: " + ex);
+      }
+  }
+
+  /**
+   *
+   *
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public void setLabelField(short fieldID)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("can't call in a non-edit context");
+      }
+
+    if (null == getField(fieldID))
+      {
+	throw new IllegalArgumentException("invalid fieldID");
+      }
+
+    label_id = fieldID;
   }
 
   /**
