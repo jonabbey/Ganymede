@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -619,6 +619,20 @@ class iClient extends UnicastRemoteObject implements Client {
   public void forceDisconnect(String reason)
   {
     System.err.println("Server forced disconnect: " + reason);
-    System.exit(0);
+
+    if (applet._infoD == null)
+      {
+	applet._infoD = new InfoDialog(applet.my_frame,true,"","");
+      }
+    
+    applet._infoD.setInfo("Server forced disconnect: " + reason);
+    Dimension d = applet._infoD.getPreferredSize();
+    
+    applet._infoD.setSize(d.width,d.height);
+    
+    applet._infoD.show();
+
+    my_glogin.connector.setEnabled(true);
+    my_glogin._quitButton.setEnabled(true);
   }
 }
