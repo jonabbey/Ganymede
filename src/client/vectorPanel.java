@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.43 $ %D%
+  Version: $Revision: 1.44 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -30,8 +30,8 @@ import java.net.*;
 
 import jdj.PackageResources;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class

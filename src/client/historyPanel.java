@@ -5,7 +5,7 @@
    The tab that holds history information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,8 +19,8 @@ import java.rmi.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.*;
+import javax.swing.*;
+import javax.swing.border.*;
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;

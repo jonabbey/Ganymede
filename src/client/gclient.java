@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.97 $ %D%
+   Version: $Revision: 1.98 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,8 +30,8 @@ import arlut.csd.JDataComponent.*;
 import arlut.csd.Util.*;
 import arlut.csd.JTree.*;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class

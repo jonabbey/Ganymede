@@ -5,7 +5,7 @@
    Description.
    
    Created: 20 January 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -21,7 +21,7 @@ import java.awt.event.*;
 import java.util.*;
 import java.rmi.RemoteException;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class 

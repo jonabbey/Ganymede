@@ -9,14 +9,14 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 package arlut.csd.ganymede.client;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;

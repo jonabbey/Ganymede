@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,9 +21,9 @@ import java.util.*;
 import java.beans.PropertyVetoException;
 
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.*;
-import com.sun.java.swing.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
 
 import jdj.PackageResources;
 import arlut.csd.ganymede.*;

@@ -3,7 +3,7 @@ package arlut.csd.ganymede.client;
 
 import java.awt.*;
 import java.awt.event.*;
-import com.sun.java.swing.*;
+import javax.swing.*;
 import arlut.csd.JDialog.JCenterDialog;
 
 public class messageDialog extends JCenterDialog implements ActionListener{

@@ -17,9 +17,9 @@ import java.util.*;
 
 import arlut.csd.ganymede.*; 
 import arlut.csd.JDialog.*;
-import com.sun.java.swing.*;
-import com.sun.java.swing.event.*;
-import com.sun.java.swing.border.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.border.*;
 
 public class personaPanel extends JPanel implements ActionListener, ChangeListener{
   

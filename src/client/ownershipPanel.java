@@ -18,7 +18,7 @@ import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;

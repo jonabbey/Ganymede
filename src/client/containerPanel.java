@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.79 $ %D%
+    Version: $Revision: 1.80 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -13,8 +13,8 @@
 
 package arlut.csd.ganymede.client;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
 
 import java.io.*;
 import java.awt.*;

@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -13,9 +13,9 @@
 
 package arlut.csd.ganymede.client;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.*;
-import com.sun.java.swing.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
 
 
 import java.awt.*;

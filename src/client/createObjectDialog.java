@@ -6,7 +6,7 @@
    create a new object in the client.
    
    Created: 17 September 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,7 +16,7 @@ package arlut.csd.ganymede.client;
 
 import java.awt.*;
 import java.awt.event.*;
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 import java.util.*;
 import arlut.csd.ganymede.*;
@@ -153,7 +153,7 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     gbc.gridx = 0;
     gbc.gridwidth = 3;
     gbc.fill = GridBagConstraints.BOTH;
-    com.sun.java.swing.JSeparator sep = new com.sun.java.swing.JSeparator();
+    javax.swing.JSeparator sep = new javax.swing.JSeparator();
     gbl.setConstraints(sep, gbc);
     p.add(sep);
 

@@ -12,8 +12,8 @@ package arlut.csd.ganymede.client;
 
 import java.awt.*;
 import java.awt.event.*;
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
 import arlut.csd.JDataComponent.*;
 import arlut.csd.ganymede.*;

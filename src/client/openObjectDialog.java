@@ -11,8 +11,8 @@ package arlut.csd.ganymede.client;
 
 import java.awt.*;
 import java.awt.event.*;
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.TitledBorder;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.util.Vector;
 import java.util.Hashtable;
 

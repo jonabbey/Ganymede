@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -32,8 +32,8 @@ import java.rmi.RemoteException;
 
 import arlut.csd.JDataComponent.*;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class 

@@ -6,7 +6,7 @@
    by the client.
    
    Created: 3 March 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,7 +17,7 @@ package arlut.csd.ganymede.client;
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;

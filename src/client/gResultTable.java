@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,7 +26,7 @@ import arlut.csd.JTable.*;
 import arlut.csd.JDialog.*;
 import arlut.csd.Util.*;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
