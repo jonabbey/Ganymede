@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -482,7 +482,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    *
-   * This is the hook that DBEditObject subclasses use to interpose wizards.
+   * This is the hook that DBEditObject subclasses use to interpose wizards when
+   * a field's value is being changed.
    *
    */
 
@@ -1221,11 +1222,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * in the ReturnVal object returned, to guide the user through
    * a set of interactive dialogs to inactive the object.
    *
-   *
    * The inactive() method can cause other objects to be deleted, can cause
    * strings to be removed from fields in other objects, whatever.
    *
-   * If remove() returns a ReturnVal that has its success flag set to false
+   * If inactivate() returns a ReturnVal that has its success flag set to false
    * and does not include a JDialogBuff for further interaction with the
    * user, then DBSEssion.inactivateDBObject() method will rollback any changes
    * made by this method.
@@ -1250,6 +1250,45 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    */
 
   public ReturnVal inactivate(boolean interactive)
+  {
+    return null;
+  }
+
+  /**
+   * This method handles reactivation logic for this object type.  A
+   * DBEditObject must first be checked out for editing, then the
+   * reactivate() method can then be called on the object to make the
+   * object active again.  reactivate() will clear the object's
+   * removal date and fix up any other state information to reflect
+   * the object's reactive status.<br><br>
+   *
+   * reactive() is designed to run synchronously with the user's
+   * request for inactivation.  It can return a wizard reference
+   * in the ReturnVal object returned, to guide the user through
+   * a set of interactive dialogs to reactive the object.<br>
+   *
+   * If reactivate() returns a ReturnVal that has its success flag set to false
+   * and does not include a JDialogBuff for further interaction with the
+   * user, then DBSEssion.inactivateDBObject() method will rollback any changes
+   * made by this method.<br><br>
+   *
+   * IMPORTANT NOTE: If a custom object's reactivate() logic decides
+   * to enter into a wizard interaction with the user, that logic is
+   * responsible for calling editset.rollback("reactivate" +
+   * getLabel()) in the case of a failure to properly do all the reactivation
+   * stuff, where getLabel() must be the name of the object
+   * prior to any attempts to clear fields which could impact the
+   * returned label.<br><br>
+   *
+   * Finally, it is up to commitPhase1() and commitPhase2() to handle
+   * any external actions related to object reactivation when
+   * the transaction is committed..
+   *
+   * @see #commitPhase1()
+   * @see #commitPhase2() 
+   */
+
+  public ReturnVal reactivate()
   {
     return null;
   }
