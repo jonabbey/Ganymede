@@ -106,9 +106,6 @@ import arlut.csd.ganymede.rmi.BaseField;
 
 public final class DBObjectBaseField implements BaseField, FieldType {
 
-  static final ReturnVal warning1 = genWarning1();
-  static final ReturnVal warning2 = genWarning2();
-
   static final boolean debug = false;
 
   /**
@@ -117,6 +114,9 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBObjectBaseField");
+
+  static final ReturnVal warning1 = genWarning1();
+  static final ReturnVal warning2 = genWarning2();
 
   /**
    * Object type definition for the database object class we are member of
@@ -1908,9 +1908,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
+		// "XML"
+		// "Unrecognized password typedef entity: {0}\nIn field def:\n{1}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "Unrecognized password typedef entity: " + child +
-						  "\nIn field def:\n" + root.getTreeString());
+						  ts.l("doPasswordXML.bad_password_typedef_item",
+						       child, root.getTreeString()));
 	      }
 	  }
       }
@@ -1921,101 +1923,110 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set min length: " + _minlength + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_min_length", new Integer(_minlength),
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setMaxLength(_maxlength);
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set max length: " + _maxlength + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_max_length", new Integer(_maxlength),
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setOKChars(_okChars);
     
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set ok chars: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set ok chars: " + _okChars + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_ok_chars", _okChars,
+					       root.getTreeString(), retVal.getDialogText()));
       }
     
     retVal = setBadChars(_badChars);
     
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set bad chars: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set bad chars: " + _badChars + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_bad_chars", _badChars,
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setCrypted(_crypted);
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set crypted flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set crypted flag: " + _crypted + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_crypted", new Boolean(_crypted),
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setMD5Crypted(_md5crypted);
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set md5 crypted flag: " + _md5crypted + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_md5_crypted", new Boolean(_md5crypted),
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setApacheMD5Crypted(_apachemd5crypted);
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set apache md5 crypted flag: " + _apachemd5crypted + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_apache_md5_crypted", new Boolean(_apachemd5crypted),
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setWinHashed(_winHashed);
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set windows hashing flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set windows hashing flag: " + _winHashed + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_windows_hashed", new Boolean(_winHashed),
+					       root.getTreeString(), retVal.getDialogText()));
       }
-
 
     retVal = setSSHAHashed(_sshaHashed);
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set SSHA hashing flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set SSHA hashing flag: " + _sshaHashed + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_ssha_hashed", new Boolean(_sshaHashed),
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setPlainText(_plaintext);
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set plaintext flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set plaintext flag: " + _plaintext + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doPasswordXML.bad_plaintext", new Boolean(_plaintext),
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     return null;
@@ -2080,9 +2091,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
+		// "XML"
+		// "Unrecognized IP typedef entity: {0}\nIn field def:\n{1}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "Unrecognized ip typedef entity: " + child +
-						  "\nIn field def:\n" + root.getTreeString());
+						  ts.l("doIPXML.bad_ip_typedef_item",
+						       child, root.getTreeString()));
 	      }
 	  }
       }
@@ -2090,13 +2103,14 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     // now do all the setting
 
     retVal = setArray(_vect);
-
+  
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set vector bit to " + _vect + ": \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doIPXML.bad_vector_op",
+					       new Boolean(_vect), root.getTreeString(), retVal.getDialogText()));
       }
 		
     if (_vect)
@@ -2105,10 +2119,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	
 	if (retVal != null && !retVal.didSucceed())
 	  {
+	    // "XML"
+	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
 	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      "fielddef could not set vector maximum size: " + _maxSize + "\n" +
-					      root.getTreeString() + "\n" +
-					      retVal.getDialogText());
+					      ts.l("doIPXML.bad_vector_limit", new Integer(_maxSize),
+						   root.getTreeString(), retVal.getDialogText()));
 	  }
       }
 
@@ -2116,10 +2131,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set namespace: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set namespace: " + _namespace + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doIPXML.bad_namespace", _namespace,
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     return null;
@@ -2171,9 +2187,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
+		// "XML"
+		// "Unrecognized numeric typedef entity: {0}\nIn field def:\n{1}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "Unrecognized numeric typedef entity: " + child +
-						  "\nIn field def:\n" + root.getTreeString());
+						  ts.l("doNumericXML.bad_numeric_typedef_item",
+						       child, root.getTreeString()));
 	      }
 	  }
       }
@@ -2184,10 +2202,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set namespace: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set namespace: " + _namespace + "\n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doNumericXML.bad_namespace", _namespace,
+					       root.getTreeString(), retVal.getDialogText()));
       }
 
     return null;
@@ -2257,10 +2276,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    
 		if (_targetobjectStr == null && _targetobject == null)
 		  {
+		    // "XML"
+		    // "targetobject item does not specify name or id: {0}\n{1}\n{2}"
 		    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						      "targetobject item does not specify name or id: " + child + "\n" +
-						      root.getTreeString() + "\n" +
-						      retVal.getDialogText());
+						      ts.l("doInvidXML.bad_target_def",
+							   child, root.getTreeString(), retVal.getDialogText()));
 		  }
 	      }
 	    else if (child.matches("targetfield"))
@@ -2270,10 +2290,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 		if (_targetfieldStr == null && _targetfield == null)
 		  {
+		    // "XML"
+		    // "targetfield item does not specify name or id: {0}\n{1}\n{2}"
 		    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						      "targetfield item does not specify name or id: " + child + "\n" +
-						      root.getTreeString() + "\n" +
-						      retVal.getDialogText());
+						      ts.l("doInvidXML.bad_target_field_def",
+							   child, root.getTreeString(), retVal.getDialogText()));
 		  }
 	      }
 	    else if (child.matches("embedded"))
@@ -2282,9 +2303,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	    else
 	      {
+		// "XML"
+		// "Unrecognized invid typedef entity: {0}\nIn field def:\n{1}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "Unrecognized invid typedef entity: " + child +
-						  "\nIn field def:\n" + root.getTreeString());
+						  ts.l("doInvidXML.bad_invid_typedef_item",
+						       child, root.getTreeString()));
 	      }
 	  }
       }
@@ -2295,10 +2318,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set vector bit to " + _vect + ": \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doInvidXML.bad_vector_op",
+					       new Boolean(_vect), root.getTreeString(), retVal.getDialogText()));
       }
 		
     if (_vect)
@@ -2307,10 +2331,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	
 	if (retVal != null && !retVal.didSucceed())
 	  {
+	    // "XML"
+	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
 	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      "fielddef could not set vector maximum size: " + _maxSize + "\n" +
-					      root.getTreeString() + "\n" +
-					      retVal.getDialogText());
+					      ts.l("doInvidXML.bad_vector_limit", new Integer(_maxSize),
+						   root.getTreeString(), retVal.getDialogText()));
 	  }
       }
 
@@ -2331,10 +2356,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
+		// "XML"
+		// "fielddef could not set invid target base: {0}\n{1}\n{2}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "fielddef could not set invid target base: " + _targetobjectStr + "\n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
+						  ts.l("doInvidXML.bad_invid_target_base",
+						       _targetobjectStr,
+						       root.getTreeString(),
+						       retVal.getDialogText()));
 	      }
 	  }
 	else if (_targetobject != null)
@@ -2343,10 +2371,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
+		// "XML"
+		// "fielddef could not set invid target base: {0,number,#}\n{1}\n{2}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "fielddef could not set invid target base: " + _targetobject + "\n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
+						  ts.l("doInvidXML.bad_invid_target_base_num",
+						       _targetobject,
+						       root.getTreeString(),
+						       retVal.getDialogText()));
 	      }
 	  }
 	else // both null
@@ -2355,10 +2386,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
+		// "XML"
+		// "fielddef could not clear invid target base:\n{0}\n{1}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "fielddef could not clear invid target base: \n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
+						  ts.l("doInvidXML.bad_null_target_base",
+						       root.getTreeString(),
+						       retVal.getDialogText()));
 	      }
 	  }
 
@@ -2370,10 +2403,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
+		// "XML"
+		// "fielddef could not set invid target field: {0}\n{1}\n{2}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "fielddef could not set invid target field: " + _targetfieldStr + "\n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
+						  ts.l("doInvidXML.bad_invid_target_field",
+						       _targetfieldStr,
+						       root.getTreeString(),
+						       retVal.getDialogText()));
 	      }
 	  }
 	else if (_targetfield != null)
@@ -2382,10 +2418,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
+		// "XML"
+		// "fielddef could not set invid target field: {0,number,#}\n{1}\n{2}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "fielddef could not set invid target field: " + _targetfield + "\n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
+						  ts.l("doInvidXML.bad_invid_target_field_num",
+						       _targetfield,
+						       root.getTreeString(),
+						       retVal.getDialogText()));
 	      }
 	  }
 	else // both null
@@ -2394,10 +2433,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
+		// "XML"
+		// "fielddef could not clear invid target field:\n{0}\n{1}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  "fielddef could not clear invid target field: \n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
+						  ts.l("doInvidXML.bad_null_target_field",
+						       root.getTreeString(),
+						       retVal.getDialogText()));
 	      }
 	  }
       }
@@ -2406,10 +2447,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (retVal != null && !retVal.didSucceed())
       {
+	// "XML"
+	// "fielddef could not set embedded status: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  "fielddef could not set embedded status: \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
+					  ts.l("doInvidXML.bad_embedded_status",
+					       new Boolean(_embedded),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     return null;
@@ -2558,21 +2602,26 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in a schema editing context");
+	// "Not in a schema editing context."
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     // if we aren't loading, don't allow messing with the global fields
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the name of a system field.");
+	// "Schema Editing Error"
+	// "Can''t change the name of a system field."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setName.system_field"));
       }
     
     if (name == null || name.equals(""))
       {
-	return Ganymede.createErrorDialog("error",
-					  "can't have a null or empty name");
+	// "Schema Editing Error"
+	// "Can''t have a null or empty name."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setName.null_name"));
       }
 
     // make sure we strip any chars that would cause this object name
@@ -2598,8 +2647,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    if (!swapIfNeeded)
 	      {
-		return Ganymede.createErrorDialog("Schema Editing Error",
-						  "That name is already taken.");
+		// "Schema Editing Error"
+		// "Can''t set a duplicate field name, "{0}" is already taken."
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("setName.duplicate_name", name));
 	      }
 	    else
 	      {
@@ -2656,15 +2707,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in a schema editing context");
+	// "Not in a schema editing context."
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     // if we're not loading, don't allow global fields to be messed with
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the class name of a system field.");
+	// "Schema Editing Error"
+	// "Can''t change the class name definition of a system field."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setClassName.system_field"));
       }
 
     if (name == null || name.equals(""))
@@ -2684,8 +2738,9 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    classdef = newclassdef;
 	  }
 	catch (ClassNotFoundException ex)
-	  {	    
-	    System.err.println("DBObjectBaseField.setClassName(): class definition could not be found: " + ex);
+	  {
+	    // "DBObjectBaseField.setClassName(): class definition could not be found: {0}"
+	    System.err.println(ts.l("setClassName.noclass_warning", ex));
 	  }
       }
 
@@ -2722,7 +2777,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     comment = s;
@@ -2777,12 +2832,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (type < FIRSTFIELD || type > LASTFIELD)
       {
-	throw new IllegalArgumentException("type argument out of range");
+	// "Type argument out of range"
+	throw new IllegalStateException(ts.l("setType.bad_type"));
       }
 
     // if no change, no problem.
@@ -2796,8 +2852,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     // now we need to delineate those fields whose types must not be
@@ -2814,14 +2870,16 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (field_type != -1 && isSystemField())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the type of a system field.");
+	// "Can''t change the type of a system field: {0}"
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field_change_attempt", this.toString()));
       }
 
     if (isInUse())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the type of a field which is in use in the database.");
+	// "Can''t change the type of a field which is in use in the database: {0}"
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setType.in_use", this.toString()));
       }
 
     if (isInvid())
@@ -2985,7 +3043,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     // no change, no problem
@@ -2997,8 +3055,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     // array-ness is way too critical to be edited, even in mildly variable system
@@ -3006,20 +3064,23 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (isSystemField())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "can't change the vector status of a system field.");
+	// "Can''t change the vector status of a system field: {0}"
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setArray.any_system_field", this.toString()));
       }
 
     if (isInUse())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "can't change the vector status of a field in use.");
+	// "Can''t change the vector status of a field which is in use in the database: {0}"
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setArray.in_use", this.toString()));
       }
 
     if (b && !(isString() || isInvid() || isIP()))
       {
-	return Ganymede.createErrorDialog("Error",
-					  "can't set this field type to vector");
+	// "Can''t set this field type ({0}) to be a vector field: {1}"
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setArray.bad_type", this.getTypeDesc(), this.toString()));
       }
 
     array = b;
@@ -3054,13 +3115,15 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in a schema editing context");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (id < 0)
       {
-	return Ganymede.createErrorDialog("error",
-					  "field id number " + id + " out of range.");
+	// "Field id number {0,number,#} is out of range: {1}."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setID.out_of_range", new Integer(id),
+					       this.toString()));
       }
 
     // no change, no problem
@@ -3072,14 +3135,17 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (base.getField(id) != null)
       {
-	return Ganymede.createErrorDialog("error",
-					  "field id number " + id + " is already in use.");
+	// "Can''t set field id number {0,number,#} on field {1}.  That field id number is already in use by another field definition."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setID.in_use", new Integer(id),
+					       this.toString()));
       }
 
     if (field_code >= 0)
       {
-	return Ganymede.createErrorDialog("error",
-					  "can't change an established field id number");
+	// "Can''t change field id number for a previously created field definition: {0}."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setID.already_set", this.toString()));
       }
 
     field_code = id;
@@ -3110,7 +3176,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     this.base = base;
@@ -3132,7 +3198,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!array)
       {
-	throw new IllegalArgumentException("not an array field");
+	throw new IllegalStateException(ts.l("global.not_array", this.toString()));
       }
 
     return limit;
@@ -3148,12 +3214,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!array)
       {
-	throw new IllegalArgumentException("not an array field");
+	throw new IllegalStateException(ts.l("global.not_array", this.toString()));
       }
 
     // no change, no problem
@@ -3165,16 +3231,17 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     // array sizes need not be screwed with in the system fields
 
     if (isSystemField())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "can't change the vector limits of a system field.");
+	// "Can''t change the vector limits of a system field: {0}"
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setMaxArraySize.any_system_field", this.toString()));
       }
 
     this.limit = limit;
@@ -3203,7 +3270,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isBoolean())
       {
-	throw new IllegalArgumentException("not a boolean field");
+	throw new IllegalStateException(ts.l("global.not_boolean", this.toString()));
       }
     
     return labeled;
@@ -3222,18 +3289,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     if (!isBoolean())
       {
-	throw new IllegalArgumentException("not a boolean field");
+	throw new IllegalStateException(ts.l("global.not_boolean", this.toString()));
       }
     
     labeled = b;
@@ -3257,7 +3324,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	return trueLabel;
       }
 
-    throw new IllegalArgumentException("not a labeled boolean field");
+    throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
   }
 
   /**
@@ -3274,13 +3341,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     if (isLabeled())
@@ -3289,7 +3356,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       }
     else
       {
-	throw new IllegalArgumentException("not a labeled boolean field");
+	throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
       }
 
     return null;
@@ -3311,7 +3378,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	return falseLabel;
       }
 
-    throw new IllegalArgumentException("not a labeled boolean field");
+    throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
   }
 
   /**
@@ -3328,13 +3395,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     if (isLabeled())
@@ -3343,7 +3410,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       }
     else
       {
-	throw new IllegalArgumentException("not a labeled boolean field");
+	throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
       }
 
     return null;
@@ -3367,7 +3434,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isString() && !isPassword())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     return minLength;
@@ -3386,12 +3453,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isString() && !isPassword())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     // no change, no problem
@@ -3403,8 +3470,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
     
     minLength = val;
@@ -3433,7 +3500,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isString() && !isPassword())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     return maxLength;
@@ -3453,12 +3520,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isString() && !isPassword())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     // no change, no problem
@@ -3470,8 +3537,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
     
     maxLength = val;
@@ -3499,7 +3566,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isString() && !isPassword())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     return okChars;
@@ -3520,18 +3587,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     if (!isString() && !isPassword())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     okChars = s;
@@ -3560,7 +3627,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isString() && !isPassword())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
 
@@ -3581,18 +3648,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     if (!isString() && !isPassword())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     badChars = s;
@@ -3621,7 +3688,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isString())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     return multiLine;
@@ -3641,18 +3708,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     if (!isString())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     multiLine = b;
@@ -3674,7 +3741,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isString())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     return regexpPat;
@@ -3694,7 +3761,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isString())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     return regexpDesc;
@@ -3713,18 +3780,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null && !loading)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     if (!isString())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     if (s == null || s.equals(""))
@@ -3742,8 +3809,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  }
 	catch (gnu.regexp.REException ex)
 	  {
-	    return Ganymede.createErrorDialog("Schema Editing Error",
-					      "Bad regexp syntax.");
+	    // "Schema Editing Error"
+	    // "Bad regular expression syntax: {0}\n{1}"
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setRegexpPat.bad_pattern", s, ex));
 	  }
 
 	regexpPat = s;
@@ -3773,18 +3842,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null && !loading)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     if (!isString())
       {
-	throw new IllegalArgumentException("not a string field");
+	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     if (s == null || s.equals(""))
@@ -3853,7 +3922,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (editor == null && !loading)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     // if we are not loading, don't allow a built-in universal field
@@ -3861,13 +3930,14 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor != null && !isEditable())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field", this.toString()));
       }
 
     if (!isString() && !isNumeric() && !isIP())
       {
-	throw new IllegalArgumentException("this field type does not accept a namespace constraint");
+	// "Can''t set a namespace constraint on this kind of field ({0}): {1}"
+	throw new IllegalStateException(ts.l("setNameSpace.bad_type", this.getTypeDesc(), this.toString()));
       }
 
     // no change, no problem
@@ -3893,44 +3963,19 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	// wouldn't it be nice if java had decent support for declared data structures?
 
-	if (base.getTypeID() == SchemaConstants.UserBase &&
-	    getID() == SchemaConstants.UserUserName)
+	if ((base.getTypeID() == SchemaConstants.UserBase &&
+	     getID() == SchemaConstants.UserUserName) ||
+	    (base.getTypeID() == SchemaConstants.PersonaBase &&
+	     getID() == SchemaConstants.PersonaLabelField) ||
+	    (base.getTypeID() == SchemaConstants.OwnerBase &&
+	     getID() == SchemaConstants.OwnerNameField) ||
+	    (base.getTypeID() == SchemaConstants.EventBase &&
+	     getID() == SchemaConstants.EventToken) ||
+	    (base.getTypeID() == SchemaConstants.RoleBase &&
+	     getID() == SchemaConstants.RoleName))
 	  {
-	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Ganymede server " +
-					      "depends on user names being unique.");
-	  }
-
-	if (base.getTypeID() == SchemaConstants.PersonaBase &&
-	    getID() == SchemaConstants.PersonaLabelField)
-	  {
-	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Ganymede server " +
-					      "depends on persona labels being unique.");
-	  }
-
-	if (base.getTypeID() == SchemaConstants.OwnerBase &&
-	    getID() == SchemaConstants.OwnerNameField)
-	  {
-	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Ganymede server " +
-					      "depends on owner group labels being unique.");
-	  }
-
-	if (base.getTypeID() == SchemaConstants.EventBase &&
-	    getID() == SchemaConstants.EventToken)
-	  {
-	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Ganymede server " +
-					      "depends on event tokens being unique.");
-	  }
-
-	if (base.getTypeID() == SchemaConstants.RoleBase &&
-	    getID() == SchemaConstants.RoleName)
-	  {
-	    return Ganymede.createErrorDialog("Error",
-					      "Proper functioning of the Ganymede server " +
-					      "depends on Role names being unique.");
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setNameSpace.need_namespace", this.toString()));
 	  }
 
 	if (!loading)
@@ -4024,10 +4069,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 		  {
 		    namespace.schemaEditUnregister(base.getTypeID(), getID());
 		    namespace = oldNamespace;
-		    
-		    return Ganymede.createErrorDialog("Schema Editing Error",
-						      "Can't set namespace " + nameSpaceId + " on field " + toString() +
-						      " without violating namespace uniqueness constraint on previously registered values.");
+
+		    // "Can''t set namespace constraint {0} on field {1} without violating namespace uniqueness constraint on previously registered values."
+		    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						      ts.l("setNameSpace.can_not_apply", nameSpaceId, this.toString()));
 		  }
 	      }
 	  }
@@ -4036,9 +4081,9 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	if (namespace == null)
 	  {
-	    return Ganymede.createErrorDialog("Schema Editing Error",
-					      "**** Unknown namespace id <" + 
-					      nameSpaceId + "> specified for field " + toString());
+	    // "Error, could not find a namespace called {0} to set on field {1}."
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setNameSpace.no_such_namespace", nameSpaceId, this.toString()));
 	  }
       }
 
@@ -4060,7 +4105,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isString() && !isNumeric() && !isIP())
       {
-	throw new IllegalArgumentException("not a string/numeric field");
+	// "Can''t set a namespace constraint on this kind of field ({0}): {1}"
+	throw new IllegalStateException(ts.l("setNameSpace.bad_type", this.getTypeDesc(), this.toString()));
       }
 
     if (!loading)
@@ -4115,10 +4161,11 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    if (!success)
 	      {
 		newNamespace.schemaEditUnregister(base.getTypeID(), getID());
-		
-		return Ganymede.createErrorDialog("Schema Editing Error",
-						  "Can't set namespace " + newNamespace.toString() + " on field " + toString() +
-						  " without violating namespace uniqueness constraint on previously registered values.");
+
+		// "Schema Editing Error"
+		// "Can''t set namespace constraint {0} on field {1} without violating namespace uniqueness constraint on previously registered values."
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("setNameSpace.can_not_apply", newNamespace.toString(), this.toString()));
 	      }
 	  }
       }
@@ -4158,7 +4205,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     // no change, no harm
@@ -4170,15 +4217,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     
     if (isSystemField())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the type of a system field.");
+	// "Schema Editing Error"
+	// "Can''t change the type of a system field: {0}."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field_change_attempt", this.toString()));
       }
     
     if (isInUse())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the editInPlace status type of an " +
-					  "invid field which is in use in the database.");
+	// "Schema Editing Error"
+	// "Can''t change the editInPlace status type of an Invid field which is in use in the database: {0}."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setEditInPlace.in_use", this.toString()));
       }
     
     editInPlace = b;
@@ -4199,7 +4249,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     return (allowedTarget != -1);
@@ -4222,7 +4272,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     return allowedTarget;
@@ -4246,12 +4296,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     // no change, no harm
@@ -4263,8 +4313,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (isSystemField())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the type of a system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field_change_attempt", this.toString()));
       }
 
     // -1 and -2 are valid possible targets
@@ -4283,7 +4333,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       }
     else
       {
-	throw new IllegalArgumentException("not a valid base id");
+	// "Can''t set the target base to base number {0,number,#}.  No such base is defined: {0}."
+	throw new IllegalArgumentException(ts.l("setTargetBase.bad_target_num", new Integer(val)));
       }
 
     if (isInUse())
@@ -4314,12 +4365,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     if (baseName == null)
@@ -4331,8 +4382,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	if (isSystemField())
 	  {
-	    return Ganymede.createErrorDialog("Error",
-					      "Can't change the type of a system field.");
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("global.system_field_change_attempt", this.toString()));
 	  }
 
 	allowedTarget = -1;
@@ -4360,21 +4411,23 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	    if (isSystemField())
 	      {
-		return Ganymede.createErrorDialog("Error",
-						  "Can't change the type of a system field.");
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("global.system_field_change_attempt", this.toString()));
 	      }
 
 	    allowedTarget = b.getTypeID();
 	  }
 	else
 	  {
-	    return Ganymede.createErrorDialog("schema edit",
-					      "couldn't find base " + baseName + " to set target base");
+	    // "Schema Editing Error"
+	    // "Can''t set the target base for invid field {1} to base {0}.  No such base is defined."
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setTargetBase.bad_target", baseName, this.toString()));
 	  }
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote except: " + ex);
+	throw new RuntimeException(ex);
       }
 
     if (isInUse())
@@ -4401,7 +4454,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     return ((allowedTarget != -1) && (targetField != -1));
@@ -4422,7 +4475,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     return targetField;
@@ -4449,12 +4502,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     if (val == targetField)
@@ -4464,8 +4517,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (isSystemField())
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the type of a system field.");
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("global.system_field_change_attempt", this.toString()));
       }
 
     if (val < 0)
@@ -4484,9 +4537,9 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (allowedTarget == -1)
       {
-	return Ganymede.createErrorDialog("schema edit error",
-					  "Can't set target field on non-symmetric invid field " + 
-					  this.toString() + " to " + val);
+	// "Can''t set target field on a non-symmetric invid field {0} to {1,number,#}"
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setTargetField.asymmetry_num", this.toString(), new Integer(val)));
       }
 
     try
@@ -4499,23 +4552,25 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	if (b == null)
 	  {
-	    return Ganymede.createErrorDialog("schema edit error",
-					      "Can't find container base in order to set target field for " + 
-					      this.toString() + " to " + val);
+	    // "Can''t find object type {0,number,#} in order to set target field for {2} to {1,number,#}"
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setTargetField.bad_base_num", new Integer(allowedTarget), new Integer(val),
+						   this.toString()));
 	  }
 	
 	bF = b.getField(val);
 
 	if (bF == null)
 	  {
-	    return Ganymede.createErrorDialog("schema edit error",
-					      "Can't find numbered target field to set invid field " + 
-					      this.toString() + " to point to field #" + val);
+	    // "Can''t find target field numbered {0,number,#} in order to set target field for {1}."
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setTargetField.bad_target_field_num", new Integer(val),
+						   this.toString()));
 	  }
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+	throw new RuntimeException(ex);
       }
 
     targetField = val;
@@ -4550,12 +4605,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     if (fieldName == null || fieldName.equals(""))
@@ -4567,8 +4622,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	if (isSystemField())
 	  {
-	    return Ganymede.createErrorDialog("Error",
-					      "Can't change the type of a system field.");
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("global.system_field_change_attempt", this.toString()));
 	  }
 
 	targetField = -1;
@@ -4588,9 +4643,9 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     if (allowedTarget == -1 && fieldName != null && !fieldName.equals(""))
       {
-	return Ganymede.createErrorDialog("schema edit error",
-					  "Can't set target field on non-symmetric invid field " + 
-					  this.toString() + " to " + fieldName);
+	// "Can''t set target field on a non-symmetric invid field {0} to {1}"
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setTargetField.asymmetry", this.toString(), fieldName));
       }
 
     b = editor.getBase(allowedTarget);
@@ -4599,18 +4654,19 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	if (b == null)
 	  {
-	    return Ganymede.createErrorDialog("schema edit error",
-					      "Can't find container base in order to set target field for " + 
-					      this.toString() + " to " + fieldName);
+	    // "Can''t find object type {0,number,#} in order to set target field for {2} to {1}"
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setTargetField.bad_base", new Integer(allowedTarget),
+						   fieldName, this.toString()));
 	  }
 	
 	bF = b.getField(fieldName);
 
 	if (bF == null)
 	  {
-	    return Ganymede.createErrorDialog("schema edit error",
-					      "Can't find naned target field to set invid field " + 
-					      this.toString() + " to point to field " + fieldName);
+	    // "Can''t find target field named {0} in order to set target field for {1}."
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setTargetField.bad_target_field", fieldName, this.toString()));
 	  }
 
 	if (bF.getID() == targetField)
@@ -4620,12 +4676,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	// remember, system fields are initialized outside of the
 	// context of the loading system, there should never be a
-	// reason to call setTargetField() on a aystem field
+	// reason to call setTargetField() on a system field
 
 	if (isSystemField())
 	  {
-	    return Ganymede.createErrorDialog("Error",
-					      "Can't change the type of a system field.");
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("global.system_field_change_attempt", this.toString()));
 	  }
 
 	targetField = bF.getID();
@@ -4676,12 +4732,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {    
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isPassword())
       {
-	throw new IllegalArgumentException("not an password field");
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     crypted = b;
@@ -4721,12 +4777,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {    
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isPassword())
       {
-	throw new IllegalArgumentException("not an password field");
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     md5crypted = b;
@@ -4766,12 +4822,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {    
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isPassword())
       {
-	throw new IllegalArgumentException("not an password field");
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     apachemd5crypted = b;
@@ -4812,12 +4868,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {    
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isPassword())
       {
-	throw new IllegalArgumentException("not an password field");
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     winHashed = b;
@@ -4857,12 +4913,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {    
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isPassword())
       {
-	throw new IllegalArgumentException("not an password field");
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     sshaHashed = b;
@@ -4901,12 +4957,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {    
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (!isPassword())
       {
-	throw new IllegalArgumentException("not a password field");
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     storePlaintext = b;
@@ -5060,8 +5116,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
   /**
    * <p>This method is intended to produce a human readable
-   * representation of this field definition's type attributes.  This
-   * method should not be used programatically to determine this
+   * representation of this field definition's simple type attribute.
+   * This method should not be used programatically to determine this
    * field's type information.</p>
    *
    * <p>This method is only for human information, and the precise
@@ -5077,162 +5133,53 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     switch (field_type)
       {
       case BOOLEAN:
-	result = "boolean";
+	result = ts.l("getTypeDesc.boolean"); // "boolean"
 	break;
 
       case NUMERIC:
-	result = "numeric";
+	result = ts.l("getTypeDesc.numeric"); // "numeric"
 	break;
 
       case FLOAT:
-	result = "float";
+	result = ts.l("getTypeDesc.float"); // "float"
 	break;
 
       case FIELDOPTIONS:
-	result = "field options";
+	result = ts.l("getTypeDesc.field_option"); // "field options"
 	break;
 
       case DATE:
-	result = "date";
+	result = ts.l("getTypeDesc.date"); // "date"
 	break;
 
       case STRING:
-
-	result = "string <min: " + minLength + ", max:" + maxLength + ">";
-	
-	if (okChars != null)
-	  {
-	    result += ", okChars: '" + okChars + "'";
-	  }
-
-	if (badChars != null)
-	  {
-	    result += ", badChars: '" + badChars + "'";
-	  }
-
-	if (namespace != null)
-	  {
-	    result += ", namespace: " + namespace.getName();
-	  }
-
-	if (regexpPat != null)
-	  {
-	    result += ", regexpPat: '" + regexpPat + "'";
-	  }
-
+	result = ts.l("getTypeDesc.string"); // "string"
 	break;
 
       case INVID:
-	result = "invid";
-
-	if (editInPlace)
-	  {
-	    result += " <edit-in-place> ";
-	  }
-
-	if (allowedTarget >= 0)
-	  {
-	    DBObjectBase refBase;
-
-	    refBase = base.store.getObjectBase(allowedTarget);
-
-	    if (refBase != null)
-	      {
-		result += ", --> [" + refBase.getName() + "] ";
-		
-		if (targetField != -1)
-		  {
-		    try
-		      {
-			result += ", <-- [" + refBase.getField(targetField).getName() + "] ";
-		      }
-		    catch (RemoteException ex)
-		      {
-			throw new RuntimeException("caught remote: " + ex);
-		      }
-		    catch (NullPointerException ex)
-		      {
-			result += ", <-- [INVALID FIELD TARGET!!] ";
-		      }
-		  }
-	      }
-	    else
-	      {
-		result += ", --> [INVALID BASE!!] ";
-	      }
-	  }
-	else if (allowedTarget == -1)
-	  {
-	    result += ", --> [any]";
-	  }
-	else if (allowedTarget == -2)
-	  {
-	    result += ", --> [any]";
-
-	    // if allowed Target == -2 and targetField != -1, we assume
-	    // that we've got a field that's guaranteed to be present in
-	    // all bases, including our parent.
-	    
-	    if (targetField != -1)
-	      {
-		try
-		  {
-		    result += ", <-- [" + base.getField(targetField).getName() + "] ";
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("caught remote: " + ex);
-		  }
-	      }
-	  }
-	
+	result = ts.l("getTypeDesc.invid"); // "invid"
 	break;
 
       case PERMISSIONMATRIX:
-	result = "permission matrix";
+	result = ts.l("getTypeDesc.permission_matrix"); // "permission matrix"
 	break;
 
       case PASSWORD:
-	result = "password";
-
-	if (crypted)
-	  {
-	    result += " <crypted>";
-	  }
-
-	if (md5crypted)
-	  {
-	    result += " <md5 crypted>";
-	  }
-
-	if (winHashed)
-	  {
-	    result += " <win hashed>";
-	  }
-
-	if (sshaHashed)
-	  {
-	    result += " <ssha hashed>";
-	  }
-
-	if (storePlaintext)
-	  {
-	    result += " <plaintext>";
-	  }
-
+	result = ts.l("getTypeDesc.password"); // "password"
 	break;
 
       case IP:
-	result = "i.p. field";
+	result = ts.l("getTypeDesc.ip_field"); // "i.p. field"
 	break;
 
       default:
-	result = "<<bad type code: " + field_type + " >>";
+	// "<<bad type code: " + field_type + " >>"
+	result = ts.l("getTypeDesc.bad_code", new Integer(field_type));
       }
 
     if (array)
       {
-	return result + " array [" + limit + "]";
+	return result + "[]";
       }
     else
       {
