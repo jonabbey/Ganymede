@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 2000/06/23 23:42:51 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 2000/10/09 05:51:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.46 $ $Date: 2000/06/23 23:42:51 $
+ * @version $Revision: 1.47 $ $Date: 2000/10/09 05:51:50 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -874,6 +874,52 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
     Ganymede.debug("Normal Operation");
 
     return null;
+  }
+
+  /**
+   *
+   * run a verification on the integrity of embedded objects and
+   * their containers
+   *
+   */
+
+  public ReturnVal runEmbeddedTest()
+  {
+    if (!fullprivs)
+      {
+	return Ganymede.createErrorDialog("Permissions Denied",
+					  "You do not have permissions to execute an embedded objects integrity test on the server");
+      }
+
+    GanymedeAdmin.setState("Running Embedded Test");
+	 
+    if (Ganymede.server.checkEmbeddedObjects())
+      {
+	Ganymede.debug("Embedded Objects Test completed successfully, no problems boss.");
+      }
+    else
+      {
+	Ganymede.debug("Embedded Objects Test encountered problems.  Oi, you're in the soup now, boss.");
+      }
+
+    GanymedeAdmin.setState("Normal Operation");
+
+    return null;
+  }
+
+  /**
+   * <P>Removes any embedded objects which do not have containers.</P>
+   */
+
+  public ReturnVal runEmbeddedSweep()
+  {
+    if (!fullprivs)
+      {
+	return Ganymede.createErrorDialog("Permissions Denied",
+					  "You do not have permissions to execute an Embedded objects sweep on the server");
+      }
+
+    return Ganymede.server.sweepEmbeddedObjects();
   }
 
   /**

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 2000/10/04 08:49:12 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 2000/10/09 05:51:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1554,5 +1554,242 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     Ganymede.debug("Ganymede invid link test complete");
 
     return ok;
+  }
+
+  /**
+   * <P>This method is used for testing.  This method sweeps 
+   * through all embedded objects in the (loaded) database, and
+   * checks to make sure that they all have valid containing objects.</P>
+   *
+   * @return true if there were any embedded objects without containers in
+   * the database
+   */
+
+  public boolean checkEmbeddedObjects()
+  {
+    Enumeration
+      enum1, enum2;
+
+    DBObjectBase
+      base;
+
+    DBObject
+      object, topObject;
+
+    boolean
+      ok = true;
+
+    // XXX
+    // 
+    // it's safe to use Ganymede.internalSession's DBSession here only
+    // because we don't call the synchronized viewDBObject method on
+    // it unless and until we are granted the DBDumpLock, and because
+    // we are not a synchronized method on GanymedeServer.
+    //
+    // XXX
+
+    GanymedeSession gSession = Ganymede.internalSession;
+
+    /* -- */
+    
+    DBDumpLock lock = new DBDumpLock(Ganymede.db);
+
+    try
+      {
+	lock.establish("checkEmbeddedObjects"); // wait until we get our lock
+      }
+    catch (InterruptedException ex)
+      {
+	Ganymede.debug("checkEmbeddedObjects couldn't proceed.");
+
+	return false;		// actually we just failed, but same difference
+      }
+
+    try
+      {
+	// loop over the object bases
+
+	enum1 = Ganymede.db.objectBases.elements();
+
+	while (enum1.hasMoreElements())
+	  {
+	    base = (DBObjectBase) enum1.nextElement();
+
+	    if (!base.isEmbedded())
+	      {
+		continue;
+	      }
+
+	    // loop over the objects in this base
+
+	    Ganymede.debug("Testing embedded object container integrity for objects of type " + base.getName());
+	
+	    enum2 = base.objectTable.elements();
+
+	    while (enum2.hasMoreElements())
+	      {
+		object = (DBObject) enum2.nextElement();
+
+		try
+		  {
+		    topObject = gSession.getContainingObj(object);
+		  }
+		catch (IntegrityConstraintException ex)
+		  {
+		    Ganymede.debug("Couldn't find containing object for " + object.getTypeName() + ": " + object.getLabel());
+		    ok = false;
+		  }
+	      }
+	  }
+      }
+    finally
+      {
+	lock.release();
+      }
+
+    Ganymede.debug("Ganymede embedded object test complete");
+
+    return ok;
+  }
+
+  /**
+   * <P>This method is used for fixing the server if it somehow leaks
+   * embedded objects..  This method sweeps 
+   * through all embedded objects in the (loaded) database, and
+   * deletes any that do not have valid containing objects.</P>
+   */
+
+  public ReturnVal sweepEmbeddedObjects()
+  {
+    Enumeration
+      enum1, enum2;
+
+    DBObjectBase
+      base;
+
+    DBObject
+      object, topObject;
+
+    Vector invidsToDelete = new Vector();
+
+    // XXX
+    // 
+    // it's safe to use Ganymede.internalSession's DBSession here only
+    // because we don't call the synchronized viewDBObject method on
+    // it unless and until we are granted the DBDumpLock, and because
+    // we are not a synchronized method on GanymedeServer.
+    //
+    // XXX
+
+    GanymedeSession gSession = Ganymede.internalSession;
+
+    /* -- */
+    
+    DBDumpLock lock = new DBDumpLock(Ganymede.db);
+
+    try
+      {
+	lock.establish("checkEmbeddedObjects"); // wait until we get our lock
+      }
+    catch (InterruptedException ex)
+      {
+	return Ganymede.createErrorDialog("Failure",
+					  "Couldn't get a dump lock to sweep the database for embedded objects");
+      }
+
+    try
+      {
+	// loop over the object bases
+
+	enum1 = Ganymede.db.objectBases.elements();
+
+	while (enum1.hasMoreElements())
+	  {
+	    base = (DBObjectBase) enum1.nextElement();
+
+	    if (!base.isEmbedded())
+	      {
+		continue;
+	      }
+
+	    // loop over the objects in this base
+
+	    Ganymede.debug("Testing embedded object container integrity for objects of type " + base.getName());
+	
+	    enum2 = base.objectTable.elements();
+
+	    while (enum2.hasMoreElements())
+	      {
+		object = (DBObject) enum2.nextElement();
+
+		try
+		  {
+		    topObject = gSession.getContainingObj(object);
+		  }
+		catch (IntegrityConstraintException ex)
+		  {
+		    invidsToDelete.addElement(object.getInvid());
+		  }
+	      }
+	  }
+      }
+    finally
+      {
+	lock.release();
+      }
+
+    if (invidsToDelete.size() == 0)
+      {
+	Ganymede.debug("Ganymede embedded object sweep complete");
+
+	return null;
+      }
+
+    // we want a private,  supergash-privileged GanymedeSession
+
+    try
+      {
+	gSession = new GanymedeSession("embeddedSweep");
+      }
+    catch (RemoteException ex)
+      {
+	ex.printStackTrace();
+	throw new RuntimeException(ex.getMessage());
+      }
+
+    try
+      {
+	// we're going to delete the objects by skipping the GanymedeSession
+	// permission layer, which will break on non-contained embedded objects
+
+	DBSession session = gSession.getSession();
+
+	// we want a non-interactive transaction.. if an object removal fails, the
+	// whole transaction will fail, no rollbacks.
+
+	gSession.openTransaction("embedded object sweep", false); // non-interactive
+    
+	for (int i = 0; i < invidsToDelete.size(); i++)
+	  {
+	    Invid objInvid = (Invid) invidsToDelete.elementAt(i);
+
+	    ReturnVal retVal = session.deleteDBObject(objInvid);
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		Ganymede.debug("Couldn't delete object " + gSession.viewObjectLabel(objInvid));
+	      }
+	    else
+	      {
+		Ganymede.debug("Deleted object " + gSession.viewObjectLabel(objInvid));
+	      }
+	  }
+
+	return gSession.commitTransaction();
+      }
+    finally
+      {
+	gSession.logout();
+      }
   }
 }

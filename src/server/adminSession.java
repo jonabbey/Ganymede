@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/03/07 23:04:06 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2000/10/09 05:51:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ import java.util.Date;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Revision: 1.15 $ %D%
+ * @version $Revision: 1.16 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -140,7 +140,7 @@ public interface adminSession extends Remote {
 
   /**
    *
-   * run a long-running verification suite on the invid links
+   * run a (possibly long-running) verification suite on the invid links
    *
    */
 
@@ -155,6 +155,21 @@ public interface adminSession extends Remote {
    */
 
   ReturnVal     runInvidSweep() throws RemoteException;
+
+  /**
+   *
+   * run a verification on the integrity of embedded objects and
+   * their containers
+   *
+   */
+
+  ReturnVal        runEmbeddedTest() throws RemoteException;
+
+  /**
+   * <P>Removes any embedded objects which do not have containers.</P>
+   */
+
+  ReturnVal     runEmbeddedSweep() throws RemoteException;
 
   /**
    * <P>Causes a pre-registered task in the Ganymede server

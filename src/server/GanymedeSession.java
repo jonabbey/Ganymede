@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.208 $
-   Last Mod Date: $Date: 2000/10/07 07:37:43 $
+   Version: $Revision: 1.209 $
+   Last Mod Date: $Date: 2000/10/09 05:51:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.208 $ $Date: 2000/10/07 07:37:43 $
+ * @version $Revision: 1.209 $ $Date: 2000/10/09 05:51:51 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -5005,9 +5005,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (inf == null)
 	  {
-	    if (false)
+	    if (true)
 	      {
-		System.err.println("Couldn't initially get a container field for object " + localObj.toString());
+		Ganymede.debug("Couldn't initially get a container field for object " + localObj.toString());
 	      }
 
 	    if (localObj instanceof DBEditObject)
@@ -5036,13 +5036,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (inf == null)
 	  {
-	    if (false)
+	    if (true)
 	      {
-		System.err.println("Couldn't get a container field for object " + localObj.toString() + " at all.");
+		Ganymede.debug("getContainingObj(): Couldn't get a container field for object " + localObj.toString() + " at all.");
 	      }
 
-	    setLastError("getContainingObj() error.. couldn't find owner of embedded object " + 
-			 localObj.getLabel());
 	    localObj = null;
 	    break;
 	  }
@@ -5079,14 +5077,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (inv == null)
 	  {
-	    if (false)
+	    if (true)
 	      {
-		System.err.println("Couldn't get a container invid for object " + localObj.toString());
+		Ganymede.debug("getContainingObj() error <2:" + loopcount +
+			       "> .. Couldn't get a container invid for object " + localObj.getLabel());
 	      }
 
-	    setLastError("getContainingObj() error <2:" + loopcount +
-			 ">.. couldn't find owner of embedded object " + 
-			 localObj.getLabel());
 	    localObj = null;
 	    break;
 	  }
@@ -5100,9 +5096,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (localObj == null)
       {
-	setLastError("getContainingObj() error <3>.. couldn't find owner of embedded object" + 
-		     object.getLabel());
-	throw new RuntimeException("getContainingObj() couldn't find owner of embedded object");
+	throw new IntegrityConstraintException("getContainingObj() couldn't find owner of embedded object " + 
+					       object.getLabel());
       }
 
     return localObj;

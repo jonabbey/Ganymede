@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2000/06/14 04:53:22 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2000/10/09 05:51:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -784,7 +784,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// object.. it makes no sense for us to be pulled out for editing without
 	// our parent also being edited.
 
-	sysObj = (systemCustom) getSession().editDBObject(sysInvid);
+	if (sysInvid != null)
+	  {
+	    sysObj = (systemCustom) getSession().editDBObject(sysInvid);
+	  }
       }
 
     return sysObj;

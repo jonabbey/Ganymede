@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2000/10/05 18:52:27 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2000/10/09 05:51:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1666,7 +1666,17 @@ public class DBLog {
 		  }
 	      }
 
-	    refObj = session.getGSession().getContainingObj(refObj);
+	    try
+	      {
+		refObj = session.getGSession().getContainingObj(refObj);
+	      }
+	    catch (IntegrityConstraintException ex)
+	      {
+		Ganymede.debug("Couldn't find container for " + refObj.getLabel());
+
+		continue;
+	      }
+
 	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
 	  }
 	else
