@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 2001/08/31 04:38:29 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 2001/09/10 19:38:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1882,8 +1882,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	if (field.getID() == userSchema.PASSWORD && operation == SETPASSPLAIN)
 	  {
-	    result = validatePasswordChoice((String) param1);
-
+	    result = validatePasswordChoice((String) param1, getGSession().isSuperGash());
+		
 	    if (result != null && !result.didSucceed())
 	      {
 		return result;
@@ -2228,7 +2228,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
   }
 
-  public ReturnVal validatePasswordChoice(String password)
+  /**
+   * <p>This method checks the given plaintext password against an
+   * external password validator library.  validatePasswordChoice
+   * specifies a file name to write the evaluation results to, runs
+   * the validator, and then reads from the file to see if the
+   * operation succeeded.</p>
+   */
+
+  public ReturnVal validatePasswordChoice(String password, boolean asRoot)
   {
     String resultString = null;
     String validatorName = "/opt/bin/ganypassValidate";
@@ -2271,10 +2279,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    resultString = in.readLine();
 		    in.close();
 
-		    resultFile.delete();
-		    
-		    return Ganymede.createErrorDialog("Password Rejected",
-						      resultString);
+		    if (!asRoot)
+		      {
+			return Ganymede.createErrorDialog("Password Rejected",
+							  resultString);
+		      }
+		    else
+		      {
+			return Ganymede.createInfoDialog("Warning: password not secure",
+							 "The password quality checker has not approved this password.  As supergash " +
+							 "you may go ahead and use the password you chose, but it may not be secure.\n\n" +
+							 resultString);
+		      }
 		  }
 		catch (FileNotFoundException ex)
 		  {
@@ -2294,6 +2310,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	finally
 	  {
 	    FileOps.cleanupProcess(process);
+
+	    try
+	      {
+		resultFile.delete();
+	      }
+	    catch (Exception ex)
+	      {
+		ex.printStackTrace();
+	      }
 	  }
       }
     else
@@ -2303,6 +2328,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     return null;
   }
+
+  /**
+   * <p>This method is used to save the chosen password to npasswd's
+   * on-disk non-reuse history so that npasswd can reject a too-soon
+   * recurrence of this password later.</p>
+   *
+   * <p>If supergash is editing this account, the password might not
+   * be to npasswd's liking, in which case the password save operation
+   * will fail, but we won't worry about that it if it happens.</p>
+   */
 
   public ReturnVal savePasswordChoice(String password)
   {
@@ -2347,8 +2382,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    resultString = in.readLine();
 		    in.close();
 
-		    resultFile.delete();
-		    
+		    // the calling code doesn't really care about the
+		    // failure to save, but
+		    // Ganymede.createErrorDialog() will log this to
+		    // stderr.
+
 		    return Ganymede.createErrorDialog("Password History Not Saved",
 						      resultString);
 		  }
@@ -2370,6 +2408,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	finally
 	  {
 	    FileOps.cleanupProcess(process);
+
+	    try
+	      {
+		resultFile.delete();
+	      }
+	    catch (Exception ex)
+	      {
+		ex.printStackTrace();
+	      }
 	  }
       }
     else
