@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.56 $ %D%
+   Version: $Revision: 1.57 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -283,7 +283,7 @@ public class Ganymede {
       {
 	debug("Creating GanymedeServer object");
 
-	server = new GanymedeServer(50);
+	server = new GanymedeServer();
 
 	debug("Binding GanymedeServer in RMI Registry");
 
@@ -455,7 +455,7 @@ public class Ganymede {
       {
 	debug("Creating GanymedeServer object");
 
-	server = new GanymedeServer(10);
+	server = new GanymedeServer();
 
 	debug("Binding GanymedeServer in RMI Registry");
       }
