@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.60 $
-# $Date: 2004/03/20 02:34:12 $
+# $Revision: 1.61 $
+# $Date: 2004/03/20 02:36:34 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -24,7 +24,7 @@ use English;
 #                                                                 resolve
 #
 # input: $dir - absolute pathname of current directory
-#        $link - string containing the readlink() results for a 
+#        $link - string containing the readlink() results for a
 #                symbolic link in $dir to be processed
 #
 # returns: absolute pathname of the target of the symbolic link
@@ -40,7 +40,7 @@ sub resolve{
     # if we have a leading / in our $dir or $link,
     # we'll need to shift to get rid of the leading
     # empty array element
-  
+
     @dirp=split(/\//, $dir);
     shift(@dirp) if (!($dirp[0]));
     @linkp=split(/\//, $link);
@@ -48,7 +48,7 @@ sub resolve{
 
     # @alinkp is an array that we will build to contain the absolute link
     # target pathname.  If the link does not begin with a /, it is a relative link,
-    # and we need to place our current directory into the @alinkp array.  
+    # and we need to place our current directory into the @alinkp array.
 
     if ($link !~ /^\//) {
 	@alinkp=@dirp;
@@ -66,7 +66,7 @@ sub resolve{
 	if ($d eq "..") {
 	    pop(@alinkp);
 	}
-	elsif ($d ne "."){		       
+	elsif ($d ne "."){
 	    push(@alinkp, $d);
 	}
 	$d=shift(@linkp);
@@ -80,16 +80,16 @@ sub resolve{
     $alinkp="/@alinkp";
 }
 
-######################################################################### 
+#########################################################################
 #
 #                                                         removelastslash
 #
 # input: a pathname to test
 #
-# this function will remove a trailing slash from the directory name 
+# this function will remove a trailing slash from the directory name
 # input
 #
-######################################################################### 
+#########################################################################
 sub removelastslash{
   if ($_[0] =~ /\/$/) {
     chop $_[0];
@@ -313,29 +313,29 @@ ENDCONFIG
     close(CONFIGFILE);
 }
 
-######################################################################### 
+#########################################################################
 #
 #                                                                 makedir
 #
 # input: 1) a directory to make
 #        2) octal chmod bits
 #
-######################################################################### 
+#########################################################################
 sub makedir{
   my ($dirpath, $chmod) = @_;
 
   if (!-e $dirpath) {
     mkdir ($dirpath, $chmod) or die("*Couldn't make $dirpath*");
   }
-} 
-######################################################################### 
+}
+#########################################################################
 #
 #                                                                 copydir
 #
 # input: 1) a directory to copy from
 #        2) directory target
 #
-######################################################################### 
+#########################################################################
 sub copydir{
   my ($source, $target) = @_;
   my (@dirs, $file);
@@ -398,7 +398,7 @@ $classdir = $ENV{GCLASSDIR};
 if ($classdir eq "") {
   $classdir = "$rootdir/src/classes";
 } else {
-  # If there is a user-set classes path, make sure it has 
+  # If there is a user-set classes path, make sure it has
   # the necessary directory structure and support files.
   &copydir("$rootdir/src/classes","$classdir");
 }
@@ -422,6 +422,7 @@ removelastslash($swingdir);
 	  "$rootdir/src/xml/xp/xml/sax", "James Clark XP XML Parser SAX Driver Classes", "$classdir",
 	  "$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$classdir",
 	  "$rootdir/src/jcrypt", "jcrypt Class", "$classdir",
+	  "$rootdir/src/jug", "Java UUID Generator Class", "$classdir",
 	  "$rootdir/src/crypto", "SMB Cryptographic Hash Classes", "$classdir",
 	  "$rootdir/src/md5", "md5 Classes", "$classdir",
 	  "$rootdir/src/Util", "Ganymede Utility Classes", "$classdir",
