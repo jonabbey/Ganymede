@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -116,10 +116,14 @@ public class DBObjectBase {
     size = in.readShort();
     fieldHash = new Hashtable(size);
 
+    // read in the field dictionary for this object
+
     for (int i = 0; i < size; i++)
       {
-	fieldHash.put(new Integer(type_code), new DBObjectBaseField(in, this));
+	fieldHash.put(new Short(type_code), new DBObjectBaseField(in, this));
       }
+
+    // read in the objects belonging to this ObjectBase
 
     object_count = in.readInt();
 
