@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -926,11 +926,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     while ((retVal != null) && (retVal.getDialog() != null))
       {
+	// System.err.println("** gclient: retrieving dialog");
+
 	JDialogBuff jdialog = retVal.getDialog();
+
+	// System.err.println("** gclient: constructing dialog");
 
 	StringDialog dialog = new StringDialog(jdialog.extractDialogRsrc(this));
 
+	// System.err.println("** gclient: displaying dialog");
+
 	Hashtable result = dialog.DialogShow();
+
+	// System.err.println("** gclient: dialog done");
 
 	if (retVal.getCallback() != null)
 	  {
