@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -449,6 +449,7 @@ public class DBJournal implements ObjectStatus {
 
 		if (debug)
 		  {
+		    System.err.print("Creating object:\n\t");
 		    eObj.print(System.err);
 		  }
 		break;
@@ -460,6 +461,7 @@ public class DBJournal implements ObjectStatus {
 		
 		if (debug)
 		  {
+		    System.err.print("Editing object:\n\t");
 		    eObj.print(System.err);
 		  }
 
@@ -472,11 +474,17 @@ public class DBJournal implements ObjectStatus {
 
 		if (debug)
 		  {
+		    System.err.print("Deleting object:\n\t");
 		    System.err.println(eObj.objectBase.object_name + " : " + eObj.id);
 		  }
 		break;
 
 	      case DROPPING:
+		if (debug)
+		  {
+		    System.err.print("Dropping object:\n\t");
+		    eObj.print(System.err);
+		  }
 		break;
 	      }
 	  }

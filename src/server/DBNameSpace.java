@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -353,7 +353,7 @@ class DBNameSpace extends UnicastRemoteObject implements NameSpace {
 
     if (debug)
       {
-	System.err.println(editSet.session.key + ": DBNameSpace.mark(): enter");
+	System.err.println(editSet.getSession().getKey() + ": DBNameSpace.mark(): enter");
       }
 
     if (uniqueHash.containsKey(value))
@@ -414,6 +414,7 @@ class DBNameSpace extends UnicastRemoteObject implements NameSpace {
 	handle = new DBNameSpaceHandle(editSet, false, null);
 	handle.inuse = true;
 	handle.shadowField = field;
+	
 	uniqueHash.put(value, handle);
 
 	remember(editSet, value);
@@ -670,9 +671,16 @@ class DBNameSpace extends UnicastRemoteObject implements NameSpace {
     // loop over the values in the namespace that were changes or affected
     // by this editset
 
+    System.err.println("namespace valueVect.size: " + valueVect.size());
+
     for (int i = 0; i < valueVect.size(); i++)
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(valueVect.elementAt(i));
+
+	if (handle == null)
+	  {
+	    System.err.println("error, element(" + i + ") " + valueVect.elementAt(i) + " isn't in unique hash");
+	  }
 
 	if (handle.inuse)
 	  {
@@ -722,6 +730,28 @@ class DBNameSpace extends UnicastRemoteObject implements NameSpace {
       {
 	tmpvect = (Vector) reserved.get(editSet);
 	tmpvect.addElement(value);
+      }
+  }
+
+  /*----------------------------------------------------------------------------
+                                                                          method
+                                                                   dumpNameSpace
+
+  ----------------------------------------------------------------------------*/
+
+  private void dumpNameSpace()
+  {
+    Enumeration enum;
+    Object key;
+    
+    /* -- */
+
+    enum = uniqueHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+	System.err.println("key: " + key + ", value: " + uniqueHash.get(key));
       }
   }
 }
