@@ -1589,6 +1589,18 @@ public class DBEditSet {
 	    // XXX which violates the guarantees we need to maintain in order to make this whole
 	    // XXX delta synchronization thing work
 	    // XXX
+	    // XXX Probably what we want to do is wait until we see whether the admin
+	    // XXX wants to just skip the transaction, in which case we could mark the
+	    // XXX transaction in the journal as 'anti-finalized', meaning it never
+	    // XXX happened.
+	    // XXX
+	    // XXX If we do that, however, do we even want to bother trying to replay
+	    // XXX changes on server restart?  We could just report that the transaction
+	    // XXX could not be done at all, and be happy with the transaction-consistent
+	    // XXX outcome we get by doing that.  As long as we don't persist a transaction
+	    // XXX that we weren't able to write out to the active sync channels, we'll keep
+	    // XXX things consistent and avoid surprises.
+	    // XXX
 
 	    if (ex instanceof IOException)
 	      {
