@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.42 $ %D%
+  Version: $Revision: 1.43 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import javax.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.42 $ %D%
+ * @version $Revision: 1.43 $ %D%
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -2944,16 +2944,21 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       {
 	// very bottom of the canvas
 
-    	ypos = getBounds().height - 1; 
+    	ypos = getBounds().height - 1;
+
+	drawHorizLine(ypos);
       }
     else
       {
 	// bottom of the last row defined (this makes a difference in fill mode)
 
 	ypos = ((tableRow) rt.rows.lastElement()).getBottomEdge() - v_offset;
-      }
 
-    drawHorizLine(ypos);
+	if (ypos <= getBounds().height - 1)
+	  {
+	    drawHorizLine(ypos);
+	  }
+      }
     
     // if rt.horizLines is true, draw the horizontal lines
     // in the body of the table
@@ -3006,7 +3011,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	    bg.setColor(rt.vHeadLineColor);
 	    bg.drawLine(xpos, 0, xpos, rt.displayRegionFirstLine() - 1);
 	    bg.setColor(rt.vRowLineColor);
-	    bg.drawLine(xpos, rt.displayRegionFirstLine(), xpos, ypos);
+	    bg.drawLine(xpos, rt.displayRegionFirstLine(), xpos, getBounds().height - 1);
 	  }
       }
 
