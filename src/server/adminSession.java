@@ -8,7 +8,7 @@
    Ganymede adminSession object holds the state for the Ganymede Admin console.
 
    Created: 28 May 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,6 +23,15 @@ public interface adminSession extends Remote {
   // Client/server interface operations
 
   void        logout() throws RemoteException;
+
+  /**
+   *
+   * This method lets the admin console explicitly request
+   * a refresh.
+   *
+   */
+
+  void        refreshMe() throws RemoteException;
   boolean     kill(String user) throws RemoteException;
   boolean     killAll() throws RemoteException;
   String      getInfo(String user) throws RemoteException;

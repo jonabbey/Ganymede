@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -499,6 +499,27 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
     Ganymede.debug("Admin console detached " + new Date());
   }
 
+
+  /**
+   *
+   * Disconnect the remote admin console associated with this object
+   *
+   */
+
+  public synchronized void refreshMe() throws RemoteException
+  {
+    admin.setServerStart(Ganymede.startTime);
+    updateTransCount(admin);
+    updateLastDump(admin);
+    updateCheckedOut(admin);
+    updateLocksHeld(admin);
+    admin.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
+    setState(admin);
+
+    refreshUsers();
+    refreshTasks();
+  }
+
   /**
    *
    * Kick all users off of the Ganymede server on behalf of this admin console
@@ -940,7 +961,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
   // any consoles that we caught a remote exception from.  We'll go ahead
   // and try the connection once more as a test before banishing it.
    
-  private static void detachBadConsoles()
+  private static synchronized void detachBadConsoles()
   {
     boolean testval;
     Admin temp;
