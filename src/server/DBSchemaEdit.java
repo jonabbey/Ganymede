@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,9 +37,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   //
 
-  private boolean developMode = false;  // CAUTION!! Should be false unless the schema elements
-				        // that the Ganymede server depends on are being deliberately
-				        // altered!
+  private boolean developMode = false; // CAUTION!! Should be false unless the schema elements
+             			       // that the Ganymede server's
+				       // internal logic depends on
+				       // are being deliberately
+				       // altered!
 
   private boolean locked;	// if true, this DBSchemaEdit object has already been
 				// committed or aborted
@@ -462,11 +464,12 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * @see arlut.csd.ganymede.SchemaEdit
    */
 
-  public synchronized Base createNewBase(Category category, boolean embedded)
+  public synchronized Base createNewBase(Category category, boolean embedded, boolean builtIn)
   {
     DBObjectBase base;
     DBBaseCategory localCat = null;
     String path;
+    short id = 0;
 
     /* -- */
 
@@ -481,9 +484,28 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new RuntimeException("already released/committed");
       }
 
+    if (builtIn)
+      {
+	Enumeration enum = store.objectBases.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    base = (DBObjectBase) enum.nextElement();
+
+	    if ((base.getTypeID() > id) && (base.getTypeID() < 256))
+	      {
+		id = (short) (base.getTypeID() + 1);
+	      }
+	  }
+      }
+    else
+      {
+	id = ++maxId;
+      }
+
     try
       {
-	base = new DBObjectBase(store, ++maxId, embedded, this);
+	base = new DBObjectBase(store, id, embedded, this);
       }
     catch (RemoteException ex)
       {
