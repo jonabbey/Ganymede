@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -162,7 +162,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 
   public StringDialog(DialogRsrc Resource) 
   {
-    super(Resource.frame, Resource.title, false);
+    super(Resource.frame, Resource.title, true);
 
     if (debug)
       {
@@ -346,7 +346,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 
 		    if (st.isMultiline())
 		      {
-			JstringArea sa = new JstringArea();
+			JstringArea sa = new JstringArea(5, 40);
 			sa.setText(st.getValue());
 			sa.setEditable(true);
 			sa.setCallback(this);
@@ -393,7 +393,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 		    if (dt.getMaxDate() != null)
 		      {
 			dateField = new JdateField(dt.getDate(), true, true,
-						   null, dt.getMaxDate(), this);
+						   dt.getDate(), dt.getMaxDate(), this);
 		      }
 		    else
 		      {
