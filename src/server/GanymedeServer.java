@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 2003/03/10 19:32:00 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 2003/03/11 20:27:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -181,16 +181,17 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   } 
 
   /**
-   * <p>Simple RMI test method.. this method is here so that the
-   * {@link arlut.csd.ganymede.client.ClientBase ClientBase} class
-   * can test to see whether it has truly gotten a valid RMI reference
-   * to the server.</p>
+   * <p>Simple RMI ping test method.. this method is here so that the
+   * {@link arlut.csd.ganymede.client.ClientBase ClientBase} class can
+   * test to see whether it has truly gotten a valid RMI reference to
+   * the server.</p>
    */
 
   public boolean up() throws RemoteException
   {
     return true;
   }
+
 
   /** 
    * <p>Client login method.  Establishes a {@link
@@ -207,13 +208,50 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   public Session login(Client client) throws RemoteException
   {
-    String clientName = null;
+    return this.login(client, null, null);
+  }
+
+  /** 
+   * <p>Client login method.  Establishes a {@link
+   * arlut.csd.ganymede.GanymedeSession GanymedeSession} object in the
+   * server for the client, and returns a {@link
+   * arlut.csd.ganymede.Session Session} remote reference to the
+   * client.  The GanymedeSession object contains all of the server's
+   * knowledge about a given client's status., and is tracked by
+   * the GanymedeServer object for statistics and for the admin
+   * console's monitoring support.</P>
+   *
+   * <p>The username and password parameters are optional.. if these
+   * parameters are null, the Ganymede Server will query the Client
+   * remote interface for this information.</p>
+   * 
+   * @see arlut.csd.ganymede.Server 
+   */
+
+  public Session login(Client client, String username, String password) throws RemoteException
+  {
+    String clientName;
     String clientPass;
 
     /* -- */
 
-    clientName = client.getName();
-    clientPass = client.getPassword();
+    if (username != null)
+      {
+	clientName = username;
+      }
+    else
+      {
+	clientName = client.getName();
+      }
+
+    if (password != null)
+      {
+	clientPass = password;
+      }
+    else
+      {
+	clientPass = client.getPassword();
+      }
 
     return processLogin(clientName, clientPass, client, Ganymede.remotelyAccessible);
   }
@@ -234,13 +272,52 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   public XMLSession xmlLogin(Client client) throws RemoteException
   {
+    return this.xmlLogin(client, null, null);
+  }
+
+  /** 
+   * <p>XML Client login method.  Establishes a {@link
+   * arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession} object
+   * in the server for the client, and returns a {@link
+   * arlut.csd.ganymede.XMLSession XMLSession} remote reference to the
+   * XML client.  The GanymedeXMLSession object in turn contains a
+   * GanymedeSession object, which contains all of the server's
+   * knowledge about a given client's status., and is tracked by the
+   * GanymedeServer object for statistics and for the admin console's
+   * monitoring support.</P>
+   *
+   * <p>The username and password parameters are optional.. if these
+   * parameters are null, the Ganymede Server will query the Client
+   * remote interface for this information.</p>
+   * 
+   * @see arlut.csd.ganymede.Server 
+   */
+
+  public XMLSession xmlLogin(Client client, String username, String password) throws RemoteException
+  {
     String clientName = null;
     String clientPass;
 
     /* -- */
 
-    clientName = client.getName();
-    clientPass = client.getPassword();
+
+    if (username != null)
+      {
+	clientName = username;
+      }
+    else
+      {
+	clientName = client.getName();
+      }
+
+    if (password != null)
+      {
+	clientPass = password;
+      }
+    else
+      {
+	clientPass = client.getPassword();
+      }
 
     GanymedeSession mySession = processLogin(clientName, clientPass, client, false);
 

@@ -11,15 +11,15 @@
    
    Created: 16 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2002/08/03 01:29:57 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/03/11 20:27:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -49,7 +49,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -77,7 +78,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientEvent
  *
- * @version $Revision: 1.5 $ $Date: 2002/08/03 01:29:57 $
+ * @version $Revision: 1.6 $ $Date: 2003/03/11 20:27:45 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
 
 public class serverClientProxy implements Runnable {

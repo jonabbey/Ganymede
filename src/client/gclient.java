@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.211 $
-   Last Mod Date: $Date: 2003/03/11 02:30:21 $
+   Version: $Revision: 1.212 $
+   Last Mod Date: $Date: 2003/03/11 20:27:44 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.211 $ $Date: 2003/03/11 02:30:21 $ $Name:  $
+ * @version $Revision: 1.212 $ $Date: 2003/03/11 20:27:44 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -289,11 +289,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   //
 
   private boolean
-    buildingPhase1 = false,
-    buildingPhase2 = false,
     toolToggle = true,
     showToolbar = true,       // Show the toolbar
     somethingChanged = false;  // This will be set to true if the user changes anything
+
+  private int
+    buildPhase = -1;		// unknown
   
   helpPanel
     help = null;
@@ -385,7 +386,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     createDialogImage;
 
   ImageIcon
-    idleIcon, buildIcon, buildIcon2;
+    idleIcon, buildIcon, buildIcon2, buildUnknownIcon;
 
   /**
    * JDesktopPane on the right side of the client's display, contains
@@ -783,6 +784,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     queryIcon = PackageResources.getImageResource(this, "query.gif", getClass());
     cloneIcon = PackageResources.getImageResource(this, "clone.gif", getClass());
     idleIcon = new ImageIcon(PackageResources.getImageResource(this, "nobuild.gif", getClass()));
+    buildUnknownIcon = new ImageIcon(PackageResources.getImageResource(this, "buildunknown.gif", getClass()));
     buildIcon = new ImageIcon(PackageResources.getImageResource(this, "build1.gif", getClass()));
     buildIcon2 = new ImageIcon(PackageResources.getImageResource(this, "build2.gif", getClass()));
     trash = PackageResources.getImageResource(this, "trash.gif", getClass());
@@ -951,22 +953,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     statusThread = new StatusClearThread(statusLabel);
     statusThread.start();
+
+    // start the securityThread to launder RMI calls from the server
     
     securityThread = new SecurityLaunderThread(this);
     securityThread.start();
-
-    if (buildingPhase1)
-      {
-	buildLabel.setIcon(buildIcon);
-      }
-    else if (buildingPhase2)
-      {
-	buildLabel.setIcon(buildIcon2);
-      }
-    else
-      {
-	buildLabel.setIcon(idleIcon);
-      }
 
     JPanel lP = new JPanel(new BorderLayout());
     lP.setBorder(statusBorder);
@@ -1302,6 +1293,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
+   * <p>Public accessor for the SecurityLaunderThread</p>
+   */
+
+  public int getBuildPhase()
+  {
+    return buildPhase;
+  }
+
+  /**
    * By overriding update(), we can eliminate the annoying flash as
    * the default update() method clears the frame before rendering.
    */
@@ -1580,10 +1580,30 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	System.out.println("Setting build status: " + status);
       }
 
-    buildingPhase1 = (status != null) && status.equals("building");
-    buildingPhase2 = (status != null) && status.equals("building2");
+    if (status.equals("idle"))
+      {
+	buildPhase = 0;
+      }
+    else if (status.equals("building"))
+      {
+	buildPhase = 1;
+      }
+    else if (status.equals("building2"))
+      {
+	buildPhase = 2;
+      }
+    else
+      {
+	buildPhase = -1;
+      }
 
-    securityThread.setBuildStatus(buildingPhase1, buildingPhase2);
+    try
+      {
+	securityThread.setBuildStatus(buildPhase);
+      }
+    catch (NullPointerException ex)
+      {
+      }
   }
 
   /**
@@ -6037,9 +6057,12 @@ class StatusClearThread extends Thread {
 ------------------------------------------------------------------------------*/
 
 /**
- * Background client thread designed to launder build status messages from
- * the server on a non-RMI thread.  Set up and torn down by the
- * {@link arlut.csd.ganymede.client.gclient gclient} class.
+ * Background client thread designed to launder build status messages
+ * from the server on a non-RMI thread.  We do this so that RMI calls
+ * from the server are granted permission to put events on the GUI
+ * thread for apropriately synchronized icon setitng.  Set up and torn
+ * down by the {@link arlut.csd.ganymede.client.gclient gclient}
+ * class.
  */
 
 class SecurityLaunderThread extends Thread {
@@ -6047,14 +6070,36 @@ class SecurityLaunderThread extends Thread {
   gclient client;
   boolean done = false;
   boolean messageSet = false;
-  boolean buildingPhase1 = false;
-  boolean buildingPhase2 = false;
+  int buildPhase = -1;		// unknown
 
   /* -- */
 
   public SecurityLaunderThread(gclient client)
   {
     this.client = client;
+
+    // assume we were constructed on the GUI thread by the main
+    // gclient constructor
+
+    switch (client.getBuildPhase())
+      {
+      case 0:
+	client.buildLabel.setIcon(client.idleIcon);
+	break;
+	
+      case 1:
+	client.buildLabel.setIcon(client.buildIcon);
+	break;
+	
+      case 2:
+	client.buildLabel.setIcon(client.buildIcon2);
+	break;
+	
+      default:
+	client.buildLabel.setIcon(client.buildUnknownIcon);
+      }
+    
+    client.buildLabel.validate();
   }
 
   public synchronized void run()
@@ -6073,19 +6118,25 @@ class SecurityLaunderThread extends Thread {
 	  {
 	    SwingUtilities.invokeLater(new Runnable() {
 	      public void run() {
-		if (buildingPhase1)
+
+		switch (buildPhase)
 		  {
-		    client.buildLabel.setIcon(client.buildIcon);
-		  }
-		else if (buildingPhase2)
-		  {
-		    client.buildLabel.setIcon(client.buildIcon2);
-		  }
-		else
-		  {
+		  case 0:
 		    client.buildLabel.setIcon(client.idleIcon);
+		    break;
+		    
+		  case 1:
+		    client.buildLabel.setIcon(client.buildIcon);
+		    break;
+
+		  case 2:
+		    client.buildLabel.setIcon(client.buildIcon2);
+		    break;
+
+		  default:
+		    client.buildLabel.setIcon(client.buildUnknownIcon);
 		  }
-		
+		  
 		client.buildLabel.validate();
 	      }
 	    });	
@@ -6104,11 +6155,10 @@ class SecurityLaunderThread extends Thread {
    * Called by {@link arlut.csd.ganymede.client.gclient#setBuildStatus(java.lang.String) gclient.setBuildStatus()}.
    */
 
-  public synchronized void setBuildStatus(boolean phase1, boolean phase2)
+  public synchronized void setBuildStatus(int phase)
   {
     this.messageSet = true;
-    this.buildingPhase1 = phase1;
-    this.buildingPhase2 = phase2;
+    this.buildPhase = phase;
 
     this.notifyAll();		// wakey-wakey!
   }

@@ -15,15 +15,15 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.263 $
-   Last Mod Date: $Date: 2002/11/01 03:48:55 $
+   Version: $Revision: 1.264 $
+   Last Mod Date: $Date: 2003/03/11 20:27:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.263 $ $Date: 2002/11/01 03:48:55 $
+ * @version $Revision: 1.264 $ $Date: 2003/03/11 20:27:45 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2041,6 +2041,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    sendMessage(ClientMessage.BUILDSTATUS, "building");
 	  }
 	else if (GanymedeBuilderTask.getPhase2Count() > 0)
+	  {
+	    sendMessage(ClientMessage.BUILDSTATUS, "building2");
+	  }
+	else
 	  {
 	    sendMessage(ClientMessage.BUILDSTATUS, "building2");
 	  }
@@ -6611,7 +6615,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (!loggedInSemaphore.isSet())
       {
-	throw new IllegalArgumentException("not logged in");
+	throw new IllegalArgumentException("Client no longer logged in.");
       }
 
     lastActionTime.setTime(System.currentTimeMillis());

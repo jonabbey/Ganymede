@@ -9,15 +9,15 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/09/13 06:11:25 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2003/03/11 20:27:44 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -71,7 +71,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.18 $ $Date: 2000/09/13 06:11:25 $ $Name:  $
+ * @version $Revision: 1.19 $ $Date: 2003/03/11 20:27:44 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -211,7 +211,7 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 	// forceDisconnect() method during the login process
 
 	loginRefuseMessage = null;
-	session = server.login(this);
+	session = server.login(this, username, password);
 
 	if (session == null)
 	  {
@@ -287,7 +287,7 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 	// forceDisconnect() method during the login process
 
 	loginRefuseMessage = null;
-	xSession = server.xmlLogin(this);
+	xSession = server.xmlLogin(this, username, password);
 
 	if (xSession == null)
 	  {
