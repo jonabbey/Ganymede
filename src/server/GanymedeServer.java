@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 2000/10/09 05:51:50 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 2000/10/09 06:23:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -773,7 +773,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * <P>This method retrieves a message from a specified directory in
    * the Ganymede installation and passes it back as a StringBuffer.
    * Used by the Ganymede server to pass motd information to the
-   * client.</P> 
+   * client.</P>
+   *
+   * @param key A text key indicating the file to be retrieved, minus
+   * the .txt or .html extension
+   * @param userToDateCompare If not null, the Invid of a user on whose behalf
+   * we want to retrieve the message.  If the user has logged in more recently
+   * than the timestamp of the file has changed, we will return a null result
+   * @param html If true, return the .html version.  If false, return the .txt
+   * version.
    */
 
   public static StringBuffer getTextMessage(String key, Invid userToDateCompare,
