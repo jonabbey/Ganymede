@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 2001/07/27 01:02:19 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 2001/07/27 01:57:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1204,6 +1204,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * <P>This operation will fail if this
    * PermissionMatrixDBField is not editable.</P>
    *
+   * @param baseID the object type to set permissions for
+   * @param fieldID the field to set permissions for.  If fieldID < 0,
+   * the permission will be applied to the object as a whole rather
+   * than any individual field within the object
+   *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermEntry 
    */
@@ -1488,7 +1493,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	return false;
       }
-    
+
     if (owner.gSession.isSuperGash())
       {
 	return true;
