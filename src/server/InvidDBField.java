@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -826,6 +826,11 @@ public class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
+    if (isEditInPlace())
+      {
+	throw new IllegalArgumentException("can't manually set element in edit-in-place vector");
+      }
+
     if (!isEditable())
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
@@ -895,6 +900,11 @@ public class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
+    if (isEditInPlace())
+      {
+	throw new IllegalArgumentException("can't manually add element to edit-in-place vector");
+      }
+
     if (!isEditable())
       {
 	setLastError("don't have permission to change field /  non-editable object");
@@ -945,6 +955,84 @@ public class InvidDBField extends DBField implements invid_field {
       {
 	unbind(remote);
 	return false;
+      }
+  }
+
+  /**
+   *
+   * Creates and adds a new embedded object in this
+   * field, if it is an edit-in-place vector.
+   *
+   * Returns an Invid pointing to the newly created
+   * and appended embedded object, or null if
+   * creation / addition was not possible.
+   *
+   * @see arlut.csd.ganymede.invid_field
+   *
+   */
+
+  public Invid createNewEmbedded()
+  {
+    if (!isEditable())
+      {
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+      }
+
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector method called on a scalar field");
+      }
+
+    if (!isEditInPlace())
+      {
+	throw new IllegalArgumentException("edit-in-place method called on a referential invid field");
+      }
+
+    if (size() >= getMaxArraySize())
+      {
+	setLastError("Field " + getName() + " already at or beyond array size limit");
+	return null;
+      }
+
+    DBEditObject eObj = (DBEditObject) owner;
+
+    // have our owner create a new embedded object
+    // for us 
+
+    Invid newObj = eObj.createNewEmbeddedObject(this);
+
+    if (newObj == null)
+      {
+	return null;
+      }
+
+    // now we need to do the binding as appropriate
+    // note that we assume that we don't need to verify the
+    // new value
+    
+    if (!bind(null, newObj))
+      {
+	setLastError("Couldn't bind reverse pointer");
+	return null;
+      }
+
+    if (eObj.finalizeAddElement(this, newObj)) 
+      {
+	values.addElement(newObj);
+
+	if (debug)
+	  {
+	    setLastError("InvidDBField debug: successfully added " + newObj);
+	  }
+
+	defined = true;		// very important!
+
+	return newObj;
+      } 
+    else
+      {
+	unbind(newObj);
+	return null;
       }
   }
 
