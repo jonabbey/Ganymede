@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.138 $
-   Last Mod Date: $Date: 2002/08/07 02:23:07 $
+   Version: $Revision: 1.139 $
+   Last Mod Date: $Date: 2002/08/07 18:39:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -45,7 +45,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -151,7 +152,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.138 $ $Date: 2002/08/07 02:23:07 $
+ * @version $Revision: 1.139 $ $Date: 2002/08/07 18:39:20 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -258,7 +259,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
     shadowObject = null;
 
-    myInvid = new Invid(objectBase.type_code, 0);
+    myInvid = Invid.createInvid(objectBase.type_code, 0);
     gSession = null;
   }
 
@@ -272,7 +273,7 @@ public class DBObject implements db_object, FieldType, Remote {
   DBObject(DBObjectBase objectBase, int id)
   {
     this(objectBase);
-    myInvid = new Invid(objectBase.type_code, id);
+    myInvid = Invid.createInvid(objectBase.type_code, id);
     gSession = null;
   }
 
@@ -931,7 +932,7 @@ public class DBObject implements db_object, FieldType, Remote {
 
     // get our unique id
 
-    myInvid = new Invid(objectBase.type_code, in.readInt());
+    myInvid = Invid.createInvid(objectBase.type_code, in.readInt());
 
     // get number of fields
 

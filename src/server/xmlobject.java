@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2001/03/24 07:42:25 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2002/08/07 18:39:22 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -72,7 +72,7 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession}.</p>
  *
- * @version $Revision: 1.4 $ $Date: 2001/03/24 07:42:25 $ $Name:  $
+ * @version $Revision: 1.5 $ $Date: 2002/08/07 18:39:22 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -473,7 +473,7 @@ public class xmlobject {
 
 	if (num != -1)
 	  {
-	    invid = new Invid(type.shortValue(), num);
+	    invid = Invid.createInvid(type.shortValue(), num);
 	  }
 	else if (id != null)
 	  {

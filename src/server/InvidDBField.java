@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.172 $
-   Last Mod Date: $Date: 2002/03/29 03:57:57 $
+   Version: $Revision: 1.173 $
+   Last Mod Date: $Date: 2002/08/07 18:39:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.172 $ %D%
+ * @version $Revision: 1.173 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -275,7 +275,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (fixup)
 	  {
-	    Invid superOwner = new Invid((short)0,(short)1);
+	    Invid superOwner = Invid.createInvid((short)0,1);
 
 	    // we want to omit any ownership links to the
 	    // supergash owner group
@@ -418,7 +418,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    for (int i = 0; i < count; i++)
 	      {
-		temp = new Invid(in.readShort(), in.readInt());
+		temp = Invid.createInvid(in.readShort(), in.readInt());
 		v.addElement(temp);
 	      }
 	  }
@@ -429,7 +429,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	value = new Invid(in.readShort(), in.readInt());
+	value = Invid.createInvid(in.readShort(), in.readInt());
       }
   }
 

@@ -8,15 +8,15 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2001/06/01 01:50:00 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2002/08/07 18:39:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -464,7 +464,7 @@ public class ReturnVal implements java.io.Serializable {
 
 	if (atom.indexOf(':') != -1)
 	  {
-	    invid = new Invid(atom);
+	    invid = Invid.createInvid(atom);
 	  }
 	else if (atom.equals("all"))
 	  {

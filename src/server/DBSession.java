@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 2002/03/18 21:37:05 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 2002/08/07 18:39:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,7 +93,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.113 $ %D%
+ * @version $Revision: 1.114 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -754,7 +754,7 @@ final public class DBSession {
 	  {
 	    // not in transaction.. maybe we created it?
 	   
-	    return editSet.findObject(new Invid(baseID, objectID));
+	    return editSet.findObject(Invid.createInvid(baseID, objectID));
 	  }
 	
 	// okay, we found it and we've got a transaction open.. see if the

@@ -11,15 +11,16 @@
    
    Created: 11 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/06/15 02:48:27 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2002/08/07 18:39:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   The University of Texas at Austin.
 
    Contact information
 
@@ -47,7 +48,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -81,6 +83,48 @@ import java.io.*;
 public final class Invid implements java.io.Serializable {
 
   static final long serialVersionUID = 5357151693275369893L;
+
+  /**
+   * <p>Receive Factory method for Invid's.  Does nothing fancy now, could
+   * be used to do Invid caching/pooling sometime if we so desire.</p>
+   */
+
+  static final public Invid createInvid(short type, int num)
+  {
+    return new Invid(type, num);
+  }
+
+  /**
+   * <p>Factory method for Invid's.  Does nothing fancy now, could
+   * be used to do Invid caching/pooling sometime if we so desire.</p>
+   */
+
+  static final public Invid createInvid(DataInput in) throws IOException
+  {
+    return new Invid(in.readShort(), in.readInt());
+  }
+
+  /**
+   * <P>Factory method for Invid's.  String should be a pair of colon
+   * separated numbers, in the form 5:134 where the first number is
+   * the short type and the second is the int object number.</P>
+   */
+
+  static final public Invid createInvid(String string)
+  {
+    String first = string.substring(0, string.indexOf(':'));
+    String last = string.substring(string.indexOf(':')+1);
+
+    try
+      {
+	return new Invid(Short.valueOf(first).shortValue(), 
+			 Integer.valueOf(last).intValue());
+      }
+    catch (NumberFormatException ex)
+      {
+	throw new IllegalArgumentException("bad string format " + ex);
+      }
+  }
 
   // ---
 

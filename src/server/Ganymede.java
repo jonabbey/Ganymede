@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.137 $
-   Last Mod Date: $Date: 2002/08/03 01:40:27 $
+   Version: $Revision: 1.138 $
+   Last Mod Date: $Date: 2002/08/07 18:39:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -809,8 +809,8 @@ public class Ganymede {
 
   static public void startupHook()
   {
-    Invid supergashinvid = new Invid(SchemaConstants.PersonaBase,
-				     SchemaConstants.PersonaSupergashObj);
+    Invid supergashinvid = Invid.createInvid(SchemaConstants.PersonaBase,
+					     SchemaConstants.PersonaSupergashObj);
     DBObject v_object;
     DBEditObject e_object;
 
@@ -887,8 +887,8 @@ public class Ganymede {
 
 	internalSession.openTransaction("Ganymede startupHook");
 
-	defaultInv = new Invid(SchemaConstants.RoleBase,
-			       SchemaConstants.RoleDefaultObj);
+	defaultInv = Invid.createInvid(SchemaConstants.RoleBase,
+				       SchemaConstants.RoleDefaultObj);
 
 	if (DBStore.viewDBObject(defaultInv) == null)
 	  {

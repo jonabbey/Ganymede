@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.149 $
-   Last Mod Date: $Date: 2002/03/29 03:57:57 $
+   Version: $Revision: 1.150 $
+   Last Mod Date: $Date: 2002/08/07 18:39:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.149 $ %D%
+ * @version $Revision: 1.150 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2013,10 +2013,10 @@ public final class DBStore {
     ReturnVal retVal;
     boolean success = false;
 
-    Invid supergashOwner = new Invid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
-    Invid supergash = new Invid(SchemaConstants.PersonaBase, SchemaConstants.PersonaSupergashObj);
-    Invid monitor = new Invid(SchemaConstants.PersonaBase, SchemaConstants.PersonaMonitorObj);
-    Invid defaultRole = new Invid(SchemaConstants.RoleBase, SchemaConstants.RoleDefaultObj);
+    Invid supergashOwner = Invid.createInvid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
+    Invid supergash = Invid.createInvid(SchemaConstants.PersonaBase, SchemaConstants.PersonaSupergashObj);
+    Invid monitor = Invid.createInvid(SchemaConstants.PersonaBase, SchemaConstants.PersonaMonitorObj);
+    Invid defaultRole = Invid.createInvid(SchemaConstants.RoleBase, SchemaConstants.RoleDefaultObj);
 
     /* -- */
 

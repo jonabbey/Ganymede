@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.133 $
-   Last Mod Date: $Date: 2002/03/29 03:57:56 $
+   Version: $Revision: 1.134 $
+   Last Mod Date: $Date: 2002/08/07 18:39:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1464,7 +1464,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (chosenSlot == null)
       {
-	invid = new Invid(getTypeID(), getNextID());
+	invid = Invid.createInvid(getTypeID(), getNextID());
 
 	if (debug2)
 	  {

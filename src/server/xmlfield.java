@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2002/03/29 03:57:58 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2002/08/07 18:39:22 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.20 $ $Date: 2002/03/29 03:57:58 $ $Name:  $
+ * @version $Revision: 1.21 $ $Date: 2002/08/07 18:39:22 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1695,7 +1695,7 @@ class xInvid {
       }
     else if (num != -1)
       {
-	return new Invid(typeId, num);
+	return Invid.createInvid(typeId, num);
       }
     else
       {

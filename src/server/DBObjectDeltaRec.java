@@ -10,15 +10,15 @@
    
    Created: 11 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2001/08/18 06:16:27 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2002/08/07 18:39:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -47,7 +47,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -225,7 +226,7 @@ public final class DBObjectDeltaRec implements FieldType {
 
     try
       {
-	invid = new Invid(in);
+	invid = Invid.createInvid(in);
 
 	baseDef = Ganymede.db.getObjectBase(invid.getType());
 
@@ -474,7 +475,7 @@ public final class DBObjectDeltaRec implements FieldType {
 			    System.err.println(status);
 			  }
 			
-			value = new Invid(in);
+			value = Invid.createInvid(in);
 			break;
 
 		      case IP:
@@ -529,7 +530,7 @@ public final class DBObjectDeltaRec implements FieldType {
 
 		      case INVID:
 			status = "Reading invid deletion " + j + " for field " + i + ":" + fieldName;
-			value = new Invid(in);
+			value = Invid.createInvid(in);
 			break;
 
 		      case IP:

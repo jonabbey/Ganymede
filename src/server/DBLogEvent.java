@@ -8,15 +8,15 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2001/06/15 16:34:57 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2002/08/07 18:39:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -323,7 +323,7 @@ public class DBLogEvent {
     
     if (!tmp.equals(""))
       {
-	this.admin = new Invid(tmp);	// get admin invid
+	this.admin = Invid.createInvid(tmp);	// get admin invid
       }
     else
       {
@@ -485,7 +485,7 @@ public class DBLogEvent {
 	  {
 	    if (multibuffer.length() != 0)
 	      {
-		result.addElement(new Invid(multibuffer.toString()));
+		result.addElement(Invid.createInvid(multibuffer.toString()));
 		multibuffer.setLength(0); // clear for next
 	      }
 	  }
@@ -501,7 +501,7 @@ public class DBLogEvent {
 	  {
 	    if (multibuffer.length() != 0)
 	      {
-		result.addElement(new Invid(multibuffer.toString()));
+		result.addElement(Invid.createInvid(multibuffer.toString()));
 	      }
 	  }
       }
@@ -743,7 +743,7 @@ public class DBLogEvent {
     StringBuffer buffer = new StringBuffer();
     DBLogEvent event = null;
     String line;
-    Invid invid = new Invid((short) 3, 336);
+    Invid invid = Invid.createInvid((short) 3, 336);
 
     /* -- */
 

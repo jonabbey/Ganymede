@@ -6,15 +6,16 @@
    
    Created: 8 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/11/16 08:01:04 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2002/08/07 18:39:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   The University of Texas at Austin.
 
    Contact information
 
@@ -42,7 +43,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -394,8 +396,8 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
 	QueryNode root = new QueryNotNode(new QueryDataNode(QueryDataNode.INVIDVAL,
 							    QueryDataNode.EQUALS,
-							    new Invid(SchemaConstants.RoleBase,
-								      SchemaConstants.RoleDefaultObj)));
+							    Invid.createInvid(SchemaConstants.RoleBase,
+									      SchemaConstants.RoleDefaultObj)));
 
 	// note that the query we are submitting here *will* be filtered by the
 	// current visibilityFilterInvid field in GanymedeSession.
