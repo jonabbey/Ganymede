@@ -6,7 +6,7 @@
    GASH user_info file
    
    Created: 22 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,6 +15,8 @@
 package arlut.csd.ganymede.loader;
 
 import java.io.*;
+
+import arlut.csd.ganymede.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -47,6 +49,10 @@ public class User {
   String homePhone;
   String directory;
   String shell;
+  String socialsecurity;
+  String type;
+
+  Invid userInvid;		// for use in directLoader after we've been recorded
 
   // instance constructor
 
@@ -151,6 +157,14 @@ public class User {
 
     // System.out.println("shell = '" + shell + "'");
 
+    socialsecurity = getNextBit(tokens);
+
+    // take out the -'s 
+
+    socialsecurity = deleteChar(socialsecurity, '-');
+
+    type = getNextBit(tokens);
+
     // get to the end of line
 
     // System.err.println("HEY! Token = " + token + ", ttype = " + tokens.ttype);
@@ -170,8 +184,29 @@ public class User {
     System.out.println("\tfullname: " + fullname + ", room: " + room + ", division: " + division +
 		       ", officePhone: " + officePhone + ", homePhone: " + homePhone);
     System.out.println("Directory: " + directory + ", shell: " + shell);
+    System.out.println("SS#: " + socialsecurity);
   }
   
+  private String deleteChar(String in, char c)
+  {
+    char ci[];
+    StringBuffer buf = new StringBuffer();
+
+    /* -- */
+
+    ci = in.toCharArray();
+    
+    for (int i=0; i < ci.length; i++)
+      {
+	if (ci[i] != c)
+	  {
+	    buf.append(ci[i]);
+	  }
+      }
+
+    return buf.toString();
+  }
+
   private String getNextBit(StreamTokenizer tokens) throws IOException
   {
     int token;
@@ -209,7 +244,6 @@ public class User {
 
 	return result;
       }
-
 
     return null;
   }
