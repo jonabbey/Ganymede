@@ -99,6 +99,7 @@ import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.messageDialog;
+import arlut.csd.JDialog.aboutGanyDialog;
 import arlut.csd.JTable.rowSelectCallback;
 import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.PackageResources;
@@ -154,6 +155,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   JMenu helpMenu = null;
   JMenuItem showAboutMI = null;
+  JMenuItem showCreditsMI = null;
 
   JPopupMenu popMenu = null;
   JMenuItem killUserMI = null;
@@ -234,8 +236,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   String
     aboutMessage = null;
 
-  messageDialog
-    about = null;
+  aboutGanyDialog about = null;
 
   /* -- */
 
@@ -414,6 +415,17 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     showAboutMI.addActionListener(this);
     helpMenu.add(showAboutMI);
+
+    // "Ganymede Credits"
+    showCreditsMI = new JMenuItem(ts.l("init.help_menu_1"));
+
+    if (ts.hasPattern("init.help_menu_1_key_optional"))
+      {
+	showCreditsMI.setMnemonic((int) ts.l("init.help_menu_1_key_optional").charAt(0));
+      }
+
+    showCreditsMI.addActionListener(this);
+    helpMenu.add(showCreditsMI);
 
     mbar.add(controlMenu);
     mbar.add(debugMenu);
@@ -1087,6 +1099,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       {
 	showAboutMessage();
       }
+    else if (event.getSource() == showCreditsMI)
+      {
+	showCreditsMessage();
+      }
     else if (event.getSource() == clearLogMI)
       {
 	statusArea.setText("");
@@ -1101,32 +1117,25 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (about == null)
       {
-	if (aboutMessage == null)
-	  {
-	    StringBuffer buffer = new StringBuffer();
-
-	    buffer.append("<head></head>");
-	    buffer.append("<body>");
-	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
-	    buffer.append("<p>Release number: ");
-	    buffer.append(arlut.csd.Util.SVNVersion.getReleaseString());
-	    buffer.append("<br>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004<br>The University of Texas at Austin</p>");
-	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
-	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
-	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
-	    buffer.append("under the conditions of the GNU General Public License.</p>");
-	    buffer.append("<p>Written by Jonathan Abbey, Michael Mulvaney, Navin Manohar, ");
-	    buffer.append("Brian O'Mara, Deepak Giridharagopal, and Erik Grostic.</p>");
-	    buffer.append("<br><p>Visit the Ganymede web site at http://www.arlut.utexas.edu/gash2/</p>");
-	    buffer.append("</body>");
-
-	    aboutMessage = buffer.toString();
-	  }
-
-	about = new messageDialog(this, "About Ganymede",  null);
-	about.setHtmlText(aboutMessage);
+	about = new aboutGanyDialog(this, "About Ganymede");
       }
 
+    about.loadAboutText();
+    about.setVisible(true);
+  }
+
+  /**
+   * Shows the Credits dialog.
+   */
+
+  public void showCreditsMessage()
+  {
+    if (about == null)
+      {
+	about = new aboutGanyDialog(this, "About Ganymede");
+      }
+
+    about.loadCreditsText();
     about.setVisible(true);
   }
 

@@ -108,6 +108,7 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.messageDialog;
+import arlut.csd.JDialog.aboutGanyDialog;
 import arlut.csd.JTree.treeCallback;
 import arlut.csd.JTree.treeControl;
 import arlut.csd.JTree.treeMenu;
@@ -212,10 +213,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   // ---
-
-  String
-    creditsMessage = null,
-    aboutMessage = null;
 
   /**
    * Main remote interface for communications with the server.
@@ -360,8 +357,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     help = null;
 
   messageDialog
-    motd = null,
-    credits = null,
+    motd = null;
+
+  aboutGanyDialog
     about = null;
 
   Vector
@@ -1723,32 +1721,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     if (about == null)
       {
-	if (aboutMessage == null)
-	  {
-	    StringBuffer buffer = new StringBuffer();
-
-	    buffer.append("<head></head>");
-	    buffer.append("<body>");
-	    buffer.append("<h1>Ganymede Directory Management System</h1>");
-	    buffer.append("<p>Release number: ");
-	    buffer.append(arlut.csd.Util.SVNVersion.getReleaseString());
-	    buffer.append("<br>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004<br>The University of Texas at Austin</p>");
-	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
-	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
-	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
-	    buffer.append("under the conditions of the GNU General Public License.</p>");
-	    buffer.append("<p>Written by Jonathan Abbey, Michael Mulvaney, Navin Manohar, ");
-	    buffer.append("Brian O'Mara, Deepak Giridharagopal, and Erik Grostic.</p>");
-	    buffer.append("<br><p>Visit the Ganymede web site at http://www.arlut.utexas.edu/gash2/</p>");
-	    buffer.append("</body>");
-
-	    aboutMessage = buffer.toString();
-	  }
-
-	about = new messageDialog(this, "About Ganymede",  null);
-	about.setHtmlText(aboutMessage);
+	about = new aboutGanyDialog(this, "About Ganymede");
       }
 
+    about.loadAboutText();
     about.setVisible(true);
   }
 
@@ -1758,34 +1734,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public void showCredits()
   {
-    if (credits == null)
+    if (about == null)
       {
-	if (creditsMessage == null)
-	  {
-	    creditsMessage = ("<head></head><h1>Ganymede credits</h1>" +
-			      "<p>Ganymede was developed by the Computer Science Division of the Applied " +
-			      "Research Laboratories at The University of Texas at Austin</p>" +
-			      "<p>The primary designer and author of Ganymede was Jonathan Abbey, " +
-			      "jonabbey@arlut.utexas.edu.</p>  <p>Michael Mulvaney, mikem@mail.utexas.edu, "+
-			      "developed large portions of the client.</p> <p>Significant portions of the client " +
-			      "were initially developed by Navin Manohar.  Erik Grostic and Brian O'Mara " +
-			      "contributed code to the client.</p><p>Navin, Erik, and Brian worked on Ganymede " +
-			      "while working as student employees at ARL.</p>" +
-			      "<p>Deepak Giridharagopal has made very significant contributions to the Ganymede " +
-			      "build process, the server-side Jython support, and latter day client code, among other things.</p>" +
-			      "<p>Dan Scott, dscott@arlut.utexas.edu, oversaw the development " +
-			      "of Ganymede and its predecessor, GASH, and provided high-level " +
-			      "direction and support.</p><br>" +
-			      "<p>The Ganymede web page is currently at " +
-			      "<a href=\"http://www.arlut.utexas.edu/gash2\">" +
-			      "http://www.arlut.utexas.edu/gash2</a>.</p>");
-	  }
-	
-	credits = new messageDialog(this, "Credits", null);
-	credits.setHtmlText(creditsMessage);
+	about = new aboutGanyDialog(this, "About Ganymede");
       }
 
-    credits.setVisible(true);
+    about.loadCreditsText();
+    about.setVisible(true);
   }
 
   /**
@@ -5373,8 +5328,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     client = null;
 
-    creditsMessage = null;
-    aboutMessage = null;
     session = null;
     _myglogin = null;
     dump = null;
@@ -5437,7 +5390,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     help = null;
     motd = null;
-    credits = null;
     about = null;
 
     if (personae != null)

@@ -161,6 +161,6 @@ public class SVNVersion {
 	  }
       }
 
-    return release_number + " - " + release_date;
+    return release_number + "\n" + release_date;
   }
 }

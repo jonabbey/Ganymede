@@ -96,12 +96,12 @@ public class JMultiLineLabel extends JTextArea {
    * Constructors
    */
 
-  public JMultiLineLabel(String label)
+  public JMultiLineLabel()
   {
-    this(label, JMultiLineLabel.LEFT);
+    this(null);
   }
 
-  public JMultiLineLabel(String label, int alignment)
+  public JMultiLineLabel(String label)
   {
     metric = getFontMetrics(getFont());
 

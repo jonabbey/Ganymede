@@ -2,7 +2,6 @@
    JLabelPanel.java
 
    This class defines a JPanel that contains stacked, labeled items.
-   preset.
    
    Created: 19 August 2004
 
@@ -17,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
