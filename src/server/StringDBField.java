@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,7 +35,6 @@ public class StringDBField extends DBField implements string_field {
 
   StringDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    defined = true;
     value = values = null;
     this.owner = owner;
     this.definition = definition;
@@ -59,7 +58,6 @@ public class StringDBField extends DBField implements string_field {
     this.owner = owner;
     this.definition = definition;
     
-    defined = false;
     value = null;
     
     if (isVector())
@@ -93,8 +91,6 @@ public class StringDBField extends DBField implements string_field {
 	value = field.value;
 	values = null;
       }
-
-    defined = true;
   }
 
   /**
@@ -113,15 +109,6 @@ public class StringDBField extends DBField implements string_field {
     this.owner = owner;
     this.definition = definition;
     this.value = value;
-
-    if (value == null)
-      {
-	defined = true;
-      }
-    else
-      {
-	defined = false;
-      }
 
     values = null;
   }
@@ -145,12 +132,10 @@ public class StringDBField extends DBField implements string_field {
     if (values == null)
       {
 	this.values = new Vector();
-	defined = false;
       }
     else
       {
 	this.values = (Vector) values.clone();
-	defined = true;
       }
     
     value = null;
@@ -187,6 +172,7 @@ public class StringDBField extends DBField implements string_field {
       {
 	count = in.readShort();
 	values = new Vector(count);
+
 	for (int i = 0; i < count; i++)
 	  {
 	    values.addElement(in.readUTF());
@@ -318,6 +304,41 @@ public class StringDBField extends DBField implements string_field {
   public String getEncodingString()
   {
     return getValueString();
+  }
+
+  /**
+   *
+   * Returns true if this field has a value associated
+   * with it, or false if it is an unfilled 'placeholder'.
+   *
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  public boolean isDefined()
+  {
+    if (isVector())
+      {
+	if (values != null && values.size() > 0)
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
+    else
+      {
+	if (value != null)
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
   }
 
   /**
