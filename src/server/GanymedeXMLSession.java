@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/10/28 00:58:19 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/10/29 09:09:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -243,8 +243,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   /**
    * <p>This vector is used by the XML schema editing logic to track
    * namespaces from the xml file that need to be removed from the
-   * current schema. Elements in this vector are empty XMLElements
-   * that contain name and optional case-sensitive attributes.</p> 
+   * current schema. Elements in this vector are Strings representing
+   * the level of name spaces to be deleted..</p> 
    */
 
   private Vector spacesToRemove;
@@ -273,9 +273,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   /**
    * <p>This vector is used by the XML schema editing logic to track
-   * object types from the xml file that need to be removed from the
-   * current schema.  Elements in this vector are XMLItem trees rooted
-   * with the appropriate &lt;objectdef&gt; elements.</p> 
+   * object types in the current schema that were not mentioned in the
+   * xml file and thus need to be removed from the current
+   * schema. Elements of this vector are the names of existing bases
+   * to be removed.</p>
    */
 
   private Vector basesToRemove;
@@ -685,8 +686,16 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	if (schemaChildren == null)
 	  {
 	    success = true;	// no editing to be done
-	    return true;
+	    return success;
 	  }
+
+	// okay, from this point forward, we're going to assume
+	// failure unless/until we get to the end of the editing
+	// process.  The finally clause for this try block will use
+	// the success variable to decide whether to commit or abort
+	// the schema edit.
+
+	success = false;
 
 	// if schemaChildren was not null, XMLReader will guarantee
 	// that it has at least one element
@@ -705,12 +714,74 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (otdItem.getChildren() == null || otdItem.getChildren().length != 1)
 	      {
 		err.println("Error, the object_type_definitions element does not contain a singly-rooted category tree.");
-		success = false;
 		return false;
 	      }
 
 	    categoryTree = otdItem.getChildren()[0];
 	  }
+
+	// 1.  calculate what name spaces need to be created, edited, or removed
+
+	if (namespaceTree != null)
+	  {
+	    if (!calculateNameSpaces())
+	      {
+		return false;
+	      }
+	  }
+
+	// 2. create new name spaces
+
+	for (int i = 0; i < spacesToAdd.size(); i++)
+	  {
+	    XMLItem space = (XMLItem) spacesToAdd.elementAt(i);
+
+	    String name = space.getAttrStr("name");
+	    boolean sensitive = space.getAttrBoolean("case-sensitive");
+
+	    if (name == null || name.equals(""))
+	      {
+		err.println("Error, namespace item " + space + " has no name.");
+		return false;
+	      }
+
+	    NameSpace aNewSpace = editor.createNewNameSpace(space.getAttrStr("name"), space.getAttrBoolean("case-sensitive"));
+
+	    if (aNewSpace == null)
+	      {
+		err.println("Couldn't create a new namespace for item " + space);
+		return false;
+	      }
+	  }
+
+	// 3. calculate what bases we need to create, edit, or remove
+
+	if (categoryTree == null || !calculateBases())
+	  {
+	    return false;
+	  }
+
+	// 4. delete any bases that are not at least mentioned in the XML
+	// schema tree
+
+	for (int i = 0; i < basesToRemove.size(); i++)
+	  {
+	    String basename = (String) basesToRemove.elementAt(i);
+
+	    if (!handleReturnVal(editor.deleteBase(basename)))
+	      {
+		return false;
+	      }
+	  }
+
+	// 5. rename any bases that need to be renamed
+
+	if (!handleBaseRenaming())
+	  {
+	    return false;
+	  }
+
+	// 6. create all bases on the basesToAdd list
 
       }
     finally
@@ -749,7 +820,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	for (int i = 0; i < list.length; i++)
 	  {
-	    current.addElement(list[i].getName());
+	    // theoretically possible RemoteException here, due to remote interface
+
+	    current.addElement(list[i].getName()); 
 	  }
 
 	XMLItem XNamespaces[] = namespaceTree.getChildren();
@@ -761,16 +834,34 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    if (!XNamespaces[i].matches("namespace"))
 	      {
-		err.println("unrecognized namespace element: " + XNamespaces[i]);
+		err.println("unrecognized element: " + XNamespaces[i] + " when expecting <namespace>");
+		return false;
+	      }
+	    
+	    String name = XNamespaces[i].getName(); // ditto remote
+
+	    newSpaces.addElement(name);
+
+	    if (entries.containsKey(name))
+	      {
+		err.println("Error, found duplicate <namespace> name '" + name + "'");
 		return false;
 	      }
 
-	    newSpaces.addElement(XNamespaces[i].getName());
-	    entries.put(XNamespaces[i].getName(), XNamespaces[i]);
+	    entries.put(name, XNamespaces[i]);
 	  }
 
+	// for spacesToRemove, we just keep the names for the missing
+	// name spaces
+
+	Vector spacesToRemove = VectorUtils.difference(current, newSpaces);
+
+	// for spacesToAdd and spacesToEdit, we need to first names
+	// that are new or that were already in our current namespaces
+	// list, then look up and save the appropriate XMLItem nodes
+	// in the spacesToAdd and spacesToEdit global Vectors.
+
 	Vector additions = VectorUtils.difference(newSpaces, current);
-	Vector deletions = VectorUtils.difference(current, newSpaces);
 	Vector possibleEdits = VectorUtils.intersection(newSpaces, current);
 
 	spacesToAdd = new Vector();
@@ -782,16 +873,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    spacesToAdd.addElement(entry);
 	  }
 
-	spacesToRemove = new Vector();
-
-	for (int i = 0; i < deletions.size(); i++)
-	  {
-	    XMLItem entry = (XMLItem) entries.get(deletions.elementAt(i));
-
-	    spacesToRemove.addElement(entry);
-	  }
-
 	spacesToEdit = new Vector();
+
+	// we are only interested in namespaces to be edited if the
+	// case-sensitivity changes.  we could defer this check, but
+	// since we know that case-sensitivity is the only thing that
+	// can vary in a namespace other than its name, we'll go ahead
+	// and filter out no-changes here.
 
 	for (int i = 0; i < possibleEdits.size(); i++)
 	  {
@@ -814,6 +902,225 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	ex.printStackTrace();
 	throw new RuntimeException(ex.getMessage());
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>This method fills in basesToAdd, basesToRemove, and basesToEdit.</p>
+   */
+
+  private boolean calculateBases()
+  {
+    // create a list of Short base id's for of bases that we have
+    // registered in the schema at present
+
+    Base[] list = editor.getBases();
+    Vector current = new Vector(list.length);
+
+    for (int i = 0; i < list.length; i++)
+      {
+	current.addElement(((DBObjectBase)list[i]).getKey());
+      }
+
+    // get a list of objectdef root nodes from our xml tree
+
+    Vector newBases = new Vector();
+
+    findBasesInXMLTree(categoryTree, newBases);
+
+    // get a list of Short id's from our xml tree, record
+    // a mapping from those id's to the objectdef nodes in
+    // our xml tree
+
+    Vector xmlBases = new Vector();
+    Hashtable entries = new Hashtable(); // for Short id's
+    Hashtable nameTable = new Hashtable(); // for checking for redundant names
+
+    for (int i = 0; i < newBases.size(); i++)
+      {
+	XMLItem objectdef = (XMLItem) newBases.elementAt(i);
+	
+	Integer id = objectdef.getAttrInt("id");
+	String name = objectdef.getAttrStr("name");
+	
+	if (id == null)
+	  {
+	    err.println("Couldn't get id for object definition item " + objectdef);
+	    return false;
+	  }
+
+	if (name == null || name.equals(""))
+	  {
+	    err.println("Couldn't get name for object definition item " + objectdef);
+	    return false;
+	  }
+
+	Short key = new Short(id.shortValue());
+	xmlBases.addElement(key);
+
+	if (entries.containsKey(key))
+	  {
+	    err.println("Error, found duplicate base id number in <ganyschema>: " + objectdef);
+	    return false;
+	  }
+
+	if (nameTable.containsKey(name))
+	  {
+	    err.println("Error, found duplicate base name in <ganyschema>: " + objectdef);
+	    return false;
+	  }
+
+	entries.put(key, objectdef);
+	nameTable.put(name, name); // just need to remember existence
+      }
+
+    // We need to calculate basesToRemove.. since the DBSchemaEditor
+    // can only delete bases based on their names, we need to 
+    // take the Vector of Shorts that we get from difference and
+    // put the matching names into basesToRemove
+
+    Vector deletions = VectorUtils.difference(current, xmlBases);
+
+    basesToRemove = new Vector();
+    
+    for (int i = 0; i < deletions.size(); i++)
+      {
+	Short id = (Short) deletions.elementAt(i);
+
+	try
+	  {
+	    // Base.getName() is defined to throw RemoteException
+	    
+	    basesToRemove.addElement(editor.getBase(id.shortValue()).getName());
+	  }
+	catch (RemoteException ex)
+	  {
+	    // should never ever happen
+
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
+	  }
+      }
+
+    // now calculate basesToAdd and basesToEdit, recording the
+    // objectdef XMLItem root for each base in each list
+    
+    Vector additions = VectorUtils.difference(xmlBases, current);
+    Vector edits = VectorUtils.intersection(xmlBases, current);
+
+    basesToAdd = new Vector();
+    
+    for (int i = 0; i < additions.size(); i++)
+      {
+	XMLItem entry = (XMLItem) entries.get(additions.elementAt(i));
+	
+	basesToAdd.addElement(entry);
+      }
+    
+    basesToEdit = new Vector();
+    
+    for (int i = 0; i < edits.size(); i++)
+      {
+	XMLItem entry = (XMLItem) entries.get(edits.elementAt(i));
+	
+	basesToEdit.addElement(entry);
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>This is a recursive method to do a traversal of an XMLItem
+   * tree, adding object base definition roots found to the foundBases
+   * vector.</p> 
+   */
+
+  private void findBasesInXMLTree(XMLItem treeRoot, Vector foundBases)
+  {
+    // objectdef's will contain fielddef children, but no more
+    // objectdef's, so we treat objectdef's as leaf nodes for our
+    // traversal
+
+    if (treeRoot.matches("objectdef"))
+      {
+	foundBases.addElement(treeRoot);
+	return;
+      }
+
+    XMLItem children[] = treeRoot.getChildren();
+
+    if (children == null)
+      {
+	return;
+      }
+
+    for (int i = 0; i < children.length; i++)
+      {
+	findBasesInXMLTree(children[i], foundBases);
+      }
+  }
+
+  /**
+   * <p>This private method takes care of doing any object type
+   * renaming, prior to resolving invid field definitions.</p>
+   */
+
+  private boolean handleBaseRenaming() throws RemoteException
+  {
+    XMLItem myBaseItem;
+    Base numBaseRef;
+    Base nameBaseRef;
+    String name;
+    
+    /* -- */
+
+    for (int i = 0; i < basesToEdit.size(); i++)
+      {
+	myBaseItem = (XMLItem) basesToEdit.elementAt(i);
+
+	name = myBaseItem.getAttrStr("name");
+
+	numBaseRef = editor.getBase(myBaseItem.getAttrInt("id").shortValue());
+
+	if (name.equals(numBaseRef.getName()))
+	  {
+	    continue;		// no rename necessary
+	  }
+
+	// we need to rename the base pointed to by numBaseRef.. first
+	// see if another base already has the name we want
+
+	nameBaseRef = editor.getBase(name);
+
+	// if we found a base with the name we need, switch the two
+	// names.  we know from calculateBases() that the user
+	// didn't put two bases by the same name in the xml <ganyschema>
+	// section, so if swap the names, we'll fix up the second name
+	// when we get to it
+
+	if (nameBaseRef != null)
+	  {
+	    String swapName = numBaseRef.getName();
+
+	    if (!handleReturnVal(numBaseRef.setName(name)))
+	      {
+		return false;
+	      }
+
+	    if (!handleReturnVal(nameBaseRef.setName(swapName)))
+	      {
+		return false;
+	      }
+	  }
+	else
+	  {
+	    if (!handleReturnVal(numBaseRef.setName(name)))
+	      {
+		return false;
+	      }
+	  }
       }
 
     return true;
@@ -1861,5 +2168,26 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	     return null;
 	   }
       }
+  }
+
+  /**
+   * <p>Private helper method to print to the client the text of
+   * any return val dialog.  Returns true if the retval codes
+   * for success, false otherwise.</p>
+   */
+
+  private boolean handleReturnVal(ReturnVal retval)
+  {
+    if (retval == null || retval.didSucceed())
+      {
+	return true;
+      }
+
+    if (retval.getDialogText() != null)
+      {
+	err.println(retval.getDialogText());
+      }
+
+    return false;
   }
 }

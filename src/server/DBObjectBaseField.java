@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 2000/10/11 19:59:47 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 2000/10/29 09:09:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -284,7 +284,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     classname = "";
     comment = "";
     
-    field_code = 0;
+    field_code = -1;
     field_type = 0;
     editor = null;
   }
@@ -313,19 +313,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   {
     this(base);
     receive(in);
-    template = new FieldTemplate(this);
-  }
-
-  /**
-   *
-   * Receive constructor, for xml loading
-   *
-   */
-
-  DBObjectBaseField(XMLReader in, DBObjectBase base) throws IOException, RemoteException
-  {
-    this(base);
-    receiveXML(in);
     template = new FieldTemplate(this);
   }
 
@@ -1057,120 +1044,205 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   /**
    * <P>This method is used to read the definition for this
-   * DBObjectBaseField from an XMLReader stream.  When this method is
-   * called, the <fielddef> open element should be the very next item
-   * in the reader stream.  This method will consume every element in
-   * the reader stream up to and including the matching </fielddef>
-   * element.</P>
-   *
-   * <P>If important expectations about the state of the XML stream
-   * are not met, an IllegalArgumentException will be thrown, and
-   * the stream will be left in an indeterminate state.</P>
+   * DBObjectBaseField from a &lt;fielddef&gt; XMLItem tree.</P>
    */
 
-  synchronized void receiveXML(XMLReader reader)
+  synchronized ReturnVal setXML(XMLItem root, boolean doLinkResolve)
   {
     XMLItem item, nextItem;
     Integer field_codeInt;
     boolean typeRead = false;
+    ReturnVal retVal = null;
+    boolean vectorSet = false;
 
     /* -- */
 
-    item = reader.getNextItem(true);
-
-    if (item == null || !item.matches("fielddef"))
+    if (root == null || !root.matches("fielddef"))
       {
 	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): next element != open fielddef: " +
-					   item);
+					   root);
       }
 
-    // neither of these should be null
+    retVal = setName(root.getAttrStr("name"));
 
-    field_name = item.getAttrStr("name");
-    field_codeInt = item.getAttrInt("id");
-
-    if (field_name == null)
+    if (retVal != null && !retVal.didSucceed())
       {
-	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): fielddef does not define name attr.: " +
-					   item);
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not have its name set: \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
       }
+
+    field_codeInt = root.getAttrInt("id");
 
     if (field_codeInt == null)
       {
-	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): fielddef does not define id attr.: " +
-					   item);
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef does not define id attr: \n" + 
+					  root.getTreeString());
       }
 
     // extract the short
 
-    field_code = field_codeInt.shortValue();
+    retVal = setID(field_codeInt.shortValue());
 
-    // and loop until we get to the fielddef close or eof
-
-    item = reader.getNextItem(true);
-
-    while (item != null && !item.matchesClose("fielddef"))
+    if (retVal != null && !retVal.didSucceed())
       {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not have its id set: \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    // look at the nodes under root, set up this field def based on
+    // them
+
+    XMLItem children[] = root.getChildren();
+
+    for (int i = 0; i < children.length; i++)
+      {
+	item = children[i];
+
 	if (item.matches("classname"))
 	  {
-	    classname = item.getAttrStr("name");
+	    setClassName(item.getAttrStr("name"));
 	  }
 	else if (item.matches("comment"))
 	  {
-	    comment = reader.getFollowingString(item, true);
+	    XMLItem commentChildren[] = item.getChildren();
+
+	    if (commentChildren == null)
+	      {
+		comment = null;
+		continue;
+	      }
+
+	    if (commentChildren.length != 1)
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "unrecognized children in comment block: \n" + 
+						  root.getTreeString());
+	      }
+
+	    retVal = setComment(commentChildren[0].getString());
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "fielddef could not set comment: \n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
 	  }
 	else if (item.matches("invisible"))
 	  {
-	    visibility = false;
+	    visibility = false;	// need a setter?
 	  }
 	else if (item.matches("typedef"))
 	  {
 	    if (typeRead)
 	      {
-		throw new IllegalArgumentException("redundant type definition for this field");
+		return Ganymede.createErrorDialog("xml",
+						  "redundant type definition for this field: \n" + 
+						  root.getTreeString());
 	      }
 
 	    if (item.getAttrStr("type") == null)
 	      {
-		throw new IllegalArgumentException("typedef tag does not contain type attribute: " + 
-						   item);
+		return Ganymede.createErrorDialog("xml",
+						  "typedef tag does not contain type attribute: \n" + 
+						  root.getTreeString());
 	      }
 
-	    if (item.getAttrStr("type").equals("boolean"))
+	    if (item.getAttrStr("type").equals("float"))
 	      {
-		field_type = FieldType.BOOLEAN;
-	      }
-	    else if (item.getAttrStr("type").equals("numeric"))
-	      {
-		field_type = FieldType.NUMERIC;
-	      }
-	    else if (item.getAttrStr("type").equals("float"))
-	      {
-		field_type = FieldType.FLOAT;
+		// float has no subchildren, all we need to
+		// do is attempt to do a setType
+
+		retVal = setType(FieldType.FLOAT);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
 	      }
 	    else if (item.getAttrStr("type").equals("date"))
 	      {
-		field_type = FieldType.DATE;
-	      }
-	    else if (item.getAttrStr("type").equals("string"))
-	      {
-		field_type = FieldType.STRING;
-	      }
-	    else if (item.getAttrStr("type").equals("invid"))
-	      {
-		field_type = FieldType.INVID;
+		// date has no subchildren, all we need to
+		// do is attempt to do a setType
+
+		retVal = setType(FieldType.DATE);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
 	      }
 	    else if (item.getAttrStr("type").equals("permmatrix"))
 	      {
-		field_type = FieldType.PERMISSIONMATRIX;
+		// permmatrix has no subchildren, all we need to
+		// do is attempt to do a setType
+
+		retVal = setType(FieldType.PERMISSIONMATRIX);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+	      }
+	    else if (item.getAttrStr("type").equals("string"))
+	      {
+		retVal = doStringXML(item);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+	      }
+	    else if (item.getAttrStr("type").equals("invid"))
+	      {
+		retVal = doInvidXML(item, doLinkResolve);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+	      }
+	    else if (item.getAttrStr("type").equals("numeric"))
+	      {
+		retVal = doNumericXML(item);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
 	      }
 	    else if (item.getAttrStr("type").equals("password"))
 	      {
-		field_type = FieldType.PASSWORD;
+		retVal = doPasswordXML(item);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
 	      }
 	    else if (item.getAttrStr("type").equals("ip"))
+	      {		
+		retVal = doIPXML(item);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+	      }
+	    else if (item.getAttrStr("type").equals("boolean"))
 	      {
-		field_type = FieldType.IP;
+		retVal = doBooleanXML(item);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
 	      }
 	    else
 	      {
@@ -1179,394 +1251,843 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	      }
 
 	    typeRead = true;
-
-	    item = reader.getNextItem(true);
-
-	    while (item != null && !item.matchesClose("typedef"))
-	      {
-		if (item.matches("vector"))
-		  {
-		    if (!isString() && !isInvid() && !isIP())
-		      {
-			// need to flesh out this error handling 
-
-			System.err.println("Ignoring vector element.. not a string, invid, or ip field.");
-		      }
-		    else
-		      {
-			Integer vectSize = item.getAttrInt("maxSize");
-
-			if (vectSize == null)
-			  {
-			    throw new IllegalArgumentException("vector tag does not contain maxSize attribute");
-			  }
-
-			limit = vectSize.shortValue();
-		      }
-		  }
-		else if (item.matches("labeled") && isBoolean())
-		  {
-		    trueLabel = item.getAttrStr("true");
-		    falseLabel = item.getAttrStr("false");
-		  }
-		else if (item.matches("minlength") && 
-			 (isString() || isPassword()))
-		  {
-		    Integer val = item.getAttrInt("val");
-
-		    if (val == null)
-		      {
-			System.err.println("minlength tag unexpectedly missing val attribute");
-		      }
-
-		    minLength = val.shortValue();
-		  }
-		else if (item.matches("maxlength") && 
-			 (isString() || isPassword()))
-		  {
-		    Integer val = item.getAttrInt("val");
-
-		    if (val == null)
-		      {
-			System.err.println("maxlength tag unexpectedly missing val attribute");
-		      }
-
-		    maxLength = val.shortValue();
-		  }
-		else if (item.matches("okchars") && 
-			 (isString() || isPassword()))
-		  {
-		    okChars = item.getAttrStr("val");
-		  }
-		else if (item.matches("badchars") && 
-			 (isString() || isPassword()))
-		  {
-		    badChars = item.getAttrStr("val");
-		  }
-		else if (item.matches("regexp") && isString())
-		  {
-		    setRegexpPat(item.getAttrStr("val"));
-		  }
-		else if (item.matches("multiline") && isString())
-		  {
-		    multiLine = true;
-		  }
-		else if (item.matches("namespace") && 
-			 (isString() || isNumeric() || isIP()))
-		  {
-		    String nameSpaceId = item.getAttrStr("val");
-
-		    if (nameSpaceId != null && !nameSpaceId.equals(""))
-		      {
-			ReturnVal retVal = setNameSpace(nameSpaceId);
-
-			if (retVal != null && !retVal.didSucceed())
-			  {
-			    System.err.println("DBObjectBaseField.receiveXML(): namespace definition for " +
-					       nameSpaceId + " not found.");
-			  }
-		      }
-		  }
-		else if (item.matches("targetobject") && isInvid())
-		  {
-		    allowedTargetStr = item.getAttrStr("name");
-		    Integer targetInt = item.getAttrInt("id");
-
-		    if (allowedTargetStr == null && targetInt != null)
-		      {
-			allowedTarget = targetInt.shortValue();
-		      }
-		    else if (allowedTargetStr == null && targetInt == null)
-		      {
-			System.err.println("DBObjectBaseField.receiveXML(): missing required attrs in <targetobject>: " +
-					   item);
-		      }
-
-		    // else we've got allowedTargetStr defined and we'll
-		    // go back through and do the resolution when the
-		    // schema is fully loaded
-		  }
-		else if (item.matches("targetfield") && isInvid())
-		  {
-		    targetFieldStr = item.getAttrStr("name");
-		    Integer targetInt = item.getAttrInt("id");
-
-		    if (targetFieldStr == null && targetInt != null)
-		      {
-			targetField = targetInt.shortValue();
-		      }
-		    else if (targetFieldStr == null && targetInt == null)
-		      {
-			System.err.println("DBObjectBaseField.receiveXML(): missing required attrs in <targetfield>: " +
-					   item);
-		      }
-
-		    // else we've got targetFieldStr defined and we'll
-		    // go back through and do the resolution when the
-		    // schema is fully loaded
-		  }
-		else if (item.matches("embedded") && isInvid())
-		  {
-		    editInPlace = true;
-		  }
-		else if (item.matches("crypted") && isPassword())
-		  {
-		    crypted = true;
-		  }
-		else if (item.matches("md5crypted") && isPassword())
-		  {
-		    md5crypted = true;
-		  }
-		else if (item.matches("plaintext") && isPassword())
-		  {
-		    storePlaintext = true;
-		  }
-		else
-		  {
-		    System.err.println("DBObjectBaseField.receiveXML(): unrecognized XML item inside typedef: " + 
-				       item);
-		  }
-	      }
 	  }
 	else
 	  {
 	    System.err.println("DBObjectBaseField.receiveXML(): unrecognized XML item inside fielddef: " +
 			       item);
 	  }
-	
-	item = reader.getNextItem(true);
       }
 
-    if (item == null)
-      {
-	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): hit end of stream prior to </fielddef>");
-      }
+    return null;
   }
 
   /**
-   * <P>This method is used to compare this DBObjectBaseField against the
-   * specified otherField.  If the two fields are equivalent, null will
-   * be returned.  Else a ReturnVal with didSucceed set to false will be
-   * returned with a text message describing the conflicts found.
+   * <p>This method takes care of doing everything required to
+   * take an XMLItem tree &lt;fielddef type="string"&gt; and
+   * update this field's schema information to match.</p>
+   *
+   * @return A failure ReturnVal if the schema for this field
+   * could not be set to match.
    */
 
-  public synchronized ReturnVal compareAgainst(DBObjectBaseField otherField)
+  private ReturnVal doStringXML(XMLItem root)
   {
-    StringBuffer diffs = new StringBuffer();
+    boolean _vect = false;
+    short _maxSize = java.lang.Short.MAX_VALUE;
+    short _minlength = -1;
+    short _maxlength = -1;
+    String _okChars = null;
+    String _badChars = null;
+    String _regexp = null;
+    boolean _multiline = false;
+    String _namespace = null;
+    ReturnVal retVal;
 
     /* -- */
 
-    // in principle, it'd be keen to write this function so it used
-    // the java reflection API to do this comparison, but there are
-    // actually a few things that we don't want to compare, and some
-    // things we need to do identity vs. equality testing on, so for
-    // now the onus is on maintainers of DBObjectBaseField to keep
-    // this method up to date.
-
-    if (this.base != otherField.base)
+    if (!root.getAttrStr("type").equals("string"))
       {
-	return Ganymede.createErrorDialog("compare",
-					  "field " + this.toString() + " is not contained in the same " +
-					  "kind of object as " + otherField.toString());
+	throw new IllegalArgumentException("bad XMLItem tree");
       }
 
-    // id of this field in the current object
+    retVal = setType(FieldType.STRING);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    // the <typedef type="string"> node can have children
+    // of its own
+
+    XMLItem typeChildren[] = root.getChildren();
+		
+    for (int j = 0; j < typeChildren.length; j++)
+      {
+	XMLItem child = typeChildren[j];
+
+	if (child.matches("vector"))
+	  {
+	    _vect = true;
+
+	    Integer vectSize = child.getAttrInt("maxSize");
+
+	    if (vectSize != null)
+	      {
+		_maxSize = vectSize.shortValue();
+	      }
+	  }
+	else if (child.matches("minlength"))
+	  {
+	    Integer val = child.getAttrInt("val");
+
+	    if (val != null)
+	      {
+		_minlength = val.shortValue();
+	      }
+	  }
+	else if (child.matches("maxlength"))
+	  {
+	    Integer val = child.getAttrInt("val");
+
+	    if (val != null)
+	      {
+		_maxlength = val.shortValue();
+	      }
+	  }
+	else if (child.matches("okchars"))
+	  {
+	    _okChars = child.getAttrStr("val");
+	  }
+	else if (child.matches("badchars"))
+	  {
+	    _badChars = child.getAttrStr("val");
+	  }
+	else if (child.matches("regexp"))
+	  {
+	    _regexp = child.getAttrStr("val");
+	  }
+	else if (child.matches("multiline"))
+	  {
+	    _multiline = true;
+	  }
+	else if (child.matches("namespace"))
+	  {
+	    _namespace = child.getAttrStr("val");
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("xml",
+					      "Unrecognized string typedef entity: " + child +
+					      "\nIn field def:\n" + root.getTreeString());
+	  }
+      }
+
+    // now do all the setting
+
+    retVal = setArray(_vect);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set vector bit to " + _vect + ": \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+		
+    if (_vect)
+      {
+	retVal = setMaxArraySize(_maxSize);
+	
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return Ganymede.createErrorDialog("xml",
+					      "fielddef could not set vector maximum size: " + _maxSize + "\n" +
+					      root.getTreeString() + "\n" +
+					      retVal.getDialogText());
+	  }
+      }
+
+    retVal = setMinLength(_minlength);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set min length: " + _minlength + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setMaxLength(_maxlength);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set max length: " + _maxlength + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setOKChars(_okChars);
     
-    if (field_code != otherField.field_code)
+    if (retVal != null && !retVal.didSucceed())
       {
-	diffs.append("Field id code " + field_code + " doesn't match " + otherField.field_code + "\n");
-
-	// this is a blocker, go ahead and just complain
-
-	return Ganymede.createErrorDialog("compare",
-					  "field " + this.toString() + " has a fundamental incompatibility with field " +
-					  otherField.toString() + "\n" + diffs.toString());
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set ok chars: " + _okChars + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+    
+    retVal = setBadChars(_badChars);
+    
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set bad chars: " + _badChars + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
       }
 
-    // data type contained herein
-
-    if (field_type != otherField.field_type)
+    retVal = setRegexpPat(_regexp);
+    
+    if (retVal != null && !retVal.didSucceed())
       {
-	diffs.append("Field type " + field_type + " doesn't match " + otherField.field_type + "\n");
-
-	// this is a blocker, go ahead and just complain
-
-	return Ganymede.createErrorDialog("compare",
-					  "field " + this.toString() + " has a fundamental incompatibility with field " +
-					  otherField.toString() + "\n" + diffs.toString());
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set regular expression: " + _regexp + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
       }
 
-    // name of this field
-
-    if (!field_name.equals(otherField.field_name))
+    retVal = setMultiLine(_multiline);
+    
+    if (retVal != null && !retVal.didSucceed())
       {
-	diffs.append("Field name " + field_name +
-		     " doesn't match " + otherField.field_name + "\n");
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set multiline: " + _multiline + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
       }
 
-    if (visibility != otherField.visibility)
+    retVal = setNameSpace(_namespace);
+
+    if (retVal != null && !retVal.didSucceed())
       {
-	diffs.append("Field visibility " + visibility +
-		     " doesn't match " + otherField.visibility + "\n");
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set namespace: " + _namespace + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
       }
 
-    // name of class to manage user interactions with this field
+    return null;
+  }
 
-    if (classname != otherField.classname || !classname.equals(otherField.classname))
+  /**
+   * <p>This method takes care of doing everything required to
+   * take an XMLItem tree &lt;fielddef type="boolean"&gt; and
+   * update this field's schema information to match.</p>
+   *
+   * @return A failure ReturnVal if the schema for this field
+   * could not be set to match.
+   */
+
+  private ReturnVal doBooleanXML(XMLItem root)
+  {
+    boolean _labeled = false;
+    String _trueLabel = null;
+    String _falseLabel = null;
+    ReturnVal retVal;
+
+    /* -- */
+
+    if (!root.getAttrStr("type").equals("boolean"))
       {
-	// how about that clever if, huh?  the first check takes care
-	// of the case where either but not both of classname or
-	// otherField.classname is null
-
-	diffs.append("Field classname " + classname + " doesn't match " + otherField.classname + "\n");
+	throw new IllegalArgumentException("bad XMLItem tree");
       }
 
-    if (comment != otherField.comment || !comment.equals(otherField.comment))
-      {
-	// ditto
+    retVal = setType(FieldType.BOOLEAN);
 
-	diffs.append("Field comment " + comment + " doesn't match " + otherField.comment + "\n");
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
       }
 
-    if (array != otherField.array)
-      {
-	diffs.append("Field vector/scalar flag " + array + " doesn't match " + otherField.array + "\n");
-      }
+    // the <typedef type="boolean"> node can have children
+    // of its own
 
-    if (limit != otherField.limit)
+    XMLItem typeChildren[] = root.getChildren();
+		
+    for (int j = 0; j < typeChildren.length; j++)
       {
-	diffs.append("Field array size limit " + limit + " doesn't match " + otherField.limit + "\n");
-      }
+	XMLItem child = typeChildren[j];
 
-    // check for boolean type, and for boolean-only params
-
-    if (field_type == FieldType.BOOLEAN)
-      {
-	if (labeled != otherField.labeled)
+	if (child.matches("labeled"))
 	  {
-	    diffs.append("Field boolean labeled flag " + labeled +
-			 " doesn't match " + otherField.labeled + "\n");
+	    _labeled = true;
+	    _trueLabel = child.getAttrStr("true");
+	    _falseLabel = child.getAttrStr("true");
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("xml",
+					      "Unrecognized boolean typedef entity: " + child +
+					      "\nIn field def:\n" + root.getTreeString());
+	  }
+      }
+
+    // now do all the setting
+
+    retVal = setLabeled(_labeled);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set labeled bit to " + _labeled + ": \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+		
+    if (_labeled)
+      {
+	retVal = setTrueLabel(_trueLabel);
+	
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return Ganymede.createErrorDialog("xml",
+					      "fielddef could not set true label to: " + _trueLabel + "\n" +
+					      root.getTreeString() + "\n" +
+					      retVal.getDialogText());
 	  }
 
-	if (trueLabel != otherField.trueLabel || !trueLabel.equals(otherField.trueLabel))
+	retVal = setFalseLabel(_falseLabel);
+	
+	if (retVal != null && !retVal.didSucceed())
 	  {
-	    // ditto
+	    return Ganymede.createErrorDialog("xml",
+					      "fielddef could not set false label to: " + _falseLabel + "\n" +
+					      root.getTreeString() + "\n" +
+					      retVal.getDialogText());
+	  }
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method takes care of doing everything required to
+   * take an XMLItem tree &lt;fielddef type="password"&gt; and
+   * update this field's schema information to match.</p>
+   *
+   * @return A failure ReturnVal if the schema for this field
+   * could not be set to match.
+   */
+
+  private ReturnVal doPasswordXML(XMLItem root)
+  {
+    short _minlength = -1;
+    short _maxlength = -1;
+    String _okChars = null;
+    String _badChars = null;
+    boolean _crypted = false;
+    boolean _plaintext = false;
+    boolean _md5crypted = false;
+    ReturnVal retVal;
+
+    /* -- */
+
+    if (!root.getAttrStr("type").equals("password"))
+      {
+	throw new IllegalArgumentException("bad XMLItem tree");
+      }
+
+    retVal = setType(FieldType.PASSWORD);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    // the <typedef type="password"> node can have children
+    // of its own
+
+    XMLItem typeChildren[] = root.getChildren();
+		
+    for (int j = 0; j < typeChildren.length; j++)
+      {
+	XMLItem child = typeChildren[j];
+
+	if (child.matches("minlength"))
+	  {
+	    Integer val = child.getAttrInt("val");
+
+	    if (val != null)
+	      {
+		_minlength = val.shortValue();
+	      }
+	  }
+	else if (child.matches("maxlength"))
+	  {
+	    Integer val = child.getAttrInt("val");
+
+	    if (val != null)
+	      {
+		_maxlength = val.shortValue();
+	      }
+	  }
+	else if (child.matches("okchars"))
+	  {
+	    _okChars = child.getAttrStr("val");
+	  }
+	else if (child.matches("badchars"))
+	  {
+	    _badChars = child.getAttrStr("val");
+	  }
+	else if (child.matches("crypted"))
+	  {
+	    _crypted = true;
+	  }
+	else if (child.matches("md5crypted"))
+	  {
+	    _md5crypted = true;
+	  }
+	else if (child.matches("plaintext"))
+	  {
+	    _plaintext = true;
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("xml",
+					      "Unrecognized password typedef entity: " + child +
+					      "\nIn field def:\n" + root.getTreeString());
+	  }
+      }
+
+    // now do all the setting
+
+    retVal = setMinLength(_minlength);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set min length: " + _minlength + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setMaxLength(_maxlength);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set max length: " + _maxlength + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setOKChars(_okChars);
+    
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set ok chars: " + _okChars + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+    
+    retVal = setBadChars(_badChars);
+    
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set bad chars: " + _badChars + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setCrypted(_crypted);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set crypted flag: " + _crypted + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setMD5Crypted(_md5crypted);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set md5 crypted flag: " + _md5crypted + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    retVal = setPlainText(_plaintext);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set plaintext flag: " + _plaintext + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method takes care of doing everything required to
+   * take an XMLItem tree &lt;fielddef type="ip"&gt; and
+   * update this field's schema information to match.</p>
+   *
+   * @return A failure ReturnVal if the schema for this field
+   * could not be set to match.
+   */
+
+  private ReturnVal doIPXML(XMLItem root)
+  {
+    boolean _vect = false;
+    short _maxSize = java.lang.Short.MAX_VALUE;
+    String _namespace = null;
+    ReturnVal retVal;
+
+    /* -- */
+
+    if (!root.getAttrStr("type").equals("ip"))
+      {
+	throw new IllegalArgumentException("bad XMLItem tree");
+      }
+
+    retVal = setType(FieldType.IP);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    // the <typedef type="ip"> node can have children
+    // of its own
+
+    XMLItem typeChildren[] = root.getChildren();
+		
+    for (int j = 0; j < typeChildren.length; j++)
+      {
+	XMLItem child = typeChildren[j];
+
+	if (child.matches("vector"))
+	  {
+	    _vect = true;
+
+	    Integer vectSize = child.getAttrInt("maxSize");
+
+	    if (vectSize != null)
+	      {
+		_maxSize = vectSize.shortValue();
+	      }
+	  }
+	else if (child.matches("namespace"))
+	  {
+	    _namespace = child.getAttrStr("val");
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("xml",
+					      "Unrecognized ip typedef entity: " + child +
+					      "\nIn field def:\n" + root.getTreeString());
+	  }
+      }
+
+    // now do all the setting
+
+    retVal = setArray(_vect);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set vector bit to " + _vect + ": \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+		
+    if (_vect)
+      {
+	retVal = setMaxArraySize(_maxSize);
+	
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return Ganymede.createErrorDialog("xml",
+					      "fielddef could not set vector maximum size: " + _maxSize + "\n" +
+					      root.getTreeString() + "\n" +
+					      retVal.getDialogText());
+	  }
+      }
+
+    retVal = setNameSpace(_namespace);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set namespace: " + _namespace + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method takes care of doing everything required to
+   * take an XMLItem tree &lt;fielddef type="numeric"&gt; and
+   * update this field's schema information to match.</p>
+   *
+   * @return A failure ReturnVal if the schema for this field
+   * could not be set to match.
+   */
+
+  private ReturnVal doNumericXML(XMLItem root)
+  {
+    String _namespace = null;
+    ReturnVal retVal;
+
+    /* -- */
+
+    if (!root.getAttrStr("type").equals("ip"))
+      {
+	throw new IllegalArgumentException("bad XMLItem tree");
+      }
+
+    retVal = setType(FieldType.NUMERIC);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    // the <typedef type="numeric"> node can have children
+    // of its own
+
+    XMLItem typeChildren[] = root.getChildren();
+		
+    for (int j = 0; j < typeChildren.length; j++)
+      {
+	XMLItem child = typeChildren[j];
+
+	if (child.matches("namespace"))
+	  {
+	    _namespace = child.getAttrStr("val");
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("xml",
+					      "Unrecognized numeric typedef entity: " + child +
+					      "\nIn field def:\n" + root.getTreeString());
+	  }
+      }
+
+    // now do all the setting
+
+    retVal = setNameSpace(_namespace);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set namespace: " + _namespace + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method takes care of doing everything required to
+   * take an XMLItem tree &lt;fielddef type="invid"&gt; and
+   * update this field's schema information to match.</p>
+   *
+   * @return A failure ReturnVal if the schema for this field
+   * could not be set to match.
+   */
+
+  private ReturnVal doInvidXML(XMLItem root, boolean doLinkResolve)
+  {
+    boolean _vect = false;
+    short _maxSize = java.lang.Short.MAX_VALUE;
+    boolean _embedded = false;
+    String _targetobjectStr = null;
+    Integer _targetobject = null;
+    String _targetfieldStr = null;
+    Integer _targetfield = null;
+    ReturnVal retVal;
+
+    /* -- */
+
+    if (!root.getAttrStr("type").equals("invid"))
+      {
+	throw new IllegalArgumentException("bad XMLItem tree");
+      }
+
+    retVal = setType(FieldType.INVID);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    // the <typedef type="ip"> node can have children
+    // of its own
+
+    XMLItem typeChildren[] = root.getChildren();
+		
+    for (int j = 0; j < typeChildren.length; j++)
+      {
+	XMLItem child = typeChildren[j];
+
+	if (child.matches("vector"))
+	  {
+	    _vect = true;
+
+	    Integer vectSize = child.getAttrInt("maxSize");
+
+	    if (vectSize != null)
+	      {
+		_maxSize = vectSize.shortValue();
+	      }
+	  }
+	else if (child.matches("targetobject"))
+	  {
+	    _targetobjectStr = child.getAttrStr("name");
+	    _targetobject = child.getAttrInt("id");
 	    
-	    diffs.append("Field trueLabel " + trueLabel +
-			 " doesn't match " + otherField.trueLabel + "\n");
+	    if (_targetobjectStr == null && _targetobject == null)
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "targetobject item does not specify name or id: " + child + "\n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
 	  }
-
-	if (falseLabel != otherField.falseLabel || !falseLabel.equals(otherField.falseLabel))
+	else if (child.matches("targetfield"))
 	  {
-	    // ditto
-	    
-	    diffs.append("Field falseLabel " + falseLabel +
-			 " doesn't match " + otherField.falseLabel + "\n");
+	    _targetfieldStr = child.getAttrStr("name");
+	    _targetfield = child.getAttrInt("id");
+
+	    if (_targetfieldStr == null && _targetfield == null)
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "targetfield item does not specify name or id: " + child + "\n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
 	  }
-      }
-
-    // check for invid type, and for invid-only params
-
-    if (field_type == FieldType.INVID)
-      {
-	if (editInPlace != otherField.editInPlace)
+	else if (child.matches("embedded"))
 	  {
-	    diffs.append("Field edit in place flag " + editInPlace + 
-			 " doesn't match " + otherField.editInPlace + "\n");
+	    _embedded = true;
 	  }
-
-	if (allowedTarget != otherField.allowedTarget)
+	else
 	  {
-	    diffs.append("Field allowed object type " + allowedTarget +
-			 " doesn't match " + otherField.allowedTarget + "\n");
+	    return Ganymede.createErrorDialog("xml",
+					      "Unrecognized invid typedef entity: " + child +
+					      "\nIn field def:\n" + root.getTreeString());
 	  }
+      }
 
-	if (targetField != otherField.targetField)
+    // now do all the setting
+
+    retVal = setArray(_vect);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set vector bit to " + _vect + ": \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+		
+    if (_vect)
+      {
+	retVal = setMaxArraySize(_maxSize);
+	
+	if (retVal != null && !retVal.didSucceed())
 	  {
-	    diffs.append("Field field symmetry target " + targetField +
-			 " doesn't match " + otherField.targetField + "\n");
+	    return Ganymede.createErrorDialog("xml",
+					      "fielddef could not set vector maximum size: " + _maxSize + "\n" +
+					      root.getTreeString() + "\n" +
+					      retVal.getDialogText());
 	  }
       }
 
-    if (field_type == FieldType.PASSWORD)
+    if (doLinkResolve)
       {
-	if (crypted != otherField.crypted)
+	// first we try to set the target object type, if any
+
+	if (_targetobjectStr != null)
 	  {
-	    diffs.append("Field password UNIX crypt flag " + crypted + 
-			 " doesn't match " + otherField.crypted + "\n");
-	  }
+	    retVal = setTargetBase(_targetobjectStr);
 
-	if (md5crypted != otherField.md5crypted)
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "fielddef could not set invid target base: " + _targetobjectStr + "\n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
+	  }
+	else if (_targetobject != null)
 	  {
-	    diffs.append("Field password md5 crypt flag " + md5crypted +
-			 " doesn't match " + otherField.md5crypted + "\n");
-	  }
+	    retVal = setTargetBase(_targetobject.shortValue());
 
-	if (storePlaintext != otherField.storePlaintext)
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "fielddef could not set invid target base: " + _targetobject + "\n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
+	  }
+	else // both null
 	  {
-	    diffs.append("Field password retain plaintext flag " + storePlaintext +
-			 " doesn't match " + otherField.storePlaintext + "\n");
-	  }
-      }
+	    retVal = setTargetBase(null);
 
-    if (field_type == FieldType.STRING)
-      {
-	if (multiLine != otherField.multiLine)
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "fielddef could not clear invid target base: \n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
+	  }
+
+	// then we try to set the target field, if any
+
+	if (_targetfieldStr != null)
 	  {
-	    diffs.append("Field string multiline flag " + multiLine +
-			 " doesn't match " + otherField.multiLine + "\n");
+	    retVal = setTargetBase(_targetfieldStr);
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "fielddef could not set invid target field: " + _targetfieldStr + "\n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
+	  }
+	else if (_targetfield != null)
+	  {
+	    retVal = setTargetField(_targetfield.shortValue());
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "fielddef could not set invid target field: " + _targetfield + "\n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
+	  }
+	else // both null
+	  {
+	    retVal = setTargetField(null);
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "fielddef could not clear invid target field: \n" +
+						  root.getTreeString() + "\n" +
+						  retVal.getDialogText());
+	      }
 	  }
       }
 
-    // and now a few more attributes that can apply to more than one field type
+    retVal = setEditInPlace(_embedded);
 
-    if (minLength != otherField.minLength)
+    if (retVal != null && !retVal.didSucceed())
       {
-	diffs.append("Field string/password minLength " + minLength + " doesn't match " + otherField.minLength + "\n");
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set embedded status: \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
       }
-
-    if (maxLength != otherField.maxLength)
-      {
-	diffs.append("Field string/password maxLength " + maxLength + " doesn't match " + otherField.maxLength + "\n");
-      }
-
-    if (okChars != otherField.okChars || !okChars.equals(otherField.okChars))
-      {
-	// ditto
-
-	diffs.append("Field okChars " + okChars + " doesn't match " + otherField.okChars + "\n");
-      }
-
-    if (badChars != otherField.badChars || !badChars.equals(otherField.badChars))
-      {
-	// ditto
-
-	diffs.append("Field badChars " + badChars + " doesn't match " + otherField.badChars + "\n");
-      }
-
-    if (regexpPat != otherField.regexpPat || !regexpPat.equals(otherField.regexpPat))
-      {
-	// ditto
-
-	diffs.append("Field regexpPat " + regexpPat + " doesn't match " + otherField.regexpPat + "\n");
-      }
-
-    if (namespace != otherField.namespace)
-      {
-	diffs.append("Field namespace " + namespace + " doesn't match " + otherField.namespace + "\n");
-      }
-
-    // and now, return
-
-    if (diffs.length() != 0)
-      {
-	return Ganymede.createErrorDialog("compare",
-					  "field " + this.toString() + " has the following " +
-					  "differences relative to field " +
-					  otherField.toString() + "\n" + diffs.toString());
-      }
-
-    // success
 
     return null;
   }
@@ -1694,16 +2215,19 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	throw new IllegalArgumentException("not in an schema editing context");
       }
-    
-    if (name == null || name.equals(""))
-      {
-	throw new IllegalArgumentException("can't have a null or empty name");
-      }
+
+    // if we aren't loading, don't allow messing with the global fields
 
     if (editor != null && !isEditable())
       {
 	return Ganymede.createErrorDialog("Error",
 					  "Can't change the name of a system field.");
+      }
+    
+    if (name == null || name.equals(""))
+      {
+	return Ganymede.createErrorDialog("error",
+					  "can't have a null or empty name");
       }
 
     // make sure we strip any chars that would cause this object name
@@ -1713,6 +2237,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     name = StringUtils.strip(name,
 			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-").trim();
+    
+    // no change, no problem
 
     if (name.equals(field_name))
       {
@@ -1764,6 +2290,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	throw new IllegalArgumentException("not in an schema editing context");
       }
+
+    // if we're not loading, don't allow global fields to be messed with
 
     if (editor != null && !isEditable())
       {
@@ -1819,10 +2347,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   public synchronized ReturnVal setComment(String s)
   {
-    if (editor == null)
+    if (!base.store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not editing");
       }
+
+    // if we're not loading, don't allow global fields to be messed with
 
     if (editor != null && !isEditable())
       {
@@ -1879,7 +2409,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   public synchronized ReturnVal setType(short type)
   {
-    if (editor == null)
+    if (!base.store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not editing");
       }
@@ -1888,6 +2418,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	throw new IllegalArgumentException("type argument out of range");
       }
+
+    // if no change, no problem.
+
+    if (type == field_type)
+      {
+	return null;
+      }
+
+    // don't allow global fields to be messed with
 
     if (editor != null && !isEditable())
       {
@@ -1898,6 +2437,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // now we need to delineate those fields whose types must not be
     // changed due to server requirements, even if we don't have an
     // instance of the field in current use
+
+    // note that isEditable() checks for one of the universal fields..
+    // isSystemField() checks for non-universal fields in any of the
+    // system mandatory objects that we want to protect
 
     // note that we don't just rule out all type setting on all fields
     // in these object types, as it is permissible to add fields to
@@ -1918,7 +2461,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (isInvid())
       {
 	// need to check to make sure no other invid field definitions are
-	// pointing to this field somehow
+	// pointing to this field somehow, else changing type might break
+	// that other field definition
       }
 
     field_type = type;
@@ -2067,6 +2611,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    // no change, no problem
+
+    if (b == array)
+      {
+	return null;
+      }
+
     if (editor != null && !isEditable())
       {
 	return Ganymede.createErrorDialog("Error",
@@ -2090,7 +2641,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     if (b && !(isString() || isInvid() || isIP()))
       {
-	throw new IllegalArgumentException("can't set this field type to vector");
+	return Ganymede.createErrorDialog("Error",
+					  "can't set this field type to vector");
       }
 
     array = b;
@@ -2112,6 +2664,50 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   public short getID()
   {
     return field_code;
+  }
+
+  /**
+   * <p>This method is used to set this field's id in the containing
+   * DBObjectBase.  This method will return a failure if an id is
+   * selected which is already in use in another field in this object
+   * definition.</p> 
+   */
+
+  public ReturnVal setID(short id)
+  {
+    if (!base.store.loading && editor == null)
+      {
+	throw new IllegalArgumentException("not in an schema editing context");
+      }
+
+    if (id < 0)
+      {
+	return Ganymede.createErrorDialog("error",
+					  "field id number " + id + " out of range.");
+      }
+
+    // no change, no problem
+
+    if (id == field_code)
+      {
+	return null;
+      }
+
+    if (base.getField(id) != null)
+      {
+	return Ganymede.createErrorDialog("error",
+					  "field id number " + id + " is already in use.");
+      }
+
+    if (field_code >= 0)
+      {
+	return Ganymede.createErrorDialog("error",
+					  "can't change an established field id number");
+      }
+
+    field_code = id;
+
+    return null;
   }
 
   /**
@@ -2178,15 +2774,22 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (!array)
+      {
+	throw new IllegalArgumentException("not an array field");
+      }
+
+    // no change, no problem
+
+    if (limit == this.limit)
+      {
+	return null;
+      }
+
     if (editor != null && !isEditable())
       {
 	return Ganymede.createErrorDialog("Error",
 					  "Can't edit system field.");
-      }
-
-    if (!array)
-      {
-	throw new IllegalArgumentException("not an array field");
       }
 
     // array sizes need not be screwed with in the system fields
@@ -2409,15 +3012,22 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (!isString() && !isPassword())
+      {
+	throw new IllegalArgumentException("not a string field");
+      }
+
+    // no change, no problem
+
+    if (val == minLength)
+      {
+	return null;
+      }
+
     if (editor != null && !isEditable())
       {
 	return Ganymede.createErrorDialog("Error",
 					  "Can't edit system field.");
-      }
-
-    if (!isString() && !isPassword())
-      {
-	throw new IllegalArgumentException("not a string field");
       }
     
     minLength = val;
@@ -2469,15 +3079,22 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (!isString() && !isPassword())
+      {
+	throw new IllegalArgumentException("not a string field");
+      }
+
+    // no change, no problem
+
+    if (val == maxLength)
+      {
+	return null;
+      }
+
     if (editor != null && !isEditable())
       {
 	return Ganymede.createErrorDialog("Error",
 					  "Can't edit system field.");
-      }
-
-    if (!isString() && !isPassword())
-      {
-	throw new IllegalArgumentException("not a string field");
       }
     
     maxLength = val;
@@ -2802,6 +3419,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    // if we are not loading, don't allow a built-in universal field
+    // to be messed with
+
     if (editor != null && !isEditable())
       {
 	return Ganymede.createErrorDialog("Error",
@@ -2812,6 +3432,25 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	throw new IllegalArgumentException("this field type does not accept a namespace constraint");
       }
+
+    // no change, no problem
+
+    if ((nameSpaceId == null || nameSpaceId.equals("")) && namespace == null)
+      {
+	return null;
+      }
+
+    if (namespace != null && nameSpaceId != null && !nameSpaceId.equals(""))
+      {
+	DBNameSpace matchingSpace = base.store.getNameSpace(nameSpaceId);
+
+	if (matchingSpace == namespace)
+	  {
+	    return null;
+	  }
+      }
+
+    // see about doing the setting
 
     if (nameSpaceId == null || nameSpaceId.equals(""))
       {
@@ -2964,6 +3603,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	throw new IllegalArgumentException("not an invid field");
       }
+
+    // no change, no harm
+
+    if (b == editInPlace)
+      {
+	return null;
+      }
     
     if (isSystemField())
       {
@@ -3051,6 +3697,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not an invid field");
       }
 
+    // no change, no harm
+
+    if (val == allowedTarget)
+      {
+	return null;
+      }
+
     if (isSystemField())
       {
 	return Ganymede.createErrorDialog("Error",
@@ -3110,16 +3763,29 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not an invid field");
       }
 
-    if (isSystemField())
-      {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the type of a system field.");
-      }
-
     if (baseName == null)
       {
+	if (allowedTarget == -1)
+	  {
+	    return null;		// no change, no harm
+	  }
+
+	if (isSystemField())
+	  {
+	    return Ganymede.createErrorDialog("Error",
+					      "Can't change the type of a system field.");
+	  }
+
 	allowedTarget = -1;
-	return null;
+
+	if (isInUse())
+	  {
+	    return warning2;
+	  }
+	else
+	  {
+	    return null;
+	  }
       }
 
     b = editor.getBase(baseName);
@@ -3128,6 +3794,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	if (b != null)
 	  {
+	    if (b.getTypeID() == allowedTarget)
+	      {
+		return null;	// no change, no harm
+	      }
+
+	    if (isSystemField())
+	      {
+		return Ganymede.createErrorDialog("Error",
+						  "Can't change the type of a system field.");
+	      }
+
 	    allowedTarget = b.getTypeID();
 	  }
 	else
@@ -3220,6 +3897,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not an invid field");
       }
 
+    if (val == targetField)
+      {
+	return null;		// no change, no harm
+      }
+
     if (isSystemField())
       {
 	return Ganymede.createErrorDialog("Error",
@@ -3229,28 +3911,46 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (val < 0)
       {
 	targetField = val;
-	return null;
+
+	if (isInUse())
+	  {
+	    return warning2;
+	  }
+	else
+	  {
+	    return null;
+	  }
       }
 
     if (allowedTarget == -1)
       {
-	throw new IllegalArgumentException("not a symmetry maintained field");
+	return Ganymede.createErrorDialog("schema edit error",
+					  "Can't set target field on non-symmetric invid field " + 
+					  this.toString() + " to " + val);
       }
 
     try
       {
 	b = editor.getBase(allowedTarget);
 
+	// we're looking up the object that we have pre-selected.. we
+	// should always set a target object before trying to set a
+	// field
+
 	if (b == null)
 	  {
-	    throw new IllegalArgumentException("invalid target base");
+	    return Ganymede.createErrorDialog("schema edit error",
+					      "Can't find container base in order to set target field for " + 
+					      this.toString() + " to " + val);
 	  }
 	
 	bF = b.getField(val);
 
 	if (bF == null)
 	  {
-	    throw new IllegalArgumentException("invalid target field in base " + b.getName());
+	    return Ganymede.createErrorDialog("schema edit error",
+					      "Can't find numbered target field to set invid field " + 
+					      this.toString() + " to point to field #" + val);
 	  }
       }
     catch (RemoteException ex)
@@ -3298,24 +3998,39 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not an invid field");
       }
 
-    if (isSystemField())
+    if (fieldName == null || fieldName.equals(""))
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't change the type of a system field.");
-      }
+	if (targetField == -1)
+	  {
+	    return null;		// no change, no harm
+	  }
 
-    if (fieldName == null)
-      {
+	if (isSystemField())
+	  {
+	    return Ganymede.createErrorDialog("Error",
+					      "Can't change the type of a system field.");
+	  }
+
 	targetField = -1;
-	return null;
+
+	if (isInUse())
+	  {
+	    return warning2;
+	  }
+	else
+	  {
+	    return null;
+	  }
       }
 
     // look for fieldName in the base currently specified in
     // allowedTarget
 
-    if (allowedTarget == -1)
+    if (allowedTarget == -1 && fieldName != null && !fieldName.equals(""))
       {
-	throw new IllegalArgumentException("not a symmetry maintained field");
+	return Ganymede.createErrorDialog("schema edit error",
+					  "Can't set target field on non-symmetric invid field " + 
+					  this.toString() + " to " + fieldName);
       }
 
     b = editor.getBase(allowedTarget);
@@ -3324,14 +4039,33 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	if (b == null)
 	  {
-	    throw new IllegalArgumentException("invalid target base");
+	    return Ganymede.createErrorDialog("schema edit error",
+					      "Can't find container base in order to set target field for " + 
+					      this.toString() + " to " + fieldName);
 	  }
 	
 	bF = b.getField(fieldName);
 
 	if (bF == null)
 	  {
-	    throw new IllegalArgumentException("invalid target field in base " + b.getName());
+	    return Ganymede.createErrorDialog("schema edit error",
+					      "Can't find naned target field to set invid field " + 
+					      this.toString() + " to point to field " + fieldName);
+	  }
+
+	if (bF.getID() == targetField)
+	  {
+	    return null;	// no change, no harm, no warning needed
+	  }
+
+	// remember, system fields are initialized outside of the
+	// context of the loading system, there should never be a
+	// reason to call setTargetField() on a aystem field
+
+	if (isSystemField())
+	  {
+	    return Ganymede.createErrorDialog("Error",
+					      "Can't change the type of a system field.");
 	  }
 
 	targetField = bF.getID();
@@ -3380,7 +4114,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   public ReturnVal setCrypted(boolean b)
   {    
-    if (editor == null)
+    if (!base.store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not editing");
       }
@@ -3424,7 +4158,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   public ReturnVal setMD5Crypted(boolean b)
   {    
-    if (editor == null)
+    if (!base.store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not editing");
       }
@@ -3471,7 +4205,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   public ReturnVal setPlainText(boolean b)
   {    
-    if (editor == null)
+    if (!base.store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not editing");
       }

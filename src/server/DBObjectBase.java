@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 2000/10/11 19:59:46 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 2000/10/29 09:09:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1037,20 +1037,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /**
    * <P>This method is used to read the definition for this
-   * DBObjectBase from an XMLReader stream.  When this method is
-   * called, the <objectdef> open element should be the very next item
-   * in the reader stream.  This method will consume every element in
-   * the reader stream up to and including the matching </objectdef>
-   * element.</P>
-   *
-   * <P>If important expectations about the state of the XML stream
-   * are not met, an IllegalArgumentException will be thrown, and
-   * the stream will be left in an indeterminate state.</P>
+   * DBObjectBase from an XMLItem &lt;objectdef&gt; tree.</P>
    */
 
-  synchronized void receiveXML(XMLReader reader)
+  synchronized void setXML(XMLItem root)
   {
-    XMLItem item, nextItem;
+    XMLItem item;
     Integer idInt;
     DBObjectBaseField newField;
 
@@ -1060,27 +1052,27 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     this.classname = null;
     this.embedded = false;
 
-    item = reader.getNextItem(true);
-
-    if (item == null || !item.matches("objectdef"))
+    if (root == null || !root.matches("objectdef"))
       {
-	throw new IllegalArgumentException("DBObjectBase.receiveXML(): next element != open objectdef: " + item);
+	throw new IllegalArgumentException("DBObjectBase.setXML(): root element != open objectdef: " + root);
       }
 
-    object_name = item.getAttrStr("name");
-    idInt = item.getAttrInt("id");
+    object_name = root.getAttrStr("name");
+    idInt = root.getAttrInt("id");
 
     if (idInt == null)
       {
-	throw new IllegalArgumentException("DBObjectBase.receiveXML(): objectdef missing id attribute: " + item);
+	throw new IllegalArgumentException("DBObjectBase.setXML(): objectdef missing id attribute: " + root);
       }
 
     type_code = idInt.shortValue();
 
-    item = reader.getNextItem(true);
+    XMLItem children[] = root.getChildren();
 
-    while (item != null && !item.matchesClose("objectdef"))
+    for (int i = 0; i < children.length; i++)
       {
+	item = children[i];
+
 	if (item.matches("classdef"))
 	  {
 	    classname = item.getAttrStr("name");
@@ -1100,8 +1092,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
 	else if (item.matches("fielddef"))
 	  {
-	    reader.pushbackItem(item);
-
 	    try
 	      {
 		newField = new DBObjectBaseField(this);
@@ -1112,231 +1102,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		throw new RuntimeException("UnicastRemoteObject initialization error " + ex.getMessage());
 	      }
 
-	    newField.receiveXML(reader);
+	    newField.setXML(item, false); // don't do invid linking on first pass
 
 	    addFieldToEnd(newField);
 	  }
 	else
 	  {
-	    System.err.println("DBObjectBase.receiveXML(): unrecognized XML item in objectdef: " + 
+	    System.err.println("DBObjectBase.setXML(): unrecognized XML item in objectdef: " + 
 			       item);
 	  }
-	
-	item = reader.getNextItem(true);
       }
-
-    if (item == null)
-      {
-	throw new IllegalArgumentException("DBObjectBase.receiveXML(): unexpected eof in XML stream");
-      }
-  }
-
-  /**
-   * <P>This method is used to read the definition for this
-   * DBObjectBase from an XMLReader stream.  When this method is
-   * called, the <objectdef> open element should be the very next item
-   * in the reader stream.  This method will consume every element in
-   * the reader stream up to and including the matching </objectdef>
-   * element.</P>
-   *
-   * <P>If important expectations about the state of the XML stream
-   * are not met, an IllegalArgumentException will be thrown, and
-   * the stream will be left in an indeterminate state.</P>
-   */
-
-  synchronized ReturnVal compareXMLDef(XMLItem objectDef, XMLReader reader)
-  {
-    XMLItem item;
-    short xmlLabelID = -1;
-    boolean xmlEmbedded = false;
-    String xmlClassName = null;
-    Hashtable fieldChecklist = new Hashtable();
-    DBObjectBaseField field;
-
-    /* -- */
-
-    /* XXXX
-
-       We need to figure out a way to make compareXMLDef be aware of any
-       field order differences.. ?
-
-       XXXX
-    */
-
-    // build up a hashtable of custom fields that already exist in
-    // this object definition.. we'll remove items when we find them
-    // in the xml for this objectdef, and if we have any left over
-    // when we're done we'll make a note of it
-
-    Enumeration enum = customFields.elements();
-    
-    while (enum.hasMoreElements())
-      {
-	field = (DBObjectBaseField) enum.nextElement();
-	    
-	fieldChecklist.put(field.getKey(), field);
-      }
-
-    // now start processing the xml for this objectDef
-
-    String xmlName = objectDef.getAttrStr("name");
-
-    if (xmlName != null && !xmlName.equals(object_name))
-      {
-	return Ganymede.createErrorDialog("mismatch",
-					  "Object named " + object_name + 
-					  " doesn't match XML object name " + xmlName);
-      }
-
-    item = reader.getNextItem(true);
-
-    while (item != null && !item.matchesClose("objectdef"))
-      {
-	if (item.matches("classdef"))
-	  {
-	    xmlClassName = item.getAttrStr("name");
-	  }
-	else if (item.matches("embedded"))
-	  {
-	    xmlEmbedded = true;
-	  }
-	else if (item.matches("label"))
-	  {
-	    Integer labelInt = item.getAttrInt("fieldid");
-
-	    if (labelInt != null)
-	      {
-		xmlLabelID = labelInt.shortValue();
-	      }
-	  }
-	else if (item.matches("fielddef"))
-	  {
-	    String field_name = item.getAttrStr("name");
-	    Integer field_codeInt = item.getAttrInt("id");
-
-	    DBObjectBaseField fieldDef = (DBObjectBaseField) getField(field_codeInt.shortValue());
-
-	    if (fieldDef == null)
-	      {
-		return Ganymede.createErrorDialog("mismatch",
-						  "Object named " + object_name + 
-						  " doesn't contain a field to match XML field " + item);
-	      }
-
-	    // we've found one, take it out of our fieldChecklist
-
-	    fieldChecklist.remove(fieldDef.getKey());
-
-	    // pushback the fielddef element so we can construct a new
-	    // DBObjectBaseField from it
-
-	    reader.pushbackItem(item);
-
-	    // and do the comparison on this field
-
-	    DBObjectBaseField newFieldDef;
-
-	    try
-	      {
-		newFieldDef = new DBObjectBaseField(reader, this);
-	      }
-	    catch (RemoteException ex)
-	      {
-		ex.printStackTrace();
-		throw new RuntimeException(ex.getMessage());
-	      }
-	    catch (IOException ex)
-	      {
-		ex.printStackTrace();
-		throw new RuntimeException(ex.getMessage());
-	      }
-
-	    ReturnVal ret = fieldDef.compareAgainst(newFieldDef);
-
-	    if (ret != null && !ret.didSucceed())
-	      {
-		return ret;
-	      }
-	  }
-	else
-	  {
-	    System.err.println("DBObjectBase.compareXMLDef(): unrecognized XML item in objectdef: " + 
-			       item);
-	  }
-	
-	item = reader.getNextItem(true);
-      }
-
-    // if we hit eof we'll have exited the loop with a null
-
-    if (item == null)
-      {
-	throw new IllegalArgumentException("DBObjectBase.compareXMLDef(): unexpected eof in XML stream");
-      }
-
-    // else check it
-
-    if (this.embedded != xmlEmbedded)
-      {
-	return Ganymede.createErrorDialog("mismatch",
-					  "Object named " + object_name +
-					  " doesn't have the same embedded status as specified in the XML stream.\n" +
-					  "Class definition in database: " + embedded + "\n" +
-					  "Class definition in XML stream: " + xmlEmbedded);
-      }
-
-    if (label_id != xmlLabelID)
-      {
-	return Ganymede.createErrorDialog("mismatch",
-					  "Object named " + object_name +
-					  " doesn't have the same label field as specified in the XML stream.\n" +
-					  "Class definition in database: " + label_id + "\n" +
-					  "Class definition in XML stream: " + xmlLabelID);
-      }
-
-    if ((classname == null && xmlClassName != null) || !classname.equals(xmlClassName))
-      {
-	return Ganymede.createErrorDialog("mismatch",
-					  "Object named " + object_name +
-					  " doesn't have the same class definition as specified in the XML stream.\n" +
-					  "Class definition in database: " + classname + "\n" +
-					  "Class definition in XML stream: " + xmlClassName);
-      }
-
-    // if we didn't have an xml entry for a field defined in this
-    // object type, say that
-
-    if (fieldChecklist.size() != 0)
-      {
-	StringBuffer errorBuf = new StringBuffer();
-
-	errorBuf.append("Error, the following field definitions were missing in the xml\nfor object type ");
-	errorBuf.append(objectDef.toString());
-	errorBuf.append(" in the submitted XML stream:\n");
-
-	Enumeration elements = fieldChecklist.elements();
-	field = null;
-	
-	while (elements.hasMoreElements())
-	  {
-	    if (field != null)
-	      {
-		errorBuf.append(", ");
-	      }
-
-	    field = (DBObjectBaseField) elements.nextElement();
-	    errorBuf.append(field.field_name);
-	  }
-
-	errorBuf.append("\n");
-
-	return Ganymede.createErrorDialog("mismatch",
-					  errorBuf.toString());
-      }
-
-    // guess we had a perfect match, woo-hoo!  return a success null
-
-    return null;
   }
 
   /**
@@ -2371,7 +2146,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // set its id
 
-    field.field_code = id;
+    field.setID(id);
 
     // give it an initial, unique name
 
@@ -2384,7 +2159,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	newName = "New Field " + i++;
       }
 
-    field.field_name = newName;
+    field.setName(newName);
 
     // and set it up in our field hash and add this to the sorted
     // fields vector
