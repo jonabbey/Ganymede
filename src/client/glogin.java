@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -98,7 +98,7 @@ public class glogin extends JApplet implements Runnable {
 
     if (properties_file == null)
       {
-	throw new IllegalArgumentException("-properties takes a String argument.  Example:\n\n  glogin -properties=properties_file\n\n");
+	throw new IllegalArgumentException("Usage error: glogin [-debug] properties=properties_file\n\n");
       }
 
     my_glogin = new glogin();
