@@ -2,8 +2,8 @@
 #
 # Ganymede build script
 #
-# Version: $Revision: 1.4 $
-# Date: $Date: 1999/01/19 22:44:13 $
+# Version: $Revision: 1.5 $
+# Date: $Date: 1999/04/06 20:57:17 $
 #
 ############################################################
 
@@ -18,7 +18,7 @@ cd $builddir
 
 # Load configuration information
 
-. config.sh
+. ./config.sh
 
 echo "Building custom jar file from compiled classes"
 

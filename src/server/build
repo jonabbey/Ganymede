@@ -3,8 +3,8 @@
 # Ganymede Server build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.4 $
-# Date: $Date: 1999/01/26 19:15:03 $
+# Version: $Revision: 1.5 $
+# Date: $Date: 1999/04/06 20:57:28 $
 #
 ############################################################
 
@@ -21,7 +21,7 @@ cd $builddir
 
 # Load configuration information
 
-. config.sh
+. ./config.sh
 
 # And do the build
 

@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.10 $
-# Date: $Date: 1999/01/29 05:08:31 $
+# Version: $Revision: 1.11 $
+# Date: $Date: 1999/04/06 20:56:13 $
 #
 ############################################################
 
@@ -18,7 +18,7 @@ cd $builddir
 
 # Load configuration information
 
-. config.sh
+. ./config.sh
 
 # And do the build
 

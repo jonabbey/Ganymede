@@ -3,8 +3,8 @@
 # Ganymede build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.6 $
-# Date: $Date: 1999/01/22 00:55:53 $
+# Version: $Revision: 1.7 $
+# Date: $Date: 1999/04/06 20:57:27 $
 #
 ############################################################
 
@@ -19,7 +19,7 @@ cd $builddir
 
 # Load configuration information
 
-. config.sh
+. ./config.sh
 
 ##################################################
 
