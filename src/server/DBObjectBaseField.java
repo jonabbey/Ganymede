@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -86,6 +86,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   DBSchemaEdit editor;
   boolean changed;
 
+  // downloadable FieldTemplate
+
+  FieldTemplate template;
+
   /* -- */
 
   /**
@@ -135,6 +139,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   {
     this(base);
     receive(in);
+    template = new FieldTemplate(this);
   }
 
   /**
@@ -180,8 +185,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     crypted = original.crypted;
 
+    template = new FieldTemplate(this);
     this.editor = editor;
     changed = false;
+
   }
 
   synchronized void emit(DataOutput out) throws IOException
