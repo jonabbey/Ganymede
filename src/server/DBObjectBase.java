@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 1999/03/24 03:29:49 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 1999/04/16 22:52:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -144,6 +144,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     DBObjectBaseField bf;
 
     /* -- */
+
+    debug = Ganymede.debug;
 
     this.store = store;
     this.containingHash = store.objectBases;
@@ -1153,9 +1155,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /**
    * Print a debugging summary of the type information encoded
-   * in this objectbase to a PrintStream.
+   * in this objectbase to a PrintWriter.
    *
-   * @param out PrintStream to print to.
+   * @param out PrintWriter to print to.
    */
 
   public synchronized void printHTML(PrintWriter out)
@@ -1234,9 +1236,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   /**
    * Print a debugging summary of the type information encoded
-   * in this objectbase to a PrintStream.
+   * in this objectbase to a PrintWriter.
    *
-   * @param out PrintStream to print to.
+   * @param out PrintWriter to print to.
    */
 
   public synchronized void print(PrintWriter out, String indent)

@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 1999/02/10 17:56:31 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 1999/04/16 22:52:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -71,29 +71,26 @@ import arlut.csd.Util.ParseArgs;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>This class is the main server module, providing the static main()
+ * method executed to start the server.</p>
  *
- * This class is the main server module, providing the static main()
- * method executed to start the server.<br><br>
- *
- * This class is never instantiated, but instead provides a bunch of
+ * <p>This class is never instantiated, but instead provides a bunch of
  * static variables and convenience methods in addition to the main()
- * start method.
- *
+ * start method.</p>
  */
 
 public class Ganymede {
 
-  public static final boolean debug = true;  
+  public static boolean debug = true;  
   public static Date startTime = new Date();
   public static String debugFilename = null;
   public static boolean developSchema = false;
 
   /**
-   *
-   * If true, GanymedeSession will export any objects being viewed,
-   * edited, or created before returning it to the client.  This will
-   * be false during direct loading, which should double load speed.
-   * 
+   * <p>If true, {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+   * will export any objects being viewed, edited, or created before
+   * returning it to the client.  This will be false during direct
+   * loading, which should double load speed.</p>
    */
 
   public static boolean remotelyAccessible = true;
@@ -120,36 +117,27 @@ public class Ganymede {
   public static DBLog log = null;
 
   /**
-   *
-   * A cached reference to a master category tree serialization
+   * <p>A cached reference to a master category tree serialization
    * object.  Initialized the first time a user logs on to the server,
    * and re-initialized when the schema is edited.  This object is
-   * provided to clients when they call GanymedeSession.getCategoryTree().
-   *
-   * @see arlut.csd.ganymede.GanymedeSession.getCategoryTree
+   * provided to clients when they call 
+   * {@link arlut.csd.ganymede.GanymedeSession#getCategoryTree() GanymedeSession.getCategoryTree()}.</p>
    */
 
   public static CategoryTransport catTransport = null;
 
   /**
-   *
-   * A cached reference to a master base list serialization object.
+   * <p>A cached reference to a master base list serialization object.
    * Initialized on server start up and re-initialized when the schema
    * is edited.  This object is provided to clients when they call
-   * GanymedeSession.getBaseList().
-   *
-   * @see arlut.csd.ganymede.GanymedeSession.getBaseList
+   * {@link arlut.csd.ganymede.GanymedeSession#getBaseList() GanymedeSession.getBaseList()}.</p>
    */
 
   public static BaseListTransport baseTransport = null;
 
   /**
-   *
-   * A vector of GanymedeBuilderTask objects initialized
-   * on database load.
-   *
-   * @see registerBuilderTasks
-   *
+   * <p>A vector of {@link arlut.csd.ganymede.GanymedeBuilderTask GanymedeBuilderTask}
+   * objects initialized on database load.</p>
    */
 
   public static Vector builderTasks = new Vector();
@@ -190,13 +178,30 @@ public class Ganymede {
 
     /* -- */
 
+    if (ParseArgs.switchExists("decode", argv))
+      {
+	String dbFilename = ParseArgs.getArg("dbfile", argv);
+
+	if (dbFilename == null)
+	  {
+	    System.err.println("Error: missing dbfile parameter for dbfile decode.");
+	    System.exit(1);
+	  }
+	else
+	  {
+	    databaseReport(dbFilename);
+	    System.exit(0);
+	  }
+      }
+
     propFilename = ParseArgs.getArg("properties", argv);
 
     if (propFilename == null)
       {
-	System.out.println("Error: invalid command line parameters");
-	System.out.print("Usage: java Ganymede [-resetadmin] [-developschema] ");
-	System.out.println("properties=<property file> [debug=<rmi debug file>]");
+	System.err.println("Error: invalid command line parameters");
+ 	System.err.print("Usage: java Ganymede [-decode dbfile=<dbfilename>] [-resetadmin] ");
+	System.err.print("[-developschema] ");
+	System.err.println("properties=<property file> [debug=<rmi debug file>]");
 	return;
       }
 
@@ -221,7 +226,7 @@ public class Ganymede {
 	System.out.println("Ganymede server: loaded properties successfully from " + propFilename);
       }
 
-    boolean stop = true;
+    boolean inUse = true;
 
     try
       {
@@ -229,7 +234,7 @@ public class Ganymede {
       }
     catch (NotBoundException ex)
       {
-	stop = false;		// this is what we want to have happen
+	inUse = false;		// this is what we want to have happen
       }
     catch (java.net.MalformedURLException ex)
       {
@@ -244,9 +249,10 @@ public class Ganymede {
 	System.out.println("Remote:" + ex);
       }
 
-    if (stop)
+    if (inUse)
       {
 	System.err.println("Warning: Ganymede server already bound by other process / Naming failure.");
+	System.err.println("         (not necessarily fatal)");
       }
 
     debug("Creating DBStore structures");
@@ -260,7 +266,7 @@ public class Ganymede {
     if (dataFile.exists())
       {
 	debug("Loading DBStore contents");
-	db.load(dbFilename);
+	db.load(dbFilename, true);
       }
     else
       {
@@ -398,12 +404,48 @@ public class Ganymede {
   }
 
   /**
-   *
-   * This method is used to initialize the Ganymede system when it is
+   * <p>This method is used to examine a Ganymede database file for the
+   * purposes of doing a schema report on it.</p>
+   */
+
+  public static void databaseReport(String dbFilename)
+  {
+    File dataFile;
+
+    /* -- */
+
+    remotelyAccessible = false;
+
+    Ganymede.dbFilename = dbFilename;
+
+    Ganymede.debug = false;
+
+    db = new DBStore();
+
+    dataFile = new File(dbFilename);
+    
+    if (dataFile.exists())
+      {
+	db.load(dbFilename, false);
+
+	StringWriter outString = new StringWriter();
+	PrintWriter out = new PrintWriter(outString);
+	
+	db.printCategoryTree(out);
+	
+	System.out.println(outString);
+
+	return;
+      }
+
+    System.err.println("Couldn't load database " + dbFilename);
+  }
+
+  /**
+   * <p>This method is used to initialize the Ganymede system when it is
    * being driven by a direct-linked loader main() entry point, as a
    * single process.  This method is not used when the server is started
-   * up normally.
-   * 
+   * up normally.</p>
    */
 
   public static GanymedeServer directInit(String dbFilename) 
@@ -416,8 +458,6 @@ public class Ganymede {
 
     Ganymede.dbFilename = dbFilename;
 
-    boolean stop = true;
-
     debug("Creating DBStore structures");
 
     db = new DBStore();
@@ -427,7 +467,7 @@ public class Ganymede {
     if (dataFile.exists())
       {
 	debug("Loading DBStore contents");
-	db.load(dbFilename);
+	db.load(dbFilename, true);
       }
     else
       {
@@ -524,10 +564,8 @@ public class Ganymede {
   }
 
   /**
-   *
    * This is a convenience method used by the server to return a
    * standard error dialog.
-   *
    */
 
   static public ReturnVal createErrorDialog(String title, String body)
@@ -548,13 +586,11 @@ public class Ganymede {
   }
 
   /**
+   * <p>This method is provided to allow us to hook in creation of new
+   * objects with specified invid's that the server code references.</p>
    *
-   * This method is provided to allow us to hook in creation of new
-   * objects with specified invid's that the server code references.<br><br>
-   *
-   * It's intended for use during server development as we evolve
-   * the schema.
-   *
+   * <p>It's intended for use during server development as we evolve
+   * the schema.</p>
    */
 
   static public void startupHook()
@@ -663,10 +699,8 @@ public class Ganymede {
   }
 
   /**
-   *
    * This method scans the database for valid BuilderTask entries and 
    * adds them to the builderTasks vector.
-   *
    */
 
   static private void registerTasks()
@@ -736,11 +770,9 @@ public class Ganymede {
   }
 
   /**
-   *
    * This method schedules all registered builder tasks for
    * execution.  This method will be called when a user commits a
    * transaction.
-   * 
    */
 
   static void runBuilderTasks()
@@ -755,14 +787,12 @@ public class Ganymede {
   }
 
   /**
+   * <p>This method loads properties from the ganymede.properties
+   * file.</p>
    *
-   * This method loads properties from the ganymede.properties
-   * file.<br><br>
-   *
-   * This method is public so that loader code linked with the
+   * <p>This method is public so that loader code linked with the
    * Ganymede server code can initialize the properties without
-   * going through Ganymede.main().
-   * 
+   * going through Ganymede.main().</p>
    */
 
   public static boolean loadProperties(String filename)
@@ -897,9 +927,8 @@ public class Ganymede {
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * Runnable class to do a journal sync.  Issued by the GanymedeScheduler.
- *
+ * <p>Runnable class to do a journal sync.  Issued by the 
+ * {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler}.</p>
  */
 
 class dumpTask implements Runnable {
@@ -971,9 +1000,8 @@ class dumpTask implements Runnable {
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * Runnable class to do a journal sync.  Issued by the GanymedeScheduler.
- *
+ * <p>Runnable class to do a journal sync.  Issued by the 
+ * {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler}.</p>
  */
 
 class dumpAndArchiveTask implements Runnable {
@@ -1039,16 +1067,14 @@ class dumpAndArchiveTask implements Runnable {
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>Runnable class to do a synchronous garbage collection run.  Issued
+ * by the {@link arlut.csd.GanymedeScheduler GanymedeScheduler}.</p>
  *
- * Runnable class to do a synchronous garbage collection run.  Issued
- * by the GanymedeScheduler.<br><br>
- *
- * I'm not sure that there is any point to having a synchronous garbage
+ * <p>I'm not sure that there is any point to having a synchronous garbage
  * collection task.. the idea was that we could schedule a full gc when
  * the server was likely not to be busy so as to keep things trim for when
  * the server was busy, but the main() entry point isn't yet scheduling this
- * for a particularly good time.
- * 
+ * for a particularly good time.</p>
  */
 
 class gcTask implements Runnable {

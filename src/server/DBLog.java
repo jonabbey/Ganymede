@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/01/22 18:05:33 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/04/16 22:52:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,19 +68,17 @@ import arlut.csd.Util.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>This class manages recording events in the system log and generating
+ * reports from the system log based on specific criteria.</p>
  *
- * This class manages recording events in the system log and generating
- * reports from the system log based on specific criteria.<br><br>
- *
- * Most of the methods in this class must be synchronized, both to keep the
+ * <p>Most of the methods in this class must be synchronized, both to keep the
  * logfile itself orderly, and to allow the various log-processing methods
- * in DBLogEvent to re-use the 'multibuffer' StringBuffer.
- *
+ * in DBLogEvent to re-use the 'multibuffer' StringBuffer.</p>
  */
 
 public class DBLog {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // -- 
 

@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/01/22 18:05:29 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/04/16 22:52:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -105,14 +105,12 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   /* -- */
 
   /**
-   *
    * Primary constructor.
    *
    * @param store DBStore that is managing us.  We'll ask it to look up parents
-   * for us.
-   *
+   *              for us.
+   * @param name Name for this base
    * @param parent If we're not being constructed at the top level, who is our parent?
-   *
    */
 
   public DBBaseCategory(DBStore store, String name, DBBaseCategory parent) throws RemoteException
@@ -137,14 +135,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
    * Default value constructor.  This is used to construct a top-level category.
    *
    * @param store DBStore that is managing us.  We'll ask it to look up parents
-   * for us.
-   *
+   *              for us.
    * @param name Name for this category
-   *
    */
 
   public DBBaseCategory(DBStore store, String name) throws RemoteException
@@ -153,14 +148,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
    * Receive constructor.
    *
    * @param store DBStore that is managing us.  We'll ask it to look up parents
-   * for us.
-   *
+   *              for us.
    * @param in DataInput stream to load the db representation of this category from
-   *
    */
 
   public DBBaseCategory(DBStore store, DataInput in) throws RemoteException, IOException
@@ -172,16 +164,12 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     receive(in, null);
   }
 
-
   /**
-   *
    * Receive constructor.
    *
    * @param store DBStore that is managing us.  We'll ask it to look up parents
-   * for us.
-   *
+   *              for us.
    * @param in DataInput stream to load the db representation of this category from
-   *
    */
 
   public DBBaseCategory(DBStore store, DataInput in, DBBaseCategory parent) throws RemoteException, IOException
@@ -194,11 +182,9 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
    * Recursive duplication constructor.  This constructor recurses down
    * through the newly created DBBaseCategory and creates copies of
    * the bases and categories therein.
-   *
    */
 
   public DBBaseCategory(DBStore store, DBBaseCategory rootCategory,
@@ -217,14 +203,14 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
-   * This method takes all the children of the passed-in category
-   * (both DBObjectBase objects and contained DBBaseCategory objects)
-   * and makes copies under this.
-   * 
+   * <p>This method takes all the children of the passed-in category
+   * (both {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} objects
+   * and contained {@link arlut.csd.ganymede.DBBaseCategory DBBaseCategory}
+   * objects) and makes copies under this.</p>
    */
 
-  private void recurseDown(DBBaseCategory category, Hashtable baseHash, DBSchemaEdit editor) throws RemoteException
+  private void recurseDown(DBBaseCategory category, Hashtable baseHash,
+			   DBSchemaEdit editor) throws RemoteException
   {
     Vector children = category.getNodes();
     CategoryNode node;
@@ -250,7 +236,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	if (node instanceof DBObjectBase)
 	  {
 	    oldBase = (DBObjectBase) node;
-	    newBase = new DBObjectBase(oldBase, editor); // a new copy, with the same objects under it
+
+	    // a new copy, with the same objects under it
+
+	    newBase = new DBObjectBase(oldBase, editor); 
 	    baseHash.put(newBase.getKey(), newBase);
 
 	    // let the base know what hash to check for name collisions
@@ -259,7 +248,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
 	    if (debug)
 	      {
-		Ganymede.debug("Created newBase " + newBase.getName() + " in recursive category tree duplication");
+		Ganymede.debug("Created newBase " + newBase.getName() + 
+			       " in recursive category tree duplication");
 	      }
 
 	    addNode(newBase, false, false);
@@ -277,7 +267,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
 	    if (debug)
 	      {
-		Ganymede.debug("Created newCategory " + newCategory.getName() + " in recursive category tree duplication");
+		Ganymede.debug("Created newCategory " + newCategory.getName() + 
+			       " in recursive category tree duplication");
 	      }
 
 	    newCategory.recurseDown(oldCategory, baseHash, editor);
@@ -286,10 +277,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
    * This method is used when a schema editor is 'checking in'
    * a category tree.
-   *
    */
 
   public synchronized void clearEditor()
@@ -310,6 +299,15 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  }
       }
   }
+
+  /**
+   * <p>Recursively prints a portion of an HTML
+   * representation of this category
+   * to &lt;out&gt;  Must be called from
+   * {@link arlut.csd.ganymede.DBStore#printCategoryTreeHTML(java.io.PrintWriter)
+   * DBStore.printCategoryTreeHTML()}, as it assumes the HTML context
+   * generated by that method.</p>
+   */
 
   public synchronized void printHTML(PrintWriter out)
   {
@@ -338,6 +336,12 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     out.println("</UL>");
   }
 
+  /**
+   * <p>Recursively prints a portion of a text
+   * representation of this category
+   * to &lt;out&gt;, with leading indent.</p>
+   */
+
   public synchronized void print(PrintWriter out, String indent)
   {
     out.println(indent + getName());
@@ -354,6 +358,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  }
       }
   }
+
+  /**
+   * <p>Emits this category and its contents to &lt;out&gt;, in
+   * ganymede.db form.</p>
+   */
 
   synchronized void emit(DataOutput out) throws IOException
   {
@@ -383,6 +392,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  }
       }
   }
+
+  /**
+   * <p>Reads this category and its contents from &lt;in&gt;, in
+   * ganymede.db form.</p>
+   */
 
   synchronized void receive(DataInput in, DBBaseCategory parent) throws IOException
   {
@@ -428,12 +442,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
-   * Returns the full path to this category, with levels
-   * in the hierarchy separated by '/'s.
+   * <p>Returns the full path to this category, with levels
+   * in the hierarchy separated by '/'s.</p>
    *
    * @see arlut.csd.ganymede.Category
-   *
    */
 
   public String getPath()
@@ -449,11 +461,9 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
    * Returns the name of this category.
    *
    * @see arlut.csd.ganymede.Category
-   *
    */
 
   public String getName()
@@ -462,11 +472,9 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
    * Gets the order of this node in the containing category
    *
    * @see arlut.csd.ganymede.CategoryNode
-   *
    */
 
   public int getDisplayOrder()
@@ -475,12 +483,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
    * Sets the name of this node.  The name must not include a '/'
    * character, but all other characters are acceptable.
    *
    * @see arlut.csd.ganymede.CategoryNode
-   *
    */
 
   public boolean setName(String newName)
@@ -643,13 +649,12 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
-   * This method is used to place a Category Node under us.  The node
+   * <p>This method is used to place a Category Node under us.  The node
    * will be placed according to the node's displayOrder value, if resort
-   * and/or adjustNodes are true.
+   * and/or adjustNodes are true.</p>
    *
-   * addNode() places the new node in the list according to the node's
-   * displayOrder value.
+   * <p>addNode() places the new node in the list according to the node's
+   * displayOrder value.</p>
    *
    * @param node Node to place under this category
    * @param sort If true, the nodes under this category will be resorted after insertion
@@ -658,7 +663,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
    * displayOrder's are to be later inserted.
    *
    * @see arlut.csd.ganymede.Category
-   *
    */
 
   public synchronized void addNode(CategoryNode node, boolean sort, boolean adjustNodes)
@@ -931,15 +935,15 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       }
   }
 
-  /**
-   *
-   * This method can be used to move a Category from another Category to this Category,
-   * or to move a Category around within this Category.
+  /** 
+   * <p>This method can be used to move a Category from another
+   * Category to this Category, or to move a Category around within
+   * this Category.</p>
    *
    * @param catPath the fully specified path of the node to be moved
    * @param displayOrder where to place this node within this category.
    *
-   * @see arlut.csd.ganymede.Category
+   * @see arlut.csd.ganymede.Category 
    */
 
   public synchronized void moveCategoryNode(String catPath, int displayOrder)
@@ -1011,17 +1015,15 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
+   * <p>This method is used to remove a Category Node from under us.</p>
    *
-   * This method is used to remove a Category Node from under us.
-   *
-   * Note that removeNode assumes that it can recalculate the
+   * <p>Note that removeNode assumes that it can recalculate the
    * displayOrder values for other nodes in this category.  This
    * method should not be called if other nodes with prefixed
    * displayOrder values are still to be added to this category, as
-   * from the DBStore file.
+   * from the {@link arlut.csd.ganymede.DBStore DBStore} file.</p>
    *
    * @see arlut.csd.ganymede.Category
-   * 
    */
 
   public synchronized void removeNode(CategoryNode node) throws RemoteException
@@ -1102,17 +1104,15 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
+   * <p>This method is used to remove a Category Node from under us.</p>
    *
-   * This method is used to remove a Category Node from under us.
-   *
-   * Note that removeNode assumes that it can recalculate the
+   * <p>Note that removeNode assumes that it can recalculate the
    * displayOrder values for other nodes in this category.  This
    * method should not be called if other nodes with prefixed
    * displayOrder values are still to be added to this category, as
-   * from the DBStore file.
+   * from the {@link arlut.csd.ganymede.DBStore DBStore} file.</p>
    *
    * @see arlut.csd.ganymede.Category
-   * 
    */
 
   public synchronized void removeNode(String name) throws RemoteException
@@ -1232,11 +1232,9 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
-   * Returns a subcategory of name <name>.
+   * <p>Returns a subcategory of name &lt;name&gt;.</p>
    *
    * @see arlut.csd.ganymede.Category
-   *
    */
 
   public CategoryNode getNode(String name)
@@ -1266,11 +1264,9 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
    * Returns child nodes
    *
    * @see arlut.csd.ganymede.Category
-   *
    */
 
   public synchronized Vector getNodes()
@@ -1279,13 +1275,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
-   * This creates a new subcategory under this category,
+   * <p>This creates a new subcategory under this category,
    * with displayOrder after the last item currently in the
    * category.  This method should only be called when
    * there are no nodes left to be added to the category
-   * with prefixed displayOrder values.
-   *
+   * with prefixed displayOrder values.</p>
    */
 
   public Category newSubCategory(String name)
@@ -1309,15 +1303,13 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
 
   /**
-   *
-   * This creates a new subcategory under this category,
+   * <p>This creates a new subcategory under this category,
    * with displayOrder after the last item currently in the
    * category.  This method should only be called when
    * there are no nodes left to be added to the category
-   * with prefixed displayOrder values.
+   * with prefixed displayOrder values.</p>
    *
    * @see arlut.csd.ganymede.Category
-   * 
    */
 
   public Category newSubCategory()
@@ -1353,12 +1345,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
-   * This method returns true if this
-   * is a subcategory of cat.
+   * <p>This method returns true if this
+   * is a subcategory of &lt;cat&gt;.</p>
    *
    * @see arlut.csd.ganymede.Category
-   *
    */
 
   public boolean isUnder(Category cat)
@@ -1384,10 +1374,9 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
-   * This method returns true if this category directly
-   * contains a CategoryNode with name &lt;name&gt;
-   *
+   * <p>This method returns true if this category directly
+   * contains a {@link arlut.csd.ganymede.CategoryNode CategoryNode}
+   * with name &lt;name&gt;</p>
    */
 
   public synchronized boolean contains(String name)
@@ -1417,10 +1406,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   *
    * This method returns a reference to the top of this category's
    * tree.
-   *
    */
 
   public DBBaseCategory getRoot()
@@ -1436,12 +1423,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
+   * <p>This method is used to convert an RMI remote reference
+   * to a Base object to a reference to the local copy.</p>
    *
-   * This method is used to convert an RMI remote reference
-   * to a Base object to a reference to the local copy.
-   *
-   * Needed for RMI under JDK 1.1.
-   *
+   * <p>Needed for RMI under JDK 1.1.</p>
    */
 
   public DBObjectBase getBaseFromBase(Base base)
@@ -1457,12 +1442,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
+   * <p>This method is used to convert an RMI remote reference
+   * to a Base object to a reference to the local copy.</p>
    *
-   * This method is used to convert an RMI remote reference
-   * to a Base object to a reference to the local copy.
-   *
-   * Needed for RMI under JDK 1.1.
-   *
+   * <p>Needed for RMI under JDK 1.1.</p>
    */
 
   public DBObjectBase getBaseFromKey(short id)

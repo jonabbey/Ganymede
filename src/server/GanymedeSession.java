@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.130 $
-   Last Mod Date: $Date: 1999/04/14 19:07:11 $
+   Version: $Revision: 1.131 $
+   Last Mod Date: $Date: 1999/04/16 22:52:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.JDialog.*;
  *
  * @see arlut.csd.ganymede.DBSession
  * 
- * @version $Revision: 1.130 $ %D%
+ * @version $Revision: 1.131 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2530,14 +2530,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	    else
 	      {
-		setLastError("Couldn't find field identifier in query optimizer");
+		setLastError("Couldn't find field label in query optimizer for base" + base);
 		return null;
 	      }
 	  }
 
 	if (fieldDef == null)
 	  {
-	    Ganymede.debug("ERROR: wound up with a null fieldDef in query optimizer");
+	    Ganymede.debug("ERROR: wound up with a null label fieldDef in query optimizer for base " + base);
+	    Ganymede.debug("       query node: " + node);
 	    return null;
 	  }
 

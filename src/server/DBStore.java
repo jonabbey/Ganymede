@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 1999/04/01 22:17:49 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 1999/04/16 22:52:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,8 +67,8 @@ import arlut.csd.Util.zipIt;
  * of the arlut.csd.ganymede package needs to instantiate an object of type DBStore.
  * DBStore is responsible for actually handling the Ganymede database, and manages
  * database loads and dumps, locking (in conjunction with 
- * {@link arlut.csd.ganymede.DBSession DBSession}), the {@link arlut.csd.ganymede.DBJournal journal},
- * and schema dumping.</p>
+ * {@link arlut.csd.ganymede.DBSession DBSession}), 
+ * the {@link arlut.csd.ganymede.DBJournal journal}, and schema dumping.</p>
  *
  * <p>The DBStore class holds all {@link arlut.csd.ganymede.DBObject DBObject}'s
  * in memory after the database loading is complete at start-up.  Changes made
@@ -80,17 +80,19 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.DBStore#dump(java.lang.String,boolean,boolean) dump} to
  * consolidate the journal and update the on-disk database file.  The server will
  * also do a dump when the server's admin console
- * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin} interface initiates a server shutdown.</p>
+ * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin} interface initiates a
+ * server shutdown.</p>
  *
- * <p>A program could in theory have any number of DBStore objects active, but there is probably
- * no good reason for doing so since a single DBStore can store and cross reference
- * up to 32k different kinds of objects.</p>
+ * <p>A program could in theory have any number of DBStore objects active, but
+ * there is probably no good reason for doing so since a single DBStore can
+ * store and cross reference up to 32k different kinds of objects.</p>
  *
- * <p>IMPORTANT NOTE: All synchronized methods in this class must do a this.notifyAll()
- * on exiting a synchronized block because the DBLock classes use DBStore as their
- * synchronization object.  If any do not, then the server can deadlock.</p>
+ * <p>IMPORTANT NOTE: All synchronized methods in this class must do a 
+ * this.notifyAll() on exiting a synchronized block because the DBLock classes 
+ * use DBStore as their synchronization object.  If any do not, then the server
+ * can deadlock.</p>
  *
- * @version $Revision: 1.77 $ %D%
+ * @version $Revision: 1.78 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -102,7 +104,7 @@ public class DBStore {
   static final byte major_version = 1;
   static final byte minor_version = 11;
 
-  static final boolean debug = true;
+  static boolean debug = false;
 
   /* - */
 
@@ -111,17 +113,60 @@ public class DBStore {
     in a critical section synchronized on the DBStore object.
    */
   
-  boolean schemaEditInProgress;	// lock for schema revision
-  boolean sweepInProgress;	// lock for invid sweep
-  short maxBaseId = 256;	// to keep track of what ID to assign to new bases
-  Hashtable objectBases;	// hash mapping object type to DBObjectBase's
-  Hashtable lockHash;		// identifier keys for current locks
-  Vector nameSpaces;		// unique valued hashes
-  boolean loading = false;	// if true, DBObjectBase set methods will be enabled
+  /**
+   * lock for schema revision
+   */
+
+  boolean schemaEditInProgress;
+
+  /** 
+   * lock for invid sweep
+   */
+
+  boolean sweepInProgress;	
+  
+  /**
+   * to keep track of what ID to assign to new bases
+   */
+
+  short maxBaseId = 256;
+  
+  /**
+   * hash mapping object type to DBObjectBase's
+   */
+	
+  Hashtable objectBases;
+
+  /**
+   * identifier keys for current locks
+   */
+
+  Hashtable lockHash;
+
+  /**
+   * unique valued hashes
+   */
+
+  Vector nameSpaces;
+
+  /**
+   * if true, DBObjectBase set methods will be enabled
+   */
+
+  boolean loading = false;
+
+  /**
+   * Root of the category tree defined in this database
+   */
 
   DBBaseCategory rootCategory;
 
   byte file_major, file_minor;
+
+  /**
+   * The Journal for this database, initialized when the database is
+   * loaded.
+   */
 
   DBJournal journal = null;
 
@@ -133,16 +178,18 @@ public class DBStore {
   /* -- */
 
   /**
-   * This is the constructor for DBStore.<br><br>
+   * <p>This is the constructor for DBStore.</p>
    *
-   * Currently, once you construct a DBStore object, all you can do to
+   * <p>Currently, once you construct a DBStore object, all you can do to
    * initialize it is call load().  This API needs to be extended to
    * provide for programmatic bootstrapping, or another tool needs
-   * to be produced for the purpose.
+   * to be produced for the purpose.</p>
    */
 
   public DBStore()
   {
+    debug = Ganymede.debug;
+
     objectBases = new Hashtable(20); // default 
     lockHash = new Hashtable(20); // default
     nameSpaces = new Vector();
@@ -161,22 +208,20 @@ public class DBStore {
   }
 
   /**
+   * <p>Load the database from disk.</p>
    *
-   * Load the database from disk.<br><br>
+   * <p>This method loads both the database type definition and database
+   * contents from a single disk file.</p>
    *
-   * This method loads both the database type definition and database
-   * contents from a single disk file.<br><br>
-   *
-   * Note that this method does _not_ do a this.notifyAll() upon
+   * <p>Note that this method does _not_ do a this.notifyAll() upon
    * returning, this is acceptable because we are assuming we will
-   * never call load() on a DBStore with locks held.
+   * never call load() on a DBStore with locks held.</p>
    *
    * @param filename Name of the database file
    * @see arlut.csd.ganymede.DBJournal
-   * 
    */
 
-  public synchronized void load(String filename)
+  public synchronized void load(String filename, boolean loadJournal)
   {
     FileInputStream inStream = null;
     BufferedInputStream bufStream = null;
@@ -325,46 +370,50 @@ public class DBStore {
 
     lockHash = new Hashtable(baseCount); // reset lockHash
 
-    try 
+    if (loadJournal)
       {
-	journal = new DBJournal(this, Ganymede.journalProperty);
-      }
-    catch (IOException ex)
-      {
-	// what do we really want to do here?
-
-	ex.printStackTrace();
-
-	throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
-      }
-
-    if (!journal.clean())
-      {
-	try
+	try 
 	  {
-	    if (!journal.load())
-	      {
-		System.err.println("\nError, couldn't load entire journal.. final transaction in journal not processed.\n");
-	      }
-	    else
-	      {
-		// go ahead and consolidate the journal into the DBStore
-		// before we really get under way.
-
-		// Notice that we are going to archive a copy of the
-		// existing db file each time we start up the server
-
-		if (!journal.clean())
-		  {
-		    dump(filename, true, true);
-		  }
-	      }
+	    journal = new DBJournal(this, Ganymede.journalProperty);
 	  }
 	catch (IOException ex)
 	  {
 	    // what do we really want to do here?
 
-	    throw new RuntimeException("couldn't load journal");
+	    ex.printStackTrace();
+
+	    throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
+	  }
+
+	if (!journal.clean())
+	  {
+	    try
+	      {
+		if (!journal.load())
+		  {
+		    System.err.println("\nError, couldn't load entire journal.. " +
+				       "final transaction in journal not processed.\n");
+		  }
+		else
+		  {
+		    // go ahead and consolidate the journal into the DBStore
+		    // before we really get under way.
+
+		    // Notice that we are going to archive a copy of the
+		    // existing db file each time we start up the server
+
+		    if (!journal.clean())
+		      {
+			dump(filename, true, true);
+		      }
+		  }
+	      }
+	    catch (IOException ex)
+	      {
+		// what do we really want to do here?
+
+		throw new RuntimeException("couldn't load journal");
+	      }
 	  }
       }
 
@@ -372,17 +421,16 @@ public class DBStore {
   }
 
   /**
+   * <p>Dumps the database to disk</p>
    *
-   * Dump the database to disk<br><br>
-   *
-   * This method dumps the entire database to disk.  The thread that calls the
+   * <p>This method dumps the entire database to disk.  The thread that calls the
    * dump method will be suspended until there are no threads performing update
    * writes to the in-memory database.  In practice this will likely never be
    * a long interval.  Note that this method *will* dump the database, even
    * if no changes have been made.  You should check the DBStore journal's 
-   * clean() method to determine whether or not a dump is really needed.<br><br>
+   * clean() method to determine whether or not a dump is really needed.</p>
    *
-   * The dump is guaranteed to be transaction consistent.
+   * <p>The dump is guaranteed to be transaction consistent.</p>
    *
    * @param filename Name of the database file to emit
    * @param releaseLock boolean.  If releaseLock==false, dump() will not release
@@ -395,13 +443,18 @@ public class DBStore {
    *
    * @see arlut.csd.ganymede.DBEditSet
    * @see arlut.csd.ganymede.DBJournal
-   *
    */
 
-  public synchronized void dump(String filename, boolean releaseLock, boolean archiveIt) throws IOException
+  public synchronized void dump(String filename, boolean releaseLock,
+				boolean archiveIt) throws IOException
   {
     try
       {
+	if (schemaEditInProgress)
+	  {
+	    Ganymede.debug("DBStore.dumpSchema(): schema being edited, dump aborted");
+	  }
+
 	File dbFile = null;
 	FileOutputStream outStream = null;
 	BufferedOutputStream bufStream = null;
@@ -615,13 +668,13 @@ public class DBStore {
   }
 
   /**
-   * Dump the schema to disk<br><br>
+   * <p>Dump the schema to disk</p>
    *
-   * This method dumps the entire database to disk, minus any actual objects.<br><br>
+   * <p>This method dumps the entire database to disk, minus any actual objects.</p>
    *
-   * The thread that calls the dump method will be suspended until
+   * <p>The thread that calls the dump method will be suspended until
    * there are no threads performing update writes to the in-memory
-   * database.  In practice this will likely never be a long interval.
+   * database.  In practice this will likely never be a long interval.</p>
    *
    * @param filename Name of the database file to emit
    * @param releaseLock boolean.  If releaseLock==false, dump() will not release
@@ -638,6 +691,11 @@ public class DBStore {
   {
     try
       {
+	if (schemaEditInProgress)
+	  {
+	    Ganymede.debug("DBStore.dumpSchema(): schema being edited, dump aborted");
+	  }
+
 	File dbFile = null;
 	FileOutputStream outStream = null;
 	BufferedOutputStream bufStream = null;
@@ -792,10 +850,9 @@ public class DBStore {
   }
 
   /**
-   * Get a session handle on this database<br><br>
-   *
-   * This is intended primarily for internal use
-   * for database initialization, hence the 'protected'.
+   * <p>Creates a {@link arlut.csd.ganymede.DBSession DBSession}
+   * handle on this database.  Each {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+   * created in the Ganymede Server will also have a DBSession.</p>
    *
    * @param key Identifying key
    */
@@ -828,10 +885,12 @@ public class DBStore {
       }
   }
 
-  /**
-   * Do a printable dump of the category hierarchy
+  /** 
+   * <p>Dumps an HTML representation of this database's category
+   * hierarchy, starting at the root 
+   * {@link arlut.csd.ganymede.DBBaseCategory DBBaseCategory}.</p>
    *
-   * @param out PrintStream to print to
+   * @param out PrintStream to print to 
    */
 
   public synchronized void printCategoryTreeHTML(PrintWriter out)
@@ -854,8 +913,28 @@ public class DBStore {
       }
   }
 
+  /** 
+   * <p>Dumps a text representation of this database's category
+   * hierarchy, starting at the root 
+   * {@link arlut.csd.ganymede.DBBaseCategory DBBaseCategory}.</p>
+   *
+   * @param out PrintStream to print to 
+   */
+
+  public synchronized void printCategoryTree(PrintWriter out)
+  {
+    try
+      {
+	rootCategory.print(out, "");
+      }
+    finally
+      {
+	this.notifyAll();
+      }
+  }
+
   /**
-   * Do a printable dump of the object databases
+   * <p>Do a printable dump of the object databases</p>
    *
    * @param out PrintStream to print to
    */
@@ -1141,16 +1220,16 @@ public class DBStore {
   }
 
   /**
-   *
-   * Initialization method for a newly created DBStore.. this
+   * <p>Initialization method for a newly created DBStore.. this
    * method creates a new Schema from scratch, defining the
    * mandatory Ganymede object types, registering their customization
-   * classes, defining fields, and all the rest.<br><br>
+   * classes, defining fields, and all the rest.</p>
    *
-   * Note that we don't go through a DBSchemaEdit here, we just
-   * initialize the DBObjectBase/DBObjectBaseField structures
-   * manually.
-   * 
+   * <p>Note that we don't go through a 
+   * {@link arlut.csd.ganymede.DBSchemaEdit DBSchemaEdit}
+   * here, we just initialize the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}/
+   * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} structures
+   * manually.</p>
    */
 
   void initializeSchema()
@@ -1798,6 +1877,11 @@ public class DBStore {
     loading = false;
   }
 
+  /**
+   * <p>Creates required objects when a new database is created
+   * from scratch.</p>
+   */
+
   void initializeObjects()
   {
     DBEditObject eO;
@@ -1974,7 +2058,7 @@ public class DBStore {
    */
 
   /**
-   * This method is used to increment the count of checked out objects.
+   * <p>Increments the count of checked-out objects for the admin consoles.</p>
    */
 
   void checkOut()
@@ -1984,7 +2068,7 @@ public class DBStore {
   }
 
   /**
-   * This method is used to decrement the count of checked out objects.
+   * <p>Decrements the count of checked-out objects for the admin consoles.</p>
    */
 
   void checkIn()
@@ -1994,9 +2078,7 @@ public class DBStore {
   }
 
   /**
-   *
-   * This method is used to increment the count of held locks
-   *
+   * <p>Increments the count of held locks for the admin consoles.</p>
    */
 
   void addLock()
@@ -2006,9 +2088,7 @@ public class DBStore {
   }
 
   /**
-   *
-   * This method is used to decrement the count of held locks
-   *
+   * <p>Decrements the count of held locks for the admin consoles.</p>
    */
 
   void removeLock()
