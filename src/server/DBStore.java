@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -539,8 +539,8 @@ public class DBStore {
 	  {
 	    base = (DBObjectBase) basesEnum.nextElement();
 
-	    if (base.type_code == SchemaConstants.AdminBase ||
-		 base.type_code == SchemaConstants.PermBase)
+	    if (base.type_code == SchemaConstants.OwnerBase ||
+		 base.type_code == SchemaConstants.PersonaBase)
 	      {
 		base.emit(out, true); // gotta retain admin login ability
 	      }
@@ -857,6 +857,9 @@ public class DBStore {
       {
 	DBBaseCategory adminCategory = new DBBaseCategory(this, "Admin-Level Objects", rootCategory);
 	rootCategory.addNode(adminCategory, false, false);
+
+	ns = new DBNameSpace("ownerbase", true);
+	nameSpaces.addElement(ns);
 	
 	ns = new DBNameSpace("username", true);
 	nameSpaces.addElement(ns);
@@ -864,137 +867,192 @@ public class DBStore {
 	ns = new DBNameSpace("access", true);
 	nameSpaces.addElement(ns);
 
-	// create admin base
+	ns = new DBNameSpace("persona", true);
+	nameSpaces.addElement(ns);
+
+	// create owner base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Admin";
-	b.type_code = (short) SchemaConstants.AdminBase; // 0
+	b.object_name = "Owner Group";
+	b.type_code = (short) SchemaConstants.OwnerBase; // 0
 	b.displayOrder = b.type_code;
 
 	adminCategory.addNode(b, false, false);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.AdminGroupField;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Group";
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "If this boolean is true, this administrator object represents a group of administrators";
-	b.fieldHash.put(new Short(bf.field_code), bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.AdminNameField;
+	bf.field_order = bf.field_code = SchemaConstants.OwnerNameField;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
 	bf.loading = true;
-	bf.setNameSpace("username");
+	bf.setNameSpace("ownerbase");
 	bf.loading = false;
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "Name of this admin group.. if this admin represents a user's admin privs, name is null";
+	bf.comment = "The name of this ownership group";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.AdminPasswordField;
-	bf.field_type = FieldType.PASSWORD;
-	bf.field_name = "Password";
-	bf.maxLength = 32;
-	bf.removable = false;
-	bf.editable = false;
-	bf.crypted = true;
-	bf.comment = "Admin Password";
-	b.fieldHash.put(new Short(bf.field_code), bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.AdminMembersField;
+	bf.field_order = bf.field_code = SchemaConstants.OwnerMembersField;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Members";
 	bf.array = true;
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "Members of this admin group";
-	bf.allowedTarget = SchemaConstants.AdminBase;
-	bf.targetField = SchemaConstants.AdminGroupsField;
+	bf.allowedTarget = SchemaConstants.PersonaBase;
+	bf.targetField = SchemaConstants.PersonaGroupsField;
+	bf.comment = "List of admin personae that are members of this owner set";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.AdminGroupsField;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Groups";
-	bf.array = true;
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "Admin group this administrative account is a member of";
-	bf.allowedTarget = SchemaConstants.AdminBase;
-	bf.targetField = SchemaConstants.AdminMembersField;
-	b.fieldHash.put(new Short(bf.field_code), bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.AdminAssocUser;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "User";
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "If this administrative account is a user admin, the user account";
-	bf.allowedTarget = SchemaConstants.UserBase;
-	bf.targetField = SchemaConstants.UserAdminRole;
-	b.fieldHash.put(new Short(bf.field_code), bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.AdminPrivs;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Privileges";
-	bf.allowedTarget = SchemaConstants.PermBase;
-	bf.array = true;
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "Permissions for this admin entity";
-	b.fieldHash.put(new Short(bf.field_code), bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.AdminObjectsOwned;
+	bf.field_order = bf.field_code = SchemaConstants.OwnerObjectsOwned;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Objects owned";
 	bf.allowedTarget = -2;	// any
 	bf.targetField = SchemaConstants.OwnerListField;	// owner list field
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "Permissions for this admin entity";
+	bf.array = true;
+	bf.comment = "What objects are owned by this owner set";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
-	b.setLabelField(SchemaConstants.AdminNameField);
+	b.setLabelField(SchemaConstants.OwnerNameField);
 
 	setBase(b);
 
+	// create persona base
+
 	b = new DBObjectBase(this, false);
-	b.object_name = "Access Set";
-	b.type_code = (short) SchemaConstants.PermBase; // 1
+	b.object_name = "Admin Persona";
+	b.type_code = (short) SchemaConstants.PersonaBase; // 1
 	b.displayOrder = b.type_code;
 
 	adminCategory.addNode(b, false, false); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PermName;
+	bf.field_code = SchemaConstants.PersonaNameField;
 	bf.field_type = FieldType.STRING;
-	bf.field_name = "Set Name";
-	bf.field_order = 2;
+	bf.field_name = "Name";
+	bf.field_order = 0;
+	bf.loading = true;
+	bf.setNameSpace("persona");
+	bf.loading = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "The unique name for this admin persona";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.PersonaPasswordField;
+	bf.field_type = FieldType.PASSWORD;
+	bf.field_name = "Password";
+	bf.maxLength = 32;
+	bf.field_order = 1;
+	bf.removable = false;
+	bf.editable = false;
+	bf.crypted = true;
+	bf.comment = "Persona password";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.PersonaGroupsField;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Owner Sets";
+	bf.allowedTarget = SchemaConstants.OwnerBase;	// any
+	bf.targetField = SchemaConstants.OwnerMembersField;	// owner list field
+	bf.removable = false;
+	bf.editable = false;
+	bf.array = true;
+	bf.comment = "What owner sets are this persona members of?";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.PersonaAssocUser;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "User";
+	bf.allowedTarget = SchemaConstants.UserBase;	// any
+	bf.targetField = SchemaConstants.UserAdminPersonae;	// owner list field
+	bf.removable = false;
+	bf.editable = false;
+	bf.array = false;
+	bf.comment = "What user is this admin persona associated with?";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.PersonaPrivs;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Privilege Sets";
+	bf.allowedTarget = SchemaConstants.PermBase;
+	bf.targetField = SchemaConstants.PermPersonae;
+	bf.array = true;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "What permission matrices are this admin persona associated with?";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.PersonaAdminConsole;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Admin Console";
+	bf.array = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, this persona can be used to access the admin console";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.PersonaAdminPower;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Full Console";
+	bf.array = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, this persona can kill users and edit the schema";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	b.setLabelField(SchemaConstants.PersonaNameField);
+
+	setBase(b);
+
+	// create permission matrix base
+
+	b = new DBObjectBase(this, false);
+	b.object_name = "Permission Matrix";
+	b.type_code = (short) SchemaConstants.PermBase; // 2
+	b.displayOrder = b.type_code;
+
+	adminCategory.addNode(b, false, false); // add it to the end is ok
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.PermName;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Name";
 	bf.loading = true;
 	bf.setNameSpace("access");
 	bf.loading = false;
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "What do we call this access category?";
+	bf.comment = "The name of this permission matrix";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PermMatrix;
+	bf.field_order = bf.field_code = SchemaConstants.PermMatrix;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
 	bf.field_name = "Access Bits";
-	bf.field_order = 3;
-	bf.loading = false;
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "Access bits, by object type";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.PermPersonae;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Persona entities";
+	bf.allowedTarget = SchemaConstants.PersonaBase;
+	bf.targetField = SchemaConstants.PersonaPrivs;
+	bf.array = true;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "What personae are using this permission matrix?";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	b.setLabelField(SchemaConstants.PermName);
@@ -1043,15 +1101,16 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.UserAdminRole;
+	bf.field_code = SchemaConstants.UserAdminPersonae;
 	bf.field_type = FieldType.INVID;
-	bf.allowedTarget = SchemaConstants.AdminBase;
-	bf.targetField = SchemaConstants.AdminAssocUser;
-	bf.field_name = "Admin Role";
-	bf.field_order = 4;
+	bf.allowedTarget = SchemaConstants.PersonaBase;
+	bf.targetField = SchemaConstants.PersonaAssocUser;
+	bf.field_name = "Admin Personae";
+	bf.field_order = bf.field_code;
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "If this user can act as an administrator, this field points to the admin object for this user";
+	bf.array = true;
+	bf.comment = "A list of admin personae this user can assume";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	b.setLabelField(SchemaConstants.UserUserName);
@@ -1068,30 +1127,61 @@ public class DBStore {
 
   void initializeObjects()
   {
+    DBEditObject eO;
+    Invid inv;
+    StringDBField s;
+    PasswordDBField p;
+    InvidDBField i;
+    BooleanDBField b;
+    DBSession session;
+    
+    /* -- */
+
     // manually insert the root (supergash) admin object
 
-    DBSession session = login("supergash");
+    session = login("supergash");
 
     session.id = "internal";
 
     session.openTransaction("DBStore bootstrap initialization");
 
-    DBEditObject eO =(DBEditObject) session.createDBObject(SchemaConstants.AdminBase); // create a new admin object
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.OwnerBase); // create a new owner group 
+    inv = eO.getInvid();
 
-    StringDBField s = (StringDBField) eO.getField("Name");
+    s = (StringDBField) eO.getField("Name");
     s.setValue("supergash");
     
-    PasswordDBField p = (PasswordDBField) eO.getField("Password");
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase); // create a supergash admin persona object 
+
+    s = (StringDBField) eO.getField("Name");
+    s.setValue("supergash");
+    
+    p = (PasswordDBField) eO.getField("Password");
     p.setPlainTextPass(GanymedeConfig.newSGpass); // default supergash password
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.AdminBase); // create a new admin object
+    i = (InvidDBField) eO.getField(SchemaConstants.PersonaGroupsField);
+    i.addElement(inv);
+
+    b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminConsole);
+    b.setValue(new Boolean(true));
+
+    b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
+    b.setValue(new Boolean(true));
+
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase); // create a monitor admin persona object 
 
     s = (StringDBField) eO.getField("Name");
     s.setValue("monitor");
     
     p = (PasswordDBField) eO.getField("Password");
     p.setPlainTextPass(GanymedeConfig.newMonpass); // default monitor password
-    
+
+    b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminConsole);
+    b.setValue(new Boolean(true));
+
+    b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
+    b.setValue(new Boolean(false));
+
     session.commitTransaction();
   }
 
