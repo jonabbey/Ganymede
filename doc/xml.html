@@ -1271,6 +1271,75 @@ reference field, the "Home Group" field is a scalar Invid/object
 reference field, and the "Email Aliases" field is a vector String
 field.</p>
 
+<p>In the above example, the <b>Groups</b> and <b>Email_Aliases</b>
+elements both contain a couple of items.  These items will be
+added to those fields, but if those fields already contain additional
+items, those items will be left alone.  There are two approaches to
+editing vector fields if you want to add or remove items.</p>
+
+<p>One method looks like this:</p>
+
+<pre>
+  &lt;object type="User" id="broccol" action="edit"&gt;
+    &lt;Room&gt;S321&lt;/Room&gt;
+    &lt;Groups&gt;
+        &lt;set&gt;
+            &lt;invid type="Group" id="omssys"/&gt;
+            &lt;invid type="Group" id="omsnet"/&gt;
+        &lt;/set&gt;
+    &lt;/Groups&gt;
+  &lt;/object&gt;
+</pre>
+
+<p>In this example, the <b>&lt;set&gt;</b> container element will
+force the xmlclient to set the <b>Groups</b> field to contain only
+the two items listed, adding or removing items as necessary.</p>
+
+<p>You can also manually add or remove individual items:</p>
+
+<pre>
+  &lt;object type="User" id="broccol" action="edit"&gt;
+    &lt;Room&gt;S321&lt;/Room&gt;
+    &lt;Groups&gt;
+        &lt;add&gt;
+            &lt;invid type="Group" id="omsovr"/&gt;
+        &lt;/add&gt;
+        &lt;delete&gt;
+            &lt;invid type="Group" id="omsnet"/&gt;
+        &lt;/delete&gt;
+    &lt;/Groups&gt;
+  &lt;/object&gt;
+</pre>
+
+<p>This will cause the omsovr group to be added and the omsnet group
+to be removed.  You can have as many <b>&lt;add&gt;</b> and
+<b>&lt;delete&gt;</b> containers as you want within a vector field,
+but <b>&lt;add&gt;</b> and <b>&lt;delete&gt;</b> are not compatible
+with <b>&lt;set&gt;</b>.  If you use <b>&lt;set&gt;</b>, you may
+not use <b>&lt;add&gt;</b> or <b>&lt;delete&gt;</b> as well.</p>
+
+<p>If you don't specify <b>&lt;add&gt;</b>, <b>&lt;delete&gt;</b>,
+or <b>&lt;set&gt;</b>, the xmlclient will treat the items as belonging
+to an <b>&lt;add&gt;</b> container.  For this reason, the following
+is not allowed:</p>
+
+<pre>
+  &lt;object type="User" id="broccol" action="edit"&gt;
+    &lt;Room&gt;S321&lt;/Room&gt;
+    &lt;Groups&gt;
+        &lt;invid type="Group" id="omsovr"/&gt;
+        &lt;set&gt;
+            &lt;invid type="Group" id="omssys"/&gt;
+            &lt;invid type="Group" id="omsnet"/&gt;
+        &lt;/set&gt;
+    &lt;/Groups&gt;
+  &lt;/object&gt;
+</pre>
+
+<p>because the omsovr element is considered to be in an
+<b>&lt;add&gt;</b>, which may not co-exist with a <b>&lt;set&gt;</b>
+in a single field element.</p>
+
 <p>There are presently nine different types of data fields supported
 by the Ganymede server, and each of these types has its own rules as
 to what kinds of elements are allowed within the field element and how
