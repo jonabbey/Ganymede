@@ -15,15 +15,15 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.220 $
-   Last Mod Date: $Date: 2000/12/13 18:44:09 $
+   Version: $Revision: 1.221 $
+   Last Mod Date: $Date: 2001/01/03 01:49:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.220 $ $Date: 2000/12/13 18:44:09 $
+ * @version $Revision: 1.221 $ $Date: 2001/01/03 01:49:58 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -586,7 +586,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 	catch (InterruptedException ex)
 	  {
-	    ex.printStackTrace();
+	    Ganymede.debug(Ganymede.stackTrace(ex));
 	    throw new RuntimeException(ex.getMessage());
 	  }
       }
@@ -822,7 +822,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 	catch (RuntimeException ex)
 	  {
-	    ex.printStackTrace();
+	    Ganymede.debug(Ganymede.stackTrace(ex));
 	  }
       }
 
@@ -5069,6 +5069,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     checklogin();
 
     base = Ganymede.db.getObjectBase(baseid);
+
+    if (base == null)
+      {
+	try
+	  {
+	    throw new RuntimeException("Error, getObjects() called on baseid " + baseid +
+				       ", but that base does not exist.");
+	  }
+	catch (RuntimeException ex)
+	  {
+	    Ganymede.debug(Ganymede.stackTrace(ex));
+	    return null;
+	  }
+      }
 
     if (!session.isTransactionOpen())
       {
