@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2001/01/12 08:38:07 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2001/06/11 21:33:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2307,7 +2307,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    err.print("edited object ");
 		  }
 
-		err.print(newObject + ", reason: " + msg);
+		err.println(newObject + ", reason: " + msg);
 	      }
 	    else
 	      {
@@ -2322,7 +2322,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    err.print("edited object ");
 		  }
 
-		err.print(newObject + ", no reason given.");
+		err.println(newObject + ", no reason given.");
 	      }
 
 	    success = false;
