@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -631,7 +631,7 @@ class JournalEntry {
 	    // objects in their post-commit state, so we don't have
 	    // to worry about it here.
 
-	    db_field[] tempFields = obj.listFields();
+	    db_field[] tempFields = badObj.listFields();
 	    fields = new DBField[tempFields.length];
 
 	    for (int i = 0; i < fields.length; i++)
