@@ -6,8 +6,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/07/28 23:11:09 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/08/14 00:47:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -271,6 +271,16 @@ public class JDialogBuff implements java.io.Serializable {
   public void addPassword(String label, boolean isNew)
   {
     resources.addElement(new passwordThing(label, isNew));
+  }
+
+  /**
+   * <p>Adds a newline and the provided text to the end of the text
+   * encoded in this dialog.</p>
+   */
+
+  public void appendText(String text)
+  {
+    this.text = this.text + "\n" + text;
   }
 
   /**
