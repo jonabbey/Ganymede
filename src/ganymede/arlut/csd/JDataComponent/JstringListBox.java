@@ -999,11 +999,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	    try
 	      {
-		callback.setValuePerformed(new JValueObject(this,
-							    popUpIndex,
-							    JValueObject.PARAMETER,
-							    popSelectedItem,
-							    string));
+		callback.setValuePerformed(new JParameterValueObject(this,
+								     popUpIndex,
+								     popSelectedItem,
+								     string));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {

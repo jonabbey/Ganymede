@@ -775,17 +775,16 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	addCustom.doClick();
 	return true;
       }
-    else if (o.getOperationType() == JValueObject.PARAMETER)  // from the popup menu
+    else if (o instanceof JParameterValueObject)  // from the popup menu
       {
 	if (my_callback != null)
 	  {
 	    try
 	      {
-		my_callback.setValuePerformed(new JValueObject(this,
-							     o.getIndex(),
-							     JValueObject.PARAMETER,
-							     o.getValue(),
-							     o.getParameter()));
+		my_callback.setValuePerformed(new JParameterValueObject(this,
+									o.getIndex(),
+									o.getValue(),
+									o.getParameter()));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
