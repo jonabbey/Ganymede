@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/05/19 04:43:26 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/10/25 05:28:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -74,6 +74,48 @@ import java.util.Enumeration;
  */
 
 public abstract class XMLItem {
+
+  public XMLItem parent;
+  public XMLItem[] children;
+
+  /* -- */
+
+  /**
+   * <P>This method returns the parent of this XMLItem, if any.</P>
+   */
+
+  public XMLItem getParent()
+  {
+    return parent;
+  }
+
+  /**
+   * <P>This method returns an array of children under this item,
+   * or null if there are none.</P>
+   */
+
+  public XMLItem[] getChildren()
+  {
+    return children;
+  }
+
+  /**
+   * <P>This method sets this XMLItem's parent.</P> */
+
+  public void setParent(XMLItem parent)
+  {
+    this.parent = parent;
+  }
+
+  /**
+   * <P>This method sets an array of XMLItem references to be
+   * this XMLItem's children.</P>
+   */
+
+  public void setChildren(XMLItem[] children)
+  {
+    this.children = children;
+  }
 
   /**
    * <P>This method returns true if this item is an
