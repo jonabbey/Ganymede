@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2000/12/03 05:16:45 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2001/02/09 03:32:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   // ---
 
   private Date now = null;
-  private boolean backedup = false;
   private SharedStringBuffer result = new SharedStringBuffer();
 
   private Invid normalCategory = null;
@@ -119,8 +118,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     /* -- */
 
     Ganymede.debug("GASHBuilderTask builderPhase1 running");
-
-    backedup = false;
 
     if (path == null)
       {
@@ -163,7 +160,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    out = openOutFile(path + "user_info");
+	    out = openOutFile(path + "user_info", "gasharl");
 	  }
 	catch (IOException ex)
 	  {
@@ -207,7 +204,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    out = openOutFile(path + "group_info");
+	    out = openOutFile(path + "group_info", "gasharl");
 	  }
 	catch (IOException ex)
 	  {
@@ -218,7 +215,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    out2 = openOutFile(path + "group.owner");
+	    out2 = openOutFile(path + "group.owner", "gasharl");
 	  }
 	catch (IOException ex)
 	  {
@@ -423,62 +420,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method opens the specified file for writing out a text stream.
-   *
-   * If the files have not yet been backed up this run time, openOutFile()
-   * will cause the files in Ganymede's output directory to be zipped up
-   * before overwriting any files.
-   *
-   */
-
-  private synchronized PrintWriter openOutFile(String filename) throws IOException
-  {
-    File
-      file,
-      oldFile;
-
-    /* -- */
-
-    if (!backedup)
-      {
-	String label;
-	Date labelDate;
-
-	if (oldLastRunTime != null)
-	  {
-	    labelDate = oldLastRunTime;
-	  }
-	else
-	  {
-	    if (now == null)
-	      {
-		now = new Date();
-	      }
-
-	    labelDate = now;
-	  }
-
-	DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", 
-						    java.util.Locale.US);
-	label=formatter.format(labelDate);
-
-	backupFiles(label);
-
-	backedup = true;
-      }
-
-    file = new File(filename);
-
-    if (file.exists())
-      {
-	file.delete();
-      }
-
-    return new PrintWriter(new BufferedWriter(new FileWriter(file)));
-  }
-
-  /**
-   *
    * This method writes out a line to the user_info GASH source file.
    *
    * The lines in this file look like the following.
@@ -654,7 +595,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	out = openOutFile(path + "maildirect");
+	out = openOutFile(path + "maildirect", "gasharl");
       }
     catch (IOException ex)
       {
@@ -926,7 +867,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	netgroupFile = openOutFile(path + "netgroup");
+	netgroupFile = openOutFile(path + "netgroup", "gasharl");
       }
     catch (IOException ex)
       {
@@ -1223,7 +1164,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	autoFile = openOutFile(path + "auto.vol");
+	autoFile = openOutFile(path + "auto.vol", "gasharl");
       }
     catch (IOException ex)
       {
@@ -1306,7 +1247,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    autoFile = openOutFile(path + mapname);
+	    autoFile = openOutFile(path + mapname, "gasharl");
 	  }
 	catch (IOException ex)
 	  {
@@ -1395,7 +1336,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	aliases_info = openOutFile(path + "aliases_info");
+	aliases_info = openOutFile(path + "aliases_info", "gasharl");
       }
     catch (IOException ex)
       {
@@ -1774,7 +1715,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	rshNT = openOutFile(path + "rshNT.txt");
+	rshNT = openOutFile(path + "rshNT.txt", "gasharl");
       }
     catch (IOException ex)
       {
@@ -1967,7 +1908,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	webPassword = openOutFile(path + "httpd.pass");
+	webPassword = openOutFile(path + "httpd.pass", "gasharl");
       }
     catch (IOException ex)
       {
@@ -2017,7 +1958,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	webGroups = openOutFile(path + "httpd.groups");
+	webGroups = openOutFile(path + "httpd.groups", "gasharl");
       }
     catch (IOException ex)
       {
@@ -2221,7 +2162,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	hosts_info = openOutFile(path + "hosts_info");
+	hosts_info = openOutFile(path + "hosts_info", "gasharl");
       }
     catch (IOException ex)
       {

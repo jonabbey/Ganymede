@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2000/11/30 00:25:02 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2001/02/09 03:32:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -256,7 +256,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // the mapEntryCustom permOverride method to get a chance
 	    // to refuse edit privileges.
 	
-	    invf.clearPermCache();	// *sync*
+	    eObj.clearFieldPerm(mapEntrySchema.MAP);
 	  }
       }
 
