@@ -4,15 +4,15 @@
    
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/01/08 03:21:54 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2002/10/05 05:38:24 $
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney, John Knutson
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -41,7 +41,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.JDataComponent;
@@ -71,7 +73,7 @@ public class JfloatField extends JentryField {
 
   public static String allowedChars = new String("0123456789-.");
 
-  private Double oldvalue;
+  private Double storedValue;
 
   private boolean limited = false;
 
@@ -201,12 +203,14 @@ public class JfloatField extends JentryField {
 
   public Double getValue() throws NumberFormatException
   {
-    if (getText().equals(""))
+    String str = getText();
+
+    if (str == null || str.equals(""))
       {
 	return null;
       }
 
-    return new Double(getText());
+    return new Double(str);
   }
 
   /**
@@ -250,7 +254,7 @@ public class JfloatField extends JentryField {
 
     // remember the value that is being set.
     
-    oldvalue = num;
+    storedValue = num;
     
     // and set the text field
     
@@ -333,15 +337,20 @@ public class JfloatField extends JentryField {
    * overrides JentryField.sendCallback().
    *
    * This is called when the float field loses focus.
+   *
+   * sendCallback is called when focus is lost, or when we are otherwise
+   * triggered.
+   *
+   * @returns -1 on change rejected, 0 on no change required, 1 on change approved
    */
 
-  public void sendCallback()
+  public int sendCallback()
   {
     synchronized (this)
       {
 	if (processingCallback)
 	  {
-	    return;
+	    return -1;
 	  }
 	
 	processingCallback = true;
@@ -357,36 +366,23 @@ public class JfloatField extends JentryField {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    if (allowCallback)
-	      {
-		try
-		  {
-		    my_parent.setValuePerformed
-		      (new JValueObject
-		       (this, 0, JValueObject.ERROR,
-			"Not a valid float: " + getText()));
-		  }
-		catch (java.rmi.RemoteException rx)
-		  {
-		    System.out.println("Could not send an error callback.");
-		  }
-	      }
+	    reportError(getText() + " is not a properly formatted floating point number.");
 
 	    // revert the text field
 
-	    setValue(oldvalue);
-	    return;
+	    setValue(storedValue);
+	    return -1;
 	  }
 
-	if ((currentValue == null && oldvalue == null) ||
-	    (oldvalue != null && oldvalue.equals(currentValue)))
+	if ((currentValue == null && storedValue == null) ||
+	    (storedValue != null && storedValue.equals(currentValue)))
 	  {
 	    if (debug)
 	      {
 		System.out.println("The field was not changed.");
 	      }
 
-	    return;
+	    return 0;
 	  }
 
 	// check to see if it's in bounds, if we have bounds set.
@@ -399,77 +395,60 @@ public class JfloatField extends JentryField {
 	      {
 		// nope, revert.
 
-		if (allowCallback)
-		  {
-		    try
-		      {
-			my_parent.setValuePerformed
-			  (new JValueObject
-			   (this, 0, JValueObject.ERROR,
-			    "Number out of range."));
-		      }
-		    catch (java.rmi.RemoteException rx)
-		      {
-			System.out.println("Could not send an error callback.");
-		      }
-		  }
+		reportError(getText() + " must be between " + minSize + " and  " + maxSize + ".");
 
-		// revert
-
-		setValue(oldvalue);
-		return;
+		setValue(storedValue);
+		return -1;
 	      }
 	  }
 
 	// now, tell somebody, if we need to.
 
-	if (allowCallback)
+	try
 	  {
-	    // Do a callback
-
-	    if (debug)
-	      {
-		System.out.println("Sending callback");
-	      }
-
-	    boolean success = false;
-
-	    try
-	      {
-		success = my_parent.setValuePerformed
-		  (new JValueObject(this,currentValue));
-	      }
-	    catch (java.rmi.RemoteException re)
-	      {
-		// success will still be false, that's good enough for us.
-	      }
-
-	    if (!success)
-	      {
-		// revert
-
-		setValue(oldvalue);
-	      }
-	    else
+	    if (!allowCallback || my_parent.setValuePerformed(new JValueObject(this,currentValue)))
 	      {
 		// good to go.  We've already got the text set in the text
 		// field, the user did that for us.  Remember the value of
 		// it, so we can revert if we need to later.
-
-		oldvalue = currentValue;
+		
+		storedValue = currentValue;
+		return 1;
+	      }
+	    else
+	      {
+		setValue(storedValue);
+		return -1;
 	      }
 	  }
-	else
+	catch (java.rmi.RemoteException re)
 	  {
-	    // no one to say no.  Odd, guess nobody cares.. remember our
-	    // value anyway.
-
-	    oldvalue = currentValue;
+	    return -1;
 	  }
       }
     finally
       {
 	processingCallback = false;
+      }
+  }
+
+  /**
+   * <p>This private helper method relays a descriptive error message to
+   * our callback interface.</p>
+   */
+
+  private void reportError(String errorString)
+  {
+    if (allowCallback)
+      {
+	try
+	  {
+	    my_parent.setValuePerformed(new JValueObject(this, errorString, JValueObject.ERROR));
+	  }
+	catch (java.rmi.RemoteException rx)
+	  {
+	    System.out.println("Could not send an error callback.");
+	  }
       }
   }
 }
