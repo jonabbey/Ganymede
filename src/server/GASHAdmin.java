@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 2000/10/10 02:59:12 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 2000/10/10 21:34:55 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1509,6 +1509,9 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   private String adminPass = null;
   private StringDialog permDialog = null;
 
+  private boolean tasksLoaded = false;
+  private Vector tasksKnown = null;
+
   JFrame schemaFrame;
 
   Date serverStart;
@@ -1838,40 +1841,43 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
     /* -- */
 
-    frame.taskTable.clearCells();
-
-    // System.err.println("changeTasks: tasks size = " + tasks.size());
+    if (!tasksLoaded)
+      {
+	// System.err.println("changeTasks: tasks size = " + tasks.size());
     
-    // Sort entries according to their incep date,
-    // to prevent confusion if new tasks are put into
-    // the server-side hashes, and as they are shuffled
-    // from hash to hash
-
-    (new VecQuickSort(tasks, 
-		      new arlut.csd.Util.Compare() 
-		      {
-			public int compare(Object a, Object b) 
+	// Sort entries according to their incep date,
+	// to prevent confusion if new tasks are put into
+	// the server-side hashes, and as they are shuffled
+	// from hash to hash
+	
+	(new VecQuickSort(tasks, 
+			  new arlut.csd.Util.Compare() 
 			  {
-			    scheduleHandle aH, bH;
-			    
-			    aH = (scheduleHandle) a;
-			    bH = (scheduleHandle) b;
-			    
-			    if (aH.incepDate.before(bH.incepDate))
+			    public int compare(Object a, Object b) 
 			      {
-				return -1;
-			      }
-			    else if (aH.incepDate.after(bH.incepDate))
-			      {
-				return 1;
-			      }
-			    else
-			      {
-				return 0;
+				scheduleHandle aH, bH;
+				
+				aH = (scheduleHandle) a;
+				bH = (scheduleHandle) b;
+				
+				if (aH.incepDate.before(bH.incepDate))
+				  {
+				    return -1;
+				  }
+				else if (aH.incepDate.after(bH.incepDate))
+				  {
+				    return 1;
+				  }
+				else
+				  {
+				    return 0;
+				  }
 			      }
 			  }
-		      }
-		      )).sort();
+			  )).sort();
+      }
+
+    Vector taskNames = new Vector();
 
     // now reload the table with the current stats
 
@@ -1879,7 +1885,13 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       {
 	handle = (scheduleHandle) tasks.elementAt(i);
 
-	frame.taskTable.newRow(handle.name);
+	taskNames.addElement(handle.name);
+
+	if (!frame.taskTable.containsKey(handle.name))
+	  {
+	    frame.taskTable.newRow(handle.name);
+	  }
+
 	frame.taskTable.setCellText(handle.name, 0, handle.name, false); // task name
 
 	if (handle.isRunning)
@@ -1922,6 +1934,24 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	  }
 
 	frame.taskTable.setCellText(handle.name, 4, handle.intervalString, false);
+      }
+
+    // and take any rows out that are gone
+
+    if (tasksKnown == null)
+      {
+	tasksKnown = taskNames;
+      }
+    else
+      {
+	Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
+
+	for (int i = 0; i < removedTasks.size(); i++)
+	  {
+	    frame.taskTable.deleteRow(removedTasks.elementAt(i), false);
+	  }
+
+	tasksKnown = taskNames;
       }
 
     // And refresh our table
