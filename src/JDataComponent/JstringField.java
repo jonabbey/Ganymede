@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -74,8 +74,6 @@ public class JstringField extends JentryField implements KeyListener{
     size = maxstrlen;
     
     setEditable(is_editable);  // will this JstringField be editable or not?
-
-    setEnabled(true);
 
     if (allowed != null)
       {
