@@ -45,8 +45,8 @@ get propagated to our Windows NT domain controller in their erroneous
 form, and Windows NT's password hashing is significant to 14
 characters.
  
-This is not a tenable situation, so the passive plaintext password
-capture logic has been disabled.
+This is not a reasonable or tenable situation, so the passive
+plaintext password capture logic has been disabled.
 
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
