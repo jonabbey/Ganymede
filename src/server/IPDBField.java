@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,6 +25,17 @@ import arlut.csd.JDialog.*;
                                                                        IPDBField
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This class holds IPv4/IPv6 address data for Ganymede.<br><br>
+ *
+ * Note that wherever Ganymede manipulates IP addresses, it does so in terms
+ * of unsigned bytes.  Since Java does not provide an unsigned byte type, Ganymede
+ * uses the s2u() and u2s() static methods defined in this class to convert from
+ * the signed Java byte to the Ganymede 0-255 IP octet range.
+ *
+ */
 
 public class IPDBField extends DBField implements ip_field {
 
@@ -1058,7 +1069,14 @@ public class IPDBField extends DBField implements ip_field {
   // to follow.
   //
 
-  private final static byte u2s(int x)
+  /**
+   *
+   * This method maps an int value between 0 and 255 inclusive
+   * to a legal signed byte value.
+   *
+   */
+
+  public final static byte u2s(int x)
   {
     if ((x < 0) || (x > 255))
       {
@@ -1068,7 +1086,14 @@ public class IPDBField extends DBField implements ip_field {
     return (byte) (x - 128);
   }
 
-  private final static short s2u(byte b)
+  /**
+   *
+   * This method maps a u2s-encoded signed byte value to an
+   * int value between 0 and 255 inclusive.
+   *
+   */
+
+  public final static short s2u(byte b)
   {
     return (short) (b + 128);
   }
