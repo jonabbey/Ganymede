@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 2001/12/19 23:46:09 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 2002/01/12 16:37:29 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -1316,7 +1316,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	DialogRsrc dialogResource = new DialogRsrc(this,
 						   "Confirm Field Deletion",
 						   "Ok to delete field " + label + 
-						   "from object type " + parentLabel + "?",
+						   " from object type " + parentLabel + "?",
 						   "Delete", "Cancel",
 						   questionImage);
 

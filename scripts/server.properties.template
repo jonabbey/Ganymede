@@ -37,6 +37,10 @@ ganymede.log=/home/broccol/gash2/code/arlut/csd/ganymede/db/log
 # which will record any 'mailout' events.  mailout events are not
 # logged to the ganymede.log file, and do not show up when viewing
 # an object's history in the Ganymede client.
+#
+# If you haven't done custom coding in your schema kit which uses
+# DBEditSet.logMail() or other, non-transactional mailout events, you
+# probably don't need to worry about setting this.
 
 ganymede.maillog=
 
