@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 2001/10/12 03:28:11 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 2002/02/27 22:47:17 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -83,7 +83,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.78 $ $Date: 2001/10/12 03:28:11 $ $Name:  $
+ * @version $Revision: 1.79 $ $Date: 2002/02/27 22:47:17 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -808,6 +808,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	      {
 		if (w instanceof framePanel)
 		  {
+		    ((framePanel) w).stopNow();	// stop all container threads asap
 		    ((framePanel) w).closingApproved = true;
 		  }
 	      }

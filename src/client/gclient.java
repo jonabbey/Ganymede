@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.204 $
-   Last Mod Date: $Date: 2002/01/29 10:41:31 $
+   Version: $Revision: 1.205 $
+   Last Mod Date: $Date: 2002/02/27 22:47:17 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.204 $ $Date: 2002/01/29 10:41:31 $ $Name:  $
+ * @version $Revision: 1.205 $ $Date: 2002/02/27 22:47:17 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -1428,23 +1428,63 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * client's cache, if it has been cached.</p>
    *
    * <p>If no handle for this invid has been cached, this method
-   * will return null.</p>
+   * will attempt to retrieve one from the server.</p>
+   */
+
+  public ObjectHandle getObjectHandle(Invid invid)
+  {
+    return this.getObjectHandle(invid, null);
+  }
+
+  /**
+   * <p>Pulls a object handle for an invid out of the
+   * client's cache, if it has been cached.</p>
+   *
+   * <p>If no handle for this invid has been cached, this method will
+   * attempt to retrieve one from the server.</p>
+   *
+   * <p>The Short type parameter is just a micro-optimizing
+   * convenience for code that already has such a Short
+   * constructed.  This method will work perfectly well if
+   * the type parameter is null.</p>
    */
 
   public ObjectHandle getObjectHandle(Invid invid, Short type)
   {
     ObjectHandle handle = null;
-      
+
     if (type == null)
       {
 	type = new Short(invid.getType());
       }
 
-    handle = null;
-
     if (cachedLists.containsList(type))
       {
-	handle = cachedLists.getList(type).getObjectHandle(invid);
+	handle = cachedLists.getInvidHandle(type, invid);
+
+	if (handle != null)
+	  {
+	    return handle;
+	  }
+      }
+
+    // okay, we haven't found it.  try to pull this invid down from the
+    // server, and cache it
+
+    Vector paramVec = new Vector();
+
+    paramVec.addElement(invid);
+
+    try
+      {
+	QueryResult result = session.queryInvids(paramVec);
+
+	Vector handleList = result.getHandles();
+
+	handle = (ObjectHandle) handleList.elementAt(0);
+      }
+    catch (RemoteException ex)
+      {
       }
 
     return handle;
@@ -2897,6 +2937,40 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	return;
       }
 
+    if (objectType == null || objectType.equals(""))
+      {
+	Short baseType = new Short(invid.getType());
+	BaseDump bd = (BaseDump) getBaseMap().get(baseType);
+	objectType = bd.getName();
+      }
+
+    ObjectHandle handle = getObjectHandle(invid);
+    
+    if (handle != null && handle.isInactive())
+      {
+	Hashtable dialogResults = null;
+
+	DialogRsrc rsrc = new DialogRsrc(this,
+					 "Edit or Reactivate?", 
+					 "Warning, " + objectType + " " + handle.toString() + 
+					 " is currently inactivated.  If you are seeking to reactivate this object, " +
+					 "it is recommended that you use the server's reactivation wizard rather " +
+					 "than manually editing it.\n\nCan I go ahead and shift you over " +
+					 "to the server's reactivation wizard?",
+					 "Yes, Reactivate", "No, I want to Edit it!",
+					 "question.gif");
+
+	StringDialog verifyDialog = new StringDialog(rsrc);
+
+	dialogResults = verifyDialog.DialogShow();
+
+	if (dialogResults != null)
+	  {
+	    reactivateObject(invid);
+	    return;
+	  }
+      }
+    
     try
       {
 	ReturnVal rv = handleReturnVal(session.edit_db_object(invid));
@@ -2918,9 +2992,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  {
 	    node = (InvidNode)invidNodeHash.get(invid);
 	  }
-
-	Short type = new Short(invid.getType());
-	ObjectHandle handle = getObjectHandle(invid, type);
 	  
 	changedHash.put(invid, invid);
 

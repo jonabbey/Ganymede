@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 2001/11/01 01:33:02 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 2002/02/27 22:47:17 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.75 $ $Date: 2001/11/01 01:33:02 $ $Name:  $
+ * @version $Revision: 1.76 $ $Date: 2002/02/27 22:47:17 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -1777,6 +1777,31 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	      }
 
 	    closingApproved = true;
+	  }
+      }
+  }
+
+  /**
+   * <p>This method is intended to stop any container panels from loading, in the
+   * event that the user has pressed the transaction cancel button in the gclient.</p>
+   */
+
+  public final synchronized void stopNow()
+  {
+    if (containerPanels != null)
+      {
+	synchronized (containerPanels)
+	  {
+	    for (int i = 0; i < containerPanels.size(); i++)
+	      {
+		if (debug)
+		  {
+		    println("Telling a containerPanel to stop loading.");
+		  }
+		
+		containerPanel cp = (containerPanel)containerPanels.elementAt(i);
+		cp.stopLoading();
+	      }
 	  }
       }
   }
