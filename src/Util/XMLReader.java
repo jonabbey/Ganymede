@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/06/15 04:43:21 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/08/25 01:50:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,6 +112,29 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
     BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(xmlFilename));
     inputSource = new InputSource(inStream);
+
+    buffer = new Vector();
+    this.bufferSize = bufferSize;
+    this.skipWhiteSpace = skipWhiteSpace;
+
+    inputThread = new Thread(this);
+
+    inputThread.start();
+  }
+
+  /**
+   * This constructor takes a PipeOutputStream as a parameter, creates a large
+   * matching input pipe to read from, and spins off the XMLReader's parsing
+   * thread to process data that is fed into the PipeOutputStream.
+   */
+
+  public XMLReader(PipedOutputStream sourcePipe, int bufferSize, boolean skipWhiteSpace) throws IOException
+  {
+    parser = new com.jclark.xml.sax.Driver();
+    parser.setDocumentHandler(this);
+
+    BigPipedInputStream bpis = new BigPipedInputStream(sourcePipe);
+    inputSource = new InputSource(bpis);
 
     buffer = new Vector();
     this.bufferSize = bufferSize;
@@ -967,5 +990,21 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	done = true;
 	buffer.notifyAll();
       }
+  }
+}
+
+/**
+ * This class is a simple subclassing of java.io.PipedInputStream that specifies
+ * a much larger buffer size, in order to make server-side XML parsing efficient.
+ */
+
+class BigPipedInputStream extends PipedInputStream {
+
+  protected byte buffer[] = new byte[1048576]; // 16 * 64k
+
+  /* -- */
+
+  public BigPipedInputStream(PipedOutputStream src) throws IOException {
+    connect(src);
   }
 }
