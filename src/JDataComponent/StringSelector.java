@@ -312,6 +312,44 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   // Public methods ------------------------------------------------------------
 
   /**
+   * Update the StringSelector.
+   */
+  public void update(Vector available, Vector chosen)
+  {
+    if (available == null)
+      {
+	// The whole thing should be blank.
+	in.model.removeAllElements();
+	if (out != null)
+	  {
+	    out.model.removeAllElements();
+	  }
+
+	return;
+      }
+
+    // If there is no out box, then we don't need to worry about available stuff
+    if (out != null)
+      {
+	if (chosen != null) // If's it null, nothing is chosen.
+	  {
+	    for (int i = 0; i < chosen.size(); i++)
+	      {
+		// What whill this do if it is not in available?  I don't know.
+		available.removeElement(chosen.elementAt(i));
+	      }
+	  }
+
+	out.reload(available, false);
+      }
+
+    in.reload(chosen, false);
+    
+
+  }
+
+
+  /**
    * Change the text on the add button.
    */
   public void setButtonText(String text)
