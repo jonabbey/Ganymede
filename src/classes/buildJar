@@ -2,8 +2,8 @@
 #
 # Ganymede client jar build script
 #
-# Version: $Revision: 1.8 $
-# Date: $Date: 1999/01/20 22:12:38 $
+# Version: $Revision: 1.9 $
+# Date: $Date: 1999/01/20 23:51:40 $
 #
 ############################################################
 
@@ -24,7 +24,7 @@ cd $builddir
 
 echo "Building client jar"
 
-mv -f ganymede.jar ganymede.jar.old
+mv -f ganymede.jar ganymede.jar.old > /dev/null 2>&1
 
 cd client_classes
 
