@@ -5,7 +5,7 @@
    This file is a management class for Automounter map entry objects in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -238,20 +238,21 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
     InvidDBField invf = (InvidDBField) getField(mapEntrySchema.MAP);
 
-    if (invf.getValueString().equals("auto.home.default"))
+    // if we aren't deleting this entry, reject any attempt to unlink
+    // us from auto.home.default, if we are linked there.
+
+    if (!deleting &&invf.getValueString().equals("auto.home.default"))
       {
 	return Ganymede.createErrorDialog("Error, auto.home.default is required",
 					  "Sorry, it is mandatory to have a directory entry on the auto.home.default map.");
       }
+  
+    // ok, we want to go ahead and approve the operation, but we want
+    // to cause the client to rescan the MAP field in all of our
+    // siblings so that their choice list gets updated to not show
+    // whatever map *we* just chose.
 
-    // ok, we want to go ahead and approve the operation,
-    // but we want to cause the client to rescan the MAP
-    // field in all of our siblings so that their choice
-    // list gets updated to not show whatever map *we*
-    // just chose.
-
-    // First, we create a ReturnVal that will apply to
-    // our siblings
+    // First, we create a ReturnVal that will apply to our siblings
 
     ReturnVal rescanPlease = new ReturnVal(true); // bool doesn't matter
     rescanPlease.addRescanField(mapEntrySchema.MAP);
