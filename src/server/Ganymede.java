@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -286,6 +286,8 @@ public class Ganymede {
       {
 	debug("Creating internal Ganymede Session");
 	internalSession = new GanymedeSession();
+	internalSession.enableWizards(false);
+	internalSession.enableOversight(false);
 
 	debug("Creating master BaseListTransport object");
 	Ganymede.baseTransport = new BaseListTransport(Ganymede.internalSession);
@@ -452,6 +454,8 @@ public class Ganymede {
       {
 	debug("Creating internal Ganymede Session");
 	internalSession = new GanymedeSession();
+	internalSession.enableWizards(false);
+	internalSession.enableOversight(false);
       }
     catch (RemoteException ex)
       {
