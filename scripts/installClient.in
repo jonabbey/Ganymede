@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.24 $
-# $Date: 2001/01/31 10:46:21 $
+# $Revision: 1.25 $
+# $Date: 2001/01/31 11:19:58 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -207,6 +207,7 @@ close OUTPUT;
 chmod 0644, "$installdir/README"; print ".";
 
 copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
+copy("README.xml", "$installdir/README.xml"); print ".";
 
 copy("jars/ganymede.jar", $installdir."/jars/ganymede.jar"); print ".";
 copy("jars/ganymedeAdmin.jar", $installdir."/jars/ganymedeAdmin.jar"); print ".";
