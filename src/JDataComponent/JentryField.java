@@ -6,8 +6,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/08/19 02:12:44 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2002/10/05 05:38:24 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -74,16 +74,16 @@ import javax.swing.text.*;
  * <p>See this subclasses of this class for actual usable classes.</p>
  */
 
-abstract public class JentryField extends JTextField implements FocusListener {
+abstract public class JentryField extends JTextField implements FocusListener, ActionListener {
 
   static final boolean debug = false;
 
   // ---
 
   public boolean allowCallback = false;
-  protected boolean changed = false; 
 
   protected JsetValueCallback my_parent = null;
+  protected ActionListener notifier = null;
 
   /* -- */
 
@@ -97,6 +97,7 @@ abstract public class JentryField extends JTextField implements FocusListener {
     setEditable(true);
 
     addFocusListener(this);
+    addActionListener(this);
 
     // try to force a validate so that NT isn't so bitchy
 
@@ -109,16 +110,6 @@ abstract public class JentryField extends JTextField implements FocusListener {
   // Class Methods //
   ///////////////////
 
-  /**
-   *  returns true if the value in the JentryField has 
-   *  been modified.
-   */
-
-  public boolean getChanged()
-  {
-    return changed;
-  }
-  
   /**
    *  sets the parent of this component for callback purposes
    *
@@ -136,14 +127,24 @@ abstract public class JentryField extends JTextField implements FocusListener {
     allowCallback = true;
   }
 
+  public void setEnterHandler(ActionListener listener)
+  {
+    this.notifier = listener;
+  }
+
   /**
-   * sendCallback is called when focus is lost.
+   * sendCallback is called when focus is lost, or when we are otherwise
+   * triggered.
+   *
+   * @returns -1 on change rejected, 0 on no change required, 1 on change approved
    */
 
-  public abstract void sendCallback();
+  public abstract int sendCallback();
 
   /**
-   *  Stub function that is overriden in subclasses of JentryField
+   * Stub function that is overriden in subclasses of JentryField.  The
+   * JentryDocument object for this field will use this method to
+   * allow or disallow the character ch from being added.
    */
 
   public boolean isAllowed(char ch)
@@ -191,6 +192,19 @@ abstract public class JentryField extends JTextField implements FocusListener {
     if (debug)
       {
 	System.out.println("focusGained");
+      }
+  }
+
+  /**
+   * <p>Handle someone hitting enter.. try to update the value and notify
+   * the actionListener if we succeeded.</p>
+   */
+
+  public void actionPerformed(ActionEvent e)
+  {
+    if (notifier != null && sendCallback() >= 0)
+      {
+	notifier.actionPerformed(e);	
       }
   }
 }
