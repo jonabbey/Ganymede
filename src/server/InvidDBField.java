@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.121 $
-   Last Mod Date: $Date: 2000/03/07 23:04:04 $
+   Version: $Revision: 1.122 $
+   Last Mod Date: $Date: 2000/03/08 22:43:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -87,7 +87,7 @@ import arlut.csd.Util.VectorUtils;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.121 $ %D%
+ * @version $Revision: 1.122 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -507,20 +507,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    entries[i] = getRemoteLabel(gsession, tmp);
 	  }
 
-	new arlut.csd.Util.QuickSort(entries,
-				     new arlut.csd.Util.Compare()
-				     {
-				       public int compare(Object a, Object b)
-					 {
-					   String aS, bS;
-					   
-					   aS = (String) a;
-					   bS = (String) b;
-					   
-					   return aS.compareTo(bS);
-					 }
-				     }
-				     ).sort();
+	new arlut.csd.Util.QuickSort(entries, null).sort();
 
 	StringBuffer result = new StringBuffer();
 

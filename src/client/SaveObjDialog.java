@@ -5,8 +5,8 @@
    Dialog for saving or mailing a table from dialog.
    
    Created: October 19, 1999
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/10/21 00:04:56 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/03/08 22:43:54 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -123,7 +123,7 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
 
   SaveObjDialog(Frame owner, String title, boolean forMail, String mailSubj)
   {
-    super(owner, title, false);	// not modal
+    super(owner, title, true);	// modal
 
     panel = new JPanel(gbl);
 
@@ -203,6 +203,7 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
   public boolean showDialog()
   {
     setVisible(true);
+
     if (debug)
       {
 	System.out.println("Returning " + returnValue);

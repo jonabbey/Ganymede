@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/03/07 08:15:18 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/03/08 22:43:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -83,6 +83,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   private org.xml.sax.Parser parser;
   private org.xml.sax.InputSource inputSource;
+  private org.xml.sax.Locator locator;
   private Vector buffer;
   private int bufferSize;
   private Thread inputThread;
@@ -164,9 +165,20 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
   }
 
+  /**
+   * <P>close() causes the XMLReader to terminate its operations as soon
+   * as possible.  Once close() has been called, the background XML parser
+   * will terminate with a SAXException the next time a SAX callback is
+   * performed.
+   */
+
   public void close()
   {
-    done = true;
+    synchronized (buffer)
+      {
+	done = true;
+	buffer.notifyAll();	// to wake up any sleepers
+      }
   }
 
   public void run()
@@ -205,8 +217,9 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    * @see org.xml.sax.Locator
    */
 
-  public void setDocumentLocator(Locator locator)
+  public void setDocumentLocator(org.xml.sax.Locator locator)
   {
+    this.locator = locator;
   }
 
   /**
@@ -244,8 +257,26 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
     synchronized (buffer)
       {
-	done = true;
+	while (!done && buffer.size() >= bufferSize)
+	  {
+	    try
+	      {
+		buffer.wait();
+	      }
+	    catch (InterruptedException ex)
+	      {
+		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+	      }
+	  }
+
+	if (done)
+	  {
+	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	  }
+	
+	buffer.addElement(new XMLEndDocument());
 	buffer.notifyAll();
+	done = true;
       }
   }
 
@@ -276,12 +307,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	if (done)
-	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	  }
-
-	while (buffer.size() >= bufferSize)
+	while (!done && buffer.size() >= bufferSize)
 	  {
 	    try
 	      {
@@ -291,6 +317,11 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      {
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
+	  }
+
+	if (done)
+	  {
+	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
 	  }
 	
 	buffer.addElement(new XMLElement(name, atts));
@@ -318,12 +349,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	if (done)
-	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	  }
-
-	while (buffer.size() >= bufferSize)
+	while (!done && buffer.size() >= bufferSize)
 	  {
 	    try
 	      {
@@ -333,6 +359,11 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      {
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
+	  }
+
+	if (done)
+	  {
+	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
 	  }
 	
 	buffer.addElement(new XMLCloseElement(name));
@@ -370,12 +401,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	if (done)
-	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	  }
-
-	while (buffer.size() >= bufferSize)
+	while (!done && buffer.size() >= bufferSize)
 	  {
 	    try
 	      {
@@ -385,6 +411,11 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      {
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
+	  }
+
+	if (done)
+	  {
+	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
 	  }
 	
 	buffer.addElement(new XMLCharData(ch, start, length));
@@ -421,12 +452,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   {
     synchronized (buffer)
       {
-	if (done)
-	  {
-	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	  }
-
-	while (buffer.size() >= bufferSize)
+	while (!done && buffer.size() >= bufferSize)
 	  {
 	    try
 	      {
@@ -436,6 +462,11 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      {
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
+	  }
+
+	if (done)
+	  {
+	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
 	  }
 	
 	buffer.addElement(new XMLCharData(ch, start, length));
@@ -580,6 +611,16 @@ class XMLElement extends XMLItem {
     this.name = name;
     this.atts = atts;
   }
+
+  public String getName()
+  {
+    return name;
+  }
+
+  public AttributeList getAttributeList()
+  {
+    return atts;
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -603,6 +644,29 @@ class XMLCloseElement extends XMLItem {
   {
     this.name = name;
   }
+
+  public String getName()
+  {
+    return name;
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                  XMLEndDocument
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>Document Close class for XML data held in the 
+ * {@link arlut.csd.Util.XMLReader XMLReader} class's buffer.</P>
+ */
+
+class XMLEndDocument extends XMLItem {
+
+  XMLEndDocument()
+  {
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -618,12 +682,27 @@ class XMLCloseElement extends XMLItem {
 
 class XMLCharData extends XMLItem {
 
-  char chars[];
+  String data;
+
+  /* -- */
 
   XMLCharData(char ch[], int start, int length)
   {
-    chars = new char[length];
+    data = new String(ch, start, length);
+  }
 
-    java.lang.System.arraycopy(ch, start, chars, 0, length);
+  public String getString()
+  {
+    return data;
+  }
+
+  /**
+   * <P>This method returns the character data for this XMLItem with
+   * leading and trailing whitespace filtered out.</P>
+   */
+
+  public String getCleanString()
+  {
+    return data.trim();
   }
 }

@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 1999/10/26 20:02:05 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 2000/03/08 22:43:54 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -15,10 +15,12 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -87,11 +89,13 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.60 $ $Date: 1999/10/26 20:02:05 $ $Name:  $
+ * @version $Revision: 1.61 $ $Date: 2000/03/08 22:43:54 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
-public class framePanel extends JInternalFrame implements ChangeListener, Runnable, ActionListener, VetoableChangeListener, InternalFrameListener {
+public class framePanel extends JInternalFrame implements ChangeListener, Runnable, 
+							  ActionListener, VetoableChangeListener,
+							  InternalFrameListener {
 
   /**  
    * This will be loaded from gclient anyway.
@@ -851,32 +855,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     FieldTemplate template;
     db_field field;
 
-    // Loop through all the fields, and get their values
-
     try
       {
-	for (int i = 0; i < templates.size();  ++i)
-	  {
-	    template = (FieldTemplate)templates.elementAt(i);
-	    field = getObject().getField(template.getID());
-
-	    if (field != null)
-	      {
-		buffer.append(template.getName() + "\t" + 
-			      field.getValueString() + 
-			      System.getProperty("line.separator")); 
-	      }
-	    else
-	      {
-		buffer.append(template.getName() + "\tUndefined" + 
-			      System.getProperty("line.separator"));
-
-		if (debug)
-		  {
-		    System.out.println("Field is null: " + template.getName());
-		  }
-	      }
-	  }
+	buffer = getObject().getSummaryDescription();
       }
     catch (RemoteException rx)
       {

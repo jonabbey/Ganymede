@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 2000/03/03 02:05:00 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 2000/03/08 22:43:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.89 $ $Date: 2000/03/03 02:05:00 $
+ * @version $Revision: 1.90 $ $Date: 2000/03/08 22:43:58 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2093,6 +2093,168 @@ public class DBObject implements db_object, FieldType, Remote {
 	    if (reverseLinks.size() == 0)
 	      {
 		Ganymede.db.backPointers.remove(target);
+	      }
+	  }
+      }
+  }
+
+  /**
+   * <p>This method is used to provide a summary description of
+   * this object, including a listing of all non-null fields and
+   * their contents.  This method is remotely callable by the client,
+   * and so will only reveal fields that the user has permission
+   * to view.</p>
+   * 
+   * <p>This method calls
+   * {@link arlut.csd.ganymede.DBObject#appendObjectInfo(java.lang.StringBuffer,
+   * java.lang.String, boolean) appendObjectInfo} to do most of its work.</p>
+   */
+
+  public StringBuffer getSummaryDescription()
+  {
+    StringBuffer result = new StringBuffer();
+
+    if (gSession != null && !gSession.getPerm(this).isVisible())
+      {
+	return result;
+      }
+
+    this.appendObjectInfo(result, null, false);
+
+    return result;
+  }
+
+  /**
+   * <p>This method is used to provide a summary description of
+   * this object, including a listing of all non-null fields and
+   * their contents.</p>
+   * 
+   * <p>This method calls
+   * {@link arlut.csd.ganymede.DBObject#appendObjectInfo(java.lang.StringBuffer,
+   * java.lang.String, boolean) appendObjectInfo} to do most of its work.</p>
+   */
+
+  public StringBuffer getSummaryDescriptionLocal()
+  {
+    StringBuffer result = new StringBuffer();
+
+    this.appendObjectInfo(result, null, true);
+
+    return result;
+  }
+
+  /**
+   * <p>This method is used to concatenate a textual description of this
+   * object to the passed-in StringBuffer.  This description is relatively
+   * free-form, and is intended to be used for human consumption and not for
+   * programmatic operations.</p>
+   *
+   * <p>This method is called by
+   * {@link arlut.csd.ganymede.DBObject#getSummaryDescription() getSummaryDescription}.</p>
+   *
+   * @param buffer The StringBuffer to append this object's description to
+   * @param prefix Used for recursive calls on embedded objects, this prefix will
+   * be inserted at the beginning of each line of text concatenated to buffer
+   * by this method.
+   * @param local If false, read permissions will be checked for each field before
+   * adding it to the buffer.
+   */
+
+  private void appendObjectInfo(StringBuffer buffer, String prefix, boolean local)
+  {
+    String name;
+    DBObjectBaseField fieldDef;
+    DBField field;
+
+    /* -- */
+
+    Vector customFields = objectBase.customFields;
+
+    synchronized (customFields)
+      {
+	for (int i = 0; i < customFields.size(); i++)
+	  {
+	    fieldDef = (DBObjectBaseField) customFields.elementAt(i);
+
+	    field = fields.get(fieldDef.getID());
+
+	    if (field != null && field.isDefined() && (local || field.isVisible()))
+	      {
+		if (!field.isEditInPlace())
+		  {
+		    if (prefix != null)
+		      {
+			buffer.append(prefix);
+		      }
+
+		    buffer.append(field.getName());
+		    buffer.append(" : ");
+		    buffer.append(field.getValueString());
+		    buffer.append("\n");
+		  }
+		else
+		  {
+		    InvidDBField invField = (InvidDBField) field;
+
+		    for (int j = 0; j < invField.size(); j++)
+		      {
+			if (prefix != null)
+			  {
+			    buffer.append(prefix);
+			  }
+
+			buffer.append(field.getName());
+			buffer.append("[");
+			buffer.append(j);
+			buffer.append("]");
+			buffer.append("\n");
+			
+			Invid x = invField.value(j);
+
+			// we use view_db_object() so that we don't reveal
+			// fields that should not be seen.
+
+			ReturnVal retVal = gSession.view_db_object(x);
+			DBObject remObj = (DBObject) retVal.getObject();
+
+			if (prefix != null)
+			  {
+			    remObj.appendObjectInfo(buffer, prefix + "\t", local);
+			  }
+			else
+			  {
+			    remObj.appendObjectInfo(buffer, "\t", local);
+			  }
+		      }
+		  }
+	      }
+	  }
+
+	// okay, got all the custom fields.. now we need to summarize all the
+	// built-in fields that were not listed in customFields.
+
+	Enumeration elements = fields.elements();
+
+	while (elements.hasMoreElements())
+	  {
+	    field = (DBField) elements.nextElement();
+
+	    if (!field.isBuiltIn() || !field.isDefined())
+	      {
+		continue;
+	      }
+
+	    if (local || field.isVisible())
+	      {
+		if (prefix != null)
+		  {
+		    buffer.append(prefix);
+		  }
+		
+		buffer.append(field.getName());
+		buffer.append(" : ");
+		buffer.append(field.getValueString());
+		buffer.append("\n");
 	      }
 	  }
       }
