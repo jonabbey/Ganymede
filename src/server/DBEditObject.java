@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.156 $
-   Last Mod Date: $Date: 2001/11/05 20:42:54 $
+   Version: $Revision: 1.157 $
+   Last Mod Date: $Date: 2001/11/05 20:57:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.156 $ $Date: 2001/11/05 20:42:54 $ $Name:  $
+ * @version $Revision: 1.157 $ $Date: 2001/11/05 20:57:51 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2023,7 +2023,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * obtainChoiceList() method to get a list of valid choices.</p>
    *
    * <p>This method will provide a reasonable default for targetted
-   * invid fields.</p>
+   * invid fields, filtered by the GanymedeSession's
+   * visibilityFilterInvids list.</p>
    *
    * <p>NOTE: This method does not need to be synchronized.  Making this
    * synchronized can lead to DBEditObject/DBSession nested monitor
@@ -2032,7 +2033,51 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public QueryResult obtainChoiceList(DBField field)
   {
-    return obtainChoiceList(field, true);
+    if (field.isEditable() && (field instanceof InvidDBField) && 
+	!field.isEditInPlace())
+      {
+	DBObjectBaseField fieldDef;
+	short baseId;
+
+	/* -- */
+
+	fieldDef = field.getFieldDef();
+	
+	baseId = fieldDef.getTargetBase();
+
+	if (baseId < 0)
+	  {
+	    //	    Ganymede.debug("DBEditObject: Returning null 2 for choiceList for field: " + field.getName());
+	    return null;
+	  }
+
+	// and we want to return a list of choices.. can use the regular
+	// query output here
+
+	QueryNode root;
+
+	// if we are pointing to objects of our own type, we don't want ourselves to be
+	// a valid choice by default.. (DBEditObject subclasses can override this, of course)
+
+	if (baseId == getTypeID())
+	  {
+	    root = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, getInvid()));
+	  }
+	else
+	  {
+	    root = null;
+	  }
+
+	boolean editOnly = !choiceListHasExceptions(field);
+
+	Query myQuery = new Query(baseId, root, editOnly); // filtered by default
+
+	return editset.getSession().getGSession().query(myQuery, this);
+      }
+    
+    //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
+
+    return null;
   }
 
   /**
@@ -2104,7 +2149,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	boolean editOnly = !choiceListHasExceptions(field);
 
 	Query myQuery = new Query(baseId, root, editOnly);
-	myQuery.setFiltered(applyFilter);
+
+	myQuery.setFiltered(applyFilter); // filtered?  maybe not!
+
 	return editset.getSession().getGSession().query(myQuery, this);
       }
     

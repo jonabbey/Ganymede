@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/11/05 20:42:53 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/11/05 20:58:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -190,7 +190,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
   {
     if (field.getID() != emailListSchema.MEMBERS)
       {
-	return super.obtainChoiceList(field);
+	return super.obtainChoiceList(field, applyFilter);
       }
 
     if (membersChoice == null)

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.165 $
-   Last Mod Date: $Date: 2001/11/05 20:42:54 $
+   Version: $Revision: 1.166 $
+   Last Mod Date: $Date: 2001/11/05 20:57:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.165 $ %D%
+ * @version $Revision: 1.166 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -4141,7 +4141,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (qr == null && eObj.getSession().isInteractive())
 	      {
-		qr = eObj.obtainChoiceList(this);
+		qr = eObj.obtainChoiceList(this, false); // allow any value, even if filtered
 	      }
 
 	    if (qr != null)
