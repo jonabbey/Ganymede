@@ -49,7 +49,7 @@
 
 */
 
-package arlut.csd.ganymede.server;
+package arlut.csd.ganymede.common;
 
 /*------------------------------------------------------------------------------
                                                                            class
