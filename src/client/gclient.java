@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.71 $ %D%
+   Version: $Revision: 1.72 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1559,11 +1559,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     base = node.getBase();    
     Id = node.getTypeID();
 
-    _query = new Query(Id.shortValue(), null, true);// include all, even non-editables
-    node.setEditableQuery(_query);
-    node.setAllQuery(new Query(Id.shortValue(), null, false));
-
-
     if (cachedLists.containsList(Id))
       {
 	if (debug)
@@ -1827,9 +1822,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     while (created.hasMoreElements())
       {
 	invid = (Invid)created.nextElement();
-	System.out.println("==created invid: " + invid);
 	node = (InvidNode)invidNodeHash.get(invid);
-	System.out.println("==node = " + node);
 	if (node != null)
 	  {
 	    if (debug)
@@ -1846,7 +1839,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     createHash.clear();
     createdObjectsWithoutNodes.clear();
-    System.out.println("Clearing createHash.");
     invid = null;
     node = null;
 
@@ -4286,7 +4278,11 @@ class InvidNode extends arlut.csd.JTree.treeNode {
 class BaseNode extends arlut.csd.JTree.treeNode {
 
   private Base base;
-  private Query editableQuery, allQuery;
+
+  private Query 
+    editableQuery = null,
+    allQuery = null;
+
   private boolean loaded = false;
   private boolean canBeInactivated = false;
   private boolean showAll = false;
@@ -4371,11 +4367,21 @@ class BaseNode extends arlut.csd.JTree.treeNode {
 
   public Query getEditableQuery()
   {
+    if (editableQuery == null)
+      {	
+	editableQuery = new Query(getTypeID().shortValue(), null, true);// include all, even non-editables
+      }
+
     return editableQuery;
   }
 
   public Query getAllQuery()
   {
+    if (allQuery == null)
+      {
+        allQuery = new Query(getTypeID().shortValue(), null, false);
+      }
+
     return allQuery;
   }
 
