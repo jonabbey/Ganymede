@@ -8,8 +8,8 @@
 
    Created: 26 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/02/15 05:55:28 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2002/01/26 19:36:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -149,6 +149,9 @@ public final class loginSemaphore {
       {
 	while (true)
 	  {
+	    // we already know from above that we have to wait, so
+	    // we'll start the loop waiting
+
 	    wait();
 
 	    if (count == 0 && disableMsg == null)
@@ -168,6 +171,9 @@ public final class loginSemaphore {
 
 	while (true)
 	  {
+	    // we already know from above that we have to wait, so
+	    // we'll start the loop waiting
+
 	    wait(waitTime);
 
 	    if (count == 0 && disableMsg == null)
@@ -259,22 +265,23 @@ public final class loginSemaphore {
   {
     try
       {
-	if (millis == 0)	// don't block.. fail if necessary
+	if (disableMsg == null)
 	  {
-	    if (disableMsg == null)
-	      {
-		count++;
-		return null;
-	      }
-	    else
-	      {
-		return disableMsg;
-	      }
+	    count++;
+	    return null;
+	  }
+
+	if (millis == 0)	// don't block.. just fail
+	  {
+	    return disableMsg;
 	  }
 	else if (millis < 0)	// block indefinitely
 	  {
 	    while (true)
 	      {
+		// we already know from above that we have to wait, so
+		// we'll start the loop waiting
+
 		wait();	// can throw InterruptedException
 
 		if (disableMsg == null)
@@ -294,6 +301,9 @@ public final class loginSemaphore {
 
 	    while (true)
 	      {
+		// we already know from above that we have to wait, so
+		// we'll start the loop waiting
+
 		wait(waitTime);	// can throw InterruptedException
 
 		if (disableMsg == null)
@@ -301,7 +311,7 @@ public final class loginSemaphore {
 		    count++;
 		    return null;
 		  }
-		
+
 		timeSoFar = System.currentTimeMillis() - startTime;
 
 		if (timeSoFar > millis)	// timed out
