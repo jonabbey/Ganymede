@@ -144,7 +144,7 @@ sub inchoverjavaargs {
   #
   # 0 - neutral, what we're in after the closing quotation
   # mark.. implies that we're not in a quoted string, not in a
-  # comment, not in an interior paren'd or braced section
+  # comment, not in an interior paren'd section
   #
   # 1 - paren.. means we've hit an open paren, and we're going to wait
   # until we're back in mode 1 and we see a close paren before we pop
