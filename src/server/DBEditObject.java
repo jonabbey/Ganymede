@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -204,6 +204,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       {
 	this.original = original;
 	this.id = original.id;
+	this.myInvid = original.myInvid;
 	this.objectBase = original.objectBase;
       }
 
@@ -662,7 +663,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  public boolean canCreate(DBSession session)
+  public boolean canCreate(Session session)
   {
     return true;
   }
