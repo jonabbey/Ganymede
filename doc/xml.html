@@ -200,7 +200,7 @@
     structure of an XML file for Ganymede looks like this:</p>
 
     <pre>
-      &lt;ganymede major="1" minor="0"&gt;
+      &lt;ganymede major="1" minor="0" persona="supergash" password="testpass" &gt;
         &lt;ganyschema&gt;
            -- Optional Ganymede Schema Definition Section Here --
         &lt;/ganyschema&gt;
@@ -211,9 +211,13 @@
     </pre>
 
     <p>The <b>ganymede</b> element is the XML file's <b>Document
-    Element</b>, and has two attributes, <b>major</b> and
+    Element</b>, and has two mandatory attributes, <b>major</b> and
     <b>minor</b>, which specify the major and minor version numbers of
-    the Ganymede XML file format the file adheres to.</p>
+    the Ganymede XML file format the file adheres to, and two
+      optional attributes, <b>persona</b> and <b>password</b> which
+      may be used to specify the username and password for the xmlclient
+      to use in attempting to log into the server to apply the changes
+      in the file.</p>
 
     <p>The <b>ganyschema</b> element contains the schema definition
     for the Ganymede database.  This section contains definitions of
@@ -1183,7 +1187,9 @@ element.  The <b>num</b> attribute is used to select pre-existing
 objects on the server for editing, inactivation, or deletion.  If this
 <b>&lt;object&gt;</b> has an <b>action</b> attribute value that would
 cause a new object to be created on the Ganymede server, the
-<b>num</b> attribute is simply ignored.</dd>
+<b>num</b> attribute is simply ignored.  It is an error to specify a <b>num</b>
+attribute for an object that does not already exist on the server at
+the time the xml file is processed.</dd>
 
 <dt><b>action</b></dt>
 
@@ -1201,11 +1207,11 @@ contain one of four strings:
 
 <p>
 If there is no <b>action</b> attribute specified at import time, the
-<b>&lt;object&gt;</b> element will be created if there is no object
-already on the server that matches the <b>id</b> or <b>num</b> object
-identifying attributes.  Otherwise, the pre-existing object on the
-Ganymede server matching the identifying attributes will be checked
-out for editing.
+<b>&lt;object&gt;</b> element will be created if the object has a
+<b>id</b> attribute and no <b>num</b> attribute and if there is no
+object already on the server that matches the <b>id</b> attribute.
+Otherwise, the pre-existing object on the Ganymede server matching the
+identifying attribute will be checked out for editing.
 </p>
 
 <p>
