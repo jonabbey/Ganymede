@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,16 +42,16 @@ public class Query implements java.io.Serializable {
   short objectType;
   QueryNode root;
   boolean editableOnly;
+  String restrictionList = null;
 
   /* -- */
 
   /**
-   * Constructor for fully specified query.
+   * Constructor for fully specified query (base by id)
    *
    * @param objectType numeric object type code to search over
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
    * @param editableOnly if true, the server will only return objects that the user's session currently has permission to edit
-   *
    *
    */
 
@@ -65,7 +65,7 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * Constructor for fully specified query.
+   * Constructor for fully specified query (base by name)
    *
    * @param objectName name of object type to query
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
@@ -82,7 +82,7 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * Constructor to create a query returning only editable objects
+   * Constructor to create a query returning only editable objects (base by id)
    *
    * @param objectType numeric object type code to search over
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
@@ -98,7 +98,7 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * Constructor to create a query returning only editable objects
+   * Constructor to create a query returning only editable objects (base by name)
    *
    * @param objectName name of object type to query
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
@@ -141,6 +141,19 @@ public class Query implements java.io.Serializable {
     objectType = -1;
     root = null;
     editableOnly = true;
+  }
+
+  /**
+   *
+   * This method takes a comma separated list of numeric field id's
+   * that should be returned by this query.  If restrictionList is
+   * null, all possible fields will be returned.
+   * 
+   */
+
+  public setRestrictionList(String restrictionList)
+  {
+    this.restrictionList = restrictionList;
   }
 
 }
