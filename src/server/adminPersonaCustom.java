@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -91,12 +91,12 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (field.getID() == SchemaConstants.PersonaNameField)
       {
-	return refreshLabelField((String) value, null);
+	return refreshLabelField((String) value, null, null);
       }
 
     if (field.getID() == SchemaConstants.PersonaAssocUser)
       {
-	return refreshLabelField(null, (Invid) value);
+	return refreshLabelField(null, (Invid) value, null);
       }
 
     return null;
@@ -108,7 +108,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    *
    */
 
-  private ReturnVal refreshLabelField(String descrip, Invid userInvid)
+  public ReturnVal refreshLabelField(String descrip, Invid userInvid, String newName)
   {
     if (descrip == null)
       {
@@ -120,7 +120,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	  }
       }
 
-    if (userInvid == null)
+    if ((userInvid == null) && (newName != null))
       {
 	InvidDBField assocUserField = (InvidDBField) getField(SchemaConstants.PersonaAssocUser);
 
@@ -140,9 +140,12 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	return setFieldValueLocal(SchemaConstants.PersonaLabelField, null);
       }
 
-    String username = this.getGSession().viewObjectLabel(userInvid);
+    if (newName == null)
+      {
+	newName = this.getGSession().viewObjectLabel(userInvid);
+      }
 
-    return setFieldValueLocal(SchemaConstants.PersonaLabelField, username + ":" + descrip);
+    return setFieldValueLocal(SchemaConstants.PersonaLabelField, newName + ":" + descrip);
   }
 
   /**

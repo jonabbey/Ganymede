@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -836,11 +836,14 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    *  
    */
 
-  public boolean finalizeSetValue(DBField field, Object value)
+  public ReturnVal finalizeSetValue(DBField field, Object value)
   {
+    // we only want to do the checks/work in this method if we aren't
+    // in bulk load mode.
+
     if (!gSession.enableOversight)
       {
-	return true;
+	return null;
       }
 
     if (field.getID() == systemSchema.ROOM)
@@ -869,7 +872,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	initializeNets((Invid) getFieldValueLocal(systemSchema.ROOM));
       }
 
-    return true;
+    return null;
   }
 
   /**
@@ -891,7 +894,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    *
    */
 
-  public boolean finalizeDeleteElement(DBField field, int index)
+  public ReturnVal finalizeDeleteElement(DBField field, int index)
   {
     if (field.getID() == systemSchema.INTERFACES)
       {
@@ -901,7 +904,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	if (interfaces.size() != 2)
 	  {
-	    return true;
+	    return null;
 	  }
 
 	// we want to clear the name field of the remaining interface, and concatenate
@@ -928,7 +931,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    return false;
+	    return retVal;
 	  }
 	
 	// we want to rip all the aliases out of the interface alias field
@@ -946,7 +949,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
       }
 
-    return true;
+    return null;
   }
 
   /**
