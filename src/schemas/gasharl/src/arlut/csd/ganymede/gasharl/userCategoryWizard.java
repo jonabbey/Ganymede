@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -58,11 +58,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.server.DBField;
 import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeSession;
 import arlut.csd.ganymede.server.GanymediatorWizard;
 
@@ -620,7 +622,14 @@ public class userCategoryWizard extends GanymediatorWizard {
 	  }
       }
 
-    retVal = userObject.setFieldValue(userCustom.CATEGORY, newCatInvid);
+    try
+      {
+	retVal = userObject.setFieldValue(userCustom.CATEGORY, newCatInvid);
+      }
+    catch (GanyPermissionsException ex)
+      {
+	return Ganymede.createErrorDialog("permissions", "permissions error setting category. " + ex);
+      }
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -639,7 +648,14 @@ public class userCategoryWizard extends GanymediatorWizard {
 	  }
       }
 
-    retVal = userObject.setFieldValue(SchemaConstants.ExpirationField, expirationDate);
+    try
+      {
+	retVal = userObject.setFieldValue(SchemaConstants.ExpirationField, expirationDate);
+      }
+    catch (GanyPermissionsException ex)
+      {
+	return Ganymede.createErrorDialog("permissions", "permissions error setting expiration date " + ex);
+      }
 
     if (retVal != null && !retVal.didSucceed())
       {

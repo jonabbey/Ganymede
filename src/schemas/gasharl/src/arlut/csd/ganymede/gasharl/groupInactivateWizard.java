@@ -56,12 +56,15 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectHandle;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeSession;
 import arlut.csd.ganymede.server.GanymediatorWizard;
 import arlut.csd.ganymede.server.InvidDBField;
@@ -416,18 +419,25 @@ public class groupInactivateWizard extends GanymediatorWizard {
 	  }
 
 	InvidDBField ugField = (InvidDBField) usr.getField(userSchema.HOMEGROUP);
-	ReturnVal retv = ugField.setValue(newHomeGroup);
 
-	if ((retv != null) && (! retv.didSucceed()))
+	try
 	  {
-	    groupObject.inactivate(false, true);
-	    return retv;
+	    ReturnVal retv = ugField.setValue(newHomeGroup);
+
+	    if ((retv != null) && (! retv.didSucceed()))
+	      {
+		groupObject.inactivate(false, true);
+		return retv;
+	      }
+	    else
+	      {
+		finalReturnVal.unionRescan(retv);
+	      }
 	  }
-	else
+	catch (GanyPermissionsException ex)
 	  {
-	    finalReturnVal.unionRescan(retv);
+	    return Ganymede.createErrorDialog("permissions", "permissions error setting home group object " + ex);
 	  }
-	
       }
 
     groupObject.inactivate(true, true);

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -335,7 +335,15 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 	    // that are already in the superset users list is not
 	    // automatically permitted.  This may change.
 
-	    retVal = userObject.setFieldValue(HOMEGROUP, groupChoice.getInvid(i));
+	    try
+	      {
+		retVal = userObject.setFieldValue(HOMEGROUP, groupChoice.getInvid(i));
+	      }
+	    catch (GanyPermissionsException ex)
+	      {
+		retVal = Ganymede.createErrorDialog("permissions" , "permissions error setting home group " + ex);
+	      }
+
 	    break;
 	  }
       }

@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -58,6 +58,7 @@ import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectHandle;
@@ -228,6 +229,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    return Ganymede.loginError(ex);
 	  }
+	catch (GanyPermissionsException ex)
+	  {
+	    return Ganymede.createErrorDialog("permissions", "permissions error initializing main system interface. " + ex);
+	  }
       }
 
     return null;
@@ -329,7 +334,14 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    for (; i < oldOnes.size(); i++)
 	      {
-		tmpVal = newInterfaces.createNewEmbedded(local);
+		try
+		  {
+		    tmpVal = newInterfaces.createNewEmbedded(local);
+		  }
+		catch (GanyPermissionsException ex)
+		  {
+		    tmpVal = Ganymede.createErrorDialog("permissions", "permissions failure creating embedded interface " + ex);
+		  }
 
 		if (!tmpVal.didSucceed())
 		  {

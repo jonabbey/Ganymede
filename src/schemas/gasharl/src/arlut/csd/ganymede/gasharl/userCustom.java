@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -73,6 +73,7 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectStatus;
@@ -365,7 +366,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     
 	InvidDBField invf = (InvidDBField) getField(userSchema.VOLUMES);
 
-	retVal = invf.createNewEmbedded(true);
+	try
+	  {
+	    retVal = invf.createNewEmbedded(true);
+	  }
+	catch (GanyPermissionsException ex)
+	  {
+	    return Ganymede.createErrorDialog("permissions", "permissions error creating embedded object" + ex);
+					      
+	  }
     
 	if ((retVal == null) || (!retVal.didSucceed()))
 	  {
@@ -542,7 +551,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	if (session.getGSession().viewObjectLabel(category).equals("normal"))
 	  {
-	    ((DBField) getField(userSchema.CATEGORY)).setValue(category, local, true);
+	    try
+	      {
+		((DBField) getField(userSchema.CATEGORY)).setValue(category, local, true);
+	      }
+	    catch (GanyPermissionsException ex)
+	      {
+		return Ganymede.createErrorDialog("permissions", "permissions error setting category" + ex);
+	      }
 	  }
     
 	if (debug)
@@ -610,7 +626,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    System.err.println("User clone sub sub " + i);
 		  }
 
-		tmpVal = newVolumes.createNewEmbedded(local);
+		try
+		  {
+		    tmpVal = newVolumes.createNewEmbedded(local);
+		  }
+		catch (GanyPermissionsException ex)
+		  {
+		    tmpVal = Ganymede.createErrorDialog("permissions", "permissions error creating embedded object during user cloning" + ex);
+		  }
 
 		if (!tmpVal.didSucceed())
 		  {
@@ -1290,7 +1313,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	if (reactivateWizard.shell != null)
 	  {
 	    stringfield = (StringDBField) getField(LOGINSHELL);
-	    retVal = stringfield.setValue(reactivateWizard.shell);
+	    
+	    try
+	      {
+		retVal = stringfield.setValue(reactivateWizard.shell);
+	      }
+	    catch (GanyPermissionsException ex)
+	      {
+		return Ganymede.createErrorDialog("permissions", "permissions error setting shell during reactivation" + ex);
+	      }
 	    
 	    if (retVal != null && !retVal.didSucceed())
 	      {

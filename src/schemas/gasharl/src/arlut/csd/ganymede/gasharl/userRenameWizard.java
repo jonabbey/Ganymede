@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -55,8 +55,10 @@ package arlut.csd.ganymede.gasharl;
 import java.rmi.RemoteException;
 
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeSession;
 import arlut.csd.ganymede.server.GanymediatorWizard;
 import arlut.csd.ganymede.server.StringDBField;
@@ -254,7 +256,15 @@ public class userRenameWizard extends GanymediatorWizard {
     // will go ahead and unregister us and let the name change
     // go through to completion.
 
-    retVal = field.setValue(newname);
+    try
+      {
+	retVal = field.setValue(newname);
+      }
+    catch (GanyPermissionsException ex)
+      {
+	retVal = Ganymede.createErrorDialog("permissions", "permissions error setting user name " + ex);
+      }
+
     System.err.println("userRenameWizard: Returned from field.setValue()");
 
     // now we need to add the old name to the alias list, possibly.

@@ -54,6 +54,7 @@ package arlut.csd.ganymede.gasharl;
 
 import java.util.Vector;
 
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectHandle;
@@ -603,20 +604,27 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// try and choose a new IP address before we get a chance to
 	// return and okay the IP address change we are processing.
 	
-	inFinalizeAddrChange = true;
-	ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, netInvid);
-	inFinalizeAddrChange = false;
-	
-	if (retVal != null && !retVal.didSucceed())
+	try
 	  {
-	    return Ganymede.createErrorDialog("schema error",
-					      "interfaceCustom.finalizeSetValue(): failed to set ip net");
+	    inFinalizeAddrChange = true;
+	    ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, netInvid);
+	    inFinalizeAddrChange = false;
+	    
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		return Ganymede.createErrorDialog("schema error",
+						  "interfaceCustom.finalizeSetValue(): failed to set ip net");
+	      }
+	    
+	    retVal = new ReturnVal(true, true);
+	    retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
+	    
+	    return retVal;
 	  }
-	
-	retVal = new ReturnVal(true, true);
-	retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
-	
-	return retVal;
+	catch (GanyPermissionsException ex)
+	  {
+	    return Ganymede.createErrorDialog("permissions", "permissions error setting network " + ex);
+	  }
       }
 
     return null;
