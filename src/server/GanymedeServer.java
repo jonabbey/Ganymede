@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,15 +42,14 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
   static Hashtable activeUsers = new Hashtable(); 
   private int limit;
 
-  private String[] users = {
-    "jonabbey",
-    "imkris",
-    "navin",
-    "circle",
-    "root"
-  };
-
   /* -- */
+
+  /**
+   *
+   * GanymedeServer constructor.  We only want one server running
+   * per invocation of Ganymede, so we'll check that here.
+   *
+   */
 
   public GanymedeServer(int limit) throws RemoteException
   {
@@ -69,6 +68,7 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
   } 
 
   /**
+   *
    * Establishes a Session object in the server.  The Session object
    * contains all of the server's knowledge about a given client's
    * status.  This method is to be called by the client via RMI.  In
@@ -81,23 +81,58 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
    * Would clients.addElement() do the right thing?  Is vector.addElement()
    * synchronized?
    * 
+   * @see arlut.csd.ganymede.Server
    */
+
   public synchronized Session login(Client client) throws RemoteException
   {
+    String clientName;
+    String clientPass;
     boolean found = false;
+    Query userQuery;
+    QueryNode root;
+    DBObject obj;
+    PasswordDBField pdbf;
 
-    for (int i = 0; i < users.length; i++)
+    /* -- */
+    
+    clientName = client.getName();
+    clientPass = client.getPassword();
+
+    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, clientName);
+    userQuery = new Query(SchemaConstants.UserBase, root, false);
+
+    Vector results = Ganymede.internalSession.query(userQuery);
+
+    for (int i = 0; !found && (i < results.size()); i++)
       {
-	try
+	obj = (DBObject) ((Result) results.elementAt(i)).getObject();
+	
+	pdbf = (PasswordDBField) obj.getField(SchemaConstants.UserPassword);
+	
+	if (pdbf.matchPlainText(clientPass))
 	  {
-	    if (users[i].equals(client.getName()))
+	    found = true;
+	  }
+      }
+
+    if (!found)
+      {
+	root = new QueryDataNode(SchemaConstants.AdminNameField,QueryDataNode.EQUALS, clientName);
+	userQuery = new Query(SchemaConstants.AdminBase, root, false);
+
+	results = Ganymede.internalSession.query(userQuery);
+
+	for (int i = 0; !found && (i < results.size()); i++)
+	  {
+	    obj = (DBObject) ((Result) results.elementAt(i)).getObject();
+	    
+	    pdbf = (PasswordDBField) obj.getField(SchemaConstants.AdminPasswordField);
+	    
+	    if (pdbf.matchPlainText(clientPass))
 	      {
 		found = true;
 	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    Ganymede.debug("Couldn't get client's user name: " + ex + "\n");
 	  }
       }
 
@@ -109,7 +144,7 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     else
       {
-	throw new RemoteException("No such user, couldn't log in");
+	throw new RemoteException("No such user or bad password, couldn't log in");
       }
   }
 
@@ -118,23 +153,49 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
    *
    * Adds <admin> as a monitoring admin console
    *
+   * @see arlut.csd.ganymede.Server
+   *
    */
+
   public synchronized adminSession admin(Admin admin) throws RemoteException
   {
-    try
+    String clientName;
+    String clientPass;
+    boolean found = false;
+    Query userQuery;
+    QueryNode root;
+    DBObject obj;
+    PasswordDBField pdbf;
+
+    /* -- */
+
+    clientName = admin.getName();
+    clientPass = admin.getPassword();
+
+    root = new QueryDataNode(SchemaConstants.AdminNameField,QueryDataNode.EQUALS, clientName);
+    userQuery = new Query(SchemaConstants.AdminBase, root, false);
+
+    Vector results = Ganymede.internalSession.query(userQuery);
+
+    for (int i = 0; !found && (i < results.size()); i++)
       {
-	if (!(admin.getPassword().equals("Dilbert")))
+	obj = (DBObject) ((Result) results.elementAt(i)).getObject();
+	    
+	pdbf = (PasswordDBField) obj.getField(SchemaConstants.AdminPasswordField);
+	    
+	if (pdbf.matchPlainText(clientPass))
 	  {
-	    throw new RemoteException("Bad Admin Password"); // do we have to throw remote here?
+	    found = true;
 	  }
       }
-    catch (RemoteException ex)
+
+    if (!found)
       {
-	Ganymede.debug("Couldn't get admin console login information: " + ex);
+	throw new RemoteException("Bad Admin Account / Password"); // do we have to throw remote here?
       }
 
     adminSession aSession = new GanymedeAdmin(admin);
-    Ganymede.debug("Admin console attached " + new Date());
+    Ganymede.debug("Admin console attached for admin " + clientName + " " + new Date());
     return aSession;
   }
 }
