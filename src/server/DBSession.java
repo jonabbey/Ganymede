@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -585,13 +585,19 @@ final public class DBSession {
 
     editSet.checkpoint(key);
 
+    System.err.println("DBSession.inactivateDBObject(): Calling eObj.inactivate(" + interactive + ")");
+
     retVal = eObj.inactivate(interactive);
+
+    System.err.println("DBSession.inactivateDBObject(): Got back from eObj.inactivate(" + interactive + ")");
 
     if (retVal != null && !retVal.didSucceed())
       {
 	if (retVal.getCallback() == null)
 	  {
 	    // oops, irredeemable failure.  rollback.
+
+	    System.err.println("DBSession.inactivateDBObject(): object refused inactivation, rolling back");
 
 	    editSet.rollback(key);
 	  }
