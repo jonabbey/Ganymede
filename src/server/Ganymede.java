@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,7 @@ public class Ganymede {
   public static String debugFilename = null;
   public static String logFilename = "db/log";
   public static DBLog log = null;
+  public static CategoryTransport catTransport = null;
   
   /* -- */
 
