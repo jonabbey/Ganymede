@@ -55,8 +55,6 @@ package arlut.csd.ganymede.client;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -68,6 +66,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -81,13 +80,15 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
-import arlut.csd.JDataComponent.JIPField;
 import arlut.csd.JDataComponent.JAddValueObject;
 import arlut.csd.JDataComponent.JAddVectorValueObject;
 import arlut.csd.JDataComponent.JDeleteValueObject;
-import arlut.csd.JDataComponent.JParameterValueObject;
 import arlut.csd.JDataComponent.JDeleteVectorValueObject;
 import arlut.csd.JDataComponent.JErrorValueObject;
+import arlut.csd.JDataComponent.JIPField;
+import arlut.csd.JDataComponent.JLabelPanel;
+import arlut.csd.JDataComponent.JParameterValueObject;
+import arlut.csd.JDataComponent.JStretchPanel;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDataComponent.JfloatField;
@@ -152,7 +153,7 @@ import arlut.csd.ganymede.rmi.string_field;
  * @author Mike Mulvaney
  */
 
-public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener {
+public class containerPanel extends JStretchPanel implements ActionListener, JsetValueCallback, ItemListener {
 
   boolean debug = false;
   static final boolean debug_persona = false;
@@ -193,13 +194,22 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   protected framePanel frame;
 
   /**
+   * All of the components in this containerPanel are placed in this
+   * {@link arlut.csd.JDataComponent.JLabelPanel JLabelPanel}, which
+   * automatically takes care of the layout and management of labeled
+   * fields in this panel.
+   */
+
+  private JLabelPanel contentsPanel;
+
+  /**
    * <p>Vector of Short field id's used to track fields for which
    * we receive update requests while we are still loading.  After
    * we finish loading this panel, we'll go back and refresh any fields
    * whose field id's are listed in this vector.</p>
    */
 
-  Vector updatesWhileLoading = new Vector();
+  private Vector updatesWhileLoading = new Vector();
 
   /**
    * <p>Vector used to list vectorPanels embedded in this object window.  This
@@ -213,32 +223,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   /**
    * <p>To help avoid recursive problems, we keep track of any arlut.csd.JDataComponent
    * GUI components that are currently having their change notification messages
-   * handled, and refuse to try to refresh them reentrantly.</p>
+   * handled, and refuse to try to refresh them re-entrantly.</p>
    */
 
-  JComponent currentlyChangingComponent = null;
-
-  /**
-   * <p>Hashtable mapping Short field id's to the AWT/Swing GUI component managing
-   * that database field.</p>
-   */
-
-  Hashtable shortToComponentHash = new Hashtable();
-
-  /**
-   * <p>Hashtable mapping the active GUI components to their labels.  This
-   * is used so that when the containerPanel update() method decides to hide
-   * a field, the associated label can be hid too.</p>
-   */
-
-  Hashtable rowHash = new Hashtable();
+  private JComponent currentlyChangingComponent = null;
 
   /**
    * <p>Hashtable mapping GUI components to their associated
    * {@link arlut.csd.ganymede.rmi.db_field db_field}'s.
    */
 
-  Hashtable objectHash = new Hashtable();
+  private Hashtable objectHash = new Hashtable();
 
   /**
    * <p>Hashtable mapping the combo boxes contained within
@@ -251,7 +246,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * box within the JInvidChooser.</p>
    */
 
-  Hashtable invidChooserHash = new Hashtable();
+  private Hashtable invidChooserHash = new Hashtable();
 
   /**
    * <p>Vector of {@link arlut.csd.ganymede.common.FieldInfo FieldInfo} objects
@@ -259,7 +254,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * and update.</p>
    */
 
-  Vector infoVector = null;
+  private Vector infoVector = null;
 
   /**
    * <p>Vector of {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
@@ -267,7 +262,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * this object.</p>
    */
 
-  Vector templates = null;
+  private Vector templates = null;
 
   boolean
     isCreating,
@@ -283,8 +278,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * update this progressBar as the panel is loaded from the server.
    */
 
-  JProgressBar
-    progressBar;
+  private JProgressBar progressBar;
 
   int
     vectorElementsAdded = 0;
@@ -305,12 +299,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    */
 
   boolean isPersonaPanel = false;
-
-  GridBagLayout
-    gbl = new GridBagLayout();
-  
-  GridBagConstraints
-    gbc = new GridBagConstraints();
 
   /* -- */
 
@@ -465,10 +453,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     // initialize layout
 
-    setLayout(gbl);
+    contentsPanel = new JLabelPanel();
+    contentsPanel.setInsets(4,4,4,4);
+    contentsPanel.setFixedSizeLabelCells(true);
 
-    gbc.anchor = GridBagConstraints.NORTHWEST;
-    gbc.insets = new Insets(4,4,4,4);
+    setComponent(contentsPanel);
 
     if (loadNow)
       {
@@ -950,25 +939,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 
-	    c = (Component) shortToComponentHash.get(fieldID);
+	    c = contentsPanel.findID(fieldID);
 
 	    if (c == null)
 	      {
 		if (debug)
 		  {
-		    println("Could not find this component: ID = " + (Short)fields.elementAt(i));
-		    println("There are " + infoVector.size() + " things in the info vector.");
-		    println("There are " + rowHash.size() + " things in the row hash.");
-		    println("Working on number " + i + " in the fields vector.");
-		    println("Valid ids: ");
-		
-		    Enumeration k = shortToComponentHash.keys();
-		
-		    while (k.hasMoreElements())
-		      {
-			Object next = k.nextElement();
-			println("   " + next);
-		      }
+		    println("Could not find this component: ID = " + fieldID);
 		  }
 	      }
 	    else 
@@ -1040,11 +1017,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (!currentInfo.isVisible())
 	  {
-	    setRowVisible(comp, false);
+	    contentsPanel.setRowVisible(comp, false);
 	    return;
 	  }
 	
-	setRowVisible(comp, true);
+	contentsPanel.setRowVisible(comp, true);
 	
 	if (comp instanceof JstringField)
 	  {
@@ -2133,75 +2110,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
   }
 
-  /** 
-   * <p>All the other addXXX methods used to add GUI components of a
-   * particular type call this to actually register the GUI component
-   * in this containerPanel for display.</p>
-   */
-
-  private synchronized void addRow(Component comp, int row, String label, boolean visible)
-  {
-    JLabel l = new JLabel(label);
-
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.gridwidth = 1;
-    
-    gbc.weightx = 0.0;
-    gbc.gridx = 0;
-    gbc.gridy = row;
-    gbl.setConstraints(l, gbc);
-    add(l);
-
-    // Password fields have labels, but no fields, so we need to be able
-    // to cope reasonably well with a null component
-
-    if (comp == null)
-      {
-	return;
-      }
-
-    rowHash.put(comp, l);
-
-    gbc.gridx = 1;
-    gbc.weightx = 1.0;
-   
-    if (comp instanceof JstringArea)
-      {
-	JScrollPane sp = new JScrollPane(comp);
-	gbl.setConstraints(sp, gbc);
-	add(sp);
-
-	setRowVisible(sp, visible);
-      }
-    else
-      {
-	gbl.setConstraints(comp, gbc);
-	add(comp);
-	
-	setRowVisible(comp, visible);
-      }
-  }
-
-  /**
-   * <p>This private method toggles the visibility of a field component
-   * and its label in this containerPanel.</p>
-   */
-
-  private void setRowVisible(Component comp, boolean b)
-  {
-    Component c = (Component) rowHash.get(comp);
-
-    /* -- */
-
-    if (c == null)
-      {
-	return;
-      }
-
-    comp.setVisible(b);
-    c.setVisible(b);
-  }
-
   /**
    * <p>Helper method to add a component during constructor operation.  This
    * is the top-level field component adding method.</p>
@@ -2297,7 +2205,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      
 	  default:
 	    JLabel label = new JLabel("(Unknown)Field type ID = " + fieldType);
-	    addRow(label, templates.indexOf(fieldTemplate), fieldTemplate.getName(), true);
+	    contentsPanel.addRow(fieldTemplate.getName(), label);
 	  }
       }
   }
@@ -2397,7 +2305,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    ss.update(null, true, null, (Vector) fieldInfo.getValue(), true, null);
 
 	    objectHash.put(ss, field);
-	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
 	    ss.setCallback(this);
 
@@ -2408,7 +2315,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		ss.setToolTipText(comment);
 	      }
 
-	    addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
+	    contentsPanel.addFillRow(fieldTemplate.getName(), ss, fieldInfo.getIDObj());
+	    contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
 	  }
 	else
 	  {
@@ -2421,7 +2329,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    ss.update(available, true, null, (Vector) fieldInfo.getValue(), true, null);
 
 	    objectHash.put(ss, field);
-	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
 	    ss.setCallback(this);
 
@@ -2432,7 +2339,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		ss.setToolTipText(comment);
 	      }
 
-	    addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
+	    contentsPanel.addFillRow(fieldTemplate.getName(), ss, fieldInfo.getIDObj());
+	    contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
 	  }
       }
     else  //not editable, don't need whole list of things
@@ -2445,7 +2353,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	ss.update(null, false, null, (Vector) fieldInfo.getValue(), true, null);
 
 	objectHash.put(ss, field);
-	shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
 	String comment = fieldTemplate.getComment();
 	    
@@ -2454,7 +2361,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    ss.setToolTipText(comment);
 	  }
 
-	addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
+	contentsPanel.addFillRow(fieldTemplate.getName(), ss, fieldInfo.getIDObj());
+	contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
       }
   }
 
@@ -2638,7 +2546,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     objectHash.put(ss, field);
-    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
     
     ss.setCallback(this);
 
@@ -2649,7 +2556,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	ss.setToolTipText(comment);
       }
 
-    addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
+    contentsPanel.addFillRow(fieldTemplate.getName(), ss, fieldInfo.getIDObj());
+    contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
   }
 
   /**
@@ -2681,7 +2589,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 				     isEditInPlace, this, isCreating);
     vectorPanelList.addElement(vp);
     objectHash.put(vp, field);
-    shortToComponentHash.put(new Short(fieldInfo.getID()), vp);
 
     String comment = fieldTemplate.getComment();
 	    
@@ -2690,29 +2597,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	vp.setToolTipText(comment);
       }
 
-    addVectorRow(vp, templates.indexOf(fieldTemplate), 
-		 fieldTemplate.getName(), fieldInfo.isVisible());
-  }
-
-  /**
-   * <p>This private helper method is used to insert a vectorPanel into the containerPanel</p>
-   */
-
-  private synchronized void addVectorRow(Component comp, int row, String label, boolean visible)
-  {
-    JLabel l = new JLabel(label);
-    rowHash.put(comp, l);
-    
-    gbc.gridwidth = 2;
-    gbc.gridx = 0;
-    gbc.gridy = row;
-
-    gbc.weightx = 1.0;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbl.setConstraints(comp, gbc);
-    add(comp);
-
-    setRowVisible(comp, visible);
+    contentsPanel.addWideFillComponent(vp, fieldInfo.getIDObj());
+    contentsPanel.setRowVisible(vp, fieldInfo.isVisible());
   }
 
   /**
@@ -2859,7 +2745,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 
 	objectHash.put(combo, field);
-	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
 
 	String comment = fieldTemplate.getComment();
 
@@ -2868,8 +2753,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    combo.setToolTipText(comment);
 	  }
 	    
-	addRow(combo, templates.indexOf(fieldTemplate), 
-	       fieldTemplate.getName(), fieldInfo.isVisible());
+	contentsPanel.addFillRow(fieldTemplate.getName(), combo, fieldInfo.getIDObj());
+	contentsPanel.setRowVisible(combo, fieldInfo.isVisible());
       }
     else if (fieldTemplate.isMultiLine())
       {
@@ -2880,7 +2765,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	sa.setCallback(this);
 	
 	objectHash.put(sa, field);
-	shortToComponentHash.put(new Short(fieldInfo.getID()), sa);
 			      
 	sa.setText((String)fieldInfo.getValue());
 	    			
@@ -2898,7 +2782,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    sa.setToolTipText(comment);
 	  }
 
-	addRow(sa, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+	contentsPanel.addFillRow(fieldTemplate.getName(), sa, fieldInfo.getIDObj());
+	contentsPanel.setRowVisible(sa, fieldInfo.isVisible());
       }
     else
       {
@@ -2915,7 +2800,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			      this);
 			      
 	objectHash.put(sf, field);
-	shortToComponentHash.put(new Short(fieldInfo.getID()), sf);
 			      
 	sf.setText((String)fieldInfo.getValue());
 	    			
@@ -2933,7 +2817,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    sf.setToolTipText(comment);
 	  }
 
-	addRow(sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+	contentsPanel.addFillRow(fieldTemplate.getName(), sf, fieldInfo.getIDObj());
+	contentsPanel.setRowVisible(sf, fieldInfo.isVisible());
       }
   }
 
@@ -2958,7 +2843,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	JpassField pf = new JpassField(gc, 10, 8, editable && fieldInfo.isEditable());
 	objectHash.put(pf, field);
-	shortToComponentHash.put(new Short(fieldInfo.getID()), pf);
 			
 	if (editable && fieldInfo.isEditable())
 	  {
@@ -2971,8 +2855,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    pf.setToolTipText(comment);
 	  }
-	  
-	addRow(pf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), field.isVisible());
+
+	contentsPanel.addRow(fieldTemplate.getName(), pf, fieldInfo.getIDObj());
+	contentsPanel.setRowVisible(pf, fieldInfo.isVisible());
       }
     else
       {
@@ -2985,7 +2870,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			      null);
 
 	objectHash.put(sf, field);
-	shortToComponentHash.put(new Short(fieldInfo.getID()), sf);
 			  
 	// the server won't give us an unencrypted password, we're clear here
 			  
@@ -3000,7 +2884,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    sf.setToolTipText(comment);
 	  }
 	
-	addRow(sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+	contentsPanel.addFillRow(fieldTemplate.getName(), sf, fieldInfo.getIDObj());
+	contentsPanel.setRowVisible(sf, fieldInfo.isVisible());
       }
   }
 
@@ -3025,7 +2910,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     JnumberField nf = new JnumberField();
 
     objectHash.put(nf, field);
-    shortToComponentHash.put(new Short(fieldInfo.getID()), nf);
 		      
     Integer value = (Integer)fieldInfo.getValue();
 
@@ -3048,8 +2932,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	nf.setToolTipText(comment);
       }
-    
-    addRow(nf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+
+    contentsPanel.addFillRow(fieldTemplate.getName(), nf, fieldInfo.getIDObj());
+    contentsPanel.setRowVisible(nf, fieldInfo.isVisible());
   }
 
    /**
@@ -3073,7 +2958,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     JfloatField nf = new JfloatField();
  
     objectHash.put(nf, field);
-    shortToComponentHash.put(new Short(fieldInfo.getID()), nf);
  		      
     Double value = (Double)fieldInfo.getValue();
  
@@ -3096,8 +2980,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
  	nf.setToolTipText(comment);
       }
-     
-    addRow(nf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+
+    contentsPanel.addFillRow(fieldTemplate.getName(), nf, fieldInfo.getIDObj());
+    contentsPanel.setRowVisible(nf, fieldInfo.isVisible());
   }
 
   /**
@@ -3116,7 +3001,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     JdateField df = new JdateField();
 
     objectHash.put(df, field);
-    shortToComponentHash.put(new Short(fieldInfo.getID()), df);
 
     if (debug) {
       println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
@@ -3140,8 +3024,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	df.setCallback(this);
       }
 
-    addRow(df, templates.indexOf(fieldTemplate), 
-	   fieldTemplate.getName(), fieldInfo.isVisible());
+    contentsPanel.addRow(fieldTemplate.getName(), df, fieldInfo.getIDObj());
+    contentsPanel.setRowVisible(df, fieldInfo.isVisible());
   }
 
   /**
@@ -3161,7 +3045,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     /* -- */
 
     objectHash.put(cb, field);
-    shortToComponentHash.put(new Short(fieldInfo.getID()), cb);
     cb.setEnabled(editable && fieldInfo.isEditable());
 
     if (editable && fieldInfo.isEditable())
@@ -3188,8 +3071,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	cb.setToolTipText(comment);
       }
 
-    addRow(cb, templates.indexOf(fieldTemplate), 
-	   fieldTemplate.getName(), fieldInfo.isVisible());
+    contentsPanel.addFillRow(fieldTemplate.getName(), cb, fieldInfo.getIDObj());
+    contentsPanel.setRowVisible(cb, fieldInfo.isVisible());
   }
 
   /**
@@ -3225,10 +3108,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	pb.setToolTipText(comment);
       }
 
-    shortToComponentHash.put(new Short(fieldInfo.getID()), pb);
-    
-    addRow(pb, templates.indexOf(fieldTemplate),
-	   fieldTemplate.getName(), fieldInfo.isVisible());
+    contentsPanel.addFillRow(fieldTemplate.getName(), pb, fieldInfo.getIDObj());
+    contentsPanel.setRowVisible(pb, fieldInfo.isVisible());
   }
 
   /**
@@ -3262,11 +3143,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    println("Hey, " + fieldTemplate.getName() +
 		    " is edit in place but not a vector, what gives?");
 	  }
+	
+	JLabel errorLabel = new JLabel("edit in place non-vector");
 
-	addRow(new JLabel("edit in place non-vector"), 
-	       templates.indexOf(fieldTemplate), 
-	       fieldTemplate.getName(), 
-	       fieldInfo.isVisible());
+	contentsPanel.addFillRow(fieldTemplate.getName(), errorLabel);
+	contentsPanel.setRowVisible(errorLabel, fieldInfo.isVisible());
 
 	return;
       }
@@ -3305,17 +3186,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		b.setToolTipText(comment);
 	      }
 
-	    addRow(b, 
-		   templates.indexOf(fieldTemplate), 
-		   fieldTemplate.getName(), 
-		   fieldInfo.isVisible());
+	    contentsPanel.addRow(fieldTemplate.getName(), b);
+	    contentsPanel.setRowVisible(b, fieldInfo.isVisible());
 	  }
 	else
 	  {
-	    addRow(new JTextField("null invid"), 
-		   templates.indexOf(fieldTemplate), 
-		   fieldTemplate.getName(), 
-		   fieldInfo.isVisible());
+	    JLabel errorLabel = new JLabel("Null Invid");
+
+	    contentsPanel.addFillRow(fieldTemplate.getName(), errorLabel);
+	    contentsPanel.setRowVisible(errorLabel, fieldInfo.isVisible());
 	  }
 
 	return;
@@ -3521,8 +3400,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     objectHash.put(combo, field); 
     
-    shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
-    
     if (debug)
       {
 	println("Adding to panel");
@@ -3534,8 +3411,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	combo.setToolTipText(comment);
       }
-    
-    addRow(combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+
+    contentsPanel.addRow(fieldTemplate.getName(), combo, fieldInfo.getIDObj());
+    contentsPanel.setRowVisible(combo, fieldInfo.isVisible());
   }
 
   /**
@@ -3574,7 +3452,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     
     objectHash.put(ipf, field);
-    shortToComponentHash.put(new Short(fieldInfo.getID()), ipf);
     
     bytes = (Byte[]) fieldInfo.getValue();
 
@@ -3592,10 +3469,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	ipf.setToolTipText(comment);
       }
 		
-    addRow(ipf,
-	   templates.indexOf(fieldTemplate), 
-	   fieldTemplate.getName(), 
-	   fieldInfo.isVisible());
+    contentsPanel.addFillRow(fieldTemplate.getName(), ipf, fieldInfo.getIDObj());
+    contentsPanel.setRowVisible(ipf, fieldInfo.isVisible());
   }
 
   /**
@@ -3618,48 +3493,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.err.println("containerPanel cleanUp()");
       }
 
-    // first we pull everything out of our panel and clear
-    // any resources we know of for the fields
-
-    if (rowHash != null)
-      {
-	en = rowHash.keys();
-
-	while (en.hasMoreElements())
-	  {
-	    JComponent j = (JComponent) en.nextElement();
-	    
-	    if (j instanceof JCheckBox)
-	      {
-		((JCheckBox) j).removeActionListener(this);
-	      }
-	    else if (j instanceof JComboBox)
-	      {
-		((JComboBox) j).removeItemListener(this);
-	      }
-	    else if (j instanceof JInvidChooser)
-	      {
-		((JInvidChooser) j).removeItemListener(this);
-	      }
-	    else if (j instanceof JdateField)
-	      {
-		JdateField df = (JdateField) j;
-		
-		df.unregister();
-	      }
-	    else if (j instanceof perm_button)
-	      {
-		perm_button pb = (perm_button) j;
-		
-		pb.unregister();
-	      }
-	  }
-
-	rowHash.clear();
-	rowHash = null;
-      }
-
-    this.removeAll();
+    contentsPanel.cleanup();
 
     gc = null;
     invid = null;
@@ -3679,12 +3513,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     currentlyChangingComponent = null;
-
-    if (shortToComponentHash != null)
-      {
-	shortToComponentHash.clear();
-	shortToComponentHash = null;
-      }
 
     /**
      * <p>The critical ones.. this will release our references to fields
@@ -3721,8 +3549,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     progressBar = null;
-    gbl = null;
-    gbc = null;
   }
 
   /**
