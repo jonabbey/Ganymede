@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -250,11 +250,6 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
       }
 
     return result;
-  }
-
-  public boolean set_admin_info()
-  {
-    return true;
   }
 
   /**
