@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,7 +29,7 @@ public class QueryDataNode extends QueryNode {
   static public final byte NOCASEEQ = 6; // case insensitive string equals
   static public final byte STARTSWITH = 7;
   static public final byte ENDSWITH = 8;
-  static public final byte UNDEFINED = 9;
+  static public final byte DEFINED = 9;
   static public final byte LAST = 9;
 
   static public final byte FIRSTVECOP = 0;
