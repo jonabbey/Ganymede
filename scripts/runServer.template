@@ -104,6 +104,11 @@ export CLASSPATH
 # server to *not* send any email notifications for any reason.
 # Think of it as an email "master cutoff switch".
 #
+# The optional -nossl parameter will force the Ganymede server not
+# to use SSL to protect client/server communications.  You should only
+# use this if you are needing to do high-speed offline bulk loading,
+# or the like.
+#
 # The optional telnet=<portnumber> parameter, if provided, causes the
 # Ganymede server to open a Jython interpreter service on port
 # <portnumber> which a Ganymede administrator with adequate
