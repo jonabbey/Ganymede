@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -643,14 +643,27 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * success or failure, and may optionally
    * pass back a dialog.<br><br>
    *
+   * This method is intended to be called by code that needs to go
+   * through the permission checking regime, and that needs to have
+   * rescan information passed back.  This includes most wizard
+   * setValue calls.
+   *
    * @see arlut.csd.ganymede.DBSession
    * @see arlut.csd.ganymede.db_field
-   *
+   * 
    */
 
   public final ReturnVal setValue(Object value)
   {
-    return setValue(value, false);
+    ReturnVal result, rescan;
+
+    /* -- */
+
+    // do the thing, calling into our subclass
+
+    result = setValue(value, false);
+
+    return rescanThisField(result);
   }
 
   /**
@@ -677,13 +690,15 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    * This method is server-side only.<br><br>
    *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
+   * The ReturnVal object returned encodes success or failure, and may
+   * optionally pass back a dialog.<br><br>
+   *
+   * This method will be overridden by DBField subclasses with special
+   * needs.
    *
    * @param value Value to set this field to
    * @param local If true, permissions checking will be skipped
-   *
+   * 
    */
 
   public synchronized ReturnVal setValue(Object value, boolean local)
@@ -883,7 +898,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   
   public final ReturnVal setElement(int index, Object value)
   {
-    return setElement(index, value, false);
+    return rescanThisField(setElement(index, value, false));
   }
 
   /**
@@ -1029,7 +1044,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public final ReturnVal addElement(Object value)
   {
-    return addElement(value, false);
+    return rescanThisField(addElement(value, false));
   }
 
   /**
@@ -1160,7 +1175,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public final ReturnVal deleteElement(int index)
   {
-    return deleteElement(index, false);
+    return rescanThisField(deleteElement(index, false));
   }
 
   /**
@@ -1276,7 +1291,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public final ReturnVal deleteElement(Object value)
   {
-    return deleteElement(value, false);
+    return rescanThisField(deleteElement(value, false));
   }
 
   /**
@@ -2016,6 +2031,66 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	this.defined = true;
       }
+  }
+
+  /**
+   *
+   * This method takes the result of an operation on this field
+   * and wraps it with an instruction to the client to rescan
+   * this field.  This isn't normally necessary for most client
+   * operations, but it is necessary for the case in which wizards
+   * call DBField.setValue() on behalf of the client, because in those
+   * cases, the client otherwise won't know that the wizard modified
+   * the field.<br><br>
+   *
+   * This makes for a significant bit of overhead on client calls
+   * to the field modifier methods, but this is avoided if code 
+   * on the server uses setValueLocal(), setElementLocal(), addElementLocal(),
+   * or deleteElementLocal() to make changes to a field.<br><br>
+   *
+   * If you are ever in a situation where you want to use the local
+   * variants of the modifier methods (to avoid permissions checking
+   * overhead), but you <b>do</b> want to have the field's rescan
+   * information returned, you can do something like:<br>
+   * <pre>
+   *
+   * return field.rescanThisField(field.setValueLocal(null));
+   *
+   * </pre> 
+   *
+   */
+
+  public final ReturnVal rescanThisField(ReturnVal original)
+  {
+    ReturnVal rescan;
+
+    /* -- */
+
+    if (original != null && !original.didSucceed())
+      {
+	return original;
+      }
+
+    if (original == null)
+      {
+	original = new ReturnVal(true);
+      }
+
+    rescan = new ReturnVal(true);
+    rescan.addRescanField(getID());
+
+    // We use addRescanObject instead of just returning
+    // rescan itself for two reasons.  One, the setValue (and etc.)
+    // method might have gone through a wizard, in which case an
+    // informative dialog might be riding along with the success
+    // value, and Two, because if a wizard did do the action, the
+    // client may not know what object the field belonged to for
+    // proper rescan behavior.  So, we specify the object and
+    // the field, and everyone's happy.
+
+    original.addRescanObject(getOwner().getInvid(), rescan);
+
+    return original;
   }
 }
 
