@@ -2118,7 +2118,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public boolean canCreate(Session session)
   {
-    return objectHook.canCreate(session);
+    return getObjectHook().canCreate(session);
   }
 
   /**
@@ -2129,7 +2129,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public synchronized boolean canInactivate()
   {
-    return objectHook.canBeInactivated();
+    return getObjectHook().canBeInactivated();
   }
 
   /**
