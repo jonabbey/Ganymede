@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 2001/10/26 21:58:36 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 2001/11/09 21:33:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -673,6 +673,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // check that here
 
     if (targetFieldID == userSchema.GROUPLIST)
+      {
+	return true;
+      }
+
+    // go ahead and allow the same for netgroups
+
+    if (targetFieldID == userSchema.NETGROUPS)
       {
 	return true;
       }
