@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/08/14 00:47:45 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/10/09 07:33:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -407,7 +407,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * The lines in this file look like the following.
    *
-   * broccol:393T6k3e/9/w2:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh
+   * broccol:393T6k3e/9/w2:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh:ss#:normal:exp:lastadm
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this user line
@@ -427,6 +427,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String homePhone;
     String directory;
     String shell;
+    Invid categoryInvid;
+    String category;
 
     PasswordDBField passField;
     Vector invids;
@@ -504,6 +506,37 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(directory);
     result.append(":");
     result.append(shell);
+    result.append("::");
+
+    categoryInvid = (Invid) object.getFieldValueLocal(userSchema.CATEGORY);
+
+    if (categoryInvid != null)
+      {
+	category = getLabel(categoryInvid);
+	result.append(category);
+      }
+
+    result.append(":");
+
+    Date expDate = (Date) object.getFieldValueLocal(SchemaConstants.ExpirationField);
+
+    if (expDate != null)
+      {
+	long timecode = expDate.getTime();
+
+	// we want to emit a UNIX timecode, which is one thousandth the
+	// value of the Java timecode.  We will overflow here if the
+	// expiration date is past 2038, but this will make Steve happy.
+
+	int mytimecode = (int) (timecode/1000);
+	result.append(mytimecode);
+      }
+    else
+      {
+	result.append("0");
+      }
+
+    result.append(":ganymede");
 
     if (result.length() > 1024)
       {
@@ -657,6 +690,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector invids;
     Invid userInvid;
     String userName;
+    String contract;
+    String description;
 
     /* -- */
 
@@ -669,6 +704,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     pass = (String) object.getFieldValueLocal(groupSchema.PASSWORD);
     gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
+
     
     invids = object.getFieldValuesLocal(groupSchema.USERS);
 
@@ -709,6 +745,24 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	result.append((String) users.elementAt(i));
       }
+
+    description = (String) object.getFieldValueLocal(groupSchema.DESCRIPTION);
+
+    Invid contractLink = (Invid) object.getFieldValueLocal(groupSchema.CONTRACTLINK);
+
+    if (contractLink != null)
+      {
+	contract = getLabel(contractLink);
+      }
+    else
+      {
+	contract = (String) object.getFieldValueLocal(groupSchema.CONTRACT);
+      }
+
+    result.append(":");
+    result.append(contract);
+    result.append(":");
+    result.append(description);
 
     if (result.length() > 1024)
       {
