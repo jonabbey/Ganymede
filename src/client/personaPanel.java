@@ -129,7 +129,11 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 		db_object ob = gc.getSession().edit_db_object(thisInvid);
 		if (ob == null)
 		  {
-		    System.out.println("Whoa, got a null object(edit), trying to go to non-editable, cover me.");
+		    if (debug)
+		      {
+			System.out.println("Whoa, got a null object(edit), trying to go to non-editable, cover me.");
+		      }
+
 		    ob = gc.getSession().view_db_object(thisInvid);
 		
 		    if (ob == null)
@@ -324,11 +328,11 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 	    if (deleted)
 	      {
-		System.out.println("Deleted the object ok");
+		gc.setStatus("Deleted the object ok");
 	      }
 	    else
 	      {
-		System.out.println("Could not delete the object.");
+	       gc.setStatus("Could not delete the object.");
 	      }
 	  }
 	catch (RemoteException rx)
@@ -429,6 +433,7 @@ class personaContainer extends JScrollPane implements Runnable{
     progressPane = new JPanel();
     progressPane.add(new JLabel("Loading..."));
     progressPane.add(progressBar);
+    getVerticalScrollBar().setUnitIncrement(15);
     setViewportView(progressPane);
   }
 

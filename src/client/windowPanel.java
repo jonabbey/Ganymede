@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,7 +57,6 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   Hashtable
     menuItems = new Hashtable(),
-    Windows = new Hashtable(),
     windowList = new Hashtable();
   
   // This is used as the wait image in other classes.  Currently, it
@@ -325,6 +324,29 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   }
 
   /**
+   * Returns true if an edit window is open for this object.
+   */
+
+  public boolean isOpenForEdit(Invid invid)
+  {
+    Enumeration e = windowList.keys();
+    while (e.hasMoreElements())
+      {
+	Object o = windowList.get(e.nextElement());
+	if (o instanceof framePanel)
+	  {
+	    framePanel fp = (framePanel)o;
+	    if ((fp.isEditable()) && (fp.getObjectInvid().equals(invid)))
+	      {
+		return true;
+	      }
+	  }
+      }
+
+    return false;
+  }
+
+  /**
    * Calls gclient.setStatus
    */
 
@@ -422,104 +444,6 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     
   }
 
-  // This makes a menu bar for the top of the JInternalFrames
-  JMenuBar createMenuBar(boolean editable, db_object object, JInternalFrame w)
-  {
-    // Adding a menu bar, checking it out
-    JMenuBar menuBar = new JMenuBar();
-    menuBar.setBorderPainted(true);
-    //menuBar.setBackground(ClientColor.WindowBG.darker());
-    
-    JMenu fileM = new JMenu("File");
-    JMenu editM = new JMenu("Edit");
-    menuBar.add(fileM);
-    menuBar.add(editM);
-    
-    JMenuItem iconifyMI = new JMenuItem("Iconify");
-    menuItems.put(iconifyMI, object);
-    Windows.put(iconifyMI, w);
-    iconifyMI.addActionListener(this);
-
-    JMenuItem closeMI = null;
-    closeMI = new JMenuItem("Close");
-    menuItems.put(closeMI , object);
-    Windows.put(closeMI, w);
-    closeMI.addActionListener(this);
-
-    JMenu deleteM = new JMenu("Delete");
-    JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
-    deleteM.add(reallyDeleteMI);
-    menuItems.put(reallyDeleteMI, object);
-    Windows.put(reallyDeleteMI, w);
-    reallyDeleteMI.setActionCommand("ReallyDelete");
-    reallyDeleteMI.addActionListener(this);
-      
-    JMenuItem inactivateMI = new JMenuItem("Inactivate");
-    Windows.put(inactivateMI, w);
-    menuItems.put(inactivateMI, object);
-    inactivateMI.addActionListener(this);
-
-    JMenuItem refreshMI = new JMenuItem("Refresh");
-    Windows.put(refreshMI, w);
-    menuItems.put(refreshMI, object);
-    refreshMI.addActionListener(this);
-
-    JMenuItem setExpirationMI = null;
-    JMenuItem setRemovalMI = null;
-    if (editable)
-      {
-	setExpirationMI = new JMenuItem("Set Expiration Date");
-	Windows.put(setExpirationMI, w);
-	menuItems.put(setExpirationMI, object);
-	setExpirationMI.addActionListener(this);
-	
-        setRemovalMI = new JMenuItem("Set Removal Date");
-	Windows.put(setRemovalMI, w);
-	menuItems.put(setRemovalMI, object);
-	setRemovalMI.addActionListener(this);
-      }
-
-    JMenuItem printMI = new JMenuItem("Print");
-    Windows.put(printMI, w);
-    menuItems.put(printMI, object);
-    printMI.addActionListener(this);
-
-    fileM.add(inactivateMI);
-    fileM.add(iconifyMI);
-    fileM.add(deleteM);
-    fileM.add(printMI);
-    fileM.add(refreshMI);
-    if (editable)
-      {
-	fileM.addSeparator();
-	fileM.add(setExpirationMI);
-	fileM.add(setRemovalMI);
-      }
-
-    fileM.addSeparator();
-    fileM.add(closeMI);
-
-    JMenuItem queryMI = new JMenuItem("Query");
-    Windows.put(queryMI, w);
-    queryMI.addActionListener(this);
-    menuItems.put(queryMI , object);
-    JMenuItem editMI = new JMenuItem("Edit");
-    Windows.put(editMI, w);
-    menuItems.put(editMI , object);
-    editMI.setEnabled(!editable);
-    editMI.addActionListener(this);
-    
-    editM.add(queryMI);
-    editM.add(editMI);
-
-    if (debug)
-      {
-	System.out.println("Returning menubar.");
-      }
-    
-    return menuBar;
-  }
-
   /**
    * Closes all the windows
    *
@@ -541,6 +465,17 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
       {
 	throw new RuntimeException("beans? " + ex);
       }
+  }
+
+  /**
+   *
+   * Returns an Enumeration of all the windows.
+   *
+   */
+
+  public Enumeration getWindows()
+  {
+    return windowList.elements();
   }
 
   /**
@@ -602,7 +537,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	    
 	    framePanel w = (framePanel)o;
 	    
-	    if (w.editable)
+	    if (w.isEditable())
 	      {
 		try
 		  {
@@ -794,160 +729,13 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   {
     if (e.getSource() instanceof JMenuItem)
       {
-	if (debug)
-	  {
-	    System.out.println("Menu item action: " + e.getActionCommand());
-	  }
-
 	JMenuItem MI = (JMenuItem)e.getSource();
 
 	if (e.getActionCommand().equals("showWindow"))
 	  {
 	    showWindow(MI.getText());
 	  }
-	else if (e.getActionCommand().equals("Edit"))
-	  {
-	    if (debug)
-	      {
-		System.out.println("edit button clicked");
-	      }
-	    try
-	      {
-		if (debug)
-		  {
-		    System.out.println("Opening new edit window");
-		  }
-		//addWindow(gc.session.edit_db_object(((db_object)menuItems.get(MI)).getInvid()), true);
-		gc.editObject(((db_object)menuItems.get(MI)).getInvid());
-	      }
-	    catch (RemoteException rx)
-	      {
-		setStatus("Something went wrong on the server.");
-		throw new RuntimeException("Could not open object for edit: " + rx);
-	      }
-	  }
-	else if (e.getActionCommand().equals("Clone"))
-	  {
-	    try
-	      {
-		if (debug)
-		  {
-		    System.out.println("Opening new edit window on the cloned object");
-		  }
-		//addWindow(parent.session.clone_db_object(((db_object)Buttons.get(button)).getInvid()), true);
-		System.out.println("clone_db_object not there yet");
-	      }
-	    //catch (RemoteException rx)
-	    catch (Exception rx)
-	      {
-		setStatus("Something went wrong on the server.");
-		throw new RuntimeException("Could not clone object: " + rx);
-	      }
-	  }
-	else if (e.getActionCommand().equals("ReallyDelete"))
-	  {
-	    try
-	      {
-		if (debug)
-		  {
-		    System.out.println("Deleting object");
-		  }
-		gc.deleteObject(((db_object)menuItems.get(MI)).getInvid());
-		try
-		  {
-		    ((JInternalFrame)Windows.get(MI)).setClosed(true);
 
-		  }
-		catch (PropertyVetoException ex)
-		  {
-		    throw new RuntimeException("JInternalFrame will not close: " + ex);
-		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		setStatus("Something went wrong on the server.");
-		throw new RuntimeException("Could not delete object: " + rx);
-	      }
-	  }
-	else if (e.getActionCommand().equals("Close"))
-	  {
-	    try
-	      {
-		((JInternalFrame)Windows.get(MI)).setClosed(true);
-		
-	      }
-	    catch (PropertyVetoException ex)
-	      {
-		throw new RuntimeException("JInternalFrame will not close: " + ex);
-	      }
-	  }
-	else if (e.getActionCommand().equals("Iconify"))
-	  {
-	    try
-	      {
-		((JInternalFrame)Windows.get(MI)).setIcon(true);
-	      }
-	    catch (PropertyVetoException ex)
-	      {
-		throw new RuntimeException("JInternalFrame will not close: " + ex);
-	      }
-	  }
-	else if (e.getActionCommand().equals("Print"))
-	  {
-	    ((framePanel)Windows.get(MI)).printObject();
-	  }
-	else if (e.getActionCommand().equals("Refresh"))
-	  {
-	    framePanel fp = (framePanel)Windows.get(MI);
-	    if (fp != null)
-	      {
-		fp.refresh();
-	      }
-	    else
-	      {
-		System.out.println("-!- Could not find the window for this menuitem.");
-	      }
-	  }
-      	else if (e.getActionCommand().equals("Inactivate"))
-	  {
-	    framePanel fp = (framePanel)Windows.get(MI);
-
-	    boolean success = gc.inactivateObject(fp.getObjectInvid());
-
-	    if (success)
-	      {
-		try
-		  {
-		    ((JInternalFrame)Windows.get(MI)).setClosed(true);
-		    
-		  }
-		catch (PropertyVetoException ex)
-		  {
-		    throw new RuntimeException("JInternalFrame will not close: " + ex);
-		  }		
-	      }
-	    else
-	      {
-		gc.showErrorMessage("Could not inactivate object.");
-	      }
-
-	  }
-	else if (e.getActionCommand().equals("Query"))
-	  {
-	    System.out.println("Not sure what a query should do");
-	  }
-	else if (e.getActionCommand().equals("Set Expiration Date"))
-	  {
-	    framePanel fp = (framePanel)Windows.get(MI);
-	    fp.addExpirationDatePanel();
-	    fp.showTab(fp.expiration_date_index);
-	  }
-	else if (e.getActionCommand().equals("Set Removal Date"))
-	  {
-	    framePanel fp = (framePanel)Windows.get(MI);
-	    fp.addRemovalDatePanel();
-	    fp.showTab(fp.removal_date_index);
-	  }
       }
     else
       {
