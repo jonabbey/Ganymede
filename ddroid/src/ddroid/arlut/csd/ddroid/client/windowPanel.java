@@ -91,6 +91,9 @@ import arlut.csd.ddroid.rmi.db_field;
 import arlut.csd.ddroid.rmi.db_object;
 import arlut.csd.ddroid.rmi.invid_field;
 
+import foxtrot.Task;
+import foxtrot.Worker;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                      windowPanel
@@ -438,7 +441,33 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    title = temp + num++;
 	  }
 
-	framePanel w = new framePanel(finalInvid, object, editable, this, title, isNewlyCreated);
+	framePanel w = null;
+
+	try
+	  {
+	    // Use foxtrot to set up the framePanel on its own thread,
+	    // while the main GUI thread keeps dispatching GUI events
+
+	    final Invid localFinalInvid = finalInvid;
+	    final db_object localObject = object;
+	    final boolean localEditable = editable;
+	    final windowPanel localWindowPanel = this;
+	    final String localTitle = title;
+	    final boolean localIsNewlyCreated = isNewlyCreated;
+
+	    w = (framePanel) Worker.post(new Task()
+	      {
+		public Object run() throws Exception
+		{
+		  return new framePanel(localFinalInvid, localObject, localEditable, localWindowPanel, localTitle, localIsNewlyCreated);
+		}
+	      }
+						    );
+	  }
+	catch (Exception ex)
+	  {
+	  }
+
 	w.setOpaque(true);
     
 	windowList.put(title, w);
