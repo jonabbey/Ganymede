@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.60 $ %D%
+   Version: $Revision: 1.61 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -793,6 +793,38 @@ public class DBStore {
 
   /**
    *
+   * Returns a vector of Strings, the names of the bases currently
+   * defined in this DBStore.
+   *
+   */
+
+  public synchronized Vector getBaseNameList()
+  {
+    Vector result = new Vector();
+
+    try
+      {
+	Enumeration enum;
+
+	/* -- */
+
+	enum = objectBases.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    result.addElement(((DBObjectBase) enum.nextElement()).getName());
+	  }
+      }
+    finally
+      {
+	this.notifyAll();
+      }
+
+    return result;
+  }
+
+  /**
+   *
    * Returns the object definition class for the id class.
    *
    * @param id Type id for the base to be returned
@@ -1220,10 +1252,10 @@ public class DBStore {
 
 	setBase(b);
 
-	// create permission matrix base
+	// create Role base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Permission Matrix";
+	b.object_name = "Role";
 	b.type_code = (short) SchemaConstants.PermBase; // 2
 	b.displayOrder = b.type_code;
 
@@ -1275,72 +1307,17 @@ public class DBStore {
 
 	setBase(b);
 
-	// create user base
+	// create System Events base
 
-	DBBaseCategory userCategory = new DBBaseCategory(this, "User-Level Objects", rootCategory);
-	rootCategory.addNode(userCategory, false, false);
-
-	b = new DBObjectBase(this, false);
-	b.object_name = "User";
-	b.type_code = (short) SchemaConstants.UserBase; // 2
-	b.displayOrder = b.type_code;
-
-	userCategory.addNode(b, false, false); // add it to the end is ok
-
-	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.UserUserName;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Username";
-	bf.minLength = 2;
-	bf.maxLength = 8;
-	bf.badChars = " :=><|+[]\\/*;:.,?\""; // See p.252, teach yourself WinNT Server 4 in 14 days
-	bf.field_order = 2;
-	bf.loading = true;
-	bf.setNameSpace("username");
-	bf.loading = false;
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "User name for an individual privileged to log into Ganymede and/or the network";
-	b.fieldTable.put(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.UserPassword;
-	bf.field_type = FieldType.PASSWORD;
-	bf.field_name = "Password";
-	bf.maxLength = 32;
-	bf.field_order = 3;
-	bf.removable = false;
-	bf.editable = false;
-	bf.crypted = true;
-	bf.isCrypted();
-	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
-	b.fieldTable.put(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.UserAdminPersonae;
-	bf.field_type = FieldType.INVID;
-	bf.allowedTarget = SchemaConstants.PersonaBase;
-	bf.targetField = SchemaConstants.PersonaAssocUser;
-	bf.field_name = "Admin Personae";
-	bf.field_order = bf.field_code;
-	bf.removable = false;
-	bf.editable = false;
-	bf.array = true;
-	bf.comment = "A list of admin personae this user can assume";
-	b.fieldTable.put(bf);
-
-	b.setLabelField(SchemaConstants.UserUserName);
-    
-	setBase(b);
-
-	// create event base
+	DBBaseCategory eventCategory = new DBBaseCategory(this, "Events", adminCategory);
+	adminCategory.addNode(eventCategory, false, false);
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Event";
+	b.object_name = "System Event";
 	b.type_code = (short) SchemaConstants.EventBase;  
 	b.displayOrder = b.type_code;
 
-	adminCategory.addNode(b, false, false); // add it to the end is ok
+	eventCategory.addNode(b, false, false); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventToken;
@@ -1413,6 +1390,174 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	b.setLabelField(SchemaConstants.EventToken);
+    
+	setBase(b);
+
+	// create Object Events base
+
+	b = new DBObjectBase(this, false);
+	b.object_name = "Object Event";
+	b.type_code = (short) SchemaConstants.ObjectEventBase;  
+	b.displayOrder = b.type_code;
+
+	eventCategory.addNode(b, false, false); // add it to the end is ok
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.ObjectEventToken;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Event Token";
+	bf.badChars = " :";
+	bf.field_order = 1;
+	bf.loading = true;
+	bf.setNameSpace("eventtoken");
+	bf.loading = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Single-word token to identify this event type in Ganymede source code";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.ObjectEventObjectName;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Object Type Name";
+	bf.field_order = 2;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "The name of the object that this event is tracking";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.ObjectEventName;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Event Name";
+	bf.badChars = ":";
+	bf.field_order = 3;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Short name for this event class, suitable for an email message title";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.ObjectEventDescription;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Event Description";
+	bf.badChars = ":";
+	bf.field_order = 4;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Fuller description for this event class, suitable for an email message body";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.ObjectEventMailBoolean;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Send Mail?";
+	bf.field_order = 5;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, occurrences of this event will be emailed";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.ObjectEventMailToSelf;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Cc: Admin?";
+	bf.field_order = 6;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.ObjectEventMailOwners;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Cc: Owner Groups?";
+	bf.field_order = 7;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, mail for this event will always be cc'ed to the owner groups owning the object";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.ObjectEventMailList;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Fixed Mail List";
+	bf.allowedTarget = -2;	// any (we'll depend on subclassing to refine this)
+	bf.targetField = -1;	// use default backlink field
+	bf.field_order = 8;
+	bf.array = true;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "List of email addresses to always send events of this type to";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.ObjectEventObjectType;
+	bf.field_type = FieldType.NUMERIC;
+	bf.field_name = "Object Type ID";
+	bf.removable = false;
+	bf.editable = false;
+	bf.visibility = false;	// we don't want this to be seen by the client
+	bf.comment = "The type code of the object that this event is tracking";
+	b.fieldTable.put(bf);
+
+	setBase(b);
+
+	// create user base
+
+	DBBaseCategory userCategory = new DBBaseCategory(this, "User-Level Objects", rootCategory);
+	rootCategory.addNode(userCategory, false, false);
+
+	b = new DBObjectBase(this, false);
+	b.object_name = "User";
+	b.type_code = (short) SchemaConstants.UserBase; // 2
+	b.displayOrder = b.type_code;
+
+	userCategory.addNode(b, false, false); // add it to the end is ok
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.UserUserName;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Username";
+	bf.minLength = 2;
+	bf.maxLength = 8;
+	bf.badChars = " :=><|+[]\\/*;:.,?\""; // See p.252, teach yourself WinNT Server 4 in 14 days
+	bf.field_order = 2;
+	bf.loading = true;
+	bf.setNameSpace("username");
+	bf.loading = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "User name for an individual privileged to log into Ganymede and/or the network";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.UserPassword;
+	bf.field_type = FieldType.PASSWORD;
+	bf.field_name = "Password";
+	bf.maxLength = 32;
+	bf.field_order = 3;
+	bf.removable = false;
+	bf.editable = false;
+	bf.crypted = true;
+	bf.isCrypted();
+	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.UserAdminPersonae;
+	bf.field_type = FieldType.INVID;
+	bf.allowedTarget = SchemaConstants.PersonaBase;
+	bf.targetField = SchemaConstants.PersonaAssocUser;
+	bf.field_name = "Admin Personae";
+	bf.field_order = bf.field_code;
+	bf.removable = false;
+	bf.editable = false;
+	bf.array = true;
+	bf.comment = "A list of admin personae this user can assume";
+	b.fieldTable.put(bf);
+
+	b.setLabelField(SchemaConstants.UserUserName);
     
 	setBase(b);
 
