@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.144 $
-   Last Mod Date: $Date: 2001/06/05 22:28:01 $
+   Version: $Revision: 1.145 $
+   Last Mod Date: $Date: 2001/06/23 04:00:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.144 $ %D%
+ * @version $Revision: 1.145 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1536,7 +1536,7 @@ public final class DBStore {
 	bf.loading = false;
 	b.addFieldToEnd(bf);
 
-	b.setLabelField(SchemaConstants.PersonaNameField);
+	b.setLabelField(SchemaConstants.PersonaLabelField);
 
 	// link in the class we specified
 
