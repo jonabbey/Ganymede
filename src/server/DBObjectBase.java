@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,6 +19,8 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
+
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -59,6 +61,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   // runtime data
 
+  Vector sortedFields;		// field dictionary, sorted in displayOrder
   Hashtable fieldHash;		// field dictionary
   Hashtable objectHash;		// objects in our objectBase
   int object_count;
@@ -111,6 +114,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     type_code = 0;
     label_id = -1;
     category = null;
+    sortedFields = new Vector();
     fieldHash = new Hashtable();
     objectHash = new Hashtable();
     maxid = 0;
@@ -237,7 +241,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    bf = new DBObjectBaseField(field, editor);
 	    bf.base = this;
 	    fieldHash.put(field.getKey(), bf);
+
+	    sortedFields.addElement(field);
 	  }
+
+	sortFields();
 
 	// remember the objects
 
@@ -376,7 +384,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	field = new DBObjectBaseField(in, this);
 	fieldHash.put(new Short(field.field_code), field);
+
+	sortedFields.addElement(field);
       }
+
+    sortFields();
 
     // at file version 1.1, we introduced label_id's.
 
@@ -1520,5 +1532,82 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     return dumperList.size();
   }
 
+  /**
+   *
+   * Dump the headers
+   *
+   *
+   */
+
+  public synchronized String dump() 
+  {
+    StringBuffer buffer = new StringBuffer();
+    DBObjectBaseField field;
+    char[] chars;
+
+    /* -- */
+
+    for (int i = 0; i < sortedFields.size(); i++)
+      {
+	field = (DBObjectBaseField) sortedFields.elementAt(i);
+
+	chars = field.getName().toCharArray();
+	    
+	for (int j = 0; j < chars.length; j++)
+	  {
+	    if (chars[j] == '|')
+	      {
+		buffer.append("\\|");
+	      }
+	    else if (chars[j] == '\n')
+	      {
+		buffer.append("\\\n");
+	      }
+	    else if (chars[j] == '\\')
+	      {
+		buffer.append("\\\\");
+	      }
+	    else
+	      {
+		buffer.append(chars[j]);
+	      }
+	  }
+
+	buffer.append("|");
+      }
+
+    buffer.append("\n");
+    
+    return buffer.toString();
+  }
+
+  private void sortFields()
+  {
+    new VecQuickSort(sortedFields, 
+		     new arlut.csd.Util.Compare()
+		     {
+		       public int compare(Object a, Object b)
+			 {
+			   DBObjectBaseField aN, bN;
+
+			   aN = (DBObjectBaseField) a;
+			   bN = (DBObjectBaseField) b;
+
+			   if (aN.getDisplayOrder() < bN.getDisplayOrder())
+			     {
+			       return -1;
+			     }
+			   else if (aN.getDisplayOrder() > bN.getDisplayOrder())
+			     {
+			       return 1;
+			     }
+			   else
+			     {
+			       return 0;
+			     }
+			 }
+		     }
+		     ).sort();
+  }
 }
 
