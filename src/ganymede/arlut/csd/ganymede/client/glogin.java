@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -225,6 +225,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   private booleanSemaphore connected = new booleanSemaphore(false);
   private booleanSemaphore connecting = new booleanSemaphore(false);
+  private boolean ssl = false;
 
   /* -- */
 
@@ -579,6 +580,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	      {
 		my_client.connect();	// exceptions ahoy!
 
+		if (my_client.getCipherSuite() != null)
+		  {
+		    ssl = true;
+		  }
+
 		connected.set(true);
 		break;
 	      }
@@ -609,7 +615,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    SwingUtilities.invokeLater(new Runnable() {
 		public void run() {
-		  connector.setText("Login to server");
+		  if (ssl)
+		    {
+		      connector.setText("Login to server (SSL)");
+		    }
+		  else
+		    {
+		      connector.setText("Login to server (NO SSL)");
+		    }
 		  enableButtons(true);
 		  connector.paintImmediately(connector.getVisibleRect());
 		  setNormalCursor();
