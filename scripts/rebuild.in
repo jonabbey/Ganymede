@@ -2,8 +2,8 @@
 #
 # Incremental rebuild script
 #
-# $Revision: 1.6 $
-# $Date: 1999/01/18 22:35:38 $
+# $Revision: 1.7 $
+# $Date: 1999/01/18 22:39:30 $
 #
 # Jonathan Abbey, jonabbey@arlut.utexas.edu
 #
@@ -118,7 +118,7 @@ sub package_scan {
 
     # Break the filename off of the file
 
-    $file =~ /([^/]*\.java)$/;
+    $file =~ /([^\/]*\.java)$/;
     $filename = $1;
     $classname = $filename;
     $classname =~ s/\.java/\.class/;
