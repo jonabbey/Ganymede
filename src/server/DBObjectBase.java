@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -381,6 +381,112 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     this.containingHash = ht;
   }
 
+  synchronized void partialEmit(DataOutput out) throws IOException
+  {
+    int size;
+    Enumeration enum;
+    Enumeration baseEnum;
+
+    /* -- */
+
+    out.writeUTF(object_name);
+    out.writeUTF(classname);
+    out.writeShort(type_code);
+
+    size = fieldHash.size();
+
+    out.writeShort((short) size); // should have no more than 32k fields
+
+    enum = fieldHash.elements();
+
+    while (enum.hasMoreElements())
+      {
+	((DBObjectBaseField) enum.nextElement()).emit(out);
+      }
+    
+    if ((store.major_version >= 1) && (store.minor_version >= 1))
+      {
+	out.writeShort(label_id);	// added at file version 1.1
+      }
+
+    if ((store.major_version >= 1) && (store.minor_version >= 3))
+      {
+	if (category.getPath() == null)
+	  {
+	    out.writeUTF(store.rootCategory.getPath());
+	  }
+	else
+	  {
+	    out.writeUTF(category.getPath()); // added at file version 1.3
+	  }
+      }
+
+    if ((store.major_version >= 1) && (store.minor_version >= 4))
+      {
+	out.writeInt(displayOrder);	// added at file version 1.4
+      }
+
+    if ((store.major_version >= 1) && (store.minor_version >= 5))
+      {
+	out.writeBoolean(embedded);	// added at file version 1.5
+      }
+
+    // now, we're doing a partial emit.. if we're SchemaConstants.PersonaBase,
+    // we only want to emit the 'constant' personae.. those that aren't associated
+    // with regular user accounts.
+
+    if (type_code == SchemaConstants.PersonaBase)
+      {
+	// first, figure out how many we're going to save to emit
+
+	int counter = 0;
+	DBObject personaObj;
+	DBField assocUser;
+
+	baseEnum = objectHash.elements();
+
+	while (baseEnum.hasMoreElements())
+	  {
+	    personaObj = (DBObject) baseEnum.nextElement();
+
+	    if (personaObj.getLabel().equals("supergash") ||
+		personaObj.getLabel().equals("monitor"))
+	      {
+		counter++;
+	      }
+	  }
+
+	//	System.err.println("Writing out " + counter + " objects");
+
+	out.writeInt(counter);
+
+	baseEnum = objectHash.elements();
+
+	while (baseEnum.hasMoreElements())
+	  {
+	    personaObj = (DBObject) baseEnum.nextElement();
+
+	    if (personaObj.getLabel().equals("supergash") ||
+		personaObj.getLabel().equals("monitor"))
+	      {
+		personaObj.emit(out);
+	      }
+	  }
+
+      }
+    else
+      {
+	out.writeInt(objectHash.size());
+	
+	baseEnum = objectHash.elements();
+	
+	while (baseEnum.hasMoreElements())
+	  {
+	    ((DBObject) baseEnum.nextElement()).emit(out);
+	  }
+      }
+  }
+
   synchronized void emit(DataOutput out, boolean dumpObjects) throws IOException
   {
     int size;
@@ -586,10 +692,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     object_count = in.readInt();
 
-    if (debug)
-      {
-	System.err.println("DBObjectBase.receive(): reading " + object_count + " objects");
-      }
+    //    if (debug)
+    //      {
+    //	System.err.println("DBObjectBase.receive(): reading " + object_count + " objects");
+    //      }
 
     temp_val = (object_count > 0) ? object_count : 100;
 
@@ -597,6 +703,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     for (int i = 0; i < object_count; i++)
       {
+	//	if (debug)
+	//	  {
+	//    System.err.println("DBObjectBase.receive(): reading object " + i);
+	//	  }
+
 	tempObject = new DBObject(this, in, false);
 
 	if (tempObject.id > maxid)
@@ -788,7 +899,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
 	catch (InvocationTargetException ex)
 	  {
-	    error_code = "Invocation Target Exception";
+	    error_code = "Invocation Target Exception: " + ex.getTargetException();
 	  }
 
 	if (error_code != null)
