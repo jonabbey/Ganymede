@@ -63,9 +63,9 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
     setEnabled(editable);
     isEditable = editable;
 
-    enableEvents(AWTEvent.FOCUS_EVENT_MASK); 
+    //enableEvents(AWTEvent.FOCUS_EVENT_MASK); 
 
-    //addItemListener(this);
+    addItemListener(this);
   }
 
   /** Constructor that creates a basic checkbox with default foreground and background
@@ -102,11 +102,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
       setCallback(callback);
       
-      this.value = state;
-	
-      this.oldvalue = state;
-
-      setSelected(value);
     }
 
   ///////////////////

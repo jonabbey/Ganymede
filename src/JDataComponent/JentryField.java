@@ -244,10 +244,22 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
   public void focusLost(FocusEvent e)
   {
+    if (debug)
+      {
+	System.out.println("JentryField: focusLost");
+      }
+
     sendCallback();
   }
 
-  public void focusGained(FocusEvent e) {}
+  public void focusGained(FocusEvent e)
+  {
+    if (debug)
+      {
+	System.out.println("focusGained");
+      }
+
+  }
 }
 
 

@@ -99,14 +99,23 @@ public class listHandle {
 
     listHandle handle = (listHandle) val;
 
+    if (handle == null)
+      {
+	return false;
+      }
+
     if (object != null)
       {
 	return object.equals(handle.object) &&
 	  label.equals(handle.label);
       }
-    else
+    else if (label != null)
       {
 	return label.equals(handle.label);
+      }
+    else
+      {
+	return false;
       }
   }
 }
