@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,6 +33,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.ganymede.client.*;
 import arlut.csd.Tree.*;
 import arlut.csd.Dialog.*;
+import arlut.csd.Util.*;
 
 import com.sun.java.swing.JButton;
 
@@ -166,7 +167,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     objectPM.add(objInactivateMI);
 
     // Build the tree
-
+    /*
     try
       {
 	Vector  typesV = session.getTypes();
@@ -238,7 +239,9 @@ public class gclient extends Frame implements treeCallback,ActionListener {
       {
 	throw new IllegalArgumentException("Could not build whole tree: " + ex);
       }
-
+      */
+    
+    refreshTree();
 
     // The right panel which will contain the containerPanel
 
@@ -287,9 +290,215 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     pack();
     setSize(800, 600);
     show();
-
-
   }
+
+  void refreshTree()
+    {
+      
+      try
+	{
+	  Vector  typesV = session.getTypes();
+	  treeNode typesnode = new treeNode(null,"Objects",null,true,0,1);
+	  tree.setRoot(typesnode);
+	  
+	  for (int i=0;i<typesV.size();i++)
+	    {
+	      Base tempBase = null;
+	      BaseNode t;
+	      try 
+		{
+		  tempBase = (Base)typesV.elementAt(i);
+		  t = new BaseNode(typesnode,tempBase.getName(), tempBase, null,true,0,1, pMenu);
+		  tree.insertNode(t,false);
+		}
+	      catch (RemoteException rx)
+		{
+		  throw new IllegalArgumentException("Could not get bases: " + rx);
+		}
+	      refreshObjects(t, false);
+	    }
+	}
+      catch (RemoteException ex) 
+	{
+	  throw new IllegalArgumentException("Could not build whole tree: " + ex);
+	}
+    }
+  
+  void refreshObjects(BaseNode node, boolean doRefresh) throws RemoteException
+  {
+    Base base;
+    db_object object;
+    Vector vect;
+    BaseNode parentNode;
+    ObjectNode oldNode, newNode, fNode;
+    int i;
+    Result sorted_results[] = null;
+
+
+    /* -- */
+
+    base = node.getBase();
+
+
+  
+    
+    Query _query = null;
+    try
+      {
+	//Now get all the children
+	_query = new Query(base.getTypeID());
+      }
+    catch (RemoteException rx)
+      {
+	throw new IllegalArgumentException("It's the Query! " + rx);
+      }
+    try
+      {
+	if (_query == null)
+	  {
+	    System.out.println("query == null");
+	  }
+	else
+	  {
+	    Vector unsorted_objects =  session.query(_query);
+	    System.out.println("There are " + unsorted_objects.size() + " objects in the query");
+	    if (unsorted_objects.size() > 0)
+	      {
+		sorted_results = new Result[unsorted_objects.size()];
+	      }
+	    else
+	      {
+		sorted_results = null;
+	      }
+	    if (unsorted_objects == null)
+	      {
+		System.out.println("unsorted_objects == null");
+	      }
+	    else
+	      {
+		for (int j = 0; j < unsorted_objects.size() ; j++)
+		  {
+		    System.out.println("Adding " + (Result)unsorted_objects.elementAt(j));
+		    sorted_results[j] = (Result)unsorted_objects.elementAt(j);
+		  }
+		
+		(new QuickSort(sorted_results, 
+			       new arlut.csd.Util.Compare() 
+			       {
+				 public int compare(Object a, Object b) 
+				   {
+				     Result aF, bF;
+				     
+				     aF = (Result) a;
+				     bF = (Result) b;
+				     int comp = 0;
+				     
+				     comp =  aF.toString().compareTo(bF.toString());
+				     
+				     if (comp < 0)
+				       {
+					 return -1;
+				       }
+				     else if (comp > 0)
+				       { 
+					 return 1;
+				       } 
+				     else
+				       { 
+					 return 0;
+				       }
+				   }
+			       }
+			       )).sort();
+	      }
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get object labels: " + rx);
+      }
+    parentNode = node;
+    oldNode = null;
+    fNode = (ObjectNode) node.getChild();
+    i = 0;
+	
+    while ((sorted_results != null) && ((i < sorted_results.length) || (fNode != null)))
+      {
+	System.out.println("");
+	System.out.println("Looking at the next node");
+	System.out.println("i = " + i + " length = " + sorted_results.length);
+	if (fNode == null)
+	  {
+	    System.out.println("fNode is null");
+	  }
+	else
+	  {
+	    System.out.println("fNode = " +fNode.getObject().getLabel());
+	  }
+	
+	if (i < sorted_results.length)
+	  {
+	    object = sorted_results[i].getObject();
+	    System.out.println("Dealing with " + object.getLabel());
+	  }
+	else
+	  {
+	    System.out.println("Object is null");
+	    object = null;
+	  }
+
+	if ((fNode == null) ||
+	    ((object != null) && 
+	     ((object.getLabel().compareTo(fNode.getObject().getLabel())) < 0)))
+	  {
+	    // insert a new object node
+	    System.out.println("Adding this node");
+	    //newNode = new ObjectNode(parentNode, object.getName(), object,
+	    //			    oldNode, false, 2, 2, objectMenu);
+	    ObjectNode objNode = new ObjectNode(node, 
+						object.getLabel(),
+						object,
+						oldNode, false, 2,2, objectPM);
+	    
+	    tree.insertNode(objNode, false);
+	    
+	    oldNode = objNode;
+	    fNode = (ObjectNode) oldNode.getNextSibling();
+	    if (fNode != null)
+	      System.out.println("setting fNode to " + fNode.getObject().getLabel());
+
+	    i++;
+	  }
+	else if ((object == null) ||
+		 ((object.getLabel().compareTo(fNode.getObject().getLabel())) > 0))
+	  {
+	    // delete a object node
+	    System.out.println("Removing this node");
+	    // System.err.println("Deleting: " + fNode.getText());
+	    newNode = (ObjectNode) fNode.getNextSibling();
+	    tree.deleteNode(fNode, false);
+
+	    fNode = newNode;
+	  }
+	else
+	  {
+	    System.out.println("No change for this node");
+	    fNode.setText(object.getLabel());
+	    // System.err.println("Setting: " + object.getName());
+
+	    oldNode = fNode;
+	    fNode = (ObjectNode) oldNode.getNextSibling();
+
+	    i++;
+	  }
+      }
+
+    if (doRefresh)
+      {
+	tree.refresh();
+      }
+  }
+
 
   // ActionListener Methods
 
@@ -405,12 +614,12 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 		Vector results =  session.query(_query);
 		if (results == null)
 		  {
-		    System.out.println("objects == null");
+		    System.out.println("results == null");
 		  }
 		else
 		  {
 		    
-		    wp.addTableWindow(session, results);
+		    wp.addTableWindow(session, results, "Query Results");
 		  }
 	      }
 	    catch (RemoteException rx)
@@ -460,6 +669,8 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	  
 	    try
 	      {
+		
+		System.out.println("edit invid= " + objectN.getObject().getInvid());
 		wp.addWindow(session.edit_db_object(objectN.getObject().getInvid()), true);
 	      }
 	    catch (RemoteException rx)
@@ -523,7 +734,7 @@ class ObjectNode extends arlut.csd.Tree.treeNode {
                                                                            class
                                                                         BaseNode
 
-------------------------------------------------------------------------------*/
+v------------------------------------------------------------------------------*/
 
 class BaseNode extends arlut.csd.Tree.treeNode {
 
