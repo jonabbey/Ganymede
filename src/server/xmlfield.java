@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2001/11/13 22:47:08 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2001/11/14 00:40:11 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.13 $ $Date: 2001/11/13 22:47:08 $ $Name:  $
+ * @version $Revision: 1.14 $ $Date: 2001/11/14 00:40:11 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -106,6 +106,7 @@ public class xmlfield implements FieldType {
   Vector setValues = null;	// if vector
   Vector delValues = null;	// if vector
   Vector addValues = null;	// if vector
+  Vector addIfNotPresentValues = null; // if vector
   boolean registered = false;
 
   /* -- */
@@ -419,6 +420,7 @@ public class xmlfield implements FieldType {
        modeStack is used to keep track of what vector mode we are currently in..
        the list of reasonable values are
 
+       "addIfNotPresent" -- Add those elements listed that are not already there
        "add" -- Add, although with invids we will ignore adds if they are already present
        "set" -- Set the list of elements to the provided list
        "delete" -- Delete the listed elements
@@ -431,13 +433,14 @@ public class xmlfield implements FieldType {
 
     // by default, we add
 
-    modeStack.push("add");
+    modeStack.push("addIfNotPresent");
 
     nextItem = owner.xSession.getNextItem();
 
     while (!nextItem.matchesClose(openElement.getName()) && !(nextItem instanceof XMLEndDocument))
       {
-	if ((nextItem.matches("add") || nextItem.matches("delete")) && !nextItem.isEmpty())
+	if (((nextItem.matches("addIfNotPresent") || nextItem.matches("add") || 
+	      nextItem.matches("delete")) && !nextItem.isEmpty()))
 	  {
 	    if (setMode)
 	      {
@@ -476,12 +479,12 @@ public class xmlfield implements FieldType {
 
 	    nextItem = owner.xSession.getNextItem();
 	  }
-	else if (nextItem.matchesClose("add") || nextItem.matchesClose("delete"))
+	else if (nextItem.matchesClose("add") || nextItem.matchesClose("delete") || nextItem.matchesClose("addIfNotPresent"))
 	  {
 	    if (modeStack.size() > 1 && modeStack.peek().equals(nextItem.getName()))
 	      {
 		// we checked for modeStack.size() > 1 to cover the
-		// initial modeStack.push("add")
+		// initial modeStack.push("addIfNotPresent")
 
 		modeStack.pop();
 	      }
@@ -551,18 +554,31 @@ public class xmlfield implements FieldType {
 		    if (addValues == null)
 		      {
 			addValues = new Vector();
-			canDoSetMode = false;
 		      }
 
+		    canDoSetMode = false;
+
 		    addValues.addElement(newValue);
+		  }
+		else if (modeStack.peek().equals("addIfNotPresent"))
+		  {
+		    if (addIfNotPresentValues == null)
+		      {
+			addIfNotPresentValues = new Vector();
+		      }
+
+		    canDoSetMode = false;
+
+		    addIfNotPresentValues.addElement(newValue);
 		  }
 		else if (modeStack.peek().equals("delete"))
 		  {
 		    if (delValues == null)
 		      {
 			delValues = new Vector();
-			canDoSetMode = false;
 		      }
+
+		    canDoSetMode = false;
 
 		    delValues.addElement(newValue);
 		  }
@@ -893,7 +909,7 @@ public class xmlfield implements FieldType {
 	  }
 	else if (fieldDef.isArray() && (fieldDef.isString() || fieldDef.isIP()))
 	  {
-	    db_field field = owner.objref.getField(fieldDef.getID());
+	    DBField field = (DBField) owner.objref.getField(fieldDef.getID());
 
 	    if (setValues != null)
 	      {
@@ -933,6 +949,18 @@ public class xmlfield implements FieldType {
 	    if (addValues != null)
 	      {
 		result = field.addElements(addValues);
+
+		if (result != null && !result.didSucceed())
+		  {
+		    return result;
+		  }
+	      }
+
+	    if (addIfNotPresentValues != null)
+	      {
+		Vector newValues = VectorUtils.difference(addIfNotPresentValues, field.getValuesLocal());
+
+		result = field.addElements(newValues);
 
 		if (result != null && !result.didSucceed())
 		  {
