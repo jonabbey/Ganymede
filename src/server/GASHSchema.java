@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.51 $ %D%
+   Version: $Revision: 1.52 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -49,6 +49,10 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   public static final boolean debug = false;
 
+  // --
+
+  boolean developMode;	// if this is true, we can mangle otherwise inviolable bases/fields
+
   SchemaEdit 
     editor;
 
@@ -66,7 +70,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     objects;			// root category node
 
   treeNode
-    namespaces;
+    namespaces,			// top-level node for namespace listing
+    builtIns;			// top-level node for (non-embedded) built-in field defs
 
   MenuItem
     createCategoryMI = null,
@@ -77,12 +82,14 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     createNameMI = null,
     deleteNameMI = null,
     createFieldMI = null,
-    deleteFieldMI = null;
+    deleteFieldMI = null,
+    createBuiltInMI = null;
   
   treeMenu
     categoryMenu = null,
     baseMenu = null,
     fieldMenu = null,
+    builtInMenu = null,
     nameSpaceMenu = null,
     nameSpaceObjectMenu = null;
 
@@ -128,6 +135,15 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     super(title);
 
     this.editor = editor;
+
+    try
+      {
+	developMode = editor.isDevelopMode();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't determine develop mode. " + ex);
+      }
 
     questionImage = PackageResources.getImageResource(this, "question.gif", getClass());
 
@@ -282,6 +298,13 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     categoryMenu.add(createObjectMI);
     categoryMenu.add(createInternalObjectMI);
 
+    // builtIn menu
+
+    createBuiltInMI = new MenuItem("Create Built-in Field");
+
+    builtInMenu = new treeMenu("Built-in Fields");
+    builtInMenu.add(createBuiltInMI);
+
     // namespace menu
 
     nameSpaceMenu = new treeMenu("Namespace Menu");
@@ -330,9 +353,14 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     tree.setRoot(objects);
 
+    // create builtIn node
+
+    builtIns = new treeNode(null, "Built-In Fields", objects, true, 0, 1, builtInMenu);
+    tree.insertNode(builtIns, false);
+
     // create namespaces node
 
-    namespaces = new treeNode(null, "Namespaces", objects, true, 0, 1, nameSpaceMenu);
+    namespaces = new treeNode(null, "Namespaces", builtIns, true, 0, 1, nameSpaceMenu);
     tree.insertNode(namespaces, false);
 
     // and initialize tree
@@ -369,6 +397,15 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     catch (RemoteException ex)
       {
 	throw new RuntimeException("couldn't refresh categories" + ex);
+      }
+
+    try
+      {
+	refreshBuiltIns();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't refresh built-ins" + ex);
       }
 
     refreshNamespaces();
@@ -473,7 +510,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
   {
     Base base;
     BaseField field, fields[];
-    Vector vect;
+    Vector vect, vect2;
     BaseNode parentNode;
     FieldNode oldNode, newNode, fNode;
     int i;
@@ -482,13 +519,28 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     base = node.getBase();
 
+    // get the list of fields we want to display
+    // note that we don't want to show built-in fields
+
     vect = base.getFields();
 
-    fields = new BaseField[vect.size()];
+    vect2 = new Vector();
+    
+    for (i = 0; i < vect.size(); i++)
+      {
+	field = (BaseField) vect.elementAt(i);
+
+	if (!field.isBuiltIn())
+	  {
+	    vect2.addElement(field);
+	  }
+      }
+
+    fields = new BaseField[vect2.size()];
     
     for (i = 0; i < fields.length; i++)
       {
-	fields[i] = (BaseField) vect.elementAt(i);
+	fields[i] = (BaseField) vect2.elementAt(i);
       }
     
     // Sort the fields by ID, using a funky anonymous
@@ -531,6 +583,9 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     oldNode = null;
     fNode = (FieldNode) node.getChild();
     i = 0;
+
+    // this loop here is intended to do a minimum-work updating
+    // of a field list
 	
     while ((i < fields.length) || (fNode != null))
       {
@@ -591,6 +646,150 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       {
 	tree.refresh();
       }
+  }
+
+  void refreshBuiltIns() throws RemoteException
+  {
+    Base base;
+    BaseField field, fields[];
+    Vector vect, vect2;
+    FieldNode oldNode, newNode, fNode;
+    int i;
+
+    /* -- */
+
+    boolean isOpen = builtIns.isOpen();
+    
+    tree.removeChildren(builtIns, false);
+
+    // we assume that we can rely on the user base having
+    // a full complement of built in fields.
+
+    base = editor.getBase(SchemaConstants.UserBase);
+
+    // get the list of fields we want to display
+    // note that we don't want to show built-in fields
+
+    vect = base.getFields();
+
+    vect2 = new Vector();
+    
+    for (i = 0; i < vect.size(); i++)
+      {
+	field = (BaseField) vect.elementAt(i);
+
+	if (field.isBuiltIn())
+	  {
+	    vect2.addElement(field);
+	  }
+      }
+
+    fields = new BaseField[vect2.size()];
+    
+    for (i = 0; i < fields.length; i++)
+      {
+	fields[i] = (BaseField) vect2.elementAt(i);
+      }
+    
+    // Sort the fields by ID, using a funky anonymous
+    // class
+    
+    (new QuickSort(fields, 
+		   new arlut.csd.Util.Compare() 
+		   {
+		     public int compare(Object a, Object b) 
+		       {
+			 BaseField aF, bF;
+      
+			 aF = (BaseField) a;
+			 bF = (BaseField) b;
+	
+			 try
+			   {
+			     if (aF.getDisplayOrder() < bF.getDisplayOrder())
+			       {
+				 return -1;
+			       }
+			     else if (aF.getDisplayOrder() > bF.getDisplayOrder())
+			       {
+				 return 1;
+			       }
+			     else
+			       {
+				 return 0;
+			       }
+			   }
+			 catch (RemoteException ex)
+			   {
+			     throw new RuntimeException("couldn't compare base fields " + ex);
+			   }
+		       }
+		   }
+		   )).sort();
+
+    oldNode = null;
+    fNode = (FieldNode) builtIns.getChild();
+    i = 0;
+
+    // this loop here is intended to do a minimum-work updating
+    // of a field list
+	
+    while ((i < fields.length) || (fNode != null))
+      {
+	if (i < fields.length)
+	  {
+	    field = fields[i];
+	  }
+	else
+	  {
+	    field = null;
+	  }
+
+	if ((fNode == null) ||
+	    ((field != null) && 
+	     (field.getID() < fNode.getField().getID())))
+	  {
+	    // insert a new field node
+
+	    newNode = new FieldNode(builtIns, field.getName(), field,
+				    oldNode, false, 3, 3, fieldMenu);
+
+	    tree.insertNode(newNode, true);
+
+	    oldNode = newNode;
+	    fNode = (FieldNode) oldNode.getNextSibling();
+
+	    i++;
+	  }
+	else if ((field == null) ||
+		 (field.getID() > fNode.getField().getID()))
+	  {
+	    // delete a field node
+
+	    if (showingField && (fe.fieldDef == fNode.getField()))
+	      {
+		card.show(attribCardPane, "empty");
+	      }
+
+	    // System.err.println("Deleting: " + fNode.getText());
+	    newNode = (FieldNode) fNode.getNextSibling();
+	    tree.deleteNode(fNode, false);
+
+	    fNode = newNode;
+	  }
+	else
+	  {
+	    fNode.setText(field.getName());
+	    // System.err.println("Setting: " + field.getName());
+
+	    oldNode = fNode;
+	    fNode = (FieldNode) oldNode.getNextSibling();
+
+	    i++;
+	  }
+      }
+
+    tree.refresh();
   }
 
   void refreshNamespaces()
@@ -1101,7 +1300,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    throw new IllegalArgumentException("exception in isRemovalbe(): " + rx);
 	  }
 
-	if (isRemovable)
+	if (isRemovable || developMode)
 	  {
 	    if (new StringDialog(this,
 				 "Confirm deletion of Object",
@@ -1245,7 +1444,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	  {
 	    throw new IllegalArgumentException("Can't get isRemoveable, assuming false: " +rx);
 	  }
-	if (isRemovable)
+
+	if (isRemovable || developMode)
 	  {
 	    try
 	      {
@@ -1256,7 +1456,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		throw new IllegalArgumentException("can't tell if field is editable, assuming false: " + rx);
 	      }
 
-	    if (isEditable)
+	    if (isEditable || developMode)
 	      {
 		System.err.println("deleting field node");
 
@@ -1270,27 +1470,47 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
 		if (results != null)
 		  {
-		    BaseNode bNode = (BaseNode) node.getParent();
-
-		    try
+		    if (node.getParent() instanceof BaseNode)
 		      {
-			if (!bNode.getBase().fieldInUse(fNode.getField()))
+			BaseNode bNode = (BaseNode) node.getParent();
+
+			try
 			  {
-			    bNode.getBase().deleteField(fNode.getField());
-			    refreshFields(bNode, true);
-			    ne.refreshSpaceList();
-			    be.refreshLabelChoice();
+			    if (!bNode.getBase().fieldInUse(fNode.getField()))
+			      {
+				bNode.getBase().deleteField(fNode.getField());
+				refreshFields(bNode, true);
+				ne.refreshSpaceList();
+				be.refreshLabelChoice();
+			      }
+			    else
+			      {
+				// field in use
+				
+				System.err.println("Couldn't delete field.. field in use");
+			      }
 			  }
-			else
+			catch (RemoteException ex)
 			  {
-			    // field in use
-			
-			    System.err.println("Couldn't delete field.. field in use");
+			    System.err.println("couldn't delete field" + ex);
 			  }
 		      }
-		    catch (RemoteException ex)
+		    else if (developMode)
 		      {
-			System.err.println("couldn't delete field" + ex);
+			// assume we're deleting a built-in field
+
+			try
+			  {
+			    editor.getBase(SchemaConstants.UserBase).deleteField(fNode.getField());
+			    refreshBuiltIns();
+			  }
+			catch (RemoteException ex)
+			  {
+			    throw new RuntimeException("danger will robinson! couldn't delete built-in field! " + ex);
+			  }
+
+			ne.refreshSpaceList();
+			be.refreshLabelChoice();
 		      }
 		  }
 	      }
@@ -1310,6 +1530,34 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 			     "This field is not removable.",
 			     "Ok",
 			     null).DialogShow();
+	  }
+      }
+    else if (event.getSource() == createBuiltInMI)
+      {
+	// find the base that asked for the field
+
+	try
+	  {
+	    // create a name for the new field
+
+	    BaseField bF;
+
+	    bF = editor.createNewBuiltIn();
+
+	    // we'll go ahead and insert the new node at the top of
+	    // the Built-In Fields subtree
+
+	    FieldNode newNode = new FieldNode(node, bF.getName(), bF, null,
+					      false, 3, 3, fieldMenu);
+	    tree.insertNode(newNode, false);
+	    tree.expandNode(node, true);
+
+	    editField(newNode);
+	    System.err.println("Called editField");
+	  }
+	catch (RemoteException ex)
+	  {
+	    System.err.println("couldn't create new field" + ex);
 	  }
       }
   }
@@ -1366,6 +1614,23 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   public boolean startDrag(treeNode dragNode)
   {
+    if (dragNode instanceof FieldNode)
+      {
+	FieldNode fN = (FieldNode) dragNode;
+
+	try
+	  {
+	    if (fN.getField().isBuiltIn())
+	      {
+		return false;	// we don't allow reordering of built-ins
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote exception when checking field for drag start:" + ex);
+	  }
+      }
+
     return ((dragNode instanceof FieldNode) ||
 	    (dragNode instanceof BaseNode) ||
 	    (dragNode instanceof CatTreeNode &&
@@ -1565,7 +1830,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    return false;
 	  }
 
-	if (belowNode == namespaces)
+	if (belowNode == builtIns)
 	  {
 	    return true;
 	  }
@@ -1584,7 +1849,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		return false;
 	      }
 
-	    if (belowNode == namespaces)
+	    if (belowNode == builtIns)
 	      {
 		return true;
 	      }
