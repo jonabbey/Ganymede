@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.100 $ %D%
+   Version: $Revision: 1.101 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2529,36 +2529,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		    System.out.println("inactivate");
 		  }
 
-		String text = node.getText();
-
-		if (text.indexOf("(inactive)") > 0)
-		  {
-		    if (debug)
-		      {
-			System.out.println("It already says inactivated.");
-		      }
-		  }
-		else
-		  {
-		    node.setText(node.getText() + " (inactive)");
-		  }
+		node.setText(handle.getLabel() + " (inactive)");
 
 		node.setMenu(objectReactivatePM);
 		node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
 	      }
 	    else
 	      {
-		// did we previously have this labeled as inactive?
+		node.setText(handle.getLabel());
 
-		String text = node.getText();
-		int index = text.indexOf("(inactive)");
-
-		if (index != -1)
-		  {
-		    node.setText(text.substring(0, index));
-		  }
-
-		// now take care of the rest of the possibilities.
+		// now take care of the rest of the menus.
 
 		if (handle.isExpirationSet())
 		  {
