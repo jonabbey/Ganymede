@@ -2,7 +2,7 @@
 #
 # Ganymede NIS Loader Run Script 
 # Created: 18 March 1998
-# Ver: $Revision: 1.3 $ %D%
+# Ver: $Revision: 1.4 $ %D%
 #
 # Jonathan Abbey
 #
@@ -26,7 +26,7 @@ LOADERCLASSPATH=$LOADERDIR/classes
 
 # Set the CLASSPATH for the JVM to use
 
-CLASSPATH=$JARPATH/GanymedeServer.jar:$LOADERCLASSPATH
+CLASSPATH=$JARPATH/ganymedeServer.jar:$LOADERCLASSPATH
 
 export CLASSPATH
 
