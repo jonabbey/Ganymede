@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.25 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.26 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1010,5 +1010,25 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     buffer.append("\n");
 
     return buffer.toString();
+  }
+
+  /**
+   *
+   * This method is used to correct this object's base and basefield
+   * pointers when the base changes.
+   *
+   */
+
+  synchronized void updateBaseRefs(DBObjectBase newBase)
+  {
+    this.objectBase = newBase;
+
+    Enumeration enum = fields.elements();
+
+    while (enum.hasMoreElements())
+      {
+	DBField field = (DBField) enum.nextElement();
+	field.definition = (DBObjectBaseField) newBase.getField(field.getID());
+      }
   }
 }
