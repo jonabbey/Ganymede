@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,8 @@
 package arlut.csd.ganymede;
 
 import java.util.*;
+
+import arlut.csd.JDataComponent.listHandle;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -171,6 +173,33 @@ public class QueryResult implements java.io.Serializable {
     return labels.size();
   }
 
+  /**
+   * returns a Vector of listhandles
+   *
+   * listHandle gives Label, Invid.
+   */
+
+  public Vector getListHandles()
+  {
+    
+    Vector valueHandles = new Vector();
+    
+    for (int i = 0; i < size(); i++)
+      {
+	valueHandles.addElement(new listHandle(getLabel(i), getInvid(i)));
+      }
+    
+    return valueHandles;
+  }
+
+  /**
+   * Returns the listHandle for this row.
+   */
+  public listHandle getListHandle(int row)
+  {
+    return new listHandle(getLabel(row), getInvid(row));
+  }
+  
   public void append(QueryResult result)
   {
     buffer.append(result.buffer.toString());
