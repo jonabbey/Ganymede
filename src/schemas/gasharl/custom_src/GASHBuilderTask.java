@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 1999/08/05 22:07:33 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 1999/08/14 00:47:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1747,7 +1747,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (hostname != null)
       {
 	result.append(hostname);
-	result.append(dnsdomain);
       }
 
     result.append(", ");
