@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.114 $
-   Last Mod Date: $Date: 2002/03/13 20:44:48 $
+   Version: $Revision: 1.115 $
+   Last Mod Date: $Date: 2002/03/13 20:48:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -104,7 +104,7 @@ import java.rmi.*;
  * tasks registered with the {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler}.</p>
  *
  * <p>If a DBEditSet commit() operation fails catastrophically, or if
- * {@link arlut.csd.ganymede.DBEditSet#release() release()} is called,
+ * {@link arlut.csd.ganymede.DBEditSet#abort() abort()} is called,
  * all DBEditObjects created or checked out during the course of the
  * transaction will be discarded, all DBNameSpace values allocated will
  * be relinquished, and any logging information for the abandoned transaction
