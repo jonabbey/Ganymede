@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/01/22 18:04:14 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/03/10 20:12:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -311,7 +311,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     String tempString = null;
     Object cellResult;
     Object data = null;
-    DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
+    DateFormat format = new SimpleDateFormat("M/d/yyyy");
 
     /* -- */
 
