@@ -13,24 +13,27 @@ package arlut.csd.JDataComponent;
 
 import com.sun.java.swing.*;
 import gjt.RowLayout;
-import java.awt.Color;
-import java.awt.Insets;
+import java.awt.*;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.lang.String;
 import java.awt.event.*;
 
-
-public class Jtaskbar extends JPanel implements ActionListener {
+public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
 
   Hashtable buttons;
   JPanel panel;
+  
+  PopupMenu
+    popup;
 
   public Jtaskbar()
     {
 
       buttons = new Hashtable();
       panel = new JPanel();
+      popup = new PopupMenu();
+      add(popup);
       add(panel);
     }
 
@@ -40,16 +43,18 @@ public class Jtaskbar extends JPanel implements ActionListener {
    * @param label Text to use as label or button
    */
 
-  public void addButton(String label)
+  public JButton addButton(String label)
     {
       //System.out.println("Adding " + label);
       JButton button = new JButton(label);
-      button.addActionListener(this);
+      //button.addActionListener(this);
+      button.addMouseListener(this);
       panel.add(button);
       buttons.put(label, button);
       panel.doLayout();
       button.setPad(new Insets(5,2,5,2));
       this.validate();
+      return button;
     }
 
   /**
@@ -59,9 +64,18 @@ public class Jtaskbar extends JPanel implements ActionListener {
    */
   public void removeButton(String label)
     {
-      panel.remove((JButton)buttons.get(label));
-      buttons.remove(label);
-      this.validate();
+      JButton button = (JButton)buttons.get(label);
+      if (button == null)
+	{
+	  System.err.println("Trying to remove a null button!");
+	}
+      else
+	{
+	  System.err.println("Button is not null, trying to remove.");
+	  panel.remove((JButton)buttons.get(label));
+	  buttons.remove(label);
+	  this.validate();
+	}
     }
 
   /**
@@ -106,5 +120,27 @@ public class Jtaskbar extends JPanel implements ActionListener {
       System.out.println("Button clicked in taskbar");
     }
 
+  /**
+   * Override these.
+   */
+
+  public void mouseClicked(MouseEvent e)
+    {
+    }
+  public void mousePressed(MouseEvent e)
+    {
+    }
+
+  public void mouseReleased(MouseEvent e)
+    {
+    }
+
+  public void mouseEntered(MouseEvent e)
+    {
+    }
+
+  public void mouseExited(MouseEvent e)
+    {
+    }
 
 }
