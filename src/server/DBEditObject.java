@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.64 $ %D%
+   Version: $Revision: 1.65 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -503,9 +503,26 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
+   * This method is the hook that DBEditObject subclasses use to interpose
+   * wizards when a field's value is being changed.<br><br>
    *
-   * This is the hook that DBEditObject subclasses use to interpose wizards when
-   * a field's value is being changed.
+   * Whenever a field is changed in this object, this method will be
+   * called with details about the change. This method can refuse to
+   * perform the operation, it can make changes to other objects in
+   * the database in response to the requested operation, or it can
+   * choose to allow the operation to continue as requested.<br><br>
+   *
+   * In the latter two cases, the wizardHook code may specify a list
+   * of fields and/or objects that the client may need to update in
+   * order to maintain a consistent view of the database.<br><br>
+   *
+   * If server-local code has called
+   * GanymedeSession.enableOversight(false), this method will never be
+   * called.  This mode of operation is intended only for initial
+   * bulk-loading of the database.<br><br>
+   *
+   * This method may also be bypassed when server-side code uses
+   * setValueLocal() and the like to make changes in the database.
    *
    */
 
@@ -588,8 +605,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * null.  If any required fields are found not to have been filled
    * out, a ReturnVal will be returned with didSucceed() set to false
    * and a dialog encoded describing the fields that need to be
-   * filled out before this object can be checked in to the database.
-   * 
+   * filled out before this object can be checked in to the database.<br><br>
+   *
+   * If server-local code has called
+   * GanymedeSession.enableOversight(false), this method will not be
+   * called at transaction commit time.
+   *  
    */
 
   public final synchronized ReturnVal checkRequiredFields()
