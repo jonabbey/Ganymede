@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -641,8 +641,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
-	return createErrorDialog("Error",
-				 "Error.. ownerInvids contains invid that the persona is not a member of.");
+	return Ganymede.createErrorDialog("Error in setDefaultOwner()",
+					  "Error.. ownerInvids contains invid that the persona is not a member of.");
       }
     else
       {
@@ -680,8 +680,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
-	return createErrorDialog("Server Error",
-				 "Error.. ownerInvids contains invid that the persona is not a member of.");
+	return Ganymede.createErrorDialog("Server: Error in filterQueries()",
+					  "Error.. ownerInvids contains invid that the persona is not a member of.");
       }
     else
       {
@@ -803,8 +803,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (session.editSet != null)
       {
-	return createErrorDialog("Server: Error in openTransaction()",
-				 "Error.. transaction already opened");
+	return Ganymede.createErrorDialog("Server: Error in openTransaction()",
+					  "Error.. transaction already opened");
       }
 
     session.openTransaction(describe);
@@ -834,8 +834,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (session.editSet == null)
       {
-	return createErrorDialog("Server: Error in commitTransaction()",
-				 "Error.. no transaction in progress");
+	return Ganymede.createErrorDialog("Server: Error in commitTransaction()",
+					  "Error.. no transaction in progress");
       }
 
     return session.commitTransaction();
@@ -1913,8 +1913,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   
   public synchronized ReturnVal inactivate_db_object(Invid invid) 
   {
-    return createErrorDialog("Server Error",
-			     "Error.. inactivate_db_object is not yet implemented on the server");
+    return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
+				      "Error.. inactivate_db_object is not yet implemented on the server");
   }
 
   /**
@@ -1942,8 +1942,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	setLastError("Can't delete default permissions definitions"); // for logging
 
-	return createErrorDialog("Server: Error in remove_db_object()",
-				"Error.. can't delete default permissions definitions");
+	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+					  "Error.. can't delete default permissions definitions");
       }
 
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
@@ -1951,8 +1951,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	setLastError("Can't delete supergash persona");	// for logging
 
-	return createErrorDialog("Server: Error in remove_db_object()",
-				 "Error.. can't delete supergash persona");
+	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+					  "Error.. can't delete supergash persona");
       }
 
     DBObjectBase objBase = Ganymede.db.getObjectBase(invid.getType());
@@ -1962,24 +1962,24 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	setLastError("Can't delete non-existent object");
 
-	return createErrorDialog("Server: Error in remove_db_object()",
-				 "Error.. can't delete non-existent object");
+	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+					  "Error.. can't delete non-existent object");
       }
 
     if (!getPerm(vObj).isEditable())
       {
 	setLastError("Don't have permission to delete object" + vObj.getLabel());
 
-	return createErrorDialog("Server: Error in remove_db_object()",
-				 "Don't have permission to delete object" + vObj.getLabel());
+	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+					  "Don't have permission to delete object" + vObj.getLabel());
       }
 
     if (!objBase.objectHook.canRemove(session, vObj))
       {
 	setLastError("object manager refused deletion" + vObj.getLabel());
 
-	return createErrorDialog("Server: Error in remove_db_object()",
-				 "Object Manager refused deletion for " + vObj.getLabel());
+	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
+					  "Object Manager refused deletion for " + vObj.getLabel());
       }
     
     session.deleteDBObject(invid);
@@ -2544,23 +2544,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     return session;
   }
 
-  /***
-   *
-   * This is a convenience method used by the server to return a
-   * standard error dialog.
-   *
-   */
-
-  public ReturnVal createErrorDialog(String title, String body)
-  {
-    ReturnVal retVal = new ReturnVal(false);
-    retVal.setDialog(new JDialogBuff(title,
-				     body,
-				     "OK",
-				     null,
-				     "error.gif"));
-    return retVal;
-  }
 
   /**
    *
