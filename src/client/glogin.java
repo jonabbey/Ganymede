@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,6 +67,8 @@ public class glogin extends JApplet implements Runnable {
 
   private static boolean WeAreApplet = true;
 
+  private static Container appletContentPane = null;
+
   /**
    *  This main() function will allow this applet to run as an application
    *  when it is not executed in the context of a browser.
@@ -81,9 +83,12 @@ public class glogin extends JApplet implements Runnable {
     my_glogin.setLayout(new BorderLayout());
 
     my_frame = new JFrame("Ganymede Client");
-    my_frame.getContentPane().setLayout(new BorderLayout());
+
+    appletContentPane = my_frame.getContentPane();
+
+    appletContentPane.setLayout(new BorderLayout());
    
-    my_frame.getContentPane().add(my_glogin,"Center");
+    appletContentPane.add(my_glogin,"Center");
 
     my_frame.pack();
     my_frame.setSize(265,380);    
@@ -132,7 +137,7 @@ public class glogin extends JApplet implements Runnable {
     gbc.gridheight = 1;
     gbc.insets = new Insets(1,1,0,0);
 
-    setLayout(gbl);
+    appletContentPane.setLayout(gbl);
 
     //add(new ImageCanvas(ganymede_logo), "North");
     ImageCanvas image = new ImageCanvas(ganymede_logo);
@@ -141,12 +146,12 @@ public class glogin extends JApplet implements Runnable {
     gbc.gridy = 0;
     gbc.gridwidth = 3;
     gbl.setConstraints(image, gbc);
-    add(image);
+    appletContentPane.add(image);
 
     JLabel label = new JLabel("Ganymede Network Management System");
     gbc.gridy = 1;
     gbl.setConstraints(label, gbc);
-    add(label);
+    appletContentPane.add(label);
 
     // the username and passwd fields here won't have their
     // callback set with addTextListener().. instead, we'll
@@ -159,14 +164,14 @@ public class glogin extends JApplet implements Runnable {
     gbc.gridy = 2;
     gbc.gridwidth = 1;
     gbl.setConstraints(userL, gbc);
-    add(userL);
+    appletContentPane.add(userL);
 
     username = new JTextField(20);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
     gbl.setConstraints(username, gbc);
-    add(username);
+    appletContentPane.add(username);
     
     JLabel passL = new JLabel("Password:");
     gbc.fill = GridBagConstraints.NONE;
@@ -174,14 +179,14 @@ public class glogin extends JApplet implements Runnable {
     gbc.gridy = 3;
     gbc.gridwidth = 1;
     gbl.setConstraints(passL, gbc);
-    add(passL);
+    appletContentPane.add(passL);
 
     passwd = new JPasswordField(20);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
     gbl.setConstraints(passwd, gbc);
-    add(passwd);
+    appletContentPane.add(passwd);
     
     username.setEnabled(false);
     username.setText("supergash");
@@ -209,12 +214,10 @@ public class glogin extends JApplet implements Runnable {
     gbc.gridy = 4;
     gbc.fill = GridBagConstraints.BOTH;
     gbl.setConstraints(buttonPanel, gbc);
-    add(buttonPanel);
-
+    appletContentPane.add(buttonPanel);
 
     passwd.addActionListener(_loginHandler);
     username.addActionListener(_loginHandler);
-
 
     _quitButton.addActionListener(_loginHandler);
 
