@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -707,8 +707,108 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   /**
    *
-   * This is the hook that DBEditObject subclasses use to interpose wizards whenever
-   * a sensitive field is being changed.
+   * This method allows the DBEditObject to have executive approval
+   * of any vector delete operation, and to take any special actions
+   * in reaction to the delete.. if this method returns true, the
+   * DBField that called us will proceed to make the change to
+   * its vector.  If this method returns false, the DBField
+   * that called us will not make the change, and the field
+   * will be left unchanged.<br><br>
+   *
+   * The DBField that called us will take care of all possible checks
+   * on the operation (including vector bounds, etc.).  Under normal
+   * circumstances, we won't need to do anything here.<br><br>
+   *
+   * If we do return false, we should set editset.setLastError to
+   * provide feedback to the client about what we disapproved of.
+   *
+   */
+
+  public boolean finalizeDeleteElement(DBField field, int index)
+  {
+    if (field.getID() == systemSchema.INTERFACES)
+      {
+	Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
+
+	// if we have more than 2 interfaces, we don't care
+
+	if (interfaces.size() != 2)
+	  {
+	    return true;
+	  }
+
+	// we want to clear the name field of the sole remaining
+	// interface
+
+	int indexToChange;
+
+	if (index == 0)
+	  {
+	    indexToChange = 1;
+	  }
+	else
+	  {
+	    indexToChange = 0;
+	  }
+
+	interfaceCustom io = (interfaceCustom) getSession().editDBObject((Invid) interfaces.elementAt(indexToChange));
+
+	ReturnVal retVal = io.setFieldValueLocal(interfaceSchema.NAME, null);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return false;
+	  }
+      }
+
+    return true;
+  }
+
+  /**
+   * This method is the hook that DBEditObject subclasses use to interpose
+   * wizards when a field's value is being changed.<br><br>
+   *
+   * Whenever a field is changed in this object, this method will be
+   * called with details about the change. This method can refuse to
+   * perform the operation, it can make changes to other objects in
+   * the database in response to the requested operation, or it can
+   * choose to allow the operation to continue as requested.<br><br>
+   *
+   * In the latter two cases, the wizardHook code may specify a list
+   * of fields and/or objects that the client may need to update in
+   * order to maintain a consistent view of the database.<br><br>
+   *
+   * If server-local code has called
+   * GanymedeSession.enableOversight(false), this method will never be
+   * called.  This mode of operation is intended only for initial
+   * bulk-loading of the database.<br><br>
+   *
+   * This method may also be bypassed when server-side code uses
+   * setValueLocal() and the like to make changes in the database.<br><br>
+   *
+   * This method is called before the finalize*() methods.. the finalize*()
+   * methods is where last minute cascading changes should be performed..
+   * the finalize*() methods have no power to set object/field rescan
+   * or return dialogs to the client, however.. in cases where such
+   * is necessary, a custom plug-in class must have wizardHook() and
+   * finalize*() configured to work together to both provide proper field
+   * rescan notification and to check the operation being performed and
+   * make any changes necessary to other fields and/or objects.<br><br>
+   *
+   * Note as well that wizardHook() is called before the namespace checking
+   * for the proposed value is performed, while the finalize*() methods are
+   * called after the namespace checking.
+   *
+   * @return a ReturnVal object indicated success or failure, objects and
+   * fields to be rescanned by the client, and a doNormalProcessing flag
+   * that will indicate to the field code whether or not the operation
+   * should continue to completion using the field's standard logic.
+   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
+   * if the wizardHook wishes to simply specify rescan information while
+   * having the field perform its standard operation.</b>  wizardHook() may
+   * return new ReturnVal(true, false) if the wizardHook performs the operation
+   * (or a logically related operation) itself.  The same holds true for the
+   * respond() method in GanymediatorWizard subclasses.
    *
    */
 
@@ -737,6 +837,52 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
 
 	return result;
+      }
+
+    if (field.getID() == systemSchema.INTERFACES)
+      {
+	if (operation == ADDELEMENT)
+	  {
+	    Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
+
+	    if (interfaces == null)
+	      {
+		return null;
+	      }
+	    
+	    ReturnVal interfaceRescan = new ReturnVal(true, true);
+	    interfaceRescan.addRescanField(interfaceSchema.NAME);
+	    
+	    ReturnVal result = new ReturnVal(true, true);
+	    
+	    for (int i = 0; i < interfaces.size(); i++)
+	      {
+		result.addRescanObject((Invid) interfaces.elementAt(i), interfaceRescan);
+	      }
+	    
+	    return result;
+	  }
+	else if (operation == DELELEMENT)
+	  {
+	    Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
+
+	    if (interfaces.size() != 2)
+	      {
+		return null;
+	      }
+	    
+	    ReturnVal interfaceRescan = new ReturnVal(true, true);
+	    interfaceRescan.addRescanField(interfaceSchema.NAME);
+	    
+	    ReturnVal result = new ReturnVal(true, true);
+	    
+	    for (int i = 0; i < interfaces.size(); i++)
+	      {
+		result.addRescanObject((Invid) interfaces.elementAt(i), interfaceRescan);
+	      }
+	    
+	    return result;
+	  }
       }
     
     return null;
