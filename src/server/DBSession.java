@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -91,7 +91,7 @@ final public class DBSession {
 
   public synchronized void logout()
   {
-    releaseAllReadLocks();
+    releaseAllLocks();
 
     if (editSet != null)
       {
@@ -763,33 +763,55 @@ final public class DBSession {
 
   /**
    *
-   * releaseReadLock releases a read lock held by this session.
+   * This method establishes a dump lock on all object bases in this Ganymede
+   * server.
    *
    */
 
-  public synchronized void releaseReadLock(DBReadLock lock)
+  public synchronized DBDumpLock openDumpLock() throws InterruptedException
+  {
+    DBDumpLock lock;
+
+    /* -- */
+
+    lock = new DBDumpLock(store);
+    lockVect.addElement(lock);
+
+    lock.establish(this);
+
+    return lock;
+  }
+
+  /**
+   *
+   * releaseLock releases a particular lock held by this session.
+   *
+   */
+
+  public synchronized void releaseLock(DBLock lock)
   {
     lock.release();
     lockVect.removeElement(lock);
     notifyAll();
   }
-  
+
   /**
    *
-   * releaseAllReadLocks() releases all 
+   * releaseAllLocks() releases all locks held by this
+   * session.
    *
    */
 
-  public synchronized void releaseAllReadLocks()
+  public synchronized void releaseAllLocks()
   {
-    DBReadLock lock;
+    DBLock lock;
     Enumeration enum = lockVect.elements();
 
     /* -- */
     
     while (enum.hasMoreElements())
       {
-	lock = (DBReadLock) enum.nextElement();
+	lock = (DBLock) enum.nextElement();
 	lock.abort();
       }
 
@@ -863,11 +885,11 @@ final public class DBSession {
 	throw new RuntimeException(key + ": commitTransaction called outside of a transaction");
       }
 
-    releaseAllReadLocks();
+    releaseAllLocks();
 
     while (lockVect.size() != 0)
       {
-	Ganymede.debug("DBSession: commitTransaction waiting for read locks to be released");
+	Ganymede.debug("DBSession: commitTransaction waiting for read/dump locks to be released");
 
 	try
 	  {
@@ -947,11 +969,11 @@ final public class DBSession {
 	  }
       }
 
-    releaseAllReadLocks();
+    releaseAllLocks();
 
     while (lockVect.size() != 0)
       {
-	Ganymede.debug("DBSession: abortTransaction waiting for read locks to be released");
+	Ganymede.debug("DBSession: abortTransaction waiting for read/dump locks to be released");
 
 	try
 	  {
