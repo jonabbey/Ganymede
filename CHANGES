@@ -124,6 +124,29 @@ an entry in a JComboBox before actually selecting it, and selecting
 items in the Ganymede client will tend to be a slow operation due to
 the round-trip to the server.
 
+13. [SERVER DISTRIBUTION] Added decodeDB command
+
+Added a new executable in the server's bin directory, decodeDB, which
+takes the name of a ganymede.db or ganymede.schema file and generates
+a print-out of the file's object and field type information.
+
+This was added mainly to make it easier for me to do quick checks on
+the ganymede.db and ganymede.schema files packaged with Ganymede
+releases.
+
+14. [DISTRIBUTION] Fixed linux, bsd, nisonly schema kits
+
+In Ganymede 0.98, the linux, bsd, and nisonly schema kits had an
+incompatibility that rendered them inoperable.  This had to do with a
+field in the admin persona object type that was not defined in these
+kits, but which the server had been modified to depend on.
+
+I've modified the kits so that the field is defined, and modified
+the server so that the lack of the field won't prevent an existing
+ganymede.db file from being usable.
+
+Reported by Nikola Nedeljkovic, nikola@carbonix.iam.tu-clausthal.de
+
 -------------------- Changes from 0.97 to 0.98 -------------------
 
 RELEASE DATE: March 17, 1999

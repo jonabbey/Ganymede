@@ -1,9 +1,9 @@
-Ganymede Developer Release 0.98
-March 17, 1999
+Ganymede Developer Release 0.99
+April 16, 1999
 KNOWNBUGS
 ----------------------------------------------
 
-Ganymede release 0.98 requires Swing 1.1 or later, as it
+Ganymede release 0.99 requires Swing 1.1 or later, as it
 is built to expect the Swing libraries to be in the package
 javax.swing, rather than com.sun.java.swing, as it was in prior
 versions.
