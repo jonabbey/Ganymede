@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/05/26 19:39:08 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/05/27 00:30:27 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.8 $ $Date: 2000/05/26 19:39:08 $ $Name:  $
+ * @version $Revision: 1.9 $ $Date: 2000/05/27 00:30:27 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -117,8 +117,8 @@ public class xmlclient implements ClientListener {
   public String server_url = null;
   public String propFilename = null;
   public String xmlFilename = null;
-  public String username = "broccol:supergash";
-  public String password = "dodo";
+  public String username = null;
+  public String password = null;
   public boolean disconnectNow = false;
 
   /**
@@ -236,6 +236,7 @@ public class xmlclient implements ClientListener {
   {
     boolean ok = true;
     File xmlFile = null;
+    java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
     /* -- */
 
@@ -251,6 +252,37 @@ public class xmlclient implements ClientListener {
     else
       {
 	ok = loadProperties(propFilename);
+      }
+
+    username = ParseArgs.getArg("username", argv);
+
+    if (username == null)
+      {
+	// we would prompt for the username here, but java gives us no
+	// portable way to turn character echo on and off.. the script
+	// that runs us has character echo off so that we can prompt
+	// for the user's password, but since it is off, we can't
+	// really prompt for a missing user name here.
+
+	System.err.println("Ganymede xmlclient: Error, must specify ganymede account name");
+ 	System.err.println("Usage: java xmlclient properties=<property file> username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+	System.exit(1);
+      }
+
+    password = ParseArgs.getArg("password", argv);
+
+    if (password == null)
+      {
+	try
+	  {
+	    System.out.print("Password:");
+	    password = in.readLine();
+	    System.out.println();
+	  }
+	catch (java.io.IOException ex)
+	  {
+	    throw new RuntimeException("Exception getting input: " + ex.getMessage());
+	  }
       }
     
     String bufferString = ParseArgs.getArg("bufsize", argv);
@@ -280,7 +312,7 @@ public class xmlclient implements ClientListener {
 
     if (!ok)
       {
- 	System.err.println("Usage: java xmlclient properties=<property file> [bufsize=<buffer size>] <xmlfile>");
+ 	System.err.println("Usage: java xmlclient properties=<property file> username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
 	System.exit(1);
       }
   }
