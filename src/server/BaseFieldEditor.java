@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -85,6 +85,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     labeledCF,			// boolean
     editInPlaceCF,		// invid
     cryptedCF,			// password
+    plainTextCF,		// password
     multiLineCF;		// string
 
   JComboBox
@@ -174,56 +175,60 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     cryptedCF = new JcheckboxField(null, false, true);
     cryptedCF.setCallback(this);
-    addRow(editPanel, cryptedCF, "Stored Crypted:" , 7);
+    addRow(editPanel, cryptedCF, "UNIX Crypted:" , 7);
+
+    plainTextCF = new JcheckboxField(null, false, true);
+    plainTextCF.setCallback(this);
+    addRow(editPanel, plainTextCF, "Store PlainText:" , 8);
 
     multiLineCF = new JcheckboxField(null, false, true);
     multiLineCF.setCallback(this);
-    addRow(editPanel, multiLineCF, "MultiLine Field:" , 8);
+    addRow(editPanel, multiLineCF, "MultiLine Field:" , 9);
 
     minLengthN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     minLengthN.setCallback(this);
-    addRow(editPanel, minLengthN, "Minimum String Size:", 9);
+    addRow(editPanel, minLengthN, "Minimum String Size:", 10);
     
     maxLengthN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     maxLengthN.setCallback(this);
-    addRow(editPanel, maxLengthN, "Maximum String Size:", 10);
+    addRow(editPanel, maxLengthN, "Maximum String Size:", 11);
    
     OKCharS = new JstringField(20, 100,  true, false, null, null);
     OKCharS.setCallback(this);
-    addRow(editPanel, OKCharS, "Allowed Chars:", 11);
+    addRow(editPanel, OKCharS, "Allowed Chars:", 12);
 
     BadCharS = new JstringField(20, 100,  true, false, null, null);
     BadCharS.setCallback(this);
-    addRow(editPanel, BadCharS, "Disallowed Chars:", 12);
+    addRow(editPanel, BadCharS, "Disallowed Chars:", 13);
 
     namespaceC = new JComboBox();
     namespaceC.addItemListener(this);
 
-    addRow(editPanel, namespaceC, "Namespace:", 13);
+    addRow(editPanel, namespaceC, "Namespace:", 14);
     
     labeledCF = new JcheckboxField(null, false, true);
     labeledCF.setCallback(this);
-    addRow(editPanel, labeledCF, "Labeled:", 14);
+    addRow(editPanel, labeledCF, "Labeled:", 15);
 
     trueLabelS = new JstringField(20, 100,  true, false, null, null);
     trueLabelS.setCallback(this);
-    addRow(editPanel, trueLabelS, "True Label:", 15);
+    addRow(editPanel, trueLabelS, "True Label:", 16);
 
     falseLabelS = new JstringField(20, 100,  true, false, null, null);
     falseLabelS.setCallback(this);
-    addRow(editPanel, falseLabelS, "False Label:", 16);
+    addRow(editPanel, falseLabelS, "False Label:", 17);
 
     editInPlaceCF = new JcheckboxField(null, false, true);
     editInPlaceCF.setCallback(this);
-    addRow(editPanel, editInPlaceCF, "Edit In Place:", 17);
+    addRow(editPanel, editInPlaceCF, "Edit In Place:", 18);
 
     targetC = new JComboBox();
     targetC.addItemListener(this);
-    addRow(editPanel, targetC, "Target Object:", 18);
+    addRow(editPanel, targetC, "Target Object:", 19);
 
     fieldC = new JComboBox();
     fieldC.addItemListener(this);
-    addRow(editPanel, fieldC, "Target Field:", 19);
+    addRow(editPanel, fieldC, "Target Field:", 20);
 
     booleanShowing = true;
     numericShowing = false;
@@ -306,10 +311,12 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     if (passwordShowing)
       {
 	setRowVisible(cryptedCF, true);
+	setRowVisible(plainTextCF, true);
       }
     else
       {
 	setRowVisible(cryptedCF, false);
+	setRowVisible(plainTextCF, false);
       }
 
     setRowVisible(labeledCF, booleanShowing);
@@ -838,6 +845,12 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    passwordShowing = true;
 
 	    cryptedCF.setValue(fieldDef.isCrypted());
+	    plainTextCF.setValue(fieldDef.isPlainText());
+
+	    // if a password is not crypted, it *must* keep
+	    // passwords in plaintext
+
+
 	  }
 	else if (fieldDef.isIP())
 	  {
@@ -1142,6 +1155,19 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	multiLineCF.setEnabled(isEditable);
 	cryptedCF.setEnabled(isEditable);
+
+	if (passwordShowing)
+	  {
+	    if (!cryptedCF.isSelected() && plainTextCF.isSelected())
+	      {
+		plainTextCF.setEnabled(false);
+	      }
+	  }
+	else
+	  {
+	    plainTextCF.setEnabled(isEditable);
+	  }
+
 	vectorCF.setEnabled(isEditable);
 	labeledCF.setEnabled(isEditable);
 	editInPlaceCF.setEnabled(isEditable);
@@ -1206,6 +1232,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    System.out.println("I'm not listening!");
 	  }
+
 	return true;  //return true because we want to component to change, just don't act on callback
       }
 
@@ -1345,6 +1372,32 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	      }
 
 	    fieldDef.setCrypted(cryptedCF.isSelected());
+
+	    // a password field has to have plaintext stored if it
+	    // is not to store the password in crypted form.
+
+	    if (!cryptedCF.isSelected() && !plainTextCF.isSelected())
+	      {
+		plainTextCF.setValue(true);
+	      }
+
+	    if (!cryptedCF.isSelected())
+	      {
+		plainTextCF.setEnabled(false);
+	      }
+	    else
+	      {
+		plainTextCF.setEnabled(fieldDef.isEditable() || owner.developMode);
+	      }
+	  }
+	else if (comp == plainTextCF)
+	  {
+	    if (debug)
+	      {
+		System.out.println("plainTextCF");
+	      }
+
+	    fieldDef.setPlainText(plainTextCF.isSelected());
 	  }
 	else if (comp == multiLineCF)
 	  {
