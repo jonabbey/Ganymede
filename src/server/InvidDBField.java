@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,6 +25,10 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 public class InvidDBField extends DBField implements invid_field {
+
+  static final boolean debug = false;
+
+  // --
 
   /**
    *
@@ -330,6 +334,7 @@ public class InvidDBField extends DBField implements invid_field {
 
     if (newRemote == null)
       {
+	setLastError("InvidDBField.bind: null newRemote");
 	throw new IllegalArgumentException("null newRemote");
       }
 
@@ -377,6 +382,7 @@ public class InvidDBField extends DBField implements invid_field {
 	  }
 	catch (ClassCastException ex)
 	  {
+	    setLastError("InvidDBField.bind: invid target field designated in schema is not an invid field");
 	    throw new IllegalArgumentException("invid target field designated in schema is not an invid field");
 	  }
 
@@ -386,6 +392,7 @@ public class InvidDBField extends DBField implements invid_field {
 	    // in the DBObjectBase, so if we got a null result we have a schema
 	    // corruption problem.
 
+	    setLastError("InvidDBField.bind: target field not defined in schema");
 	    throw new RuntimeException("target field not defined in schema");
 	  }
       }
@@ -404,6 +411,7 @@ public class InvidDBField extends DBField implements invid_field {
       }
     catch (ClassCastException ex)
       {
+	setLastError("invid target field designated in schema is not an invid field");
 	throw new IllegalArgumentException("invid target field designated in schema is not an invid field");
       }
 
@@ -412,7 +420,9 @@ public class InvidDBField extends DBField implements invid_field {
 	// editDBObject() will create undefined fields for all fields defined
 	// in the DBObjectBase, so if we got a null result we have a schema
 	// corruption problem.
-	
+
+	setLastError("target field not defined in schema");
+
 	throw new RuntimeException("target field not defined in schema");
       }
 
@@ -581,10 +591,14 @@ public class InvidDBField extends DBField implements invid_field {
 	if (eObj.finalizeDeleteElement(this, index))
 	  {
 	    values.removeElementAt(index);
+
+	    defined = (values.size() > 0 ? true : false);
+
 	    return true;
 	  }
 	else
 	  {
+	    setLastError("InvidDBField remote dissolve: couldn't finalizeDeleteElement");
 	    return false;
 	  }
       }
@@ -604,6 +618,7 @@ public class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
+	    setLastError("InvidDBField remote dissolve: couldn't finalizeSetValue");
 	    return false;
 	  }
       }
@@ -643,16 +658,19 @@ public class InvidDBField extends DBField implements invid_field {
       {
 	if (size() >= getMaxArraySize())
 	  {
+	    setLastError("InvidDBField remote establish: vector overrun");
 	    return false;
 	  }
 
 	if (eObj.finalizeAddElement(this, newInvid))
 	  {
 	    values.addElement(newInvid);
+	    defined = true;
 	    return true;
 	  }
 	else
 	  {
+	    setLastError("InvidDBField remote establish: finalize returned false");
 	    return false;
 	  }
       }
@@ -669,6 +687,7 @@ public class InvidDBField extends DBField implements invid_field {
 
 	    if (!unbind(tmp))
 	      {
+		setLastError("InvidDBField remote establish: couldn't unbind old value");
 		return false;
 	      }
 	  }
@@ -676,6 +695,7 @@ public class InvidDBField extends DBField implements invid_field {
 	if (eObj.finalizeSetValue(this, newInvid))
 	  {
 	    value = newInvid;
+	    defined = true;
 	    return true;
 	  }
 	else
@@ -743,6 +763,7 @@ public class InvidDBField extends DBField implements invid_field {
 
     if (!bind(oldRemote, newRemote))
       {
+	setLastError("InvidDBField setValue: couldn't bind");
 	return false;
       }
 
@@ -759,6 +780,8 @@ public class InvidDBField extends DBField implements invid_field {
       {
 	unbind(newRemote);
 	bind(null, oldRemote);
+
+	setLastError("InvidDBField setValue: couldn't finalize");
 	return false;
       }
   }
@@ -854,11 +877,13 @@ public class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable())
       {
+	setLastError("don't have permission to change field /  non-editable object");
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
       }
 
     if (!isVector())
       {
+	setLastError("vector accessor called on scalar field");
 	throw new IllegalArgumentException("vector accessor called on scalar field");
       }
 
@@ -879,12 +904,21 @@ public class InvidDBField extends DBField implements invid_field {
 
     if (!bind(null, remote))
       {
+	setLastError("Couldn't bind reverse pointer");
 	return false;
       }
 
     if (eObj.finalizeAddElement(this, value)) 
       {
 	values.addElement(value);
+
+	if (debug)
+	  {
+	    setLastError("InvidDBField debug: successfully added " + value);
+	  }
+
+	defined = true;		// very important!
+
 	return true;
       } 
     else
@@ -941,7 +975,16 @@ public class InvidDBField extends DBField implements invid_field {
     if (eObj.finalizeDeleteElement(this, index))
       {
 	values.removeElementAt(index);
-	return true;
+
+	if (values.size() > 0)
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    defined = false;
+	    return true;
+	  }
       }
     else
       {
@@ -1029,6 +1072,7 @@ public class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable())
       {
+	setLastError("object/field not editable");
 	return false;
       }
 
