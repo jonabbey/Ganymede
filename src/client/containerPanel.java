@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.7 $ %D%
+    Version: $Revision: 1.8 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,8 @@ import arlut.csd.JDataComponent.*;
                                                                   containerPanel
 
 ------------------------------------------------------------------------------*/
-public class containerPanel extends JBufferedPane implements ActionListener, JsetValueCallback, ItemListener{  
+
+public class containerPanel extends JScrollPane implements ActionListener, JsetValueCallback, ItemListener{  
 
   static final boolean debug = true;
 
@@ -61,9 +62,8 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
   db_field[] 
     fields = null;
   
-  JScrollPane
-    scrollpane;
-  
+  JViewport
+    vp;
 
   JButton
     editB;
@@ -125,7 +125,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	  }
       }
       
-    setLayout(new BorderLayout());
+    //    setLayout(new BorderLayout());
 
     panel = new JBufferedPane();
     layout = new TableLayout(false);
@@ -184,17 +184,11 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       {
 	System.out.println("Done with loop");
       }
-    
-    //scrollPane = new JScrollPane();
-    //scrollPane.add(panel);
-    
-    add("Center", panel);
-      
-    //scrollpane = new JScrollPane();
-    
-    //scrollpane.setViewport(vp);
-    
-    //scrollpane.getViewport().add(jpanel);
+
+    vp = new JViewport();
+    vp.add(panel);
+    vp.setBackingStoreEnabled(false);
+    setViewportView(vp);
   }
 
   /**
