@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.9 $ %D%
+  Version: $Revision: 1.10 $ %D%
   Module By: Navin Manohar
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -49,6 +49,8 @@ import com.sun.java.swing.*;
 
 public class vectorPanel extends JBufferedPane implements JsetValueCallback, ActionListener {
 
+  private final static boolean debug = true;
+
   // class variables
 
   static JcomponentAttr ca = new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),Color.black,Color.white);
@@ -81,11 +83,15 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 
   boolean 
     editable,
-    isEditInPlace;
+    isEditInPlace,
+    centerPanelAdded = false;
 
   private db_field my_field;
 
   private windowPanel parent;
+
+  containerPanel
+    container;
 
   /* -- */
   
@@ -94,7 +100,7 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
    *
    */
 
-  public vectorPanel(db_field field, windowPanel parent, boolean editable, boolean isEditInPlace)
+  public vectorPanel(db_field field, windowPanel parent, boolean editable, boolean isEditInPlace, containerPanel container)
   {
     try
       {
@@ -127,10 +133,12 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 
     this.editable = editable;
     this.isEditInPlace = isEditInPlace;
+    this.parent = parent;
+    this.container = container;
 
-    bottomPanel = new JBufferedPane();
+    bottomPanel = new JBufferedPane(false);
     bottomPanel.setLayout(new BorderLayout());
-    centerPanel = new JBufferedPane();
+    centerPanel = new JBufferedPane(false);
 
     centerPanel.setLayout(new ColumnLayout(Orientation.LEFT,Orientation.TOP));
 
@@ -156,25 +164,18 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       {
 	throw new RuntimeException("Can't check if field is editable: " + rx);
       }
-
-    JBufferedPane main = new JBufferedPane();
-    main.setLayout(new BorderLayout());
-    main.setBorderStyle(2);
-    main.add("South", bottomPanel);
-    main.add("Center", centerPanel);
     
-    //scrollPane = new JScrollPane();
-    //scrollPane.setViewportView(main);
-    //add(scrollPane);
-
-    add(main);
-
+    setLayout(new BorderLayout());
+    setBorderStyle(2);
+    //add("South", addB);
+    
     compVector = new Vector();
     ewHash = new Hashtable();
 
-    this.parent = parent;
-    
     createVectorComponents();
+
+    invalidate();
+    container.frame.validate();
   }
   
   private void createVectorComponents()
@@ -333,7 +334,7 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 		      }
 
 		    JListBox list = new JListBox(strings);
-		    centerPanel.add(list);
+		    addElement(list);
 		  }
 		else
 		  {
@@ -356,20 +357,34 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 
 	    if (isEditInPlace)
 	      {
-		System.out.println("Adding edit in place invid vector");
-
-		for (int i=0;i<invidfield.size();i++)
+		if (debug)
 		  {
+		    System.out.println("Adding edit in place invid vector, size = " + invidfield.size());
+		  }
+		
+
+		for (int i=0; i < invidfield.size() ; i++)
+		  {
+		    if (debug)
+		      {
+			System.out.println("Adding Invid to edit in place vector panel");
+		      }
 		    Invid inv = (Invid)(invidfield.getElement(i));
+		   
 		    db_object object = parent.getgclient().getSession().edit_db_object(inv);
+		    
 		    containerPanel cp = new containerPanel(object,
 							   invidfield.isEditable() && editable,
 							   parent.parent,
-							   parent);
+							   parent, container.frame);
+
+		    addElement(cp);
 		  }
 	      }
 	    else
 	      {
+		System.out.println("*** Error - should not handle non edit-in-place Invid's in vector panel ***");
+		
 		System.out.println("Adding invid vector");
 
 		if (editable)
@@ -417,7 +432,7 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 	if (my_field.isEditable())
 	  {
 	    System.out.println("Adding add button");
-	    bottomPanel.add("Center", addB);
+	    add("South", addB);
 	  }
 	else
 	  {
@@ -456,13 +471,14 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 	    System.out.println("Adding new edit in place element");
 
 	    try
+	      
 	      {
-		short type = my_field.getType();
-		db_object object = parent.getgclient().getSession().create_db_object(type);
+		Invid invid = ((invid_field)my_field).createNewEmbedded();
+		db_object object = parent.parent.getSession().edit_db_object(invid);
 		containerPanel cp = new containerPanel(object,
 						       my_field.isEditable() && editable,
 						       parent.parent,
-						       parent);
+						       parent, container.frame);
 		addElement(cp);
 	      }
 	    catch (RemoteException rx)
@@ -582,6 +598,12 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       
     //Don't add the buttons for an non-editable field
 
+    if (!centerPanelAdded)
+      {
+	add("Center", centerPanel);
+	centerPanelAdded = true;
+      }
+
     if (editable)
       {
 	elementWrapper ew = new elementWrapper(c, this);
@@ -592,8 +614,9 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       {
 	centerPanel.add(c);
       }
-    validate();
-    parent.validate();
+    invalidate();
+    container.invalidate();
+    container.frame.validate();
   }
   
   public void deleteElement(Component c) 
@@ -637,7 +660,7 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 	my_field.deleteElement(compVector.indexOf(c));
 	compVector.removeElement(c);	  
 	centerPanel.remove((elementWrapper)ewHash.get(c));
-	invalidate();
+	validate();
 	parent.validate();
       }
     catch (RemoteException rx)
