@@ -8,7 +8,7 @@
    server.
    
    Created: 6 February 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,6 +57,11 @@ public class ObjectHandle {
   public final void setLabel(String label)
   {
     this.label = label;
+
+    if (lHandle != null)
+      {
+	lHandle.setLabel(label);
+      }
   }
 
   public final Invid getInvid()
