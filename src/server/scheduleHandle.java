@@ -7,8 +7,8 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2001/05/07 05:57:55 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2001/10/29 20:03:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -253,7 +253,7 @@ public class scheduleHandle implements java.io.Serializable {
 
     if (suspend)
       {
-	System.err.println("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
+	Ganymede.debug("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
 	scheduler.notifyCompletion(this);
 	return;
       }

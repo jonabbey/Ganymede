@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2001/10/26 21:30:02 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2001/10/29 20:03:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -424,7 +424,7 @@ public class GanymedeScheduler extends Thread {
 
     if (logStuff)
       {
-	System.err.println("Ganymede Scheduler: Scheduled task " + name + " for execution at " + time);
+	Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for execution at " + time);
       }
   }
 
@@ -483,7 +483,7 @@ public class GanymedeScheduler extends Thread {
 
     if (logStuff)
       {
-	System.err.println("Ganymede Scheduler: Scheduled task " + name + " for daily execution at " + time);
+	Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for daily execution at " + time);
       }
   }
 
@@ -530,8 +530,8 @@ public class GanymedeScheduler extends Thread {
 
     if (logStuff)
       {
-	System.err.println("Ganymede Scheduler: Scheduled task " + name + " for periodic execution at " + firstTime);
-	System.err.println("                    Task will repeat every " + intervalMinutes + " minutes");
+	Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for periodic execution at " + firstTime);
+	Ganymede.debug("                    Task will repeat every " + intervalMinutes + " minutes");
       }
   }
 
@@ -819,14 +819,14 @@ public class GanymedeScheduler extends Thread {
       {
 	if (logStuff)
 	  {
-	    System.err.println("Ganymede Scheduler: scheduling task started");
+	    Ganymede.debug("Ganymede Scheduler: scheduling task started");
 	  }
 
 	while (true)
 	  {
 	    if (isInterrupted())
 	      {
-		System.err.println("Scheduler interrupted");
+		Ganymede.debug("Scheduler interrupted");
 		return;	// jump to finally, then return
 	      }
 
@@ -947,14 +947,14 @@ public class GanymedeScheduler extends Thread {
       {
 	if (logStuff)
 	  {
-	    System.err.println("Ganymede Scheduler going down");
+	    Ganymede.debug("Ganymede Scheduler going down");
 	  }
 
 	cleanUp();		// send interrupts to all running tasks
 
 	if (logStuff)
 	  {
-	    System.err.println("Ganymede Scheduler exited");
+	    Ganymede.debug("Ganymede Scheduler exited");
 	  }
       }
   }
@@ -971,7 +971,7 @@ public class GanymedeScheduler extends Thread {
       {
 	if (logStuff && !(handle.task instanceof silentTask))
 	  {
-	    System.err.println("Ganymede Scheduler: running " + handle.name);
+	    Ganymede.debug("Ganymede Scheduler: running " + handle.name);
 	  }
 
 	currentlyRunning.put(handle.name, handle);
@@ -994,7 +994,7 @@ public class GanymedeScheduler extends Thread {
       {
 	if (logStuff && !(handle.task instanceof silentTask))
 	  {
-	    System.err.println("Ganymede Scheduler: " + handle.name + " completed");
+	    Ganymede.debug("Ganymede Scheduler: " + handle.name + " completed");
 	  }
 
 	// we need to check to see if the task was ordinarily scheduled to
@@ -1013,8 +1013,8 @@ public class GanymedeScheduler extends Thread {
 	      {
 		if (logStuff && !(handle.task instanceof silentTask))
 		  {
-		    System.err.println("Ganymede Scheduler: rescheduling task " + 
-				       handle.name + " for " + handle.startTime);
+		    Ganymede.debug("Ganymede Scheduler: rescheduling task " + 
+				   handle.name + " for " + handle.startTime);
 		  }
 		
 		scheduleTask(handle);
@@ -1034,8 +1034,8 @@ public class GanymedeScheduler extends Thread {
       }
     else
       {
-	System.err.println("Ganymede Scheduler: confusion! Couldn't find task " + 
-			   handle.name + " on the runnng list");
+	Ganymede.debug("Ganymede Scheduler: confusion! Couldn't find task " + 
+		       handle.name + " on the runnng list");
       }
   }
 
