@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,6 +14,7 @@
 
 package arlut.csd.ganymede;
 
+import java.lang.reflect.*;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
@@ -380,6 +381,14 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	throw new IllegalArgumentException("scalar accessor called on vector");
       }
 
+    if (owner.objectBase.objectHook != null)
+      {
+	if (owner.objectBase.objectHook.virtualizeField(getID()))
+	  {
+	    return owner.objectBase.objectHook.getVirtualValue(this);
+	  }
+      }
+
     return value;
   }
 
@@ -559,6 +568,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
     if (eObj.finalizeSetElement(this, index, value))
       {
 	values.setElementAt(value, index);
+
+	defined = true;
+	
 	return true;
       }
     else
@@ -634,6 +646,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
     if (eObj.finalizeAddElement(this, value)) 
       {
 	values.addElement(value);
+	defined = true;
 	return true;
       } 
     else
@@ -693,6 +706,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
     if (eObj.finalizeDeleteElement(this, index))
       {
 	values.removeElementAt(index);
+
+	defined = (values.size() > 0);
+
 	return true;
       }
     else
