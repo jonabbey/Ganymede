@@ -90,7 +90,7 @@ import java.text.*;
  * this class may not function properly when used within an applet.</P>
  */
 
-public class Qsmtp {
+public class Qsmtp implements Runnable {
 
   static final int DEFAULT_PORT = 25;
   static final String EOL = "\r\n"; // network end of line
@@ -105,6 +105,10 @@ public class Qsmtp {
   private String hostid = null;
   private InetAddress address = null;
   private int port = DEFAULT_PORT;
+
+  private Vector queuedMessages = new Vector();
+  private boolean threaded = false;
+  private Thread backgroundThread;
 
   /* -- */
 
@@ -130,6 +134,24 @@ public class Qsmtp {
     this.port = port;
   }
 
+  /** 
+   * <P>After this method is called, all further sendMsg() calls will
+   * not directly send mail themselves, but will rather queue the mail
+   * for sending by a back-ground thread.</P>
+   *
+   * <P>One result of this is that after this is called, the sendMsg()
+   * methods will never throw Protcol or IO Exceptions, and no
+   * success/failure results will be returned.</P> 
+   */
+
+  public synchronized void goThreaded()
+  {
+    backgroundThread = new Thread(this);
+    this.threaded = true;
+
+    backgroundThread.start();
+  }
+
   /**
    * <P>Sends a plain ASCII mail message</P>
    *
@@ -138,12 +160,11 @@ public class Qsmtp {
    * @param subject Subject for this message
    * @param message The text for the mail message
    *
-   * @exception ProtocolException
    * @exception IOException
    */
 
-  public void sendmsg(String from_address, Vector to_addresses,
-		      String subject, String message) throws IOException, ProtocolException 
+  public synchronized void sendmsg(String from_address, Vector to_addresses,
+				   String subject, String message) throws IOException
   {
     sendmsg(from_address, to_addresses, subject, message, null);
   }
@@ -162,13 +183,12 @@ public class Qsmtp {
    * show up in mail clients
    * @param textBody The text for the non-HTML part of the mail message
    *
-   * @exception ProtocolException
    * @exception IOException
    */
 
-  public void sendHTMLmsg(String from_address, Vector to_addresses,
-			  String subject, String htmlBody, String htmlFilename,
-			  String textBody) throws IOException, ProtocolException 
+  public synchronized void sendHTMLmsg(String from_address, Vector to_addresses,
+				       String subject, String htmlBody, String htmlFilename,
+				       String textBody) throws IOException
   {
     Vector MIMEheaders = new Vector();
     String separator = "B24FDA77DFMIMEISNEAT4976B1CA5E8A49";
@@ -231,18 +251,101 @@ public class Qsmtp {
    * @param extraHeaders Vector of string headers to include in the message's
    * envelope
    *
-   * @exception ProtocolException
    * @exception IOException
    */
 
-  public void sendmsg(String from_address, Vector to_addresses, 
-		      String subject, String message,
-		      Vector extraHeaders) throws IOException, ProtocolException
+  public synchronized void sendmsg(String from_address, Vector to_addresses, 
+				   String subject, String message,
+				   Vector extraHeaders) throws IOException
+  {
+    messageObject msgObj = new messageObject(from_address, to_addresses,
+					     subject, message, extraHeaders);
+
+    if (threaded)
+      {
+	synchronized (queuedMessages)
+	  {
+	    queuedMessages.addElement(msgObj);
+	    queuedMessages.notify();
+	  }
+      }
+    else
+      {
+	dispatchMessage(msgObj);
+      }
+  }
+
+  /**
+   * <P>Main worker routine for the background thread which handles mail-outs.</P>
+   */
+
+  public void run()
+  {
+    messageObject message = null;
+
+    /* -- */
+
+    while (true)
+      {
+	message = null;
+
+	synchronized (queuedMessages)
+	  {
+	    while (message == null)
+	      {
+		if (queuedMessages.size() > 0)
+		  {
+		    message = (messageObject) queuedMessages.firstElement();
+		    queuedMessages.removeElementAt(0);
+		  }
+		else
+		  {
+		    message = null;
+
+		    try
+		      {
+			queuedMessages.wait(); // wait until something is queued
+		      }
+		    catch (InterruptedException ex)
+		      {
+			// ??
+		      }
+		  }
+	      }
+	  }
+
+	try
+	  {
+	    dispatchMessage(message);
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
+	    System.err.println(message.toString());
+	    ex.printStackTrace();
+	    System.err.println();
+	  }
+      }
+  }
+
+  /**
+   * <P>This method handles the actual mail-out</P>
+   *
+   * @exception IOException
+   */
+
+  private void dispatchMessage(messageObject msgObj) throws IOException
   {
     String rstr;
     String sstr;
 
     InetAddress local;
+
+    String from_address = msgObj.from_address;
+    Vector to_addresses = msgObj.to_addresses;
+    String subject = msgObj.subject;
+    String message = msgObj.message;
+    Vector extraHeaders = msgObj.extraHeaders;
 
     /* -- */
 
@@ -325,9 +428,11 @@ public class Qsmtp {
 	send.flush();
 
 	rstr = reply.readLine();
+
 	if (!rstr.startsWith("250")) 
 	  {
-	    throw new ProtocolException(rstr);
+	    throw new ProtocolException(rstr + " received for address " + 
+					(String) to_addresses.elementAt(i));
 	  }
       }
 
@@ -424,5 +529,80 @@ public class Qsmtp {
     DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", 
 						java.util.Locale.US);
     return formatter.format(date);
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                   messageObject
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>Data-holding object used by the Qstmp class to queue messages for mailing
+ * on a separate thread.</P>
+ */
+
+class messageObject {
+  
+  String from_address;
+  Vector to_addresses;
+  String subject;
+  String message;
+  Vector extraHeaders;
+
+  /* -- */
+
+  messageObject(String from_address, Vector to_addresses, 
+		String subject, String message,
+		Vector extraHeaders)
+  {
+    this.from_address = from_address;
+    this.to_addresses = to_addresses;
+    this.subject = subject;
+    this.message = message;
+    this.extraHeaders = extraHeaders;
+  }
+
+  public String toString()
+  {
+    StringBuffer buffer = new StringBuffer();
+
+    buffer.append("From: ");
+    buffer.append(from_address);
+    buffer.append("\n");
+
+    buffer.append("To: ");
+
+    if (to_addresses != null)
+      {
+	for (int i = 0; i < to_addresses.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		buffer.append(", ");
+	      }
+
+	    buffer.append(to_addresses.elementAt(i));
+	  }
+      }
+
+    buffer.append("\nSubject: ");
+    buffer.append(subject);
+    buffer.append("\n");
+
+    if (extraHeaders != null)
+      {
+	for (int i = 0; i < extraHeaders.size(); i++)
+	  {
+	    buffer.append(extraHeaders.elementAt(i));
+	    buffer.append("\n");
+	  }
+      }
+
+    buffer.append("Message:\n");
+    buffer.append(message);
+
+    return buffer.toString();
   }
 }
