@@ -6,7 +6,7 @@ package arlut.csd.JDialog;
 
 import java.lang.String;
 
-public class passwordThing {
+public class passwordThing implements java.io.Serializable {
   
   String PWLabel;
   boolean isNew;
