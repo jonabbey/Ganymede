@@ -18,14 +18,14 @@ to turn off enableOversight.
 
 Now, if the GanymedeSession's enableOversight flag is turned off, the
 default commitPhase1() method won't bother to run consistencyCheck(),
-and will simply return a success value.
+and will simply return a positive success value.
 
 This comes in handy, as the nightly GanymedeExpirationTask runs with
 enableOversight turned off, so that we can allow object
 expiration/removal that would break a required field or other
 consistency guarantee if need be, rather than having the nightly task
-be blocked from committing its changes if anything would lead to an
-inconsistency.
+be blocked from committing its changes if anything would lead to a
+slight inconsistency.
 
 Note as always that the default DBEditObject commitPhase1() method can
 be overridden with custom logic if it is not desireable to have any
@@ -54,19 +54,20 @@ The GanymedeValidationTask scans through the database checking objects
 for consistency.  Previously, however, the only check this task was
 performing was to see if any required fields were missing.  Now, the
 GanymedeValidationTask will also call consistencyCheck() on each
-object, allowing inconsistencies that have creeped in to be easily
-detected on demand.
+object, allowing inconsistencies that have creeped in from
+transactions run with enableOversight turned off to be easily detected
+on demand.
 
 4. [SERVER] Turned off passive password capture
 
 Turned off passive password capture.  Ganymede stores passwords in a
-variety of hashed forms, strings that can be used for validating a
-password but not in retrieving the password without the use of a
-brute-force encryption search.  Plaintext is never saved on disk
-unless the password field is specifically configured to do so in the
-Ganymede schema.  Things like sync'ing passwords to Windows NT which
-require plaintext passwords have to obtain them from temporary storage
-in the Ganymede server.
+variety of hashed forms, which are strings that can be used for
+validating a password but not which can't reveal the actual text of
+the password without the use of a brute-force encryption search.
+Plaintext is never saved on disk unless the password field is
+specifically configured to do so in the Ganymede schema.  Things like
+sync'ing passwords to Windows NT which require plaintext passwords
+have to obtain them from temporary storage in the Ganymede server.
  
 Formerly, whenever a user logged into Ganymede, Ganymede would
 temporarily acquire and retain the plaintext used to login to Ganymede
@@ -269,6 +270,8 @@ sequence look like this:
         Old: ATL - Outgoing Inet Access Only
         New: ADG/OMG - Outgoing Inet Access Only
 
+This misfeature was reported by Gil Kloepfer, here at ARL.
+
 13. [CLIENT] Put warning dialog up when editing inactivated objects
 
 A good number of admins here at ARL have ran into problems when they
@@ -322,9 +325,6 @@ certain user accounts.
 The client's vertical splitter supports the OneTouchExpandable option
 as well, making it possible to entirely hide the tree if more space is
 needed for showing object windows.
-
-The client no longer bothers to show an empty, non-editable string
-field for non-editable password fields.
 
 The admin console's layout has changed very slightly, with a splitter
 bar added between the log panel and the bottom status tables panel,
