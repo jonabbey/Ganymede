@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 2001/09/17 20:19:55 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 2001/10/30 19:08:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -200,7 +200,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // group
 
-    if (baseChanged((short) 257))
+    if (baseChanged((short) 257) ||
+	baseChanged(SchemaConstants.UserBase)) // in case a user was renamed
       {
 	Ganymede.debug("Need to build group map");
 
@@ -275,7 +276,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     if (baseChanged((short) 271) || // system netgroups
-	baseChanged((short) 270)) // user netgroups
+	baseChanged((short) 270) || // user netgroups
+	baseChanged(SchemaConstants.UserBase) || // in case users were renamed
+	baseChanged((short) 263)) // in case systems were renamed
       {
 	Ganymede.debug("Need to build netgroup map");
 
@@ -287,6 +290,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (baseChanged((short) 277) || // automounter maps
 	baseChanged((short) 276) || // nfs volumes
+	baseChanged((short) 263) || // in case systems were renamed
+	baseChanged(SchemaConstants.UserBase) || // in case users were renamed
 	baseChanged((short) 278)) // automounter map entries
       {
 	Ganymede.debug("Need to build automounter maps");
