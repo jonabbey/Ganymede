@@ -5,7 +5,7 @@
    Client side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,6 +29,32 @@ import java.util.*;
  */
 
 public interface SchemaEdit extends Remote {
+
+  /**
+   *
+   * Returns true if the schema editor is allowing
+   * the 'constant' fields to be edited.  This is
+   * provided solely so the Ganymede developers can
+   * make incompatible changes to the 'constant' schema
+   * items during development.
+   *
+   */
+
+  public boolean isDevelopMode() throws RemoteException;
+
+  /**
+   *
+   * When the server is in develop mode, it is possible to create new
+   * built-in fields, or fields that can be relied on by the server
+   * code to exist in every non-embedded object type defined.
+   * 
+   */
+
+  public BaseField createNewBuiltIn() throws RemoteException;
+
+  //
+  // From here on are the normal schema editing methods
+  //
 
   public Category getRootCategory() throws RemoteException;
 
