@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/06/23 23:42:48 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/06/26 20:38:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -99,8 +99,8 @@ class DBCheckPoint {
 
     objects = new Vector();
 
-    // we can safely iterate on transaction.objects since we're being
-    // created from within a synchronized block in DBEditSet.
+    // we can only safely iterate on transaction.objects because we're
+    // being created from within a synchronized block in DBEditSet.
 
     Enumeration enum = transaction.objects.elements();
 

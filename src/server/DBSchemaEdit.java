@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2000/06/24 18:36:40 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2000/06/26 20:38:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -940,12 +940,28 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     Ganymede.debug("DBSchemaEdit: schema changes committed.");
 
+    // disallow any more schema editing activity
+
+    locked = false;
+
+    // and dump the changed schema out to disk before we allow any
+    // transactions
+
+    GanymedeAdmin.setState("Dumping Database");
+
+    try
+      {
+	Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+      }
+
     // and unlock the server
 
     GanymedeAdmin.setState("Normal Operation");
 
-    locked = false;
-    
     GanymedeServer.lSemaphore.enable("schema edit");
 
     return;
