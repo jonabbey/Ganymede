@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -362,10 +362,13 @@ public class JstringField extends JentryField {
    * the value in the JstringField need to be propogated to the
    * server.  This method will handle that functionality.
    *
+   * This method is synchronized to prevent overlapping callbacks
+   * if we are in a threaded environment.
+   *
    * @param e the FocusEvent that needs to be process
    */
 
-  public void processFocusEvent(FocusEvent e)
+  public synchronized void processFocusEvent(FocusEvent e)
   {
     String str;
 
