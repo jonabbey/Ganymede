@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.33 $ %D%
+  Version: $Revision: 1.34 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -333,6 +333,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public void addNewElement()
   {
+    ReturnVal retVal = null;
+    Invid invid = null;
+
+    /* -- */
+
     if (debug)
       {
 	System.out.println("Adding new element");
@@ -347,24 +352,32 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	try
 	  {
-	    Invid invid = ((invid_field)my_field).createNewEmbedded();
-	    db_object object = wp.gc.getSession().edit_db_object(invid);
+	    retVal = ((invid_field)my_field).createNewEmbedded();
+	    gc.handleReturnVal(retVal);
+	    container.checkReturnValForRescan(retVal);
 
-	    containerPanel cp = new containerPanel(object,
-						   isFieldEditable() && editable,
-						   wp.gc,
-						   wp, container.frame);
-	    
-	    // register this containerPanel with the framePanel, so it
-	    // can be told to stop.  The containerPanel will also
-	    // register with the gclient, but it can handle this
-	    // itself.
-
-	    container.frame.containerPanels.addElement(cp);
-
-	    cp.setBorder(wp.lineEmptyBorder);
-
-	    addElement("New Element", cp, true);
+	    if (retVal != null && retVal.didSucceed())
+	      {
+		invid = retVal.getInvid();
+		
+		db_object object = wp.gc.getSession().edit_db_object(invid);
+		
+		containerPanel cp = new containerPanel(object,
+						       isFieldEditable() && editable,
+						       wp.gc,
+						       wp, container.frame);
+		
+		// register this containerPanel with the framePanel, so it
+		// can be told to stop.  The containerPanel will also
+		// register with the gclient, but it can handle this
+		// itself.
+		
+		container.frame.containerPanels.addElement(cp);
+		
+		cp.setBorder(wp.lineEmptyBorder);
+		
+		addElement("New Element", cp, true);
+	      }
 	  }
 	catch (RemoteException rx)
 	  {
