@@ -4,8 +4,8 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/11/04 03:13:11 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/11/04 21:38:02 $
    Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
    ----------------------------------------------------------------------------
@@ -67,9 +67,9 @@ import MD5;
  *
  * <p>Created: 3 November 1999</p>
  * <p>Release: $Name:  $</p>
- * <p>Version: $Revision: 1.3 $</p>
- * <p>Last Mod Date: $Date: 1999/11/04 03:13:11 $</p>
- * <p> Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
+ * <p>Version: $Revision: 1.4 $</p>
+ * <p>Last Mod Date: $Date: 1999/11/04 21:38:02 $</p>
+ * <p>Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
  * <p>Original C Version:<pre>
  * ----------------------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
@@ -118,6 +118,19 @@ public final class MD5Crypt {
 
     return result.toString();
   }
+
+  static private final void clearbits(byte bits[])
+  {
+    for (int i = 0; i < bits.length; i++)
+      {
+	bits[i] = 0;
+      }
+  }
+
+  /**
+   * convert an encoded unsigned byte value into a int
+   * with the unsigned value.
+   */
 
   static private final int bytes2u(byte inp)
   {
@@ -192,17 +205,23 @@ public final class MD5Crypt {
 	ctx.Update(finalState, pl > 16? 16 : pl);
       }
 
+    /* the original code claimed that finalState was being cleared
+       to keep dangerous bits out of memory, but doing this is also
+       required in order to get the right output. */
+
+    clearbits(finalState);
+    
     /* Then something really weird... */
 
-    for (int j = 0, i = password.length(); i != 0; i >>>=1)
+    for (int i = password.length(); i != 0; i >>>=1)
       {
 	if ((i & 1) != 0)
 	  {
-	    ctx.Update(finalState, j, 1);
+	    ctx.Update(finalState, 1);
 	  }
 	else
 	  {
-	    ctx.Update(password.getBytes(), j, 1);
+	    ctx.Update(password.getBytes(), 1);
 	  }
       }
 
@@ -276,6 +295,9 @@ public final class MD5Crypt {
 
     l = bytes2u(finalState[11]);
     result.append(to64(l, 2));
+
+    /* Don't leave anything around in vm they could use. */
+    clearbits(finalState);
 
     return result.toString();
   }

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/broccol/ganymede/cvsroot/ganymede/src/md5/MD5.java,v 1.1 1999/08/05 22:07:03 broccol Exp $
+ * $Header: /home/broccol/ganymede/cvsroot/ganymede/src/md5/MD5.java,v 1.2 1999/11/04 21:38:00 broccol Exp $
  *
  * MD5 in Java JDK Beta-2
  * written Santeri Paavolainen, Helsinki Finland 1996
@@ -34,6 +34,9 @@
  *
  *
  * $Log: MD5.java,v $
+ * Revision 1.2  1999/11/04 21:38:00  broccol
+ * Got MD5Crypt calculating the same hash as the OpenBSD md5crypt.c routine.
+ *
  * Revision 1.1  1999/08/05 22:07:03  broccol
  * Added support for the MD5 classes.
  *
@@ -101,7 +104,7 @@ class MD5State {
 /**
  * Implementation of RSA's MD5 hash generator
  *
- * @version	$Revision: 1.1 $
+ * @version	$Revision: 1.2 $
  * @author	Santeri Paavolainen <sjpaavol@cc.helsinki.fi>
  */
 
@@ -151,6 +154,11 @@ public class MD5 {
   public MD5 (Object ob) {
     this();
     Update(ob.toString());
+  }
+
+  public String debugDump()
+  {
+    return asHex();
   }
 
   private int rotate_left (int x, int n) {
