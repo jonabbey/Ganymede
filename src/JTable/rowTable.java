@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,7 +14,6 @@ package csd.Table;
 
 import java.awt.*;
 import java.util.*;
-import csd.Table.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -29,7 +28,7 @@ import csd.Table.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.2 $ %D% 
+ * @version $Revision: 1.3 $ %D% 
  */
 
 public class rowTable extends baseTable {
@@ -39,6 +38,9 @@ public class rowTable extends baseTable {
 
   Vector
     crossref;
+
+  rowSelectCallback
+    callback;
 
   /**
    * This is the base constructor for rowTable, which allows
@@ -59,7 +61,7 @@ public class rowTable extends baseTable {
    * @param vertFill    true if table should expand vertically to fill size of baseTable
    * @param hVertFill   true if horizontal lines should be drawn in the vertical fill region
    * 			(only applies if vertFill and horizLines are true)
-   * @param allow_select true if rows should be selectable by the user
+   * @param callback    reference to an object that implements the rowSelectCallback interface
    *
    */
 
@@ -74,15 +76,153 @@ public class rowTable extends baseTable {
 		  String[] headers,
 		  boolean horizLines, boolean vertLines,
 		  boolean vertFill, boolean hVertFill,
-		  boolean allow_select)
+		  rowSelectCallback callback)
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
 	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
-	  headers, horizLines, vertLines, vertFill, hVertFill,
-	  allow_select);
+	  headers, horizLines, vertLines, vertFill, hVertFill);
+
+    this.callback = callback;
 
     index = new Hashtable();
     crossref = new Vector();
+  }
+
+  /**
+   * Constructor with default fonts, justification, and behavior
+   *
+   * @param colWidths  array of initial column widths
+   * @param headers    array of column header titles, must be same size as colWidths
+   * @param callback    reference to an object that implements the rowSelectCallback interface
+   *
+   */
+
+  public rowTable(int[] colWidths, String[] headers, rowSelectCallback callback)
+  {
+    this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
+		       Color.white, Color.blue, tableAttr.JUST_CENTER),
+	 new tableAttr(null, new Font("Helvetica", Font.PLAIN, 12),
+		       Color.black, Color.white, tableAttr.JUST_LEFT),
+	 (tableAttr[]) null,
+	 colWidths, 
+	 Color.black,
+	 Color.black,
+	 Color.black,
+	 Color.black,
+	 headers,
+	 false, true, true, false, callback);
+
+    // we couldn't pass this to the baseTableConstructors
+    // above, so we set it directly here, then force metrics
+    // calculation
+
+    headerAttrib.c = this;
+    headerAttrib.calculateMetrics();
+    tableAttrib.c = this;
+    tableAttrib.calculateMetrics();
+
+    calcFonts();
+    calcCols();
+  }
+
+  /**
+   * Hook for subclasses to implement selection logic
+   *
+   * @param x col of cell clicked in
+   * @param y row of cell clicked in
+   */
+
+  public synchronized void clickInCell(int x, int y)
+  {
+    rowHandle 
+      element = null;
+
+    /* -- */
+
+    for (int i = 0; i < crossref.size(); i++)
+      {
+	if (((rowHandle) crossref.elementAt(i)).rownum == y)
+	  {
+	    element = (rowHandle) crossref.elementAt(i);
+	  }
+      }
+
+    if (!testRowSelected(y))
+      {
+	// unselect the currently selected row, if any.  Note that we
+	// are currently only supporting single row selection.
+
+	for (int i = 0; i < rows.size(); i++)
+	  {
+	    if (testRowSelected(y))
+	      {
+		unSelectRow(y);
+		if (callback != null)
+		  {
+		    // if we get a nullpointer exception on
+		    // element here, it means that the tableCanvas
+		    // code didn't properly check to make sure that
+		    // the location clicked on corresponded to
+		    // a proper row
+		    callback.rowUnSelected(element.key, true);
+		  }
+	      }
+	  }
+
+	selectRow(y);
+	refreshTable();
+
+	if (callback != null)
+	  {
+	    callback.rowSelected(element.key);
+	  }
+      }
+    else
+      {
+	// go ahead and deselect the current row
+	
+	unSelectRow(y);
+	refreshTable();
+
+	if (callback != null)
+	  {
+	    callback.rowUnSelected(element.key, false);
+	  }
+      }
+  }
+
+
+  /**
+   * Hook for subclasses to implement selection logic
+   *
+   * @param x col of cell double clicked in
+   * @param y row of cell double clicked in
+   */
+
+  public synchronized void doubleClickInCell(int x, int y)
+  {
+    rowHandle element = null;
+    
+    /* -- */
+
+    for (int i = 0; i < crossref.size(); i++)
+      {
+	if (((rowHandle) crossref.elementAt(i)).rownum == y)
+	  {
+	    element = (rowHandle) crossref.elementAt(i);
+	  }
+      }
+
+    if (testRowSelected(y))
+      {
+	callback.rowDoubleSelected(element.key);
+      }
+    else
+      {
+	// the first click of our double click deselected
+	// the row, go ahead and reselect it
+	clickInCell(x,y);
+      }
   }
 
   /**
@@ -101,7 +241,7 @@ public class rowTable extends baseTable {
 	// a row with that key already exists.. what to do?
       }
 
-    element = new rowHandle(this);
+    element = new rowHandle(this, key);
 
     index.put(key, element);
   }
@@ -110,9 +250,10 @@ public class rowTable extends baseTable {
    * Deletes a row
    *
    * @param key A hashtable key for the row to delete
+   * @param repaint true if the table should be redrawn after the row is deleted
    */
 
-  public void deleteRow(Object key)
+  public void deleteRow(Object key, boolean repaint)
   {
     rowHandle element;
 
@@ -121,18 +262,16 @@ public class rowTable extends baseTable {
     if (!index.containsKey(key))
       {
 	// no such row exists.. what to do?
+	return;
       }
 
     element = (rowHandle) index.get(key);
 
     index.remove(key);
 
-    // delete the row from our parent.. we do this
-    // directly here because our parent doesn't
-    // support any means of row access that isn't
-    // sensitive to numeric position
+    // delete the row from our parent..
 
-    rows.removeElementAt(element.rownum);
+    super.deleteRow(element.rownum, repaint);
 
     // sync up the rowHandles 
 
@@ -305,12 +444,17 @@ This class is used to map a hash key to a position in the table.
 
 class rowHandle {
 
-  int rownum;
+  Object 
+    key;
 
-  public rowHandle(rowTable parent)
+  int
+    rownum;
+
+  public rowHandle(rowTable parent, Object key)
   {
     parent.addRow(false);	// don't repaint table
     rownum = parent.rows.size() - 1; // we always add the new row to the end
+    this.key = key;
 
     // crossref's index for RowHash element should be same as
     // rows's index for the corresponding ReportRow
@@ -324,5 +468,4 @@ class rowHandle {
 	throw new RuntimeException("rowTable / baseTable mismatch");
       }
   }
-
 }
