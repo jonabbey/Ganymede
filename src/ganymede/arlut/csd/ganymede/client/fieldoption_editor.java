@@ -138,6 +138,7 @@ class fieldoption_editor extends JDialog
     
     TreeTableModel model = new FieldOptionModel(rowRootNode);
     treeTable = new JTreeTable(model);
+
     tree = treeTable.getTree();
     tree.setCellRenderer(new FieldOptionTreeRenderer(this));
 
@@ -157,6 +158,8 @@ class fieldoption_editor extends JDialog
     
     edit_pane = new JScrollPane(treeTable);
     edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    edit_pane.getViewport().setOpaque(true);
+    edit_pane.getViewport().setBackground(Color.white);
 
     Base_Panel = new JPanel(); 
     Base_Panel.setLayout(new BorderLayout());

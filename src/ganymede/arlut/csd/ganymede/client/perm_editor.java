@@ -412,10 +412,11 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     
     edit_pane = new JScrollPane(treeTable);
     edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    edit_pane.getViewport().setOpaque(true);
+    edit_pane.getViewport().setBackground(Color.white);
 
     Base_Panel = new JPanel(); 
     Base_Panel.setLayout(new BorderLayout());
-    //Base_Panel.setBackground(Color.white);
     Base_Panel.add("Center", edit_pane);
     Base_Panel.add("South", All_Buttons);
 
