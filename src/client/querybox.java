@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 2002/10/05 07:51:47 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2002/10/09 02:38:22 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -821,6 +821,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    }
 	  }
       }
+
+    // if the user hit enter in one of the operand components that we have
+    // registered ourselves for, submit the query
 
     if (e.getSource() instanceof JstringField ||
 	e.getSource() instanceof JnumberField ||
