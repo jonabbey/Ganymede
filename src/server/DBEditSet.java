@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 2000/02/10 04:35:35 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 2000/03/03 02:04:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -260,8 +261,6 @@ public class DBEditSet {
     DBEditObject eObj;
 
     /* -- */
-
-    System.err.println("DBEditSet.deleteLock( " + session.getGSession().describe(target) + ")");
 
     obj = session.viewDBObject(target);
 

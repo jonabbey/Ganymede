@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 2000/03/01 05:03:06 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 2000/03/03 02:05:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.88 $ $Date: 2000/03/01 05:03:06 $
+ * @version $Revision: 1.89 $ $Date: 2000/03/03 02:05:00 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1288,7 +1288,15 @@ public class DBObject implements db_object, FieldType, Remote {
 	
 	if (field != null)
 	  {
-	    results.addElement(new FieldInfo(field));
+	    try
+	      {
+		results.addElement(new FieldInfo(field));
+	      }
+	    catch (IllegalArgumentException ex)
+	      {
+		// we had a permissions failure reading this
+		// field.. skip it.
+	      }
 	  }
       }
 
@@ -2089,5 +2097,4 @@ public class DBObject implements db_object, FieldType, Remote {
 	  }
       }
   }
-
 }

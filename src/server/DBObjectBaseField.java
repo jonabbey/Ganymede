@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 2000/03/01 05:03:07 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 2000/03/03 02:05:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -386,6 +386,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	out.writeShort(minLength);
 	out.writeShort(maxLength);
+
 	if (okChars == null)
 	  {
 	    out.writeUTF("");
@@ -413,21 +414,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    out.writeUTF("");
 	  }
 
-	if ((base.store.major_version >= 1) || (base.store.minor_version >= 9))
-	  {
-	    out.writeBoolean(multiLine); // added at file version 1.9
-	  }
+	out.writeBoolean(multiLine); // added at file version 1.9
 
-	if ((base.store.major_version >= 1) || (base.store.minor_version >= 14))
+	if (regexpPat == null)
 	  {
-	    if (regexpPat == null)
-	      {
-		out.writeUTF("");
-	      }
-	    else
-	      {
-		out.writeUTF(regexpPat); // added at file version 1.14
-	      }
+	    out.writeUTF("");	// added at file version 1.14
+	  }
+	else
+	  {
+	    out.writeUTF(regexpPat); // added at file version 1.14
 	  }
       }
     else if (isNumeric())
@@ -462,6 +457,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	out.writeShort(minLength);
 	out.writeShort(maxLength);
+
 	if (okChars == null)
 	  {
 	    out.writeUTF("");
