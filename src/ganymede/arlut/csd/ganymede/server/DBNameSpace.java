@@ -1102,7 +1102,7 @@ public final class DBNameSpace implements NameSpace {
 
 		throw new RuntimeException("ASSERT BLARGH");
 
-		return false;
+		//		return false;
 	      }
 	    else
 	      {
@@ -1156,7 +1156,7 @@ public final class DBNameSpace implements NameSpace {
 
     throw new RuntimeException("ASSERT YICK!");
 
-    return false;
+    //    return false;
   }
 
   /*----------------------------------------------------------------------------
