@@ -126,8 +126,10 @@ sub countparams {
 #
 # input: $string, $filehandle
 #
-# output: Returns a count of the number of distinct arguments that we
-# find before we hit the closing paren for the ts.l() method call.
+# output: Returns an array containing first, the count of the number
+# of distinct arguments that we find before we hit the closing paren
+# for the ts.l() method call, and second, the last string we inched
+# over, back to examine_java() for it to continue chewing on.
 #
 #
 #########################################################################
