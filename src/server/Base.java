@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/10/11 19:59:45 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/11/21 12:57:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ import java.util.*;
  * <P>The {@link arlut.csd.ganymede.Category Category} interface is also vital to
  * the client and schema editor's work with object types.</P>
  *
- * @version $Revision: 1.19 $ $Date: 2000/10/11 19:59:45 $ $Name:  $
+ * @version $Revision: 1.20 $ $Date: 2000/11/21 12:57:22 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -107,7 +107,7 @@ public interface Base extends CategoryNode, Remote {
    * Guaranteed to be unique in the Ganymede server.
    */
 
-  public String getPathedName() throws RemoteException;
+  public String getPath() throws RemoteException;
 
   /**
    * Returns the name of the class managing this object type

@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 2000/11/10 05:04:56 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2000/11/21 12:57:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -238,7 +238,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    *
    */
 
-  public DBBaseCategory getCategory(String pathName)
+  public CategoryNode getCategoryNode(String pathName)
   {
     DBBaseCategory 
       bc;
@@ -290,7 +290,16 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    
 	    if (tok == StreamTokenizer.TT_WORD)
 	      {
-		bc = (DBBaseCategory) bc.getNode(tokens.sval);
+		CategoryNode cn = bc.getNode(tokens.sval);
+
+		if (cn instanceof DBBaseCategory)
+		  {
+		    bc = (DBBaseCategory) cn;
+		  }
+		else if (cn instanceof DBObjectBase)
+		  {
+		    return cn;
+		  }
 	      }
 	    
 	    tok = tokens.nextToken();
@@ -569,7 +578,12 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	Ganymede.debug("DBSchemaEdit: title is " + newName + ", working to add to category " + path);
       }
 
-    localCat = getCategory(path);
+    // getCategoryNode can also return DBObjectBases, if the path
+    // points to a leaf base rather than a category.. but that should
+    // never happen in this context, so we'll let the
+    // ClassCastExceptions fall where they may.
+
+    localCat = (DBBaseCategory) getCategoryNode(path);
 
     if (localCat == null)
       {

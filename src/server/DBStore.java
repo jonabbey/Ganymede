@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.134 $
-   Last Mod Date: $Date: 2000/11/10 05:04:57 $
+   Version: $Revision: 1.135 $
+   Last Mod Date: $Date: 2000/11/21 12:57:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.134 $ %D%
+ * @version $Revision: 1.135 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1196,7 +1196,7 @@ public final class DBStore {
    *
    */
 
-  public synchronized DBBaseCategory getCategory(String pathName)
+  public synchronized CategoryNode getCategoryNode(String pathName)
   {
     DBBaseCategory 
       bc;
@@ -1252,7 +1252,20 @@ public final class DBStore {
 	      {
 		// System.err.println("DBStore.getCategory(): Looking for node " + tokens.sval);
 
-		bc = (DBBaseCategory) bc.getNode(tokens.sval);
+		CategoryNode cn = bc.getNode(tokens.sval);
+
+		if (cn instanceof DBBaseCategory)
+		  {
+		    bc = (DBBaseCategory) cn;
+		  }
+		else if (cn instanceof DBObjectBase)
+		  {
+		    return cn;
+		  }
+		else
+		  {
+		    throw new RuntimeException("Found unknown thing in category tree.." + cn.toString());
+		  }
 
 		if (bc == null)
 		  {

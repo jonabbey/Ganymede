@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 2000/11/10 05:04:55 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 2000/11/21 12:57:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -691,7 +691,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	String categoryName = in.readUTF();
 
-	category = store.getCategory(categoryName);
+	category = (DBBaseCategory) store.getCategoryNode(categoryName);
 
 	if (category != null)
 	  {
@@ -1661,8 +1661,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * Guaranteed to be unique in the Ganymede server.
    */
 
-  public String getPathedName()
+  public String getPath()
   {
+    if (category == null)
+      {
+	return "./" + getName();
+      }
+
     try
       {
 	return category.getPath() + "/" + object_name;

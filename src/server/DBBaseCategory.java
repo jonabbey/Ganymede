@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2000/11/10 05:04:51 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2000/11/21 12:57:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -309,6 +309,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 			       " in recursive category tree duplication");
 	      }
 
+	    // we want this base to be added to the current end of this category
+
 	    addNodeAfter(newBase, null);
 
 	    if (debug)
@@ -522,6 +524,9 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
 		store.setBase(tempBase); // register in DBStore objectBases hash
 
+		// we want to add this node to the end of this
+		// category, since we are reading them in order.
+
 		addNodeAfter(tempBase, null);
 
 		if (store.debug)
@@ -532,6 +537,9 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	      }
 	    else
 	      {
+		// we want to add this node to the end of this
+		// category, since we are reading them in order.
+
 		addNodeAfter(new DBBaseCategory(store, in), null);
 	      }
 	  }
@@ -749,13 +757,16 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	    System.err.println("** Attempting to find local copy of category " + path);
 	  }
 
+	// getCategoryNode could also return a DBObjectBase, but not
+	// in this context
+
 	if (editor == null)
 	  {
-	    cat = store.getCategory(path);
+	    cat = (DBBaseCategory) store.getCategoryNode(path);
 	  }
 	else
 	  {
-	    cat = editor.getCategory(path);
+	    cat = (DBBaseCategory) editor.getCategoryNode(path);
 	  }
 
 	if (cat == null)
@@ -790,23 +801,38 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     /* -- */
 
-    if (debug)
-      {
-	System.err.println("DBBaseCategory<" + getName() + ">.addNodeAfter(" + 
-			   node + "," + prevNodeName +")");
-      }
-
     if (node == null)
       {
-	throw new IllegalArgumentException("Can't add a null node");
+	throw new IllegalArgumentException("Can't add a null node, not even after " + prevNodeName);
+      }
+
+    // make sure we've got a local reference if we're being given a
+    // Base
+
+    if ((node instanceof Base) && !(node instanceof DBObjectBase))
+      {
+	node = getBaseFromBase((Base) node);
+      }
+
+    if (debug)
+      {
+	try
+	  {
+	    System.err.println("DBBaseCategory<" + getName() + ">.addNodeAfter(" + 
+			       node.getPath() + "," + prevNodeName +")");
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Couldn't check node path: " + ex);
+	  }
       }
 
     // find our insertion point
 
-    if (debug)
-      {
-	System.err.println("DBBaseCategory.addNodeAfter(): searching to see if node is already in this category");
-      }
+    //    if (debug)
+    //      {
+    //	System.err.println("DBBaseCategory.addNodeAfter(): searching to see if node is already in this category");
+    //      }
 
     for (int i = 0; i < contents.size(); i++)
       {
@@ -825,13 +851,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  }
       }
 
-    // make sure we've got a local reference if we're being given a
-    // Base
-
-    if ((node instanceof Base) && !(node instanceof DBObjectBase))
-      {
-	node = getBaseFromBase((Base) node);
-      }
 
     // put our node into our content list
 
@@ -867,10 +886,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     try
       {
-	if (debug)
-	  {
-	    System.err.println("DBBaseCategory.addNodeAfter(): setting category for node");
-	  }
+	//	if (debug)
+	//	  {
+	//	    System.err.println("DBBaseCategory.addNodeAfter(): setting category for node");
+	//	  }
 
 	node.setCategory(this);
       }
@@ -899,23 +918,38 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     /* -- */
 
-    if (debug)
-      {
-	System.err.println("DBBaseCategory<" + getName() + ">.addNodeBefore(" + 
-			   node + "," + nextNodeName +")");
-      }
-
     if (node == null)
       {
-	throw new IllegalArgumentException("Can't add a null node");
+	throw new IllegalArgumentException("Can't add a null node, not even before " + nextNodeName);
+      }
+
+    if (debug)
+      {
+	try
+	  {
+	    System.err.println("DBBaseCategory<" + getName() + ">.addNodeBefore(" + 
+			       node.getPath() + "," + nextNodeName +")");
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException(ex.getMessage());
+	  }
+      }
+
+    // make sure we've got a local reference if we're being given a
+    // Base
+
+    if ((node instanceof Base) && !(node instanceof DBObjectBase))
+      {
+	node = getBaseFromBase((Base) node);
       }
 
     // find our insertion point
 
-    if (debug)
-      {
-	System.err.println("DBBaseCategory.addNodeAfter(): searching to see if node is already in this category");
-      }
+    //    if (debug)
+    //      {
+    //	System.err.println("DBBaseCategory.addNodeBefore(): searching to see if node is already in this category");
+    //      }
 
     for (int i = 0; i < contents.size(); i++)
       {
@@ -932,14 +966,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  {
 	    throw new RuntimeException("Couldn't check node name: " + ex);
 	  }
-      }
-
-    // make sure we've got a local reference if we're being given a
-    // Base
-
-    if ((node instanceof Base) && !(node instanceof DBObjectBase))
-      {
-	node = getBaseFromBase((Base) node);
       }
 
     // put our node into our content list
@@ -976,10 +1002,10 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     try
       {
-	if (debug)
-	  {
-	    System.err.println("DBBaseCategory.addNodeAfter(): setting category for node");
-	  }
+	//	if (debug)
+	//	  {
+	//	    System.err.println("DBBaseCategory.addNodeBefore(): setting category for node");
+	//	  }
 
 	node.setCategory(this);
       }
@@ -996,26 +1022,38 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
    *
    * @param catPath the fully specified path of the node to be moved
    * @param prevNodeName the name of the node that the catPath node is
-   * to be placed after in this category.
+   * to be placed after in this category, or null if the node is to
+   * be placed at the first element of this category
    *
    * @see arlut.csd.ganymede.Category 
    */
 
   public synchronized void moveCategoryNode(String catPath, String prevNodeName)
   {
-    DBBaseCategory categoryNode = editor.getCategory(catPath);
-    DBBaseCategory oldCategory = (DBBaseCategory) categoryNode.getCategory();
-
     if (debug)
       {
-	System.err.println("DBBaseCategory.moveNode(" + catPath + "," + prevNodeName + ")");
+	System.err.println("DBBaseCategory.moveCategoryNode(" + catPath + "," + prevNodeName + ")");
+      }
+
+    CategoryNode categoryNode;
+    DBBaseCategory oldCategory;
+
+    try
+      {
+	categoryNode = editor.getCategoryNode(catPath);
+	oldCategory = (DBBaseCategory) categoryNode.getCategory();
+      }
+    catch (RemoteException ex)
+      {
+	ex.printStackTrace();
+	throw new RuntimeException("wow, surprising remote local exception");
       }
 
     if (oldCategory == this)
       {
 	if (debug)
 	  {
-	    System.err.println("DBBaseCategory.moveNode(): moving node within category");
+	    System.err.println("DBBaseCategory.moveCategoryNode(): moving node within category");
 	  }
 
 	contents.removeElement(categoryNode);
@@ -1024,7 +1062,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       {
 	if (debug)
 	  {
-	    System.err.println("DBBaseCategory.moveNode(): moving node from " + 
+	    System.err.println("DBBaseCategory.moveCategoryNode(): moving node from " + 
 			       oldCategory.getPath() + " to " + getPath());
 	  }
 
@@ -1038,7 +1076,14 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  }
       }
 
-    categoryNode.setCategory(this);
+    try
+      {
+	categoryNode.setCategory(this);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("Local category node threw a remote exception.. ? " + ex);
+      }
 
     if (prevNodeName == null)
       {
@@ -1092,14 +1137,30 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     if (debug)
       {
-	Ganymede.debug("DBBaseCategory (" + getName() + ").removeNode(" + node + ")");
+	try
+	  {
+	    Ganymede.debug("DBBaseCategory (" + getName() + ").removeNode(" + node.getPath() + ")");
+	  }
+	catch (RemoteException ex)
+	  {
+	    ex.printStackTrace();
+	    throw new RuntimeException("rmi local failure?" + ex.getMessage());
+	  }
       }
 
     for (i = 0; i < contents.size(); i++)
       {
 	if (debug)
 	  {
-	    Ganymede.debug(" examining: " + contents.elementAt(i));
+	    try
+	      {
+		Ganymede.debug(" examining: " + ((CategoryNode) contents.elementAt(i)).getPath());
+	      }
+	    catch (RemoteException ex)
+	      {
+		ex.printStackTrace();
+		throw new RuntimeException("rmi local failure?" + ex.getMessage());
+	      }
 	  }
 
 	if (contents.elementAt(i).equals(node))
@@ -1117,7 +1178,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     contents.removeElementAt(index);
 
-    if (debug)
+    if (false)
       {
 	if (node instanceof DBObjectBase)
 	  {

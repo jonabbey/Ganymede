@@ -6,15 +6,16 @@
    
    Created: 14 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:28 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/11/21 12:57:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
- 
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -56,6 +57,12 @@ import java.awt.*;
                                                                      CatTreeNode
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>This class is a simple {@link arlut.csd.JTree.treeNode treeNode} subclass
+ * with a {@link arlut.csd.ganymede.Category Category} data element.  Used in
+ * the Ganymede admin console's schema editor.</p>
+ */
 
 public class CatTreeNode extends arlut.csd.JTree.treeNode {
 

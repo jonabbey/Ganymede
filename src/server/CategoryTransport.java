@@ -8,8 +8,8 @@
    
    Created: 12 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/02/29 09:35:07 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/11/21 12:57:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -285,7 +285,7 @@ public class CategoryTransport implements java.io.Serializable {
   {
     addChunk("base");
     addChunk(node.getName());
-    addChunk(node.getPathedName());
+    addChunk(node.getPath());
     addChunk(String.valueOf(node.getTypeID()));
     addChunk(String.valueOf(node.getLabelField()));
     addChunk(node.getLabelFieldName());

@@ -8,8 +8,8 @@
    
    Created: 2 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/06/23 23:42:47 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/11/21 12:57:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -157,7 +157,7 @@ public class BaseListTransport implements java.io.Serializable {
   {
     addChunk("base");
     addChunk(node.getName());
-    addChunk(node.getPathedName());
+    addChunk(node.getPath());
     addChunk(String.valueOf(node.getTypeID()));
     addChunk(String.valueOf(node.getLabelField()));
     addChunk(node.getLabelFieldName());

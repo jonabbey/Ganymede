@@ -14,8 +14,8 @@
    
    Created: 12 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/02/29 09:35:03 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/11/21 12:57:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -84,7 +84,7 @@ import java.util.*;
  * remote access.  Thus, we are not extending UnicastRemoteObject
  * as we would if we were truly a remote object.</p>
  *
- * @version $Revision: 1.8 $ $Date: 2000/02/29 09:35:03 $ $Name:  $
+ * @version $Revision: 1.9 $ $Date: 2000/11/21 12:57:22 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -244,7 +244,7 @@ public class BaseDump implements Base, CategoryNode {
     return name;
   }  
 
-  public String getPathedName()
+  public String getPath()
   {
     return pathedName;
   }

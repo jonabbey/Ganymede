@@ -7,8 +7,8 @@
    
    Created: 12 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/02/29 09:35:06 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/11/21 12:57:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,4 +93,12 @@ public interface CategoryNode extends Remote {
    */
 
   public String getName() throws RemoteException;
+
+  /**
+   *
+   * This method returns the fully pathed name of this node.
+   *
+   */
+
+  public String getPath() throws RemoteException;
 }

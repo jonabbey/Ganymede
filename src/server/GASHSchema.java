@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 2000/10/30 23:06:29 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 2000/11/21 12:57:27 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -1724,6 +1724,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    System.err.println("No change necessary");
 	  }
+
 	return;
       }
 
@@ -1828,12 +1829,18 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		  {
 		    if (aboveNode.isOpen())
 		      {
+			// we want to place ourselves within the category whose
+			// node is right above the drop point
+
 			newCategory = ((CatTreeNode) aboveNode).getCategory();
 			newParent = (CatTreeNode) aboveNode;
 			previousNode = null;
 		      }
 		    else
 		      {
+			// we want to place ourselves in the category
+			// containing the above node
+
 			newParent = (CatTreeNode) aboveNode.getParent();
 			newCategory = newParent.getCategory();
 			previousNode = aboveNode;
@@ -1867,11 +1874,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	    if (previousNode != null)
 	      {
-		newCategory.moveCategoryNode(base.getName(), previousNode.getText());
+		newCategory.moveCategoryNode(base.getPath(), previousNode.getText());
 	      }
 	    else
 	      {
-		newCategory.moveCategoryNode(base.getName(), null);
+		newCategory.moveCategoryNode(base.getPath(), null);
 	      }
 
 	    BaseNode newNode = (BaseNode) tree.moveNode(dragNode, newParent, previousNode, true);
@@ -1962,12 +1969,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		  }
 	      }
 
-	    if (debug)
-	      {
-		System.err.println("Moving category " + category.getPath() +
-				   ", previous node = " + previousNode.getText());
-	      }
-	    
 	    newCategory.moveCategoryNode(category.getPath(), previousNode.getText());
 
 	    if (debug)
