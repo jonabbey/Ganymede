@@ -5,7 +5,7 @@
    Client side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,11 +30,18 @@ import java.util.*;
 
 public interface SchemaEdit extends Remote {
   public Base[] getBases() throws RemoteException;
+  public Base getBase(short id) throws RemoteException;
+  public Base getBase(String baseName) throws RemoteException;
+
   public Base createNewBase() throws RemoteException;
   public void deleteBase(Base b) throws RemoteException;
+
   public NameSpace[] getNameSpaces() throws RemoteException;
+  public NameSpace getNameSpace(String spaceName) throws RemoteException;
+
   public NameSpace createNewNameSpace(String name, boolean caseInsensitive) throws RemoteException;
   public boolean deleteNameSpace(String name) throws RemoteException;
+
   public void commit() throws RemoteException;
   public void release() throws RemoteException;
 }

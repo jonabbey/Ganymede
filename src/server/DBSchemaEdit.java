@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -164,6 +164,90 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   /**
    *
+   * Returns a Base reference to match the id.
+   * Returns null if no match.
+   *
+   * @see arlut.csd.ganymede.Base
+   * @see arlut.csd.ganymede.SchemaEdit
+   *
+   */
+
+  public Base getBase(short id)
+  {
+    Base base;
+    Enumeration enum;
+    int i;
+
+    /* -- */
+
+    synchronized (store)
+      {
+	enum = store.objectBases.elements();
+	while (enum.hasMoreElements())
+	  {
+	    base = (Base) enum.nextElement();
+	
+	    try
+	      {
+		if (base.getTypeID() == id)
+		  {
+		    return base;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		// we'll ignore it here.
+	      }
+	  }
+      }
+
+    return null;
+  }
+
+  /**
+   *
+   * Returns a Base reference to match the baseName.
+   * Returns null if no match.
+   *
+   * @see arlut.csd.ganymede.Base
+   * @see arlut.csd.ganymede.SchemaEdit
+   *
+   */
+
+  public Base getBase(String baseName)
+  {
+    Base base;
+    Enumeration enum;
+    int i;
+
+    /* -- */
+
+    synchronized (store)
+      {
+	enum = store.objectBases.elements();
+	while (enum.hasMoreElements())
+	  {
+	    base = (Base) enum.nextElement();
+	
+	    try
+	      {
+		if (base.getName().equals(baseName))
+		  {
+		    return base;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		// we'll ignore it here.
+	      }
+	  }
+      }
+
+    return null;
+  }
+
+  /**
+   *
    * This method creates a new DBObjectBase object and returns a remote handle
    * to it so that the admin client can set fields on the base, set attributes,
    * and generally make a nuisance of itself.
@@ -244,6 +328,14 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
   }
 
+  /**
+   * This method returns an array of defined NameSpace objects.
+   *
+   *
+   * @see arlut.csd.ganymede.NameSpace
+   * @see arlut.csd.ganymede.SchemaEdit
+   *
+   */
 
   public synchronized NameSpace[] getNameSpaces()
   {
@@ -266,6 +358,46 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
 
     return spaces;
+  }
+
+  /**
+   * This method returns a NameSpace by matching name,
+   * or null if no match is found.
+   *
+   * @see arlut.csd.ganymede.NameSpace
+   * @see arlut.csd.ganymede.SchemaEdit
+   *
+   */
+
+  public synchronized NameSpace getNameSpace(String name)
+  {
+    NameSpace ns;
+    Enumeration enum;
+
+    /* -- */
+
+    synchronized (store)
+      {
+	enum = store.nameSpaces.elements();
+	while (enum.hasMoreElements())
+	  {
+	    ns = (NameSpace) enum.nextElement();
+
+	    try
+	      {
+		if (ns.getName().equals(name))
+		  {
+		    return ns;
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		// we'll just fall through to return null below.
+	      }
+	  }
+      }
+
+    return null;
   }
 
   /**
