@@ -165,47 +165,17 @@ public final class Invid implements java.io.Serializable {
   private int num;
   private transient boolean interned = false;
 
-  // constructors
+  // constructor
+
+  /**
+   * <p>Private constructor.  Use the static createInvid methods to
+   * create Invids, please.</p>
+   */
 
   private Invid(short type, int num) 
   {
     this.type = type;
     this.num = num;
-  }
-
-  /**
-   *
-   * Receive constructor
-   *
-   */
-
-  private Invid(DataInput in) throws IOException
-  {
-    type = in.readShort();
-    num = in.readInt();
-  }
-
-  /**
-   * <P>This is the string constructor.. string should be
-   * a pair of colon separated numbers, in the form
-   * 5:134 where the first number is the short type
-   * and the second is the int object number.</P>
-   */
-
-  private Invid(String string)
-  {
-    String first = string.substring(0, string.indexOf(':'));
-    String last = string.substring(string.indexOf(':')+1);
-
-    try
-      {
-	this.type = Short.valueOf(first).shortValue();
-	this.num = Integer.valueOf(last).intValue();
-      }
-    catch (NumberFormatException ex)
-      {
-	throw new IllegalArgumentException("bad string format " + ex);
-      }
   }
 
   // equals
@@ -249,12 +219,13 @@ public final class Invid implements java.io.Serializable {
 
   public int hashCode()
   {
+    // we'll mix type and num.. since we allocate invids in
+    // incrementing order starting at 0, we'll shove the type numbers,
+    // (which also start at 0 and go up) to the left of our 32 bit
+    // hash so that when we hash invids of differing type together
+    // they won't all collide at the low end of the range
 
-    return num;			// simplistic, different types of invid's with
-				// same number will hash to same bucket, but
-				// this is probably ok for our uses, where we
-				// will generally not have multiple types of
-				// invid's in a particular hash.
+    return (type << 23) ^ num;
   }
 
   /**
