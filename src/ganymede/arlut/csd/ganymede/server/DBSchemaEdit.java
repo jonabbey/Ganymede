@@ -949,13 +949,26 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     Ganymede.debug("DBSchemaEdit: Dumping Database.");
 
-    try
+    boolean dumpedOk = false;
+
+    while (!dumpedOk)
       {
-	Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
-      }
-    catch (IOException ex)
-      {
-	ex.printStackTrace();
+	try
+	  {
+	    Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
+
+	    dumpedOk = true;
+	  }
+	catch (IOException ex)
+	  {
+	    ex.printStackTrace();
+	    dumpedOk = true;	// if we had an io exception, retrying isn't likely to succeed
+	  }
+	catch (InterruptedException ex)
+	  {
+	    ex.printStackTrace();
+	    Ganymede.debug("DBSchemaEdit: retrying database dump");
+	  }
       }
       
     // and unlock the server

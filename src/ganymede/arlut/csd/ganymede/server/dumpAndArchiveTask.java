@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -117,6 +117,10 @@ class dumpAndArchiveTask implements Runnable {
 	catch (IOException ex)
 	  {
 	    Ganymede.debug(ts.l("dump_error", ex.getMessage()));
+	  }
+	catch (InterruptedException ex)
+	  {
+	    Ganymede.debug(ts.l("dump_interrupted_error", ex.getMessage()));
 	  }
 
 	completed = true;

@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -1069,6 +1069,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
       }
     catch (IOException ex)
+      {
+	return Ganymede.createErrorDialog("Database Dump Error",
+					  "Database could not be dumped successfully. " + ex);
+      }
+    catch (InterruptedException ex)
       {
 	return Ganymede.createErrorDialog("Database Dump Error",
 					  "Database could not be dumped successfully. " + ex);

@@ -712,7 +712,16 @@ public final class DBStore implements JythonMap {
 	      {
 		// what do we really want to do here?
 
+		ex.printStackTrace();
 		throw new RuntimeException("couldn't load journal");
+	      }
+	    catch (InterruptedException ex)
+	      {
+		// we got interrupted while waiting to lock
+		// the database.. unlikely in the extreme here.
+
+		ex.printStackTrace();
+		throw new RuntimeException("couldn't dump journal");
 	      }
 	  }
       }
@@ -747,7 +756,7 @@ public final class DBStore implements JythonMap {
    */
 
   public synchronized void dump(String filename, boolean releaseLock,
-				boolean archiveIt) throws IOException
+				boolean archiveIt) throws IOException, InterruptedException
   {
     File dbFile = null;
     FileOutputStream outStream = null;
@@ -775,13 +784,7 @@ public final class DBStore implements JythonMap {
 	System.err.println("DBStore: establishing dump lock");
       }
 
-    try
-      {
-	lock.establish("System");	// wait until we get our lock 
-      }
-    catch (InterruptedException ex)
-      {
-      }
+    lock.establish("System");	// wait until we get our lock 
 
     if (debug)
       {
