@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,7 +26,7 @@ import arlut.csd.JDataComponent.*;
 
 public class ownerPanel extends JPanel implements JsetValueCallback {
 
-  private final static boolean debug = false;
+  private final static boolean debug = true;
 
   boolean
     editable;
@@ -94,8 +94,8 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
       choiceResults = null;
 
     Vector
-      valueHandles = null,
-      choiceHandles = null;
+      currentOwners = null,
+      availableOwners = null;
 
     /* -- */
     if (debug)
@@ -103,29 +103,40 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	System.out.println("Adding StringSelector, its a vector of invids!");
       }
 
-    results = field.encodedValues();
-    valueHandles = new Vector();
- 
-    if (editable)
+    Object key = field.choicesKey();
+    
+    if ((key != null) && (parent.parent.parent.cachedLists.containsKey(key)))
       {
-	choiceResults = field.choices();
-	choiceHandles = new Vector();
-      }
-
-    for (int i = 0; i < results.size(); i++)
-      {
-	valueHandles.addElement(new listHandle(results.getLabel(i), results.getInvid(i)));
-      }
-
-    if (editable)
-      {
-	for (int i = 0; i < choiceResults.size(); i++)
+	if (debug)
 	  {
-	    choiceHandles.addElement(new listHandle(choiceResults.getLabel(i), choiceResults.getInvid(i)));
+	    System.out.println("Using cached copy...");
 	  }
+	
+	availableOwners = (Vector)parent.parent.parent.cachedLists.get(key);
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.out.println("Downloading copy");
+	  }
+	availableOwners = field.choices().getListHandles();
+	
+	if (key != null)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Saving this under key: " + key);
+	      }
+	    
+	    parent.parent.parent.cachedLists.put(key, availableOwners);
+	  }
+	
       }
 
-    tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, 100, "Owners", "Owner Groups");
+    currentOwners = field.encodedValues().getListHandles();
+
+    tStringSelector ss = new tStringSelector(availableOwners, currentOwners, this, editable, 100, "Owners", "Owner Groups");
     ss.setCallback(this);
     return ss;
   }
