@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 2001/08/18 06:16:26 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 2002/03/13 20:44:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -524,9 +524,8 @@ public class DBJournal implements ObjectStatus {
    *
    */
 
-  public synchronized boolean writeTransaction(DBEditSet editset) throws IOException
+  public synchronized boolean writeTransaction(DBEditObject[] objects) throws IOException
   {
-    Enumeration enum;
     DBEditObject eObj;
     long transaction_time = 0;
     Date now;
@@ -544,100 +543,91 @@ public class DBJournal implements ObjectStatus {
     jFile.writeUTF(OPENTRANS);
     jFile.writeLong(transaction_time);
 
-    if (editset.objects != null)
+    if (debug)
       {
-	if (debug)
+	System.err.println("Objects in Transaction: " + objects.length);
+      }
+	
+    jFile.writeInt(objects.length);
+    
+    for (int i = 0; i < objects.length; i++)
+      {
+	eObj = objects[i];
+
+	switch (eObj.getStatus())
 	  {
-	    System.err.println("Objects in Transaction: " + editset.objects.size());
-	  }
+	  case CREATING:
+	    jFile.writeByte(CREATE);
+	    jFile.writeShort(eObj.objectBase.type_code);
+	    eObj.emit(jFile);
 
-	jFile.writeInt(editset.objects.size());
-
-	enum = editset.objects.elements();
-
-	while (enum.hasMoreElements())
-	  {
-	    eObj = (DBEditObject) enum.nextElement();
-
-	    switch (eObj.getStatus())
+	    if (debug)
 	      {
-	      case CREATING:
-		jFile.writeByte(CREATE);
-		jFile.writeShort(eObj.objectBase.type_code);
-		eObj.emit(jFile);
-
-		if (debug)
-		  {
-		    System.err.println("Creating object:");
-		    printObject(eObj);
-		  }
-		break;
-
-	      case EDITING:
-		jFile.writeByte(EDIT);
-		jFile.writeShort(eObj.objectBase.type_code);
-
-		DBObjectDeltaRec delta = new DBObjectDeltaRec(eObj.original, eObj);
-		delta.emit(jFile);
-		
-		if (debug)
-		  {
-		    System.err.print("Wrote object edit record:\n\t");
-
-		    System.err.println(StringUtils.replaceStr(delta.toString(),"\n","\n\t"));
-
-		    //		    printObject(eObj);
-		  }
-
-		break;
-
-	      case DELETING:
-		jFile.writeByte(DELETE);
-		jFile.writeShort(eObj.objectBase.type_code);
-		jFile.writeShort(eObj.getID());
-
-		if (debug)
-		  {
-		    System.err.println("Wrote object deletion record:");
-		    System.err.println("\t" + eObj.objectBase.object_name + " : " + eObj.getID());
-		  }
-		break;
-
-	      case DROPPING:
-		if (debug)
-		  {
-		    System.err.println("Dropping object:");
-
-		    printObject(eObj);
-		  }
-		break;
+		System.err.println("Creating object:");
+		printObject(eObj);
 	      }
+	    break;
+
+	  case EDITING:
+	    jFile.writeByte(EDIT);
+	    jFile.writeShort(eObj.objectBase.type_code);
+
+	    DBObjectDeltaRec delta = new DBObjectDeltaRec(eObj.original, eObj);
+	    delta.emit(jFile);
+		
+	    if (debug)
+	      {
+		System.err.print("Wrote object edit record:\n\t");
+
+		System.err.println(StringUtils.replaceStr(delta.toString(),"\n","\n\t"));
+
+		//		    printObject(eObj);
+	      }
+
+	    break;
+
+	  case DELETING:
+	    jFile.writeByte(DELETE);
+	    jFile.writeShort(eObj.objectBase.type_code);
+	    jFile.writeShort(eObj.getID());
+
+	    if (debug)
+	      {
+		System.err.println("Wrote object deletion record:");
+		System.err.println("\t" + eObj.objectBase.object_name + " : " + eObj.getID());
+	      }
+	    break;
+
+	  case DROPPING:
+	    if (debug)
+	      {
+		System.err.println("Dropping object:");
+
+		printObject(eObj);
+	      }
+	    break;
 	  }
-
-	dirty = true;
-      }
-    else
-      {
-	jFile.writeInt(0);
       }
 
+    dirty = true;
+    
     // write out the end of transaction stamp.. the transaction_time
     // is used to verify that we completed this write okay.
-
+    
     jFile.writeUTF(CLOSETRANS);
     jFile.writeLong(transaction_time);
-
+    
     if (debug)
       {
 	System.err.println("Transaction " + now + " successfully written to Journal.");
       }
-
+    
     transactionsInJournal++;
     GanymedeAdmin.updateTransCount();
-
+    
     return true;
   }
-
+  
   /**
    *  returns true if the journal does not contain any transactions
    *

@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 2002/03/13 05:29:50 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 2002/03/13 20:44:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -54,6 +54,7 @@ import java.io.*;
 import java.util.*;
 
 import arlut.csd.JDialog.*;
+import arlut.csd.Util.booleanSemaphore;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -92,7 +93,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.105 $ %D%
+ * @version $Revision: 1.106 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -174,7 +175,7 @@ final public class DBSession {
    * should be editable by this transaction.</p>
    */
 
-  private boolean terminating = false;
+  private booleanSemaphore terminatingSemaphore = new booleanSemaphore(false);
 
 
   /* -- */
@@ -795,7 +796,7 @@ final public class DBSession {
 	if (obj == null)
 	  {
 	    // not in transaction.. maybe we created it?
-	    
+	   
 	    return editSet.findObject(new Invid(baseID, objectID));
 	  }
 	
@@ -925,6 +926,16 @@ final public class DBSession {
 
     /* -- */
 
+    if (editSet == null)
+      {
+	throw new RuntimeException("deleteDBObject called outside of a transaction");
+      }
+
+    if (isTerminating())
+      {
+	throw new RuntimeException("deleteDBObject called during transaction commit/abort");
+      }
+
     key = "del" + eObj.getLabel();
 
     switch (eObj.getStatus())
@@ -1030,6 +1041,16 @@ final public class DBSession {
 
     /* -- */
 
+    if (editSet == null)
+      {
+	throw new RuntimeException("inactivateDBObject called outside of a transaction");
+      }
+
+    if (isTerminating())
+      {
+	throw new RuntimeException("inactivateDBObject called during transaction commit/abort");
+      }
+
     key = "inactivate" + eObj.getLabel();
 
     switch (eObj.getStatus())
@@ -1106,6 +1127,16 @@ final public class DBSession {
     String key;
 
     /* -- */
+
+    if (editSet == null)
+      {
+	throw new RuntimeException("reactivateDBObject called outside of a transaction");
+      }
+
+    if (isTerminating())
+      {
+	throw new RuntimeException("reactivateDBObject called during transaction commit/abort");
+      }
 
     key = "reactivate" + eObj.getLabel();
 
@@ -1307,6 +1338,11 @@ final public class DBSession {
 
   public final void checkpoint(String name)
   {
+    if (isTerminating())
+      {
+	throw new RuntimeException("checkpoint called during transaction commit/abort");
+      }
+
     if (editSet != null)
       {
 	editSet.checkpoint(name); // *synchronized*
@@ -1321,6 +1357,11 @@ final public class DBSession {
 
   public final boolean popCheckpoint(String name)
   {
+    if (isTerminating())
+      {
+	throw new RuntimeException("popCheckpoint called during transaction commit/abort");
+      }
+
     DBCheckPoint point = null;
 
     /* -- */
@@ -1341,6 +1382,11 @@ final public class DBSession {
 
   public final boolean rollback(String name)
   {
+    if (isTerminating())
+      {
+	throw new RuntimeException("rollback called during transaction commit/abort");
+      }
+
     if (editSet != null)
       {
 	return editSet.rollback(name); // *synchronized*
@@ -1655,9 +1701,9 @@ final public class DBSession {
 	throw new IllegalArgumentException("transaction already open.");
       }
 
-    terminating = false;
-
     editSet = new DBEditSet(store, this, describe, interactive);
+
+    terminatingSemaphore.set(false);
   }
 
   /**
@@ -1698,26 +1744,32 @@ final public class DBSession {
 	System.err.println(key + ": entering commitTransaction");
       }
 
+    // test and set
+
+    if (terminatingSemaphore.set(true))
+      {
+	return Ganymede.createErrorDialog("Commit Error",
+					  "Error, this transaction is already being committed or aborted");
+      }
+
     if (editSet == null)
       {
 	throw new RuntimeException(key + ": commitTransaction called outside of a transaction");
       }
 
-    // we can't commit a transaction with locks held, because that
-    // might lead to deadlock.  we release all locks now, then when we
-    // call editSet.commit(), that will attempt to establish whatever
-    // write locks we need, for the duration of the commit() call.
-
-    releaseAllLocks();
-
-    if (debug)
-      {
-	System.err.println(key + ": commiting editset");
-      }
-
     try
       {
-	terminating = true;
+	// we can't commit a transaction with locks held, because that
+	// might lead to deadlock.  we release all locks now, then when we
+	// call editSet.commit(), that will attempt to establish whatever
+	// write locks we need, for the duration of the commit() call.
+	
+	releaseAllLocks();
+	
+	if (debug)
+	  {
+	    System.err.println(key + ": commiting editset");
+	  }
 
 	retVal = editSet.commit(); // *synchronized*
 	
@@ -1746,7 +1798,7 @@ final public class DBSession {
       }
     finally
       {
-	terminating = false;
+	terminatingSemaphore.set(false);
       }
 
     return retVal;		// later on we'll figure out how to do this right
@@ -1780,44 +1832,19 @@ final public class DBSession {
 	throw new RuntimeException("abortTransaction called outside of a transaction");
       }
 
-    if (editSet.wLock != null)
+    terminatingSemaphore.set(true);
+
+    if (!editSet.abort())
       {
-	// if we are called while our DBEditSet transaction object is
-	// waiting on a write lock in order to commit() on another
-	// thread, try to kill it off.  We synchronize on
-	// Ganymede.db.lockSync here because we are using that as a
-	// monitor for all lock operations, and we need the
-	// wLock.inEstablish check to be sync'ed so that we don't
-	// force an abort after the editSet has gotten its lock
-	// established and is busy mucking with the server's
-	// DBObjectTables.
-
-	synchronized (Ganymede.db.lockSync)
-	  {
-	    if (editSet.wLock.inEstablish)
-	      {
-		terminating = true;
-
-		try
-		  {
-		    editSet.wLock.abort();
-		  }
-		catch (NullPointerException ex)
-		  {
-		  }
-	      }
-	    else
-	      {
-		Ganymede.debug("abortTransaction() for " + key + ", can't safely dump writeLock.. can't kill it off");
-		    
-		return Ganymede.createErrorDialog("Server: Error in DBSession.abortTransaction()",
-						  "Error.. transaction could not abort: can't safely dump writeLock");
-	      }
-	  }
+	Ganymede.debug("abortTransaction() for " + key + ", can't safely dump writeLock.. can't kill it off");
+	
+	return Ganymede.createErrorDialog("Server: Error in DBSession.abortTransaction()",
+					  "Error.. transaction could not abort: can't safely dump writeLock");
       }
-
-    editSet.release();		// *synchronized*
-    editSet = null;		// for gc
+    else
+      {
+	editSet = null;		// for gc
+      }
 
     return null;
   }
@@ -1855,7 +1882,7 @@ final public class DBSession {
 
   public boolean isTerminating()
   {
-    return terminating;
+    return terminatingSemaphore.isSet();
   }
 
   /**

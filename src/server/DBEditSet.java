@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 2002/03/13 19:13:10 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 2002/03/13 20:44:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -129,20 +129,20 @@ public class DBEditSet {
   static final boolean debug = false;
 
   /**
-   * A hashtable mapping Invids to {@link
+   * <p>A hashtable mapping Invids to {@link
    * arlut.csd.ganymede.DBEditObject DBEditObject}s checked out in
-   * care of this transaction.  
+   * care of this transaction.</p>
    */
 
-  Hashtable objects = null;
+  private Hashtable objects = null;
 
   /**
-   * A list of {@link arlut.csd.ganymede.DBLogEvent DBLogEvent}'s
+   * <p>A list of {@link arlut.csd.ganymede.DBLogEvent DBLogEvent}'s
    * to be written to the Ganymede logfile and/or mailed out when
-   * this transaction commits.
+   * this transaction commits.</p>
    */
 
-  Vector logEvents = null;
+  private Vector logEvents = null;
 
   /**
    * <p>A record of the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}'s
@@ -177,7 +177,7 @@ public class DBEditSet {
    * to keep track of check points performed during the course of this transaction.
    */
 
-  NamedStack checkpoints = new NamedStack();
+  private NamedStack checkpoints = new NamedStack();
 
   /**
    * <p>We keep track of the thread that is doing checkpointing.. once
@@ -188,7 +188,7 @@ public class DBEditSet {
    * multiple threads.</p>
    */
 
-  Thread currentCheckpointThread = null;
+  private Thread currentCheckpointThread = null;
 
   /**
    * The writelock acquired during the course of a commit attempt.  We keep
@@ -197,7 +197,7 @@ public class DBEditSet {
    * method, but wLock should really never be non-null outside of the
    * context of the commit() call.  */
 
-  DBWriteLock wLock = null;
+  private DBWriteLock wLock = null;
 
   /**
    * <p>True if this DBEditSet is operating in interactive mode.</p>
@@ -287,6 +287,36 @@ public class DBEditSet {
   public boolean isInteractive()
   {
     return interactive;
+  }
+
+  /**
+   * <p>To allow the GanymedeSession to get a copy of our object hash.</p>
+   */
+
+  public Hashtable getObjectHashClone()
+  {
+    return (Hashtable) objects.clone();
+  }
+
+  /**
+   * <p>Return a list of objects that we are currently working on.</p>
+   */
+
+  public DBEditObject[] getObjectList()
+  {
+    synchronized (objects)
+      {
+	DBEditObject[] results = new DBEditObject[objects.size()];
+	
+	Enumeration enum = objects.elements();
+	
+	for (int i = 0; enum.hasMoreElements(); i++)
+	  {
+	    results[i] = (DBEditObject) enum.nextElement();
+	  }
+
+	return results;
+      }
   }
 
   /**
@@ -529,7 +559,7 @@ public class DBEditSet {
 
     // checkpoint our objects, logEvents, and deletion locks
 
-    checkpoints.push(name, new DBCheckPoint(this));
+    checkpoints.push(name, new DBCheckPoint(logEvents, getObjectList(), session));
 
     // and our namespaces
 
@@ -1736,7 +1766,7 @@ public class DBEditSet {
   {
     try
       {
-	if (!dbStore.journal.writeTransaction(this))
+	if (!dbStore.journal.writeTransaction(getObjectList()))
 	  {
 	    throw new CommitFatalException(Ganymede.createErrorDialog("Couldn't commit transaction, couldn't write " +
 								      "transaction to disk",
@@ -1897,6 +1927,40 @@ public class DBEditSet {
   }
 
   /**
+   * <p>This method is intended for use by DBSession's
+   * abortTransaction() method, and returns true if the transaction
+   * could be aborted, false otherwise.</p>
+   */
+
+  public synchronized boolean abort()
+  {
+    // if we are called while we are waiting on a write lock in order
+    // to commit() on another thread, try to kill it off.  We
+    // synchronize on Ganymede.db.lockSync here because we are using
+    // that as a monitor for all lock operations, and we need the
+    // wLock.inEstablish check to be sync'ed so that we don't force an
+    // abort after we have gotten our lock established and are busy
+    // mucking with the server's DBObjectTables.
+    
+    synchronized (Ganymede.db.lockSync)
+      {
+	if (wLock != null)
+	  {
+	    if (wLock.inEstablish)
+	      {
+		return false;
+	      }
+
+	    wLock.abort();
+	  }
+      }
+    
+    release();
+
+    return true;
+  }
+
+  /**
    * <p>release is used to abandon all changes made in association
    * with this DBEditSet.  All DBObjects created, deleted, or
    * modified, and all unique values allocated and freed during the
@@ -1909,7 +1973,7 @@ public class DBEditSet {
    * will not be affected by this transaction's release. </p>
    */
 
-  public synchronized void release()
+  private final void release()
   {
     DBEditObject eObj;
 
@@ -2044,6 +2108,8 @@ public class DBEditSet {
 	  }
       }
   }
+
+
 }
 
 /*------------------------------------------------------------------------------

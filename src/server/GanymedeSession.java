@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.252 $
-   Last Mod Date: $Date: 2002/02/26 18:44:18 $
+   Version: $Revision: 1.253 $
+   Last Mod Date: $Date: 2002/03/13 20:44:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.252 $ $Date: 2002/02/26 18:44:18 $
+ * @version $Revision: 1.253 $ $Date: 2002/03/13 20:44:48 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3510,86 +3510,78 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 				   " : scanning intratransaction objects");
 	      }
 
-	    // by synchronizing on our editset, we get a pretty clean
-	    // shot at our editset's in-process transactional object
-	    // set, even if we are not using a DBReadLock here.  It's
-	    // possible that another thread could be editing one of
-	    // these DBEditObjects during this loop, but that's not
-	    // unreasonable in this context.
+	    DBEditObject transactionObjects[] = session.editSet.getObjectList();
 
-	    synchronized (session.editSet)
+	    for (int i = 0; i < transactionObjects.length; i++)
 	      {
-		enum = session.editSet.objects.elements();
+		DBEditObject transaction_object = transactionObjects[i];
 
-		while (enum.hasMoreElements())
+		// don't consider objects of the wrong type here.
+
+		if (transaction_object.getTypeID() != query.objectType)
 		  {
-		    DBEditObject transaction_object = (DBEditObject) enum.nextElement();
+		    continue;
+		  }
 
-		    // don't consider objects of the wrong type here.
+		// don't consider objects we already have stored in the result
 
-		    if (transaction_object.getTypeID() != query.objectType)
+		if (result.containsInvid(transaction_object.getInvid()))
+		  {
+		    if (debug)
 		      {
-			continue;
+			System.err.println("don't need to add invid " + transaction_object.getInvid() +
+					   ", we got it first time");
 		      }
 
-		    // don't consider objects we already have stored in the result
+		    continue;
+		  }
 
-		    if (result.containsInvid(transaction_object.getInvid()))
+		// don't show objects that are being deleted or
+		// dropped
+
+		if (transaction_object.getStatus() == ObjectStatus.DELETING ||
+		    transaction_object.getStatus() == ObjectStatus.DROPPING)
+		  {
+		    continue;
+		  }
+
+		if (DBQueryHandler.matches(this, query, transaction_object))
+		  {
+		    if (returnContainingObject)
+		      {
+			obj = getContainingObj(transaction_object);
+		      }
+		    else
+		      {
+			obj = transaction_object;
+		      }
+
+		    if (obj == null)
+		      {
+			Ganymede.debug("Error, couldn't find a containing object for an embedded query");
+			continue;	// try next match
+		      }
+
+		    // make sure we've found an object of the
+		    // proper type.. if we're not querying on an
+		    // embedded object type, the above clause
+		    // won't have been run.
+
+		    // DBQueryHandler.matches() doesn't check
+		    // object type, so we need to do it here
+		    // before we add this to our result.
+
+		    if (obj.getTypeID() != containingBase.getTypeID())
 		      {
 			if (debug)
 			  {
-			    System.err.println("don't need to add invid " + transaction_object.getInvid() +
-					       ", we got it first time");
+			    Ganymede.debug("queryDispatch(): Type mismatch in object open in trans!");
 			  }
 
 			continue;
 		      }
 
-		    // don't show objects that are being deleted or
-		    // dropped
-
-		    if (transaction_object.getStatus() == ObjectStatus.CREATING ||
-			transaction_object.getStatus() == ObjectStatus.EDITING)
-		      {
-			if (DBQueryHandler.matches(this, query, transaction_object))
-			  {
-			    if (returnContainingObject)
-			      {
-				obj = getContainingObj(transaction_object);
-			      }
-			    else
-			      {
-				obj = transaction_object;
-			      }
-
-			    if (obj == null)
-			      {
-				Ganymede.debug("Error, couldn't find a containing object for an embedded query");
-				continue;	// try next match
-			      }
-
-			    // make sure we've found an object of the
-			    // proper type.. if we're not querying on an
-			    // embedded object type, the above clause
-			    // won't have been run.
-
-			    // DBQueryHandler.matches() doesn't check
-			    // object type, so we need to do it here
-			    // before we add this to our result.
-
-			    if (obj.getTypeID() != containingBase.getTypeID())
-			      {
-				if (debug)
-				  {
-				    Ganymede.debug("queryDispatch(): Type mismatch in object open in trans!");
-				  }
-
-				continue;
-			      }
-
-			    addResultRow(obj, query, result, internal, perspectiveObject);
-			  }
-		      }
+		    addResultRow(obj, query, result, internal, perspectiveObject);
 		  }
 	      }
 
@@ -5164,21 +5156,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	Vector iterationSet;
 	Hashtable objects;
 
-	synchronized (session.editSet)
-	  {
-	    // grab a snapshot reference to the vector of objects
-	    // checked into the database
+	// grab a snapshot reference to the vector of objects
+	// checked into the database
 
-	    iterationSet = base.getIterationSet();
+	iterationSet = base.getIterationSet();
 
-	    // grab a snapshot copy of the objects checked out in this transaction
-	    
-	    objects = (Hashtable) session.editSet.objects.clone();
-	  }
-
+	// grab a snapshot copy of the objects checked out in this transaction
+	
+	objects = session.editSet.getObjectHashClone();
+	
 	// and generate our list
 
-	Vector results = new Vector(objects.size(), 100);
+	Vector results = new Vector(iterationSet.size(), 100);
 
 	// optimize this loop a bit
 

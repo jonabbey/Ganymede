@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.164 $
-   Last Mod Date: $Date: 2002/03/13 18:44:33 $
+   Version: $Revision: 1.165 $
+   Last Mod Date: $Date: 2002/03/13 20:44:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -114,7 +114,7 @@ import arlut.csd.Util.booleanSemaphore;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.164 $ $Date: 2002/03/13 18:44:33 $ $Name:  $
+ * @version $Revision: 1.165 $ $Date: 2002/03/13 20:44:47 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2407,13 +2407,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    buffer.append(getFieldValueLocal(SchemaConstants.RemovalField).toString());
 	    buffer.append(".\n\n");
 	
-	    editset.logEvents.addElement(new DBLogEvent("inactivateobject",
-							buffer.toString(),
-							(gSession.personaInvid == null ?
-							 gSession.userInvid : gSession.personaInvid),
-							gSession.username,
-							invids,
-							getEmailTargets(this)));
+	    editset.logEvent(new DBLogEvent("inactivateobject",
+					    buffer.toString(),
+					    (gSession.personaInvid == null ?
+					     gSession.userInvid : gSession.personaInvid),
+					    gSession.username,
+					    invids,
+					    getEmailTargets(this)));
 	  }
 	else
 	  {
@@ -2428,13 +2428,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    buffer.append(getLabel());
 	    buffer.append(" has been inactivated.\n\nThe object has no removal date set.\n\n");
 
-	    editset.logEvents.addElement(new DBLogEvent("inactivateobject",
-							buffer.toString(),
-							(gSession.personaInvid == null ?
-							 gSession.userInvid : gSession.personaInvid),
-							gSession.username,
-							invids,
-							getEmailTargets(this)));
+	    editset.logEvent(new DBLogEvent("inactivateobject",
+					    buffer.toString(),
+					    (gSession.personaInvid == null ?
+					     gSession.userInvid : gSession.personaInvid),
+					    gSession.username,
+					    invids,
+					    getEmailTargets(this)));
 	  }
 
 	editset.popCheckpoint("inactivate" + getLabel());
@@ -2513,13 +2513,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	buffer.append(getLabel());
 	buffer.append(" has been reactivated.\n\n");
 
-	editset.logEvents.addElement(new DBLogEvent("reactivateobject",
-						    buffer.toString(),
-						    (gSession.personaInvid == null ?
-						     gSession.userInvid : gSession.personaInvid),
-						    gSession.username,
-						    invids,
-						    getEmailTargets(this)));
+	editset.logEvent(new DBLogEvent("reactivateobject",
+					buffer.toString(),
+					(gSession.personaInvid == null ?
+					 gSession.userInvid : gSession.personaInvid),
+					gSession.username,
+					invids,
+					getEmailTargets(this)));
       }
     else
       {

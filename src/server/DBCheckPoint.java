@@ -6,15 +6,16 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/10/02 22:00:18 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2002/03/13 20:44:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   The University of Texas at Austin.
 
    Contact information
 
@@ -81,7 +82,7 @@ class DBCheckPoint {
 
   /* -- */
 
-  DBCheckPoint(DBEditSet transaction)
+  DBCheckPoint(Vector logEvents, DBEditObject[] transObjects, DBSession session)
   {
     DBEditObject obj;
 
@@ -90,18 +91,13 @@ class DBCheckPoint {
     // assume that log events are not going to change once recorded,
     // so we can make do with a shallow copy.
 
-    logEvents = (Vector) transaction.logEvents.clone();
+    this.logEvents = (Vector) logEvents.clone();
 
-    objects = new Vector();
+    objects = new Vector(transObjects.length);
 
-    // we can only safely iterate on transaction.objects because we're
-    // being created from within a synchronized block in DBEditSet.
-
-    Enumeration enum = transaction.objects.elements();
-
-    while (enum.hasMoreElements())
+    for (int i = 0; i < transObjects.length; i++)
       {
-	obj = (DBEditObject) enum.nextElement();
+	obj = transObjects[i];
 
 	if (debug)
 	  {
@@ -112,7 +108,7 @@ class DBCheckPoint {
 	objects.addElement(new DBCheckPointObj(obj));
       }
 
-    invidDeleteLocks = DBDeletionManager.getSessionCheckpoint(transaction.session);
+    invidDeleteLocks = DBDeletionManager.getSessionCheckpoint(session);
   }
 }
 
