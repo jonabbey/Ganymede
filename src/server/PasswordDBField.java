@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -273,6 +273,20 @@ public class PasswordDBField extends DBField implements pass_field {
    */
 
   public Object getValue()
+  {
+    return null;
+  }
+
+  /** 
+   *
+   * Returns an Object carrying the value held in this field.<br><br>
+   *
+   * This is intended to be used within the Ganymede server, it bypasses
+   * the permissions checking that getValues() does.
+   *
+   */
+
+  public Object getValueLocal()
   {
     return null;
   }
