@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -91,7 +91,7 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
     boolean found = false;
     Query userQuery;
     QueryNode root;
-    DBObject obj = null;
+    DBObject user = null, persona = null;
     PasswordDBField pdbf;
 
     /* -- */
@@ -115,9 +115,9 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
 
     for (int i = 0; !found && (i < results.size()); i++)
       {
-	obj = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
+	user = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
 	
-	pdbf = (PasswordDBField) obj.getField(SchemaConstants.UserPassword);
+	pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 	
 	if (pdbf.matchPlainText(clientPass))
 	  {
@@ -127,16 +127,16 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (!found)
       {
-	root = new QueryDataNode(SchemaConstants.AdminNameField,QueryDataNode.EQUALS, clientName);
-	userQuery = new Query(SchemaConstants.AdminBase, root, false);
+	root = new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName);
+	userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
 	results = Ganymede.internalSession.internalQuery(userQuery);
 
 	for (int i = 0; !found && (i < results.size()); i++)
 	  {
-	    obj = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
+	    persona = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
 	    
-	    pdbf = (PasswordDBField) obj.getField(SchemaConstants.AdminPasswordField);
+	    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
 	    
 	    if (pdbf.matchPlainText(clientPass))
 	      {
@@ -147,7 +147,7 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (found)
       {
-	GanymedeSession session = new GanymedeSession(client, obj);
+	GanymedeSession session = new GanymedeSession(client, user, persona);
  	Ganymede.debug("Client logged in: " + session.username);
 	return (Session) session;
       }
@@ -182,8 +182,8 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
     clientName = admin.getName();
     clientPass = admin.getPassword();
 
-    root = new QueryDataNode(SchemaConstants.AdminNameField,QueryDataNode.EQUALS, clientName);
-    userQuery = new Query(SchemaConstants.AdminBase, root, false);
+    root = new QueryDataNode(SchemaConstants.PersonaNameField, QueryDataNode.EQUALS, clientName);
+    userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
     Vector results = Ganymede.internalSession.internalQuery(userQuery);
 
@@ -191,7 +191,7 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	obj = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
 	    
-	pdbf = (PasswordDBField) obj.getField(SchemaConstants.AdminPasswordField);
+	pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
 	    
 	if (pdbf.matchPlainText(clientPass))
 	  {
