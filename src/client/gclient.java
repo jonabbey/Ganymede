@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.98 $ %D%
+   Version: $Revision: 1.99 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -279,7 +279,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     cloneObjectMI,
     deleteObjectMI,
     inactivateObjectMI,
-    showLogMI,
     menubarQueryMI = null;
 
   String
@@ -430,11 +429,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     menubarQueryMI = new JMenuItem("Query");
     menubarQueryMI.addActionListener(this);
 
-    showLogMI = new JMenuItem("Show Log");
-    showLogMI.addActionListener(this);
-
     actionMenu.add(menubarQueryMI);
-    actionMenu.add(showLogMI);
     actionMenu.addSeparator();
     actionMenu.add(viewObjectMI);
     actionMenu.add(createObjectMI);
@@ -4102,11 +4097,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
 	
 	commitTransaction();
-      }
-    else if (source == showLogMI)
-      {
-	logPanel lp = new logPanel(this);
-	lp.showLogPanel();
       }
     else if (source == menubarQueryMI)
       {
