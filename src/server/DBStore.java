@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.65 $ %D%
+   Version: $Revision: 1.66 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1310,7 +1310,8 @@ public class DBStore {
 	permCategory.addNode(b, false, false); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.RoleName;
+	bf.field_code = SchemaConstants.RoleName;
+	bf.field_order = 1;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
 	bf.loading = true;
@@ -1322,7 +1323,18 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.RoleMatrix;
+	bf.field_code = SchemaConstants.RoleDelegatable;
+	bf.field_order = 2;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Delegatable Role?";
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, this role can be granted to admins created/edited by Personae with this role.";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.RoleMatrix;
+	bf.field_order = 3;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
 	bf.field_name = "Objects Owned Access Bits";
 	bf.removable = false;
@@ -1331,7 +1343,8 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.RoleDefaultMatrix;
+	bf.field_code = SchemaConstants.RoleDefaultMatrix;
+	bf.field_order = 4;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
 	bf.field_name = "Default Access Bits";
 	bf.removable = false;
@@ -1340,7 +1353,8 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.RolePersonae;
+	bf.field_code = SchemaConstants.RolePersonae;
+	bf.field_order = 5;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Persona entities";
 	bf.allowedTarget = SchemaConstants.PersonaBase;
