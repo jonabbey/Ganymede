@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.17 $ %D%
+  Version: $Revision: 1.18 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -47,7 +47,7 @@ import com.sun.java.swing.border.*;
  *
  */
 
-public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener {
+public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener {
 
   private final static boolean debug = true;
 
@@ -203,6 +203,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     ewHash = new Hashtable();
 
     createVectorComponents();
+
+    addMouseListener(this);
 
     invalidateRight();
   }
@@ -381,7 +383,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    cp.setBorder(new LineBorder(Color.black));
 		    
 		    //		    addElement(object.getLabel(), cp);
-		    addElement(object.getLabel(), cp);
+		    addElement((i+1) + ". " + object.getLabel(), cp);
 		  }
 	      }
 	    else
@@ -404,7 +406,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	      {
 		System.out.println("Adding add button");
 	      }
-	    add("South", addB);
+	    //add("South", addB);
 	  }
 	else
 	  {
@@ -571,28 +573,28 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
     }
 
-
-  //  /** 
-  //   * Paint method draws a little plus box on the bottom right.
-  //   *
-  //   */
-  //  public void paint(Graphics g)
-  //  {
-  //    super.paint(g);
-  //
-  //    Color color = g.getColor();
-  //    g.setColor(Color.black);
-  //    
-  //    Rectangle bounds = getBounds();
-  //
-  //    g.drawRect(bounds.height - 10, bounds.y, bounds.height, bounds.y+10);
-  //    g.drawLine(bounds.x + 5, bounds.height - 10, bounds.x + 5, bounds.height); 
-  //
-  //    g.drawLine(bounds.x, bounds.height - 5, bounds.x + 10, bounds.height - 5); 
-  //   
-  //
-  //    g.setColor(color);
-  //  }
+  
+  /** 
+   * Paint method draws a little plus box on the bottom right.
+   *
+   */
+  public void paint(Graphics g)
+  {
+    super.paint(g);
+    
+    Color color = g.getColor();
+    g.setColor(Color.black);
+    
+    Rectangle bounds = getBounds();
+    
+    // horizontal
+    g.drawLine(8, bounds.height - 15, 8, bounds.height - 5);
+    // vertical
+    g.drawLine(3, bounds.height - 10, 13, bounds.height - 10);
+    
+    
+    g.setColor(color);
+  }
 
 
   public void addElement(Component c)
@@ -886,5 +888,42 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	c = c.getParent();
       }
   }
+
+  // Mouse listener stuff
+
+  public void mouseClicked(MouseEvent e)
+    {
+
+      Rectangle bounds = getBounds();
+      int x = e.getX();
+      int y = e.getY();
+
+      System.out.println("Mouse clicked-> " + e.getPoint() + " bounds.height = " + bounds.height);
+
+
+      if ((x > 0) && (x < 13) && (y > bounds.height - 15) && (y < bounds.height))
+	{
+	  if (debug)
+	    {
+	      System.out.println("Adding new element");
+	    }
+
+	  addNewElement();
+	}
+      else
+	{
+	  if (debug)
+	    {
+	      System.out.println("Miss!");
+	    }
+	}
+
+    }
+
+  public void mouseEntered(MouseEvent e) {}
+  public void mouseExited(MouseEvent e) {}
+  public void mousePressed(MouseEvent e) {}
+  public void mouseReleased(MouseEvent e) {}
+
 }
 
