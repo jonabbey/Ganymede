@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -599,6 +599,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * This is only valid for vectors.  If the field is a scalar, use
    * getValue().
    *
+   * @see arlut.csd.ganymede.db_field
+   *
    */
   public Vector getValues()
   {
@@ -615,6 +617,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
     return values; // this is ok, since this is being serialized. the client's not
                    // gaining the ability to add or remove items from this field
   }
+
 
   /**
    *
@@ -1190,4 +1193,43 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	return false;  // if we're not in a transaction, we certainly can't be edited.
       }
   }
+
+  /** 
+   *
+   * Returns a Vector of the values of the elements in this field,
+   * if a vector.
+   *
+   * This is intended to be used within the Ganymede server, it bypasses
+   * the permissions checking that getValues() does.
+   *
+   */
+  public Vector getValuesLocal()
+  {
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field");
+      }
+
+    return values; // this is ok, since this is being serialized. the client's not
+                   // gaining the ability to add or remove items from this field
+  }
+
+  /** 
+   *
+   * Returns an Object carrying the value held in this field.
+   *
+   * This is intended to be used within the Ganymede server, it bypasses
+   * the permissions checking that getValues() does.
+   *
+   */
+  public Object getValueLocal()
+  {
+    if (isVector())
+      {
+	throw new IllegalArgumentException("scalar accessor called on vector field");
+      }
+
+    return value;
+  }
+
 }
