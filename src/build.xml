@@ -372,10 +372,10 @@ refresh the jar files.
   <target name="genkeys" if="need.sslkeys" depends="prepare">
     <genkey alias="${priv_key.alias}" keystore="${priv_key.keystore}" storepass="${priv_key.storepass}"
             dname="${priv_key.dname}" validity="${priv_key.days_valid}" verbose="true"/>
-    <exec dir="." executable="keytool">
+    <exec dir="." executable="${java.home}${file.separator}bin${file.separator}keytool">
       <arg line= "-export -v -keystore ${priv_key.keystore} -alias ${priv_key.alias} -file ${pubcert.truststore}.tmp -storepass ${priv_key.storepass}"/>
     </exec>
-    <exec dir="." executable="keytool">
+    <exec dir="." executable="${java.home}${file.separator}bin${file.separator}keytool">
       <arg line="-import -v -alias ${priv_key.alias} -noprompt -file ${pubcert.truststore}.tmp -keystore ${pubcert.truststore} -storepass ${pubcert.storepass}"/>
     </exec>
     <delete failonerror="false"><fileset dir="." includes="${pubcert.truststore}.tmp"/></delete>
