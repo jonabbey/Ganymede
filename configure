@@ -28,7 +28,7 @@ guessperl=`which perl5`
   guessperl=`which perl`
  fi
 
-echo "\nWhere is perl5 installed? [$guessperl] \c" 
+echo "Where is perl5 installed? [$guessperl] \c" 
 
 read userperl
 
@@ -49,7 +49,7 @@ export GPERL
 guessjava=`which java`
 guessjava=`dirname ${guessjava}`
 
-echo "\nWhat is the location of the directory where java is installed? [$guessjava] \c"
+echo "What is the location of the directory where java is installed? [$guessjava] \c"
 
 read userjava
 
@@ -68,7 +68,7 @@ export GJAVA
 
 if [ "$1" = "-develop" ]
     then
-    echo "\nWhere should the class files be located? \c"
+    echo "Where should the class files be located? \c"
     read GCLASSDIR
 fi
 
