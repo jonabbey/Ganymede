@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.22 $ %D%
+    Version: $Revision: 1.23 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -141,7 +141,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     try
       {
-	fields = object.listFields();
+	// get all the custom fields
+	fields = object.listFields(true);
       }
     catch (RemoteException rx)
       {
@@ -171,11 +172,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    try
 	      {
 		short ID = fields[i].getID();
+		short type = object.getTypeID();
+		
 		// Skip some fields.  custom panels hold the built ins, and a few others.
-		if (fields[i].isBuiltIn() || 
-		    ((object.getTypeID() == SchemaConstants.OwnerBase) &&
-		                             (ID == SchemaConstants.OwnerObjectsOwned)) 
-		    || (ID == SchemaConstants.UserAdminPersonae))
+		if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned)) 
+		    || ((type == SchemaConstants.UserBase) && (ID == SchemaConstants.UserAdminPersonae))
+		    || ((ID == SchemaConstants.ContainerField) && object.isEmbedded()))
+			
+		    
 		  {
 		    if (debug)
 		      {
@@ -597,7 +601,20 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	try
 	  {
 	    boolean ok = false;
-	    ok = field.setValue((String)e.getItem());
+	    Object item = e.getItem();
+	    if (item instanceof String)
+	      {
+		ok = field.setValue((String)e.getItem());
+	      }
+	    else if (item instanceof listHandle)
+	      {
+		ok = field.setValue(((Invid) ((listHandle)e.getItem()).getObject() ));
+
+	      }
+	    else 
+	      {
+		System.out.println("Unknown type from JComboBox: " + item);
+	      }
 	    if (debug)
 	      {
 		if (ok)
@@ -627,8 +644,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     JLabel l = new JLabel("");
     rowHash.put(comp, l);
-
-    comp.setBackground(ClientColor.ComponentBG);
+    
+    //comp.setBackground(ClientColor.ComponentBG);
     add("0 " + row + " 2 lthH", comp); // span 2 columns, no label
     row++;
 
@@ -763,7 +780,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    break;
 		      
 	  case FieldType.INVID:
-	    addInvidField(field);
+	    addInvidField((invid_field)field);
 	    break;
 
 	  case FieldType.IP:
@@ -797,7 +814,31 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
       }
 
-    QueryResult qr = field.choices();
+    QueryResult qr = null;
+
+
+    Object id = field.choicesKey();
+    if (id == null)
+      {
+	qr = field.choices();
+      }
+    else
+      {
+	if (parent.cachedLists.containsKey(id))
+	  {
+	    qr = (QueryResult)parent.cachedLists.get(id);
+	  }
+	else
+	  {	
+	    qr =field.choices();
+	    if (qr != null)
+	      {
+		parent.cachedLists.put(id, qr);
+	      }
+	  }
+      }
+    
+
 
     if (qr == null)
       {
@@ -851,22 +892,58 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.out.println("Adding StringSelector, its a vector of invids!");
       }
 
-    valueResults = field.encodedValues();
-    valueHandles = new Vector();
+    valueHandles = field.encodedValues().getListHandles();
 
     if (editable)
       {
-	choiceResults = field.choices();
-	choiceHandles = new Vector();
+	Object key = field.choicesKey();
+
+	if (key == null)
+	  {
+	    if (debug)
+	      {
+		System.out.println("key is null, downloading new copy");
+	      }
+	    choiceHandles = field.choices().getListHandles();
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.out.println("key= " + key);
+	      }
+
+	    if (parent.cachedLists.containsKey(key))
+	      {
+		if (debug)
+		  {
+		    System.out.println("It's in there, using cached list");
+		  }
+		choiceHandles = (Vector)parent.cachedLists.get(key);
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println("It's not in there, downloading anew.");
+		  }
+
+		choiceHandles = field.choices().getListHandles();
+		parent.cachedLists.put(key, choiceHandles);
+	      }
+	  }
       }
 
+    // This is taken out, because we use getListHandles() now, 
+
+    /*
     for (int i = 0; i < valueResults.size(); i++)
       {
 	valueHandles.addElement(new listHandle(valueResults.getLabel(i), 
 					       valueResults.getInvid(i)));
       }
 
-    if (editable)
+     if (editable)
       {
 	if (choiceResults != null)
 	  {
@@ -876,7 +953,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 							choiceResults.getInvid(i)));
 	      }
 	  }
-      }
+      }*/
 
     // ss is canChoose, mustChoose
 
@@ -945,109 +1022,70 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("You can choose");
 	      }
-      
-	    if (field.mustChoose())
+	    
+	    JComboBox combo = new JComboBox();
+	    
+	    Vector choices = field.choices().getLabels();
+	    String currentChoice = (String) field.getValue();
+	    boolean found = false;
+	    
+	    for (int j = 0; j < choices.size(); j++)
 	      {
+		String thisChoice = (String)choices.elementAt(j);
+		combo.addItem(thisChoice);
+		
+		if (!found && (currentChoice != null))
+		  {
+		    if (thisChoice.equals(currentChoice))
+		      {
+			found = true;
+		      }
+		  }
+		
 		if (debug)
 		  {
-		    System.out.println("You must choose.");
-		  }	  
-				// Add a choice
-				  
-		JComboBox choice = new JComboBox();
-		Vector choices = field.choices().getLabels();
-				  
-		for (int j = 0; j < choices.size(); j++)
-		  {
-		    choice.addItem((String)choices.elementAt(j));
-		  }
-				  
-		choice.setEditable(editable);
-		choice.addItemListener(this); // register callback
-		choice.setVisible(true);
-				  
-		try
-		  {
-		    choice.setSelectedItem(field.getValue());
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not get value for field: " + rx);
-		  }
-				  
-		objectHash.put(choice, field);
-
-		try
-		  {
-		    addRow( choice, field.getName(), field.isVisible());
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not check visibility");
+		    System.out.println("Adding " + (String)choices.elementAt(j));
 		  }
 	      }
-	    else
+	    
+	    // if the current value wasn't in the choice, add it in now
+	    
+	    if (!found && (currentChoice != null))
 	      {
-		// Add a combo box
-				  
-		JComboBox combo = new JComboBox();
-
-		Vector choices = field.choices().getLabels();
-		String currentChoice = (String) field.getValue();
-		boolean found = false;
-
-		for (int j = 0; j < choices.size(); j++)
-		  {
-		    String thisChoice = (String)choices.elementAt(j);
-		    combo.addItem(thisChoice);
-
-		    if (!found)
-		      {
-			if (thisChoice.equals(currentChoice))
-			  {
-			    found = true;
-			  }
-		      }
-
-		    if (debug)
-		      {
-			System.out.println("Adding " + (String)choices.elementAt(j));
-		      }
-		  }
-
-		// if the current value wasn't in the choice, add it in now
-				  
-		if (!found)
-		  {
-		    combo.addItem(currentChoice);
-		  }
-
-		combo.setMaximumRowCount(8);
-		combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-		combo.setEditable(false); // This should be true
-		combo.setVisible(true);
-
+		combo.addItem(currentChoice);
+	      }
+	    
+	    combo.setMaximumRowCount(8);
+	    combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
+	    combo.setEditable(false); // this should be setEditable(mustChoose());
+	    combo.setVisible(true);
+	    
+	    if (currentChoice != null)
+	      {
 		combo.setSelectedItem(currentChoice);
-		if (debug)
-		  {
-		    System.out.println("Setting current value: " + currentChoice);
-		  }	  
-		combo.addItemListener(this); // register callback
-		objectHash.put(combo, field);
-		if (debug)
-		  {
-		    System.out.println("Adding to panel");
-		  }
-
-		try
-		  {
-		    addRow( combo, field.getName(), field.isVisible());
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not check visibility");
-		  }
 	      }
+
+	    if (debug)
+	      {
+		System.out.println("Setting current value: " + currentChoice);
+	      }	  
+
+	    combo.addItemListener(this); // register callback
+	    objectHash.put(combo, field);
+	    if (debug)
+	      {
+		System.out.println("Adding to panel");
+	      }
+	    
+	    try
+	      {
+		addRow( combo, field.getName(), field.isVisible());
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not check visibility");
+	      }
+	    
 	  }
 	else
 	  {
@@ -1366,13 +1404,90 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addInvidField(db_field field) throws RemoteException
+  private void addInvidField(invid_field field) throws RemoteException
   {
     if (editable && field.isEditable())
       {
 	// really probably ought to do a combo box here.. we shouldn't
 	// ever have an invid field without a list of choices provided
 	// us by the server
+	
+
+	JComboBox combo = new JComboBox();
+	
+	Vector choices = field.choices().getListHandles();
+        Invid currentChoice = (Invid) field.getValue();
+	listHandle currentListHandle = null;
+	
+	boolean found = false;
+	
+	for (int j = 0; j < choices.size(); j++)
+	  {
+	    listHandle thisChoice = (listHandle)choices.elementAt(j);
+	    combo.addItem(thisChoice);
+	    
+	    if (!found && (currentChoice != null))
+	      {
+		if (((Invid)thisChoice.getObject()).equals(currentChoice))
+		  {
+		    if (debug)
+		      {
+			System.out.println("Found the current object in the list!");
+		      }
+		    currentListHandle = thisChoice;
+		    found = true;
+		  }
+	      }
+	    
+	    if (debug)
+	      {
+		System.out.println("Adding " + (listHandle)choices.elementAt(j));
+	      }
+	  }
+	
+	// if the current value wasn't in the choice, add it in now
+	
+	if (!found && (currentChoice != null))
+	  {
+	    currentListHandle = new listHandle(parent.getSession().viewObjectLabel(currentChoice), currentChoice);
+	    combo.addItem(currentListHandle);
+	  }
+	
+	combo.setMaximumRowCount(12);
+	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
+	combo.setEditable(false); // This should be true
+	combo.setVisible(true);
+
+	if (currentChoice != null)
+	  {
+	    if (debug)
+	      {
+		System.out.println("setting current choice: " + currentChoice);
+	      }
+	    combo.setSelectedItem(currentChoice);
+	  }
+	else
+	  {
+	    System.out.println("currentChoice is null");
+	  }	  
+
+	combo.addItemListener(this); // register callback
+	objectHash.put(combo, field);
+
+	if (debug)
+	  {
+	    System.out.println("Adding to panel");
+	  }
+	
+	try
+	  {
+	    addRow( combo, field.getName(), field.isVisible());
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not check visibility");
+	  }
+	
       }
     else
       {
