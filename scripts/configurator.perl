@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.7 $
-# $Date: 1999/01/16 02:28:39 $
+# $Revision: 1.8 $
+# $Date: 1999/01/16 04:29:14 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -99,6 +99,8 @@ sub write_makefile {
 
 classfiles:
 	\@echo "Building Ganymede sources"
+	\@cd $rootdir/src/jdj; \\
+	build		
 	\@cd $rootdir/src/Util; \\
 	build		
 	\@cd $rootdir/src/JDialog; \\
@@ -236,7 +238,9 @@ $javadir = $ENV{GJAVA};
 # rebuild scripts depend on.  See the header for write_config() to
 # identify the four pieces.
 
-@configs=("$rootdir/src/Util", "Ganymede Utility Classes",
+@configs=("$rootdir/src/jdj", "Image Resources Class",
+	  "$rootdir/src/classes", "$rootdir/src/classes/jdj",
+	  "$rootdir/src/Util", "Ganymede Utility Classes",
 	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/Util",
 	  "$rootdir/src/JCalendar", "Ganymede Calendar Classes",
 	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/JCalendar",
@@ -282,7 +286,8 @@ while ($#configs > 0) {
 # rewrite the header to properly specify the location of perl on this
 # system.
 
-@rebuilds=("$rootdir/src/Util",
+@rebuilds=("$rootdir/src/jdj",
+	   "$rootdir/src/Util",
 	   "$rootdir/src/JCalendar",
 	   "$rootdir/src/JDialog",
 	   "$rootdir/src/JTable",
