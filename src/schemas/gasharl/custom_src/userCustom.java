@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.96 $
-   Last Mod Date: $Date: 2001/09/11 04:10:10 $
+   Version: $Revision: 1.97 $
+   Last Mod Date: $Date: 2001/09/11 04:38:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2370,20 +2370,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (process.exitValue() != 0)
 	      {
-		try
-		  {
-		    // the calling code doesn't really care about the
-		    // failure to save, but
-		    // Ganymede.createErrorDialog() will log this to
-		    // stderr.
-
-		    return Ganymede.createErrorDialog("Password History Not Saved",
-						      "External error in npasswd saver");
-		  }
-		catch (FileNotFoundException ex)
-		  {
-		    ex.printStackTrace();
-		  }
+		// the calling code doesn't really care about the
+		// failure to save, but
+		// Ganymede.createErrorDialog() will log this to
+		// stderr.
+		
+		return Ganymede.createErrorDialog("Password History Not Saved",
+						  "External error in npasswd saver");
 	      }
 	  }
 	catch (IOException ex)
@@ -2398,15 +2391,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	finally
 	  {
 	    FileOps.cleanupProcess(process);
-
-	    try
-	      {
-		resultFile.delete();
-	      }
-	    catch (Exception ex)
-	      {
-		ex.printStackTrace();
-	      }
 	  }
       }
     else
