@@ -18,6 +18,8 @@ import java.util.*;
 
 import oreilly.Label.*;
 
+import gjt.ImageCanvas;
+
 
 //import gjt.ButtonPanel;
 import gjt.*;
@@ -31,7 +33,7 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
   boolean
     done;
 
-  Canvas
+  ImageCanvas
     imageCanvas;
 
   Button OKButton;
@@ -112,25 +114,32 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
       Panel textPanel = new Panel();
       textPanel.setLayout(new BorderLayout());
       MultiLineLabel textLabel = new MultiLineLabel(Resource.getText());
-      imageCanvas = new Canvas();
+      
       textPanel.add("Center", textLabel);
-      textPanel.add("West", imageCanvas);
+      
       textBorder = new EtchedBorder(textPanel, 2, 5);
       
       image = Resource.getImage();
       if (image != null)
 	{
 	  System.out.println("add image");
-	  
-	  
+	  imageCanvas = new ImageCanvas(image);
+	  textPanel.add("West", imageCanvas);
 	}
 
       buttonPanel = new ButtonPanel();
       OKButton = buttonPanel.add(Resource.OKText);
-      CancelButton = buttonPanel.add(Resource.CancelText);
-  
       OKButton.addActionListener(this);
-      CancelButton.addActionListener(this);
+
+      //if cancel is null, don't put it on there
+      if (Resource.CancelText != null)
+	{
+	  CancelButton = buttonPanel.add(Resource.CancelText);
+	  CancelButton.addActionListener(this);
+	}
+
+      OKButton.addActionListener(this);
+
 
       //EtchedBorder panelBorder = new EtchedBorder(panel, 2, 5);
       
@@ -178,6 +187,20 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 		      componentHash.put(sf, st.getLabel());
 		      valueHash.put(st.getLabel(), "");
 		      
+		    }
+		  else if (element instanceof passwordThing)
+		    {
+		      passwordThing pt = (passwordThing)element;
+		      stringField sf = new stringField();
+		      sf.setEchoChar('*');
+		      sf.setEditable(true);
+		      sf.setCallback(this); 
+		      addRow(panel, sf, pt.getLabel(), i);
+		      
+		      componentHash.put(sf, pt.getLabel());
+		      valueHash.put(pt.getLabel(), "");
+
+
 		    }
 		  else if (element instanceof booleanThing)
 		    {
@@ -275,7 +298,7 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 
       return valueHash;
     }
-
+  /*
   public void paint(Graphics g)
     {
       System.out.println("Painting");
@@ -296,7 +319,7 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
     {
       paint(g);
     }
-
+    */
   public  void actionPerformed(ActionEvent e)
     {
       System.out.println("There was some action performed in StringDialog");
