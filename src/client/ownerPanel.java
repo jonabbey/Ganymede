@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -188,16 +188,19 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
     // We don't want the supergash owner group to show up anywhere,
     // because everything is owned by supergash.
 
-    Invid supergash = new Invid((short)0, 1); // This is supergash
-    for (int i = 0; i < availableOwners.size(); i++)
+    if (availableOwners != null)
       {
-	listHandle l = (listHandle)availableOwners.elementAt(i);
-	if (supergash.equals(l.getObject()))
+	Invid supergash = new Invid((short)0, 1); // This is supergash
+	for (int i = 0; i < availableOwners.size(); i++)
 	  {
-	    availableOwners.removeElementAt(i);
-	    break;
+	    listHandle l = (listHandle)availableOwners.elementAt(i);
+	    if (supergash.equals(l.getObject()))
+	      {
+		availableOwners.removeElementAt(i);
+		break;
+	      }
+	    
 	  }
-
       }
 
     StringSelector ss = new StringSelector(availableOwners, 
