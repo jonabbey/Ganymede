@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 2001/07/05 22:25:53 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 2001/07/06 06:36:24 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -2139,11 +2139,11 @@ class OptionsPanel extends JPanel {
 
 	if (template.isBuiltIn())
 	  {
-	    builtInItems_Vect.add( template.getName() );
+	    builtInItems_Vect.addElement( template.getName() );
 	  }
 	else
 	  {
-	    customItems_Vect.add( template.getName() );
+	    customItems_Vect.addElement( template.getName() );
 	  }
 	
       }
