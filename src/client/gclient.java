@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1755,7 +1755,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	try
 	  {
-	    StringDialog d = new StringDialog(this, "Verify invalidation", "Are you sure you want to inactivate " + session.viewObjectLabel(invid), "Yes", "No");
+	    StringDialog d = new StringDialog(this, 
+					      "Verify invalidation", 
+					      "Are you sure you want to inactivate " + 
+					      session.viewObjectLabel(invid), "Yes", "No");
 	    Hashtable result = d.DialogShow();
 
 	    if (result == null)
