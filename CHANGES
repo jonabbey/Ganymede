@@ -198,6 +198,14 @@ been manually selected in the interactive case.  Ganymede will now
 provide a warning if it had to pick an owner group at random to put a
 newly created object in when run with a non-interactive client.
 
+14. [CLIENT] Added menu options to view object window, cleaned dialogs
+
+The view object window now has several menu options to allow editing,
+deleting, cloning, and inactivating of objects from the view object
+window.
+
+Cleaned up several dialogs in the code.
+
 -------------------- Changes from 1.0.9 to 1.0.10 -------------------
 
 RELEASE DATE: April 2, 2002
