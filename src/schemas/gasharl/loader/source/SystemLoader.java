@@ -6,7 +6,7 @@
    GASH hosts_info file
    
    Created: 18 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,6 +36,7 @@ public class SystemLoader {
   {
     system systemTmp;
     interfaceObj interfaceTmp;
+    int interfaceCount = 0;
 
     /* -- */
 
@@ -74,6 +75,7 @@ public class SystemLoader {
 	    // read an interface
 
 	    System.out.print(">");
+	    interfaceCount++;
 
 	    try
 	      {
@@ -115,6 +117,8 @@ public class SystemLoader {
 	      }
 	  }
       }
+
+    System.err.println("\nTotal interfaces created: " + interfaceCount);
   }
 
 }
