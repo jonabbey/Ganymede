@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -143,7 +143,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   // - ints
 
   int row = 0;
-  int readLength;  // for use in the reading of queries
 
   // - other variables
 
@@ -779,7 +778,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     return returnChoice;
   }  
   
-
   /**
    *
    * This internal method generates the GUI choice component
@@ -789,20 +787,18 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    */
 
   private qaryChoice getDoesNot ()
-    {
-      qaryChoice returnChoice = new qaryChoice();
-      returnChoice.qRow = this.row;
-      
-      returnChoice.addItem("does");
-      returnChoice.addItem("does not");
-      
-      System.out.println("Deos not selected");
-
-      returnChoice.addItemListener(this);
-      return returnChoice;
-
-     
-    }
+  {
+    qaryChoice returnChoice = new qaryChoice();
+    returnChoice.qRow = this.row;
+    
+    returnChoice.addItem("does");
+    returnChoice.addItem("does not");
+    
+    System.out.println("Does not selected");
+    
+    returnChoice.addItemListener(this);
+    return returnChoice;
+  }
   
   /**
    *
@@ -972,7 +968,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
       }
 
-    this.row ++;
+    this.row++;
     this.Rows.insertElementAt(myRow, Row); // add component array to vector
     
     // make sure the scroll pane is correctly spacing things
@@ -1458,13 +1454,22 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    myQuery = setFields(myQuery);
 	  }
 
-	// TESTING dumpToString
+	// this section below here is for the purpose of testing the
+	// query serialization/de-serialization logic, which we don't
+	// yet use. 
+
+	if (false)
+	  {
+	    // TESTING dumpToString
 	
-	System.out.println("Results: " + myQuery.dumpToString());
+	    System.out.println("Results: " + myQuery.dumpToString());
 
-	// TESTING readQuery
+	    // TESTING readQuery
 
-	readQuery(myQuery.dumpToString());
+	    Query testResult = readQuery(myQuery.dumpToString());
+
+	    System.out.println("Reprocessed results: " + testResult.dumpToString());
+	  }
 
 	return myQuery;
       }
@@ -1602,7 +1607,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	// Cancel the save transaction and close the save dialog
 
 	saveBox.setVisible(false);
-
       }
     
     if (e.getSource() == qDone)
@@ -1870,7 +1874,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	tempRow[7] = newInput;
 	addRow(tempRow, true, inner_choice, currentRow);
       }
-    
     else if (e.getSource() instanceof qaryChoice)
       {
 	System.out.println("Other Choice selected (presumably operator choice)");
@@ -1890,9 +1893,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    
 	    tempRow[3].setVisible(false);
 	    tempRow[3] = getDoesNot();    
-	    
 	  }
-	
 	else 
 	  {
 	    JComboBox tempChoice = (JComboBox) tempRow[1];
@@ -1900,14 +1901,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    tempRow[3].setVisible(false);
 	    tempRow[3] = getIsNot(myField);
 	    System.out.println("NO START WITH");
-	    
 	  }
 
 	removeRow(tempRow, inner_choice, currentRow);
 	addRow(tempRow, true, inner_choice, currentRow); // make sure the new 
 	                                                 // component makes it into the 
 	                                                 //row
-	
 
 	if ((opName.equalsIgnoreCase("Contains All")) || 
 	    (opName.equalsIgnoreCase("Contains None")) ||
@@ -1939,401 +1938,325 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       }
   }
 
-
+  /** 
+   *
+   * This method takes a as its parameter query and sets the 
+   * gui components of the querybox to reflect the state of 
+   * that query.
+   *
+   */
 
   public Query readQuery (String savedQuery)
-    {
-      /** 
-       *
-       * This method takes a as its parameter query and sets the 
-       * gui components of the querybox to reflect the state of 
-       * that query.
-       */
-      
-      String temp,
-	     name,
-	     base,
-	     edit;
-
-      int baseInt,
-	  nameBreak,
-	  baseBreak,
-          editBreak,
-	  queryBreak;
-      
-      temp = savedQuery;
-
-      nameBreak = temp.indexOf(":"); // this will get the first 
-                                     // index of the ':' character 
-      System.out.println("--------");
-
-      name = temp.substring(0, nameBreak); 
-      System.out.println("Name Found: " + name);
-
-      temp = temp.substring(nameBreak + 1, temp.length()); // The '+1' removes the colon
-
-      baseBreak = temp.indexOf(":");
-      base = temp.substring(0, baseBreak);
-      System.out.println("Here's base: " + base);
-      
-      temp = temp.substring(baseBreak + 1, temp.length());
-      editBreak = temp.indexOf(":");
-      edit = temp.substring(0, editBreak);
-      System.out.println("And Edit: " + edit);
-
-      temp = temp.substring(editBreak + 1, temp.length());
-      System.out.println("And the Rest: " + temp);
-      System.out.println("--------");
-
-      // Time to create the query....
-
-      // Step One: Create the root Node. Then we can make a nice query from it.
-       
-	 
-      // First, check and see if the base is in short or string form. This is done
-      // by looking to see if a '#' sign is the first character (note: be sure to
-      // ignore backslashed characters
-
-
-      // <<< Insert well written and robust code here >>>
-
-
-      /* Step Two: Figure out what the base is, and what form it's in (ie, baseID,
-       * baseName, etc), and get the other pertinent variables. We'll use these to 
-       * create the query object.
-       */
-      
+  {
+    String 
+      temp,
+      name,
+      base,
+      edit;
     
-      this.queryString = temp;   // decodeString will use the querystring to read
-                                 // the query
+    int 
+      baseInt,
+      nameBreak,
+      baseBreak,
+      editBreak,
+      queryBreak;
+
+    /* -- */
+    
+    temp = savedQuery;
+
+    nameBreak = temp.indexOf(":"); // this will get the first 
+                                     // index of the ':' character 
+    System.out.println("--------");
+
+    name = temp.substring(0, nameBreak); 
+    System.out.println("Name Found: " + name);
+
+    temp = temp.substring(nameBreak + 1, temp.length()); // The '+1' removes the colon
+
+    baseBreak = temp.indexOf(":");
+    base = temp.substring(0, baseBreak);
+    System.out.println("Here's base: " + base);
+      
+    temp = temp.substring(baseBreak + 1, temp.length());
+    editBreak = temp.indexOf(":");
+    edit = temp.substring(0, editBreak);
+    System.out.println("And Edit: " + edit);
+
+    temp = temp.substring(editBreak + 1, temp.length());
+    System.out.println("And the Rest: " + temp);
+    System.out.println("--------");
+
+    // Time to create the query....
+
+    // Step One: Create the root Node. Then we can make a nice query from it.
+	 
+    // First, check and see if the base is in short or string form. This is done
+    // by looking to see if a '#' sign is the first character (note: be sure to
+    // ignore backslashed characters
+
+    // <<< Insert well written and robust code here >>>
+
+    /* Step Two: Figure out what the base is, and what form it's in (ie, baseID,
+     * baseName, etc), and get the other pertinent variables. We'll use these to 
+     * create the query object.
+     */
+    
+    this.queryString = temp;	// decodeString will use the querystring to read
+				// the query
                               
-      QueryNode root = decodeString();
-      boolean Edit;
-      
+    QueryNode root = decodeString();
+    boolean Edit;
+    
+    Query returnQuery = new Query(base, root, edit.equals("true"));
+    
+    System.out.println("");
+    System.out.println("______________");
+    System.out.println("And Here it is: " + returnQuery.dumpToString());
+    
+    return returnQuery;
+  }
 
-      if (edit.equals("true"))
-	{
-	  Edit = true;
-	}
-      else
-	{
-	  Edit = false;
-	}
-
-      Query returnQuery = new Query(base, root, Edit);
-
-      System.out.println("");
-      System.out.println("______________");
-      System.out.println("And Here it is: " + returnQuery.dumpToString());
-
-      return returnQuery;
-      
-    }
-
+  /**
+   * This method will break down the LISP-y section of the
+   * query-string. In keeping with the theme, it is 
+   * recursive. The nodes of the query are set as it goes along.
+   *
+   * The outer method is a helper method, while the inner method
+   * rDecode really does all the work
+   */
       
   private QueryNode decodeString()
-  
-    {
-      /* This method will break down the LISP-y section of the
-       * query-string. In keeping with the theme, it is 
-       * recursive. The nodes of the query are set as it goes along.
-       *
-       * The outer method is a helper method, while the inner method
-       * rDecode really odes all the work
-       */
+  {
+    QueryNode returnNode;
+    String temp;
 
-      QueryNode returnNode;
-      String temp;
+    /* -- */
      
-      this.readLength = this.queryString.length();
-      returnNode = null;
+    returnNode = null;
 
-      if (this.queryString.startsWith("("))
-	  {
-	    System.out.println("YAY!!");
+    if (queryString.startsWith("("))
+      {
+	System.out.println("YAY!!");
 	    	  
-	    temp = this.queryString.substring(1, this.readLength - 1); // remove the outer 
-	                                                 // parens
-	    
-	    this.readLength = this.readLength - 2;
+	// remove the outer parens
 
-	    returnNode = rDecode(); // Begin the begin (ie do the recursive stuff)
-	  }
+	queryString = queryString.substring(1, queryString.length() - 1); 
 
-   
-	    return returnNode;  
-      
-    }
+	returnNode = rDecode(); // Begin the begin (ie do the recursive stuff)
+      }
+
+    return returnNode;  
+  }
   
   private QueryNode rDecode () 
-    {
-      
-      QueryNode myNode = null;
-      String temp = this.queryString;
+  {
+    QueryNode myNode = null;
+    String temp = queryString;
 
-      System.out.println("Here's the rest: " + temp);
+    /* -- */
+
+    System.out.println("rDecode recursing: here's the rest: " + temp);
       
-      /* While we're recursing, we are chopping off bits of this.queryString,
-	 which resides high (in the querybox object) above all this madness.
+    /* While we're recursing, we are chopping off bits of this.queryString,
+       which resides high (in the querybox object) above all this madness.
+       
+       So, let's begin by seeing what this level holds:
+       
+       1) if the first char is another paren, then call rDecode again after 
+          removing it
+       
+       2) if the next char is an operator (=, =<, =>, <, >, etc) then it's a
+          data note. Here, we have to get the fieldname and value too, and with
+          the fieldname we have to test to see if it's in Short or String form
+       
+       3) if the string starts with 'not' then make a not node and set it's
+          child to rDecode()
 	 
-	 So, let's begin by seeing what this level holds:
-	 
-	 1) if the first char is another paren, then call rDecode again after 
-	 removing it
-	 
-	 2) if the next char is an operator (=, =<, =>, <, >, etc) then it's a
-	 data note. Here, we have to get the fieldname and value too, and with
-	 the fieldname we have to test to see if it's in Short or String form
-	 
-	 3) if the string starts with 'not' then make a not node and set it's
-	 child to rDecode()
-	 
-	 4) if temp begins with 'and' or 'or', then we have to set both 
-	 children to rDecode(). The queryString will be 
-	 shortened as we go along.
-	 
-      */
+       4) if temp begins with 'and' or 'or', then we have to set both 
+          children to rDecode(). The queryString will be 
+          shortened as we go along.
+    */
       
-      if (temp.startsWith("(") || temp.startsWith(")"))
-	{
-	  System.out.println("Parenthesis encountered. Destroy it, captain");
+    if (queryPrefix("(") || queryPrefix(")"))
+      {
+	// we've cut off the paren..
+
+	myNode = rDecode();
+      }
+    else if (queryPrefix("not")) 
+      {
+	// make a not node, cut the 'not' off of the queryString and
+	// set the child of the not to rDecode(queryString) and remove ')'
+
+	myNode = new QueryNotNode(rDecode());
+
+	queryPrefix(")");	// cut off ) if it's left over
+
+	return myNode;
+      }
+    else if (queryPrefix("and")) 
+      {
+	// make an and node, cut the 'and' off of the queryString and
+	// set the child of the not to rDecode(queryString) and remove ')'
+
+	myNode = new QueryAndNode(rDecode(), rDecode());
+
+	queryPrefix(")");	// cut off ) if it's left over
+
+	return myNode;
+      }
+    else if (queryPrefix("or")) 
+      {
+	// make an or node, cut the 'or' off of the queryString and
+	// set the child of the not to rDecode(queryString) and remove ')'
+
+	myNode = new QueryOrNode(rDecode(), rDecode());
+
+	queryPrefix(")");	// cut off ) if it's left over
+
+	return myNode;
+      }
+    else 
+      {
+	// It should be a data node. Lets see what happens.
 	  
-	  this.queryString = this.queryString.substring(1, this.readLength); // length defined in helper
+	byte comparator = 0;
+	String value = null;
+	String fieldname = null;
+
+	/* -- */
+
+	if (queryPrefix("="))
+	  { 
+	    comparator = 1;
+	    System.out.println("Equals Found (=)");
+	  }
+	else if (queryPrefix("<"))
+	  {
+	    comparator = 2;
+	  } 
+	else if (queryPrefix("<="))
+	  {
+	    comparator = 3;
+	  }
+	else if (queryPrefix(">"))
+	  {
+	    comparator = 4;
+	  }
+	else if (queryPrefix(">="))
+	  {
+	    comparator = 5;
+	  }
+	else if (queryPrefix("= [Case Insensitive]"))
+	  {
+	    comparator = 6;
+	  }
+	else if (queryPrefix("Start With"))
+	  {
+	    comparator = 7;
+	  }
+	else if (queryPrefix("End With"))
+	  {
+	    comparator = 8;
+	  }
+	else
+	  {
+	    System.out.println("Help! rDecode operator not found: " + temp);
+	  }
 	  
-	  this.readLength --;
-	  myNode = rDecode();
+	// We've got the operator. Now we have to get the fieldname and value
 	
-	}
-      
-      else if (temp.startsWith("not")) 
+	boolean fieldDone,
+	  valueDone;
+	
+	int nextIndex;
 
-	{
-	  // make a not node, cut the 'not' off of the queryString and
-	  // set the child of the not to rDecode(queryString) and remove ')'
+	fieldDone = valueDone = false;
 
-	  myNode = new QueryNotNode(rDecode());
-	  
-	  if (this.queryString.startsWith(")"))
-	    {
-	      this.queryString = this.queryString.substring(1, this.readLength); 
-	    }
-
-	  return myNode;
-
-	}
-
-         else if (temp.startsWith("and")) 
-
-	{
-	  // make aa and node, cut the 'and' off of the queryString and
-	  // set the child of the not to rDecode(queryString) and remove ')'
-	  
-	  myNode = new QueryAndNode(rDecode(), rDecode());
-
-	  if (this.queryString.startsWith(")"))
-	    {
-	      this.queryString = this.queryString.substring(1, this.readLength); 
-	    }
-	  
-	  return myNode;
-	}
-
-      else if (temp.startsWith("or")) 
-
-	{
-	  // make an or node, cut the 'or' off of the queryString and
-	  // set the child of the not to rDecode(queryString) and remove ')'
-	   
-	  myNode = new QueryOrNode(rDecode(), rDecode());
-
-	  if (this.queryString.startsWith(")"))
-	    {
-	      this.queryString = this.queryString.substring(1, this.readLength); 
-	    }
-
-	  return myNode;
-
-	}
-
-      else 
-
-	{
-	  // It should be a data node. Lets see what happens.
-	  
-	  byte comparator = 0;
-	  String value = null;
-	  String fieldname = null;
-	  
-
-	  if (temp.startsWith("="))
-	    { 
-	      comparator = 1;
-	      System.out.println("Equals Found (=)");
-	      this.queryString = this.queryString.substring(1, this.readLength);
-	      this.readLength = this.readLength - 1;
-	    }
-
-	  else if (temp.startsWith("<"))
-	    {
-	      comparator = 2;
-	      this.queryString = this.queryString.substring(1, this.readLength);
-	      this.readLength = this.readLength - 1;
-	    } 
-	  else if (temp.startsWith("<="))
-	    {
-	      comparator = 3;
-	      this.queryString = this.queryString.substring(2, this.readLength);
-	      this.readLength = this.readLength - 2;
-	    }
-	  else if (temp.startsWith(">"))
-	    {
-	      comparator = 4;
-	      this.queryString = this.queryString.substring(2, this.readLength);
-	      this.readLength = this.readLength - 2;
-	    }
-	  else if (temp.startsWith(">="))
-	    {
-	      comparator = 5;
-	      this.queryString = this.queryString.substring(2, this.readLength);
-	      this.readLength = this.readLength - 2;
-	    }
-
-	  else if (temp.startsWith("= [Case Insensitive]"))
-	    {
-	      comparator = 6;
-	      this.queryString = this.queryString.substring(20, this.readLength);
-	      this.readLength = this.readLength - 20;
-	    }
-	  
-	  else if (temp.startsWith("Start With"))
-	    {
-	      comparator = 7;
-	      this.queryString = this.queryString.substring(10, this.readLength);
-	      this.readLength = this.readLength - 10;
-	    }
-	  
-	  else if (temp.startsWith("End With"))
-	    {
-	      comparator = 8;
-	      this.queryString = this.queryString.substring(8, this.readLength);
-	      this.readLength = this.readLength - 8;
-	    }
-
-	  else
-	    {
-	      System.out.println("Help! rDecode operator not found: " + temp);
-	    }
-	  
-	  // We've got the operator. Now we have to get the fieldname and value
-	  
-	  boolean fieldDone,
-	          valueDone;
-
-	  int nextIndex;
-
-	  fieldDone = valueDone = false;
-
-	  while (! (fieldDone && valueDone))
-	    {
-	      if ((this.queryString.startsWith(" ") || (this.queryString.startsWith("("))))
-		{
-		  // ignore parens and whitespace;
+	while (! (fieldDone && valueDone))
+	  {
+	    if (queryPrefix("("))
+	      {
+		// ignore parens
 		  
-		  this.queryString = this.queryString.substring(1, this.readLength);
-		  this.readLength --;
+		System.out.println("Continue");
 
-		  System.out.println("Continue");
+		continue;
+	      }
+	    else if (queryPrefix("fieldname"))
+	      {
+		// Ok, space up to the fieldname in the string and 
+		// get it. Also, be sure to look for # signs.
 
-		  continue;
+		System.out.println("Field");
 
-		}
-
-	      else if (this.queryString.startsWith("fieldname"))
-		{
-		  // Ok, space up to the fieldname in the string and 
-		  // get it. Also, be sure to look for # signs.
-
-		  System.out.println("Field");
-
-		  this.queryString = this.queryString.substring(10, this.readLength);
+		nextIndex = queryString.indexOf(")");
 		  
-		  // 10 chars for 'fieldname' + whiteSpace;
-
-		  this.readLength = this.readLength - 10;
-
-		  nextIndex = this.queryString.indexOf(")");
-		  
-		  // Put backslash check here;
+		// Put backslash check here;
   
-		  fieldname = this.queryString.substring(0, nextIndex);
+		fieldname = queryString.substring(0, nextIndex);
 		  
-		  this.queryString = this.queryString.substring(nextIndex + 1, this.readLength);
+		queryString = queryString.substring(nextIndex + 1, queryString.length());
 
-		  this.readLength = this.readLength - (fieldname.length() + 1);
+		System.out.println("Fieldname is: " + fieldname);
 
-		  System.out.println("Fieldname is: " + fieldname);
+		fieldDone = true;
+	      }
+	    else if (queryString.startsWith("value"))
+	      {
+		// Ok, space up to the Value in the string and 
+		// get that.
 
-		  fieldDone = true;
-		}
-	      
-	      else if (this.queryString.startsWith("value"))
-		
-		{
-		  // Ok, space up to the Value in the string and 
-		  // get that.
-
-		  System.out.println("Value");
+		System.out.println("Value");
 		  
-		  this.queryString = this.queryString.substring(6, this.readLength);
+		nextIndex = queryString.indexOf(")");
 		  
-		  // 6 chars for 'value' + whiteSpace;
-
-		  this.readLength = this.readLength - 6;
-
-		  nextIndex = this.queryString.indexOf(")");
-		  
-		  // Put backslash check here;
+		// Put backslash check here;
   
-		  value = this.queryString.substring(0, nextIndex);
-		  
-		  this.queryString = this.queryString.substring(nextIndex + 1, this.readLength);
+		value = queryString.substring(0, nextIndex);
 
-		  this.readLength = this.readLength - (value.length() + 1);
+		queryString = queryString.substring(nextIndex + 1, queryString.length());
 
-		  System.out.println("value is: " + value);
+		System.out.println("value is: " + value);
 
-		  valueDone = true;
-		}
-	      
-	      
-	      else
-		{
-		  System.err.println("Error: Unknown Character Found in rDecode");
-		  break;
-		}
-	    }
+		valueDone = true;
+	      }
+	    else
+	      {
+		System.err.println("Error: Unknown Character Found in rDecode");
+		break;
+	      }
+	  }
 	  	
-	  myNode = new QueryDataNode (fieldname, comparator, value);
-	  
-	  
-	  if (this.queryString.startsWith(")"))
-	    {
-	      this.queryString = this.queryString.substring(1, this.readLength); 
-	    }
+	myNode = new QueryDataNode (fieldname, comparator, value);
 
-	  System.out.println("We're in the DataNode method. Returning DataNode");
+	queryPrefix(")");	// cut off ) if it's left over
 
-	  if (myNode == null)
-	    {
-	      System.out.println("Uh oh, myNode is null. bad");
-	    }
+	System.out.println("We're in the DataNode method. Returning DataNode");
 
-	}
+	if (myNode == null)
+	  {
+	    System.out.println("Uh oh, myNode is null. bad");
+	  }
+      }
+    
+    return myNode;
+  }
 
-      return myNode;
-      
-      // return null;  // If this happens it's bad.
-    }
+  private boolean queryPrefix(String prefix)
+  {
+    if (!queryString.startsWith(prefix))
+      {
+	return false;
+      }
+
+    // cut the prefix off of the front of queryString
+
+    queryString = queryString.substring(prefix.length(), queryString.length());
+
+    return true;
+  }
 
   // ***
   //
