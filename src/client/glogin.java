@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 1999/10/09 01:00:00 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 1999/10/13 19:59:56 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -86,7 +86,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.61 $ $Date: 1999/10/09 01:00:00 $ $Name:  $
+ * @version $Revision: 1.62 $ $Date: 1999/10/13 19:59:56 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -478,9 +478,16 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	return;
       }
 
-    connector.setText("Connecting...");
-    username.setEnabled(false);
-    passwd.setEnabled(false);
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	connector.setText("Connecting...");
+	connector.paintImmediately(connector.getVisibleRect());
+	username.setEnabled(false);
+	username.paintImmediately(username.getVisibleRect());
+	passwd.setEnabled(false);
+	passwd.paintImmediately(passwd.getVisibleRect());
+      }
+    });
 
     int try_number = 0;
     
@@ -489,8 +496,15 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	if (try_number++ > 10)
 	  {
 	    System.out.println("I've tried ten times to connect, but I can't do it.  Maybe the server is down.");
-	    connector.setEnabled(true);
-	    connector.setText("Attempt to reconnect");
+
+	    SwingUtilities.invokeLater(new Runnable() {
+	      public void run() {
+		connector.setEnabled(true);
+		connector.setText("Attempt to reconnect");
+		connector.paintImmediately(connector.getVisibleRect());
+	      }
+	    });
+
 	    my_thread = null;
 	    return;
 	  }
@@ -499,16 +513,25 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    my_client = new ClientBase(server_url, this);  // Exception will happen here
 
-	    connector.setText("Login to server");
 	    connected = true;
-	    connector.setEnabled(true);
-	    setNormalCursor();
 
-	    username.setEnabled(true);
-	    passwd.setEnabled(true);
-	    
-	    invalidate();
-	    validate();
+	    SwingUtilities.invokeLater(new Runnable() {
+	      public void run() {
+		connector.setText("Login to server");
+		connector.setEnabled(true);
+		connector.paintImmediately(connector.getVisibleRect());
+		setNormalCursor();
+		
+		username.setEnabled(true);
+		passwd.setEnabled(true);
+		username.paintImmediately(username.getVisibleRect());
+		passwd.paintImmediately(passwd.getVisibleRect());
+		
+		invalidate();
+		validate();
+	      }
+	    });
+
 	    
 	    // we've done our work, remember that.
 	    
@@ -846,7 +869,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.61 $ $Date: 1999/10/09 01:00:00 $ $Name:  $
+ * @version $Revision: 1.62 $ $Date: 1999/10/13 19:59:56 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -939,7 +962,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.61 $ $Date: 1999/10/09 01:00:00 $ $Name:  $
+ * @version $Revision: 1.62 $ $Date: 1999/10/13 19:59:56 $ $Name:  $
  * @author Jonathan Abbey
  */
 
