@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -111,6 +111,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       }
 
     Query query = new Query((short) 272, null, false); // list all system types
+
+    query.setFiltered(false);	// don't care if we own the system types
 
     return editset.getSession().getGSession().query(query);
   }
