@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 2001/04/19 22:55:07 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 2001/05/25 07:23:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1638,6 +1638,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     try
       {
+	if (field.getID() == userSchema.PASSWORD && operation == SETPASSPLAIN)
+	  {
+	    result = validatePasswordChoice((String) param1);
+
+	    if (result != null && !result.didSucceed())
+	      {
+		return result;
+	      }
+	  }
+
 	// if we are changing the list of email aliases, we'll want
 	// to update the list of choices for the signature field.
 
@@ -1976,6 +1986,206 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
   }
 
+  public ReturnVal validatePasswordChoice(String password)
+  {
+    String resultString = null;
+    String validatorName = "/opt/bin/ganypassValidate";
+
+    String username = (String) getFieldValueLocal(USERNAME);
+
+    if (username == null)
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "I need to know the username before I can set the password");
+      }
+
+    String validatorCommand = validatorName + " " + username;
+
+    File file = new File(validatorName);
+
+    if (file.exists())
+      {
+	Process process = null;
+
+	/* -- */
+
+	try
+	  {
+	    process = Runtime.getRuntime().exec(validatorCommand);
+
+	    PrintWriter out = new PrintWriter(process.getOutputStream());
+	    out.println(password);
+	    out.close();
+
+	    process.waitFor();
+
+	    if (process.exitValue() != 0)
+	      {
+		BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		resultString = in.readLine();
+		in.close();
+
+		return Ganymede.createErrorDialog("Password Rejected",
+						  resultString);
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("Couldn't exec validatorCommand (" + validatorCommand + 
+			   ") due to IOException: " + ex);
+	  }
+	catch (InterruptedException ex)
+	  {
+	    Ganymede.debug("Failure during exec of validatorCommand (" + validatorCommand + "): " + ex);
+	  }
+	finally
+	  {
+	    // the following is mentioned as a work-around for the
+	    // fact that Process keeps its file descriptors open by
+	    // default until Garbage Collection
+
+	    try
+	      {
+		process.getInputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getOutputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getErrorStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+	  }
+      }
+    else
+      {
+	Ganymede.debug(validatorCommand + " doesn't exist, not running external password validation program");
+      }
+
+    return null;
+  }
+
+  public ReturnVal savePasswordChoice(String password)
+  {
+    String resultString = null;
+    String saverName = "/opt/bin/ganypassSave";
+
+    String username = (String) getFieldValueLocal(USERNAME);
+
+    if (username == null)
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "I need to know the username before I can save the password");
+      }
+
+    String saverCommand = saverName + " " + username;
+
+    File file = new File(saverName);
+
+    if (file.exists())
+      {
+	Process process = null;
+
+	/* -- */
+
+	try
+	  {
+	    process = Runtime.getRuntime().exec(saverCommand);
+
+	    PrintWriter out = new PrintWriter(process.getOutputStream());
+	    out.println(password);
+	    out.close();
+
+	    process.waitFor();
+
+	    if (process.exitValue() != 0)
+	      {
+		BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		resultString = in.readLine();
+		in.close();
+
+		return Ganymede.createErrorDialog("Password History Not Saved",
+						  resultString);
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("Couldn't exec saverCommand (" + saverCommand + 
+			   ") due to IOException: " + ex);
+	  }
+	catch (InterruptedException ex)
+	  {
+	    Ganymede.debug("Failure during exec of saverCommand (" + saverCommand + "): " + ex);
+	  }
+	finally
+	  {
+	    // the following is mentioned as a work-around for the
+	    // fact that Process keeps its file descriptors open by
+	    // default until Garbage Collection
+
+	    try
+	      {
+		process.getInputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getOutputStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		process.getErrorStream().close();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+	  }
+      }
+    else
+      {
+	Ganymede.debug(saverCommand + " doesn't exist, not saving password history");
+      }
+
+    return null;
+  }
+
   /**
    *
    * This method is a hook for subclasses to override to
@@ -2029,6 +2239,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// did we change home directory volumes?
 
 	handleVolumeChanges();
+
+	// did the user's password change?
+
+	PasswordDBField pField1 = (PasswordDBField) getField(userSchema.PASSWORD);
+	String pass1 = pField1.getPlainText();
+
+	PasswordDBField pField2 = (PasswordDBField) original.getField(userSchema.PASSWORD);
+	String pass2 = pField2.getPlainText();
+
+	if (pass1 != null && !pass1.equals(pass2))
+	  {
+	    savePasswordChoice(pass1);
+	  }
       }
 
     return;
