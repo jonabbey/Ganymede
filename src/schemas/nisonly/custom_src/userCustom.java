@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -154,46 +154,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   /**
    *
-   * Hook to have this object create a new embedded object
-   * in the given field.  
-   *
-   */
-
-  public Invid createNewEmbeddedObject(InvidDBField field)
-  {
-    DBEditObject newObject;
-    DBObjectBase targetBase;
-    DBObjectBaseField fieldDef;
-
-    /* -- */
-
-    if (field.getID() == VOLUMES)	// auxiliary volume mappings
-      {
-	fieldDef = field.getFieldDef();
-
-	if (fieldDef.getTargetBase() > -1)
-	  {
-	    newObject = getSession().createDBObject(fieldDef.getTargetBase(), null, null);
-
-	    // link it in
-
-	    newObject.setFieldValue(SchemaConstants.ContainerField, getInvid());
-	    
-	    return newObject.getInvid();
-	  }
-	else
-	  {
-	    throw new RuntimeException("error in schema.. interface field target base not restricted..");
-	  }
-      }
-    else
-      {
-	return null;		// default
-      }
-  }
-
-  /**
-   *
    * Customization method to verify whether this object type has an inactivation
    * mechanism.
    *
@@ -299,26 +259,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    finalizeInactivate(false);
 	    return retVal;
-	  }
-
-	// reset the forwarding address?
-
-	if (forward != null)
-	  {
-	    stringfield = (StringDBField) getField(EMAILTARGET);
-	
-	    while (stringfield.size() > 0)
-	      {
-		retVal = stringfield.deleteElement(0);
-		
-		if (retVal != null && !retVal.didSucceed())
-		  {
-		    finalizeInactivate(false);
-		    return retVal;
-		  }
-	      }
-
-	    stringfield.addElement(forward);
 	  }
 
 	// make sure that the expiration date is cleared.. we're on
@@ -494,26 +434,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	  }
 
-	// reset the forwarding address
-
-	if (reactivateWizard.forward != null)
-	  {
-	    stringfield = (StringDBField) getField(EMAILTARGET);
-	
-	    while (stringfield.size() > 0)
-	      {
-		retVal = stringfield.deleteElement(0);
-		
-		if (retVal != null && !retVal.didSucceed())
-		  {
-		    finalizeReactivate(false);
-		    return retVal;
-		  }
-	      }
-
-	    stringfield.addElement(reactivateWizard.forward);
-	  }
-
 	// make sure that the removal date is cleared..
 
 	date = (DateDBField) getField(SchemaConstants.RemovalField);
@@ -564,19 +484,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   /**
    *
-   * This method provides a hook that a DBEditObject subclass
-   * can use to indicate whether a given string field can only
-   * choose from a choice provided by obtainChoiceList()
-   *
-   */
-
-  public boolean mustChoose(DBField field)
-  {
-    return (field.getID() == SIGNATURE); // we want to force signature alias choosing
-  }
-
-  /**
-   *
    * This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
@@ -608,47 +515,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	updateGroupChoiceList();
 	return groupChoices;
-	
-      case SIGNATURE:			// signature alias
 
-	QueryResult result = new QueryResult();
-
-	/* -- */
-
-	// our list of possible aliases includes the user's name
-
-	// note that we first check the new value, if any, for the
-	// user name.. this way the user rename code can change the
-	// signature alias without having the StringDBField for the
-	// signature alias reject the new name.
-
-	String name = (String) ((DBField) getField(USERNAME)).getNewValue();
-
-	if (name != null)
-	  {
-	    result.addRow(null, name, false);
-	  }
-	else
-	  {
-	    name = (String) ((DBField) getField(USERNAME)).getValue();
-
-	    if (name != null)
-	      {
-		result.addRow(null, name, false);
-	      }
-	  }
-
-	// and any aliases defined
-
-	Vector values = ((DBField) getField(ALIASES)).getValues();
-
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    result.addRow(null, (String) values.elementAt(i), false);
-	  }
-
-	return result;
-	
       default:
 	return super.obtainChoiceList(field);
       }
@@ -737,26 +604,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return true;
 	  }
 
-	// signature alias field will need to be rescanned,
-	// but we don't need to do the persona rename stuff.
-
-	sf = (StringDBField) getField(USERNAME); // old user name
-
-	oldName = (String) sf.getValueLocal();
-
-	if (oldName != null)
-	  {
-	    sf = (StringDBField) getField(SIGNATURE); // signature alias
-
-	    // if the signature alias was the user's name, we'll want
-	    // to continue that.
-		
-	    if (oldName.equals((String) sf.getValueLocal()))
-	      {
-		sf.setValue(value);	// set the signature alias to the user's new name
-	      }
-	  }
-
 	inv = (InvidDBField) getField(PERSONAE);
 	
 	if (inv == null)
@@ -835,7 +682,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     // if the groups field is being changed, we may need to intervene
 
-    System.err.println("userCustom ** entering wizardHook, field = " + field.getName() + ", op= " + operation);
+    if (debug)
+      {
+	System.err.println("userCustom ** entering wizardHook, field = " + field.getName() + ", op= " + operation);
+      }
 
     if (field.getID() == GROUPLIST)
       {
