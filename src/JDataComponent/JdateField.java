@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -68,7 +68,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
     _clearButton;
 
   private JpopUpCalendar 
-    pCal;
+    pCal = null;
 
   protected GregorianCalendar 
     _myCalendar;
@@ -179,14 +179,10 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 
     add(buttonPanel, "East");
 
-    // create the pop up calendar
-
     if (my_date != null)
       {
 	_myCalendar.setTime(my_date);
       }
-
-    pCal = new JpopUpCalendar(_myCalendar,this);
 
     setEditable(iseditable);
 
@@ -207,6 +203,11 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 
     if (c == _calendarButton)
       {
+	if (pCal == null)
+	  {
+	    pCal = new JpopUpCalendar(_myCalendar,this);
+	  }
+
 	if (pCal.isVisible())
 	  {
 	    pCal.setVisible(false);
@@ -540,7 +541,11 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 		  {
 		    setDate(d);
 		    _myCalendar.setTime(d);
-		    pCal.update();
+
+		    if (pCal != null)
+		      {
+			pCal.update();
+		      }
 		  }
 	      }
 	    else 
