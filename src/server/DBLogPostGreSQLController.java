@@ -8,8 +8,8 @@
    
    Created: 26 February 2003
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2003/02/27 03:37:24 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2003/02/27 03:38:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.sql.Timestamp;
  * arlut.csd.ganymede.DBLog DBLog} class, using a PostGreSQL database
  * for the storage format.</p>
  *
- * @version $Revision: 1.3 $ $Date: 2003/02/27 03:37:24 $
+ * @version $Revision: 1.4 $ $Date: 2003/02/27 03:38:51 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -120,6 +120,31 @@ public class DBLogPostGreSQLController implements DBLogController {
     else
       {
 	url = "jdbc:postgresql://" + hostname + "/" + databaseName;
+      }
+
+    con = DriverManager.getConnection(url, username, password);
+  } 
+
+
+  public DBLogPostGreSQLController(String hostname,
+				   String databaseName,
+				   int port,
+				   String username, 
+				   String password) throws ClassNotFoundException, SQLException
+  {
+    String url;
+
+    /* -- */
+
+    Class.forName("org.postgresql.Driver");
+    
+    if (hostname == null)
+      {
+	url = "jdbc:postgresql://localhost:" + port + "/" + databaseName;
+      }
+    else
+      {
+	url = "jdbc:postgresql://" + hostname + ":" + port + "/" + databaseName;
       }
 
     con = DriverManager.getConnection(url, username, password);
