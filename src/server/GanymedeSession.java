@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -427,7 +427,12 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	while (enum.hasMoreElements())
 	  {
-	    result.addElement(enum.nextElement());
+	    DBObjectBase base = (DBObjectBase) enum.nextElement();
+
+	    if (getPerm(base.getTypeID()).isVisible())
+	      {
+		result.addElement(base);
+	      }
 	  }
       }
 
@@ -895,6 +900,11 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   public String viewObjectLabel(Invid invid)
   {
+    // should we try to check permissions here?  This would
+    // make this operation a bit heavier.. there's little
+    // harm in allowing viewing of object labels if they
+    // have the invid, is there?
+
     try
       {
 	return session.viewDBObject(invid).getLabel();
@@ -926,13 +936,21 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   public synchronized db_object view_db_object(Invid invid)
   {
-    db_object result;
+    DBObject obj;
 
     /* -- */
 
-    result = session.viewDBObject(invid);
+    obj = (DBObject) session.viewDBObject(invid);
 
-    return result;
+    if (getPerm(obj).isVisible())
+      {
+        return obj;
+      }
+    else
+      {
+	setLastError("Permission to view invid " + invid + " denied.");
+	return null;
+      }
   }
 
   /**
@@ -944,7 +962,21 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   public db_object edit_db_object(Invid invid)
   {
-    return session.editDBObject(invid);
+    DBObject obj;
+
+    /* -- */
+
+    obj = (DBObject) session.viewDBObject(invid);
+
+    if (getPerm(obj).isEditable())
+      {
+	return session.editDBObject(invid);
+      }
+    else
+      {
+	setLastError("Permission to edit invid " + invid + " denied.");
+	return null;
+      }
   }
 
   /**
@@ -957,7 +989,15 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   public synchronized db_object create_db_object(short type) 
   {
-    return session.createDBObject(type);
+    if (getPerm(type).isCreatable())
+      {
+	return session.createDBObject(type);
+      }
+    else
+      {
+	setLastError("Permission to create object of type " + type + " denied.");
+	return null;
+      }
   }
 
   /**
@@ -1020,6 +1060,12 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	return false;
       }
 
+    if (!getPerm(vObj).isEditable())
+      {
+	setLastError("Don't have permission to delete object" + vObj.getLabel());
+	return false;
+      }
+
     if (!objBase.objectHook.canRemove(session, vObj))
       {
 	setLastError("object manager refused deletion");
@@ -1070,6 +1116,11 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	return null;
       }
 
+    if (supergashMode)
+      {
+	return PermEntry.fullPerms;
+      }
+
     // is our current persona an owner of this object in some
     // fashion?
 
@@ -1082,7 +1133,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
     // ok, we know our persona has ownership.. return the
     // permission entry for this object
 
-    return  personaPerms.getPerm(object.getTypeID());
+    return personaPerms.getPerm(object.getTypeID());
   }
 
   /**
@@ -1097,7 +1148,17 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   final PermEntry getPerm(short baseID)
   {
-    updatePerms();		// make sure we have personaPerms up to date
+    if (supergashMode)
+      {
+	return PermEntry.fullPerms;
+      }
+
+    updatePerms(); // make sure we have personaPerms up to date
+
+    // note that we can use personaPerms, since the persona's
+    // base type privileges apply generically to objects of the
+    // given type
+
     return personaPerms.getPerm(baseID);
   }
 
@@ -1117,6 +1178,11 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     /* -- */
 
+    if (supergashMode)
+      {
+	return PermEntry.fullPerms;
+      }
+
     updatePerms();		// make sure we have personaPerms up to date
 
     if (personaPerms != null)
@@ -1134,6 +1200,14 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     return result;
   }
+
+  /**
+   *
+   * This non-exported method is used to generate a comprehensive permissions
+   * matrix that applies to all objects owned by the active persona for this
+   * user.
+   *
+   */
 
   final synchronized void updatePerms()
   {
@@ -1262,6 +1336,13 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   {
     return personaObj;
   }
+
+  /**
+   *
+   * This method returns true if the active persona has some sort of
+   * owner relationship with the object in question.
+   * 
+   */
 
   private final boolean personaMatch(DBObject obj)
   {
