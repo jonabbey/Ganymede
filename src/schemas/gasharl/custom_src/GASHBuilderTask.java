@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/04/14 19:05:28 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/07/23 02:28:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -167,6 +167,39 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		    user = (DBObject) users.nextElement();
 		    
 		    writeUserLine(user, out);
+		  }
+	      }
+	    finally
+	      {
+		out.close();
+	      }
+	  }
+
+	// we write out a file that maps social security numbers to a
+	// user's primary email address and user name for the
+	// personnel office's phonebook database to use
+
+	try
+	  {
+	    out = openOutFile(path + "maildirect");
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open maildirect file: " + ex);
+	  }
+	
+	if (out != null)
+	  {
+	    try
+	      {
+		DBObject user;
+		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+		
+		while (users.hasMoreElements())
+		  {
+		    user = (DBObject) users.nextElement();
+		    
+		    writeMaildirectLine(user, out);
 		  }
 	      }
 	    finally
@@ -502,6 +535,47 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     writer.println(result.toString());
   }
 
+  /**
+   *
+   * This method writes out a line to the maildirect GASH output file.
+   *
+   * The lines in this file look like the following.
+   *
+   * 999341010 jonabbey@arlut.utexas.edu broccol
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this user line
+   *
+   */
+
+  private void writeMaildirectLine(DBObject object, PrintWriter writer)
+  {
+    String username;
+    String signature;
+    String socSecurity;
+
+    /* -- */
+
+    result.setLength(0);
+
+    username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
+    signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
+    socSecurity = (String) object.getFieldValueLocal(userSchema.SOCIALSECURITY);
+
+    if (username != null && signature != null && socSecurity != null)
+      {
+	result.append(socSecurity);
+	result.append(" ");
+	result.append(signature);
+	result.append("@");
+	result.append(dnsdomain.substring(1)); // skip leading .
+	result.append(" ");
+	result.append(username);
+
+	writer.println(result.toString());
+      }
+  }
+  
   /**
    *
    * This method writes out a line to the group_info GASH source file.
