@@ -113,19 +113,54 @@
     the synchronization system to locate the user record to be changed
     in the target service.</p>
 
+    <h2 id="buildertask">3. Ganymede Synchronization Options</h2>
+
     <p>As it happens, Ganymede 2.0 provides three distinct systems for
     data synchronization.  Two are based on the full state
     synchronization model and one on the transactional delta model.
     The two full state models differ mostly in where the logic for the
     synchronization process is placed, and in when and how the
-    synchronizations are triggered.  We'll start first by talking
-    about the original Ganymede 1.0 full state synchronization model,
-    before considering the two new models that Ganymede 2.0
-    introduces.</p>
+    synchronizations are triggered.</p>
 
-    <h2 id="buildertask">3. The GanymedeBuilderTask Synchronization Model</h2>
+    <div align="center">
+    <table border="1">
+      <tr>
+        <th>Name</th>
+        <th>Full State/Incremental</th>
+        <th>Scheduled by Ganymede Server</th>
+        <th>XML-based</th>
+        <th>Requires Custom Java Code</th>
+        <th>Requires Custom External Code</th>
+      </tr>
+      <tr>
+        <td><a href="#buildertask">GanymedeBuilderTask</a></td>
+        <td align="center">Full State</td>
+        <td align="center">Yes</td>
+        <td align="center">No</td>
+        <td align="center">Yes</td>
+        <td align="center">Yes</td>
+      </tr>
+      <tr>
+        <td><a href="#xml_incrementals">Sync Channel Incremental</a></td>
+        <td align="center">Incremental</td>
+        <td align="center">Yes</td>
+        <td align="center">Yes</td>
+        <td align="center">No</td>
+        <td align="center">Yes</td>
+     </tr>
+      <tr>
+        <td><a href="#xml_full_state">Sync Channel Full</a></td>
+        <td align="center">Full State</td>
+        <td align="center">No</td>
+        <td align="center">Yes</td>
+        <td align="center">No</td>
+        <td align="center">Yes</td></tr>
+    </table>
+    </div>
 
-    <h3 id="buildertask_explained">The GanymedeBuilderTask Model Explained</h3>
+    <h3 id="buildertask">The GanymedeBuilderTask Synchronization Model</h3>
+
+    <h4 id="buildertask_explained">The GanymedeBuilderTask Model Explained</h4>
 
     <p>The original Ganymede synchronization model is based around
     full state synchronization, and was designed in conjunction with
@@ -216,7 +251,7 @@
     constructing a GanymedeBuilderTask subclass to handle a full state
     build.</p>
 
-    <h3 id="buildertask_creation">How To Create A Custom GanymedeBuilderTask Subclass</h3>
+    <h4 id="buildertask_creation">How To Create A Custom GanymedeBuilderTask Subclass</h4>
 
     <p>The <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
@@ -302,7 +337,7 @@
     run.  You'll see how this works in our example builder task in the
     next section.</p>
     
-    <h3 id="buildertask_whaaaa">What A Builder Task Looks Like</h3>
+    <h4 id="buildertask_whaaaa">What A Builder Task Looks Like</h4>
 
     <p>What follows is a slightly simplified version of the
     UNIXBuilderTask class from the Ganymede userKit.  It will
@@ -871,7 +906,59 @@ the specific structure and details of your schema.  You're quite
 correct if you consider the necessity of coding at this level to be a
 disadvantage of using the GanymedeBuilderTask approach.</p>
 
-    <h2 id="xml_incrementals">4. The Sync Channel Synchronization Model</h2>
+    <h4 id="external_builder">Creating An External Sync Script For Use With GanymedeBuilderTask</h4>
+
+<p>The <a href="UNIXBuilderTask.java">UNIXBuilderTask class</a> is the
+piece of the GanymedeBuilderTask sync puzzle that is operating inside
+the Ganymede server.  As you can see above, all the <a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2()</a>
+method does is call out to an external builder script, which must read
+the files written by <a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a> and
+do something productive with them.</p>
+
+<p>What "something productive" means may vary considerably from
+installation to installation, and that's up for you to determine.
+Whatever builder script you create will need to keep the following
+things in mind:</p>
+
+<ul>
+<li>The Ganymede server will not write to your builder script's
+standard input stream.</li>
+
+<li>Anything your script writes to its standard output or error
+streams will be completely ignored by Ganymede, and lost.  You are
+responsible for making your builder script log any error conditions to
+something other than standard error.</li>
+
+<li>Your script should not expect any command line arguments from Ganymede.</li>
+
+<li>Your script should not expect to have any useful environment
+variables set by Ganymede.</li>
+
+<li>Your script should not expect to have its current working
+directory set to anything useful or meaningful by Ganymede.</li>
+
+<li>Your script should not terminate until the synchronization process
+is truly finished, and it is safe for the Ganymede server to begin a
+new external synchronization.</li>
+</ul>
+
+<p>At ARL:UT, our Ganymede builder script is a simple Bourne shell
+script that sets environment variables and working conditions before
+running make on a makefile, redirecting make's output to log files for
+later examination.  By creating appropriate makefile dependencies on
+the various synchronization files written by Ganymede, the make
+program can make decisions for us as to what pieces of the build need
+to be redone.  If the Ganymede server didn't write a new group file,
+we don't bother doing any group updates.  Building this sort of
+intelligence into your external builder script may reduce the time it
+takes to run the average build for your network.</p>
+
+<p>If you want to reduce your average build time still further, you'll
+need to move to an incremental model for synchronization.</p>
+
+    <h3 id="xml_incrementals">The Sync Channel Incremental Model</h3>
 
     <p>Ganymede 2.0 introduces an incremental XML-based
     synchronization system, which we call the "Sync Channel
