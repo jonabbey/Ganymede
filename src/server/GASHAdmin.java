@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -994,7 +994,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	    // This shouldn't kill everything off, but it does for now.  Need to fix this later.
 	    
-	    if (! WeAreApplet)
+	    if ( WeAreApplet)
 	      {
 		System.exit(0);
 	      }
@@ -1117,6 +1117,15 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	    catch (RemoteException ex)
 	      {
 		admin.forceDisconnect("Couldn't talk to server" + ex);
+	      }
+
+	    adminPanel.quitButton.setEnabled(true);
+	    adminPanel.loginButton.setEnabled(true);
+	    setVisible(false);
+    
+	    if (!WeAreApplet)
+	      {
+		System.exit(0);
 	      }
 	  }
       }
@@ -1350,6 +1359,8 @@ public class GASHAdmin extends JApplet {
       }
 
     applet = new GASHAdmin();
+
+    applet.WeAreApplet = false;
 
     // the frame constructor shows itself, and the gui thread takes
     // care of keeping us going.
