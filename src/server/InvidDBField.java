@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -112,7 +112,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (definition.isArray())
       {
-	throw new IllegalArgumentException("scalar value constructor called on vector field");
+	throw new IllegalArgumentException("scalar value constructor called on vector field " + getName());
       }
 
     this.owner = owner;
@@ -137,7 +137,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!definition.isArray())
       {
-	throw new IllegalArgumentException("vector value constructor called on scalar field");
+	throw new IllegalArgumentException("vector value constructor called on scalar field " + getName());
       }
 
     this.owner = owner;
@@ -243,7 +243,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector");
+	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
       }
 
     return (Invid) value;
@@ -253,7 +253,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar");
+	throw new IllegalArgumentException("vector accessor called on scalar " + getName());
       }
 
     return (Invid) values.elementAt(index);
@@ -267,7 +267,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!verifyReadPermission())
       {
-	throw new IllegalArgumentException("permission denied to read this field");
+	throw new IllegalArgumentException("permission denied to read this field " + getName());
       }
 
     // where will we go to look up the label for our target(s)?
@@ -375,7 +375,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!(orig instanceof InvidDBField))
       {
-	throw new IllegalArgumentException("bad field comparison");
+	throw new IllegalArgumentException("bad field comparison " + getName());
       }
 
     if (debug)
@@ -647,7 +647,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  private boolean bind(Invid oldRemote, Invid newRemote)
+  private boolean bind(Invid oldRemote, Invid newRemote, boolean local)
   {
     short targetField;
 
@@ -668,10 +668,10 @@ public final class InvidDBField extends DBField implements invid_field {
     if (newRemote == null)
       {
 	setLastError("InvidDBField.bind: null newRemote");
-	throw new IllegalArgumentException("null newRemote");
+	throw new IllegalArgumentException("null newRemote " + getName());
       }
 
-    if (!isEditable())
+    if (!isEditable(local))
       {
 	throw new IllegalArgumentException("not an editable invid field");
       }
@@ -787,18 +787,18 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (oldRefField != null)
       {
-	if (!oldRefField.dissolve(owner.getInvid()))
+	if (!oldRefField.dissolve(owner.getInvid(), local))
 	  {
 	    setLastError("couldn't dissolve old field symmetry with " + oldRef);
 	    return false;
 	  }
       }
 	    
-    if (!newRefField.establish(owner.getInvid()))
+    if (!newRefField.establish(owner.getInvid(), local))
       {
 	if (oldRefField != null)
 	  {
-	    oldRefField.establish(owner.getInvid()); // hope this works
+	    oldRefField.establish(owner.getInvid(), local); // hope this works
 	  }
 	
 	setLastError("couldn't establish field symmetry with " + newRef);
@@ -817,7 +817,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  private boolean unbind(Invid remote)
+  private boolean unbind(Invid remote, boolean local)
   {
     short targetField;
 
@@ -838,7 +838,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("null remote");
       }
 
-    if (!isEditable())
+    if (!isEditable(local))
       {
 	throw new IllegalArgumentException("not an editable invid field");
       }
@@ -907,7 +907,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new RuntimeException("target field not defined in schema");
       }
 
-    if (!oldRefField.dissolve(owner.getInvid()))
+    if (!oldRefField.dissolve(owner.getInvid(), local))
       {
 	setLastError("couldn't dissolve old field symmetry with " + oldRef);
 	return false;
@@ -930,7 +930,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  synchronized boolean dissolve(Invid oldInvid)
+  synchronized boolean dissolve(Invid oldInvid, boolean local)
   {
     int 
       index = -1;
@@ -947,7 +947,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // REMOVABLE FROM GROUPS AND WHATNOT REGARDLESS OF WHETHER THE SESSION WOULD HAVE
     // EDIT PERMISSION FOR THE GROUP.
 
-    if (!isEditable())
+    if (!isEditable(local))
       {
 	throw new IllegalArgumentException("dissolve called on non-editable field");
       }
@@ -1027,7 +1027,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  synchronized boolean establish(Invid newInvid)
+  synchronized boolean establish(Invid newInvid, boolean local)
   {
     Invid 
       tmp = null;
@@ -1036,7 +1036,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(local))
       {
 	throw new IllegalArgumentException("dissolve called on non-editable field");
       }
@@ -1078,7 +1078,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		return true;	// already linked
 	      }
 
-	    if (!unbind(tmp))
+	    if (!unbind(tmp, local))
 	      {
 		setLastError("InvidDBField remote establish: couldn't unbind old value");
 		return false;
@@ -1093,7 +1093,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
-	    if (!bind(null, tmp))	// this should always work
+	    if (!bind(null, tmp, local))	// this should always work
 	      {
 		throw new RuntimeException("couldn't rebind a value " + tmp + " we just unbound.. sync error");
 	      }
@@ -1339,18 +1339,17 @@ public final class InvidDBField extends DBField implements invid_field {
    * indicate the reason for failure.
    *
    * @see arlut.csd.ganymede.DBSession
-   * @see arlut.csd.ganymede.db_field
    *
    */
 
-  public ReturnVal setValue(Object value)
+  public ReturnVal setValue(Object value, boolean local)
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(local))
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
       }
@@ -1377,7 +1376,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newRemote != null)
       {
-	if (!bind(oldRemote, newRemote))
+	if (!bind(oldRemote, newRemote, local))
 	  {
 	    setLastError("InvidDBField setValue: couldn't bind");
 
@@ -1389,7 +1388,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	if (oldRemote != null)
 	  {
-	    unbind(oldRemote);
+	    unbind(oldRemote, local);
 	  }
       }
 
@@ -1422,8 +1421,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	setLastError("InvidDBField setValue: couldn't finalize");
 
-	unbind(newRemote);
-	bind(null, oldRemote);
+	unbind(newRemote, local);
+	bind(null, oldRemote, local);
 
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
 					  "InvidDBField setValue: couldn't finalize");
@@ -1440,11 +1439,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * indicate the reason for failure.
    *
    * @see arlut.csd.ganymede.DBSession
-   * @see arlut.csd.ganymede.db_field
    *
    */
   
-  public ReturnVal setElement(int index, Object value)
+  public ReturnVal setElement(int index, Object value, boolean local)
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
@@ -1456,7 +1454,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("can't manually set element in edit-in-place vector");
       }
 
-    if (!isEditable())
+    if (!isEditable(local))
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
       }
@@ -1484,7 +1482,7 @@ public final class InvidDBField extends DBField implements invid_field {
     
     // try to do the binding
 
-    if (!bind(oldRemote, newRemote))
+    if (!bind(oldRemote, newRemote, local))
       {
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setElement()",
 					  getLastError());
@@ -1501,8 +1499,8 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	unbind(newRemote);
-	bind(null, oldRemote);
+	unbind(newRemote, local);
+	bind(null, oldRemote, local);
 
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setElement()",
 					  "InvidDBField setElement: couldn't finalize\n" +
@@ -1519,11 +1517,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * indicate the reason for failure.
    *
    * @see arlut.csd.ganymede.DBSession
-   * @see arlut.csd.ganymede.db_field
    *
    */
 
-  public ReturnVal addElement(Object value)
+  public ReturnVal addElement(Object value, boolean local)
   {
     DBEditObject eObj;
     Invid remote;
@@ -1535,7 +1532,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("can't manually add element to edit-in-place vector");
       }
 
-    if (!isEditable())
+    if (!isEditable(local))
       {
 	setLastError("don't have permission to change field /  non-editable object");
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
@@ -1565,7 +1562,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!bind(null, remote))
+    if (!bind(null, remote, local))
       {
 	setLastError("Couldn't bind reverse pointer");
 
@@ -1588,7 +1585,7 @@ public final class InvidDBField extends DBField implements invid_field {
       } 
     else
       {
-	unbind(remote);
+	unbind(remote, local);
 
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElement()",
 					  "Couldn't finalize\n" + getLastError());
@@ -1610,7 +1607,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public Invid createNewEmbedded()
   {
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
       }
@@ -1702,11 +1699,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * client can use to display the error condition.
    *
    * @see arlut.csd.ganymede.DBSession
-   * @see arlut.csd.ganymede.db_field
    *
    */
 
-  public ReturnVal deleteElement(int index)
+  public ReturnVal deleteElement(int index, boolean local)
   {
     ReturnVal retVal = null;
     DBEditObject eObj;
@@ -1714,7 +1710,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(local))
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
       }
@@ -1733,7 +1729,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!unbind(remote))
+    if (!unbind(remote, local))
       {
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElement()",
 					  "Couldn't unbind old value\n" + getLastError());
@@ -1770,7 +1766,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	bind(null, remote);
+	bind(null, remote, local);
 
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElement()",
 					  "Couldn't finalize\n" + getLastError());
@@ -1901,9 +1897,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not an editable field");
+	throw new IllegalArgumentException("not an editable field: " + getName());
       }
 
     eObj = (DBEditObject) owner;
@@ -1953,7 +1949,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    if (!isEditable())
+    if (!isEditable(true))
       {
 	setLastError("object/field not editable");
 	return false;
