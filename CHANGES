@@ -32,6 +32,21 @@ The journal loading code in the Ganymede server now simply complains
 politely to stderr if the journal is truncated inappropriately, rather
 than throwing an IOException.
 
+4. [SERVER] Modified all the schema kits to handle backups differently
+
+Previously, all of the schema kits' builder tasks copied individual
+files to file.<date> when the builder task was re-run.  Now any time
+a builder task is executed, the existing output files are zipped into
+a file named <date>.zip in an 'old' directory in the output directory.
+
+Actually, didn't modify all of the kits.. I didn't bother to modify
+the ganymede.old kit, which is really in need of a major overhaul.
+
+5. [CLIENT] Better taskbar icons, taskbar on/off menu
+
+Brian enlarged the taskbar icons and added a menu item to allow the
+taskbar to be turned off in the client.
+
 -------------------- Changes from 0.95 to 0.96 -------------------
 
 RELEASE DATE: January 29, 1999
