@@ -5,7 +5,7 @@
    A wizard to manage step-by-step interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -138,8 +138,14 @@ public class userInactivateWizard extends GanymediatorWizard {
 
     if (retVal == null || retVal.didSucceed())
       {
+	Date date = (Date) userObject.getFieldValueLocal(SchemaConstants.RemovalField);
+
+	String message = userObject.getLabel() + 
+	  " has been inactivated, and will be removed on " +
+	  date.toString();
+	  
 	return success("User Inactivation Performed",
-		       "User has been inactivated",
+		       message,
 		       "OK",
 		       null,
 		       "ok.gif").unionRescan(retVal);
