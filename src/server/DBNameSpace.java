@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,6 +43,7 @@ The actual acquisition logic is in the DBEditObject's setValue method.
 
 class DBNameSpace {
 
+  String    name;		// the name of this namespace
   Hashtable uniqueHash;		// index of values used in the current namespace
   Hashtable reserved;		// index of editSet's currently actively modifying
 				// values in this namespace
@@ -50,10 +51,16 @@ class DBNameSpace {
 
   // constructors
 
-  public DBNameSpace()
+  public DBNameSpace(String name)
   {
+    this.name = name;
     uniqueHash = new Hashtable(); // size?
     reserved = new Hashtable();	// size?
+  }
+
+  public String name()
+  {
+    return name;
   }
 
   /*----------------------------------------------------------------------------
