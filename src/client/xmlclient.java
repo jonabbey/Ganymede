@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/05/19 04:42:20 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/05/24 00:48:34 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.5 $ $Date: 2000/05/19 04:42:20 $ $Name:  $
+ * @version $Revision: 1.6 $ $Date: 2000/05/24 00:48:34 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -718,6 +718,84 @@ public class xmlclient implements ClientListener {
   }
 
   /**
+   * <p>This method resolves an Invid from a type/id pair, talking
+   * to the server if the type/id pair has not previously been seen.</p>
+   *
+   * <p>Returns null on failure to retrieve.</p>
+   *
+   * @param typeId The object type number of the invid to find
+   * @param objId The unique label of the object
+   */
+
+  public Invid getInvid(short typeId, String objId)
+  {
+    Invid result = null;
+    Short typeKey;
+    Hashtable objectHash;
+
+    /* -- */
+
+    typeKey = new Short(typeId);
+    objectHash = (Hashtable) objectStore.get(typeKey);
+
+    if (objectHash == null)
+      {
+	objectHash = new Hashtable();
+	objectStore.put(typeKey, objectHash);
+      }
+
+    Object element = objectHash.get(objId);
+
+    if (element == null)
+      {
+	try
+	  {
+	    result = session.findLabeledObject(objId, typeId);
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+
+	if (result != null)
+	  {
+	    // remember it in the cache
+
+	    objectHash.put(objId, result);
+	  }
+      }
+    else
+      {
+	if (element instanceof xmlobject)
+	  {
+	    result = ((xmlobject) element).invid;
+	  }
+	else
+	  {
+	    // we'll just go ahead and throw a ClassCastException if
+	    // we've got something strange in our objectHash
+
+	    result = (Invid) element;
+	  }
+      }
+
+    return result;
+  }
+
+  /**
+   * <p>This method resolves an Invid from a type/num pair</p>
+   *
+   * <p>Returns null on failure to retrieve.</p>
+   *
+   * @param typename The name of the object type, in XML encoded form
+   * @param num The numeric id of 
+   */
+
+  public Invid getInvid(String typename, int num)
+  {
+    return new Invid(getTypeNum(typename), num);
+  }
+
+  /**
    * <p>This method retrieves an xmlobject that has been previously
    * loaded from the XML file.</p>
    *
@@ -912,7 +990,7 @@ public class xmlclient implements ClientListener {
 		continue;
 	      }
 
-	    attempt = newObject.registerFields(session);
+	    attempt = newObject.registerFields(0); // everything but invids
 
 	    if (attempt != null && !attempt.didSucceed())
 	      {
@@ -932,12 +1010,166 @@ public class xmlclient implements ClientListener {
 	      }
 	  }
 
-	System.err.println("Committing transaction");
+	// at this point, all objects we need to create are created,
+	// and any non-invid fields in those new objects have been
+	// registered.  We now need to register any invid fields in
+	// the newly created objects, which should be able to resolve
+	// now.
+
+	for (int i = 0; success && i < createdObjects.size(); i++)
+	  {
+	    xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
+
+	    System.err.println("Resolving invids for " + newObject);
+	
+	    attempt = newObject.registerFields(1); // just invids
+
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    System.err.println("Error registering fields for " + newObject + ", reason: " + msg);
+		  }
+		else
+		  {
+		    System.err.println("Error registering fields for " + newObject + ", no reason given.");
+		  }
+
+		success = false;
+		continue;
+	      }
+	  }
+
+	// now we need to register fields in the edited objects
+
+	for (int i = 0; success && i < editedObjects.size(); i++)
+	  {
+	    xmlobject object = (xmlobject) editedObjects.elementAt(i);
+
+	    System.err.println("Editing " + object);
+	
+	    attempt = object.registerFields(2); // invids and others
+
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    System.err.println("Error registering fields for " + object + ", reason: " + msg);
+		  }
+		else
+		  {
+		    System.err.println("Error registering fields for " + object + ", no reason given.");
+		  }
+
+		success = false;
+		continue;
+	      }
+	  }
+
+	// now we need to inactivate any objects to be inactivated
+
+	for (int i = 0; success && i < inactivatedObjects.size(); i++)
+	  {
+	    xmlobject object = (xmlobject) inactivatedObjects.elementAt(i);
+
+	    System.err.println("Inactivating " + object);
+	    
+	    Invid target = object.getInvid();
+
+	    if (target == null)
+	      {
+		System.err.println("Error, couldn't find Invid for object to be inactivated: " + object);
+
+		success = false;
+		continue;
+	      }
+
+	    try
+	      {
+		attempt = session.inactivate_db_object(target);
+	      }
+	    catch (RemoteException ex)
+	      {
+		ex.printStackTrace();
+		throw new RuntimeException(ex.getMessage());
+	      }
+	
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    System.err.println("Error inactivating " + object + ", reason: " + msg);
+		  }
+		else
+		  {
+		    System.err.println("Error inactivating  " + object + ", no reason given.");
+		  }
+
+		success = false;
+		continue;
+	      }
+	  }
+
+	// and we need to delete any objects to be deleted
+
+	for (int i = 0; success && i < deletedObjects.size(); i++)
+	  {
+	    xmlobject object = (xmlobject) deletedObjects.elementAt(i);
+
+	    System.err.println("Deleting " + object);
+	    
+	    Invid target = object.getInvid();
+
+	    if (target == null)
+	      {
+		System.err.println("Error, couldn't find Invid for object to be deleted: " + object);
+
+		success = false;
+		continue;
+	      }
+
+	    try
+	      {
+		attempt = session.remove_db_object(target);
+	      }
+	    catch (RemoteException ex)
+	      {
+		ex.printStackTrace();
+		throw new RuntimeException(ex.getMessage());
+	      }
+
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    System.err.println("Error deleting " + object + ", reason: " + msg);
+		  }
+		else
+		  {
+		    System.err.println("Error deleting  " + object + ", no reason given.");
+		  }
+
+		success = false;
+		continue;
+	      }
+	  }
+
+	// and close up the transaction, one way or another
 
 	try
 	  {
 	    if (success)
-	      {
+	      {	
+		System.err.println("Committing transaction");
+
 		attempt = session.commitTransaction(true);
 
 		if (attempt != null && !attempt.didSucceed())

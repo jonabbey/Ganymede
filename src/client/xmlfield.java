@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/05/19 04:42:20 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/05/24 00:48:35 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.rmi.server.*;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.3 $ $Date: 2000/05/19 04:42:20 $ $Name:  $
+ * @version $Revision: 1.4 $ $Date: 2000/05/24 00:48:35 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -657,7 +657,7 @@ public class xmlfield implements FieldType {
 	      }
 	    else if (addValues != null)
 	      {
-		return field.addElements(setValues);
+		return field.addElements(addValues);
 	      }
 	    else if (delValues != null)
 	      {
@@ -687,13 +687,153 @@ public class xmlfield implements FieldType {
 	  }
 	else if (fieldDef.isInvid())
 	  {
-	    System.err.println("**** xmlclient can't yet process invid fields");
-	    return new ReturnVal(false);
+	    if (!fieldDef.isArray())
+	      {
+		xInvid invidValue = (xInvid) value;
+
+		return owner.objref.setFieldValue(fieldDef.getID(), invidValue.getInvid());
+	      }
+	    else
+	      {
+		db_field field = owner.objref.getField(fieldDef.getID());
+
+		/* -- */
+
+		if (setValues != null)
+		  {
+		    // need to explicitly delete all elements, then set new ones
+		    
+		    result = field.deleteElements(field.getValues());
+		    
+		    if (result != null && !result.didSucceed())
+		      {
+			return result;
+		      }
+
+		    Vector newValues = new Vector();
+
+		    for (int i = 0; i < setValues.size(); i++)
+		      {
+			xInvid invidValue = (xInvid) setValues.elementAt(i);
+			Invid invid = invidValue.getInvid();
+
+			if (invid == null)
+			  {
+			    System.err.println("Error, couldn't resolve invid reference " + invidValue);
+			    return new ReturnVal(false);
+			  }
+
+			newValues.addElement(invid);
+		      }
+
+		    return field.addElements(newValues);
+		  }
+		else if (addValues != null)
+		  {
+		    Vector newValues = new Vector();
+
+		    for (int i = 0; i < addValues.size(); i++)
+		      {
+			xInvid invidValue = (xInvid) addValues.elementAt(i);
+			Invid invid = invidValue.getInvid();
+
+			if (invid == null)
+			  {
+			    System.err.println("Error, couldn't resolve invid reference " + invidValue);
+			    return new ReturnVal(false);
+			  }
+
+			newValues.addElement(invid);
+		      }
+
+		    return field.addElements(newValues);
+		  }
+		else if (delValues != null)
+		  {
+		    Vector oldValues = new Vector();
+
+		    for (int i = 0; i < delValues.size(); i++)
+		      {
+			xInvid invidValue = (xInvid) delValues.elementAt(i);
+			Invid invid = invidValue.getInvid();
+
+			if (invid == null)
+			  {
+			    System.err.println("Error, couldn't resolve invid reference " + invidValue);
+			    return new ReturnVal(false);
+			  }
+
+			oldValues.addElement(invid);
+		      }
+
+		    return field.deleteElements(oldValues);
+		  }
+	      }
 	  }
 	else if (fieldDef.isPermMatrix())
 	  {
-	    System.err.println("**** xmlclient can't yet process permission fields");
-	    return new ReturnVal(false);
+	    perm_field field = (perm_field) owner.objref.getField(fieldDef.getID());
+
+	    if (setValues != null)
+	      {
+		// first, clear out any permissions set
+
+		field.resetPerms();
+
+		// now set the permissions
+		
+		for (int i = 0; i < setValues.size(); i++)
+		  {
+		    xPerm perm = (xPerm) setValues.elementAt(i);
+
+		    short baseId = xmlclient.xc.getTypeNum(perm.getName());
+
+		    result = field.setPerm(baseId, perm.getPermEntry());
+
+		    if (result != null && !result.didSucceed())
+		      {
+			return result;
+		      }
+		    
+		    if (perm.fields != null)
+		      {
+			Enumeration fieldPerms = perm.fields.elements();
+
+			while (fieldPerms.hasMoreElements())
+			  {
+			    xPerm fieldPerm = (xPerm) fieldPerms.nextElement();
+
+			    Hashtable fieldHash = xmlclient.xc.getFieldHash(perm.getName());
+
+			    if (fieldHash == null)
+			      {
+				System.err.println("Error, can't process field permissions for object base " + 
+						   XMLUtils.XMLDecode(perm.getName()) + ", base not found.");
+				return new ReturnVal(false);
+			      }
+
+			    FieldTemplate permFieldDef = xmlclient.xc.getObjectFieldType(fieldHash, fieldPerm.getName());
+
+			    if (permFieldDef == null)
+			      {
+				System.err.println("Error, can't process field permissions for field " +
+						   XMLUtils.XMLDecode(fieldPerm.getName()) + " in object base " + 
+						   XMLUtils.XMLDecode(perm.getName()) + ", base not found.");
+				return new ReturnVal(false);
+			      }
+
+			    result = field.setPerm(baseId, permFieldDef.getID(), fieldPerm.getPermEntry());
+
+			    if (result != null && !result.didSucceed())
+			      {
+				return result;
+			      }
+			  }
+		      }
+		  }
+	      }
+
+	    return null;	// success!
 	  }
       }
     catch (RemoteException ex)
@@ -760,7 +900,6 @@ class xInvid {
 
   short typeId;
   String objectId;
-  Invid resolved;
   int num = -1;
 
   /* -- */
@@ -807,8 +946,6 @@ class xInvid {
 			   " in invid field element: " + item);
 	throw new NullPointerException("Bad item!");
       }
-
-    resolved = null;
   }
 
   public xInvid(String type, String id)
@@ -825,7 +962,28 @@ class xInvid {
       }
 
     this.objectId = id;
-    resolved = null;
+  }
+
+  /**
+   * <p>This method resolves and returns the Invid for
+   * this xInvid place holder, talking to the server
+   * if necessary to resolve an id string.</p>
+   */
+
+  public Invid getInvid()
+  {
+    if (objectId != null)
+      {
+	return xmlclient.xc.getInvid(typeId, objectId);
+      }
+    else if (num != -1)
+      {
+	return new Invid(typeId, num);
+      }
+    else
+      {
+	return null;
+      }
   }
 
   public String toString()
@@ -946,7 +1104,10 @@ class xPassword {
 class xPerm {
 
   /**
-   * <p>String describing this xPerm's contents.</p>
+   * <p>String describing this xPerm's contents.  This String
+   * is held in XMLEncoded form.  That is, spaces in the Ganymede
+   * object type and/or field name have been replaced with
+   * underscores.</p>
    */
 
   String label = null;

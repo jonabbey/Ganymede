@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/05/19 04:42:21 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/05/24 00:48:35 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -71,7 +71,7 @@ import java.util.Vector;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.3 $ $Date: 2000/05/19 04:42:21 $ $Name:  $
+ * @version $Revision: 1.4 $ $Date: 2000/05/24 00:48:35 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -236,19 +236,54 @@ public class xmlobject {
     else
       {
 	objref = result.getObject();
+
+	try
+	  {
+	    invid = objref.getInvid();
+	  }
+	catch (RemoteException ex)
+	  {
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
+	  }
+
 	return null;
       }
   }
 
-  public ReturnVal registerFields(Session session)
+  /**
+   * <p>This method uploads non-Invid field information contained in
+   * this object up to the Ganymede server.</p>
+   *
+   * <p>This method skips any Invid fields, which will need to be resolved
+   * in a second pass.</p> 
+   *
+   * @param mode 0 to register all non-invids, 1 to register just invids, 2 to register both
+   */
+
+  public ReturnVal registerFields(int mode)
   {
     ReturnVal result = null;
 
     /* -- */
 
+    if (mode < 0 || mode > 2)
+      {
+	throw new IllegalArgumentException("mode must be 0, 1, or 2.");
+      }
+
     for (int i = 0; i < fields.size(); i++)
       {
 	xmlfield field = (xmlfield) fields.elementAt(i);
+
+	if (field.fieldDef.isInvid() && mode == 0)
+	  {
+	    continue;
+	  }
+	else if (!field.fieldDef.isInvid() && mode == 1)
+	  {
+	    continue;
+	  }
 
 	result = field.registerOnServer();
 
@@ -264,6 +299,28 @@ public class xmlobject {
   public short getType()
   {
     return type.shortValue();
+  }
+
+  /**
+   * <p>This method returns an invid for this xmlobject record,
+   * performing a lookup on the server if necessary.</p> 
+   */
+
+  public Invid getInvid()
+  {
+    if (invid == null)
+      {
+	if (id != null)
+	  {
+	    invid = xmlclient.xc.getInvid(type.shortValue(), id);
+	  }
+	else if (num != -1)
+	  {
+	    invid = new Invid(type.shortValue(), num);
+	  }
+      }
+
+    return invid;
   }
 
   /**
