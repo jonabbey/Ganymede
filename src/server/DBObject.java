@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,7 +79,7 @@ public class DBObject {
     this.id = id;
   }
 
-  DBObject(DBObjectBase objectBase, DataInputStream in) throws IOException
+  DBObject(DBObjectBase objectBase, DataInput in) throws IOException
   {
     this.objectBase = objectBase;
     shadowObject = null;
@@ -96,7 +96,7 @@ public class DBObject {
    *
    */
 
-  void emit(DataOutputStream out) throws IOException
+  void emit(DataOutput out) throws IOException
   {
     Enumeration enum;
     short key;
@@ -124,11 +124,13 @@ public class DBObject {
    *
    */
 
-  void emitJournalEntry(DataOutputStream out) throws IOException
+  void emitJournalEntry(DataOutput out) throws IOException
   {
     Enumeration enum, enum2;
     Object key;
     DBField shadowField, origField;
+    short fieldcount = 0;
+    Vector fieldVect = null;
 
     /* -- */
 
@@ -137,6 +139,8 @@ public class DBObject {
 	return; // this object is not edited
       }
 
+    fieldVect = new Vector();
+    
     enum = shadowObject.fields.keys();
 
     while (enum.hasMoreElements())
@@ -145,8 +149,7 @@ public class DBObject {
 
 	if (!fields.contains(key))
 	  {
-	    out.writeShort((short) ((Integer)key).intValue());
-	    ((DBField) fields.get(key)).emit(out);
+	    fieldVect.addElement(shadowObject.fields.get(key));
 	  }
 	else
 	  {
@@ -155,10 +158,22 @@ public class DBObject {
 
 	    if (!origField.equals(shadowField))
 	      {
-		out.writeShort((short) ((Integer)key).intValue());
-		((DBField) fields.get(key)).emit(out);
+		fieldVect.addElement(shadowField);
 	      }
 	  }
+      }
+
+    // write out the field count
+
+    out.writeShort((short)fieldVect.size());
+
+    // and the fields that are new or have changed
+
+    enum = fieldVect.elements();
+
+    while (enum.hasMoreElements())
+      {
+	((DBField) enum.nextElement()).emit(out);
       }
   }
 
@@ -170,7 +185,7 @@ public class DBObject {
    *
    */
 
-  void receive(DataInputStream in) throws IOException
+  void receive(DataInput in) throws IOException
   {
     DBField tmp;
     DBArrayField tmp2;
