@@ -236,6 +236,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   private Hashtable objectHash = new Hashtable();
 
   /**
+   * <p>Hashtable mapping Short Field ID numbers to their associated
+   * GUI components.
+   */
+
+  private Hashtable idHash = new Hashtable();
+
+  /**
    * <p>Hashtable mapping the combo boxes contained within
    * {@link arlut.csd.ganymede.client.JInvidChooser JInvidChooser}
    * GUI components to their associated
@@ -939,7 +946,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  }
 	      }
 
-	    c = contentsPanel.findID(fieldID);
+	    c = (Component) idHash.get(fieldID);
 
 	    if (c == null)
 	      {
@@ -2315,7 +2322,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		ss.setToolTipText(comment);
 	      }
 
-	    contentsPanel.addFillRow(fieldTemplate.getName(), ss, fieldInfo.getIDObj());
+	    associateFieldId(fieldInfo, ss);
+
+	    contentsPanel.addFillRow(fieldTemplate.getName(), ss);
 	    contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
 	  }
 	else
@@ -2339,7 +2348,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		ss.setToolTipText(comment);
 	      }
 
-	    contentsPanel.addFillRow(fieldTemplate.getName(), ss, fieldInfo.getIDObj());
+	    associateFieldId(fieldInfo, ss);
+
+	    contentsPanel.addFillRow(fieldTemplate.getName(), ss, available == null? 1: 2);
 	    contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
 	  }
       }
@@ -2361,7 +2372,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    ss.setToolTipText(comment);
 	  }
 
-	contentsPanel.addFillRow(fieldTemplate.getName(), ss, fieldInfo.getIDObj());
+	associateFieldId(fieldInfo, ss);
+
+	contentsPanel.addFillRow(fieldTemplate.getName(), ss, 1);
 	contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
       }
   }
@@ -2556,7 +2569,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	ss.setToolTipText(comment);
       }
 
-    contentsPanel.addFillRow(fieldTemplate.getName(), ss, fieldInfo.getIDObj());
+    associateFieldId(fieldInfo, ss);
+
+    contentsPanel.addFillRow(fieldTemplate.getName(), ss, choiceHandles == null ? 1 : 2);
     contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
   }
 
@@ -2597,7 +2612,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	vp.setToolTipText(comment);
       }
 
-    contentsPanel.addWideFillComponent(vp, fieldInfo.getIDObj());
+    associateFieldId(fieldInfo, vp);
+
+    contentsPanel.addWideFillComponent(vp, 4);
     contentsPanel.setRowVisible(vp, fieldInfo.isVisible());
   }
 
@@ -2752,8 +2769,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    combo.setToolTipText(comment);
 	  }
+
+	associateFieldId(fieldInfo, combo);
 	    
-	contentsPanel.addFillRow(fieldTemplate.getName(), combo, fieldInfo.getIDObj());
+	contentsPanel.addFillRow(fieldTemplate.getName(), combo, 1);
 	contentsPanel.setRowVisible(combo, fieldInfo.isVisible());
       }
     else if (fieldTemplate.isMultiLine())
@@ -2782,7 +2801,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    sa.setToolTipText(comment);
 	  }
 
-	contentsPanel.addFillRow(fieldTemplate.getName(), sa, fieldInfo.getIDObj());
+	associateFieldId(fieldInfo, sa);
+
+	contentsPanel.addFillRow(fieldTemplate.getName(), sa, 1);
 	contentsPanel.setRowVisible(sa, fieldInfo.isVisible());
       }
     else
@@ -2817,7 +2838,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    sf.setToolTipText(comment);
 	  }
 
-	contentsPanel.addFillRow(fieldTemplate.getName(), sf, fieldInfo.getIDObj());
+	associateFieldId(fieldInfo, sf);
+
+	contentsPanel.addFillRow(fieldTemplate.getName(), sf, 1);
 	contentsPanel.setRowVisible(sf, fieldInfo.isVisible());
       }
   }
@@ -2856,7 +2879,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    pf.setToolTipText(comment);
 	  }
 
-	contentsPanel.addRow(fieldTemplate.getName(), pf, fieldInfo.getIDObj());
+	associateFieldId(fieldInfo, pf);
+
+	contentsPanel.addRow(fieldTemplate.getName(), pf);
 	contentsPanel.setRowVisible(pf, fieldInfo.isVisible());
       }
     else
@@ -2884,7 +2909,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    sf.setToolTipText(comment);
 	  }
 	
-	contentsPanel.addFillRow(fieldTemplate.getName(), sf, fieldInfo.getIDObj());
+	associateFieldId(fieldInfo, sf);
+
+	contentsPanel.addFillRow(fieldTemplate.getName(), sf, 1);
 	contentsPanel.setRowVisible(sf, fieldInfo.isVisible());
       }
   }
@@ -2933,7 +2960,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	nf.setToolTipText(comment);
       }
 
-    contentsPanel.addFillRow(fieldTemplate.getName(), nf, fieldInfo.getIDObj());
+    associateFieldId(fieldInfo, nf);
+
+    contentsPanel.addFillRow(fieldTemplate.getName(), nf, 1);
     contentsPanel.setRowVisible(nf, fieldInfo.isVisible());
   }
 
@@ -2981,7 +3010,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
  	nf.setToolTipText(comment);
       }
 
-    contentsPanel.addFillRow(fieldTemplate.getName(), nf, fieldInfo.getIDObj());
+    associateFieldId(fieldInfo, nf);
+
+    contentsPanel.addFillRow(fieldTemplate.getName(), nf, 1);
     contentsPanel.setRowVisible(nf, fieldInfo.isVisible());
   }
 
@@ -3024,7 +3055,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	df.setCallback(this);
       }
 
-    contentsPanel.addRow(fieldTemplate.getName(), df, fieldInfo.getIDObj());
+    associateFieldId(fieldInfo, df);
+
+    contentsPanel.addRow(fieldTemplate.getName(), df);
     contentsPanel.setRowVisible(df, fieldInfo.isVisible());
   }
 
@@ -3071,7 +3104,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	cb.setToolTipText(comment);
       }
 
-    contentsPanel.addFillRow(fieldTemplate.getName(), cb, fieldInfo.getIDObj());
+    associateFieldId(fieldInfo, cb);
+
+    contentsPanel.addFillRow(fieldTemplate.getName(), cb, 1);
     contentsPanel.setRowVisible(cb, fieldInfo.isVisible());
   }
 
@@ -3108,7 +3143,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	pb.setToolTipText(comment);
       }
 
-    contentsPanel.addFillRow(fieldTemplate.getName(), pb, fieldInfo.getIDObj());
+    associateFieldId(fieldInfo, pb);
+
+    contentsPanel.addRow(fieldTemplate.getName(), pb);
     contentsPanel.setRowVisible(pb, fieldInfo.isVisible());
   }
 
@@ -3412,7 +3449,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	combo.setToolTipText(comment);
       }
 
-    contentsPanel.addRow(fieldTemplate.getName(), combo, fieldInfo.getIDObj());
+    associateFieldId(fieldInfo, combo);
+
+    contentsPanel.addRow(fieldTemplate.getName(), combo);
     contentsPanel.setRowVisible(combo, fieldInfo.isVisible());
   }
 
@@ -3468,9 +3507,16 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       {
 	ipf.setToolTipText(comment);
       }
+
+    associateFieldId(fieldInfo, ipf);
 		
-    contentsPanel.addFillRow(fieldTemplate.getName(), ipf, fieldInfo.getIDObj());
+    contentsPanel.addFillRow(fieldTemplate.getName(), ipf, 1);
     contentsPanel.setRowVisible(ipf, fieldInfo.isVisible());
+  }
+
+  private void associateFieldId(FieldInfo fieldInfo, Component comp)
+  {
+    idHash.put(fieldInfo.getIDObj(), comp);
   }
 
   /**
