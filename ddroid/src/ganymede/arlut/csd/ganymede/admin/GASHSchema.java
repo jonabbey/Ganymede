@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
 
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.admin;
+package arlut.csd.ganymede.admin;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -95,14 +95,14 @@ import arlut.csd.JTree.treeDragDropCallback;
 import arlut.csd.JTree.treeMenu;
 import arlut.csd.JTree.treeNode;
 import arlut.csd.Util.PackageResources;
-import arlut.csd.ddroid.common.CatTreeNode;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.BaseField;
-import arlut.csd.ddroid.rmi.Category;
-import arlut.csd.ddroid.rmi.CategoryNode;
-import arlut.csd.ddroid.rmi.NameSpace;
-import arlut.csd.ddroid.rmi.SchemaEdit;
+import arlut.csd.ganymede.common.CatTreeNode;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.BaseField;
+import arlut.csd.ganymede.rmi.Category;
+import arlut.csd.ganymede.rmi.CategoryNode;
+import arlut.csd.ganymede.rmi.NameSpace;
+import arlut.csd.ganymede.rmi.SchemaEdit;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -111,10 +111,10 @@ import arlut.csd.ddroid.rmi.SchemaEdit;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>GUI Schema Editor, part of the Directory Droid admin console.</P>
+ * <P>GUI Schema Editor, part of the Ganymede admin console.</P>
  *
  * <P>GASHSchema talks to the server by way of the
- * {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} remote interface.</P>
+ * {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote interface.</P>
  */
 
 public class GASHSchema extends JFrame implements treeCallback, treeDragDropCallback, ActionListener {

@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,11 +50,11 @@
 
 */
 
-package arlut.csd.ddroid.admin;
+package arlut.csd.ganymede.admin;
 
 import arlut.csd.JTree.treeMenu;
 import arlut.csd.JTree.treeNode;
-import arlut.csd.ddroid.rmi.BaseField;
+import arlut.csd.ganymede.rmi.BaseField;
 
 /*------------------------------------------------------------------------------
                                                                            class

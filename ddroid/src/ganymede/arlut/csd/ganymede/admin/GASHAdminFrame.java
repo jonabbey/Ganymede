@@ -13,7 +13,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -49,7 +49,7 @@
 
 */
 
-package arlut.csd.ddroid.admin;
+package arlut.csd.ganymede.admin;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -111,7 +111,7 @@ import arlut.csd.Util.PackageResources;
 
 /**
  *
- * GASHAdminFrame is the main class for the Directory Droid admin console.  The
+ * GASHAdminFrame is the main class for the Ganymede admin console.  The
  * GASHAdminFrame constructor is the first piece of common code that is executed
  * both in an applet context and as a stand-alone app.
  *
@@ -322,9 +322,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     // text field showing the server we're connected
     // to.
 
-    /* Directory Droid Server Host */
+    /* Ganymede Server Host */
 
-    hostLabel = new JLabel("Directory Droid Server Host:");
+    hostLabel = new JLabel("Ganymede Server Host:");
 
     hostField = new JTextField(GASHAdmin.url, 40);
     hostField.setEditable(false);
@@ -555,7 +555,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     
     JPanel topBox = new JPanel(new BorderLayout());
     topBox.add("Center",topPanel);
-    topBox.setBorder(new TitledBorder("Directory Droid Server"));
+    topBox.setBorder(new TitledBorder("Ganymede Server"));
     topGBL.setConstraints(topBox, topGBC);
     getContentPane().add(topBox);
 
@@ -564,7 +564,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     topGBC.fill = GridBagConstraints.BOTH;
     topGBC.weighty = 1.0;
 
-    statusArea = new JTextArea("Directory Droid Admin Console\n", 6, 50);
+    statusArea = new JTextArea("Ganymede Admin Console\n", 6, 50);
     statusArea.setEditable(false);
     JScrollPane statusAreaPane = new JScrollPane(statusArea);
 
@@ -713,8 +713,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	if (dumpDialog == null)
 	  {
 	    dumpDialog = new StringDialog(this,
-					  "Directory Droid Server Dump",
-					  "Are you sure you want to schedule \na full dump of the Directory Droid database?", 
+					  "Ganymede Server Dump",
+					  "Are you sure you want to schedule \na full dump of the Ganymede database?", 
 					  "Yes", "No", question);
 	  }
 
@@ -949,17 +949,17 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
 	    buffer.append("<head></head>");
 	    buffer.append("<body>");
-	    buffer.append("<h1>Directory Droid Directory Management System</h1><p>");
+	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
 	    buffer.append("<p>Release number: ");
 	    buffer.append(arlut.csd.Util.SVNVersion.getReleaseString());
 	    buffer.append("<br>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004<br>The University of Texas at Austin</p>");
-	    buffer.append("<p>Directory Droid is licensed and distributed under the GNU General Public License ");
+	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
 	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
 	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
 	    buffer.append("under the conditions of the GNU General Public License.</p>");
 	    buffer.append("<p>Written by Jonathan Abbey, Michael Mulvaney, Navin Manohar, ");
 	    buffer.append("Brian O'Mara, and Erik Grostic.</p>");
-	    buffer.append("<br><p>Visit the Directory Droid web site at http://www.arlut.utexas.edu/gash2/</p>");
+	    buffer.append("<br><p>Visit the Ganymede web site at http://www.arlut.utexas.edu/gash2/</p>");
 	    buffer.append("</body>");
 
 	    aboutMessage = buffer.toString();
@@ -1158,7 +1158,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
   JLabel
     imageCanvas;
 
-  String body = "Shut down the Directory Droid server?";
+  String body = "Shut down the Ganymede server?";
   String buttonText[] = {"Yes, Immediately",
 			 "Yes, When Users Log Off",
 			 "No, Cancel"};
@@ -1173,7 +1173,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
 
   public consoleShutdownDialog(Frame frame)
   {
-    super(frame, "Confirm Directory Droid Server Shutdown?", true);
+    super(frame, "Confirm Ganymede Server Shutdown?", true);
 
     this.addWindowListener(this);
 
@@ -1192,7 +1192,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
     // Title at top of dialog
     //
 
-    JLabel titleLabel = new JLabel("Confirm Directory Droid Server Shutdown?", SwingConstants.CENTER);
+    JLabel titleLabel = new JLabel("Confirm Ganymede Server Shutdown?", SwingConstants.CENTER);
     titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
 
     gbc.gridx = 0;

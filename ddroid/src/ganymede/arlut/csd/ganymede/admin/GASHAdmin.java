@@ -13,7 +13,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -49,7 +49,7 @@
 
 */
 
-package arlut.csd.ddroid.admin;
+package arlut.csd.ganymede.admin;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -83,7 +83,7 @@ import javax.swing.JTextField;
 
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.PackageResources;
-import arlut.csd.ddroid.rmi.Server;
+import arlut.csd.ganymede.rmi.Server;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -92,16 +92,16 @@ import arlut.csd.ddroid.rmi.Server;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Directory Droid GUI admin console.</P>
+ * <P>Ganymede GUI admin console.</P>
  *
  * <P>GASHAdmin is a dual-mode (applet/application) GUI app for monitoring and
- * controlling the Directory Droid server.  In addition to monitoring users and tasks
- * on the Directory Droid server, the admin console includes a full-functioned
- * {@link arlut.csd.ddroid.admin.GASHSchema schema editor}.</P>
+ * controlling the Ganymede server.  In addition to monitoring users and tasks
+ * on the Ganymede server, the admin console includes a full-functioned
+ * {@link arlut.csd.ganymede.admin.GASHSchema schema editor}.</P>
  *
  * <P>GASHAdmin connects to a running
- * {@link arlut.csd.ddroid.server.GanymedeServer GanymedeServer} using the 
- * {@link arlut.csd.ddroid.server.GanymedeServer#admin(java.lang.String, java.lang.String) admin()}
+ * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer} using the 
+ * {@link arlut.csd.ganymede.server.GanymedeServer#admin(java.lang.String, java.lang.String) admin()}
  * method.</P>
  */
 
@@ -292,7 +292,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
     JPanel labelPanel = new JPanel();
     labelPanel.setLayout(new BorderLayout());
 
-    JLabel label = new JLabel("Directory Droid Server on: ");
+    JLabel label = new JLabel("Ganymede Server on: ");
     labelPanel.add("North", label);
 
     JLabel hostLabel = new JLabel(serverhost + ", port " + registryPortProperty);
@@ -488,7 +488,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	  {
 	    new StringDialog(new JFrame(),
 			     "Login error",
-			     "Couldn't log in to the Directory Droid server... perhaps it is down?\n\nException: " + 
+			     "Couldn't log in to the Ganymede server... perhaps it is down?\n\nException: " + 
 			     rx.getMessage(),
 			     "OK", null,
 			     getErrorImage()).DialogShow();
@@ -496,9 +496,9 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	catch (IllegalArgumentException ex)
 	  {
 	    new StringDialog(new JFrame(),
-			     "Couldn't log in to the Directory Droid Server",
-			     "Couldn't log in to the Directory Droid server.\n\nBad username/password or " +
-			     "insufficient permissions to run the Directory Droid admin console.",
+			     "Couldn't log in to the Ganymede Server",
+			     "Couldn't log in to the Ganymede server.\n\nBad username/password or " +
+			     "insufficient permissions to run the Ganymede admin console.",
 			     "OK", null, 
 			     getErrorImage()).DialogShow();
 	    
@@ -511,7 +511,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	quitButton.setEnabled(false);
 	loginButton.setEnabled(false);
 
-	frame = new GASHAdminFrame("Directory Droid Admin Console", applet);
+	frame = new GASHAdminFrame("Ganymede Admin Console", applet);
 	
 	// Now that the frame is completely initialized, tie the
 	// GASHAdminDispatch object to the frame, and vice-versa.
@@ -540,9 +540,9 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   }
 
   /**
-   * <P>Private method to load the Directory Droid console's parameters
+   * <P>Private method to load the Ganymede console's parameters
    * from a file.  Used when GASHAdmin is run from the command line..
-   * {@link arlut.csd.ddroid.admin.GASHAdmin#loadParameters() loadParameters()}
+   * {@link arlut.csd.ganymede.admin.GASHAdmin#loadParameters() loadParameters()}
    * is for use in an applet context.</P>
    */ 
 
@@ -595,9 +595,9 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   }
 
   /**
-   * <P>Private method to load the Directory Droid console's parameters
+   * <P>Private method to load the Ganymede console's parameters
    * from an applet's HTML parameters.  Used when GASHAdmin is run as an applet..
-   * {@link arlut.csd.ddroid.admin.GASHAdmin#loadProperties(java.lang.String) loadProperties()}
+   * {@link arlut.csd.ganymede.admin.GASHAdmin#loadProperties(java.lang.String) loadProperties()}
    * is for use in an application context.</P>
    */ 
 
@@ -657,7 +657,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
 /**
  * <p>JFrame subclass which is used to hold the {@link
- * arlut.csd.ddroid.admin.GASHAdmin GASHAdmin} applet when the Directory Droid
+ * arlut.csd.ganymede.admin.GASHAdmin GASHAdmin} applet when the Directory Droid
  * admin console is run as an application rather than an applet.</p>
  */
 

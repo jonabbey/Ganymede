@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -49,7 +49,7 @@
    02111-1307, USA
 */
 
-package arlut.csd.ddroid.admin;
+package arlut.csd.ganymede.admin;
 
 import java.rmi.RemoteException;
 
@@ -63,8 +63,8 @@ import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.JstringField;
 import arlut.csd.JDataComponent.JLabelPanel;
 import arlut.csd.JDataComponent.JStretchPanel;
-import arlut.csd.ddroid.common.CatTreeNode;
-import arlut.csd.ddroid.rmi.Category;
+import arlut.csd.ganymede.common.CatTreeNode;
+import arlut.csd.ganymede.rmi.Category;
 
 /*------------------------------------------------------------------------------
                                                                            class

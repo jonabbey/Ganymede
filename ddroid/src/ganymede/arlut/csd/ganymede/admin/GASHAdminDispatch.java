@@ -2,7 +2,7 @@
    GASHAdminDispatch.java
 
    Logical interface class that provides the connectivity between the
-   Directory Droid admin console and the server, bidirectionally.
+   Ganymede admin console and the server, bidirectionally.
 
    Created: 28 May 1996
    Last Mod Date: $Date$
@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.admin;
+package arlut.csd.ganymede.admin;
 
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
@@ -67,14 +67,14 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.QuickSort;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.AdminEntry;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.adminAsyncMessage;
-import arlut.csd.ddroid.common.scheduleHandle;
-import arlut.csd.ddroid.rmi.AdminAsyncResponder;
-import arlut.csd.ddroid.rmi.SchemaEdit;
-import arlut.csd.ddroid.rmi.Server;
-import arlut.csd.ddroid.rmi.adminSession;
+import arlut.csd.ganymede.common.AdminEntry;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.adminAsyncMessage;
+import arlut.csd.ganymede.common.scheduleHandle;
+import arlut.csd.ganymede.rmi.AdminAsyncResponder;
+import arlut.csd.ganymede.rmi.SchemaEdit;
+import arlut.csd.ganymede.rmi.Server;
+import arlut.csd.ganymede.rmi.adminSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -84,9 +84,9 @@ import arlut.csd.ddroid.rmi.adminSession;
 
 /**
  * <p>Logical interface class that provides the connectivity between
- * the Directory Droid admin console and the server, bidirectionally.
- * This class is part of the Directory Droid admin console code, not
- * the Directory Droid server.</p>
+ * the Ganymede admin console and the server, bidirectionally.
+ * This class is part of the Ganymede admin console code, not
+ * the Ganymede server.</p>
  */
 
 class GASHAdminDispatch implements Runnable {
@@ -187,7 +187,7 @@ class GASHAdminDispatch implements Runnable {
 
   /**
    * <p>This method spins continuously, polling the server for {@link
-   * arlut.csd.ddroid.common.adminAsyncMessage adminAsyncMessages}.  The
+   * arlut.csd.ganymede.common.adminAsyncMessage adminAsyncMessages}.  The
    * server will block until something happens, then download a set of
    * adminAsyncMessages.  This run method will then dispatch those messages
    * to the appropriate GASHAdminDispatch methods for propagation into the
@@ -287,7 +287,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server
+   * <p>This method is remotely called by the Ganymede server
    * to set the server start date in the admin console.</p>
    */
 
@@ -313,7 +313,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to set the last dump
+   * <p>This method is remotely called by the Ganymede server to set the last dump
    * date in the admin console.</p>
    */
 
@@ -346,7 +346,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to set the number of
+   * <p>This method is remotely called by the Ganymede server to set the number of
    * transactions in the server's journal in the admin console.</p>
    */
 
@@ -372,7 +372,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to set the number of
+   * <p>This method is remotely called by the Ganymede server to set the number of
    * objects checked out in the admin console.</p>
    */
 
@@ -398,7 +398,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to set the number of
+   * <p>This method is remotely called by the Ganymede server to set the number of
    * locks held in the admin console.</p>
    */
 
@@ -424,7 +424,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to update the
+   * <p>This method is remotely called by the Ganymede server to update the
    * memory statistics display in the admin console.</p>
    */
 
@@ -451,7 +451,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to add to the
+   * <p>This method is remotely called by the Ganymede server to add to the
    * admin console's log display.</p>
    *
    * @param status A string to add to the console's log display, with the
@@ -481,7 +481,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to update the
+   * <p>This method is remotely called by the Ganymede server to update the
    * number of admin consoles attached to the server.</p>
    */
 
@@ -507,7 +507,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to update the
+   * <p>This method is remotely called by the Ganymede server to update the
    * admin console's server state display.</p>
    */
 
@@ -533,10 +533,10 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to update the
+   * <p>This method is remotely called by the Ganymede server to update the
    * admin console's connected user table.</p>
    *
-   * @param entries a Vector of {@link arlut.csd.ddroid.common.AdminEntry AdminEntry}
+   * @param entries a Vector of {@link arlut.csd.ganymede.common.AdminEntry AdminEntry}
    * login description objects.
    */
 
@@ -607,11 +607,11 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Directory Droid server to update the
+   * <p>This method is remotely called by the Ganymede server to update the
    * admin console's task table.</p>
    *
-   * @param tasks a Vector of {@link arlut.csd.ddroid.common.scheduleHandle scheduleHandle}
-   * objects describing the tasks registered in the Directory Droid server.
+   * @param tasks a Vector of {@link arlut.csd.ganymede.common.scheduleHandle scheduleHandle}
+   * objects describing the tasks registered in the Ganymede server.
    */
 
   public void changeTasks(Object tasks[])
