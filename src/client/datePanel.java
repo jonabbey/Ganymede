@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2002/01/29 10:47:26 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2002/01/29 10:51:01 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -222,8 +222,8 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	topButton = new JButton();
 	topButton.setActionCommand("back");
 	topButton.addActionListener(this);
-	topButton.setToolTipText("Click here to display this date");
-	topButton.setBorder(new EmptyBorder(new Insets(5,1,5,1)));
+	topButton.setToolTipText("Click here to return to this date");
+	//	topButton.setBorder(new EmptyBorder(new Insets(5,1,5,1)));
 
 	this.name = template.getName();
 
