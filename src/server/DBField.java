@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -612,7 +612,8 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	throw new IllegalArgumentException("vector accessor called on scalar field");
       }
 
-    return values;
+    return values; // this is ok, since this is being serialized. the client's not
+                   // gaining the ability to add or remove items from this field
   }
 
   /**
@@ -1141,7 +1142,26 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
    public boolean verifyReadPermission()
    {
-     return true;
+     GanymedeSession gSession;
+
+     /* -- */
+
+     if (owner.editset != null)
+       {
+	 gSession = owner.editset.getSession().getGSession();
+	 
+	 return (gSession.getPerm(owner).isVisible() &&
+		 gSession.getPerm(owner.getInvid().getType(), getID()).isVisible());
+       }
+     else if (owner.gSession != null)
+       {
+	 return (owner.gSession.getPerm(owner).isVisible() &&
+		 owner.gSession.getPerm(owner.getInvid().getType(), getID()).isVisible());
+       }
+     else
+       {
+	 return true; // we don't know who is looking at us, assume it's a server-local access
+       }
    }
 
   /**
@@ -1154,6 +1174,20 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   public boolean verifyWritePermission()
   {
-    return true;
+    GanymedeSession gSession;
+
+    /* -- */
+
+    if (owner.editset != null)
+      {
+	gSession = owner.editset.getSession().getGSession();
+
+	return (gSession.getPerm(owner).isEditable() &&
+		gSession.getPerm(owner.getInvid().getType(), getID()).isEditable());
+      }
+    else
+      {
+	return false;  // if we're not in a transaction, we certainly can't be edited.
+      }
   }
 }
