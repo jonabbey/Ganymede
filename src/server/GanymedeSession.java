@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -910,7 +910,29 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	      {
 		if (!query.filtered || filterMatch(obj))
 		  {
-		    result.addRow(obj);
+		    DBEditObject x;
+
+		    if (session.isTransactionOpen())
+		      {
+			x = session.editSet.findObject(obj.getInvid());
+
+			if (x == null)
+			  {
+			    result.addRow(obj);
+			  }
+			else
+			  {
+			    if (x.getStatus() != ObjectStatus.DELETING &&
+				x.getStatus() != ObjectStatus.DROPPING)
+			      {
+				result.addRow(x);
+			      }
+			  }
+		      }
+		    else
+		      {
+			result.addRow(obj);
+		      }
 		  }
 	      } 
 	    else
@@ -926,7 +948,29 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 		  {
 		    if (!query.filtered || filterMatch(obj))
 		      {
-			result.addRow(obj);
+			DBEditObject x;
+
+			if (session.isTransactionOpen())
+			  {
+			    x = session.editSet.findObject(obj.getInvid());
+
+			    if (x == null)
+			      {
+				result.addRow(obj);
+			      }
+			    else
+			      {
+				if (x.getStatus() != ObjectStatus.DELETING &&
+				    x.getStatus() != ObjectStatus.DROPPING)
+				  {
+				    result.addRow(x);
+				  }
+			      }
+			  }
+			else
+			  {
+			    result.addRow(obj);
+			  }
 		      }
 		  }
 	      }
@@ -937,6 +981,23 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
       {
 	setLastError("lock interrupted");
 	return null;
+      }
+
+    if (session.isTransactionOpen())
+      {
+	enum = session.editSet.objects.elements();
+
+	DBEditObject x;
+
+	while (enum.hasMoreElements())
+	  {
+	    x = (DBEditObject) enum.nextElement();
+
+	    if (x.getStatus() == ObjectStatus.CREATING)
+	      {
+		result.addRow(x);
+	      }
+	  }
       }
     
     session.releaseReadLock(rLock);
@@ -1082,7 +1143,29 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 		if (!query.filtered || filterMatch(obj))
 		  {
-		    result.addRow(obj);
+		    DBEditObject x;
+
+		    if (session.isTransactionOpen())
+		      {
+			x = session.editSet.findObject(obj.getInvid());
+
+			if (x == null)
+			  {
+			    result.addRow(obj);
+			  }
+			else
+			  {
+			    if (x.getStatus() != ObjectStatus.DELETING &&
+				x.getStatus() != ObjectStatus.DROPPING)
+			      {
+				result.addRow(x);
+			      }
+			  }
+		      }
+		    else
+		      {
+			result.addRow(obj);
+		      }
 		  }
 	      } 
 	    else
@@ -1099,7 +1182,29 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 			
 		    if (!query.filtered || filterMatch(obj))
 		      {
-			result.addRow(obj);
+			DBEditObject x;
+
+			if (session.isTransactionOpen())
+			  {
+			    x = session.editSet.findObject(obj.getInvid());
+
+			    if (x == null)
+			      {
+				result.addRow(obj);
+			      }
+			    else
+			      {
+				if (x.getStatus() != ObjectStatus.DELETING &&
+				    x.getStatus() != ObjectStatus.DROPPING)
+				  {
+				    result.addRow(x);
+				  }
+			      }
+			  }
+			else
+			  {
+			    result.addRow(obj);
+			  }
 		      }
 		  }
 	      }
@@ -1110,6 +1215,23 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
       {
 	setLastError("lock interrupted");
 	return null;
+      }
+
+    if (session.isTransactionOpen())
+      {
+	enum = session.editSet.objects.elements();
+
+	DBEditObject x;
+
+	while (enum.hasMoreElements())
+	  {
+	    x = (DBEditObject) enum.nextElement();
+
+	    if (x.getStatus() == ObjectStatus.CREATING)
+	      {
+		result.addRow(x);
+	      }
+	  }
       }
     
     session.releaseReadLock(rLock);
@@ -1267,7 +1389,14 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     if (getPerm(obj).isVisible())
       {
-        return obj;
+	try
+	  {
+	    return new DBObject(obj, this);	// return a copy that knows what GanymedeSession is looking at it
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Couldn't create copy of DBObject: " + ex);
+	  }
       }
     else
       {
