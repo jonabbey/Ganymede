@@ -1106,7 +1106,7 @@ public final class DBStore implements JythonMap {
     try
       {
 	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
-				    false, // don't dump plaintext passwords needlessly
+				    includePlaintext,
 				    false, // don't include creator/modifier data
 				    syncConstraint);
 
