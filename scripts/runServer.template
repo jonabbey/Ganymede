@@ -85,6 +85,26 @@ MAXPERMSPACE=256m
 
 RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000'
 
+# This option forces the Ganymede server to use 64 bit
+# cryptographically random object id numbers to make it extremely
+# unlikely for a third party to be able to guess the RMI/JRMP object
+# identifiers in use by whatever objects are exported for client
+# access by Ganymede at any given time.
+#
+# You will generally always want this to be true, even though the use
+# of a SecureRandom generator when Ganymede exports its RMI objects
+# may impose some computational overhead on the server.  Given that
+# you'll want to be using SSL anyway, this overhead is not likely to
+# be enough to worry about.
+#
+# If you don't set this parameter to true and use SSL, however, the
+# integrity of Ganymede's security model will be at considerable risk,
+# and you should not allow access to a Ganymede server configured in
+# such a fashion outside of a well-protected and trusted network
+# environment.
+
+RMISECURITY='-Djava.rmi.server.randomIDs=true'
+
 # ------------------------------------------------------------------ #
 
 # The minimum requirements to invoke the Ganymede server is to
@@ -182,4 +202,4 @@ export CLASSPATH
 # in JVMs other than Sun's.. you can remove this directive if you need
 # to in such cases.
 
-$JAVA -server $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP -XX:MaxPermSize=$MAXPERMSPACE $RMIGC arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
+$JAVA -server $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP -XX:MaxPermSize=$MAXPERMSPACE $RMIGC $RMISECURITY arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
