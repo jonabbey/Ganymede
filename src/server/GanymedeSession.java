@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.164 $
-   Last Mod Date: $Date: 1999/12/14 23:44:15 $
+   Version: $Revision: 1.165 $
+   Last Mod Date: $Date: 2000/01/04 05:57:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.164 $ %D%
+ * @version $Revision: 1.165 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1507,17 +1507,35 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   /**
    * <p>Returns a serialized representation of the basic category
-   * and base structure on the server.</p>
-   *
-   * <p>This method is synchronized to avoid any possible deadlock
-   * between DBStore and GanymedeSession, as the CategoryTransport
-   * constructor calls other synchronized methods on GanymedeSession.</p>
+   * and base structure on the server.  The returned CategoryTransport
+   * will include only object types that are editable by the user.</p>
    *
    * @see arlut.csd.ganymede.Category
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized CategoryTransport getCategoryTree()
+  public CategoryTransport getCategoryTree()
+  {
+    return this.getCategoryTree(true);
+  }
+
+  /**
+   * <p>Returns a serialized representation of the basic category
+   * and base structure on the server.</p>
+   *
+   * <p>This method is synchronized to avoid any possible deadlock
+   * between DBStore and GanymedeSession, as the CategoryTransport
+   * constructor calls other synchronized methods on GanymedeSession.</p>
+   * 
+   * @param hideNonEditables If true, the CategoryTransport returned
+   * will only include those object types that are editable by the
+   * client.
+   *
+   * @see arlut.csd.ganymede.Category
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public synchronized CategoryTransport getCategoryTree(boolean hideNonEditables)
   {
     checklogin();
 
@@ -1558,7 +1576,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	synchronized (Ganymede.db)
 	  {
-	    transport = new CategoryTransport(Ganymede.db.rootCategory, this);
+	    transport = new CategoryTransport(Ganymede.db.rootCategory, this, hideNonEditables);
 
 	    if (debug)
 	      {

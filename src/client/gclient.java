@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.166 $
-   Last Mod Date: $Date: 1999/12/14 23:39:54 $
+   Version: $Revision: 1.167 $
+   Last Mod Date: $Date: 2000/01/04 05:56:51 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.166 $ $Date: 1999/12/14 23:39:54 $ $Name:  $
+ * @version $Revision: 1.167 $ $Date: 2000/01/04 05:56:51 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -127,7 +127,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 1999/12/14 23:39:54 $";
+  static String release_date = "$Date: 2000/01/04 05:56:51 $";
   static String release_number = null;
 
   // ---
@@ -452,8 +452,21 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     showHelpMI,
     toggleToolBarMI;
 
-  boolean
-    defaultOwnerChosen = false;
+  JCheckBoxMenuItem
+    hideNonEditablesMI;
+
+  /**
+   * If true, the client will only display object types that the
+   * user has permission to edit, and by default will only show objects
+   * in the tree that the user can edit.  If false, all objects and
+   * object types the the user has permission to view will be shown
+   * in the tree.  Toggled by the user manipulating the hideNonEditablesMI
+   * check box menu item.
+   */
+
+  boolean    hideNonEditables = true;
+
+  boolean defaultOwnerChosen = false;
 
   JMenuItem
     changePersonaMI,
@@ -631,13 +644,18 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     filterQueryMI = new JMenuItem("Filter Query");
     filterQueryMI.setMnemonic('q');
     filterQueryMI.addActionListener(this);
+
     defaultOwnerMI = new JMenuItem("Set Default Owner");
     defaultOwnerMI.setMnemonic('d');
     defaultOwnerMI.addActionListener(this);
 
+    hideNonEditablesMI = new JCheckBoxMenuItem("Hide non-editable objects", true);
+    hideNonEditablesMI.addActionListener(this);
+
     fileMenu.add(clearTreeMI);
     fileMenu.add(filterQueryMI);
     fileMenu.add(defaultOwnerMI);
+    fileMenu.add(hideNonEditablesMI);
     fileMenu.addSeparator();
     fileMenu.add(logoutMI);
 
@@ -770,27 +788,27 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     // Create menus for the tree
 
-    pMenuAll.add(new MenuItem("List editable"));
-    pMenuAll.add(new MenuItem("List all"));
-    pMenuAll.add(new MenuItem("Query"));
     pMenuAll.add(new MenuItem("Hide Non-Editables"));
+    pMenuAll.add(new MenuItem("Query"));
+    pMenuAll.add(new MenuItem("Report editable"));
+    pMenuAll.add(new MenuItem("Report all"));
 
-    pMenuEditable.add(new MenuItem("List editable"));
-    pMenuEditable.add(new MenuItem("List all"));
+    pMenuEditable.add(new MenuItem("Show Non-Editables"));
     pMenuEditable.add(new MenuItem("Query"));
-    pMenuEditable.add(new MenuItem("Show All Objects"));
+    pMenuEditable.add(new MenuItem("Report editable"));
+    pMenuEditable.add(new MenuItem("Report all"));
 
-    pMenuEditableCreatable.add(new MenuItem("List editable"));
-    pMenuEditableCreatable.add(new MenuItem("List all"));
-    pMenuEditableCreatable.add(new MenuItem("Create"));
-    pMenuEditableCreatable.add(new MenuItem("Query"));
-    pMenuEditableCreatable.add(new MenuItem("Show All Objects"));
-
-    pMenuAllCreatable.add(new MenuItem("List editable"));
-    pMenuAllCreatable.add(new MenuItem("List all"));
-    pMenuAllCreatable.add(new MenuItem("Create"));
-    pMenuAllCreatable.add(new MenuItem("Query"));
     pMenuAllCreatable.add(new MenuItem("Hide Non-Editables"));
+    pMenuAllCreatable.add(new MenuItem("Query"));
+    pMenuAllCreatable.add(new MenuItem("Report editable"));
+    pMenuAllCreatable.add(new MenuItem("Report all"));
+    pMenuAllCreatable.add(new MenuItem("Create"));
+
+    pMenuEditableCreatable.add(new MenuItem("Show Non-Editables"));
+    pMenuEditableCreatable.add(new MenuItem("Query"));
+    pMenuEditableCreatable.add(new MenuItem("Report editable"));
+    pMenuEditableCreatable.add(new MenuItem("Report all"));
+    pMenuEditableCreatable.add(new MenuItem("Create"));
 
     if (debug)
       {
@@ -2204,7 +2222,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	System.out.println("gclient.buildTree(): Building tree");
       }
 
-    CategoryTransport transport = session.getCategoryTree();
+    CategoryTransport transport = session.getCategoryTree(hideNonEditables);
 
     // get the category dump, save it
 
@@ -2317,6 +2335,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 			       CLOSED_BASE,
 			       canCreate ? pMenuEditableCreatable : pMenuEditable,
 			       canCreate);
+
+	((BaseNode) newNode).showAll(!hideNonEditables);
 
 	shortToBaseNodeHash.put(((BaseNode)newNode).getTypeID(), newNode);
       }
@@ -4466,6 +4486,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	clearTree();
       }
+    else if (source == hideNonEditablesMI)
+      {
+	hideNonEditables = hideNonEditablesMI.getState();
+	clearTree();
+      }
     else if (source == logoutMI)
       {
 	if (OKToProceed())
@@ -4767,8 +4792,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    System.err.println("not a base node, can't create");
 	  }
       }
-    else if ((event.getActionCommand().equals("List editable")) ||
-	     (event.getActionCommand().equals("List all")))
+    else if ((event.getActionCommand().equals("Report editable")) ||
+	     (event.getActionCommand().equals("Report all")))
       {
 	if (treeMenuDebug)
 	  {
@@ -4781,7 +4806,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    Query listQuery = null;
 
-	    if (event.getActionCommand().equals("List editable"))
+	    if (event.getActionCommand().equals("Report editable"))
 	      {
 		listQuery = baseN.getEditableQuery();
 	      }
@@ -4924,7 +4949,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      t.start();
 	  }
       }
-    else if (event.getActionCommand().equals("Show All Objects"))
+    else if (event.getActionCommand().equals("Show Non-Editables"))
       {
 	BaseNode bn = (BaseNode) node;
 	Base base = bn.getBase();

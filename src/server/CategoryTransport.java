@@ -8,8 +8,8 @@
    
    Created: 12 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/11/09 22:40:17 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/01/04 05:57:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,10 +77,18 @@ public class CategoryTransport implements java.io.Serializable {
   /**
    * <p>This is really a GanymedeSession object, but by defining this
    * as a generic Object we avoid having the client attempt to load
-   * the GanymedeSession.class.</p>
+   * the GanymedeSession.class unless it calls the server-side constructor
+   * methods, which it should not do.</p>
    */
 
   transient Object session = null;
+
+  /**
+   * <p>If true and the session is a user client, only editable 
+   * object types will be included in the generated CategoryTransport.</p>
+   */
+
+  transient private boolean hideNonEditables;
 
   /* -- */
 
@@ -103,7 +111,19 @@ public class CategoryTransport implements java.io.Serializable {
 
   public CategoryTransport(DBBaseCategory root, GanymedeSession session)
   {
+    this(root, session, true);
+  }
+
+  /**
+   *
+   * Server side constructor for the viewable subset of the category tree
+   *
+   */
+
+  public CategoryTransport(DBBaseCategory root, GanymedeSession session, boolean hideNonEditables)
+  {
     this.session = session;
+    this.hideNonEditables = hideNonEditables;
     addCategoryInfo(root);
   }
 
@@ -155,15 +175,9 @@ public class CategoryTransport implements java.io.Serializable {
 	      {
 		DBObjectBase base = (DBObjectBase) node;
 
-		if (session != null)
-		  {
-		    if (((GanymedeSession) session).getPerm(base.getTypeID(), true).isEditable())
-		      {
-			result = true;
-			addBaseInfo(base);
-		      }
-		  }
-		else
+		if ((session == null) ||
+		    (hideNonEditables && ((GanymedeSession) session).getPerm(base.getTypeID(), true).isEditable()) ||
+		    (!hideNonEditables && ((GanymedeSession) session).getPerm(base.getTypeID(), true).isVisible()))
 		  {
 		    result = true;
 		    addBaseInfo(base);
@@ -171,7 +185,9 @@ public class CategoryTransport implements java.io.Serializable {
 	      }
 	    else if (node instanceof DBBaseCategory)
 	      {
-		if (containsEditableBase((DBBaseCategory) node))
+		if ((session == null) ||
+		    (hideNonEditables & containsEditableBase((DBBaseCategory) node)) ||
+		    (!hideNonEditables && containsVisibleBase((DBBaseCategory) node)))
 		  {
 		    addCategoryInfo((DBBaseCategory) node);
 		  }

@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 1999/10/21 16:01:26 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2000/01/04 05:57:31 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,7 +79,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.40 $ %D%
+ * @version $Revision: 1.41 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -254,12 +254,26 @@ public interface Session extends Remote {
 
   /**
    * <p>Returns a serialized representation of the basic category
-   * and base structure on the server.</p>
+   * and base structure on the server.  The returned CategoryTransport
+   * will include only object types that are editable by the user.</p>
    *
    * @see arlut.csd.ganymede.CategoryTransport
    */
 
   CategoryTransport    getCategoryTree() throws RemoteException;
+
+  /**
+   * <p>Returns a serialized representation of the basic category
+   * and base structure on the server.</p>
+   *
+   * @param hideNonEditables If true, the CategoryTransport returned
+   * will only include those object types that are editable by the
+   * client.
+   *
+   * @see arlut.csd.ganymede.CategoryTransport
+   */
+
+  CategoryTransport    getCategoryTree(boolean hideNonEditables) throws RemoteException;
 
   /**
    * <p>Returns a serialized representation of the object types

@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 1999/11/05 00:31:35 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 2000/01/04 05:57:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -226,7 +226,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   boolean editInPlace = false;
   short allowedTarget = -1;	// no target restrictions
-  short targetField = -1;
+  short targetField = -1;	// no field symmetry.. we use the DBStore backPointers structure by default
 
   // password attributes
 
@@ -695,6 +695,18 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	allowedTarget = in.readShort();
 	editInPlace = in.readBoolean();
 	targetField = in.readShort();
+
+	// In DBStore file version 1.17 we dropped the use of the back
+	// links field.  Some folks apparently used the schema editor
+	// to set an Invid Field to point to the backlinks field
+	// explicitly (rather than 'none').  We handle that here so
+	// that the code that takes care of handling asymmetric fields
+	// doesn't get confused.
+
+	if (targetField == SchemaConstants.BackLinksField)
+	  {
+	    targetField = -1;
+	  }
       }
     else if (isPassword())
       {
