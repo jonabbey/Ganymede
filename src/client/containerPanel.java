@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.59 $ %D%
+    Version: $Revision: 1.60 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,7 +16,7 @@ package arlut.csd.ganymede.client;
 import com.sun.java.swing.*;
 import com.sun.java.swing.event.*;
 
-
+import java.io.*;
 import java.awt.*;
 import java.beans.*;
 import java.awt.event.*;
@@ -1162,6 +1162,60 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     ss.update(available, chosen);
+
+  }
+
+  /**
+   * This writes out some information to a file.
+   *
+   * Currently it just saves the labels, and it saves them in random
+   * order(from the hash.)  May need another Vector to keep things in order.
+   */
+  public void save(File file)
+  {
+    FileOutputStream fos = null;
+    PrintWriter writer = null;
+    
+    Enumeration comps = rowHash.keys();
+    JLabel label;
+    JComponent c;
+
+    /* -- */
+
+    try
+      {
+	fos = new FileOutputStream(file);
+        writer = new PrintWriter(fos);
+      }
+    catch (java.io.IOException e)
+      {
+	gc.showErrorMessage("Trouble saving", "Could not open the file.");
+	return;
+      }
+    
+    while(comps.hasMoreElements())
+      {
+	c = (JComponent)comps.nextElement();
+	label = (JLabel)rowHash.get(c);
+	
+	writer.print(label.getText() + "\t");
+
+	if (c instanceof JstringField)
+	  {
+	    writer.println(((JstringField)c).getText());
+	  }
+	else if (c instanceof JComboBox)
+	  {
+	    // All JComboBox's just hold strings.
+	    writer.println(((JComboBox)c).getSelectedItem());
+	  }
+	else
+	  {
+	    writer.println(" - Not a JstringField or JComboBox.");
+	  }
+      }
+
+  writer.close();
 
   }
 
@@ -2388,8 +2442,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("You can choose");
 	  }
 	    
-	JComboBox combo = new JComboBox();
-
 	Vector choiceHandles = null;
 	Vector choices = null;
 
@@ -2438,28 +2490,23 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	String currentChoice = (String) fieldInfo.getValue();
 	boolean found = false;
 	    
-	for (int j = 0; j < choices.size(); j++)
-	  {
-	    String thisChoice = (String)choices.elementAt(j);
-	    combo.addItem(thisChoice);
+	JComboBox combo = new JComboBox(choices);
 
-	    if (!found && (currentChoice != null))
-	      {
-		if (thisChoice.equals(currentChoice))
-		  {
-		    found = true;
-		  }
-	      }
-		
-	  }
-	    
+	/*
+	 * Look at the try/catch around setSelected.  IF that works, get rid of this stuff.
+	 *
 	// if the current value wasn't in the choice, add it in now
-	    
-	if (!found && (currentChoice != null))
+	if (currentChoice != null)
 	  {
-	    combo.addItem(currentChoice);
+	  if (!combo.contains(currentChoice))
+	      {
+		combo.addItem(currentChoice);
+	      }
 	  }
-	    
+	  *
+	  *
+	  */
+  
 	combo.setMaximumRowCount(8);
 	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
 
@@ -2510,7 +2557,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println("Setting current value: " + currentChoice);
 	      }	  
 
-	    combo.setSelectedItem(currentChoice);
+	    try
+	      {
+		combo.setSelectedItem(currentChoice);
+	      }
+	    catch (IllegalArgumentException e)
+	      {
+		System.out.println("IllegalArgumentException: current choice is not in the string selection combobox.  Adding it now.");
+		combo.addItem(currentChoice);
+		combo.setSelectedItem(currentChoice);
+	      }
 	  }
 
 
@@ -2842,7 +2898,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	listHandle currentListHandle = null;
 	listHandle noneHandle = new listHandle("<none>", null);
 	boolean found = false;
-	JInvidChooser combo = new JInvidChooser(this, fieldTemplate.getTargetBase());
+	JInvidChooser combo;
 	boolean mustChoose = false;
 	
 	/* -- */
@@ -2856,20 +2912,28 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    throw new RuntimeException("Could not get mustChoose: " + rx);
 	  }
 	
+	choices = gc.sortListHandleVector(choices);
+	combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
+
 	if (!mustChoose)
 	  {
 	    combo.addItem(noneHandle);
 	  }
 
-	choices = gc.sortListHandleVector(choices);
+	/*
+	 * I am going to try to setSelectedItem and catch the
+	 * exception.  If that does it, then I doen't need this loop
+	 * anymore.
 
-	for (int j = 0; j < choices.size(); j++)
+	 // Make sure the current choice is in thechooser, if there is
+	 // a current choice.
+
+	if (currentChoice != null)
 	  {
-	    listHandle thisChoice = (listHandle) choices.elementAt(j);
-	    combo.addItem(thisChoice);
-	    
-	    if (!found && (currentChoice != null))
+	    for (int j = 0; j < choices.size(); j++)
 	      {
+		listHandle thisChoice = (listHandle) choices.elementAt(j);
+		
 		if (thisChoice.getObject().equals(currentChoice))
 		  {
 		    if (debug)
@@ -2878,26 +2942,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      }
 		    currentListHandle = thisChoice;
 		    found = true;
+		    break;
 		  }
 	      }
-	    
-	    /*	    if (debug)
-	      {
-		System.out.println("Adding " + (listHandle)choices.elementAt(j));
-	      }*/
-	  }
-	
-	// if the current value wasn't in the choice, add it in now
-	
-	if (!found)
-	  {
-	    if (currentChoice != null)
+
+	    if (!found)
 	      {
 		currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
 		combo.addItem(currentListHandle);
 	      }
 	  }
 	
+	  *
+	  *
+	  */
+
 	combo.setMaximumRowCount(12);
 	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
 	combo.setEditable(false);
@@ -2909,7 +2968,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("setting current choice: " + currentChoice);
 	      }
-	    combo.setSelectedItem(currentListHandle);
+	    try
+	      {
+		combo.setSelectedItem(currentListHandle);
+	      }
+	    catch (IllegalArgumentException e)
+	      {
+		System.out.println("IllegalArgumentException: current handle not in the list, adding it now.");
+		combo.addItem(currentListHandle);
+		combo.setSelectedItem(currentListHandle);
+	      }
+
 	  }
 	else
 	  {
@@ -3007,8 +3076,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    * private helper method to instantiate an ip field in this
    * container panel
-   *
-   */
+   * */
 
   private void addIPField(ip_field field, 
 			  FieldInfo fieldInfo, 
