@@ -1256,9 +1256,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	
 	// disconnect the Jython server
   
+	/*
 	Ganymede.debug(ts.l("shutdown.jython"));
 	
 	Ganymede.jythonServer.shutdown();
+	*/
 
 	// log our shutdown and close the log
 
