@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.54 $ %D%
+   Version: $Revision: 1.55 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1555,7 +1555,7 @@ public class DBStore {
    *
    */
 
-  synchronized void checkOut()
+  void checkOut()
   {
     try
       {
@@ -1574,7 +1574,7 @@ public class DBStore {
    *
    */
 
-  synchronized void checkIn()
+  void checkIn()
   {
     try
       {
@@ -1593,7 +1593,7 @@ public class DBStore {
    *
    */
 
-  synchronized void addLock()
+  void addLock()
   {
     try
       {
@@ -1612,7 +1612,7 @@ public class DBStore {
    *
    */
 
-  synchronized void removeLock()
+  void removeLock()
   {
     try
       {
