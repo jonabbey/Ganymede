@@ -1124,6 +1124,30 @@ included in the history string fields, I have modified the client
 to display the history date fields with hour, minute, and second
 as well as date.
 
+78. [SERVER] Memory, security fix
+
+The new system for handling DBField/DBObjectBaseField association
+revealed a longstanding bug in DBObject that prevented Ganymede from
+properly de-linking fields from their previous DBEditObject when a
+transaction was committed.  This had the effect of preventing the last
+DBEditObject constructed for a particular database object from
+being garbage collected unless and until the object was actually
+deleted from the database.  A small memory leak.
+
+This bug also allowed clients the possibility of at least attempting
+to continue to perform edit operations on fields after a transaction
+was committed and the editing objects were checked back into the
+server's database hashes.
+
+Both conditions have been solved, which will reduce the server's
+active working set somewhat during runtime and which will protect the
+server against malicious clients.
+
+79. [SERVER] Fixed logging of newly created Role objects
+
+The PermissionMatrixDBField wasn't properly reporting the value
+of a newly created Permission Matrix in the log file.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
