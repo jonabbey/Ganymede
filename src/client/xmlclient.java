@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/05/27 03:14:39 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/05/30 05:53:37 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.10 $ $Date: 2000/05/27 03:14:39 $ $Name:  $
+ * @version $Revision: 1.11 $ $Date: 2000/05/30 05:53:37 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -613,34 +613,6 @@ public class xmlclient implements ClientListener {
 
     System.err.print("\n\n");
 
-    System.err.println("Assembling data");
-
-    // not sure if there's much assembling to do yet.. eventually i'm
-    // going to have to do the thing with doing invid link-ups, but
-    // that'll really be part of transmitData().
-
-    if (false)
-      {
-	Enumeration enum = objectStore.keys();
-
-	while (enum.hasMoreElements())
-	  {
-	    Short typeId = (Short) enum.nextElement();
-	
-	    System.err.println("\n--------------------------------------------------------------------------------\n\n" +
-			       "Dumping objects of type " + getTypeName(typeId.shortValue()) + "\n");
-
-	    Hashtable idHash = (Hashtable) objectStore.get(typeId);
-
-	    Enumeration enum2 = idHash.elements();
-	
-	    while (enum2.hasMoreElements())
-	      {
-		System.err.println(enum2.nextElement().toString());
-	      }
-	  }
-      }
-
     transmitData();
 
     System.err.println("/processData");
@@ -984,6 +956,8 @@ public class xmlclient implements ClientListener {
       {
 	try
 	  {
+	    System.err.println("Opening transaction");
+
 	    attempt = session.openTransaction("xmlclient client (" + username + ")");
 	    
 	    if (attempt != null && !attempt.didSucceed())
@@ -1252,6 +1226,12 @@ public class xmlclient implements ClientListener {
 		      }
 		  }
 	      }
+	    else
+	      {
+		System.err.println("Errors encountered, aborting transaction.");
+
+		// the disconnect below will abort the transaction and log us out
+	      }
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1297,5 +1277,10 @@ public class xmlclient implements ClientListener {
     // this is mostly used so the server can asynchronously notify the
     // client about the server's build activity.  for now we're just
     // ignoring any such messages
+
+    if (e.type == e.ERROR)
+      {
+	System.err.println("Server error: " + e.getMessage());
+      }
   }
 }

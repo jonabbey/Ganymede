@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/05/27 03:14:39 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/05/30 05:53:37 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -70,13 +70,19 @@ import java.rmi.server.*;
 /**
  * <p>This class is a data holding structure that is intended to hold
  * object and field data for an XML object element for
- * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
+ * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.  This
+ * class is also responsible for actually registering its data
+ * on the server on demand.</p>
  *
- * @version $Revision: 1.8 $ $Date: 2000/05/27 03:14:39 $ $Name:  $
+ * @version $Revision: 1.9 $ $Date: 2000/05/30 05:53:37 $ $Name:  $
  * @author Jonathan Abbey
  */
 
 public class xmlfield implements FieldType {
+
+  /**
+   * <p>Formatter that we use for generating and parsing date fields</p>
+   */
 
   static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss",
 						     java.util.Locale.US);
@@ -756,18 +762,32 @@ public class xmlfield implements FieldType {
 		  }
 		else
 		  {
-		    // skip a pointless server call
+		    // skip a pointless server call if we
+		    // are doing a <set></set> to clear
+		    // the field
 
-		    return new ReturnVal(true);
+		    return null;
 		  }
 	      }
-	    else if (addValues != null)
+	    
+	    if (addValues != null)
 	      {
-		return field.addElements(addValues);
+		result = field.addElements(addValues);
+
+		if (result != null && !result.didSucceed())
+		  {
+		    return result;
+		  }
 	      }
-	    else if (delValues != null)
+
+	    if (delValues != null)
 	      {
-		return field.deleteElements(delValues);
+		result = field.deleteElements(delValues);
+
+		if (result != null && !result.didSucceed())
+		  {
+		    return result;
+		  }
 	      }
 	  }
 	else if (fieldDef.isPassword())
@@ -777,21 +797,32 @@ public class xmlfield implements FieldType {
 
 	    // set anything we can.. note that if we transmit null for
 	    // any of the three password options, it will null the
-	    // password out entirely, so we don't want to transmit
+	    // password out entirely, so we don't want to transmit a
 	    // null unless all three password options are all null.
 
 	    if (xp.plaintext != null)
 	      {
 		result = field.setPlainTextPass(xp.plaintext);
 
-		if (result != null && !result.didSucceed())
-		  {
-		    return result;
-		  }
+		// setting plaintext will cause the server to
+		// generate its own crypt and md5 text, so we
+		// will just return here
+
+		return result;
 	      }
+
+	    // we can't set both crypttext and md5 text, because
+	    // setting one clears the other
 
 	    if (xp.crypttext != null)
 	      {
+		if (xp.md5text != null)
+		  {
+		    System.err.println("Warning, setting crypt() hash and ignoring md5Crypt hash " +
+				       "for password in object " +
+				       owner);
+		  }
+
 		result = field.setCryptPass(xp.crypttext);
 		
 		if (result != null && !result.didSucceed())
@@ -799,8 +830,7 @@ public class xmlfield implements FieldType {
 		    return result;
 		  }
 	      }
-
-	    if (xp.md5text != null)
+	    else if (xp.md5text != null)
 	      {
 		result = field.setMD5CryptedPass(xp.md5text);
 		
@@ -809,6 +839,9 @@ public class xmlfield implements FieldType {
 		    return result;
 		  }
 	      }
+
+	    // if we have to, clear the password out.  We do this if we see
+	    // something like <password/> instead of <password plaintext="pass"/>
 
 	    if (xp.plaintext == null && xp.crypttext == null && xp.md5text == null)
 	      {
@@ -858,6 +891,8 @@ public class xmlfield implements FieldType {
 
 			/* -- */
 			
+			// handle the embedded object case
+
 			if (setValues.elementAt(i) instanceof xmlobject)
 			  {
 			    invid = ((xmlobject) setValues.elementAt(i)).getInvid();
@@ -887,7 +922,15 @@ public class xmlfield implements FieldType {
 			return new ReturnVal(true);
 		      }
 		  }
-		else if (addValues != null)
+
+		// we can have both add values and delete values if we had a case
+		// like
+		// <invidField>
+		//   <invid type="User" id="broccol"/>
+		//   <delete><invid type="User" id="amy"/></delete>
+		// </invidField>
+
+		if (addValues != null)
 		  {
 		    Vector newValues = new Vector();
 
@@ -897,6 +940,8 @@ public class xmlfield implements FieldType {
 
 			/* -- */
 			
+			// handle embedded object case
+
 			if (addValues.elementAt(i) instanceof xmlobject)
 			  {
 			    invid = ((xmlobject) addValues.elementAt(i)).getInvid();
@@ -915,9 +960,15 @@ public class xmlfield implements FieldType {
 			newValues.addElement(invid);
 		      }
 
-		    return field.addElements(newValues);
+		    result = field.addElements(newValues);
+
+		    if (result != null && !result.didSucceed())
+		      {
+			return result;
+		      }
 		  }
-		else if (delValues != null)
+
+		if (delValues != null)
 		  {
 		    Vector oldValues = new Vector();
 
@@ -927,6 +978,9 @@ public class xmlfield implements FieldType {
 
 			/* -- */
 			
+			// it would be really odd to see an embedded object
+			// case here, but no harm in being thorough
+
 			if (delValues.elementAt(i) instanceof xmlobject)
 			  {
 			    invid = ((xmlobject) delValues.elementAt(i)).getInvid();
@@ -945,7 +999,12 @@ public class xmlfield implements FieldType {
 			oldValues.addElement(invid);
 		      }
 
-		    return field.deleteElements(oldValues);
+		    result = field.deleteElements(oldValues);
+
+		    if (result != null && !result.didSucceed())
+		      {
+			return result;
+		      }
 		  }
 	      }
 	  }
@@ -1086,8 +1145,33 @@ public class xmlfield implements FieldType {
 
 class xInvid {
 
+  /**
+   * <p>The numeric type id for the object type this xInvid is
+   * meant to point to.</p>
+   *
+   * <p>In the XML file, this field is derived from the type attribute,
+   * after doing an object type lookup on the server by way of
+   * the Ganymede client {@link arlut.csd.ganymede.client.Loader Loader}
+   * object.</p>
+   */
+
   short typeId;
+
+  /**
+   * <p>The id string for this xInvid from the XML file.  Will
+   * be used to resolve this xInvid to an actual {@link arlut.csd.ganymede.Invid Invid}
+   * on the server, if set.</p>
+   *
+   * <p>In the XML file, this field is taken from the id attribute.</p>
+   */
+
   String objectId;
+
+  /**
+   * <p>The numeric object id, if specified in the XML file for this
+   * xInvid.</p>
+   */
+
   int num = -1;
 
   /* -- */
@@ -1199,6 +1283,12 @@ class xInvid {
 /**
  * <p>This class is used by the Ganymede XML client to represent
  * a password field value.</p>
+ *
+ * <p>This class has three separate value fields, for the
+ * possible password formats supported by Ganymede, but in fact
+ * only one of them at a time should be anything other than
+ * null, as setting any of these attributes on a Ganymede
+ * password field clears the others.</p>
  */
 
 class xPassword {

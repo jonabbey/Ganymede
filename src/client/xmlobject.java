@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/05/26 19:39:09 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/05/30 05:53:38 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.6 $ $Date: 2000/05/26 19:39:09 $ $Name:  $
+ * @version $Revision: 1.7 $ $Date: 2000/05/30 05:53:38 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -85,7 +85,9 @@ public class xmlobject {
   String id = null;
 
   /**
-   * Descriptive typeString for this object
+   * <p>Descriptive typeString for this object.  This is the
+   * contents of the &lt;object&gt;'s type attribute, in
+   * XML (underscores for spaces) encoding.</p>
    */
 
   String typeString = null;
@@ -266,6 +268,9 @@ public class xmlobject {
     ReturnVal result;
 
     /* -- */
+    
+    // just to check our logic.. we shouldn't be getting a create and
+    // an edit directive on the same object from the XML file
 
     if (objref != null)
       {
@@ -365,6 +370,10 @@ public class xmlobject {
 
 	    continue;
 	  }
+
+	// on mode 0, we register everything but invid's.  on mode 1,
+	// we only register invid's.  on mode 2, we register
+	// everything.
 
 	if (field.fieldDef.isInvid() && mode == 0)
 	  {

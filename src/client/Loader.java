@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/05/19 04:42:19 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/05/30 05:53:36 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.20 $ $Date: 2000/05/19 04:42:19 $ $Name:  $
+ * @version $Revision: 1.21 $ $Date: 2000/05/30 05:53:36 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -208,7 +208,7 @@ public class Loader extends Thread {
     
     if (debug)
       {
-	if(!( baseNamesLoaded && baseListLoaded && baseMapLoaded))
+	if (!(baseNamesLoaded && baseListLoaded && baseMapLoaded))
 	  {
 	    System.out.println("***There are not all finished.");
 	  }
@@ -218,12 +218,17 @@ public class Loader extends Thread {
 	  }
       }
 
-    while (! ( baseNamesLoaded && baseListLoaded && baseMapLoaded && !templateLoading))
+    synchronized (this) 
       {
-	System.out.println("Loader waiting for previous method to stop.");
+	// setting keepGoing to false should cause the loader run
+	// method to quickly drop out and set the loader flags to
+	// true, so we wait until all of the boolean loaded flags are
+	// set
 
-	synchronized (this) 
+	while (!(baseNamesLoaded && baseListLoaded && baseMapLoaded && !templateLoading))
 	  {
+	    System.out.println("Loader waiting for previous method to stop.");
+
 	    try
 	      {
 		this.wait();
@@ -259,6 +264,8 @@ public class Loader extends Thread {
       }
 
     keepGoing = true;
+
+    // start up a new thread
 
     Thread t = new Thread(this);
     t.start();
@@ -297,22 +304,28 @@ public class Loader extends Thread {
 
   public Vector getBaseList()
   {
-    synchronized (this)
+    if (!baseListLoaded || !keepGoing)
       {
-	while (!baseListLoaded)
+	synchronized (this)
 	  {
-	    if (debug)
+	    // we have to check baseListLoaded inside the
+	    // synchronization loop or else we can get deadlocked
+
+	    while (!baseListLoaded || !keepGoing)
 	      {
-		System.out.println("Dang, have to wait to get the base list");
-	      }
+		if (debug)
+		  {
+		    System.out.println("Dang, have to wait to get the base list");
+		  }
 		
-	    try
-	      {
-		this.wait();
-	      }
-	    catch (InterruptedException x)
-	      {
-		throw new RuntimeException("Interrupted while waiting for base list to load: " + x);
+		try
+		  {
+		    this.wait();
+		  }
+		catch (InterruptedException x)
+		  {
+		    throw new RuntimeException("Interrupted while waiting for base list to load: " + x);
+		  }
 	      }
 	  }
       }
@@ -342,22 +355,28 @@ public class Loader extends Thread {
 
   public Hashtable getBaseNames()
   {
-    synchronized (this)
+    if (!baseNamesLoaded || !keepGoing)
       {
-	while (!baseNamesLoaded)
+	synchronized (this)
 	  {
-	    if (debug)
-	      {
-		System.out.println("Dang, have to wait to get the base names list");
-	      }
+	    // we have to check baseNamesLoaded inside the
+	    // synchronization loop or else we can get deadlocked
 
-	    try
+	    while (!baseNamesLoaded || !keepGoing)
 	      {
-		this.wait();
-	      }
-	    catch (InterruptedException x)
-	      {
-		throw new RuntimeException("Interrupted while waiting for base names to load: " + x);
+		if (debug)
+		  {
+		    System.out.println("Dang, have to wait to get the base names list");
+		  }
+
+		try
+		  {
+		    this.wait();
+		  }
+		catch (InterruptedException x)
+		  {
+		    throw new RuntimeException("Interrupted while waiting for base names to load: " + x);
+		  }
 	      }
 	  }
       }
@@ -387,19 +406,25 @@ public class Loader extends Thread {
 
   public Hashtable getBaseMap()
   {
-    synchronized (this)
+    if (!baseMapLoaded || !keepGoing)
       {
-	while (!baseMapLoaded)
+	synchronized (this)
 	  {
-	    System.out.println("Loader: waiting for base map");
+	    // we have to check baseMapLoaded inside the
+	    // synchronization loop or else we can get deadlocked
 
-	    try
+	    while (!baseMapLoaded || !keepGoing)
 	      {
-		this.wait();
-	      }
-	    catch (InterruptedException x)
-	      {
-		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+		System.out.println("Loader: waiting for base map");
+
+		try
+		  {
+		    this.wait();
+		  }
+		catch (InterruptedException x)
+		  {
+		    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+		  }
 	      }
 	  }
       }
@@ -434,22 +459,28 @@ public class Loader extends Thread {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
 
-    synchronized (this)
+    if (!baseMapLoaded || !keepGoing)
       {
-	while (! baseMapLoaded)
+	synchronized (this)
 	  {
-	    if (debug)
-	      {
-		System.out.println("Loader: waiting for base hash");
-	      }
+	    // we have to check baseMapLoaded inside the
+	    // synchronization loop or else we can get deadlocked
 
-	    try
+	    while (!baseMapLoaded || !keepGoing)
 	      {
-		this.wait();
-	      }
-	    catch (InterruptedException x)
-	      {
-		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+		if (debug)
+		  {
+		    System.out.println("Loader: waiting for base hash");
+		  }
+
+		try
+		  {
+		    this.wait();
+		  }
+		catch (InterruptedException x)
+		  {
+		    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+		  }
 	      }
 	  }
       }
@@ -483,22 +514,28 @@ public class Loader extends Thread {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
 
-    synchronized (this)
+    if (!baseMapLoaded || !keepGoing)
       {
-	while (! baseMapLoaded)
+	synchronized (this)
 	  {
-	    if (debug)
-	      {
-		System.out.println("Loader: waiting for base hash");
-	      }
+	    // we have to check baseMapLoaded inside the
+	    // synchronization loop or else we can get deadlocked
 
-	    try
+	    while (!baseMapLoaded || !keepGoing)
 	      {
-		this.wait();
-	      }
-	    catch (InterruptedException x)
-	      {
-		throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+		if (debug)
+		  {
+		    System.out.println("Loader: waiting for base hash");
+		  }
+
+		try
+		  {
+		    this.wait();
+		  }
+		catch (InterruptedException x)
+		  {
+		    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+		  }
 	      }
 	  }
       }

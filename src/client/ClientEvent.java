@@ -8,8 +8,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/03/01 22:01:07 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/05/30 05:53:36 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -105,5 +105,10 @@ public class ClientEvent implements arlut.csd.ganymede.ClientMessage {
   public String getMessage()
   {
     return message;
+  }
+
+  public String toString()
+  {
+    return "ClientEvent: " + message;
   }
 }
