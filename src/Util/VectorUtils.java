@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/02/11 06:56:15 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/03/09 18:46:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -349,6 +349,11 @@ public class VectorUtils {
 
   public static String vectorString(Vector vec)
   {
+    if (vec == null)
+      {
+	return "";
+      }
+
     StringBuffer temp = new StringBuffer();
 
     for (int i = 0; i < vec.size(); i++)
