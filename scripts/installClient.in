@@ -3,14 +3,17 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.17 $
-# $Date: 2000/10/10 06:55:48 $
+# $Revision: 1.18 $
+# $Date: 2000/11/24 06:25:23 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
 ############################################################
 
 use File::Copy;
+
+$homedir = $ENV{HOME};
+&removelastslash($homedir);
 
 # This script needs to get a several pieces of information from
 # the user, including:
@@ -111,6 +114,10 @@ foreach $step (@steps) {
     if (($step eq "CLIENTINSTALL") ||
 	($step eq "SWINGJARS") ||
 	($step eq "JVM")) {
+
+      # process unqualified ~ expansion
+      
+      $vars{$step} =~ s/\~\//$homedir\//g;
 
       if ($vars{$step} !~ /^\//) {
 	print "*Relative pathnames not allowed, please enter a full path.\n";
