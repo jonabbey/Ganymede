@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -720,7 +720,7 @@ final public class DBSession {
    * transaction. Because the object must be checked out (which is the only
    * way to obtain a DBEditObject), no other locking is required. This method
    * will take an object out of the DBStore and proceed to do whatever is
-   * necessary to cause that object to be 'inactivated'.
+   * necessary to cause that object to be 'inactivated'.<br><br>
    *
    * Note that this method does not specifically check to see whether permission
    * has been obtained to reactivate the object.. that's done in
@@ -748,6 +748,12 @@ final public class DBSession {
 					  "If you need to undo an object deletion, cancel your transaction.");
       }
 
+    if (!eObj.isInactivated())
+      {
+	return Ganymede.createErrorDialog("Server: Error in DBSession.reactivateDBObject()",
+					  "Error.. can't reactivate an object that is not inactive.");
+      }
+
     checkpoint(key);
 
     System.err.println("DBSession.reactivateDBObject(): Calling eObj.reactivate()");
@@ -772,6 +778,7 @@ final public class DBSession {
 	// immediate success!
 
 	eObj.finalizeReactivate(true);
+	popCheckpoint(key);
       }
 
     return retVal;
