@@ -235,7 +235,7 @@ refresh the jar files.
       
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/FileReceiverBase*_Stub.class"/>
 
-      <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/server/*.properties"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/server/**"/>
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/GanymedeSSLServerKeys"/>
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
@@ -258,9 +258,9 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
 
-      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/client/*"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/client/**"/>
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
     </jar>
@@ -285,10 +285,9 @@ refresh the jar files.
 
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/server/GanymedeScheduler.class"/>
       
-      <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/admin/**.gif"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/admin/**.jpg"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*.gif"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*.gif"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/admin/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/**"/>
 
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
 
