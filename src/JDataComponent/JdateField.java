@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,8 +30,6 @@ import arlut.csd.JCalendar.*;
 import arlut.csd.JDataComponent.*;
 
 import oreilly.Dialog.*;
-
-import gjt.Box;
 
 /*******************************************************************
                                                       JdateField()
@@ -173,6 +171,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
     buttonPanel.add(_calendarButton,"West");
 
     // don't need the clear button if it is not editable
+
     if (iseditable)
       {
 	_clearButton = new JButton("Clear");

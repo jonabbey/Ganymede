@@ -28,16 +28,19 @@ package arlut.csd.JDataComponent;
 import com.sun.java.swing.*;
 
 import java.awt.*;
-import gjt.Box;
 
 public class JFieldWrapper extends JPanel {
 
   JComponent my_field = null;
 
+  /* -- */
+
   public JFieldWrapper(String fieldname)
   {
     if (fieldname==null)
-      throw new IllegalArgumentException("Error: handle to the name of the field is null");
+      {
+	throw new IllegalArgumentException("Error: handle to the name of the field is null");
+      }
 
     setLayout(new BorderLayout());
 
@@ -53,14 +56,11 @@ public class JFieldWrapper extends JPanel {
     my_field = field;
 
     add("East",my_field);
-
   }
 
   public void highLight()
   {
-
     // Set the background color to red and foreground color to black
-
   }
 
 }
