@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -107,29 +107,17 @@ public class glogin extends JApplet implements Runnable {
   {
     System.out.println("init in glogin");
 
-    try
+    my_glogin = this;
+    
+    // Dowload the ganymede logo using the appropriate method
+    
+    ganymede_logo = PackageResources.getImageResource(this, "ganymede.jpg", getClass());
+    
+    if (WeAreApplet)
       {
-	my_glogin = this;
-      
-	// Dowload the ganymede logo using the appropriate method
-
-	if (!WeAreApplet)
-	  {
-	    //	    ganymede_logo = Toolkit.getDefaultToolkit().getImage(new URL(gConfig._GANYMEDE_LOGO_URL));
-	    ganymede_logo = PackageResources.getImageResource(this, "ganymede.jpg", getClass());
-	  }
-	else
-	  {
-	    ganymede_logo = getImage(new URL(gConfig._GANYMEDE_LOGO_URL));
-
-	    my_frame = new JFrame();
-	  }
+	my_frame = new JFrame();
       }
-    catch (java.net.MalformedURLException e) 
-      {
-	System.out.println("The URL was malformed");
-      }
-   
+
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
     gbc.anchor = GridBagConstraints.WEST;
@@ -430,7 +418,9 @@ class LoginHandler implements ActionListener {
 	  }
 	catch (RemoteException ex)
 	  {
-	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame, "RMI Error: Couldn't log into server: \n" + ex.getMessage());
+	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame,
+					      "RMI Error: Couldn't log into server: \n" +
+					      ex.getMessage());
 	    
 	    my_glogin.connector.setEnabled(true);
 	    my_glogin._quitButton.setEnabled(true);
@@ -441,7 +431,8 @@ class LoginHandler implements ActionListener {
 	catch (NullPointerException ex)
 	  {
 
-	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame, "Error: Didn't get server reference.  Please Quit and Restart");
+	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame,
+					      "Error: Didn't get server reference.  Please Quit and Restart");
 	    
 	    my_glogin.connector.setEnabled(true);
 	    my_glogin._quitButton.setEnabled(true);
@@ -450,7 +441,8 @@ class LoginHandler implements ActionListener {
 	  }
 	catch (Exception ex) 
 	  {
-	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame, "Error: " + ex.getMessage());
+	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame,
+					      "Error: " + ex.getMessage());
 	    	    
 	    my_glogin.connector.setEnabled(true);
 	    my_glogin._quitButton.setEnabled(true);
