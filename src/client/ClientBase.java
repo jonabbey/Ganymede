@@ -8,91 +8,132 @@ package arlut.csd.ganymede.client;
 
 import arlut.csd.ganymede.*;
 
-import java.awt.*;
+//import java.awt.*;
 import java.rmi.*;
 import java.rmi.server.*;
-
-
-import arlut.csd.JDialog.*;
+import java.util.Vector;
 
 public class ClientBase extends UnicastRemoteObject implements Client {
 
-  protected Server server = null;
-  protected String username = null;
-  protected String password = null;
-  protected Session session = null;
+  private final boolean debug = true;
 
+  private Server server = null;
+  private String username = null;
+  private String password = null;
+  private Session session = null;
+
+  private boolean connected = false;
+
+  private String server_url;
+
+  Vector listeners = new Vector();
   /* -- */
 
-  public iClient(glogin applet, Server server, String username, String password) throws RemoteException
+  public ClientBase(String serverURL, ClientListener listener) throws RemoteException
   {
     super();
 
+    this.server_url = serverURL;
+    listeners.addElement(listener);
     // UnicastRemoteObject can throw RemoteException 
 
-    this.applet = applet;
-    this.server = server;
-    this.username = username;
-    this.password = password;
-
-    System.err.println("Initializing iClient object");
+    if (debug)
+      {
+	System.err.println("Initializing BaseClient object");
+      }
 
     try
       {
-	session = server.login(this);
+	connected = true;
 
-	if (session == null)
+	Remote obj = Naming.lookup(server_url);
+	  
+	if (obj instanceof Server)
 	  {
-	    System.err.println("Couldn't log in to server... bad username/password?");
-
-	    JErrorDialog d = new JErrorDialog(applet.my_frame, "Couldn't log in to server... bad username/password?");
-	  }
-	else
-	  {
-	    System.out.println("logged in");
+	    server = (Server) obj;
 	  }
       }
-    catch (RemoteException ex)
+    catch (NotBoundException ex)
       {
-	System.err.println("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
-
-	JErrorDialog d = new JErrorDialog(applet.my_frame, "RMI Error: Couldn't log in to server.\n" + ex.getMessage());
-      }
-    catch (NullPointerException ex)
-      {
-	System.err.println("Error: Didn't get server reference.  Exiting now.");
-	//System.exit(0);
-
-	JErrorDialog d = new JErrorDialog(applet.my_frame, "Error: Didn't get server reference.  Exiting now.");
+	connected = false;
 	
+	System.err.println("RMI: Couldn't bind to server object\n" + ex );
       }
-    catch (Exception ex)
+    catch (java.rmi.UnknownHostException ex)
       {
-	System.err.println("Got some other exception: " + ex);
-      }
-
-    //    System.err.println("Got session");
-
-/*    try
-      {
-	Type typeList[] = session.types();
+	connected = false;
 	
-	for (int i=0; i < typeList.length; i++)
-	  {
-	    System.err.println("Type: " + typeList[i]);
-	  }
+	System.err.println("RMI: Couldn't find server\n" + server_url );
       }
-    catch (Exception ex)
+    catch (java.net.MalformedURLException ex)
       {
-	System.err.println("typecatch: " + ex);
+	connected = false;
+	  	  
+	System.err.println("RMI: Malformed URL " + server_url );
       }
-*/	
+
+
   }
 
   public Session getSession()
   {
     return session;
   }
+
+  public Session login(String username, String password) throws RemoteException
+  {
+
+    this.username = username;
+    this.password = password;
+
+
+    try
+      {
+	session = server.login(this);
+	
+	if (session == null)
+	  {
+	    sendErrorMessage("Couldn't log in to server... bad username/password?");
+	  }
+	else
+	  {
+	    System.out.println("logged in");
+	  }
+      }
+    catch (NullPointerException ex)
+      {
+	System.err.println("Error: Didn't get server reference.  Exiting now.");
+	//System.exit(0);
+	
+	sendErrorMessage( "Error: Didn't get server reference.  Exiting now.");
+	
+      }
+    catch (Exception ex)
+      {
+	System.err.println("Got some other exception: " + ex);
+      }
+  
+    return session;
+
+  }
+
+  /**
+   * Register a client listener.
+   */
+  public void addClientListener(ClientListener l)
+  {
+    listeners.addElement(l);
+  }
+
+  /**
+   * Remove a client listener.
+   */
+  public void removeClientListener(ClientListener l)
+  {
+    listeners.removeElement(l);
+  }
+
+
   /**
    * Calls the logout() method on the Session object
    */
@@ -122,31 +163,19 @@ public class ClientBase extends UnicastRemoteObject implements Client {
    */
   public void forceDisconnect(String reason)
   {
-    System.err.println("Server forced disconnect: " + reason);
-    
-    final String finalReason = reason;
-
-    // Need to spawn off another thread here, so forceDisconnect can return.  Server
-    // will wait for forceDisconnect to return, so it will hang if we don't.
-
-    Runnable shutdown = new Runnable() {
-      public void run() {
-	if (applet.g_client != null)
-	  {
-	    
-	    applet.g_client.dispose();
-	    
-	    applet.g_client = null;
-	  }
-	
-	JErrorDialog d = new JErrorDialog(new com.sun.java.swing.JFrame(), "You are not worthy", "Press ok to disconnect.\n\n " + finalReason);
-	
-	
-	System.exit(0);
+    ClientEvent e = new ClientEvent("Server forced disconect: " + reason);
+    for (int i = 0; i < listeners.size(); i++)
+      {
+	((ClientListener)listeners.elementAt(i)).disconnected(e);
       }
-    };
-    
-    Thread thread = new Thread(shutdown);
-    thread.start();
+  }
+
+  private void sendErrorMessage(String message)
+  {
+    ClientEvent e = new ClientEvent(message);
+    for (int i = 0; i < listeners.size(); i++)
+      { 
+	((ClientListener)listeners.elementAt(i)).messageReceived(e);
+      }
   }
 }
