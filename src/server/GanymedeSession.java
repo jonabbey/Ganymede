@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.100 $ %D%
+   Version: $Revision: 1.101 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -763,6 +763,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public String getHelpBase()
   {
     return Ganymede.helpbaseProperty;
+  }
+
+  /**
+   *
+   * This method returns the identification string that the server
+   * has assigned to the user.
+   * 
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public String getMyUserName()
+  {
+    return username;
   }
 
   /**
