@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 1999/06/25 01:47:47 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 1999/06/25 02:04:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -102,7 +102,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.110 $ $Date: 1999/06/25 01:47:47 $ $Name:  $
+ * @version $Revision: 1.111 $ $Date: 1999/06/25 02:04:15 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -709,6 +709,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * of this method must be able to handle a null targetObject, or else
    * an exception will be thrown inappropriately.</P>
    *
+   * <P>The only reason to consult targetObject in any case is to
+   * allow or disallow anonymous object linking to a field based on
+   * the current state of the target object.  If you are just writing
+   * generic anonymous linking rules for a field in this object type,
+   * targetObject won't concern you anyway.  If you do care about the
+   * targetObject's state, though, you have to be prepared to handle
+   * a null valued targetObject.</P>
+   *
    * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param targetObject The object that the link is to be created in (may be null)
@@ -782,15 +790,31 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
    * anonymousLinkOK() method chaining.</P>
    *
+   * <P>Note that the {@link
+   * arlut.csd.ganymede.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.DBField)
+   * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
+   * with a null targetObject, to determine that the client should not
+   * use its cache for an InvidDBField's choices.  Any overriding done
+   * of this method must be able to handle a null targetObject, or else
+   * an exception will be thrown inappropriately.</P>
+   *
+   * <P>The only reason to consult targetObject in any case is to
+   * allow or disallow anonymous object linking to a field based on
+   * the current state of the target object.  If you are just writing
+   * generic anonymous linking rules for a field in this object type,
+   * targetObject won't concern you anyway.  If you do care about the
+   * targetObject's state, though, you have to be prepared to handle
+   * a null valued targetObject.</P>
+   *
    * <p><b>*PSEUDOSTATIC*</b></p>
    *
-   * @param object The object that the link is to be created in
-   * @param fieldID The field that the link is to be created in
+   * @param targetObject The object that the link is to be created in (may be null)
+   * @param targetFieldID The field that the link is to be created in
    * @param gsession Who is trying to do this linking?  */
 
-  public boolean anonymousLinkOK(DBObject object, short fieldID, GanymedeSession gsession)
+  public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID, GanymedeSession gsession)
   {
-    return anonymousLinkOK(object, fieldID);
+    return anonymousLinkOK(targetObject, targetFieldID);
   }
 
   /**
@@ -837,13 +861,29 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
    * anonymousLinkOK() method chaining.</P>
    *
+   * <P>Note that the {@link
+   * arlut.csd.ganymede.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.DBField)
+   * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
+   * with a null targetObject, to determine that the client should not
+   * use its cache for an InvidDBField's choices.  Any overriding done
+   * of this method must be able to handle a null targetObject, or else
+   * an exception will be thrown inappropriately.</P>
+   *
+   * <P>The only reason to consult targetObject in any case is to
+   * allow or disallow anonymous object linking to a field based on
+   * the current state of the target object.  If you are just writing
+   * generic anonymous linking rules for a field in this object type,
+   * targetObject won't concern you anyway.  If you do care about the
+   * targetObject's state, though, you have to be prepared to handle
+   * a null valued targetObject.</P>
+   *
    * <p><b>*PSEUDOSTATIC*</b></p>
    *
-   * @param object The object that the link is to be created in
-   * @param fieldID The field that the link is to be created in
+   * @param targetObject The object that the link is to be created in (may be null)
+   * @param targetFieldID The field that the link is to be created in
    */
 
-  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID)
   {
     return false;		// by default, permission is denied
   }
