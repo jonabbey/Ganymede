@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.145 $
-   Last Mod Date: $Date: 2003/03/13 00:51:08 $
+   Version: $Revision: 1.146 $
+   Last Mod Date: $Date: 2003/09/04 00:27:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -326,6 +326,15 @@ public class Ganymede {
     // bound.. doesn't matter much, but useful for logging
 
     boolean inUse = true;
+
+    // since we may have clients behind personal firewalls that drop
+    // packets rather than provide ICMP reject, limit the amount of
+    // time we'll wait for a new outgoing connection to be
+    // established.
+    //
+    // to 5 seconds, as it happens.
+
+    RMISocketFactory.setSocketFactory(new RMITimeOutFactory(5));
 
     try
       {
