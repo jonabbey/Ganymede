@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1010,13 +1010,6 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	return false;
       }
 
-    if ((invid.getType() == SchemaConstants.PermBase) &&
-	(invid.getNum() == SchemaConstants.PermEndUserObj))
-      {
-	setLastError("Can't delete end user permissions definitions");
-	return false;
-      }
-
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
 	(invid.getNum() == 0))
       {
@@ -1126,10 +1119,20 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   final PermEntry getPerm(short baseID, short fieldID)
   {
+    PermEntry result;
+
+    /* -- */
+
     updatePerms();		// make sure we have personaPerms up to date
+
     if (personaPerms != null)
       {
-	return personaPerms.getPerm(baseID, fieldID);
+	result = personaPerms.getPerm(baseID, fieldID);
+	
+	if (result == null)
+	  {
+	    return personaPerms.getPerm(baseID);
+	  }
       }
     else
       {
