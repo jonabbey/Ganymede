@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -341,6 +341,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	throw new IllegalArgumentException("not an editable field");
       }
+
+    defined = true;
   }
 
   /**
@@ -365,6 +367,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	throw new IllegalArgumentException("not an editable field");
       }
+
+    defined = true;
   }
 
   /**
@@ -396,6 +400,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	throw new IllegalArgumentException("not an editable field");
       }
 
+    defined = true;
   }
 
   /**
@@ -426,6 +431,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	throw new IllegalArgumentException("not an editable field");
       }
+
+    defined = true;
   }
 
   private String matrixEntry(short baseID, short fieldID)
