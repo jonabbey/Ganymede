@@ -67,6 +67,7 @@ import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.net.ProtocolException;
 import java.rmi.RemoteException;
+import java.rmi.NoSuchObjectException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
@@ -1191,6 +1192,20 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // happen
 	    
 	    GanymedeServer.clearActiveUser(username);
+
+	    if (remoteClient)
+	      {
+		try
+		  {
+		    // must force, since we might ourselves be being
+		    // called through RMI
+
+		    UnicastRemoteObject.unexportObject(this, true);
+		  }
+		catch (NoSuchObjectException ex)
+		  {
+		  }
+	      }
 
 	    // help the garbage collector
 
