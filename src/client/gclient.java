@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.96 $ %D%
+   Version: $Revision: 1.97 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -5017,7 +5017,7 @@ class PersonaListener implements ActionListener {
       }
     
     //Check to see if we need to commit the transaction first.
-
+    
     String newPersona = null;
     
     if (event.getSource() instanceof JMenuItem)
@@ -5076,7 +5076,7 @@ class PersonaListener implements ActionListener {
 					  "Commit",
 					  "Cancel");
 	Hashtable result = d.DialogShow();
-
+	
 	if (result == null)
 	  {
 	    gc.setStatus("Persona change cancelled");
@@ -5090,81 +5090,83 @@ class PersonaListener implements ActionListener {
 	  }
       }
 
-      // Now change the persona
+    // Now change the persona
 
-      boolean personaChangeSuccessful = false;
+    boolean personaChangeSuccessful = false;
 
-      resource = new DialogRsrc(gc, "Change Persona", 
+    resource = new DialogRsrc(gc, "Change Persona", 
 				"Enter the password for " + newPersona + ":");
-      resource.addPassword("Password:");
+    resource.addPassword("Password:");
 
-      if (gc.debug)
-	{
-	  System.out.println("MenuItem action command: " + newPersona);
-	}
+    if (gc.debug)
+      {
+	System.out.println("MenuItem action command: " + newPersona);
+      }
     
-      Hashtable result = null;
-      String password = null;
+    Hashtable result = null;
+    String password = null;
+      
+    // All admin level personas have a : in them.  Only admin level
+    // personas need passwords.
     
-      // All admin level personas have a : in them.  Only admin level
-      // personas need passwords.
-
-      if (newPersona.indexOf(":") > 0)
-	{
-	  StringDialog d = new StringDialog(resource);
-	  result = d.DialogShow();
+    if (newPersona.indexOf(":") > 0)
+      {
+	StringDialog d = new StringDialog(resource);
+	result = d.DialogShow();
 	
-	  if (result != null)
-	    {
-	      password = (String) result.get("Password:");
-	    }
-	  else
-	    {
-	      gc.updatePersonaMenu();
-	      return;		// they canceled.
-	    }
-	}
+	if (result != null)
+	  {
+	    password = (String) result.get("Password:");
+	  }
+	else
+	  {
+	    gc.updatePersonaMenu();
+	    return;		// they canceled.
+	  }
+      }
     
-      try
-	{	      
-	  personaChangeSuccessful = session.selectPersona(newPersona, password);
+    try
+      {	      
+	personaChangeSuccessful = session.selectPersona(newPersona, password);
 	  
-	  if (personaChangeSuccessful)
-	    {
-	      gc.setWaitCursor();
-	      gc.setStatus("Successfully changed persona.");
+	if (personaChangeSuccessful)
+	  {
+	    gc.setWaitCursor();
+	    gc.setStatus("Changing persona.");
 
-	      // List of creatable object types might have changed.
+	    // List of creatable object types might have changed.
 
-	      gc.createDialog = null;
-	      gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
+	    gc.createDialog = null;
+	    gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
 
-	      //gc.setPersonaCombo(newPersona);
+	    //gc.setPersonaCombo(newPersona);
 
-	      gc.ownerGroups = null;
-	      gc.clearCaches();
-	      gc.loader.clear();  // This reloads the hashes
-	      gc.clearLoaderLists();
-	      gc.cancelTransaction();
-	      gc.buildTree();
-	      gc.currentPersonaString = newPersona;
-	      gc.setNormalCursor();
-	    }
-	  else
-	    {
-	      gc.showErrorMessage("Error: could not change persona", 
-				  "Perhaps the password was wrong.", gc.getErrorImage());
+	    gc.ownerGroups = null;
+	    gc.clearCaches();
+	    gc.loader.clear();  // This reloads the hashes
+	    gc.clearLoaderLists();
+	    gc.cancelTransaction();
+	    gc.buildTree();
+	    gc.currentPersonaString = newPersona;
+	    gc.setNormalCursor();
 
-	      gc.setStatus("Persona change failed");
-	    }
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not set persona to " + newPersona + ": " + rx);
-	}
-
-      gc.updatePersonaMenu();
-    }
+	    gc.setStatus("Successfully changed persona.");
+	  }
+	else
+	  {
+	    gc.showErrorMessage("Error: could not change persona", 
+				"Perhaps the password was wrong.", gc.getErrorImage());
+	      
+	    gc.setStatus("Persona change failed");
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not set persona to " + newPersona + ": " + rx);
+      }
+    
+    gc.updatePersonaMenu();
+  }
 }
 
 /*------------------------------------------------------------------------------
