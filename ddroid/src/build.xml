@@ -168,6 +168,7 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ddroid/server/*_Stub.class"/>
       <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
       <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
+      <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
 
       <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*"/>
@@ -219,6 +220,8 @@ refresh the jar files.
       <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/admin/**.jpg"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*.gif"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/*.gif"/>
+
+      <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
     </jar>
     
     <!-- Copy over the newly created jars -->
