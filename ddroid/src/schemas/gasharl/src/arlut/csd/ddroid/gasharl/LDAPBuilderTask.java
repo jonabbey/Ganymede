@@ -151,7 +151,9 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     now = null;
 
     if (baseChanged(SchemaConstants.UserBase) || 
-	baseChanged((short) 257))
+	baseChanged((short) 257) ||
+        baseChanged((short) 270) ||
+        baseChanged((short) 271))
       {
 	Ganymede.debug("Need to build LDAP output");
 
@@ -217,6 +219,45 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	      }
 	  }
 
+	try
+	  {
+	    out = openOutFile(path + "netgroups.ldif", "ldap");
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("LDAPBuilderTask.builderPhase1(): couldn't open netgroups.ldif file: " + ex);
+	  }
+	  
+	if (out != null)
+	  {
+	    try
+	      {
+		DBObject netgroup;
+		
+		// First we'll do the user netgroups
+		Enumeration netgroups = enumerateObjects((short) 270);
+		
+		while (netgroups.hasMoreElements())
+		  {
+		    netgroup = (DBObject) netgroups.nextElement();
+		    writeLDIFNetgroupEntry(out, netgroup);
+		  }
+		  
+		// And now for the system netgroups
+		netgroups = enumerateObjects((short) 271);
+    
+		while (netgroups.hasMoreElements())
+		  {
+		    netgroup = (DBObject) netgroups.nextElement();
+		    writeLDIFNetgroupEntry(out, netgroup);
+		  }
+	      }
+	    finally
+	      {
+		out.close();
+	      }
+	  }
+  
 	success = true;
       }
 
@@ -417,6 +458,83 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     writeLDIF(out, "cn", group.getLabel());
 
     out.println();
+  }
+  
+  private void writeLDIFNetgroupEntry(PrintWriter out, DBObject netgroup)
+  {
+    String 
+      name,
+      membername,
+      attrvalue;
+    
+    Vector
+      contents, 
+      memberNetgroups;
+    
+    Invid
+      invid;
+      
+    /* Let's figure out what kind of netgroup this is: user or system */
+    short typeid = netgroup.getTypeID();
+    
+    if (typeid == 270)
+      {
+        /* This is a user netgroup */
+        name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+        contents = netgroup.getFieldValuesLocal(userNetgroupSchema.USERS);
+        memberNetgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+      }
+    else
+      {
+        /* This is a system netgroup */
+        name = (String) netgroup.getFieldValueLocal(systemNetgroupSchema.NETGROUPNAME);
+        contents = netgroup.getFieldValuesLocal(systemNetgroupSchema.SYSTEMS);
+        memberNetgroups = netgroup.getFieldValuesLocal(systemNetgroupSchema.MEMBERGROUPS);
+      }
+      
+    /* Write out the LDIF header for this netgroup. We'll make the CN the netgroup name. */
+    writeLDIF(out, "dn", "cn=" + name + ",cn=netgroups,dc=xserve");
+    writeLDIF(out, "objectclass", "nisNetgroup");
+    writeLDIF(out, "cn", name);
+    
+    if (contents != null)
+      {
+        for (Iterator iter = contents.iterator(); iter.hasNext();)
+          {
+            invid = (Invid) iter.next();
+            membername = getLabel(invid);
+            typeid = invid.getType();
+    
+            /* The members of this netgroup can either be User objects or System objects.
+             * We need to write out the correct LDIF triple for each case. An LDIF netgroup
+             * triple is of the form (hostname,username,domain), where each part is optional.
+             */
+            
+            if (typeid == SchemaConstants.UserBase)
+              {
+                writeLDIF(out, "nisNetgroupTriple", "(," + membername + ",)");
+              }
+            else if (typeid == 263) 
+              {
+                writeLDIF(out, "nisNetgroupTriple", "(" + membername + ",,)");
+              }
+          }
+      }
+     
+    /* This part handles prining out what sub-netgroups belong to this one. This
+     * is done by using the LDAP attribute "memberNisNetgroup". */
+    
+    if (memberNetgroups != null)
+      {
+        for (Iterator iter = memberNetgroups.iterator(); iter.hasNext();)
+          {
+            invid = (Invid) iter.next();
+            membername = getLabel(invid);
+            writeLDIF(out, "memberNisNetgroup", membername);
+          }
+      }
+     
+    out.println();    
   }
 
   /**
