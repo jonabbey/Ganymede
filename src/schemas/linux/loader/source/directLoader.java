@@ -12,8 +12,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/01/22 18:05:20 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/11/23 04:04:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -470,8 +470,16 @@ public class directLoader {
 
 	// set the password
 
-	p_field = (pass_field) current_obj.getField(SchemaConstants.UserPassword);
-	p_field.setCryptPass(userObj.password);
+	if (userObj.password != null && userObj.password.startsWith("$1$"))
+	  {
+	    p_field = (pass_field) current_obj.getField(SchemaConstants.UserPassword);
+	    p_field.setMD5CryptedPass(userObj.password);
+	  }
+	else
+	  {
+	    p_field = (pass_field) current_obj.getField(SchemaConstants.UserPassword);
+	    p_field.setCryptPass(userObj.password);
+	  }
 
 	// set the fullname
 

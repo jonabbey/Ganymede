@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 1999/11/16 08:01:01 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 1999/11/23 04:04:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -281,6 +281,13 @@ public class Ganymede {
 
     /* -- */
 
+    // the Ganymede class can be called in a few different modes, in which
+    // case the server will do something other than boot up into normal
+    // operation
+
+    // first, if we see -decode on the command line, do a textual dump of the
+    // schema encoded in the ganymede.db file
+
     if (ParseArgs.switchExists("decode", argv))
       {
 	String dbFilename = ParseArgs.getArg("dbfile", argv);
@@ -300,6 +307,9 @@ public class Ganymede {
 	    System.exit(0);
 	  }
       }
+
+    // second, if we see -permdecode on the command line, do a textual dump of
+    // the permissions objects encoded in the ganymede.db file.
 
     if (ParseArgs.switchExists("permdecode", argv))
       {
@@ -574,9 +584,6 @@ public class Ganymede {
     // terminate here.
 
     // wa-la
-
-    //    debug("Dumping all back pointers.. kill me, please");
-    //    db.debugBackPointers();
 
     if (debug)
       {
@@ -1294,7 +1301,12 @@ public class Ganymede {
       {
 	try
 	  {
-	    fis = new FileInputStream(schemaDirectoryProperty);
+	    String propName = arlut.csd.Util.PathComplete.completePath(schemaDirectoryProperty) + 
+	      "schema.properties";
+
+	    System.err.println("Attempting to read schema properties: " + propName);
+
+	    fis = new FileInputStream(propName);
 	    bis = new BufferedInputStream(fis);
 	    props.load(bis);
 	  }
@@ -1498,11 +1510,11 @@ class gcTask implements Runnable {
   }
 
   public void run()
-   {
-     Ganymede.debug("Running garbage collection task");
-     System.gc();
-     Ganymede.debug("Garbage collection task finished");
-   }
+  {
+    Ganymede.debug("Running garbage collection task");
+    System.gc();
+    Ganymede.debug("Garbage collection task finished");
+  }
 }
 
 /*------------------------------------------------------------------------------

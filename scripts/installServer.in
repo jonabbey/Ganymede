@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.13 $
-# $Date: 1999/08/27 18:39:01 $
+# $Revision: 1.14 $
+# $Date: 1999/11/23 04:03:55 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -38,6 +38,7 @@ use English;
 
 @gashsteps = ("DNSDOMAIN", "MAILSUFFIX", "HOMEDIRPREFIX");
 @nisonlysteps = ("HOMEDIRPREFIX");
+@linuxbsdsteps = ("HOMEDIRPREFIX", "MD5");
 
 %vars = ("JVM" => "<#JAVADIR#>",
          "SERVERINSTALL" => "",
@@ -53,7 +54,8 @@ use English;
          "MONITORPASS" => "monitor",
 	 "SCHEMA" => "",
 	 "DNSDOMAIN" => "",
-         "HELPWEB" => "http://www.arlut.utexas.edu/gash2/help/");
+         "HELPWEB" => "http://www.arlut.utexas.edu/gash2/help/",
+	 "MD5" => "no");
 
 %descrip = ("JVM" => "Where are the JDK 1.1 binaries installed?",
             "SERVERINSTALL" => "Where should the server tree be installed?",
@@ -69,7 +71,8 @@ use English;
 	    "MONITORPASS" => "What password do you want the monitor account to have?",
 	    "SCHEMA" => "What schema do you want to initialize the database with? (gash,nisonly,bsd,linux,gasharl)",
 	    "DNSDOMAIN" => "What single DNS domain do you want the GASH Schema to manage?",
-	    "HELPWEB" => "What URL is the Ganymede help web at (leave default for now)?");
+	    "HELPWEB" => "What URL is the Ganymede help web at (leave default for now)?",
+	    "MD5" => "Do you want this schema kit to generate MD5-hashed passwords in the emitted passwd files?");
 
 $template = "scripts/server.properties.template";
 
@@ -172,11 +175,37 @@ if (($vars{"SCHEMA"} eq "gash")|| ($vars{"SCHEMA"} eq "gasharl")) {
       }
     }
   }
+} elsif ($vars{"SCHEMA"} eq "nisonly") {
+
+  foreach $step (@nisonlysteps) {
+    
+    $success = 0;
+    
+    while (!$success) {
+      print $descrip{$step};
+      print " [$vars{$step}] ";
+      
+      $inp = <>;
+      
+      chop $inp;		# cut off newline
+      
+      if ($inp ne "") {
+	$vars{$step} = $inp;
+      }
+      
+      if ($vars{$step}eq "") {
+	$success = 0;
+	print "*You must provide a value for this field*\n";
+      } else {
+	$success = 1;
+      }
+    }
+  }
 } elsif (($vars{"SCHEMA"} eq "nisonly") ||
 	 ($vars{"SCHEMA"} eq "bsd") ||
 	 ($vars{"SCHEMA"} eq "linux")) {
 
-  foreach $step (@nisonlysteps) {
+  foreach $step (@linuxbsdsteps) {
     
     $success = 0;
     
@@ -327,7 +356,8 @@ if ($schemainstalled) {
 		"ganymede.helpbase" => $vars{"HELPWEB"},
 		"ganymede.builder.output" => "$installdir/db/out",
 		"ganymede.builder.scriptlocation" => "$installdir/db",
-	        "ganymede.gash.dnsdomain" => $vars{"DNSDOMAIN"});
+	        "ganymede.gash.dnsdomain" => $vars{"DNSDOMAIN"},
+		"ganymede.md5" => $vars{"MD5"});
 
 open INPUT, $template or die "Couldn't open properties template!";
 open OUTPUT, ">$installdir/ganymede.properties" or die "Couldn't write ganymede.properties";

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.122 $
-   Last Mod Date: $Date: 1999/11/16 08:36:06 $
+   Version: $Revision: 1.123 $
+   Last Mod Date: $Date: 1999/11/23 04:04:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.122 $ $Date: 1999/11/16 08:36:06 $ $Name:  $
+ * @version $Revision: 1.123 $ $Date: 1999/11/23 04:04:36 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1552,6 +1552,18 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * supports cloning (which should be very much customized for this
    * object type.. creation of the ancillary objects, which fields to
    * clone, etc.), this customization method will actually do the work.</p>
+   *
+   * <p>This method is called on a newly created object, in order
+   * to clone the state of origObj into it.  This method does not actually
+   * create a new object.. that is handled by
+   * {@link arlut.csd.ganymede.GanymedeSession#clone_db_object(arlut.csd.ganymede.Invid)
+   * before this method is called on the newly created object.</p>
+   *
+   * <p>The default (DBEditObject) implementation of this method will only clone
+   * fields for which
+   * {@link arlut.csd.ganymede.DBEditObject#canCloneField(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject, arlut.csd.ganymede.DBField) canCloneField()}
+   * returns true, and which are not connected to a namespace (and thus could not
+   * possibly be cloned).</p>
    */
 
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)

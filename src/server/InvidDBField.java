@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 1999/11/20 00:01:55 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 1999/11/23 04:04:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -82,10 +82,10 @@ import arlut.csd.Util.VectorUtils;
  * references in the server are symmetric.  If one object points to
  * another via an InvidDBField, the target of that pointer will point
  * back, either through a field explicitly specified in the schema, or
- * via the SchemaConstants.BackLinksField, which is guaranteed to be
- * defined in every object in the database.</P>
+ * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
+ * hash structure.</P>
  *
- * @version $Revision: 1.115 $ %D%
+ * @version $Revision: 1.116 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -896,7 +896,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	return null;		// success
       }
 
-    // find out whether there is an explicit back-link field
+    // find out whether there is a symmetric field pointing back to
+    // us, or whether we will need to use the backPointers hashing
+    // structure.
 
     if (getFieldDef().isSymmetric())
       {
@@ -2039,8 +2041,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    // find out what the back-pointer field in the target object is
-
     if (getFieldDef().isSymmetric())
       {
 	targetField = getFieldDef().getTargetField();
@@ -2048,7 +2048,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	asymBackPointer = true;
+	asymBackPointer = true;	// we'll test Ganymede.db.backPointers
 	targetField = -1;
       }
 

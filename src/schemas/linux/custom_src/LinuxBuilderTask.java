@@ -7,8 +7,8 @@
    
    Created: 8 September 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/10/13 20:01:26 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/11/23 04:04:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,6 +76,7 @@ public class LinuxBuilderTask extends GanymedeBuilderTask {
   private static String path = null;
   private static String buildScript = null;
   private static Runtime runtime = null;
+  private static Boolean useMD5 = null;	// Boolean for tri-state boolean
 
   // ---
 
@@ -115,6 +116,27 @@ public class LinuxBuilderTask extends GanymedeBuilderTask {
 	  }
 
 	path = PathComplete.completePath(path);
+      }
+
+    if (useMD5 == null)
+      {
+	String md5p = System.getProperty("ganymede.md5");
+
+	if (md5p == null)
+	  {
+	    useMD5 = Boolean.FALSE;
+	  }
+	else
+	  {
+	    if (md5p.toLowerCase().equals("yes"))
+	      {
+		useMD5 = Boolean.TRUE;
+	      }
+	    else
+	      {
+		useMD5 = Boolean.FALSE;
+	      }
+	  }
       }
 
     now = null;
@@ -370,7 +392,7 @@ public class LinuxBuilderTask extends GanymedeBuilderTask {
   private void writeUserLine(DBObject object, PrintWriter writer)
   {
     String username;
-    String cryptedPass;
+    String cryptedPass = null;
     int uid;
     int gid;
     String name;
@@ -395,7 +417,20 @@ public class LinuxBuilderTask extends GanymedeBuilderTask {
 
     if (passField != null)
       {
-	cryptedPass = passField.getUNIXCryptText();
+	if (useMD5.booleanValue())
+	  {
+	    cryptedPass = passField.getMD5CryptText();
+	  }
+
+	// if the Ganymede server doesn't have an MD5 password for
+	// this user, go ahead and devolve to the crypt() password if
+	// available.  This might have been set by rpcpass and the NIS
+	// passwd daemon.
+
+	if (cryptedPass == null)
+	  {
+	    cryptedPass = passField.getUNIXCryptText();
+	  }
       }
     else
       {
