@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.73 $ %D%
+   Version: $Revision: 1.74 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -767,7 +767,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
-	    oldRef = (DBEditObject) session.getGSession().edit_db_object(oldRemote);
+	    ReturnVal oldResult = session.getGSession().edit_db_object(oldRemote);
+
+	    oldRef = (DBEditObject) oldResult.getObject();
 	  }
 
 	if (oldRef == null)
@@ -855,7 +857,8 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	newRef = (DBEditObject) session.getGSession().edit_db_object(newRemote);
+	ReturnVal newResult = session.getGSession().edit_db_object(newRemote);
+	newRef = (DBEditObject) newResult.getObject();
       }
     
     if (newRef == null)
@@ -1075,7 +1078,9 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	oldRef = (DBEditObject) session.getGSession().edit_db_object(remote);
+	ReturnVal editResult = session.getGSession().edit_db_object(remote);
+
+	oldRef = (DBEditObject) editResult.getObject();
 
 	if (oldRef == null)
 	  {
