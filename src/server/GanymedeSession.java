@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.102 $ %D%
+   Version: $Revision: 1.103 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1278,6 +1278,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    transport = new CategoryTransport(Ganymede.db.rootCategory, this);
 	    Ganymede.db.notifyAll(); // in case of locks
 	  }
+
+	//	System.err.println("%%% Printing PersonaPerms");
+	//	personaPerms.debugdump();
+
+	//	System.err.println("%%% Printing DefaultPerms");
+	//	defaultPerms.debugdump();
 	
 	return transport;
       }
@@ -4348,7 +4354,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   private final boolean personaMatch(DBObject obj)
   {
+    Vector owners;
     InvidDBField inf;
+    boolean showit = false;
 
     /* -- */
 
@@ -4362,11 +4370,80 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (inf == null)
       {
-	//	Ganymede.debug("Null ownerlistfield in object");
-	return false;
+	owners = new Vector();
+      }
+    else
+      {
+	owners = inf.getValuesLocal();
+      }
+
+    // All owner group objects are considered to be self-owning.
+
+    if (obj.getTypeID() == SchemaConstants.OwnerBase)
+      {
+	if (debug)
+	  {
+	    System.err.println("** Augmenting owner group " + obj.getLabel() + " with self-ownership");
+	    showit = true;
+	  }
+
+	if (!owners.contains(obj.getInvid()))
+	  {
+	    owners.addElement(obj.getInvid());
+	  }
+      }
+
+    // All admin personae are considered to be owned by the owner groups
+    // that they are members of
+
+    if (obj.getTypeID() == SchemaConstants.PersonaBase)
+      {
+	if (debug)
+	  {
+	    System.err.print("** Augmenting admin persona " + obj.getLabel() + " ");
+	    showit = true;
+	  }
+
+	InvidDBField inf2 = (InvidDBField) obj.getField(SchemaConstants.PersonaGroupsField);
+
+	if (inf2 != null)
+	  {
+	    Vector values = inf2.getValuesLocal();
+
+	    if (debug)
+	      {
+		for (int i = 0; i < values.size(); i++)
+		  {
+		    if (i > 0)
+		      {
+			System.err.print(", ");
+		      }
+		    
+		    System.err.print(values.elementAt(i));
+		  }
+		
+		System.err.println();
+	      }
+
+	    owners = arlut.csd.Util.VectorUtils.union(owners, inf2.getValuesLocal());
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.err.println("<no owner groups in this persona>");
+	      }
+	  }
+      }
+
+    boolean result = recursePersonaMatch(owners, new Vector());
+
+    if (showit)
+      {
+	System.err.println("++ Result = " + result);
       }
     
-    return recursePersonaMatch(inf.getValuesLocal(), new Vector());
+    return result;
   }
 
   /**
