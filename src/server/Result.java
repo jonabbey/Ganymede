@@ -8,7 +8,7 @@
    Result is serializable.
    
    Created: 21 October 1996 
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,17 @@
 package arlut.csd.ganymede;
 
 import java.rmi.RemoteException;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                          Result
+
+------------------------------------------------------------------------------*/
+
+/**
+ * The result class is used to return labeled invid's for
+ * database queries.
+ */
 
 public class Result implements java.io.Serializable {
 
