@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.5 $
-# $Date: 1999/04/06 21:36:02 $
+# $Revision: 1.6 $
+# $Date: 1999/04/28 08:19:27 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -23,17 +23,19 @@ use File::Copy;
 #
 # Everything else can be reasonably derived from the above.
 
-@steps = ("JVM", "SWINGJARS", "SYSTEMNAME","CLIENTINSTALL", "SUPERNAME");
+@steps = ("JVM", "SWINGJARS", "SYSTEMNAME","REGISTRYPORT", "CLIENTINSTALL", "SUPERNAME");
 
 %vars = ("JVM" => "<#JAVADIR#>",
 	 "SWINGJARS" => "<#SWINGDIR#>",
          "SYSTEMNAME" => "",
+         "REGISTRYPORT" => "1099",
          "CLIENTINSTALL" => "",
          "SUPERNAME" => "supergash");
 
 %descrip = ("JVM" => "Where are the JDK 1.1 binaries installed?",
 	    "SWINGJARS" => "Where are the Swing 1.1 jar files installed at?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
+	    "REGISTRYPORT" => "What port is the RMI registry supporting Ganymede running on?",
             "CLIENTINSTALL" => "Where should the client binaries be installed?",
 	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?");
 
@@ -169,7 +171,8 @@ copy($vars{"SWINGJARS"}."/swingall.jar", "$installdir/html/hotjava/swingall.jar"
 # Copy and process the properties file into place
 
 %clientconvert = ("ganymede.serverhost" => $vars{"SYSTEMNAME"},
-		  "ganymede.rootname" => $vars{"SUPERNAME"});
+		  "ganymede.rootname" => $vars{"SUPERNAME"},
+		  "ganymede.registryPort" => $vars{"REGISTRYPORT"});
 
 open INPUT, $template or die "Couldn't open client properties template!";
 open OUTPUT, ">$installdir/client.properties" or die "Couldn't write client.properties";
@@ -321,6 +324,7 @@ open OUTPUT, ">$installdir/html/activator/client.html" or die "Couldn't write ac
 
 while (<INPUT>) {
   s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
   print OUTPUT $_;
 }
 
@@ -334,6 +338,7 @@ open OUTPUT, ">$installdir/html/hotjava/client.html" or die "Couldn't write acti
 
 while (<INPUT>) {
   s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
   print OUTPUT $_;
 }
 
@@ -350,6 +355,7 @@ open OUTPUT, ">$installdir/html/activator/console.html" or die "Couldn't write a
 while (<INPUT>) {
   s/www\.arlut\.utexas\.edu/$systemname/g;
   s/supergash/$vars{"SUPERNAME"}/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
   print OUTPUT $_;
 }
 
@@ -364,6 +370,7 @@ open OUTPUT, ">$installdir/html/hotjava/console.html" or die "Couldn't write hot
 while (<INPUT>) {
   s/www\.arlut\.utexas\.edu/$systemname/g;
   s/supergash/$vars{"SUPERNAME"}/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
   print OUTPUT $_;
 }
 
@@ -382,6 +389,7 @@ open OUTPUT, ">$installdir/html/activator/password.html" or die "Couldn't write 
 
 while (<INPUT>) {
   s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
   print OUTPUT $_;
 }
 
@@ -395,6 +403,7 @@ open OUTPUT, ">$installdir/html/hotjava/password.html" or die "Couldn't write ac
 
 while (<INPUT>) {
   s/www\.arlut\.utexas\.edu/$systemname/g;
+  s/\"1099\"/\"$vars{"REGISTRYPORT"}\"/g;
   print OUTPUT $_;
 }
 

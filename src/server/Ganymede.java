@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 1999/04/20 18:21:53 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 1999/04/28 08:19:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -159,6 +159,7 @@ public class Ganymede {
   public static String monitornameProperty = null;
   public static String defaultmonitorpassProperty = null;
   public static String messageDirectoryProperty = null;
+  public static int    registryPortProperty = 1099;
 
   public static boolean resetadmin = false;
   public static boolean firstrun = false;
@@ -230,7 +231,7 @@ public class Ganymede {
 
     try
       {
-	Naming.lookup("rmi://localhost/ganymede.server");
+	Naming.lookup("rmi://localhost:" + registryPortProperty + "/ganymede.server");
       }
     catch (NotBoundException ex)
       {
@@ -831,6 +832,7 @@ public class Ganymede {
     monitornameProperty = System.getProperty("ganymede.monitorname");
     defaultmonitorpassProperty = System.getProperty("ganymede.defaultmonitorpass");
     messageDirectoryProperty = System.getProperty("ganymede.messageDirectory");
+    
 
     if (dbFilename == null)
       {
@@ -914,6 +916,23 @@ public class Ganymede {
       {
 	System.err.print("Couldn't get the default monitor password property.. ");
 	System.err.println("may have problems if initializing a new db");
+      }
+
+    // get the registry port number
+
+    String registryPort = System.getProperty("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
+			       registryPort);
+	  }
       }
 
     return success;

@@ -8,8 +8,8 @@
 
    Created: 28 April 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/04/28 06:46:52 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/04/28 08:20:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,6 +73,7 @@ public class stopServer {
   public static String serverHostProperty = null;
   public static String rootname = null;
   public static String defaultrootpassProperty = null;
+  public static int    registryPortProperty = 1099;
 
   public static void main(String argv[])
   {
@@ -88,14 +89,15 @@ public class stopServer {
 
     if (propFilename == null)
       {
-	System.err.println("Error: invalid command line parameters");
+	System.err.println("Ganymede stopServer: Error, invalid command line parameters");
  	System.err.print("Usage: java stopServer properties=<property file>");
 	return;
       }
 
     if (!loadProperties(propFilename))
       {
-	System.out.println("Error, couldn't successfully load properties from file " + propFilename + ".");
+	System.out.println("Ganymede stopServer: Error, couldn't successfully load properties from file " + 
+			   propFilename + ".");
 	return;
       }
 
@@ -149,8 +151,7 @@ public class stopServer {
       }
     catch (RemoteException rx)
       {
-	System.err.println("Ganymede stopServer: Error, caught remote exception shutting down server: " + rx);
-	System.exit(1);
+	// just have to hope we did shut it down
       }
 
     System.out.println("Ganymede stopServer: Ganymede server shutdown");
@@ -210,6 +211,23 @@ public class stopServer {
 	success = false;
       }
 
+    // get the registry port number
+
+    String registryPort = System.getProperty("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
+			       registryPort);
+	  }
+      }
+
     return success;
   }
 }
@@ -248,8 +266,8 @@ class stopServerAdmin extends UnicastRemoteObject implements Admin {
       }
     catch (NullPointerException ex)
       {
-	System.err.println("Error: Didn't get server reference.  Exiting now.");
-	return;
+	System.err.println("Ganymede stopServer: Error, couldn't log into server with admin privs.");
+	System.exit(1);
       }
   }
 

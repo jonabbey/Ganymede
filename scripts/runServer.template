@@ -12,6 +12,7 @@
 
 JAVA=/usr/bin/java
 RMIREGISTRY=/usr/bin/rmiregistry
+RMIPORT=1099
 PROPERTIES=ganymede.properties
 CLASSPATH=jars/ganymedeServer.jar:jars/custom.jar:jars/password.jar
 

@@ -3,8 +3,8 @@
 # Ganymede Server RMI build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.5 $
-# Date: $Date: 1999/04/15 22:34:05 $
+# Version: $Revision: 1.6 $
+# Date: $Date: 1999/04/28 08:20:00 $
 #
 ############################################################
 
@@ -32,6 +32,6 @@ $RMICOMPILER -d $TARGETDIR arlut.csd.ganymede.DBField arlut.csd.ganymede.DBNameS
 
 $RMICOMPILER -d $TARGETDIR arlut.csd.ganymede.PermissionMatrixDBField arlut.csd.ganymede.InvidDBField arlut.csd.ganymede.StringDBField arlut.csd.ganymede.BooleanDBField arlut.csd.ganymede.DateDBField arlut.csd.ganymede.NumericDBField arlut.csd.ganymede.PasswordDBField arlut.csd.ganymede.IPDBField arlut.csd.ganymede.GanymediatorWizard
 
-$RMICOMPILER -d $TARGETDIR arlut.csd.ganymede.DBBaseCategory
+$RMICOMPILER -d $TARGETDIR arlut.csd.ganymede.DBBaseCategory arlut.csd.ganymede.stopServerAdmin
 
 echo "Done"

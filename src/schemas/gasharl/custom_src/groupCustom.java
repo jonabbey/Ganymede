@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/03/16 22:13:31 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/04/28 08:19:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -340,7 +340,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    * is required to be defined at commit time for a given object.<br><br>
    *
    * To be overridden in DBEditObject subclasses.
-   * */
+   * 
+   */
 
   public boolean fieldRequired(DBObject object, short fieldid)
   {
@@ -486,13 +487,18 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	      
 		if (homeWizard.getState() == homeWizard.DONE)
 		  {
-		    // Ok, the home wizard has done its deed, so get rid of it
+		    // Ok, the home wizard has done its deed, so get
+		    // rid of it
+
 		    homeWizard.unregister();
 
-		    // I don't think it is a good idea to return null here.
+		    // I don't think it is a good idea to return null
+		    // here.
+
 		    if (debug)
 		      {
-			print("Returning null, because I am in groupCustom.wizardHook with an active wizard that is done.");
+			print("Returning null, because I am in groupCustom.wizardHook " +
+			      "with an active wizard that is done.");
 		      }
 
 		    return null;

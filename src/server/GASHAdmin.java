@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 1999/03/17 20:13:50 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 1999/04/28 08:19:58 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -50,8 +50,6 @@ package arlut.csd.ganymede;
 
 import java.rmi.*;
 import java.rmi.server.*;
-
-//import java.awt.*;
 
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
@@ -1331,6 +1329,7 @@ public class GASHAdmin extends JApplet implements ActionListener {
 
   static String rootname = null;
   static String serverhost = null;
+  static int registryPortProperty = 1099;
   static String url = null;
 
   static Server server = null;
@@ -1629,6 +1628,23 @@ public class GASHAdmin extends JApplet implements ActionListener {
 
     serverhost = props.getProperty("ganymede.serverhost");
 
+    // get the registry port number
+
+    String registryPort = System.getProperty("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
+			       registryPort);
+	  }
+      }
+
     if (serverhost == null)
       {
 	System.err.println("Couldn't get the server host property");
@@ -1636,7 +1652,7 @@ public class GASHAdmin extends JApplet implements ActionListener {
       }
     else
       {
-	url = "rmi://" + serverhost + "/ganymede.server";
+	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
       }
 
     rootname = props.getProperty("ganymede.rootname");

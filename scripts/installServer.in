@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.7 $
-# $Date: 1999/04/28 06:52:50 $
+# $Revision: 1.8 $
+# $Date: 1999/04/28 08:19:28 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -29,7 +29,7 @@ use English;
 #
 # Everything else can be reasonably derived from the above.
 
-@steps = ("JVM","SERVERINSTALL","SYSTEMNAME","MAILHOST",
+@steps = ("JVM","SERVERINSTALL","SYSTEMNAME","REGISTRYPORT","MAILHOST",
 	  "RETURNADDR", "SUPERNAME", "SUPERPASS",
 	  "MONITORNAME", "MONITORPASS", "SCHEMA");
 
@@ -42,6 +42,7 @@ use English;
 %vars = ("JVM" => "<#JAVADIR#>",
          "SERVERINSTALL" => "",
          "SYSTEMNAME" => "",
+         "REGISTRYPORT" => "1099",
 	 "MAILHOST" => "",
          "RETURNADDR" => "",
 	 "MAILSUFFIX" => "\@arlut.utexas.edu",
@@ -57,6 +58,7 @@ use English;
 %descrip = ("JVM" => "Where are the JDK 1.1 binaries installed?",
             "SERVERINSTALL" => "Where should the server tree be installed?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
+	    "REGISTRYPORT" => "What port should the RMI registry supporting Ganymede run on?",
 	    "MAILHOST" => "What mailhost should Ganymede use to send out diagnostic mail?",
 	    "RETURNADDR" => "What email address should Ganymede sign on email that it sends out?",
 	    "MAILSUFFIX" => "What suffix should be tacked onto users' names for their default mail delivery?",
@@ -316,6 +318,7 @@ if ($schemainstalled) {
 		"ganymede.defaultmailsuffix" => $vars{"MAILSUFFIX"},
 		"ganymede.homedirprefix" => $vars{"HOMEDIRPREFIX"},
 		"ganymede.serverhost" => $vars{"SYSTEMNAME"},
+		"ganymede.registryPort" => $vars{"REGISTRYPORT"},
 		"ganymede.rootname" => $vars{"SUPERNAME"},
 		"ganymede.defaultrootpass" => $vars{"SUPERPASS"},
 		"ganymede.monitorname" => $vars{"MONITORNAME"},
@@ -352,7 +355,8 @@ print "\nCustomizing ganymede runServer script\n";
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
                "PROPERTIES" => "$installdir/ganymede.properties",
-               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/jars/custom.jar");
+               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/jars/custom.jar",
+	       "RMIPORT" => $vars{"REGISTRYPORT"});
 
 open INPUT, "scripts/runServer.template" or die "Couldn't open runServer template!";
 open OUTPUT, ">$installdir/bin/runServer" or die "Couldn't write runServer";
@@ -528,7 +532,8 @@ if ($schemainstalled) {
 		   "ganymede.defaultrootpass" => $vars{"SUPERPASS"},
 		   "ganymede.monitorname" => $vars{"MONITORNAME"},
 		   "ganymede.defaultmonitorpass" => $vars{"MONITORPASS"},
-		   "ganymede.helpbase" => $vars{"HELPWEB"});
+		   "ganymede.helpbase" => $vars{"HELPWEB"},
+		   "ganymede.registryPort" => $vars{"REGISTRYPORT"});
 
   open INPUT, "scripts/loader.properties.template" or die "Couldn't open loader properties template!";
   open OUTPUT, ">$installdir/schema/loader/ganymede.properties" or die "Couldn't write loader's ganymede.properties";

@@ -6,8 +6,8 @@
    
    Created: 28 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:04:21 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/04/28 08:19:49 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -435,6 +435,23 @@ public class PasswordClient implements ClientListener {
       }
 
     serverhost = props.getProperty("ganymede.serverhost");
+    
+    int registryPortProperty = 1099;
+
+    String registryPort = System.getProperty("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
+			       registryPort);
+	  }
+      }
 
     if (serverhost == null)
       {
@@ -443,7 +460,7 @@ public class PasswordClient implements ClientListener {
       }
     else
       {
-	url = "rmi://" + serverhost + "/ganymede.server";
+	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
       }
 
     return success;

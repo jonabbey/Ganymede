@@ -121,6 +121,14 @@ ganymede.returnaddr=jonabbey@arlut.utexas.edu
 
 ganymede.serverhost=www.arlut.utexas.edu
 
+# ganymede.registryPort
+#
+# The port number of the Java rmi registry daemon handling object
+# bindings for the Ganymede server
+#
+# Used by the client, server, and admin console
+
+ganymede.registryPort=1099
 
 # ganymede.rootname
 #
