@@ -5,8 +5,8 @@
    The core of a gui/text password changing client for Ganymede.
    
    Created: 28 January 1998
-   Version: $Revision: 1.1 $ %D%
-   Module By: Michael Mulvaney, Jonathan Abbey
+   Version: $Revision: 1.2 $ %D%
+   Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
 */
@@ -28,7 +28,7 @@ import java.rmi.server.*;
 
 public class PasswordClient extends UnicastRemoteObject implements arlut.csd.ganymede.Client {
 
-  final static boolean debug = true;
+  final static boolean debug = false;
 
   static String serverhost;
   static String url;
@@ -138,35 +138,39 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
 
 		if (returnValue == null)
 		  {
-		    error("It worked, returnValue is null");
+		    if (debug)
+		      {
+			error("It worked, returnValue is null");
+		      }
 		  }
 		else if (returnValue.didSucceed())
 		  {
-		    error("returnValue is not null, but it did suceed.");
+		    if (debug)
+		      {
+			error("returnValue is not null, but it did suceed.");
+		      }
 		  }
 		else
 		  {
-		    error("It didn't work.");
-		    session.abortTransaction();
+		    if (debug)
+		      {
+			error("It didn't work.");
+		      }
 		    session.logout();
 		    return false;
 		  }
 	      }
 	    else
 	      {
-		if (debug)
+		if (results == null)
 		  {
-		    if (results == null)
-		      {
-			System.out.println("Results==null");
-		      }
-		    else
-		      {
-			System.out.println("size = " + results.size());
-		      }
+		    System.out.println("No user " + username + ", can't change password");
+		  }
+		else
+		  {
+		    System.out.println("Error, found multiple matching user records.. can't happen?");
 		  }
 
-		session.abortTransaction();
 		session.logout();
 		return false;
 	      }
@@ -260,6 +264,8 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
 	System.exit(0);
       }
 
+    loadProperties(argv[0]);
+
     /* RMI initialization stuff. */
       
     System.setSecurityManager(new RMISecurityManager());
@@ -311,7 +317,7 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
 	throw new RuntimeException("Exception getting input: " + ex);
       }
 
-    boolean success = client.changePassword(argv[0], oldPassword, newPassword);
+    boolean success = client.changePassword(argv[1], oldPassword, newPassword);
 
     if (success)
       {
