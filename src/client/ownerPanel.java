@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/03/29 22:56:27 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/08/04 18:39:50 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import arlut.csd.JDialog.*;
  * the client.  This panel is created in association with the "Owners"
  * tab in framePanel.</p>
  *
- * @version $Revision: 1.24 $ $Date: 1999/03/29 22:56:27 $ $Name:  $
+ * @version $Revision: 1.25 $ $Date: 1999/08/04 18:39:50 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -183,7 +183,6 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	  {
 	    StringSelector ownerList = createInvidSelector(field);
 	    ownerList.setBorder(new LineBorder(Color.black));
-	    ownerList.setVisibleRowCount(-1);
 	    remove(holdOnPanel);
 	    add("Center", ownerList);
 	  }
