@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.68 $ %D%
+   Version: $Revision: 1.69 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -331,6 +331,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     // File menu
 
     fileMenu = new JMenu("File");
+    fileMenu.setDelay(0);
     logoutMI = new JMenuItem("Logout");//, new MenuShortcut(KeyEvent.VK_L));
     logoutMI.addActionListener(this);
 
@@ -2770,9 +2771,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    */
   public void chooseDefaultOwner(boolean forcePopup)
   {
-    // What to do here?  don't check for null, because maybe forcePopup was false.
-    // Have to think about this one, maybe keep groups Vector in gclient (ie not local here)
-    // yeah, looks like that's what I did
     if (ownerGroups == null)
       {
 	try
