@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -77,7 +77,7 @@ import java.util.Vector;
  * have JDialogBuff transport its parameters, which could be done
  * directly with DialogRsrc just as well.  There are some things in
  * the DialogRsrc class, like the image cache, that we may not want
- * to mess with.  In any case, all of the Directory Droid code expects JDialogBuff,
+ * to mess with.  In any case, all of the Ganymede code expects JDialogBuff,
  * so it's going to stay for now.)
  */
 

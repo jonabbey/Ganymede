@@ -4,7 +4,7 @@
 
    A dialog class used to display text and HTML with an optional
    image on the left side, used for the about.. and motd features
-   in the Directory Droid client.
+   in the Ganymede client.
    
    Created: 16 September 1998
 
@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -80,7 +80,7 @@ import javax.swing.JSeparator;
  *
  * A dialog class used to display text and HTML with an optional
  * image on the left side, used for the about.. and motd features
- * in the Directory Droid client.
+ * in the Ganymede client.
  *   
  * @version $Id$
  * @author Mike Mulvaney
