@@ -261,6 +261,14 @@ public final class Invid implements java.io.Serializable {
    *
    * <p>If an Invid Allocator has not been set with setAllocator(), intern()
    * will do nothing, and will return this.</p>
+   *
+   * <p>Note that there only two ways to create an Invid.. to use the
+   * public static createInvid factory methods, in which case the
+   * Invids you get will already be interned, or through
+   * deserialization, in which case the JVM creates the Invid from
+   * the serialized representation without going through the Invid
+   * class constructors or factory methods.  Intern is to provide for
+   * the latter case.</p>
    */
 
   public Invid intern()
@@ -269,7 +277,7 @@ public final class Invid implements java.io.Serializable {
       {
 	return this;
       }
-    else
+    else			// we're interning a deserialized Invid
       {
 	Invid result = allocator.findInvid(this);
 
