@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.55 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.56 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -69,22 +69,70 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   /* - */
 
+  /**
+   *
+   * The type definition for this object.
+   *
+   */
+
   protected DBObjectBase objectBase;
-  protected int id;			// 32 bit id - the object's invariant id
+
+  /**
+   *
+   * 32 bit id - the object's invariant id
+   *
+   */
+
+  protected int id;
+
+  /**
+   *
+   * Our field table, essentially a custom hash of DBField objects
+   * keyed by their numeric field id's.
+   *
+   * @see arlut.csd.ganymede.DBField
+   *
+   */
+
   protected DBFieldTable fields;
 
-  DBEditObject shadowObject;	// if this object is being edited or removed, this points
-				// to the shadow that manages the changes
-  
-  protected DBEditSet editset;	// transaction that this object has been checked out in
-				// care of, if any
+  /**
+   *
+   * if this object is being edited or removed, this points
+   * to the DBEditObject copy that is being edited.  If
+   * this object is not being edited, this field will be null,
+   * and we are available for someone to edit.
+   *
+   */
 
-  protected GanymedeSession gSession; // if this object is being viewed by a particular
-				      // Ganymede Session, we record that here
+  DBEditObject shadowObject;	
+
+  /**
+   * transaction that this object has been checked out in
+   * care of, if any.
+   */
+
+  protected DBEditSet editset;	
+
+  /**
+   * if this object is being viewed by a particular
+   * Ganymede Session, we record that here.
+   */
+
+  protected GanymedeSession gSession;
+
+  /** 
+   * A fixed copy of our Invid, so that we don't have to create
+   * new ones all the time when people call getInvid() on us.
+   */
 
   Invid myInvid = null;
 
-  DBObject next = null;		// used by the DBObjectTable logic
+  /** 
+   * used by the DBObjectTable logic
+   */
+
+  DBObject next = null;
 
   /* -- */
 
