@@ -135,6 +135,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    *
    * <p>This variable needs to be set to true in order for setClosed() calls
    * in windowPanel to avoid bringing up the dialogs.</p>
+   *
+   * <p>Actually, this variable has now been overloaded with an
+   * additional function.  When we are closing a newly created window,
+   * we set closingApproved to true so that the gclient deleteObject()
+   * method won't balk at our deleting the newly created objects.</p>
+   *
+   * <p>This is totally like biological evolution, in which a
+   * pre-existing feature is adapted for a new purpose over time.
+   * Hot-cha-cha.</p>
    */
 
   boolean closingApproved = false;
@@ -1888,6 +1897,26 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					    "Discard It",
 					    "Cancel",
 					    gclient.client.getQuestionImage());
+
+		Hashtable result = okToKill.DialogShow();
+	    
+		if (result == null)
+		  {
+		    throw new PropertyVetoException("Cancelled", null);
+		  }
+
+		if (debug)
+		  {
+		    System.err.println("framePanel.vetoableChange(): setting closingApproved true");
+		  }
+
+		// set closingApproved to true before we call
+		// deleteObject() so that the gclient class will
+		// consider this deletion approved.
+		
+		closingApproved = true;
+
+		gclient.client.deleteObject(getObjectInvid(), false);
 	      }
 	    else
 	      {
@@ -1902,29 +1931,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					    "Hide it",
 					    "Cancel",
 					    gclient.client.getQuestionImage());
-	      }
 
-	    Hashtable result = okToKill.DialogShow();
+		Hashtable result = okToKill.DialogShow();
 	    
-	    if (result == null)
-	      {
-		throw new PropertyVetoException("Cancelled", null);
+		if (result == null)
+		  {
+		    throw new PropertyVetoException("Cancelled", null);
+		  }
 	      }
-
-	    // ah, we get to close.. delete us first.. this will cause the
-	    // server to drop this object on commit.
-
-	    if (isCreating)
-	      {
-		gclient.client.deleteObject(getObjectInvid(), false);
-	      }
-
-	    if (debug)
-	      {
-		System.err.println("framePanel.vetoableChange(): setting closingApproved true");
-	      }
-
-	    closingApproved = true;
 	  }
       }
   }
