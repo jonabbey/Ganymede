@@ -1180,6 +1180,14 @@ public class Ganymede {
 	    scheduler.demandTask((String) builderTasks.elementAt(i));
 	  }
       }
+
+    synchronized (syncRunners)
+      {
+	for (int i = 0; i < syncRunners.size(); i++)
+	  {
+	    scheduler.demandTask((String) syncRunners.elementAt(i));
+	  }
+      }
   }
 
   /**
@@ -1200,6 +1208,9 @@ public class Ganymede {
 	    scheduler.demandTask((String) builderTasks.elementAt(i), options);
 	  }
       }
+
+    // XXX do we want to do something about forcing sync channels
+    // here?
   }
 
   static void registerSyncChannel(SyncRunner channel)

@@ -551,7 +551,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
 
-  public ReturnVal setValue(Object value, boolean local, boolean noWizards)
+  public ReturnVal setValue(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -688,7 +688,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
   
-  public ReturnVal setElement(int index, Object value, boolean local, boolean noWizards)
+  public ReturnVal setElement(int index, Object value, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -835,7 +835,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</P>
    */
 
-  public ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
+  public ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     DBNameSpace ns;
     DBEditObject eObj;

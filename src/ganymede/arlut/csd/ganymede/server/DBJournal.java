@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -117,6 +117,7 @@ public class DBJournal implements ObjectStatus {
 
   static final String OPENTRANS = "open";
   static final String CLOSETRANS = "close";
+  static final String FINALIZE = "finalize";
 
   static final byte CREATE = 1;
   static final byte EDIT = 2;

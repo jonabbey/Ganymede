@@ -336,6 +336,22 @@ public abstract class DBField implements Remote, db_field {
   abstract void emitXML(XMLDumpContext dump) throws IOException;
 
   /**
+   * <p>This method is used when this field has changed, and its
+   * changes need to be written to a Sync Channel.</p>
+   *
+   * <p>The assumptions of this method are that both this field and
+   * the orig field are defined (i.e., non-null, non-empty), and that
+   * orig is of the same class as this field.  It is an error to call
+   * this method with null dump or orig parameters.</p>
+   *
+   * <p>It is the responsibility of the code that calls this method to
+   * determine that this field differs from orig.  If this field and
+   * orig have no changes between them, the output is undefined.</p>
+   */
+
+  abstract void emitXMLDelta(XMLDumpContext dump, DBField orig) throws IOException;
+
+  /**
    * <P>Returns true if obj is a field with the same value(s) as
    * this one.</P>
    *
@@ -699,14 +715,13 @@ public abstract class DBField implements Remote, db_field {
    * operation.  Caveat Coder.</p>
    */
 
-  public synchronized ReturnVal setUndefined(boolean local)
+  public synchronized ReturnVal setUndefined(boolean local) throws GanyPermissionsException
   {
     if (isVector())
       {
 	if (!isEditable(local))	// *sync* GanymedeSession possible
 	  {
-	    return Ganymede.createErrorDialog(ts.l("setUndefined.perm_subject"),
-					      ts.l("setUndefined.no_perm_vect", getName(), owner.getLabel()));
+	    throw new GanyPermissionsException(ts.l("setUndefined.no_perm_vect", getName(), owner.getLabel()));
 	  }
 
 	// we have to clone our values Vector in order to use
@@ -950,7 +965,7 @@ public abstract class DBField implements Remote, db_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public final ReturnVal setValue(Object value)
+  public final ReturnVal setValue(Object value) throws GanyPermissionsException
   {
     ReturnVal result;
 
@@ -976,7 +991,14 @@ public abstract class DBField implements Remote, db_field {
 
   public final ReturnVal setValueLocal(Object value)
   {
-    return setValue(value, true, false);
+    try
+      {
+	return setValue(value, true, false);
+      }
+    catch (GanyPermissionsException ex)
+      {
+	throw new RuntimeException(ex);
+      }
   }
 
   /**
@@ -994,7 +1016,14 @@ public abstract class DBField implements Remote, db_field {
 
   public final ReturnVal setValueLocal(Object value, boolean noWizards)
   {
-    return setValue(value, true, noWizards);
+    try
+      {
+	return setValue(value, true, noWizards);
+      }
+    catch (GanyPermissionsException ex)
+      {
+	throw new RuntimeException(ex);
+      }
   }
 
   /**
@@ -1009,7 +1038,7 @@ public abstract class DBField implements Remote, db_field {
    * @param local If true, permissions checking will be skipped
    */
 
-  public final ReturnVal setValue(Object submittedValue, boolean local)
+  public final ReturnVal setValue(Object submittedValue, boolean local) throws GanyPermissionsException
   {
     return setValue(submittedValue, local, false);
   }
@@ -1030,7 +1059,7 @@ public abstract class DBField implements Remote, db_field {
    * @param noWizards If true, wizards will be skipped
    */
 
-  public synchronized ReturnVal setValue(Object submittedValue, boolean local, boolean noWizards)
+  public synchronized ReturnVal setValue(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1041,8 +1070,7 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* possible
       {
-	return Ganymede.createErrorDialog(ts.l("global.perms_sub"),
-					  ts.l("global.no_write_perms", getName(), owner.getLabel()));
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (isVector())
@@ -1255,6 +1283,9 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful setElement will
    * encode an order to rescan this field.</p>
    *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
+   *
    * @see arlut.csd.ganymede.server.DBSession
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -1290,6 +1321,9 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.</p>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
    *
    * @see arlut.csd.ganymede.server.DBSession
    *
@@ -1333,6 +1367,9 @@ public abstract class DBField implements Remote, db_field {
    * may optionally pass back a dialog.  A null result means the
    * operation was carried out successfully and no information
    * needed to be passed back about side-effects.</p>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
    */
 
   public final ReturnVal setElement(int index, Object submittedValue, boolean local) throws GanyPermissionsException
@@ -1349,6 +1386,9 @@ public abstract class DBField implements Remote, db_field {
    * may optionally pass back a dialog.  A null result means the
    * operation was carried out successfully and no information
    * needed to be passed back about side-effects.</p>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
    */
   
   public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -1371,12 +1411,31 @@ public abstract class DBField implements Remote, db_field {
 					 getName());
       }
 
+    Vector values = getVectVal();
+
+    // make sure we're not duplicating an item
+
+    int oldIndex = values.indexOf(submittedValue);
+
+    if (oldIndex == index)
+      {
+	return null;		// no-op
+      }
+    else if (oldIndex != -1)
+      {
+	return getDuplicateValueDialog("setElement", submittedValue); // duplicate
+      }
+
+    // make sure that the constraints on this field don't rule out, prima facie, the proposed value
+
     retVal = verifyNewValue(submittedValue);
 
     if (retVal != null && !retVal.didSucceed())
       {
 	return retVal;
       }
+
+    // allow the plugin class to review the operation
 
     eObj = (DBEditObject) owner;
 
@@ -1394,35 +1453,14 @@ public abstract class DBField implements Remote, db_field {
 	  }
       }
 
-    // okay, we're going to proceed.  Get our vector.
+    // okay, we're going to proceed.. unless there's a namespace
+    // violation
 
-    Vector values = getVectVal();
-
-    // check to see if we can do the namespace manipulations implied by this
-    // operation
-
-    ns = getNameSpace();
+    ns = this.getNameSpace();
 
     if (ns != null)
       {
-	// if the old value was unique in our vector, we need to
-	// unmark it in our namespace
-
-	Object oldElement = values.elementAt(index);
-	int count = 0;
-	
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    if (values.elementAt(i).equals(oldElement))
-	      {
-		count++;
-	      }
-	  }
-
-	if (count == 1)
-	  {
-	    unmark(values.elementAt(index));
-	  }
+	unmark(values.elementAt(index));
 
 	if (!mark(submittedValue))
 	  {
@@ -1432,9 +1470,9 @@ public abstract class DBField implements Remote, db_field {
 	  }
       }
 
-    // check our owner, do it.  Checking our owner should
-    // be the last thing we do.. if it returns true, nothing
-    // should stop us from running the change to completion
+    // check our owner, do it.  Checking our owner should be the last
+    // thing we do.. if it returns true, nothing should stop us from
+    // running the change to completion
 
     newRetVal = eObj.finalizeSetElement(this, index, submittedValue);
 
@@ -1493,6 +1531,9 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful addElement will
    * encode an order to rescan this field.</p>
    *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
+   *
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
@@ -1509,6 +1550,9 @@ public abstract class DBField implements Remote, db_field {
    * <P>The ReturnVal object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.</P>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
    */
 
   public final ReturnVal addElementLocal(Object value)
@@ -1532,6 +1576,9 @@ public abstract class DBField implements Remote, db_field {
    * success or failure, and may optionally
    * pass back a dialog.</P>
    *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
+   *
    * @param submittedValue Value to be added
    * @param local If true, permissions checking will be skipped
    */
@@ -1549,6 +1596,9 @@ public abstract class DBField implements Remote, db_field {
    * <P>The ReturnVal object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.</P>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
    *
    * @param submittedValue Value to be added
    * @param local If true, permissions checking will be skipped
@@ -1588,6 +1638,13 @@ public abstract class DBField implements Remote, db_field {
     else if (submittedValue instanceof Invid)
       {
 	submittedValue = ((Invid) submittedValue).intern();
+      }
+
+    // make sure we're not duplicating an item
+
+    if (getVectVal().contains(submittedValue))
+      {
+	return getDuplicateValueDialog("addElement", submittedValue); // duplicate
       }
 
     // verifyNewValue should setLastError for us.
@@ -1687,6 +1744,9 @@ public abstract class DBField implements Remote, db_field {
    * <p>The ReturnVal resulting from a successful addElements will
    * encode an order to rescan this field.</p> 
    *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
+   *
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
@@ -1708,6 +1768,9 @@ public abstract class DBField implements Remote, db_field {
    * may optionally pass back a dialog. If a success code is returned,
    * all values were added.  If failure is returned, no values
    * were added.</p>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
    */
 
   public final ReturnVal addElementsLocal(Vector values)
@@ -1737,19 +1800,24 @@ public abstract class DBField implements Remote, db_field {
    * all values were added.  If failure is returned, no values
    * were added.</p>
    *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
+   *
    * @param submittedValues Values to be added
    * @param noWizards If true, wizards will be skipped
-   * @param partialSuccessOk If true, addElements will add any values that
-   * it can, even if some values are refused by the server logic.  Any
-   * values that are skipped will be reported in a dialog passed back
-   * in the returned ReturnVal
+   * @param copyFieldMode If true, addElements will add any values
+   * that it can, even if some values are refused by the server logic.
+   * Any values that are skipped will be reported in a dialog passed
+   * back in the returned ReturnVal.  This is intended to support
+   * vector field cloning, in which we add what values may be cloned,
+   * and skip the rest.
    */
 
-  public final ReturnVal addElementsLocal(Vector values, boolean noWizards, boolean partialSuccessOk)
+  public final ReturnVal addElementsLocal(Vector values, boolean noWizards, boolean copyFieldMode)
   {
     try
       {
-	return addElements(values, true, noWizards, partialSuccessOk);
+	return addElements(values, true, noWizards, copyFieldMode);
       }
     catch (GanyPermissionsException ex)
       {
@@ -1770,6 +1838,9 @@ public abstract class DBField implements Remote, db_field {
    * may optionally pass back a dialog. If a success code is returned,
    * all values were added.  If failure is returned, no values
    * were added.</p>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
    *
    * @param submittedValues Values to be added
    * @param local If true, permissions checking will be skipped
@@ -1793,6 +1864,9 @@ public abstract class DBField implements Remote, db_field {
    * may optionally pass back a dialog. If a success code is returned,
    * all values were added.  If failure is returned, no values
    * were added.</p>
+   *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
    *
    * @param submittedValues Values to be added
    * @param local If true, permissions checking will be skipped
@@ -1819,17 +1893,20 @@ public abstract class DBField implements Remote, db_field {
    * all values were added.  If failure is returned, no values
    * were added.</p>
    *
+   * <p>Note that vector fields in Ganymede are not allowed to contain
+   * duplicate values.</p>
+   *
    * @param submittedValues Values to be added
    * @param local If true, permissions checking will be skipped
    * @param noWizards If true, wizards will be skipped
-   * @param partialSuccessOk If true, addElements will add any values that
+   * @param copyFieldMode If true, addElements will add any values that
    * it can, even if some values are refused by the server logic.  Any
    * values that are skipped will be reported in a dialog passed back
    * in the returned ReturnVal
    */
 
   public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
-					    boolean noWizards, boolean partialSuccessOk) throws GanyPermissionsException
+					    boolean noWizards, boolean copyFieldMode) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1863,6 +1940,20 @@ public abstract class DBField implements Remote, db_field {
 	throw new IllegalArgumentException("can't add field values to itself");
       }
 
+    Vector duplicateValues = VectorUtils.intersection(getVectVal(), submittedValues);
+
+    if (duplicateValues.size() > 0)
+      {
+	if (!copyFieldMode)
+	  {
+	    return getDuplicateValuesDialog("addElements", VectorUtils.vectorString(duplicateValues));
+	  }
+	else
+	  {
+	    submittedValues = VectorUtils.difference(submittedValues, getVectVal());
+	  }
+      }
+
     // can we add this many values?
 
     if (size() + submittedValues.size() > getMaxArraySize())
@@ -1874,7 +1965,7 @@ public abstract class DBField implements Remote, db_field {
       }
 
     // check to see if all of the submitted values are acceptable in
-    // type and in identity.  if partialSuccessOk, we won't complain
+    // type and in identity.  if copyFieldMode, we won't complain
     // unless none of the submitted values are acceptable
 
     StringBuffer errorBuf = new StringBuffer();
@@ -1896,7 +1987,7 @@ public abstract class DBField implements Remote, db_field {
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    if (!partialSuccessOk)
+	    if (!copyFieldMode)
 	      {
 		return retVal;
 	      }
@@ -2001,7 +2092,7 @@ public abstract class DBField implements Remote, db_field {
 	  }
 
 	// if we were not able to copy some of the values (and we
-	// had partialSuccessOk set), encode a description of what
+	// had copyFieldMode set), encode a description of what
 	// happened along with the success code
 	
 	if (errorBuf.length() != 0)
@@ -2619,69 +2710,17 @@ public abstract class DBField implements Remote, db_field {
     fieldDeltaRec deltaRec = new fieldDeltaRec(getID());
     Vector oldValues = oldField.getVectVal();
     Vector newValues = getVectVal();
-    Object compareValue;
+    Vector addedValues = VectorUtils.difference(newValues, oldValues);
+    Vector deletedValues = VectorUtils.difference(oldValues, newValues);
 
-    // make hashes of our before and after state so that we
-    // can do the add/delete calculations in a linear order.
-
-    Hashtable oldHash = new Hashtable(oldValues.size() + 1, 1.0f);
-
-    for (int i = 0; i < oldValues.size(); i++)
+    for (int i = 0; i < addedValues.size(); i++)
       {
-	compareValue = oldValues.elementAt(i);
-
-	if (compareValue instanceof Byte[])
-	  {
-	    compareValue = new IPwrap((Byte[]) compareValue);
-	  }
-
-	oldHash.put(compareValue, compareValue);
+	deltaRec.addValue(addedValues.elementAt(i));
       }
 
-    Hashtable newHash = new Hashtable(newValues.size()+1, 1.0f);
-
-    for (int i = 0; i < newValues.size(); i++)
+    for (int i = 0; i < deletedValues.size(); i++)
       {
-	compareValue = newValues.elementAt(i);
-
-	if (compareValue instanceof Byte[])
-	  {
-	    compareValue = new IPwrap((Byte[]) compareValue);
-	  }
-
-	newHash.put(compareValue, compareValue);
-      }
-
-    // and do the compare
-
-    for (int i = 0; i < oldValues.size(); i++)
-      {
-	compareValue = oldValues.elementAt(i);
-	
-	if (compareValue instanceof Byte[])
-	  {
-	    compareValue = new IPwrap((Byte[]) compareValue);
-	  }
-
-	if (!newHash.containsKey(compareValue))
-	  {
-	    deltaRec.delValue(compareValue);
-	  }
-      }
-
-    for (int i = 0; i < newValues.size(); i++)
-      {
-	compareValue = newValues.elementAt(i);
-
-	if (compareValue instanceof Byte[])
-	  {
-	    compareValue = new IPwrap((Byte[]) compareValue);
-	  }
-	    
-	if (!oldHash.containsKey(compareValue))
-	  {
-	    deltaRec.addValue(compareValue);
-	  }
+	deltaRec.delValue(deletedValues.elementAt(i));
       }
 
     return deltaRec;
@@ -2770,6 +2809,9 @@ public abstract class DBField implements Remote, db_field {
    * modifiers (setElement, addElement, deleteElement, etc.)
    * to keep track of namespace modifications as we go along.</p>
    *
+   * <p>If there is no namespace associated with this field, this
+   * method will always return true, as a no-op.</p>
+   *
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
@@ -2785,7 +2827,7 @@ public abstract class DBField implements Remote, db_field {
 
     if (namespace == null)
       {
-	return false;
+	return true;		// do a no-op
       }
 
     if (value == null)
@@ -2802,6 +2844,9 @@ public abstract class DBField implements Remote, db_field {
    * will be permanently reserved in the namespace.  If the editset is
    * instead aborted, the namespace values will be returned to their
    * pre-editset status.</p>
+   *
+   * <p>If there is no namespace associated with this field, this
+   * method will always return true, as a no-op.</p>
    *  
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
@@ -2814,6 +2859,12 @@ public abstract class DBField implements Remote, db_field {
     /* -- */
 
     namespace = getFieldDef().getNameSpace();
+
+    if (namespace == null)
+      {
+	return true;		// do a no-op
+      }
+
     editset = ((DBEditObject) owner).getEditSet();
 
     if (!isVector())
@@ -3275,6 +3326,28 @@ public abstract class DBField implements Remote, db_field {
 					  "value " + conflictValue +
 					  " already taken in namespace");
       }
+  }
+
+  /**
+   * <p>Handy utility method for reporting an attempted duplicate
+   * submission to a vector field.</p>
+   */
+
+  public ReturnVal getDuplicateValueDialog(String methodName, Object conflictValue)
+  {
+    return Ganymede.createErrorDialog("Server: Error in " + methodName,
+				      "This action could not be duplicated because \"" + String.valueOf(conflictValue) + "\" is already contained in field " + getName());
+  }
+
+  /**
+   * <p>Handy utility method for reporting an attempted duplicate
+   * submission to a vector field.</p>
+   */
+
+  public ReturnVal getDuplicateValuesDialog(String methodName, String conflictValues)
+  {
+    return Ganymede.createErrorDialog("Server: Error in " + methodName,
+				      "This action could not be duplicated because \"" + conflictValues + "\" are already contained in field " + getName());
   }
 
   /**

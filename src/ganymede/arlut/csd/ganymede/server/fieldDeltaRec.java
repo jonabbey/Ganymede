@@ -114,8 +114,6 @@ class fieldDeltaRec {
   {
     this.fieldcode = fieldcode;
     vector = true;
-    addValues = new Vector();
-    delValues = new Vector();
   }
 
   /**
@@ -127,12 +125,22 @@ class fieldDeltaRec {
 
   void addValue(Object value)
   {
+    if (!this.vector)
+      {
+	throw new IllegalStateException();
+      }
+
+    if (addValues == null)
+      {
+	addValues = new Vector();
+      }
+
     if (value instanceof Byte[])
       {
 	value = new IPwrap((Byte []) value);
       }
 
-    if (delValues.contains(value))
+    if (delValues != null && delValues.contains(value))
       {
 	delValues.removeElement(value);
       }
@@ -151,12 +159,22 @@ class fieldDeltaRec {
 
   void delValue(Object value)
   {
+    if (!this.vector)
+      {
+	throw new IllegalStateException();
+      }
+
+    if (delValues == null)
+      {
+        delValues = new Vector();
+      }
+
     if (value instanceof Byte[])
       {
 	value = new IPwrap((Byte []) value);
       }
 
-    if (addValues.contains(value))
+    if (addValues != null && addValues.contains(value))
       {
 	addValues.removeElement(value);
       }
@@ -193,6 +211,7 @@ class fieldDeltaRec {
     result.append(VectorUtils.vectorString(addValues));
     result.append(", deleting: ");
     result.append(VectorUtils.vectorString(delValues));
+    result.append(">");
 
     return result.toString();
   }

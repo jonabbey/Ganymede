@@ -85,6 +85,7 @@ import javax.swing.SwingUtilities;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.RMISSLClientListener;
 import arlut.csd.ganymede.common.RMISSLClientSocketFactory;
 import arlut.csd.ganymede.rmi.Server;
@@ -112,6 +113,13 @@ import arlut.csd.ganymede.rmi.Server;
 public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMISSLClientListener {
 
   static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede admin console.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdmin");
 
   /**
    * We assume that we're only ever going to have one console running in

@@ -1265,50 +1265,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     Vector fieldVec = getFieldVector(false);
 
-    if (getTypeID() == SchemaConstants.OwnerBase)
+    for (int i = 0; i < fieldVec.size(); i++)
       {
-	for (int i = 0; i < fieldVec.size(); i++)
+	DBField field = (DBField) fieldVec.elementAt(i);
+	    
+	if (xmlOut.shouldInclude(field))
 	  {
-	    DBField field = (DBField) fieldVec.elementAt(i);
-	    
-	    if (!xmlOut.doDumpHistoryInfo() &&
-		field.getID() == SchemaConstants.CreationDateField ||
-		field.getID() == SchemaConstants.CreatorField ||
-		field.getID() == SchemaConstants.ModificationDateField ||
-		field.getID() == SchemaConstants.ModifierField)
-	      {
-		// skip these
-		
-		continue;
-	      }
-	    
-	    if (field.getID() == SchemaConstants.OwnerObjectsOwned)
-	      {
-		// also this
-		
-		continue;
-	      }
-	    
-	    field.emitXML(xmlOut);
-	  }
-      }
-    else
-      {
-	for (int i = 0; i < fieldVec.size(); i++)
-	  {
-	    DBField field = (DBField) fieldVec.elementAt(i);
-	    
-	    if (!xmlOut.doDumpHistoryInfo() &&
-		field.getID() == SchemaConstants.CreationDateField ||
-		field.getID() == SchemaConstants.CreatorField ||
-		field.getID() == SchemaConstants.ModificationDateField ||
-		field.getID() == SchemaConstants.ModifierField)
-	      {
-		// skip these
-		
-		continue;
-	      }
-
 	    field.emitXML(xmlOut);
 	  }
       }
@@ -2099,7 +2061,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public ReturnVal setFieldValue(short fieldID, Object value)
+  public ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
   {
     // we override in DBEditObject
 

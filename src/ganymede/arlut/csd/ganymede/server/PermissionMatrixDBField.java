@@ -789,7 +789,17 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * out this field to disk.  It is mated with receiveXML().</p>
    */
 
-  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
+  void emitXML(XMLDumpContext dump) throws IOException
+  {
+    this.emitXML(dump, true);
+  }
+
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().</p>
+   */
+
+  synchronized void emitXML(XMLDumpContext xmlOut, boolean writeSurroundContext) throws IOException
   {
     Enumeration en, enum2;
     String key;
@@ -826,8 +836,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	innerTable.put(decodeFieldName(key), entry);
       }
 
-    xmlOut.startElementIndent(this.getXMLName());
-    xmlOut.indentOut();
+    if (writeSurroundContext)
+      {
+	xmlOut.startElementIndent(this.getXMLName());
+	xmlOut.indentOut();
+      }
 
     xmlOut.startElementIndent("permissions");
     xmlOut.indentOut();
@@ -874,8 +887,48 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     xmlOut.indentIn();
     xmlOut.endElementIndent("permissions");
 
+    if (writeSurroundContext)
+      {
+	xmlOut.indentIn();
+	xmlOut.endElementIndent(this.getXMLName());
+      }
+  }
+
+  /**
+   * <p>This method is used when this field has changed, and its
+   * changes need to be written to a Sync Channel.</p>
+   *
+   * <p>The assumptions of this method are that both this field and
+   * the orig field are defined (i.e., non-null, non-empty), and that
+   * orig is of the same class as this field.  It is an error to call
+   * this method with null dump or orig parameters.</p>
+   *
+   * <p>It is the responsibility of the code that calls this method to
+   * determine that this field differs from orig.  If this field and
+   * orig have no changes between them, the output is undefined.</p>
+   */
+
+  synchronized void emitXMLDelta(XMLDumpContext xmlOut, DBField orig) throws IOException
+  {
+    xmlOut.startElementIndent(this.getXMLName());
+
+    xmlOut.indentOut();
+    xmlOut.indent();
+    xmlOut.startElement("delta");
+    xmlOut.attribute("state", "before");
+    ((PermissionMatrixDBField) orig).emitXML(xmlOut, false);
+    xmlOut.endElement("delta");
+    
+    xmlOut.indent();
+    xmlOut.startElement("delta");
+    xmlOut.attribute("state", "after");
+    emitXML(xmlOut, false);
+    xmlOut.endElement("delta");
+
     xmlOut.indentIn();
-    xmlOut.endElementIndent(this.getXMLName());
+    xmlOut.indent();
+
+    xmlOut.endElement(this.getXMLName());
   }
 
   public synchronized String getValueString()

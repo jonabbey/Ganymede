@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -186,6 +186,44 @@ public class FloatDBField extends DBField implements float_field {
   {
     xmlOut.startElementIndent(this.getXMLName());
     emitDoubleXML(xmlOut, value());
+    xmlOut.endElement(this.getXMLName());
+  }
+
+  /**
+   * <p>This method is used when this field has changed, and its
+   * changes need to be written to a Sync Channel.</p>
+   *
+   * <p>The assumptions of this method are that both this field and
+   * the orig field are defined (i.e., non-null, non-empty), and that
+   * orig is of the same class as this field.  It is an error to call
+   * this method with null dump or orig parameters.</p>
+   *
+   * <p>It is the responsibility of the code that calls this method to
+   * determine that this field differs from orig.  If this field and
+   * orig have no changes between them, the output is undefined.</p>
+   */
+
+  synchronized void emitXMLDelta(XMLDumpContext xmlOut, DBField orig) throws IOException
+  {
+    xmlOut.startElementIndent(this.getXMLName());
+
+    xmlOut.indentOut();
+
+    xmlOut.indent();
+    xmlOut.startElement("delta");
+    xmlOut.attribute("state", "before");
+    emitDoubleXML(xmlOut, ((FloatDBField) orig).value());
+    xmlOut.endElement("delta");
+    
+    xmlOut.indent();
+    xmlOut.startElement("delta");
+    xmlOut.attribute("state", "after");
+    emitDoubleXML(xmlOut, this.value());
+    xmlOut.endElement("delta");
+
+    xmlOut.indentIn();
+    xmlOut.indent();
+
     xmlOut.endElement(this.getXMLName());
   }
 

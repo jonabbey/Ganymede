@@ -199,6 +199,35 @@ public class TranslationService {
   }
 
   /**
+   * <p>This method returns true if this TranslationService has a
+   * non-empty, non-null resource string corresponding to the key
+   * parameter.</p>
+   */
+
+  public boolean hasPattern(String key)
+  {
+    String pattern;
+
+    /* -- */
+
+    try
+      {
+	pattern = bundle.getString(key);
+      }
+    catch (MissingResourceException ex)
+      {
+	return false;
+      }
+
+    if (pattern.equals(""))
+      {
+	return false;
+      }
+
+    return true;
+  }
+
+  /**
    * <p>This method takes a localization key and returns the localized
    * string that matches it in this TranslationService.</p>
    *

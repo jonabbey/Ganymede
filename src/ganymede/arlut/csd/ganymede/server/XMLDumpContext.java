@@ -54,11 +54,10 @@
 
 package arlut.csd.ganymede.server;
 
-import java.io.IOException;
-
+import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.Util.XMLUtils;
-
 import com.jclark.xml.output.XMLWriter;
+import java.io.IOException;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -91,6 +90,13 @@ public class XMLDumpContext {
   boolean dumpCreatorModifierInfo;
 
   /**
+   * <p>If non-null, this SyncRunner will be consulted to answer the
+   * mayInclude and shouldInclude questions.</p>
+   */
+
+  private SyncRunner syncConstraints;
+
+  /**
    * <p>The actual writer, from James Clark's XML package.</p>
    */
 
@@ -110,13 +116,19 @@ public class XMLDumpContext {
    * the plaintext.
    * @param historyInfo If true, all objects dumped out using this XMLDumpContext
    * will include creator and modification information.
+   * @param syncConstraints If non-null, this XMLDumpContext will
+   * carry along with it enough information to answer questions about
+   * whether a given object or field should be emitted to the Sync Channel this XMLDumpContext
+   * is writing to.  If null, the mayInclude and shouldInclude methods will always
+   * return true.
    */
   
-  public XMLDumpContext(XMLWriter xmlOut, boolean passwords, boolean historyInfo)
+  public XMLDumpContext(XMLWriter xmlOut, boolean passwords, boolean historyInfo, SyncRunner syncConstraints)
   {
     this.xmlOut = xmlOut;
     dumpPlaintextPasswords = passwords;
     dumpCreatorModifierInfo = historyInfo;
+    this.syncConstraints = syncConstraints;
   }
 
   public XMLWriter getWriter()
@@ -127,6 +139,90 @@ public class XMLDumpContext {
   public XMLWriter writer()
   {
     return xmlOut;
+  }
+
+  /**
+   * <p>Returns true if the DBObject passed in needs to be synced to
+   * this channel.  This version of shouldInclude() assumes that the
+   * object passed in is a read-only DBObject.  In this case, the
+   * shouldInclude() test will just determine whether an object of
+   * this type should ever be written to the sync channel we are
+   * writing to, if indeed we are writing to one.</p>
+   *
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
+   */
+
+  public boolean shouldInclude(DBObject object)
+  {
+    return syncConstraints == null || syncConstraints.mayInclude(object);
+  }
+
+  /**
+   * <p>Returns true if the DBEditObject passed in needs to be synced
+   * to the sync channel we're writing to.  Because we're passed in a
+   * DBEditObject, we can assume that we are being asked about whether
+   * we should write out this object in the course of a sync
+   * operation.  When DBStore is writing out an XML dump, all the
+   * objects should be read only copies, so we will always use the
+   * DBObject version of shouldInclude().</p>
+   *
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
+   */
+
+  public boolean shouldInclude(DBEditObject object)
+  {
+    return syncConstraints == null || syncConstraints.shouldInclude(object);
+  }
+
+  /**
+   * <p>Returns true if the DBField passed in needs to be synced to
+   * the sync channel attached to this XMLDumpContext.  This version
+   * of shouldInclude() treats the field as always changed, and is
+   * intended for doing full dumps, rather than delta dumps.</p>
+   *
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
+   */
+
+  public boolean shouldInclude(DBField field)
+  {
+    if ((field.getID() == SchemaConstants.CreationDateField ||
+	 field.getID() == SchemaConstants.CreatorField ||
+	 field.getID() == SchemaConstants.ModificationDateField ||
+	 field.getID() == SchemaConstants.ModifierField) &&
+	!doDumpHistoryInfo())
+      {
+	return false;
+      }
+
+    return syncConstraints == null || syncConstraints.shouldInclude(field, true);
+  }
+
+  /**
+   * <p>Returns true if the DBField passed in needs to be synced to
+   * the sync channel attached to this XMLDumpContext. The hasChanged
+   * parameter should be set to true if the field being tested was
+   * changed in the current transaction, or false if it remains
+   * unchanged.</p>
+   *
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
+   */
+
+  public boolean shouldInclude(DBField field, boolean hasChanged)
+  {
+    if ((field.getID() == SchemaConstants.CreationDateField ||
+	 field.getID() == SchemaConstants.CreatorField ||
+	 field.getID() == SchemaConstants.ModificationDateField ||
+	 field.getID() == SchemaConstants.ModifierField) &&
+	!doDumpHistoryInfo())
+      {
+	return false;
+      }
+
+    return syncConstraints == null || syncConstraints.shouldInclude(field, hasChanged);
   }
 
   /**
@@ -174,6 +270,11 @@ public class XMLDumpContext {
     return indentLevel;
   }
 
+  /**
+   * <P>This helper method writes a newline and the appropriate amount
+   * of indentation to this XMLDumpContext's stream.</p>
+   */
+
   public void indent() throws IOException
   {
     XMLUtils.indent(xmlOut, indentLevel);
@@ -209,10 +310,11 @@ public class XMLDumpContext {
   }
 
   /**
-   * Starts an element, indented according to the current indent level.
-   * This may be followed by zero or more calls to <code>attribute</code>.
-   * The start-tag will be closed by the first following call to any method
-   * other than <code>attribute</code>.
+   * Starts an element, preceded by a newline and indented according
+   * to the current indent level.  This may be followed by zero or
+   * more calls to <code>attribute</code>.  The start-tag will be
+   * closed by the first following call to any method other than
+   * <code>attribute</code>.
    */
 
   public void startElementIndent(String name) throws IOException

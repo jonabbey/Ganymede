@@ -266,6 +266,19 @@ public class SyncRunner implements Runnable {
    * remains unchanged.</p>
    */
 
+  public boolean shouldInclude(DBField field, boolean hasChanged)
+  {
+    return this.shouldInclude(field.getOwner().getTypeID(), field.getID(), hasChanged);
+  }
+
+  /**
+   * <p>Returns true if the given object type (baseID) and field
+   * number (fieldID) should be included in this sync channel.  The
+   * hasChanged parameter should be set to true if the field being
+   * tested was changed in the current transaction, or false if it
+   * remains unchanged.</p>
+   */
+
   public boolean shouldInclude(short baseID, short fieldID, boolean hasChanged)
   {
     String x = getOption(baseID, fieldID);

@@ -66,6 +66,7 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectStatus;
@@ -409,6 +410,104 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 
 	xmlOut.indent();
+      }
+
+    xmlOut.endElement(this.getXMLName());
+  }
+
+  /**
+   * <p>This method is used when this field has changed, and its
+   * changes need to be written to a Sync Channel.</p>
+   *
+   * <p>The assumptions of this method are that both this field and
+   * the orig field are defined (i.e., non-null, non-empty), and that
+   * orig is of the same class as this field.  It is an error to call
+   * this method with null dump or orig parameters.</p>
+   *
+   * <p>It is the responsibility of the code that calls this method to
+   * determine that this field differs from orig.  If this field and
+   * orig have no changes between them, the output is undefined.</p>
+   */
+
+  synchronized void emitXMLDelta(XMLDumpContext xmlOut, DBField orig) throws IOException
+  {
+    xmlOut.startElementIndent(this.getXMLName());
+
+    if (!isVector())
+      {
+	// we know that scalar invid fields can never be
+	// edit-in-place/embedded
+
+	xmlOut.indentOut();
+
+	xmlOut.indent();
+	xmlOut.startElement("delta");
+	xmlOut.attribute("state", "before");
+	emitInvidXML(xmlOut, ((InvidDBField) orig).value(), false);
+	xmlOut.endElement("delta");
+
+	xmlOut.indent();
+	xmlOut.startElement("delta");
+	xmlOut.attribute("state", "after");
+	emitInvidXML(xmlOut, this.value(), false);
+	xmlOut.endElement("delta");
+
+	xmlOut.indentIn();
+      }
+    else if (!isEditInPlace())
+      {
+	fieldDeltaRec vectorDelta = this.getVectorDiff(orig);
+	Vector unchangedValues = VectorUtils.difference(this.getVectVal(), VectorUtils.union(vectorDelta.addValues, vectorDelta.delValues));
+
+	xmlOut.indentOut();
+
+	for (int i = 0; i < unchangedValues.size(); i++)
+	  {
+	    xmlOut.indent();
+	    emitInvidXML(xmlOut, (Invid) unchangedValues.elementAt(i), false);
+	  }
+
+	if (vectorDelta.addValues.size() > 0)
+	  {
+	    xmlOut.startElement("delta");
+	    xmlOut.attribute("state", "add");
+	    xmlOut.indentOut();
+
+	    for (int i = 0; i < vectorDelta.addValues.size(); i++)
+	      {
+		xmlOut.indent();
+		emitInvidXML(xmlOut, (Invid) vectorDelta.addValues.elementAt(i), false);
+	      }
+
+	    xmlOut.indentIn();
+	    xmlOut.indent();
+
+	    xmlOut.endElement("delta");
+	  }
+
+	if (vectorDelta.delValues.size() > 0)
+	  {
+	    xmlOut.startElement("delta");
+	    xmlOut.attribute("state", "remove");
+	    xmlOut.indentOut();
+
+	    for (int i = 0; i < vectorDelta.delValues.size(); i++)
+	      {
+		xmlOut.indent();
+		emitInvidXML(xmlOut, (Invid) vectorDelta.delValues.elementAt(i), false);
+	      }
+
+	    xmlOut.indentIn();
+	    xmlOut.indent();
+
+	    xmlOut.endElement("delta");
+	  }
+	
+	xmlOut.indentIn();
+	xmlOut.indent();
+      }
+    else			// edit-in-place
+      {
       }
 
     xmlOut.endElement(this.getXMLName());
@@ -2427,7 +2526,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * in these cases.
    *
    * @param index The index of the element in this field to change.
-   * @param value The value to put into this vector.
+   * @param submittedValue The value to put into this vector.
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
    * @param noWizards If true, wizards will be skipped
@@ -2436,7 +2535,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
   
-  public synchronized ReturnVal setElement(int index, Object value, boolean local, boolean noWizards)
+  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
@@ -2468,6 +2567,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
     Vector values = getVectVal();
 
+    int oldIndex = values.indexOf(submittedValue);
+
+    if (oldIndex == index)
+      {
+	return null;		// no-op
+      }
+    else if (oldIndex != -1)
+      {
+	return getDuplicateValueDialog("setElement", submittedValue); // duplicate
+      }
+
     if (this.value.equals(values.elementAt(index)))
       {
 	if (debug)
@@ -2478,7 +2588,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	return null;		// no change
       }
 
-    retVal = verifyNewValue(value, local);
+    retVal = verifyNewValue(submittedValue, local);
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -2491,7 +2601,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
+	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), submittedValue);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
@@ -2502,7 +2612,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
 
     oldRemote = (Invid) values.elementAt(index);
-    newRemote = (Invid) value;
+    newRemote = (Invid) submittedValue;
 
     checkkey = "setElement" + getName() + owner.getLabel();
 
@@ -2534,11 +2644,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	// be the last thing we do.. if it returns true, nothing
 	// should stop us from running the change to completion
 	
-	newRetVal = eObj.finalizeSetElement(this, index, value);
+	newRetVal = eObj.finalizeSetElement(this, index, submittedValue);
 	
 	if (newRetVal == null || newRetVal.didSucceed())
 	  {
-	    values.setElementAt(value, index);
+	    values.setElementAt(submittedValue, index);
 	    qr = null;
 
 	    // success!
@@ -2586,13 +2696,13 @@ public final class InvidDBField extends DBField implements invid_field {
    * or on a scalar field.  An IllegalArgumentException will be thrown
    * in these cases.
    *
-   * @param value The value to put into this vector.
+   * @param submittedValue The value to put into this vector.
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
    * 
    */
 
-  public synchronized ReturnVal addElement(Object value, boolean local, boolean noWizards)
+  public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid remote;
@@ -2623,12 +2733,12 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // don't both adding something we've already got
 
-    if (values.contains(value))
+    if (values.contains(submittedValue))
       {
-	return null;
+	return getDuplicateValueDialog("addElement", submittedValue); // duplicate
       }
 
-    retVal = verifyNewValue(value, local);
+    retVal = verifyNewValue(submittedValue, local);
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -2643,7 +2753,7 @@ public final class InvidDBField extends DBField implements invid_field {
 					  ts.l("addElement.overflow_text", getName()));
       }
 
-    remote = (Invid) value;
+    remote = (Invid) submittedValue;
 
     eObj = (DBEditObject) owner;
 
@@ -2651,7 +2761,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, submittedValue, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
@@ -2685,11 +2795,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	    retVal = newRetVal;
 	  }
 
-	newRetVal = eObj.finalizeAddElement(this, value);
+	newRetVal = eObj.finalizeAddElement(this, submittedValue);
 
 	if (newRetVal == null || newRetVal.didSucceed())
 	  {
-	    values.addElement(value);
+	    values.addElement(submittedValue);
 	    qr = null;
 
 	    // success!
@@ -2805,13 +2915,20 @@ public final class InvidDBField extends DBField implements invid_field {
 					       Integer.toString(size()), Integer.toString(getMaxArraySize())));
       }
 
-    // don't bother adding values we've already got
+    // Don't allow adding values we've already got
 
-    submittedValues = VectorUtils.difference(submittedValues, values);
+    Vector duplicateValues = VectorUtils.intersection(getVectVal(), submittedValues);
 
-    if (submittedValues.size() == 0)
+    if (duplicateValues.size() > 0)
       {
-	return null;
+	if (!partialSuccessOk)
+	  {
+	    return getDuplicateValuesDialog("addElements", VectorUtils.vectorString(duplicateValues));
+	  }
+	else
+	  {
+	    submittedValues = VectorUtils.difference(submittedValues, getVectVal());
+	  }
       }
 
     // check to see if all of the submitted values are acceptable in
@@ -3019,7 +3136,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * @see arlut.csd.ganymede.rmi.invid_field
    */
 
-  public ReturnVal createNewEmbedded() throws NotLoggedInException
+  public ReturnVal createNewEmbedded() throws NotLoggedInException, GanyPermissionsException
   {
     return createNewEmbedded(false);
   }
@@ -3041,7 +3158,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * field before creating the new object.  
    */
 
-  public synchronized ReturnVal createNewEmbedded(boolean local) throws NotLoggedInException
+  public synchronized ReturnVal createNewEmbedded(boolean local) throws NotLoggedInException, GanyPermissionsException
   {
     ReturnVal retVal = null;
 

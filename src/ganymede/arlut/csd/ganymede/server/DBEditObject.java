@@ -53,6 +53,7 @@
 
 package arlut.csd.ganymede.server;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -62,6 +63,7 @@ import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.booleanSemaphore;
+import arlut.csd.Util.XMLUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
@@ -665,7 +667,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @see arlut.csd.ganymede.rmi.db_object 
    */
 
-  public final ReturnVal setFieldValue(short fieldID, Object value)
+  public final ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
   { 
     DBField field = retrieveField(fieldID);
 
@@ -702,7 +704,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       {
 	return field.setValueLocal(value);
       }
-
 
     // "DBEditObject.setFieldValueLocal() error"
     // "DBEditObject.setFieldValueLocal() couldn''t find field {0} in object {1}"
@@ -2833,7 +2834,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		    // and password fields, which do this their own
 		    // way.
 		    
-		    field.setUndefined(true);
+		    try
+		      {
+			field.setUndefined(true);
+		      }
+		    catch (GanyPermissionsException ex)
+		      {
+			throw new RuntimeException(ex);	// should never happen
+		      }
 		  }
 	      }
 	  }
@@ -3550,6 +3558,104 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       }
   }
 
+  /**
+   * <p>This method is used to write out this DBEditObject and the
+   * deltas between this DBEditObject and the original checked in
+   * version of this DBEditObject to the provided XMLDumpContext.  The
+   * constraints specified in the {@link
+   * arlut.csd.ganymede.server.SyncRunner} registered with the
+   * XMLDumpContext parameter will be used to control what fields are
+   * written.</p>
+   *
+   * <p>This method should only be called on a DBEditObject that is
+   * known to have been edited.. calling this method on a newly
+   * created object should not be done.. use the normal DBObject
+   * emitXML() method in a &lt;delta state="object created"&gt;
+   * element instead.</p>
+   */
+
+  public void emitXMLDelta(XMLDumpContext xmlOut) throws IOException
+  {
+    DBObjectBaseField fieldDef;
+    boolean fieldChanged;
+
+    /* -- */
+
+    if (getStatus() != ObjectStatus.EDITING)
+      {
+	// "Can''t call emitXMLDelta on a DBEditObject in the CREATING, DELETING, or DROPPING state."
+	throw new IllegalArgumentException(ts.l("emitXMLDelta.bad_state"));
+      }
+
+    xmlOut.startElementIndent("object");
+    xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
+    xmlOut.attribute("id", getXMLLabel());
+    xmlOut.indentOut();
+
+    // by using getFieldAry(), we get the fields in display order.  We
+    // just have to be careful not to mess with the array we get back
+
+    DBObjectBaseField[] fieldDefs = objectBase.getFieldAry();
+
+    for (int i = 0; i < fieldDefs.length; i++)
+      {
+	fieldDef = fieldDefs[i];
+
+	DBField myField = (DBField) this.getField(fieldDef.getID());
+	DBField origField = (DBField) original.getField(fieldDef.getID());
+
+	if (myField == null && origField == null)
+	  {
+	    // not present in either old or new
+	    continue;
+	  }
+
+	if (myField != null && origField == null)
+	  {
+	    // newly created
+
+	    if (xmlOut.shouldInclude(myField, true))
+	      {
+		xmlOut.indent();
+		xmlOut.startElement("delta");
+		xmlOut.attribute("state", "field created");
+		xmlOut.indentOut();
+		xmlOut.indent();
+		myField.emitXML(xmlOut);
+		xmlOut.indentIn();
+		xmlOut.indent();
+	      }
+	  }
+	else if (myField == null && origField != null)
+	  {
+	    // deleted
+
+	    if (xmlOut.shouldInclude(origField, true))
+	      {
+		xmlOut.indent();
+		xmlOut.startElement("delta");
+		xmlOut.attribute("state", "field deleted");
+		xmlOut.indentOut();
+		xmlOut.indent();
+		origField.emitXML(xmlOut);
+		xmlOut.indentIn();
+		xmlOut.indent();
+	      }
+	  }
+	else
+	  {
+	    // edited
+
+	    if (xmlOut.shouldInclude(myField))
+	      {
+		myField.emitXMLDelta(xmlOut, origField);
+	      }
+	  }
+      }
+
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("object");
+  }
 
   /**
    * <p>This method is used to generate a String describing the difference
