@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,9 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   //
 
+  private boolean developMode = true; // CAUTION!! Should be false unless the schema elements
+				      // that the Ganymede server depends on are being deliberately
+				      // altered!
   private boolean locked;
   Admin console;
   DBStore store;
@@ -105,6 +108,84 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	  }
 
       } // end synchronized (store)
+  }
+
+  /**
+   *
+   * Returns true if the schema editor is allowing
+   * the 'constant' fields to be edited.  This is
+   * provided solely so the Ganymede developers can
+   * make incompatible changes to the 'constant' schema
+   * items during development.
+   *
+   * @see arlut.csd.ganymede.SchemaEdit
+   *
+   */
+
+  public boolean isDevelopMode()
+  {
+    return developMode;
+  }
+
+  /**
+   *
+   * When the server is in develop mode, it is possible to create new
+   * built-in fields, or fields that can be relied on by the server
+   * code to exist in every non-embedded object type defined.
+   *
+   * @see arlut.csd.ganymede.SchemaEdit
+   *
+   */
+
+  public BaseField createNewBuiltIn()
+  {
+    DBObjectBaseField field = null;
+
+    /* -- */
+
+    if (!developMode)
+      {
+	throw new IllegalArgumentException("can't create new built-ins when developMode is false");
+      }
+
+    synchronized(store)
+      {
+	DBObjectBase base = (DBObjectBase) getBase(SchemaConstants.UserBase);
+	Vector fields = base.getFields();
+	short nextId = 0;
+
+	/* -- */
+
+	for (int i = 0; i < fields.size(); i++)
+	  {
+	    field = (DBObjectBaseField) fields.elementAt(i);
+
+	    if (field.isBuiltIn() && field.getID() >= nextId)
+	      {
+		nextId = (short) (field.getID() + 1);
+	      }
+	  }
+
+	if (nextId > 99)
+	  {
+	    throw new IllegalArgumentException("Error, we have no more room to create built-in fields");
+	  }
+
+	field = base.createNewBuiltIn(nextId);
+
+	String template = "New Built-In Field";
+	String newName = template;
+	int i = 2;
+
+	while (base.getField(newName) != null)
+	  {
+	    newName = template + (i++);
+	  }
+
+	field.setName(newName);
+      }
+
+    return (BaseField) field;
   }
 
   /**
@@ -680,6 +761,19 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	Ganymede.debug("DBSchemaEdit: entered synchronized block");
 
+	// yeah, this is cheesy.. if we can't synchronize the built in
+	// fields due to a name conflict, we're just going to release
+	// the changes.. this wouldn't be adequate if we expected
+	// end-users or even end administrators to mess with the built
+	// in fields, but this is just for we, the developers of
+	// Ganymede, while we're getting things worked out.
+
+	if (developMode && !synchronizeBuiltInFields())
+	  {
+	    release();
+	    return;
+	  }
+
 	enum = newBases.elements();
 
 	Ganymede.debug("DBSchemaEdit: established enum");
@@ -731,6 +825,113 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
     locked = false;
 
     return;
+  }
+
+  /**
+   *
+   * The schema editor edits built-in fields by editing the
+   * set of built-in fields associated with base SchemaConstants.UserBase
+   * (which is chosen randomly as a representative non-embedded object).
+   *
+   * IMPORTANT NOTE: This is only to be used when the Schema Editing rig
+   * is being used to alter the basic built-in fields that the Ganymede
+   * schema depends on.  As such, it is critical that built-ins only
+   * be modified with great caution.  Note also that DBObjectBase()'s
+   * constructor is responsible for implementing built-ins for newly
+   * created object base types.  DBObjectBase.java should be edited
+   * before any new bases are created after any editing of the built-in
+   * fields.
+   *
+   */
+
+  private boolean synchronizeBuiltInFields()
+  {
+    DBObjectBase 
+      userBase,
+      base;
+
+    Vector
+      fields,
+      builtInFields = new Vector();
+
+    DBObjectBaseField
+      fieldDef,
+      newFieldDef;
+
+    Base[] bases;
+
+    /* -- */
+
+    userBase = (DBObjectBase) getBase(SchemaConstants.UserBase);
+
+    fields = userBase.getFields();
+
+    for (int i = 0; i < fields.size(); i++)
+      {
+	fieldDef = (DBObjectBaseField) fields.elementAt(i);
+
+	if (fieldDef.isBuiltIn())
+	  {
+	    builtInFields.addElement(fieldDef);
+	  }
+      }
+
+    bases = getBases(false);
+    
+    for (int i = 0; i < bases.length; i++)
+      {
+	base = (DBObjectBase) bases[i];
+
+	if (base == userBase)
+	  {
+	    continue;
+	  }
+
+	// now we need to make sure that base
+	// has just those built-in field definitions that
+	// were in userBase
+
+	fields = base.getFields();
+
+	for (int j = 0; j < fields.size(); j++)
+	  {
+	    fieldDef = (DBObjectBaseField) fields.elementAt(j);
+	    
+	    if (fieldDef.isBuiltIn())
+	      {
+		base.deleteField(fieldDef);
+	      }
+	  }
+
+	for (int j = 0; j < builtInFields.size(); j++)
+	  {
+	    fieldDef = (DBObjectBaseField) builtInFields.elementAt(j);
+
+	    // make sure that the base doesn't already have a field with
+	    // the same name
+
+	    if (base.getField(fieldDef.getName()) != null)
+	      {
+		return false;
+	      }
+	    
+	    // copy it
+
+	    try
+	      {
+		newFieldDef = new DBObjectBaseField(fieldDef, this);
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("bizarre remote exception: " + ex);
+	      }
+
+	    newFieldDef.setBase(base);
+	    base.fieldHash.put(new Short(newFieldDef.getID()), newFieldDef);
+	  }
+      }
+
+    return true;
   }
 
   /**
