@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -54,7 +54,7 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
   public GanymedeServer(int limit) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
-
+ 
     if (server == null)
       {
 	this.limit = limit;
@@ -95,6 +95,15 @@ class GanymedeServer extends UnicastRemoteObject implements Server {
     PasswordDBField pdbf;
 
     /* -- */
+
+    synchronized (Ganymede.db)
+      {
+	if (Ganymede.db.schemaEditInProgress)
+	  {
+	    client.forceDisconnect("Schema Edit In Progress");
+	    return null;
+	  }
+      }
     
     clientName = client.getName();
     clientPass = client.getPassword();
