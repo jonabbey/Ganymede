@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1160,24 +1160,41 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    public boolean verifyReadPermission()
    {
      GanymedeSession gSession;
+     PermEntry perm1, perm2;
 
      /* -- */
 
      if (owner.editset != null)
        {
 	 gSession = owner.editset.getSession().getGSession();
-	 
-	 return (gSession.getPerm(owner).isVisible() &&
-		 gSession.getPerm(owner.getInvid().getType(), getID()).isVisible());
        }
      else if (owner.gSession != null)
        {
-	 return (owner.gSession.getPerm(owner).isVisible() &&
-		 owner.gSession.getPerm(owner.getInvid().getType(), getID()).isVisible());
+	 gSession = owner.gSession;
        }
      else
        {
 	 return true; // we don't know who is looking at us, assume it's a server-local access
+       }
+
+     perm2 = gSession.getPerm(owner, getID());
+
+     if (perm2 == null)
+       {
+	 perm1 = gSession.getPerm(owner);
+	 
+	 if (perm1 != null)
+	   {
+	     return perm1.isVisible();
+	   }
+	 else
+	   {
+	     return false;
+	   }
+       }
+     else
+       {
+	 return perm2.isVisible();
        }
    }
 
@@ -1192,6 +1209,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   public boolean verifyWritePermission()
   {
     GanymedeSession gSession;
+    PermEntry perm1, perm2;
 
     /* -- */
 
@@ -1199,8 +1217,25 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	gSession = owner.editset.getSession().getGSession();
 
-	return (gSession.getPerm(owner).isEditable() &&
-		gSession.getPerm(owner.getInvid().getType(), getID()).isEditable());
+	perm2 = gSession.getPerm(owner, getID());
+
+	if (perm2 == null)
+	  {
+	    perm1 = gSession.getPerm(owner);
+	
+	    if (perm1 != null)
+	      {
+		return perm1.isEditable();
+	      }
+	    else
+	      {
+		return false;
+	      }
+	  }
+	else
+	  {
+	    return perm2.isEditable();
+	  }
       }
     else
       {
