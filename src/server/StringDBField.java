@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -241,13 +241,25 @@ public class StringDBField extends DBField implements string_field {
     return (String) values.elementAt(index);
   }
 
+  /**
+   *
+   * This method returns a text encoded value for this StringDBField
+   * without checking permissions.<br><br>
+   *
+   * This method avoids checking permissions because it is used on
+   * the server side only and because it is involved in the getLabel()
+   * logic for DBObject, which is invoked from GanymedeSession.getPerm().<br><br>
+   *
+   * If this method checked permissions and the getPerm() method
+   * failed for some reason and tried to report the failure using
+   * object.getLabel(), as it does at present, the server could get
+   * into an infinite loop.
+   * 
+   */
+
+
   public synchronized String getValueString()
   {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
-
     if (!isVector())
       {
 	if (value == null)
