@@ -129,7 +129,6 @@ total         - Complete strip and rebuild
 
       <fileset dir="${graphics.dir}" includes="arlut/csd/JCalendar/*"/>
       <fileset dir="${graphics.dir}" includes="arlut/csd/JDataComponent/*"/>
-      <fileset dir="${graphics.dir}" includes="arlut/csd/JCalendar/*"/>
       <fileset dir="${graphics.dir}" includes="arlut/csd/ganymede/client/*"/>
 
       <fileset dir="${build.classes}">
