@@ -130,8 +130,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
   public boolean builderPhase1()
   {
     PrintWriter out;
-    boolean success = false;
-
+    
     /* -- */
 
     Ganymede.debug("LDAPBuilderTask builderPhase1 running");
@@ -151,9 +150,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     now = null;
 
     if (baseChanged(SchemaConstants.UserBase) || 
-	baseChanged((short) 257) ||
-        baseChanged((short) 270) ||
-        baseChanged((short) 271))
+	baseChanged((short) 257))
       {
 	Ganymede.debug("Need to build LDAP output");
 
@@ -165,7 +162,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("LDAPBuilderTask.builderPhase1(): couldn't open users.ldif file: " + ex);
+	    throw new RuntimeException("LDAPBuilderTask.builderPhase1(): couldn't open users.ldif file: " + ex);
 	  }
 	
 	if (out != null)
@@ -196,7 +193,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("LDAPBuilderTask.builderPhase1(): couldn't open groups.ldif file: " + ex);
+	    throw new RuntimeException("LDAPBuilderTask.builderPhase1(): couldn't open groups.ldif file: " + ex);
 	  }
 
 	if (out != null)
@@ -218,14 +215,28 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 		out.close();
 	      }
 	  }
+      }
 
+    if (baseChanged(SchemaConstants.UserBase) ||
+        /* Groups */
+        baseChanged((short) 257) ||
+        /* User netgroups */
+        baseChanged((short) 270) ||
+        /* Systems */
+        baseChanged((short) 263) ||
+        /* System netgroups */
+        baseChanged((short) 271))
+      {
+        /* Reset some of our locals for this second pass */
+	out = null;
+  
 	try
 	  {
 	    out = openOutFile(path + "netgroups.ldif", "ldap");
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("LDAPBuilderTask.builderPhase1(): couldn't open netgroups.ldif file: " + ex);
+	    throw new RuntimeException("LDAPBuilderTask.builderPhase1(): couldn't open netgroups.ldif file: " + ex);
 	  }
 	  
 	if (out != null)
@@ -257,13 +268,11 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 		out.close();
 	      }
 	  }
-  
-	success = true;
       }
 
     Ganymede.debug("LDAPBuilderTask builderPhase1 completed");
 
-    return success;
+    return true;
   }
 
   /**
