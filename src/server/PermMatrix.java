@@ -6,7 +6,7 @@
    object type and field id's.
    
    Created: 3 October 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -78,6 +78,11 @@ public class PermMatrix implements java.io.Serializable {
     Object key;
 
     /* -- */
+
+    if (orig == null)
+      {
+	return new PermMatrix(this);
+      }
 
     result = new PermMatrix(orig);
 
@@ -208,7 +213,13 @@ public class PermMatrix implements java.io.Serializable {
 
   public PermEntry getPerm(short baseID)
   {
-    return (PermEntry) matrix.get(matrixEntry(baseID));
+    PermEntry result;
+
+    /* -- */
+
+    result = (PermEntry) matrix.get(matrixEntry(baseID));
+
+    return result;
   }
 
   /**
@@ -221,14 +232,20 @@ public class PermMatrix implements java.io.Serializable {
 
   public PermEntry getPerm(Base base, BaseField field)
   {
+    PermEntry result;
+
+    /* -- */
+
     try
       {
-	return (PermEntry) matrix.get(matrixEntry(base.getTypeID(), field.getID()));
+	result = (PermEntry) matrix.get(matrixEntry(base.getTypeID(), field.getID()));
       }
     catch (RemoteException ex)
       {
 	throw new RuntimeException("caught remote: " + ex);
       }
+
+    return result;
   }
 
   /**
@@ -241,14 +258,20 @@ public class PermMatrix implements java.io.Serializable {
 
   public PermEntry getPerm(Base base)
   {
+    PermEntry result;
+
+    /* -- */
+
     try
       {
-	return (PermEntry) matrix.get(matrixEntry(base.getTypeID()));
+	result = (PermEntry) matrix.get(matrixEntry(base.getTypeID()));
       }
     catch (RemoteException ex)
       {
 	throw new RuntimeException("caught remote: " + ex);
       }
+
+    return result;
   }
 
   /**
