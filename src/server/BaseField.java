@@ -6,7 +6,7 @@
    from a field.
    
    Created: 17 April 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -119,6 +119,18 @@ public interface BaseField extends Remote {
   public void setCrypted(boolean b) throws RemoteException;
   
   // convenience methods
+
+  /**
+   *
+   * This method is intended to produce a human readable
+   * representation of this field definition's type attributes.  This
+   * method should not be used programatically to determine this
+   * field's type information.
+   *
+   * This method is only for human elucidation, and the precise
+   * results returned are subject to change at any time.
+   *
+   */
 
   public String getTypeDesc() throws RemoteException;
 }
