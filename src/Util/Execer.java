@@ -8,8 +8,8 @@
    
    Created: 13 July 2001
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2001/07/13 18:43:27 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2001/07/13 18:53:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import java.io.*;
  * process and to take care of promptly closing down file handles,
  * etc.</p>
  *
- * @version $Revision: 1.3 $ $Date: 2001/07/13 18:43:27 $ $Name:  $
+ * @version $Revision: 1.4 $ $Date: 2001/07/13 18:53:46 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -94,44 +94,52 @@ public class Execer {
       }
     finally
       {
-	// the following is mentioned as a work-around for the
-	// fact that Process keeps its file descriptors open by
-	// default until Garbage Collection
-		    
-	try
-	  {
-	    p.getInputStream().close();
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
-	catch (IOException ex)
-	  {
-	  }
-		
-	try
-	  {
-	    p.getOutputStream().close();
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
-	catch (IOException ex)
-	  {
-	  }
-		
-	try
-	  {
-	    p.getErrorStream().close();
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
-	catch (IOException ex)
-	  {
-	  }
-
-	p.destroy();
+	Execer.cleanup(p);
       }
+  }
+
+  /**
+   * <p>This method shuts down / cleans up all resources related to
+   * Process p.  The following is mentioned as a work-around for the
+   * fact that Process keeps its file descriptors open by default
+   * until Garbage Collection.</p>
+   */
+
+  public static void cleanup(Process p)
+  {
+    try
+      {
+	p.getInputStream().close();
+      }
+    catch (NullPointerException ex)
+      {
+      }
+    catch (IOException ex)
+      {
+      }
+    
+    try
+      {
+	p.getOutputStream().close();
+      }
+    catch (NullPointerException ex)
+      {
+      }
+    catch (IOException ex)
+      {
+      }
+    
+    try
+      {
+	p.getErrorStream().close();
+      }
+    catch (NullPointerException ex)
+      {
+      }
+    catch (IOException ex)
+      {
+      }
+    
+    p.destroy();
   }
 }
