@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/10/21 00:04:56 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/01/14 00:50:47 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -52,6 +52,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
+import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 
 import javax.swing.*;
@@ -75,6 +76,12 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   JButton
     showHistory,
     showFullHistory;
+
+  JPanel
+    historyTextPanel;
+
+  CardLayout
+    historyTextCard = new CardLayout();
 
   JdateField
     selectDate;
@@ -135,7 +142,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 					 modifier_field, modification_date_field));;
 
     topPanel.add("North", midPanel);
-    topPanel.setBorder(new TitledBorder("Creation/Modifcation"));
+    topPanel.setBorder(new TitledBorder("Creation/Modification"));
     
     JPanel p = new JPanel(new BorderLayout());
     titledBorder = new TitledBorder("Detailed History");
@@ -145,11 +152,38 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     historyText = new JTextArea();
     historyText.setBackground(Color.white);
     historyText.setEditable(false);
-    
-    p.add("Center", new JScrollPane(historyText));
+
+    historyTextPanel = new JPanel(historyTextCard);
+    historyTextPanel.add("text", new JScrollPane(historyText));
+
+    ImageIcon waitImage = new ImageIcon(gc.wp.getWaitImage());
+    JLabel waitLabel = new JLabel(waitImage);
+
+    JPanel waitPanel = new JPanel(new BorderLayout());
+    waitPanel.setBackground(java.awt.Color.white);
+
+    JLabel waitText = new JLabel("Waiting for history from server...");
+    waitText.setForeground(java.awt.Color.black);
+    waitText.setFont(Font.getFont("Courier"));
+
+    JPanel topwaitPanel = new JPanel(new FlowLayout());
+    topwaitPanel.setBackground(java.awt.Color.white);
+    topwaitPanel.add(waitText);
+
+    waitPanel.add("North", topwaitPanel);
+    waitPanel.add("Center", waitLabel);
+    waitPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(java.awt.Color.black),
+							   BorderFactory.createEmptyBorder(5,5,5,5)));
+
+    historyTextPanel.add("wait", waitPanel);
+
+    historyTextCard.show(historyTextPanel, "text");
+
+    p.add("Center", historyTextPanel);
 
     JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, p);
     topPanel.setMinimumSize(new Dimension(1,1));
+    split.setDividerLocation(100);
     add("Center", split);
   }
   
@@ -157,22 +191,70 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   {
     if (e.getSource() == showHistory || e.getSource() == showFullHistory)
       {
+	loadHistory(e.getSource() == showFullHistory);
+      }
+  }
+
+  public void showWait()
+  {
+    showHistory.setEnabled(false);
+    showFullHistory.setEnabled(false);
+    historyTextCard.show(historyTextPanel, "wait");
+  }
+
+  public void showText(String text)
+  {
+    showHistory.setEnabled(true);
+    showFullHistory.setEnabled(true);
+    historyTextCard.show(historyTextPanel, "text");
+    historyText.setText(text);
+  }
+
+  public void loadHistory(boolean fullHistory)
+  {
+    final historyPanel me = this;
+    final boolean showAll = fullHistory;
+
+    /* -- */
+
+    Thread historyThread = new Thread(new Runnable() {
+      public void run() {
 	try
 	  {
-	    gc.setWaitCursor();
+	    try
+	      {
+		SwingUtilities.invokeAndWait(new Runnable() {
+		  public void run() {
+		    me.showWait();
+		  }
+		});
+	      }
+	    catch (InvocationTargetException ite)
+	      {
+		ite.printStackTrace();
+	      }
+	    catch (InterruptedException ie)
+	      {
+		ie.printStackTrace();
+	      }
 
-	    historyBuffer = gc.getSession().viewObjectHistory(invid, selectedDate, 
-							      (e.getSource() == showFullHistory));
-	    historyText.setText(historyBuffer.toString());
-
-	    gc.setNormalCursor();
+	    historyBuffer = gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
 	  }
 	catch (RemoteException rx)
 	  {
-	    gc.setNormalCursor();
 	    throw new RuntimeException("Could not get object history.");
 	  }
-      }
+	finally
+	  {
+	    SwingUtilities.invokeLater(new Runnable() {
+	      public void run() {
+		me.showText(historyBuffer.toString());
+	      }
+	    });
+	  }
+      }}, "History loader thread");
+
+    historyThread.start();
   }
 
   public boolean setValuePerformed(JValueObject e)
