@@ -6,7 +6,7 @@
    field.
    
    Created: 13 October 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -548,10 +548,10 @@ public class userCategoryWizard extends GanymediatorWizard {
 
     if (notifyList != null)
       {
-	userObject.getGSession().sendMail(arlut.csd.Util.VectorUtils.vectorString(notifyList),
-					  "CategorySet: User " + userObject.getLabel() + " in " +
-					  newCategory.getLabel(),
-					  tempBuffer);
+	userObject.getEditSet().logMail(notifyList,
+					"CategorySet: User " + userObject.getLabel() + " in " +
+					newCategory.getLabel(),
+					tempBuffer.toString());
       }
 
     retVal = success("Category Changed",
