@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -90,9 +90,17 @@ public class DBObject {
 
   /**
    *
-   * This constructor is used to create a non-editable from a DBEditObject
-   * that we have finished editing.
+   * <p>This constructor is used to create a non-editable from a
+   * DBEditObject that we have finished editing.  Whenever a
+   * transaction checks a created or edited shadow back into the
+   * DBStore, it actually does so by creating a new DBObject to
+   * replace any previous version of the object in the DBStore.</p>
    *
+   * @param eObj The shadow object to copy into the new DBObject
+   *
+   * @see csd.DBStore.DBEditSet#commit()
+   * @see csd.DBStore.DBEditSet#release()
+   * 
    */
   
   DBObject(DBEditObject eObj)
@@ -112,12 +120,14 @@ public class DBObject {
    * to disk.  emit() dumps an object in its entirety to the
    * given out stream.
    *
+   * @param out A journal or DBStore writing stream.
+   *
    */
 
   void emit(DataOutput out) throws IOException
   {
     Enumeration enum;
-    short key;
+    Short key;
 
     /* -- */
 
@@ -128,9 +138,9 @@ public class DBObject {
 
     while (enum.hasMoreElements())
       {
-	key = (short) ((Integer) enum.nextElement()).intValue();
-	out.writeShort((short) key);
-	((DBField) fields.get(new Integer(key))).emit(out);
+	key = (Short) enum.nextElement();
+	out.writeShort(key.shortValue());
+	((DBField) fields.get(key)).emit(out);
       }
   }
 
@@ -149,7 +159,7 @@ public class DBObject {
     DBObjectBaseField definition;
     short fieldcode;
     short type;
-    Integer fieldINT;
+    Short key;
 
     /* -- */
 
@@ -169,9 +179,9 @@ public class DBObject {
 	// DBObjectBase
 
 	fieldcode = in.readShort();
-	fieldINT = new Integer(fieldcode);
+	key = new Short(fieldcode);
 
-	definition = (DBObjectBaseField) objectBase.fieldHash.get(fieldINT);
+	definition = (DBObjectBaseField) objectBase.fieldHash.get(key);
 
 	type = definition.field_type;
 
@@ -261,27 +271,28 @@ public class DBObject {
 	tmp.owner = this;
 	    
 	// now add the field to our fields hash
-	fields.put(fieldINT, tmp);
+	fields.put(key, tmp);
       }
   }
 
   /**
    *
-   * Check this object out from the datastore for editing.  This
-   * method is intended to be called by the editDBObject method
-   * in DBSession.. createShadow should not be called on an
-   * arbitrary viewed object in other contexts.. probably should
-   * do something to guarantee this?
+   * <p>Check this object out from the datastore for editing.  This
+   * method is intended to be called by the editDBObject method in
+   * DBSession.. createShadow should not be called on an arbitrary
+   * viewed object in other contexts.. probably should do something to
+   * guarantee this?</p>
    *
-   * If this object is being edited, we say that it has a shadow
-   * object;  a session gets a copy of this object.. the copy
-   * is actually a DBEditObject, which has the intelligence to
-   * allow the client to modify the (copies of the) data fields.
+   * <p>If this object is being edited, we say that it has a shadow
+   * object; a session gets a copy of this object.. the copy is
+   * actually a DBEditObject, which has the intelligence to allow the
+   * client to modify the (copies of the) data fields.</p>
    *
-   * note: this is only used for editing pre-existing objects..
-   * the code for creating new objects is in DBSession.. 
-   * this method might be better incorporated into DBSession
-   * as well.
+   * <p>note: this is only used for editing pre-existing objects..
+   * the code for creating new objects is in DBSession..  this method
+   * might be better incorporated into DBSession as well.</p>
+   * 
+   * @param editset The transaction to own this shadow.
    *
    */
 
@@ -303,6 +314,16 @@ public class DBObject {
     return shadowObject;
   }
 
+  /**
+   * <p>This method is the complement to createShadow, and
+   * is used during editset release.</p>
+   *
+   * @param editset The transaction owning this object's shadow.
+   *
+   * @see csd.DBStore.DBEditSet#release()
+   *
+   */
+
   synchronized boolean clearShadow(DBEditSet editset)
   {
     if (markedAsDeleted || editset != this.editset)
@@ -322,13 +343,18 @@ public class DBObject {
 
   /**
    *
-   * Mark this object as deleted by the given editset.
+   * <p>Mark this object as deleted by the given editset.</p>
    *
-   * An object that is marked for deletion cannot be
+   * <p>An object that is marked for deletion cannot be
    * checked out for editing or marked for deletion
    * by another editset.  When the editset that has marked
    * this object has committed, this object will be unlinked
-   * from the objectBase.
+   * from the objectBase.</p>
+   *
+   * @param editset The transaction seeking to delete this object.
+   *
+   * @see csd.DBStore.DBSession#deleteDBObject()
+   * @see csd.DBStore.DBEditSet#release()
    *
    */
 
@@ -350,7 +376,15 @@ public class DBObject {
 
   /**
    *
-   * Clear out a deletion mark.  Used for editset abort.
+   * <p>Clear out a deletion mark.  Used for editset abort.</p>
+   *
+   * <p>Once the deletion mark is cleared, the object is considered
+   * up for grabs for any other transaction wishing to check it out
+   * for editing or mark it for deletion.  Assuming of course, that
+   * this object wasn't checked out for editing *and* marked for
+   * deletion. Which shouldn't happen, I don't think. </p>
+   *
+   * @param editset The transaction that previously marked this object for deletion.
    *
    */
 
@@ -373,13 +407,15 @@ public class DBObject {
   
   /**
    *
-   * Get read-only access to a field from this object
+   * <p>Get read-only access to a field from this object.</p>
+   *
+   * @param id The field code for the desired field of this object.
    *
    */
 
   public DBField viewField(short id)
   {
-    return (DBField) fields.get(new Integer(id));
+    return (DBField) fields.get(new Short(id));
   }
 
   /**
