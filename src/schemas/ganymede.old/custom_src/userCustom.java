@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -312,7 +312,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     return false;
   }
-
 
   /**
    *
@@ -956,6 +955,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	sf = (StringDBField) getField(HOMEDIR);
 
 	sf.setValueLocal("/home/" + (String) value);	// ** ARL
+
+	// if we don't have a signature set, set it to the username.
+
+	sf = (StringDBField) getField(SIGNATURE);
+
+	String sigVal = (String) sf.getValueLocal();
+
+	if (sigVal == null || sigVal.equals(oldName))
+	  {
+	    sf.setValueLocal(value);
+	  }
 
 	// update the email target field.  We want to look for
 	// oldName@arlut.utexas.edu and replace it if we find it.
