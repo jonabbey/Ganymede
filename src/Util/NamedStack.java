@@ -8,8 +8,8 @@
    
    Created: 2 October 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/10/02 21:12:44 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/10/03 01:42:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -103,19 +103,24 @@ public class NamedStack {
 
   public synchronized Object pop(String name)
   {
-    if (findName(name) == -1)
+    // okay, i'm a bad person.  i micro-optimized this to avoid having
+    // to do a few name equality tests twice.  i figure everything's
+    // nice, private, and synchronized, so this is a safe enough thing
+    // to do.  but you can spank me if you want to.
+
+    int i = findName(name);
+
+    if (i == -1)
       {
 	return null;
       }
 
-    NamedStackHandle handle = (NamedStackHandle) stack.pop();
-
-    while (!handle.getName().equals(name))
+    for (int j = stack.size()-1; j > i; j--)
       {
-	handle = (NamedStackHandle) stack.pop();
+	stack.pop();
       }
 
-    return handle.getData();
+    return ((NamedStackHandle) stack.pop()).getData();
   }
 
   public Object elementAt(int index)
