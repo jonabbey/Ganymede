@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.69 $ %D%
+   Version: $Revision: 1.70 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2007,18 +2007,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * Creates and adds a new embedded object in this
-   * field, if it is an edit-in-place vector.<br><br>
+   * This method is used to create a new embedded object in an
+   * invid field that contains a vector of edit-in-place/embedded
+   * objects.  The ReturnVal returned indicates success/failure,
+   * and on success will provide the Invid of the newly created
+   * embedded when ReturnVal.getInvid() is called on it.
    *
-   * Returns an Invid pointing to the newly created
-   * and appended embedded object, or null if
-   * creation / addition was not possible.
    *
    * @see arlut.csd.ganymede.invid_field
-   *
    */
 
-  public Invid createNewEmbedded()
+  public ReturnVal createNewEmbedded()
   {
     return createNewEmbedded(false);
   }
@@ -2036,7 +2035,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * 
    */
 
-  public synchronized Invid createNewEmbedded(boolean local)
+  public synchronized ReturnVal createNewEmbedded(boolean local)
   {
     if (!isEditable(local))
       {
@@ -2121,6 +2120,13 @@ public final class InvidDBField extends DBField implements invid_field {
     // the schema.  Doing it this way, we don't have to worry about
     // whether the admins got this part of the schema right.
 
+    retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, newObj, null);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
     if (eObj.finalizeAddElement(this, newObj))
       {
 	values.addElement(newObj);
@@ -2132,12 +2138,15 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	defined = true;		// very important!
 
-	return newObj;
+	retVal.setInvid(newObj);
+	return retVal;
       } 
     else
       {
 	embeddedObj.setFieldValue(SchemaConstants.ContainerField, null); // *sync* DBField
-	return null;
+	return Ganymede.createErrorDialog("Couldn't create embedded object",
+					  "The custom code for this object type refused to okay adding " +
+					  "a new embedded object.  It was created though..");
       }
   }
 
