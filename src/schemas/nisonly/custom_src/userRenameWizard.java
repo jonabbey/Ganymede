@@ -5,7 +5,7 @@
    A wizard to manage user rename interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,11 +28,11 @@ import arlut.csd.JDialog.JDialogBuff;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * A wizard to handle the wizard interactions required when a user is
- * renamed.  All that this wizard actually does is pop up a couple of
- * dialog boxes advising the user as to the implications of renaming
- * a user account.
+ * renamed.  All that this wizard actually does is pop up a dialog box
+ * advising the user about the implications of renaming a user
+ * account, and asking the user for a confirmation that he really
+ * wants to do this.
  *
  * @see arlut.csd.ganymede.ReturnVal
  * @see arlut.csd.ganymede.Ganymediator 
@@ -139,6 +139,7 @@ public class userRenameWizard extends GanymediatorWizard {
   {
     JDialogBuff dialog;
     ReturnVal retVal = null;
+    boolean aborted;
 
     /* -- */
 
@@ -146,9 +147,17 @@ public class userRenameWizard extends GanymediatorWizard {
       {
 	System.err.println("userRenameWizard: USER_RENAME state 1 processing return vals from dialog");
 
-	boolean aborted = false;
+	if (returnHash != null)
+	  {
+	    Boolean answer = (Boolean) returnHash.get("Yes, I'm sure I want to do this");
+	    aborted = (answer == null) || !answer.booleanValue();
+	  }
+	else
+	  {
+	    aborted = true;
+	  }
 
-	if (returnHash == null)
+	if (aborted)
 	  {
 	    retVal = new ReturnVal(false);
 	    dialog = new JDialogBuff("User Rename Cancelled",
@@ -162,24 +171,18 @@ public class userRenameWizard extends GanymediatorWizard {
 
 	    return retVal;
 	  }
-	else
+
+	Enumeration enum = returnHash.keys();
+	int i = 0;
+
+	while (enum.hasMoreElements())
 	  {
-	    Enumeration enum = returnHash.keys();
-	    int i = 0;
-
-	    while (enum.hasMoreElements())
-	      {
-		Object key = enum.nextElement();
-		Object value = returnHash.get(key);
-
-		System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
-	      }
-
-	    Boolean answer = (Boolean) returnHash.get("Yes, I'm sure I want to do this");
-		
-	    aborted = (answer == null) || !answer.booleanValue();
+	    Object key = enum.nextElement();
+	    Object value = returnHash.get(key);
+	    
+	    System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
 	  }
-
+	
 	System.err.println("userRenameWizard: Calling field.setValue()");
 
 	state = DONE;		// let the userCustom wizardHook know to go 
