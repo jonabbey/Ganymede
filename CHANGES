@@ -417,6 +417,29 @@ anymore.  It does the right thing.
 This is another one of those things that's been bugging me for a long
 time, and I'm glad to see it fixed.
 
+26. [SERVER] Fixed case-sensitive login handling
+
+The GanymedeServer login process was mishandling login authentication,
+by canonicalizing user login to lower case, but using a case-sensitive
+comparison to find matching admin privileges.
+
+GanymedeServer.login() now uses a case-insensitive query to look up a
+user's login privileges.
+
+This is another thing that Pug caught.
+
+27. [SERVER] Fixed mail handling for persona names
+
+Another fix for a Pug bug.  Pug reported that attempting to log into a
+server with a fully qualified persona name, like 'pug:admin', and
+messing up on the password would cause the server to attempt to send
+mail to 'pug:admin@mailserver.com', which his mail system ultimately
+resolved to be equivalent to 'admin@mailserver.com'.
+
+The DBLog code that handles system event mail will now truncate at the
+colon, so a bad login for 'pug:admin' will be sent to
+'pug@mailserver.com'.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
