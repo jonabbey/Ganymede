@@ -6,8 +6,8 @@
    
    Created: 17 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/02/26 20:48:04 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/03/04 19:52:44 $
    Module By: Brian O'Mara
 
    -----------------------------------------------------------------------
@@ -123,6 +123,11 @@ public class PersonaDialog extends JCenterDialog implements ActionListener{
 					TitledBorder.LEFT,
 					TitledBorder.TOP));
 
+    JLabel image = new JLabel(new ImageIcon(gc.personaIcon));
+    image.setBorder(new EmptyBorder(new Insets(10,15,0,0)));
+    image.setVerticalAlignment(JLabel.TOP);
+    personaPanel.add("West", image);
+
     topPanel.add("Center", personaPanel);
     topPanel.add("South", new JSeparator());
 
@@ -161,7 +166,7 @@ public class PersonaDialog extends JCenterDialog implements ActionListener{
     personaBox.add(Box.createVerticalStrut(25));
 
     personaBox.add(passPanel);
-    personaPanel.add("North", personaBox);
+    personaPanel.add("Center", personaBox);
     
 
     pack();
