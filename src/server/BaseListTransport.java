@@ -7,7 +7,7 @@
    types on the server to the client.
    
    Created: 2 March 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,7 +39,7 @@ public class BaseListTransport implements java.io.Serializable {
 
   private StringBuffer buffer;
   private transient int lastIndex = 0;
-  private transient GanymedeSession session;
+  private transient Object session;
 
   /* -- */
 
@@ -119,7 +119,7 @@ public class BaseListTransport implements java.io.Serializable {
     addChunk(String.valueOf(node.getLabelField()));
     addChunk(node.getLabelFieldName());
     addChunk(String.valueOf(node.canInactivate()));
-    addChunk(String.valueOf(node.canCreate(session)));
+    addChunk(String.valueOf(node.canCreate(((GanymedeSession) session))));
     addChunk(String.valueOf(node.isEmbedded()));
     addChunk(String.valueOf(node.getDisplayOrder()));
   }

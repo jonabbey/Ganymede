@@ -7,7 +7,7 @@
    and base structures on the server to the client.
    
    Created: 12 February 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -38,7 +38,7 @@ public class CategoryTransport implements java.io.Serializable {
   // ---
 
   StringBuffer buffer;
-  transient GanymedeSession session = null;
+  transient Object session = null;
 
   /* -- */
 
@@ -115,7 +115,7 @@ public class CategoryTransport implements java.io.Serializable {
 
 		if (session != null)
 		  {
-		    if (session.getPerm(base.getTypeID(), true).isEditable())
+		    if (((GanymedeSession) session).getPerm(base.getTypeID(), true).isEditable())
 		      {
 			result = true;
 			addBaseInfo(base);
@@ -167,7 +167,7 @@ public class CategoryTransport implements java.io.Serializable {
 	      {
 		DBObjectBase base = (DBObjectBase) node;
 
-		if (session.getPerm(base.getTypeID(), true).isEditable())
+		if (((GanymedeSession) session).getPerm(base.getTypeID(), true).isEditable())
 		  {
 		    result = true;
 		  }
@@ -207,7 +207,7 @@ public class CategoryTransport implements java.io.Serializable {
 	      {
 		DBObjectBase base = (DBObjectBase) node;
 
-		if (session.getPerm(base.getTypeID(), true).isVisible())
+		if (((GanymedeSession) session).getPerm(base.getTypeID(), true).isVisible())
 		  {
 		    result = true;
 		  }
@@ -230,7 +230,7 @@ public class CategoryTransport implements java.io.Serializable {
     addChunk(String.valueOf(node.getLabelField()));
     addChunk(node.getLabelFieldName());
     addChunk(String.valueOf(node.canInactivate()));
-    addChunk(String.valueOf(node.canCreate(session)));
+    addChunk(String.valueOf(node.canCreate(((GanymedeSession) session))));
     addChunk(String.valueOf(node.isEmbedded()));
     addChunk(String.valueOf(node.getDisplayOrder()));
   }
