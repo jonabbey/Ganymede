@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 2001/07/03 17:52:15 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 2001/07/04 01:11:53 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -95,7 +95,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.44 $ $Date: 2001/07/03 17:52:15 $ $Name:  $
+ * @version $Revision: 1.45 $ $Date: 2001/07/04 01:11:53 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -106,7 +106,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   // --
 
   JsetValueCallback
-    my_parent;
+    my_callback;
 
   JButton
     add,
@@ -125,17 +125,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     outTitle = new JButton();
 
   String
-    org_in,
-    org_out;
+    org_in = "Members",
+    org_out = "Available";
 
   JButton
     addCustom;
-
-  JPanel
-    lists;
-
-  boolean
-    allowCallback = false;
 
   JstringField 
     custom = null;
@@ -150,139 +144,23 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   BevelBorder
     bborder = new BevelBorder(BevelBorder.RAISED);
-
-  LineBorder
-    lborder = new LineBorder(Color.black);
   
-  int rowWidth;
-
   /* -- */
-
-  /**
-   *
-   * @param available Vector of listHandles for choices that are available
-   * but are not currently in the set of selected values
-   * @param chosen Vector of listHandles for available choices
-   * @param parent AWT container that the StringSelector will be contained in.
-   * @param editable If false, this string selector is for display only
-   * @param canChoose Vector of choices is available
-   * @param mustChoose Choice must be made from vector of choices
-   * @param rowWidth How many columns wide should each box be?  If <= 0, the
-   * StringSelector will auto-size the columns
-   */
-
-  public StringSelector(Vector available, Vector chosen, Container parent, 
-			boolean editable, boolean canChoose, boolean mustChoose, int rowWidth)
-  {
-    this(available, chosen, parent, editable, canChoose, mustChoose, rowWidth, "Members", "Available", null, null);
-  }
-
-  /**
-   *
-   * @param available Vector of listHandles for choices that are available
-   * but are not currently in the set of selected values
-   * @param chosen Vector of listHandles for available choices
-   * @param parent AWT container that the StringSelector will be contained in.
-   * @param editable If false, this string selector is for display only
-   * @param canChoose Vector of choices is available
-   * @param mustChoose Choice must be made from vector of choices
-   */
-
-  public StringSelector(Vector available, Vector chosen, Container parent, 
-			boolean editable, boolean canChoose, boolean mustChoose)
-  {
-    this(available, chosen, parent, editable, canChoose, mustChoose, 0, "Members", "Available", null, null);
-  }
-
-  /**
-   *
-   * @param available Vector of listHandles for choices that are available
-   * but are not currently in the set of selected values
-   * @param chosen Vector of listHandles for available choices
-   * @param parent AWT container that the StringSelector will be contained in.
-   * @param editable If false, this string selector is for display only
-   * @param rowWidth How many columns wide should each box be?  If <= 0, the
-   * StringSelector will auto-size the columns
-   * @param inLabel Label for the list of selected choices
-   * @param outLabel Label for the list of available choices
-   */
-
-  public StringSelector(Vector available, Vector chosen, Container parent, 
-			boolean editable, int rowWidth,
-			String inLabel, String outLabel)
-  {
-    this(available, chosen, parent, editable, true, false, rowWidth, 
-	 inLabel, outLabel, null, null);
-  }
-
-  /**
-   *
-   * @param available Vector of listHandles for choices that are available
-   * but are not currently in the set of selected values
-   * @param chosen Vector of listHandles for available choices
-   * @param parent AWT container that the StringSelector will be contained in.
-   * @param editable If false, this string selector is for display only
-   * @param rowWidth How many columns wide should each box be?  If <= 0, the
-   * StringSelector will auto-size the columns
-   */
-  
-  public StringSelector(Vector available, Vector chosen, Container parent, boolean editable, int rowWidth)
-  {
-    this(available, chosen, parent, editable, (available != null), false, rowWidth);
-  }
-
-  /**
-   *
-   * @param available Vector of listHandles for choices that are available
-   * but are not currently in the set of selected values
-   * @param chosen Vector of listHandles for available choices
-   * @param parent AWT container that the StringSelector will be contained in.
-   * @param editable If false, this string selector is for display only
-   * @param inLabel Label for the list of selected choices
-   * @param outLabel Label for the list of available choices
-   */
-
-  public StringSelector(Vector available, Vector chosen, Container parent, boolean editable, 
-			String inLabel, String outLabel)
-  {
-    this(available, chosen, parent, editable, (available != null), false, 0,
-	 inLabel, outLabel, null, null);
-  }
 
   /**
    *
    * Fully specified Constructor for StringSelector
    *
-   * @param available Vector of listHandles for choices that are available
-   * but are not currently in the set of selected values
-   *
-   * @param chosen Vector of listHandles for available choices
-   *
    * @param parent AWT container that the StringSelector will be contained in.
    * @param editable If false, this string selector is for display only
    * @param canChoose Choice must be made from vector of choices
    * @param mustChoose Vector of choices is available
-   * @param rowWidth How many columns wide should each box be?  If <= 0, the
-   * StringSelector will auto-size the columns
-   * @param inLabel Label for the list of selected choices
-   * @param outLabel Label for the list of available choices
-   * @param inPopup Popup Menu for in table
-   * @param outPopup PopupMenu for out table
+   *
    */
 
-  public StringSelector(Vector available, Vector chosen, Container parent, 
-			boolean editable, boolean canChoose, boolean mustChoose, int rowWidth,
-			String inLabel, String outLabel, JPopupMenu inPopup, JPopupMenu outPopup)
+  public StringSelector(Container parent, boolean editable, boolean canChoose,
+			boolean mustChoose)
   {
-    Vector
-      inVector = new Vector(),
-      outVector = new Vector();
-
-    /* -- */
-
-    org_in = inLabel;
-    org_out = outLabel;
-
     if (debug)
       {
 	System.out.println("-Adding new StringSelector-");
@@ -294,7 +172,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     this.editable = editable;
     this.canChoose = canChoose;
     this.mustChoose = mustChoose;
-    this.rowWidth = rowWidth;
     
     setLayout(new BorderLayout());
 
@@ -306,54 +183,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     GridBagConstraints
       gbc = new GridBagConstraints();
 
-    lists = new JPanel();
+    JPanel lists = new JPanel();
     lists.setLayout(gbl);
 
     // Set up the inPanel, which holds the in list and button
 
-    // chosen is a vector of listhandles or Strings.  If it is
-    // strings, create a vector of listhandles.
-
-    if (chosen != null && chosen.size() > 0)
-      {
-	if ((chosen.elementAt(0) == null) || (chosen.elementAt(0) instanceof listHandle))
-	  {
-	    if (debug)
-	      {
-		if (chosen.elementAt(0) instanceof listHandle)
-		  {
-		    System.err.println("arlut.csd.JDataComponent.StringSelector(): chosen = listHandle vector");
-		  }
-		else
-		  {
-		    System.err.println("arlut.csd.JDataComponent.StringSelector(): chosen[0] = null");
-		  }
-	      }
-
-	    inVector = chosen;
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("arlut.csd.JDataComponent.StringSelector(): chosen = String vector");
-	      }
-
-	    String label;
-
-	    for (int i = 0; i < chosen.size(); i++)
-	      {
-		label = (String) chosen.elementAt(i);
-		inVector.addElement(new listHandle(label, label));
-	      }
-	  }
-      }
-
     // JstringListBox does the sorting
 
     in = new JstringListBox();
-    in.registerPopupMenu(inPopup);
-    in.load(inVector, rowWidth, true, null);
     in.setCallback(this);
 
     inPanel.setBorder(bborder);
@@ -361,7 +198,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     inPanel.add("Center", new JScrollPane(in));
 
-    inTitle.setText( org_in.concat(" : " + inVector.size()) );
+    inTitle.setText(org_in.concat(" : 0"));
     inTitle.setHorizontalAlignment( SwingConstants.LEFT );
     inTitle.setMargin( new Insets(0,0,0,0) );
     inTitle.addActionListener(this);
@@ -370,7 +207,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (editable)
       {
-	if (canChoose && (available != null))
+	if (canChoose)
 	  {
 	    remove = new JButton("remove >>");
 	  }
@@ -396,71 +233,26 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     lists.add(inPanel);
 
-    // Set up the outPanel.
-    // If we need an out box, build it now.
-
-    if (editable && canChoose) 
-      {
-	if (available == null)
-	  {
-	    if (debug)
-	      {
-		System.out.println(" HEY!  You tried to make a canChoose StringSelector with a null available vector.");
-	      }
-	  }
-	else
-	  {
-	    String label = null;
-	    listHandle lh = null;
-	    for (int i = 0; i < available.size(); i++)
-	      {
-		if (available.elementAt(i) instanceof listHandle)
-		  {
-		    lh = (listHandle) available.elementAt(i);
-		  }
-		else
-		  {
-		    label = (String) available.elementAt(i);
-		    lh = new listHandle(label, label);
-		  }
-	    
-		// Don't add them if they are already in the in list
-
-		if (!in.containsItem(lh))
-		  {
-		    outVector.addElement(lh);
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			System.out.println("** THIS ONES ALREADY IN THERE:" + lh);
-		      }
-		  }
-	      }
-
-	    outTitle.setText( org_out.concat(" : " + outVector.size()) );
-	  }
-      }
-
-    outTitle.setHorizontalAlignment( SwingConstants.LEFT );
-    outTitle.setMargin( new Insets(0,0,0,0) );
-
     // JstringListBox does the sorting
 
-    if (editable && canChoose && (available != null))
+    if (editable && canChoose)
       {
+	// Set up the outPanel.
+	// If we need an out box, build it now.
+
+	outTitle.setText(org_out.concat(": 0"));
+	outTitle.setHorizontalAlignment( SwingConstants.LEFT );
+	outTitle.setMargin( new Insets(0,0,0,0) );
+	outTitle.addActionListener(this);
+
+	out = new JstringListBox();
+	out.setCallback(this);
+
 	add = new JButton("<< add");
 	add.setEnabled(false);
 	add.setOpaque(true);
 	add.setActionCommand("Add");
 	add.addActionListener(this);
-
-	out = new JstringListBox();
-	outTitle.addActionListener(this);
-	out.registerPopupMenu(outPopup);
-	out.load(outVector, rowWidth, true, null);
-	out.setCallback(this);
 	
 	outPanel.setBorder(bborder);
 	outPanel.setLayout(new BorderLayout());
@@ -622,6 +414,38 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   // Public methods ------------------------------------------------------------
+
+  /**
+   * <p>This method sets the width of the in and out rows.</p>
+   *
+   * @param width How many columns wide should each box be?  If <= 0, the
+   * StringSelector will auto-size the columns
+   */
+
+  public void setCellWidth(int rowWidth)
+  {
+    in.setCellWidth(rowWidth);
+
+    if (out != null)
+      {
+	out.setCellWidth(rowWidth);
+      }
+
+    invalidate();
+    parent.validate();
+  }
+
+  /**
+   * <p>This method sets the titles for the in and out boxes.  The
+   * StringSelector will show these titles, followed by a colon and
+   * the current count of elements in the in and/or out boxes.</p>
+   */
+
+  public void setTitles(String inString, String outString)
+  {
+    org_in = inString;
+    org_out = outString;
+  }
 
   /**
    * <P>Returns true if this StringSelector is editable.</P>
@@ -788,14 +612,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   public void setCallback(JsetValueCallback parent)
   {
-    if (parent == null)
-      {
-	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
-      }
-    
-    my_parent = parent;
-
-    allowCallback = true;
+    my_callback = parent;
   }
 
   /**
@@ -913,13 +730,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 			
 		    boolean ok = true;
 		    
-		    if (allowCallback)
+		    if (my_callback != null)
 		      {
 			ok = false;
 
 			try
 			  {
-			    ok = my_parent.setValuePerformed(new JValueObject(this, 
+			    ok = my_callback.setValuePerformed(new JValueObject(this, 
 									      0,  //in.getSelectedIndex(),
 									      JValueObject.ADD,
 									      handle.getObject()));
@@ -943,14 +760,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		      {
 			if (out == null)
 			  {
-			    my_parent.setValuePerformed(new JValueObject(this, 
+			    my_callback.setValuePerformed(new JValueObject(this, 
 									 0,  
 									 JValueObject.ERROR,
 									 "You can't choose stuff for this vector.  Sorry."));
 			  }
 			else
 			  {
-			    my_parent.setValuePerformed(new JValueObject(this, 
+			    my_callback.setValuePerformed(new JValueObject(this, 
 									 0,  
 									 JValueObject.ERROR,
 									 "That choice is not appropriate.  Please choose from the list."));
@@ -976,13 +793,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		
 		boolean ok = true;
 		
-		if (allowCallback)
+		if (my_callback != null)
 		  {
 		    ok = false;
 
 		    try
 		      {
-			ok = my_parent.setValuePerformed(new JValueObject(this, 
+			ok = my_callback.setValuePerformed(new JValueObject(this, 
 									  0,  //in.getSelectedIndex(),
 									  JValueObject.ADD,
 									  handle.getObject()));
@@ -1013,7 +830,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 		try
 		  {
-		    ok = my_parent.setValuePerformed(new JValueObject(this, 
+		    ok = my_callback.setValuePerformed(new JValueObject(this, 
 								      0,  //in.getSelectedIndex(),
 								      JValueObject.ADD,
 								      item));  //item is a String
@@ -1075,7 +892,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	ok = true;
 
-	if (allowCallback)
+	if (my_callback != null)
 	  {
 	    Vector objVector = new Vector(handles.size());
 
@@ -1086,7 +903,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	    try
 	      {
-		ok = my_parent.setValuePerformed(new JValueObject(this, 
+		ok = my_callback.setValuePerformed(new JValueObject(this, 
 								  0, // we are not giving a true index
 								  JValueObject.ADDVECTOR,
 								  objVector));
@@ -1116,11 +933,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	ok = true;
 
-	if (allowCallback)
+	if (my_callback != null)
 	  {
 	    try
 	      {
-		ok = my_parent.setValuePerformed(new JValueObject(this, 
+		ok = my_callback.setValuePerformed(new JValueObject(this, 
 								  0, // we are not giving a true index
 								  JValueObject.ADD,
 								  ((listHandle)handles.elementAt(0)).getObject()));
@@ -1175,7 +992,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	ok = true;
 
-	if (allowCallback)
+	if (my_callback != null)
 	  {
 	    Vector objVector = new Vector(handles.size());
 
@@ -1186,7 +1003,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	    try
 	      {
-		ok = my_parent.setValuePerformed(new JValueObject(this, 
+		ok = my_callback.setValuePerformed(new JValueObject(this, 
 								  0, // we are not giving a true index
 								  JValueObject.DELETEVECTOR,
 								  objVector));
@@ -1216,11 +1033,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	ok = true;
 
-	if (allowCallback)
+	if (my_callback != null)
 	  {
 	    try
 	      {
-		ok = my_parent.setValuePerformed(new JValueObject(this, 
+		ok = my_callback.setValuePerformed(new JValueObject(this, 
 								  0, // we are not giving a true index
 								  JValueObject.DELETE,
 								  ((listHandle)handles.elementAt(0)).getObject()));
@@ -1368,11 +1185,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
     else if (o.getOperationType() == JValueObject.PARAMETER)  // from the popup menu
       {
-	if (allowCallback)
+	if (my_callback != null)
 	  {
 	    try
 	      {
-		my_parent.setValuePerformed(new JValueObject(this,
+		my_callback.setValuePerformed(new JValueObject(this,
 							     o.getIndex(),
 							     JValueObject.PARAMETER,
 							     o.getValue(),
@@ -1506,12 +1323,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	v2.addElement( Integer.toString( 20-i ) );
       }
 
-    StringSelector ss = new StringSelector( v1,
-					    v2, 
-					    frame, 
+    StringSelector ss = new StringSelector( frame, 
 					    true, 
 					    true, 
 					    true);
+
+    ss.update(v1, true, null, v2, true, null);
 	
     frame.getContentPane().add(ss, BorderLayout.CENTER);
 
