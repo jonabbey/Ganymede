@@ -1,9 +1,17 @@
-Ganymede Developer Release 0.99.7
-October 13, 1999
+Ganymede Developer Release 0.99.8
+November 23, 1999
 THINGSTODO
 ---------------------------------------------
 
 0) Schema Kit Separation
+
+I keep putting off doing this, but I really do need to rework
+the way schema kits are packaged and distributed with Ganymede,
+to make it easier for people to do schema kit maintenance.
+
+I'm going to really try to make this the focus for 0.99.9.
+
+..
 
 For 0.99.8 I'm planning on reworking how schema kits are packaged and
 installed, to make it possible to maintain and distribute schema kits

@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.99.7
-October 13, 1999
+Ganymede Developer Release 0.99.8
+November 23, 1999
 CREDITS
 ---------------------------------------------
 
@@ -88,8 +88,8 @@ distribution).  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
 Gramann and others made helpful reports on gaps and problems with
 Ganymede.
 
-John Knutson has provided a lot of good bug reports and suggestions in
-the course of evaluating the Ganymede code for use on an SGL project.
+John Knutson has provided bug reports and code contributions the
+course of evaluating the Ganymede code for use on an SGL project.
 
 A lot of Ganymede is based on the experience and design work that went
 into GASH.  In addition to the aforementioned names, Dean Kennedy and
