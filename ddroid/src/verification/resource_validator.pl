@@ -408,6 +408,13 @@ sub examine_java {
       $seen{$key} = 1;
 
       $value = $properties->getProperty($key);
+
+      # make sure we don't have any non-doubled single quotes in this property
+
+      if ($value =~ /[^']'[^']/) {
+	print "*** Warning, non-escaped single quote in property $key\n";
+      }
+
       $prop_param_count = countparams($value);
 
       # okay, now we need to count the parameters provided.
