@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.103 $ %D%
+   Version: $Revision: 1.104 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -331,12 +331,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     setIconImage(pencil);
 
     client = this;
+
     debug = g.debug;
 
-    //System.out.println("Shortcut key mask: " + KeyEvent.getKeyText(Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
-
-    System.out.println("Starting client");
-
+    if (debug)
+      {
+	System.out.println("Starting client");
+      }
 
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 
@@ -830,6 +831,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  {
 	    System.out.println("Found the template, using cache for base: " + id);
 	  }
+
 	result = (Vector) th.get(id);
       }
     else
@@ -895,9 +897,23 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     baseToShort = baseNames = baseHash = baseMap = null;
   }
 
+  /**
+   * This method is used to get a list of objects from the server, in
+   * a form appropriate for use in constructing a list of nodes in the
+   * tree under an object type (object base) folder.<br><br>
+   *
+   * This method supports client-side caching.. if the list required
+   * has already been retrieved, the cached list will be returned.  If
+   * it hasn't, getObjectList() will get the list from the server and
+   * save a local copy for future requests.
+   * 
+   */
+
   public objectList getObjectList(Short id, boolean showAll)
   {
     objectList objectlist = null;
+
+    /* -- */
 
     if (cachedLists.containsList(id))
       {
@@ -907,29 +923,33 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
 
 	objectlist = cachedLists.getList(id);
-	if (showAll)
+
+	// If we are being asked for a *complete* list of objects of
+	// the given type and we only have editable objects of this
+	// type cached, we may need to go back to the server to
+	// get the full list.
+
+	if (showAll && !objectlist.containsNonEditable())
 	  {
-	    if (!objectlist.containsNonEditable())
+	    try
 	      {
-		try
+		QueryResult qr = session.query(new Query(id.shortValue(), null, false));
+		
+		if (qr != null)
 		  {
-		    QueryResult qr = session.query(new Query(id.shortValue(), null, !showAll));
-		    
-		    if (qr != null)
+		    if (debug)
 		      {
-			if (debug)
-			  {
-			    System.out.println("augmenting");
-			  }
-			objectlist.augmentListWithNonEditables(qr);
+			System.out.println("augmenting");
 		      }
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not do the query: " + rx);
+		    
+		    objectlist.augmentListWithNonEditables(qr);
 		  }
 	      }
-
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not do the query: " + rx);
+	      }
+	    
 	    cachedLists.putList(id, objectlist);
 	  }
       }
@@ -962,7 +982,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   }
 
   /**
+   *
    * Update the persona menu so it shows the correct persona as chosen.
+   *
    */
 
   public void updatePersonaMenu()
@@ -972,7 +994,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	System.out.println("--Updating persona menu");
       }
 
-    // either update the JComboBox, or the menu, depending on which one we have.
+    // If we are configured to use the persona pull-down menu from the
+    // client's menu bar, handle that
 
     if (personaGroup != null)
       {
@@ -999,7 +1022,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
       }
 
-    // If we have a combo box, update that too
+    // else, if we're using the combo box for our persona selection,
+    // update that too
 
     if (personaCombo != null)
       {
@@ -1013,6 +1037,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
   }
 
+  /**
+   *
+   * By overriding update(), we can eliminate the annoying flash as
+   * the default update() method clears the frame before rendering
+   * 
+   */
 
   public void update(Graphics g)
   {
@@ -1031,6 +1061,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   /**
    * Returns the error Image.
    */
+
   public final Image getErrorImage()
   {
     if (errorImage == null)
@@ -1125,6 +1156,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    * directly.</p>
    *
    */
+
   public Hashtable getBaseToShort()
   {
     if (baseToShort == null)
@@ -1135,24 +1167,34 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     return baseToShort;
   }
 
+  /**
+   *
+   * This method pulls a object handle for an invid out of the
+   * client's cache, if it has been cached.<br><br>
+   *
+   * If no handle for this invid has been cached, this method
+   * will return null.
+   *
+   */
+
   public ObjectHandle getObjectHandle(Invid invid, Short type)
-    {
-      ObjectHandle handle = null;
+  {
+    ObjectHandle handle = null;
       
-      if (type == null)
-	{
-	  type = new Short(invid.getType());
-	}
+    if (type == null)
+      {
+	type = new Short(invid.getType());
+      }
 
-      handle = null;
+    handle = null;
 
-      if (cachedLists.containsList(type))
-	{
-	  handle = cachedLists.getList(type).getObjectHandle(invid);
-	}
+    if (cachedLists.containsList(type))
+      {
+	handle = cachedLists.getList(type).getObjectHandle(invid);
+      }
 
-      return handle;
-    }
+    return handle;
+  }
 
   /**
    * Change the text in the status bar
@@ -1220,16 +1262,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    */
    
   public void showHelpWindow()
-    {
-      if (help == null)
-	{
-	  help = new helpPanel(this);
-	}
-      else
-	{
-	  help.setVisible(true);
-	}
-    }
+  {
+    if (help == null)
+      {
+	help = new helpPanel(this);
+      }
+    else
+      {
+	help.setVisible(true);
+      }
+  }
 
   /**
    * Show the About... dialog.
@@ -1258,26 +1300,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	if (creditsMessage == null)
 	  {
 	    creditsMessage = ("<head></head><h1>Ganymede credits</h1>" +
-	      "<p>Ganymede has been under development for nearly 3 years now, in both planning and execution.  " +
-			      "The work has primarily been performed in the Computer Science Division of The Applied " +
-			      "Research Laboratories, The University of Texas at Austin, with support from CSD and ARL " +
-			      "management.</p>" +
-			      "<p>The development of Ganymede has benefited from the direct development " +
-			      "contributions of the following individuals:</p> " +
-			      " <h3>Jonathan Abbey, jonabbey@arlut.utexas.edu</h3>" +
-			      "<p>Jon initiated the Ganymede project with support from CSD and lab " +
-			      "management after shortcomings in the GASH system became apparent.  Jon " +
-			      "has been the primary architect and coder on the project, developing " +
-			      "the Ganymede server and admin console, and well as contributing the " +
-			      "table and tree GUI components used in both the admin console and " +
-			      "the primary client.</p>" +
-			      "<h3> Mike Mulvaney, mulvaney@arlut.utexas.edu</h3>" +
-			      "<p> Mike has worked on Ganymede continuously since joining the lab in " +
-			      "February of 1997.  The client as it currently stands is primarily " +
-			      "Mike's work.  In addition to the large bulk of client-side coding," +
-			      "Mike has contributed significantly to the design of the system " +
-			      "architecture as a whole.  Ganymede would be a far, far poorer thing " +
-			      "were it not for Mike. </p>");
+			      "<p>Ganymede was developed by the Computer Science Division of the Applied " +
+			      "Research Laboratories at The University of Texas at Austin</p>" +
+			      "<p>The primary designer and author of Ganymede was Jonathan Abbey, " +
+			      "jonabbey@arlut.utexas.edu.  The client was primarily written by " +
+			      "Michael Mulvaney, mikem@mail.utexas.edu.  Portions of the client were " +
+			      "written by Navin Manohar and Erik Grostic while they worked as student " +
+			      "employees in CSD.  Dan Scott, dscott@arlut.utexas.edu, oversaw the development " +
+			      " of Ganymede and its predecessor, GASH.</p>" +
+			      "<p>The Ganymede web page is currently at " +
+			      "<a href=\"http://www.arlut.utexas.edu/gash2\">" +
+			      "http://www.arlut.utexas.edu/gash2</a>.</p>");
 	  }
 	
 	credits = new messageDialog(this, "Credits", null);
@@ -1388,29 +1421,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 			       {
 				 public void run()
 				   {
-				     
 				     JErrorDialog d = new JErrorDialog(gc, Title, Message, fIcon);
-				     /*
-				     final JDialog d = new JDialog(gc, Title, true);
-				     JPanel p = new JPanel();
-				     p.add(new JLabel(Message));
-				     JButton b = new JButton("ok");
-				     b.addActionListener(new ActionListener() {
-				       public void actionPerformed(ActionEvent e)
-					 {
-					   d.setVisible(false);
-					 }});
-				     p.add(b);
-				     d.setContentPane(p);
-				     d.setVisible(true);
-				     */
 				   }
 			       });
- 
-
 
     setStatus(title + ": " + message);
-
   }
 
   /**
@@ -1470,7 +1485,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   public boolean getSomethingChanged()
   {
     return somethingChanged;
-
   }
 
   /**
@@ -1605,7 +1619,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    
     if (objects == null)
       {
-	System.err.println("Odd, was told to rescan, but there's nothing there!");
+	if (debug)
+	  {
+	    System.err.println("Odd, was told to rescan, but there's nothing there!");
+	  }
+
 	return retVal;
       }
     
@@ -1981,7 +1999,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 				  CLOSED_CAT, 
 				  null);
       }
-    else
+    else if (debug)
       {
 	System.out.println("Unknown instance: " + node);
       }
@@ -2026,6 +2044,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     base = node.getBase();    
     Id = node.getTypeID();
 
+    // get the object list.. this call will automatically handle
+    // caching for us.
+
     objectlist = getObjectList(Id, node.isShowAll());
 
     objectHandles = objectlist.getObjectHandles(true, node.isShowAll()); // include inactives
@@ -2050,9 +2071,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	
     while ((i < objectHandles.size()) || (fNode != null))
       {
-	//System.out.println("Looking at the next node");
-	//System.out.println("i = " + i + " length = " + unsorted_objects.length);
-	
 	if (i < objectHandles.size())
 	  {
 	    handle = (ObjectHandle) objectHandles.elementAt(i);
@@ -2071,8 +2089,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    // We've gone past the end of the list of objects in this
 	    // object list.. from here on out, we're going to wind up
 	    // removing anything we find in this subtree
-
-	    //System.out.println("Object is null");
 
 	    handle = null;
 	    label = null;
@@ -2111,8 +2127,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 			System.out.println("Found this object in the creating objectsWithoutNodes hash: " + 
 					   handle.getLabel());
 		      }
-		    
-		    
+		    		    
 		    createHash.put(invid, new CacheInfo(node.getTypeID(),
 							(handle.getLabel() == null) ? "New Object" : handle.getLabel(),
 							null, handle));
@@ -2135,9 +2150,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    // We've found a node in the tree without a matching
 	    // node in the object list.  Delete it!
 
-	    // System.out.println("Removing this node");
-	    // System.err.println("Deleting: " + fNode.getText());
-
 	    newNode = (InvidNode) fNode.getNextSibling();
 	    tree.deleteNode(fNode, false);
 
@@ -2149,8 +2161,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    // invid of the current object in the object list,
 	    // but the label may possibly have changed, so we'll
 	    // go ahead and re-set the label, just to be sure
-
-	    // System.err.println("Setting: " + object.getName());
 
 	    if (handle.isInactive())
 	      {
@@ -2224,45 +2234,45 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     //
 
     invid = null;
-    node = null;
 
+    Vector changedInvids = new Vector();
     Enumeration created = createHash.keys();
 
     while (created.hasMoreElements())
       {
-	invid = (Invid)created.nextElement();
-	node = (InvidNode)invidNodeHash.get(invid);
-	if (node != null)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Committing created node: " + node.getText());
-	      }
+	invid = (Invid) created.nextElement();
 
-	    // change the icon
-	    node.setText(session.viewObjectLabel(invid));
-	    createHash.remove(invid);
-	    setIconForNode(invid);
-	  }
+	changedInvids.addElement(invid);
       }
 
     createHash.clear();
     createdObjectsWithoutNodes.clear();
 
-    //
-    // Update any other nodes we touched
-    //
+    invid = null;
+    Enumeration changed = changedHash.keys();
+    
+    while (changed.hasMoreElements())
+      {
+	invid = (Invid) changed.nextElement();
 
-    refreshChangedObjectHandles(null, true);
+	changedInvids.addElement(invid);
+      }
 
-    if (!changedHash.isEmpty())
+    changedHash.clear();
+
+    if (changedInvids.size() > 0)
       {
 	if (debug)
 	  {
-	    System.out.println("Changed hash is not empty, clearing... client/server sync prob?");
+	    System.err.println("gclient.refreshTreeAfterCommit(): refreshing created objects");
 	  }
 
-	changedHash.clear();
+	refreshChangedObjectHandles(changedInvids, true);
+
+	if (debug)
+	  {
+	    System.err.println("gclient.refreshTreeAfterCommit(): done refreshing created objects");
+	  }
       }
 
     tree.refresh();
@@ -2274,17 +2284,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    * the client after transaction commit.  The results from the
    * queries are used to update the icons in the tree.
    *
-   * If paramVect is null, this method will be destructive to the
-   * changedHash, and will remove any entries that it was properly
-   * able to refresh.  Any entries that it was not able to refresh
-   * indicate either a network problem, or that the objects were
-   * removed from the server without our knowing, which shouldn't
-   * happen generally.  It _can_ happen, if another transaction gets
-   * the object checked out, deleted, and committed before we can fire
-   * off our queries after commit.  Which really shouldn't happen.
-   *
-   * @param paramVect Vector of invid's to refresh.  If null, the invid's
-   * keyed in this.changedHash will be used instead.
+   * @param paramVect Vector of invid's to refresh.
    * @param afterCommit If true, this method will update the client's
    * status bar as it progresses.
    * 
@@ -2292,7 +2292,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   public void refreshChangedObjectHandles(Vector paramVect, boolean afterCommit)
   {
-    Vector invidVect = new Vector();
     Enumeration enum;
     Invid invid;
     Short objectTypeKey = null;
@@ -2304,24 +2303,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	setStatus("refreshing object handles after commit");
       }
 
-    if (paramVect == null)
-      {
-	enum = changedHash.keys();
-
-	while (enum.hasMoreElements())
-	  {
-	    invid = (Invid) enum.nextElement();
-	    invidVect.addElement(invid);
-	  }
-      }
-    else
-      {
-	invidVect = paramVect;
-      }
-
     try
       {
-	QueryResult result = session.queryInvids(invidVect);
+	QueryResult result = session.queryInvids(paramVect);
 
 	// now get the results
 	    
@@ -2359,13 +2343,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
 		setIconForNode(newHandle.getInvid());
 	      }
+	    else if (debug)
+	      {
+		System.err.println("gclient.refreshChangedObjectHandles(): null node for " + newHandle.debugDump());
+	      }
 	    
 	    // and update our tree cache for this item
 
 	    objectList list = cachedLists.getList(objectTypeKey);
 
-	    list.removeInvid(newHandle.getInvid());
-	    list.addObjectHandle(newHandle);
+	    if (list != null)
+	      {
+		list.removeInvid(newHandle.getInvid());
+		list.addObjectHandle(newHandle);
+	      }
 	  }
       }
     catch (RemoteException ex)
@@ -2648,8 +2639,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     if (obj == null)
       {
-	showErrorMessage("Could not create object for some reason.  Check the Admin console, or the server debuggin information.");
-	throw new RuntimeException("Could not create object for some reason- server returned a null object.  Check the Admin console.");
+	showErrorMessage("Could not create object for some reason.  Check the Admin " +
+			 "console, or the server debuggin information.");
+
+	throw new RuntimeException("Could not create object for some reason- server returned " +
+				   "a null object.  Check the Admin console.");
       }
 
     if (showNow)
@@ -2752,6 +2746,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    // in the tree.  This way, if a new object is created
 	    // before the base node is expanded, the new object will
 	    // have the correct icon.
+
 	    createdObjectsWithoutNodes.put(invid, baseN);
 	  }
       }
@@ -2865,7 +2860,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
 	    if (deleteHash.containsKey(invid))
 	      {
-		System.out.println("already deleted, nothing to change, right?");
+		if (debug)
+		  {
+		    System.out.println("already deleted, nothing to change, right?");
+		  }
 	      }
 	    else
 	      {
@@ -3597,6 +3595,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     catch (Exception e)
       {
+	e.printStackTrace();
 	showErrorMessage("Exception during commit: " + e);
 	throw new RuntimeException("Exception during commit: " + e);
       }
@@ -3687,7 +3686,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	      {
 		setStatus("Error on server, transaction cancel failed.");
 
-		System.out.println("Everytime I think I'm out, they pull me back in!  Something went wrong with the cancel.");
+		if (debug)
+		  {
+		    System.out.println("Everytime I think I'm out, they pull me back in! " +
+				       "Something went wrong with the cancel.");
+		  }
+
 		return;
 	      }
 	  }
@@ -3798,10 +3802,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     
     // Now go through changed list and revert any names that may be needed
 
-    refreshChangedObjectHandles(null, true);
+    Vector changedInvids = new Vector();
+    Enumeration changed = changedHash.keys();
 
-    if (debug && createHash.isEmpty() && deleteHash.isEmpty() && 
-	changedHash.isEmpty())
+    while (changed.hasMoreElements())
+      {
+	changedInvids.addElement(changed.nextElement());
+      }
+
+    changedHash.clear();
+
+    refreshChangedObjectHandles(changedInvids, true);
+
+    if (debug && createHash.isEmpty() && deleteHash.isEmpty())
       {
 	System.out.println("Woo-woo the hashes are all empty");
       }
@@ -3838,6 +3851,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   {
     Object source = event.getSource();
     String command = event.getActionCommand();
+
+    /* -- */
+
     if (debug)
       {
 	System.out.println("Action: " + command);
@@ -3977,13 +3993,26 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
   }
 
+  /**
+   *
+   * This is a debugging hook, to allow the user to enter an invid in 
+   * string form for direct viewing.
+   *
+   */
+
   void openAnInvid()
   {
-    DialogRsrc r = new DialogRsrc(this, "Open an invid","This will open an invid by number.  This is for debugging purposes only.  Invid's have the format number:number, like 21:423");
+    DialogRsrc r = new DialogRsrc(this,
+				  "Open an invid",
+				  "This will open an invid by number.  This is for " +
+				  "debugging purposes only.  Invid's have the format " +
+				  "number:number, like 21:423");
     r.addString("Invid number:");
     StringDialog d = new StringDialog(r);
     
     Hashtable result = d.DialogShow();
+
+    /* -- */
 
     if (result == null)
       {
@@ -3993,7 +4022,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
 	return;
       }
+
     String invidString = (String)result.get("Invid number:");
+
     if (invidString == null)
       {
 	if (debug)
@@ -4004,10 +4035,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	return;
       }
 
-    Invid invid = new Invid(invidString);
-    viewObject(invid);
-
-
+    viewObject(new Invid(invidString));
   }
 
   public void addTableWindow(Session session, Query query, DumpResult buffer, String title)
@@ -4030,6 +4058,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	      {
 		System.out.println("It's ok to log out.");
 	      }
+
 	    logout();
 	    super.processWindowEvent(e);
 	  }
@@ -4044,7 +4073,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
   }
 
-
   // Callbacks
 
   public boolean setValuePerformed(JValueObject o)
@@ -4055,8 +4083,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     else
       {
-	
-	System.out.println("I don't know what to do with this setValuePerformed: " + o);
+	if (debug)
+	  {
+	    System.out.println("I don't know what to do with this setValuePerformed: " + o);
+	  }
+
 	return false;
       }
     return true;
@@ -4064,6 +4095,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   }
 
   // treeCallback methods
+
+  /**
+   *
+   * Called when a node is expanded, to allow the
+   * user of the tree to dynamically load the information
+   * at that time.
+   *
+   * @param node The node opened in the tree.
+   *
+   * @see arlut.csd.Tree.treeCanvas
+   */
 
   public void treeNodeExpanded(treeNode node)
   {
@@ -4089,9 +4131,27 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
   }
 
+  /**
+   *
+   * Called when a node is closed.
+   *
+   * @see arlut.csd.Tree.treeCanvas
+   */
+
   public void treeNodeContracted(treeNode node)
   {
   }
+
+  /**
+   *
+   * Called when an item in the tree is unselected
+   *
+   * @param node The node selected in the tree.
+   * @param someNodeSelected If true, this node is being unselected by the selection
+   *                         of another node.
+   *
+   * @see arlut.csd.Tree.treeCanvas
+   */
 
   public void treeNodeSelected(treeNode node)
   {
@@ -4402,6 +4462,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     else if (event.getActionCommand().equals("Delete Object"))
       {
 	// Need to change the icon on the tree to an X or something to show that it is deleted
+
 	if (debug)
 	  {
 	    System.out.println("Deleting object");
@@ -4413,7 +4474,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    Invid invid = invidN.getInvid();
 
 	    deleteObject(invid);
-
 	  }
 	else  // Should never get here, but just in case...
 	  {
@@ -4961,6 +5021,7 @@ class CacheInfo {
 	try
 	  {
 	    originalHandle = (ObjectHandle)handle.clone();
+
 	    if (debug) 
 	      {
 		System.out.println("a cloned handle.");
@@ -4969,16 +5030,17 @@ class CacheInfo {
 	catch (Exception x)
 	  {
 	    originalHandle = null;
+
 	    if (debug)
 	      {
 		System.out.println("Clone is not supported: " + x);
 	      }
 	  }
-
       }
     else
       {
 	originalHandle = null;
+
 	if (debug)
 	  {
 	    System.out.println("a null handle.");
