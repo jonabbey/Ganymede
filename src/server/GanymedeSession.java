@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.207 $
-   Last Mod Date: $Date: 2000/10/07 06:31:07 $
+   Version: $Revision: 1.208 $
+   Last Mod Date: $Date: 2000/10/07 07:37:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.207 $ $Date: 2000/10/07 06:31:07 $
+ * @version $Revision: 1.208 $ $Date: 2000/10/07 07:37:43 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4680,9 +4680,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * GanymedeSession.</p>
    */
 
-  public ReturnVal getSchemaXML(FileReceiver receiver)
+  public ReturnVal getSchemaXML(FileReceiver receiver, boolean logOffOnFailure)
   {
-    return this.sendXML(receiver, false);
+    return this.sendXML(receiver, false, logOffOnFailure);
   }
 
   /**
@@ -4700,12 +4700,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * GanymedeSession.</p>
    */
 
-  public ReturnVal getDataXML(FileReceiver receiver)
+  public ReturnVal getDataXML(FileReceiver receiver, boolean logOffOnFailure)
   {
-    return this.sendXML(receiver, true);
+    return this.sendXML(receiver, true, logOffOnFailure);
   }
 
-  private ReturnVal sendXML(FileReceiver receiver, boolean sendData)
+  private ReturnVal sendXML(FileReceiver receiver, boolean sendData, boolean logOffOnFailure)
   {
     checklogin();
 
@@ -4739,6 +4739,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// background to our pipe
 
 	final boolean doSendData = sendData;
+	final boolean logoutOnFail = logOffOnFailure;
+	final GanymedeSession mySession = this;
 
 	Thread dumpThread = new Thread(new Runnable() {
 	  public void run() {
@@ -4752,7 +4754,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		// nothing we can productively do here, go
 		// ahead and show it for debug purposes
 
-		ex.printStackTrace();
+		System.err.println("XML remote data/schema dump hit EOF.. client disconnected");
+		
+		if (logoutOnFail)
+		  {
+		    mySession.forceOff("xmlclient dump error");
+		  }
 	      }
 	  }}, "XMLSession Schema/Data Dump Thread");
 

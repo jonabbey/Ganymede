@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 2000/10/07 06:31:08 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 2000/10/07 07:37:44 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.49 $ %D%
+ * @version $Revision: 1.50 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -687,7 +687,7 @@ public interface Session extends Remote {
    * GanymedeSession.</p>
    */
 
-  ReturnVal getSchemaXML(FileReceiver receiver) throws RemoteException;
+  ReturnVal getSchemaXML(FileReceiver receiver, boolean logOffOnFailure) throws RemoteException;
 
   /**
    * <p>This method is called by the XML client to initiate a dump of
@@ -704,5 +704,5 @@ public interface Session extends Remote {
    * GanymedeSession.</p>
    */
 
-  ReturnVal getDataXML(FileReceiver receiver) throws RemoteException;
+  ReturnVal getDataXML(FileReceiver receiver, boolean logOffOnFailure) throws RemoteException;
 }
