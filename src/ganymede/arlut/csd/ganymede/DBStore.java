@@ -133,7 +133,7 @@ public final class DBStore {
    * after id_string
    */
 
-  static final byte minor_version = 4;
+  static final byte minor_version = 5;
 
   /**
    * XML version major id

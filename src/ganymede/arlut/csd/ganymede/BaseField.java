@@ -706,6 +706,29 @@ public interface BaseField extends Remote {
 
   public ReturnVal setWinHashed(boolean b) throws RemoteException;
 
+  /** 
+   * <p>This method returns true if this is a password field that will
+   * store passwords in the Netscape SSHA (salted SHA) hash format,
+   * used in LDAP. If passwords are stored in the SSHA hashing format,
+   * they will not be kept in plaintext on disk, unless isPlainText()
+   * returns true.</p>
+   */
+
+  public boolean isSSHAHashed() throws RemoteException;
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * store passwords in the Netscape SSHA (salted SHA) LDAP format.</p>
+   *
+   * <p>setSSHAHashed() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   */
+
+  public ReturnVal setSSHAHashed(boolean b) throws RemoteException;
+
   /**
    * <p>This method returns true if this is a password field that
    * will keep a copy of the password in plaintext in the Ganymede

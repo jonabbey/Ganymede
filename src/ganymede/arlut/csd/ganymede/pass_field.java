@@ -5,17 +5,20 @@
    Remote interface definition.
 
    Created: 21 July 1997
-   Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2002/03/29 03:57:58 $
+
+   Last Revision Changed: $Rev: 5292 $
+   Last Changed By: $Author: broccol $
+   Last Mod Date: $Date: 2004-04-26 21:36:03 -0500 (Mon, 26 Apr 2004) $
+   SVN URL: $HeadURL: http://db1.arlut.utexas.edu/svn/ganymede/branches/package_shuffle/ganymede/src/ddroid/arlut/csd/ddroid/rmi/pass_field.java $
+
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   The University of Texas at Austin.
+   Copyright (C) 1996 - 2004
+   The University of Texas at Austin
 
    Contact information
 

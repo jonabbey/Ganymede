@@ -15,8 +15,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   The University of Texas at Austin.
+   Copyright (C) 1996 - 2004
+   The University of Texas at Austin
 
    Contact information
 
@@ -244,6 +244,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   boolean md5crypted = false;	// OpenBSD style md5crypt() is not
   boolean apachemd5crypted = false;	// Apache style md5crypt() is not
   boolean winHashed = false;	// Windows NT/Samba hashes are not
+  boolean sshaHashed = false;	// SSHA hash is not either
   boolean storePlaintext = false; // nor is plaintext
 
   // schema editing
@@ -373,6 +374,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     md5crypted = original.md5crypted;
     apachemd5crypted = original.apachemd5crypted;
     winHashed = original.winHashed;
+    sshaHashed = original.sshaHashed;
     storePlaintext = original.storePlaintext;
 
     inUseCache = null;
@@ -540,6 +542,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	out.writeBoolean(md5crypted);
 	out.writeBoolean(apachemd5crypted);
 	out.writeBoolean(winHashed);
+	out.writeBoolean(sshaHashed);
 	out.writeBoolean(storePlaintext);
       }
   }
@@ -791,6 +794,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    winHashed = false;
 	  }
 
+	// at 2.5 we introduced sshaHashed
+
+	if (base.store.isAtLeast(2,5))
+	  {
+	    sshaHashed = in.readBoolean();
+	  }
+	else
+	  {
+	    sshaHashed = false;
+	  }
+
 	// at 1.10 we introduced storePlaintext
 
 	if (base.store.isAtLeast(1,10))
@@ -808,7 +822,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   /**
    * <p>This method is used when the database is being dumped, to write
-   * out this field definition to disk.  It is mated with receive().</p>
+   * out this field definition to disk.  It is mated with setXML().</p>
    */
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
@@ -1111,6 +1125,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    xmlOut.startElementIndent("winHashed");
 	    xmlOut.endElement("winHashed");
+	  }
+
+	if (sshaHashed)
+	  {
+	    xmlOut.startElementIndent("sshaHashed");
+	    xmlOut.endElement("sshaHashed");
 	  }
 
 	if (storePlaintext)
@@ -1708,6 +1728,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     boolean _md5crypted = false;
     boolean _apachemd5crypted = false;
     boolean _winHashed = false;
+    boolean _sshaHashed = false;
     ReturnVal retVal;
 
     /* -- */
@@ -1776,6 +1797,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    else if (child.matches("winHashed"))
 	      {
 		_winHashed = true;
+	      }
+	    else if (child.matches("sshaHashed"))
+	      {
+		_sshaHashed = true;
 	      }
 	    else if (child.matches("plaintext"))
 	      {
@@ -1868,6 +1893,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	return Ganymede.createErrorDialog("xml",
 					  "fielddef could not set windows hashing flag: " + _winHashed + "\n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+
+    retVal = setSSHAHashed(_sshaHashed);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set SSHA hashing flag: " + _sshaHashed + "\n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
       }
@@ -4674,6 +4710,51 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     return null;
   }
 
+  /** 
+   * <p>This method returns true if this is a password field that will
+   * store passwords in the Netscape SSHA (salted SHA) hash format,
+   * used in LDAP. If passwords are stored in the SSHA hashing format,
+   * they will not be kept in plaintext on disk, unless isPlainText()
+   * returns true.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public boolean isSSHAHashed()
+  {
+    return sshaHashed;
+  }
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * store passwords in the Netscape SSHA (salted SHA) LDAP format.</p>
+   *
+   * <p>setSSHAHashed() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public ReturnVal setSSHAHashed(boolean b)
+  {    
+    if (!base.store.loading && editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isPassword())
+      {
+	throw new IllegalArgumentException("not an password field");
+      }
+
+    sshaHashed = b;
+
+    return null;
+  }
+
   /**
    * <p>This method returns true if this is a password field that
    * will keep a copy of the password in plaintext in the Ganymede
@@ -4998,6 +5079,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    result += " <win hashed>";
 	  }
 
+	if (sshaHashed)
+	  {
+	    result += " <ssha hashed>";
+	  }
+
 	if (storePlaintext)
 	  {
 	    result += " <plaintext>";
@@ -5207,9 +5293,14 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    result += " md5crypted";
 	  }
 
-	if (md5crypted)
+	if (winHashed)
 	  {
 	    result += " winhashed";
+	  }
+
+	if (sshaHashed)
+	  {
+	    result += " ssha hashed";
 	  }
 
 	if (storePlaintext)

@@ -156,6 +156,12 @@ public class PasswordDBField extends DBField implements pass_field {
 
   private String ntHash;
 
+  /**
+   * <p>SSHA hash, for LDAP</p>
+   */
+
+  private String sshaHash;
+
   /* -- */
 
   /**
@@ -256,6 +262,7 @@ public class PasswordDBField extends DBField implements pass_field {
     uncryptedPass = null;
     ntHash = null;
     lanHash = null;
+    sshaHash = null;
   }
 
   /**
@@ -280,7 +287,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	    streq(apacheMd5CryptPass, origP.apacheMd5CryptPass) &&
 	    streq(uncryptedPass, origP.uncryptedPass) && 
 	    streq(lanHash, origP.lanHash) && 
-	    streq(ntHash, origP.ntHash));
+	    streq(ntHash, origP.ntHash) &&
+	    streq(sshaHash, origP.sshaHash));
   }
 
   /**
@@ -340,6 +348,7 @@ public class PasswordDBField extends DBField implements pass_field {
     target.lanHash = lanHash;
     target.ntHash = ntHash;
     target.uncryptedPass = uncryptedPass;
+    target.sshaHash = sshaHash;
 
     return null;		// simple success value
   }
@@ -468,6 +477,25 @@ public class PasswordDBField extends DBField implements pass_field {
 	out.writeUTF("");
       }
 
+    if (getFieldDef().isSSHAHashed())
+      {
+	sshaHash = getSSHAHashText();
+
+	if (sshaHash == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(sshaHash);
+	    wrote_hash = true;
+	  }
+      }
+    else
+      {
+	out.writeUTF("");
+      }
+
     // at file version 2.1, we write out plaintext if the field
     // definition requires it, or if we were not able to write
     // out any crypttext
@@ -534,6 +562,18 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (ntHash.equals(""))
 	  {
 	    ntHash = null;
+	  }
+
+	// we added SSHA Hash at file format 2.5
+
+	if (Ganymede.db.isAtLeast(2,5))
+	  {
+	    sshaHash = in.readUTF();
+	    
+	    if (sshaHash.equals(""))
+	      {
+		sshaHash = null;
+	      }
 	  }
 
 	uncryptedPass = in.readUTF();
@@ -673,6 +713,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	dump.attribute("ntmd4", ntHash);
       }
 
+    if (sshaHash != null)
+      {
+	dump.attribute("ssha", sshaHash);
+      }
+
     dump.endElement("password");
     dump.endElement(this.getXMLName());
   }
@@ -760,6 +805,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (ntHash != null)
 	  {
 	    result.append("ntmd4 ");
+	  }
+
+	if (sshaHash != null)
+	  {
+	    result.append("ssha ");
 	  }
 
 	if (uncryptedPass != null)
@@ -941,6 +991,10 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	success = uncryptedPass.equals(plaintext); // most accurate
       }
+    else if (sshaHash != null)
+      {
+	success = SSHA.matchSHAHash(sshaHash, plaintext);
+      }
     else if (md5CryptPass != null)
       {
 	success = md5CryptPass.equals(MD5Crypt.crypt(plaintext, getMD5Salt()));
@@ -1087,6 +1141,32 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (uncryptedPass != null)
 	  {
 	    return smbencrypt.NTUNICODEHash(uncryptedPass);
+	  }
+	else
+	  {
+	    return null;
+	  }
+      }
+  }
+
+  /** 
+   * <p>This server-side only method returns the Netscape SSHA (salted
+   * SHA) LDAP hash of the password data held in this field.</p>
+   *
+   * <p>This method is never meant to be available remotely.</p>
+   */
+
+  public String getSSHAHashText()
+  {
+    if (sshaHash != null)
+      {
+	return sshaHash;
+      }
+    else
+      {
+	if (uncryptedPass != null)
+	  {
+	    return SSHA.getLDAPSSHAHash(uncryptedPass, null);
 	  }
 	else
 	  {
@@ -1318,6 +1398,11 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	lanHash = smbencrypt.LANMANHash(plaintext);
 	ntHash = smbencrypt.NTUNICODEHash(plaintext);
+      }
+
+    if (getFieldDef().isSSHAHashed())
+      {
+	sshaHash = SSHA.getLDAPSSHAHash(plaintext, null);
       }
 
     return retVal;
