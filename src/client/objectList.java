@@ -8,7 +8,7 @@
    their current state in the client, and more.
    
    Created: 6 February 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -153,8 +153,16 @@ public class objectList {
       {
 	handle = (ObjectHandle) enum.nextElement();
 
-	if (getObjectHandle(handle.getInvid()) != null)
+	// we only want to add a handle if we don't have the
+	// invid in place already
+
+	if (getObjectHandle(handle.getInvid()) == null)
 	  {
+	    if (!handle.isEditable())
+	      {
+		containsNonEditable = true;
+	      }
+
 	    addObjectHandle(handle);
 	  }
       }
