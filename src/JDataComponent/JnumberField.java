@@ -132,7 +132,7 @@ public class JnumberField extends JentryField {
    *
    * @param c the character to check
    */
-  private boolean isAllowed(char c)
+  public boolean isAllowed(char c)
   {
     if (((int)c > getMaxValue()) || ((int)c > getMinValue()))
       {
