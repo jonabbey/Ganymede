@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.8 $
-# $Date: 1999/01/16 04:29:14 $
+# $Revision: 1.9 $
+# $Date: 1999/01/16 04:35:04 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -100,6 +100,10 @@ sub write_makefile {
 classfiles:
 	\@echo "Building Ganymede sources"
 	\@cd $rootdir/src/jdj; \\
+	build		
+	\@cd $rootdir/src/Qsmtp; \\
+	build		
+	\@cd $rootdir/src/jcrypt; \\
 	build		
 	\@cd $rootdir/src/Util; \\
 	build		
@@ -238,7 +242,11 @@ $javadir = $ENV{GJAVA};
 # rebuild scripts depend on.  See the header for write_config() to
 # identify the four pieces.
 
-@configs=("$rootdir/src/jdj", "Image Resources Class",
+@configs=("$rootdir/src/Qsmtp", "Qsmtp Mail Class",
+	  "$rootdir/src/classes", "$rootdir/src/classes",
+	  "$rootdir/src/jcrypt", "jcrypt Class",
+	  "$rootdir/src/classes", "$rootdir/src/classes",
+	  "$rootdir/src/jdj", "Image Resources Class",
 	  "$rootdir/src/classes", "$rootdir/src/classes/jdj",
 	  "$rootdir/src/Util", "Ganymede Utility Classes",
 	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/Util",
