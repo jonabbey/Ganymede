@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 1999/09/22 23:14:21 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 1999/10/27 06:08:55 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.108 $ $Date: 1999/09/22 23:14:21 $ $Name:  $
+ * @version $Revision: 1.109 $ $Date: 1999/10/27 06:08:55 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1967,6 +1967,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	Object newValue = e.getItem();
 	Object oldValue = field.getValue();
 
+	if (newValue.equals(oldValue))
+	  {
+	    return;		// what else is new?
+	  }
+
 	if (newValue instanceof String)
 	  {
 	    returnValue = field.setValue(newValue);
@@ -2019,7 +2024,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    // turn off callbacks
 
 	    cb.removeItemListener(this);
-
+	    
 	    if (newValue instanceof String)
 	      {
 		cb.setSelectedItem(oldValue);
@@ -2029,9 +2034,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid) oldValue), oldValue);
 		cb.setSelectedItem(lh);
 	      }
-
+	    
 	    // turn callbacks back on
-
+	    
 	    cb.addItemListener(this);
 	  }
       }
@@ -3299,7 +3304,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     combo.setMaximumRowCount(12);
     combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-    combo.setEditable(false);
+    //    combo.setEditable(false);
     combo.setVisible(true);
     
     if (currentChoice != null)
