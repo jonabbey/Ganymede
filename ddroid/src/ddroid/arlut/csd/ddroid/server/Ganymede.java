@@ -455,7 +455,7 @@ public class Ganymede {
     // to create this before creating our DBStore, as some of the
     // components of DBStore are to be made accessible through RMI
 
-    Ganymede.rmi = new GanymedeRMIManager(0, true);
+    Ganymede.rmi = new GanymedeRMIManager(55555, true);
 
     // if debug=<filename> was specified on the command line, tell the
     // RMI system to log RMI calls and exceptions that occur in

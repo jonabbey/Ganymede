@@ -74,7 +74,10 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
   private int _hashCode = "arlut.csd.ddroid.common.RMISSLServerSocketFactory".hashCode();
 
   private static String passphrase = "ganypassphrase";
-  private static String keysResource = "GanymedeServerSSLKeys";
+  private static String keysResource = "GanymedeSSLServerKeys";
+  private static final boolean socketDebug = false;
+
+  private static int counter = 0;
 
   private transient SSLServerSocketFactory ssf;
 
@@ -85,9 +88,17 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
   }
 
   public ServerSocket createServerSocket(int port) throws IOException
-  { 
-    System.err.println("Creating server socket on port " + port);
-    Ganymede.printCallStack();
+  {
+    if (socketDebug)
+      {
+	synchronized (arlut.csd.ddroid.common.RMISSLServerSocketFactory.class)
+	  {
+	    System.err.println("Creating server socket # " + counter + " on port " + port);
+	    counter++;
+	  }
+
+	Ganymede.printCallStack();
+      }
 
     return getSSF().createServerSocket(port);
   }
@@ -114,8 +125,11 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
 	return ssf;
       }
 
-    System.err.println("Creating server socket factory");
-    Ganymede.printCallStack();
+    if (socketDebug)
+      {
+	System.err.println("Creating server socket factory");
+	Ganymede.printCallStack();
+      }
 
     try
       {
@@ -128,8 +142,39 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
 	ctx = SSLContext.getInstance("TLS");
 	kmf = KeyManagerFactory.getInstance("SunX509");
 	ks = KeyStore.getInstance("JKS");
+
+	InputStream x = PackageResources.getPackageResourceAsStream(keysResource, this.getClass());
+
+	if (x == null)
+	  {
+	    System.err.println("Hey, couldn't load " + keysResource);
+	  }
+	else
+	  {
+	    if (socketDebug)
+	      {
+		int count = 0;
+
+		try
+		  {
+		    int i = x.read();
+
+		    while (i >= 0)
+		      {
+			count++;
+			i = x.read();
+		      }
+		  }
+		catch (IOException ex)
+		  {
+		    ex.printStackTrace();
+		  }
+		
+		System.err.println("Read " + count + " bytes from " + keysResource);
+	      }
+	  }
       
-	ks.load(PackageResources.getPackageResourceAsStream(keysResource, null), pass);
+	ks.load(PackageResources.getPackageResourceAsStream(keysResource, this.getClass()), pass);
 	kmf.init(ks, pass);
 	ctx.init(kmf.getKeyManagers(), null, null);
 	

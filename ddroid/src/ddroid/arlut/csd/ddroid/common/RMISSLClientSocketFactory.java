@@ -71,6 +71,8 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   private int _hashCode = "arlut.csd.ddroid.common.RMISSLClientSocketFactory".hashCode();
 
   private static String certsResource = "client.truststore";
+  private static int counter = 0;
+  private static final boolean socketDebug = false;
 
   private transient SSLSocketFactory sf;
 
@@ -82,8 +84,16 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 
   public Socket createSocket(String host, int port) throws IOException
   {
-    System.err.println("Creating client socket to hose " + host + " on port " + port);
-    Ganymede.printCallStack();
+    if (socketDebug)
+      {
+	synchronized (arlut.csd.ddroid.common.RMISSLClientSocketFactory.class)
+	  {
+	    System.err.println("Creating client socket # " + counter + " to host " + host + " on port " + port);
+	    counter++;
+	  }
+	
+	RMISSLClientSocketFactory.printCallStack();
+      }
 
     return getSF().createSocket(host, port);
   }
@@ -110,8 +120,11 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 	return sf;
       }
 
-    System.err.println("Creating client socket factory");
-    Ganymede.printCallStack();
+    if (socketDebug)
+      {
+	System.err.println("Creating client socket factory");
+	RMISSLClientSocketFactory.printCallStack();
+      }
 
     try
       {
@@ -123,7 +136,38 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 	tmf = TrustManagerFactory.getInstance("SunX509");
 	ks = KeyStore.getInstance("JKS");
 
-	ks.load(PackageResources.getPackageResourceAsStream(certsResource, null), null);
+	InputStream x = PackageResources.getPackageResourceAsStream(certsResource, this.getClass());
+
+	if (x == null)
+	  {
+	    System.err.println("Hey, couldn't load " + certsResource);
+	  }
+	else
+	  {
+	    if (socketDebug)
+	      {
+		int count = 0;
+
+		try
+		  {
+		    int i = x.read();
+		    
+		    while (i >= 0)
+		      {
+			count++;
+			i = x.read();
+		      }
+		  }
+		catch (IOException ex)
+		  {
+		    ex.printStackTrace();
+		  }
+		
+		System.err.println("Read " + count + " bytes from " + certsResource);
+	      }
+	  }
+
+	ks.load(PackageResources.getPackageResourceAsStream(certsResource, this.getClass()), null);
 	tmf.init(ks);
 	ctx.init(null, tmf.getTrustManagers(), null);
 
@@ -135,5 +179,22 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
       }
 
     return sf;
+  }
+
+  /**
+   * This is a convenience method used by the server to generate a
+   * stack trace print from a server code.
+   */
+
+  private static void printCallStack()
+  {
+    try
+      {
+	throw new RuntimeException("TRACE");
+      }
+    catch (RuntimeException ex)
+      {
+	ex.printStackTrace();
+      }
   }
 }

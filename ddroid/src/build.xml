@@ -52,10 +52,10 @@
   <property name="priv_key.days_valid" value="3650"/>
 
   <!-- This filename should not be changed -->
-  <property name="priv_key.keystore" value="${build.crypto}/GanymedeSSLServerKeys"/>
+  <property name="priv_key.keystore" value="${build.crypto}/arlut/csd/ddroid/common/GanymedeSSLServerKeys"/>
   <property name="priv_key.alias" value="GanymedeServerKey"/>
   <property name="priv_key.dname" value="cn=Ganymede Server,ou=Your Domain Here,c=Your Country Here"/>
-  <property name="pubcert.truststore" value="${build.crypto}/client.truststore"/>
+  <property name="pubcert.truststore" value="${build.crypto}/arlut/csd/ddroid/common/client.truststore"/>
   <property name="pubcert.storepass" value="gclientpassphrase"/>
 
   <condition property="sslkeys.notgenerated">
@@ -133,6 +133,7 @@ total         - Complete strip and rebuild
     <mkdir dir="${build.lib}"/>
     <mkdir dir="${build.doc}"/>
     <mkdir dir="${build.crypto}"/>
+    <mkdir dir="${build.crypto}/arlut/csd/ddroid/common"/>
     <tstamp/>
     <echo message="${TSTAMP}"/>
   </target>
@@ -229,8 +230,8 @@ refresh the jar files.
 
       <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/server/*.properties"/>
 
-      <fileset dir="${build.crypto}" includes="GanymedeServerKey"/>
-      <fileset dir="${build.crypto}" includes="client.truststore"/>
+      <fileset dir="${build.crypto}" includes="arlut/csd/ddroid/common/GanymedeSSLServerKeys"/>
+      <fileset dir="${build.crypto}" includes="arlut/csd/ddroid/common/client.truststore"/>
     </jar>
 
     <!-- Build the client jar file -->
@@ -253,7 +254,7 @@ refresh the jar files.
       <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/*"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/client/*"/>
 
-      <fileset dir="${build.crypto}" includes="client.truststore"/>
+      <fileset dir="${build.crypto}" includes="arlut/csd/ddroid/common/client.truststore"/>
     </jar>
 
     <!-- Build the admin jar file -->
@@ -283,7 +284,7 @@ refresh the jar files.
 
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
 
-      <fileset dir="${build.crypto}" includes="client.truststore"/>
+      <fileset dir="${build.crypto}" includes="arlut/csd/ddroid/common/client.truststore"/>
     </jar>
 
     <antcall target="signjars"/>
