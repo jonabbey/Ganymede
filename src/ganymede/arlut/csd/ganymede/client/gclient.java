@@ -1730,7 +1730,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    buffer.append("<head></head>");
 	    buffer.append("<body>");
-	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
+	    buffer.append("<h1>Ganymede Directory Management System</h1>");
 	    buffer.append("<p>Release number: ");
 	    buffer.append(arlut.csd.Util.SVNVersion.getReleaseString());
 	    buffer.append("<br>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004<br>The University of Texas at Austin</p>");
@@ -1739,7 +1739,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
 	    buffer.append("under the conditions of the GNU General Public License.</p>");
 	    buffer.append("<p>Written by Jonathan Abbey, Michael Mulvaney, Navin Manohar, ");
-	    buffer.append("Brian O'Mara, and Erik Grostic.</p>");
+	    buffer.append("Brian O'Mara, Deepak Giridharagopal, and Erik Grostic.</p>");
 	    buffer.append("<br><p>Visit the Ganymede web site at http://www.arlut.utexas.edu/gash2/</p>");
 	    buffer.append("</body>");
 
@@ -1772,6 +1772,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 			      "were initially developed by Navin Manohar.  Erik Grostic and Brian O'Mara " +
 			      "contributed code to the client.</p><p>Navin, Erik, and Brian worked on Ganymede " +
 			      "while working as student employees at ARL.</p>" +
+			      "<p>Deepak Giridharagopal has made very significant contributions to the Ganymede " +
+			      "build process, the server-side Jython support, and latter day client code, among other things.</p>" +
 			      "<p>Dan Scott, dscott@arlut.utexas.edu, oversaw the development " +
 			      "of Ganymede and its predecessor, GASH, and provided high-level " +
 			      "direction and support.</p><br>" +

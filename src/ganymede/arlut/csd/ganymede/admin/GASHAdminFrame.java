@@ -958,7 +958,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
 	    buffer.append("under the conditions of the GNU General Public License.</p>");
 	    buffer.append("<p>Written by Jonathan Abbey, Michael Mulvaney, Navin Manohar, ");
-	    buffer.append("Brian O'Mara, and Erik Grostic.</p>");
+	    buffer.append("Brian O'Mara, Deepak Giridharagopal, and Erik Grostic.</p>");
 	    buffer.append("<br><p>Visit the Ganymede web site at http://www.arlut.utexas.edu/gash2/</p>");
 	    buffer.append("</body>");
 
