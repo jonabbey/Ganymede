@@ -6,8 +6,8 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.9 $ %D%
-   Module By: Jonathan Abbey
+   Version: $Revision: 1.10 $ %D%
+   Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
 */
@@ -33,7 +33,7 @@ import gjt.RowLayout;
 import gjt.ColumnLayout;
 
 import arlut.csd.Tree.*;
-import arlut.csd.Dialog.YesNoDialog;
+// import arlut.csd.Dialog.YesNoDialog;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -237,6 +237,13 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     setSize(800, 600);
     show();
   }
+
+  /**
+   *
+   * Base ID comparator for the Quicksort used in objectsRefresh.
+   *
+   * @see arlut.csd.Util.Compare
+   */
 
   public int compare(Object a, Object b) 
   {
@@ -1201,3 +1208,92 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                        BaseNode
+
+------------------------------------------------------------------------------*/
+
+class BaseNode extends arlut.csd.Tree.treeNode {
+
+  private Base base;
+
+  /* -- */
+
+  BaseNode(treeNode parent, String text, Base base, treeNode insertAfter,
+	   boolean expandable, int openImage, int closedImage, PopupMenu menu)
+  {
+    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
+    this.base = base;
+  }
+
+  public Base getBase()
+  {
+    return base;
+  }
+
+  public void setBase(Base base)
+  {
+    this.base = base;
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                       FieldNode
+
+------------------------------------------------------------------------------*/
+
+class FieldNode extends arlut.csd.Tree.treeNode {
+
+  private BaseField field;
+
+  /* -- */
+
+  FieldNode(treeNode parent, String text, BaseField field, treeNode insertAfter,
+	    boolean expandable, int openImage, int closedImage, PopupMenu menu)
+  {
+    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
+    this.field = field;
+  }
+
+  public BaseField getField()
+  {
+    return field;
+  }
+
+  public void setField(BaseField field)
+  {
+    this.field = field;
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                       SpaceNode
+
+------------------------------------------------------------------------------*/
+
+class SpaceNode extends arlut.csd.Tree.treeNode {
+
+  private NameSpace space;
+
+  /* -- */
+
+  SpaceNode(treeNode parent, String text, NameSpace space, treeNode insertAfter,
+	    boolean expandable, int openImage, int closedImage, PopupMenu menu)
+  {
+    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
+    this.space = space;
+  }
+
+  public NameSpace getSpace()
+  {
+    return space;
+  }
+
+  public void setSpace(NameSpace space)
+  {
+    this.space = space;
+  }
+}
