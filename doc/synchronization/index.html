@@ -310,7 +310,7 @@
     writing a full-state builder task with the GanymedeBuilderTask
     class.</p>
 
-    <pre>
+    <pre class="listing">
 package arlut.csd.ganymede.userKit;
 
 import arlut.csd.ganymede.server.*;
@@ -373,7 +373,7 @@ href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a>
 parameter, and set the <a
 href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#taskDefObjInvid">taskDefObjInvid</a>
 variable from the GanymedeBuilderTask class.</p>
-<pre>
+<pre class="listing">
 
   /**
    * This method runs with a dumpLock obtained for the builder task.
@@ -530,6 +530,7 @@ variable from the GanymedeBuilderTask class.</p>
     return result;
   }
 </pre>
+
 <p>And here we have our <a
 href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
 method.  The important things to note here are the use of the <a
@@ -561,7 +562,7 @@ class="filename">/etc/group</code> type environment.</p>
 will return false, which will tell the GanymedeBuilderTask base class
 not to bother running builderPhase2().</p>
 
-<pre>
+<pre class="listing">
 
   /**
    *
@@ -649,7 +650,7 @@ files that your external builder script is still working with.</p>
 <p>What I say to you three times is true.  Never let your external
 builder script return until it is truly finished with its build.</p>
 
-<pre>
+<pre class="listing">
 
   // ***
   //
