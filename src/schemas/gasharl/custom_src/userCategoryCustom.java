@@ -6,8 +6,8 @@
    
    Created: 7 October 1998
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:07 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2003/07/31 22:54:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -126,5 +126,4 @@ public class userCategoryCustom extends DBEditObject implements SchemaConstants 
 
     return false;		// by default, permission is denied
   }
-  
 }

@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 2003/07/17 02:07:32 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 2003/07/31 22:54:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -820,6 +820,80 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     return false;
+  }
+
+
+  /**
+   * <p>Customization method to verify overall consistency of
+   * a DBObject.  This method is intended to be overridden
+   * in DBEditObject subclasses, and will be called by
+   * {@link arlut.csd.ganymede.DBEditObject#commitPhase1() commitPhase1()}
+   * to verify the readiness of this object for commit.  The
+   * DBObject passed to this method will be a DBEditObject,
+   * complete with that object's GanymedeSession reference
+   * if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if
+   * the code needs to access the database.</p>
+   *
+   * <p>To be overridden in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal consistencyCheck(DBObject object)
+  {
+    DBSession session = null;
+    DBObject categoryObj = null;
+    String categoryName = null;
+
+    /* -- */
+
+    Invid category = (Invid) object.getFieldValueLocal(userSchema.CATEGORY);
+
+    if (category == null)
+      {
+	return null;
+      }
+
+    if (object instanceof DBEditObject)
+      {
+	session = ((DBEditObject) object).getSession();
+      }
+
+    if (session != null)
+      {
+	categoryObj = session.viewDBObject(category);
+      } 
+    else
+      {
+	categoryObj = DBStore.viewDBObject(category);
+      }
+
+    if (categoryObj == null) 
+      {
+	// shouldn't happen, but if it does we'll assume something
+	// else will catch this
+
+	return null;
+      }
+
+    categoryName = categoryObj.getLabel();
+    
+    if (categoryObj.isSet(userCategorySchema.EXPIRE))
+      {
+	if (object.getFieldValueLocal(SchemaConstants.ExpirationField) == null)
+	  {
+	    return Ganymede.createErrorDialog("Missing Expiration Field",
+					      "User objects belonging to the " + categoryName +
+					      " category require an expiration date to be set.");
+	  }
+      }
+
+    return null;
   }
 
   /**
