@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -74,18 +74,41 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     super(original, editset);
   }
 
+  /**
+   *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    switch (fieldid)
+      {
+      case systemSchema.SYSTEMNAME:
+      case systemSchema.INTERFACES:
+      case systemSchema.DNSDOMAIN:
+      case systemSchema.SYSTEMTYPE:
+	return true;
+      }
+
+    return false;
+  }
+
   public Object obtainChoicesKey(DBField field)
   {
     DBObjectBase base = Ganymede.db.getObjectBase((short) 272);	// system types
 
     /* -- */
 
-    if (field.getID() == 268)
+    if (field.getID() == systemSchema.VOLUMES)
       {
 	return null;		// no choices for volumes
       }
     
-    if (field.getID() != 266)	// system type field
+    if (field.getID() != systemSchema.SYSTEMTYPE)	// system type field
       {
 	return super.obtainChoicesKey(field);
       }
@@ -110,12 +133,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public QueryResult obtainChoiceList(DBField field)
   {
-    if (field.getID() == 268)
+    if (field.getID() == systemSchema.VOLUMES)
       {
 	return null;		// no choices for volumes
       }
 
-    if (field.getID() != 266)	// system type field
+    if (field.getID() != systemSchema.SYSTEMTYPE) // system type field
       {
 	return super.obtainChoiceList(field);
       }
@@ -137,7 +160,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public boolean mustChoose(DBField field)
   {
-    return (field.getID() == 266);
+    if (field.getID() == systemSchema.SYSTEMTYPE)
+      {
+	return true;
+      }
+
+    return super.mustChoose(field);
   }
   
   /**
@@ -155,7 +183,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     /* -- */
 
-    if (field.getID() == 260)	// interface field
+    if (field.getID() == systemSchema.INTERFACES) // interface field
       {
 	fieldDef = field.getFieldDef();
 	
