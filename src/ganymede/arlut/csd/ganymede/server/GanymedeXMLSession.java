@@ -2969,7 +2969,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    String key = (String) iter.next();
 
 		    // "\t{0}: {1,number,#}"
-		    err.println(ts.l("integrateXMLTransaction.object_count", key, createCount.get(key)));		    
+		    err.println(ts.l("integrateXMLTransaction.object_count", key, editCount.get(key)));
 		  }
 	      }
 	    
@@ -2985,7 +2985,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    String key = (String) iter.next();
 
 		    // "\t{0}: {1,number,#}"
-		    err.println(ts.l("integrateXMLTransaction.object_count", key, createCount.get(key)));		    
+		    err.println(ts.l("integrateXMLTransaction.object_count", key, deleteCount.get(key)));		    
 		  }
 	      }
 	    
@@ -3001,7 +3001,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		    String key = (String) iter.next();
 
 		    // "\t{0}: {1,number,#}"
-		    err.println(ts.l("integrateXMLTransaction.object_count", key, createCount.get(key)));		    
+		    err.println(ts.l("integrateXMLTransaction.object_count", key, inactivateCount.get(key)));		    
 		  }
 	      }
 
