@@ -6,7 +6,7 @@
    these constants, edit this file and re-build Ganymede.
    
    Created: 3 July 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -21,7 +21,7 @@ package arlut.csd.ganymede;
 ------------------------------------------------------------------------------*/
 
 public class GanymedeConfig {
-  static final String newSGpass = "p"; // initial supergash password
+  static final String newSGpass = "dodo"; // initial supergash password
   static final String newMonpass = "display"; // initial monitor password
   static final String schemaPath = "ganymede.schema"; // what name to dump the schema to?
 }
