@@ -5,12 +5,13 @@
 
    This module is intended to be bound to the bulk of the Ganymede
    server and automatically create a whole bunch of objects
-   to initialize the database from NIS data.
+   to initialize the database from a pair of BSD 4.4 compatible
+   master.passwd/group files.
 
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,6 +37,8 @@ import arlut.csd.ganymede.custom.*;
 ------------------------------------------------------------------------------*/
 
 public class directLoader {
+
+  static final boolean debug = true;
 
   static GanymedeServer my_server;
   static Session my_session;
@@ -113,19 +116,19 @@ public class directLoader {
 	System.err.println("heck.");
       }
 
-    System.err.println("---------------------------------------- Initiating NIS file scan --------------------");
+    System.err.println("---------------------------------------- Initiating BSD file scan --------------------");
 
     scanUsers();
     scanGroups();
 
-    System.err.println("\n---------------------------------------- Completed NIS file scan --------------------\n");
+    System.err.println("\n---------------------------------------- Completed BSD file scan --------------------\n");
     
     // Okay.. at this point we've scanned the files we need to scan..
     // now we initialize the database module and create the objects
 
     try
       {
-	my_client.session.openTransaction("NIS directLoader");
+	my_client.session.openTransaction("BSD directLoader");
 
 	String key;
 	Invid invid, objInvid;
@@ -142,12 +145,12 @@ public class directLoader {
 
 	my_client.session.checkpoint("GASHAdmin");
 
-	current_obj = (DBEditObject) createObject(SchemaConstants.PermBase);
+	current_obj = (DBEditObject) createObject(SchemaConstants.RoleBase);
 	gashadminPermInvid = current_obj.getInvid();
 
 	System.err.println("Trying to create a new GASHAdmin perm object: " + gashadminPermInvid.toString());
 
-	retVal = current_obj.setFieldValueLocal(SchemaConstants.PermName, "GASH Admin");
+	retVal = current_obj.setFieldValueLocal(SchemaConstants.RoleName, "GASH Admin");
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -158,7 +161,7 @@ public class directLoader {
 	    // note that QueryDataNode uses the label as the
 	    // comparator if you don't provide a field id
 
-	    Query q = new Query(SchemaConstants.PermBase, 
+	    Query q = new Query(SchemaConstants.RoleBase, 
 				new QueryDataNode(QueryDataNode.EQUALS, "GASH Admin"),
 				false);
 
@@ -181,7 +184,7 @@ public class directLoader {
 	  {
 	    System.err.println("\n***Default permissions matrix is " + gashadminPermInvid.toString());
 
-	    perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
+	    perm_field pf = (perm_field) current_obj.getField(SchemaConstants.RoleMatrix);
 
 	    PermEntry defPerm = new PermEntry(true, true, true, true);
 	
@@ -191,7 +194,7 @@ public class directLoader {
 	  }
 
 	commitTransaction();
-	my_client.session.openTransaction("NIS directLoader");
+	my_client.session.openTransaction("BSD directLoader");
 
 	System.out.println("\nRegistering users\n");
 
@@ -199,7 +202,7 @@ public class directLoader {
 	commitTransaction();
 
 	System.out.println("\nRegistering groups\n");
-	my_client.session.openTransaction("NIS directLoader");
+	my_client.session.openTransaction("BSD directLoader");
 	registerGroups();
 	commitTransaction();
       }
@@ -241,7 +244,7 @@ public class directLoader {
   /*----------------------------------------------------------------------------*/
 
   //
-  // the following methods handle the parsing of a particular NIS file
+  // the following methods handle the parsing of a particular BSD file
   //
 
   /*----------------------------------------------------------------------------*/
@@ -256,12 +259,12 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("input/passwd");
+	inStream = new FileInputStream("input/master.passwd");
 	done = false;
       }
     catch (FileNotFoundException ex)
       {
-	System.err.println("Couldn't find passwd");
+	System.err.println("Couldn't find master.passwd in the input directory");
 	done = true;
       }
 
@@ -278,10 +281,19 @@ public class directLoader {
 	    userObj = new User();
 	    done = userObj.loadLine(tokens);
 
-	    if (!done)
+	    if (!done && userObj.valid)
 	      {
-		System.out.print(".");
 		users.put(userObj.name, userObj);
+
+		if (debug)
+		  {
+		    System.out.println("\n\n");
+		    userObj.display();
+		  }
+		else
+		  {
+		    System.out.print(".");
+		  }
 	      }
 	  }
 	catch (EOFException ex)
@@ -340,11 +352,20 @@ public class directLoader {
 	    groupObj = new Group();
 	    done = groupObj.loadLine(tokens);
 
-	    if (!done)
+	    if (!done && groupObj.valid)
 	      {
-		System.out.print(".");
 		groups.put(groupObj.name, groupObj);
 		groupID.put(new Integer(groupObj.gid), groupObj);
+
+		if (debug)
+		  {
+		    System.out.println("\n\n");
+		    groupObj.display();
+		  }
+		else
+		  {
+		    System.out.print(".");
+		  }
 	      }
 	  }
 	catch (EOFException ex)
@@ -423,7 +444,7 @@ public class directLoader {
 
 	// set the division
 
-	current_obj.setFieldValueLocal(userSchema.DIVISION, userObj.division);
+	current_obj.setFieldValueLocal(userSchema.CLASSIFICATION, userObj.classification);
 
 	// set the room
 
@@ -507,11 +528,13 @@ public class directLoader {
 		if (invid != null)
 		  {
 		    System.err.println("Add " + username + ", [" + invid.toString()+"]");
-		    current_field.addElement(invid);
+		    ((DBField) current_field).addElementLocal(invid);
 		  }
 		else
 		  {
-		    System.err.println("null invid");
+		    System.err.println("Error, user '" + username + "' listed in group " + 
+				       groupObj.name + 
+				       " doesn't really exist");
 		  }
 
 		// does this user have this group specified as his/her home group?
@@ -519,11 +542,20 @@ public class directLoader {
 
 		userObj = (User) users.get(username);
 
-		if (userObj.gid == groupObj.gid)
+		if (userObj == null)
 		  {
+		    System.err.println("Error, user '" + username + "' listed in group " + 
+				       groupObj.name + 
+				       " doesn't really exist");
+		  }
+		else
+		  {
+		    if (userObj.gid == groupObj.gid)
+		      {
 		    System.err.println("-- home group add " + username);
 		    current_field2 = current_obj.getField(groupSchema.HOMEUSERS);
-		    current_field2.addElement(invid);
+		    ((DBField) current_field2).addElementLocal(invid);
+		      }
 		  }
 	      }
 	    else
