@@ -346,7 +346,7 @@ not present in <namespace>.
 
 Also, the Ganymede server now properly handles switching a namespace
 from case-sensitive to insensitive, or vice-vera, as needed, and
-checks to amke sure that this redefinition operation can be done
+checks to make sure that this redefinition operation can be done
 safely on the namespace-constrained data loaded in the server.  The
 admin console's schema editor still does not allow changing the case
 sensitivity of a namespace, but the xmlclient may be used to do this.
@@ -548,9 +548,7 @@ GanyPermissionException, as it is a declared exception that derives
 from RemoteException for compatibility with the client.
 
 In some cases, methods that previously returned ReturnVal to indicate
-permissions failures may now throw GanyPermissionException.  I'm not
-sure that this is entirely accounted for in the client code at this
-writing (10 February 2005).
+permissions failures may now throw GanyPermissionException.
 
 29. [SERVER] Added entirely new Sync Channel build system
 
@@ -590,9 +588,6 @@ written out at the time that the service program is run.
 The service program is intended to read all of the transactions up to
 and including the number given it, and to integrate those changes into
 whatever directory service the Sync Channel is intended to support.
-
-At this writing (14 February 2005), I still need to write
-documentation for the Sync Channel system.
 
 30. [SERVER] Forced java.rmi.server.randomIDs on by default
 
