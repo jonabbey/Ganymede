@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -131,15 +131,15 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     ca = new JcomponentAttr(this, new java.awt.Font("SansSerif", java.awt.Font.BOLD, 12),
 			    java.awt.Color.black, java.awt.Color.white);
     
-    idN = new JnumberField(20, ca, false, false, 0, 0);
+    idN = new JnumberField(20,  false, false, 0, 0);
     idN.setCallback(this);
     addRow(editPanel, idN, "Field ID:", 0);
     
-    nameS = new JstringField(20, 100, ca, true, false, null, null);
+    nameS = new JstringField(20, 100,  true, false, null, null);
     nameS.setCallback(this);
     addRow(editPanel, nameS, "Field Name:", 1);
 
-    classS = new JstringField(20, 100, ca, true, false, null, null);
+    classS = new JstringField(20, 100,  true, false, null, null);
     classS.setCallback(this);
     addRow(editPanel, classS, "Class name:", 2);
 
@@ -153,7 +153,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     vectorCF.setCallback(this);
     addRow(editPanel, vectorCF, "Vector:", 4);
 
-    maxArrayN = new JnumberField(20, ca, true, false, 0, Integer.MAX_VALUE);
+    maxArrayN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     maxArrayN.setCallback(this);
     addRow(editPanel, maxArrayN, "Max Array Size:", 5);
 
@@ -177,19 +177,19 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
    
     addRow(editPanel, typeC, "Field Type:", 6);
 
-    minLengthN = new JnumberField(20, ca, true, false, 0, Integer.MAX_VALUE);
+    minLengthN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     minLengthN.setCallback(this);
     addRow(editPanel, minLengthN, "Minimum String Size:", 8);
     
-    maxLengthN = new JnumberField(20, ca, true, false, 0, Integer.MAX_VALUE);
+    maxLengthN = new JnumberField(20,  true, false, 0, Integer.MAX_VALUE);
     maxLengthN.setCallback(this);
     addRow(editPanel, maxLengthN, "Maximum String Size:", 9);
    
-    OKCharS = new JstringField(20, 100, ca, true, false, null, null);
+    OKCharS = new JstringField(20, 100,  true, false, null, null);
     OKCharS.setCallback(this);
     addRow(editPanel, OKCharS, "Allowed Chars:", 10);
 
-    BadCharS = new JstringField(20, 100, ca, true, false, null, null);
+    BadCharS = new JstringField(20, 100,  true, false, null, null);
     BadCharS.setCallback(this);
     addRow(editPanel, BadCharS, "Disallowed Chars:", 11);
 
@@ -202,11 +202,11 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     labeledCF.setCallback(this);
     addRow(editPanel, labeledCF, "Labeled:", 13);
 
-    trueLabelS = new JstringField(20, 100, ca, true, false, null, null);
+    trueLabelS = new JstringField(20, 100,  true, false, null, null);
     trueLabelS.setCallback(this);
     addRow(editPanel, trueLabelS, "True Label:", 14);
 
-    falseLabelS = new JstringField(20, 100, ca, true, false, null, null);
+    falseLabelS = new JstringField(20, 100,  true, false, null, null);
     falseLabelS.setCallback(this);
     addRow(editPanel, falseLabelS, "False Label:", 15);
 

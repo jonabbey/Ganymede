@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.58 $ %D%
+   Version: $Revision: 1.59 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2339,7 +2339,7 @@ class NameSpaceEditor extends JPanel implements ActionListener {
     ca = new JcomponentAttr(this, new java.awt.Font("SansSerif", java.awt.Font.BOLD, 12),
 			   java.awt.Color.black, java.awt.Color.white);
       
-    nameS = new JstringField(20, 100, ca, false, false, null, null);
+    nameS = new JstringField(20, 100, false, false, null, null);
     addRow(nameJPanel, nameS, "Namespace:", 0);
       
     caseCB = new JCheckBox();
@@ -2500,7 +2500,7 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     ca = new JcomponentAttr(this, new java.awt.Font("SansSerif",java.awt.Font.BOLD, 12),
 			   java.awt.Color.black, java.awt.Color.white);
     
-    catNameS = new JstringField(20, 100, ca, true, false, null, null, this);
+    catNameS = new JstringField(20, 100, true, false, null, null, this);
     addRow(catJPanel, catNameS, "Category Label:", 0);
     
     setLayout(new java.awt.BorderLayout());
