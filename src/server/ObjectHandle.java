@@ -8,7 +8,7 @@
    server.
    
    Created: 6 February 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,6 +28,7 @@ public class ObjectHandle implements Cloneable {
 
   String label;
   Invid invid;
+  boolean editable = false;
   boolean inactive, expirationSet, removalSet;
 
   listHandle lHandle = null;
@@ -37,13 +38,15 @@ public class ObjectHandle implements Cloneable {
   public ObjectHandle(String label, Invid invid,
 		      boolean inactive,
 		      boolean expirationSet,
-		      boolean removalSet)
+		      boolean removalSet,
+		      boolean editable)
   {
     this.label = label;
     this.invid = invid;
     this.inactive = inactive;
     this.expirationSet = expirationSet;
     this.removalSet = removalSet;
+    this.editable = editable;
   }
 
   public Object clone()
@@ -108,6 +111,16 @@ public class ObjectHandle implements Cloneable {
   public final boolean isRemovalSet()
   {
     return removalSet;
+  }
+
+  public final boolean isEditable()
+  {
+    return editable;
+  }
+
+  public final void setEditable(boolean editable)
+  {
+    this.editable = editable;
   }
 
   public void setExpirationSet(boolean expirationSet)
