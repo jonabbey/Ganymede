@@ -6,7 +6,7 @@
    tuned for use as Ganymede's field hashes.
    
    Created: 9 June 1998
-   Version: 1.2 98/06/09
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
