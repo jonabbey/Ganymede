@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.189 $
-   Last Mod Date: $Date: 2001/07/26 17:25:23 $
+   Version: $Revision: 1.190 $
+   Last Mod Date: $Date: 2001/07/26 17:33:10 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.189 $ $Date: 2001/07/26 17:25:23 $ $Name:  $
+ * @version $Revision: 1.190 $ $Date: 2001/07/26 17:33:10 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/07/26 17:25:23 $";
+  static String release_date = "$Date: 2001/07/26 17:33:10 $";
   static String release_number = null;
 
   /**
@@ -5796,8 +5796,8 @@ class StatusClearThread extends Thread {
 
 /**
  * Background client thread designed to launder build status messages from
- * the server on a non-RMI thread.
- * Called by {@link arlut.csd.ganymede.client.gclient#setBuildStatus(java.lang.String) gclient.setBuildStatus()}.
+ * the server on a non-RMI thread.  Set up and torn down by the
+ * {@link arlut.csd.ganymede.client.gclient gclient} class.
  */
 
 class SecurityLaunderThread extends Thread {
@@ -5851,10 +5851,15 @@ class SecurityLaunderThread extends Thread {
 	    messageSet = false;
 	  }
       }
+
+    // done!
+
+    client = null;
   }
 
   /**
    * <p>This method is called to trigger a build status icon update.</p>
+   * Called by {@link arlut.csd.ganymede.client.gclient#setBuildStatus(java.lang.String) gclient.setBuildStatus()}.
    */
 
   public synchronized void setBuildStatus(boolean phase1, boolean phase2)
