@@ -2,8 +2,8 @@
 #
 # Ganymede client jar build script
 #
-# Version: $Revision: 1.13 $
-# Date: $Date: 1999/05/26 18:27:05 $
+# Version: $Revision: 1.14 $
+# Date: $Date: 2000/05/27 00:32:56 $
 #
 ############################################################
 
@@ -36,6 +36,20 @@ cd arlut/csd
 rm -f Util
 ln -s $TARGETDIR/arlut/csd/Util Util
 cd ../..
+
+#
+# And the XML class directories
+#
+
+# The SAX classes
+
+rm -f org
+ln -s $TARGETDIR/org org
+
+# James Clark's parser classes
+
+rm -f com
+ln -s $TARGETDIR/com com
 
 # And the JDataComponent directory
 
@@ -74,7 +88,7 @@ cd ../..
 
 ./sync_tree
 
-$JAVADIR/jar -cf ../ganymede.jar arlut
+$JAVADIR/jar -cf ../ganymede.jar arlut com org
 
 cd ..
 
