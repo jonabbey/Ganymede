@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.143 $
-   Last Mod Date: $Date: 1999/07/15 01:07:47 $
+   Version: $Revision: 1.144 $
+   Last Mod Date: $Date: 1999/07/19 21:02:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.143 $ %D%
+ * @version $Revision: 1.144 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4009,6 +4009,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public Invid getUserInvid()
   {
     return userInvid;
+  }
+
+  /**
+   *
+   * Convenience method to get access to this session's persona invid.
+   *
+   */
+
+  public Invid getPersonaInvid()
+  {
+    return personaInvid;
   }
 
   // **

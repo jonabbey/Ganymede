@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 1999/07/15 01:07:46 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 1999/07/19 21:02:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1022,6 +1022,16 @@ public class DBEditSet {
 
 	    popCheckpoint(checkpointLabel);
 
+	    // phase one complete, go ahead and have all our
+	    // objects do their 2nd level (external) commit processes
+
+	    for (int i = 0; i < objects.size(); i++)
+	      {
+		eObj = (DBEditObject) objects.elementAt(i);
+
+		eObj.commitPhase2();
+	      }
+
 	    // need to clear out any transients before
 	    // we write the transaction out to disk
 
@@ -1175,7 +1185,13 @@ public class DBEditSet {
 						  " disk space.");
 	      }
 
-	    // log it
+	    if (debug)
+	      {
+		System.err.println(session.key + ": DBEditSet.commit(): transaction written to disk");
+	      }
+
+	    // log it.. note that we may mail out events created by
+	    // the commitPhase2() methods called above.
 
 	    if (Ganymede.log != null)
 	      {
@@ -1185,20 +1201,6 @@ public class DBEditSet {
 					    this);
 	      }
 
-	    if (debug)
-	      {
-		System.err.println(session.key + ": DBEditSet.commit(): transaction written to disk");
-	      }
-
-	    // phase one complete, go ahead and have all our
-	    // objects do their 2nd level (external) commit processes
-
-	    for (int i = 0; i < objects.size(); i++)
-	      {
-		eObj = (DBEditObject) objects.elementAt(i);
-
-		eObj.commitPhase2();
-	      }
 	  }
 	catch (Exception ex)
 	  {
