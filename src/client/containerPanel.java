@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.9 $ %D%
+    Version: $Revision: 1.10 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -427,19 +427,19 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       }
   }
   
-  void addRow(JComponent parent, Component comp,  String label, boolean visible)
+  void addRow(Component comp,  String label, boolean visible)
   {
-    addRow(parent, comp, label);
+    addRow(comp, label);
     setRowVisible(comp, visible);
   }
 
-  void addRow(JComponent parent, Component comp,  String label)
+  void addRow(Component comp,  String label)
   {
     JLabel l = new JLabel(label);
     rowHash.put(comp, l);
     comp.setBackground(ClientColor.ComponentBG);
-    parent.add("0 " + row + " lthwHW", l);
-    parent.add("1 " + row + " lthwHW", comp);
+    add("0 " + row + " lthwHW", l);
+    add("1 " + row + " lthwHW", comp);
 
     row++;
   }
@@ -508,7 +508,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
 	try 
 	  {
-	    addRow(panel, new JLabel("new container panel will go here"), name, field.isVisible());
+	    addRow( new JLabel("new container panel will go here"), name, field.isVisible());
 	  }
 	catch (RemoteException rx)
 	  {
@@ -555,7 +555,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 		      
 	  default:
 	    JLabel label = new JLabel("(Unknown)Field type ID = " + type);
-	    addRow(panel, label, name);
+	    addRow( label, name);
 	  }
       }
   }
@@ -575,7 +575,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 					   field.getValues(), 
 					   this,
 					   editable);
-    addRow(panel, ss, field.getName(), field.isVisible()); 
+    addRow( ss, field.getName(), field.isVisible()); 
   }
 
   /**
@@ -628,7 +628,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       }
 
     stringSelector ss = new stringSelector(choiceHandles, valueHandles, this, editable);
-    addRow(panel, ss, field.getName(), field.isVisible()); 
+    addRow( ss, field.getName(), field.isVisible()); 
   }
 
   /**
@@ -660,7 +660,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
     try
       {
-	addRow(panel, vp, field.getName(), field.isVisible());
+	addRow( vp, field.getName(), field.isVisible());
       }
     catch (RemoteException rx)
       {
@@ -719,7 +719,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
 		try
 		  {
-		    addRow(panel, choice, field.getName(), field.isVisible());
+		    addRow( choice, field.getName(), field.isVisible());
 		  }
 		catch (RemoteException rx)
 		  {
@@ -774,7 +774,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
 		try
 		  {
-		    addRow(panel, combo, field.getName(), field.isVisible());
+		    addRow( combo, field.getName(), field.isVisible());
 		  }
 		catch (RemoteException rx)
 		  {
@@ -826,7 +826,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
 	    try
 	      {
-		addRow(panel, sf, field.getName(), field.isVisible());
+		addRow( sf, field.getName(), field.isVisible());
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -862,7 +862,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 			  
 	try
 	  {
-	    addRow(panel, pf, field.getName(), field.isVisible());
+	    addRow( pf, field.getName(), field.isVisible());
 	  }
 	catch (RemoteException rx)
 	  {
@@ -909,7 +909,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 		
 	try
 	  {
-	    addRow(panel, sf, field.getName(), field.isVisible());
+	    addRow( sf, field.getName(), field.isVisible());
 	  }
 	catch (RemoteException rx)
 	  {
@@ -965,7 +965,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
     try
       {
-	addRow(panel, df, field.getName(), field.isVisible());
+	addRow( df, field.getName(), field.isVisible());
       }
     catch (RemoteException rx)
       {
@@ -1004,7 +1004,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
     try
       {
-	addRow(panel, cb, field.getName(), field.isVisible());
+	addRow( cb, field.getName(), field.isVisible());
       }
     catch (RemoteException rx)
       {
@@ -1034,7 +1034,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 				     parent.baseHash);
     try
       {
-	addRow(panel, pb, field.getName(), field.isVisible());
+	addRow( pb, field.getName(), field.isVisible());
       }
     catch (RemoteException rx)
       {
@@ -1062,11 +1062,11 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	if (field.getValue() != null)
 	  {
 	    String label = (String)parent.getSession().view_db_object((Invid)field.getValue()).getLabel();
-	    addRow(panel, new JLabel(label), field.getName(), field.isVisible());
+	    addRow( new JLabel(label), field.getName(), field.isVisible());
 	  }
 	else
 	  {
-	    addRow(panel, new JLabel("null invid"), field.getName(), field.isVisible());
+	    addRow( new JLabel("null invid"), field.getName(), field.isVisible());
 	  }
       }
   }
