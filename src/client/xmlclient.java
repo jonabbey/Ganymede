@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2000/05/31 21:11:35 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/06/01 03:20:34 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.13 $ $Date: 2000/05/31 21:11:35 $ $Name:  $
+ * @version $Revision: 1.14 $ $Date: 2000/06/01 03:20:34 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -611,6 +611,21 @@ public class xmlclient implements ClientListener {
 	    
 		if (mode == null || mode.equals("create"))
 		  {
+		    // if they did specify "create" as the object
+		    // action mode, this object definition record will
+		    // be forced into a new object, rather than trying
+		    // to look for an object on the server with
+		    // matching identity attributes
+
+		    // this can be useful if the user wants to create
+		    // new objects without worrying about whether
+		    // there are id conflicts with the server's state
+
+		    if (mode != null)
+		      {
+			objectRecord.forceCreate = true;
+		      }
+
 		    createdObjects.addElement(objectRecord);
 		  }
 		else if (mode.equals("edit"))
@@ -1055,14 +1070,12 @@ public class xmlclient implements ClientListener {
       {
 	xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
 	
-	// if the object has enough information that we can look
-	// it up on the server, assume that it already exists and
-	// go ahead and pull it for editing rather than creating
-	// it.
+	// if the object has enough information that we can look it up
+	// on the server (and get an Invid for it), assume that it
+	// already exists and go ahead and pull it for editing rather
+	// than creating it, unless the forceCreate flag is on.
 
-	// otherwise, create it.
-
-	if (newObject.getInvid() != null)
+	if (!newObject.forceCreate && newObject.getInvid() != null)
 	  {
 	    System.err.println("Editing " + newObject);
 

@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/05/31 00:56:57 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/06/01 03:20:35 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.8 $ $Date: 2000/05/31 00:56:57 $ $Name:  $
+ * @version $Revision: 1.9 $ $Date: 2000/06/01 03:20:35 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -130,6 +130,14 @@ public class xmlobject {
    */
 
   db_object objref = null;
+
+  /**
+   * <p>Create only flag.  If this flag is true, this object was explicitly specified
+   * as a new object to be created, rather than one that should be created only
+   * if an object with the same type/id pair isn't found on the server.</p>
+   */
+
+  boolean forceCreate = false;
 
   /* -- */
 
