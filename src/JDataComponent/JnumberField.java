@@ -30,9 +30,7 @@ public class JnumberField extends JentryField {
 
   public static int DEFAULT_COLS = 20;
 
-  public static String allowedChars = new String("0123456789.");
-
-  private Integer value = null;
+  public static String allowedChars = new String("0123456789-");
 
   private Integer oldvalue;
 
@@ -97,6 +95,16 @@ public class JnumberField extends JentryField {
 			   Color.black,Color.white),
 	 true,
 	 false,
+	 0,Integer.MAX_VALUE);
+  }
+
+  public JnumberField(int width)
+  {
+    this(width,
+	 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
+			   Color.black,Color.white),
+	 true,
+	 false,
 	 0,0);
   }
  
@@ -155,7 +163,18 @@ public class JnumberField extends JentryField {
    */
   public Integer getValue()
   {
-    return value;
+    Integer i = null;
+    try
+      {
+	i = new Integer(getText());
+      }
+    catch (NumberFormatException e)
+      {
+	System.out.println("That's not a number.");
+	i = null;
+      }
+
+    return i;
   }
 
   /**
@@ -166,14 +185,16 @@ public class JnumberField extends JentryField {
   public void setValue(int num)
   {
     if (limited)
-      if (num > maxSize || num < minSize)
-	throw new IllegalArgumentException("Invalid Parameter: number out of range");
+      {
+	if (num > maxSize || num < minSize)
+	  {
+	    System.out.println("Invalid Parameter: number out of range");
+	    return;
+	  }
+      }
     
-    oldvalue = value;
+    setValue(new Integer(num));
 
-    value = new Integer(num);
-
-    setText(value.toString());
   }
 
   /**
@@ -185,12 +206,39 @@ public class JnumberField extends JentryField {
   public void setValue(String num)
   {
     if (num == null)
-      throw new IllegalArgumentException("Invalid Parameter: string cannot be null");
+      return;
 
     if (num.equals(""))
-      throw new IllegalArgumentException("Invalid Parameter: string cannot be blank");
+      return;
 
-    setValue(Integer.valueOf(num).intValue());
+    try
+      {
+	Integer number = new Integer(num);
+	setValue(number);
+      }
+    catch (NumberFormatException e)
+      {
+	System.out.println("That's not a number.");
+	if (allowCallback)
+	  {
+	    try
+	      {
+		my_parent.setValuePerformed(new JValueObject(this, 0,
+							     JValueObject.ERROR,
+							     "Invalid number format."));
+	      }
+	    catch (java.rmi.RemoteException rx)
+	      {
+		System.out.println("Could not send an error callback.");
+	      }
+	  }
+
+	setValue(oldvalue);
+	throw new IllegalArgumentException ("That String is not castable into an Integer. " + e);
+      }
+    
+    oldvalue = getValue();
+
   }
 
 
@@ -202,9 +250,9 @@ public class JnumberField extends JentryField {
   public void setValue(Integer num)
   {
     if (num == null)
-      throw new IllegalArgumentException("Invalid Parameter: Integer cannot be null");
+      return;
 
-    setValue(num.intValue());
+    setText(num.toString());
   }
 
   /**
@@ -294,6 +342,8 @@ public class JnumberField extends JentryField {
 	(e.getKeyCode() == KeyEvent.VK_HOME))
       {
 	super.processKeyEvent(e);
+	System.out.println("it's a special, processing it");
+	return;
       }
 
     // We check against KeyEvent.CHAR_UNDEFINED so that we pass
@@ -302,12 +352,20 @@ public class JnumberField extends JentryField {
     if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
       {
 	super.processKeyEvent(e);
+	System.out.println("it's an unknown, processing it");
+	return;
       }
-    else if (isAllowed(e.getKeyChar()) && (getText().length() < maxSize))
+    else if (isAllowed(e.getKeyChar())) 
       {
 	super.processKeyEvent(e);
+	System.out.println("This one is allowed, so I am going to do it.");
+	return;
       }
 
+
+    System.out.println("Ignoring: " + e.getKeyChar());
+    
+    
     // otherwise, we ignore it
   }
 
@@ -321,19 +379,55 @@ public class JnumberField extends JentryField {
    * @param e the FocusEvent that needs to be processed
    */
   public synchronized void processFocusEvent(FocusEvent e)
-    {
-      // When the JnumberField widget looses focus, we must check
-      // to see whether the number, if any, within the input field
-      // is a valid value that falls within the specified valid range.
-      
-      // But first, if nothing in the field changed, then there is
-      // no reason to do anything.  We simply let the focus move
-      // on to another Component
+  {
+    
+    System.out.println("Got a focus event.");
 
-      if (!changed)
+    // When the JnumberField widget looses focus, we must check
+    // to see whether the number, if any, within the input field
+    // is a valid value that falls within the specified valid range.
+    
+    // But first, if nothing in the field changed, then there is
+    // no reason to do anything.  We simply let the focus move
+    // on to another Component
+    
+    super.processFocusEvent(e);
+    
+    if (e.getID() != FocusEvent.FOCUS_LOST)
+      {
+	System.out.println("This wasn't a focus lost.");
 	return;
+      }
+    Integer currentValue = getValue();
+    if (currentValue == null)
+      {
+	System.out.println("Invalid number format.");
+	if (allowCallback)
+	  {
+	    try
+	      {
+		my_parent.setValuePerformed(new JValueObject(this, 0,
+							     JValueObject.ERROR,
+							     "Invalid number format."));
+	      }
+	    catch (java.rmi.RemoteException rx)
+	      {
+		System.out.println("Could not send an error callback.");
+	      }
 
-      
+	    setValue(oldvalue);
+	  }
+	return;
+      }
+
+    
+    if ((oldvalue != null) && oldvalue.equals(currentValue))
+      {
+	System.out.println("The field was not changed.");
+	return;
+      }
+    
+
     changed = false;
 
     try
@@ -344,32 +438,34 @@ public class JnumberField extends JentryField {
       {
 	if (oldvalue == null)
 	  {
-	    value = oldvalue;
 	    setText("");
 	  }
 	else
-	  setValue(oldvalue.intValue());
+	  {
+	    setValue(oldvalue.intValue());
+	  }
       }
     catch (IllegalArgumentException iae)
       {
 	if (oldvalue == null)
 	  {
-	    value = oldvalue;
 	    setText("");
 	  }
 	else
 	  setValue(oldvalue.intValue());
       }
 
-    if (value != null && allowCallback)
+    if (currentValue != null && allowCallback)
       {
 	//Do a callback
+
+	System.out.println("Sending callback");
 
 	boolean b = false;
 	
 	try {
 
-	b = my_parent.setValuePerformed(new JValueObject(this,value));
+	b = my_parent.setValuePerformed(new JValueObject(this,currentValue));
 
 	}
 	catch (java.rmi.RemoteException re) {
@@ -377,22 +473,25 @@ public class JnumberField extends JentryField {
 	  
 	}
 
-	if (!b) {
+	if (!b) 
+	  {
+	    
+	    if (oldvalue == null)
+	      {
+		setText("");
+	      }
+	    else
+	      {
+		setValue(oldvalue.intValue());
+	      }
+	  }
+	else
+	  {
 
-	  if (oldvalue == null)
-	    {
-	      value = oldvalue;
-	      setText("");
-	    }
-	  else
-	    setValue(oldvalue.intValue());
-	}
-	else {
+	    oldvalue = currentValue;
+	    changed = false;
 
-	  oldvalue = value;
-	  changed = false;
-
-	}
+	  }
       }
     }
 }
