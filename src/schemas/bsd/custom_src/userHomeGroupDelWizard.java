@@ -7,8 +7,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/07/14 21:51:15 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/10/04 22:56:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -313,7 +313,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     // InvidDBField logic does its own checkpointing, but we need
     // one that includes the two operations <<ensemble>>.
 
-    session.checkpoint(checkPointKey);
+    session.getSession().checkpoint(checkPointKey);
     
     for (int i = 0; i < groupChoice.size(); i++)
       {
@@ -381,7 +381,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 	    // try to undo everything.. if we can, we'll go ahead
 	    // and return the failure report from invF.deleteElement()
 
-	    if (!session.rollback(checkPointKey))
+	    if (!session.getSession().rollback(checkPointKey))
 	      {
 		retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 						    "Ran into a problem during home group deletion, and rollback failed");
@@ -394,7 +394,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
       {
 	// argh, failure with no explanation..
 
-	if (!session.rollback(checkPointKey))
+	if (!session.getSession().rollback(checkPointKey))
 	  {
 	    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 						"Ran into a problem during home group change, and rollback failed");

@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 2000/02/11 07:10:04 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 2000/10/04 22:56:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2245,7 +2245,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     Vector objects = new Vector();
     objects.addElement(sysInvid);
-    Vector addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    Vector addresses = Ganymede.log.calculateOwnerAddresses(objects);
 
     String subject = null;
 
@@ -2371,7 +2371,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     Vector objects = new Vector();
     objects.addElement(sysInvid);
-    Vector addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    Vector addresses = Ganymede.log.calculateOwnerAddresses(objects);
 
     String subject = null;
 
@@ -2764,7 +2764,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     sysObj = getSession().viewDBObject(newSysInvid);
     newSysName = sysObj.getLabel();    
     
-    Vector addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    Vector addresses = Ganymede.log.calculateOwnerAddresses(objects);
 
     buffer.append("Hi.  User ");
     buffer.append(getLabel());

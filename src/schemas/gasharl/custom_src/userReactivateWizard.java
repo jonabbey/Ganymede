@@ -6,8 +6,8 @@
 
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/07/15 01:06:34 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/10/04 22:56:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -291,8 +291,10 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
       {
 	// failure.. need to do the rollback that would have originally
 	// been done for us if we hadn't gone through the wizard process
+
+	// DBSession.reactivate() checkpointed for us
 	
-	if (!session.rollback("reactivate" + userObject.getLabel()))
+	if (!session.getSession().rollback("reactivate" + userObject.getLabel()))
 	  {
 	    return Ganymede.createErrorDialog("userReactivateWizard: Error",
 					      "Ran into a problem during user reactivation, and rollback failed");

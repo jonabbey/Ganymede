@@ -12,8 +12,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/02/18 08:24:12 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/10/04 22:56:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -178,7 +178,7 @@ public class directLoader {
 
 	System.err.println("\nCreating GASH standard permission matrix");
 
-	my_client.session.checkpoint("GASHAdmin");
+	my_client.session.getSession().checkpoint("GASHAdmin");
 
 	current_obj = (DBEditObject) createObject(SchemaConstants.RoleBase);
 	gashadminPermInvid = current_obj.getInvid();
@@ -191,7 +191,7 @@ public class directLoader {
 	  {
 	    // the gash privilege matrix object is already in the schema.. rollback
 
-	    my_client.session.rollback("GASHAdmin");
+	    my_client.session.getSession().rollback("GASHAdmin");
 
 	    // note that QueryDataNode uses the label as the
 	    // comparator if you don't provide a field id
