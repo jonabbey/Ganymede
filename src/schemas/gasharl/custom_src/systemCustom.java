@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -814,39 +814,45 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    return true;
 	  }
 
-	// we want to clear the name field of the sole remaining
-	// interface
+	// we want to clear the name field of the remaining interface, and concatenate
+	// any aliases defined on it to the system alias list instead.
 
 	int indexToChange;
 
-	if (index == 0)
+	if (index == 1)
+	  {
+	    indexToChange = 0;
+	  }
+	else if (index == 0)
 	  {
 	    indexToChange = 1;
 	  }
 	else
 	  {
-	    indexToChange = 0;
+	    throw new ArrayIndexOutOfBoundsException("can't delete an index out of range");
 	  }
 
 	interfaceCustom io = (interfaceCustom) getSession().editDBObject((Invid) interfaces.elementAt(indexToChange));
-
+	    
 	ReturnVal retVal = io.setFieldValueLocal(interfaceSchema.NAME, null);
-
+	    
 	if (retVal != null && !retVal.didSucceed())
 	  {
 	    return false;
 	  }
-
-	Vector aliasNames = io.getFieldValuesLocal(interfaceSchema.ALIASES);
-
-	if (aliasNames != null)
+	
+	// we want to rip all the aliases out of the interface alias field
+	// and add them to our system aliases field.. we know there's no
+	// overlap because they are both in the same namespace.
+	
+	DBField aliasesField = (DBField) getField(systemSchema.SYSTEMALIASES);
+	DBField sourceField = (DBField) io.getField(interfaceSchema.ALIASES);
+	
+	while (sourceField.size() > 0)
 	  {
-	    DBField aliasesField = (DBField) getField(systemSchema.SYSTEMALIASES);
-
-	    for (int i = 0; i < aliasNames.size(); i++)
-	      {
-		aliasesField.addElementLocal(aliasNames.elementAt(i));
-	      }
+	    String alias = (String) sourceField.getElement(0);
+	    sourceField.deleteElement(0);
+	    aliasesField.addElementLocal(alias);
 	  }
       }
 
