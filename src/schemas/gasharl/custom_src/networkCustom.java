@@ -6,8 +6,8 @@
    
    Created: 20 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2001/04/26 02:42:41 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2001/04/26 03:06:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -61,6 +61,8 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 public class networkCustom extends DBEditObject {
+
+  public final static boolean debug = false;
 
   /**
    *
@@ -236,7 +238,24 @@ public class networkCustom extends DBEditObject {
     // we want to grant ownership if the "Public Network" checkbox
     // is selected
 
-    return object.isSet(networkSchema.PUBLICNETWORK);
+    if (object.isSet(networkSchema.PUBLICNETWORK))
+      {
+	if (debug)
+	  {
+	    System.err.println("networkCustom.grantOwnership(): returning true for " + object);
+	  }
+
+	return true;
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.err.println("networkCustom.grantOwnership(): returning false for " + object);
+	  }
+
+	return false;
+      }
   }
 
   /**
