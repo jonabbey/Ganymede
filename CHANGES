@@ -1,7 +1,20 @@
-Ganymede Release 1.03
-June 22, 2001
+Ganymede Release 1.04
+July ??, 2001
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.03 to 1.04 -------------------
+
+RELEASE DATE: July ??, 2001
+
+1. [SERVER] Fixed NullPointerException thrown in XML Login path
+
+The Ganymede server's xmlLogin() method was throwing a
+NullPointerException if a user submitted an XML file through the XML
+client with an invalid username and/or password.  The server now
+avoids having that exception thrown by explicitly checking the success
+of the username/password login before trying to construct a
+GanymedeXMLSession.
 
 -------------------- Changes from 1.02 to 1.03 -------------------
 
