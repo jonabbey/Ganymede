@@ -5,7 +5,7 @@
    The core of a gui/text password changing client for Ganymede.
    
    Created: 28 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -58,6 +58,11 @@ public class PasswordClient implements ClientListener {
    * This method actually does the work of logging into the server,
    * changing the password, committing the transaction, and disconnecting.
    *
+   * There are three basic steps involved in changing the password.
+   * First, the client must log on to the system, getting a handle on
+   * the Session object.  Next, we get a handle on the password field
+   * of the user object, and change the value.  Finally, we commit the
+   * transaction.
    */
 
   public boolean changePassword(String username, String oldPassword, String newPassword)
@@ -73,120 +78,162 @@ public class PasswordClient implements ClientListener {
 
     try
       {
+	// First we need a referrence to a Session object.  This is
+	// accomplished through the ClientBase's login method.
 	session = client.login(username, oldPassword);
 
-	if (session != null)
+	// If the username/password combination doesn't match, then
+	// the session object will be null.  For the purposes of this
+	// client, it is suficient to just return false and require
+	// the user to rerun the password client if the session is null.
+	if (session == null)
 	  {
 	    if (debug)
 	      {
 		System.out.println(" logged in, looking for :" + username + ":");
 	      }
 	    
-	    session.openTransaction("PasswordClient");
+	    error("Wrong password.");
+	    return false;
+	  }
 
-	    QueryResult results = session.query(new Query(SchemaConstants.UserBase,
-							  new QueryDataNode(SchemaConstants.UserUserName,
-									    QueryDataNode.EQUALS, username)));
-	    
-	    if (results != null && results.size() == 1)
+	// Now that we have a session object, we need to open a
+	// transaction.  All changes must be made with an open
+	// tranaction.
+
+	session.openTransaction("PasswordClient");
+	
+	// In order to change the password, we must first get a handle
+	// on the user object.  This is accomplished through the
+	// server's Query engine.
+
+	QueryResult results = session.query(new Query(SchemaConstants.UserBase,
+						      new QueryDataNode(SchemaConstants.UserUserName,
+									QueryDataNode.EQUALS, username)));
+	
+	if (results != null && results.size() == 1)
+	  {
+	    if (debug)
 	      {
-		if (debug)
-		  {
-		    System.out.println(" Changing password");
-		  }
-
-		Invid invid = results.getInvid(0);
-
-		db_object user = session.edit_db_object(invid);
-
-		if (user == null)
-		  {
-		    error("Could not get handle on user object.  Someone else might be editing it.");
-		    session.abortTransaction();
-		    client.disconnect();
-		    return false;
-		  }
-
-		pass_field pass = (pass_field)user.getField(SchemaConstants.UserPassword);
-		
-		ReturnVal returnValue = pass.setPlainTextPass(newPassword);
-
-		if (returnValue == null)
-		  {
-		    if (debug)
-		      {
-			error("It worked, returnValue is null");
-		      }
-		  }
-		else if (returnValue.didSucceed())
-		  {
-		    if (debug)
-		      {
-			error("returnValue is not null, but it did suceed.");
-		      }
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			error("It didn't work.");
-		      }
-
-		    client.disconnect();
-		    return false;
-		  }
+		System.out.println(" Changing password");
 	      }
-	    else
-	      {
-		if (results == null)
-		  {
-		    System.out.println("No user " + username + ", can't change password");
-		  }
-		else
-		  {
-		    System.out.println("Error, found multiple matching user records.. can't happen?");
-		  }
+	    
+	    // Invid's are id numbers for objects, the basic way to
+	    // referrencing objects in the server.
+	    Invid invid = results.getInvid(0);
+	    
+	    // To edit the object, we must check out the user through
+	    // the Session object.
 
+	    ReturnVal retVal = session.edit_db_object(invid);
+	    db_object user = retVal.getObject(); 
+
+	    // If edit_db_object returns a null object, it usually
+	    // means someone else is editing the object.  It could
+	    // also mean that the user doesn't have sufficient
+	    // permission to edit the object.
+
+	    if (user == null)
+	      {
+		error("Could not get handle on user object.  Someone else might be editing it.");
+		session.abortTransaction();
 		client.disconnect();
 		return false;
 	      }
 
-	    ReturnVal rv = session.commitTransaction();
+	    // pass_field is a subclass of db_field, which represents
+	    // the fields in each object.  We need a referrence to the
+	    // user's password field, so we can change it.
+	    pass_field pass = (pass_field)user.getField(SchemaConstants.UserPassword);
+	    
+	    // Changes to objects on the server return a ReturnVal.
+	    // ReturnVal contains information about the change just
+	    // made, including a list of fields that may have changed
+	    // as a result of this change, or dialogs prompting the
+	    // user for more information.
 
-	    if (rv == null || rv.didSucceed())
+	    // For the purposes of this application, we don't care
+	    // about the extra stuff in ReturnVal; we only want to
+	    // know if the password change worked or not.
+	    ReturnVal returnValue = pass.setPlainTextPass(newPassword);
+
+	    // A null value means success.
+	    if (returnValue == null)
 	      {
 		if (debug)
 		  {
-		    System.out.println("It worked.");
+		    error("It worked, returnValue is null");
 		  }
-
-		client.disconnect();
-		return true;
+	      }
+	    // If ReturnVal is not null, the didSucceed() boolean is
+	    // set to indicate failure or success.
+	    else if (returnValue.didSucceed())
+	      {
+		if (debug)
+		  {
+		    error("returnValue is not null, but it did suceed.");
+		  }
 	      }
 	    else
 	      {
-		error("Error commiting transaction, password change failed.");
+		if (debug)
+		  {
+		    error("It didn't work.");
+		  }
+		
+		client.disconnect();
+		return false;
 	      }
 	  }
 	else
 	  {
-	    error("Wrong password.");
+	    if (results == null)
+	      {
+		System.out.println("No user " + username + ", can't change password");
+	      }
+	    else
+	      {
+		System.out.println("Error, found multiple matching user records.. can't happen?");
+	      }
+	    
+	    client.disconnect();
+	    return false;
+	  }
+
+	// After making changes to the database, the session changes
+	// must be committed.  This also returns a ReturnVal.
+	ReturnVal rv = session.commitTransaction();
+	
+	if (rv == null || rv.didSucceed())
+	  {
+	    if (debug)
+	      {
+		System.out.println("It worked.");
+	      }
+	    
+	    client.disconnect();
+	    return true;
+	  }
+	else
+	  {
+	    error("Error commiting transaction, password change failed.");
 	  }
       }
+  
     catch (RemoteException ex)
       {
 	error("Caught remote exception in authenticate: " + ex);
       }
-
+    
     return false;
   }
-
+  
   /**
    *
    * Send output to this.  
    *
-   * This just prints out the message, but could be directed to a dialog or something later.
-   *
+   * This just prints out the message, but could be directed to a
+   * dialog or something later.
    */
 
   public void error(String message)
@@ -196,8 +243,9 @@ public class PasswordClient implements ClientListener {
 
   // ***
   //
-  // The following two methods comprise the ClientListener interface which
-  // we need to implement to give the ClientBase object someone to talk to.
+  // The following two methods comprise the ClientListener interface
+  // which we need to implement to give the ClientBase object someone
+  // to talk to.
   //
   // ***
 
@@ -256,12 +304,14 @@ public class PasswordClient implements ClientListener {
 	System.exit(0);
       }
 
+    // Get the server URL
     loadProperties(argv[0]);
 
     /* RMI initialization stuff. */
       
     System.setSecurityManager(new RMISecurityManager());
 
+    // Create the client
     try
       {
 	client = new PasswordClient(url);
@@ -271,6 +321,7 @@ public class PasswordClient implements ClientListener {
 	throw new RuntimeException("Couldn't connect to authentication server.. " + ex);
       }
 
+    // Get the passwords from standard in
     java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
     // get old password, new password
@@ -279,6 +330,10 @@ public class PasswordClient implements ClientListener {
 
     try
       {
+	// WARNING - This client won't hide the user's text.  When we
+	// use this client, we wrap it in a shell script that calls
+	// "stty -echo" before starting the client.
+
 	// Get the old password
 
 	System.out.print("Old password:");
@@ -287,6 +342,8 @@ public class PasswordClient implements ClientListener {
 
 	String verify = null;
 
+	// Get the new password.  Loop until the password is entered
+	// correctly twice.
 	do
 	  {
 	    System.out.print("New password:");
@@ -310,6 +367,7 @@ public class PasswordClient implements ClientListener {
 	throw new RuntimeException("Exception getting input: " + ex);
       }
 
+    // Now change the password with the passwordClient.
     boolean success = client.changePassword(argv[1], oldPassword, newPassword);
 
     if (success)
