@@ -186,7 +186,13 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	expanded = true;
       }
 
+
     System.out.println("Done with expand().");
+    
+    invalidate();
+    vp.container.frame.validate();
+    
+
   }
 
   /*
