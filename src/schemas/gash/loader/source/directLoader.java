@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -185,7 +185,7 @@ public class directLoader {
 
 	my_client.session.checkpoint("GASHAdmin");
 
-	current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.PermBase);
+	current_obj = (DBEditObject) createObject(SchemaConstants.PermBase);
 	gashadminPermInvid = current_obj.getInvid();
 
 	System.err.println("Trying to create a new GASHAdmin perm object: " + gashadminPermInvid.toString());
@@ -222,7 +222,7 @@ public class directLoader {
 			       gashadminPermInvid.toString());
 	  }
 
-	current_obj = (DBEditObject) my_client.session.edit_db_object(gashadminPermInvid);
+	current_obj = (DBEditObject) editObject(gashadminPermInvid);
 
 	System.err.println("\n***Default permissions matrix is " + gashadminPermInvid.toString());
 
@@ -299,7 +299,7 @@ public class directLoader {
 
 	    // create the owner group on the server
 
-	    current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.OwnerBase);
+	    current_obj = (DBEditObject) createObject(SchemaConstants.OwnerBase);
 	    invid = current_obj.getInvid();
 
 	    // record the invid so that we can refer to this ownerbase later
@@ -1188,7 +1188,7 @@ public class directLoader {
 
 	System.out.print("Creating " + key);
 
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 270);	// base 270 is for user netgroups
+	current_obj = (DBEditObject) createObject((short) 270);	// base 270 is for user netgroups
 	objInvid = current_obj.getInvid();
 
 	System.out.println(" [" + objInvid + "]");
@@ -1242,7 +1242,7 @@ public class directLoader {
 
 	    if (ogRec.matchMask(key))
 	      {
-		db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
 		f.addElement(objInvid); // add this group
@@ -1263,7 +1263,7 @@ public class directLoader {
 	uNetObj = (UserNetgroup) userNetgroup.get(key);
 
 	objInvid = (Invid) netHash.get(key);
-	current_obj = (DBEditObject) my_client.session.edit_db_object(objInvid);
+	current_obj = (DBEditObject) editObject(objInvid);
 
 	// we have to put the sub netgroups in
 
@@ -1344,7 +1344,7 @@ public class directLoader {
 
 	System.out.print("Creating " + key);
 
-	current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.UserBase);
+	current_obj = (DBEditObject) createObject(SchemaConstants.UserBase);
 	invid = current_obj.getInvid();
 
 	System.out.print(" [" + invid + "] ");
@@ -1449,7 +1449,7 @@ public class directLoader {
 
 	    if (ogRec.matchUID(userObj.uid))
 	      {
-		db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
 		f.addElement(invid); // add this user
@@ -1474,7 +1474,7 @@ public class directLoader {
 		System.out.print("User " + key + " is a GASH admin.. creating persona object ");
 	      }
 
-	    DBEditObject newPersona = (DBEditObject) my_client.session.create_db_object(SchemaConstants.PersonaBase);
+	    DBEditObject newPersona = (DBEditObject) createObject(SchemaConstants.PersonaBase);
 	    Invid personaInvid = newPersona.getInvid();
 
 	    System.out.println("[" + personaInvid + "]");
@@ -1528,7 +1528,9 @@ public class directLoader {
       {
 	mailRec = (ExternMail) externalAliases.elementAt(i);
 
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 275);	// base 275 is for Email Redirect objects
+	// base 275 is for Email Redirect objects
+
+	current_obj = (DBEditObject) createObject((short) 275);
 	objInvid = current_obj.getInvid();
 
 	// remember that we have this external record as a possible target for
@@ -1573,7 +1575,7 @@ public class directLoader {
 
 	    if (ogRec.matchMask(mailRec.ownerCode))
 	      {
-		db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
 		f.addElement(objInvid); // add this group
@@ -1592,7 +1594,9 @@ public class directLoader {
       {
 	mailGroup = (MailGroup) mailGroups.elementAt(i);
 
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 274);	// base 274 is for Email List objects
+	// base 274 is for Email List objects
+
+	current_obj = (DBEditObject) createObject((short) 274);
 	objInvid = current_obj.getInvid();
 
 	mailInvids.put(mailGroup.listName.toLowerCase(), objInvid);
@@ -1621,7 +1625,7 @@ public class directLoader {
 
 	    if (ogRec.matchMask(mailGroup.ownerCode))
 	      {
-		db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
 		f.addElement(objInvid); // add this group
@@ -1638,7 +1642,7 @@ public class directLoader {
       {
 	mailGroup = (MailGroup) mailGroups.elementAt(i);
 
-	current_obj = (DBEditObject) my_client.session.edit_db_object((Invid) mailInvids.get(mailGroup.listName.toLowerCase()));
+	current_obj = (DBEditObject) editObject((Invid) mailInvids.get(mailGroup.listName.toLowerCase()));
 
 	// set internal targets
 
@@ -1699,8 +1703,10 @@ public class directLoader {
 	groupObj = (Group) groups.get(key);
 	
 	System.out.print("Creating " + key);
-	
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 257);	// base 257 is for groups
+
+	// base 257 is for groups
+
+	current_obj = (DBEditObject) createObject((short) 257);
 	objInvid = current_obj.getInvid();
 	
 	System.out.println(" [" + objInvid + "]");
@@ -1777,7 +1783,7 @@ public class directLoader {
 
 	    if (ogRec.matchGID(groupObj.gid))
 	      {
-		db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
 		f.addElement(objInvid); // add this group
@@ -1813,7 +1819,9 @@ public class directLoader {
 	
 	System.out.print("Creating " + key);
 	
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 272);	// base 272 is for system types
+	// base 272 is for system types
+
+	current_obj = (DBEditObject) createObject((short) 272);
 	objInvid = current_obj.getInvid();
 	
 	System.out.print(" [" + objInvid + "]");
@@ -1860,8 +1868,10 @@ public class directLoader {
 	name = (String) enum.nextElement();
 	
 	System.out.print("Creating net: " + name);
+
+	// base 267 is for networks
 	
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 267);	// base 267 is for networks
+	current_obj = (DBEditObject) createObject((short) 267);
 	objInvid = current_obj.getInvid();
 	
 	System.out.println(" [" + objInvid + "]");
@@ -1910,8 +1920,10 @@ public class directLoader {
 	room = (Room) rooms.get(name);
 	
 	System.out.print("Creating room: " + name);
+
+	// base 269 is for rooms
 	
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 269);	// base 269 is for rooms
+	current_obj = (DBEditObject) createObject((short) 269);
 	objInvid = current_obj.getInvid();
 	
 	System.out.println(" [" + objInvid + "]");
@@ -1968,7 +1980,9 @@ public class directLoader {
 	
 	System.out.print("Creating " + key);
 	
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 263);	// base 263 is for systems
+	// base 263 is for systems
+
+	current_obj = (DBEditObject) createObject((short) 263);
 	objInvid = current_obj.getInvid();
 	
 	System.out.print(" [" + objInvid + "]");
@@ -1991,7 +2005,9 @@ public class directLoader {
 	    System.err.println("\nWarning: registerSystems() creating a room entry not defined in");
 	    System.err.println("networks_by_room.cpp file. <" + sysObj.room + ">\n");
 
-	    DBEditObject room_obj = (DBEditObject) my_client.session.create_db_object((short) 269);	// base 269 is for rooms
+	    // base 269 is for rooms
+
+	    DBEditObject room_obj = (DBEditObject) createObject((short) 269);
 	    roomInvid = room_obj.getInvid();
 
 	    // label the room with the room number
@@ -2080,7 +2096,7 @@ public class directLoader {
 	      }
 
 	    intInvid = ((invid_field) current_field).createNewEmbedded().getInvid();
-	    interfaceRef = (DBEditObject) my_client.session.edit_db_object(intInvid);
+	    interfaceRef = (DBEditObject) editObject(intInvid);
 
 	    // set the Ethernet Info for this Interface
 
@@ -2152,7 +2168,7 @@ public class directLoader {
 		  {
 		    // we haven't put the system into this owner group yet
 
-		    db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+		    db_object ownerGroup = editObject(ogRec.getInvid());
 		    db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
 		    f.addElement(objInvid); // add this group
@@ -2178,7 +2194,7 @@ public class directLoader {
 		    
 		    if (ogRec.matchMask(u))
 		      {
-			db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+			db_object ownerGroup = editObject(ogRec.getInvid());
 			db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 			
 			f.addElement(objInvid); // add this group.. this is a bi-directional link-up
@@ -2219,7 +2235,9 @@ public class directLoader {
 
 	System.out.print("\nCreating " + key);
 
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 271);	// base 271 is for system netgroups
+	// base 271 is for system netgroups
+
+	current_obj = (DBEditObject) createObject((short) 271);
 	objInvid = current_obj.getInvid();
 
 	System.out.println(" [" + objInvid + "]");
@@ -2275,7 +2293,7 @@ public class directLoader {
 
 	    if (ogRec.matchMask(key))
 	      {
-		db_object ownerGroup = my_client.session.edit_db_object(ogRec.getInvid());
+		db_object ownerGroup = editObject(ogRec.getInvid());
 		db_field f = ownerGroup.getField(SchemaConstants.OwnerObjectsOwned);
 		    
 		f.addElement(objInvid); // add this group
@@ -2296,7 +2314,7 @@ public class directLoader {
 	System.out.print("Loading subnetgroups for " + key);
 
 	objInvid = (Invid) netHash.get(key);
-	current_obj = (DBEditObject) my_client.session.edit_db_object(objInvid);
+	current_obj = (DBEditObject) editObject(objInvid);
 
 	System.out.println(" [" + objInvid + "]");
 
@@ -2365,8 +2383,10 @@ public class directLoader {
 	v.hostName = SystemLoader.stripDomain(v.hostName);
 
 	System.out.print("Creating " + key + " on host: " + v.hostName);
+
+	// base 276 is nfs volume
 	
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 276); // nfs volume
+	current_obj = (DBEditObject) createObject((short) 276);
 	objInvid = current_obj.getInvid();
 
 	System.out.println(" [" + objInvid + "]");
@@ -2393,7 +2413,9 @@ public class directLoader {
       {
 	key = (String) enum.nextElement();
 
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 277); // automounter map
+	// base 277 is automounter map
+
+	current_obj = (DBEditObject) createObject((short) 277);
 
 	current_obj.setFieldValueLocal(mapSchema.MAPNAME, key); // set the name of the map
 
@@ -2420,11 +2442,11 @@ public class directLoader {
 	  {
 	    // need to edit this user, create an imbedded object
 
-	    user_obj = (DBEditObject) my_client.session.edit_db_object(userInvid);
+	    user_obj = (DBEditObject) editObject(userInvid);
 
 	    embed_field = (invid_field) user_obj.getField(userSchema.VOLUMES); // Map Entries
 
-	    embed_obj = (DBEditObject) my_client.session.edit_db_object(embed_field.createNewEmbedded().getInvid());
+	    embed_obj = (DBEditObject) editObject(embed_field.createNewEmbedded().getInvid());
 
 	    // we've got the new map entry, load 'er up
 	    
@@ -2442,6 +2464,16 @@ public class directLoader {
       }
     
     System.out.println("\nFinished creating automounter map entries\n");
+  }
+
+  private static db_object createObject(short type)
+  {
+    return my_client.session.create_db_object(type).getObject();
+  }
+
+  private static db_object editObject(Invid invid)
+  {
+    return my_client.session.edit_db_object(invid).getObject();
   }
 
 }  
