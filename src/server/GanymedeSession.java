@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.63 $ %D%
+   Version: $Revision: 1.64 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2932,8 +2932,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (defaultObj == null)
 	  {
-	    Ganymede.debug("Serious error!  No default permissions object found in database!");
-	    throw new RuntimeException("Serious error!  No default permissions object found in database!");
+	    if (!Ganymede.firstrun)
+	      {
+		Ganymede.debug("Serious error!  No default permissions object found in database!");
+		throw new RuntimeException("Serious error!  No default permissions object found in database!");
+	      }
+	    else
+	      {
+		supergashMode = true;
+		return;
+	      }
 	  }
 
 	// remember we update this so we don't need to do it again
