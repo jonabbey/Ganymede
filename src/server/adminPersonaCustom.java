@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,6 +67,82 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   // and now the customizations
+
+  /**
+   * This method is the hook that DBEditObject subclasses use to interpose
+   * wizards when a field's value is being changed.<br><br>
+   *
+   * Whenever a field is changed in this object, this method will be
+   * called with details about the change. This method can refuse to
+   * perform the operation, it can make changes to other objects in
+   * the database in response to the requested operation, or it can
+   * choose to allow the operation to continue as requested.<br><br>
+   *
+   * In the latter two cases, the wizardHook code may specify a list
+   * of fields and/or objects that the client may need to update in
+   * order to maintain a consistent view of the database.<br><br>
+   *
+   * If server-local code has called
+   * GanymedeSession.enableOversight(false), this method will never be
+   * called.  This mode of operation is intended only for initial
+   * bulk-loading of the database.<br><br>
+   *
+   * This method may also be bypassed when server-side code uses
+   * setValueLocal() and the like to make changes in the database.<br><br>
+   *
+   * This method is called before the finalize*() methods.. the finalize*()
+   * methods is where last minute cascading changes should be performed..
+   * the finalize*() methods have no power to set object/field rescan
+   * or return dialogs to the client, however.. in cases where such
+   * is necessary, a custom plug-in class must have wizardHook() and
+   * finalize*() configured to work together to both provide proper field
+   * rescan notification and to check the operation being performed and
+   * make any changes necessary to other fields and/or objects.<br><br>
+   *
+   * Note as well that wizardHook() is called before the namespace checking
+   * for the proposed value is performed, while the finalize*() methods are
+   * called after the namespace checking.
+   *
+   * @return a ReturnVal object indicated success or failure, objects and
+   * fields to be rescanned by the client, and a doNormalProcessing flag
+   * that will indicate to the field code whether or not the operation
+   * should continue to completion using the field's standard logic.
+   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
+   * if the wizardHook wishes to simply specify rescan information while
+   * having the field perform its standard operation.</b>  wizardHook() may
+   * return new ReturnVal(true, false) if the wizardHook performs the operation
+   * (or a logically related operation) itself.  The same holds true for the
+   * respond() method in GanymediatorWizard subclasses.
+   *
+   */
+
+  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
+  {
+    // if we are being deleted, go ahead and approve whatever.
+
+    if (deleting)
+      {
+	return null;
+      }
+
+    // otherwise, if they aren't setting the associated user field,
+    // complain if the associated user isn't set.
+
+    if (field.getID() != SchemaConstants.PersonaAssocUser)
+      {
+	DBField assocUser = (DBField) getField(SchemaConstants.PersonaAssocUser);
+
+	if (assocUser == null || !assocUser.isDefined())
+	  {
+	    return Ganymede.createErrorDialog("Client Error",
+					      "Error, the client has not set the associated user for " +
+					      "this admin persona.  The client is supposed to handle linking " +
+					      "this admin persona with a user.  Something's wrong on the client.");
+	  }
+      }
+
+    return null;		// by default, we just ok whatever
+  }
 
   public boolean finalizeSetValue(DBField field, Object value)
   {
@@ -220,8 +296,9 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	    return null;
 	  }
 
-	// We don't want the PermSelfUserObj or PermEndUserObj to be shown as valid choices
-	// for this 
+	// We don't want the Default Role to be shown as a valid
+	// choice for this.. everyone has Default implicitly, no point
+	// in showing it.
 
 	QueryNode root = new QueryNotNode(new QueryDataNode(QueryDataNode.INVIDVAL,
 							    QueryDataNode.EQUALS,
@@ -235,6 +312,30 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
       }
 
     return null;
+  }
+
+  /**
+   *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    switch (fieldid)
+      {
+      case SchemaConstants.PersonaAssocUser:
+      case SchemaConstants.PersonaNameField:
+      case SchemaConstants.PersonaPasswordField:
+	return true;
+      }
+
+    return false;
   }
 
   /**
