@@ -163,6 +163,8 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ddroid/rmi/*.class"/>
       
       <fileset dir="${build.classes}" includes="arlut/csd/ddroid/client/FileReceiverBase*_Stub.class"/>
+
+      <fileset dir="${resources.dir}" includes="arlut/csd/ddroid/server/*.properties"/>
     </jar>
 
     <!-- Build the admin jar file -->
