@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -379,7 +379,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  public Vector choices()
+  public StringBuffer choices()
   {
     if (!(owner instanceof DBEditObject))
       {
@@ -460,7 +460,7 @@ public class StringDBField extends DBField implements string_field {
   {
     DBEditObject eObj;
     String s, s2;
-    Vector v;
+    StringBuffer sb;
     boolean ok = true;
 
     /* -- */
@@ -539,7 +539,9 @@ public class StringDBField extends DBField implements string_field {
     if (mustChoose())
       {
 	ok = false;
-	v = choices();
+	sb = choices();
+
+	Vector v = DBEditObject.parseDump(sb);
 
 	for (int i = 0; i < v.size() && !ok; i++)
 	  {

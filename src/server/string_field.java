@@ -5,7 +5,7 @@
    Remote interface definition.
 
    Created: 14 November 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,5 +28,5 @@ public interface string_field extends db_field {
   String disallowedChars() throws RemoteException;
   boolean allowed(char c) throws RemoteException;
 
-  Vector choices() throws RemoteException;
+  StringBuffer choices() throws RemoteException;
 }
