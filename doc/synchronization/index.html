@@ -76,12 +76,11 @@
     The target directory will just catch up the next time a
     synchronization occurs.  The inherent redundancy of this approach
     can make the synchronization process very robust, but the downside
-    is that a full state synchronization can be very time consuming.</p>
-
-    <p>In addition, if it isn't possible to efficiently wipe and
-    reload the target directory service, a process of comparison must
-    be undertaken to calculate what has changed between the data
-    written out for the synchronization requires and the pre-existing
+    is that a full state synchronization can be very time consuming.
+    In addition, if it isn't possible to efficiently wipe and reload
+    the target directory service, a process of comparison must be
+    undertaken to calculate what has changed between the data written
+    out for the synchronization requires and the pre-existing
     configuration of the target directory service.  In some cases,
     including that of passwords in Active Directory, it may not even
     be possible to completely read the pre-existing data from the
@@ -103,18 +102,16 @@
     previous changes.  If a transaction were to get lost somehow, the
     target directory service would become out of sync with the master
     data held in Ganymede, and later synchronizations might never
-    detect or fix the problem.</p>
-
-    <p>Another problem is that if we limit the amount of data we send
-    to the synchronization channel to only that which recently
-    changed, we might fail to provide enough surrounding context to
-    allow the synchronization system to translate the synchronization
-    data into a form suitable to the target directory service.  It
-    wouldn't do, for example, to try and write to a synchronization
-    channel the fact that a user's password changed without also
-    including enough surrounding context to allow the synchronization
-    system to locate the user record to be changed in the target
-    service.</p>
+    detect or fix the problem.  Another problem is that if we limit
+    the amount of data we send to the synchronization channel to only
+    that which recently changed, we might fail to provide enough
+    surrounding context to allow the synchronization system to
+    translate the synchronization data into a form suitable to the
+    target directory service.  It wouldn't do, for example, to try and
+    write to a synchronization channel the fact that a user's password
+    changed without also including enough surrounding context to allow
+    the synchronization system to locate the user record to be changed
+    in the target service.</p>
 
     <p>As it happens, Ganymede 2.0 provides three distinct systems for
     data synchronization.  Two are based on the full state
