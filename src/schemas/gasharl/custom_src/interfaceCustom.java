@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2001/04/27 21:21:59 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2001/05/08 21:12:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -120,6 +120,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   public String getLabelHook(DBObject object)
   {
     StringBuffer result = new StringBuffer();
+    boolean openIP = false;
+    boolean openMAC = false;
 
     /* -- */
 
@@ -136,10 +138,41 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       {
 	if (result.length() != 0)
 	  {
-	    result.append(":");
+	    result.append(" ");
 	  }
-	
+
+	result.append("[");
 	result.append(ipfield.getValueString(true));
+
+	openIP = true;
+      }
+
+    String macAddress = (String) object.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
+
+    if (macAddress != null && macAddress.length() != 0)
+      {
+	if (result.length() != 0)
+	  {
+	    result.append(" ");
+	  }
+
+	if (openIP)
+	  {
+	    result.append(" - ");
+	  }
+	else
+	  {
+	    result.append("[");
+	  }
+
+	result.append(macAddress);
+
+	openMAC = true;
+      }
+
+    if (openIP || openMAC)
+      {
+	result.append("]");
       }
 
     if (result.length() == 0)
