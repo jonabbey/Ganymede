@@ -5004,6 +5004,18 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  }
 
 	break;
+
+      case SchemaConstants.SyncChannelBase:
+
+	switch (getID())
+	  {
+	  case SchemaConstants.SyncChannelName:
+	  case SchemaConstants.SyncChannelDirectory:
+	  case SchemaConstants.SyncChannelServicer:
+	  case SchemaConstants.SyncChannelFields:
+	  case SchemaConstants.SyncChannelPlaintextOK:
+	    return true;
+	  }
       }
 
     return false;
