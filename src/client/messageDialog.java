@@ -4,8 +4,9 @@ package arlut.csd.ganymede.client;
 import java.awt.*;
 import java.awt.event.*;
 import com.sun.java.swing.*;
+import arlut.csd.JDialog.JCenterDialog;
 
-public class messageDialog extends JDialog implements ActionListener{
+public class messageDialog extends JCenterDialog implements ActionListener{
 
   private final boolean debug = false;
 
@@ -100,39 +101,8 @@ public class messageDialog extends JDialog implements ActionListener{
 
   public void layout(int width, int height)
   {
-    pack();
-    setSize(width, height);
-    
-    Rectangle r = gc.getBounds();
-    
-    if (debug)
-      {
-	System.out.println("Bounds: " + r);
-      }
-    
-    // Sometimes a new JFrame() is passed in, and it won't have
-    // anything interesting for bounds I don't think they are
-    // null, but they are all 0 or something.  Might as well make
-    // sure they are not null anyway.
-    
-    if ((r != null) && ((r.width != 0) && (r.height != 0)))
-      {
-	
-	setLocation(r.width/2 + r.x - width/2, r.height/2 + r.y - height/2);
-	if (debug)
-	  {
-	    System.out.println("r.width = " + r.width + " r.x = " + r.x + " r.y = " + r.y);
-
-	    int loc = r.width/2 - r.x - width/2;
-	    int locy = r.height/2 - r.y - height/2;
-	    System.out.println("Setting location to : " + loc + "," + locy);
-	  }
-      }
-    else if (debug)
-      {
-	System.out.println("getBounds() returned null.");
-      }
-
+    // Uses a special pack in JCenterDialog
+    pack(width, height);
   }
 
 }
