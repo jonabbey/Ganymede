@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.88 $ %D%
+   Version: $Revision: 1.89 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -190,7 +190,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   final JTextField
     statusLabel = new JTextField();
 
-
   private JSplitPane
     sPane;
 
@@ -210,6 +209,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     pencil,
     trash,
     creation,
+    newToolbarIcon,
     createDialogImage;
 
   public JLabel
@@ -227,6 +227,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   windowPanel
     wp;
+
+  treeNode
+    selectedNode;
 
   //
   // Menu resources
@@ -444,6 +447,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     LandFMenu = new arlut.csd.JDataComponent.LAFMenu(this);
     LandFMenu.setCallback(this);
+
     // Personae menu
 
     boolean personasExist = false;
@@ -481,6 +485,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
 
 	personasExist = true;
+      }
+    else if (showToolbar && personae != null)
+      {
+	currentPersonaString = my_username;
       }
 
     // Help menu
@@ -543,6 +551,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     search = PackageResources.getImageResource(this, "srchfol2.gif", getClass());
     trash = PackageResources.getImageResource(this, "trash.gif", getClass());
     creation = PackageResources.getImageResource(this, "creation.gif", getClass());
+    newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
     pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
     createDialogImage = PackageResources.getImageResource(this, "wiz3b.gif", getClass());
 
@@ -687,17 +696,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     JPanel bottomButtonP = new JPanel(false);
 
-    if (showToolbar)
-      {
-	rightTop.add("East", bottomButtonP);
-      }
-    else
-      {
-	//rightP.add(bottomButtonP,"South");
-      }
-
     bottomButtonP.add(commit);
     bottomButtonP.add(cancel);
+    bottomButtonP.setBorder(loweredBorder);
 
     // Create the pane splitter
 
@@ -740,8 +741,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	throw new RuntimeException("Could not open transaction: " + rx);
       }
 
-    timer.start();
-
+    if (timer != null)
+      {
+	timer.start();
+      }
 
     loader = new Loader(session, debug);
     loader.start();
@@ -901,15 +904,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   /**
    * Update the persona menu so it shows the correct persona as chosen.
    */
+
   public void updatePersonaMenu()
   {
-    personaListener.listen(false);
     if (debug)
       {
 	System.out.println("--Updating persona menu");
       }
 
     // either update the JComboBox, or the menu, depending on which one we have.
+
     if (personaGroup != null)
       {
 	Enumeration buttons = personaGroup.getElements();
@@ -917,6 +921,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	while (buttons.hasMoreElements())
 	  {
 	    JCheckBoxMenuItem mi = (JCheckBoxMenuItem)buttons.nextElement();
+
 	    if (mi.getActionCommand().equals(currentPersonaString))
 	      {
 		if (debug)
@@ -924,7 +929,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		    System.out.println("Calling setState(true)");
 		  }
 		
+		mi.removeActionListener(personaListener);
 		mi.setState(true);
+		mi.addActionListener(personaListener);
+
 		break; // Don't need to set the rest of false, because only one can be selected via the ButtonGroup
 		// besides, if I do some setState(false)'s, then actions will be performed.
 	      }
@@ -932,12 +940,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     // If we have a combo box, update that too
+
     if (personaCombo != null)
       {
-	personaCombo.setSelectedItem(currentPersonaString);
+	SwingUtilities.invokeLater(new Runnable() {
+	  public void run() {
+	    personaCombo.removeActionListener(personaListener);
+	    personaCombo.setSelectedItem(currentPersonaString);
+	    personaCombo.addActionListener(personaListener);
+	  }
+	});
       }
-
-    personaListener.listen(true);
   }
 
 
@@ -1101,6 +1114,32 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	statusLabel.paintImmediately(statusLabel.getVisibleRect());
       }
     });
+  }
+
+  /**
+   *
+   * Returns the name of the object currently selected in the tree, if
+   * any.  Returns null if there are no nodes selected in the tree, of
+   * if the node selected is not an object node.
+   * 
+   */
+
+  public InvidNode getSelectedObjectNode()
+  {
+    // get our own copy of the current node so
+    // that we don't get tripped up by threading
+
+    treeNode myNode = selectedNode;
+
+    if ((myNode == null) ||
+	!(myNode instanceof InvidNode))
+      {
+	return null;
+      }
+    else
+      {
+	return (InvidNode) myNode;
+      }
   }
 
   /**
@@ -1485,27 +1524,42 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     JPanel panel = new JPanel(new BorderLayout());
     panel.setBorder(BorderFactory.createEmptyBorder(0,4,0,4));
     JToolBar toolBar = new JToolBar();
-    toolBar.setBorderPainted(false);
+    toolBar.setBorderPainted(true);
     Insets insets = new Insets(0,0,0,0);
     
     toolBar.setMargin(insets);
 
-    JButton b = new JButton(new ImageIcon(pencil));
+    JButton b = new JButton("Create", new ImageIcon(newToolbarIcon));
+    b.setActionCommand("create new object");
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
+    b.setToolTipText("Create a new object");
+    b.addActionListener(this);
+    b.setMargin(insets);
+    toolBar.add(b);
+
+    b = new JButton("Edit", new ImageIcon(pencil));
     b.setActionCommand("open object for editing");
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
     b.setToolTipText("Edit an object");
     b.addActionListener(this);
     b.setMargin(insets);
     toolBar.add(b);
 
-    b = new JButton(new ImageIcon(trash));
+    b = new JButton("Delete", new ImageIcon(trash));
     b.setActionCommand("delete an object");
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
     b.setToolTipText("Delete an object");
     b.addActionListener(this);
     b.setMargin(insets);
     toolBar.add(b);
 
-    b = new JButton(new ImageIcon(search));
+    b = new JButton("View", new ImageIcon(search));
     b.setActionCommand("open object for viewing");
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
     b.setToolTipText("View an object");
     b.setMargin(insets);
     b.addActionListener(this);
@@ -1521,31 +1575,35 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
 	
 	personaCombo = new JComboBox();
+
 	for(int i =0; i< personae.size(); i++)
 	  {
 	    personaCombo.addItem((String)personae.elementAt(i));
 	  }
+
 	personaCombo.setSelectedItem(my_username);
 
 	personaCombo.addActionListener(personaListener);
 
 	// Check this out
-	JPanel Ppanel = new JPanel(new BorderLayout());
-	Ppanel.add("Center", new JLabel("Persona:", SwingConstants.RIGHT));
-	Ppanel.add("East", personaCombo);
-	panel.add("Center", Ppanel);
 
+	JPanel POuterpanel = new JPanel(new BorderLayout());
+	JPanel PInnerpanel = new JPanel(new BorderLayout());
+	PInnerpanel.add("Center", new JLabel("Persona:", SwingConstants.RIGHT));
+	PInnerpanel.add("East", personaCombo);
+	POuterpanel.add("South", PInnerpanel);
+	panel.add("East", POuterpanel);
       }
     else if (debug)
       {
 	System.out.println("No personas.");
       }
 
-    // Now the connected timer.
-    timerLabel = new JLabel("00:00:00", JLabel.RIGHT);
-    timer = new connectedTimer(timerLabel, 5000, true);
-    timerLabel.setMinimumSize(new Dimension(200,timerLabel.getPreferredSize().height));
-    panel.add("East", timerLabel);
+//     // Now the connected timer.
+//     timerLabel = new JLabel("00:00:00", JLabel.RIGHT);
+//     timer = new connectedTimer(timerLabel, 5000, true);
+//     timerLabel.setMinimumSize(new Dimension(200,timerLabel.getPreferredSize().height));
+//     panel.add("East", timerLabel);
 
     return panel;
   }
@@ -2832,9 +2890,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    inactivateHash.remove(invid);
 	    
 	    // Probably should get the original handle, and stick it in the real cache
-
-	    
-
 	  }
 	else
 	  {
@@ -2892,6 +2947,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	openDialog = new openObjectDialog(this);
       }
+    else
+      {
+	if (selectedNode != null && selectedNode instanceof InvidNode)
+	  {
+	    openDialog.dispose();
+	    openDialog = new openObjectDialog(this);	    
+	  }
+      }
 
     openDialog.setText("Open object for editing");
     openDialog.setReturnEditableOnly(true);
@@ -2923,6 +2986,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	openDialog = new openObjectDialog(this);
       }
+    else
+      {
+	if (selectedNode != null && selectedNode instanceof InvidNode)
+	  {
+	    openDialog.dispose();
+	    openDialog = new openObjectDialog(this);	    
+	  }
+      }
 
     openDialog.setText("Open object for viewing");
     openDialog.setReturnEditableOnly(false);
@@ -2951,11 +3022,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	openDialog = new openObjectDialog(this);
       }
+    else
+      {
+	if (selectedNode != null && selectedNode instanceof InvidNode)
+	  {
+	    openDialog.dispose();
+	    openDialog = new openObjectDialog(this);	    
+	  }
+      }
 
     openDialog.setText("Choose object to be cloned");
     openDialog.setReturnEditableOnly(false);
     
-
     Invid invid = openDialog.chooseInvid();
 
     if (invid == null)
@@ -2984,12 +3062,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    */
   void inactivateObjectDialog()
   {
-
-    /* -- */
-
     if (openDialog == null)
       {
 	openDialog = new openObjectDialog(this);
+      }
+    else
+      {
+	if (selectedNode != null && selectedNode instanceof InvidNode)
+	  {
+	    openDialog.dispose();
+	    openDialog = new openObjectDialog(this);	    
+	  }
       }
 
     openDialog.setText("Choose object to be inactivated");
@@ -2998,7 +3081,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     Invid invid = openDialog.chooseInvid();
     
     inactivateObject(invid);
-
   }
 
   /**
@@ -3010,6 +3092,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     if (openDialog == null)
       {
 	openDialog = new openObjectDialog(this);
+      }
+    else
+      {
+	if (selectedNode != null && selectedNode instanceof InvidNode)
+	  {
+	    openDialog.dispose();
+	    openDialog = new openObjectDialog(this);	    
+	  }
       }
 
     openDialog.setText("Choose object to be deleted");
@@ -3059,7 +3149,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   {
     try
       {
-	timer.stop();
+	if (timer != null)
+	  {
+	    timer.stop();
+	  }
+
 	_myglogin.logout();
 	this.dispose();
       }
@@ -3941,7 +4035,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   }
 
-
   // treeCallback methods
 
   public void treeNodeExpanded(treeNode node)
@@ -3974,6 +4067,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   public void treeNodeSelected(treeNode node)
   {
+    selectedNode = node;
     validate();
   }
 
@@ -4629,7 +4723,7 @@ class BaseNode extends arlut.csd.JTree.treeNode {
 
 ------------------------------------------------------------------------------*/
 
-class PersonaListener implements ActionListener{
+class PersonaListener implements ActionListener {
 
   Session session;
 
@@ -4643,14 +4737,9 @@ class PersonaListener implements ActionListener{
     listen = true;
 
   PersonaListener(Session session, gclient parent)
-    {
-      this.session = session;
-      this.gc = parent;
-    }
-
-  public void listen(boolean listen)
   {
-    this.listen = listen;
+    this.session = session;
+    this.gc = parent;
   }
 
   public void actionPerformed(ActionEvent event)
@@ -4661,6 +4750,7 @@ class PersonaListener implements ActionListener{
       }
     
     //Check to see if we need to commit the transaction first.
+
     String newPersona = null;
     
     if (event.getSource() instanceof JMenuItem)
@@ -4681,13 +4771,13 @@ class PersonaListener implements ActionListener{
 	  }
 	
 	//JComboBox bad
-	newPersona = (String)gc.personaCombo.getSelectedItem();
+
+	newPersona = (String) gc.personaCombo.getSelectedItem();
 	
 	if (gc.debug)
 	  {
 	    System.out.println("Box says: " + newPersona);
 	  }
-	
       }
     else
       {
@@ -4699,7 +4789,6 @@ class PersonaListener implements ActionListener{
 	gc.updatePersonaMenu();
 	return;
       }
-    
     
     if (newPersona.equals(gc.currentPersonaString))
       {
@@ -4738,7 +4827,8 @@ class PersonaListener implements ActionListener{
 
       boolean personaChangeSuccessful = false;
 
-      resource = new DialogRsrc(gc, "Change Persona", "Enter the password for " + newPersona + ":");
+      resource = new DialogRsrc(gc, "Change Persona", 
+				"Enter the password for " + newPersona + ":");
       resource.addPassword("Password:");
 
       if (gc.debug)
@@ -4749,14 +4839,17 @@ class PersonaListener implements ActionListener{
       Hashtable result = null;
       String password = null;
     
-      if (newPersona.indexOf(":") > 0) // All admin level personas have a : in them.  Only admin level personas need passwords.
+      // All admin level personas have a : in them.  Only admin level
+      // personas need passwords.
+
+      if (newPersona.indexOf(":") > 0)
 	{
 	  StringDialog d = new StringDialog(resource);
 	  result = d.DialogShow();
 	
 	  if (result != null)
 	    {
-	      password = (String)result.get("Password:");
+	      password = (String) result.get("Password:");
 	    }
 	  else
 	    {
@@ -4773,10 +4866,14 @@ class PersonaListener implements ActionListener{
 	    {
 	      gc.setWaitCursor();
 	      gc.setStatus("Successfully changed persona.");
+
 	      // List of creatable object types might have changed.
+
 	      gc.createDialog = null;
 	      gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
+
 	      //gc.setPersonaCombo(newPersona);
+
 	      gc.ownerGroups = null;
 	      gc.clearCaches();
 	      gc.loader.clear();  // This reloads the hashes
@@ -4797,10 +4894,9 @@ class PersonaListener implements ActionListener{
 	{
 	  throw new RuntimeException("Could not set persona to " + newPersona + ": " + rx);
 	}
+
       gc.updatePersonaMenu();
     }
-
-
 }
 
 /*------------------------------------------------------------------------------
@@ -4867,7 +4963,8 @@ class CacheInfo {
       }
   }
 
-  public CacheInfo(Short baseID, String originalLabel, String currentLabel, ObjectHandle handle, ObjectHandle originalHandle)
+  public CacheInfo(Short baseID, String originalLabel, 
+		   String currentLabel, ObjectHandle handle, ObjectHandle originalHandle)
   {
     this.baseID = baseID;
     this.originalLabel = originalLabel;
