@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -667,6 +667,24 @@ final public class DBSession {
       {
 	throw new RuntimeException("abortTransaction called outside of a transaction");
       }
+    else if (editSet.wLock != null)
+      {
+	if (editSet.wLock.inEstablish)
+	  {
+	    try
+	      {
+		editSet.wLock.abort();
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+	  }
+	else
+	  {
+	    Ganymede.debug("abortTransaction() for " + key + ", can't safely dump writeLock.. can't kill it off");
+	    return;
+	  }
+      }
 
     while (lockVect.size() != 0)
       {
@@ -674,7 +692,7 @@ final public class DBSession {
 
 	try
 	  {
-	    wait();
+	    wait(500);
 	  }
 	catch (InterruptedException ex)
 	  {
