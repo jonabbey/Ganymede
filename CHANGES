@@ -15,6 +15,9 @@ would return an object of class SimpleTimeZone.
 Fixed the jar packaging to satisfy Java 1.4's slightly pickier
 serialization logic.
 
+Because of these changes, the Ganymede 1.0.5 server will not be
+compatible with clients from 1.04 or earlier.
+
 2. [DISTRIB] Added support for using Java Web Start to launch clients
 
 Sun's excellent Java Web Start provides the best way yet to launch the
@@ -35,6 +38,58 @@ for build status messages from the server and updates the build status
 icon.  Since the SecurityLaunderThread was started by the client and
 not by the RMI system, it has proper permissions to play with the
 Swing Event Queue, and everything works properly.
+
+4. [SERVER, CLIENT] Reworked permissions handling for built-in fields
+
+The Ganymede server previously did not separately track permission to
+edit the "built-in" fields.  That is, the permissions editor in the
+client did not allow per-field permissions to be set for the standard
+fields that are automatically present in every object, including the
+Owner List, Expiration Date, Removal Date, and Notes fields.  Instead
+of allowing access controls for these fields to be set in the standard
+permission matrices in the Role objects, all of these fields were
+accessible with the same permission as the containing object itself.
+If a user had permission to edit an object, that user automatically
+had permission to edit these four system fields.
+
+This turned out to be a security hole, because there are many cases in
+which it is desirable to allow an object to be minimally editable by
+non-privileged users (so that end users can change their own
+passwords, for instance), where such users may not be trusted to edit
+the owner list, notes, expiration date, and removal date fields.
+
+The client's permissions editor and the server now allow explicit
+setting of permissions for the Owner List, Notes, Removal, and
+Expiration Fields.  The four 'historical' fields used to track object
+creation and modification timestamps and admins are never allowed to
+be edited by the user, and so are still left out of the permissions
+editor.
+
+In the process of doing this work, a few potential vulnerabilities
+that might have been exploitable by a rewritten Ganymede client were
+closed.  The Ganymede philosophy is that the server should not trust
+the client for anything, and a few security assumptions have now been
+made explicit.
+
+The server now makes several checks and forbids the granting of
+privileges that would be liable to break the Ganymede security
+model.  For instance, non-privileged end users will never be allowed
+to edit the owner list field for objects, regardless of whatever
+permission for the Owner List field might be granted in the server's
+Default role.
+
+5. [CLIENT] Improved GUI cleanup
+
+Miklos Muller reported that the client was leaving the permissions
+editor up if the server forced a client disconnect due to a timeout.
+
+I looked into things, and the code for handling resource cleanup on
+window close in the client was still very messy, despite Bug fix #11
+for release 1.0, below.
+
+Things are a good bit cleaner in the client, now, and all popup
+permission editor windows should now be put away properly when the
+window that the permission editor was launched from is closed.
 
 -------------------- Changes from 1.03 to 1.04 -------------------
 
