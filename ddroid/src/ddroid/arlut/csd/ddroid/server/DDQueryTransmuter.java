@@ -348,36 +348,68 @@ public class DDQueryTransmuter implements QueryParserTokenTypes {
 	    argument = null;
 	  }
 
-	if (field.isArray())
-	  {
-	    if (op_vector_mapping.containsKey(op))
-	      {
-		Byte opI = (Byte) op_vector_mapping.get(op);
-		
-		vector_operator = opI.byteValue();
-		scalar_operator = QueryDataNode.NONE;
-	      }
-	    else if (op_scalar_mapping.containsKey(op))
-	      {
-		Byte opI = (Byte) op_scalar_mapping.get(op);
-		scalar_operator = opI.byteValue();
-		vector_operator = QueryDataNode.CONTAINS;
-	      }
-	    else
-	      {
-		throw new DDParseException(op + " is not an operation that I understand.");
-	      }
-	  }
-	else
-	  {
-	    if (op_scalar_mapping.containsKey(op))
-	      {
-		Byte opI = (Byte) op_scalar_mapping.get(op);
-		scalar_operator = opI.byteValue();
-		vector_operator = QueryDataNode.NONE;
-	      }
-	  }
+        /*
+         * If we don't know the objectbase, then we have to think. We can't
+         * check and see if the field we're querying is a scalar or a vector
+         * field. Thus, we'll have to trust that the user knows what he wants.
+         * If he's wrong about the vector/scalar type of the field he's
+         * querying, then the query engine will try its best to figure out what
+         * the user really meant.
+         */
+         
+	if (base == null)
+          {
+            if (op_vector_mapping.containsKey(op))
+              {
+                Byte opI = (Byte) op_vector_mapping.get(op);
+                vector_operator = opI.byteValue();
+                scalar_operator = QueryDataNode.NONE;
+              }
+            else if (op_scalar_mapping.containsKey(op))
+              {
+                Byte opI = (Byte) op_scalar_mapping.get(op);
+                vector_operator = QueryDataNode.NONE;
+                scalar_operator = opI.byteValue();
+              }
+            else
+              {
+              	throw new DDParseException(op + " is not an operation that I understand.");
+              }
+          }
+        else
+          {
+            if (field.isArray())
+              {
+                if (op_vector_mapping.containsKey(op))
+                  {
+                    Byte opI = (Byte) op_vector_mapping.get(op);
 
+                    vector_operator = opI.byteValue();
+                    scalar_operator = QueryDataNode.NONE;
+                  }
+                else if (op_scalar_mapping.containsKey(op))
+                  {
+                    Byte opI = (Byte) op_scalar_mapping.get(op);
+                    scalar_operator = opI.byteValue();
+                    vector_operator = QueryDataNode.CONTAINS;
+                  }
+                else
+                  {
+                    throw new DDParseException(op
+                        + " is not an operation that I understand.");
+                  }
+              }
+            else
+              {
+                if (op_scalar_mapping.containsKey(op))
+                  {
+                    Byte opI = (Byte) op_scalar_mapping.get(op);
+                    scalar_operator = opI.byteValue();
+                    vector_operator = QueryDataNode.NONE;
+                  }
+              }
+          }
+	
 	if (base != null && scalar_operator != QueryDataNode.NONE && !valid_op(op, field_type))
 	  {
 	    throw new DDParseException("The " + op + " operation is not valid on a " +
