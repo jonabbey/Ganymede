@@ -494,13 +494,35 @@ public class Ganymede {
 	// no database on disk.. create a new one, along with a new
 	// journal
 
+	// but first, let's make sure there is no journal left alone
+	// without a ganymede.db file..
+
+	dataFile = new File(Ganymede.journalProperty);
+
+	if (dataFile.exists())
+	  {
+	    // ***
+	    // *** Error, I found an orphan journal ({0}), but no matching database file ({1}) to go with it.
+	    // ***
+	    // *** You need either to restore the {1} file, or to remove the {0} file.
+	    // ***
+	    debug(ts.l("main.orphan_journal", dbFilename, Ganymede.journalProperty));
+	    return;
+	  }
+
 	firstrun = true;
 
 	Invid.setAllocator(new InvidPool());
 
+	// "No DBStore exists under filename {0}, not loading"
 	debug(ts.l("main.info_new_dbstore", dbFilename));
+
+	// "Initializing new schema"
 	debug(ts.l("main.info_initializing_schema"));
+
 	db.initializeSchema();
+
+	// "Template schema created."
 	debug(ts.l("main.info_created_schema"));
 
 	try 
@@ -510,7 +532,8 @@ public class Ganymede {
 	catch (IOException ex)
 	  {
 	    // what do we really want to do here?
-	    
+
+	    // "couldn''t initialize journal"
 	    throw new RuntimeException(ts.l("main.error_no_init_journal"));
 	  }
 
