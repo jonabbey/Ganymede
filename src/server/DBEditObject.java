@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -131,6 +131,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    key = enum.nextElement();
 	    
 	    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
+
+	    if (!instantiateNewField(fieldDef.getID()))
+	      {
+		continue;
+	      }
 		
 	    switch (fieldDef.getType())
 	      {
@@ -286,6 +291,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    if (!fields.containsKey(key))
 	      {
 		fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
+
+		if (!instantiateNewField(fieldDef.getID()))
+		  {
+		    continue;
+		  }
 		
 		switch (fieldDef.getType())
 		  {
@@ -709,7 +719,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     return true;
   }
 
-
   /**
    *
    * Hook to allow intelligent generation of labels for DBObjects
@@ -722,6 +731,43 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public String getLabelHook(DBObject object)
   {
     return null;		// no default
+  }
+
+  /**
+   *
+   * This method provides a hook that can be used to indicate whether
+   * a field that is defined in this object's field dictionary
+   * should be newly instantiated in this particular object.
+   *
+   * This method does not affect those fields which are actually present
+   * in the object's record in the DBStore.  What this method allows
+   * you to do is have a subclass decide whether it wants to instantiate
+   * a potential field (one that is declared in the field dictionary for
+   * this object, but which doesn't happen to be presently defined in
+   * this object) in this particular object.
+   *
+   * A concrete example will help here.  The Permissions Object type
+   * (base number SchemaConstants.PermBase) holds a permission
+   * matrix, a descriptive title, and a list of admin personae that hold
+   * those permissions for objects they own.
+   *
+   * There are a few specific instances of SchemaConstants.PermBase
+   * that don't properly need the list of admin personae, as their
+   * object invids are hard-coded into the Ganymede security system, and
+   * their permission matrices are automatically consulted in certain
+   * situations.  In order to support this, we're going to want to have
+   * a DBEditObject subclass for managing permission objects.  In that
+   * subclass, we'll define instantiateNewField() so that it will return
+   * false if the fieldID corresponds to the admin personae list if the
+   * object's ID is that of one of these special objects.  As a result,
+   * when the objects are viewed by an administrator, the admin personae
+   * list will not be seen.
+   *
+   */
+
+  public boolean instantiateNewField(short fieldID)
+  {
+    return true;
   }
 
   /**
