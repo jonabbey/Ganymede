@@ -210,6 +210,9 @@ copy("KNOWNBUGS", "$installdir/KNOWNBUGS"); print ".";
 
 copy("jars/ddroidServer.jar", "$installdir/jars/ddroidServer.jar"); print ".";
 copy("jars/gnu-regexp-1.1.4.jar", "$installdir/jars/gnu-regexp-1.1.4.jar"); print ".";
+copy("jars/jython.jar", "$installdir/jars/jython.jar"); print ".";
+copy("jars/jython-lib.jar", "$installdir/jars/jython-lib.jar"); print ".";
+&copydir("jars/Lib", "$installdir/jars/Lib"); print ".";
 
 # for the xmlclient, go ahead and install the client jar file
 
