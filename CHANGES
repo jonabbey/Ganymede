@@ -57,6 +57,17 @@ The userCustom object in the gasharl schema was not properly
 differentiating between the case of wizard-led inactivation and
 automated inactivation in handling checkpointing and rollback.
 
+6. [SERVER] Added GanymedeValidationTask
+
+Added GanymedeValidationTask, a task that scans through the entire
+database and reports on any objects which are missing ostensibly
+required fields.
+
+7. [ADMIN CONSOLE] Added a clear log button
+
+Added a clear log button to the admin console, to allow admins to
+reset the log display.
+
 -------------------- Changes from 0.94 to 0.95 -------------------
 
 RELEASE DATE: January 22, 1999
