@@ -8,8 +8,8 @@
    
    Created: 2 October 2000
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2001/05/21 02:51:42 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2001/05/22 01:53:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -130,12 +130,12 @@ final public class NamedStack {
 
   public synchronized Object pop()
   {
-    NamedStackHandle handle = (NamedStackHandle) stack.pop();
-
-    if (handle == null)
+    if (stack.size() == 0)
       {
 	return null;
       }
+
+    NamedStackHandle handle = (NamedStackHandle) stack.pop();
     
     return handle.getData();
   }
