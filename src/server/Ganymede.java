@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -78,8 +78,8 @@ public class Ganymede {
 
     if (stop)
       {
-	System.out.println("Ganymede server already bound by other process / Naming failure.");
-	System.exit(0);
+	System.err.println("Warning: Ganymede server already bound by other process / Naming failure.");
+	//	System.exit(0);
       }
 
     debug("Creating DBStore structures");
@@ -142,7 +142,7 @@ public class Ganymede {
 
 	debug("Binding GanymedeServer in RMI Registry");
 
-	Naming.bind("ganymede.server", server);
+	Naming.rebind("ganymede.server", server);
       }
     catch (Exception ex)
       {
