@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Ganymede Permissions DB Decode Script
+# 
+############################
+
+## This section is customized by the server install script
+
+# These lines should be in the form X=Y, with nothing else on
+# the line.. they are customized by the installServer.perl
+# script
+
+JAVA=/usr/bin/java
+RMIREGISTRY=/usr/bin/rmiregistry
+PROPERTIES=ganymede.properties
+CLASSPATH=jars/ganymedeServer.jar:jars/custom.jar:jars/password.jar
+
+
+############################################### 
+
+trap "echo Aborted" 2
+
+export CLASSPATH
+
+$JAVA -ms32m -mx128m arlut.csd.ganymede.Ganymede -permdecode dbfile=$1
