@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -26,8 +26,7 @@ import tablelayout.*;
 import arlut.csd.JDataComponent.*;
 
 import com.sun.java.swing.*;
-
-import gjt.Box;
+import com.sun.java.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class 
@@ -49,14 +48,14 @@ import gjt.Box;
  *  
  */
 
-class querybox extends Dialog implements ActionListener, ItemListener {
+class querybox extends JDialog implements ActionListener, ItemListener {
   
   static final boolean debug = false;
   static final int MAXCOMPONENTS = 8; // the number of components that
                                       // can appear in a query choice
   // --
 
-  Frame optionsFrame = null;	// to hold the frame that we popup to get a list of
+  JFrame optionsFrame = null;	// to hold the frame that we popup to get a list of
 				// desired fields in the query's results
 
   Hashtable 
@@ -80,42 +79,42 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   // - Buttons
   
-  Button OkButton = new Button ("Submit");
-  Button CancelButton = new Button("Cancel");
-  Button addButton = new Button("Add Choices");
-  Button removeButton = new Button("Remove Choices");
-  Button displayButton = new Button("Options");
-  Button optionClose = new Button("Close");
+  JButton OkButton = new JButton ("Submit");
+  JButton CancelButton = new JButton("Cancel");
+  JButton addButton = new JButton("Add Choices");
+  JButton removeButton = new JButton("Remove Choices");
+  JButton displayButton = new JButton("Options");
+  JButton optionClose = new JButton("Close");
 
   //----------- more Buttons, this time used by the save/load menu
 
-  Button qSave = new Button("Save");
-  Button qLoad = new Button("Load");
-  Button qDone = new Button("Done");
-  Button qCancel = new Button("Cancel");
-  Button lCancel = new Button("Cancel");
-  Button lRename = new Button("Rename");
-  Button lSelect = new Button("Select");
+  JButton qSave = new JButton("Save");
+  JButton qLoad = new JButton("Load");
+  JButton qDone = new JButton("Done");
+  JButton qCancel = new JButton("Cancel");
+  JButton lCancel = new JButton("Cancel");
+  JButton lRename = new JButton("Rename");
+  JButton lSelect = new JButton("Select");
 
   //-----------
 
 
-  // - Panels, Boxes and Panes
+  // - Panels and Panes
 
-  Panel query_panel = new Panel();
-  Panel base_panel = new Panel();
-  Panel inner_choice = new Panel();
-  Panel outer_choice = new Panel();
- 
-  ScrollPane choice_pane = new ScrollPane();
-  
-  Box choiceBox = new Box(choice_pane, "Query Fields");
-  Box baseBox = new Box(base_panel, "Base and Field Menu");
- 
-  Panel Choice_Buttons = new Panel(); 
-  Panel query_Buttons = new Panel();
+  JPanel query_panel = new JPanel();
 
-  Checkbox editBox = new Checkbox("Editable");
+  JPanel base_panel = new JPanel();
+
+
+  JPanel inner_choice = new JPanel();
+  JPanel outer_choice = new JPanel();
+ 
+  JScrollPane choice_pane = new JScrollPane();
+
+  JPanel Choice_Buttons = new JPanel();
+  JPanel query_Buttons = new JPanel();
+
+  JCheckBox editBox = new JCheckBox("Editable");
 
   // - Choice menus
   
@@ -130,9 +129,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   // - imput fields
 
-  TextField inputField = new TextField(12);
-  TextField saveText;
-  TextField dateField;
+  JTextField inputField = new JTextField(12);
+  JTextField saveText;
+  JTextField dateField;
   
   // - Vectors
 
@@ -174,9 +173,12 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   // - Dialog Boxes
 
-  Dialog saveBox;
-  Dialog loadBox;
+  JDialog saveBox;
+  JDialog loadBox;
 
+  // our dialog's content pane
+
+  private Container contentPane;
 
   /* -- */
 
@@ -210,6 +212,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     
     System.out.println("Hi! I'm your happy query friend!");
 
+    contentPane = this.getContentPane();
+
     // Main constructor for the querybox window
     
     this.baseHash = baseHash;  
@@ -218,8 +222,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     
     // - Define the main window
     
-    this.setLayout(new BorderLayout());   
-    this.setBackground(Color.white);
+    contentPane.setLayout(new BorderLayout());
+    contentPane.setBackground(Color.white);
     
     OkButton.addActionListener(this);
     OkButton.setBackground(Color.lightGray);
@@ -228,15 +232,15 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     Choice_Buttons.setLayout(new FlowLayout ());
     Choice_Buttons.add(OkButton);
     Choice_Buttons.add(CancelButton);
-    this.add("South", Choice_Buttons); 
+    contentPane.add("South", Choice_Buttons); 
     
     editBox.addItemListener(this);
-    editBox.setState(false);
+    editBox.setSelected(false);
     this.editOnly = false;
       
     query_panel.setLayout(new BorderLayout());
     query_panel.setBackground(Color.lightGray); 
-    this.add("Center", query_panel); 
+    contentPane.add("Center", query_panel); 
     
     // - Define the inner window with the query choice buttons
       
@@ -253,6 +257,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
     base_panel.setSize(100,100);
     base_panel.setLayout(new FlowLayout());
+    base_panel.setBorder(new TitledBorder("Base and Field Menu"));
      
     // - Create the choice window containing the fields 
 
@@ -290,7 +295,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      { 
 		// no default given. pick the one that's there.
 	    
-		currentBase = baseChoice.getSelectedItem();
+		currentBase = (String) baseChoice.getSelectedItem();
 		this.defaultBase = (Base) myHash.get(currentBase);
 		defaultBase = this.defaultBase;
 		this.baseName = defaultBase.getName();
@@ -306,9 +311,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     baseChoice.setBackground(Color.white);
     baseChoice.addItemListener(this);
     base_panel.add(baseChoice);
-    base_panel.add(new Label("  "));
+    base_panel.add(new JLabel("  "));
     base_panel.add(editBox);
-    base_panel.add(new Label("  "));
+    base_panel.add(new JLabel("  "));
     base_panel.add(displayButton);
     
     inner_choice.setLayout(new TableLayout(false));
@@ -318,10 +323,11 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     outer_choice.setBackground(Color.white);
     outer_choice.add(inner_choice);
 
-    choice_pane.add(outer_choice);
+    choice_pane.setBorder(new TitledBorder("Query Fields"));
+    choice_pane.setViewportView(outer_choice);
 
-    query_panel.add("North", baseBox);
-    query_panel.add("Center", choiceBox);
+    query_panel.add("North", base_panel);
+    query_panel.add("Center", choice_pane);
       
     addChoiceRow(defaultBase); // adds the initial row   
     
@@ -388,26 +394,26 @@ class querybox extends Dialog implements ActionListener, ItemListener {
    *
    */
 
-  private Frame createOptionFrame (Base base)
+  private JFrame createOptionFrame (Base base)
   {
     /* Method to return a choice menu containing the fields for
      * a particular base, along with the query saving options
      */
     
-    ScrollPane option_pane = new ScrollPane();    
+    JScrollPane option_pane = new JScrollPane();
+    option_pane.setBorder(new TitledBorder("Return Options"));
 
-    Panel save_panel = new Panel(); // holds query options
-    Panel option_panel = new Panel();
-    Panel choice_option = new Panel(); // basically holds the Close button
-    Panel contain_panel = new Panel(); // Holds the boxes
+    JPanel save_panel = new JPanel(); // holds query options
+    save_panel.setBorder(new TitledBorder("Query Options"));
 
-    Box saveBox = new Box (save_panel, "Query Options");
-    Box returnBox = new Box (option_pane, "Return Options");
-   
+    JPanel option_panel = new JPanel();
+    JPanel choice_option = new JPanel(); // basically holds the Close button
+    JPanel contain_panel = new JPanel(); // Holds the boxes
+
     BaseField basefield;
-    Frame myFrame = new Frame("Options");
-    Checkbox newCheck; 
-    Panel inner_panel = new Panel();
+    JFrame myFrame = new JFrame("Options");
+    JCheckBox newCheck; 
+    JPanel inner_panel = new JPanel();
     
     Vector tmpAry;
     
@@ -423,19 +429,19 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     choice_option.add(optionClose);
     
     contain_panel.setLayout(new BorderLayout());
-    contain_panel.add("South", saveBox);
-    contain_panel.add("Center", returnBox);
+    contain_panel.add("South", save_panel);
+    contain_panel.add("Center", option_pane);
     
     option_panel.setLayout(new BorderLayout());
     option_panel.add("South",choice_option);
     option_panel.add("Center", contain_panel);
   
-    option_pane.add(inner_panel);
+    option_pane.setViewportView(inner_panel);
     inner_panel.setLayout(new TableLayout());
     
     save_panel.setLayout(new FlowLayout());
     save_panel.add(qSave);
-    save_panel.add(new Label("   "));
+    save_panel.add(new JLabel("   "));
     save_panel.add(qLoad);
 
     qSave.addActionListener(this);
@@ -453,8 +459,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {	
 	    basefield = (BaseField) fields.elementAt(j);
 	    String Name = basefield.getName();	   
-	    newCheck = new Checkbox(Name);
-	    newCheck.setState(true);
+	    newCheck = new JCheckBox(Name);
+	    newCheck.setSelected(true);
 	      
 	    if (count <= 2) // we've got space in the current row)
 	      {
@@ -504,7 +510,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       }
             
     //option_pane.add(option_panel);
-    myFrame.add(option_panel);
+    myFrame.getContentPane().add(option_panel);
       
     // overkill?
 
@@ -646,7 +652,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		    // ignore containing objects and the like...
 
 		String Name = basefield.getName();
-		myChoice.add(Name);		  
+		myChoice.addItem(Name);
 		
 		// To avoid a whole bunch of string comparisons, 
 		// we'll put the name of the field in the nameHash
@@ -665,7 +671,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      {
 		String embedName = (String) Embedded.elementAt(k);
 
-		myChoice.add(embedName); // make it so #1
+		myChoice.addItem(embedName); // make it so #1
 
 		// Ok, let's try some string processing -- removing the
 		// slashes.
@@ -701,10 +707,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   
   private void addChoiceRow (Base base)
   {
-    Label label1 = new Label("   ");
-    Label label2 = new Label("     ");
-    Label label3 = new Label("     ");
-    Label label4 = new Label("     ");
+    JLabel label1 = new JLabel("   ");
+    JLabel label2 = new JLabel("     ");
+    JLabel label3 = new JLabel("     ");
+    JLabel label4 = new JLabel("     ");
     
     /* -- */
 
@@ -712,7 +718,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
     fieldChoice = getChoiceFields(base);
     
-    currentField = fieldChoice.getSelectedItem();  
+    currentField = (String) fieldChoice.getSelectedItem();  
     opChoice = getOpChoice(currentField);
     isNot = getIsNot(currentField);
     opChoice.qRow = this.row;
@@ -776,8 +782,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	//System.out.println("Yes, brothers and sisters, we have an EIP!!!");
       }
   
-    returnChoice.add("is");
-    returnChoice.add("is not");
+    returnChoice.addItem("is");
+    returnChoice.addItem("is not");
  
     returnChoice.addItemListener(this);
     return returnChoice;
@@ -797,8 +803,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       qaryChoice returnChoice = new qaryChoice();
       returnChoice.qRow = this.row;
       
-      returnChoice.add("does");
-      returnChoice.add("does not");
+      returnChoice.addItem("does");
+      returnChoice.addItem("does not");
       
       System.out.println("Deos not selected");
 
@@ -838,22 +844,22 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    // Probably fix this...make it bring up an error dialog or
 	    // something
    
-	    inputField = new qTextField(12);
+	    inputField = new JTextField(12);
 	    
 	    return inputField; 
 	  }
 
 	if (myField.isDate())
 	  {
-	    dateField = new TextField("dd/mm/yyyy");
+	    dateField = new JTextField("dd/mm/yyyy");
 	    
 	    return dateField;   
 	  }
 	else if (myField.isBoolean())
 	  {
-	    Checkbox boolBox = new Checkbox("True");
+	    JCheckBox boolBox = new JCheckBox("True");
 	    System.out.println("It's a Boolean!");
-	    boolBox.setState(true);
+	    boolBox.setSelected(true);
 
 	    return boolBox;
 	  }
@@ -867,7 +873,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {
 	    // It ain't no date
 	    
-	    inputField = new qTextField(12);
+	    inputField = new JTextField(12);
 	    
 	    return inputField; 
 	  }
@@ -906,14 +912,14 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  }
 	
 	intChoice = new qaryChoice();
-	intChoice.add("="); 
-	intChoice.add(">="); 
-	intChoice.add("<="); 
-	intChoice.add("<"); 
-	intChoice.add(">");
-	intChoice.add("= [Case Insensitive]");
-	intChoice.add("Start With");
-	intChoice.add("End With");
+	intChoice.addItem("="); 
+	intChoice.addItem(">="); 
+	intChoice.addItem("<="); 
+	intChoice.addItem("<"); 
+	intChoice.addItem(">");
+	intChoice.addItem("= [Case Insensitive]");
+	intChoice.addItem("Start With");
+	intChoice.addItem("End With");
 	intChoice.addItemListener(this);
 
 	// Do a nice null test to make sure stuff isn't screwey
@@ -930,11 +936,11 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	if (myField.isDate())
 	  {
 	    dateChoice = new qaryChoice();
-	    dateChoice.add("Same Day As");
-	    dateChoice.add("Same Week As");
-	    dateChoice.add("Same Month As");
-	    dateChoice.add("Before");
-	    dateChoice.add("After");
+	    dateChoice.addItem("Same Day As");
+	    dateChoice.addItem("Same Week As");
+	    dateChoice.addItem("Same Month As");
+	    dateChoice.addItem("Before");
+	    dateChoice.addItem("After");
 
 	    dateChoice.addItemListener(this);
 	    return dateChoice;   
@@ -947,12 +953,12 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	else if (myField.isArray())
 	  {
 	    vectorChoice = new qaryChoice();
-	    vectorChoice.add("Contains All");
-	    vectorChoice.add("Contains Any");
-	    vectorChoice.add("Contains None");
-	    vectorChoice.add("Length <");
-	    vectorChoice.add("Length >");
-	    vectorChoice.add("Length =");
+	    vectorChoice.addItem("Contains All");
+	    vectorChoice.addItem("Contains Any");
+	    vectorChoice.addItem("Contains None");
+	    vectorChoice.addItem("Length <");
+	    vectorChoice.addItem("Length >");
+	    vectorChoice.addItem("Length =");
 	    vectorChoice.addItemListener(this);
 
 	    return vectorChoice;
@@ -976,7 +982,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
    *
    */
 
-  private void addRow (Component[] myRow, boolean visible, Panel myPanel, int Row) 
+  private void addRow (Component[] myRow, boolean visible, JPanel myPanel, int Row) 
   {
     for (int n = 0; n < myRow.length; n++)
       {
@@ -1007,7 +1013,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
    *
    */
 
-  private void removeRow(Component[] myRow, Panel myPanel, int Row)
+  private void removeRow(Component[] myRow, JPanel myPanel, int Row)
   {
     for (int n = 0; n < myRow.length ; n++)
       {
@@ -1050,9 +1056,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
     BaseField tempField;
     Integer tempInt = new Integer(0);
-    TextField tempText = new TextField();
-    TextField tempDate = new TextField();
-    Checkbox tempBox = new Checkbox(); 
+    JTextField tempText = new JTextField();
+    JTextField tempDate = new JTextField();
+    JCheckBox tempBox = new JCheckBox(); 
     JIPField tempIP = new JIPField(true); // allow possible V6 IPs
 
     boolean editInPlace;
@@ -1064,26 +1070,29 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     System.out.println("NUMBER OF ROWS: " + allRows);
        
     tempAry = (Component[]) this.Rows.elementAt(0); // This is the first row in the Vector
+
     tempChoice1 = (Choice) tempAry[1];
-    fieldName = tempChoice1.getSelectedItem();
+    fieldName = (String) tempChoice1.getSelectedItem();
+
     tempChoice2 = (Choice) tempAry[3];
-    notValue = tempChoice2.getSelectedItem();
+    notValue = (String) tempChoice2.getSelectedItem();
+
     tempChoice3 =  (Choice) tempAry[5];
-    operator = tempChoice3.getSelectedItem();
+    operator = (String)tempChoice3.getSelectedItem();
     
     Object tempObj = tempAry[7];
 
-    if (tempObj instanceof qTextField)
+    if (tempObj instanceof JTextField)
       {
-	tempText = (qTextField) tempAry[7];    
+	tempText = (JTextField) tempAry[7];    
       }
     else if (tempObj instanceof Date)
       {
-	tempDate = (qTextField) tempAry[7];
+	tempDate = (JTextField) tempAry[7];
       }
-    else if (tempObj instanceof Checkbox)
+    else if (tempObj instanceof JCheckBox)
       {
-	tempBox = (Checkbox) tempAry[7];
+	tempBox = (JCheckBox) tempAry[7];
       }
     else if (tempObj instanceof JIPField)
       {
@@ -1093,10 +1102,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     else 
       { 
 	// default
-	tempText = (qTextField) tempAry[7];    
+	tempText = (JTextField) tempAry[7];    
       }
 
-    // -- set the type for the text entered in the TextField
+    // -- set the type for the text entered in the JTextField
     
     try
       {      
@@ -1138,7 +1147,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  }
 	else if (tempField.isBoolean())
 	  {
-	    value = new Boolean(tempBox.getState());
+	    value = new Boolean(tempBox.isSelected());
 	  }
 	else if (tempField.isIP())
 	  {
@@ -1301,24 +1310,27 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    for (int i = 1; i < allRows; i ++) 
 	      {
 		tempAry = (Component[]) this.Rows.elementAt(i);
+
 		tempChoice1 = (Choice) tempAry[1];
-		fieldName = tempChoice1.getSelectedItem();
+		fieldName = (String) tempChoice1.getSelectedItem();
+
 		tempChoice2 = (Choice) tempAry[3];
-		notValue = tempChoice2.getSelectedItem();
+		notValue = (String) tempChoice2.getSelectedItem();
+
 		tempChoice3 =  (Choice) tempAry[5];
-		operator = tempChoice3.getSelectedItem();
+		operator = (String) tempChoice3.getSelectedItem();
 	 
-		if (tempObj instanceof qTextField)
+		if (tempObj instanceof JTextField)
 		  {
-		    tempText = (qTextField) tempAry[7];    
+		    tempText = (JTextField) tempAry[7];    
 		  }
 		else if (tempObj instanceof Date)
 		  {
-		    tempDate = (qTextField) tempAry[7];
+		    tempDate = (JTextField) tempAry[7];
 		  }
-		else if (tempObj instanceof Checkbox)
+		else if (tempObj instanceof JCheckBox)
 		  {
-		    tempBox = (Checkbox) tempAry[7];
+		    tempBox = (JCheckBox) tempAry[7];
 		  }
 		else if (tempObj instanceof JIPField)
 		  {
@@ -1328,24 +1340,24 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		else 
 		  { 
 		    // default
-		    tempText = (qTextField) tempAry[7];    
+		    tempText = (JTextField) tempAry[7];    
 		  }
 		
 		// Now that we have tempObj, find out what it is and
 		// use that information to assign a value to the query.
 
 
-		if (tempObj instanceof qTextField)
+		if (tempObj instanceof JTextField)
 		  {
-		    tempText = (qTextField) tempAry[7];    
+		    tempText = (JTextField) tempAry[7];    
 		  }
 		else if (tempObj instanceof Date)
 		  {
-		    tempDate = (qTextField) tempAry[7];
+		    tempDate = (JTextField) tempAry[7];
 		  }
-		else if (tempObj instanceof Checkbox)
+		else if (tempObj instanceof JCheckBox)
 		  {
-		    tempBox = (Checkbox) tempAry[7];
+		    tempBox = (JCheckBox) tempAry[7];
 		  }
 		else if (tempObj instanceof JIPField)
 		  {
@@ -1355,7 +1367,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		else 
 		  { 
 		    // default
-		    tempText = (qTextField) tempAry[7];    
+		    tempText = (JTextField) tempAry[7];    
 		  }
 
 		
@@ -1394,7 +1406,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		  }
 		else if (tempField.isBoolean())
 		  {
-		    value = new Boolean(tempBox.getState());
+		    value = new Boolean(tempBox.isSelected());
 		  }
 		else if (tempField.isIP())
 		  {
@@ -1508,7 +1520,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     BaseField tempField;
     short tempShort;
     String tempString;
-    Checkbox tempBox;
+    JCheckBox tempBox;
     Vector tempVector;
 
     /* -- */
@@ -1527,13 +1539,13 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      {
 		// here we process each checkbox in the row
 		
-		tempBox = (Checkbox) tempVector.elementAt(y);
+		tempBox = (JCheckBox) tempVector.elementAt(y);
 
-		if (tempBox.getState())
+		if (tempBox.isSelected())
 		  {
 		    // the box has been checked -- we want this field
 
-		    tempString = tempBox.getLabel();
+		    tempString = tempBox.getText();
 		    tempField = defaultBase.getField(tempString);
 			
 		    // Sometimes this next lines gives us fits...why?
@@ -1556,7 +1568,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		  {
 		    // else just skip this box
 		    
-		    System.out.println("Skipping " + tempBox.getLabel()); 
+		    System.out.println("Skipping " + tempBox.getText()); 
 		  }
 	      }
 	  }
@@ -1586,29 +1598,28 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       {
 	System.out.println("Save Clicked");
 
-	saveBox = new Dialog(optionsFrame, "Save As", true);
+	saveBox = new JDialog(optionsFrame, "Save As", true);
 
-	Panel button_panel = new Panel();
-	Panel mid_panel = new Panel();
+	JPanel button_panel = new JPanel();
+	JPanel mid_panel = new JPanel();
 
 	button_panel.setLayout(new FlowLayout());
 	button_panel.add(qDone);
-	button_panel.add(new Label("   "));
+	button_panel.add(new JLabel("   "));
 	button_panel.add(qCancel);
 
-
-	saveText = new TextField(10);
+	saveText = new JTextField(10);
 	mid_panel.add(saveText);
 
 
 	Font f = new Font("TimesRoman", Font.BOLD, 14);
-	Label SaveLabel = new Label("Enter Name For Query");
-	SaveLabel.setFont(f);
+	JLabel SaveJLabel = new JLabel("Enter Name For Query");
+	SaveJLabel.setFont(f);
 	
-	saveBox.setLayout(new BorderLayout());
-	saveBox.add("North", SaveLabel);
-	saveBox.add("Center", mid_panel);
-	saveBox.add("South", button_panel);
+	saveBox.getContentPane().setLayout(new BorderLayout());
+	saveBox.getContentPane().add("North", SaveJLabel);
+	saveBox.getContentPane().add("Center", mid_panel);
+	saveBox.getContentPane().add("South", button_panel);
 	saveBox.setSize(300, 135);
 
 	qDone.addActionListener(this);
@@ -1641,25 +1652,25 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	
 	System.out.println("Load Button Clicked");
 	
-	Label l;
+	JLabel l;
 	int n;
-	Panel listPanel = new Panel();
-	Panel centeringPanel = new Panel();
+	JPanel listPanel = new JPanel();
+	JPanel centeringPanel = new JPanel();
 
 	GridBagLayout gbl = new GridBagLayout();
 	GridBagConstraints gbc = new GridBagConstraints();
-  	Panel button_panel = new Panel();
-	Panel outPanel = new Panel();
+  	JPanel button_panel = new JPanel();
+	JPanel outPanel = new JPanel();
 
 	button_panel.setLayout(gbl);
 	button_panel.setSize(100, 50);
 	button_panel.setBackground(Color.white);
 	
 	centeringPanel.setLayout(new FlowLayout());
-	loadBox = new Dialog(optionsFrame, "Load Query", true);	
+	loadBox = new JDialog(optionsFrame, "Load Query", true);	
 	List queryList = new List(10);
 
-	l = new Label("");
+	l = new JLabel("");
 	gbc.gridy = n = 0;
 	gbl.setConstraints(l, gbc);
 	button_panel.add(l);
@@ -1685,7 +1696,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	lCancel.setBackground(Color.lightGray);
 
 	n = 17;
-	l = new Label("");
+	l = new JLabel("");
 	gbc.gridy = n;
 	gbl.setConstraints(l, gbc);
 	button_panel.add(l);
@@ -1699,10 +1710,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	// - add identifying label
 	
 	Font f = new Font("TimesRoman", Font.BOLD, 14);
-	Label qLabel = new Label("Saved Queries");
-	qLabel.setFont(f);
-	qLabel.setForeground(Color.white);
-	centeringPanel.add(qLabel);
+	JLabel qJLabel = new JLabel("Saved Queries");
+	qJLabel.setFont(f);
+	qJLabel.setForeground(Color.white);
+	centeringPanel.add(qJLabel);
 	listPanel.add("North", centeringPanel);
 
 	queryList.setBackground(Color.white);
@@ -1717,11 +1728,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	JSplitPane loadPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, button_panel);
 
 	loadBox.setSize(275, 175);
-	loadBox.add(loadPane);
+	loadBox.getContentPane().add(loadPane);
 	loadBox.setVisible(true);
-
       }
-
 
     if (e.getSource() == displayButton)
       {
@@ -1806,7 +1815,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   {
     if (e.getSource() == editBox)
       {
-	this.editOnly = editBox.getState();
+	this.editOnly = editBox.isSelected();
 	System.out.println("Edit Box Clicked: " + editOnly);
       }
 
@@ -1855,9 +1864,14 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 	qfieldChoice source = (qfieldChoice) e.getSource();
 
-	String fieldName = source.getSelectedItem();
+	String fieldName = (String) source.getSelectedItem();
 
 	int currentRow = source.getRow();
+
+	if (currentRow >= Rows.size())
+	  {
+	    return;		// to handle Swing's value-set notification
+	  }
 
 	System.out.println("Current Row " + currentRow);
 
@@ -1883,7 +1897,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 	qaryChoice source = (qaryChoice) e.getSource();
 	
-	String opName = source.getSelectedItem();
+	String opName = (String) source.getSelectedItem();
 	System.out.println("Opname: " + opName);
 	int currentRow = source.getRow();
 	Component[] tempRow = (Component[]) Rows.elementAt(currentRow);
@@ -1902,7 +1916,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	else 
 	  {
 	    Choice tempChoice = (Choice) tempRow[1];
-	    String myField = tempChoice.getSelectedItem();
+	    String myField = (String) tempChoice.getSelectedItem();
 	    tempRow[3].setVisible(false);
 	    tempRow[3] = getIsNot(myField);
 	    System.out.println("NO START WITH");
@@ -2326,17 +2340,17 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    {
 	      this.queryString = this.queryString.substring(1, this.readLength); 
 	    }
-	  
 
 	  System.out.println("We're in the DataNode method. Returning DataNode");
-	  if (myNode == null){
-	    System.out.println("Uh oh, myNode is null. bad");
-	  }
+
+	  if (myNode == null)
+	    {
+	      System.out.println("Uh oh, myNode is null. bad");
+	    }
 
 	}
-	  return myNode;
-	  
-	
+
+      return myNode;
       
       // return null;  // If this happens it's bad.
     }
@@ -2348,7 +2362,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 ------------------------------------------------------------------------------*/
 
-class qfieldChoice extends Choice {
+class qfieldChoice extends JComboBox {
   
   int qRow; // keeps track of which row the choice menu is located in
   
@@ -2364,7 +2378,7 @@ class qfieldChoice extends Choice {
 
 ------------------------------------------------------------------------------*/
 
-class qbaseChoice extends Choice {
+class qbaseChoice extends JComboBox {
   
   int qRow; // keeps track of which row the choice menu is located in
   
@@ -2380,7 +2394,7 @@ class qbaseChoice extends Choice {
 
 ------------------------------------------------------------------------------*/
 
-class qaryChoice extends Choice {
+class qaryChoice extends JComboBox {
   
   int qRow; // keeps track of which row the choice menu is located in
  
