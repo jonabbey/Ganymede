@@ -7,8 +7,8 @@
    
    Created: 22 March 2004
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2004/03/24 04:15:12 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2004/03/24 04:22:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -305,6 +305,10 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     if (fullName != null)
       {
 	writeLDIF(out, "cn", fullName);
+      }
+    else
+      {
+	writeLDIF(out, "cn", user.getLabel());
       }
 
     String homeDirectory = (String) user.getFieldValueLocal(userSchema.HOMEDIR);
