@@ -1,6 +1,11 @@
 #!/bin/sh
 #
 # Ganymede Server Run Script
+#
+# Last Mod Date: $Date$
+# Last Revision Changed: $Rev$
+# Last Changed By: $Author$
+# SVN URL: $HeadURL$
 # 
 ############################
 
