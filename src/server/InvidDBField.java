@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -112,7 +112,8 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (definition.isArray())
       {
-	throw new IllegalArgumentException("scalar value constructor called on vector field " + getName());
+	throw new IllegalArgumentException("scalar value constructor called on vector field " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     this.owner = owner;
@@ -137,7 +138,8 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!definition.isArray())
       {
-	throw new IllegalArgumentException("vector value constructor called on scalar field " + getName());
+	throw new IllegalArgumentException("vector value constructor called on scalar field " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     this.owner = owner;
@@ -243,7 +245,8 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
+	throw new IllegalArgumentException("scalar accessor called on vector " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     return (Invid) value;
@@ -253,7 +256,8 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar " + getName());
+	throw new IllegalArgumentException("vector accessor called on scalar " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     return (Invid) values.elementAt(index);
@@ -267,7 +271,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!verifyReadPermission())
       {
-	throw new IllegalArgumentException("permission denied to read this field " + getName());
+	throw new IllegalArgumentException("permission denied to read this field " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     // where will we go to look up the label for our target(s)?
@@ -668,12 +673,13 @@ public final class InvidDBField extends DBField implements invid_field {
     if (newRemote == null)
       {
 	setLastError("InvidDBField.bind: null newRemote");
-	throw new IllegalArgumentException("null newRemote " + getName());
+	throw new IllegalArgumentException("null newRemote " + getName() + " in object " + owner.getLabel());
       }
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("not an editable invid field");
+	throw new IllegalArgumentException("not an editable invid field: " + getName() + 
+					   " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) this.owner;
@@ -729,7 +735,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	catch (ClassCastException ex)
 	  {
 	    setLastError("InvidDBField.bind: invid target field designated in schema is not an invid field");
-	    throw new IllegalArgumentException("invid target field designated in schema is not an invid field");
+	    throw new IllegalArgumentException("invid target field designated in schema is not an invid field: " +
+					       getName() + " in object " + owner.getLabel());
 	  }
 	
 	if (oldRefField == null)
@@ -771,7 +778,8 @@ public final class InvidDBField extends DBField implements invid_field {
     catch (ClassCastException ex)
       {
 	setLastError("invid target field designated in schema is not an invid field");
-	throw new IllegalArgumentException("invid target field designated in schema is not an invid field");
+	throw new IllegalArgumentException("invid target field designated in schema is not an invid field: " +
+					   getName() + " in object " + owner.getLabel());
       }
     
     if (newRefField == null)
@@ -835,12 +843,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (remote == null)
       {
-	throw new IllegalArgumentException("null remote");
+	throw new IllegalArgumentException("null remote: " + getName() + " in object " + owner.getLabel());
       }
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("not an editable invid field");
+	throw new IllegalArgumentException("not an editable invid field: " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     // find out whether there is an explicit back-link field
@@ -895,7 +904,8 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     catch (ClassCastException ex)
       {
-	throw new IllegalArgumentException("invid target field designated in schema is not an invid field");
+	throw new IllegalArgumentException("invid target field designated in schema is not an invid field " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (oldRefField == null)
@@ -949,7 +959,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("dissolve called on non-editable field");
+	throw new IllegalArgumentException("dissolve called on non-editable field: " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) owner;
@@ -1038,7 +1049,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("dissolve called on non-editable field");
+	throw new IllegalArgumentException("establish called on non-editable field: " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) owner;
@@ -1349,12 +1361,14 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object: " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar method called on a vector field");
+	throw new IllegalArgumentException("scalar method called on a vector field: " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     if (!verifyNewValue(value))
@@ -1449,22 +1463,26 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isEditInPlace())
       {
-	throw new IllegalArgumentException("can't manually set element in edit-in-place vector");
+	throw new IllegalArgumentException("can't manually set element in edit-in-place vector: " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object: " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field");
+	throw new IllegalArgumentException("vector accessor called on scalar field: " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if ((index < 0) || (index > values.size()))
       {
-	throw new IllegalArgumentException("invalid index " + index);
+	throw new IllegalArgumentException("invalid index " + (index) + 
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (!verifyNewValue(value))
@@ -1525,19 +1543,22 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isEditInPlace())
       {
-	throw new IllegalArgumentException("can't manually add element to edit-in-place vector");
+	throw new IllegalArgumentException("can't manually add element to edit-in-place vector" +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (!isEditable(local))
       {
 	setLastError("don't have permission to change field /  non-editable object");
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (!isVector())
       {
 	setLastError("vector accessor called on scalar field");
-	throw new IllegalArgumentException("vector accessor called on scalar field");
+	throw new IllegalArgumentException("vector accessor called on scalar field " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (!verifyNewValue(value))
@@ -1605,17 +1626,20 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object: " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector method called on a scalar field");
+	throw new IllegalArgumentException("vector method called on a scalar field " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (!isEditInPlace())
       {
-	throw new IllegalArgumentException("edit-in-place method called on a referential invid field");
+	throw new IllegalArgumentException("edit-in-place method called on a referential invid field " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (size() >= getMaxArraySize())
@@ -1706,17 +1730,20 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	throw new IllegalArgumentException("don't have permission to change field /  non-editable object");
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field");
+	throw new IllegalArgumentException("vector accessor called on scalar field " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     if ((index < 0) || (index >= values.size()))
       {
-	throw new IllegalArgumentException("invalid index " + index);
+	throw new IllegalArgumentException("invalid index " + index + 
+					   getName() + " in object " + owner.getLabel());
       }
 
     remote = (Invid) values.elementAt(index);
@@ -1822,7 +1849,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("can't call encodedValues on scalar field");
+	throw new IllegalArgumentException("can't call encodedValues on scalar field: " +
+					   getName() + " in object " + owner.getLabel());
       }
 
     try
@@ -1893,7 +1921,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not an editable field: " + getName());
+	throw new IllegalArgumentException("not an editable field: " + 
+					   getName() + " in object " + owner.getLabel());
       }
 
     eObj = (DBEditObject) owner;
