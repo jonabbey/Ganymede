@@ -1,47 +1,124 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Ganymede Release 0.99 - Documentation 16 April 1999</title>
+    <title>Ganymede Release 0.99.1 - Documentation 27 May 1999</title>
   </head>
 
   <body BGCOLOR="#FFFFFF">
   <body BGCOLOR="#FFFFFF">
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede Release 0.99<br>Documentation 16 April 1999</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede Release 0.99.1<br>Documentation 27 May 1999</FONT></h1>
 
-    <hr>
-    
-    Most of the documentation for this release is found in the README and INSTALL files
-    in the main directory you find after you unzip the Ganymede tar file.  We are
-    starting to provide some web documentation, but for this release we just have a few
-    supplementary files.  Following are some links you may find helpful<p>
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Main README files</b></h2></td>
+      </tr>
+    </table> 
 
     <UL>
     <LI><a href="../README">README</a></LI>
+    <LI><a href="../CHANGES">CHANGE LOG</A></LI>
     <LI><a href="../INSTALL">INSTALL</a></LI>
     <LI><a href="../CREDITS">CREDITS</a></LI>
     <LI><a href="../THINGSTODO">THINGS TO DO</a></LI>
+    </UL>
 
-    <LI><A href="client.html">Simple introductory documentation on the Ganymede client</a></LI>
+    <UL>
+      <LI><a href="install.html">Install Guide</a></LI>
+      <LI><a href="glossary.html">File Glossary</a></LI>
+    </UL>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>General Overview</b></h2></td>
+      </tr>
+    </table> 
+    
+    <UL>
     <LI><A href="server.html">An overview of the Ganymede server</a></LI>
     <LI><A href="permissions/privs.html">A brief walkthrough of the Ganymede permissions/ownership model</a></LI>
     <LI><A href="customization.html">A brief discussion of Ganymede customization</a></LI>
-    <LI><A href="customization/index.html">The new DBEditObject subclass customization guide</a></LI>
-    <LI><a href="../src/schemas/README">Schemas README</a></LI>
-    <LI>JAVADOC documentation on server and client classes
-      <UL>
-        <LI><A href="javadoc/packages.html">Class listing</A></LI>
-        <LI><A href="javadoc/arlut/csd/ganymede/GanymedeServer.html">Ganymede Server Documentation</a></LI>
-        <LI><A href="javadoc/arlut/csd/ganymede/client/glogin.html">Ganymede Client Documentation</a></LI>
-        <LI><A href="javadoc/arlut/csd/ganymede/client/ClientBase.html">Ganymede Client Core Documentation</a></LI>
-      </UL>
-    </LI>
-    <LI><a href="http://www.arlut.utexas.edu/csd/gash_docs/gash.html">GASH Docs</a> (for reference on GASH Schema)</LI>
-    <LI><A href="http://www.arlut.utexas.edu/gash2/">The Ganymede home page</a>
     </UL>
 
-    We know this documentation needs work, but please be assured that our code is better than
-    our docs, and that we are continuing to develop the documentation as we go along.<p>
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Client Documentation</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>When the Ganymede client is installed using 
+
+    <h3>Command Reference</h3>
+
+    <dl>
+      <dt><code>ganymede</code></dt>
+      <dd>This command runs the Ganymede GUI client from a UNIX prompt.  DISPLAY must be set
+      to the user's display.  The <code>ganymede</code> script refers to a <code>ganymede.properties</code>
+      file that defines the server's location.</dd>
+      <dt><code>ganymedeAdmin</code></dt>
+      <dd>This command runs the Ganymede GUI admin console from a UNIX prompt.  DISPLAY must be set
+      to the user's display.  The <code>ganymedeAdmin</code> script refers to a <code>ganymede.properties</code>
+      file that defines the server's location.</dd>
+      <dt><code>rpcpass</code></dt>
+      <dd>This command is used to allow easy password and shell updating from external code.  In
+      particular, version 1.3.6.92 of the <a href="http://www.suse.de/~kukuk/linux/nis.html">Linux NISKit's</a>
+      ypserv distribution knows how to interface with this program using the --execute or -x options.</dd>
+    </dl>
+
+    <UL>
+    <LI><A href="client.html">Simple introductory documentation on the Ganymede client</a></LI>
+    </UL>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Server Documentation</b></h2></td>
+      </tr>
+    </table> 
+
+    <h3>Command Reference</h3>
+
+    <dl>
+      <dt>runServer
+      <dt>stopServer
+    </dl>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Customization Documentation</b></h2></td>
+      </tr>
+    </table> 
+
+    <UL>
+    <LI><A href="customization/index.html">A guide to DBEditObject subclassing</a></LI>
+    </UL>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Class Documentation (JavaDocs)</b></h2></td>
+      </tr>
+    </table> 
+
+    <UL>
+      <LI><A href="javadoc/packages.html">Class listing</A></LI>
+      <LI><A href="javadoc/arlut/csd/ganymede/Ganymede.html">Ganymede Server Documentation</a></LI>
+      <LI><A href="javadoc/arlut/csd/ganymede/client/glogin.html">Ganymede Client Documentation</a></LI>
+      <LI><A href="javadoc/arlut/csd/ganymede/client/ClientBase.html">Ganymede Client Core Documentation</a></LI>
+    </UL>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Web Links</b></h2></td>
+      </tr>
+    </table> 
+
+    <UL>
+    <LI><a href="http://www.arlut.utexas.edu/csd/gash_docs/gash.html">GASH Docs</a> (for reference on GASH Schema)</LI>
+    <LI><A href="http://www.arlut.utexas.edu/gash2/">The Ganymede home page</a>
+    <LI><A href="http://www.arlut.utexas.edu/gash2/maillists/ganymede/thrd1.html">Ganymede discussion
+	mailing list archive</a>
+    </UL>
+
+    <hr>
 
     Please send comments and questions to the Ganymede mailing list, below.
 

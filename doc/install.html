@@ -1,0 +1,348 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede UNIX Installation Guide Release 0.99.1 - 27 May 1999</title>
+  </head>
+
+  <body BGCOLOR="#FFFFFF">
+
+<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
+<h1><FONT FACE="Arial, Helvetica">Ganymede UNIX Installation Guide Release 0.99.1 - 27 May 1999</FONT></h1>
+<hr>
+
+<p>Installing Ganymede breaks down into five steps:</p>
+    <ol>
+      <li>Configuring the distribution for your site</li>
+      <li>Installing server files</li>
+      <li>Installing client files</li>
+      <li>Configuring the server</li>
+      <li>Loading the server</li>
+    </ol>
+
+<p>Each of these topics is discussed in its own section below.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Configuring the distribution for your site</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>When you first unpack the Ganymede UNIX distribution, you will see that there is
+    a <a href="glossary.html#configure">configure</a> script under the ganymede-xx directory.
+    This script
+    does two main things.  First, it unpacks three scripts you can
+    immediately use to install the client and server, called <a href="glossary.html#installClient">installClient</a>,
+    <a href="glossary.html#installClient2">installClient2</a> (for JDK 1.2), and 
+    <font color="#ff0000"><code><b>installServer</b></code></font>.
+    Second, <a href="glossary.html#configure">configure</a> goes through the source tree and builds and configures the makefiles
+    and build scripts used to build the source.</p>
+
+    <p>See README.source for information on building the source tree.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Installing server files</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>The server files should be in a location that is not accessible
+    to the average user.  On UNIX, you'll probably want to be running
+    the Ganymede server as <font color="#ff0000"><code><b>root</b></code></font> so that Ganymede can properly build
+    NIS maps and DNS tables.  There is nothing intrinsic to the
+    Ganymede server that requires root privileges, but the build scripts
+    that you install to propagate network information may need to be
+    installed as root.</p>
+
+    <p>The Ganymede server consists primarily of:</p>
+
+    <ul>
+      <li>a jar file that contains the Ganymede server code (
+      <a href="glossary.html#ganymedeServer.jar">ganymedeServer.jar</a>)
+      <li>a jar file that contains custom plug-in code
+      <li>a <a href="glossary.html#server.properties">ganymede.properties</a> file that sets configuration parameters
+      <li>a <a href="glossary.html#ganymede.db">ganymede.db</a> file
+      <li>a script, <a href="glossary.html#runServer">runServer</a>, that invokes java on <font color="#ff0000"><code><b>arlut.csd.ganymede.Ganymede</b></code></font> to run the server
+    </ul>
+
+    <p>While running, the server will also produce:</p>
+
+    <ul>
+      <li>a running <a href="glossary.html#journal">journal</a> file that records all transactions made by the
+      server so that the server can fully recover if it ever crashes
+      or if the system running it goes down</li>
+
+      <li>a comprehensive log file, <a href="glossary.html#log">log</a></li>
+
+      <li>NIS and/or DNS source files, depending on the schema configuration &lt;optional&gt;</li>
+
+      <li>a schematic listing of the database definition &lt;optional&gt;</li>
+    </ul>
+
+    <p>Of these, <a href="glossary.html#ganymede.db">ganymede.db</a>, <a href="glossary.html#server.properties">ganymede.properties</a>,
+    <a href="glossary.html#journal">journal</a>, <a href="glossary.html#log">log</a>, and
+    the NIS and DNS source files are sensitive. The <a href="glossary.html#ganymede.db">ganymede.db</a> file is
+    not difficult to analyze, and passwords may be stored in plaintext
+    therein, depending on your database configuration.  As shipped with
+    the current release, the five sample database configurations do not
+    store plaintext passwords.  The <a href="glossary.html#server.properties">ganymede.properties</a> file must be
+    protected, as it has the the root (supergash) password chosen at
+    install time in plaintext.  If desired, the <a href="glossary.html#server.properties">ganymede.properties</a>
+    file can be edited to remove the ganymede.defaultrootpass entry.</p>
+    
+    <p>With those notes out of the way, run <a href="glossary.html#installServer">installServer</a> to install
+    the server.  <a href="glossary.html#installServer">installServer</a> will ask you for a directory to
+    install the server under, and will ask you if you want to use one
+    of the schema configurations that we have included.  The gash
+    configuration is the most full-featured, and includes support
+    for users, groups, netgroups, email aliasing, systems, NFS volumes,
+    and automounter configuration.  The nisonly configuration includes
+    Solaris-style passwd and group support only.  The gash configuration
+    is what we are concentrating on developing at ARL, but using it
+    right now is difficult if you don't already have a set of gash data
+    files to import.  The linux and bsd schemas are designed for doing
+    simple managment of passwd and group files under those operating
+    systems.</p>
+    
+    <p>In either case, if you choose a default schema, the <a href="glossary.html#installServer">installServer</a>
+    script will configure the server to run with a <a href="glossary.html#ganymede.db">ganymede.db</a> and
+    <a href="glossary.html#custom.jar">custom.jar</a> file built for the chosen schema.</p>
+      
+    <p>After you have run <a href="glossary.html#installServer">installServer</a> and <a href="glossary.html#installClient">installClient</a>
+    (below), you can immediately run the server and connect with
+    the client, but the database will be empty.  You will need
+    to see section 3) below to get data bulk-loaded into Ganymede.</p>
+    
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Installing client files</b></h2></td>
+      </tr>
+    </table> 
+    
+    <p>There are two primary clients for Ganymede.  We will call these the
+    end-user client and the admin console.  Both can be run from a UNIX
+    command line with a shell script that will run java on them, or from
+    a web browser with support for the full 1.1 JDK standard.  There is
+    nothing to stop you from running either client on a Win32 box, but
+    you will have to develop .bat files to run the code on your own.  The
+    clients are themselves totally portable, however, as they are simply
+    Java jar files.</p>
+    
+    <p>We have provided two install scripts.  <a href="glossary.html#installClient">installClient</a> is for
+    Java 1.1 and <a href="glossary.html#installClient2">installClient2</a> is for Java 1.2.  Either script
+    which will prompt you for the name of the machine that will be
+    running your Ganymede server, and the directory which will contain
+    the bin, html, and jars directories. The install script will
+    customize web pages and scripts for you so that the end-user client
+    and admin console can easily be run.  Of course, that the server has
+    to be up and running to run either the main client or the console.</p>
+
+    <p>Don't try to install the client and server into the same
+    directory.. the two are meant to be installed separately, in separate
+    directories. This is important because the server files need to
+    be kept out of the reach of non-privileged users, while the client
+    files are intended to be available for anyone to run.</p>
+    
+    <p>The <a href="glossary.html#installClient">installClient</a> script will build an html directory, which
+    includes two subdirectories, one labeled activator and one labeled
+    hotjava.  The activator subdirectory contains versions of the
+    client.html, console.html, and password.html files that work with
+    Sun's Java Plug-In package, version 1.1 or later.  The Plug-In
+    is an embeddable JVM from Sun that includes all of the JDK 1.1
+    features needed to run the Ganymede clients.  This is currently the
+    recommended means of running the Ganymede clients from Netscape or
+    Internet Explorer versions 3 or 4.  NOTE: As installed, the html
+    files produced in html/activator just includes the ganymede.jar and
+    ganymedeAdmin.jar files for the client and console pages,
+    respectively.  If you try running a version of the Java plug-in
+    that does not include one of the newer javax.swing releases, you
+    will need to modify these .html files to include swing.jar as well
+    as ganymede.jar or ganymedeAdmin.jar, and you will need to copy the
+    swing.jar file from the Swing 1.1 beta 3 (or better) package into
+    html/activator.</p>
+
+    <p><b>IMPORTANT NOTE</b>: If you go to one of the activator pages, Netscape
+    and/or Internet Explorer will take you to the web page where you
+    can download the Java Plug-In software to your PC.  Once you download
+    the Java Plug-In, you'll want to quit out of your browser and run
+    the Plug-In control panel.  Configure the Plug-In so that your
+    network and class access is unrestricted and unsigned applets are
+    allowed.  Apply the preference changes, and restart your browser.
+    The next time you visit one of the activator pages, you should
+    see the appropriate client come up.</p>
+    
+    <p>The other subdirectory is labeled 'hotjava', and these
+    versions of the html pages for the Ganymede clients are
+    appropriate for any browser with _full_ native 1.1/1.2 JDK
+    support, including RMI and Swing.  To date, hotjava is the only
+    browser that provides full native RMI support.</p>
+    
+    <p>We have also included a simple password-change utility, which can
+    be either run from a web page, or from the command line.  We
+    have included source and build scripts for this program.</p>
+    
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Configuring the server</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>The server may be configured in two ways.  The first is by using the
+    admin console to edit the server's schema and the second is by
+    authoring and/or modifying plug-in classes.</p>
+
+    <p>The server schema is specified in the <a href="glossary.html#ganymede.db">ganymede.db</a> file, and includes 
+    definitions of the object types to be stored in the database, their
+    fields, and any plug-in classes that are to manage particular object
+    types.  We will occasionally talk about a 'schema file'.  A schema
+    file is simply a <a href="glossary.html#ganymede.db">ganymede.db</a> file that just contains the data 
+    definition specification, but no custom objects.  Each of the sample
+    schemas included with Ganymede include a <a href="glossary.html#ganymede.schema">ganymede.schema</a> file
+    that you can use in your evaluation of Ganymede.</p>
+  
+    <p>The plug-in classes themselves are typically packaged in a file
+    named <a href="glossary.html#custom.jar">custom.jar</a>.  As with the <a href="glossary.html#ganymede.schema">ganymede.schema</a> files, both the
+    gash and nisonly schema directories contain a <a href="glossary.html#custom.jar">custom.jar</a> file.</p>
+  
+    <p>Ganymede schema/db files and custom class sets (<a href="glossary.html#custom.jar">custom.jar</a>) need
+    to be matched together.  Whenever you run the server, you will want
+    to specify both a <a href="glossary.html#ganymede.db">ganymede.db</a> file and a <a href="glossary.html#custom.jar">custom.jar</a> file.  You
+    can run the Ganymede server with no <a href="glossary.html#ganymede.db">ganymede.db</a> or <a href="glossary.html#custom.jar">custom.jar</a> files,
+    and the Ganymede server will initialize a simple <a href="glossary.html#ganymede.db">ganymede.db</a> file
+    for you.</p>
+
+    <p>If you chose one of the sample schemas when you ran <a href="glossary.html#installServer">installServer</a>,
+    you should have a <a href="glossary.html#ganymede.db">ganymede.db</a> and a <a href="glossary.html#custom.jar">custom.jar</a> file in place.  You
+    should be able to start the server and have it come up with the
+    object types and custom code from whichever of the schemas you
+    chose.  If you did not choose a schema, but rather just hit return
+    when prompted, the Ganymede server will create you a bare-bones
+    <a href="glossary.html#ganymede.db">ganymede.db</a> file when you run the server for the first time.  See
+    src/schemas/README for a description of the various schema kits.</p>
+
+    <p>In order to edit the server's schema, start the Ganymede server on
+    your server machine.  The server will load its database, come up,
+    and tell you that it is ready to operate.  You can now run the
+    adminConsole from your client install.  Log in using the root name
+    and password you specified when you ran <a href="glossary.html#installServer">installServer</a>.  After
+    a moment, you'll see the admin console come up.  Go to the control
+    menu and select 'Edit Schema'.  After a bit, you'll see the schema
+    editor come up.  You can add, remove, or modify object definitions.
+    Each object definition has a 'Classname' field.  You can enter
+    the name of a class in this field, and the next time that the 
+    Ganymede server is restarted, Ganymede will load that class and
+    use it to manage the object type that you associated it with.</p>
+
+    <p>When you have made all the changes to the schema that you want,
+    hit OK and the Ganymede server will integrate the changes you made.
+    You should then use the Admin console to tell the server to dump
+    the database.  If you are going to be loading the database from
+    scratch using the database definition you just created, you should
+    also tell the admin console to have the server dump the schema.
+    This will cause the server to emit a schema file (empty db file)
+    according to the <a href="glossary.html#server.properties">ganymede.properties</a> file that the server was
+    started with.  You can then take this schema file and copy it
+    for use with the loader code, as discussed in section 4.</p>
+
+    <p>The sample schemas each specify a builder task to
+    be run when a transaction is committed.</p>
+
+    <dl>
+
+      <dt>gasharl</dt>
+      <dd>arlut.csd.ganymede.custom.GASHBuilderTask</dd>
+      
+      <dt>linux</dt>
+      <dd>arlut.csd.ganymede.custom.LinuxBuilderTask</dd>
+
+      <dt>bsd</dt>
+      <dd>arlut.csd.ganymede.custom.BSDBuilderTask</dd>
+
+      <dt>nisonly</dt>
+      <dd>arlut.csd.ganymede.custom.NISBuilderTask</dd>
+
+      <dt>gash</dt>
+      <dd>arlut.csd.ganymede.custom.GASHBuilderTask</dd>
+
+      <dt>ganymede.only</dt>
+      <dd>arlut.csd.ganymede.custom.DNSBuilderTask and
+      arlut.csd.ganymede.custom.NISBuilderTask</dd>
+
+      </dl>
+
+    <p>In addition, each schema by default will look for a script
+    to run in the &lt;installdir&gt;/db directory.  If you like, you
+    can edit the server's properties file to change
+    ganymede.builder.scriptlocation, which specifies where the
+    build scripts are to be found.</p>
+
+    <dl>
+
+      <dt>gasharl</dt> <dd>gashbuilder</dd>
+      <dt>bsd</dt> <dd>bsd_builder</dd>
+      <dt>linux</dt> <dd>linux_builder</dd>
+      <dt>nisonly</dt> <dd>nisbuilder</dd>
+      <dt>gash</dt> <dd>gashbuilder</dd>
+      <dt>ganymede.only</dt> <dd>nisbuilder,dnsbuilder (not maintained currently)</dd>
+
+    </dl>
+
+    <p>These scripts should be executable by the user under which the
+    Ganymede server is run.  The appropriate script will be run
+    after the corresponding builder task has emitted fresh copies
+    of the data files to &lt;installdir&gt;/db/out.  The scripts are intended
+    to do an NIS/DNS push, or to copy passwd and group files to /etc,
+    depending on the schema, and how you wish to use them.</p>
+
+    <p>No matter which schema you choose, the class file for the builder
+    task is bundled as part of the schema's <a href="glossary.html#custom.jar">custom.jar</a> file, and you can
+    view and alter the source code in schema/custom_src.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Loading the server</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>When you run the <a href="glossary.html#installServer">installServer</a> script, you are prompted for
+    which sample schema you want to use.  Whichever you choose is copied
+    to your server install directory under '<font color="#ff0000"><code><b>schema</b></code></font>'.</p>
+
+    <p>The <font color="#ff0000"><code><b>schema</b></code></font> directory contains the sample schema file as discussed above,
+    a <font color="#ff0000"><code><b>custom_src</b></code></font> directory with the source code for the custom plug-ins to
+    go with the object definitions in the <a href="glossary.html#ganymede.schema">ganymede.schema</a> file, and a <font color="#ff0000"><code><b>loader</b></code></font>
+    directory.</p>
+
+    <p>The <font color="#ff0000"><code><b>loader</b></code></font> directory contains the following:</p>
+
+    <ul>
+      <li>a <a href="glossary.html#server.properties">ganymede.properties</a> file that you will want to customize
+      <LI>an <font color="#ff0000"><code><b>input</b></code></font> directory
+      <li>a <font color="#ff0000"><code><b>db</b></code></font> directory
+      <li>a <a href="glossary.html#runDirectLoader">runDirectLoader</a> script
+    </ul>
+
+    <p>In order to load the Ganymede server, copy your input files to
+    the input directory, and run the <a
+    href="glossary.html#runDirectLoader">runDirectLoader</a> script.
+    This will produce a <font
+    color="#ff0000"><code><b>loader.db</b></code></font> file in the
+    <font color="#ff0000"><code><b>schema/loader/db</b></code></font>
+    directory.  You can then copy this file to <a
+    href="glossary.html#ganymede.db">ganymede.db</a>, remove any <a
+    href="glossary.html#journal">journal</a> file in <font
+    color="#ff0000"><code><b>db</b></code></font>, and start the
+    server.  The server will load the new database, and you will then
+    be able to log in as supergash and take a look at your
+    database.</p>
+
+    <p>Take a look at the README file in the schema directory for details
+    on how the schema you installed works.</p>
+
+    <hr>
+    <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
+    <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
+    <!-- hhmts start -->
+Last modified: Thu May 27 21:22:55 CDT 1999
+<!-- hhmts end -->
+  </body>
+</html>
