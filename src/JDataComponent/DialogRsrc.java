@@ -159,7 +159,7 @@ public class DialogRsrc {
     objects = new Vector();
   }
 
-    /**
+  /**
    *
    * Adds a labeled text field
    *
@@ -169,7 +169,7 @@ public class DialogRsrc {
 
   public void addString(String label, String value)
   {
-    objects.addElement(new stringThing(label, value));
+    objects.addElement(new stringThing(label, value, false));
   }
 
   /**
@@ -184,6 +184,30 @@ public class DialogRsrc {
     addString(label, null);
   }
 
+  /**
+   *
+   * Adds a labeled multi-line text field
+   *
+   * @param label String to use as the label
+   * @param value Initial value of text field
+   */
+
+  public void addMultiString(String label, String value)
+  {
+    objects.addElement(new stringThing(label, value, true));
+  }
+
+  /**
+   *
+   * Adds a labeled multi-line text field
+   *
+   * @param string String to use as the label
+   */
+
+  public void addMultiString(String label)
+  {
+    addMultiString(label, null);
+  }
 
   /**
    * 

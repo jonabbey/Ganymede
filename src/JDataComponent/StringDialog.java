@@ -320,28 +320,42 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 			System.out.println("Adding string field(JstringField)");
 		      }
 		    
-		    stringThing st = (stringThing)element;
-		    JstringField sf = new JstringField();
-		    sf.setText(st.getValue());
-		    sf.setEditable(true);
-		    sf.setCallback(this); 
+		    stringThing st = (stringThing) element;
 
-		    if (i == (numberOfObjects - 1)) // This is the last object
+		    if (st.isMultiline())
 		      {
-			sf.addActionListener(new ActionListener() {
-			  public void actionPerformed(ActionEvent e)
-			    {
-			      OKButton.doClick();
-			    }
-			});
+			JstringArea sa = new JstringArea();
+			sa.setText(st.getValue());
+			sa.setEditable(true);
+			sa.setCallback(this);
 
-		      }
-
-		    addRow(panel, sf, st.getLabel(), i);
+			addRow(panel, sa, st.getLabel(), i);
 		    
-		    componentHash.put(sf, st.getLabel());
-		    valueHash.put(st.getLabel(), "");
-		      
+			componentHash.put(sa, st.getLabel());
+			valueHash.put(st.getLabel(), "");
+		      }
+		    else
+		      {
+			JstringField sf = new JstringField();
+			sf.setText(st.getValue());
+			sf.setEditable(true);
+			sf.setCallback(this); 
+
+			if (i == (numberOfObjects - 1)) // This is the last object
+			  {
+			    sf.addActionListener(new ActionListener() {
+			      public void actionPerformed(ActionEvent e)
+				{
+				  OKButton.doClick();
+				}
+			    });
+			  }
+			
+			addRow(panel, sf, st.getLabel(), i);
+		    
+			componentHash.put(sf, st.getLabel());
+			valueHash.put(st.getLabel(), "");
+		      }
 		  }
 		else if (element instanceof passwordThing)
 		  {

@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -126,6 +126,15 @@ public class JDialogBuff implements java.io.Serializable {
 	      }
 
 	    retVal.addString((String) chunk.value, (String)chunk.initialValue);
+	  }
+	else if (chunk.label.equals("@multistring"))
+	  {
+	    if (debug)
+	      {
+		System.err.println("JDialogBuff: retrieving multi string chunk");
+	      }
+
+	    retVal.addMultiString((String) chunk.value, (String)chunk.initialValue);
 	  }
 	else if (chunk.label.equals("@boolean"))
 	  {
@@ -267,6 +276,19 @@ public class JDialogBuff implements java.io.Serializable {
   public void addString(String string, String value)
   {
     addChunk("@string", string, value);
+  }
+
+  /**
+   *
+   * Adds a labeled multi-line text field
+   *
+   * @param string String to use as the label
+   * @param value Initial value for string
+   */
+
+  public void addMultiString(String string, String value)
+  {
+    addChunk("@multistring", string, value);
   }
 
   /**
