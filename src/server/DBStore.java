@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.53 $ %D%
+   Version: $Revision: 1.54 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1531,7 +1531,7 @@ public class DBStore {
     // what can users do with objects they own?  Includes users themselves
 
     pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
-    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); // view self, nothing else
+    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); // view self, nothing else
 
     // what can arbitrary users do with objects they don't own?  nothing by default
 

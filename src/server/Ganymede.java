@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -497,13 +497,13 @@ public class Ganymede {
 	    // else will have to be manually configured by the supergash administrator.
 	
 	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.PermMatrix);
-	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); 
+	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); 
 
 	    // By default, users will not be able to view, create, or edit anything.  The supergash
 	    // administrator is free to reconfigure this.
 	
 	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.PermDefaultMatrix);
-	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(false, false, false)); 
+	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(false, false, false, false)); 
 	  }
 	else
 	  {
