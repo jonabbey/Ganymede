@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2001/05/21 08:26:42 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2001/05/21 21:31:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -467,7 +467,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
    *  
    */
 
-  synchronized public boolean mark(DBEditSet editSet, Object value, DBField field)
+  public synchronized boolean mark(DBEditSet editSet, Object value, DBField field)
   {
     DBNameSpaceHandle handle;
     
@@ -606,7 +606,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
    * @return true if the value could be reserved in the given editSet.  
    */
 
-  synchronized public boolean reserve(DBEditSet editSet, Object value, boolean onlyUnused)
+  public synchronized boolean reserve(DBEditSet editSet, Object value, boolean onlyUnused)
   {
     DBNameSpaceHandle handle;
     
