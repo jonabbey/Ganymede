@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -89,11 +89,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    out = openOutFile(path + "passwd");
+	    out = openOutFile(path + "user_info");
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open passwd file: " + ex);
+	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open user_info file: " + ex);
 	  }
 	
 	if (out != null)
@@ -124,11 +124,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    out = openOutFile(path + "group");
+	    out = openOutFile(path + "group_info");
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open group file: " + ex);
+	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open group_info file: " + ex);
 	  }
 	
 	if (out != null)
@@ -149,15 +149,20 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	result = true;
       }
 
-    if (baseChanged((short) 274) ||
-	baseChanged((short) 275))
+    if (baseChanged(SchemaConstants.UserBase) || // users
+	baseChanged((short) 274) || // mail lists
+	baseChanged((short) 275)) // external mail addresses
       {
 	Ganymede.debug("Need to build aliases map");
-	result = true;
+
+	if (writeAliasesFile())
+	  {
+	    result = true;
+	  }
       }
 
-    if (baseChanged((short) 271) ||
-	baseChanged((short) 270))
+    if (baseChanged((short) 271) || // system netgroups
+	baseChanged((short) 270)) // user netgroups
       {
 	Ganymede.debug("Need to build netgroup map");
 
@@ -167,9 +172,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
       }
 
-    if (baseChanged((short) 277) ||
-	baseChanged((short) 276) ||
-	baseChanged((short) 278))
+    if (baseChanged((short) 277) || // automounter maps
+	baseChanged((short) 276) || // nfs volumes
+	baseChanged((short) 278)) // automounter map entries
       {
 	Ganymede.debug("Need to build automounter maps");
 
@@ -876,6 +881,282 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   // The following private methods are used to support the DNS builder logic.
   //
   // ***
+
+  /**
+   *
+   * This method generates an aliases_info file.  This method must be run during
+   * builderPhase1 so that it has access to the enumerateObjects() method
+   * from our superclass.
+   *
+   */
+
+  private boolean writeAliasesFile()
+  {
+    PrintWriter aliases_info = null;
+    DBObject user, group, external;
+    Enumeration users, mailgroups, externals;
+
+    /* -- */
+
+    try
+      {
+	aliases_info = openOutFile(path + "aliases_info");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeAliasesFile(): couldn't open aliases_info file: " + ex);
+      }
+
+    // our email aliases database is spread across three separate object
+    // bases.
+
+    users = enumerateObjects(SchemaConstants.UserBase);
+
+    while (users.hasMoreElements())
+      {
+	user = (DBObject) users.nextElement();
+	
+	writeUserAlias(user, aliases_info);
+      }
+
+    // now the mail lists
+    
+    mailgroups = enumerateObjects((short) 274);
+
+    while (mailgroups.hasMoreElements())
+      {
+	group = (DBObject) mailgroups.nextElement();
+	
+	writeGroupAlias(group, aliases_info);
+      }
+
+    // and the external mail addresses
+    
+    externals = enumerateObjects((short) 275);
+
+    while (externals.hasMoreElements())
+      {
+	external = (DBObject) externals.nextElement();
+	
+	writeExternalAlias(external, aliases_info);
+      }
+
+    aliases_info.close();
+
+    return true;
+  }
+  
+  /**
+   *
+   * This method writes out a user alias line to the aliases_info NIS source file.<br><br>
+   *
+   * The user alias lines in this file look like the following:<br><br>
+   *
+   * <pre>
+   *
+   * broccol:jonabbey, abbey, broccol, rust-admin:broccol@arlut.utexas.edu, broccol@csdsun4.arlut.utexas.edu
+   *
+   * </pre>
+   *
+   * The first item in the second field (jonabbey, above) is the 'signature'
+   * alias, which the GASH makefile configures sendmail to rewrite as the
+   * From: line.
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this alias line
+   *
+   */
+
+  private void writeUserAlias(DBObject object, PrintWriter writer)
+  {
+    String username;
+    String signature;
+    Vector aliases;
+    String alias;
+    Vector addresses;
+    String target;
+
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    username = (String) object.getFieldValueLocal(userSchema.USERNAME);
+    signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
+    aliases = object.getFieldValuesLocal(userSchema.ALIASES);
+    addresses = object.getFieldValuesLocal(userSchema.EMAILTARGET);
+
+    result.append(username);
+    result.append(":");
+    result.append(signature);
+
+    for (int i = 0; i < aliases.size(); i++)
+      {
+	alias = (String) aliases.elementAt(i);
+
+	if (alias.equals(signature))
+	  {
+	    continue;
+	  }
+
+	result.append(", ");
+	result.append(alias);
+      }
+
+    result.append(":");
+
+    for (int i = 0; i < addresses.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    result.append(", ");
+	  }
+
+	target = (String) addresses.elementAt(i);
+
+	result.append(target);
+      }
+
+    writer.println(result.toString());
+  }
+
+  /**
+   *
+   * This method writes out a mail list alias line to the aliases_info NIS source file.<br><br>
+   *
+   * The mail list lines in this file look like the following:<br><br>
+   *
+   * <pre>
+   *
+   * :oms:csd-news-dist-omg:csd_staff, granger, iselt, lemma, jonabbey@eden.com
+   *
+   * </pre>
+   *
+   * Where the leading colon identifies to the GASH makefile that it is a group
+   * line and 'oms' is the GASH ownership code.  Ganymede won't try to emit
+   * a GASH ownership code that could be used to load the aliases_info file
+   * back into GASH.
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this alias line
+   *
+   */
+
+  private void writeGroupAlias(DBObject object, PrintWriter writer)
+  {
+    String groupname;
+    Vector group_targets;
+    Vector external_targets;
+    String target;
+
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    groupname = (String) object.getFieldValueLocal(emailListSchema.LISTNAME);
+    group_targets = object.getFieldValuesLocal(emailListSchema.MEMBERS);
+    external_targets = object.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
+
+    result.append(":xxx:");
+    result.append(groupname);
+    result.append(":");
+
+    for (int i = 0; i < group_targets.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    result.append(", ");
+	  }
+
+	target = (String) group_targets.elementAt(i);
+
+	result.append(target);
+      }
+
+    for (int i = 0; i < external_targets.size(); i++)
+      {
+	if ((i > 0) || (group_targets.size() > 0))
+	  {
+	    result.append(", ");
+	  }
+
+	target = (String) external_targets.elementAt(i);
+
+	result.append(target);
+      }
+
+    writer.println(result.toString());
+  }
+
+  /**
+   *
+   * This method writes out a mail list alias line to the aliases_info NIS source file.<br><br>
+   *
+   * The mail list lines in this file look like the following:<br><br>
+   *
+   * <pre>
+   *
+   * &lt;omj&gt;abuse:abuse, postmaster:postmaster@ns1.arlut.utexas.edu
+   *
+   * </pre>
+   *
+   * Where the leading < identifies to GASH and the GASH makefile that
+   * it is an external user line and 'omj' is the GASH ownership code.
+   * Ganymede won't try to emit a GASH ownership code that could be
+   * used to load the aliases_info file back into GASH.
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this alias line
+   * 
+   */
+
+  private void writeExternalAlias(DBObject object, PrintWriter writer)
+  {
+    String name;
+    Vector aliases;
+    String alias;
+    Vector targets;
+    String target;
+
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    name = (String) object.getFieldValueLocal(emailRedirectSchema.NAME);
+    targets = object.getFieldValuesLocal(emailRedirectSchema.TARGETS);
+    aliases = object.getFieldValuesLocal(emailRedirectSchema.ALIASES);
+
+    result.append("<xxx>");
+    result.append(name);
+    result.append(":");
+
+    for (int i = 0; i < aliases.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    result.append(", ");
+	  }
+
+	alias = (String) aliases.elementAt(i);
+
+	result.append(alias);
+      }
+
+    result.append(":");
+
+    for (int i = 0; i < targets.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    result.append(", ");
+	  }
+
+	target = (String) targets.elementAt(i);
+
+	result.append(target);
+      }
+
+    writer.println(result.toString());
+  }
 
   /**
    *
