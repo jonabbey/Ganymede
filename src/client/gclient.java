@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.152 $
-   Last Mod Date: $Date: 1999/07/08 04:25:37 $
+   Version: $Revision: 1.153 $
+   Last Mod Date: $Date: 1999/07/14 04:44:22 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.152 $ $Date: 1999/07/08 04:25:37 $ $Name:  $
+ * @version $Revision: 1.153 $ $Date: 1999/07/14 04:44:22 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -3882,6 +3882,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    // the server cancelled our transaction.  We don't need to
 	    // call cancelTransaction ourselves.
 
+	    wp.closeEditables();
 	    cleanUpAfterCancel();
 	    openNewTransaction();
 
