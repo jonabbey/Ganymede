@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -502,5 +502,16 @@ public class QueryResult implements java.io.Serializable {
       }
 
     unpacked = true;
+  }
+
+  /**
+   *
+   * For debug.
+   * 
+   */
+
+  public String getBuffer()
+  {
+    return buffer.toString();
   }
 }
