@@ -8,8 +8,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/03/04 00:54:08 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/06/17 00:29:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -281,6 +281,12 @@ public class DBLogEvent {
     cary = line.toCharArray();
 
     i = line.indexOf('|');
+
+    if (i == -1)
+      {
+	throw new IOException("malformed log line: " + line);
+      }
+
     dateString = line.substring(0, i);
     
     try

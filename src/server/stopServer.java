@@ -8,8 +8,8 @@
 
    Created: 28 April 1999
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/01/14 00:52:22 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/06/17 00:29:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -298,6 +298,12 @@ class stopServerAdmin extends UnicastRemoteObject implements Admin {
     catch (NullPointerException ex)
       {
 	System.err.println("Ganymede stopServer: Error, couldn't log into server with admin privs.");
+	System.exit(1);
+      }
+
+    if (aSession == null)
+      {
+	System.err.println("Ganymede stopServer: Error, couldn't log into server with admin privs.. bad password?");
 	System.exit(1);
       }
   }
