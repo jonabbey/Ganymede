@@ -22,4 +22,11 @@ echo "Running Ganymede Admin Console"
 
 export CLASSPATH
 
-$JAVA -mx32m arlut.csd.ganymede.GASHAdmin $PROPERTIES
+# For Java 1.1
+
+#$JAVA -mx32m arlut.csd.ganymede.GASHAdmin $PROPERTIES
+
+# For Java 1.2 or later
+
+$JAVA -Xmx32m arlut.csd.ganymede.GASHAdmin $PROPERTIES
+
