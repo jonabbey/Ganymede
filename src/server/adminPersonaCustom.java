@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -106,6 +106,17 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	    System.err.println("adminPersonaCustom.finalizeSetValue(): setting persona user, refreshing label");
 	  }
 
+	// Hide the associated user field if we are looking at the
+	// supergash or monitor persona objects.
+
+	if ((field.getID() == SchemaConstants.PersonaAssocUser) &&
+	    (getInvid().getNum() <= 2))
+	  {
+	    return Ganymede.createErrorDialog("Permissions Error",
+					      "It is not permitted to set an associated user on either the supergash " +
+					      "or monitor persona objects.");
+	  }
+
 	return refreshLabelField(null, (Invid) value, null);
       }
 
@@ -139,6 +150,9 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	    userInvid = (Invid) assocUserField.getValueLocal();
 	  }
       }
+
+    // if we are messing with the supergash or monitor persona
+    // objects, don't try to mess around with the associated user.
 
     if (getInvid().getNum() <= 2)
       {
@@ -320,10 +334,17 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
       {
 	return false;
       }
-    else
+
+    // Hide the associated user field if we are looking at the
+    // supergash or monitor persona objects.
+
+    if ((field.getID() == SchemaConstants.PersonaAssocUser) &&
+	(getInvid().getNum() <= 2))
       {
-	return super.canSeeField(session, field);
+	return false;
       }
+
+    return super.canSeeField(session, field);
   }
 
   /**
