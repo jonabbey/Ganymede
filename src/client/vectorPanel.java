@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.24 $ %D%
+  Version: $Revision: 1.25 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -47,9 +47,9 @@ import com.sun.java.swing.border.*;
  *
  */
 
-public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener {
+public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener {
 
-  private final static boolean debug = true;
+  private final static boolean debug = false;
 
   // class variables
 
@@ -100,6 +100,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   containerPanel
     container;
+
+  JPopupMenu
+    popupMenu;
+
+  JMenuItem
+    closeLevelMI,
+    expandLevelMI,
+    closeAllMI,
+    expandAllMI;
 
   /* -- */
   
@@ -162,6 +171,25 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     //setBackground(container.frame.getVectorBG());
 
+    // Set up pop up menu
+    popupMenu = new JPopupMenu();
+    expandLevelMI = new JMenuItem("Expand this level");
+    expandLevelMI.addActionListener(this);
+    expandAllMI = new JMenuItem("Expand all elements");
+    expandAllMI.addActionListener(this);
+    popupMenu.add(expandLevelMI);
+    popupMenu.add(expandAllMI);
+    popupMenu.addSeparator();
+
+    closeLevelMI = new JMenuItem("Close this level");
+    closeLevelMI.addActionListener(this);
+    closeAllMI = new JMenuItem("Close all elements");
+    closeAllMI.addActionListener(this);
+    popupMenu.add(closeLevelMI);
+    popupMenu.add(closeAllMI);
+
+    addMouseListener(this);
+
     compVector = new Vector();
     ewHash = new Hashtable();
 
@@ -169,7 +197,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     //invalidateRight();
   }
-  
+
+  private void showPopupMenu(int x, int y)
+  {
+    popupMenu.show(this, x, y);
+
+  }
+
   private void createVectorComponents()
   {
     // Took out some more redundant checking
@@ -508,11 +542,78 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
   }
 
+  public void expandLevels(boolean recursive)
+  {
+    Enumeration wrappers = ewHash.keys();
+    while (wrappers.hasMoreElements())
+      {
+	elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
+	ew.expand(true);
+	if (recursive)
+	  {
+	    System.out.println("Recursing...");
+	    Component comp = ew.getComponent();
+	    if (comp instanceof containerPanel)
+	      {
+		System.out.println("Aye, it's a containerPanel");
+		containerPanel cp = (containerPanel)comp;
+		for (int i = 0; i < cp.vectorPanelList.size(); i++)
+		  {
+		    ((vectorPanel)cp.vectorPanelList.elementAt(i)).expandLevels(true);
+		  }
+	      }
+	    else
+	      {
+		System.out.println("The likes of this I have never seen: " + comp);
+	      }
+	  }
+      }
+  }
+
+  public void closeLevels(boolean recursive)
+  {
+    Enumeration wrappers = ewHash.keys();
+    while (wrappers.hasMoreElements())
+      {
+	elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
+	ew.expand(false);
+	if (recursive)
+	  {
+	    Component comp = ew.getComponent();
+	    if (comp instanceof vectorPanel)
+	      {
+		((vectorPanel)comp).closeLevels(true);
+	      }
+	  }
+      }
+
+  }
+
   public void actionPerformed(ActionEvent e)
   {
     if ((e.getSource() == addB) && editable)
       {
 	addNewElement();
+      }
+    else if (e.getSource() instanceof JMenuItem)
+      {
+	System.out.println("JMenuItem: " + e.getActionCommand());
+	if (e.getActionCommand().equals("Expand all elements"))
+	  {
+	    expandLevels(true);
+	  }
+	else if (e.getActionCommand().equals("Expand this level"))
+	  {
+	    expandLevels(false);
+	  }
+	else if (e.getActionCommand().equals("Close this level"))
+	  {
+	    closeLevels(false);
+	  }
+	else if (e.getActionCommand().equals("Close all elements"))
+	  {
+	    closeLevels(true);
+	  }
       }
   }
 
@@ -592,6 +693,18 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     return returnValue;
   }
+
+  public void mousePressed(java.awt.event.MouseEvent e) 
+    {
+      if (e.isPopupTrigger())
+	{
+	  showPopupMenu(e.getX(), e.getY());
+	}
+    }
+  public void mouseClicked(MouseEvent e) {}
+  public void mouseReleased(MouseEvent e) {}
+  public void mouseEntered(MouseEvent e) {}
+  public void mouseExited(MouseEvent e) {}
 	
   /*
    * This changes an element after a ValueCallback.
