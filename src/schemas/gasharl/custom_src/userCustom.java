@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 2001/06/15 20:57:31 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 2001/06/25 21:12:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -105,6 +105,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   QueryResult groupChoices = null;
 
   String newUsername = null;
+
+  private boolean amChangingExpireDate = false;
 
   /**
    *
@@ -1386,38 +1388,51 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public Date maxDate(DBField field)
   {
-    if (field.getID() != SchemaConstants.ExpirationField)
+    if (field.getID() == SchemaConstants.ExpirationField)
       {
-	return super.maxDate(field);
-      }
+	// if we have a user category set, limit the acceptable date to
+	// current date + max days
 
-    // if we have a user category set, limit the acceptable date to
-    // current date + max days
+	Date currentDate = new Date();
 
-    Date currentDate = new Date();
+	Calendar cal = Calendar.getInstance();
 
-    Calendar cal = Calendar.getInstance();
+	cal.setTime(currentDate);
 
-    cal.setTime(currentDate);
+	try
+	  {
+	    Invid catInvid = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
 
-    try
-      {
-	Invid catInvid = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
+	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
 
-	DBObject category = internalSession().getSession().viewDBObject(catInvid);
-
-	Integer maxDays = (Integer) category.getFieldValueLocal(userCategorySchema.LIMIT);
+	    Integer maxDays = (Integer) category.getFieldValueLocal(userCategorySchema.LIMIT);
 	
-	cal.add(Calendar.DATE, maxDays.intValue());
+	    cal.add(Calendar.DATE, maxDays.intValue());
+	  }
+	catch (NullPointerException ex)
+	  {
+	    // oops, no category set.. <shrug>
+
+	    return super.maxDate(field);
+	  }
+
+	return cal.getTime();
       }
-    catch (NullPointerException ex)
+
+    if (field.getID() == userSchema.PASSWORDCHANGETIME)
       {
-	// oops, no category set.. <shrug>
+	GanymedeSession mySession = this.getGSession();
 
-	return super.maxDate(field);
+	// if we are supergash, don't restrict what the date
+	// can be set to.
+
+	if (mySession == null || mySession.isSuperGash() || amChangingExpireDate)
+	  {
+	    return super.maxDate(field);
+	  }
       }
 
-    return cal.getTime();
+    return super.maxDate(field);
   }
 
   /**
@@ -1480,20 +1495,33 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// the password is being changed, update the time that it will need to
 	// be changed again
 
-	Calendar myCal = new GregorianCalendar();
-	myCal.add(Calendar.MONTH, 3);
-
-	Date updateTime = myCal.getTime();
-
 	DateDBField dateField = (DateDBField) getField(userSchema.PASSWORDCHANGETIME);
 
 	if (dateField != null)
 	  {
-	    ReturnVal result = dateField.setValueLocal(updateTime);
+	    Date passwordDate = getNewPasswordExpirationDate();
+	    Date currentDate = dateField.value();
 
-	    if (result != null)
+	    // be sure and check to make sure we never pull a password
+	    // expiration date backwards in time
+
+	    if (currentDate == null || !currentDate.after(passwordDate))
 	      {
-		System.err.println("UserCustom: setValueLocal on PASSWORDCHANGETIME field failed: " + result);
+		// set the amChangingExpireDate flag to true so that we
+		// won't try and restrict the forward date when the date
+		// set operation cascades forward through our maxDate()
+		// method
+		
+		amChangingExpireDate = true;
+		
+		ReturnVal result = dateField.setValueLocal(passwordDate);
+		
+		amChangingExpireDate = false;
+		
+		if (result != null)
+		  {
+		    System.err.println("UserCustom: setValueLocal on PASSWORDCHANGETIME field failed: " + result);
+		  }
 	      }
 	  }
 	else
@@ -1684,6 +1712,32 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     return null;		// success by default
+  }
+
+  /**
+   * <p>This method calculates what time the password expiration field should be set to
+   * if the password is being changed right now.</p>
+   */
+
+  private Date getNewPasswordExpirationDate()
+  {
+    Calendar myCal = new GregorianCalendar();
+    myCal.add(Calendar.MONTH, 3);
+
+    // if the expiration date will fall between Dec 20
+    // and January 10, bump the date forward three
+    // weeks to skip over the year-end holidays
+
+    int month = myCal.get(Calendar.MONTH);
+    int day = myCal.get(Calendar.DATE);
+
+    if ((month == Calendar.DECEMBER && day >= 20) ||
+	(month == Calendar.JANUARY && day < 10))
+      {
+	myCal.add(Calendar.DATE, 21);
+      }
+
+    return myCal.getTime();
   }
 
   /**

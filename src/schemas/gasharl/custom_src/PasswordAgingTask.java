@@ -7,8 +7,8 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2001/06/15 22:32:02 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2001/06/25 21:12:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -273,7 +273,7 @@ public class PasswordAgingTask implements Runnable {
 
 	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
-	    warnRealSoonNowPasswordExpire(object);
+	    warnUpcomingPasswordExpire(object);
 	    continue;
 	  }
 
@@ -367,7 +367,7 @@ public class PasswordAgingTask implements Runnable {
 
     objVect.addElement(userObject.getInvid());
 
-    String titleString = "Password Expiring Soon For User " + userObject.toString();
+    String titleString = "Password Expiring Soon For User " + userObject.toString() + ", at " + passwordChangeTime;
 
     String messageString = "The password for user account " + userObject.toString() + 
       " will expire soon.  You will need to change your password before " + passwordChangeTime +
@@ -390,7 +390,7 @@ public class PasswordAgingTask implements Runnable {
 
     objVect.addElement(userObject.getInvid());
 
-    String titleString = "Password Expiring Very Soon For User " + userObject.toString();
+    String titleString = "Password Expiring Very Soon For User " + userObject.toString() + ", at " + passwordChangeTime;
 
     String messageString = "The password for user account " + userObject.toString() + 
       " will expire very soon.  The password for this user account will need to be changed before " + passwordChangeTime +
@@ -415,7 +415,7 @@ public class PasswordAgingTask implements Runnable {
 
     objVect.addElement(userObject.getInvid());
 
-    String titleString = "Password Has Expired For User " + userObject.toString();
+    String titleString = "Password Has Expired For User " + userObject.toString() + "!!!";
 
     String messageString = "The password for user account " + userObject.toString() + 
       " expired at " + passwordChangeTime + ".  The password for this user account *must* be changed immediately, or else" +
