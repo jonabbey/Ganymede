@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.14 $ %D%
+  Version: $Revision: 1.15 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -77,9 +77,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   short 
     type;
 
-  LineBorder
-   lineBorder = new LineBorder(Color.black);
-
   JPanel
     bottomPanel,
     centerPanel;
@@ -89,14 +86,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     isEditInPlace,
     centerPanelAdded = false;
 
+  LineBorder
+    lineBorder = new LineBorder(Color.black);
+
   Image
     removeImage;
 
   private db_field my_field;
 
   protected windowPanel parent;
-
-
 
   containerPanel
     container;
@@ -110,12 +108,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public vectorPanel(db_field field, windowPanel parent, boolean editable, boolean isEditInPlace, containerPanel container)
   {
-
     if (debug)
       {
 	System.out.println("Adding new vectorPanel");
       }
-			   
 
     try
       {
@@ -183,7 +179,22 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
     
     setLayout(new BorderLayout());
-    setBorder(new com.sun.java.swing.border.EtchedBorder());
+
+    EmptyBorder eb = (EmptyBorder) BorderFactory.createEmptyBorder(10, 10, 10, 10);
+    TitledBorder tb;
+
+    try
+      {
+	tb = BorderFactory.createTitledBorder(field.getName() + ": Vector");
+      }
+    catch (RemoteException ex)
+      {
+	tb = BorderFactory.createTitledBorder("Vector -- unknown field name");
+      }
+
+    CompoundBorder cb = BorderFactory.createCompoundBorder(tb,eb);
+    setBorder(cb);
+
     //add("South", addB);
     
     compVector = new Vector();
@@ -191,8 +202,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     createVectorComponents();
 
-    invalidate();
-    container.frame.validate();
+    invalidateRight();
   }
   
   private void createVectorComponents()
@@ -357,6 +367,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		      {
 			System.out.println("Adding Invid to edit in place vector panel");
 		      }
+
 		    Invid inv = (Invid)(invidfield.getElement(i));
 		   
 		    db_object object = parent.getgclient().getSession().edit_db_object(inv);
@@ -438,7 +449,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	      }
 
 	    try
-	      
 	      {
 		Invid invid = ((invid_field)my_field).createNewEmbedded();
 		db_object object = parent.parent.getSession().edit_db_object(invid);
@@ -492,7 +502,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    
 	    try
 	      {
-		
 		JIPField ipf = new JIPField(new JcomponentAttr(null,
 							       new Font("Helvetica",Font.PLAIN,12),
 							       Color.black,Color.white),
@@ -561,7 +570,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public void addElement(Component c)
   {
-
     addElement("Title(temp)", c);
   }
 	
@@ -570,6 +578,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * button, this item is going to be added to the end
    * of the vector.
    */
+
   public void addElement(String title, Component c)
   {
     if (c == null)
@@ -652,11 +661,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  {
 	    System.out.println("Deleting element number: " + compVector.indexOf(c));
 	  }
+
 	my_field.deleteElement(compVector.indexOf(c));
 	compVector.removeElement(c);	  
 	centerPanel.remove((elementWrapper)ewHash.get(c));
-	validate();
-	parent.validate();
+
+	invalidateRight();
       }
     catch (RemoteException rx)
       {
@@ -825,59 +835,29 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     return null;
   }
-  /*
-  public void doLayout()
-  {
-    super.doLayout();
-    setSize(getPreferredSize().width, getPreferredSize().height);
-  }*/
 
   /**
-   * Override validate to reset the current size.
+   *
+   * This method does causes the hierarchy of containers above
+   * us to be recalculated from the bottom (us) on up.  Normally
+   * the validate process works from the top-most container down,
+   * which isn't what we want at all in this context.
+   *
    */
-  /*
-  public void validate()
-  {
-    //System.out.println("validate in vp: " + whereAmI());
-    super.validate();
-    if (getParent() != null)
-      {
-	getParent().validate();
-      }
-    container.validate();
-  }
-  
-  public void invalidate()
-  {
-    //System.out.println("invalidate in vp: " + whereAmI());
-    System.out.println("inv in vp: parent ->" + getParent());
-    super.invalidate();
-  }
-  */
-  public String whereAmI()
-  {
-    if (getParent() instanceof containerPanel)
-      {
-	return ((containerPanel)getParent()).whereAmI() + "/v";
-      }
-    else if (getParent() instanceof vectorPanel)
-      {
-	return ((vectorPanel)getParent()).whereAmI() + "/v";
-      }
-    else if (getParent() instanceof JPanel)
-      {
-	return ((vectorPanel)((JPanel)getParent()).getParent()).whereAmI() + "/p/v";
-      }
-    else if (getParent() instanceof elementWrapper)
-      {
-	return ((elementWrapper)getParent()).whereAmI() + "/v";
-      }
-    else 
-      {
-	System.out.println("What kind of parent is this: " + getParent());
-      }
-    return "/v";
-  }
 
+  public void invalidateRight()
+  {
+    Component c;
+
+    c = this;
+
+    while ((c != null) && !(c instanceof JViewport))
+      {
+	//System.out.println("doLayout on " + c);
+
+	c.doLayout();
+	c = c.getParent();
+      }
+  }
 }
 
