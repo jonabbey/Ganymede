@@ -6,8 +6,8 @@
    
    Created: 5 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/02/10 05:33:43 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/02/10 17:56:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -149,6 +149,26 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
 
   /**
    *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    return (fieldid == SchemaConstants.TaskName || fieldid == SchemaConstants.TaskClass);
+  }
+
+  /**
+   *
    * This method allows the DBEditObject to have executive approval
    * of any scalar set operation, and to take any special actions
    * in reaction to the set.. if this method returns true, the
@@ -274,26 +294,80 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
 
   public void commitPhase2()
   {
+    String origName = null, taskName;
+
+    /* -- */
+
+    if (original != null)
+      {
+	origName = (String) original.getFieldValueLocal(SchemaConstants.TaskName);
+      }
+
+    taskName = (String) getFieldValueLocal(SchemaConstants.TaskName);
+
     switch (getStatus())
       {
       case DROPPING:
 	return;
 
       case DELETING:
-	Ganymede.scheduler.unregisterTask((String)original.getFieldValueLocal(SchemaConstants.TaskName));
+	Ganymede.scheduler.unregisterTask(origName);
+
+	if (original.isSet(SchemaConstants.TaskRunOnCommit))
+	  {
+	    Ganymede.unregisterBuilderTask(origName);
+	  }
+
 	break;
 
       case EDITING:
-	if (!original.getFieldValueLocal(SchemaConstants.TaskName).equals(getFieldValueLocal(SchemaConstants.TaskName)))
+	if (!origName.equals(taskName))
 	  {
-	    Ganymede.scheduler.unregisterTask((String)original.getFieldValueLocal(SchemaConstants.TaskName));
-	  }
+	    // we changed our task name.. ditch the old record
 
-	Ganymede.scheduler.registerTaskObject(this);
+	    Ganymede.scheduler.unregisterTask(origName);
+
+	    if (original.isSet(SchemaConstants.TaskRunOnCommit))
+	      {
+		Ganymede.unregisterBuilderTask(origName);
+	      }
+
+	    // and re-register ourselves appropriately
+
+	    Ganymede.scheduler.registerTaskObject(this);
+
+	    if (isSet(SchemaConstants.TaskRunOnCommit))
+	      {
+		Ganymede.registerBuilderTask(taskName);
+	      }
+	  }
+	else
+	  {
+	    // no name change, go ahead and reschedule ourselves
+
+	    Ganymede.scheduler.registerTaskObject(this);
+
+	    // get the buildertask list updated to handle this task
+	    // on transaction commit appropriately
+
+	    if (original.isSet(SchemaConstants.TaskRunOnCommit) && !isSet(SchemaConstants.TaskRunOnCommit))
+	      {
+		Ganymede.unregisterBuilderTask(origName);
+	      }
+	    else if (isSet(SchemaConstants.TaskRunOnCommit) && !original.isSet(SchemaConstants.TaskRunOnCommit))
+	      {
+		Ganymede.registerBuilderTask(taskName);
+	      }
+	  }
 	break;
 
       case CREATING:
 	Ganymede.scheduler.registerTaskObject(this);
+
+	if (isSet(SchemaConstants.TaskRunOnCommit))
+	  {
+	    Ganymede.registerBuilderTask(taskName);
+	  }
       }
   }
 

@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 1999/02/10 05:33:40 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 1999/02/10 17:56:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -699,18 +699,39 @@ public class Ganymede {
 
 	    if (object.isSet(SchemaConstants.TaskRunOnCommit))
 	      {
-		builderTasks.addElement((String) object.getFieldValueLocal(SchemaConstants.TaskName));
-
-		if (debug)
-		  {
-		    System.err.println("Registering " + object + " for execution on transaction commit.");
-		  }
+		registerBuilderTask((String) object.getFieldValueLocal(SchemaConstants.TaskName));
 	      }
 	  }
       }
     else
       {
 	System.err.println("** No tasks found in database!");
+      }
+  }
+
+  static void registerBuilderTask(String taskName)
+  {
+    if (debug)
+      {
+	System.err.println("Registering " + taskName + " for execution on transaction commit.");
+      }
+
+    synchronized (builderTasks)
+      {
+	arlut.csd.Util.VectorUtils.unionAdd(builderTasks, taskName);
+      }
+  }
+
+  static void unregisterBuilderTask(String taskName)
+  {
+    if (debug)
+      {
+	System.err.println("Unregistering " + taskName + " for execution on transaction commit.");
+      }
+
+    synchronized (builderTasks)
+      {
+	builderTasks.removeElement(taskName);
       }
   }
 
@@ -724,9 +745,12 @@ public class Ganymede {
 
   static void runBuilderTasks()
   {
-    for (int i = 0; i < builderTasks.size(); i++)
+    synchronized (builderTasks)
       {
-	scheduler.demandTask((String) builderTasks.elementAt(i));
+	for (int i = 0; i < builderTasks.size(); i++)
+	  {
+	    scheduler.demandTask((String) builderTasks.elementAt(i));
+	  }
       }
   }
 
