@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 2002/03/13 18:44:33 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 2002/11/01 02:24:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -200,6 +200,12 @@ public abstract class DBField implements Remote, db_field {
    * <p>This method does no permissions checking at all, and should only
    * be used from within DBField and subclass code.  For other purposes,
    * use getValuesLocal().</p>
+   *
+   * <p>This method should always return a valid vector if this field
+   * is truly a vector field, as we don't keep empty vector fields in
+   * non-editable objects, and if this is an editable object we'll
+   * have created a vector when this field was initialized for
+   * editing.</p>
    */
   
   public final Vector getVectVal()
