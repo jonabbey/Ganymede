@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,6 +53,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
   JTabbedPane 
     pane;
+
+  Color
+    vectorBG = Color.lightGray;
+
+  boolean
+    darkNow = true;
 
   // Each of these panes is one of the tabs in the tabbedPane
   JScrollPane 
@@ -532,6 +538,22 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
       pane.setSelectedIndex(REMOVAL_DATE);
     }
+
+  public Color getVectorBG()
+  {
+    if (darkNow)
+      {
+	vectorBG = vectorBG.brighter();
+      }
+    else
+      {
+	vectorBG = vectorBG.darker();
+      }
+
+    darkNow = !darkNow;
+
+    return vectorBG;
+  }
 
   // For the ChangeListener
   public void stateChanged(ChangeEvent e)
