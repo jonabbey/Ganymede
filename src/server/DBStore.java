@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 1999/08/14 00:49:05 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 1999/08/27 17:25:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.88 $ %D%
+ * @version $Revision: 1.89 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -165,7 +165,7 @@ public class DBStore {
   boolean sweepInProgress;	
   
   /**
-   * to keep track of what ID to assign to new bases
+   * to keep track of what ID to assign to new user-space object types
    */
 
   short maxBaseId = 256;
@@ -191,14 +191,16 @@ public class DBStore {
 
   Hashtable lockHash;
 
-  /**
-   * unique valued hashes
+  /** 
+   * A collection of {@link arlut.csd.ganymede.DBNameSpace
+   * DBNameSpaces} registered in this DBStore.  
    */
 
   Vector nameSpaces;
 
-  /**
-   * if true, DBObjectBase set methods will be enabled
+  /** 
+   * if true, {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}
+   * set methods will be enabled 
    */
 
   boolean loading = false;
@@ -209,7 +211,19 @@ public class DBStore {
 
   DBBaseCategory rootCategory;
 
-  byte file_major, file_minor;
+  /**
+   * Major revision number of the database file loaded by this
+   * DBStore object.
+   */
+
+  byte file_major;
+
+  /**
+   * Minor revision number of the database file loaded by this
+   * DBStore object.
+   */
+
+  byte file_minor;
 
   /**
    * The Journal for this database, initialized when the database is
@@ -220,7 +234,19 @@ public class DBStore {
 
   // debugging info
 
+  /**
+   * A count of how many database objects in this DBStore are currently
+   * checked out for creation, editing, or removal.
+   */
+
   int objectsCheckedOut = 0;
+
+  /**
+   * A count of how many {@link arlut.csd.ganymede.DBLock DBLocks} are
+   * established on {@link arlut.csd.ganymede.DBObjectBase DBObjectBases}
+   * in this DBStore.
+   */
+
   int locksHeld = 0;
 
   /* -- */

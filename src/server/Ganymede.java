@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 1999/08/14 00:49:05 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 1999/08/27 17:25:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -122,8 +122,36 @@ import arlut.csd.Util.ParseArgs;
 public class Ganymede {
 
   public static boolean debug = true;  
+
+  /**
+   * <p>If true, Ganymede.createErrorDialog() will print the
+   * content of error dialogs to the server's stderr.</p>
+   */
+
+  public static boolean logErrorDialogs = true;
+
+  /**
+   * <p>We keep the server's start time for display in the
+   * admin console.</p>
+   */
+
   public static Date startTime = new Date();
+
+  /**
+   * <p>If the server is started with debug=&lt;filename&gt; on
+   * the command line, debugFilename will hold the name
+   * of the file to write our RMI debug log to.</p>
+   */
+
   public static String debugFilename = null;
+
+  /**
+   * <p>If true, the server's schema editing code will allow
+   * the admin console's schema editor to change the definitions
+   * of object and field types that the server depends on for
+   * its operations.</p>
+   */
+
   public static boolean developSchema = false;
 
   /**
@@ -135,8 +163,26 @@ public class Ganymede {
 
   public static boolean remotelyAccessible = true;
 
+  /**
+   * <p>Once the server is started and able to accept RMI clients,
+   * this field will hold the GanymedeServer object which clients
+   * talk to in order to login to the server.</p>
+   */
+
   public static GanymedeServer server;
+
+  /**
+   * <p>A number of operations in the Ganymede server require 'root' 
+   * access to the database.  This GanymedeSession object is provided
+   * for system database operations.</p>
+   */
+
   public static GanymedeSession internalSession;
+
+  /**
+   * <p>The background task scheduler.</p>
+   */
+
   public static GanymedeScheduler scheduler;
 
   /**
@@ -148,10 +194,8 @@ public class Ganymede {
   public static DBStore db;
 
   /**
-   *
-   * This object provides access to the Ganymede log file, providing
-   * both logging and search services.
-   *
+   * <p>This object provides access to the Ganymede log file, providing
+   * logging, email, and search services.</p>
    */
 
   public static DBLog log = null;
@@ -199,9 +243,27 @@ public class Ganymede {
   public static String monitornameProperty = null;
   public static String defaultmonitorpassProperty = null;
   public static String messageDirectoryProperty = null;
+  public static String schemaDirectoryProperty = null;
   public static int    registryPortProperty = 1099;
 
+  /**
+   * <p>If the server is started with the -resetadmin command line flag,
+   * this field will be set to true and the server's startupHook() will
+   * reset the supergash password to that specified in the server's
+   * ganymede.properties file.</p>
+   */
+
   public static boolean resetadmin = false;
+
+  /** 
+   * <p>This flag is true if the server was started with no
+   * pre-existing ganymede.db file.  This will be true when the server
+   * code is run from a schema kit's runDirectLoader script.  If true,
+   * the {@link arlut.csd.ganymede.GanymedeSession GanymedeSession}
+   * class will not worry about not finding the default permissions
+   * role in the database.</p> 
+   */
+
   public static boolean firstrun = false;
 
   /* -- */
@@ -287,6 +349,9 @@ public class Ganymede {
 	System.out.println("Ganymede server: loaded properties successfully from " + propFilename);
       }
 
+    // see whether our RMI registry currently has ganymede.server
+    // bound.. doesn't matter much, but useful for logging
+
     boolean inUse = true;
 
     try
@@ -313,14 +378,16 @@ public class Ganymede {
     if (inUse)
       {
 	System.err.println("Warning: Ganymede server already bound by other process / Naming failure.");
-	System.err.println("         (not necessarily fatal)");
+	System.err.println("(not likely fatal, the server probably restarted with an existing rmi registry)");
       }
+
+    // create the database 
 
     debug("Creating DBStore structures");
 
-    // And how can this be!?  For he IS the kwizatch-haderach!!
+    db = new DBStore();		// And how can this be!?  For he IS the kwizatch-haderach!!
 
-    db = new DBStore();
+    // load the database
 
     dataFile = new File(dbFilename);
     
@@ -331,6 +398,9 @@ public class Ganymede {
       }
     else
       {
+	// no database on disk.. create a new one, along with a new
+	// journal
+
 	firstrun = true;
 
 	debug("No DBStore exists under filename " + dbFilename + ", not loading");
@@ -349,16 +419,20 @@ public class Ganymede {
 	    throw new RuntimeException("couldn't initialize journal");
 	  }
 
-	debug("Creating " + rootname + " object");
+	// create the database objects required for the server's operation
+
+	debug("Creating mandatory database objects");
 	db.initializeObjects();
-	debug(rootname + " object created");
+	debug("Mandatory database objects created.");
 
 	firstrun = false;
       }
 
     // Java 2 makes it a real pain to change out security
-    // managers.. since we don't need to do classfile transfer, we
-    // just don't bother with it.
+    // managers.. since we don't need to do classfile transfer from
+    // the client (since all clients should use
+    // arlut.csd.ganymede.client.ClientBase), we just don't bother
+    // with it.
 
     if (false)
       {
@@ -370,6 +444,10 @@ public class Ganymede {
       {
 	debug("Not Initializing RMI Security Manager.. not supporting classfile transfer");
       }
+
+    // if debug=<filename> was specified on the command line, tell the
+    // RMI system to log RMI calls and exceptions that occur in
+    // response to RMI calls.
 
     if (debugFilename != null)
       {
@@ -383,23 +461,25 @@ public class Ganymede {
 	  }
       }
 
-    // Create a Server object
+    // Create a GanymedeServer object to support the logging
+    // code... the GanymedeServer's main purpose (to allow logins)
+    // won't come into play until we bind the server object into the
+    // RMI registry.
 
     try
       {
 	debug("Creating GanymedeServer object");
 
 	server = new GanymedeServer();
-
-	debug("Binding GanymedeServer in RMI Registry");
-
-	Naming.rebind("rmi://localhost:" + registryPortProperty + "/ganymede.server", server);
       }
     catch (Exception ex)
       {
-	debug("Couldn't establish server binding: " + ex);
-	return;
+	debug("Couldn't create GanymedeServer: " + ex);
+	throw new RuntimeException(ex.getMessage());
       }
+
+    // create the internal GanymedeSession that we use for system
+    // database maintenance
 
     try
       {
@@ -427,6 +507,8 @@ public class Ganymede {
 	throw new RuntimeException("Couldn't initialize log file");
       }
 
+    // log our restart
+
     String startMesg;
 
     if (debugFilename != null)
@@ -445,18 +527,43 @@ public class Ganymede {
 				      null,
 				      null));
 
+    // take care of any startup-time database modifications
+
     startupHook();
 
-    // start the background scheduler
+    // Create the background scheduler
 
     scheduler = new GanymedeScheduler(true);
+
+    // set the background scheduler running on its own thread
+
     new Thread(scheduler).start();
 
     // and install the tasks listed in the database
 
     registerTasks();
 
-    // and wa-la
+    // Bind the GanymedeServer object in the RMI registry so clients
+    // and admin consoles can connect to us.
+
+    try
+      {
+	debug("Binding GanymedeServer in RMI Registry");
+
+	Naming.rebind("rmi://localhost:" + registryPortProperty + "/ganymede.server", server);
+      }
+    catch (Exception ex)
+      {
+	debug("Couldn't establish server binding: " + ex);
+	throw new RuntimeException(ex.getMessage());
+      }
+
+    // at this point clients can log in to the server.. the RMI system
+    // will spawn threads as necessary to handle RMI client activity..
+    // the main thread has nothing left to do and can go ahead and
+    // terminate here.
+
+    // wa-la
 
     if (debug)
       {
@@ -731,7 +838,7 @@ public class Ganymede {
 				     null,
 				     "error.gif"));
 
-    if (debug)
+    if (logErrorDialogs)
       {
 	System.err.println("Ganymede.createErrorDialog(): dialog says " + body);
       }
@@ -1004,7 +1111,7 @@ public class Ganymede {
     monitornameProperty = System.getProperty("ganymede.monitorname");
     defaultmonitorpassProperty = System.getProperty("ganymede.defaultmonitorpass");
     messageDirectoryProperty = System.getProperty("ganymede.messageDirectory");
-    
+    schemaDirectoryProperty = System.getProperty("ganymede.schemaDirectory");
 
     if (dbFilename == null)
       {
@@ -1104,6 +1211,21 @@ public class Ganymede {
 	  {
 	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
 			       registryPort);
+	  }
+      }
+
+    // if the main ganymede.properties file has a
+    // ganymede.schemaDirectory property, load in the properties from
+    // the schema's properties file.
+
+    if (schemaDirectoryProperty != null && !schemaDirectoryProperty.equals(""))
+      {
+	try
+	  {
+	    props.load(new BufferedInputStream(new FileInputStream(schemaDirectoryProperty)));
+	  }
+	catch (IOException ex)
+	  {
 	  }
       }
 
