@@ -4,8 +4,15 @@
 
    Server main module
 
+   This class is the main server module, providing the static main()
+   method executed to start the server.
+
+   This class is never instantiated, but instead provides a bunch of
+   static variables and convenience methods in addition to the main()
+   start method.
+
    Created: 17 January 1997
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,19 +35,77 @@ import arlut.csd.Util.ParseArgs;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ *
+ * This class is the main server module, providing the static main()
+ * method executed to start the server.<br><br>
+ *
+ * This class is never instantiated, but instead provides a bunch of
+ * static variables and convenience methods in addition to the main()
+ * start method.
+ *
+ */
+
 public class Ganymede {
-  
+
+  public static final boolean debug = true;  
+  public static Date startTime = new Date();
+  public static String debugFilename = null;
+
   public static GanymedeServer server;
   public static GanymedeSession internalSession;
   public static GanymedeScheduler scheduler;
-  public static DBStore db;
-  public static final boolean debug = true;
 
-  public static Date startTime = new Date();
-  public static String debugFilename = null;
+  /**
+   *
+   * The Ganymede object store.
+   * 
+   */
+
+  public static DBStore db;
+
+  /**
+   *
+   * This object provides access to the Ganymede log file, providing
+   * both logging and search services.
+   *
+   */
+
   public static DBLog log = null;
+
+  /**
+   *
+   * A cached reference to a master category tree serialization
+   * object.  Initialized the first time a user logs on to the server,
+   * and re-initialized when the schema is edited.  This object is
+   * provided to clients when they call GanymedeSession.getCategoryTree().
+   *
+   * @see arlut.csd.ganymede.GanymedeSession.getCategoryTree
+   */
+
   public static CategoryTransport catTransport = null;
+
+  /**
+   *
+   * A cached reference to a master base list serialization object.
+   * Initialized on server start up and re-initialized when the schema
+   * is edited.  This object is provided to clients when they call
+   * GanymedeSession.getBaseList().
+   *
+   * @see arlut.csd.ganymede.GanymedeSession.getBaseList
+   */
+
   public static BaseListTransport baseTransport = null;
+
+  /**
+   *
+   * A vector of GanymedeBuilderTask objects initialized
+   * on database load.
+   *
+   * @see registerBuilderTasks
+   *
+   */
+
   public static Vector builderTasks = new Vector();
 
   // properties from the ganymede.properties file
@@ -64,6 +129,12 @@ public class Ganymede {
   public static boolean firstrun = false;
 
   /* -- */
+
+  /**
+   *
+   * The Ganymede server start point.
+   *
+   */
 
   public static void main(String argv[]) 
   {
@@ -290,7 +361,8 @@ public class Ganymede {
    *
    * This method is used to initialize the Ganymede system when it is
    * being driven by a direct-linked loader main() entry point, as a
-   * single process.
+   * single process.  This method is not used when the server is started
+   * up normally.
    * 
    */
 
@@ -391,6 +463,13 @@ public class Ganymede {
 
   // debug routine
 
+  /**
+   *
+   * This is a convenience method used by server-side code to send
+   * debug output to stdout and to any attached admin consoles.
+   *
+   */
+
   static public void debug(String string)
   {
     if (debug)
@@ -400,7 +479,7 @@ public class Ganymede {
     GanymedeAdmin.setStatus(string);
   }
 
-  /***
+  /**
    *
    * This is a convenience method used by the server to return a
    * standard error dialog.
@@ -427,7 +506,7 @@ public class Ganymede {
   /**
    *
    * This method is provided to allow us to hook in creation of new
-   * objects with specified invid's that the server code references.
+   * objects with specified invid's that the server code references.<br><br>
    *
    * It's intended for use during server development as we evolve
    * the schema.
@@ -541,7 +620,6 @@ public class Ganymede {
    * This method scans the database for valid BuilderTask entries and 
    * adds them to the builderTasks vector.
    *
-   *
    */
 
   static private void registerBuilderTasks()
@@ -616,7 +694,7 @@ public class Ganymede {
 
   /**
    *
-   * This method scans schedules all registered builder tasks for
+   * This method schedules all registered builder tasks for
    * execution.  This method will be called when a user commits a
    * transaction.
    * 
@@ -633,7 +711,7 @@ public class Ganymede {
   /**
    *
    * This method loads properties from the ganymede.properties
-   * file.
+   * file.<br><br>
    *
    * This method is public so that loader code linked with the
    * Ganymede server code can initialize the properties without
@@ -691,7 +769,7 @@ public class Ganymede {
 
     if (logProperty == null)
       {
-	System.err.println("Couldn't get the journal property");
+	System.err.println("Couldn't get the log property");
 	success = false;
       }
 
@@ -765,6 +843,18 @@ public class Ganymede {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                        dumpTask
+
+------------------------------------------------------------------------------*/
+
+/**
+ *
+ * Runnable class to do a journal sync.  Issued by the GanymedeScheduler.
+ *
+ */
+
 class dumpTask implements Runnable {
 
   public dumpTask()
@@ -820,6 +910,25 @@ class dumpTask implements Runnable {
       }
   }
 }
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                          gcTask
+
+------------------------------------------------------------------------------*/
+
+/**
+ *
+ * Runnable class to do a synchronous garbage collection run.  Issued
+ * by the GanymedeScheduler.<br><br>
+ *
+ * I'm not sure that there is any point to having a synchronous garbage
+ * collection task.. the idea was that we could schedule a full gc when
+ * the server was likely not to be busy so as to keep things trim for when
+ * the server was busy, but the main() entry point isn't yet scheduling this
+ * for a particularly good time.
+ * 
+ */
 
 class gcTask implements Runnable {
 
