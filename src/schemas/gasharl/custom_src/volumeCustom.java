@@ -5,7 +5,7 @@
    This file is a management class for NFS volume objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -83,7 +83,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
   {
     switch (fieldid)
       {
-      case volumeSchema.VOLNAME:
+      case volumeSchema.LABEL:
       case volumeSchema.HOST:
       case volumeSchema.PATH:
 	return true;
@@ -106,7 +106,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
   public Object obtainChoicesKey(DBField field)
   {
-    if (field.getID() == volumeSchema.MAPENTRIES)
+    if (field.getID() == volumeSchema.ENTRIES)
       {
 	return null;
       }
@@ -128,7 +128,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
   public QueryResult obtainChoiceList(DBField field)
   {
-    if (field.getID() == volumeSchema.MAPENTRIES)
+    if (field.getID() == volumeSchema.ENTRIES)
       {
 	return null;	// no choices for imbeddeds
       }
@@ -211,7 +211,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    if (field.getID() != volumeSchema.MAPENTRIES)
+    if (field.getID() != volumeSchema.ENTRIES)
       {
 	return null;		// by default, we just ok whatever
       }
@@ -228,7 +228,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
 	int index = ((Integer) param1).intValue();
 
-	Vector entries = getFieldValuesLocal(volumeSchema.MAPENTRIES);
+	Vector entries = getFieldValuesLocal(volumeSchema.ENTRIES);
 
 	if (entries == null)
 	  {

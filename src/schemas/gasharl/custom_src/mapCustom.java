@@ -5,7 +5,7 @@
    This file is a management class for automounter map objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -103,7 +103,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
   public Object obtainChoicesKey(DBField field)
   {
-    if (field.getID() == MAPENTRIES)
+    if (field.getID() == ENTRIES)
       {
 	return null;
       }
@@ -125,7 +125,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
   public QueryResult obtainChoiceList(DBField field)
   {
-    if (field.getID() == MAPENTRIES)
+    if (field.getID() == ENTRIES)
       {
 	return null;	// no choices for embeddeds
       }
@@ -142,7 +142,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    if (field.getID() != MAPENTRIES)
+    if (field.getID() != ENTRIES)
       {
 	return null;		// by default, we just ok whatever
       }
@@ -175,7 +175,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 	    // DBField.deleteElement() try to do it in its naive
 	    // fashion.
 
-	    Vector entries = getFieldValuesLocal(MAPENTRIES);
+	    Vector entries = getFieldValuesLocal(ENTRIES);
 
 	    if (entries == null)
 	      {
@@ -233,7 +233,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 	    // the embedded volume object, we will let the user
 	    // object take care of deleting the embedded volume
 	    // object.  The invid linking system will then take care
-	    // of removing it from the map object's MAPENTRIES field.
+	    // of removing it from the map object's ENTRIES field.
 
 	    ReturnVal retVal = invf.deleteElement(invid);
 
