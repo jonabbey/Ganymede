@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.15 $ %D%
+ * @version $Revision: 1.16 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -222,6 +222,36 @@ public interface Session extends Remote {
    */
 
   String    viewObjectLabel(Invid invid) throws RemoteException;
+
+  /**
+   *
+   * This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to <invid>, since time <since>.
+   *
+   * @param invid The invid identifier for the object whose history is sought
+   * @param since Report events since this date, or all events if this is null.
+   *
+   * @return A String containing a record of events for the Invid in question,
+   * or null if permissions are denied to view the history.
+   *
+   */
+
+  StringBuffer    viewObjectHistory(Invid invid, Date since) throws RemoteException;
+
+  /**
+   *
+   * This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to <invid>, since time <since>.
+   *
+   * @param invid The invid identifier for the admin Persona whose history is sought
+   * @param since Report events since this date, or all events if this is null.
+   *
+   * @return A String containing a record of events for the Invid in question,
+   * or null if permissions are denied to view the history.
+   *
+   */
+
+  StringBuffer    viewAdminHistory(Invid invid, Date since) throws RemoteException;
 
   /**
    *
