@@ -22,7 +22,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.30 $ $Date: 2000/01/29 02:29:37 $
+  Version: $Revision: 1.31 $ $Date: 2000/05/30 06:27:30 $
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -49,7 +49,7 @@ import javax.swing.*;
  *
  * @see arlut.csd.JTable.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.30 $ $Date: 2000/01/29 02:29:37 $
+ * @version $Revision: 1.31 $ $Date: 2000/05/30 06:27:30 $
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -889,17 +889,50 @@ class rowSorter {
     Adata = a.element.elementAt(column).getData();
     Bdata = b.element.elementAt(column).getData();
 
+    // Adata and/or Bdata will be null if we are just comparing
+    // strings, rather than the attached integer or date values for
+    // numeric or temporal sorting.  If one but not both of Adata and
+    // Bdata are null, the text of the column will hopefully be
+    // matching null, and we'll do the right thing by always treating
+    // the null string as lesser in our sort
+
     if (Adata == null || Bdata == null)
       {
+	String one, two;
+
 	if (forward)
 	  {
-	    return a.element.elementAt(column).text.compareTo(b.element.elementAt(column).text);
+	    one = a.element.elementAt(column).text;
+	    two = b.element.elementAt(column).text;
 	  }
 	else
 	  {
-	    return b.element.elementAt(column).text.compareTo(a.element.elementAt(column).text);
+	    two = a.element.elementAt(column).text;
+	    one = b.element.elementAt(column).text;
 	  }
+
+	// null is always lesser
+
+	if (one == null && two != null)
+	  {
+	    return -1;
+	  }
+	else if (one == null && two == null)
+	  {
+	    return 0;
+	  }
+	else if (one != null && two == null)
+	  {
+	    return 1;
+	  }
+
+	// okay, not null.
+	
+	return one.compareTo(two);
       }
+
+    // if we are sorting dates, we expect everything in this column
+    // to be a date
 
     if (Adata instanceof Date)
       {
