@@ -324,15 +324,10 @@ public class BaseDump implements Base, CategoryNode {
     throw new RuntimeException("this method not supported in BaseDump");
   }  
 
-  public ReturnVal setClassName(String newName) 
+  public ReturnVal setClassInfo(String newClassName, String newClassOptionString) 
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }
-
-  public ReturnVal setClassOptionString(String newOption) 
-  {
-    throw new RuntimeException("this method not supported in BaseDump");
-  }  
 
   public ReturnVal moveFieldAfter(String fieldName, String previousFieldName)
   {

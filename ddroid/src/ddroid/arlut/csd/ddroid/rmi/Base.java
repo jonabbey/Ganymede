@@ -215,23 +215,31 @@ public interface Base extends CategoryNode, Remote {
   public ReturnVal setName(String newName) throws RemoteException;
 
   /**
-   * <p>Sets the fully qualified classname of the class 
-   * managing this object type</p>
+   * <p>This method is used to associate a management class with this
+   * object base.</p>
+   *
+   * <p>The newClassName argument must be fully qualified, and must
+   * refer to one of two kinds of classes.  The first is a {@link
+   * arlut.csd.ddroid.server.DBEditObject DBEditObject} subclass that
+   * implements the requisite three constructors, a la the traditional
+   * Ganymede customization hook.  The second is any class
+   * implementing the {@link arlut.csd.ddroid.common.DDPluginFactory
+   * DDPluginFactory} interface, which provides a set of factory
+   * methods which return DBEditObject instances.</p>
+   *
+   * <p>If newClassName implements DDPluginFactory, the
+   * newOptionString argument will be available to the factory methods
+   * so that the constructed objects can be dynamically customized.
+   * This is intended to support the use of DBEditObject subclasses
+   * written in Jython, with support for dynamic reloading during
+   * server execution.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
    * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
    * by the Directory Droid schema editor.</p>
    */
 
-  public ReturnVal setClassName(String newName) throws RemoteException;
-
-  /**
-   * Sets the option string for the class definition.. see {@link
-   * arlut.csd.ganymede.DBObjectBase#classOptionString} for more
-   * details.
-   */
-
-  public ReturnVal setClassOptionString(String newOptionString) throws RemoteException;
+  public ReturnVal setClassInfo(String newClassName, String newOptionString) throws RemoteException;
 
   /**
    * <p>This method is used to adjust the ordering of a custom field

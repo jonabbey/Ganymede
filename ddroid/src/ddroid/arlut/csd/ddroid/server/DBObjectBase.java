@@ -182,7 +182,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * arlut.csd.ddroid.server.DBStore#initializeSchema()} uses it to
    * initialize class definitions when bootstrapping.  If we ever
    * revise the initializeSchema code (tricky, given that
-   * setClassName() automatically sets the classdef and creates the
+   * setClassInfo() automatically sets the classdef and creates the
    * objectHook, which we aren't necessarily ready to do during
    * initializeSchema until the very end) , we can think about making
    * this private.</p>
@@ -532,6 +532,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	object_name = original.object_name;
 	classname = original.classname;
+	classOptionString = original.classOptionString;
 	classdef = original.classdef;
 	type_code = original.type_code;
 	label_id = original.label_id;
@@ -1310,15 +1311,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	err.println("Setting class name");
       }
     
-    retVal = setClassName(_classStr);
+    retVal = setClassInfo(_classStr, _classOptionStr);
     
-    if (retVal != null && !retVal.didSucceed())
-      {
-	return retVal;
-      }
-
-    retVal = setClassOptionString(_classOptionStr);
-
     if (retVal != null && !retVal.didSucceed())
       {
 	return retVal;
@@ -1493,7 +1487,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     try
       {
-	c = classdef.getDeclaredConstructor(cParams); // no param constructor
+	c = classdef.getDeclaredConstructor(cParams); // DBObjectBase constructor
 	e_object = (DBEditObject) c.newInstance(params);
       }
     catch (NoSuchMethodException ex)
@@ -1519,6 +1513,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     catch (InvocationTargetException ex)
       {
 	System.err.println("InvocationTargetException " + ex);
+      }
+    finally
+      {
+	if (e_object == null)
+	  {
+	    e_object = new DBEditObject(this);
+	  }
       }
 
     if (debug2)
@@ -1910,8 +1911,24 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * <p>Sets the fully qualified classname of the class 
-   * managing this object type</p>
+   * <p>This method is used to associate a management class with this
+   * object base.</p>
+   *
+   * <p>The newClassName argument must be fully qualified, and must
+   * refer to one of two kinds of classes.  The first is a {@link
+   * arlut.csd.ddroid.server.DBEditObject DBEditObject} subclass that
+   * implements the requisite three constructors, a la the traditional
+   * Ganymede customization hook.  The second is any class
+   * implementing the {@link arlut.csd.ddroid.common.DDPluginFactory
+   * DDPluginFactory} interface, which provides a set of factory
+   * methods which return DBEditObject instances.</p>
+   *
+   * <p>If newClassName implements DDPluginFactory, the
+   * newOptionString argument will be available to the factory methods
+   * so that the constructed objects can be dynamically customized.
+   * This is intended to support the use of DBEditObject subclasses
+   * written in Jython, with support for dynamic reloading during
+   * server execution.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
    * from a {@link arlut.csd.ddroid.rmi.SchemaEdit SchemaEdit} reference
@@ -1920,21 +1937,22 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ddroid.rmi.Base
    */
 
-  public synchronized ReturnVal setClassName(String newName)
+  public synchronized ReturnVal setClassInfo(String newClassName, String newOptionString)
   {
     if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not in a schema editing context");
       }
 
-    // return if no changes
-
-    if (newName == classname || (newName != null && newName.equals(classname)))
+    if ((newClassName == classname ||
+	 (newClassName != null && newClassName.equals(classname))) &&
+	(newOptionString == classOptionString ||
+	 (newOptionString != null && newOptionString.equals(classOptionString))))
       {
-	return null;
+	return null;		// no change
       }
 
-    if (newName == null || newName.equals(""))
+    if (newClassName == null || newClassName.equals(""))
       {
 	classname = "";
 	classdef = null;
@@ -1942,64 +1960,58 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	return null;
       }
 
-    classname = newName;
+    classname = newClassName;
 
-    // try to load the proposed class.. if we can't, no big deal,
-    // it'll just have to be done after the server is restarted.
-
-    try
+    if (newOptionString != null && newOptionString.equals(""))
       {
-	classdef = Class.forName(classname);
-	objectHook = this.createHook();
+	newOptionString = null;
       }
-    catch (ClassNotFoundException ex)
-      {
-	classdef = null;
 
+    classOptionString = newOptionString;
+
+    // try to create an object using the proposed class
+    // information.. if we can't, no big deal, it'll just have to be
+    // done after the server is restarted.
+
+    objectHook = this.createHook();
+
+    if (objectHook.getClass().getName().equals("arlut.csd.ddroid.server.DBEditObject") &&
+	!classname.equals("arlut.csd.ddroid.server.DBEditObject"))
+      {
 	ReturnVal retVal = new ReturnVal(true);	// success, but...
-	retVal.setDialog(new JDialogBuff("Schema Editor Warning",
-					 "Couldn't find class " + classname +
-					 " in the server's CLASSPATH.  This probably means that " +
-					 "you have not yet rebuilt the custom.jar file with this class " +
-					 "added.\n\nThis classname has been set for object type " + getName() +
-					 " in " +
-					 "the server, but will not take effect until the server is restarted " +
-					 "with this class available to the server.",
-					 "Ok",
-					 null,
-					 "error.gif"));
+
+	if (classOptionString == null)
+	  {
+	    retVal.setDialog(new JDialogBuff("Schema Editor Warning",
+					     "Couldn't find class " + classname +
+					     " in the server's CLASSPATH.  This probably means that " +
+					     "you have not yet rebuilt the custom.jar file with this class " +
+					     "added.\n\nThis classname has been set for object type " + getName() +
+					     " in " +
+					     "the server, but will not take effect until the server is restarted " +
+					     "with this class available to the server.\n\n" +
+					     "This object base will not be managed with custom code unless and until this is fixed.\n",
+					     "Ok",
+					     null,
+					     "error.gif"));
+	  }
+	else
+	  {
+	    retVal.setDialog(new JDialogBuff("Schema Editor Warning",
+					     "Couldn't load custom management logic from class " + classname + 
+					     " using class option string '" + classOptionString + "'.\n\n" +
+					     "This may mean that " +
+					     "you have not yet rebuilt the custom.jar file with the " + classname +
+					     " class added, or that the resource specified in the option string can not found by " +
+					     classname + "'s factory methods.\n\n" +
+					     "This object base will not be managed with custom code unless and until this is fixed.\n",
+					     "Ok",
+					     null,
+					     "error.gif"));
+	  }
 
 	return retVal;
       }
-    catch (RemoteException ex)
-      {
-	Ganymede.debug("DBObjectBase.setClassName(): local rmi error constructing object hook");
-	objectHook = null;
-      }
-
-    return null;
-  }
-
-  /**
-   * <p>Sets the option string for the class definition.. see {@link
-   * arlut.csd.ganymede.DBObjectBase#classOptionString} for more
-   * details.</p>
-   *
-   * <p>This method is only valid when the Base reference is obtained
-   * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
-   * by the Ganymede schema editor.</p>
-   *
-   * @see arlut.csd.ganymede.Base
-   */
-
-  public synchronized ReturnVal setClassOptionString(String newOptionString)
-  {
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException("not in a schema editing context");
-      }
-
-    this.classOptionString = newOptionString;
 
     return null;
   }
