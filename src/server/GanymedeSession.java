@@ -14,8 +14,8 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.115 $ %D%
-   Module By: Jonathan Abbey
+   Version: $Revision: 1.116 $ %D%
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
    Applied Research Laboratories, The University of Texas at Austin
 
 */
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.115 $ %D%
+ * @version $Revision: 1.116 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -1250,13 +1250,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * the client to present the world as would be seen by administrator personas
    * with just the listed ownerGroups accessible.<br><br>
    *
-   * This method cannot be used to grant access to objects that are accessible
-   * by the client's adminPersona.<br><br>
+   * This method cannot be used to grant access to objects that are
+   * not accessible by the client's adminPersona.<br><br>
    *
    * Calling this method with ownerInvids set to null will turn off the filtering.
    *
    * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
-   *
+   * 
    */
 
   public synchronized ReturnVal filterQueries(Vector ownerInvids)
@@ -1506,7 +1506,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * Currently each client can only have one transaction open.. it
    * is an error to call openTransaction() while another transaction
-   * is still open, and an exception will be thrown.<br><br>
+   * is still open, and an error dialog will be returned in that case.<br><br>
    *
    * @param describe An optional string containing a comment to be
    * stored in the modification history for objects modified by this
@@ -1537,11 +1537,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   /**
    *
-   * This method call causes the server to checkpoint the current state
-   * of an open transaction on the server.  At any time thereafter,
-   * the server can be instructed to revert the transaction to the
-   * state at the time of this checkpoint by calling rollback()
-   * with the same key.<br><br>
+   * This method call causes the server to checkpoint the current
+   * state of an open transaction on the server.  At any time between
+   * the checkpoint() call and a concluding commitTransaction() or
+   * abortTransaction() thereafter, the server can be instructed to
+   * revert the transaction to the state at the time of this
+   * checkpoint by calling rollback() with the same key.<br><br>
    *
    * Checkpointing only makes sense in the context of a transaction;
    * it is an error to call either checkpoint() or rollback() if
@@ -1877,6 +1878,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody)
   {
+    checklogin();
+
+    /* - */
+
     Qsmtp mailer;
     String returnAddr;
     String mailsuffix;
@@ -1974,6 +1979,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public synchronized DumpResult dump(Query query)
   {
+    checklogin();
+
+    /* - */
+
     DumpResult result;
 
     /**
@@ -2003,8 +2012,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     boolean embedded;
 
     /* -- */
-
-    checklogin();
 
     if (query == null)
       {
@@ -2291,6 +2298,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public synchronized QueryResult queryInvids(Vector invidVector)
   {
+    checklogin();
+
+    /* - */
+
     QueryResult result = new QueryResult(true);	// for transport
     DBObject obj;
     Invid invid;
@@ -2533,6 +2544,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if (node.fieldId == -2)
 	  {
 	    DBObject resultobject = session.viewDBObject((Invid) node.value);
+
+	    // the whole query system is predicated on returning top-level
+	    // objects only, so we have to do it here, too.
+
+	    resultobject = getContainingObj(resultobject);
+
 	    addResultRow(resultobject, query, result, internal, perspectiveObject);
 	    return result;
 	  }
@@ -2608,6 +2625,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		      }
 
 		    resultobject = resultfield.owner;
+
+		    // if we're matching an embedded, we want to return our
+		    // container.
+
+		    resultobject = getContainingObj(resultobject);
 		    
 		    // addResultRow() will do our permissions checking for us
 
