@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1375,6 +1375,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    //System.out.println("Object is null");
 
+	    handle = null;
+	    label = null;
 	    invid = null;
 	  }
 
@@ -1389,7 +1391,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    // in the tree, we need to insert it
 
 	    InvidNode objNode = new InvidNode(node, 
-					      label,
+					      handle.isInactive() ? (label + " (inactive)") :label,
 					      invid,
 					      oldNode, false,
 					      OPEN_FIELD,
