@@ -3,10 +3,10 @@
    LinuxBuilderTask.java
 
    This class is intended to dump the Ganymede datastore to the
-   Linux passwd, master.passwd, and group files.
+   Linux passwd and group files.
    
    Created: 8 September 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,7 +29,7 @@ import java.io.*;
 /**
  *
  * This class is intended to dump the Ganymede datastore to the
- * Linux passwd, master.passwd, and group files.
+ * Linux passwd and group files.
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
@@ -90,11 +90,11 @@ public class LinuxBuilderTask extends GanymedeBuilderTask {
 
 	try
 	  {
-	    out = openOutFile(path + "master.passwd");
+	    out = openOutFile(path + "passwd");
 	  }
 	catch (IOException ex)
 	  {
-	    System.err.println("LinuxBuilderTask.builderPhase1(): couldn't open master.passwd file: " + ex);
+	    System.err.println("LinuxBuilderTask.builderPhase1(): couldn't open passwd file: " + ex);
 	  }
 	
 	if (out != null)
@@ -394,7 +394,7 @@ public class LinuxBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("LinuxBuilder.writeGroupLine(): Warning!  user " + 
+	System.err.println("LinuxBuilder.writeUserLine(): Warning!  user " + 
 			   username + " overflows the Linux line length!");
       }
 
