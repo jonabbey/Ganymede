@@ -5,14 +5,13 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.44 $ %D%
+    Version: $Revision: 1.45 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
 */
 package arlut.csd.ganymede.client;
 
-//import tablelayout.*;
 import com.sun.java.swing.*;
 import com.sun.java.swing.event.*;
 
@@ -28,6 +27,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.*;
 import arlut.csd.Util.VecQuickSort;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                   containerPanel
@@ -1941,8 +1941,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     perm_button pb = new perm_button(gc, 
 				     (perm_field) field,
 				     editable,
-				     gc.getBaseHash(),
-				     object.getID() == SchemaConstants.PermSelfUserObj);
+				     gc.getBaseHash());
     
     addRow( pb, fieldTemplate.getName(), fieldInfo.isVisible());
     
