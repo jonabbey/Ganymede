@@ -8,8 +8,8 @@
    
    Created: 13 July 2001
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2001/07/13 18:43:03 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/07/13 18:43:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,15 +65,11 @@ import java.io.*;
  * process and to take care of promptly closing down file handles,
  * etc.</p>
  *
- * @version $Revision: 1.2 $ $Date: 2001/07/13 18:43:03 $ $Name:  $
+ * @version $Revision: 1.3 $ $Date: 2001/07/13 18:43:27 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class Execer {
-
-  final static boolean debug = false;
-
-  // ---
 
   /**
    * <p>This method executes the given command line in an external
