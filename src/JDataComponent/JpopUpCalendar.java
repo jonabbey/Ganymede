@@ -4,8 +4,8 @@
    
    Created: 11 March 1997
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/03/12 21:06:48 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2002/01/29 09:55:13 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ public class JpopUpCalendar extends JFrame implements JsetValueCallback {
 
   public JpopUpCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback, boolean editable) 
   {
-    super("Please Choose a Date & Time");
+    super(editable? "Please Choose a Date & Time": "Selected Date");
 
     if (callback == null)
       {

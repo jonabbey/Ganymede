@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2002/01/29 06:00:00 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2002/01/29 09:55:12 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -75,76 +75,104 @@ import javax.swing.border.*;
  * arlut.csd.JDataComponent.JdateField JdateField} class.</p>
  */
 
-public class JpanelCalendar extends JPanel implements ActionListener, ItemListener {
+public class JpanelCalendar extends JPanel implements ActionListener {
 
   static final boolean debug = false;
 
+  static final int leapDays[] = {31,29,31,30,31,30,31,31,30,31,30,31};
+  static final int monthDays[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+  static final String[] month_names = {"January", "February", "March", "April", 
+				       "May", "June", "July", "August",
+				       "September", "October", "November", "December"};
   // ---
 
   /**
-   *
    * What time do we have set?
-   *
    */
 
-  protected GregorianCalendar my_calendar;
+  protected GregorianCalendar selectedDate_calendar;
 
   /**
-   *
    * What time do we have visible?  Month, year, etc.
-   *
    */
 
-  protected GregorianCalendar temp_calendar;
-  protected SimpleDateFormat _dateformat = null;
-  protected JsetValueCallback parent;
+  protected GregorianCalendar visibleDate_calendar;
+
+  /**
+   * <p>Who do we notify when the user changes the date through
+   * direct manipulation of the calendar?</p>
+   */
+
+  protected JsetValueCallback callback;
+
+  /**
+   * <p>If we are contained in a pop-up, this will refer to
+   * the dialog frame, so that the close button can close
+   * it.</p>
+   */
 
   protected JpopUpCalendar pCal = null;
+  protected JButton closeButton;
+
+  /**
+   * <p>The meat of the calendar.  This array of JdateButton's
+   * are both the display and the main user interface element for the
+   * JpanelCalendar.</p>
+   */
 
   protected JdateButton _datebuttonArray[] = new JdateButton[37];
 
-  private JPanel sPa = null;
-  protected JButton _prevdate;
-  protected JButton _nextdate;
-  protected JButton _timeShow;
-  protected JButton _close;
-
-  protected JTimePanel _tPanel;
+  private JMonthYearPanel monthYearPanel = null;
+  private JPanel buttonPanel = null;
+  private JTimePanel timePanel;
   
-  protected int leapDays[] = {31,29,31,30,31,30,31,31,30,31,30,31};
-  protected int monthDays[] = {31,28,31,30,31,30,31,31,30,31,30,31};
-
   protected Font todayFont = new Font("sansserif", Font.BOLD, 12);
   protected Font notTodayFont = new Font("serif", Font.PLAIN, 12);
 
-  protected boolean editable;
+  /**
+   * <p>If true, we will allow the calendar to be used to change the
+   * date/time selected.  If false, we will be display only.</p>
+   */
 
-  int
-    current_day,
-    current_year;
+  private boolean editable;
 
-  boolean
-    dateIsSet,
-    compact,
-    showTime;
+  /**
+   * <p>Used to control whether we show a selected day in the
+   * calendar.  If false, no date has been set, and we'll
+   * show all calendar pages with no dates highlighed.</p>
+   */
 
-  JPanel
-    centerPanel;
+  private boolean dateIsSet;
 
-  JComboBox
-    month;
+  /**
+   * <p>If true, we'll show the time of day in the calendar, and allow
+   * the user to edit the time of day if we are editable.  If false,
+   * we'll show the the date only.</p>
+   */
 
-  JYearChooser
-    year;
+  private boolean showTime;
 
-  GridBagLayout
-    gbl;
+  /**
+   * <p>If true, we'll allow the use to change the month and year
+   * displayed in the calendar.</p>
+   */
 
-  GridBagConstraints
-    gbc;
+  private boolean allowMonthChange;
 
-  Date
-    previousDate;
+  /**
+   * <p>If true, we'll try to render the calendar in a compressed
+   * form, with less space for the calendar buttons.</p>
+   */
+
+  private boolean compact;
+
+  /**
+   * <p>The last known good date.  If we attempt to pass a date change
+   * back to our client and the attempt fails, this is the date we'll
+   * revert to afterwards.</p>
+   */
+
+  private Date previousDate;
 
   /* -- */
 
@@ -204,11 +232,15 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
     pCal = pC;
     
-    _close = new JButton("Close");
-    sPa.add(_close,"East");
+    closeButton = new JButton("Close");
+    buttonPanel.add(closeButton,"East");
 
-    _close.addActionListener(this);
+    closeButton.addActionListener(this);
   }
+
+  /**
+   * <p>The main constructor.  Here's where all the magic happens.</p>
+   */
 
   public JpanelCalendar(GregorianCalendar parentCalendar, 
 			JsetValueCallback callback,  
@@ -217,7 +249,10 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
   {
     if (parentCalendar == null)
       {
-	parentCalendar = new GregorianCalendar();
+	// if we weren't given a calendar object, create a default
+	// calendar, which will be initialized to current date/time.
+
+	parentCalendar = new GregorianCalendar(); 
 	dateIsSet = false;
       }
     else
@@ -241,94 +276,37 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 	  }
       }
 
-    parent = callback;
+    this.callback = callback;
     
-    my_calendar = parentCalendar;
+    selectedDate_calendar = parentCalendar;
 
-    previousDate = my_calendar.getTime();
+    previousDate = selectedDate_calendar.getTime();
     dateIsSet = true;
 
-    temp_calendar = (GregorianCalendar) my_calendar.clone();
+    // we start off with our visible calendar page the same as our
+    // selected date calendar
 
-    current_year = temp_calendar.get(Calendar.YEAR);
-    current_day = temp_calendar.get(Calendar.DAY_OF_MONTH);
-
-    if (debug)
-      {
-	System.out.println("Year: " + current_year + " day: " + current_day);
-      }
-
-    if (showTime)
-      {
-	_dateformat = new SimpleDateFormat("MMM yyyy  [hh:mm:ss z]",Locale.getDefault());
-      }
-    else
-      {
-	_dateformat = new SimpleDateFormat("MMM yyyy",Locale.getDefault());
-      }
-
-    _dateformat.setTimeZone(my_calendar.getTimeZone());
+    visibleDate_calendar = (GregorianCalendar) selectedDate_calendar.clone();
 
     setLayout(new BorderLayout());
 
-    // First, the north 
+    JPanel northPanel = new JPanel(false);
+    northPanel.setLayout(new GridLayout(2,1));
 
-    JPanel p1 = new JPanel(false);
-    p1.setLayout(new BorderLayout());
-
-    _prevdate = new JButton("<<");
-    _prevdate.setToolTipText("Previous Month");
-    _nextdate = new JButton(">>");
-    _nextdate.setToolTipText("Next Month");
-
-    _prevdate.addActionListener(this);
-    
-    _nextdate.addActionListener(this);
-
-    month = new JComboBox();
-    month.setKeySelectionManager(new TimedKeySelectionManager());
-    month.addItem("January");
-    month.addItem("February");	// thanks amy!
-    month.addItem("March");
-    month.addItem("April");
-    month.addItem("May");
-    month.addItem("June");
-    month.addItem("July");
-    month.addItem("August");
-    month.addItem("September");
-    month.addItem("October");
-    month.addItem("November");
-    month.addItem("December");
-
-    month.setSelectedIndex(temp_calendar.get(Calendar.MONTH));
-    month.addItemListener(this);
-
-    year = new JYearChooser(temp_calendar.get(Calendar.YEAR), this);
-
-    p1.add(_prevdate,"West");
-    p1.add(_nextdate,"East");
-
-    JPanel middlePanel = new JPanel(new BorderLayout());
-    middlePanel.add("Center", month);
-    middlePanel.add("East", year);
-
-    p1.add(middlePanel,"Center");
+    monthYearPanel = new JMonthYearPanel(this);
+    northPanel.add(monthYearPanel);
 
     JPanel p2 = new JPanel(false);
     p2.setLayout(new GridLayout(1,7));
-    
-    JPanel northPanel = new JPanel(false);
-    northPanel.setLayout(new GridLayout(2,1));
-    northPanel.add(p1);
     northPanel.add(p2);
 
     add(northPanel,"North");
 
     // Next, the center ( this part contains a bunch of buttons with numbers)
 
-    centerPanel = new JPanel(false);
-    gbl = new GridBagLayout();
-    gbc = new GridBagConstraints();
+    JPanel centerPanel = new JPanel(false);
+    GridBagLayout gbl = new GridBagLayout();
+    GridBagConstraints gbc = new GridBagConstraints();
     centerPanel.setLayout(gbl);
     
     gbc.gridy = 0;
@@ -403,35 +381,46 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
     JPanel southPanel = new JPanel();
     southPanel.setLayout(new BorderLayout());
 
-    sPa = new JPanel();
-    sPa.setLayout(new BorderLayout());
-    southPanel.add(sPa,"North");
+    buttonPanel = new JPanel();
+    buttonPanel.setLayout(new BorderLayout());
+
+    southPanel.add(buttonPanel,"North");
 
     if (showTime)
       {
-	_tPanel = new JTimePanel(this);
+	timePanel = new JTimePanel(this);
 
 	if (editable)
 	  {
-	    _tPanel.setBorder(new TitledBorder("Please choose a time:"));
+	    timePanel.setBorder(new TitledBorder("Please choose a time of day:"));
 	  }
 	else
 	  {
-	    _tPanel.setBorder(new TitledBorder("Time:"));
+	    timePanel.setBorder(new TitledBorder("Time of day:"));
 	  }
 
-	southPanel.add(_tPanel,"Center");
+	southPanel.add(timePanel,"Center");
 	
 	add(southPanel,"South");
       }
 
     writeDates();
+
+    setAllowMonthChange(editable);
   }
+
+  /**
+   * <p>This is the main programmatic entry point for setting the date selected
+   * in this calendar widget.  Calling this method will update the selected
+   * time/date to that passed, and will redraw the calendar with the selected
+   * time/date shown.</p>
+   *
+   * <p>Calling this method will not trigger a callback to report the date
+   * change to our client.</p>
+   */
  
   public synchronized void setDate(Date date)
   {
-    Calendar c = Calendar.getInstance();
-
     if (date == null)
       {
 	if (debug)
@@ -459,34 +448,32 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 	    System.err.println("JpanelCalendar.setDate(): setting to " + date);
 	  }
 
-	c.setTime(date);
+	// refresh the visible calendar page (month/year) to the newly set date
 
-	current_year = c.get(Calendar.YEAR);
-	current_day = c.get(Calendar.DAY_OF_MONTH);
-
-	// refresh the month visible in the month combo box
-
-	month.setSelectedIndex(c.get(Calendar.MONTH));
-
-	// refresh the calendar page (month/year) visible
-
-	temp_calendar.setTime(date);
+	visibleDate_calendar.setTime(date);
 
 	// refresh the recorded time
 
-	my_calendar.setTime(date);
+	selectedDate_calendar.setTime(date);
 
 	if (debug)
 	  {
 	    System.err.println("JpanelCalendar.setDate(): calling writeDates()");
 	  }
 
+	// do the calendar calculations to update the display
+
+	Calendar c = Calendar.getInstance();
+	c.setTime(date);
+
+	// refresh the month visible in the month combo box
+
+	monthYearPanel.setMonth(c.get(Calendar.MONTH));
+
 	// set the year and re-draw.. note that setYear calls writeDates()
 	// for us so we don't have to do that here.
 
-	setYear(current_year);
-
-	writeDates();
+	setYear(c.get(Calendar.YEAR));
 
 	if (debug)
 	  {
@@ -497,10 +484,70 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
     this.previousDate = date;
   }
 
-  public void setYear(int year)
+  /**
+   * <p>This method returns the selected date held in this calendar.</p>
+   */
+
+  public Date getDate()
   {
-    current_year = year;
-    this.year.setYear(year);  // this.year is a JYearChooser
+    return selectedDate_calendar.getTime();
+  }
+
+  /**
+   * <p>Returns true if this calendar is configured to allow editing
+   * of the selected date.</p>
+   */
+
+  public boolean isEditable()
+  {
+    return editable;
+  }
+
+  /**
+   * <p>This method returns the month of the year
+   * currently being displayed in the calendar gui,
+   * in the range 0-11.</p>
+   */
+
+  public int getVisibleMonth()
+  {
+    return visibleDate_calendar.get(Calendar.MONTH);
+  }
+
+  /**
+   * <p>This method returns the month of the year for the selected
+   * date, in the range 0-11.</p>
+   */
+
+  public int getSelectedMonth()
+  {
+    return visibleDate_calendar.get(Calendar.MONTH);
+  }
+
+  /**
+   * <p>This method returns the year being displayed
+   * in the calendar gui.</p>
+   */
+
+  public int getVisibleYear()
+  {
+    return visibleDate_calendar.get(Calendar.YEAR);
+  }
+
+  /**
+   * <p>This method returns the year being displayed
+   * in the calendar gui.</p>
+   */
+
+  public int getSelectedYear()
+  {
+    return selectedDate_calendar.get(Calendar.YEAR);
+  }
+
+  private void setYear(int year)
+  {
+    monthYearPanel.setYear(year);
+
     writeDates();
   }
 
@@ -509,8 +556,35 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
     setDate(null);
   }
 
+  /**
+   * <p>This method may be used to enable or disable the month and year changing
+   * buttons.  If this method is called with a false parameter, the calendar
+   * will not allow changing of the month/year.</p>
+   *
+   * <p>By default, the JpanelCalendar allows month flipping in editable calendars
+   * and does not allow it in non-editable calendars.</p>
+   */
+
+  public void setAllowMonthChange(boolean okay)
+  {
+    allowMonthChange = okay;
+    monthYearPanel.setAllowMonthChange(allowMonthChange);
+  }
+
+  /**
+   * <p>This method may be used to query the calendar to see if the
+   * month and year changing buttons are enabled.  If this method
+   * returns false, the calendar does not allow changing of the
+   * month/year.</p>
+   */
+
+  public boolean getAllowMonthChange()
+  {
+    return allowMonthChange;
+  }
+
   /** 
-   * This will update the temp_calendar according to the current
+   * This will update the visibleDate_calendar according to the current
    * year and month visible in the GUI controls.
    *
    * Call this from writeDates().
@@ -518,97 +592,69 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
   void updateDate()
   {
-    temp_calendar.set(current_year, month.getSelectedIndex(), current_day);
+    // we actually don't care about the date, since visibleDate_calendar only
+    // tracks the month and year shown in the calendar
+
+    visibleDate_calendar.set(monthYearPanel.getYear(), monthYearPanel.getMonth(), 1);
   }
 
   /**
-   *
+   * <p>This method forces the calendar to jump to the page containing the
+   * selected date.</p>
+   */
+
+  public void displaySelectedPage()
+  {
+    visibleDate_calendar.setTime(selectedDate_calendar.getTime());
+
+    monthYearPanel.setMonth(visibleDate_calendar.get(Calendar.MONTH));
+    monthYearPanel.setYear(visibleDate_calendar.get(Calendar.YEAR));
+
+    writeDates();
+  }
+
+  /**
+   * <p>This method returns a string describing the month and year
+   * of the currently selected date</p>
+   */
+
+  public String getSelectedMonthString()
+  {
+    return month_names[selectedDate_calendar.get(Calendar.MONTH)] + " " + 
+      selectedDate_calendar.get(Calendar.YEAR);
+  }
+
+  /**
    * Our buttons call us back here.
    */
 
   public void actionPerformed(ActionEvent e) 
   {
-    if (e.getSource() == _nextdate) 
-      {
-	int current_month = month.getSelectedIndex() + 1;
-
-	if (current_month > 11)
-	  {
-	    current_month = 0;
-
-	    if (debug)
-	      {
-		System.out.println("Going back to Jan");
-	      }
-
-	    setYear(year.getYear().intValue() + 1);
-	  }
-
-	month.setSelectedIndex(current_month);
-      }
-    else if (e.getSource() == _prevdate) 
-      {
-	int current_month = month.getSelectedIndex() - 1;
-
-	if (current_month < 0)
-	  {
-	    current_month = 11;
-
-	    if (debug)
-	      {
-		System.out.println("Going back to Dec");
-	      }
-
-	    setYear(year.getYear().intValue() - 1);
-	  }
-
-	month.setSelectedIndex(current_month);
-      }
-    else if (e.getSource() == _close)
+    if (e.getSource() == closeButton)
       {
 	if (debug)
 	  {
 	    System.err.println("Closing pCal");
 	  }
-
+	
 	pCal.setVisible(false);
       }
   }
 
   /**
-   *
-   * This is called when our month is changed
-   *
-   */
-
-  public void itemStateChanged(ItemEvent e)
-  {
-    if (e.getStateChange() == ItemEvent.SELECTED)
-      {
-	writeDates();
-      }
-  }
-
-  /**
-   *
-   * This method takes the current time held in my_calendar and refreshes
+   * This method takes the current time held in selectedDate_calendar and refreshes
    * the calendar with it.
-   * 
    */
 
   public void update() 
   {
-    temp_calendar.setTime(my_calendar.getTime()); // this sets all the fields properly
-    
-    writeDates();
-    _tPanel.update();
+    displaySelectedPage();
+    timePanel.update();
   }
 
   /**
-   *
-   * This method updates the calendar buttons from the time information held
-   * in temp_calendar.
-   *
+   * <p>This method updates the calendar buttons from the time information held
+   * in visibleDate_calendar.</p>
    */
 
   protected synchronized void writeDates() 
@@ -618,7 +664,9 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
     // get a local copy of the calendar object indicating the month and year
     // shown
 
-    GregorianCalendar temp  = (GregorianCalendar) temp_calendar.clone();
+    GregorianCalendar temp  = (GregorianCalendar) visibleDate_calendar.clone();
+
+    // find the first day of the month
 
     temp.add(Calendar.DATE,-(temp.get(Calendar.DATE)-1));
 
@@ -651,15 +699,10 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 	_datebuttonArray[i].showYourself();
 
 	if (dateIsSet &&
-	    temp_calendar.get(Calendar.YEAR) == my_calendar.get(Calendar.YEAR) &&
-	    temp_calendar.get(Calendar.MONTH) == my_calendar.get(Calendar.MONTH) &&
-	    my_calendar.get(Calendar.DATE) == day)
+	    visibleDate_calendar.get(Calendar.YEAR) == selectedDate_calendar.get(Calendar.YEAR) &&
+	    visibleDate_calendar.get(Calendar.MONTH) == selectedDate_calendar.get(Calendar.MONTH) &&
+	    selectedDate_calendar.get(Calendar.DATE) == day)
 	  {
-	    if (debug)
-	      {
-		System.err.println("JpanelCalendar.writeDates(): setting date to " + i);
-	      }
-
 	    _datebuttonArray[i].setForeground(Color.red);
 	    _datebuttonArray[i].setFont(todayFont);
 	  }
@@ -679,7 +722,7 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
     if (showTime)
       {
-	_tPanel.update();
+	timePanel.update();
       }
 
     validate();
@@ -708,6 +751,11 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
       {
 	throw new IllegalArgumentException("The dateButton parameter is null");
       }
+
+    if (_bttn.getText().equals(""))
+      {
+	return;			// no-op
+      }
     
     int date = Integer.parseInt(_bttn.getText(),10);
 
@@ -716,15 +764,15 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 	System.err.println("setting date to day " + date);
       }
 
-    temp_calendar.set(Calendar.DATE,date);
+    visibleDate_calendar.set(Calendar.DATE,date);
     
-    temp_calendar.setTime(temp_calendar.getTime()); // this sets all the fields properly
+    visibleDate_calendar.setTime(visibleDate_calendar.getTime()); // this sets all the fields properly
     
-    my_calendar.setTime(temp_calendar.getTime());
+    selectedDate_calendar.setTime(visibleDate_calendar.getTime());
 
     if (debug)
       {
-	System.err.println("my_calendar = " + my_calendar.getTime());
+	System.err.println("selectedDate_calendar = " + selectedDate_calendar.getTime());
       }
 
     // clear the button that was pressed previously
@@ -733,12 +781,12 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
     try 
       {
-	if (parent != null)
+	if (callback != null)
 	  {
 	    // we're going to count on our parent doing an error dialog display if
 	    // needed.
 
-	    if (!parent.setValuePerformed(new JValueObject(this, my_calendar.getTime())))
+	    if (!callback.setValuePerformed(new JValueObject(this, selectedDate_calendar.getTime())))
 	      {
 		if (debug)
 		  {
@@ -781,18 +829,18 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
     if (_field.equals("hour") ) 
       {
-	temp_calendar.set(Calendar.HOUR_OF_DAY,_value);
-	my_calendar.set(Calendar.HOUR_OF_DAY,_value);
+	visibleDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
+	selectedDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
       }
     else if (_field.equals("min")) 
       {
-	temp_calendar.set(Calendar.MINUTE,_value);
-	my_calendar.set(Calendar.MINUTE,_value);
+	visibleDate_calendar.set(Calendar.MINUTE,_value);
+	selectedDate_calendar.set(Calendar.MINUTE,_value);
       }
     else if (_field.equals("sec")) 
       {
-	temp_calendar.set(Calendar.SECOND,_value);
-	my_calendar.set(Calendar.SECOND,_value);
+	visibleDate_calendar.set(Calendar.SECOND,_value);
+	selectedDate_calendar.set(Calendar.SECOND,_value);
       }
     else
       {
@@ -801,7 +849,7 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
 
     try 
       {
-	if (!parent.setValuePerformed(new JValueObject(this, my_calendar.getTime())))
+	if (!callback.setValuePerformed(new JValueObject(this, selectedDate_calendar.getTime())))
 	  {
 	    // constructing a JErrorDialog causes it to be shown.
 	    
@@ -827,7 +875,7 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
   {
     JFrame frame = new JFrame();
 
-    frame.getContentPane().add(new JpanelCalendar(new GregorianCalendar(), null, true));
+    frame.getContentPane().add(new JpanelCalendar(new GregorianCalendar(), null, true, true));
 
     frame.setSize(300,200);
     frame.pack();
@@ -899,7 +947,7 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
 
   public void hideYourself()
   {
-    setText("00");
+    setText("");
     setBorderPainted(false);
     super.setForeground(getBackground());
   }
@@ -955,17 +1003,19 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
  * arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.  If the
  * calendar widget is editable, this panel will allow the user to set
  * the time corresponding with the date shown in the calendar widget.</p>
+ *
+ * <p>The numeric fields contained in this panel will transmit the
+ * change in time back to the JpanelCalendar's client whenever the focus
+ * exits one of the numeric fields.</p>
  */
 
 class JTimePanel extends JPanel implements JsetValueCallback {
 
-  JpanelCalendar _parent;
+  JpanelCalendar container;
 
   JnumberField _hour = null;
   JnumberField _min = null;
   JnumberField _sec = null;
-
-  GregorianCalendar temp = null; 
 
   /* -- */
 
@@ -976,15 +1026,13 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 	throw new IllegalArgumentException("The parameter parent is null");
       }
     
-    _parent = parent;
-
-    temp = _parent.temp_calendar;
+    container = parent;
 
     _hour = new JnumberField(3,true,true,0,23,this);
     _min = new JnumberField(3,true,true,0,59,this);
     _sec = new JnumberField(3,true,true,0,59,this);
 
-    if (!parent.editable)
+    if (!parent.isEditable())
       {
 	_hour.setEditable(false);
 	_min.setEditable(false);
@@ -1026,12 +1074,24 @@ class JTimePanel extends JPanel implements JsetValueCallback {
     update();
   }
 
+  /**
+   * <p>This method updates the numeric fields from
+   * our JpanelCalendar's current selected time.</p>
+   */
+
   public void update() 
   {
-    _hour.setValue(temp.get(Calendar.HOUR_OF_DAY));
-    _min.setValue(temp.get(Calendar.MINUTE));
-    _sec.setValue(temp.get(Calendar.SECOND));
+    GregorianCalendar cal = new GregorianCalendar(); 
+    cal.setTime(container.getDate());
+
+    _hour.setValue(cal.get(Calendar.HOUR_OF_DAY));
+    _min.setValue(cal.get(Calendar.MINUTE));
+    _sec.setValue(cal.get(Calendar.SECOND));
   }
+
+  /**
+   * <p>Process callbacks from the numeric fields.</p>
+   */
 
   public boolean setValuePerformed(JValueObject valueObj)
   {
@@ -1058,15 +1118,15 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 
     if (comp == _hour)
       {
-	_parent.timeChanged("hour",val);
+	container.timeChanged("hour",val);
       }
     else if (comp == _min)
       {
-	_parent.timeChanged("min",val);
+	container.timeChanged("min",val);
       }
     else 
       {
-	_parent.timeChanged("sec",val);
+	container.timeChanged("sec",val);
       }
 
     return true;
@@ -1080,10 +1140,9 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class displays the year at the top of the composite {@link
- * arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.  If the
- * calendar widget is editable, this panel will allow the user to change
- * the year corresponding with the date shown in the calendar widget.</p>
+ * <p>This class provides a 'spinner' widget for displaying and allowing the
+ * editing of the year in the composite {@link
+ * arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.</p>
  */
 
 class JYearChooser extends JPanel implements ActionListener {
@@ -1099,14 +1158,14 @@ class JYearChooser extends JPanel implements ActionListener {
     up,
     down;
 
-  JpanelCalendar
-    cal;
+  JMonthYearPanel
+    callback;
 
   /* -- */
 
-  public JYearChooser(int year, JpanelCalendar parent)
+  public JYearChooser(int year, JMonthYearPanel parent)
   {
-    this.cal = parent;
+    this.callback = parent;
 
     year_field = new JnumberField(4);
     year_field.setValue(year);
@@ -1137,14 +1196,14 @@ class JYearChooser extends JPanel implements ActionListener {
     if (e.getSource() == up)
       {
 	int year = year_field.getValue().intValue();
-	year_field.setValue(year + 1);
-	cal.setYear(year + 1);
+	year_field.setValue(year+1);
+	callback.updateYear(year+1);
       }
     else if (e.getSource() == down)
       {
 	int year = year_field.getValue().intValue();
-	year_field.setValue(year - 1);
-	cal.setYear(year  - 1);
+	year_field.setValue(year-1);
+	callback.updateYear(year-1);
       }
   }
 
@@ -1162,5 +1221,309 @@ class JYearChooser extends JPanel implements ActionListener {
 
     year_field.setValue(year);
   }
+
+  public void setAllowMonthChange(boolean doit)
+  {
+    up.setEnabled(doit);
+    down.setEnabled(doit);
+  }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                 JMonthYearPanel
+	
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>This class displays the year/month gui controls at the top of
+ * the composite {@link arlut.csd.JCalendar.JpanelCalendar
+ * JpanelCalendar} widget.  If the calendar widget is editable, this
+ * panel will allow the user to change the month and year year
+ * corresponding with the date shown in the calendar widget.</p>
+ */
+
+class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
+
+  static final boolean debug = false;
+
+  // ---
+
+  private boolean editable;
+  private JButton _prevdate;
+  private JButton _nextdate;
+  private JYearChooser year;
+  private JComboBox month;
+  private JpanelCalendar container;
+  private int currentMonth;
+  private int currentYear;
+  private JLabel mYLabel;
+
+  /* -- */
+
+  public JMonthYearPanel(JpanelCalendar parent)
+  {
+    this.container = parent;
+
+    currentMonth = container.getVisibleMonth();
+    currentYear = container.getVisibleYear();
+
+    editable = container.getAllowMonthChange();
+
+    if (editable)
+      {
+	initializeEditable();
+      }
+    else
+      {
+	initializeNonEditable();
+      }
+  }
+
+  /**
+   * <p>This method sets the month in the JMonthYearPanel.  The
+   * appropriate range is from 0 to 11.</p>
+   *
+   * <p>Calling this method will update the display, but it will
+   * not trigger a callback to the JpanelCalendar.</p>
+   */
+
+  public void setMonth(int index)
+  {
+    if (index < 0 || index > 11)
+      {
+	throw new IllegalArgumentException("month out of range: " + index);
+      }
+
+    currentMonth = index;
+
+    if (editable)
+      {
+	month.setSelectedIndex(currentMonth);
+      }
+    else
+      {
+	mYLabel.setText(JpanelCalendar.month_names[currentMonth] + " " + currentYear);
+      }
+  }
+
+  /**
+   * <p>Returns the month currently selected in the JMonthYearPanel.
+   * This is not necessarily the same as the month of the currently
+   * selected day in the calendar.</p>
+   */
+
+  public int getMonth()
+  {
+    return currentMonth;
+  }
+
+  /**
+   * <p>This method returns a human readable string containing
+   * the month shown in the JMonthYearPanel.</p>
+   */
+
+  public String getMonthString()
+  {
+    return JpanelCalendar.month_names[currentMonth];
+  }
+
+  /**
+   * <p>This method sets the year in the JMonthYearPanel.</p>
+   *
+   * <p>Calling this method will update the display, but it will
+   * not trigger a callback to the JpanelCalendar.</p>
+   */
+
+  public void setYear(int index)
+  {
+    currentYear = index;
+
+    if (editable)
+      {
+	year.setYear(currentYear);
+      }
+    else
+      {
+	mYLabel.setText(JpanelCalendar.month_names[currentMonth] + " " + currentYear);
+      }
+  }
+
+  /**
+   * <p>This method passes changes from the JYearChooser up to
+   * the parent calendar widget.</p>
+   */
+
+  public void updateYear(int index)
+  {
+    currentYear = index;
+    performCallback();
+  }
+
+  /**
+   * <p>Returns the year currently selected in the JMonthYearPanel.
+   * This is not necessarily the same as the year of the currently
+   * selected day in the calendar.</p>
+   */
+
+  public int getYear()
+  {
+    return currentYear;
+  }
+
+  /**
+   * <p>This method initializes or re-initializes this panel for editing.</p>
+   */
+
+  public void initializeEditable()
+  {
+    this.removeAll();
+
+    setLayout(new BorderLayout());
+
+    _prevdate = new JButton("<<");
+    _prevdate.setToolTipText("Previous Month");
+    _nextdate = new JButton(">>");
+    _nextdate.setToolTipText("Next Month");
+
+    _prevdate.addActionListener(this);
+    _nextdate.addActionListener(this);
+
+    month = new JComboBox();
+    month.setKeySelectionManager(new TimedKeySelectionManager());
+
+    for (int i = 0; i < JpanelCalendar.month_names.length; i++)
+      {
+	month.addItem(JpanelCalendar.month_names[i]);
+      }
+
+    month.setSelectedIndex(currentMonth);
+    month.addItemListener(this);
+
+    year = new JYearChooser(currentYear, this);
+
+    JPanel middlePanel = new JPanel(new BorderLayout());
+    middlePanel.add("Center", month);
+    middlePanel.add("East", year);
+
+    add(_prevdate, "West");
+    add(_nextdate, "East");
+    add(middlePanel, "Center");
+
+    validate();
+  }
+
+  /**
+   * <p>This method initializes or re-initializes this panel for
+   * display.</p>
+   */
+
+  public void initializeNonEditable()
+  {
+    this.removeAll();
+
+    setLayout(new BorderLayout());
+
+    mYLabel = new JLabel(JpanelCalendar.month_names[currentMonth] + " " + currentYear);
+    add(mYLabel, "Center");
+
+    validate();
+  }
+
+  /**
+   * <p>This method toggles this panel from display mode to editing mode
+   * or vice-versa.  If allow is true, this panel will be editable, and
+   * the year and month will be changable by the user.</p>
+   */
+
+  public void setAllowMonthChange(boolean allow)
+  {
+    if (this.editable == allow)
+      {
+	return;
+      }
+
+    this.editable = allow;
+
+    if (editable)
+      {
+	initializeEditable();
+      }
+    else
+      {
+	initializeNonEditable();
+      }
+  }
+
+  public void actionPerformed(ActionEvent e)
+  {
+    if (e.getSource() == _nextdate) 
+      {
+	currentMonth++;
+
+	if (currentMonth > 11)
+	  {
+	    currentMonth = 0;
+
+	    if (debug)
+	      {
+		System.out.println("Going back to Jan");
+	      }
+
+	    setYear(currentYear + 1);
+	  }
+
+	month.setSelectedIndex(currentMonth);
+
+	performCallback();
+      }
+    else if (e.getSource() == _prevdate) 
+      {
+	currentMonth--;
+
+	if (currentMonth < 0)
+	  {
+	    currentMonth = 11;
+
+	    if (debug)
+	      {
+		System.out.println("Going back to Dec");
+	      }
+
+	    setYear(currentYear - 1);
+	  }
+
+	month.setSelectedIndex(currentMonth);
+
+	performCallback();
+      }
+  }
+
+  /**
+   * This is called when our month is changed
+   */
+
+  public void itemStateChanged(ItemEvent e)
+  {
+    if (e.getStateChange() == ItemEvent.SELECTED)
+      {
+	if (month.getSelectedIndex() != currentMonth)
+	  {
+	    int index = month.getSelectedIndex();
+
+	    if (index < 0 || index > 11)
+	      {
+		throw new IllegalArgumentException("month out of range: " + index);
+	      }
+
+	    currentMonth = index;
+	    performCallback();
+	  }
+      }
+  }
+
+  private void performCallback()
+  {
+    container.writeDates();
+  }
+}
