@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,8 +53,8 @@ public class DBJournal implements ObjectStatus {
   }
 
   static final String id_string = "GJournal";
-  static final byte major_version = 0;
-  static final byte minor_version = 1;
+  static final byte major_version = 1;
+  static final byte minor_version = 0;
 
   static final String OPENTRANS = "open";
   static final String CLOSETRANS = "close";
@@ -335,7 +335,14 @@ public class DBJournal implements ObjectStatus {
 
 		  case EDIT:
 
-		    obj = new DBObject(base, jFile, true);
+		    DBObjectDeltaRec delta = new DBObjectDeltaRec(jFile);
+
+		    short typecode = delta.invid.getType();
+		    int objnum = delta.invid.getNum();
+
+		    DBObject original = Ganymede.db.getObjectBase(typecode).objectTable.get(objnum);
+
+		    obj = delta.applyDelta(original);
 
 		    if (!base.objectTable.containsKey(obj.id))
 		      {
@@ -481,7 +488,9 @@ public class DBJournal implements ObjectStatus {
 	      case EDITING:
 		jFile.writeByte(EDIT);
 		jFile.writeShort(eObj.objectBase.type_code);
-		eObj.emit(jFile);
+
+		DBObjectDeltaRec delta = new DBObjectDeltaRec(eObj.original, eObj);
+		delta.emit(jFile);
 		
 		if (debug)
 		  {
