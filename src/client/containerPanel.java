@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.51 $ %D%
+    Version: $Revision: 1.52 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -85,7 +85,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     infoVector = null,
     templates = null;
 
-  int row = 0;			// we'll use this to keep track of rows added as we go along
+  //int row = 0;			// we'll use this to keep track of rows added as we go along
 
   boolean
     editable;
@@ -430,6 +430,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
+    invalidate();
+    frame.validate();
   }
 
   public void updateComponent(Component comp)
@@ -442,6 +444,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       try
 	{
 	  db_field field = (db_field)objectHash.get(comp);
+	  if (field == null)
+	    {
+	      System.out.println("Fiel dis null, skipping.");
+	      return;
+	    }
+
 	  setRowVisible(comp, field.isVisible());
 
 	  if (comp instanceof JstringField)
@@ -454,19 +462,30 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    }
 	  else if (comp instanceof JnumberField)
 	    {
-	      ((JnumberField)comp).setText(((Integer)field.getValue()).toString());
+	      Integer value = (Integer)field.getValue();
+	      ((JnumberField)comp).setText((value == null) ? "" : value.toString());
 	    }
 	  else if (comp instanceof JcheckboxField)
 	    {
-	      ((JcheckboxField)comp).setSelected(((Boolean)field.getValue()).booleanValue());
+	      Boolean value = (Boolean)field.getValue();
+	      ((JcheckboxField)comp).setSelected((value == null) ? false : value.booleanValue());
 	    }
 	  else if (comp instanceof JCheckBox)
 	    {
-	      ((JCheckBox)comp).setSelected(((Boolean)field.getValue()).booleanValue());
+	      Boolean value = (Boolean)field.getValue();
+
+	      ((JCheckBox)comp).setSelected((value == null) ? false : value.booleanValue());
 	    }
-	  else if (comp instanceof JComboBox)
+	  else if ((comp instanceof JComboBox) || (comp instanceof JInvidChooser))
 	    {
-	      ((JComboBox)comp).removeItemListener(this);
+	      if (comp instanceof JComboBox)
+		{
+		  ((JComboBox)comp).removeItemListener(this);
+		}
+	      else
+		{
+		  ((JInvidChooser)comp).removeItemListener(this);
+		}
 
 	      if (debug)
 		{
@@ -525,15 +544,29 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			{
 			  System.out.println("It's not in there, downloading a new one.");
 			}
+		      
+		      QueryResult choicesV = null;
+		      
 		      if (field instanceof invid_field)
 			{
-			  gc.cachedLists.putList(key, ((invid_field)field).choices());
+			  choicesV = ((invid_field)field).choices();
 			}
 		      else if (field instanceof string_field)
 			{
-			  gc.cachedLists.putList(key, ((string_field)field).choices());
+			  choicesV = ((string_field)field).choices();
 			}
-		      choiceHandles = gc.cachedLists.getListHandles(key, false);
+		      
+		      if (choicesV == null)
+			{
+			  choiceHandles = new Vector();
+			}
+		      else
+			{
+			  gc.cachedLists.putList(key, choicesV);
+			  
+			  
+			  choiceHandles = choicesV.getListHandles();
+			}
 		      
 		    }
 		}
@@ -572,7 +605,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    }
 
 
-		  JComboBox cb = (JComboBox)comp;
+		  JInvidChooser cb = (JInvidChooser)comp;
 		  cb.removeAllItems();
 
 		  for (int i = 0; i < choiceHandles.size(); i++)
@@ -585,7 +618,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		  // Still need to rebuild list here.
 		  listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid)o), o);
-		  ((JComboBox)comp).setSelectedItem(lh);
+		  cb.setSelectedItem(lh);
 		}
 	      else
 		{
@@ -598,14 +631,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    }
 		  else if (field instanceof invid_field)
 		    {
-		      ((JComboBox)comp).setSelectedItem(new listHandle("<none>", null));
+		      ((JInvidChooser)comp).setSelectedItem(new listHandle("<none>", null));
 		    }
 		  else
 		    {
 		      System.out.println("I am not expecting this type in JComboBox: " + field);
 		    }
 		}
-	      ((JComboBox)comp).addItemListener(this);
+	      if (comp instanceof JComboBox)
+		{
+		  ((JComboBox)comp).addItemListener(this);
+		}
+	      else
+		{
+		  ((JInvidChooser)comp).addItemListener(this);
+		}
 	    }
 	  else if (comp instanceof JLabel)
 	    {
@@ -1090,18 +1130,27 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   public void actionPerformed(ActionEvent e)
   {
     ReturnVal returnValue = null;
+    db_field field = null;
 
     if (e.getSource() instanceof JCheckBox)
       {
-	db_field field = (db_field)objectHash.get(e.getSource());
+	field = (db_field)objectHash.get(e.getSource());
 	  
-	try
+	if (field == null)
 	  {
-	    returnValue = field.setValue(new Boolean(((JCheckBox)e.getSource()).isSelected()));
+	    System.out.println("Whoa, null field for a JCheckBox: " + e);
+	    return;
 	  }
-	catch (RemoteException rx)
+	else
 	  {
-	    throw new IllegalArgumentException("Could not set field value: " + rx);
+	    try
+	      {
+		returnValue = field.setValue(new Boolean(((JCheckBox)e.getSource()).isSelected()));
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("Could not set field value: " + rx);
+	      }
 	  }
       }
     else
@@ -1123,7 +1172,25 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     else
       {
-	// This really should revert the thing.  But that will trigger another actionPerformed...
+	if (e.getSource() instanceof JCheckBox)
+	  {
+	    try
+	      {
+		JCheckBox cb = (JCheckBox)e.getSource();
+		
+		// This really should revert the thing.  But that will trigger another actionPerformed...
+		cb.removeActionListener(this);
+		// If field is not null, then set the state to whatever the field says it should be.
+		// If field is null, flip the state.  The field should never be null, but what the hey.
+		cb.setSelected((field == null) ? !cb.isSelected() : ((Boolean)field.getValue()).booleanValue());
+		cb.addActionListener(this);
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("couldn't get the value of a measly boolean field: " + rx);
+	      }
+	  }
+
 	checkReturnValForRescan(returnValue);
       }
   }
@@ -1153,7 +1220,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 		else if (item instanceof listHandle)
 		  {
-		    returnValue = field.setValue(((Invid) ((listHandle)e.getItem()).getObject() ));
+		    listHandle lh = (listHandle)item;
+		    if (debug)
+		      {
+			if (field == null)
+			  {
+			    System.out.println("Field is null.");
+			  }
+		      }
+
+		    returnValue = field.setValue(((Invid)lh.getObject() ));
 
 		  }
 		else 
@@ -1191,10 +1267,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		throw new RuntimeException("Could not set combo box value: " + rx);
 	      }
-	  }
-	else
-	  {
-	    System.out.println("You very tricky: try to do something with a deselect.");
 	  }
       }
     else
@@ -1243,7 +1315,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
 
-  void addVectorRow(Component comp, String label, boolean visible)
+  void addVectorRow(Component comp, int row, String label, boolean visible)
   {
 
     JLabel l = new JLabel("");
@@ -1258,12 +1330,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     gbl.setConstraints(comp, gbc);
     add(comp);
 
-    row++;
-
-    //setRowVisible(comp, visible);
+    setRowVisible(comp, visible);
   }
   
-  void addRow(Component comp,  String label, boolean visible)
+  void addRow(Component comp, int row, String label, boolean visible)
   {
     JLabel l = new JLabel(label);
     rowHash.put(comp, l);
@@ -1284,9 +1354,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     gbl.setConstraints(comp, gbc);
     add(comp);
 
-    row++;
-
-    //setRowVisible(comp, visible);
+    setRowVisible(comp, visible);
   }
 
   void setRowVisible(Component comp, boolean b)
@@ -1393,7 +1461,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      
 	  default:
 	    JLabel label = new JLabel("(Unknown)Field type ID = " + fieldType);
-	    addRow( label, fieldTemplate.getName(), true);
+	    addRow( label, templates.indexOf(fieldTemplate), fieldTemplate.getName(), true);
 	  }
       }
   }
@@ -1495,7 +1563,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		ss.setCallback(this);
 		//}
 
-	    addRow(ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
+	    addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
 	else
 	  {
@@ -1514,7 +1582,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		ss.setCallback(this);
 		//}
 
-	    addRow(ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
+	    addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
       }
     else  //not editable, don't need whole list of things
@@ -1528,7 +1596,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 					       160);
 	objectHash.put(ss, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
-	addRow(ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
+	addRow(ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
       }
   }
 
@@ -1690,7 +1758,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     //  {
 	ss.setCallback(this);
 	//}
-    addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
+    addRow( ss, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible()); 
   }
 
 
@@ -1727,7 +1795,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     vectorPanel vp = new vectorPanel(field, winP, editable && fieldInfo.isEditable(), isEditInPlace, this);
     vectorPanelList.addElement(vp);
 
-    addVectorRow( vp, fieldTemplate.getName(), fieldInfo.isVisible());
+    addVectorRow( vp, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
     
   }
 
@@ -1873,7 +1941,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Adding to panel");
 	  }
 	    
-	addRow( combo, fieldTemplate.getName(), fieldInfo.isVisible());
+	addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	    	    
       }
     else
@@ -1905,7 +1973,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	sf.setToolTipText(fieldTemplate.getComment());
 
-	addRow( sf, fieldTemplate.getName(), fieldInfo.isVisible());
+	addRow( sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
       }
   }
 
@@ -1933,7 +2001,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    pf.setCallback(this);
 	  }
 	  
-	addRow( pf, field.getName(), field.isVisible());
+	addRow( pf, templates.indexOf(fieldTemplate), field.getName(), field.isVisible());
 	
       }
     else
@@ -1960,7 +2028,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	sf.setToolTipText(fieldTemplate.getComment());
 	
-	addRow( sf, fieldTemplate.getName(), fieldInfo.isVisible());
+	addRow( sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	
       }
   }
@@ -2007,7 +2075,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     nf.setToolTipText(fieldTemplate.getComment());
     
-    addRow( nf, fieldTemplate.getName(), fieldInfo.isVisible());
+    addRow( nf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
   
     
   }
@@ -2042,7 +2110,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	df.setCallback(this);
       }
 
-    addRow( df, fieldTemplate.getName(), fieldInfo.isVisible());
+    addRow( df, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
@@ -2076,7 +2144,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-    addRow( cb, fieldTemplate.getName(), fieldInfo.isVisible());
+    addRow( cb, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
     
   }
 
@@ -2104,7 +2172,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 				     gc,
 				     false);
     
-    addRow( pb, fieldTemplate.getName(), fieldInfo.isVisible());
+    addRow( pb, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
     
   }
 
@@ -2128,7 +2196,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Hey, " + fieldTemplate.getName() + " is edit in place but not a vector, what gives?");
 	  }
 
-	addRow(new JLabel("edit in place non-vector"), fieldTemplate.getName(), fieldInfo.isVisible());
+	addRow(new JLabel("edit in place non-vector"), templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	return;
       }
 
@@ -2182,7 +2250,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	listHandle currentListHandle = null;
 	listHandle noneHandle = new listHandle("<none>", null);
 	boolean found = false;
-	JComboBox combo = new JComboBox();
+	JInvidChooser combo = new JInvidChooser(this, fieldTemplate.getTargetBase());
 	
 	/* -- */
 
@@ -2252,7 +2320,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    combo.addItemListener(this); // register callback
 	  }
 
-	objectHash.put(combo, field);
+	objectHash.put(combo.getCombo(), field); // We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
+	
 	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
 
 	if (debug)
@@ -2260,21 +2329,34 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Adding to panel");
 	  }
 	
-	addRow( combo, fieldTemplate.getName(), fieldInfo.isVisible());
+	addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	
       }
     else
       {
 	if (fieldInfo.getValue() != null)
 	  {
-	    String label = (String)gc.getSession().view_db_object((Invid)fieldInfo.getValue()).getLabel();
-	    JstringField sf = new JstringField(20, false);
-	    sf.setText(label);
-	    addRow(sf, fieldTemplate.getName(), fieldInfo.isVisible());
+	    final Invid thisInvid = (Invid)fieldInfo.getValue();
+
+	    String label = (String)gc.getSession().view_db_object(thisInvid).getLabel();
+	    //JstringField sf = new JstringField(20, false);
+	    //sf.setText(label);
+
+	    //JPanel p = new JPanel(new BorderLayout());
+	    JButton b = new JButton(label);
+	    b.addActionListener(new ActionListener() {
+	      public void actionPerformed(ActionEvent e)
+		{
+		  getgclient().viewObject(thisInvid);
+		}});
+
+	    //p.add("Center", sf);
+	    //p.add("West", b);
+	    addRow(b, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	  }
 	else
 	  {
-	    addRow( new JTextField("null invid"), fieldTemplate.getName(), fieldInfo.isVisible());
+	    addRow( new JTextField("null invid"), templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	  }
       }
   }
@@ -2295,17 +2377,22 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     /* -- */
 
+    if (debug)
+      {
+	System.out.println("Adding IP field");
+      }
+
     try
       {
 	ipf = new JIPField(new JcomponentAttr(null,
 					      new Font("Helvetica",Font.PLAIN,12),
 					      Color.black,Color.white),
 			   editable && fieldInfo.isEditable(),
-			   field.v6Allowed());
+			   (editable && fieldInfo.isEditable()) ? field.v6Allowed() : field.isIPV6());
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not get determine v6Allowed for ip field: " + rx);
+	throw new RuntimeException("Could not determine if v6 Allowed for ip field: " + rx);
       }
     
     objectHash.put(ipf, field);
@@ -2322,8 +2409,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     ipf.setToolTipText(fieldTemplate.getComment());
 		
-    addRow( ipf, fieldTemplate.getName(), fieldInfo.isVisible());
+    addRow( ipf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
     
   }
 
+  public final gclient getgclient()
+  {
+    return gc;
+  }
 }
