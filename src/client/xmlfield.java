@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/05/31 21:11:36 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/06/06 05:52:09 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.10 $ $Date: 2000/05/31 21:11:36 $ $Name:  $
+ * @version $Revision: 1.11 $ $Date: 2000/06/06 05:52:09 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -84,8 +84,9 @@ public class xmlfield implements FieldType {
    * <p>Formatter that we use for generating and parsing date fields</p>
    */
 
-  static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss",
-						     java.util.Locale.US);
+  static DateFormat formatterWithZone = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+  static DateFormat formatterDefaultZone = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
+
   /**
    * <p>Definition record for this field type</p>
    */
@@ -599,12 +600,19 @@ public class xmlfield implements FieldType {
       {
 	try
 	  {
-	    result1 = formatter.parse(formattedDate);
+	    result1 = formatterWithZone.parse(formattedDate);
 	  }
 	catch (ParseException ex)
 	  {
-	    System.err.println("\nError, could not parse date entity val " + formattedDate + " in element " + item);
-	    System.err.println(ex.getMessage());
+	    try
+	      {
+		result1 = formatterDefaultZone.parse(formattedDate);
+	      }
+	    catch (ParseException ex2)
+	      {
+		System.err.println("\nError, could not parse date entity val " + formattedDate + " in element " + item);
+		System.err.println(ex2.getMessage());
+	      }
 	  }
       }
 
@@ -629,7 +637,7 @@ public class xmlfield implements FieldType {
       {
 	System.err.println("\nWarning, date element " + item + " is not internally consistent.");
 	System.err.println("Ignoring date string \"" + formattedDate + "\".");
-	System.err.println("Using timecode data string \"" + formatter.format(result2) + "\".");
+	System.err.println("Using timecode data string \"" + formatterWithZone.format(result2) + "\".");
 
 	return result2;
       }
