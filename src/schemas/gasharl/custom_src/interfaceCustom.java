@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -174,9 +174,12 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     sysObj = getParentObj();
     Vector ipNetVec = sysObj.getAvailableNets();
 
-    for (int i = 0; i < ipNetVec.size(); i++)
+    if (ipNetVec != null)
       {
-	result.addRow((ObjectHandle) ipNetVec.elementAt(i));
+	for (int i = 0; i < ipNetVec.size(); i++)
+	  {
+	    result.addRow((ObjectHandle) ipNetVec.elementAt(i));
+	  }
       }
 
     if (debug)
@@ -211,9 +214,21 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // if we only have a single interface in this system, we don't
     // want the name field to be visible
 
-    if (field.getID() == interfaceSchema.NAME)
+    if ((field.getID() == interfaceSchema.NAME) ||
+	(field.getID() == interfaceSchema.ALIASES))
       {
-	Vector siblings = getSiblingInvids();
+	interfaceCustom iObj;
+
+	if (field.getOwner() instanceof interfaceCustom)
+	  {
+	    iObj = (interfaceCustom) field.getOwner();
+	  }
+	else
+	  {
+	    iObj = (interfaceCustom) session.editDBObject(field.getOwner().getInvid());
+	  }
+
+	Vector siblings = iObj.getSiblingInvids();
 
 	if (siblings.size() == 0)
 	  {
