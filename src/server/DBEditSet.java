@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 2000/09/14 23:15:35 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 2000/09/30 00:45:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -639,13 +639,27 @@ public class DBEditSet {
 	if (debug)
 	  {
 	    System.err.println("Object in transaction at checkpoint time: " + objck.invid.toString());
-	  }
 
+	    System.err.println("Looking for object " + objck.invid.toString() + " in database");
+	  }
+	
 	obj = findObject(objck.invid);
 
 	if (obj != null)
 	  {
+	    if (debug)
+	      {
+		System.err.println("Found object " + obj.toString() + ", rolling back fields");
+	      }
+
 	    obj.rollback(objck.fields);
+
+	    if (debug)
+	      {
+		System.err.println("Found object " + obj.toString() + ", rolling back status ");
+		System.err.println(obj.status + " to old status " + objck.status);
+	      }
+
 	    obj.status = objck.status;
 	  }
 	else

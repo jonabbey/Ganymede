@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 2000/09/14 23:15:36 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 2000/09/30 00:45:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.91 $ %D%
+ * @version $Revision: 1.92 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -914,14 +914,33 @@ final public class DBSession {
       case DBEditObject.CREATING:
       case DBEditObject.EDITING:
 
+	// we have to checkpoint before we set the status to delete,
+	// or else a later rollback will still leave the object in
+	// must-delete status if the transaction is committed
+
+	checkpoint(key);
+
+	// by calling the synchronized setDeleteStatus() method on the
+	// DBDeletionManager, we announce our intention to delete this
+	// object, and lock out any other objects from establishing
+	// asymmetrical links to this object..  if this fails, another
+	// object in an open transaction has linked to us without
+	// having checked us out for editing (which always means an
+	// asymmetrical link), and we can't let the object be deleted
+
 	if (!DBDeletionManager.setDeleteStatus(eObj, this))
 	  {
+	    // the only thing changed by setDeleteStatus is the object's
+	    // status, but that's a critical thing to undo, or else
+	    // the transaction will blithely blow this object away
+	    // at commit time
+
+	    popCheckpoint(key);
+
 	    return Ganymede.createErrorDialog("Can't delete " + eObj.toString(),
 					      eObj.toString() + " can't be deleted because an object which points " +
 					      "to it is currently checked out for editing by someone else.");
 	  }
-
-	checkpoint(key);
 
 	break;
 

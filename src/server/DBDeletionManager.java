@@ -7,8 +7,8 @@
 
    Created: 23 June 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/06/24 18:36:39 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/09/30 00:45:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -147,6 +147,12 @@ public class DBDeletionManager {
   public static synchronized boolean setDeleteStatus(DBEditObject obj, DBSession session)
   {
     Invid objInvid = obj.getInvid();
+
+    // we need to see if a session has expressed a desire to establish
+    // an asymmetrical link to obj in another transaction, using
+    // deleteLockObject().. if they have, we can't delete.  Otherwise,
+    // go ahead and set the deletion status, which will prevent
+    // deleteLockObject() from messing with us
 
     Vector sessionList = (Vector) invids.get(objInvid);
 

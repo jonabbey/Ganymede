@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.201 $
-   Last Mod Date: $Date: 2000/09/17 10:15:35 $
+   Version: $Revision: 1.202 $
+   Last Mod Date: $Date: 2000/09/30 00:45:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.201 $ $Date: 2000/09/17 10:15:35 $
+ * @version $Revision: 1.202 $ $Date: 2000/09/30 00:45:25 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4190,6 +4190,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     if (getPerm(type, true).isCreatable())
       {
+	// i think this section of code is actually pretty unlikely to
+	// be executed, as the creation of embedded objects is pretty
+	// much universally performed by manipulating the container
+	// object, but until i verify that and/or make some kind of
+	// definitive decision on that, this code remains
+
 	if (embedded)
 	  {
 	    retVal = session.createDBObject(type, null); // *sync* DBSession

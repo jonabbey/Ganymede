@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.142 $
-   Last Mod Date: $Date: 2000/09/27 22:34:17 $
+   Version: $Revision: 1.143 $
+   Last Mod Date: $Date: 2000/09/30 00:45:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.142 $ %D%
+ * @version $Revision: 1.143 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2128,7 +2128,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 	  }
       }
-    else
+    else			// scalar invid field case
       {
 	temp = (Invid) value;
 
@@ -2163,7 +2163,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (target == null)
 		  {
-		    Ganymede.debug("*** InvidDBField.test(): Invid pointer to null object located: " + objectName);
+		    Ganymede.debug("*** InvidDBField.test(): Invid pointer to null object " + temp + " located: " + 
+				   objectName + " in scalar field " + getName());
 	    
 		    return false;
 		  }
