@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -94,8 +94,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    dnsdomain = "." + dnsdomain;
 	  }
-
-	path = PathComplete.completePath(path);
       }
 
     now = null;
