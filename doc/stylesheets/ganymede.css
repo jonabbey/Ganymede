@@ -58,6 +58,8 @@
 
 @media print {
 
+   body { background: white; font-size: smaller; }
+
   img.screenshot {
     width: 80%;
     page-break-inside: avoid;
