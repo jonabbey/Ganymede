@@ -6,7 +6,7 @@
    for Ganymede.
    
    Created: 24 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,10 +28,10 @@ public class SystemType {
   {
     tokens.resetSyntax();
     tokens.wordChars(0, Integer.MAX_VALUE);
-    tokens.eolIsSignificant(true);
+    //    tokens.parseNumbers();
     tokens.ordinaryChar(':');
-    //    tokens.ordinaryChar(',');
-    //    tokens.ordinaryChar('\n');
+    tokens.ordinaryChar('\n');
+    tokens.eolIsSignificant(true);
   }
 
   // member fields
@@ -39,7 +39,7 @@ public class SystemType {
   String name;
   int start;
   int end;
-  boolean requireUser;
+  boolean requireUser = false;
 
   // instance constructor
 
@@ -57,10 +57,6 @@ public class SystemType {
       {
 	return true;
       }
-    else
-      {
-	tokens.pushBack();
-      }
 
     name = tokens.sval;
 
@@ -68,31 +64,56 @@ public class SystemType {
 
     if (tokens.ttype != ':')
       {
-	System.err.println("parse error 1 in SystemType.loadLine()");
+	System.err.println("parse error 1 in SystemType.loadLine(): " + tokens.ttype);
+	System.err.println("token val = " + tokens.sval);
       }
     
     tokens.nextToken();
 
-    start = (int) tokens.nval;
+    try
+      {
+	start = (int) Integer.parseInt(tokens.sval);
+      }
+    catch (NumberFormatException ex)
+      {
+	System.err.println("Crap! " + tokens.sval);
+      }
 
     tokens.nextToken();
 
     if (tokens.ttype != ':')
       {
-	System.err.println("parse error 2 in SystemType.loadLine()");
+	System.err.println("parse error 2 in SystemType.loadLine(): " + tokens.ttype);
+	System.err.println("token val = " + tokens.sval);
       }
     
     tokens.nextToken();
 
-    end = (int) tokens.nval;
-
-    tokens.nextToken();
-
-    if (tokens.ttype != StreamTokenizer.TT_EOL &&
-	tokens.ttype != StreamTokenizer.TT_EOF)
+    try
       {
+	end = (int) Integer.parseInt(tokens.sval);
+      }
+    catch (NumberFormatException ex)
+      {
+	System.err.println("Crap++! " + tokens.sval);
+      }
+
+    tokens.nextToken();		// either : or EOL
+
+    if ((tokens.ttype != StreamTokenizer.TT_EOL) &&
+	(tokens.ttype != StreamTokenizer.TT_EOF))
+      {
+	//System.err.println("Requiring user: next Token was " + tokens.ttype);
+	//System.err.println("token val = " + tokens.sval);
 	requireUser = true;
       }
+    else
+      {
+	//	System.err.println("Early return: " + (tokens.ttype == StreamTokenizer.TT_EOF));
+	return (tokens.ttype == StreamTokenizer.TT_EOF);
+      }
+
+    // skip to the end of the line
 
     while ((tokens.ttype != StreamTokenizer.TT_EOL) && (tokens.ttype != StreamTokenizer.TT_EOF))
       {
@@ -104,6 +125,6 @@ public class SystemType {
 
   public void display()
   {
-    System.out.println(name + ":" + start + ":" + end + (requireUser ? "" : ":username"));
+    System.out.println(name + ":" + start + ":" + end + (requireUser ? ":username" : ""));
   }
 }
