@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -227,8 +227,6 @@ public class directLoader {
 
 	// set permissions for objects owned by the GASH administrator
 
-	// note that if we 
-
 	perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
 
 	// visible, editable, create, delete
@@ -239,7 +237,6 @@ public class directLoader {
 	pf.setPerm((short) 257, defPerm); // group privs
 	pf.setPerm((short) 263, defPerm); // systems privs
 	pf.setPerm((short) 267, defPerm); // I.P. network
-	pf.setPerm((short) 268, defPerm); // DNS domain
 	pf.setPerm((short) 265, defPerm); // System Interface
 	pf.setPerm((short) 271, defPerm); // Systems Netgroups
 	pf.setPerm((short) 270, defPerm); // User Netgroups
@@ -248,13 +245,14 @@ public class directLoader {
 
 	// set default permissions for objects *not* owned by the GASH administrator
 
-	// Here we want to make all rooms, networks, and dns domains
-	// 'editable', but not grant permission to any individual
-	// fields.. this will have the effect of allowing dns domains,
-	// rooms and networks to show up in choice lists, but will not
-	// allow a gash admin to directly edit the objects'
-	// fields.. the custom code for these objects permit anonymous
-	// linking to allow systems and interfaces to be linked in.
+	// Here we want to make all rooms, automounter volumes,
+	// networks and system types 'editable', but not grant
+	// permission to any individual fields.. this will have the
+	// effect of allowing rooms, system types, and networks to show
+	// up in choice lists, but will not allow a gash admin to
+	// directly edit the objects' fields.. the custom code for
+	// these objects permit anonymous linking to allow systems and
+	// interfaces to be linked in.
 
 	pf = (perm_field) current_obj.getField(SchemaConstants.PermDefaultMatrix);
 
@@ -262,9 +260,6 @@ public class directLoader {
 
 	defPerm = new PermEntry(true, true, true, false);
 	PermEntry fieldPerm = new PermEntry(true, false, false, false);
-
-	pf.setPerm((short) 268, defPerm); // DNS domain
-	pf.setDefaultFieldsPerm((short) 268, fieldPerm);
 
 	pf.setPerm((short) 269, defPerm); // room
 	pf.setDefaultFieldsPerm((short) 269, fieldPerm);
@@ -275,9 +270,13 @@ public class directLoader {
 	pf.setPerm((short) 267, defPerm); // network
 	pf.setDefaultFieldsPerm((short) 267, fieldPerm);
 
-	// now, the ownerGroups Vector has been loaded for us by the scanOwnerGroups() method.
-	// go ahead and register owner groups for the set of differentiable owner prefixes
-	// from the GASH admin_info file
+	pf.setPerm((short) 272, defPerm); // system type
+	pf.setDefaultFieldsPerm((short) 272, fieldPerm);
+
+	// now, the ownerGroups Vector has been loaded for us by the
+	// scanOwnerGroups() method.  go ahead and register owner
+	// groups for the set of differentiable owner prefixes from
+	// the GASH admin_info file
 
 	System.err.println("\nCreating ownergroups in server: ");
 
@@ -1914,7 +1913,7 @@ public class directLoader {
   private static void registerSystems() throws RemoteException
   {
     String key;
-    Invid invid, dnsInvid, objInvid;
+    Invid invid, objInvid;
     Enumeration enum;
     OwnerGroup ogRec;
     DBEditObject current_obj;
@@ -1925,14 +1924,7 @@ public class directLoader {
 
     /* -- */
 
-    // create an arlut.utexas.edu DNS domain entry
-
-    current_obj = (DBEditObject) my_client.session.create_db_object((short) 268); // base 268 is for DNS domain
-    dnsInvid = current_obj.getInvid();
-
-    current_obj.setFieldValueLocal((short) 257, "arlut.utexas.edu");	// no dnsSchema yet
-
-    // and create all the systems
+    // create all the systems
 
     enum = sysLoader.systems.keys();
 
@@ -1953,10 +1945,6 @@ public class directLoader {
 	// set the system name
 	    
 	current_obj.setFieldValueLocal(systemSchema.SYSTEMNAME,key);
-
-	// set the DNS domain
-	    
-	current_obj.setFieldValueLocal(systemSchema.DNSDOMAIN, dnsInvid);
 
 	// set the room
 
