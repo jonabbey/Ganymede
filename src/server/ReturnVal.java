@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -64,7 +64,14 @@ import arlut.csd.JDialog.*;
 
 public class ReturnVal implements java.io.Serializable {
 
-  boolean success;	// default value, as booleans don't have an undefined val
+  public static final byte NONE = 0;
+  public static final byte EXPIRATIONSET = 1;
+  public static final byte LAST = 1;
+
+  // ---
+
+  boolean success;
+  byte status;
   private StringBuffer rescanList;
   private JDialogBuff dialog;
   private Ganymediator callback;
@@ -84,6 +91,17 @@ public class ReturnVal implements java.io.Serializable {
   public boolean didSucceed()
   {
     return success;
+  }
+
+  /**
+   *
+   * Certain operations may set status codes.
+   *
+   */
+
+  public byte getObjectStatus()
+  {
+    return status;
   }
 
   /**
@@ -207,6 +225,17 @@ public class ReturnVal implements java.io.Serializable {
     rescanList = null;
     dialog = null;
     callback = null;
+    status = NONE;
+  }
+
+  public void setStatus(byte status)
+  {
+    if (status < NONE || status > LAST)
+      {
+	throw new IllegalArgumentException("invalid status code");
+      }
+
+    this.status = status;
   }
 
   public void setRescanAll()
