@@ -8,8 +8,8 @@
    
    Created: 3 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/02/03 23:05:09 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/02/03 23:11:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -119,7 +119,14 @@ public class zipIt {
       {
 	for (int i = 0; i < files.size(); i++)
 	  {
-	    addZipEntry(zipOut, (File) files.elementAt(i));
+	    File inFile = (File) files.elementAt(i);
+
+	    if (inFile.isDirectory())
+	      {
+		continue;
+	      }
+
+	    addZipEntry(zipOut, inFile);
 	  }
       }
     finally
@@ -179,6 +186,13 @@ public class zipIt {
 	inFiles.addElement(args[i]);
       }
 
-    createZipFile(zipName, inFiles);
+    try
+      {
+	createZipFile(zipName, inFiles);
+      }
+    catch (IOException ex)
+      {
+	throw new RuntimeException(ex.getMessage());
+      }
   }
 }
