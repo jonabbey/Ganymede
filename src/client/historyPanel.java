@@ -5,7 +5,7 @@
    The tab that holds history information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -72,7 +72,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     JPanel buttonPanel = new JPanel(false);
 
     JPanel leftPanel = new JPanel(false);
-    leftPanel.setBorder(new TitledBorder("Restrict dates"));
+    leftPanel.add(new JLabel("Restrict dates:"));
     selectDate = new JdateField();
     selectDate.setCallback(this);
     leftPanel.add(selectDate);
