@@ -394,7 +394,7 @@ public class Ganymede {
         return;
       }
 
-    if (ParseArgs.switchExists("nossl", argv) != null)
+    if (ParseArgs.switchExists("nossl", argv))
       {
 	useSSL = false;
 
