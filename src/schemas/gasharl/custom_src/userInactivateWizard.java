@@ -6,8 +6,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2001/09/17 20:19:55 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/09/17 20:37:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -185,7 +185,7 @@ public class userInactivateWizard extends GanymediatorWizard {
 			"Cancel",
 			"question.gif");
 
-    StringDBField addrField = (StringDBField) userObject.getFieldValueLocal(userSchema.EMAILTARGET);
+    StringDBField addrField = (StringDBField) userObject.getField(userSchema.EMAILTARGET);
 
     if (addrField == null || addrField.size() == 0)
       {
