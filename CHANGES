@@ -30,6 +30,9 @@ We imported the old Ganymede CVS repository into Subversion.  I went
 through all of the source files and replaced the old CVS keywords with
 Subversion keywords.
 
+Subversion is wonderful.  Ganymede 2.0 would never have happened if we
+were still stuck with CVS.
+
 2. [SERVER] Localization
 
 The Ganymede server now incorporates a method for localizing message
@@ -116,6 +119,10 @@ In a number of other places, we had to explicitly cast some parameters
 when making reflection calls to avoid confusion between an older
 method call that has null as the final parameter and the newer Java
 5.0 varargs versions of those methods.
+
+We've made the ant build files for everything specify a source code
+and class file target level of Java 1.4, so nothing in Ganymede 2.0
+should require a Java 5.0 system.
 
 6. [CLIENT] Cleaned up some threading
 
@@ -597,7 +604,23 @@ In theory turning off java.rmi.server.randomIDs should make the
 Ganymede server startup marginally faster, but any modern system that
 provides high entropy random numbers through a /dev/random device
 shouldn't see any delay to speak of anyway, and the Ganymede server is
-much, much, much more secure with SSL+randomIDs turned on.
+much, much, much more secure with both SSL and randomIDs turned on
+than it is with one or the other of them turned on.
+
+31. [XMLCLIENT] Added sync argument to allow for constrained dumps
+
+Now that Ganymede 2.0 allows you to define object and field
+constraints on sync channels, the xmlclient has been elaborated to be
+able to apply a sync channel constraint to a dump.  This makes it
+possible to dump out a tailored XML report that only contains the
+object and field types that a given synchronization target might be
+interested in.
+
+The ultimate purpose of this is to allow an administrator to pull the
+full state of Ganymede with respect to certain objects and fields, for
+the purpose of doing initial setup of an external directory service
+target, before setting up a sync channel to transmits deltas as they
+are committed to Ganymede.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
