@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -148,7 +148,7 @@ public class DBStore {
 	  {
 	    tempBase = new DBObjectBase(in, this);
 	    
-	    objectBases.put(new Integer(tempBase.type_code), tempBase);
+	    objectBases.put(new Short(tempBase.type_code), tempBase);
 	  }
       }
     catch (IOException ex)
@@ -192,6 +192,10 @@ public class DBStore {
 	  }
 	else
 	  {
+	    // go ahead and consolidate the journal into the DBStore
+	    // before we really get under way.
+
+	    dump(filename);
 	    journal.reset();
 	  }
       }
