@@ -53,7 +53,6 @@
     
     <javac destdir="${build.classes}"
            debug="${debug.flags}"
-           nowarn="true"
            deprecation="on">
            <src path="${src.dir}"/>
            <classpath refid="classpath"/>
