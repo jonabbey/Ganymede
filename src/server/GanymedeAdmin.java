@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -722,8 +722,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
     try
       {
-	Ganymede.db.dumpSchema(GanymedeConfig.schemaPath, true); // release the
-				                                 // lock when the dump is complete
+	Ganymede.db.dumpSchema(Ganymede.schemaProperty, true); // release the lock when the dump is complete
       }
     catch (IOException ex)
       {
