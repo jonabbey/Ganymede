@@ -69,6 +69,16 @@ import java.text.MessageFormat;
  * This class is designed to use localized properties files to do
  * string lookup and synthesis.</p>
  *
+ * <p>Things to think about for TranslationServices..</p>
+ *
+ * <p>We'd like a way to force all TranslationServices objects to
+ * reload their bundles, but Java's ResourceBundle and
+ * PropertyResourceBundle classes really don't support that.  It would
+ * be nice to be able to cause Directory Droid to reload its
+ * localization strings on demand, rather than forcing a
+ * stop/restart, but we'd have to recreate the locale seeking logic
+ * for locating and loading the property files to do this.</p>
+ *
  * @version $Id$
  * @author Jonathan Abbey
  */
@@ -77,6 +87,13 @@ import java.text.MessageFormat;
 public class TranslationService {
 
   // - Statics
+
+  /**
+   * <p>This is a factory method for creating TranslationService
+   * objects.  We use a factory method so that we have the option
+   * later on of tracking the TranslationService objects we create and
+   * possibly supporting some kind of reload functionality, howsomever
+   * primitive.</p>
 
   public static TranslationService getTranslationService(String resourceName, Locale locale) throws MissingResourceException
   {
