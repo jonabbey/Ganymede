@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2000/04/04 05:17:40 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2000/04/04 08:28:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1853,7 +1853,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    
 	    InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
 
-	    rshNT.println(escapeString(usersField.getValueString()));
+	    if (usersField != null)
+	      {
+		rshNT.println(escapeString(usersField.getValueString()));
+	      }
+	    else
+	      {
+		rshNT.println();
+	      }
 	  }
 
 	// second we write out user netgroups
@@ -1935,20 +1942,26 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     InvidDBField users = (InvidDBField) object.getField(userNetgroupSchema.USERS);
 
-    oldMembers = VectorUtils.union(oldMembers, 
-				   VectorUtils.stringVector(users.getValueString(), ", "));
+    if (users != null)
+      {
+	oldMembers = VectorUtils.union(oldMembers, 
+				       VectorUtils.stringVector(users.getValueString(), ", "));
+      }
 
     // recursively add in users in any netgroups in this netgroup
 
     InvidDBField subGroups = (InvidDBField) object.getField(userNetgroupSchema.MEMBERGROUPS);
 
-    for (int i = 0; i < subGroups.size(); i++)
+    if (subGroups != null)
       {
-	DBObject subGroup = getObject(subGroups.value(i));
-
-	if (!subGroup.isInactivated())
+	for (int i = 0; i < subGroups.size(); i++)
 	  {
-	    oldMembers = netgroupMembers(subGroup, oldMembers, graphCheck);
+	    DBObject subGroup = getObject(subGroups.value(i));
+	    
+	    if (!subGroup.isInactivated())
+	      {
+		oldMembers = netgroupMembers(subGroup, oldMembers, graphCheck);
+	      }
 	  }
       }
 
