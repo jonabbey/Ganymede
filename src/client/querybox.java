@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1091,7 +1091,10 @@ class QueryRow implements ItemListener {
     if (does && (!showDoes || boolChoice.getItemCount() == 0))
       {
 	boolChoice.setVisible(false);
-	boolChoice.removeAllItems();
+	if (boolChoice.getItemCount() > 0)
+	  {
+	    boolChoice.removeAllItems();
+	  }
 
 	boolChoice.addItem("does");
 	boolChoice.addItem("does not");
@@ -1102,7 +1105,10 @@ class QueryRow implements ItemListener {
     else if (!does && (showDoes || boolChoice.getItemCount() == 0))
       {
 	boolChoice.setVisible(false);
-	boolChoice.removeAllItems();
+	if (boolChoice.getItemCount() > 0)
+	  {
+	    boolChoice.removeAllItems();
+	  }
 
 	boolChoice.addItem("is");
 	boolChoice.addItem("is not");
@@ -1130,8 +1136,11 @@ class QueryRow implements ItemListener {
     // don't show us changing it
 
     compareChoice.setVisible(false);
-
-    compareChoice.removeAllItems();
+    
+    if (compareChoice.getItemCount() > 0)
+      {
+	compareChoice.removeAllItems();
+      }
 
     if (field.isEditInPlace())
       {
