@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.95 $ %D%
+   Version: $Revision: 1.96 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1967,10 +1967,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	Base base = (Base)node;
 	boolean canCreate = base.canCreate(getSession());
-	if (base.getTypeID() == SchemaConstants.PersonaBase)
-	  {
-	    canCreate = false;
-	  }
 
 	newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
 			       true, 
