@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,7 +39,7 @@ import arlut.csd.ganymede.*;
 public class Query implements java.io.Serializable {
 
   String objectName;
-  int objectType;
+  short objectType;
   QueryNode root;
   boolean editableOnly;
 
@@ -55,7 +55,7 @@ public class Query implements java.io.Serializable {
    *
    */
 
-  public Query(int objectType, QueryNode root, boolean editableOnly)
+  public Query(short objectType, QueryNode root, boolean editableOnly)
   {
     this.objectType = objectType;
     this.root = root;
@@ -88,7 +88,7 @@ public class Query implements java.io.Serializable {
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
    */
 
-  public Query(int objectType, QueryNode root)
+  public Query(short objectType, QueryNode root)
   {
     this.objectType = objectType;
     this.root = root;
@@ -119,7 +119,7 @@ public class Query implements java.io.Serializable {
    * @param objectType numeric object type code to search over
    */
 
-  public Query(int objectType)
+  public Query(short objectType)
   {
     this.objectType = objectType;
 
@@ -142,5 +142,6 @@ public class Query implements java.io.Serializable {
     root = null;
     editableOnly = true;
   }
+
 }
 
