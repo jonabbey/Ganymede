@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.102 $ %D%
+   Version: $Revision: 1.103 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2429,6 +2429,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	if (!handle.isEditable())
 	  {
 	    node.setImages(OBJECTNOWRITE, OBJECTNOWRITE);
+	    node.setMenu(objectViewPM);
 	    return;
 	  }
 
@@ -2470,6 +2471,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    else
 	      {
 		node.setText(handle.getLabel());
+
+		BaseNode parentNode = (BaseNode) node.getParent();
+
+		if (parentNode.canInactivate())
+		  {
+		    node.setMenu(objectInactivatePM);
+		  }
+		else 
+		  {
+		    node.setMenu(objectRemovePM);
+		  }
 
 		// now take care of the rest of the menus.
 
