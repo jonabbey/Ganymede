@@ -38,7 +38,7 @@
   }
 
   img.screenshot {
-    float: right;
+    float: right;  page-break-inside: avoid;
   }
   
  p.address { font-family: Arial, Helvetica; font-style: italic; }
@@ -55,8 +55,5 @@
   img.screenshot {
     width: 60%;
   }
-  
-  p.top {
-    page-break-before: always;
-  }
+
 }
