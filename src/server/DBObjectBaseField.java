@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -84,6 +84,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // password attributes
   
   boolean crypted = false;
+  boolean storePlaintext = false;
 
   // schema editing
 
@@ -196,6 +197,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     targetField = original.targetField;
 
     crypted = original.crypted;
+    storePlaintext = original.storePlaintext;
 
     // We'll just re-use the original's FieldTemplate for the time
     // being.. when the SchemaEditor is done, it will call
@@ -342,6 +344,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
 
 	out.writeBoolean(crypted);
+	out.writeBoolean(storePlaintext);
       }
   }
 
@@ -381,7 +384,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     // at file version 1.6, we introduced field visibility
 
-    if ((base.store.file_major >= 1) && (base.store.file_minor >= 6))
+    if ((base.store.file_major > 1) || (base.store.file_minor >= 6))
       {
 	visibility = in.readBoolean();
       }
@@ -392,7 +395,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     // at file version 1.7, we introduced an explicit built-in flag
 
-    if ((base.store.file_major >= 1) && (base.store.file_minor >= 7))
+    if ((base.store.file_major > 1) || (base.store.file_minor >= 7))
       {
 	builtIn = in.readBoolean();
       }
@@ -403,7 +406,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     // at file version 1.1, we introduced field_order
 
-    if ((base.store.file_major >= 1) && (base.store.file_minor >= 1))
+    if ((base.store.file_major > 1) || (base.store.file_minor >= 1))
       {
 	field_order = in.readShort();
       }
@@ -463,7 +466,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at file version 1.9, we introduced multiLine
 	
-	if ((base.store.file_major >= 1) && (base.store.file_minor >= 9))
+	if ((base.store.file_major > 1) || (base.store.file_minor >= 9))
 	  {
 	    multiLine = in.readBoolean();
 	  }
@@ -480,7 +483,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at 1.8 we introduced namespaces for number fields
 
-	if ((base.store.file_major >= 1) && (base.store.file_minor >= 8))
+	if ((base.store.file_major > 1) || (base.store.file_minor >= 8))
 	  {
 	    nameSpaceId = in.readUTF();
 	    
@@ -498,7 +501,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	// at 1.8 we introduced namespaces for IP fields
 
-	if ((base.store.file_major >= 1) && (base.store.file_minor >= 8))
+	if ((base.store.file_major > 1) || (base.store.file_minor >= 8))
 	  {
 	    nameSpaceId = in.readUTF();
 	    
@@ -533,6 +536,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
 
 	crypted = in.readBoolean();
+
+	if ((base.store.file_major >1) || (base.store.file_minor >= 10))
+	  {
+	    storePlaintext = in.readBoolean();
+	  }
+	else
+	  {
+	    storePlaintext = false;
+	  }
       }
 
     loading = false;
@@ -1891,6 +1903,49 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     crypted = b;
   }
 
+  /**
+   *
+   * This method returns true if this is a password field that
+   * will keep a copy of the password in plaintext.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   *
+   */
+
+  public boolean isPlainText()
+  {
+    return storePlaintext;
+  }
+
+  /**
+   *
+   * This method is used to specify that this password field
+   * should keep a copy of the password in plaintext, in
+   * addition to a UNIX crypted copy.  If crypted is
+   * false, plaintext will be treated as true, whether
+   * or not this is explicitly set by the schema editor.<br><br>
+   *
+   * This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public void setPlainText(boolean b)
+  {    
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (!isPassword())
+      {
+	throw new IllegalArgumentException("not an password field");
+      }
+
+    storePlaintext = b;
+  }
+
   // general convenience methods
 
   /**
@@ -2030,6 +2085,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (crypted)
 	  {
 	    result += " <crypted>";
+	  }
+
+	if (storePlaintext)
+	  {
+	    result += " <plaintext>";
 	  }
 
 	break;
@@ -2223,6 +2283,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    result += "crypted";
 	  }
+
+	if (storePlaintext)
+	  {
+	    result += " plaintext";
+	  }
+
 	break;
 
       default:
