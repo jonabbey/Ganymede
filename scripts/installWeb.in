@@ -3,8 +3,8 @@
 # Install script for Ganymede web resources
 #
 # $Name:  $
-# $Revision: 1.4 $
-# $Date: 1999/07/07 02:08:57 $
+# $Revision: 1.5 $
+# $Date: 1999/07/07 02:10:52 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -134,6 +134,7 @@ ENDOK
 &copy_file("jars/ganymede.jar", "$installdir/ganymede.jar");
 &copy_file("jars/ganymedeAdmin.jar", "$installdir/ganymedeAdmin.jar");
 &copy_file("jars/password.jar", "$installdir/password.jar");
+&copy_file("webforms/ganymede_title.gif", "$installdir/ganymede_title.gif");
 
 # Customize and copy the client web pages
 
