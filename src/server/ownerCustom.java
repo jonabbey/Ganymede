@@ -5,7 +5,7 @@
    This file is a management class for owner-group records in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -77,6 +77,35 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
       }
 
     return super.mustChoose(field);
+  }
+
+  /**
+   *
+   * This method provides a hook that can be used to check any values
+   * to be set in any field in this object.  Subclasses of
+   * DBEditObject should override this method, implementing basically
+   * a large switch statement to check for any given field whether the
+   * submitted value is acceptable given the current state of the
+   * object.<br><br>
+   *
+   * Question: what synchronization issues are going to be needed
+   * between DBEditObject and DBField to insure that we can have
+   * a reliable verifyNewValue method here?
+   * 
+   */
+
+  public boolean verifyNewValue(DBField field, Object value)
+  {
+    // We really don't want the supergash owner group from ever
+    // having any explicit ownership links.
+
+    if (field.getOwner().getInvid().getNum() == SchemaConstants.OwnerSupergash &&
+	getID() == SchemaConstants.OwnerObjectsOwned)
+      {
+	return false;
+      }
+
+    return super.verifyNewValue(field, value);
   }
 
   /**
