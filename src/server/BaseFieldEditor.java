@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -367,8 +367,18 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
      NameSpace[] nameSpaces = null;
 
      /* -- */
-      
-     namespaceC.removeAllItems();
+
+     try
+       {
+	 namespaceC.removeAllItems();
+       }
+     catch (IndexOutOfBoundsException ex)
+       {
+	 // Swing 1.1 beta 2 will do this to us, just
+	 // ignore it for now.
+
+	 System.err.println("refreshNamespaceChoice(): Swing Bug Bites Again");
+       }
 
      SchemaEdit test = owner.getSchemaEdit();
 
@@ -427,7 +437,17 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     /* -- */
 
-    targetC.removeAllItems();
+    try
+      {
+	targetC.removeAllItems();
+      }     
+    catch (IndexOutOfBoundsException ex)
+      {
+	// Swing 1.1 beta 2 will do this to us, just
+	// ignore it.
+
+	System.err.println("refreshTargetChoice(): Swing Bug Bites Again");
+      }
 
     try
       {
@@ -514,7 +534,17 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	throw new IllegalArgumentException("Exception getting bases in refreshFieldChoice " + rx);
       }
 
-    fieldC.removeAllItems();
+    try
+      {
+	fieldC.removeAllItems();
+      }
+    catch (IndexOutOfBoundsException ex)
+      {
+	// Swing 1.1 beta 2 will do this to us, just
+	// ignore it.
+	System.err.println("refreshFieldChoice(): Swing Bug Bites Again");
+      }
+
     fieldC.addItem("<none>");
     
     if (fields == null)

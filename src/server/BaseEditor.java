@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -154,7 +154,17 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 
     /* -- */
 
-    labelC.removeAllItems();
+    try
+      {
+	labelC.removeAllItems();
+      }
+    catch (IndexOutOfBoundsException ex)
+      {
+	// Swing 1.1 beta 2 will do this to us, just
+	// ignore it.
+
+	System.err.println("refreshLabelChoice(): Swing Bug Bites Again");
+      }
 
     if (base == null)
       {
