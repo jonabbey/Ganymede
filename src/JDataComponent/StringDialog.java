@@ -31,6 +31,9 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
   boolean
     done;
 
+  Canvas
+    imageCanvas;
+
   Button OKButton;
   Button CancelButton;
   Panel panel;
@@ -40,7 +43,7 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
   ButtonPanel buttonPanel;
   Panel mainPanel;
   TableLayout table;
-  //ActionListener listener;
+  Image image;
 
   Vector objects;
 
@@ -54,7 +57,7 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
    */
   public StringDialog(Frame frame, String Title, String Text)
     {
-      this(frame, Title, Text, "Ok", "Cancel");
+      this(frame, Title, Text, "Ok", "Cancel", null);
     }
 
  /**
@@ -67,9 +70,26 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
    * @param Cancel String for "Cancel" button
    *
    */
+
   public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel)
     {
-      this(new DialogRsrc(frame, Title, Text, OK, Cancel));
+      this(new DialogRsrc(frame, Title, Text, OK, Cancel, null));
+    }
+  
+
+ /**
+   * Simple constructor for a small dialog box
+   *
+   * @param frame Parent frame of the Dialog Box
+   * @param Title Title of the Dialog Box
+   * @param Text Text shown in the Dialog Box
+   * @param OK String for "OK" button
+   * @param Cancel String for "Cancel" button
+   * @param image Image to display next to text
+   */
+  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, Image image)
+    {
+      this(new DialogRsrc(frame, Title, Text, OK, Cancel, image));
     }
 
   /**
@@ -87,9 +107,24 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 
       objects = Resource.getObjects();
 
+
+      //Set up the text box at the top
+      Panel textPanel = new Panel();
+      textPanel.setLayout(new BorderLayout());
       MultiLineLabel textLabel = new MultiLineLabel(Resource.getText());
-      textBorder = new EtchedBorder(textLabel, 2, 5);
+      imageCanvas = new Canvas();
+      textPanel.add("Center", textLabel);
+      textPanel.add("West", imageCanvas);
+      textBorder = new EtchedBorder(textPanel, 2, 5);
       
+      image = Resource.getImage();
+      if (image != null)
+	{
+	  System.out.println("add image");
+	  
+	  
+	}
+
       buttonPanel = new ButtonPanel();
       OKButton = buttonPanel.add(Resource.OKText);
       CancelButton = buttonPanel.add(Resource.CancelText);
@@ -229,12 +264,38 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
   public Hashtable DialogShow()
     {
       pack();
+      if (image != null)
+	{
+	  imageCanvas.setSize(image.getHeight(null), image.getWidth(null));
+	}
+      repaint();
       show();
+      
       this.dispose();
 
       return valueHash;
     }
 
+  public void paint(Graphics g)
+    {
+      System.out.println("Painting");
+      if (image != null)
+	{
+	  System.out.println("image != null");
+	  imageCanvas.setSize(image.getHeight(null), image.getWidth(null));
+	  Graphics ig = imageCanvas.getGraphics();
+	  ig.drawImage(image, 0, 0, null);
+	}
+      else
+	{
+	  System.out.println("image == null");
+	}
+    }
+
+  public void update(Graphics g)
+    {
+      paint(g);
+    }
 
   public  void actionPerformed(ActionEvent e)
     {
