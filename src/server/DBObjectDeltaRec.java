@@ -10,8 +10,8 @@
    
    Created: 11 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2001/08/15 03:56:57 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2001/08/18 06:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,7 +73,7 @@ import java.rmi.RemoteException;
  *
  */
 
-public class DBObjectDeltaRec implements FieldType {
+public final class DBObjectDeltaRec implements FieldType {
 
   static final boolean debug = false;
 
@@ -205,7 +205,6 @@ public class DBObjectDeltaRec implements FieldType {
    *
    * This DBObjectDeltaRec constructor is used to load a delta record
    * from a Journal stream.
-   *
    *
    */
 

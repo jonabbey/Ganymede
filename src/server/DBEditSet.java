@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 2001/03/03 07:36:32 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 2001/08/18 06:16:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1282,15 +1282,38 @@ public class DBEditSet {
 			    System.err.println("Logging event for " + eObj.getLabel());
 			  }
 
-			// DBEditObject.diff() does not work for deleted objects.
+			String oldVals = null;
 
-			logEvent("deleteobject",
-				 eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
-				 eObj.getInvid() + "> was deleted.\n\n",
-				 (gSession.personaInvid == null ?
-				  gSession.userInvid : gSession.personaInvid),
-				 gSession.username,
-				 invids, eObj.getEmailTargets());
+			try
+			  {
+			    oldVals = eObj.getOriginal().getPrintString();
+			  }
+			catch (NullPointerException ex)
+			  {
+			    ex.printStackTrace();
+			  }
+
+			if (oldVals != null)
+			  {
+			    logEvent("deleteobject",
+				     eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
+				     eObj.getInvid() + "> was deleted.\n\n" +
+				     oldVals + "\n",
+				     (gSession.personaInvid == null ?
+				      gSession.userInvid : gSession.personaInvid),
+				     gSession.username,
+				     invids, eObj.getEmailTargets());
+			  }
+			else
+			  {
+			    logEvent("deleteobject",
+				     eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
+				     eObj.getInvid() + "> was deleted.\n\n",
+				     (gSession.personaInvid == null ?
+				      gSession.userInvid : gSession.personaInvid),
+				     gSession.username,
+				     invids, eObj.getEmailTargets());
+			  }
 
 			break;
 		      }

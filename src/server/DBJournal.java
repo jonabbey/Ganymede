@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2001/08/15 03:47:17 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2001/08/18 06:16:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -404,10 +404,7 @@ public class DBJournal implements ObjectStatus {
 
 		    DBObjectDeltaRec delta = new DBObjectDeltaRec(jFile);
 
-		    short typecode = delta.invid.getType();
-		    int objnum = delta.invid.getNum();
-
-		    DBObject original = Ganymede.db.getObjectBase(typecode).objectTable.get(objnum);
+		    DBObject original = DBStore.viewDBObject(delta.invid);
 
 		    obj = delta.applyDelta(original);
 
@@ -717,7 +714,7 @@ public class DBJournal implements ObjectStatus {
 
 class JournalEntry {
 
-  static boolean debug = true;
+  static boolean debug = false;
 
   // ---
 
@@ -757,7 +754,7 @@ class JournalEntry {
       {
 	// delete the object
 	
-	badObj = base.objectTable.get(id);
+	badObj = base.getObject(id);
 
 	if (badObj == null)
 	  {
@@ -835,7 +832,7 @@ class JournalEntry {
 	// First we need to clear any back links from the old version
 	// of the object, if there was any such.
 
-	badObj = base.objectTable.get(id);
+	badObj = base.getObject(id);
 
 	if (badObj != null)
 	  {

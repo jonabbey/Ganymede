@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2001/08/13 20:10:04 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/08/18 06:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -172,7 +172,7 @@ class DBNameSpaceHandle implements Cloneable {
 	    return null;
 	  }
 
-	DBObject _obj = _base.objectTable.get(fieldInvid.getNum());
+	DBObject _obj = _base.getObject(fieldInvid);
 
 	if (_obj == null)
 	  {

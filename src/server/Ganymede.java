@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.121 $
-   Last Mod Date: $Date: 2001/06/03 09:40:19 $
+   Version: $Revision: 1.122 $
+   Last Mod Date: $Date: 2001/08/18 06:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -766,7 +766,7 @@ public class Ganymede {
 	// check to see if we need to reset the password to match our
 	// properties file
 
-	v_object = internalSession.session.viewDBObject(supergashinvid);
+	v_object = DBStore.viewDBObject(supergashinvid);
 	p = (PasswordDBField) v_object.getField("Password");
 
 	if (p == null || !p.matchPlainText(Ganymede.defaultrootpassProperty))
@@ -820,7 +820,7 @@ public class Ganymede {
 	defaultInv = new Invid(SchemaConstants.RoleBase,
 			       SchemaConstants.RoleDefaultObj);
 
-	if (internalSession.session.viewDBObject(defaultInv) == null)
+	if (DBStore.viewDBObject(defaultInv) == null)
 	  {
 	    System.err.println("Creating the RoleDefaultObj");
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.145 $
-   Last Mod Date: $Date: 2001/06/23 04:00:27 $
+   Version: $Revision: 1.146 $
+   Last Mod Date: $Date: 2001/08/18 06:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.145 $ %D%
+ * @version $Revision: 1.146 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -153,7 +153,58 @@ public final class DBStore {
 
   static boolean debug = false;
 
-  /* - */
+  /**
+   * We're going to just have a singleton
+   */
+
+  static DBStore db = null;
+
+  /**
+   * <p>Convenience function to find and return objects from the database
+   * without having to go through the GanymedeSession and DBSession layers.</p>
+   *
+   * <p>This method provides a direct reference to an object in the DBStore,
+   * without exporting it for remote RMI reference and without doing any
+   * permissions setting.</p>
+   */
+
+  public static DBObject viewDBObject(Invid invid)
+  {
+    if (DBStore.db == null)
+      {
+	throw new IllegalStateException("DBStore not initialized");
+      }
+
+    DBObjectBase base;
+
+    base = DBStore.db.getObjectBase(invid.getType());
+
+    if (base == null)
+      {
+	return null;
+      }
+
+    return base.getObject(invid);
+  }
+
+  /**
+   * <p>Convenience synchronized function to set the singleton DBStore
+   * db member in the DBStore class.</p>
+   */
+
+  private static synchronized boolean setDBSingleton(DBStore store)
+  {
+    if (DBStore.db != null)
+      {
+	return false;
+      }
+
+    DBStore.db = store;
+
+    return true;
+  }
+
+  /* --- */
 
   /*
     All of the following should only be modified/accessed
@@ -272,6 +323,14 @@ public final class DBStore {
 	System.err.println("Caught DBBaseCategory ex: " + ex.getMessage());
 	ex.printStackTrace();
 	throw new Error("couldn't initialize rootCategory");
+      }
+
+    // set the static pointer after we have at least created the basic
+    // data structures
+
+    if (!setDBSingleton(this))
+      {
+	throw new IllegalStateException("DBStore already created");
       }
 
     GanymedeAdmin.setState("Normal Operation");

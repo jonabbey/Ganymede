@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.133 $
-   Last Mod Date: $Date: 2001/08/15 04:27:39 $
+   Version: $Revision: 1.134 $
+   Last Mod Date: $Date: 2001/08/18 06:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.133 $ $Date: 2001/08/15 04:27:39 $
+ * @version $Revision: 1.134 $ $Date: 2001/08/18 06:16:27 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2223,91 +2223,6 @@ public class DBObject implements db_object, FieldType, Remote {
     return results;
   }
 
-
-
-  /**
-   * <p>Generate a complete printed representation of the object,
-   * suitable for printing to a debug or log stream.</p>
-   */
-
-  public void print(PrintStream out)
-  {
-    out.print(this.getPrintString());
-  }
-
-  /**
-   * <p>Generate a complete printed representation of the object,
-   * suitable for printing to a debug or log stream.</p>
-   */
-
-  public String getPrintString()
-  {
-    StringWriter stringTarget = new StringWriter();
-    PrintWriter writer = new PrintWriter(stringTarget);
-    
-    this.print(writer);
-    writer.close();
-
-    return stringTarget.toString();
-  }
-
-  /**
-   * <p>Generate a complete printed representation of the object,
-   * suitable for printing to a debug or log stream.</p>
-   */
-
-  public void print(PrintWriter out)
-  {
-    DBField field;
-
-    /* -- */
-
-    out.println("Invid: <" + objectBase.object_name + ":" + getID() + ">");
-
-    synchronized (fieldAry)
-      {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    field = fieldAry[i];
-
-	    if (field == null)
-	      {
-		continue;
-	      }
-
-	    out.print(field.getName());
-	    out.print(" : ");
-
-	    if (field instanceof PasswordDBField)
-	      {
-		out.println("<password>");
-		continue;
-	      }
-
-	    if (field.isVector())
-	      {
-		for (int j = 0; j < field.size(); j++)
-		  {
-		    out.print("\t" + field.key(j));
-
-		    if (j + 1 < field.size())
-		      {
-			out.println(",");
-		      }
-		    else
-		      {
-			out.println();
-		      }
-		  }
-	      }
-	    else
-	      {
-		out.println(field.key());
-	      }
-	  } 
-      }   
-  }
-
   /**
    * <p>This method is used to provide a hook to allow different
    * objects to generate different labels for a given object
@@ -2588,11 +2503,52 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
+   * <p>Generate a complete printed representation of the object,
+   * suitable for printing to a debug or log stream.</p>
+   */
+
+  public void print(PrintStream out)
+  {
+    out.print(getPrintString());
+  }
+
+  /**
+   * <p>Generate a complete printed representation of the object,
+   * suitable for printing to a debug or log stream.</p>
+   */
+
+  public void print(PrintWriter out)
+  {
+    out.print(getPrintString());
+  }
+
+  /**
+   * <p>This server-side method returns a summary description of
+   * this object, including a listing of all non-null fields and
+   * their contents.</p>
+   * 
+   * <p>This method calls
+   * {@link arlut.csd.ganymede.DBObject#appendObjectInfo(java.lang.StringBuffer,
+   * java.lang.String, boolean) appendObjectInfo} to do most of its work.</p>
+   */
+
+  public String getPrintString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    this.appendObjectInfo(result, null, true);
+
+    return result.toString();
+  }
+
+  /**
    * <p>This method is used to provide a summary description of
    * this object, including a listing of all non-null fields and
    * their contents.  This method is remotely callable by the client,
    * and so will only reveal fields that the user has permission
-   * to view.</p>
+   * to view.  This method returns a StringBuffer to work around
+   * problems with serializing large strings in early versions of the
+   * JDK.</p>
    * 
    * <p>This method calls
    * {@link arlut.csd.ganymede.DBObject#appendObjectInfo(java.lang.StringBuffer,
@@ -2609,25 +2565,6 @@ public class DBObject implements db_object, FieldType, Remote {
       }
 
     this.appendObjectInfo(result, null, false);
-
-    return result;
-  }
-
-  /**
-   * <p>This method is used to provide a summary description of
-   * this object, including a listing of all non-null fields and
-   * their contents.</p>
-   * 
-   * <p>This method calls
-   * {@link arlut.csd.ganymede.DBObject#appendObjectInfo(java.lang.StringBuffer,
-   * java.lang.String, boolean) appendObjectInfo} to do most of its work.</p>
-   */
-
-  public StringBuffer getSummaryDescriptionLocal()
-  {
-    StringBuffer result = new StringBuffer();
-
-    this.appendObjectInfo(result, null, true);
 
     return result;
   }
@@ -2703,11 +2640,37 @@ public class DBObject implements db_object, FieldType, Remote {
 			
 			Invid x = invField.value(j);
 
-			// we use view_db_object() so that we don't reveal
-			// fields that should not be seen.
+			DBObject remObj = null;
 
-			ReturnVal retVal = gSession.view_db_object(x);
-			DBObject remObj = (DBObject) retVal.getObject();
+			if (gSession != null)
+			  {
+			    // if this object has been checked out for
+			    // viewing by a session, we'll use
+			    // view_db_object() so that we don't
+			    // reveal fields that should not be seen.
+			    
+			    ReturnVal retVal = gSession.view_db_object(x);
+			    remObj = (DBObject) retVal.getObject();
+			  }
+			else
+			  {
+			    // we use DBStore's static viewDBObject
+			    // method so that we can call this even
+			    // before the GanymedeServer object is
+			    // initialized
+
+			    remObj = DBStore.viewDBObject(x);
+			  }
+
+			if (remObj instanceof DBEditObject)
+			  {
+			    DBEditObject eO = (DBEditObject) remObj;
+			    
+			    if (eO.getStatus() == ObjectStatus.DELETING)
+			      {
+				remObj = eO.getOriginal();
+			      }
+			  }
 
 			if (prefix != null)
 			  {

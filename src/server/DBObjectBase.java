@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.131 $
-   Last Mod Date: $Date: 2001/03/27 07:30:28 $
+   Version: $Revision: 1.132 $
+   Last Mod Date: $Date: 2001/08/18 06:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2567,6 +2567,31 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
 
     return id;
+  }
+
+  /**
+   * <p>This server-side routine provides a convenient accessor to retrieve
+   * a specific object stored in this DBObjectBase.</p>
+   */
+
+  public final DBObject getObject(Invid invid)
+  {
+    if (invid.getType() != this.getTypeID())
+      {
+	throw new IllegalArgumentException("wrong invid type");
+      }
+
+    return objectTable.get(invid.getNum());
+  }
+
+  /**
+   * <p>This server-side routine provides a convenient accessor to retrieve
+   * a specific object stored in this DBObjectBase.</p>
+   */
+
+  public final DBObject getObject(int objectID)
+  {
+    return objectTable.get(objectID);
   }
 
   /**

@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 2001/06/01 01:35:01 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 2001/08/18 06:16:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.100 $ %D%
+ * @version $Revision: 1.101 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -767,7 +767,7 @@ final public class DBSession {
     // can look up objects even while the DBObjectBase is locked
     // during another transaction's commit
 
-    obj = base.objectTable.get(objectID);
+    obj = base.getObject(objectID);
 
     // if we aren't editing anything, we can't possibly have our own
     // version of the object checked out
