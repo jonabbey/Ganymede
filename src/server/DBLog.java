@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2000/06/28 03:07:05 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2000/06/28 03:29:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -490,7 +490,7 @@ public class DBLog {
 	    // parties, for later transmission with sendObjectMail().
 
 	    sentTo = VectorUtils.union(sentTo, appendObjectMail(event, objectOuts,
-								transdescrip));
+								transdescrip, transaction.session));
 
 	    // we may have a system event instead, in which case we handle
 	    // mailing it here
@@ -1031,7 +1031,7 @@ public class DBLog {
    */
 
   private Vector appendObjectMail(DBLogEvent event, Hashtable objectOuts,
-				  String transdescrip)
+				  String transdescrip, DBSession transSession)
   {
     if (event == null || event.objects == null || event.objects.size() != 1)
       {
@@ -1072,7 +1072,7 @@ public class DBLog {
 
 	if (event.admin != null)
 	  {
-	    name = adminPersonaCustom.convertAdminInvidToString(event.admin, session.getSession());
+	    name = adminPersonaCustom.convertAdminInvidToString(event.admin, transSession);
 
 	    if (name != null)
 	      {
@@ -1084,7 +1084,7 @@ public class DBLog {
     if (type.ccToOwners)
       {
 	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects,
-				     session.getSession()));
+								       transSession));
       }
 
     mailList = VectorUtils.union(mailList, type.addressVect);
@@ -1097,7 +1097,7 @@ public class DBLog {
     // looking up the object name can be pricey, so we wait until we
     // know we probably need to do it, here
 
-    String objectName = session.viewObjectLabel(objectInvid);
+    String objectName = transSession.getGSession().viewObjectLabel(objectInvid);
 
     // okay, we have some users interested in getting notified about this
     // object event..
@@ -1179,7 +1179,7 @@ public class DBLog {
 
 		if (mailout.objName != null)
 		  {
-		    title = title + " \"" + mailout.objName + "\"";
+		    title = title + " (\"" + mailout.objName + "\")";
 		  }
 	      }
 	    else
