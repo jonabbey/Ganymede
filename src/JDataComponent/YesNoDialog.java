@@ -5,7 +5,7 @@
    A 1.1 compatible YesNoDialog box
    
    Created: 6 February 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -157,6 +157,6 @@ class ButtonPanel extends JPanel {
     protected String paramString() 
     {
       return super.paramString() + "buttons=" +
-        countComponents();
+        getComponentCount();
     }
 }
