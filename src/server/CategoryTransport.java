@@ -8,8 +8,8 @@
    
    Created: 12 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/01/22 18:05:29 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/11/09 22:40:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,6 +73,13 @@ public class CategoryTransport implements java.io.Serializable {
   // ---
 
   StringBuffer buffer;
+
+  /**
+   * <p>This is really a GanymedeSession object, but by defining this
+   * as a generic Object we avoid having the client attempt to load
+   * the GanymedeSession.class.</p>
+   */
+
   transient Object session = null;
 
   /* -- */
