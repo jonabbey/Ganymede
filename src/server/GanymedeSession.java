@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.184 $
-   Last Mod Date: $Date: 2000/06/22 04:56:25 $
+   Version: $Revision: 1.185 $
+   Last Mod Date: $Date: 2000/06/29 05:03:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.184 $ $Date: 2000/06/22 04:56:25 $
+ * @version $Revision: 1.185 $ $Date: 2000/06/29 05:03:09 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4410,7 +4410,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     setLastEvent("remove_db_object: " + vObj.getLabel());
 
-    // note!  DBEditObject's finalizeRemove() method does the event logging
+    // note!  the 'object deleted' DBLogEvent is currently created in
+    // the DBEditSet commit() logic.  Strange, but true.
     
     return session.deleteDBObject(invid);
   }

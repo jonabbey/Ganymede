@@ -7,8 +7,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2000/02/21 19:50:23 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2000/06/29 05:03:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -329,6 +329,4 @@ public class GanymedeExpirationTask implements Runnable {
 	  }
       }
   }
-
-
 }

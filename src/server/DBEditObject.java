@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.130 $
-   Last Mod Date: $Date: 2000/06/29 04:39:26 $
+   Version: $Revision: 1.131 $
+   Last Mod Date: $Date: 2000/06/29 05:03:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.130 $ $Date: 2000/06/29 04:39:26 $ $Name:  $
+ * @version $Revision: 1.131 $ $Date: 2000/06/29 05:03:07 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2503,6 +2503,20 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     
     // set the deleting flag to true so that our subclasses won't
     // freak about values being set to null.
+
+    // NOTE: notice that we don't log a DBLogEvent for the object's
+    // deletion anywhere in this method, as is done similarly in
+    // finalizeInactivate() and finalizeReactivate().  We currently
+    // take care of it in DBEditSet's commit() method.  I have no
+    // idea now why I didn't do it the same for object removal, but
+    // the commit() method does check to make sure that the object
+    // was previously committed to the database before logging
+    // its deletion (it doesn't log it if the object is being
+    // DROPPED rather than DELETED), so maybe I had some reason
+    // in my head.
+
+    // Probably not though.. for now, I'm leaving the object deletion
+    // logging in DBEditSet.commit() for historical flavor.
 
     if (debug)
       {
