@@ -627,9 +627,9 @@ public final class DBNameSpace implements NameSpace {
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.owner != editSet)
+	if (handle.owner != null && handle.owner != editSet)
 	  {
-	    return false;	// we don't owns it
+	    return false;	// another active transaction owns it
 	  }
 	else
 	  {
@@ -700,56 +700,58 @@ public final class DBNameSpace implements NameSpace {
 	
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.owner != editSet && editSet.isInteractive())
+	if (handle.owner != null && handle.owner != editSet)
 	  {
-	    // another transaction is manipulating this value
+	    // this handle hasn't been checked out by a different
+	    // transaction, we can't mess with it
 		
 	    if (debug)
 	      {
 		System.err.println(editSet.session.key + ": DBNameSpace.mark(): we don't own handle");
 	      }
 	    
-	    return false;	// somebody else owns it
+	    return false;
 	  }
 	else
 	  {
 	    // we own it, or can own it
 
-	    // If we are an interactive transaction, we can't mark
-	    // this value if this namespace value is still being used
-	    // in the namespace.  they need to unmark the value in one
-	    // place before they can mark it in another.
-
-	    // if we're not interactive, we'll remember the proposed
-	    // new field association in our handle's shadowFieldB
-	    // variable.. if we later unmark the original association,
-	    // we'll promote the shadowFieldB association to
-	    // shadowField 'A'.
-
 	    if (handle.inuse)
 	      {
 		if (editSet.isInteractive())
 		  {
+		    // If we are an interactive transaction, we can't mark
+		    // this value if this namespace value is still being used
+		    // in the namespace.  they need to unmark the value in one
+		    // place before they can mark it in another.
+
 		    return false;
 		  }
 		else
 		  {
-		    if (handle.owner == null)
-		      {
-			handle.owner = editSet;
-		      }
+		    // if we're not interactive, we'll remember the proposed
+		    // new field association in our handle's shadowFieldB
+		    // variable.. if we later unmark the original association,
+		    // we'll promote the shadowFieldB association to
+		    // shadowField 'A'.
 
-		    if (handle.getShadowFieldB() != null)
+		    if (handle.getShadowFieldB() != field)
 		      {
 			// we've already speculatively associated
 			// ourselves with this value with another
 			// field.. we can't do more than one
 			// speculative association in one
-			// non-interactice transaction and have any
+			// non-interactive transaction and have any
 			// chance of consistency at the end, so just
 			// go ahead and reject this attempt
 
 			return false;
+		      }
+
+		    if (handle.owner == null)
+		      {
+			handle.owner = editSet;	// yoinks!  ours!
+			remember(editSet, value);
 		      }
 
 		    handle.setShadowFieldB(field);
@@ -759,11 +761,13 @@ public final class DBNameSpace implements NameSpace {
 	      {
 		handle.inuse = true;
 		handle.setShadowField(field);
-	      }
 
-	    // we don't have to have the transaction record remember
-	    // the value since we should already have this value noted
-	    // in the editset
+		if (handle.owner == null)
+		  {
+		    handle.owner = editSet;
+		    remember(editSet, value);
+		  }
+	      }
 	  }
       }
     else
@@ -879,7 +883,7 @@ public final class DBNameSpace implements NameSpace {
 	
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.owner != editSet)
+	if (handle.owner != null && handle.owner != editSet)
 	  {
 	    // either someone else is manipulating this value, or an object
 	    // stored in the database holds this value.  We would need to
@@ -902,6 +906,12 @@ public final class DBNameSpace implements NameSpace {
 	    if (onlyUnused && handle.inuse)
 	      {
 		return false;
+	      }
+
+	    if (handle.owner == null)
+	      {
+		handle.owner = editSet;
+		remember(editSet, value);
 	      }
 
 	    return true;
@@ -1524,6 +1534,13 @@ public final class DBNameSpace implements NameSpace {
   This is a private convenience method.
 
   ----------------------------------------------------------------------------*/
+
+  /**
+   * <p>This method associates the value with the given editset in a
+   * stored transaction record, so that we can rollback the namespace
+   * to a fixed state later.</p>
+   */
+
   private void remember(DBEditSet editSet, Object value)
   {
     getTransactionRecord(editSet).remember(value);
