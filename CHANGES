@@ -87,8 +87,9 @@ See doc/server.html for a guide on the new task scheduling system.
 
 6. [CLIENT] Better taskbar icons
 
-Brian reworked the taskbar significantly, with bigger and nicer the
-taskbar icons.
+Brian reworked the taskbar significantly, with bigger and nicer
+taskbar icons.  The dialogs brought up when the toolbar buttons are
+clicked have been reworked a bit to be more distinctive.
 
 More work coming to the client's GUI in 0.98.
 
