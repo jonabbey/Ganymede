@@ -6,8 +6,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/08/14 00:47:01 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/11/04 00:22:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ public class JDialogBuff implements java.io.Serializable {
   // ---
   
   String title;
-  String text;
+  StringBuffer text;
   String okText;
   String cancelText;
   String imageName;
@@ -98,7 +98,7 @@ public class JDialogBuff implements java.io.Serializable {
 
     /* -- */
 
-    rsrc = new DialogRsrc(frame, title, text, okText, cancelText, imageName);
+    rsrc = new DialogRsrc(frame, title, text.toString(), okText, cancelText, imageName);
 
     rsrc.objects = resources;
 
@@ -147,7 +147,13 @@ public class JDialogBuff implements java.io.Serializable {
   public JDialogBuff(String Title, String Text, String OK, String Cancel, String image)
   {
     this.title = Title;
-    this.text = Text;
+
+    if (Text == null)
+      {
+	this.text = new StringBuffer();
+	this.text.append(Text);
+      }
+
     this.okText = OK;
     this.cancelText = Cancel;
     this.imageName = image;
@@ -280,7 +286,8 @@ public class JDialogBuff implements java.io.Serializable {
 
   public void appendText(String text)
   {
-    this.text = this.text + "\n" + text;
+    this.text.append("\n");
+    this.text.append(text);
   }
 
   /**
@@ -289,7 +296,11 @@ public class JDialogBuff implements java.io.Serializable {
 
   public String getText()
   {
-    return text;
-  }
+    if (text == null)
+      {
+	return null;
+      }
 
+    return text.toString();
+  }
 }
