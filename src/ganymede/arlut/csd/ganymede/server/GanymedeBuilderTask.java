@@ -690,6 +690,15 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * an external Makefile, which can take an indeterminate period of
    * time.</P>
    *
+   * <P>It is important that any external process run by
+   * builderPhase2() blocks until it is finished doing the build.  If
+   * the external script tries to put itself into the background and
+   * return early, the Ganymede server will conclude that the external
+   * build has completely finished, and it will feel free to
+   * immediately schedule this builder task again, which may mean that
+   * the builderPhase1() method will overwrite files the backgrounded
+   * external builder process is still using.</p>
+   *
    * <P>By releasing the dumpLock before we get to that point, we
    * minimize contention for users of the system.</P>
    *
