@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -84,9 +84,22 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   Button CancelButton = new Button("Cancel");
   Button addButton = new Button("Add Choices");
   Button removeButton = new Button("Remove Choices");
-  Button displayButton = new Button("Return Options");
+  Button displayButton = new Button("Options");
   Button optionClose = new Button("Close");
- 
+
+  //----------- more Buttons, this time used by the save/load menu
+
+  Button qSave = new Button("Save");
+  Button qLoad = new Button("Load");
+  Button qDone = new Button("Done");
+  Button qCancel = new Button("Cancel");
+  Button lCancel = new Button(" Cancel ");
+  Button lRename = new Button("Rename");
+  Button lSelect = new Button(" Select ");
+
+  //-----------
+
+
   // - Panels, Boxes and Panes
 
   Panel query_panel = new Panel();
@@ -117,8 +130,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   // - imput fields
 
   TextField inputField = new TextField(12);
+  TextField saveText;
   TextField dateField;
-
+  
   // - Vectors
 
   Vector fieldOptions = new Vector(); // keeps track of which fields will
@@ -134,9 +148,13 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       editOnly,
       booleanField;
 
-  // - other variables
+  // - ints
 
   int row = 0;
+  int readLength;  // for use in the reading of queries
+
+  // - other variables
+
   Query returnVal;
   Base defaultBase;
   Component[] myAry = new Component[MAXCOMPONENTS]; // stores a single row
@@ -147,6 +165,17 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     currentBase,
     currentField,
     baseName;
+
+  // -- read query stuff (strings)
+  
+    String
+      queryString; // qeuryString is used in the loading of queries
+
+  // - Dialog Boxes
+
+  Dialog saveBox;
+  Dialog loadBox;
+
 
   /* -- */
 
@@ -335,9 +364,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   public Query myshow()
   {
-    // Method to set the perm_editor to visible or invisible
+    // Method to set the querybox to visible or invisible
     
-    setSize(800,350);
+    setSize(800,250);
     setVisible(true);		// our thread will wait at this point
     
     return this.returnVal; // once setVisible is set to false
@@ -361,16 +390,21 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   private Frame createOptionFrame (Base base)
   {
     /* Method to return a choice menu containing the fields for
-     * a particular base
+     * a particular base, along with the query saving options
      */
     
-    ScrollPane option_pane = new ScrollPane();
-    
+    ScrollPane option_pane = new ScrollPane();    
+
+    Panel save_panel = new Panel(); // holds query options
     Panel option_panel = new Panel();
     Panel choice_option = new Panel(); // basically holds the Close button
-    
+    Panel contain_panel = new Panel(); // Holds the boxes
+
+    Box saveBox = new Box (save_panel, "Query Options");
+    Box returnBox = new Box (option_pane, "Return Options");
+   
     BaseField basefield;
-    Frame myFrame = new Frame("Return Options");
+    Frame myFrame = new Frame("Options");
     Checkbox newCheck; 
     Panel inner_panel = new Panel();
     
@@ -378,22 +412,34 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     
     /* -- */
       
-    myFrame.setSize(380,250);
-      
+    myFrame.setSize(500,300);
+  
     optionClose.setBackground(Color.lightGray);
     optionClose.addActionListener(this);
     
-    choice_option.setBackground(Color.gray);
+    choice_option.setBackground(Color.white);
     choice_option.setLayout(new FlowLayout());
     choice_option.add(optionClose);
     
-    inner_panel.setBackground(Color.white);
+    contain_panel.setLayout(new BorderLayout());
+    contain_panel.add("South", saveBox);
+    contain_panel.add("Center", returnBox);
+    
     option_panel.setLayout(new BorderLayout());
     option_panel.add("South",choice_option);
-    option_panel.add("Center", inner_panel);
-    
+    option_panel.add("Center", contain_panel);
+  
+    option_pane.add(inner_panel);
     inner_panel.setLayout(new TableLayout());
     
+    save_panel.setLayout(new FlowLayout());
+    save_panel.add(qSave);
+    save_panel.add(new Label("   "));
+    save_panel.add(qLoad);
+
+    qSave.addActionListener(this);
+    qLoad.addActionListener(this);
+
     try
       {
 	Vector fields = base.getFields();
@@ -456,15 +502,15 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	throw new RuntimeException("caught remote exception: " + ex);	
       }
             
-    option_pane.add(option_panel);
-    myFrame.add(option_pane);
+    //option_pane.add(option_panel);
+    myFrame.add(option_panel);
       
     // overkill?
 
     myFrame.invalidate();
     myFrame.validate();
     myFrame.repaint();
-    
+
     return myFrame;  
   }
 
@@ -729,7 +775,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  }
 	else 
 	  {
-	    System.out.println("Yes, brothers and sisters, we have an EIP!!!");
+	    //System.out.println("Yes, brothers and sisters, we have an EIP!!!");
 	  }
 
 	if (myField == null)
@@ -741,8 +787,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	if (myField.isArray())
 	  {
 	    returnChoice.add("Length");
-	    returnChoice.add("Contains");
-	    returnChoice.add("Does Not Contain");       
+	    returnChoice.add("Contains Any");
+	    returnChoice.add("Contains None");
+	    returnChoice.add("Contains All");
 	  }
 	else 
 	  {
@@ -803,6 +850,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	else if (myField.isBoolean())
 	  {
 	    Checkbox boolBox = new Checkbox("True");
+	    System.out.println("It's a Boolean!");
 	    boolBox.setState(true);
 
 	    return boolBox;
@@ -861,6 +909,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	intChoice.add("<="); 
 	intChoice.add("<"); 
 	intChoice.add(">");
+	intChoice.add("= [Case Insensitive]");
+	intChoice.add("Starts With");
+	intChoice.add("Ends With");
   
 	// Do a nice null test to make sure stuff isn't screwey
 	  
@@ -1062,7 +1113,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  }
 	else if (tempField.isDate())
 	  {
-	    // Fix THIS!!!!
+	    // **NOTE: This will have to be implemented when we decide how
+	    // ** we're going to do dates
+
+
 	    value = new Date();
 	  }
 	else if (tempField.isBoolean())
@@ -1079,7 +1133,12 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  }
 
 	// -- get the correct operator
-    
+	// -- Note: you'll have to do this agian for vectors.
+        //    Don't do them here!!
+
+
+	if (! tempField.isArray()){
+
 	if (operator == "=")
 	  {
 	    opValue = 1;
@@ -1100,11 +1159,58 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {
 	    opValue = 5;
 	  } 
-	else 
+	else if (operator.equals("= [Case Insesitive]"))
 	  {
-	    opValue = 7; // UNDEFINED
+	    opValue = 6;
+	  }
+	else if (operator.equals("Starts With"))
+	  {
+	    opValue = 7;
+	  }
+	else if (operator.equals("Ends With"))
+	  {
+	    opValue = 8;
+	  }
+	else
+	  {
+	    opValue = 9; // UNDEFINED
 	  }    
-	
+	}
+
+	else{
+
+	  // we have a vector, so use vector operators
+	  
+	if (operator.equals("Contains Any"))
+	  {
+	    opValue = 1;
+	  } 
+	else if (operator.equals("Contains All"))
+	  {
+	    opValue = 2;
+	  } 
+	else if (operator.equals("Contains None"))
+	  {
+	    opValue = 3;
+	  } 
+	else if (operator.equals("Length Equals")) 
+	  {
+	    opValue = 4;
+	  } 
+	else if (operator.equals("Length Greater Than")) 
+	  {
+	    opValue = 5;
+	  } 
+	else if (operator.equals("Length Less Than"))
+	  {
+	    opValue = 6;
+	  }
+	else
+	  {
+	    opValue = 7; // Undefined
+	  } 
+	}
+
 	// -- if not is true then add a not node
     
 	dataNode = new QueryDataNode(fieldName, opValue, value);
@@ -1119,8 +1225,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    myNode = dataNode;
 	  }
 	
-
-
 
 	if (allRows == 1)
 	  {
@@ -1360,6 +1464,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	
 	System.out.println("Results: " + myQuery.dumpToString());
 
+	// TESTING readQuery
+
+	readQuery(myQuery.dumpToString());
+
 	return myQuery;
       }
     catch (RemoteException ex)
@@ -1457,6 +1565,142 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   
   public void actionPerformed(ActionEvent e)
   {
+    if (e.getSource() == qSave)
+      {
+	System.out.println("Save Clicked");
+
+	saveBox = new Dialog(optionsFrame, "Save As", true);
+
+	Panel button_panel = new Panel();
+	Panel mid_panel = new Panel();
+
+	button_panel.setLayout(new FlowLayout());
+	button_panel.add(qDone);
+	button_panel.add(new Label("   "));
+	button_panel.add(qCancel);
+
+
+	saveText = new TextField(10);
+	mid_panel.add(saveText);
+
+
+	Font f = new Font("TimesRoman", Font.BOLD, 14);
+	Label SaveLabel = new Label("Enter Name For Query");
+	SaveLabel.setFont(f);
+	
+	saveBox.setLayout(new BorderLayout());
+	saveBox.add("North", SaveLabel);
+	saveBox.add("Center", mid_panel);
+	saveBox.add("South", button_panel);
+	saveBox.setSize(300, 135);
+
+	qDone.addActionListener(this);
+	qCancel.addActionListener(this);
+
+	saveBox.setVisible(true);
+      }		   
+    
+    if (e.getSource() == qCancel)
+      {
+	// Cancel the save transaction and close the save dialog
+
+	saveBox.setVisible(false);
+
+      }
+    
+    if (e.getSource() == qDone)
+      {
+	// -- We want to save the current query under the current name
+
+	String outPut = saveText.getText();
+	System.out.println("save name is: " + outPut);
+
+	saveBox.setVisible(false);
+      }
+
+    if (e.getSource() == qLoad)
+      {
+	// We gots to create the dialog for loading queries.
+	
+	System.out.println("Load Button Clicked");
+	
+	Label l;
+	int n;
+	Panel listPanel = new Panel();
+
+	GridBagLayout gbl = new GridBagLayout();
+	GridBagConstraints gbc = new GridBagConstraints();
+  	Panel button_panel = new Panel();
+	Panel outPanel = new Panel();
+
+	button_panel.setLayout(gbl);
+	button_panel.setSize(100, 50);
+	button_panel.setBackground(Color.white);
+	
+	loadBox = new Dialog(optionsFrame, "Load Query", true);	
+	List queryList = new List(10);
+
+	l = new Label("");
+	gbc.gridy = n = 0;
+	gbl.setConstraints(l, gbc);
+	button_panel.add(l);
+
+	n = 6;
+
+	gbc.gridy = n++;
+	gbl.setConstraints(lSelect, gbc);
+	button_panel.add(lSelect);
+	lSelect.addActionListener(this);
+	lSelect.setBackground(Color.lightGray);
+
+	gbc.gridy = n++;
+	gbl.setConstraints(lRename, gbc);
+	button_panel.add(lRename);
+	lRename.addActionListener(this);
+	lRename.setBackground(Color.lightGray);
+
+	gbc.gridy = n++;
+	gbl.setConstraints(lCancel, gbc);
+	button_panel.add(lCancel);
+	lCancel.addActionListener(this);
+	lCancel.setBackground(Color.lightGray);
+
+	n = 17;
+	l = new Label("");
+	gbc.gridy = n;
+	gbl.setConstraints(l, gbc);
+	button_panel.add(l);
+ 
+	// -- Add the elements to the choice list
+
+	listPanel.setBackground(Color.lightGray);
+	listPanel.setLayout(new BorderLayout());
+	listPanel.add(queryList);
+
+	// - add identifying label
+	
+	Font f = new Font("TimesRoman", Font.BOLD, 14);
+	Label qLabel = new Label("Saved Queries");
+	qLabel.setFont(f);
+	listPanel.add("North", qLabel);
+
+	queryList.setBackground(Color.white);
+	queryList.setSize(100, 100);
+	queryList.add("Testing 1");
+	queryList.add("Testing 2");
+	queryList.add("Testing 3");
+
+	listPanel.add("South", queryList);
+
+	JSplitPane loadPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, button_panel);
+
+	loadBox.setSize(275, 175);
+	loadBox.add(loadPane);
+	loadBox.setVisible(true);
+
+      }
+
+
     if (e.getSource() == displayButton)
       {
 	System.out.println("Field Display Selected");
@@ -1477,6 +1721,11 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {
 	    optionsFrame.setVisible(false);
 	  }
+      }
+
+    if (e.getSource() == lCancel)
+      {
+	loadBox.setVisible(false);
       }
 
     if (e.getSource() == OkButton) 
@@ -1537,7 +1786,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       {
 	this.editOnly = editBox.getState();
 	System.out.println("Edit Box Clicked: " + editOnly);
-	// IMPLEMENT ME!!!
       }
 
     if (e.getSource() == baseChoice)
@@ -1617,12 +1865,13 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	int currentRow = source.getRow();
 	Component[] tempRow = (Component[]) Rows.elementAt(currentRow);
 	
-	if ((opName.equalsIgnoreCase("Contains")) || 
-	    (opName.equalsIgnoreCase("Does Not Contain")))
+	if ((opName.equalsIgnoreCase("Contains All")) || 
+	    (opName.equalsIgnoreCase("Contains None")) ||
+	    (opName.equalsIgnoreCase("Contains Any")))
 	  {
 	    // disable the numeric operator choice cause it makes
 	    // no sense in this contaxt
-
+	    
 	    if (tempRow[5].isEnabled())
 	      {	
 		tempRow[5].setEnabled(false);
@@ -1640,9 +1889,386 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       }
     else 
       {
-	// ?? what the heck is it?  
+	// ?? what the heck is it? We don't recognize this oprator 
       }
   }
+
+
+
+  public Query readQuery (String savedQuery)
+    {
+      /** 
+       * NOTE: CONVERT STRING TO QUERY AFTER TESTING
+       *
+       *
+       * This method takes a as its parameter query and sets the 
+       * gui components of the querybox to reflect the state of 
+       * that query.
+       */
+      
+      String temp,
+	     name,
+	     base,
+	     edit;
+
+      int baseInt,
+	  nameBreak,
+	  baseBreak,
+          editBreak,
+	  queryBreak;
+      
+      temp = savedQuery;
+
+      nameBreak = temp.indexOf(":"); // this will get the first 
+                                     // index of the ':' character 
+      System.out.println("--------");
+
+      name = temp.substring(0, nameBreak); 
+      System.out.println("Name Found: " + name);
+
+      temp = temp.substring(nameBreak + 1, temp.length()); // The '+1' removes the colon
+
+      baseBreak = temp.indexOf(":");
+      base = temp.substring(0, baseBreak);
+      System.out.println("Here's base: " + base);
+      
+      temp = temp.substring(baseBreak + 1, temp.length());
+      editBreak = temp.indexOf(":");
+      edit = temp.substring(0, editBreak);
+      System.out.println("And Edit: " + edit);
+
+      temp = temp.substring(editBreak + 1, temp.length());
+      System.out.println("And the Rest: " + temp);
+      System.out.println("--------");
+
+      // Time to create the query....
+
+      // Step One: Create the root Node. Then we can make a nice query from it.
+       
+	 
+      // First, check and see if the base is in short or string form. This is done
+      // by looking to see if a '#' sign is the first character (note: be sure to
+      // ignore backslashed characters
+
+
+
+
+
+
+      /* Step Two: Figure out what the base is, and what form it's in (ie, baseID,
+       * baseName, etc), and get the other pertinent variables. We'll use these to 
+       * create the query object.
+       */
+      
+    
+      this.queryString = temp;   // decodeString will use the querystring to read
+                                 // the query
+                              
+      QueryNode root = decodeString();
+      boolean Edit;
+      
+
+      if (edit.equals("true"))
+	{
+	  Edit = true;
+	}
+      else
+	{
+	  Edit = false;
+	}
+
+      Query returnQuery = new Query(base, root, Edit);
+
+      System.out.println("");
+      System.out.println("______________");
+      System.out.println("And Here it is: " + returnQuery.dumpToString());
+
+      return returnQuery;
+      
+    }
+
+      
+  private QueryNode decodeString()
+  
+    {
+      /* This method will break down the LISP-y section of the
+       * query-string. In keeping with the theme, it is 
+       * recursive. The nodes of the query are set as it goes along.
+       *
+       * The outer method is a helper method, while the inner method
+       * rDecode really odes all the work
+       */
+
+      QueryNode returnNode;
+      String temp;
+     
+      this.readLength = this.queryString.length();
+      returnNode = null;
+
+      if (this.queryString.startsWith("("))
+	  {
+	    System.out.println("YAY!!");
+	    	  
+	    temp = this.queryString.substring(1, this.readLength - 1); // remove the outer 
+	                                                 // parens
+	    
+	    this.readLength = this.readLength - 2;
+
+	    returnNode = rDecode(); // Begin the begin (ie do the recursive stuff)
+	  }
+
+   
+	    return returnNode;  
+      
+    }
+  
+  private QueryNode rDecode () 
+    {
+      
+      QueryNode myNode = null;
+      String temp = this.queryString;
+
+      System.out.println("Here's the rest: " + temp);
+      
+      /* While we're recursing, we are chopping off bits of this.queryString,
+	 which resides high (in the querybox object) above all this madness.
+	 
+	 So, let's begin by seeing what this level holds:
+	 
+	 1) if the first char is another paren, then call rDecode again after 
+	 removing it
+	 
+	 2) if the next char is an operator (=, =<, =>, <, >, etc) then it's a
+	 data note. Here, we have to get the fieldname and value too, and with
+	 the fieldname we have to test to see if it's in Short or String form
+	 
+	 3) if the string starts with 'not' then make a not node and set it's
+	 child to rDecode()
+	 
+	 4) if temp begins with 'and' or 'or', then we have to set both 
+	 children to rDecode(). The queryString will be 
+	 shortened as we go along.
+	 
+      */
+      
+      if (temp.startsWith("(") || temp.startsWith(")"))
+	{
+	  System.out.println("Parenthesis encountered. Destroy it, captain");
+	  
+	  this.queryString = this.queryString.substring(1, this.readLength); // length defined in helper
+	  
+	  this.readLength --;
+	  myNode = rDecode();
+	
+	}
+      
+      else if (temp.startsWith("not")) 
+
+	{
+	  // make a not node, cut the 'not' off of the queryString and
+	  // set the child of the not to rDecode(queryString) and remove ')'
+
+	  myNode = new QueryNotNode(rDecode());
+	  
+	  if (this.queryString.startsWith(")"))
+	    {
+	      this.queryString = this.queryString.substring(1, this.readLength); 
+	    }
+
+	  return myNode;
+
+	}
+
+         else if (temp.startsWith("and")) 
+
+	{
+	  // make aa and node, cut the 'and' off of the queryString and
+	  // set the child of the not to rDecode(queryString) and remove ')'
+	  
+	  myNode = new QueryAndNode(rDecode(), rDecode());
+
+	  if (this.queryString.startsWith(")"))
+	    {
+	      this.queryString = this.queryString.substring(1, this.readLength); 
+	    }
+	  
+	  return myNode;
+	}
+
+      else if (temp.startsWith("or")) 
+
+	{
+	  // make an or node, cut the 'or' off of the queryString and
+	  // set the child of the not to rDecode(queryString) and remove ')'
+	   
+	  myNode = new QueryOrNode(rDecode(), rDecode());
+
+	  if (this.queryString.startsWith(")"))
+	    {
+	      this.queryString = this.queryString.substring(1, this.readLength); 
+	    }
+
+	  return myNode;
+
+	}
+
+      else 
+
+	{
+	  // It should be a data node. Lets see what happens.
+	  
+	  byte comparator = 0;
+	  String value = null;
+	  String fieldname = null;
+	  
+
+	  if (temp.startsWith("="))
+	    { 
+	      comparator = 1;
+	      System.out.println("Equals Found (=)");
+	      this.queryString = this.queryString.substring(1, this.readLength);
+	      this.readLength = this.readLength - 1;
+	    }
+
+	  else if (temp.startsWith("<"))
+	    {
+	      comparator = 2;
+	      this.queryString = this.queryString.substring(1, this.readLength);
+	      this.readLength = this.readLength - 1;
+	    } 
+	  else if (temp.startsWith("<="))
+	    {
+	      comparator = 3;
+	      this.queryString = this.queryString.substring(2, this.readLength);
+	      this.readLength = this.readLength - 2;
+	    }
+	  else if (temp.startsWith(">"))
+	    {
+	      comparator = 4;
+	      this.queryString = this.queryString.substring(2, this.readLength);
+	      this.readLength = this.readLength - 2;
+	    }
+	  else if (temp.startsWith(">="))
+	    {
+	      comparator = 5;
+	      this.queryString = this.queryString.substring(2, this.readLength);
+	      this.readLength = this.readLength - 2;
+	    }
+	  else
+	    {
+	      System.out.println("Help! Here's temp: " + temp);
+	    }
+	  
+	  // We've got the operator. Now we have to get the fieldname and value
+	  
+	  boolean fieldDone,
+	          valueDone;
+
+	  int nextIndex;
+
+	  fieldDone = valueDone = false;
+
+	  while (! (fieldDone && valueDone))
+	    {
+	      if ((this.queryString.startsWith(" ") || (this.queryString.startsWith("("))))
+		{
+		  // ignore parens and whitespace;
+		  
+		  this.queryString = this.queryString.substring(1, this.readLength);
+		  this.readLength --;
+
+		  System.out.println("Continue");
+
+		  continue;
+
+		}
+
+	      else if (this.queryString.startsWith("fieldname"))
+		{
+		  // Ok, space up to the fieldname in the string and 
+		  // get it. Also, be sure to look for # signs.
+
+		  System.out.println("Field");
+
+		  this.queryString = this.queryString.substring(10, this.readLength);
+		  
+		  // 10 chars for 'fieldname' + whiteSpace;
+
+		  this.readLength = this.readLength - 10;
+
+		  nextIndex = this.queryString.indexOf(")");
+		  
+		  // Put backslash check here;
+  
+		  fieldname = this.queryString.substring(0, nextIndex);
+		  
+		  this.queryString = this.queryString.substring(nextIndex + 1, this.readLength);
+
+		  this.readLength = this.readLength - (fieldname.length() + 1);
+
+		  System.out.println("Fieldname is: " + fieldname);
+
+		  fieldDone = true;
+		}
+	      
+	      else if (this.queryString.startsWith("value"))
+		
+		{
+		  // Ok, space up to the Value in the string and 
+		  // get that.
+
+		  System.out.println("Value");
+		  
+		  this.queryString = this.queryString.substring(6, this.readLength);
+		  
+		  // 6 chars for 'value' + whiteSpace;
+
+		  this.readLength = this.readLength - 6;
+
+		  nextIndex = this.queryString.indexOf(")");
+		  
+		  // Put backslash check here;
+  
+		  value = this.queryString.substring(0, nextIndex);
+		  
+		  this.queryString = this.queryString.substring(nextIndex + 1, this.readLength);
+
+		  this.readLength = this.readLength - (value.length() + 1);
+
+		  System.out.println("value is: " + value);
+
+		  valueDone = true;
+		}
+	      
+	      
+	      else
+		{
+		  System.err.println("Error: Unknown Character Found in rDecode");
+		  break;
+		}
+	    }
+	  	
+	  myNode = new QueryDataNode (fieldname, comparator, value);
+	  
+	  
+	  if (this.queryString.startsWith(")"))
+	    {
+	      this.queryString = this.queryString.substring(1, this.readLength); 
+	    }
+	  
+
+	  System.out.println("We're in the DataNode method. Returning DataNode");
+	  if (myNode == null){
+	    System.out.println("Uh oh, myNode is null. bad");
+	  }
+
+	}
+	  return myNode;
+	  
+	
+      
+      // return null;  // If this happens it's bad.
+    }
 }
 
 /*------------------------------------------------------------------------------
