@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -77,8 +77,6 @@ public class JIPField extends JentryField {
     //    setText(null);
 
     setEditable(is_editable);  // will this JIPField be editable or not?
-
-    setEnabled(true);
 
     if (valueAttr != null)
       {
@@ -160,6 +158,8 @@ public class JIPField extends JentryField {
       {
 	setText(genIPV6string(bytes));
       }
+
+    value = getText();
 
     return;
   }
