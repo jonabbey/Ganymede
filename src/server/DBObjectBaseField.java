@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1896,18 +1896,30 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    DBObjectBase refBase;
 
 	    refBase = base.store.getObjectBase(allowedTarget);
-	    result += ", --> [" + refBase.getName() + "] ";
 
-	    if (targetField != -1)
+	    if (refBase != null)
 	      {
-		try
+		result += ", --> [" + refBase.getName() + "] ";
+		
+		if (targetField != -1)
 		  {
-		    result += ", <-- [" + refBase.getField(targetField).getName() + "] ";
+		    try
+		      {
+			result += ", <-- [" + refBase.getField(targetField).getName() + "] ";
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("caught remote: " + ex);
+		      }
+		    catch (NullPointerException ex)
+		      {
+			result += ", <-- [INVALID FIELD TARGET!!] ";
+		      }
 		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("caught remote: " + ex);
-		  }
+	      }
+	    else
+	      {
+		result += ", --> [INVALID BASE!!] ";
 	      }
 	  }
 	else if (allowedTarget == -1)
@@ -2085,17 +2097,25 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    DBObjectBase refBase;
 
 	    refBase = base.store.getObjectBase(allowedTarget);
-	    result += "targets [" + refBase.getName() + "] ";
 
-	    if (targetField != -1)
+	    if (refBase == null)
 	      {
-		try
+		result += "targets [INVALID OBJECT TYPE]";
+	      }
+	    else
+	      {
+		result += "targets [" + refBase.getName() + "] ";
+
+		if (targetField != -1)
 		  {
-		    result += "reverse link [" + refBase.getField(targetField).getName() + "] ";
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("caught remote: " + ex);
+		    try
+		      {
+			result += "reverse link [" + refBase.getField(targetField).getName() + "] ";
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("caught remote: " + ex);
+		      }
 		  }
 	      }
 	  }
