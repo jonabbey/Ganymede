@@ -7,18 +7,20 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/07/14 21:52:00 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/02/10 04:35:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -115,14 +117,13 @@ public abstract class DBLock {
   Object key;
 
   /**
-   * <P>All DBLock's establish() and release() methods synchronize their
-   * critical sections on the Ganymede server's DBStore object to guarantee
-   * that all lock negotiations are thread-safe.  We have a reference to the
-   * DBStore here so that we can change the synchronization monitor to something
-   * other than DBStore if we need to.
+   * <P>All DBLock's establish() and release() methods synchronize
+   * their critical sections on the DBLockSync object held in the
+   * Ganymede server's DBStore object in order to guarantee that all
+   * lock negotiations are thread-safe.</P>
    */
 
-  DBStore lockManager;
+  DBLockSync lockSync;
 
   /**
    * <P>In order to prevent deadlocks, each individual lock must be established on
@@ -181,7 +182,7 @@ public abstract class DBLock {
 	return false;
       }
 
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	for (int i=0; i < baseSet.size(); i++)
 	  {
@@ -203,7 +204,7 @@ public abstract class DBLock {
 
   boolean isLocked(Vector bases)
   {
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	return arlut.csd.Util.VectorUtils.difference(bases, baseSet).size() == 0;
       }
@@ -217,9 +218,9 @@ public abstract class DBLock {
 
   boolean overlaps(Vector bases)
   {
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
-	return arlut.csd.Util.VectorUtils.intersection(bases, baseSet).size() != 0;
+	return arlut.csd.Util.VectorUtils.overlaps(bases, baseSet);
       }
   }
 

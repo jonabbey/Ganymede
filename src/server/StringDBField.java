@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2000/01/08 03:29:02 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2000/02/10 04:35:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -863,17 +863,7 @@ public class StringDBField extends DBField implements string_field {
 	ok = false;
 	qr = choices();
 
-	for (int i = 0; i < qr.size() && !ok; i++)
-	  {
-	    s2 = (String) qr.getLabel(i);
-
-	    if (s2.equals(s))
-	      {
-		ok = true;
-	      }
-	  }
-
-	if (!ok)
+	if (!qr.containsLabel(s))
 	  {
 	    return Ganymede.createErrorDialog("String Field Error",
 					      "string value " + s +

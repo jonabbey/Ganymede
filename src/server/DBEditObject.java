@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.125 $
-   Last Mod Date: $Date: 2000/01/29 02:32:53 $
+   Version: $Revision: 1.126 $
+   Last Mod Date: $Date: 2000/02/10 04:35:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.125 $ $Date: 2000/01/29 02:32:53 $ $Name:  $
+ * @version $Revision: 1.126 $ $Date: 2000/02/10 04:35:34 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -125,7 +125,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public final static int SETELEMENT = 2;
   public final static int ADDELEMENT = 3;
   public final static int DELELEMENT = 4;
-  public final static int LASTOP = 4;
+  public final static int ADDELEMENTS = 5;
+  public final static int DELELEMENTS = 6;
+  public final static int LASTOP = 6;
 
   public final static void setDebug(boolean val)
   {
@@ -1793,6 +1795,26 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    * <p>This method allows the DBEditObject to have executive approval of
+   * any vector-vector removal operation, and to take any special actions in
+   * reaction to the removal.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us will proceed to
+   * make the change to its vector.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.</p>
+   *
+   * <p>The DBField that called us will take care of all possible checks
+   * on the operation (including vector bounds, etc.).  Under normal
+   * circumstances, we won't need to do anything here.</p>
+   */
+
+  public ReturnVal finalizeDeleteElements(DBField field, Vector valuesToDelete)
+  {
+    return null;
+  }
+
+  /**
+   * <p>This method allows the DBEditObject to have executive approval of
    * any vector add operation, and to take any special actions in
    * reaction to the add.. if this method returns null or a success
    * code in its ReturnVal, the DBField that called us will proceed to
@@ -1807,6 +1829,26 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    */
 
   public ReturnVal finalizeAddElement(DBField field, Object value)
+  {
+    return null;
+  }
+
+  /**
+   * <p>This method allows the DBEditObject to have executive approval of
+   * any vector-vector add operation, and to take any special actions in
+   * reaction to the add.. if this method returns null or a success
+   * code in its ReturnVal, the DBField that called us will proceed to
+   * make the change to its vector.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.</p>
+   *
+   * <p>The DBField that called us will take care of all possible checks
+   * on the operation (including vector bounds, etc.).  Under normal
+   * circumstances, we won't need to do anything here.</p>
+   */
+
+  public ReturnVal finalizeAddElements(DBField field, Vector submittedValues)
   {
     return null;
   }
@@ -2911,14 +2953,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	try
 	  {
-	    // clear all references in this field to us, if we can
+	    // clear any reference in this field to us, if we can
 
 	    if (false)
 	      {
 		System.err.println("DBEditObject.clearBackLink(): calling dissolve on " + oldRefField);
 	      }
 
-	    retVal = oldRefField.dissolve(getInvid(), local, true);
+	    retVal = oldRefField.dissolve(getInvid(), local);
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {

@@ -7,15 +7,16 @@
 
    Created: 10 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/05/07 05:21:37 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/02/10 04:35:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -62,7 +63,7 @@ import java.util.*;
  * db_field is used by the client to make changes to a field when editing the
  * {@link arlut.csd.ganymede.db_object db_object} the field is contained within.</p>
  *
- * @version $Revision: 1.18 $ $Date: 1999/05/07 05:21:37 $ $Name:  $
+ * @version $Revision: 1.19 $ $Date: 2000/02/10 04:35:41 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -246,6 +247,24 @@ public interface db_field extends java.rmi.Remote {
   ReturnVal addElement(Object value) throws RemoteException;
 
   /**
+   * <p>Adds a set of elements to the end of this field, if a
+   * vector.  Using addElements() to add a sequence of items
+   * to a field may be many times more efficient than calling
+   * addElement() repeatedly, as addElements() can do a single
+   * server checkpoint before attempting to add all the values.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog. If a success code is returned,
+   * all values were added.  If failure is returned, no values
+   * were added.</p>
+   *
+   * <p>The ReturnVal resulting from a successful addElements will
+   * encode an order to rescan this field.</p> 
+   */
+
+  ReturnVal addElements(Vector values) throws RemoteException;
+
+  /**
    * <p>Deletes an element of this field, if a vector.</p>
    *
    * <p>The ReturnVal object returned encodes success or failure, 
@@ -268,6 +287,24 @@ public interface db_field extends java.rmi.Remote {
    */
 
   ReturnVal deleteElement(Object value) throws RemoteException;
+
+  /**
+   * <p>Removes a set of elements from this field, if a
+   * vector.  Using deleteElements() to remove a sequence of items
+   * from a field may be many times more efficient than calling
+   * deleteElement() repeatedly, as removeElements() can do a single
+   * server checkpoint before attempting to remove all the values.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog. If a success code is returned,
+   * all values were deleted.  If failure is returned, no values
+   * were deleted.</p>
+   *
+   * <p>The ReturnVal resulting from a successful deleteElements will
+   * encode an order to rescan this field.</p> 
+   */
+
+  ReturnVal deleteElements(Vector values) throws RemoteException;
 
   /**
    * <p>Returns true if this field is a vector field and value is contained

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/02/03 04:59:31 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/02/10 04:35:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -94,7 +95,7 @@ public class DBReadLock extends DBLock {
    *
    */
 
-  public DBReadLock(DBStore lockManager)
+  public DBReadLock(DBStore store)
   {
     Enumeration enum;
     DBObjectBase base;
@@ -102,26 +103,8 @@ public class DBReadLock extends DBLock {
     /* -- */
 
     key = null;
-    this.lockManager = lockManager;
-    baseSet = new Vector();
-
-    synchronized (lockManager)
-      {
-	try
-	  {
-	    enum = lockManager.objectBases.elements();
-	    
-	    while (enum.hasMoreElements())
-	      {
-		base = (DBObjectBase) enum.nextElement();
-		baseSet.addElement(base);
-	      }
-	  }
-	finally
-	  {
-	    lockManager.notifyAll();
-	  }
-      }
+    this.lockSync = store.lockSync;
+    baseSet = store.getBases();
   }
 
   /**
@@ -131,10 +114,10 @@ public class DBReadLock extends DBLock {
    *
    */
 
-  public DBReadLock(DBStore lockManager, Vector baseSet)
+  public DBReadLock(DBStore store, Vector baseSet)
   {
     key = null;
-    this.lockManager = lockManager;
+    this.lockSync = store.lockSync;
     this.baseSet = baseSet;
   }
 
@@ -147,14 +130,14 @@ public class DBReadLock extends DBLock {
 
   public void establish(Object key) throws InterruptedException
   {
-    boolean done, okay;
+    boolean done = false, okay = false, added = false;
     DBObjectBase base;
     Vector vect;
     Object obj;
 
     /* -- */
 
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	try
 	  {
@@ -165,59 +148,29 @@ public class DBReadLock extends DBLock {
 	    // not, we'll record that we are trying to establish/hold
 	    // a read lock with this key
 
-	    if (lockManager.lockHash.containsKey(key))
+	    if (lockSync.isLockHeld(key) && !lockSync.isReadLock(key))
 	      {
-		// we've got a lock already by this key.. 
-
-		obj = lockManager.lockHash.get(key);
-
-		if (obj instanceof Vector)
-		  {
-		    // we've got a vector, indicating that we have another read lock set
-		    // open.  It's okay to add another item to this vector, since we
-		    // only do read locks in the GanymedeSession query() and dump() methods.
-		    // These methods have no possibility of deadlock, so we don't care.
-
-		    vect = (Vector) obj;
-
-		    vect.addElement(this);
-
-		    if (debug)
-		      {
-			// Ganymede.debug("DBReadLock (" + key + "):  added this to lockHash vector");
-
-			System.err.println("DBReadLock (" + key + "):  added this to lockHash vector");
-		      }
-		  }
-		else
-		  {
-		    // we've got a write lock or a dump lock.. it's ok to hold off here.
-
-		    if (debug)
-		      {
-			// Ganymede.debug("DBReadLock (" + key + "):  dump or write lock blocking us");
-
-			System.err.println("DBReadLock (" + key + "):  dump or write lock blocking us");
-		      }
-		
-		    throw new RuntimeException("Error: read lock sought by owner of existing write or dump lockset.");
-		  }
-	      }
-	    else
-	      {
-		// no lock with this key.. remembe that we have this one
-
-		vect = new Vector();
-
-		vect.addElement(this);
-		lockManager.lockHash.put(key, vect);
+		// we've got a write lock or a dump lock.. it's ok to hold off here.
 
 		if (debug)
 		  {
-		    // Ganymede.debug("DBReadLock (" + key + "):  initialized lockHash vector");
-
-		    System.err.println("DBReadLock (" + key + "):  initialized lockHash vector");
+		    // Ganymede.debug("DBReadLock (" + key + "):  dump or write lock blocking us");
+		    
+		    System.err.println("DBReadLock (" + key + "):  dump or write lock blocking us");
 		  }
+		
+		throw new RuntimeException("Error: read lock sought by owner of existing write or dump lockset.");
+	      }
+	    else
+	      {
+		// we may already have a readlock registered with this
+		// key, but that's okay, since we only do read locks
+		// in the GanymedeSession query() and dump() methods.
+		// These methods have no possibility of deadlock, so
+		// we don't care.
+
+		lockSync.addReadLock(key, this);
+		added = true;
 	      }
 
 	    // okay, we've made sure that we're not going to chance a
@@ -245,15 +198,10 @@ public class DBReadLock extends DBLock {
 		if (abort)
 		  {
 		    // this lock is going away.. dissociate it from the key
-		    // in the lockManager lockHash.
+		    // in the lockSync lockHash.
 
-		    vect = (Vector) lockManager.lockHash.get(key);
-		    vect.removeElement(this);
-
-		    if (vect.size() == 0)
-		      {
-			lockManager.lockHash.remove(key);
-		      }
+		    lockSync.delReadLock(key, this);
+		    added = false;
 
 		    if (debug)
 		      {
@@ -301,10 +249,29 @@ public class DBReadLock extends DBLock {
 
 		if (okay)
 		  {
-		    for (int i = 0; i < baseSet.size(); i++)
+		    int i = 0;
+		    
+		    try
 		      {
-			base = (DBObjectBase) baseSet.elementAt(i);
-			base.addReader(this);
+			for (i = 0; i < baseSet.size(); i++)
+			  {
+			    base = (DBObjectBase) baseSet.elementAt(i);
+			    base.addReader(this);
+			  }
+		      }
+		    catch (RuntimeException ex)
+		      {
+			ex.printStackTrace();
+
+			// clean up if we can
+
+			for (int j = i-1; j >= 0; j--)
+			  {
+			    base = (DBObjectBase) baseSet.elementAt(i);
+			    base.removeReader(this);
+			  }
+
+			throw ex; // the finally clause below will clean up
 		      }
 
 		    done = true;
@@ -314,31 +281,31 @@ public class DBReadLock extends DBLock {
 		    // oops, things aren't clear for us to lock yet.
 		    // we need to wait for a few seconds, or until
 		    // something wakes up by doing a notifyAll() on
-		    // our lockManager.
+		    // our lockSync.
 
 		    if (debug)
 		      {
-			// Ganymede.debug("DBReadLock (" + key + "):  waiting on lockManager");
+			// Ganymede.debug("DBReadLock (" + key + "):  waiting on lockSync");
 
-			System.err.println("DBReadLock (" + key + "):  waiting on lockManager");
+			System.err.println("DBReadLock (" + key + "):  waiting on lockSync");
 		      }
 		 
 		    try
 		      {
-			lockManager.wait(2500); // an InterruptedException here gets propagated up
+			lockSync.wait(2500); // an InterruptedException here gets propagated up
 
 			if (debug)
 			  {
-			    // Ganymede.debug("DBReadLock (" + key + "):  done waiting on lockManager");
+			    // Ganymede.debug("DBReadLock (" + key + "):  done waiting on lockSync");
 
-			    System.err.println("DBReadLock (" + key + "):  done waiting on lockManager");
+			    System.err.println("DBReadLock (" + key + "):  done waiting on lockSync");
 			  }
 		      }
 		    catch (InterruptedException ex)
 		      {
 			// looks like something wants us to abort the
 			// lock?  dissociate this lock from our key in
-			// the lockManager's lockHash and throw the
+			// the lockSync's lockHash and throw the
 			// exception up.
 
 			if (debug)
@@ -348,15 +315,9 @@ public class DBReadLock extends DBLock {
 			    System.err.println("DBReadLock (" + key + "):  interrupted exception");
 			  }
 
-			vect = (Vector) lockManager.lockHash.get(key);
-			vect.removeElement(this);
+			lockSync.delReadLock(key, this);
+			added = false;
 
-			if (vect.size() == 0)
-			  {
-			    lockManager.lockHash.remove(key);
-			  }
-
-			inEstablish = false;
 			throw ex;
 		      }
 		  }
@@ -366,7 +327,7 @@ public class DBReadLock extends DBLock {
 
 	    locked = true;
 	    inEstablish = false;
-	    lockManager.addLock();	// notify consoles
+	    lockSync.addLock();	// notify consoles
 
 	    if (debug)
 	      {
@@ -376,9 +337,14 @@ public class DBReadLock extends DBLock {
 	finally
 	  {
 	    inEstablish = false; // in case we threw an exception while establishing
-	    lockManager.notifyAll(); // let a thread trying to release this lock proceed
+	    lockSync.notifyAll(); // let a thread trying to release this lock proceed
+
+	    if (added && !done)
+	      {
+		lockSync.delReadLock(key, this);
+	      }
 	  }
-      }	// synchronized (lockManager)
+      }	// synchronized (lockSync)
   }
 
   /**
@@ -412,7 +378,7 @@ public class DBReadLock extends DBLock {
 	System.err.println("DBReadLock (" + key + "):  attempting release");
       }
 
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	try
 	  {
@@ -433,7 +399,7 @@ public class DBReadLock extends DBLock {
 
 		try
 		  {
-		    lockManager.wait(2500);
+		    lockSync.wait(2500);
 		  } 
 		catch (InterruptedException ex)
 		  {
@@ -460,17 +426,11 @@ public class DBReadLock extends DBLock {
 
 	    locked = false;
 
-	    // dissociate this lock from the lockManager's lockHash.
+	    // dissociate this lock from the lockSync's lockHash.
 	    // if this key has another readlock, that other lock will
 	    // need to take care of its own dissociation
 
-	    Vector vect = (Vector) lockManager.lockHash.get(key);
-	    vect.removeElement(this);
-
-	    if (vect.size() == 0)
-	      {
-		lockManager.lockHash.remove(key);
-	      }
+	    lockSync.delReadLock(key, this);
 
 	    key = null;		// for gc
 
@@ -481,11 +441,11 @@ public class DBReadLock extends DBLock {
 		System.err.println("DBReadLock (" + key + "):  release() released");
 	      }
 
-	    lockManager.removeLock();	// notify consoles
+	    lockSync.removeLock();	// notify consoles
 	  }
 	finally
 	  {
-	    lockManager.notifyAll(); // let other threads waiting to establish proceed
+	    lockSync.notifyAll(); // let other threads waiting to establish proceed
 	  }
       }
   }
@@ -514,7 +474,7 @@ public class DBReadLock extends DBLock {
 
   public void abort()
   {
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	try
 	  {
@@ -523,7 +483,7 @@ public class DBReadLock extends DBLock {
 	  }
 	finally
 	  {
-	    lockManager.notifyAll();
+	    lockSync.notifyAll();
 	  }
       }
   }

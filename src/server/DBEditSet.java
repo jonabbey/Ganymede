@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 2000/02/03 04:59:30 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 2000/02/10 04:35:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -356,7 +356,6 @@ public class DBEditSet {
 
 	basesModified.put(object.objectBase, this);
       }
-
 
     if (false)
       {

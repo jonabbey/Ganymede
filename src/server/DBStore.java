@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.101 $
-   Last Mod Date: $Date: 2000/02/03 04:59:32 $
+   Version: $Revision: 1.102 $
+   Last Mod Date: $Date: 2000/02/10 04:35:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -104,12 +105,7 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * <P>In addition to handling loads, dumps, and schema initialization
- * for cold server start-ups, DBStore also acts as a synchronization
- * monitor object for all {@link arlut.csd.ganymede.DBLock DBLock}
- * activity.</p>
- *
- * @version $Revision: 1.101 $ %D%
+ * @version $Revision: 1.102 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -173,21 +169,6 @@ public class DBStore {
 
   Hashtable backPointers;
 
-  /** 
-   * <P>Identifier keys for current {@link arlut.csd.ganymede.DBLock
-   * DBLocks}.</P>
-   *
-   * <P>This hash is used by the establish() method in various DBLock
-   * subclasses to guarantee that only one lock will established by
-   * a client at a time, to prevent any possibility of DBLock deadlock.</P>
-   *
-   * <P>The values in this hash may either be scalar DBLock objects, or
-   * in the case of readers (where it is permissible for a single client
-   * to have several distinct reader locks), a Vector of DBLocks.</P>
-   */
-
-  Hashtable lockHash;
-
   /**
    * <p>Vector of {@link arlut.csd.ganymede.DBSession DBSession} objects.</p>
    */
@@ -235,6 +216,13 @@ public class DBStore {
 
   DBJournal journal = null;
 
+  /**
+   * A separate object to act as a synchronization monitor for DBLock
+   * code.
+   */
+
+  public DBLockSync lockSync = new DBLockSync();
+
   // debugging info
 
   /**
@@ -243,14 +231,6 @@ public class DBStore {
    */
 
   int objectsCheckedOut = 0;
-
-  /**
-   * A count of how many {@link arlut.csd.ganymede.DBLock DBLocks} are
-   * established on {@link arlut.csd.ganymede.DBObjectBase DBObjectBases}
-   * in this DBStore.
-   */
-
-  int locksHeld = 0;
 
   /* -- */
 
@@ -269,7 +249,6 @@ public class DBStore {
 
     objectBases = new Hashtable(20); // default 
     backPointers = new Hashtable(1000);	// default
-    lockHash = new Hashtable(20); // default
     nameSpaces = new Vector();
     sessions = new Vector();
 
@@ -476,7 +455,7 @@ public class DBStore {
 	  }
       }
 
-    lockHash = new Hashtable(baseCount); // reset lockHash
+    lockSync.resetLockHash(baseCount);
 
     if (loadJournal)
       {
@@ -1090,6 +1069,28 @@ public class DBStore {
     while (enum.hasMoreElements())
       {
 	result.addElement(((DBObjectBase) enum.nextElement()).getName());
+      }
+    
+    return result;
+  }
+
+  /**
+   * Returns a vector of {@link arlut.csd.ganymede.DBObjectBase DBObjectBases} currently
+   * defined in this DBStore.
+   */
+
+  public synchronized Vector getBases()
+  {
+    Vector result = new Vector();
+    Enumeration enum;
+
+    /* -- */
+
+    enum = objectBases.elements();
+    
+    while (enum.hasMoreElements())
+      {
+	result.addElement(enum.nextElement());
       }
     
     return result;
@@ -2313,8 +2314,7 @@ public class DBStore {
 
   void addLock()
   {
-    locksHeld++;
-    GanymedeAdmin.updateLocksHeld();
+    lockSync.addLock();
   }
 
   /**
@@ -2323,13 +2323,7 @@ public class DBStore {
 
   void removeLock()
   {
-    locksHeld--;
-    GanymedeAdmin.updateLocksHeld();
-
-    if (locksHeld < 0)
-      {
-	throw new RuntimeException("Locks held has gone negative"); 
-      }
+    lockSync.removeLock();
   }
 
   public void debugBackPointers()

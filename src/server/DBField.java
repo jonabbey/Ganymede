@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 2000/01/08 03:28:56 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 2000/02/10 04:35:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,6 +55,7 @@ import java.rmi.*;
 import java.rmi.server.*;
 
 import arlut.csd.JDialog.*;
+import arlut.csd.Util.VectorUtils;
 
 /*------------------------------------------------------------------------------
                                                                   abstract class
@@ -147,7 +148,7 @@ import arlut.csd.JDialog.*;
  * other objects should themselves be synchronized in any fashion.</P> 
  */
 
-public abstract class DBField implements Remote, db_field, Cloneable {
+public abstract class DBField implements Remote, db_field {
 
   /**
    * the object's current value.  May be a Vector for vector fields, in
@@ -306,8 +307,10 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * <P>Returns true if obj is a field with the same value(s) as
    * this one.</P>
    *
-   * <P>This method is ok to be synchronized because it does not
-   * call synchronized methods on any other object.</P>
+   * <P>This method is ok to be synchronized because it does not call
+   * synchronized methods on any other object that is likely to have
+   * another thread trying to call another synchronized method on
+   * us.</P> 
    */
 
   public synchronized boolean equals(Object obj)
@@ -348,11 +351,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * checked-out DBEditObject in order to be updated.  Any actions
    * that would normally occur from a user manually setting a value
    * into the field will occur.</p>
-   *
-   * <p>Note that the default implementation of copyFieldTo() does
-   * not cleanly handle problems that occur during field copying.  In
-   * particular, if there is a failure while copying a vector field,
-   * the target field may be left with a partially copied vector.</p>
    *
    * @param target The DBField to copy this field's contents to.
    * @param local If true, permissions checking is skipped.
@@ -398,31 +396,27 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	    valuesToCopy = getValuesLocal();
 	  }
 
-	for (int i = 0; i < valuesToCopy.size(); i++)
+	retVal = target.addElements(valuesToCopy, local, true);	// inhibit wizards
+
+	// the above operation could fail if we don't have write
+	// privileges for the target field, so we'll return an
+	// error code back to the cloneFromObject() method.
+
+	// this isn't exactly the right thing to do if the failure
+	// pertains to a single value that we attempted to add,
+	// but if a value was legal in the source object, it
+	// should generally be legal in the target object, so
+	// undoing the total copy here isn't too horribly
+	// inappropriate.
+
+	// if this turns out to be unacceptable, i'll have to add
+	// code here to build up a dialog describing the values
+	// that could not be copied, which would be a bit of a
+	// pain.
+	
+	if (retVal != null && !retVal.didSucceed())
 	  {
-	    retVal = target.addElement(valuesToCopy.elementAt(i), local, true); // inhibit wizards
-
-	    // the above operation could fail if we don't have write
-	    // privileges fo the target field, so we'll return an
-	    // error code back to the cloneFromObject() method.
-
-	    // this isn't exactly the right thing to do if the failure
-	    // pertains to a single value that we attempted to add,
-	    // but if a value was legal in the source object, it
-	    // should generally be legal in the target object, so
-	    // aborting the copy here isn't too horribly
-	    // inappropriate.  We will leave the target field with a
-	    // partial field copy in that case, however.
-
-	    // if this turns out to be unacceptable, i'll have to add
-	    // code here to build up a dialog describing the values
-	    // that could not be copied, which would be a bit of a
-	    // pain.
-
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		return retVal;
-	      }
+	    return retVal;
 	  }
       }
 
@@ -639,31 +633,19 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					      getName());
 	  }
 
-	// we know we're editable, so..
+	// we have to clone our values Vector in order to use
+	// deleteElements().
 
-	ReturnVal tempResult = null;
+	Vector currentValues = (Vector) getVectVal().clone();
 
-	DBSession session = ((DBEditObject) owner).getSession();
-	String key = "DBField.setUndefined:" + new Date();
-
-	session.checkpoint(key);
-
-	while ((tempResult == null || tempResult.didSucceed()) && 
-	       getVectVal().size() > 0)
+	if (currentValues.size() != 0)
 	  {
-	    tempResult = deleteElement(0, local, false);
-	  }
-
-	if (tempResult != null && !tempResult.didSucceed())
-	  {
-	    session.rollback(key);
+	    return deleteElements(currentValues);
 	  }
 	else
 	  {
-	    session.popCheckpoint(key);
+	    return null;	// success
 	  }
-	
-	return tempResult;
       }
     else
       {
@@ -979,7 +961,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	throw new IllegalArgumentException("scalar method called on a vector field for field " + getName());
       }
 
-    if (this.value == submittedValue)
+    if (this.value == submittedValue || this.value.equals(submittedValue))
       {
 	return retVal;		// no change (useful for null)
       }
@@ -1091,6 +1073,14 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * <p>This is only valid for vectors.  If the field is a scalar, use
    * getValue().</p>
    *
+   * <p>This method checks for read permissions.</p>
+   *
+   * <p><b>Be very careful using this for server-side code, because
+   * the Vector returned is not cloned from the field's actual data
+   * Vector, for performance reasons.  If this is called by the client,
+   * the serialization process will protect us from the client being
+   * able to mess with our contents.</b></p>
+   *
    * @see arlut.csd.ganymede.db_field
    */
 
@@ -1108,8 +1098,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					   getName());
       }
 
-    return getVectVal();	// this is ok, since this is being serialized. the client's not
-				// gaining the ability to add or remove items from this field
+    return getVectVal();
   }
 
   /**
@@ -1293,7 +1282,24 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     if (ns != null)
       {
-	unmark(values.elementAt(index));
+	// if the old value was unique in our vector, we need to
+	// unmark it in our namespace
+
+	Object oldElement = values.elementAt(index);
+	int count = 0;
+	
+	for (int i = 0; i < values.size(); i++)
+	  {
+	    if (values.elementAt(i).equals(oldElement))
+	      {
+		count++;
+	      }
+	  }
+
+	if (count == 1)
+	  {
+	    unmark(values.elementAt(index));
+	  }
 
 	if (!mark(submittedValue))
 	  {
@@ -1337,7 +1343,17 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
 	if (ns != null)
 	  {
-	    unmark(submittedValue);
+	    // values is in its final state.. if the submittedValue
+	    // isn't in it anywhere, unmark it in the namespace
+
+	    if (!values.contains(submittedValue))
+	      {
+		unmark(submittedValue);
+	      }
+
+	    // mark the old value.. we can always do this safely, even
+	    // if the value was already marked
+
 	    mark(values.elementAt(index));
 	  }
 
@@ -1432,6 +1448,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					   getName());
       }
 
+    if (submittedValue == null)
+      {
+	throw new IllegalArgumentException("null value passed to addElement.");
+      }
+
     // verifyNewValue should setLastError for us.
 
     retVal = verifyNewValue(submittedValue);
@@ -1500,10 +1521,271 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       {
 	if (ns != null)
 	  {
-	    unmark(submittedValue);	// *sync* DBNameSpace
+	    // if the value that we were going to add is not
+	    // left in our vector, unmark the to-be-added
+	    // value
+
+	    if (!getVectVal().contains(submittedValue))
+	      {
+		unmark(submittedValue);	// *sync* DBNameSpace
+	      }
 	  }
 
 	// return the error dialog created by finalizeAddElement
+
+	return newRetVal;
+      }
+  }
+
+  /**
+   * <p>Adds a set of elements to the end of this field, if a
+   * vector.  Using addElements() to add a sequence of items
+   * to a field may be many times more efficient than calling
+   * addElement() repeatedly, as addElements() can do a single
+   * server checkpoint before attempting to add all the values.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog. If a success code is returned,
+   * all values were added.  If failure is returned, no values
+   * were added.</p>
+   *
+   * <p>The ReturnVal resulting from a successful addElements will
+   * encode an order to rescan this field.</p> 
+   *
+   * @see arlut.csd.ganymede.db_field
+   */
+
+  public final ReturnVal addElements(Vector values)
+  {
+    return rescanThisField(addElements(values, false, false));
+  }
+
+  /**
+   * <p>Adds a set of elements to the end of this field, if a
+   * vector.  Using addElements() to add a sequence of items
+   * to a field may be many times more efficient than calling
+   * addElement() repeatedly, as addElements() can do a single
+   * server checkpoint before attempting to add all the values.</p>
+   *
+   * <P>Server-side method only</P>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog. If a success code is returned,
+   * all values were added.  If failure is returned, no values
+   * were added.</p>
+   */
+
+  public final ReturnVal addElementsLocal(Vector values)
+  {
+    return addElements(values, true, false);
+  }
+
+  /**
+   * <p>Adds a set of elements to the end of this field, if a
+   * vector.  Using addElements() to add a sequence of items
+   * to a field may be many times more efficient than calling
+   * addElement() repeatedly, as addElements() can do a single
+   * server checkpoint before attempting to add all the values.</p>
+   *
+   * <P>Server-side method only</P>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog. If a success code is returned,
+   * all values were added.  If failure is returned, no values
+   * were added.</p>
+   *
+   * @param submittedValues Values to be added
+   * @param local If true, permissions checking will be skipped
+   */
+
+  public final ReturnVal addElements(Vector submittedValues, boolean local)
+  {
+    return addElements(submittedValues, local, false);
+  }
+
+  /**
+   * <p>Adds a set of elements to the end of this field, if a
+   * vector.  Using addElements() to add a sequence of items
+   * to a field may be many times more efficient than calling
+   * addElement() repeatedly, as addElements() can do a single
+   * server checkpoint before attempting to add all the values.</p>
+   *
+   * <P>Server-side method only</P>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog. If a success code is returned,
+   * all values were added.  If failure is returned, no values
+   * were added.</p>
+   *
+   * @param submittedValues Values to be added
+   * @param local If true, permissions checking will be skipped
+   * @param noWizards If true, wizards will be skipped
+   */
+
+  public synchronized ReturnVal addElements(Vector submittedValues, boolean local, boolean noWizards)
+  {
+    ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
+    DBNameSpace ns;
+    DBEditObject eObj;
+    DBEditSet editset;
+
+    /* -- */
+
+    if (!isEditable(local))	// *sync* on GanymedeSession possible
+      {
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
+					   getName());
+      }
+
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + 
+					   getName());
+      }
+
+    if (submittedValues == null || submittedValues.size() == 0)
+      {
+	return Ganymede.createErrorDialog("Server: Error in DBField.addElements()",
+					  "Field " + getName() + " can't add a null/empty vector");
+      }
+
+    if (submittedValues == getVectVal())
+      {
+	throw new IllegalArgumentException("can't add field values to itself");
+      }
+
+    // can we add this many values?
+
+    if (size() + submittedValues.size() > getMaxArraySize())
+      {
+	return Ganymede.createErrorDialog("Server: Error in DBField.addElements()",
+					  "Field " + getName() + 
+					  " can't take " + submittedValues.size() + " new values");
+      }
+
+    // check to see if all of the submitted values are acceptable in
+    // kind
+
+    for (int i = 0; i < submittedValues.size(); i++)
+      {
+	retVal = verifyNewValue(submittedValues.elementAt(i));
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+      }
+
+    // see if our container wants to intercede in the adding operation
+
+    eObj = (DBEditObject) owner;
+    editset = eObj.getEditSet();
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, submittedValues, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
+    // check to see if the all of the values being added are
+    // acceptable to a namespace constraint
+
+    ns = getNameSpace();
+
+    if (ns != null)
+      {
+	synchronized (ns)
+	  {
+	    for (int i = 0; i < submittedValues.size(); i++)
+	      {
+		if (!ns.testmark(editset, submittedValues.elementAt(i)))
+		  {
+		    return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
+						      "value " + submittedValues.elementAt(i) + 
+						      " already taken in namespace");
+		  }
+	      }
+	
+	    for (int i = 0; i < submittedValues.size(); i++)
+	      {
+		if (!ns.mark(editset, submittedValues.elementAt(i), this))
+		  {
+		    throw new RuntimeException("error: testmark / mark inconsistency");
+		  }
+	      }
+	  }
+      }
+
+    // okay, see if the DBEditObject is willing to allow all of these
+    // elements to be added
+
+    newRetVal = eObj.finalizeAddElements(this, submittedValues);
+
+    if (newRetVal == null || newRetVal.didSucceed()) 
+      {
+	// okay, we're allowed to do it, so we add them all
+
+	for (int i = 0; i < submittedValues.size(); i++)
+	  {
+	    getVectVal().addElement(submittedValues.elementAt(i));
+	  }
+
+	// if the return value from the wizard was not null,
+	// it might have included rescan information, which
+	// we'll want to combine with that from our 
+	// finalizeAddElement() call.
+
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;		// success
+	  }
+      } 
+    else
+      {
+	if (ns != null)
+	  {
+	    // for each value that we were going to add (and which we
+	    // marked in our namespace above), we need to unmark it if
+	    // it is not contained in our vector at this point.
+
+	    Vector currentValues = getVectVal();
+
+	    // build up a hashtable of our current values so we can
+	    // efficiently do membership checks for our namespace
+
+	    Hashtable valuesLeft = new Hashtable(currentValues.size());
+
+	    for (int i = 0; i < currentValues.size(); i++)
+	      {
+		valuesLeft.put(currentValues.elementAt(i), currentValues.elementAt(i));
+	      }
+
+	    // for each item we were submitted, unmark it in our
+	    // namespace if we don't have it left in our vector.
+
+	    for (int i = 0; i < submittedValues.size(); i++)
+	      {
+		if (!valuesLeft.containsKey(submittedValues.elementAt(i)))
+		  {
+		    ns.unmark(editset, submittedValues.elementAt(i));
+		  }
+	      }
+	  }
+
+	// return the error dialog created by finalizeAddElements
 
 	return newRetVal;
       }
@@ -1607,18 +1889,21 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	  }
       }
 
-    ns = getNameSpace();
-
-    if (ns != null)
-      {
-	unmark(values.elementAt(index)); // *sync* DBNameSpace
-      }
-
     newRetVal = eObj.finalizeDeleteElement(this, index);
 
     if (newRetVal == null || newRetVal.didSucceed())
       {
+	Object valueToDelete = values.elementAt(index);
 	values.removeElementAt(index);
+
+	// if this field no longer contains the element that
+	// we are deleting, we're going to unmark that value
+	// in our namespace
+	
+	if (!values.contains(valueToDelete))
+	  {
+	    unmark(valueToDelete);
+	  }
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
@@ -1636,13 +1921,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       }
     else
       {
-	if (ns != null)
-	  {
-	    mark(values.elementAt(index)); // *sync* DBNameSpace
-	  }
-
-	// return the error dialog from finalizeDeleteElement().
-
 	return newRetVal;
       }
   }
@@ -1736,6 +2014,213 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       }
 
     return deleteElement(index, local, noWizards);	// *sync* DBNameSpace possible
+  }
+
+  /**
+   * <p>Removes a set of elements from this field, if a
+   * vector.  Using deleteElements() to remove a sequence of items
+   * from a field may be many times more efficient than calling
+   * deleteElement() repeatedly, as removeElements() can do a single
+   * server checkpoint before attempting to remove all the values.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.  If a success code is returned,
+   * all elements in values was removed from this field.  If a 
+   * failure code is returned, no elements in values were removed.</p>
+   *
+   * <p>The ReturnVal resulting from a successful deleteElements will
+   * encode an order to rescan this field.</p> 
+   *
+   * @see arlut.csd.ganymede.db_field
+   */
+
+  public final ReturnVal deleteElements(Vector values)
+  {
+    return rescanThisField(deleteElements(values, false, false));
+  }
+
+  /**
+   * <p>Removes a set of elements from this field, if a
+   * vector.  Using deleteElements() to remove a sequence of items
+   * from a field may be many times more efficient than calling
+   * deleteElement() repeatedly, as removeElements() can do a single
+   * server checkpoint before attempting to remove all the values.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.  If a success code is returned,
+   * all elements in values was removed from this field.  If a 
+   * failure code is returned, no elements in values were removed.</p>
+   *
+   * <P>Server-side method only</P>
+   */
+
+  public final ReturnVal deleteElementsLocal(Vector values)
+  {
+    return deleteElements(values, true, false);
+  }
+
+  /**
+   * <p>Removes a set of elements from this field, if a
+   * vector.  Using deleteElements() to remove a sequence of items
+   * from a field may be many times more efficient than calling
+   * deleteElement() repeatedly, as removeElements() can do a single
+   * server checkpoint before attempting to remove all the values.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.  If a success code is returned,
+   * all elements in values was removed from this field.  If a 
+   * failure code is returned, no elements in values were removed.</p>
+   *
+   * <P>Server-side method only</P>
+   */
+
+  public final ReturnVal deleteElements(Vector valuesToDelete, boolean local)
+  {
+    return deleteElements(valuesToDelete, local, false);
+  }
+
+  /**
+   * <p>Removes a set of elements from this field, if a
+   * vector.  Using deleteElements() to remove a sequence of items
+   * from a field may be many times more efficient than calling
+   * deleteElement() repeatedly, as removeElements() can do a single
+   * server checkpoint before attempting to remove all the values.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.  If a success code is returned,
+   * all elements in values was removed from this field.  If a 
+   * failure code is returned, no elements in values were removed.</p>
+   *
+   * <P>Server-side method only</P>
+   */
+
+  public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
+  {
+    ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
+    DBNameSpace ns;
+    DBEditObject eObj;
+    DBEditSet editset;
+    Vector currentValues;
+
+    /* -- */
+
+    if (!isEditable(local))	// *sync* on GanymedeSession possible
+      {
+	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
+					   getName());
+      }
+
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + 
+					   getName());
+      }
+
+    if (valuesToDelete == null || valuesToDelete.size() == 0)
+      {
+	return Ganymede.createErrorDialog("Server: Error in DBField.addElements()",
+					  "Field " + getName() + " can't remove a null/empty vector");
+      }
+
+    // get access to our value vector.
+
+    currentValues = getVectVal();
+
+    // make sure the two vectors we're going to be manipulating aren't
+    // actually the same vector
+
+    if (valuesToDelete == currentValues)
+      {
+	throw new IllegalArgumentException("can't remove field values from itself");
+      }
+
+    // see if we are being asked to remove items not in our vector
+
+    Vector notPresent = VectorUtils.minus(valuesToDelete, currentValues);
+
+    if (notPresent.size() != 0)
+      {
+	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElements()",
+					  "Field " + getName() + " can't remove non-present items: " +
+					  VectorUtils.vectorString(notPresent));
+      }
+
+    // see if our container wants to intercede in the removing operation
+
+    eObj = (DBEditObject) owner;
+    editset = eObj.getEditSet();
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENTS, valuesToDelete, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
+    // okay, see if the DBEditObject is willing to allow all of these
+    // elements to be removed
+
+    newRetVal = eObj.finalizeDeleteElements(this, valuesToDelete);
+
+    if (newRetVal == null || newRetVal.didSucceed()) 
+      {
+	// okay, we're allowed to remove, so take the items out
+
+	for (int i = 0; i < valuesToDelete.size(); i++)
+	  {
+	    currentValues.removeElement(valuesToDelete.elementAt(i));
+	  }
+
+	// if this vector is connected to a namespace, clear out what
+	// we've left out from the namespace
+
+	ns = getNameSpace();
+
+	if (ns != null)
+	  {
+	    // build up a hashtable of our current values so we can
+	    // efficiently do membership checks for our namespace
+
+	    Hashtable valuesLeft = new Hashtable(currentValues.size());
+
+	    for (int i = 0; i < currentValues.size(); i++)
+	      {
+		valuesLeft.put(currentValues.elementAt(i), currentValues.elementAt(i));
+	      }
+
+	    // for each item we were submitted, unmark it in our
+	    // namespace if we don't have it left in our vector.
+
+	    for (int i = 0; i < valuesToDelete.size(); i++)
+	      {
+		if (!valuesLeft.containsKey(valuesToDelete.elementAt(i)))
+		  {
+		    ns.unmark(editset, valuesToDelete.elementAt(i));
+		  }
+	      }
+	  }
+
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;		// success
+	  }
+      } 
+    else
+      {
+	return newRetVal;
+      }
   }
 
   /**
@@ -1987,7 +2472,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     if (namespace == null)
       {
-	return false;		// should we throw an exception?
+	return false;
       }
 
     if (value == null)

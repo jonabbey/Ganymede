@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2000/01/27 06:03:17 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2000/02/10 04:35:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -2391,7 +2392,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   boolean isLocked()
   {
-    synchronized (store)
+    synchronized (store.lockSync)
       {
 	return (!isReaderEmpty() || writeInProgress || dumpInProgress);
       }
@@ -2403,7 +2404,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   boolean addWriter(DBWriteLock writer)
   {
-    synchronized (store)
+    synchronized (store.lockSync)
       {
 	writerList.addElement(writer);
       }
@@ -2419,10 +2420,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     boolean result;
 
-    synchronized (store)
+    synchronized (store.lockSync)
       {
 	result = writerList.removeElement(writer);
-	store.notifyAll();
+	store.lockSync.notifyAll();
 
 	return result;
       }
@@ -2452,7 +2453,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   boolean addReader(DBReadLock reader)
   {
-    synchronized (store)
+    synchronized (store.lockSync)
       {
 	readerList.addElement(reader);
       }
@@ -2468,7 +2469,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     boolean result;
 
-    synchronized (store)
+    synchronized (store.lockSync)
       {
 	result = readerList.removeElement(reader);
 
@@ -2501,7 +2502,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   boolean addDumper(DBDumpLock dumper)
   {
-    synchronized (store)
+    synchronized (store.lockSync)
       {
 	dumperList.addElement(dumper);
       }
@@ -2519,7 +2520,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     /* -- */
 
-    synchronized (store)
+    synchronized (store.lockSync)
       {
 	result = dumperList.removeElement(dumper);
 	

@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 2000/02/03 04:59:32 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 2000/02/10 04:35:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -19,6 +19,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -91,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.78 $ %D%
+ * @version $Revision: 1.79 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -126,11 +127,12 @@ final public class DBSession {
    * objects at a time.  Only one writer lock is allowed at a time, however,
    * to avoid deadlock.</P>
    *
-   * <P>The {@link arlut.csd.ganymede.DBStore#lockHash DBStore.lockHash} hashtable
-   * is used, in conjunction with the 
-   * {@link arlut.csd.ganymede.DBLock#establish(java.lang.Object) establish()}
-   * methods in the DBReadLock, {@link arlut.csd.ganymede.DBWriteLock DBWriteLock},
-   * and {@link arlut.csd.ganymede.DBDumpLock DBDumpLock} classes.</P>
+   * <P>The DBStore's {@link arlut.csd.ganymede.DBStore#DBLockSync
+   * DBLockSync} object is used, in conjunction with the {@link
+   * arlut.csd.ganymede.DBLock#establish(java.lang.Object)
+   * establish()} methods in the DBReadLock, {@link
+   * arlut.csd.ganymede.DBWriteLock DBWriteLock}, and {@link
+   * arlut.csd.ganymede.DBDumpLock DBDumpLock} classes.</P> 
    */
 
   Vector lockVect = new Vector();

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.118 $
-   Last Mod Date: $Date: 2000/01/29 02:32:58 $
+   Version: $Revision: 1.119 $
+   Last Mod Date: $Date: 2000/02/10 04:35:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,7 +86,7 @@ import arlut.csd.Util.VectorUtils;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.118 $ %D%
+ * @version $Revision: 1.119 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -109,6 +109,18 @@ public final class InvidDBField extends DBField implements invid_field {
   static final boolean fixup = false;
 
   // ---
+
+  /**
+   * <p>We'll cache the choiceList from our parent in case we're doing
+   * a large vector add/delete.  Any time we change our value/values
+   * actually contained in this field, we'll null this out.</p>
+   *
+   * <p>Note that having this here costs us 4 bytes RAM for every InvidDBField
+   * held in the Ganymede server's database, but without it we'll have
+   * an extraordinarily painful time doing mass adds/deletes.</p>
+   */
+
+  private QueryResult qr = null;
 
   /**
    * <P>Receive constructor.  Used to create a InvidDBField from a
@@ -935,10 +947,13 @@ public final class InvidDBField extends DBField implements invid_field {
 	// result code, the system will prevent the target object
 	// from being deleted until our transaction has cleared.
 
-	// Note that we don't both clearing a delete lock on
-	// oldRemote, which we may still link to in some fashion.  The
-	// user may cancel the transaction, in which case the target
-	// object had better not be deleted.
+	// We don't have to worry about oldRemote (if it is indeed not
+	// null), as the DBEditSet marked it as non-deletable when we
+	// added the owner of this field to the transaction.  This is
+	// done in DBEditSet.addObject().  We don't want to clear the
+	// delete lock our transaction has on it, because we have to
+	// be able to revert the link to oldRemote if the transaction
+	// is cancelled.
 
 	retVal = eObj.getEditSet().deleteLock(newRemote);
 
@@ -1272,10 +1287,14 @@ public final class InvidDBField extends DBField implements invid_field {
     else
       {
 	// if we are unbinding an asymmetric field, we do nothing.
-	// the fact that we were linked at some point during this
-	// transaction is enough that we have to maintain the
-	// deletelock that DBEditSet asserted when this object was
-	// pulled into the transaction.
+	// the fact that we were asymmetrically linked to remote at
+	// some point during this transaction is enough to insure that
+	// the object pointed to by remote is delete locked for the
+	// duration of this transaction.  If and when the transaction
+	// commits, the remote object will have its delete lock
+	// cleared, and later transactions will be able to delete that
+	// object.  See DBEditSet.addObject() to see how this implicit
+	// locking is done.
 
 	return null;
       }
@@ -1434,48 +1453,13 @@ public final class InvidDBField extends DBField implements invid_field {
    * field is not linked to the invid specified, nothing will happen.
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
-   *
    */
 
-  private synchronized final ReturnVal dissolve(Invid oldInvid, boolean local)
+  synchronized final ReturnVal dissolve(Invid oldInvid, boolean local)
   {
-    return this.dissolve(oldInvid, local, false);
-  }
-
-  /**
-   *
-   * <p>This method is used to effect the remote side of an unbind operation.</p>
-   *
-   * <p>An InvidDBField being manipulated with the standard editing accessors
-   * (setValue, addElement, deleteElement, setElement) will call this method
-   * on another InvidDBField in order to unlink a pair of symmetrically bound
-   * InvidDBFields.</p>
-   *
-   * <p>This method will return false if the unbinding could not be performed for
-   * some reason.</p>
-   *
-   * <p>This method is private, and is not to be called by any code outside
-   * of this class.</p>
-   *
-   * @param oldInvid The invid to be unlinked from this field.  If this
-   * field is not linked to the invid specified, nothing will happen.
-   * @param local if true, this operation will be performed without regard
-   * to permissions limitations.
-   * @param allTargets if true, dissolve will remove all references to oldInvid,
-   * rather than just one.
-   *
-   */
-
-  synchronized final ReturnVal dissolve(Invid oldInvid, boolean local, boolean allTargets)
-  {
-    int 
-      index = -1;
-
     Invid tmp;
 
     DBEditObject eObj;
-
-    ReturnVal successVal = new ReturnVal(true, true);
 
     /* -- */
 
@@ -1492,59 +1476,51 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    tmp = (Invid) values.elementAt(i);
 
-	    if (tmp.equals(oldInvid))
+	    if (!tmp.equals(oldInvid))
 	      {
-		index = i;
+		continue;
+	      }
 
-		ReturnVal retVal = eObj.finalizeDeleteElement(this, index);
+	    ReturnVal retVal = eObj.finalizeDeleteElement(this, i);
 
-		if (retVal == null || retVal.didSucceed())
+	    if (retVal == null || retVal.didSucceed())
+	      {
+		// we got the okay, so we are going to take out this
+		// element and return.  note that if we didn't return
+		// here, we might get confused on our values loop.
+
+		values.removeElementAt(i);
+		qr = null;
+
+		return retVal;
+	      }
+	    else
+	      {
+		if (retVal.getDialog() != null)
 		  {
-		    values.removeElementAt(index);
-		   
-		    if (allTargets)
-		      {
-			successVal = successVal.unionRescan(retVal);
-		      }
+		    return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
+						      "The custom plug-in class for object " + eObj.getLabel() +
+						      "refused to allow us to clear out all " + 
+						      "the references in field " + 
+						      getName() + ":\n\n" + retVal.getDialog().getText());
 		  }
 		else
 		  {
-		    if (retVal.getDialog() != null)
-		      {
-			return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
-							  "The custom plug-in class for object " + eObj.getLabel() +
-							  "refused to allow us to clear out all " + 
-							  "the references in field " + 
-							  getName() + ":\n\n" + retVal.getDialog().getText());
-		      }
-		    else
-		      {
-			return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
-							  "The custom plug-in class for object " + eObj.getLabel() +
-							  "refused to allow us to clear out all " +
-							  "the references in field " + 
-							  getName());
-		      }
-		  }
-
-		if (!allTargets)
-		  {
-		    return retVal;
+		    return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
+						      "The custom plug-in class for object " + eObj.getLabel() +
+						      "refused to allow us to clear out all " +
+						      "the references in field " + 
+						      getName());
 		  }
 	      }
 	  }
 
-	if (index == -1)
-	  {
-	    Ganymede.debug("warning: dissolve for " + 
-			   owner.getLabel() + ":" + getName() + 
-			   " called with an unbound invid (vector): " + 
-			   oldInvid.toString());
-	    
-	    return null;	// we're already dissolved, effectively
-	  }
-
-	return successVal;
+	Ganymede.debug("warning: dissolve for " + 
+		       owner.getLabel() + ":" + getName() + 
+		       " called with an unbound invid (vector): " + 
+		       oldInvid.toString());
+	
+	return null;	// we're already dissolved, effectively
       }
     else
       {
@@ -1560,6 +1536,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (retVal == null || retVal.didSucceed())
 	  {
 	    value = null;
+	    qr = null;
 
 	    return retVal;
 	  }
@@ -1655,7 +1632,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (retVal == null || retVal.didSucceed())
 	  {
 	    values.addElement(newInvid);
-
+	    qr = null;
 	    return retVal;
 	  }
 	else
@@ -1715,6 +1692,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (newRetVal == null || newRetVal.didSucceed())
 	  {
 	    value = newInvid;
+	    qr = null;
 
 	    if (retVal != null)
 	      {
@@ -2207,6 +2185,7 @@ public final class InvidDBField extends DBField implements invid_field {
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	this.value = value;
+	qr = null;
 
 	if (checkpoint)
 	  {
@@ -2372,6 +2351,7 @@ public final class InvidDBField extends DBField implements invid_field {
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.setElementAt(value, index);
+	qr = null;
 
 	if (checkpoint)
 	  {
@@ -2529,6 +2509,7 @@ public final class InvidDBField extends DBField implements invid_field {
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.addElement(value);
+	qr = null;
 
 	if (checkpoint)
 	  {
@@ -2554,6 +2535,250 @@ public final class InvidDBField extends DBField implements invid_field {
 	return newRetVal;
       }
   }
+
+  /**
+   * <p>Adds a set of elements to the end of this field, if a
+   * vector.  Using addElements() to add a sequence of items
+   * to a field may be many times more efficient than calling
+   * addElement() repeatedly, as addElements() can do a single
+   * server checkpoint before attempting to add all the values.</p>
+   *
+   * <p>The Invid we are passed must refer to a valid object in the
+   * database.  The remote object will be checked out for
+   * editing and a backpointer will placed in it.  If this field
+   * previously held a pointer to another object, that other
+   * object will be checked out and its pointer to us cleared.</p>
+   *
+   * <p>It is an error to call this method on an edit in place vector,
+   * or on a scalar field.  An IllegalArgumentException will be thrown
+   * in these cases.</p>
+   *
+   * <P>Server-side method only</P>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
+   *
+   * @param submittedValues Values to be added
+   * @param local If true, permissions checking will be skipped
+   * @param noWizards If true, wizards will be skipped
+   */
+
+  public synchronized ReturnVal addElements(Vector submittedValues, boolean local, boolean noWizards)
+  {
+    boolean checkpoint = false;
+    boolean success = false;
+    String checkkey = null;
+    ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
+    DBEditObject eObj;
+    Vector values;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("InvidDBField.addElements(" + VectorUtils.vectorString(submittedValues) + ")");
+      }
+
+    if (isEditInPlace())
+      {
+	return Ganymede.createErrorDialog("InvidDBField.addElements()",
+					  "can't manually add elements to edit-in-place vector" +
+					  getName() + " in object " + owner.getLabel());
+      }
+
+    if (!isEditable(local))	// *sync* on GanymedeSession possible
+      {
+	return Ganymede.createErrorDialog("InvidDBField.addElements()",
+					  "don't have permission to change field /  non-editable object " +
+					  getName() + " in object " + owner.getLabel());
+      }
+
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + 
+					   getName());
+      }
+
+    values = getVectVal(); // cast once
+
+    if (submittedValues == null || submittedValues.size() == 0)
+      {
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElements()",
+					  "Field " + getName() + " can't add a null/empty vector");
+      }
+
+    // can we add this many values?
+
+    if (size() + submittedValues.size() > getMaxArraySize())
+      {
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElements()",
+					  "Field " + getName() + 
+					  " can't take " + submittedValues.size() + " new values");
+      }
+
+    // make sure none of the submitted values are already in this field
+
+    if (VectorUtils.overlaps(values, submittedValues))
+      {
+	return Ganymede.createErrorDialog("InvidDBField.addElement() - redundant value submitted",
+					  "Field " + getName() + " already contains values " + 
+					  VectorUtils.vectorString(VectorUtils.intersection(values, submittedValues)));
+      }
+
+    // check to see if all of the submitted values are acceptable in
+    // type
+
+    for (int i = 0; i < submittedValues.size(); i++)
+      {
+	retVal = verifyNewValue(submittedValues.elementAt(i));
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+      }
+
+    // see if our container wants to intercede in the adding operation
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, submittedValues, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
+    // unless we're doing bulk-loading, checkpoint to make sure we can
+    // undo this operation cleanly if it fails in the middle
+    
+    checkpoint = eObj.getGSession().enableOversight;
+
+    if (checkpoint)
+      {
+	checkkey = "addElements" + getName() + owner.getLabel();
+
+	if (debug)
+	  {
+	    System.err.println("InvidDBField.addElements(): checkpointing " + checkkey);
+	  }
+
+	eObj.getSession().checkpoint(checkkey);
+
+	if (debug)
+	  {
+	    System.err.println("InvidDBField.addElements(): completed checkpointing " + checkkey);
+	  }
+      }
+
+    try
+      {
+	if (debug)
+	  {
+	    System.err.println("InvidDBField.addElements(): binding");
+	  }
+
+	for (int i = 0; i < submittedValues.size(); i++)
+	  {
+	    Invid remote = (Invid) submittedValues.elementAt(i);
+
+	    newRetVal = bind(null, remote, local); // bind us to the target field
+
+	    if (newRetVal != null && !newRetVal.didSucceed())
+	      {
+		return newRetVal;
+	      }
+
+	    if (retVal != null)
+	      {
+		retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		retVal = newRetVal;
+	      }
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("InvidDBField.addElements(): all new elements bound");
+	  }
+
+	// okay, see if the DBEditObject is willing to allow all of these
+	// elements to be added
+
+	newRetVal = eObj.finalizeAddElements(this, submittedValues);
+
+	if (newRetVal == null || newRetVal.didSucceed()) 
+	  {
+	    if (debug)
+	      {
+		System.err.println("InvidDBField.addElements(): finalize approved");
+	      }
+
+	    for (int i = 0; i < submittedValues.size(); i++)
+	      {
+		values.addElement(submittedValues.elementAt(i));
+	      }
+
+	    qr = null;
+	    success = true;
+
+	    // if retVal is not null, we may have some rescan
+	    // information from our previous activity which we'll want
+	    // to return, otherwise we'll want to return the results
+	    // from newRetVal.
+
+	    if (retVal != null)
+	      {
+		return retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		return newRetVal;
+	      }
+	  }
+	else
+	  {
+	    return newRetVal;
+	  }
+      }
+    finally
+      {
+	if (checkpoint)
+	  {
+	    if (success)
+	      {
+		if (debug)
+		  {
+		    System.err.println("InvidDBField.addElements(): popping checkpoint " + checkkey);
+		  }
+
+		eObj.getSession().popCheckpoint(checkkey);
+	      }
+	    else
+	      {
+		// undo the bindings
+
+		if (debug)
+		  {
+		    System.err.println("InvidDBField.addElements(): rolling back checkpoint " + checkkey);
+		  }
+
+		eObj.getSession().rollback(checkkey);
+	      }
+	  }
+      }
+  }
+
 
   /**
    *
@@ -2865,7 +3090,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    checkkey = "del" + remote.toString();
+    checkkey = "delElement" + getName() + owner.getLabel();
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -3000,6 +3225,248 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
 					      "Couldn't finalize element deletion\n");
+	  }
+      }
+  }
+
+  /**
+   * <p>Removes a set of elements from this field, if a
+   * vector.  Using deleteElements() to remove a sequence of items
+   * from a field may be many times more efficient than calling
+   * deleteElement() repeatedly, as removeElements() can do a single
+   * server checkpoint before attempting to remove all the values.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
+   *
+   * <P>Server-side method only</P>
+   */
+
+  public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
+  {
+    DBEditObject eObj;
+    ReturnVal retVal = null, newRetVal;
+    boolean checkpoint = false;
+    boolean success = false;
+    String checkkey = null;
+    Vector currentValues;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("InvidDBField.deleteElements(" + VectorUtils.vectorString(valuesToDelete) + ")");
+      }
+
+    if (!isEditable(local))
+      {
+	return Ganymede.createErrorDialog("InvidDBField.deleteElement()",
+					  "don't have permission to change field /  non-editable object " +
+					  getName() + " in object " + owner.getLabel());
+      }
+
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " +
+					   getName() + " in object " + owner.getLabel());
+      }
+
+    currentValues = getVectVal();
+
+    // see if we are being asked to remove items not in our vector
+
+    Vector notPresent = VectorUtils.minus(valuesToDelete, currentValues);
+
+    if (notPresent.size() != 0)
+      {
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElements()",
+					  "Field " + getName() + " can't remove non-present items: " +
+					  VectorUtils.vectorString(notPresent));
+      }
+
+    // see if our container wants to intercede in the removing operation
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENTS, valuesToDelete, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
+    // ok, we're going to handle it.  Checkpoint
+    // so we can easily undo any changes that we make
+    // if we have to return failure.
+
+    // if we are doing bulk-loaded, we don't want to go through the
+    // time consuming checkpoint() operation for each invid link.
+
+    checkpoint = eObj.getGSession().enableOversight;
+
+    if (checkpoint)
+      {
+	checkkey = "delElements" + getName() + owner.getLabel();
+
+	if (debug)
+	  {
+	    System.err.println("][ InvidDBField.deleteElements() checkpointing " + checkkey);
+	  }
+
+	eObj.getSession().checkpoint(checkkey);
+
+	if (debug)
+	  {
+	    System.err.println("][ InvidDBField.deleteElements() checkpointed " + checkkey);
+	  }
+      }
+
+    // if we are an edit in place object, we don't want to do an
+    // unbinding.. we'll do a deleteDBObject() below, instead.  The
+    // reason for this is that the deleteDBObject() code requires that
+    // the SchemaConstants.ContainerField field be intact to properly
+    // check permissions for embedded objects.
+
+    if (!getFieldDef().isEditInPlace())
+      {
+	try
+	  {
+	    // do all the remote unbinding, as needed
+
+	    for (int i = 0; i < valuesToDelete.size(); i++)
+	      {
+		Invid remote = (Invid) valuesToDelete.elementAt(i);
+
+		newRetVal = unbind(remote, local);
+
+		if (newRetVal != null && !newRetVal.didSucceed())
+		  {
+		    return newRetVal; // abort.  the finally clause will uncheckpoint
+		  }
+
+		if (retVal != null)
+		  {
+		    retVal.unionRescan(newRetVal);
+		  }
+		else
+		  {
+		    retVal = newRetVal;
+		  }
+	      }
+
+	    // check to make sure our container is okay with us deleting
+	    // all of these values
+
+	    newRetVal = eObj.finalizeDeleteElements(this, valuesToDelete);
+
+	    if (newRetVal == null || newRetVal.didSucceed())
+	      {
+		// our container is okay, go ahead and remove
+
+		for (int i = 0; i < valuesToDelete.size(); i++)
+		  {
+		    currentValues.removeElement(valuesToDelete.elementAt(i));
+		  }
+
+		success = true;
+
+		// if retVal is not null, we may have some rescan
+		// information from our previous activity which we'll want
+		// to return, otherwise we'll want to return the results
+		// from newRetVal.
+
+		if (retVal != null)
+		  {
+		    return retVal.unionRescan(newRetVal);
+		  }
+		else
+		  {
+		    return newRetVal;
+		  }
+	      }
+	    else
+	      {
+		return newRetVal;
+	      }
+	  }
+	finally
+	  {
+	    // if we've had success, clear the checkpoint, else rollback
+
+	    if (checkpoint)
+	      {
+		if (success)
+		  {
+		    eObj.getSession().popCheckpoint(checkkey);
+		  }
+		else
+		  {
+		    // undo the bindings
+
+		    eObj.getSession().rollback(checkkey);
+		  }
+	      }
+	  }
+      }
+    else			// deleting embedded objects
+      {
+	try
+	  {
+	    // check to make sure our container is okay with us deleting
+	    // all of these values
+
+	    retVal = eObj.finalizeDeleteElements(this, valuesToDelete);
+
+	    if (retVal == null || retVal.didSucceed())
+	      {
+		for (int i = 0; i < valuesToDelete.size(); i++)
+		  {
+		    Invid remote = (Invid) valuesToDelete.elementAt(i);
+
+		    newRetVal = eObj.getSession().deleteDBObject(remote);
+
+		    if (newRetVal != null && !newRetVal.didSucceed())
+		      {
+			return newRetVal;
+		      }
+
+		    if (retVal != null)
+		      {
+			retVal.unionRescan(newRetVal);
+		      }
+		    else
+		      {
+			retVal = newRetVal;
+		      }
+		  }
+
+		success = true;
+	      }
+
+	    return retVal;
+	  }
+	finally
+	  {
+	    if (checkpoint)
+	      {
+		if (success)
+		  {
+		    eObj.getSession().popCheckpoint(checkkey);
+		  }
+		else
+		  {
+		    // undo the bindings
+
+		    eObj.getSession().rollback(checkkey);
+		  }
+	      }
 	  }
       }
   }
@@ -3175,6 +3642,14 @@ public final class InvidDBField extends DBField implements invid_field {
 					   getName() + " in object " + owner.getLabel());
       }
 
+    // if choices is called, the client has asked to get
+    // a new copy of the choice list for this field.  assume
+    // that the client's asking because it was told to ask
+    // via a rescan command in a ReturnVal from the server,
+    // so we need to clear the qr cache
+
+    qr = null;
+
     eObj = (DBEditObject) owner;
 
     return eObj.obtainChoiceList(this);
@@ -3237,7 +3712,6 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid inv, inv2;
     boolean ok;
-    QueryResult qr;
 
     /* -- */
 
@@ -3280,7 +3754,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (!local && mustChoose())
 	  {
 	    ok = false;
-	    qr = choices();
+
+	    if (qr == null)
+	      {
+		qr = eObj.obtainChoiceList(this);
+	      }
 
 	    if (qr != null)
 	      {
@@ -3289,29 +3767,14 @@ public final class InvidDBField extends DBField implements invid_field {
 		    Ganymede.debug("InvidDBField.verifyNewValue(): searching for matching choice");
 		  }
 
-		for (int i = 0; i < qr.size() && !ok; i++)
+		if (!qr.containsInvid(inv))
 		  {
-		    inv2 = qr.getInvid(i);
-
-		    if (debug)
-		      {
-			Ganymede.debug("InvidDBField.verifyNewValue(): comparing " + inv + " to " + inv2);
-		      }
-		    
-		    if (inv2.equals(inv))
-		      {
-			ok = true;
-		      }
+		    return Ganymede.createErrorDialog("Invid Field Error",
+						      "invid value " + inv + 
+						      " is not a valid choice for field" +
+						      getName() + " in object " + owner.getLabel() +
+						      ".  Serious client error?");
 		  }
-	      }
-
-	    if (!ok)
-	      {
-		return Ganymede.createErrorDialog("Invid Field Error",
-						  "invid value " + inv + 
-						  " is not a valid choice for field" +
-						  getName() + " in object " + owner.getLabel() +
-						  ".  Serious client error?");
 	      }
 	  }
       }

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2000/01/27 06:03:16 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/02/10 04:35:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -84,33 +85,15 @@ class DBDumpLock extends DBLock {
    *
    */
 
-  public DBDumpLock(DBStore lockManager)
+  public DBDumpLock(DBStore store)
   {
     Enumeration enum;
     DBObjectBase base;
 
     /* -- */
 
-    this.lockManager = lockManager;
-    baseSet = new Vector();
-
-    synchronized (lockManager)
-      {
-	try
-	  {
-	    enum = lockManager.objectBases.elements();
-	    
-	    while (enum.hasMoreElements())
-	      {
-		base = (DBObjectBase) enum.nextElement();
-		baseSet.addElement(base);
-	      }    
-	  }
-	finally
-	  {
-	    lockManager.notifyAll();
-	  }
-      }
+    this.lockSync = store.lockSync;
+    baseSet = store.getBases();
 
     locked = false;
   }
@@ -122,9 +105,9 @@ class DBDumpLock extends DBLock {
    *
    */
 
-  public DBDumpLock(DBStore lockManager, Vector baseSet)
+  public DBDumpLock(DBStore store, Vector baseSet)
   {
-    this.lockManager = lockManager;
+    this.lockSync = store.lockSync;
     this.baseSet = baseSet;
 
     locked = false;
@@ -144,18 +127,18 @@ class DBDumpLock extends DBLock {
 
     /* -- */
 
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	try
 	  {
 	    done = false;
 
-	    if (lockManager.lockHash.containsKey(key))
+	    if (lockSync.isLockHeld(key))
 	      {
-		throw new RuntimeException("Error: lock sought by owner of existing lockset.");
+		throw new InterruptedException("Error: lock sought by owner of existing lockset.");
 	      }
 
-	    lockManager.lockHash.put(key, this);
+	    lockSync.setDumpLockHeld(key, this);
 	    this.key = key;
 	    inEstablish = true;
 
@@ -184,7 +167,7 @@ class DBDumpLock extends DBLock {
 		
 		    inEstablish = false;
 		    key = null;
-		    lockManager.lockHash.remove(key);
+		    lockSync.clearLockHeld(key);
 
 		    throw new InterruptedException();
 		  }
@@ -218,7 +201,7 @@ class DBDumpLock extends DBLock {
 		  {
 		    try
 		      {
-			lockManager.wait(500);
+			lockSync.wait(500);
 		      }
 		    catch (InterruptedException ex)
 		      {
@@ -227,7 +210,7 @@ class DBDumpLock extends DBLock {
 			    base = (DBObjectBase) baseSet.elementAt(i);
 			    base.removeDumper(this);
 			  }
-			lockManager.lockHash.remove(key);
+			lockSync.clearLockHeld(key);
 
 			throw ex;
 		      } 
@@ -236,14 +219,14 @@ class DBDumpLock extends DBLock {
 
 	    inEstablish = false;
 	    locked = true;
-	    lockManager.addLock();	// notify consoles
+	    lockSync.addLock();	// notify consoles
 	  }
 	finally
 	  {
-	    lockManager.notifyAll(); // let a thread trying to release this lock proceed
+	    lockSync.notifyAll(); // let a thread trying to release this lock proceed
 	  }
 
-      } // synchronized (lockManager)
+      } // synchronized (lockSync)
   }
 
   /**
@@ -258,7 +241,7 @@ class DBDumpLock extends DBLock {
 
     /* -- */
 
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	try
 	  {
@@ -266,7 +249,7 @@ class DBDumpLock extends DBLock {
 	      {
 		try
 		  {
-		    lockManager.wait(500);
+		    lockSync.wait(500);
 		  } 
 		catch (InterruptedException ex)
 		  {
@@ -290,14 +273,15 @@ class DBDumpLock extends DBLock {
 	      }
 
 	    locked = false;
-	    lockManager.lockHash.remove(key);
-	    key = null;
+	    lockSync.clearLockHeld(key);
 
-	    lockManager.removeLock();	// notify consoles
+	    key = null;		// gc
+
+	    lockSync.removeLock();	// notify consoles
 	  }
 	finally
 	  {
-	    lockManager.notify();
+	    lockSync.notify();
 	  }
       }
   }
@@ -317,7 +301,7 @@ class DBDumpLock extends DBLock {
 
   public void abort()
   {
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	try
 	  {
@@ -326,7 +310,7 @@ class DBDumpLock extends DBLock {
 	  }
 	finally
 	  {
-	    lockManager.notifyAll();
+	    lockSync.notifyAll();
 	  }
       }
   }

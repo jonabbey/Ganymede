@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2000/02/01 04:04:16 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2000/02/10 04:35:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -22,6 +22,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -78,7 +79,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.40 $ $Date: 2000/02/01 04:04:16 $
+ * @version $Revision: 1.41 $ $Date: 2000/02/10 04:35:39 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -360,7 +361,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   {
     try
       {
-	console.proxy.setLocksHeld(Ganymede.db.locksHeld);
+	console.proxy.setLocksHeld(Ganymede.db.lockSync.getLockCount());
       }
     catch (RemoteException ex)
       {

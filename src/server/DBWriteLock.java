@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/02/03 04:59:33 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/02/10 04:35:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -94,7 +95,7 @@ public class DBWriteLock extends DBLock {
    *
    */
 
-  public DBWriteLock(DBStore lockManager)
+  public DBWriteLock(DBStore store)
   {
     Enumeration enum;
     DBObjectBase base;
@@ -102,26 +103,8 @@ public class DBWriteLock extends DBLock {
     /* -- */
 
     this.key = null;
-    this.lockManager = lockManager;
-    baseSet = new Vector();
-
-    synchronized (lockManager)
-      {
-	try
-	  {
-	    enum = lockManager.objectBases.elements();
-	
-	    while (enum.hasMoreElements())
-	      {
-		base = (DBObjectBase) enum.nextElement();
-		baseSet.addElement(base);
-	      }
-	  }
-	finally
-	  {
-	    lockManager.notifyAll();
-	  }
-      }
+    this.lockSync = store.lockSync;
+    baseSet = store.getBases();
   }
 
   /**
@@ -131,10 +114,10 @@ public class DBWriteLock extends DBLock {
    *
    */
 
-  public DBWriteLock(DBStore lockManager, Vector baseSet)
+  public DBWriteLock(DBStore store, Vector baseSet)
   {
     this.key = null;
-    this.lockManager = lockManager;
+    this.lockSync = store.lockSync;
     this.baseSet = baseSet;
   }
 
@@ -158,7 +141,7 @@ public class DBWriteLock extends DBLock {
 	System.err.println(key + ": DBWriteLock.establish(): baseSet vector size " + baseSet.size());
       }
 
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	try
 	  {
@@ -168,16 +151,16 @@ public class DBWriteLock extends DBLock {
 	    // avoid deadlock.  we don't support upgrading read locks
 	    // to write locks.
 
-	    if (lockManager.lockHash.containsKey(key))
+	    if (lockSync.isLockHeld(key))
 	      {
 		throw new InterruptedException("DBWriteLock.establish(): error, lock already held for key: " + key);
 	      }
 
-	    lockManager.lockHash.put(key, this);
+	    lockSync.setWriteLockHeld(key, this);
 
 	    if (debug)
 	      {
-		System.err.println(key + ": DBWriteLock.establish(): added myself to the DBStore lockHash.");
+		System.err.println(key + ": DBWriteLock.establish(): added myself to the DBLockSync lockHash.");
 	      }
 
 	    // okay, now we've got ourselves recorded as the only lock
@@ -197,9 +180,10 @@ public class DBWriteLock extends DBLock {
 	      {
 		if (abort)
 		  {
-		    lockManager.lockHash.remove(key);
-		    key = null;
-		    inEstablish = false;
+		    lockSync.clearLockHeld(this.key);
+		    this.key = null;
+
+		    // the finally clause at bottom will clean up
 
 		    throw new InterruptedException("aborted on command");
 		  }
@@ -217,7 +201,7 @@ public class DBWriteLock extends DBLock {
 
 		if (disabledMessage != null)
 		  {
-		    throw new InterruptedException(disabledMessage);
+		    throw new InterruptedException(disabledMessage); // finally will clean up
 		  }
 		else
 		  {
@@ -236,9 +220,9 @@ public class DBWriteLock extends DBLock {
 			  {
 			    if (debug)
 			      {
-				System.err.println(key + ": DBWriteLock.establish(): waiting for dumpers on base " + 
+				System.err.println(this.key + ": DBWriteLock.establish(): waiting for dumpers on base " + 
 						   base.object_name);
-				System.err.println(key + ": DBWriteLock.establish(): dumperList size: " + 
+				System.err.println(this.key + ": DBWriteLock.establish(): dumperList size: " + 
 						   base.getDumperSize());
 			      }
 
@@ -251,14 +235,13 @@ public class DBWriteLock extends DBLock {
 		  {
 		    try
 		      {
-			lockManager.wait(2500);
+			lockSync.wait(2500);
 		      }
 		    catch (InterruptedException ex)
 		      {
-			lockManager.lockHash.remove(key);
-			inEstablish = false;
+			lockSync.clearLockHeld(this.key);
 
-			throw ex;
+			throw ex; // finally at bottom will clean up
 		      }
 		  }
 
@@ -266,7 +249,7 @@ public class DBWriteLock extends DBLock {
 
 	    if (debug)
 	      {
-		System.err.println(key + ": DBWriteLock.establish(): no dumpers queued.");
+		System.err.println(this.key + ": DBWriteLock.establish(): no dumpers queued.");
 	      }
 
 	    // okay, there are no dump locks waiting to establish.
@@ -285,7 +268,7 @@ public class DBWriteLock extends DBLock {
 
 	    if (debug)
 	      {
-		System.err.println(key + ": DBWriteLock.establish(): added ourself to the writerList.");
+		System.err.println(this.key + ": DBWriteLock.establish(): added ourself to the writerList.");
 	      }
 
 	    // spinwait until we can get into all of the ObjectBases
@@ -297,7 +280,7 @@ public class DBWriteLock extends DBLock {
 	      {
 		if (debug)
 		  {
-		    System.err.println(key + ": DBWriteLock.establish(): spinning.");
+		    System.err.println(this.key + ": DBWriteLock.establish(): spinning.");
 		  }
 
 		if (abort)
@@ -313,9 +296,8 @@ public class DBWriteLock extends DBLock {
 			base.removeWriter(this);
 		      }
 
-		    lockManager.lockHash.remove(key);
-		    key = null;
-		    inEstablish = false;
+		    lockSync.clearLockHeld(this.key);
+		    this.key = null;
 
 		    throw new InterruptedException("aborted on command");
 		  }
@@ -340,13 +322,13 @@ public class DBWriteLock extends DBLock {
 			  {
 			    if (!base.isReaderEmpty())
 			      {
-				System.err.println(key +
+				System.err.println(this.key +
 						   ": DBWriteLock.establish(): " +
 						   "waiting for readers to release.");
 			      }
 			    else if (base.writeInProgress)
 			      {
-				System.err.println(key +
+				System.err.println(this.key +
 						   ": DBWriteLock.establish(): " + 
 						   "waiting for writer to release.");
 			      }
@@ -389,7 +371,7 @@ public class DBWriteLock extends DBLock {
 
 		    try
 		      {
-			lockManager.wait(2500);
+			lockSync.wait(2500);
 		      }
 		    catch (InterruptedException ex)
 		      {
@@ -402,25 +384,24 @@ public class DBWriteLock extends DBLock {
 			    base.removeWriter(this);
 			  }
 	
-			lockManager.lockHash.remove(key);
-			key = null;
-			inEstablish = false;
+			lockSync.clearLockHeld(this.key);
+			this.key = null;
 
-			throw ex;
+			throw ex; // finally will clean up
 		      }
 		  }
 	      } // while (!done)
 
 	    locked = true;
-	    lockManager.addLock();	// notify consoles
+	    lockSync.addLock();	// notify consoles
 	  }
 	finally
 	  {
 	    inEstablish = false; // in case we threw an exception establishing
-	    lockManager.notifyAll(); // wake up threads waiting to establish or release
+	    lockSync.notifyAll(); // wake up threads waiting to establish or release
 	  }
 
-      } // synchronized(lockManager)
+      } // synchronized(lockSync)
 
     if (debug)
       {
@@ -440,7 +421,7 @@ public class DBWriteLock extends DBLock {
 
     /* -- */
 
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	try
 	  {
@@ -448,7 +429,7 @@ public class DBWriteLock extends DBLock {
 	      {
 		try
 		  {
-		    lockManager.wait(2500);
+		    lockSync.wait(2500);
 		  } 
 		catch (InterruptedException ex)
 		  {
@@ -472,13 +453,15 @@ public class DBWriteLock extends DBLock {
 	      }
 
 	    locked = false;
-	    lockManager.lockHash.remove(key);
-	    key = null;
-	    lockManager.removeLock();	// notify consoles
+	    lockSync.clearLockHeld(key);
+
+	    key = null;		// gc
+
+	    lockSync.removeLock();	// notify consoles
 	  }
 	finally
 	  {
-	    lockManager.notifyAll();	// many readers may want in
+	    lockSync.notifyAll();	// many readers may want in
 	  }
       }
   }
@@ -498,7 +481,7 @@ public class DBWriteLock extends DBLock {
   
   public void abort()
   {
-    synchronized (lockManager)
+    synchronized (lockSync)
       {
 	try
 	  {
@@ -507,7 +490,7 @@ public class DBWriteLock extends DBLock {
 	  }
 	finally
 	  {
-	    lockManager.notifyAll();
+	    lockSync.notifyAll();
 	  }
       }
   }
