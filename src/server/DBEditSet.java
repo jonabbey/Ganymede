@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.101 $
-   Last Mod Date: $Date: 2001/10/01 17:19:45 $
+   Version: $Revision: 1.102 $
+   Last Mod Date: $Date: 2001/10/01 18:37:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -370,9 +370,8 @@ public class DBEditSet {
   }
 
   /**
-   *
-   * This method is used to record a message to be sent out when
-   * the transaction is committed.
+   * <p>This method is used to record a message to be sent out when
+   * the transaction is committed.</p>
    *
    * @param addressList Vector of Strings, the address list
    * @param subject The subject line of the message
@@ -380,7 +379,6 @@ public class DBEditSet {
    * @param admin The invid of the admin whose action resulted in the mail
    * @param adminName The name of the admin whose actin resulted in the mail
    * @param objects A vector of invids of objects involved in the mail
-   *
    */
 
   public void logMail(Vector addresses, String subject, String message, 
@@ -390,14 +388,12 @@ public class DBEditSet {
   }
 
   /**
-   *
-   * This method is used to record a message to be sent out when
-   * the transaction is committed.
+   * <p>This method is used to record a message to be sent out when
+   * the transaction is committed.</p>
    *
    * @param addressList Vector of Strings, the address list
    * @param subject The subject line of the message
    * @param message The body of the message
-   *
    */
 
   public void logMail(Vector addresses, String subject, String message)
