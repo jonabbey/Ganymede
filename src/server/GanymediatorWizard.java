@@ -17,7 +17,7 @@
    call back this GanymediatorWizard to continue along the process.
    
    Created: 29 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -58,6 +58,17 @@ import arlut.csd.JDialog.JDialogBuff;
 
 public abstract class GanymediatorWizard extends UnicastRemoteObject implements Ganymediator {
 
+  public final static int STARTUP = 0;
+  public final static int DONE = 99;	// we'll never have a wizard with > 99 steps, right?
+
+  // ---
+
+  protected boolean active = false;
+  protected int state = 0;
+  protected GanymedeSession session = null;
+
+  /* -- */
+
   /**
    *
    * Constructor
@@ -67,6 +78,22 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
   public GanymediatorWizard(GanymedeSession session) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
+
+    if (session == null)
+      {
+	throw new IllegalArgumentException("can't construct: null session");
+      }
+
+    this.session = session;
+
+    active = session.registerWizard(this);
+
+    if (!active)
+      {
+	throw new RuntimeException("error, couldn't register wizard with session");
+      }
+
+    state = STARTUP;
   }
 
   /**
@@ -95,7 +122,12 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
    *
    */
 
-  public abstract void unregister();
+  public void unregister()
+  {
+    active = false;
+    session.unregisterWizard(this);
+    state = DONE;
+  }
 
   /**
    * This method is used to allow server code to determine whether
@@ -106,7 +138,28 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
 
   public boolean isActive()
   {
-    return false;		// we can't be instantiated, after all
+    return active;
   }
 
+  /**
+   *
+   * This method lets us know where the wizard is in its process
+   *
+   */
+
+  public int getState()
+  {
+    return state;
+  }
+
+  /**
+   *
+   * This method starts off the wizard process
+   *
+   */
+
+  public ReturnVal getStartDialog()
+  {
+    return null;
+  }
 }
