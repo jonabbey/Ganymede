@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1405,7 +1405,7 @@ class QueryRow implements ItemListener {
 	    choices = list.getListHandles(false, true); // no inactives, but do want non-editables
 	    choices = parent.gc.sortListHandleVector(choices);
 
-	    operand = invidChooser = new JInvidChooser(choices, null, targetBase);
+	    operand = invidChooser = new JInvidChooser(choices, null, targetBase, false);
 
 	    addOperand = true;
 
