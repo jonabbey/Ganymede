@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.94 $ %D%
+   Version: $Revision: 1.95 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.94 $ %D%
+ * @version $Revision: 1.95 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -397,7 +397,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  protected final DBSession getSession()
+  public final DBSession getSession()
   {
     return editset.getSession();
   }
@@ -410,7 +410,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * 
    */
 
-  protected final GanymedeSession getGSession()
+  public final GanymedeSession getGSession()
   {
     return getSession().getGSession();
   }
@@ -423,7 +423,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * 
    */
 
-  protected final DBObject getOriginal()
+  public final DBObject getOriginal()
   {
     return original;
   }
