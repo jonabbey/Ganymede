@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -38,16 +38,13 @@ import arlut.csd.JDataComponent.*;
 ------------------------------------------------------------------------------*/
 
 
-public class windowPanel extends JBufferedPane implements PropertyChangeListener, ActionListener{  
+public class windowPanel extends JDesktopPane implements PropertyChangeListener, ActionListener{  
   static final boolean debug = true;
   
   // --
 
   gclient
     parent;
-
-  JDesktopPane 
-    lc;
 
   int 
     topLayer = 0,
@@ -82,17 +79,8 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
     this.parent = parent;
     this.windowMenu = windowMenu;
 
-    this.setBuffered(false);
-
     setBackground(ClientColor.background);
 
-    setLayout(new BorderLayout());
-    lc = new JDesktopPane();
-
-    add("Center", lc);
-
-    //windowBar.addButton("Test");
-    //add("South", windowBar);
   }
 
   /**
@@ -216,8 +204,8 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
 
     w.setLayer(new Integer(topLayer));
     
-    lc.add(w);
-    lc.moveToFront(w);
+    add(w);
+    moveToFront(w);
     updateMenu();
     
     parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -293,8 +281,8 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
 	    windowBar.addButton(title);
 	  }
 	  
-	lc.add(rt);
-	lc.moveToFront(rt);
+	add(rt);
+	moveToFront(rt);
 	updateMenu();
 	parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	parent.setStatus("Done.");
