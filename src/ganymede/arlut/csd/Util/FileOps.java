@@ -219,6 +219,34 @@ public class FileOps {
     Process p = java.lang.Runtime.getRuntime().exec(commandLine);
     InputStream iStream = p.getInputStream();
     InputStream eStream = p.getErrorStream();
+
+    try
+      {
+	iStream.close();
+      }
+    catch (IOException ex)
+      {
+      }
+
+    try
+      {
+	eStream.close();
+      }
+    catch (IOException ex)
+      {
+      }
+
+    try
+      {
+	return p.waitFor();
+      }
+    finally
+      {
+	cleanupProcess(p);
+      }
+
+    /*
+
     byte[] buffer = new byte[4096]; // our own skip buffer
 
     try
@@ -287,6 +315,7 @@ public class FileOps {
       {
 	FileOps.cleanupProcess(p);
       }
+    */
   }
 
   /**
