@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.37 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.38 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -397,7 +397,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	  }
 	else
 	  {
-
 	    // Ganymede.debug("Getting field " + val + " for label");
 
 	    DBField f = (DBField) getField(val);
@@ -1011,7 +1010,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public db_field[] listFields(boolean customOnly)
+  public synchronized db_field[] listFields(boolean customOnly)
   {
     db_field[] results;
     Enumeration enum;
@@ -1221,12 +1220,68 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   /**
    *
+   * Shortcut method to get a field's value.  Using this
+   * method saves a roundtrip to the server, which is
+   * particularly useful in database loading.
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public Object getFieldValue(short fieldID)
+  {
+    DBField f = (DBField) getField(fieldID);
+    
+    if (f == null)
+      {
+	editset.getSession().setLastError("couldn't find field " + fieldID);
+	return null;
+      }
+
+    if (f.isVector())
+      {
+	editset.getSession().setLastError("couldn't get scalar value on vector field " + fieldID);
+	return null;
+      }
+
+    return f.getValue();
+  }
+
+  /**
+   *
+   * Shortcut method to set a field's value.  Using this
+   * method saves a roundtrip to the server, which is
+   * particularly useful in database loading.
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public Vector getFieldValues(short fieldID)
+  {
+    DBField f = (DBField) getField(fieldID);
+    
+    if (f == null)
+      {
+	editset.getSession().setLastError("couldn't find field " + fieldID);
+	return null;
+      }
+
+    if (!f.isVector())
+      {
+	editset.getSession().setLastError("couldn't get vector value on scalar field " + fieldID);
+	return null;
+      }
+
+    return f.getValues();
+  }
+
+  /**
+   *
    * Generate a complete printed representation of the object,
    * suitable for printing to a debug or log stream.
    *
    */
 
-  synchronized public void print(PrintStream out)
+  public synchronized void print(PrintStream out)
   {
     Enumeration enum;
     Object key;
@@ -1267,6 +1322,25 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    out.println(field.key());
 	  }
       }    
+  }
+
+  /**
+   *
+   * This method is used to provide a hook to allow different
+   * objects to generate different labels for a given object
+   * based on their perspective.  This is used to sort
+   * of hackishly simulate a relational-type capability for
+   * the purposes of viewing backlinks.
+   *
+   * See the automounter map and NFS volume DBEditObject
+   * subclasses for how this is to be used, if you have
+   * them.
+   *
+   */
+  
+  public String lookupLabel(DBObject object)
+  {
+    return object.getLabel();	// default
   }
 
   /**
