@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -92,7 +92,12 @@ public class directLoader {
 
   public static void main (String args[])
   {
-    /* RMI initialization stuff. We do this for our directLoaderClient object. */
+    if (args.length < 1)
+      {
+	System.err.println("Usage error: java arlut.csd.ganymede.loader.directLoader <properties file>");
+      }
+    
+    Ganymede.loadProperties(args[0]);
       
     my_server = Ganymede.directInit("db/loader.db");
 
@@ -120,9 +125,13 @@ public class directLoader {
 
     try
       {
+	System.err.println("Writing schema summary to schema.list");
 	FileOutputStream textOutStream = new FileOutputStream("schema.list");
 	PrintWriter textOut = new PrintWriter(textOutStream);
 	Ganymede.db.printBases(textOut);
+	textOut.close();
+	textOutStream.close();
+	System.err.println("Completed writing schema summary to schema.list");
       }
     catch (IOException ex)
       {
@@ -360,14 +369,14 @@ public class directLoader {
 	    adminObj = new Admin();
 	    done = adminObj.loadLine(tokens);
 
-	    if (adminObj.name.equals("supergash"))
-	      {
-		System.err.println("Skipping over supergash");
-		continue;
-	      }
-
 	    if (adminObj.name != null)
 	      {
+		if (adminObj.name.equals("supergash"))
+		  {
+		    System.err.println("Skipping over supergash");
+		    continue;
+		  }
+
 		boolean found = false;
 		OwnerGroup ogRec = null;
 
