@@ -8,8 +8,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2002/11/01 02:24:18 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2002/11/01 02:30:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -282,13 +282,21 @@ public class QueryResult implements java.io.Serializable {
     if (invid != null)
       {
 	invidHash.put(invid, label);
-	invidList.addElement(invid);
+
+	if (invidList != null)
+	  {
+	    invidList.addElement(invid);
+	  }
       }
 
     if (label != null)
       {
 	labelHash.put(label, label);
-	labelList.addElement(label);
+
+	if (labelList != null)
+	  {
+	    labelList.addElement(label);
+	  }
       }
 
     unpacked = false;
