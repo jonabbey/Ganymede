@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 1999/06/18 22:43:22 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 1999/07/29 21:37:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -488,7 +488,7 @@ public class Ganymede {
     
     if (dataFile.exists())
       {
-	db.load(dbFilename, false);
+	db.load(dbFilename, false, false); // don't try to load journal
 
 	StringWriter outString = new StringWriter();
 	PrintWriter out = new PrintWriter(outString);
