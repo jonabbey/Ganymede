@@ -118,46 +118,66 @@ public class PasswordDBField extends DBField implements pass_field {
   // ---
 
   /**
-   * <p>Traditional Unix crypt()'ed pass</p>
+   * <p>Traditional Unix crypt()'ed pass.  Only good for validating the
+   * first 8 characters of a plaintext.</p>
    */
 
   private String cryptedPass;
 
   /**
-   * <p>The complex md5crypt()'ed password, as in
-   * OpenBSD, FreeBSD, Linux PAM, etc.</p>
+   * <p>The complex md5crypt()'ed password, as in OpenBSD, FreeBSD,
+   * Linux PAM, etc.  Good for validating indefinite length
+   * strings.</p>
    */
 
   private String md5CryptPass;
 
   /**
-   * <p>The complex md5crypt()'ed password, with the magic string
-   * used by Apache for their htpasswd file format.</p>
+   * <p>The complex md5crypt()'ed password, with the magic string used
+   * by Apache for their htpasswd file format.  Good for validating
+   * indefinite length strings.</p>
    */
 
   private String apacheMd5CryptPass;
 
   /**
-   * <p>Plaintext password.. will never be saved to
-   * disk if we have cryptedPass or md5CryptPass.</p>
+   * <p>Plaintext password.. will never be saved to disk if we have
+   * another hash format available to validate, unless this field has
+   * been specifically configured to always save plaintext to disk in
+   * the schema editor.  See {@link
+   * arlut.csd.ganymede.DBObjectBaseField#isPlainText()} for more
+   * detail.</p>
    */
 
   private String uncryptedPass;
 
   /**
-   * <p>Samba LANMAN hash, for Win95 clients</p>
+   * <p>Samba LANMAN hash, for Win95 clients.  Only good for
+   * validating the first 14 characters of a plaintext.  This hash is
+   * actually incredibly, mind-crushingly weak.. weaker than
+   * traditional Unix crypt, even.  If you're basing your password
+   * security on this hash still, you're in trouble.</p>
+   *
+   * <p>At the time this comment was written (26 October 2004), the
+   * following URL had a really good discussion of a great number of
+   * password authenticator hash algorithms:</p>
+   *
+   * <p>http://www.harper.no/valery/default,date,2004-08-27.aspx</p>
    */
 
   private String lanHash;
 
   /**
-   * <p>Samba md4 Unicode hash, for WinNT/2k clients</p>
+   * <p>Samba md4 Unicode hash, for WinNT/2k clients. Good for
+   * validating up to 2^64 bits of plaintext.. effectively indefinite
+   * in extent </p>
    */
 
   private String ntHash;
 
   /**
-   * <p>SSHA hash, for LDAP</p>
+   * <p>SSHA hash, for LDAP.  Good for validating up to 2^64 bits of
+   * plaintext.. effectively indefinite in extent.</p>
    */
 
   private String sshaHash;
@@ -981,7 +1001,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     /* -- */
     
-    if (plaintext == null || !this.isDefined())
+    if (plaintext == null || plaintext.equals("") || !this.isDefined())
       {
 	return false;
       }
@@ -992,29 +1012,47 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	success = uncryptedPass.equals(plaintext); // most accurate
       }
-    else if (sshaHash != null)
+    else if (sshaHash != null)	// 2^64 bits, but fast
       {
 	success = SSHA.matchSHAHash(sshaHash, plaintext);
       }
-    else if (md5CryptPass != null)
+    else if (md5CryptPass != null) // indefinite
       {
 	success = md5CryptPass.equals(MD5Crypt.crypt(plaintext, getMD5Salt()));
       }
-    else if (apacheMd5CryptPass != null)
+    else if (apacheMd5CryptPass != null) // indefinite
       {
 	success = apacheMd5CryptPass.equals(MD5Crypt.apacheCrypt(plaintext, getApacheMD5Salt()));
       }
-    else if (ntHash != null)
+    else if (ntHash != null)	// 2^64 bits
       {
 	success = ntHash.equals(smbencrypt.NTUNICODEHash(plaintext));
       }
-    else if (lanHash != null)
+    else if (lanHash != null)	// 14 chars
       {
 	success = lanHash.equals(smbencrypt.LANMANHash(plaintext));
       }
-    else if (cryptedPass != null)
+    else if (cryptedPass != null) // 8 chars
       {
 	success = cryptedPass.equals(jcrypt.crypt(getSalt(), plaintext));
+      }
+
+    // if we matched against a stored hash that has sufficient
+    // representational capacity to verify the full plaintext (at
+    // least to the limits of chance collision), go ahead and take the
+    // opportunity to capture the plaintext and set up any hashes that
+    // we want to use but don't have initialized at this point.
+
+    if (success && uncryptedPass == null)
+      {
+	int precision = getHashPrecision();
+
+	if (precision == -1 ||
+	    (precision > 0 && precision >= plaintext.length()))
+	  {
+	    uncryptedPass = plaintext;
+	    setHashes(plaintext, false);
+	  }
       }
 
     return success;
@@ -1379,32 +1417,7 @@ public class PasswordDBField extends DBField implements pass_field {
     // else, go ahead and set everything
 
     uncryptedPass = plaintext;
-
-    if (getFieldDef().isCrypted())
-      {
-	cryptedPass = jcrypt.crypt(plaintext);
-      }
-
-    if (getFieldDef().isMD5Crypted())
-      {
-	md5CryptPass = MD5Crypt.crypt(plaintext);
-      }
-
-    if (getFieldDef().isApacheMD5Crypted())
-      {
-	apacheMd5CryptPass = MD5Crypt.apacheCrypt(plaintext);
-      }
-
-    if (getFieldDef().isWinHashed())
-      {
-	lanHash = smbencrypt.LANMANHash(plaintext);
-	ntHash = smbencrypt.NTUNICODEHash(plaintext);
-      }
-
-    if (getFieldDef().isSSHAHashed())
-      {
-	sshaHash = SSHA.getLDAPSSHAHash(plaintext, null);
-      }
+    setHashes(plaintext, true);
 
     return retVal;
   }
@@ -2051,5 +2064,89 @@ public class PasswordDBField extends DBField implements pass_field {
     // have our parent make the final ok on the value
 
     return eObj.verifyNewValue(this, s);
+  }
+
+  /**
+   * <p>This method returns an int indicating to what precision the
+   * password in this PasswordDBField is known.  Certain cryptographic
+   * hashes have limits on how many characters of the input text are
+   * taken into account in the hash.</p>
+   *
+   * <p>This method returns -1 if the password is known with no limits
+   * on its precision (plaintext, or md5crypt, or ssha which is
+   * precise to 2^64 bits.. close enough), 0 if the password is not
+   * know, or a positive integer indicating the number of characters
+   * of precision that we believe we can recognize from our hash
+   * authenticators.</p>
+   */
+
+  private int getHashPrecision()
+  {
+    if (uncryptedPass != null || md5CryptPass != null ||
+	apacheMd5CryptPass != null || sshaHash != null || ntHash != null)
+      {
+	return -1;		// full precision
+      }
+
+    if (lanHash != null)
+      {
+	return 14;		// Old-school Windows hashes are good
+				// for 14 chars
+      }
+
+    if (cryptedPass != null)
+      {
+	return 8;		// Old-school UNIX sux0rs.. we should
+				// only be using this for importing
+				// users from old /etc/passwd-style
+				// files
+      }
+
+    return 0;			// i got nothing, boss
+  }
+
+  /**
+   * <p>This method does the work of storing the given plaintext into
+   * whatever hashes we are configured to retain.  If forceChange is
+   * true, this calculation and storage is non-optional.  If
+   * forceChange is false, we will only store the plaintext into a
+   * hash if we are configured to use it but for some reason do not
+   * have a hash value of that kind stored.</p>
+   */
+
+  private void setHashes(String plaintext, boolean forceChange)
+  {
+    if (getFieldDef().isCrypted() && (forceChange || cryptedPass == null))
+      {
+	cryptedPass = jcrypt.crypt(plaintext);
+      }
+
+    if (getFieldDef().isMD5Crypted() && (forceChange || md5CryptPass == null))
+      {
+	md5CryptPass = MD5Crypt.crypt(plaintext);
+      }
+
+    if (getFieldDef().isApacheMD5Crypted() && (forceChange || apacheMd5CryptPass == null))
+      {
+	apacheMd5CryptPass = MD5Crypt.apacheCrypt(plaintext);
+      }
+
+    if (getFieldDef().isWinHashed())
+      {
+	if (forceChange || lanHash == null)
+	  {
+	    lanHash = smbencrypt.LANMANHash(plaintext);
+	  }
+
+	if (forceChange || ntHash == null)
+	  {
+	    ntHash = smbencrypt.NTUNICODEHash(plaintext);
+	  }
+      }
+
+    if (getFieldDef().isSSHAHashed() && (forceChange || sshaHash == null))
+      {
+	sshaHash = SSHA.getLDAPSSHAHash(plaintext, null);
+      }
   }
 }
