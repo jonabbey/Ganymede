@@ -7,7 +7,7 @@
    and base structures on the server to the client.
    
    Created: 12 February 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,17 +34,30 @@ import java.util.*;
 public class CategoryTransport implements java.io.Serializable {
 
   StringBuffer buffer;
+  transient GanymedeSession session = null;
 
   /* -- */
 
   /**
    *
-   * Server side constructor
+   * Server side constructor for the full category tree
    *
    */
 
   public CategoryTransport(DBBaseCategory root)
   {
+    addCategoryInfo(root);
+  }
+
+  /**
+   *
+   * Server side constructor for the viewable subset of the category tree
+   *
+   */
+
+  public CategoryTransport(DBBaseCategory root, GanymedeSession session)
+  {
+    this.session = session;
     addCategoryInfo(root);
   }
 
@@ -69,6 +82,7 @@ public class CategoryTransport implements java.io.Serializable {
   {
     Vector contents;
     CategoryNode node;
+    boolean result = false;
 
     /* -- */
 
@@ -93,11 +107,28 @@ public class CategoryTransport implements java.io.Serializable {
 	    
 	    if (node instanceof DBObjectBase)
 	      {
-		addBaseInfo((DBObjectBase) node);
+		DBObjectBase base = (DBObjectBase) node;
+
+		if (session != null)
+		  {
+		    if (session.getPerm(base.getTypeID()).isVisible())
+		      {
+			result = true;
+			addBaseInfo(base);
+		      }
+		  }
+		else
+		  {
+		    result = true;
+		    addBaseInfo(base);
+		  }
 	      }
 	    else if (node instanceof DBBaseCategory)
 	      {
-		addCategoryInfo((DBBaseCategory) node);
+		if (containsVisibleBase((DBBaseCategory) node))
+		  {
+		    addCategoryInfo((DBBaseCategory) node);
+		  }
 	      }
 	  }
       }
@@ -105,6 +136,46 @@ public class CategoryTransport implements java.io.Serializable {
     // terminate this category record
 
     addChunk(">");
+  }
+
+  private boolean containsVisibleBase(DBBaseCategory category)
+  {
+    Vector contents;
+    CategoryNode node;
+    boolean result = false;
+
+    /* -- */
+
+    if (session == null)
+      {
+	return true;		// we're not filtering, return true immediately
+      }
+
+    contents = category.getNodes();
+
+    if (contents.size() > 0)
+      {
+	for (int i = 0; !result && i < contents.size(); i++)
+	  {
+	    node = (CategoryNode) contents.elementAt(i);
+	    
+	    if (node instanceof DBObjectBase)
+	      {
+		DBObjectBase base = (DBObjectBase) node;
+
+		if (session.getPerm(base.getTypeID()).isVisible())
+		  {
+		    result = true;
+		  }
+	      }
+	    else if (node instanceof DBBaseCategory)
+	      {
+		result = containsVisibleBase((DBBaseCategory) node);
+	      }
+	  }
+      }
+
+    return result;
   }
 
   private void addBaseInfo(DBObjectBase node)
