@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -58,24 +58,18 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   JFrame optionsFrame = null;	// to hold the frame that we popup to get a list of
 				// desired fields in the query's results
 
+  private gclient gc;
+
   Hashtable 
-    baseHash,			// Key: Bases      *--*  Value: Fields  
     shortHash;			// Key: Base ID    *--*  Value: Corresponding Base
-  
-  Hashtable baseIDHash = new Hashtable();  
-            // Key: Fieldname
-            //Value: Short ID of corresponding base
-  
-  Hashtable fieldHash = new Hashtable();  
-            // Key: Fieldname
-            // Value: baseField
 
-  Hashtable  nameHash = new Hashtable();   
-            // Key: embedded fieldname (with slashes)
-            // Value: field after last slash 
-
-  Hashtable myHash = new Hashtable(); // allows you to look up a base with its
-                                      // name as the key
+  // the following hashes are accessed through a set of private accessor
+  // methods to avoid confusion
+  
+  private Hashtable baseIDHash = new Hashtable();
+  private Hashtable fieldHash = new Hashtable();  
+  private Hashtable  nameHash = new Hashtable();   
+  private Hashtable myHash = new Hashtable();
 
   // - Buttons
   
@@ -98,13 +92,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
   //-----------
 
-
   // - Panels and Panes
 
   JPanel query_panel = new JPanel();
 
   JPanel base_panel = new JPanel();
-
 
   JPanel inner_choice = new JPanel();
   JPanel outer_choice = new JPanel();
@@ -189,11 +181,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    * @param defaultBase The object base that will be initially selected.
    *                    May be null.
    *
-   * @param baseHash A hash mapping bases to a vector of field definitions,
-   *                 to save a bunch of redundant calls to the server.
-   *
-   * @param shortHash A hash mapping short ID's to Base objects, used to
-   *                  resolve base linking in embedded object hierarchies.
+   * @param gc A gclient used to get access to client caches
    *
    * @param parent The frame that this querybox is to be connected to.
    *
@@ -201,7 +189,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    */
 
-  public querybox (Base defaultBase, Hashtable baseHash, Hashtable shortHash,
+  public querybox (Base defaultBase, gclient gc,
 		   Frame parent, String DialogTitle)
   {
     super(parent, DialogTitle, true); // the boolean value is to make the dialog modal
@@ -216,21 +204,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     // Main constructor for the querybox window
     
-    this.baseHash = baseHash;  
-    this.shortHash = shortHash;
-    try
-      {
-	// We have to go get a real Base reference to the server, through the
-	// shortHash.  The "base" that we have here is actually a BaseDump, so
-	// we can't call the getFields type methods on it.
+    this.gc = gc;
+    this.shortHash = gc.getBaseMap();
+    this.defaultBase = defaultBase;
 
-	this.defaultBase = (Base)shortHash.get(new Short(defaultBase.getTypeID()));
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Exception loading base: " + rx);
-      }
-    
     // - Define the main window
     
     contentPane.setLayout(new BorderLayout());
@@ -248,13 +225,13 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     editBox.addItemListener(this);
     editBox.setSelected(false);
     this.editOnly = false;
-      
+
     query_panel.setLayout(new BorderLayout());
     query_panel.setBackground(Color.lightGray); 
     contentPane.add("Center", query_panel); 
-    
+
     // - Define the inner window with the query choice buttons
-      
+
     addButton.addActionListener(this);
     addButton.setBackground(Color.lightGray);
     removeButton.addActionListener(this);
@@ -263,7 +240,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     query_Buttons.add(addButton);
     query_Buttons.add(removeButton);
     query_panel.add("South", query_Buttons);  
-    
+
     // - Define the two inner choice windows
 
     base_panel.setSize(100,100);
@@ -272,7 +249,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
      
     // - Create the choice window containing the fields 
 
-    Enumeration enum = baseHash.keys();
+    Enumeration enum = gc.getBaseList().elements();
       
     try
       {
@@ -294,7 +271,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		String choiceToAdd = new String(key.getName());
 
 		baseChoice.addItem(choiceToAdd);
-		myHash.put(choiceToAdd, key);
+		mapNameToBase(choiceToAdd, key);
 	      }
 	  
 	    if (defaultBase != null)
@@ -307,10 +284,14 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		// no default given. pick the one that's there.
 	    
 		currentBase = (String) baseChoice.getSelectedItem();
-		this.defaultBase = (Base) myHash.get(currentBase);
+		this.defaultBase = getBaseFromName(currentBase);
 		defaultBase = this.defaultBase;
 		this.baseName = defaultBase.getName();
 	      }
+
+	    // preload our field cache
+
+	    mapBaseNamesToTemplates(defaultBase.getTypeID());
 	  }
       }
     catch (RemoteException ex)
@@ -343,18 +324,13 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     addChoiceRow(defaultBase); // adds the initial row   
     
     this.pack();
-
   }
 
   /**
    *
    * Alternate Constructor. Used when no default query is provided 
    *
-   * @param baseHash A hash mapping bases to a vector of field definitions,
-   *                 to save a bunch of redundant calls to the server.
-   *
-   * @param shortHash A hash mapping short ID's to Base objects, used to
-   *                  resolve base linking in embedded object hierarchies.
+   * @param gc A gclient used to get access to client caches
    *
    * @param parent The frame that this querybox is to be connected to.
    *
@@ -362,10 +338,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    */
 
-  public querybox (Hashtable baseHash, Hashtable shortHash, 
-                   Frame parent, String myTitle) 
+  public querybox (gclient gc,
+                   Frame parent,
+		   String myTitle) 
   {
-    this(null, baseHash, shortHash, parent, myTitle);
+    this(null, gc, parent, myTitle);
   } 
 
   ///////////////////////
@@ -421,7 +398,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     JPanel choice_option = new JPanel(); // basically holds the Close button
     JPanel contain_panel = new JPanel(); // Holds the boxes
 
-    BaseField basefield;
+    FieldTemplate template;
     JFrame myFrame = new JFrame("Options");
     JCheckBox newCheck; 
     JPanel inner_panel = new JPanel();
@@ -460,10 +437,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     try
       {
-	// We have to go get a real Base reference to the server, through the
-	// shortHash.  The "base" that we have here is actually a BaseDump, so
-	// we can't call the getFields type methods on it.
-	Vector fields = ((Base)shortHash.get(new Short(base.getTypeID()))).getFields();
+	Vector fields = gc.getTemplateVector(base.getTypeID());
+
 	tmpAry = new Vector();
 
 	int count = 0;
@@ -471,8 +446,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  
 	for (int j=0; fields != null && (j < fields.size()); j++) 
 	  {	
-	    basefield = (BaseField) fields.elementAt(j);
-	    String Name = basefield.getName();	   
+	    template = (FieldTemplate) fields.elementAt(j);
+	    String Name = template.getName();
 	    newCheck = new JCheckBox(Name);
 	    newCheck.setSelected(true);
 	      
@@ -524,6 +499,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       }
             
     //option_pane.add(option_panel);
+
     myFrame.getContentPane().add(option_panel);
       
     // overkill?
@@ -547,76 +523,71 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    */
   
-  private void getEmbedded (Vector fields, String basePrefix, Short lowestBase)
+  private void getEmbedded(Vector fields, String basePrefix, Short lowestBase)
   {
-    Base tempBase;
-    BaseField tempField;
+    FieldTemplate tempField;
     String myName;
     Short tempIDobj;
     short tempID;
       
     /* -- */
     
-    try
-      {
-	// Examine each field and if it's not referring to an embedded,
-	// then add it's name + basePrefix to the string vector
-     
-	for (int j=0; fields != null && (j < fields.size()); j++)
-	  { 
-	    tempField = (BaseField) fields.elementAt(j);
+    // Examine each field and if it's not referring to an embedded,
+    // then add it's name + basePrefix to the string vector
+    
+    for (int j=0; fields != null && (j < fields.size()); j++)
+      { 
+	tempField = (FieldTemplate) fields.elementAt(j);
 	      
-	    if (! tempField.isEditInPlace())
-	      {	 
-		if (! (tempField.getID() == 0 || tempField.getID() == 8))
-		  {
-		    // ignore containing objects and the like...
-
-		    myName = tempField.getName();
-		    myName = basePrefix + "/" + myName;  // slap on the prefix
-		    Embedded.addElement(myName);
-
-		    fieldHash.put(myName, tempField);
-		   
-		    // Also, save the information on the target base
-		    // in a hashtable
-		      
-		    // the ID will be used in creating the query for the 
-		    // edit-in-place
-		    
-		    // if tempIDobj isn't null, then we've got 
-		    // something beneath an edit in place. Add the
-		    // id of the lowest level base to the baseIDHash
-		    
-		    if (lowestBase != null)
-		      {
-			baseIDHash.put(myName, lowestBase);
-		      }
-		  }
-	      }
-	    else
+	if (!tempField.isEditInPlace())
+	  {	 
+	    if (tempField.getID() != SchemaConstants.OwnerListField &&
+		tempField.getID() != SchemaConstants.BackLinksField)
 	      {
-		// since it does refer to an embedded, call getEmbedded again,
-		// with tempBase.getFields(), basePrefix/tempBase, 
+		// ignore containing objects and the like...
 
 		myName = tempField.getName();
 		myName = basePrefix + "/" + myName;  // slap on the prefix
-		  
-		tempID = tempField.getTargetBase();
 
-		tempIDobj = new Short(tempID);
+		// save the embedded information in our global Embedded vector
 
-		// get the base from the ShortHash
-		  
-		tempIDobj = new Short(tempID);
-		tempBase = (Base) shortHash.get(tempIDobj);
-		getEmbedded(tempBase.getFields(), basePrefix, tempIDobj);
+		Embedded.addElement(myName);
+
+		mapNameToTemplate(myName, tempField);
+		   
+		// Also, save the information on the target base
+		// in a hashtable
+		      
+		// the ID will be used in creating the query for the 
+		// edit-in-place
+		    
+		// if tempIDobj isn't null, then we've got 
+		// something beneath an edit in place. Add the
+		// id of the lowest level base to the baseIDHash
+
+		mapNameToId(myName, lowestBase);
 	      }
 	  }
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote exception: " + ex);	
+	else
+	  {
+	    // since it does refer to an embedded, call
+	    // getEmbedded again, with tempID's templateVector,
+	    // basePrefix/tempBase,
+
+	    myName = tempField.getName();
+	    myName = basePrefix + "/" + myName;  // slap on the prefix
+		  
+	    tempID = tempField.getTargetBase();
+
+	    if (tempID >= 0)
+	      {
+		tempIDobj = new Short(tempID);
+		    
+		// process embedded fields for target
+		    
+		getEmbedded(gc.getTemplateVector(tempID), basePrefix, tempIDobj);
+	      }
+	  }
       }
   }
 
@@ -627,91 +598,84 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    */
     
-  private qfieldChoice getChoiceFields (Base base)
+  private qfieldChoice getChoiceFields(short id)
   {
     short inVid;
     Base tempBase;                            // Used when handeling embedded objs
-    BaseField basefield;
+    FieldTemplate template;
     qfieldChoice myChoice = new qfieldChoice();
-    int i = 0; // counter variable
 
     /* -- */
 
     myChoice.addItemListener(this);
     myChoice.qRow = this.row;
     
-    try
-      {
-
-	// We have to go get a real Base reference to the server, through the
-	// shortHash.  The "base" that we have here is actually a BaseDump, so
-	// we can't call the getFields type methods on it.
-
-	Vector fields = ((Base)shortHash.get(new Short(base.getTypeID()))).getFields();
-	Vector EIPfields = new Vector();
+    Vector fields = gc.getTemplateVector(id);
+    Vector EIPfields = new Vector();
 		  
-	for (int j=0; fields != null && (j < fields.size()); j++) 
-	  {
-	    basefield = (BaseField) fields.elementAt(j);
+    for (int j=0; fields != null && (j < fields.size()); j++) 
+      {
+	template = (FieldTemplate) fields.elementAt(j);
 	    
-	    if (basefield.isEditInPlace())
-	      {
-		// add it to EIPfields
+	if (template.isEditInPlace())
+	  {
+	    // We're an edit in place.. we want to recurse down
+	    // to the bottom of this edit-in-place tree, and
+	    // add the terminals to the global Embedded vector
+
+	    // because getEmbedded is recursive, we need to pass
+	    // a vector of FieldTemplate's so that getEmbedded
+	    // can recurse down with it.
 		 
-		EIPfields.addElement(basefield);
-		String fieldName = basefield.getName();
-		getEmbedded(EIPfields, fieldName, null);
-		EIPfields.removeElement(basefield);
-	      }
-	    else
+	    EIPfields.addElement(template);
+	    getEmbedded(EIPfields, template.getName(), null);
+	    EIPfields.removeElement(template);
+	  }
+	else
+	  {
+	    // ignore containing objects and the like...
+
+	    if (template.getID() != SchemaConstants.OwnerListField &&
+		template.getID() != SchemaConstants.BackLinksField)
 	      {
-
-		if (! (basefield.getID() == 0 || basefield.getID() == 8))
-		  {
-		    // ignore containing objects and the like...
-
-		String Name = basefield.getName();
+		String Name = template.getName();
 		myChoice.addItem(Name);
 		
-		// To avoid a whole bunch of string comparisons, 
-		// we'll put the name of the field in the nameHash
-		// with it's own name as the value (since it's not
-		// an edit-in-place)
-		  
-		nameHash.put(Name, Name);
-	      
-		  }
+		// Keep a shortcut for our later fieldname parsing
+		// This was Erik's idea.. 
+
+		mapEmbeddedToField(Name, Name);
 	      }
-	  }
-	  
-	if (! Embedded.isEmpty())
-	  {
-	    for (int k = 0; (k < Embedded.size()); k ++)
-	      {
-		String embedName = (String) Embedded.elementAt(k);
-
-		myChoice.addItem(embedName); // make it so #1
-
-		// Ok, let's try some string processing -- removing the
-		// slashes.
-		  
-		int first = embedName.lastIndexOf("/") + 1;
-		int last = embedName.length();
-		String noSlash = embedName.substring(first, last);
-		System.out.println("Feild Name for embedded: " + noSlash);
-
-		// Add the slash-less name to the name hash, with the key
-		// being the slash filled name
-		  
-		nameHash.put(embedName, noSlash);
-	      }
-
-	    Embedded.removeAllElements();
 	  }
       }
-    catch (RemoteException ex)
+    
+    // If we wound up with any embedded (edit-in-place) fields from
+    // contained objects, add those fields to our embedded map.
+    
+    if (!Embedded.isEmpty())
       {
-	throw new RuntimeException("caught remote exception: " + ex);	
+	for (int k = 0; (k < Embedded.size()); k ++)
+	  {
+	    String embedName = (String) Embedded.elementAt(k);
+
+	    myChoice.addItem(embedName); // make it so #1
+
+	    // Ok, let's do our string processing for our field name,
+	    // once and for all by removing the slashes and saving
+	    // the result. Erik again.
+		  
+	    String noSlash = embedName.substring(embedName.lastIndexOf("/") + 1,
+						 embedName.length());
+
+	    // System.out.println("Field Name for embedded: " + noSlash);
+
+	    // Add the slash-less name to the name hash, with the key
+	    // being the slash filled name
+		  
+	    mapEmbeddedToField(embedName, noSlash);
+	  }
+
+	Embedded.removeAllElements();
       }
 
     return myChoice;  
@@ -737,11 +701,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     try
       {
-	// We have to go get a real Base reference to the server, through the
-	// shortHash.  The "base" that we have here is actually a BaseDump, so
-	// we can't call the getFields type methods on it.
-
-	fieldChoice = getChoiceFields((Base)shortHash.get(new Short(base.getTypeID())));
+	fieldChoice = getChoiceFields(base.getTypeID());
       }
     catch (RemoteException rx)
       {
@@ -793,12 +753,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     // Look it up in the fieldHash. if it's there, then goodie!
 
-    BaseField myField = (BaseField) fieldHash.get(field);
+    FieldTemplate myField = getTemplateFromName(field);
     
     // If the field contains slashes, then we'll remove 'em
     // by using the name hash
     
-    field = (String) nameHash.get(field);
+    field = getFieldFromEmbedded(field);
     
     // easy as cake
     
@@ -854,63 +814,56 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
   private Component getInputField (String field)
   {
-    try 
-      {
-	BaseField myField = (BaseField) fieldHash.get(field); 
+    FieldTemplate myField = getTemplateFromName(field);
 	
-	// If the field contains slashes, then we'll remove 'em
-	// by using the name hash
-
-	field = (String) nameHash.get(field);
-
-	System.out.println("And We have put gotten it from NameHash: " + field);
-	    
-	// easy as pie
-	  
-	if (myField == null)
-	  {
-	    myField = this.defaultBase.getField(field);  
-
-	    // Probably fix this...make it bring up an error dialog or
-	    // something
-   
-	    inputField = new JTextField(12);
-	    
-	    return inputField; 
-	  }
-
-	if (myField.isDate())
-	  {
-	    dateField = new JTextField("dd/mm/yyyy");
-	    
-	    return dateField;   
-	  }
-	else if (myField.isBoolean())
-	  {
-	    JCheckBox boolBox = new JCheckBox("True");
-	    System.out.println("It's a Boolean!");
-	    boolBox.setSelected(true);
-
-	    return boolBox;
-	  }
-	else if (myField.isIP())
-	  {
-	    JIPField IPField = new JIPField(true); // allow V6
-	    
-	    return IPField;
-	  }
-	else 
-	  {
-	    // It ain't no date
-	    
-	    inputField = new JTextField(12);
-	    
-	    return inputField; 
-	  }
-      }      
-    catch (RemoteException ex)
+    // If the field contains slashes, then we'll remove 'em
+    // by using the name hash
+    
+    field = getFieldFromEmbedded(field);
+    
+    System.out.println("And We have put gotten it from NameHash: " + field);
+    
+    // easy as pie
+    
+    if (myField == null)
       {
-	throw new RuntimeException("caught remote exception: " + ex);	
+	myField = getTemplateFromName(field);
+
+	// Probably fix this...make it bring up an error dialog or
+	// something
+   
+	inputField = new JTextField(12);
+	    
+	return inputField; 
+      }
+
+    if (myField.isDate())
+      {
+	dateField = new JTextField("dd/mm/yyyy");
+	
+	return dateField;   
+      }
+    else if (myField.isBoolean())
+      {
+	JCheckBox boolBox = new JCheckBox("True");
+	System.out.println("It's a Boolean!");
+	boolBox.setSelected(true);
+
+	return boolBox;
+      }
+    else if (myField.isIP())
+      {
+	JIPField IPField = new JIPField(true); // allow V6
+	
+	return IPField;
+      }
+    else 
+      {
+	// It ain't no date
+	
+	inputField = new JTextField(12);
+	
+	return inputField; 
       }
   }
 
@@ -924,86 +877,78 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
   private qaryChoice getOpChoice (String field)
   {
-    try 
+    FieldTemplate myField = getTemplateFromName(field);
+
+    // Check to see if the damn thing has slashes in it
+
+    field = getFieldFromEmbedded(field);
+
+    // easy as fish
+    
+    if (myField == null)
       {
-	BaseField myField = (BaseField) fieldHash.get(field);
-
-	// Check to see if the damn thing has slashes in it
-
-	field = (String) nameHash.get(field);
-
-	// easy as fish
-
-	if (myField == null)
-	  {
-	    // It's not an edit in place. Engage.
-	    
-	    myField = this.defaultBase.getField(field);  
-	  }
+	// It's not an edit in place. Engage.
 	
-	intChoice = new qaryChoice();
-	intChoice.addItem("="); 
-	intChoice.addItem(">="); 
-	intChoice.addItem("<="); 
-	intChoice.addItem("<"); 
-	intChoice.addItem(">");
-	intChoice.addItem("= [Case Insensitive]");
-	intChoice.addItem("Start With");
-	intChoice.addItem("End With");
-	intChoice.addItemListener(this);
-
-	// Do a nice null test to make sure stuff isn't screwey
+	myField = getTemplateFromName(field);
+      }
+    
+    intChoice = new qaryChoice();
+    intChoice.addItem("="); 
+    intChoice.addItem(">="); 
+    intChoice.addItem("<="); 
+    intChoice.addItem("<"); 
+    intChoice.addItem(">");
+    intChoice.addItem("= [Case Insensitive]");
+    intChoice.addItem("Start With");
+    intChoice.addItem("End With");
+    intChoice.addItemListener(this);
+    
+    // Do a nice null test to make sure stuff isn't screwey
 	  
-	if (myField == null)
-	  {
-	    System.out.println("MYFIELD IS NULL! LIFE REALLY SUCKS!!");
-	    
-	    return intChoice;
-	  }
-	
-	// NOTE - HANDLE VECTORS, IPs, etc
-
-	if (myField.isDate())
-	  {
-	    dateChoice = new qaryChoice();
-	    dateChoice.addItem("Same Day As");
-	    dateChoice.addItem("Same Week As");
-	    dateChoice.addItem("Same Month As");
-	    dateChoice.addItem("Before");
-	    dateChoice.addItem("After");
-
-	    dateChoice.addItemListener(this);
-	    return dateChoice;   
-	  }
-	else if (myField.isNumeric())
-	  {
-	    //System.out.println("Field: It's a number!");
-	    return intChoice; 
-	  }
-	else if (myField.isArray())
-	  {
-	    vectorChoice = new qaryChoice();
-	    vectorChoice.addItem("Contains All");
-	    vectorChoice.addItem("Contains Any");
-	    vectorChoice.addItem("Contains None");
-	    vectorChoice.addItem("Length <");
-	    vectorChoice.addItem("Length >");
-	    vectorChoice.addItem("Length =");
-	    vectorChoice.addItemListener(this);
-
-	    return vectorChoice;
-	  }
-	else 
-	  {
-	    return intChoice; // Numeric operators are the default
-	  }
-      }      
-    catch (RemoteException ex)
+    if (myField == null)
       {
-	throw new RuntimeException("caught remote exception: " + ex);	
+	System.out.println("MYFIELD IS NULL! LIFE REALLY SUCKS!!");
+	
+	return intChoice;
+      }
+    
+    // NOTE - HANDLE VECTORS, IPs, etc
+    
+    if (myField.isDate())
+      {
+	dateChoice = new qaryChoice();
+	dateChoice.addItem("Same Day As");
+	dateChoice.addItem("Same Week As");
+	dateChoice.addItem("Same Month As");
+	dateChoice.addItem("Before");
+	dateChoice.addItem("After");
+
+	dateChoice.addItemListener(this);
+	return dateChoice;   
+      }
+    else if (myField.isNumeric())
+      {
+	//System.out.println("Field: It's a number!");
+	return intChoice; 
+      }
+    else if (myField.isArray())
+      {
+	vectorChoice = new qaryChoice();
+	vectorChoice.addItem("Contains All");
+	vectorChoice.addItem("Contains Any");
+	vectorChoice.addItem("Contains None");
+	vectorChoice.addItem("Length <");
+	vectorChoice.addItem("Length >");
+	vectorChoice.addItem("Length =");
+	vectorChoice.addItemListener(this);
+
+	return vectorChoice;
+      }
+    else 
+      {
+	return intChoice; // Numeric operators are the default
       }
   }
-
 
   /**
    *
@@ -1084,7 +1029,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
            fieldName,
            operator;
 
-    BaseField tempField;
+    FieldTemplate tempField;
     Integer tempInt = new Integer(0);
     JTextField tempText = new JTextField();
     JTextField tempDate = new JTextField();
@@ -1128,7 +1073,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       {
 	tempIP = (JIPField) tempAry[7];
       }
-
     else 
       { 
 	// default
@@ -1146,20 +1090,20 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	 *
 	 */ 
 
-	baseID = (Short) baseIDHash.get(fieldName);
+	baseID = getIdFromName(fieldName);
 	
 	if (baseID != null)
 	  {
 	    // The hash has a defined value for the base ID, therefore
 	    // it's an edit in place
 	    
-	    tempField = (BaseField) fieldHash.get(fieldName);
-	    fieldName = (String) nameHash.get(fieldName); // keep only the last field 
+	    tempField = getTemplateFromName(fieldName);
+	    fieldName = getFieldFromEmbedded(fieldName); // keep only the last field 
 	    editInPlace = true;
 	  }
 	else
 	  {
-	    tempField = defaultBase.getField(fieldName);
+	    tempField = getTemplateFromName(fieldName);
 	    editInPlace = false;
 	  }
 
@@ -1193,79 +1137,78 @@ class querybox extends JDialog implements ActionListener, ItemListener {
         //    Don't do them here!!
 
 
-	if (! tempField.isArray()){
-
-	if (operator == "=")
+	if (! tempField.isArray())
 	  {
-	    opValue = 1;
-	  } 
-	else if (operator == "<")
-	  {
-	    opValue = 2;
-	  } 
-	else if (operator == "<=")
-	  {
-	    opValue = 3;
-	  } 
-	else if (operator == ">") 
-	  {
-	    opValue = 4;
-	  } 
-	else if (operator == ">=") 
-	  {
-	    opValue = 5;
-	  } 
-	else if (operator.equals("= [Case Insesitive]"))
-	  {
-	    opValue = 6;
-	  }
-	else if (operator.equals("Start With"))
-	  {
-	    opValue = 7;
-	  }
-	else if (operator.equals("End With"))
-	  {
-	    opValue = 8;
+	    if (operator == "=")
+	      {
+		opValue = 1;
+	      } 
+	    else if (operator == "<")
+	      {
+		opValue = 2;
+	      } 
+	    else if (operator == "<=")
+	      {
+		opValue = 3;
+	      } 
+	    else if (operator == ">") 
+	      {
+		opValue = 4;
+	      } 
+	    else if (operator == ">=") 
+	      {
+		opValue = 5;
+	      } 
+	    else if (operator.equals("= [Case Insesitive]"))
+	      {
+		opValue = 6;
+	      }
+	    else if (operator.equals("Start With"))
+	      {
+		opValue = 7;
+	      }
+	    else if (operator.equals("End With"))
+	      {
+		opValue = 8;
+	      }
+	    else
+	      {
+		opValue = 9; // UNDEFINED
+	      }    
 	  }
 	else
 	  {
-	    opValue = 9; // UNDEFINED
-	  }    
-	}
-
-	else{
-
-	  // we have a vector, so use vector operators
+	    // we have a vector, so use vector operators
 	  
-	if (operator.equals("Contains Any"))
-	  {
-	    opValue = 1;
-	  } 
-	else if (operator.equals("Contains All"))
-	  {
-	    opValue = 2;
-	  } 
-	else if (operator.equals("Contains None"))
-	  {
-	    opValue = 3;
-	  } 
-	else if (operator.equals("Length =")) 
-	  {
-	    opValue = 4;
-	  } 
-	else if (operator.equals("Length >")) 
-	  {
-	    opValue = 5;
-	  } 
-	else if (operator.equals("Length <"))
-	  {
-	    opValue = 6;
+	    if (operator.equals("Contains Any"))
+	      {
+		opValue = 1;
+	      } 
+	    else if (operator.equals("Contains All"))
+	      {
+		opValue = 2;
+	      } 
+	    else if (operator.equals("Contains None"))
+	      {
+		opValue = 3;
+	      } 
+	    else if (operator.equals("Length =")) 
+	      {
+		opValue = 4;
+	      } 
+	    else if (operator.equals("Length >")) 
+	      {
+		opValue = 5;
+	      } 
+	    else if (operator.equals("Length <"))
+	      {
+		opValue = 6;
+	      }
+	    else
+	      {
+		opValue = 7; // Undefined
+	      } 
 	  }
-	else
-	  {
-	    opValue = 7; // Undefined
-	  } 
-	}
 
 	// -- if not is true then add a not node
     
@@ -1280,7 +1223,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  {
 	    myNode = dataNode;
 	  }
-	
 
 	if (allRows == 1)
 	  {
@@ -1311,8 +1253,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		System.out.println("");
 		System.out.println("Field Name: " + fieldName);
 
-		Base upWithPeople = (Base) shortHash.get(baseID); 
-		String bName = upWithPeople.getName();
+		String bName = getBaseFromShort(baseID).getName();
 
 		System.out.println("Low Base: " + bName);
 		System.out.println("Top Base: " + defaultBase.getName());
@@ -1366,7 +1307,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		  {
 		    tempIP = (JIPField) tempAry[7];
 		  }
-		
 		else 
 		  { 
 		    // default
@@ -1393,7 +1333,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		  {
 		    tempIP = (JIPField) tempAry[7];
 		  }
-		
 		else 
 		  { 
 		    // default
@@ -1401,27 +1340,27 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		  }
 
 		
-	/* Here's some code to deal with edit-in-place fields again
-	 * what we need to do here is get the actual field from the 
-	 * name, using the shortID of the base preovided by the
-	 * fieldname Hash.
-	 *
-	 */ 
+		/* Here's some code to deal with edit-in-place fields again
+		 * what we need to do here is get the actual field from the 
+		 * name, using the shortID of the base preovided by the
+		 * fieldname Hash.
+		 *
+		 */ 
 		
-		baseID = (Short) baseIDHash.get(fieldName);
+		baseID = getIdFromName(fieldName);
 		
 		if (baseID != null)
 		  {
 		    // The hash has a defined value for the base ID, therefore
 		    // it's an edit in place
 		    
-		    tempField = (BaseField) fieldHash.get(fieldName);
-		    fieldName = (String) nameHash.get(fieldName); // keep only the last field 
+		    tempField = getTemplateFromName(fieldName);
+		    fieldName = getFieldFromEmbedded(fieldName); // keep only the last field 
 		    editInPlace = true;
 		  }
 		else
 		  {
-		    tempField = defaultBase.getField(fieldName);
+		    tempField = getTemplateFromName(fieldName);
 		    editInPlace = false;
 		  }
 		
@@ -1854,7 +1793,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	System.out.println("Base selected");
 	// First, change the base
 	  
-	Base defaultBase = (Base) myHash.get(baseChoice.getSelectedItem());
+	Base defaultBase = getBaseFromName((String) baseChoice.getSelectedItem());
 	this.defaultBase = defaultBase;
 
 	try
@@ -1863,7 +1802,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
 	catch (RemoteException ex)
 	  {
-	    throw new RuntimeException("caught remote exception: " + ex);	
+	    throw new RuntimeException("caught remote exception: " + ex);
 	  }
 	  
 	// remove for all entries in vector of component arrays
@@ -1877,6 +1816,17 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
 	  
 	addChoiceRow(defaultBase);
+
+	// update field name map
+
+	try
+	  {
+	    mapBaseNamesToTemplates(defaultBase.getTypeID());
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote exception: " + ex);
+	  }
 
 	// Now update optionsFrame
 
@@ -2384,6 +2334,96 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       
       // return null;  // If this happens it's bad.
     }
+
+  // ***
+  //
+  // private convenience methods
+  //
+  // ***
+
+  // we have a map from base name to base id
+
+  private void mapNameToId(String name, Short id)
+  {
+    if (id != null)
+      {
+	baseIDHash.put(name, id);
+      }
+  }
+
+  private Short getIdFromName(String name)
+  {
+    return (Short) baseIDHash.get(name);
+  }
+
+  private void mapBaseNamesToTemplates(short id)
+  {
+    Vector fieldDefs = null;
+    FieldTemplate template;
+
+    /* -- */
+
+    fieldDefs = gc.getTemplateVector(id);
+    
+    if (fieldDefs != null)
+      {
+	fieldHash.clear();
+
+	for (int i = 0; i < fieldDefs.size(); i++)
+	  {
+	    template = (FieldTemplate) fieldDefs.elementAt(i);
+	    mapNameToTemplate(template.getName(), template);
+	  }
+      }
+  }
+
+  // we have a map from fieldname to field template
+
+  private void mapNameToTemplate(String name, FieldTemplate template)
+  {
+    fieldHash.put(name, template);
+  }
+
+  private FieldTemplate getTemplateFromName(String name)
+  {
+    return (FieldTemplate) fieldHash.get(name);
+  }
+
+  // we have a map from embedded fieldname (with slashes) to 
+  // the name 
+  // template after the last slash
+
+  private void mapEmbeddedToField(String name, String fieldName)
+  {
+    nameHash.put(name, fieldName);
+  }
+
+  private String getFieldFromEmbedded(String name)
+  {
+    return (String) nameHash.get(name);
+  }
+
+  // we have a map from base names to Base
+
+  private void mapNameToBase(String name, Base base)
+  {
+    myHash.put(name, base);
+  }
+
+  private Base getBaseFromName(String name)
+  {
+    return (Base) myHash.get(name);
+  }
+
+  private Base getBaseFromShort(Short id)
+  {
+    return (Base) shortHash.get(id);
+  }
+
+  private Base getBaseFromShort(short id)
+  {
+    return (Base) shortHash.get(new Short(id));
+  }
 }
 
 /*------------------------------------------------------------------------------
