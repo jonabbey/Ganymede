@@ -8,8 +8,8 @@
    
    Created: 26 February 2003
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2003/02/27 03:35:51 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2003/02/27 03:37:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.sql.Timestamp;
  * arlut.csd.ganymede.DBLog DBLog} class, using a PostGreSQL database
  * for the storage format.</p>
  *
- * @version $Revision: 1.2 $ $Date: 2003/02/27 03:35:51 $
+ * @version $Revision: 1.3 $ $Date: 2003/02/27 03:37:24 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -291,14 +291,10 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     StringBuffer buffer = new StringBuffer();
     DBLogEvent event = null;
-    String line;
 
     java.util.Date transDate = null;
     String prevTransID = null;
     String transAdmin = null;
-
-    String dateString;
-    long timeCode;
 
     ResultSet rs = null;
 
