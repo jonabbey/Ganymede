@@ -5,7 +5,7 @@
    Resource class for use with StringDialog.java
    
    Created: 16 June 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -13,9 +13,7 @@
 
 package arlut.csd.JDialog;
 
-import java.lang.String;
 import java.util.Vector;
-
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -33,29 +31,29 @@ public class choiceThing implements java.io.Serializable {
   /* -- */
 
   public choiceThing(String label, Vector Items)
-    {
-      this(label, Items, null);
-    }
+  {
+    this(label, Items, null);
+  }
 
   public choiceThing(String label, Vector Items, Object selectedObject)
-    {
-      this.choiceLabel = label;
-      this.items = Items;
-      this.selected = selectedObject;
-    }
+  {
+    this.choiceLabel = label;
+    this.items = Items;
+    this.selected = selectedObject;
+  }
 
   public String getLabel()
-    {
-      return choiceLabel;
-    }
+  {
+    return choiceLabel;
+  }
 
   public Vector getItems()
-    {
-      return items;
-    }
+  {
+    return items;
+  }
 
   public Object getSelectedItem()
-    {
-      return selected;
-    }
+  {
+    return selected;
+  }
 }
