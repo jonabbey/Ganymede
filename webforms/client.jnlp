@@ -32,6 +32,9 @@
     <j2se version="1.2"/>
     <jar href="ganymede.jar"/>
   </resources>
+  <security>
+    <j2ee-application-client-permissions/>
+  </security>
   <applet-desc 
     documentBase="#WEBROOT"
     name="Ganymede"
