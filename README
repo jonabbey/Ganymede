@@ -1,5 +1,5 @@
-Ganymede Release 1.0 prerelease beta 2
-September 15, 2000
+Ganymede Release 1.0 prerelease beta 3
+October 5, 2000
 README
 ---------------------------------------------
 
@@ -47,13 +47,17 @@ This release includes:
 Things you will need:
 
   A JDK 1.1.7 or better compliant JVM to run the server, client, and
-  admin console.  We recommend using Sun's JDK 1.2.2 where you can.
-  JDK 1.2 on UNIX thus far only seems to support 8 and 24 bit color
-  displays.
+  admin console.  We recommend using Sun's JDK 1.3 where you can.
+  JDK 1.3 on UNIX thus far only seems to support 8 and 24 bit color
+  displays and performs poorly on remote displays.  For this reason,
+  the Ganymede client and admin console are designed to be able to
+  work with JDK 1.1.7 as well as 1.3.
 
-  Swing 1.1 (or later) from Sun.  Swing 1.1.1 has *many* bugs fixed
-  relative to Swing 1.1, and should be used if at all possible. You
-  can download this from http://java.sun.com/products/jfc/index.html.  
+  If you intend to use the Ganymede clients with a 1.1 series JDK, you
+  will need to download Swing 1.1 (or later) from Sun.  Swing 1.1.1
+  has *many* bugs fixed relative to Swing 1.1, and should be used if
+  at all possible. You can download this from
+  http://java.sun.com/products/jfc/index.html.
 
   Versions of Swing before Swing 1.1 will NOT work, as Ganymede is now
   built to use the javax version of the Swing libraries.  Probably 
@@ -62,11 +66,7 @@ Things you will need:
   current release has been performed with JDK 1.1.8 on Solaris and
   JDK 1.3 on Windows.
 
-  The Ganymede client in version 0.99.9 has been tested running on Kestrel,
-  the new JDK 1.3 beta on Windows.  Neither the server nor the admin
-  console have yet been tested on Kestrel.
-
-  Lots of bugs in Swing and JDK have been fixed in JDK 1.2.2.. get it
+  Lots of bugs in Swing and JDK have been fixed in JDK 1.3.. get it
   if you can.
 
   Perl 5 to run the install scripts.
@@ -79,7 +79,7 @@ Things you will need:
   If you want to run the Ganymede client or admin console on a Win32
   machine, download the latest version of the Java Runtime Environment
   (1.3.0 at this writing) from
-  http://java.sun.com/j2se/1.3/jre/download-windows.html.
+  http://java.sun.com/products/plugin/
   
 --
 

@@ -1,12 +1,12 @@
-Ganymede Developer Release 0.99.9
-January 13, 2000
+Ganymede Developer 1.0 prerelease beta 3
+October 5, 2000
 KNOWNBUGS
 ----------------------------------------------
 
-Ganymede release 0.99.9 requires Swing 1.1 or later, as it is built to
-expect the Swing libraries to be in the package javax.swing, rather
+Ganymede release 1.0p1b3 requires Swing 1.1 or later, as it is built
+to expect the Swing libraries to be in the package javax.swing, rather
 than com.sun.java.swing, as it was in prior versions.  Use of Java JRE
-1.2.2 for the clients is highly recommended, as many Swing bugs are
+1.3 for the clients is highly recommended, as many Swing bugs are
 fixed in this release.
 
 Sun has just released Swing 1.1.1, which has lots and lots of bugs
@@ -23,7 +23,7 @@ account name/ password is not properly reset.  It is, instead, user:
 monitor, password: display.  If you start a new ganymede.db file
 from scratch, the monitor account should be configured properly.
 
-2) The gash and gasharl schemas are provided in 0.99.9 is intended to
+2) The gash and gasharl schemas are provided in 1.0p1b3 is intended to
 enable the use of Ganymede as a 'drop-in' replacement for GASH.  There
 are, however, a relatively small number of functions that are not
 performed by Ganymede with the gash schemas.  These include the
@@ -61,9 +61,10 @@ references in the user's gid field.
 5) The Ganymede admin console will fail with security exceptions when
 run in a browser with any Java 1.2 plugin prior to version 1.2.2, due
 to a bug in thread permission allocations in early 1.2 JDK's.  If you
-see problems with the Ganymede admin console, try the 1.2.2 plugin.
+see problems with the Ganymede admin console, try the latest 1.3
+plugin.
 
-Comments welcome. ;-)
+Comments welcome.
 
 ganymede@arlut.utexas.edu for the list, or
 ganymede_author@arlut.utexas.edu to comment to us.
