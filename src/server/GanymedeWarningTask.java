@@ -8,15 +8,15 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2001/10/13 00:49:17 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2002/03/21 21:46:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -243,17 +243,7 @@ public class GanymedeWarningTask implements Runnable {
 
 		    actionDate = (Date) obj.getFieldValue(SchemaConstants.ExpirationField);
 
-		    tempString.append("\n\nExpiration scheduled to take place on or after " + actionDate.toString());
-
-		    tempString.append("\n\nObject expiration typically means that the object in question is ");
-		    tempString.append("to be made unusable, but the record will not be immediately removed from ");
-		    tempString.append("the database.  The object will typically be scheduled for permanent removal ");
-		    tempString.append("at a later time.\n\n");
-		    tempString.append("Depending on the type of object, the object may be made usable again by ");
-		    tempString.append("a Ganymede administrator taking the appropriate action prior to the object's ");
-		    tempString.append("formal removal.\n\n");
-		    tempString.append("As with all Ganymede messages, if you have questions about this action, please ");
-		    tempString.append("contact your Ganymede management team.");
+		    tempString.append(getExpirationWarningMesg(obj));
 		    
 		    objects.setSize(0);
 		    objects.addElement(invid);
@@ -397,17 +387,7 @@ public class GanymedeWarningTask implements Runnable {
 
 		actionDate = (Date) obj.getFieldValue(SchemaConstants.ExpirationField);
 
-		tempString.append("\n\nExpiration scheduled to take place on or after " + actionDate.toString());
-
-		tempString.append("\n\nObject expiration typically means that the object in question is ");
-		tempString.append("to be made unusable, but the record will not be immediately removed from ");
-		tempString.append("the database.  The object will typically be scheduled for permanent removal ");
-		tempString.append("at a later time.\n\n");
-		tempString.append("Depending on the type of object, the object may be made usable again by ");
-		tempString.append("a Ganymede administrator taking the appropriate action prior to the object's ");
-		tempString.append("formal removal.\n\n");
-		tempString.append("As with all Ganymede messages, if you have questions about this action, please ");
-		tempString.append("contact your Ganymede management team.");
+		tempString.append(getExpirationWarningMesg(obj));
 		    
 		objects.setSize(0);
 		objects.addElement(invid);
@@ -524,4 +504,33 @@ public class GanymedeWarningTask implements Runnable {
     // Ganymede.debug(description);
   }
 
+  public String getExpirationWarningMesg(DBObject object)
+  {
+    StringBuffer tempString = new StringBuffer();
+    Date actionDate = (Date) object.getFieldValue(SchemaConstants.ExpirationField);
+    String typeName = object.getTypeName();
+    String label = object.getLabel();
+
+    tempString.append("\n\n");
+    tempString.append(typeName.toUpperCase().charAt(0));
+    tempString.append(typeName.substring(1));
+    tempString.append(" ");
+    tempString.append(label);
+    tempString.append(" is scheduled to expire after " + actionDate.toString());
+
+    tempString.append("In order to prevent this " + typeName + " from expiring, this object's Expiration Date Field must ");
+    tempString.append("be cleared or changed in Ganymede.");
+
+    tempString.append("\n\nObject expiration typically means that the object in question is ");
+    tempString.append("to be rendered unusable, but the object will not be immediately removed from ");
+    tempString.append("the Ganymede database.  Objects that have expired will typically be scheduled for removal from the ");
+    tempString.append("Ganymede database after a delay period.\n\n");
+    tempString.append("Depending on the type of object, the object may be made usable again by ");
+    tempString.append("a Ganymede administrator taking the appropriate action prior to the object's ");
+    tempString.append("formal removal.\n\n");
+    tempString.append("As with all Ganymede messages, if you have questions about this action, please ");
+    tempString.append("contact your Ganymede management team.");
+
+    return tempString.toString();
+  }
 }
