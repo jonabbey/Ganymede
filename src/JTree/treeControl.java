@@ -27,7 +27,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.2 $ %D%
+  Version: $Revision: 1.3 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import com.sun.java.swing.*;
  * an outline display.  </p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.2 $ %D%
+ * @version $Revision: 1.3 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -98,7 +98,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   // popup menu support
 
   treeMenu
-    menu;			// popup menu attached to tree as a whole
+    menu;			// default popup menu attached to tree as a whole
 
   // housekeeping 
 
@@ -170,8 +170,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (menu!= null)
       {
-	menu.registerItems(this);
-	canvas.add(menu);
+	if (menu.registerItems(this))
+	  {
+	    canvas.add(menu);
+	  }
       }
 
     rows = new Vector();
@@ -282,16 +284,20 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	rows = new Vector();
       }
 
+    // let the node know who it is attached to
+
+    root.tree = this;
+
     this.root = root;
 
     root.row = 0;
 
     if (root.menu != null)
       {
-	MenuItem temp;
-
-	root.menu.registerItems(this);
-	canvas.add(root.menu);
+	if (root.menu.registerItems(this))
+	  {
+	    canvas.add(root.menu);
+	  }
       }
 
     rows.addElement(root);
@@ -335,12 +341,19 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	throw new IllegalArgumentException("error, no insert after or parent set.  Use setRoot to establish root node");
       }
 
+    // let the node know who we are, so it can change
+    // its menu later
+
+    newNode.tree = this;
+
     // attach the menu to us
 
     if (newNode.menu != null)
       {
-	newNode.menu.registerItems(this);
-	canvas.add(newNode.menu);
+	if (newNode.menu.registerItems(this))
+	  {
+	    canvas.add(newNode.menu);
+	  }
       }
 
     if (newNode.prevSibling != null)
@@ -525,6 +538,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
 
     breakdownTree(node.child);
+    node.tree = null;
     node.row = -1;
     node.parent = null;
     node.childStack = null;
@@ -584,6 +598,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	return;
       }
 
+    node.tree = null;
     node.row = -1;
     node.text = null;
     node.childStack = null;
