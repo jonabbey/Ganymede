@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2001/01/03 01:48:36 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2001/07/28 04:59:30 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * the file to the server for server-side integration into the Ganymede
  * database.</p>
  *
- * @version $Revision: 1.37 $ $Date: 2001/01/03 01:48:36 $ $Name:  $
+ * @version $Revision: 1.38 $ $Date: 2001/07/28 04:59:30 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -222,8 +222,7 @@ public final class xmlclient implements ClientListener {
 
     if (propFilename == null)
       {
-	System.err.println("Ganymede xmlclient: Error, must specify properties");
- 	System.err.println("Usage: java arlut.csd.ganymede.client.xmlclient properties=<properties file> [username=<username>] [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+	System.err.println("Ganymede xmlclient: Error, must specify properties on Java invocation line");
 	System.exit(1);
       }
     else
@@ -293,9 +292,18 @@ public final class xmlclient implements ClientListener {
 
     if (!ok)
       {
- 	System.err.println("Usage: xmlclient [username=<username>] [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+	printUsage();
 	System.exit(1);
       }
+  }
+
+  public void printUsage()
+  {
+    System.err.println("Usage:");
+    System.err.println("1: xmlclient [username=<username>] [password=<password>] <xmlfile>");
+    System.err.println("2: xmlclient [username=<username>] [password=<password>] -dump");
+    System.err.println("3: xmlclient [username=<username>] [password=<password>] -dumpschema");
+    System.err.println("4: xmlclient [username=<username>] [password=<password>] -dumpdata");
   }
 
   public boolean doXMLDump(boolean commandLine, boolean sendData, boolean sendSchema) throws RemoteException
@@ -461,7 +469,7 @@ public final class xmlclient implements ClientListener {
 
 	System.err.println("Ganymede xmlclient: Error, must specify ganymede account name in <ganymede> element, or on");
 	System.err.println("command line.");
- 	System.err.println("Usage: xmlclient [username=<username>] [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+	printUsage();
 	return false;
       }
 

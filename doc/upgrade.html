@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede Upgrade Guide</title>
+  </head>
+
+  <body BGCOLOR="#FFFFFF">
+
+<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo">
+<h1><FONT FACE="Arial, Helvetica">Ganymede Upgrade Guide<br>Release 1.0.5 - 27 July 2001</FONT></h1>
+<hr>
+
+<p>Note: If you are reading this as the <code>UPGRADE</code> text file
+in the Ganymede distribution directory, you are missing a bunch of
+hyper-links that link to extra information about many topics
+discussed.  If you can, view this document with a web browser as
+<code>doc/upgrade.html</code>.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Upgrading Ganymede</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>Upgrading Ganymede generally amounts to upgrading the <a
+    href="glossary.html#ganymedeServer.jar">jar files</a> that contain
+    the Java class files that make up the Ganymede server and clients.
+    When a new release of Ganymede comes out, you'll generally want to
+    upgrade your server and your clients together, as it is sometimes
+    necessary to make incompatible changes to the network API's that
+    the clients use to talk to the server between versions of the
+    Ganymede distribution.</p>
+
+    <p>Upgrading the clients is extremely easy, as there is almost
+    never anything to be done other than to replace the <a
+    href="glossary.html#ganymede.jar">client jar files</a>.  Sometimes
+    the support files that are used to launch the clients may change,
+    as is the case with the Ganymede 1.0.5 upgrade, which introduces
+    support for Sun's <a
+    href="http://java.sun.com/products/javawebstart/">Java Web
+    Start</a> application launcher.  At the worst, you can simply
+    delete the old clients and re-install.  More on this later.</p>
+
+    <p>The hardest thing to upgrade is the schema kit that takes care
+    of backend network updates when transactions are committed in the
+    Ganymede server.  Generally, the backend scripts that take files
+    emitted by the Ganymede server and propagate them into your
+    network are heavily customized for local use, and you will not
+    want to lose that work.  We'll go into greater detail on this as
+    well.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Upgrading the Ganymede Server</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>The first thing to do when upgrading the Ganymede server is to
+    make a backup copy of your existing server installation.  Shut
+    down your existing server, create a tar file of your existing
+    server directory, and put it in a safe place.  You may also want
+    to use the <a href="xml/xmlclient.html">xml client</a> to dump
+    a copy of your current database to an XML file for safekeeping,
+    just in case.</p>
+
+    <p>Now, you'll want to take the new Ganymede distribution and
+    unpack it, <a href="glossary.html#configure">configure</a> it, and
+    run <a href="glossary.html#installServer">installServer</a> to
+    install the new server code into a scratch directory.</p>
+      
+    <p>Once you have installed the new server into a scratch
+    directory, you can go ahead and copy the new <a
+    href="glossary.html#ganymede.jar">ganymede.jar</a> and <a
+    href="glossary.html#ganymedeServer.jar">ganymedeServer.jar</a>
+    from the scratch directory's <code>jars</code> directory into your
+    existing server's <code>jars</code> directory.</p>
+    
+    <p>That is generally all that you will have to do to upgrade your
+    server.  The Ganymede server is designed to retain upward
+    compatiblity with all of its data files, including especially the
+    <a href="glossary.html#ganymede.db">ganymede.db</a> file.  Newer
+    servers can load and use ganymede.db files from any version of
+    Ganymede released in the last couple of years, but if you are
+    upgrading from a very old release (before 0.99), you may have
+    problems.  If worst comes to worst, we've got that backup copy of
+    everything.</p>
+
+    <p>The more typical problem you'll encounter is a compatibility
+    problem between the schema kit you have installed and the new
+    ganymedeServer.jar file.  The custom code in a <a
+    href="glossary.html#custom.jar">custom.jar</a> file is meant to be
+    compiled against the contents of a specific ganymedeServer.jar
+    file, and it is good practice to recompile your custom code, just
+      to be sure.</p>
+
+    <p>Assuming that you are using a schema kit that is structured in
+    the same way as the Ganymede 1.0 userKit, the way to do this is to
+    cd to <code>&lt;server&gt;/schema/src</code> and run the
+    <code>build</code> and <code>buildJar</code> scripts.  If the
+    build and buildJar scripts compile and install your code without
+    problems, you are probably done with the server upgrade.</p>
+
+    <p>If not, take your backup copy and restore the original state of
+    the <code>&lt;server&gt;</code> directory from your backup.</p>
+
+    <p>Keep in mind during all of this that all of the server scripts
+    are custom configured to run in the location in which they are
+    installed.  If you try running your backup copy in a different
+    location than it was originally installed, you'll find things not
+    working properly.  The jar files don't care, obviously, but don't
+    think that the server you installed in the scratch directory can
+    be moved to where your old server was running.  If you want to
+    completely reinstall from scratch, install the server where you
+    want it from the beginning.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Upgrading the Schema Kit</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>It is possible, however, that your schema kit rebuild won't
+    work properly.  This generally means that something in the server
+    has changed in an incompatible fashion.  Since 1.0, I am trying to
+    avoid this kind of incompatible change, but if it is necessary I
+    will do so.  The incompatible change should be noted in the
+    CHANGES file in the discussion of the latest release of the
+    Ganymede distribution.</p>
+
+    <p>Alternately, it may be that your rebuild worked fine, but you
+    have seen that a new version of the schema kit that you are using
+    has been released, and you want to upgrade your schema kit,
+    possibly even without upgrading the server proper.  This is a more
+    tricky issue, as you will have customized a lot of the files in
+    your server's schema directory in order to interconnect the files
+    generated by Ganymede with your network.</p>
+
+    <p>This discussion will be assuming that you are using a schema
+    kit patterned after the Ganymede 1.0 userKit.  If you are using
+    one of the pre-1.0 "schema kits", like we use at ARL:UT, or if you
+    have designed your own custom code distribution without using the
+    1.0 userKit as a template, you'll have to figure out how to do
+    this process by analogy.</p>
+
+    <p>Any schema kit upgrade you download should include a CHANGES
+    file that will warn you of any things you'll need to look out for
+    in doing the schema kit upgrade, as well as a description of what
+    benefits you can expect to see from performing the upgrade.</p>
+
+    <p>Before attempting to perform any schema kit upgrade, you will
+    want to have shut down and backed up your entire server directory,
+    as discussed above.  Once this is done, you should rename the
+    <code>&lt;server&gt;/schema</code> directory to something like
+    <code>&lt;server&gt;/schema.save</code>.</p>
+
+    <p>Once the schema directory has been renamed, you can run the
+    <code>installKit</code> script from the newly downloaded schemaKit
+    distribution.  <code>installKit</code> will ask you for the name
+    of the directory where your server is installed.  Tell it the
+    location of your existing server directory, and
+    <code>installKit</code> will compile all of the custom code in the
+    new schema kit against your server's <a
+    href="glossary.html#ganymedeServer.jar">ganymedeServer.jar</a>
+    file, and integrate the new schema kit into your existing server
+    directory.</p>
+
+    <p>If the <code>installKit</code> script fails for some reason,
+    you haven't lost anything.  You can just delete the
+    <code>schema</code> directory it was trying to create and rename
+    your <code>schema.save</code> directory back to
+    <code>schema</code> to put the old schema kit back in place.</p>
+
+    <p>Assuming it succeeds, though, you need to do the next step,
+    which is to migrate your backend scripts forward.  In the simplest
+    case, where you don't care about any improvements in whatever
+    backend scripts are provided by the new schema kit, and the new
+    schema kit's logic for interfacing with its build scripts has not
+    changed, you can generally just replace the new schema kit's
+    <code>output</code> directory with the <code>output</code>
+    directory for your <code>schema.save</code> directory.  The
+    Ganymede 1.0 userKit is designed so that all files and scripts
+    involved with the backend update process are stored in the
+    <code>&lt;server&gt;/schema/output</code> directory, so if you
+    move your old <code>output</code> directory forward, you should
+    keep everything on the backend working just as before.</p>
+
+    <p>If the new schema kit includes new features in the backend,
+    you'll probably want to either copy some of the scripts from the
+    new kit's <code>output</code> directory, or at the very least look
+    at the files and see if you need or want to make any manual edits
+    to incorporate new features.  Again, read the CHANGES file in the
+    new schema kit for details.</p>
+
+    <p>Once you have completed this process, you can start your server
+    up again, and all should be well.  If not, you've got that backup
+    copy, and you can just recreate your <code>&lt;server&gt;</code>
+    directory as it was before your attempted upgrade.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Upgrading the Ganymede Clients</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>Upgrading the clients is a lot easier than upgrading the
+    server, but you will often need to do both at the same time.
+    Upgrading the clients without upgrading the server may cause a
+    failure of the clients, as they attempt to speak to the server
+    using a newer version of the network API's than the server can
+    handle.  If you upgrade the clients, you should plan on upgrading
+    the server, and vice versa, generally.</p>
+
+    <p>Again, before you do anything to your existing clients, you
+    should make a backup copy of everything.  Upgrading the clients is
+    easy, but if you find that your server upgrade fails, you will
+    need to revert the clients as well as the server.</p>
+
+    <p>The easiest way to upgrade the clients is to simply delete the
+    old clients (scripts and jars and all) and re-run the <a
+    href="glossary.html#installClient">installClient</a> and <a
+    href="glossary.html#installWeb">installWeb</a> scripts from the
+    new Ganymede distribution that you have downloaded.</p>
+
+    <p>If you have made significant local customizations to the client
+    scripts or web forms, you can do a more nuanced upgrade by just
+    taking the new jar files and incorporating them into your existing
+    client directories.</p>
+
+    <p>In this case, all you need to do is to run <a
+    href="glossary.html#installClient">installClient</a> or <a
+    href="glossary.html#installWeb">installWeb</a> to get the new jar
+    files installed into a scratch directory.  Copy <a
+    href="glossary.html#ganymede.jar">ganymede.jar</a> and <a
+    href="glossary.html#ganymedeAdmin.jar">ganymedeAdmin.jar</a> from
+    the scratch directory to your old client directories, and you're
+    set.</p>
+      
+    <hr>
+    <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
+<!-- Created: Fri Jul 27 22:19:10 CDT 2001 -->
+<!-- hhmts start -->
+Last modified: Fri Jul 27 23:58:08 CDT 2001
+<!-- hhmts end -->
+  </body>
+</html>

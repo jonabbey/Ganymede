@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Ganymede File Glossary 1.0 - 31 May 2001</title>
+    <title>Ganymede File Glossary</title>
   </head>
 
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary <br>1.0 - 31 May 2001</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary <br>1.0.5 - 27 July 2001</FONT></h1>
 <hr>
     <p>This page contains descriptions of various significant files that are part
     of the Ganymede package.</p>
@@ -60,6 +60,11 @@
       <li><a href="#xmlclient2">xmlclient</a></li>
       </ul></li>
 
+      <li><a href="#webfiles">Web Files</a>
+      <ul>
+      <li><a href="#client_jnlp">client.jnlp</a></li>
+      <li><a href="#console_jnlp">console.jnlp</a></li>
+      </ul></li>
     </ul>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
@@ -180,14 +185,33 @@
     can then visit the published directory through the web to use the Ganymede
     clients in your web browser.</p>
 
-    <p>The most convenient way to run the Ganymede clients from a
-    Windows web browser is to visit <a
+    <p>There are two convenient ways to run the Ganymede clients from
+    a Windows web browser.  The first is to visit <a
     href="http://java.sun.com/products/plugin/">java.sun.com/products/plugin/</a>
     and download the latest version of the Java JRE.  The JRE for
     Windows includes the Java plug-in, which is currently the best way
     to run Ganymede within a web-browser.  You should be running at
     least version 1.2.2 of the JRE, which fixes many problems with
     earlier versions.</p>
+
+    <p>In addition to the Java Plugin, however, you may also want to
+    use the <A href="http://java.sun.com/products/javawebstart/">Java
+    Web Start</A> or the <a
+    href="http://openjnlp.nanode.org/">OpenJNLP Launcher</a> in order
+    to support your users running the Ganymede clients from the user's
+    desktop.  Java Web Start runs on Windows, Linux, and Solaris,
+    while the OpenJNLP Launcher works on the Macintosh and other
+    platforms.  Another choice for JNLP services is the <a
+    href="http://www.amherst.edu/~tliron/javaurl/">JavaURL</a>
+    project.</p>
+
+    <p>In order to use the JNLP launch option, your web server will
+    have to be configured to associate the
+    <code>application/x-java-jnlp-file</code> MIME type with the
+    <code>.jnlp</code> extension. See the <a
+    href="install.html#webconfig">web server configuration</a> section
+    in the <a href="install.html">Install Guide</a> for more
+    details.</p>
 
     <p>We have not run the Ganymede clients from within a browser on Solaris.. if anyone
     has success on this or any other unusual environment, please
@@ -494,13 +518,13 @@
     server installation's <code>bin</code> directory by the <a
     href="#installServer">installServer</a> script.</p>
 
-    <p>The <font color="#ff0000"><code><b>xmlclient</b></code></font>
-    script runs a Java client which reads a <a
-    href="xml.html">specially formatted</a> XML file and transmits
-    data from it into the Ganymede Server.  The <font
-    color="#ff0000"><code><b>xmlclient</b></code></font> can handle
-    creating, deleting, inactivating and editing objects on the
-    Ganymede server.</p>
+    <p>See the <a href="xml/xmlclient.html">xmlclient 
+    documentation</a> for details on how to use the <font
+    color="#ff0000"><code><b>xmlclient</b></code></font>.</p>
+
+    <p>See the <a href="xml/index.html">Ganymede XML Guide</a> for
+    details on the XML file format supported by <font
+    color="#ff0000"><code><b>xmlclient</b></code></font>.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
@@ -684,18 +708,66 @@
     server installation's <code>bin</code> directory by the <a
     href="#installServer">installServer</a> script.</p>
 
-    <p>The <font color="#ff0000"><code><b>xmlclient</b></code></font>
-    script runs a Java client which reads a <a
-    href="xml.html">specially formatted</a> XML file and transmits
-    data from it into the Ganymede Server.  The <font
-    color="#ff0000"><code><b>xmlclient</b></code></font> can handle
-    creating, deleting, inactivating and editing objects on the
-    Ganymede server.</p>
+    <p>See the <a href="xml/xmlclient.html">xmlclient
+    documentation</a> for details on how to use the <font
+    color="#ff0000"><code><b>xmlclient</b></code></font>.</p>
+
+    <p>See the <a href="xml/index.html">Ganymede XML Guide</a> for
+    details on the XML file format supported by <font
+    color="#ff0000"><code><b>xmlclient</b></code></font>.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><a name="webfiles"><b>Web Files</b></h2></td>
+      </tr>
+    </table> 
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="client_jnlp"><b>client.jnlp</b></h3></td></tr></table> 
+    
+    <p><font color="#ff0000"><code><b>client.jnlp</b></code></font> is
+    an XML file formatted according to the Sun <a
+    href="http://jcp.org/jsr/detail/056.jsp">Java Network Launch
+    Protocol Community Standard</a>, that allows the Ganymede client
+      to be launched from a user's web browser or desktop.</p>
+
+    <p>The <font
+    color="#ff0000"><code><b>client.jnlp</b></code></font> is created,
+    configured, and installed by the <a
+    href="#installWeb">installWeb</a> script.  Read more about this in
+    the installWeb script's <a href="#installWeb">glossary entry</a>,
+    and see the <a href="install.html#webconfig">Web Server
+    Configuration</a> section in the <a href="install.html">Install
+    Guide</a> for more details on the use of JNLP with the Ganymede
+      client.
+    </p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="console_jnlp"><b>console.jnlp</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>console.jnlp</b></code></font>
+    is an XML file formatted according to the Sun <a
+    href="http://jcp.org/jsr/detail/056.jsp">Java Network Launch
+    Protocol Community Standard</a>, that allows the Ganymede admin
+    console to be launched from a user's web browser or desktop.</p>
+
+    <p>The <font
+    color="#ff0000"><code><b>console.jnlp</b></code></font> is
+    created, configured, and installed by the <a
+    href="#installWeb">installWeb</a> script.  Read more about this in
+    the installWeb script's <a href="#installWeb">glossary entry</a>,
+    and see the <a href="install.html#webconfig">Web Server
+    Configuration</a> section in the <a href="install.html">Install
+    Guide</a> for more details on the use of JNLP with the Ganymede
+    admin console.
+    </p>
 
     <hr>
-    <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
+    <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- hhmts start -->
-Last modified: Thu May 31 19:48:07 CDT 2001
+Last modified: Fri Jul 27 22:02:04 CDT 2001
 <!-- hhmts end -->
   </body>
 </html>
