@@ -6,8 +6,8 @@
 
    Created: 28 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/08/18 23:47:24 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/10/10 02:29:07 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -193,6 +193,11 @@ public class JMultiLineLabel extends JTextArea {
       }
     
     return (WordWrap.wrap(text, columns, null));
+  }
+
+  public boolean isFocusTraversable()
+  {
+    return false;
   }
 
   ///////////////////////////////////////////////////////////////////////////////
