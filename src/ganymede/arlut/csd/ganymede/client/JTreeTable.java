@@ -64,17 +64,14 @@ public class JTreeTable extends JTable {
     public JTreeTable(TreeTableModel treeTableModel) {
 	super();
 
+        /* Keep the JTable from scrolling inappropriately */
+        setAutoscrolls(false);
+
 	// Create the tree. It will be used as a renderer and editor. 
 	tree = new TreeTableCellRenderer(treeTableModel);
 
 	// Install a tableModel representing the visible rows in the tree. 
 	super.setModel(new TreeTableModelAdapter(treeTableModel, tree));
-
-	// Force the JTable and JTree to share their row selection models. 
-	ListToTreeSelectionModelWrapper selectionWrapper = new 
-	                        ListToTreeSelectionModelWrapper();
-	tree.setSelectionModel(selectionWrapper);
-	setSelectionModel(selectionWrapper.getListSelectionModel()); 
 
 	// Install the tree editor renderer and editor. 
 	setDefaultRenderer(TreeTableModel.class, tree); 
@@ -97,6 +94,7 @@ public class JTreeTable extends JTable {
 	tree.putClientProperty("JTree.lineStyle", "Angled");      
 
     }
+
 
     /**
      * Overridden to message super and forward the method to the tree.
@@ -218,12 +216,6 @@ public class JTreeTable extends JTable {
 						       boolean isSelected,
 						       boolean hasFocus,
 						       int row, int column) {
-	    if(isSelected)
-		setBackground(table.getSelectionBackground());
-	    else
-		setBackground(Color.white);
-	    //	setBackground(table.getBackground());
-
 	    visibleRow = row;
 	    return this;
 	}
@@ -262,122 +254,7 @@ public class JTreeTable extends JTable {
 	 * the tree will never be editable (at least by a key sequence).
 	 */
 	public boolean isCellEditable(EventObject e) {
-	    if (e instanceof MouseEvent) {
-		for (int counter = getColumnCount() - 1; counter >= 0;
-		     counter--) {
-		    if (getColumnClass(counter) == TreeTableModel.class) {
-			MouseEvent me = (MouseEvent)e;
-			MouseEvent newME = new MouseEvent(tree, me.getID(),
-				   me.getWhen(), me.getModifiers(),
-				   me.getX() - getCellRect(0, counter, true).x,
-				   me.getY(), me.getClickCount(),
-                                   me.isPopupTrigger());
-			tree.dispatchEvent(newME);
-			break;
-		    }
-		}
-	    }
-	    return false;
-	}
-    }
-
-
-    /**
-     * ListToTreeSelectionModelWrapper extends DefaultTreeSelectionModel
-     * to listen for changes in the ListSelectionModel it maintains. Once
-     * a change in the ListSelectionModel happens, the paths are updated
-     * in the DefaultTreeSelectionModel.
-     */
-    class ListToTreeSelectionModelWrapper extends DefaultTreeSelectionModel { 
-	/** Set to true when we are updating the ListSelectionModel. */
-	protected boolean         updatingListSelectionModel;
-
-	public ListToTreeSelectionModelWrapper() {
-	    super();
-	    getListSelectionModel().addListSelectionListener
-	                            (createListSelectionListener());
-	}
-
-	/**
-	 * Returns the list selection model. ListToTreeSelectionModelWrapper
-	 * listens for changes to this model and updates the selected paths
-	 * accordingly.
-	 */
-	ListSelectionModel getListSelectionModel() {
-	    return listSelectionModel; 
-	}
-
-	/**
-	 * This is overridden to set <code>updatingListSelectionModel</code>
-	 * and message super. This is the only place DefaultTreeSelectionModel
-	 * alters the ListSelectionModel.
-	 */
-	public void resetRowSelection() {
-	    if(!updatingListSelectionModel) {
-		updatingListSelectionModel = true;
-		try {
-		    super.resetRowSelection();
-		}
-		finally {
-		    updatingListSelectionModel = false;
-		}
-	    }
-	    // Notice how we don't message super if
-	    // updatingListSelectionModel is true. If
-	    // updatingListSelectionModel is true, it implies the
-	    // ListSelectionModel has already been updated and the
-	    // paths are the only thing that needs to be updated.
-	}
-
-	/**
-	 * Creates and returns an instance of ListSelectionHandler.
-	 */
-	protected ListSelectionListener createListSelectionListener() {
-	    return new ListSelectionHandler();
-	}
-
-	/**
-	 * If <code>updatingListSelectionModel</code> is false, this will
-	 * reset the selected paths from the selected rows in the list
-	 * selection model.
-	 */
-	protected void updateSelectedPathsFromSelectedRows() {
-	    if(!updatingListSelectionModel) {
-		updatingListSelectionModel = true;
-		try {
-		    // This is way expensive, ListSelectionModel needs an
-		    // enumerator for iterating.
-		    int        min = listSelectionModel.getMinSelectionIndex();
-		    int        max = listSelectionModel.getMaxSelectionIndex();
-
-		    clearSelection();
-		    if(min != -1 && max != -1) {
-			for(int counter = min; counter <= max; counter++) {
-			    if(listSelectionModel.isSelectedIndex(counter)) {
-				TreePath     selPath = tree.getPathForRow
-				                            (counter);
-
-				if(selPath != null) {
-				    addSelectionPath(selPath);
-				}
-			    }
-			}
-		    }
-		}
-		finally {
-		    updatingListSelectionModel = false;
-		}
-	    }
-	}
-
-	/**
-	 * Class responsible for calling updateSelectedPathsFromSelectedRows
-	 * when the selection of the list changse.
-	 */
-	class ListSelectionHandler implements ListSelectionListener {
-	    public void valueChanged(ListSelectionEvent e) {
-		updateSelectedPathsFromSelectedRows();
-	    }
+          return true;
 	}
     }
 }
