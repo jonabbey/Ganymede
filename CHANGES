@@ -61,12 +61,14 @@ enforce field requirements for the expiration and removal fields.
 
 Reworked both XMLReader and serverAdminProxy classes to use an
 efficient circular buffer rather than continually doing
-System.arraycopy operations within a Vector.  Probably won't make a
+System.arraycopy operations within a Vector.  Won't make any
 noticeable difference, but after seeing Doug Lea's optimized
 concurrency structures (at
 http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html),
 I felt like tinkering.  At best, this might be able to speed up
 xmlclient and admin console operations (very) marginally.
+
+7. [SERVER] Started to use JDK 1.2 Collections API
 
 -------------------- Changes from 1.0.9 to 1.0.10 -------------------
 
