@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.10 $ %D%
+  Version: $Revision: 1.11 $ %D%
   Module By: Navin Manohar
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -81,6 +81,9 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
     bottomPanel,
     centerPanel;
 
+  JBorderedPane
+    border;
+
   boolean 
     editable,
     isEditInPlace,
@@ -102,6 +105,13 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 
   public vectorPanel(db_field field, windowPanel parent, boolean editable, boolean isEditInPlace, containerPanel container)
   {
+
+    if (debug)
+      {
+	System.out.println("Adding new vectorPanel");
+      }
+			   
+
     try
       {
 	if (field == null)
@@ -140,8 +150,9 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
     bottomPanel.setLayout(new BorderLayout());
     centerPanel = new JBufferedPane(false);
 
-    centerPanel.setLayout(new ColumnLayout(Orientation.LEFT,Orientation.TOP));
-
+    //centerPanel.setLayout(new ColumnLayout(Orientation.LEFT,Orientation.TOP));
+    centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+    
     try
       {
 	type = my_field.getType();
@@ -199,7 +210,10 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 
     if (my_field instanceof date_field)
       {
-	System.out.println("Adding date vector field");
+	if (debug)
+	  {
+	    System.out.println("Adding date vector field");
+	  }
 
 	try
 	  {
@@ -238,16 +252,19 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       }
     else if (my_field instanceof num_field)
       {
-	System.out.println("Adding vector number field");
-
+	if (debug)
+	  {
+	    System.out.println("Adding vector number field");
+	  }
+	  
 	try
 	  {
 	    num_field numfield = (num_field)my_field;
 	    
 	    for (int i=0;i<numfield.size();i++) 
 	      {
-		/*		
-		
+
+		/*
 		JnumberField nf = new JnumberField(15,
 						   ca,
 						   numfield.isEditable() && editable,
@@ -277,79 +294,15 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       }
     else if (my_field instanceof string_field)
       {
-	System.out.println("Adding vector string field");
+	System.out.println("string_field!?!  Use the stringSelector");
 
-	try
-	  {
-	    string_field stringfield = (string_field)my_field;
-	    
-	    if (editable && stringfield.isEditable())
-	      {
-		if (stringfield.size() > 0)
-		  {
-		    for (int i=0; i < stringfield.size(); i++) 
-		      {
-			if (isEditInPlace)
-			  {
-			    /*
-			    containerPanel cp = new containerPanel(stringfield, 
-								   stringfield.isEditable() && editable, 
-								   parent.parent,
-								   parent);
-			    addElement(cp);
-			    */
-			  }
-			else
-			  {
-			    
-			    JstringField sf = new JstringField(stringfield.maxSize() <= 12 ? 12 : stringfield.maxSize(),
-							       stringfield.maxSize() <= 12 ? 12 : stringfield.maxSize(),
-							       ca,
-							       stringfield.isEditable(),
-							       !(stringfield.showEcho()),
-							       stringfield.allowedChars(),
-							       stringfield.disallowedChars(),
-							       this);
-			    System.out.println("Setting text");
-			    sf.setText((String)(stringfield.getElement(i)));
-			    
-			    addElement(sf);
-			  }
-		      }
-		  }
-		else
-		  {
-		    System.out.println("No objects in vector");
-		  } 
-	      }
-	    else // Not editable
-	      {
-		if (stringfield.size() > 0)
-		  {
-		    Vector strings = new Vector();;
-
-		    for (int i=0;i<stringfield.size();i++) 
-		      {
-			strings.addElement(stringfield.getElement(i));
-		      }
-
-		    JListBox list = new JListBox(strings);
-		    addElement(list);
-		  }
-		else
-		  {
-		    System.out.println("No objects in vector");
-		  } 
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Can't make checkbox field: " + rx);
-	  }
       }
     else if (my_field instanceof invid_field)
       {
-	System.out.println("Adding vector invid_field");
+	if (debug)
+	  {
+	    System.out.println("Adding vector invid_field");
+	  }
 
 	try
 	  {
@@ -377,6 +330,7 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 							   invidfield.isEditable() && editable,
 							   parent.parent,
 							   parent, container.frame);
+		    cp.setBorderStyle(1);
 
 		    addElement(cp);
 		  }
@@ -384,42 +338,8 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 	    else
 	      {
 		System.out.println("*** Error - should not handle non edit-in-place Invid's in vector panel ***");
-		
-		System.out.println("Adding invid vector");
+	      }	
 
-		if (editable)
-		  {
-		    StringBuffer sb = invidfield.choices();
-
-		    System.out.println("got choice buffer: " + sb.toString());
-
-		    Vector choices = gclient.parseDump(sb);
-
-		    System.out.println("got " + choices.size() + " choices to load");
-		  }
-
-		for (int i=0; i < invidfield.size() ;i++) 
-		  {
-		    Invid inv = (Invid)(invidfield.getElement(i));
-
-		    // Add a series of JChoices
-		    
-		    JComboBox choice = new JComboBox();
-
-		    choice.addPossibleValue(inv.toString());
-
-		    if (editable)
-		      {
-			for (int j=0; j< choices.size(); j++)
-			  {
-			    Result result = (Result) choices.elementAt(j);
-			    choice.addPossibleValue(result.toString());
-			  }
-		      }
-
-		    elementWrapper ew = new elementWrapper(choice, this);
-		  }
-	      }
 	  }
 	catch (RemoteException rx)
 	  {
@@ -431,12 +351,18 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       {
 	if (my_field.isEditable())
 	  {
-	    System.out.println("Adding add button");
+	    if (debug)
+	      {
+		System.out.println("Adding add button");
+	      }
 	    add("South", addB);
 	  }
 	else
 	  {
-	    System.out.println("Field is not editable, no button added");
+	    if (debug)
+	      {
+		System.out.println("Field is not editable, no button added");
+	      }
 	  }
       }
     catch (RemoteException rx)
@@ -464,11 +390,17 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       }
     else
       {
-	System.out.println("Adding new element");
-	  
+	if (debug)
+	  {
+	    System.out.println("Adding new element");
+	  }
+
 	if (isEditInPlace)
 	  {
-	    System.out.println("Adding new edit in place element");
+	    if (debug)
+	      {
+		System.out.println("Adding new edit in place element");
+	      }
 
 	    try
 	      
@@ -479,6 +411,7 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 						       my_field.isEditable() && editable,
 						       parent.parent,
 						       parent, container.frame);
+		cp.setBorderStyle(1);
 		addElement(cp);
 	      }
 	    catch (RemoteException rx)
@@ -487,32 +420,13 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 	      }
 
 	  }
-	else if (my_field instanceof string_field)
-	  {
-	    System.out.println("Adding new string type");
-
-	    try
-	      {
-		JstringField sf = new JstringField(((string_field)my_field).maxSize() <= 12 ? 12 : ((string_field)my_field).maxSize(),
-						   ((string_field)my_field).maxSize() <= 12 ? 12 : ((string_field)my_field).maxSize(),
-						   ca,
-						   true,
-						   false,
-						   null,
-						   null,
-						   this);
-
-		addElement(sf);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get field size: " + rx);
-	      }
-	  }
 	else if (my_field instanceof date_field)
 	  {
-	    System.out.println("Adding new date type");
-
+	    if (debug)
+	      {
+		System.out.println("Adding new date type");
+	      }
+	    
 	    date_field datefield = (date_field)my_field;
 
 	    try
@@ -534,8 +448,11 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 	  }
 	else if (my_field instanceof num_field) 
 	  {
-	    System.out.println("Adding new num_field");
-
+	    if (debug)
+	      {
+		System.out.println("Adding new num_field");
+	      }
+	    
 	    try
 	      {
 		num_field numfield = (num_field)my_field;
@@ -546,13 +463,16 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 				  numfield.getMinValue(),
 				  numfield.getMaxValue(),
 				  this);*/
-		if (numfield.limited())
+		if (debug)
 		  {
-		    System.out.println("It is limited");
-		  }
-		else
-		  {
-		    System.out.println("NOT limited");
+		    if (numfield.limited())
+		      {
+			System.out.println("It is limited");
+		      }
+		    else
+		      {
+			System.out.println("NOT limited");
+		      }
 		  }
 		JstringField sf = new JstringField(10,
 						   64,
@@ -593,9 +513,11 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       }
       
     compVector.addElement(c);
+    if (debug)
+      {
+	System.out.println("Index of element: " + compVector.size());
+      }
 
-    System.out.println("Index of element: " + compVector.size());
-      
     //Don't add the buttons for an non-editable field
 
     if (!centerPanelAdded)
@@ -615,13 +537,17 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 	centerPanel.add(c);
       }
     invalidate();
-    container.invalidate();
-    container.frame.validate();
+    //container.invalidate();
+    //container.frame.validate();
+    container.frame.validate_general();
   }
   
   public void deleteElement(Component c) 
   {
-    System.out.println("Deleting element");
+    if (debug)
+      {
+	System.out.println("Deleting element");
+      }
 
     if (c == null)
       {
@@ -656,7 +582,10 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 
     try
       {
-	System.out.println("Deleting element number: " + compVector.indexOf(c));
+	if (debug)
+	  {
+	    System.out.println("Deleting element number: " + compVector.indexOf(c));
+	  }
 	my_field.deleteElement(compVector.indexOf(c));
 	compVector.removeElement(c);	  
 	centerPanel.remove((elementWrapper)ewHash.get(c));
@@ -681,8 +610,6 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
   {
     boolean returnValue = false;
     
-    System.out.println();
-    
     if (v == null)
       {
 	throw new IllegalArgumentException("ValueObject Argument is null");
@@ -694,16 +621,22 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       }
     else if (v.getValue().equals("plus") )
       {
-	System.out.println("You clicked on a plus");
+	System.out.println("You clicked on a plus (no action)?");
       }
     else if (v.getValue().equals("minus") )
       {
-	System.out.println("You clicked on a minus");
+	if (debug)
+	  {
+	    System.out.println("You clicked on a minus");
+	  }
 	deleteElement(v.getSource());
       }
     else if (v.getSource() instanceof JstringField)
       {
-	System.out.println("Stringfield changed.");
+	if (debug)
+	  {
+	    System.out.println("Stringfield changed.");
+	  }
 	short index = (short)compVector.indexOf(v.getSource());
 	System.out.println(" index = " + index);
 
@@ -733,7 +666,11 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       }
     else if (v.getSource() instanceof JdateField)
       {
-	System.out.println("Date field changed");
+	if (debug)
+	  {
+	    System.out.println("Date field changed");
+	  }
+
 	short index = (short)compVector.indexOf(v.getSource());
 	System.out.println(" index = " + index);
 
