@@ -450,9 +450,20 @@ exception to be thrown.
 Sun really makes it hard to be both 1.1 and 1.2 compatible, some
 times.  Fortunately, the Ganymede clients work acceptably well with
 the default security manager, since we package all of the RMI stub
-classes with the client jar.
+classes with the client and password jar files.
 
-This was another bug reported by pug.
+This was yet another fine bug report by Pug.
+
+29. [NIS PASSWORD CLIENT] Fixed rpcpass non-termination errors
+
+There were certain conditions in which the rpcpass client proxy would
+not properly exit the JVM, but would instead linger until manually
+killed.
+
+Now, the client will always terminate if something goes wrong, rather
+than sticking around.
+
+This time, for real.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
