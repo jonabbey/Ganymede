@@ -55,7 +55,7 @@ public class QueryResultContainer implements List, Serializable {
    * row.
    */
   Vector handles = null;
-  
+
   /**
    * Optimization structure that speeds up obtaining a list of labels for each
    * object referenced in the result set. This list has the same order of the
@@ -90,12 +90,37 @@ public class QueryResultContainer implements List, Serializable {
    */
   transient Map invidHash = null;
 
+  /*
+   * These are constants used to define the type of the rows in the result set.
+   */
+  
+  public static final int ARRAYROWS = 0;
+  public static final int MAPROWS = 1;
+  int rowType = ARRAYROWS;  
+  
   public QueryResultContainer()
   {
     handles = new Vector();
     headers = new ArrayList();
     types = new ArrayList();
     rows = new ArrayList();
+  }
+
+  /**
+   * The rowType specifies what composition the result set has. It can either
+   * be a List of array objects (where each array represents one row of the
+   * result set and the array elements are ordered corresponding to the order
+   * of this container's header fields) or it can be a List of Maps (where each
+   * Map represents one row of the result set and the Map's keys are the headers
+   * defined for this container).
+   * 
+   * @param rowType
+   */
+  
+  public QueryResultContainer(int rowType)
+  {
+    this();
+    this.rowType = rowType;
   }
   
   /**
@@ -174,7 +199,14 @@ public class QueryResultContainer implements List, Serializable {
 					inactive, expirationSet, 
 					removalSet, editable));
 
-    rows.add(row);
+    if (rowType == MAPROWS)
+      {
+      	rows.add(convertArrayRowToMapRow(row));
+      }
+    else 
+      {
+      	rows.add(row);
+      }
   }
 
   /**
@@ -345,7 +377,15 @@ public class QueryResultContainer implements List, Serializable {
   
   public Vector getFieldRow(int rowNumber)
   {
-    Object[] row = (Object[]) rows.get(rowNumber);
+    Object[] row;
+    if (rowType == MAPROWS)
+      {
+      	row = convertMapRowToArrayRow((Map) rows.get(rowNumber));
+      }
+    else
+      {
+      	row = (Object[]) rows.get(rowNumber);
+      }
     return new Vector(Arrays.asList(row));
   }
 
@@ -360,7 +400,15 @@ public class QueryResultContainer implements List, Serializable {
 
   public Object getResult(int row, int col)
   {
-    Object[] r = (Object[]) rows.get(row);
+    Object[] r;
+    if (rowType == MAPROWS)
+      {
+      	r = convertMapRowToArrayRow((Map) rows.get(row));
+      }
+    else
+      {
+      	r = (Object[]) rows.get(row);
+      }
     return r[col];
   }
 
@@ -398,6 +446,46 @@ public class QueryResultContainer implements List, Serializable {
         invidHash.put(invid, label);
         labelHash.put(label, invid);
       }
+  }
+
+  /**
+   * Takes a row as represented in a result set with row type ARRAYROWS and
+   * converts it to one that matches the row type MAPROWS.
+   * 
+   * @param row
+   * @return
+   */
+
+  private Map convertArrayRowToMapRow(Object[] row)
+  {
+    Map newRow = new HashMap(row.length);
+    String currentHeader;
+    for (int i = 0; i < row.length; i++)
+      {
+      	currentHeader = (String) headers.get(i);
+      	newRow.put(currentHeader, row[i]);
+      }
+    return newRow;
+  }
+  
+  /**
+   * Takes a row as represented in a result set with row type MAPROWS and
+   * converts it to one that matches the row type ARRAYROWS.
+   * 
+   * @param row
+   * @return
+   */
+
+  private Object[] convertMapRowToArrayRow(Map row)
+  {
+    Object[] newRow = new Object[headers.size()];
+    String currentHeader;
+    for (int i = 0; i < headers.size(); i++)
+      {
+      	currentHeader = (String) headers.get(i);
+      	newRow[i] = row.get(currentHeader);
+      }
+    return newRow;
   }
 
   /* ------------------------------------------------------------------------
@@ -616,7 +704,14 @@ public class QueryResultContainer implements List, Serializable {
     Object[] row;
     for (Iterator iter = rows.iterator(); iter.hasNext();)
       {
-      	row = (Object[]) iter.next();
+      	if (rowType == MAPROWS)
+      	  {
+      	    row = convertMapRowToArrayRow((Map) iter.next());
+      	  }
+      	else
+      	  {
+      	    row = (Object[]) iter.next();
+      	  }
       	for (int i = 0; i < row.length; i++)
       	  {
       	    result.append(row[i].toString() + "\t");
