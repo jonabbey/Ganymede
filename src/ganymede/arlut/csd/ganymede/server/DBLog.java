@@ -553,9 +553,10 @@ public class DBLog {
    * which is responsible for sequencing this call with calls to streamLogEvent() and
    * endTransactionLog().</P>
    *
-   * <p>DBEditSet.commit_logTransaction() is responsible for synchronizing on Ganymede.log,
-   * and thereby excluding all other log calls from being initiated during a transaction's
-   * commit.</p>
+   * <p>DBEditSet.commit_logTransaction() is responsible for
+   * synchronizing on Ganymede.log, and thereby excluding all other
+   * synchronized log calls from being initiated during a
+   * transaction's commit.</p>
    *
    * @param invids a HashMap mapping Invid objects to identity
    * @param adminName Human readable string identifying the admin responsible for this transaction
@@ -612,9 +613,10 @@ public class DBLog {
    * endTransactionLog() call, made by {@link
    * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)}.</p>
    *
-   * <p>DBEditSet.commit_logTransaction() is responsible for synchronizing on Ganymede.log,
-   * and thereby excluding all other log calls from being initiated during a transaction's
-   * commit.</p>
+   * <p>DBEditSet.commit_logTransaction() is responsible for
+   * synchronizing on Ganymede.log, and thereby excluding all other
+   * synchronized log calls from being initiated during a
+   * transaction's commit.</p>
    */
 
   public synchronized void streamEvent(DBLogEvent event, DBEditSet transaction)
@@ -750,9 +752,10 @@ public class DBLog {
    * endTransactionLog() calls, made by {@link
    * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)}.</p>
    *
-   * <p>DBEditSet.commit_logTransaction() is responsible for synchronizing on Ganymede.log,
-   * and thereby excluding all other log calls from being initiated during a transaction's
-   * commit, when calling this function</p>
+   * <p>DBEditSet.commit_logTransaction() is responsible for
+   * synchronizing on Ganymede.log, and thereby excluding all other
+   * synchronized log calls from being initiated during a
+   * transaction's commit, when calling this function</p>
    *
    * @param adminName Human readable string identifying the admin responsible for this transaction
    * @param admin Invid representing the user or admin responsible for this transaction
