@@ -1,11 +1,11 @@
 Ganymede Release 1.0.11
-? ?, 2002
+December 9, 2002
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.0.10 to 1.0.11 -------------------
 
-RELEASE DATE: ? ?, 2002
+RELEASE DATE: December 9, 2002
 
 1. [SERVER] Put safety interlock in DBEditSet.addNewObject()
 
@@ -67,9 +67,7 @@ concurrency structures (at
 http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html),
 I felt like tinkering.
 
-7. [SERVER] Started to use JDK 1.2 Collections API (?)
-
-8. [SERVER/XML] Fixed feedback on transaction failure in the xml subsystem
+7. [SERVER/XML] Fixed feedback on transaction failure in the xml subsystem
 
 The Ganymede server's XML transaction logic was faulty, and would
 attempt to report a successful commit even in the circumstance where
@@ -80,7 +78,7 @@ Now, an xmlclient transaction that could not complete due to
 consistency problems during transaction commit will no longer report a
 confusing mix of success and failure messages.
 
-9. [SERVER] Changed plug-in API for object labels
+8. [SERVER] Changed plug-in API for object labels
 
 The Ganymede object model has always had a rather poorly thought out
 implementation of object labeling, with two separate means of
@@ -107,7 +105,7 @@ method will now also consult the new useLabelHook() method, and if
 useLabelHook() does not return true, the getLabelHook() method will
 simply not be used under any circumstances.
 
-10. [SERVER] runServer now specifies less frequent full-heap GC
+9. [SERVER] runServer now specifies less frequent full-heap GC
 
 Since 1.2, Sun's HotSpot JVM (server-mode) has incorporated
 generational garbage collection, which allows the JVM to perform
@@ -144,7 +142,7 @@ All of this is documented in the new runServer script, and this
 parameter can be tweaked as you like.  See
 http://java.sun.com/docs/hotspot/gc/ for complete details.
 
-11. [CLIENT] Several small improvements to the Ganymede user interface
+10. [CLIENT] Several small improvements to the Ganymede user interface
 
 You can now hit enter after typing a search value in the query box and
 the query will be submitted for you.  This should save people from
@@ -162,7 +160,7 @@ and having you try again without any guidance as to why.
 Thanks to Marcus Walker and Tom Embleton for these suggestions.. I
 hope the changes I made help out.
 
-12. [SERVER] Improved logging for newly created objects
+11. [SERVER] Improved logging for newly created objects
 
 I slightly reworked the commit_createLogEvent() method in DBEditSet so
 that newly created objects will use DBObject.getPrintString() to
@@ -173,7 +171,7 @@ method.
 This has the advantage that newly created objects which contain
 embedded objects will include full information on the embedded objects.
 
-13. [SERVER] Reworked ownership inheritance
+12. [SERVER] Reworked ownership inheritance
 
 The support in GanymedeSession's recursePersonaMatch() method for
 recursing up the ownership tree to find matching personas was broken
@@ -191,7 +189,7 @@ there may be a noticeable decrease in the time taken when a new object
 is created, as the owner group list calculation code is far more
 efficient now.
 
-14. [SERVER] Tweaked object creation ownership behavior 
+13. [SERVER] Tweaked object creation ownership behavior 
 
 Previously, the Ganymede server would complain any time someone tried
 to create an object with more than one default owner selected.
