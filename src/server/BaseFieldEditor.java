@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,8 +18,6 @@ import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.*;
 
 import javax.swing.*;
-
-import tablelayout.*;
 
 import java.rmi.*;
 import java.rmi.server.*;
@@ -107,6 +105,12 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     ipShowing,
     permissionShowing;
 
+  GridBagLayout
+    gbl = new GridBagLayout();
+  
+  GridBagConstraints
+    gbc = new GridBagConstraints();
+
   /* -- */
 
   /**
@@ -129,7 +133,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     
     editPanel = new JPanel();
     editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-    editPanel.setLayout(new TableLayout(false));
+    editPanel.setLayout(gbl);
     
     idN = new JnumberField(20,  false, false, 0, 0);
     idN.setCallback(this);
@@ -264,13 +268,25 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     addRow(parent, comp, label, row, true);
   }
 
-  void addRow(JPanel parent, java.awt.Component comp,  String label, int row, boolean visible)
+  void synchronized addRow(JPanel parent, java.awt.Component comp,  String label, int row)
   {
     JLabel l = new JLabel(label);
 
     rowHash.put(comp, l);
-    parent.add("0 " + row + " lhwHW", l);
-    parent.add("1 " + row + " lhwHW", comp);
+    
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+
+    gbc.weightx = 0.0;
+    gbc.gridx = 0;
+    gbc.gridy = row;
+    gbl.setConstraints(l, gbc);
+    parent.add(l);
+
+    gbc.gridx = 1;
+    gbc.weightx = 1.0;
+    gbl.setConstraints(comp, gbc);
+    parent.add(comp);
 
     setRowVisible(comp, visible);
   }

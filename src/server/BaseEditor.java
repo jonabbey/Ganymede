@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,8 +18,6 @@ import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.*;
 
 import javax.swing.*;
-
-import tablelayout.*;
 
 import java.rmi.*;
 import java.rmi.server.*;
@@ -67,6 +65,12 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
   GASHSchema
      owner;
 
+  GridBagLayout
+    gbl = new GridBagLayout();
+  
+  GridBagConstraints
+    gbc = new GridBagConstraints();
+
   /* -- */
 
   BaseEditor(GASHSchema owner)
@@ -86,12 +90,11 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 
     editPanel = new JPanel(false);
     editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-    editPanel.setLayout(new TableLayout(false));
+    editPanel.setLayout(gbl);
     
     typeN = new JnumberField(30, false, false, 0, 0);
     typeN.setCallback(this);
     addRow(editPanel, typeN, "ObjectType ID:", 0);
-
 
     nameS = new JstringField(40, 100, true, false, null, null);
     nameS.setCallback(this);
@@ -106,7 +109,6 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     addRow(editPanel, labelC, "Label:", 3);
 
     add(editPanel);
-    //    doLayout();
   }
 
   /**
@@ -372,14 +374,23 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     return true;
   }
 
-  void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
+  void synchronized addRow(JPanel parent, java.awt.Component comp,  String label, int row)
   {
     JLabel l = new JLabel(label);
     
-    parent.add("0 " + row + " lhwHW", l);
-    parent.add("1 " + row + " lhwHW", comp);
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
 
+    gbc.weightx = 0.0;
+    gbc.gridx = 0;
+    gbc.gridy = row;
+    gbl.setConstraints(l, gbc);
+    parent.add(l);
+
+    gbc.gridx = 1;
+    gbc.weightx = 1.0;
+    gbl.setConstraints(comp, gbc);
+    parent.add(comp);
   }
-
 }
 
