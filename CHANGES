@@ -1,11 +1,11 @@
 Ganymede Release 1.0pre1
-March ??, 2000
+April ??, 2000
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
-RELEASE DATE: March ??
+RELEASE DATE: April ??
 
 1. [SERVER] Reworked server synchronization logic
 
@@ -464,6 +464,13 @@ Now, the client will always terminate if something goes wrong, rather
 than sticking around.
 
 This time, for real.
+
+30. [SERVER] The dump task now reports how many transactions it is dumping
+
+The dump task, which typically runs every couple of hours to
+consolidate the transaction journal into the ganymede.db file, will
+now announce the number of transactions in the journal to the log and
+admin console when it runs.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 

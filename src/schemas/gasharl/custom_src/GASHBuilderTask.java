@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2000/04/04 08:28:21 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2000/04/13 04:51:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1855,12 +1855,21 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    if (usersField != null)
 	      {
-		rshNT.println(escapeString(usersField.getValueString()));
+		rshNT.print(escapeString(usersField.getValueString()));
 	      }
-	    else
+
+	    rshNT.print(":Ganymede");
+
+	    InvidDBField ownerField = (InvidDBField) group.getField(SchemaConstants.OwnerListField);
+
+	    if (ownerField != null)
 	      {
-		rshNT.println();
+		rshNT.print(" [");
+		rshNT.print(escapeString(ownerField.getValueString()));
+		rshNT.print("]");
 	      }
+
+	    rshNT.println();
 	  }
 
 	// second we write out user netgroups
@@ -1880,7 +1889,20 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    rshNT.print(escapeString(group.getLabel()));
 	    rshNT.print("::");	// skip rename info for now
 	    
-	    rshNT.println(escapeString(VectorUtils.vectorString(netgroupMembers(group))));
+	    rshNT.print(escapeString(VectorUtils.vectorString(netgroupMembers(group))));
+
+	    rshNT.print(":Ganymede");
+
+	    InvidDBField ownerField = (InvidDBField) group.getField(SchemaConstants.OwnerListField);
+
+	    if (ownerField != null)
+	      {
+		rshNT.print(" [");
+		rshNT.print(escapeString(ownerField.getValueString()));
+		rshNT.print("]");
+	      }
+
+	    rshNT.println();
 	  }
 
 	rshNT.println("[Inactivate Groups]");
