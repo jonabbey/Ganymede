@@ -26,6 +26,9 @@
 # exist, and that the ts.l() call provides the proper number of parameters
 # to match the resource definition in the property file.
 #
+# Jonathan Abbey
+# Applied Research Laboratories, The University of Texas at Austin
+#
 ######################################################################
 
 use FindBin;
