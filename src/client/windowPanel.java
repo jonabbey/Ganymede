@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -38,7 +38,7 @@ import arlut.csd.JDataComponent.*;
 ------------------------------------------------------------------------------*/
 
 
-public class windowPanel extends JPanel implements PropertyChangeListener, ActionListener{  
+public class windowPanel extends JBufferedPane implements PropertyChangeListener, ActionListener{  
   static final boolean debug = true;
   
   // --

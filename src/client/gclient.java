@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -403,7 +403,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // The right panel which will contain the windowPanel
 
-    JPanel rightP = new JPanel();
+    JBufferedPane rightP = new JBufferedPane();
 
     rightP.setLayout(new BorderLayout());
 
@@ -412,9 +412,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rightP.add("Center", wp);
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
-    JPanel bottomButtonP = new JPanel();
-    JPanel leftButtonP = new JPanel();
-    JPanel rightButtonP = new JPanel();
+    JBufferedPane bottomButtonP = new JBufferedPane();
+    JBufferedPane leftButtonP = new JBufferedPane();
+    JBufferedPane rightButtonP = new JBufferedPane();
     bottomButtonP.setLayout(new BorderLayout());
     bottomButtonP.add("West", leftButtonP);
     bottomButtonP.add("Center", rightButtonP);
@@ -439,7 +439,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    
     add("Center",rightP);
 
-    JPanel statusBar = new JPanel();
+    JBufferedPane statusBar = new JBufferedPane();
     statusBar.setLayout(new BorderLayout());
     statusLabel = new TextField();
     statusLabel.setEditable(false);

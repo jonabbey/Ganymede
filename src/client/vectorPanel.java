@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.7 $ %D%
+  Version: $Revision: 1.8 $ %D%
   Module By: Navin Manohar
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -47,7 +47,7 @@ import com.sun.java.swing.*;
  *
  */
 
-public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener {
+public class vectorPanel extends JBufferedPane implements JsetValueCallback, ActionListener {
 
   // class variables
 
@@ -75,7 +75,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   short 
     type;
 
-  JPanel
+  JBufferedPane
     bottomPanel,
     centerPanel;
 
@@ -128,9 +128,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     this.editable = editable;
     this.isEditInPlace = isEditInPlace;
 
-    bottomPanel = new JPanel();
+    bottomPanel = new JBufferedPane();
     bottomPanel.setLayout(new BorderLayout());
-    centerPanel = new JPanel();
+    centerPanel = new JBufferedPane();
 
     centerPanel.setLayout(new ColumnLayout(Orientation.LEFT,Orientation.TOP));
 
@@ -157,7 +157,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	throw new RuntimeException("Can't check if field is editable: " + rx);
       }
 
-    JPanel main = new JPanel();
+    JBufferedPane main = new JBufferedPane();
     main.setLayout(new BorderLayout());
     main.setBorderStyle(2);
     main.add("South", bottomPanel);
@@ -389,7 +389,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 		    // Add a series of JChoices
 		    
-		    JChoice choice = new JChoice();
+		    JComboBox choice = new JComboBox();
 
 		    choice.addItem(inv.toString());
 

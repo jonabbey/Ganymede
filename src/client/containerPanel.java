@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.5 $ %D%
+    Version: $Revision: 1.6 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import arlut.csd.JDataComponent.*;
                                                                   containerPanel
 
 ------------------------------------------------------------------------------*/
-public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
+public class containerPanel extends JBufferedPane implements ActionListener, JsetValueCallback, ItemListener{  
 
   static final boolean debug = true;
 
@@ -52,7 +52,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     rowHash, 
     objectHash;
   
-  JPanel 
+  JBufferedPane 
     panel;			// currently not very useful.. ?
   
   TableLayout 
@@ -127,7 +127,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       
     setLayout(new BorderLayout());
 
-    panel = new JPanel();
+    panel = new JBufferedPane();
     layout = new TableLayout(false);
     layout.rowSpacing(5);
     panel.setLayout(layout);
@@ -237,9 +237,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		((JcheckboxField)comp).setSelected(((Boolean)field.getValue()).booleanValue());
 	      }
-	    else if (comp instanceof JCheckbox)
+	    else if (comp instanceof JCheckBox)
 	      {
-		((JCheckbox)comp).setSelected(((Boolean)field.getValue()).booleanValue());
+		((JCheckBox)comp).setSelected(((Boolean)field.getValue()).booleanValue());
 	      }
 	    else if (comp instanceof JComboBox)
 	      {
@@ -374,21 +374,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() instanceof JCheckbox)
+    if (e.getSource() instanceof JCheckBox)
       {
 	db_field field = (db_field)objectHash.get(e.getSource());
 	  
 	try
 	  {
 	      
-	    if (field.setValue(new Boolean(((JCheckbox)e.getSource()).isSelected())))
+	    if (field.setValue(new Boolean(((JCheckBox)e.getSource()).isSelected())))
 	      {
 		parent.somethingChanged = true;
 	      }
 	    else
 	      {
 		System.err.println("Could not change checkbox, resetting it now");
-		((JCheckbox)e.getSource()).setSelected(((Boolean)field.getValue()).booleanValue());
+		((JCheckBox)e.getSource()).setSelected(((Boolean)field.getValue()).booleanValue());
 	      }
 	  }
 	catch (RemoteException rx)
@@ -702,7 +702,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 				  
 				// Add a choice
 				  
-		JChoice choice = new JChoice();
+		JComboBox choice = new JComboBox();
 		Vector choices = gclient.parseDump(field.choices());
 				  
 		for (int j = 0; j < choices.size(); j++)
@@ -992,7 +992,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   {
     //JcheckboxField cb = new JcheckboxField();
 
-    JCheckbox cb = new JCheckbox();
+    JCheckBox cb = new JCheckBox();
     objectHash.put(cb, field);
     cb.setEnabled(editable);
     cb.addActionListener(this);	// register callback

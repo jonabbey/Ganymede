@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -63,7 +63,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     setLayout(new BorderLayout());
 
-    JPanel buttonPanel = new JPanel();
+    JBufferedPane buttonPanel = new JBufferedPane();
     refreshButton = new JButton("Refresh Query");
     refreshButton.addActionListener(this);
     buttonPanel.add(refreshButton);
