@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.243 $
-   Last Mod Date: $Date: 2001/07/27 02:19:41 $
+   Version: $Revision: 1.244 $
+   Last Mod Date: $Date: 2001/07/27 04:24:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.243 $ $Date: 2001/07/27 02:19:41 $
+ * @version $Revision: 1.244 $ $Date: 2001/07/27 04:24:40 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -5651,6 +5651,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    return objectPerm.intersection(PermEntry.viewPerms);
 	  }
 
+	// nor do we want anyone to be able to modify the historical
+	// fields
+
+	if (fieldId == SchemaConstants.CreationDateField ||
+	    fieldId == SchemaConstants.CreatorField ||
+	    fieldId == SchemaConstants.ModificationDateField ||
+	    fieldId == SchemaConstants.ModifierField)
+	  {
+	    return objectPerm.intersection(PermEntry.viewPerms);
+	  }
+
 	return objectPerm;
       }
 
@@ -5671,8 +5682,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // the object ownership list, nor do we ever want to allow
     // non-privileged end users to edit the ownership list.
 
-    if (fieldId == SchemaConstants.OwnerListField &&
-	(!objectIsOwned || personaObj == null))
+    // nor do we allow editing the historical fields
+
+    if ((fieldId == SchemaConstants.OwnerListField &&
+	(!objectIsOwned || personaObj == null)) ||
+	(fieldId == SchemaConstants.CreationDateField ||
+	 fieldId == SchemaConstants.CreatorField ||
+	 fieldId == SchemaConstants.ModificationDateField ||
+	 fieldId == SchemaConstants.ModifierField))
       {
 	return fieldPerm.union(expandFieldPerm).intersection(objectPerm).intersection(PermEntry.viewPerms);
       }
