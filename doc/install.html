@@ -7,7 +7,7 @@
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo">
-<h1><FONT FACE="Arial, Helvetica">Ganymede Installation Guide<br>Release 1.0.5 - 27 July 2001</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede Installation Guide<br>Release 1.0.7 - 11 October 2001</FONT></h1>
 <hr>
 
 <p>Note: If you are reading this as the <code>INSTALL</code> text file
@@ -287,6 +287,28 @@ directory.</p>
 	or a fully qualified DNS host name.  The installServer script
 	will provide the name of the system you are on as a
 	default.</p>
+
+	<p>Note that the Ganymede server needs to know a name for the
+	server that will resolve to a network-accessible I.P. address.
+	Some Linux systems are configured by default so that the
+	system 'hostname' command returns the system's name without
+	any DNS domain information, and so that the system's name is
+	mapped to '127.0.0.1' in the /etc/hosts file.  On such
+	systems, the Ganymede server may report an error message on
+	startup, complaining that the system hostname and the
+	<code><b>ganymede.serverhost</b></code> definition both
+	resolve to '127.0.0.1'.</p>
+
+	<p>By answering this question with either a fully qualified
+	DNS name or a network-accessible numeric address, the Ganymede
+	server will be able to generate a proper network address for
+	clients to use.  If you discover after installing the server
+	that you need to change the name that the Ganymede server uses
+	to identify its network address, you can edit the <a
+	href="glossary.html#ganymede.properties">ganymede.properties</a>
+	file and change the <code><b>ganymede.serverhost</b></code>
+	definition to something that will resolve to a network accessible
+	address.</p>
 </dd>
 
 <dt><b>What port should the RMI registry supporting Ganymede run on?</b></dt>
@@ -948,7 +970,7 @@ Ganymede server, see the <a href="xml.html">xml.html</a> file in the
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
     <!-- hhmts start -->
-Last modified: Fri Jul 27 21:37:50 CDT 2001
+Last modified: Thu Oct 11 20:56:54 CDT 2001
 <!-- hhmts end -->
   </body>
 </html>

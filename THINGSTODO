@@ -1,5 +1,5 @@
-Ganymede Release 1.0.5
-July 27, 2001
+Ganymede Release 1.0.7
+October 11, 2001
 THINGSTODO
 ---------------------------------------------
 
@@ -20,6 +20,13 @@ to be bulk-loaded into the environment.  Things like LDAP and NT
 maintenance could be supported a lot better if Ganymede was able to
 provide limited delta records rather than forcing a complete reload
 from the Ganymede server's state.
+
+11-Oct-2001:
+
+Note that Thomas Reith has published a fantastic tool called ldapdiff
+at http://webtomware.rhoen.de/.  With ldapdiff and some appropriate
+LDIF-generating Java code for a Ganymede builder task, you could
+easily build an LDAP management tool out of Ganymede.
 
 1) DNS Support
 

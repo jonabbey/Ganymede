@@ -1,11 +1,11 @@
 Ganymede Release 1.0.7
-October ??, 2001
+October 11, 2001
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
-RELEASE DATE: October ??, 2001
+RELEASE DATE: October 11, 2001
 
 1. [SERVER] Deleted objects now have all of their fields logged
 
@@ -84,6 +84,9 @@ configuration for such systems includes the system's hostname in
 returns by default a non-fully-qualified hostname.  The combination
 of these two conditions resulted in the Ganymede server registering
 itself with the rmiregistry process as being on IP address 127.0.0.1.
+
+This change was in response to a problem report from Steve Lemons
+(steve.lemons@arrisi.com).
 
 6. [SERVER] Objects in the process of being deleted may not be linked to
 

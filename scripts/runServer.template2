@@ -78,7 +78,16 @@ echo
 # client or with the admin console, the RMI debug log will capture
 # the exception's stack trace.
 #
-# The -resetadmin, and debug=XXX parameters should be placed
+# The optional -forcelocalhost parameter will force the Ganymede
+# server to ignore the fact that the configured hostname will
+# map to the 127.0.0.1 loopback address.  If the Ganymede server
+# prints an error message and refuses to start due to some problem
+# relating to 127.0.0.1, adding -forcelocalhost to the java invocation
+# line will tell the Ganymede server not to be so picky.  You'll then
+# be able to use the Ganymede server from the local system, at least.
+# See the Ganymede FAQ for more details on this option.
+#
+# The -resetadmin, -forcelocalhost and debug=XXX parameters should be placed
 # on the invocation line after arlut.csd.ganymede.Ganymede.
 #
 # Other options included below include the -Xms32m and -Xmx128m jvm

@@ -1,5 +1,5 @@
-Ganymede Release 1.0.5
-July 24, 2001
+Ganymede Release 1.0.7
+October 11, 2001
 FAQ
 ---------------------------------------------
 
@@ -22,8 +22,11 @@ Questions Answered:
 15) What is Ganymede's development history like?
 16) I see a bunch of messages about missing fonts when I run the
     Ganymede client or admin console GUI under Linux, what's up?
-17) Where's the Ganymede web site?
-18) What's the best way to report bugs?  How should I ask questions?
+17) When I try to start the Ganymede server, I see a message complaining about
+    the system hostname resolving to the 127.0.0.1 loopback address and
+    the server quits.  What's going on?
+18) Where's the Ganymede web site?
+19) What's the best way to report bugs?  How should I ask questions?
 
 --====================================================================--
 
@@ -221,87 +224,25 @@ Java Web Start product at http://java.sun.com/products/javawebstart/.
 
 8) How scalable is Ganymede, with its memory-based database?
 
-   An excellent question.  The Ganymede server is extensively
-multi-threaded and optimized, but memory is a fairly hard limit to get
-around.  Without any data loaded, and using the latest JVM for Solaris
-on UltraSPARC, the Ganymede server has a 61 meg memory image with 19
-megs resident.  With all of ARL's data loaded and an admin console
-attached, the server takes 62 megs memory image with 32 megs in-memory
-resident.  That data comprises:
+   Fairly scalable.  At ARL, we use Ganymede to manage a rather
+complex NIS domain containing around 800 users and our DNS domain with
+over 2500 system records defined. During execution our Ganymede server
+takes up only about 9 megabytes of JVM heap space.
 
-   780 user/passwd records
-   240 group records
-   524 nfs volume definitions
-   238 nis netgroup records
-   1321 email alias records
-   2676 i.p. addresses
-   2553 dns records
-   ~600 room/network connectivity records
+   The Ganymede server should be able to scale up to handle the
+largest NIS domain, and to handle DNS information for many thousand
+systems without much difficulty.  If you try to manage information
+from many NIS domains in one server, you may well overflow what the
+memory resident database is designed to handle.
 
-or about 1.5 megs of data in the binary ganymede.db file, using the
-'gasharl' schema definition.
-
-   This is an interesting data point, but not a reliable guide.  Many
-JVM's will grow their heap until they reach the maximum defined heap
-size before commencing garbage collection.  To the extent that the
-Ganymede server creates a lot of temporary objects during runtime, the
-memory usage will increase possibly a good deal more quickly than the
-heap fills up with actual database objects.
-
-   Further, the memory usage patterns may be significantly different on
-different VM's.  On an Athlon box running Linux and Sun's HotSpot VM,
-the server with no data loaded takes up 11 megabytes, and only 23
-megabytes with all of the above data loaded.
-
-   Because of this variability, and because of the effects of delayed
-garbage collection, really testing Ganymede's scalability will require
-direct testing under the necessary load, rather than attempting to
-scale up the memory usage seen before GC is taken into account.
-
-   We can, however, perhaps take the Athlon/Linux case as a minimum
-bound, where data in the ganymede.db file grows by slightly less than
-ten times when expanded into linked objects in memory.
-
-   If we take this as a minimum bound, and if we imagine a system that
-can dedicate 1 gigabyte of RAM and/or swap for the JVM, a database
-hundred times that of the size we use at ARL seems at least
-conceivable, or an NIS/DNS-style database with nearly 80,000 users and
-255,000 systems.  Ganymede has not been tested to this level, and it
-would take an extremely well tuned VM to handle garbage collection for
-that size database, but Sun's HotSpot VM on a multi-processor machine
-might have a decent go at it.  Whether the JVM would handle i/o and
-threading for as many clients as is implied by such a scale, and
-whether Ganymede's hashing data structures would function efficiently
-at that scale are open questions.  The client would certainly have
-scaling problems before that point, from a user-interface standpoint
-if nothing else.
-
-   I personally wouldn't bet money on the viability on 80,000 users
-and 255,000 systems without specifically testing at that level, but I
-think 8,000 users and 25,000 systems, or vice-versa should be very
-doable.  This should serve to scale to as large a size as you would
-realistically want for a single domain.  If you want to put enough
-data into Ganymede that a flat namespace would be difficult to live
-with, you'd probably want to go ahead and split things up into
-multiple servers for separate domains.
-
-   It might be possible to rearchitect Ganymede to be more scalable by
-going to a disk-based database runtime and using the Java 1.2 weak
-references API to manage in-process object caching, but given the
-current Ganymede design of doing complete dataset rebuilds when
-transactions are committed, it seems that most data would be
-continuously brought back in-process during the build phase after a
-transaction was committed.  Garbage collection should keep everything
-viable, but the i/o overhead would be very much greater.
-
-     With the current design, the server should degrade gracefully if
-the heap usage gets to be too much.  As the amount of data loaded into
-the server increases towards the upper limits that can be held in the
-the JVM's maximum allocated heap, garbage collection activity will
-increase significantly.  If there is simply too much data to fit into
-the set heap size, an OutOfMemoryError will eventually be thrown and
-the server will be unable to handle new logins, new object creation,
-and such.  With the current design an OutOfMemoryError would not cause
+   The server should degrade gracefully if the heap usage gets to be
+too much.  As the amount of data loaded into the server increases
+towards the upper limits that can be held in the the JVM's maximum
+allocated heap, garbage collection activity will increase
+significantly.  If there is simply too much data to fit into the set
+heap size, an OutOfMemoryError will eventually be thrown and the
+server will be unable to handle new logins, new object creation, and
+such.  With the current design an OutOfMemoryError would not cause
 precipitous data loss.  At the worst, the server would have to be shut
 down, the amount of heap dedicated to the jvm increased, and the
 server re-started.  If the heap size is bumping up against the maximum
@@ -309,13 +250,15 @@ available on a given machine, it would be necessary to export the
 server's data to XML, split the data, and create separate Ganymede
 servers for separate subdomains or separate object types.
 
-   News: As of version 1.0, the Ganymede server reports its internal
-memory usage.  The Ganymede server tends to require around three times
-as much heap space in RAM as the binary ganymede.db file takes up on
-disk.  For our purposes we pre-allocate 32 megs of RAM for the
-Ganymede server's heap, with an upper limit of 128 megs defined.  We
-have never exceeded the minimum heap size for our data set.  Ganymede
-1.0 in general is far, far better about memory usage in the server.
+   It may be possible in the not-too-distant future to rearchitect
+Ganymede to be more scalable by going to a disk-based database runtime
+and using the Java 1.2 weak references API to manage in-process object
+caching, but given the current Ganymede design of doing complete
+dataset rebuilds when transactions are committed, it seems that most
+data would be continuously brought back in-process during the build
+phase after a transaction was committed.  Garbage collection should
+keep everything viable, but the i/o overhead would be very much
+greater.
 
    The final word on scalability remains that you should be sure and
 test with a representative dataset before committing to Ganymede, and
@@ -356,6 +299,17 @@ operating system (PAM) and/or application code consults directly.
 Instead, Ganymede is intended to feed things like NIS, DNS, and LDAP,
 which have their own means of doing replication and redundant servers
 for backups.
+
+   If you are interested in using Ganymede in conjunction with LDAP,
+you should be aware of Thomas Reith's excellent ldapdiff utility,
+which may be found at http://webtomware.rhoen.de/.  ldapdiff is
+designed to take an LDIF file from a data source and merge it into an
+LDAP server's dataset, merging only those object and attribute types
+defined in a configuration file.  ldapdiff provides the missing link
+to allow Ganymede to manage portions of an LDAP server without
+necessitating a complete tear-down and rebuild of the LDAP server's
+dataset.  With ldapdiff, Ganymede can co-exist peacefully with
+non-Ganymede-mastered LDAP data in a single server.
 
      ------------------------------------------------------------
 
@@ -468,13 +422,57 @@ http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.ht
 
      ------------------------------------------------------------
 
-17) Where's the Ganymede web site?
+17) When I try to start the Ganymede server, I see a message complaining about
+    the system hostname resolving to the 127.0.0.1 loopback address and
+    the server quits.  What's going on?
+
+The Ganymede server is trying to protect you from a misconfiguration
+of your system.
+
+In order for the Ganymede server to work, it needs to pass a URL to
+the rmiregistry process describing the network name that the Ganymede
+server wants to be known by.  This will look like
+rmi://myhost.domain.com:1099/ganymede.server.  When the rmiregistry on
+the server system receives a network call asking to talk to the
+Ganymede server, it will return an IP address and TCP port number that
+the client should use to talk to the server.
+
+On some systems, the 'hostname' command returns a name that is
+associated with the 127.0.0.1 loopback address in /etc/hosts.  On such
+systems, the rmiregistry will get the idea that the I.P. address that
+the client should talk to in order to find the server is 127.0.0.1.
+127.0.0.1 is a 'magic' address, which is always interpreted to mean
+'myself'.  Remote Ganymede clients obviously won't find the server on
+their own system, so you'll experience mysterious failures when the
+clients try to talk to the server.
+
+To prevent this problem, the Ganymede server checks the system's idea
+of its name against the 127.0.0.1 address.  If it finds that the
+systems' hostname would cause the rmiregistry to provide the unhelpful
+127.0.0.1 address, it tries instead to use the system name provided by
+the user when the Ganymede server was installed.  If that name also
+resolves to 127.0.0.1, the server prints the error message and exits,
+rather than confusing you with an inability to talk to remote clients.
+
+If you experience this problem, edit the server's ganymede.properties
+file and change the ganymede.serverhost definition to something that
+will resolve on the server to something other than 127.0.0.1.  This
+can even be the server's network accessible I.P. address, if you like.
+
+Hopefully a future version of the Java rmiregistry utility will have
+smarter behavior regarding the loopback address.  If you do find that
+you need to override this check, you can edit the server's runServer
+script and add the -forcelocalhost option to the Java invocation line.
+
+     ------------------------------------------------------------
+
+18) Where's the Ganymede web site?
 
     http://www.arlut.utexas.edu/gash2/
 
      ------------------------------------------------------------
 
-18) What's the best way to report bugs?  How should I ask questions?
+19) What's the best way to report bugs?  How should I ask questions?
 
     We have a bugzilla database running at the Ganymede web site.  You should
 visit the bugzilla database and report bugs there.  
@@ -493,6 +491,6 @@ see the question you asked or bug you reported.
 Ganymede FAQ
 Author: Jonathan Abbey
 Release: $name:  $
-Version: $Revision: 1.17 $
-Last Mod Date: $Date: 2001/07/26 19:51:51 $
+Version: $Revision: 1.18 $
+Last Mod Date: $Date: 2001/10/12 02:38:44 $
 -------------------------------------------------------------------------------
