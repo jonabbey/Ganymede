@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -513,14 +513,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   /**
    *
    * This method returns true if this field definition can be edited
-   * in the schema editor.
+   * in the schema editor.<br><br>
+   *
+   * This method will return true if the DBSchemaEdit class is configured
+   * with developMode set to true.
    *
    * @see arlut.csd.ganymede.BaseField
    */
 
   public boolean isEditable()
   {
-    return editable;
+    return editable || (editor != null && editor.developMode);
   }
 
   /**
