@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.56 $ %D%
+   Version: $Revision: 1.57 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -571,6 +571,104 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     // assume that unlinking is ok by default
 
     return true;
+  }
+
+  /**
+   *
+   * Customization method to allow this Ganymede object type to
+   * override the default permissions mechanism for special
+   * purposes.<br><br>
+   *
+   * If this method returns null, the default permissions mechanism
+   * will be followed.  If not, the permissions system will grant
+   * the permissions specified by this method for access to the
+   * given object, and no further elaboration of the permission
+   * will be performed.  Note that this override capability does
+   * not apply to operations performed in supergash mode.<br><br>
+   *
+   * This method should be used very sparingly.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public PermEntry permOverride(GanymedeSession session, DBObject object)
+  {
+    return null;
+  }
+
+  /**
+   *
+   * Customization method to allow this Ganymede object type to grant
+   * permissions above and beyond the default permissions mechanism
+   * for special purposes.<br><br>
+   *
+   * If this method returns null, the default permissions mechanism
+   * will be followed.  If not, the permissions system will grant
+   * the union of the permissions specified by this method for access to the
+   * given object.<br><br>
+   *
+   * This method is essentially different from permOverride() in that
+   * the permissions system will not just take the result of this
+   * method for an answer, but will grant additional permissions as
+   * appropriate.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public PermEntry permExpand(GanymedeSession session, DBObject object)
+  {
+    return null;
+  }
+
+  /**
+   *
+   * Customization method to allow this Ganymede object type to
+   * override the default permissions mechanism for special
+   * purposes.<br><br>
+   *
+   * If this method returns null, the default permissions mechanism
+   * will be followed.  If not, the permissions system will grant
+   * the permissions specified by this method for access to the
+   * given field, and no further elaboration of the permission
+   * will be performed.  Note that this override capability does
+   * not apply to operations performed in supergash mode.<br><br>
+   *
+   * This method should be used very sparingly.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public PermEntry permOverride(GanymedeSession session, DBObject object, short fieldid)
+  {
+    return null;
+  }
+
+  /**
+   *
+   * Customization method to allow this Ganymede object type to grant
+   * permissions above and beyond the default permissions mechanism
+   * for special purposes.<br><br>
+   *
+   * If this method returns null, the default permissions mechanism
+   * will be followed.  If not, the permissions system will grant
+   * the union of the permissions specified by this method for access to the
+   * given field.<br><br>
+   *
+   * This method is essentially different from permOverride() in that
+   * the permissions system will not just take the result of this
+   * method for an answer, but will grant additional permissions as
+   * appropriate.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public PermEntry permExpand(GanymedeSession session, DBObject object, short fieldid)
+  {
+    return null;
   }
 
   /**
