@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.132 $
-   Last Mod Date: $Date: 2002/03/01 22:35:28 $
+   Version: $Revision: 1.133 $
+   Last Mod Date: $Date: 2002/03/02 01:35:01 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.132 $ $Date: 2002/03/01 22:35:28 $ $Name:  $
+ * @version $Revision: 1.133 $ $Date: 2002/03/02 01:35:01 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -2939,7 +2939,31 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
     else
       {
-	addRow(null, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+	int maxLength = fieldTemplate.getMaxLength();
+	sf = new JstringField(FIELDWIDTH > maxLength ? maxLength + 1 : FIELDWIDTH,
+			      maxLength,
+			      true,
+			      false,
+			      null,
+			      null);
+
+	objectHash.put(sf, field);
+	shortToComponentHash.put(new Short(fieldInfo.getID()), sf);
+			  
+	// the server won't give us an unencrypted password, we're clear here
+			  
+	sf.setText((String)fieldInfo.getValue());
+		      
+	sf.setEditable(false);
+	
+	String comment = fieldTemplate.getComment();
+	
+	if (comment != null && !comment.equals(""))
+	  {
+	    sf.setToolTipText(comment);
+	  }
+	
+	addRow(sf, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
       }
   }
 
