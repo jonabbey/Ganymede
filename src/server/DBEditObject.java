@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.71 $ %D%
+   Version: $Revision: 1.72 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1583,10 +1583,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * The inactive() method can cause other objects to be deleted, can cause
    * strings to be removed from fields in other objects, whatever.<br><br>
    *
-   * If inactivate() returns a ReturnVal that has its success flag set to false
-   * and does not include a JDialogBuff for further interaction with the
-   * user, then DBSEssion.inactivateDBObject() method will rollback any changes
-   * made by this method.<br><br>
+   * If inactivate() returns a ReturnVal that has its success flag set
+   * to false and does not include a JDialogBuff for further
+   * interaction with the user, then DBSEssion.inactivateDBObject()
+   * method will rollback any changes made by this method.<br><br>
+   *
+   * If inactivate() returns a success value, we expect that the object
+   * will have a removal date set.<br><br>
    *
    * IMPORTANT NOTE: If a custom object's inactivate() logic decides
    * to enter into a wizard interaction with the user, that logic is
@@ -1625,26 +1628,52 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   {
     if (success)
       {
-	Vector invids = new Vector();
+	Object val = getFieldValueLocal(SchemaConstants.RemovalField);
 
-	invids.addElement(this.getInvid());
+	if (val != null)
+	  {
+	    Vector invids = new Vector();
+	    
+	    invids.addElement(this.getInvid());
 	
-	StringBuffer buffer = new StringBuffer();
+	    StringBuffer buffer = new StringBuffer();
 
-	buffer.append(getTypeDesc());
-	buffer.append(" ");
-	buffer.append(getLabel());
-	buffer.append(" has been inactivated.\n\nThe object is due to be removed from the database at ");
-	buffer.append(getFieldValueLocal(SchemaConstants.RemovalField).toString());
-	buffer.append(".");
+	    buffer.append(getTypeDesc());
+	    buffer.append(" ");
+	    buffer.append(getLabel());
+	    buffer.append(" has been inactivated.\n\nThe object is due to be removed from the database at ");
+	    buffer.append(getFieldValueLocal(SchemaConstants.RemovalField).toString());
+	    buffer.append(".");
 	
-	editset.logEvents.addElement(new DBLogEvent("inactivateobject",
-						    buffer.toString(),
-						    (gSession.personaInvid == null ?
-						     gSession.userInvid : gSession.personaInvid),
-						    gSession.username,
-						    invids,
-						    null));
+	    editset.logEvents.addElement(new DBLogEvent("inactivateobject",
+							buffer.toString(),
+							(gSession.personaInvid == null ?
+							 gSession.userInvid : gSession.personaInvid),
+							gSession.username,
+							invids,
+							null));
+	  }
+	else
+	  {
+	    Vector invids = new Vector();
+	    
+	    invids.addElement(this.getInvid());
+	
+	    StringBuffer buffer = new StringBuffer();
+
+	    buffer.append(getTypeDesc());
+	    buffer.append(" ");
+	    buffer.append(getLabel());
+	    buffer.append(" has been inactivated.\n\nThe object has no removal date set.");
+	
+	    editset.logEvents.addElement(new DBLogEvent("inactivateobject",
+							buffer.toString(),
+							(gSession.personaInvid == null ?
+							 gSession.userInvid : gSession.personaInvid),
+							gSession.username,
+							invids,
+							null));
+	  }
       }
     else
       {
