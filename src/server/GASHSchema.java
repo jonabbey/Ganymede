@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -861,14 +861,12 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
     else if (event.getSource() == deleteObjectMI)
       {
-	DialogRsrc dialogrc = new DialogRsrc(this,
+	StringDialog dialog = new StringDialog(this,
 					     "Confirm deletion of Object",
 					     "Are you sure you want to delete this object?",
 					     "Confirm",
 					     "Cancel");
 
-
-	StringDialog dialog = new StringDialog(dialogrc);
 
 	Hashtable answer = dialog.DialogShow();
 
@@ -2380,14 +2378,12 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
 	    if ((currentFieldName != null) && currentLabel.equals(currentFieldName))
 	      {
-		DialogRsrc labelRsrc = new DialogRsrc(owner, 
-						      "Warning: changing object type",
-						      "Changing the type of this field will invalidate the label for this base.  Are you sure you want to continue?",
-						      "Confirm",
-						      "Cancel");
-
-		changeLabelTypeDialog = new StringDialog(labelRsrc);
-
+		changeLabelTypeDialog = new StringDialog(owner, 
+							 "Warning: changing object type",
+							 "Changing the type of this field will invalidate the label for this base.  Are you sure you want to continue?",
+							 "Confirm",
+							 "Cancel");
+		
 		Hashtable answer = changeLabelTypeDialog.DialogShow();
 
 		if (answer != null)  //Ok button was clicked
