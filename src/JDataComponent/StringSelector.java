@@ -276,7 +276,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    
 		// Don't add them if they are already in the in list
 
-		if (! in.contains(lh))
+		if (! in.containsItem(lh))
 		  {
 		    outVector.addElement(lh);
 		  }
@@ -318,8 +318,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 				 }
 			     });
       
-    custom.setCallback(this);
-    
     JPanel customP = new JPanel();
     customP.setLayout(new BorderLayout());
     customP.add("Center", custom);
@@ -368,6 +366,22 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     my_parent = parent;
 
     allowCallback = true;
+  }
+
+  public void setAvailableData(Vector available)
+  {
+    for (int i = 0; i < available.size(); i++)
+      {
+	if (in.containsItem(available.elementAt(i)))
+	  {
+	    available.removeElementAt(i);
+	  }
+      }
+  }
+  
+  public void setChosenData(Vector chosen)
+  {
+    in.setListData(chosen);
   }
 
   // Event handling
@@ -427,7 +441,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  {
 		    out.setSelectedLabel(item);
 		    // Not sure if this cast is going to always work.
-		    listHandle handle = (listHandle)out.getSelectedItem();
+		    listHandle handle = out.getSelectedHandle();
 			
 		    boolean ok = true;
 		    
@@ -536,7 +550,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    
 	    if (ok)
 	      {
-		in.addHandle(new listHandle(item, item));
+		in.addItem(new listHandle(item, item));
 		
 		//	in.setSelectedValue(item, true);
 		custom.setText("");
@@ -548,7 +562,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  }
 	else //no callback to check
 	  {
-	    in.addHandle(new listHandle(item, item));
+	    in.addItem(new listHandle(item, item));
 	    //		    in.setSelectedValue(item, true);
 	    custom.setText("");
 	  }
@@ -560,117 +574,108 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   void addItem()
   {
     boolean ok = false;
-    listHandle handle;
+    Vector handles;
 
-    if (out.getSelectedItem() == null)
+    if (out == null)
+      {
+	System.out.println("Can't figure out the handle.  No out box to get it from.");
+	return;
+      }
+
+    handles = out.getSelectedHandles();
+
+    if (handles == null)
       {
 	System.err.println("Error.. got addItem with outSelected == null");
 	return;
       }
 	
-    if (out.getSelectedItem() instanceof String)
+    for (int i = 0; i < handles.size(); i++)
       {
-	String os = (String)out.getSelectedItem();
-	handle = new listHandle(os, os);
-      }
-    else
-      {
-	if (out == null)
+	
+	if (allowCallback)
 	  {
-	    System.out.println("Can't figure out the handle.  No out box to get it from.");
-	    return;
+	    try
+	      {
+		ok = my_parent.setValuePerformed(new JValueObject(this, 
+								  0, // we are not giving a true index
+								  JValueObject.ADD,
+								  ((listHandle)handles.elementAt(i)).getObject()));
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not setValuePerformed: " + rx);
+	      }
+	    
+	    if (ok)
+	      {
+		putItemIn((listHandle)handles.elementAt(i));
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.err.println("setValuePerformed returned false");
+		  }
+	      }
 	  }
 	else
 	  {
-	    handle = out.getSelectedHandle();
+	    putItemIn((listHandle)handles.elementAt(i));
 	  }
       }
     
-    if (allowCallback)
-      {
-	try
-	  {
-	    ok = my_parent.setValuePerformed(new JValueObject(this, 
-							      0, // we are not giving a true index
-							      JValueObject.ADD,
-							      handle.getObject()));
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not setValuePerformed: " + rx);
-	  }
-	    
-	if (ok)
-	  {
-	    putItemIn(handle);
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("setValuePerformed returned false");
-	      }
-	  }
-      }
-    else
-      {
-	putItemIn(handle);
-      }
-
     invalidate();
     parent.validate();
   }
   
   void removeItem()
   {
+    Vector handles;
     listHandle handle;
 
     /* -- */
 
-    if (in.getSelectedItem() == null)
+    handles = in.getSelectedHandles();
+
+    if (handles == null)
       {
 	System.err.println("Error.. got removeItem with inSelected == null");
 	return;
       }
 	
-    if (in.getSelectedItem() instanceof String)
+    for (int i =0; i < handles.size(); i++)
       {
-	String os = (String)in.getSelectedItem();
-	handle = new listHandle(os, os);
-      }
-    else
-      {
-	handle = in.getSelectedHandle();
-      }
-
-    if (allowCallback)
-      {
-	boolean ok = false;
-
-	try
+	handle = (listHandle)handles.elementAt(i);
+	if (allowCallback)
 	  {
-	    ok = my_parent.setValuePerformed(new JValueObject(this, 
-							      0,
-							      JValueObject.DELETE,
-							      handle.getObject()));
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not setValuePerformed: " + rx);
-	  }
+	    boolean ok = false;
 	    
-	if (ok)
+	    try
+	      {
+		ok = my_parent.setValuePerformed(new JValueObject(this, 
+								  0,
+								  JValueObject.DELETE,
+								  handle.getObject()));
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not setValuePerformed: " + rx);
+	      }
+	    
+	    if (ok)
+	      {
+		takeItemOut(handle);
+	      }
+	    else
+	      {
+		System.err.println("setValuePerformed returned false.");
+	      }
+	  }
+	else // no callback
 	  {
 	    takeItemOut(handle);
 	  }
-	else
-	  {
-	    System.err.println("setValuePerformed returned false.");
-	  }
-      }
-    else // no callback
-      {
-	takeItemOut(handle);
       }
   }
 
@@ -690,7 +695,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	if (out != null)
 	  {
-	    out.removeHandle(item, false);
+	    out.removeItem(item);
 	  }
 
 	if (debug)
@@ -698,13 +703,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Adding handle");
 	  }
 
-	in.addHandle(item, true);
+	in.addItem(item);
 
 	if (debug)
 	  {
 	    System.out.println("Done Adding handle");
 	  }
-	//	in.setSelectedValue(item, true);
+	//in.setSelectedValue(item, true);
       }
     else
       {
@@ -725,11 +730,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	return;
       }
 
-    in.removeHandle(item);
+    in.removeItem(item);
 
     if (out != null)
       {
-	out.addHandle(item);
+	out.addItem(item);
       }
 
     // This should scroll to the new selected item
