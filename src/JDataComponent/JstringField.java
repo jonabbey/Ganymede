@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -32,11 +32,11 @@ import java.rmi.RemoteException;
 
 public class JstringField extends JentryField {
 
+  public static final boolean debug = false;
 
   public static int DEFAULT_COLS = 15;
   public static int DEFAULT_SIZE = 4096;
   
-
   private int size = DEFAULT_SIZE;
 
   private String value = null;
@@ -64,27 +64,22 @@ public class JstringField extends JentryField {
     super(columns);
     
     if (maxstrlen <= 0)
-      throw new IllegalArgumentException("Invalid Parameter: maximum string size is negative or zero");
+      {
+	throw new IllegalArgumentException("Invalid Parameter: maximum string size is negative or zero");
+      }
 
     size = maxstrlen;
 
     if (valueAttr == null)
-      throw new IllegalArgumentException("Invalid Paramter: valueAttr is null");
+      {
+	throw new IllegalArgumentException("Invalid Paramter: valueAttr is null");
+      }
 
     this.valueAttr = valueAttr;
     
     //    setText(null);
 
     setEditable(is_editable);  // will this JstringField be editable or not?
-
-    if (is_editable)
-      {
-	System.err.println("Stringfield is editable");
-      }
-    else
-      {
-	System.err.println("Stringfield is NOT editable");
-      }
 
     setEnabled(true);
 
@@ -116,11 +111,12 @@ public class JstringField extends JentryField {
    * default column size, and default foregound/background
    * colors.
    */
+
   public JstringField()
   {
     this(JstringField.DEFAULT_COLS,JstringField.DEFAULT_SIZE,
 	 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),
-			   Color.black,Color.white),
+			    Color.black,Color.white),
 	 true,
 	 false,
 	 null,
@@ -138,14 +134,15 @@ public class JstringField extends JentryField {
     *         data contained within this JstringField.)
     *
     */
+
   public JstringField(int cols,
-		     int maxstrlen,
-		     JcomponentAttr valueAttr,
-		     boolean is_editable,
-		     boolean invisible,
-		     String allowed,
-		     String disallowed,
-		     JsetValueCallback callback)
+		      int maxstrlen,
+		      JcomponentAttr valueAttr,
+		      boolean is_editable,
+		      boolean invisible,
+		      String allowed,
+		      String disallowed,
+		      JsetValueCallback callback)
   {
     this(cols,maxstrlen,valueAttr,is_editable,invisible,allowed,disallowed);
 
@@ -160,40 +157,41 @@ public class JstringField extends JentryField {
    *
    * @param str value to which the JstringField is set
    */
+
   public void setText(String str)
   {
-    if (str == null) {
+    if (str == null) 
+      {
+	value = new String("");
+	
+	super.setText("");
       
-      value = new String("");
-      
-      super.setText("");
+	changed = true;
+      }
+    else 
+      {
+	if (str.length() > size)
+	  {
+	    throw new IllegalArgumentException("string too long");
+	  }
 
-      changed = true;
-    }
-    else {
-    
-      if (str.length() > size)
-	{
-	  throw new IllegalArgumentException("string too long");
-	}
+	for (int i = 0; i < str.length(); i++)
+	  {
+	    if (!isAllowed(str.charAt(i)))
+	      {
+		throw new IllegalArgumentException("invalid char in string: " + 
+						   str.charAt(i));
+	      }
+	  }
 
-      for (int i = 0; i < str.length(); i++)
-	{
-	  if (!isAllowed(str.charAt(i)))
-	    {
-	      throw new IllegalArgumentException("invalid char in string: " + 
-						 str.charAt(i));
-	    }
-	}
-
-      old_value = value;
-
-      value = new String(str);
-
-      super.setText(str);
-      
-      changed = true;
-    }
+	old_value = value;
+	
+	value = new String(str);
+	
+	super.setText(str);
+	
+	changed = true;
+      }
   }
 
   /**
@@ -201,12 +199,17 @@ public class JstringField extends JentryField {
    *  returns the value of the member variable value
    *
    */
-  public String getValue() {
 
+  public String getValue() 
+  {
     if (value == null)
-      return value;
+      {
+	return value;
+      }
     else
-      return new String(value);
+      {
+	return new String(value);
+      }
   }
 
   /**
@@ -214,6 +217,7 @@ public class JstringField extends JentryField {
    *
    * @param n position in the JstringField value from which to retrieve character
    */
+
   public char getCharAt(int n)
   {
     return this.getText().charAt(n);
@@ -224,9 +228,12 @@ public class JstringField extends JentryField {
    *
    * @param s each character in this string will be considered an allowed character
    */
+
   public void setAllowedChars(String s)
   {
+
     return;
+
 //     if (s != null)
 //       {
 // 	this.allowedChars = new String(s);
@@ -306,6 +313,7 @@ public class JstringField extends JentryField {
   /**
    *   returns the set of allowed characters as a String object
    */
+
   public String getAllowedChars()
   {
     return this.allowedChars;
@@ -314,6 +322,7 @@ public class JstringField extends JentryField {
   /**
    *  returns the set of disallowed characters as a String object
    */
+
   public String getDisallowedChars()
   {
     return this.disallowedChars;
@@ -322,6 +331,7 @@ public class JstringField extends JentryField {
   /**
    * returns the maximum size of the string that can be placed in this JstringField
    */
+
   public int getMaxStringSize()
   {
     return this.size;
@@ -333,6 +343,7 @@ public class JstringField extends JentryField {
    *
    * @param ch the character which is being tested for its validity
    */
+
   private boolean isAllowed(char ch)
   {
     if (disallowedChars != null)
@@ -367,44 +378,77 @@ public class JstringField extends JentryField {
   {
     super.processFocusEvent(e);
 
+    if (debug)
+      {
+	System.err.println("JstringField.processFocusEvent: entering");
+      }
+
     if (e.getID() == FocusEvent.FOCUS_LOST)
       {
 	// if nothing in the JstringField has changed,
 	// we don't need to worry about this event.
 
-	if (!changed)
-	  return;
-	
 	value = new String(getText());
 
-	if (allowCallback) {
-
-	  boolean b = false;
-	  
-	  try {
-
-	    b = my_parent.setValuePerformed(new JValueObject(this,value));
-	    
+	if (old_value != null)
+	  {
+	    changed = !value.equals(old_value);
 	  }
-	  catch (RemoteException re)
-	    {
-	    }
-
-	  if (b==false) {
-	    
-	    value = old_value;
-
-	    setText(value);
-
+	else
+	  {
 	    changed = true;
 	  }
-	  else {
 
-	    old_value = value;
-
-	    changed = false;
+	if (!changed)
+	  {
+	    if (debug)
+	      {
+		System.err.println("JstringField.processFocusEvent: no change, ignoring");
+	      }
+	    return;
 	  }
-	}
+	
+	if (allowCallback) 
+	  {
+	    boolean b = false;
+	  
+	    try 
+	      {
+		if (debug)
+		  {
+		    System.err.println("JstringField.processFocusEvent: making callback");
+		  }
+		b = my_parent.setValuePerformed(new JValueObject(this,value));
+	      }
+	    catch (RemoteException re)
+	      {
+	      }
+	    
+	    if (b==false) 
+	      {
+		if (debug)
+		  {
+		    System.err.println("JstringField.processFocusEvent: setValue rejected");
+		  }
+		value = old_value;
+		
+		setText(value);
+		
+		changed = true;
+	      }
+	    else 
+	      {
+		if (debug)
+		  {
+		    System.err.println("JstringField.processFocusEvent: setValue accepted");
+		  }
+		old_value = value;
+		
+		changed = false;
+	      }
+	  }
+
       }
+
   }
 }
