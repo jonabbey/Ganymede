@@ -5,7 +5,7 @@
    A wizard to manage user rename interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -87,6 +87,12 @@ public class userRenameWizard extends GanymediatorWizard {
 
   String newname;
 
+  /**
+   * The old name for the user
+   */
+
+  String oldname;
+
   /* -- */
 
   /**
@@ -110,7 +116,8 @@ public class userRenameWizard extends GanymediatorWizard {
   public userRenameWizard(GanymedeSession session, 
          		  userCustom userObject, 
 		          DBField field,
-		          String newname) throws RemoteException
+		          String newname,
+			  String oldname) throws RemoteException
   {
     super(session);		// register ourselves
 
@@ -118,6 +125,7 @@ public class userRenameWizard extends GanymediatorWizard {
     this.userObject = userObject;
     this.field = field;
     this.newname = newname;
+    this.oldname = oldname;
   }
 
   /**
@@ -141,8 +149,7 @@ public class userRenameWizard extends GanymediatorWizard {
   /**
    *
    * The client will call us in this state with a Boolean
-   * param for key "Yes, I'm sure I want to do this".  If
-   * this param is True, we'll go ahead and rename this user.
+   * param for key "Keep old name as an email alias?"
    *
    */
 
@@ -154,24 +161,22 @@ public class userRenameWizard extends GanymediatorWizard {
 
     System.err.println("userRenameWizard: USER_RENAME state 1 processing return vals from dialog");
 
-    Boolean answer = (Boolean) getParam("Yes, I'm sure I want to do this");
+    Boolean answer = (Boolean) getParam("Keep old name as an email alias?");
 
-    if ((answer == null) || !answer.booleanValue())
+    // One thing we need to check is whether the new name that they
+    // are wanting is already an alias for them..
+
+    StringDBField aliases = (StringDBField) userObject.getField(userSchema.ALIASES);
+
+    if (aliases != null)
       {
-	return cancel();
+	if (aliases.containsElementLocal(newname))
+	  {
+	    aliases.deleteElementLocal(newname);
+	  }
       }
 
-    Enumeration enum = getKeys();
-    int i = 0;
 
-    while (enum.hasMoreElements())
-      {
-	Object key = enum.nextElement();
-	Object value = getParam(key);
-	    
-	System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
-      }
-	
     System.err.println("userRenameWizard: Calling field.setValue()");
 
     state = DONE;		// let the userCustom wizardHook know to go 
@@ -185,6 +190,13 @@ public class userRenameWizard extends GanymediatorWizard {
 
     retVal = field.setValue(newname);
     System.err.println("userRenameWizard: Returned from field.setValue()");
+
+    // now we need to add the old name to the alias list, possibly.
+
+    if (answer != null && answer.booleanValue())
+      {
+	aliases.addElementLocal(oldname);
+      }
 
     if (retVal == null)
       {
@@ -227,7 +239,7 @@ public class userRenameWizard extends GanymediatorWizard {
 			"Never Mind",
 			"question.gif");
 
-    retVal.getDialog().addBoolean("Yes, I'm sure I want to do this");
+    retVal.getDialog().addBoolean("Keep old name as an email alias?");
 
     return retVal;
   }
