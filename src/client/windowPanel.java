@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 2000/09/25 21:45:33 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 2001/03/28 23:24:58 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -44,7 +44,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.ganymede.client;
@@ -81,7 +83,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.73 $ $Date: 2000/09/25 21:45:33 $ $Name:  $
+ * @version $Revision: 1.74 $ $Date: 2001/03/28 23:24:58 $ $Name:  $
  * @author Mike Mulvaney
  */
 

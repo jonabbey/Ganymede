@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 2000/03/08 22:43:54 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 2001/03/28 23:24:56 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -45,7 +45,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.ganymede.client;
@@ -89,7 +91,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.61 $ $Date: 2000/03/08 22:43:54 $ $Name:  $
+ * @version $Revision: 1.62 $ $Date: 2001/03/28 23:24:56 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -1562,10 +1564,24 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     this.dispose();
 
+    this.removeAll();
+
     if (debug)
       {
 	System.err.println("framePanel.internalFrameClosed(): disposed");
       }
+
+    for (int i = 0; i < containerPanels.size(); i++)
+      {
+	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+	
+	cp.cleanUp();
+      }
+
+    // finally, null out all references to make sure that we don't cascade
+    // any leaks
+
+    cleanUp();
   }
 
   public void internalFrameClosing(InternalFrameEvent event)
@@ -1674,5 +1690,51 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    closingApproved = true;
 	  }
       }
+  }
+
+  /**
+   * <p>This method provides a handy way to null out data structures held in
+   * relationship to this framePanel, particularly network reference
+   * resources.</p>
+   */
+
+  public final void cleanUp()
+  {
+    this.removeVetoableChangeListener(this);
+    this.removeInternalFrameListener(this);
+    this.removeInternalFrameListener(getWindowPanel());
+    pane.removeChangeListener(this);
+    
+    progressBar = null;
+    progressPanel = null;
+    pane = null;
+    general = null;
+    expiration_date = null;
+    removal_date = null;
+    owner = null;
+    notes = null;
+    objects_owned = null;
+    exp_date_panel = null;
+    rem_date_panel = null;
+    history = null;
+    personae = null;
+    history_panel = null;
+    containerPanels = null;
+    templates = null;
+    createdList = null;
+    exp_field = null;
+    rem_field = null;
+    creation_date_field = null;
+    modification_date_field = null;
+    notes_field = null;
+    creator_field = null;
+    modifier_field = null;
+    persona_field = null;
+    objects_owned_field = null;
+    server_object = null;
+    wp = null;
+    gc = null;
+    my_notesPanel = null;
+    invid = null;
   }
 }

@@ -7,15 +7,16 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/05/31 00:56:56 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2001/03/28 23:24:55 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -65,7 +66,7 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.23 $ $Date: 2000/05/31 00:56:56 $ $Name:  $
+ * @version $Revision: 1.24 $ $Date: 2001/03/28 23:24:55 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -220,21 +221,28 @@ public class Loader extends Thread {
 
   public void clear()
   {
-    // First stop loading stuff.
+    cleanUp();
 
-    keepGoing = false;
-    
     if (debug)
       {
-	if (!(baseNamesLoaded && baseListLoaded && baseMapLoaded))
-	  {
-	    System.out.println("***There are not all finished.");
-	  }
-	else
-	  {
-	    System.out.println("***All the hashes are clear.");
-	  }
+	System.out.println("Starting to load the loader again");
       }
+
+    keepGoing = true;
+
+    // start up a new thread
+
+    Thread t = new Thread(this);
+    t.start();
+  }
+
+  /**
+   * <p>Clear out all information in the loader</p>
+   */
+
+  public void cleanUp()
+  {
+    keepGoing = false;
 
     synchronized (this) 
       {
@@ -258,35 +266,44 @@ public class Loader extends Thread {
 	  }
       }
 
-    if (debug)
-      {
-	System.out.println("Clearing the loader");
-      }
-
-    // Set everything to false, so it will reload them all.
-
     baseNamesLoaded = false;
     baseListLoaded = false;
     baseMapLoaded = false;
-    
-    baseList = null;
-    baseNames = null;
-    baseMap = null;
-    baseList = null;
-    templateHash = null;
-    templateNameHash = null;
 
-    if (debug)
+    if (baseList != null)
       {
-	System.out.println("Starting to load the loader again");
+	baseList.setSize(0);
+	baseList = null;
       }
 
-    keepGoing = true;
+    // many of these hashes have values that are themselves hashes,
+    // but we won't worry about things enough to iterate over the
+    // interior hashes and clear them out.  GC will do that for us
+    // anyway, and it would take us some effort to do it affirmatively
 
-    // start up a new thread
+    if (baseNames != null)
+      {
+	baseNames.clear();
+	baseNames = null;
+      }
 
-    Thread t = new Thread(this);
-    t.start();
+    if (baseMap != null)
+      {
+	baseMap.clear();
+	baseMap = null;
+      }
+
+    if (templateHash != null)
+      {
+	templateHash.clear();
+	templateHash = null;
+      }
+
+    if (templateNameHash != null)
+      {
+	templateNameHash.clear();
+	templateNameHash = null;
+      }
   }
 
   /**

@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 2000/10/10 02:59:09 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 2001/03/28 23:24:58 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -88,7 +88,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.66 $ $Date: 2000/10/10 02:59:09 $ $Name:  $
+ * @version $Revision: 1.67 $ $Date: 2001/03/28 23:24:58 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -588,20 +588,29 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       }
     finally
       {
-	try
-	  {
-	    g_client.statusThread.shutdown();
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
+	// clean everything up on the gui thread
 
 	try
 	  {
-	    g_client.setVisible(false);
-	    g_client.dispose();
+	    SwingUtilities.invokeAndWait(new Runnable() {
+	      public void run() {
+		if (glogin.g_client != null)
+		  {
+		    glogin.g_client.setVisible(false);
+		    glogin.g_client.dispose();
+		    glogin.g_client.cleanUp();
+		    glogin.g_client = null;
+		  }
+	      }
+	    });
 	  }
 	catch (NullPointerException ex)
+	  {
+	  }
+	catch (InterruptedException ex)
+	  {
+	  }
+	catch (java.lang.reflect.InvocationTargetException ex)
 	  {
 	  }
 
@@ -888,7 +897,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.66 $ $Date: 2000/10/10 02:59:09 $ $Name:  $
+ * @version $Revision: 1.67 $ $Date: 2001/03/28 23:24:58 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -982,7 +991,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.66 $ $Date: 2000/10/10 02:59:09 $ $Name:  $
+ * @version $Revision: 1.67 $ $Date: 2001/03/28 23:24:58 $ $Name:  $
  * @author Jonathan Abbey
  */
 

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.180 $
-   Last Mod Date: $Date: 2001/02/14 22:51:11 $
+   Version: $Revision: 1.181 $
+   Last Mod Date: $Date: 2001/03/28 23:24:57 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -44,7 +44,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.ganymede.client;
@@ -89,7 +91,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.180 $ $Date: 2001/02/14 22:51:11 $ $Name:  $
+ * @version $Revision: 1.181 $ $Date: 2001/03/28 23:24:57 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +131,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/02/14 22:51:11 $";
+  static String release_date = "$Date: 2001/03/28 23:24:57 $";
   static String release_number = null;
 
   // ---
@@ -315,7 +317,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     commit,
     cancel;
 
-  final JPanel
+  JPanel
     statusPanel = new JPanel(new BorderLayout());
 
   /**
@@ -329,7 +331,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * Build status field at the bottom of the client.
    */
 
-  final JLabel
+  JLabel
     buildLabel = new JLabel();
 
   /**
@@ -3795,18 +3797,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   void logout()
   {
+    // glogin's logout method will call our cleanUp() method on the
+    // GUI thread.
+
     _myglogin.logout();
-
-    try 
-      {
-	this.dispose();
-      }
-    catch (NullPointerException e)
-      {
-	// Swing 1.1 complains about this.
-
-	// System.err.println(e + " - logout() tried to remove something that wasn't there.");
-      }
   }
 
   /**
@@ -5177,6 +5171,255 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     new VecQuickSort(v, null).sort();
     
     return v;
+  }
+
+  /**
+   * <p>This method does all the clean up required to let garbage
+   * collection tear everything completely down.</p>
+   *
+   * <p>This method must be called from the Java GUI thread.</p>
+   */
+
+  public void cleanUp()
+  {
+    this.removeAll();
+
+    creditsMessage = null;
+    aboutMessage = null;
+    session = null;
+    _myglogin = null;
+    dump = null;
+    currentPersonaString = null;
+    emptyBorder5 = null;
+    emptyBorder10 = null;
+    raisedBorder = null;
+    loweredBorder = null;
+    lineBorder = null;
+    statusBorder = null;
+    statusBorderRaised = null;
+
+    if (changedHash != null)
+      {
+	changedHash.clear();
+	changedHash = null;
+      }
+
+    if (deleteHash != null)
+      {
+	deleteHash.clear();
+	deleteHash = null;
+      }
+    
+    if (createHash != null)
+      {
+	createHash.clear();
+	createHash = null;
+      }
+
+    if (createdObjectsWithoutNodes != null)
+      {
+	createdObjectsWithoutNodes.clear();
+	createdObjectsWithoutNodes = null;
+      }
+
+    if (shortToBaseNodeHash != null)
+      {
+	shortToBaseNodeHash.clear();
+	shortToBaseNodeHash = null;
+      }
+
+    if (invidNodeHash != null)
+      {
+	invidNodeHash.clear();
+	invidNodeHash = null;
+      }
+
+    if (cachedLists != null)
+      {
+	cachedLists.clearCaches();
+	cachedLists = null;
+      }
+
+    if (loader != null)
+      {
+	loader.cleanUp();
+	loader = null;
+      }
+
+    help = null;
+    motd = null;
+    credits = null;
+    about = null;
+
+    if (personae != null)
+      {
+	personae.setSize(0);
+	personae = null;
+      }
+
+    if (ownerGroups != null)
+      {
+	ownerGroups.setSize(0);
+	ownerGroups = null;
+      }
+
+    toolBar = null;
+
+    if (filterDialog != null)
+      {
+	filterDialog.dispose();
+	filterDialog = null;
+      }
+
+    if (personaDialog != null)
+      {
+	personaDialog.dispose();
+	personaDialog = null;
+      }
+
+    if (defaultOwnerDialog != null)
+      {
+	defaultOwnerDialog.dispose();
+	defaultOwnerDialog = null;
+      }
+
+    if (openDialog != null)
+      {
+	openDialog.dispose();
+	openDialog = null;
+      }
+
+    if (createDialog != null)
+      {
+	createDialog.dispose();
+	createDialog = null;
+      }
+
+    images = null;
+    commit = null;
+    cancel = null;
+
+    if (statusPanel != null)
+      {
+	statusPanel.removeAll();
+	statusPanel = null;
+      }
+
+    buildLabel = null;
+    tree = null;
+    selectedNode = null;
+
+    errorImage = null;
+    questionImage = null;
+    search = null;
+    queryIcon = null;
+    cloneIcon = null;
+    pencil = null;
+    personaIcon = null;
+    inactivateIcon = null;
+    treepencil = null;
+    trash = null;
+    treetrash = null;
+    creation = null;
+    treecreation = null;
+    newToolbarIcon = null;
+    ganymede_logo = null;
+    createDialogImage = null;
+
+    idleIcon = null;
+    buildIcon = null;
+    buildIcon2 = null;
+    
+    wp.closeAll(true);
+    wp = null;
+
+    objectViewPM = null;
+    objectReactivatePM = null;
+    objectInactivatePM = null;
+    objectRemovePM = null;
+
+    pMenuAll = null;
+    pMenuEditable= null;
+    pMenuEditableCreatable = null;
+    pMenuAllCreatable = null;
+
+    menubar = null;
+
+    logoutMI = null;
+    clearTreeMI = null;
+    filterQueryMI = null;
+    defaultOwnerMI = null;
+    showHelpMI = null;
+    toggleToolBarMI = null;
+
+    hideNonEditablesMI = null;
+
+    changePersonaMI = null;
+    editObjectMI = null;
+    viewObjectMI = null;
+    createObjectMI = null;
+    deleteObjectMI = null;
+    inactivateObjectMI = null;
+    menubarQueryMI = null;
+
+    my_username = null;
+
+    if (actionMenu != null)
+      {
+	actionMenu.removeAll();
+	actionMenu = null;
+      }
+
+    if (windowMenu != null)
+      {
+	windowMenu.removeAll();
+	windowMenu = null;
+      }
+
+    if (fileMenu != null)
+      {
+	fileMenu.removeAll();
+	fileMenu = null;
+      }
+
+    if (helpMenu != null)
+      {
+	helpMenu.removeAll();
+	helpMenu = null;
+      }
+
+    if (PersonaMenu != null)
+      {
+	PersonaMenu.removeAll();
+	PersonaMenu = null;
+      }
+
+    if (LandFMenu != null)
+      {
+	LandFMenu.removeAll();
+	LandFMenu = null;
+      }
+
+    personaListener = null;
+
+    if (my_querybox != null)
+      {
+	my_querybox.dispose();
+	my_querybox = null;
+      }
+
+    if (statusThread != null)
+      {
+	try
+	  {
+	    statusThread.shutdown();
+	  }
+	catch (NullPointerException ex)
+	  {
+	  }
+
+	statusThread = null;
+      }
   }
 }
 

@@ -6,15 +6,15 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.116 $
-   Last Mod Date: $Date: 2000/07/13 21:33:10 $
+   Version: $Revision: 1.117 $
+   Last Mod Date: $Date: 2001/03/28 23:24:55 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -44,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -99,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.116 $ $Date: 2000/07/13 21:33:10 $ $Name:  $
+ * @version $Revision: 1.117 $ $Date: 2001/03/28 23:24:55 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -3568,6 +3569,112 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	   templates.indexOf(fieldTemplate), 
 	   fieldTemplate.getName(), 
 	   fieldInfo.isVisible());
+  }
+
+  /**
+   * <p>This method provides a handy way to null out data structures held in
+   * relationship to this containerPanel, particularly network reference
+   * resources.</p>
+   *
+   * <p>It is essential that this method be called from the client's
+   * GUI thread.</p>
+   */
+
+  public final void cleanUp()
+  {
+    Enumeration enum;
+
+    /* -- */
+
+    // first we pull everything out of our panel
+
+    enum = rowHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	JComponent j = (JComponent) enum.nextElement();
+
+	if (j instanceof JCheckBox)
+	  {
+	    ((JCheckBox) j).removeActionListener(this);
+	  }
+	else if (j instanceof JComboBox)
+	  {
+	    ((JComboBox) j).removeItemListener(this);
+	  }
+	else if (j instanceof JInvidChooser)
+	  {
+	    ((JInvidChooser) j).removeItemListener(this);
+	  }
+      }
+
+    this.removeAll();
+
+    gc = null;
+    invid = null;
+    winP = null;
+    frame = null;
+    
+    if (updatesWhileLoading != null)
+      {
+	updatesWhileLoading.setSize(0);
+	updatesWhileLoading = null;
+      }
+
+    if (vectorPanelList != null)
+      {
+	vectorPanelList.setSize(0);
+	vectorPanelList = null;
+      }
+
+    currentlyChangingComponent = null;
+
+    if (shortToComponentHash != null)
+      {
+	shortToComponentHash.clear();
+	shortToComponentHash = null;
+      }
+
+    if (rowHash != null)
+      {
+	rowHash.clear();
+	rowHash = null;
+      }
+
+    /**
+     * <p>The critical ones.. this will release our references to fields
+     * on the server</p>
+     */
+
+    object = null;
+
+    if (objectHash != null)
+      {
+	objectHash.clear();
+	objectHash = null;
+      }
+
+    if (invidChooserHash != null)
+      {
+	invidChooserHash.clear();
+	invidChooserHash = null;
+      }
+
+    if (infoVector != null)
+      {
+	infoVector.setSize(0);
+	infoVector = null;
+      }
+
+    if (templates != null)
+      {
+	templates.setSize(0);
+	templates = null;
+      }
+
+    progressBar = null;
+    gbl = null;
+    gbc = null;
   }
 
   /**
