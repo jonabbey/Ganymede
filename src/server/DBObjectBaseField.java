@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.81 $
-   Last Mod Date: $Date: 2000/10/31 09:20:45 $
+   Version: $Revision: 1.82 $
+   Last Mod Date: $Date: 2000/11/03 05:46:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1062,19 +1062,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 					   root);
       }
 
-    // swap names if needed.. the DBObjectBase.setXML() will have checked for unique field
-    // names before calling us
-
-    retVal = setName(XMLUtils.XMLDecode(root.getAttrStr("name")), true);
-
-    if (retVal != null && !retVal.didSucceed())
-      {
-	return Ganymede.createErrorDialog("xml",
-					  "fielddef could not have its name set: \n" +
-					  root.getTreeString() + "\n" +
-					  retVal.getDialogText());
-      }
-
     field_codeInt = root.getAttrInt("id");
 
     if (field_codeInt == null)
@@ -1093,7 +1080,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (_fieldID < 100)
       {
 	return Ganymede.createErrorDialog("xml",
-					  "fielddef defines an id attr out of range.. must be >= 100 for custom fields: \n" + 
+					  "fielddef defines an id attr out of range.. " + 
+					  "must be >= 100 for custom fields:\n" + 
 					  root.getTreeString());
       }
 
@@ -1103,6 +1091,19 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	return Ganymede.createErrorDialog("xml",
 					  "fielddef could not have its id set: \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    // swap names if needed.. the DBObjectBase.setXML() will have checked for unique field
+    // names before calling us
+
+    retVal = setName(XMLUtils.XMLDecode(root.getAttrStr("name")), true);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not have its name set: \n" +
 					  root.getTreeString() + "\n" +
 					  retVal.getDialogText());
       }
@@ -1298,8 +1299,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   {
     boolean _vect = false;
     short _maxSize = java.lang.Short.MAX_VALUE;
-    short _minlength = -1;
-    short _maxlength = -1;
+    short _minlength = 0;
+    short _maxlength = java.lang.Short.MAX_VALUE;
     String _okChars = null;
     String _badChars = null;
     String _regexp = null;
@@ -1325,65 +1326,68 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // of its own
 
     XMLItem typeChildren[] = root.getChildren();
-		
-    for (int j = 0; j < typeChildren.length; j++)
+
+    if (typeChildren != null)
       {
-	XMLItem child = typeChildren[j];
-
-	if (child.matches("vector"))
+	for (int j = 0; j < typeChildren.length; j++)
 	  {
-	    _vect = true;
+	    XMLItem child = typeChildren[j];
 
-	    Integer vectSize = child.getAttrInt("maxSize");
-
-	    if (vectSize != null)
+	    if (child.matches("vector"))
 	      {
-		_maxSize = vectSize.shortValue();
-	      }
-	  }
-	else if (child.matches("minlength"))
-	  {
-	    Integer val = child.getAttrInt("val");
+		_vect = true;
 
-	    if (val != null)
-	      {
-		_minlength = val.shortValue();
-	      }
-	  }
-	else if (child.matches("maxlength"))
-	  {
-	    Integer val = child.getAttrInt("val");
+		Integer vectSize = child.getAttrInt("maxSize");
 
-	    if (val != null)
-	      {
-		_maxlength = val.shortValue();
+		if (vectSize != null)
+		  {
+		    _maxSize = vectSize.shortValue();
+		  }
 	      }
-	  }
-	else if (child.matches("okchars"))
-	  {
-	    _okChars = child.getAttrStr("val");
-	  }
-	else if (child.matches("badchars"))
-	  {
-	    _badChars = child.getAttrStr("val");
-	  }
-	else if (child.matches("regexp"))
-	  {
-	    _regexp = child.getAttrStr("val");
-	  }
-	else if (child.matches("multiline"))
-	  {
-	    _multiline = true;
-	  }
-	else if (child.matches("namespace"))
-	  {
-	    _namespace = child.getAttrStr("val");
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "Unrecognized string typedef entity: " + child +
-					      "\nIn field def:\n" + root.getTreeString());
+	    else if (child.matches("minlength"))
+	      {
+		Integer val = child.getAttrInt("val");
+
+		if (val != null)
+		  {
+		    _minlength = val.shortValue();
+		  }
+	      }
+	    else if (child.matches("maxlength"))
+	      {
+		Integer val = child.getAttrInt("val");
+
+		if (val != null)
+		  {
+		    _maxlength = val.shortValue();
+		  }
+	      }
+	    else if (child.matches("okchars"))
+	      {
+		_okChars = child.getAttrStr("val");
+	      }
+	    else if (child.matches("badchars"))
+	      {
+		_badChars = child.getAttrStr("val");
+	      }
+	    else if (child.matches("regexp"))
+	      {
+		_regexp = child.getAttrStr("val");
+	      }
+	    else if (child.matches("multiline"))
+	      {
+		_multiline = true;
+	      }
+	    else if (child.matches("namespace"))
+	      {
+		_namespace = child.getAttrStr("val");
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "Unrecognized string typedef entity: " + child +
+						  "\nIn field def:\n" + root.getTreeString());
+	      }
 	  }
       }
 
@@ -1519,22 +1523,25 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // of its own
 
     XMLItem typeChildren[] = root.getChildren();
-		
-    for (int j = 0; j < typeChildren.length; j++)
-      {
-	XMLItem child = typeChildren[j];
 
-	if (child.matches("labeled"))
+    if (typeChildren != null)
+      {
+	for (int j = 0; j < typeChildren.length; j++)
 	  {
-	    _labeled = true;
-	    _trueLabel = child.getAttrStr("true");
-	    _falseLabel = child.getAttrStr("true");
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "Unrecognized boolean typedef entity: " + child +
-					      "\nIn field def:\n" + root.getTreeString());
+	    XMLItem child = typeChildren[j];
+
+	    if (child.matches("labeled"))
+	      {
+		_labeled = true;
+		_trueLabel = child.getAttrStr("true");
+		_falseLabel = child.getAttrStr("true");
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "Unrecognized boolean typedef entity: " + child +
+						  "\nIn field def:\n" + root.getTreeString());
+	      }
 	  }
       }
 
@@ -1587,8 +1594,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   private ReturnVal doPasswordXML(XMLItem root)
   {
-    short _minlength = -1;
-    short _maxlength = -1;
+    short _minlength = 0;
+    short _maxlength = java.lang.Short.MAX_VALUE;
     String _okChars = null;
     String _badChars = null;
     boolean _crypted = false;
@@ -1614,54 +1621,57 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // of its own
 
     XMLItem typeChildren[] = root.getChildren();
-		
-    for (int j = 0; j < typeChildren.length; j++)
+
+    if (typeChildren != null)
       {
-	XMLItem child = typeChildren[j];
-
-	if (child.matches("minlength"))
+	for (int j = 0; j < typeChildren.length; j++)
 	  {
-	    Integer val = child.getAttrInt("val");
+	    XMLItem child = typeChildren[j];
 
-	    if (val != null)
+	    if (child.matches("minlength"))
 	      {
-		_minlength = val.shortValue();
-	      }
-	  }
-	else if (child.matches("maxlength"))
-	  {
-	    Integer val = child.getAttrInt("val");
+		Integer val = child.getAttrInt("val");
 
-	    if (val != null)
-	      {
-		_maxlength = val.shortValue();
+		if (val != null)
+		  {
+		    _minlength = val.shortValue();
+		  }
 	      }
-	  }
-	else if (child.matches("okchars"))
-	  {
-	    _okChars = child.getAttrStr("val");
-	  }
-	else if (child.matches("badchars"))
-	  {
-	    _badChars = child.getAttrStr("val");
-	  }
-	else if (child.matches("crypted"))
-	  {
-	    _crypted = true;
-	  }
-	else if (child.matches("md5crypted"))
-	  {
-	    _md5crypted = true;
-	  }
-	else if (child.matches("plaintext"))
-	  {
-	    _plaintext = true;
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "Unrecognized password typedef entity: " + child +
-					      "\nIn field def:\n" + root.getTreeString());
+	    else if (child.matches("maxlength"))
+	      {
+		Integer val = child.getAttrInt("val");
+
+		if (val != null)
+		  {
+		    _maxlength = val.shortValue();
+		  }
+	      }
+	    else if (child.matches("okchars"))
+	      {
+		_okChars = child.getAttrStr("val");
+	      }
+	    else if (child.matches("badchars"))
+	      {
+		_badChars = child.getAttrStr("val");
+	      }
+	    else if (child.matches("crypted"))
+	      {
+		_crypted = true;
+	      }
+	    else if (child.matches("md5crypted"))
+	      {
+		_md5crypted = true;
+	      }
+	    else if (child.matches("plaintext"))
+	      {
+		_plaintext = true;
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "Unrecognized password typedef entity: " + child +
+						  "\nIn field def:\n" + root.getTreeString());
+	      }
 	  }
       }
 
@@ -1774,31 +1784,34 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // of its own
 
     XMLItem typeChildren[] = root.getChildren();
-		
-    for (int j = 0; j < typeChildren.length; j++)
+
+    if (typeChildren != null)
       {
-	XMLItem child = typeChildren[j];
-
-	if (child.matches("vector"))
+	for (int j = 0; j < typeChildren.length; j++)
 	  {
-	    _vect = true;
+	    XMLItem child = typeChildren[j];
 
-	    Integer vectSize = child.getAttrInt("maxSize");
-
-	    if (vectSize != null)
+	    if (child.matches("vector"))
 	      {
-		_maxSize = vectSize.shortValue();
+		_vect = true;
+
+		Integer vectSize = child.getAttrInt("maxSize");
+
+		if (vectSize != null)
+		  {
+		    _maxSize = vectSize.shortValue();
+		  }
 	      }
-	  }
-	else if (child.matches("namespace"))
-	  {
-	    _namespace = child.getAttrStr("val");
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "Unrecognized ip typedef entity: " + child +
-					      "\nIn field def:\n" + root.getTreeString());
+	    else if (child.matches("namespace"))
+	      {
+		_namespace = child.getAttrStr("val");
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "Unrecognized ip typedef entity: " + child +
+						  "\nIn field def:\n" + root.getTreeString());
+	      }
 	  }
       }
 
@@ -1856,7 +1869,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     /* -- */
 
-    if (!root.getAttrStr("type").equals("ip"))
+    if (!root.getAttrStr("type").equals("numeric"))
       {
 	throw new IllegalArgumentException("bad XMLItem tree");
       }
@@ -1872,20 +1885,23 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // of its own
 
     XMLItem typeChildren[] = root.getChildren();
-		
-    for (int j = 0; j < typeChildren.length; j++)
-      {
-	XMLItem child = typeChildren[j];
 
-	if (child.matches("namespace"))
+    if (typeChildren != null)
+      {
+	for (int j = 0; j < typeChildren.length; j++)
 	  {
-	    _namespace = child.getAttrStr("val");
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "Unrecognized numeric typedef entity: " + child +
-					      "\nIn field def:\n" + root.getTreeString());
+	    XMLItem child = typeChildren[j];
+	    
+	    if (child.matches("namespace"))
+	      {
+		_namespace = child.getAttrStr("val");
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "Unrecognized numeric typedef entity: " + child +
+						  "\nIn field def:\n" + root.getTreeString());
+	      }
 	  }
       }
 
@@ -1938,61 +1954,64 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	return retVal;
       }
 
-    // the <typedef type="ip"> node can have children
+    // the <typedef type="invid"> node can have children
     // of its own
 
     XMLItem typeChildren[] = root.getChildren();
-		
-    for (int j = 0; j < typeChildren.length; j++)
+
+    if (typeChildren != null)
       {
-	XMLItem child = typeChildren[j];
-
-	if (child.matches("vector"))
+	for (int j = 0; j < typeChildren.length; j++)
 	  {
-	    _vect = true;
+	    XMLItem child = typeChildren[j];
 
-	    Integer vectSize = child.getAttrInt("maxSize");
-
-	    if (vectSize != null)
+	    if (child.matches("vector"))
 	      {
-		_maxSize = vectSize.shortValue();
+		_vect = true;
+
+		Integer vectSize = child.getAttrInt("maxSize");
+
+		if (vectSize != null)
+		  {
+		    _maxSize = vectSize.shortValue();
+		  }
 	      }
-	  }
-	else if (child.matches("targetobject"))
-	  {
-	    _targetobjectStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
-	    _targetobject = child.getAttrInt("id");
+	    else if (child.matches("targetobject"))
+	      {
+		_targetobjectStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
+		_targetobject = child.getAttrInt("id");
 	    
-	    if (_targetobjectStr == null && _targetobject == null)
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  "targetobject item does not specify name or id: " + child + "\n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
+		if (_targetobjectStr == null && _targetobject == null)
+		  {
+		    return Ganymede.createErrorDialog("xml",
+						      "targetobject item does not specify name or id: " + child + "\n" +
+						      root.getTreeString() + "\n" +
+						      retVal.getDialogText());
+		  }
 	      }
-	  }
-	else if (child.matches("targetfield"))
-	  {
-	    _targetfieldStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
-	    _targetfield = child.getAttrInt("id");
+	    else if (child.matches("targetfield"))
+	      {
+		_targetfieldStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
+		_targetfield = child.getAttrInt("id");
 
-	    if (_targetfieldStr == null && _targetfield == null)
+		if (_targetfieldStr == null && _targetfield == null)
+		  {
+		    return Ganymede.createErrorDialog("xml",
+						      "targetfield item does not specify name or id: " + child + "\n" +
+						      root.getTreeString() + "\n" +
+						      retVal.getDialogText());
+		  }
+	      }
+	    else if (child.matches("embedded"))
+	      {
+		_embedded = true;
+	      }
+	    else
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "targetfield item does not specify name or id: " + child + "\n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
+						  "Unrecognized invid typedef entity: " + child +
+						  "\nIn field def:\n" + root.getTreeString());
 	      }
-	  }
-	else if (child.matches("embedded"))
-	  {
-	    _embedded = true;
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("xml",
-					      "Unrecognized invid typedef entity: " + child +
-					      "\nIn field def:\n" + root.getTreeString());
 	  }
       }
 
@@ -2258,7 +2277,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in an schema editing context");
+	throw new IllegalArgumentException("not in a schema editing context");
       }
 
     // if we aren't loading, don't allow messing with the global fields
@@ -2356,7 +2375,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in an schema editing context");
+	throw new IllegalArgumentException("not in a schema editing context");
       }
 
     // if we're not loading, don't allow global fields to be messed with
@@ -2745,7 +2764,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   {
     if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in an schema editing context");
+	throw new IllegalArgumentException("not in a schema editing context");
       }
 
     if (id < 0)

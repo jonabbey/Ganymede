@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.121 $
-   Last Mod Date: $Date: 2000/11/02 02:41:19 $
+   Version: $Revision: 1.122 $
+   Last Mod Date: $Date: 2000/11/03 05:46:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,6 +111,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    */
 
   final static boolean debug2 = false;
+  final static boolean xmldebug = true;
 
   public static void setDebug(boolean val)
   {
@@ -553,7 +554,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     /* -- */
 
     out.writeUTF(object_name);
-    out.writeUTF(classname);
+
+    if (classname == null)
+      {
+	out.writeUTF("");
+      }
+    else
+      {
+	out.writeUTF(classname);
+      }
+
     out.writeShort(type_code);
 
     out.writeShort((short) customFields.size()); // should have no more than 32k fields
@@ -904,7 +914,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * DBObjectBase from an XMLItem &lt;objectdef&gt; tree.</P>
    */
 
-  synchronized ReturnVal setXML(XMLItem root, boolean resolveInvidLinks)
+  synchronized ReturnVal setXML(XMLItem root, boolean resolveInvidLinks, PrintWriter err)
   {
     XMLItem item;
     String _objectName = null;
@@ -928,6 +938,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	throw new IllegalArgumentException("DBObjectBase.setXML(): root element != open objectdef: " + 
 					   root);
+      }
+
+    if (xmldebug)
+      {
+	err.println("Setting XML for object Base.." + root.getTreeString());
       }
 
     // GanymedeXMLSession.processSchema does a handleBaseRenaming up
@@ -955,6 +970,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 					  root.getTreeString());
       }
 
+    if (xmldebug)
+      {
+	err.println("Setting id");
+      }
+
     retVal = setTypeID(_idInt.shortValue());
 
     if (retVal != null && !retVal.didSucceed())
@@ -966,6 +986,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // names and id's, build up a list of Integer field id's for us to
     // compare against the list of field id's currently defined
 
+    if (xmldebug)
+      {
+	err.println("Scanning fields");
+      }
+
     XMLItem children[] = root.getChildren();
 
     for (int i = 0; i < children.length; i++)
@@ -976,6 +1001,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    String _fieldNameStr = XMLUtils.XMLDecode(item.getAttrStr("name"));
 	    Integer _fieldIDInt = item.getAttrInt("id");
+
 
 	    if (_fieldNameStr == null || _fieldIDInt == null)
 	      {
@@ -1025,6 +1051,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
       }
 
+    if (xmldebug)
+      {
+	err.println("Calculating fields to delete");
+      }
+
     // we've got a vector of Integers for the field id's we are going to be
     // setting.. we now need to find out field id's that are missing
     // in the xml, as we'll need to delete these
@@ -1043,6 +1074,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	Integer _fieldID = (Integer) _fieldsToDelete.elementAt(i);
 
 	DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldID.shortValue());
+
+	if (xmldebug)
+	  {
+	    err.println("Deleting field " + _field.getName());
+	  }
 
 	retVal = deleteField(_field.getName());
 
@@ -1092,13 +1128,23 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
 	else if (item.matches("fielddef"))
 	  {
+	    if (xmldebug)
+	      {
+		err.println("Processing field " + item);
+	      }
+
 	    newField = (DBObjectBaseField) getField(item.getAttrInt("id").shortValue());
 
 	    if (newField == null)
 	      {
+		if (xmldebug)
+		  {
+		    err.println("Creating field " + item);
+		  }
+
 		try
 		  {
-		    newField = new DBObjectBaseField(this);
+		    newField = new DBObjectBaseField(this, editor);
 		  }
 		catch (RemoteException ex)
 		  {
@@ -1106,14 +1152,33 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		    throw new RuntimeException("UnicastRemoteObject initialization error " + ex.getMessage());
 		  }
 
+		if (xmldebug)
+		  {
+		    err.println("Setting XML on new field " + item);
+		  }
+
+		retVal = newField.setXML(item, false); // don't do invid linking on first pass
+		
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+
 		addFieldToEnd(newField);
 	      }
-
-	    retVal = newField.setXML(item, false); // don't do invid linking on first pass
-
-	    if (retVal != null && !retVal.didSucceed())
+	    else
 	      {
-		return retVal;
+		if (xmldebug)
+		  {
+		    err.println("Setting XML on field " + item);
+		  }
+		
+		retVal = newField.setXML(item, false); // don't do invid linking on first pass
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
 	      }
 	  }
 	else
@@ -1125,6 +1190,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
 
     // and set or clear the label and class options
+
+    if (xmldebug)
+      {
+	err.println("Setting label field");
+      }
 
     if (_labelInt == null)
       {
@@ -1139,6 +1209,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	return retVal;
       }
+
+    if (xmldebug)
+      {
+	err.println("Setting class name");
+      }
     
     retVal = setClassName(_classStr);
     
@@ -1151,6 +1226,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // setName() can enforce the embedded object naming convention
 
     embedded = _embedded;	// XXX need to work on this
+
+    if (xmldebug)
+      {
+	err.println("Setting object name");
+      }
     
     retVal = setName(_objectName);
     
@@ -1161,6 +1241,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // and we need to order the fields in customFields in the same
     // order they appeared in the XML
+
+    if (xmldebug)
+      {
+	err.println("Sorting fields");
+      }
 
     Vector _newCustom = new Vector();
 
@@ -1194,6 +1279,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     customFields = _newCustom;
 
     // and we're done
+
+    if (xmldebug)
+      {
+	err.println("Done processing object base " + root);
+      }
 
     return null;
   }
@@ -1622,7 +1712,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in an schema editing context");
+	throw new IllegalArgumentException("not in a schema editing context");
       }
 
     // make sure we strip any chars that would cause this object name
@@ -1695,24 +1785,25 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in an schema editing context");
+	throw new IllegalArgumentException("not in a schema editing context");
       }
 
     // return if no changes
 
-    if (newName == classname || newName.equals(classname))
+    if (newName == classname || (newName != null && newName.equals(classname)))
       {
 	return null;
       }
 
-    classname = newName;
-
-    if (newName.equals(""))
+    if (newName == null || newName.equals(""))
       {
+	classname = "";
 	classdef = null;
 	objectHook = null;
 	return null;
       }
+
+    classname = newName;
 
     // try to load the proposed class.. if we can't, no big deal,
     // it'll just have to be done after the server is restarted.
@@ -1896,9 +1987,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public synchronized ReturnVal setTypeID(short objectId)
   {
+    if (objectId == type_code)
+      {
+	return null;
+      }
+
     if (!store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not in an schema editing context");
+	throw new IllegalArgumentException("not in a schema editing context");
       }
 
     if ((objectId != type_code) && (type_code != -1))

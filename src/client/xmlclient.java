@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2000/10/26 03:42:53 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2000/11/03 05:46:10 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * the file to the server for server-side integration into the Ganymede
  * database.</p>
  *
- * @version $Revision: 1.31 $ $Date: 2000/10/26 03:42:53 $ $Name:  $
+ * @version $Revision: 1.32 $ $Date: 2000/11/03 05:46:10 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -239,6 +239,12 @@ public final class xmlclient implements ClientListener {
       }
 
     username = ParseArgs.getArg("username", argv);
+
+    if (username == null)
+      {
+	username = "supergash";
+      }
+
     password = ParseArgs.getArg("password", argv);
     
     String bufferString = ParseArgs.getArg("bufsize", argv);
@@ -627,8 +633,6 @@ public final class xmlclient implements ClientListener {
 
 	if (nextElement.matches("ganyschema"))
 	  {
-	    System.err.println("Skipping <ganyschema> element (no schema loading support yet)");
-
 	    skipToClose("ganyschema");
 	    nextElement = getNextItem();
 	  }

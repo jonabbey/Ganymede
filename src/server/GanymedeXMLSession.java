@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/11/02 02:16:23 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/11/03 05:46:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -74,6 +74,7 @@ import org.xml.sax.*;
 public final class GanymedeXMLSession extends java.lang.Thread implements XMLSession, Unreferenced {
 
   public static final boolean debug = false;
+  public static final boolean schemadebug = true;
 
   /**
    * <p>This major version number is compared with the "major"
@@ -450,7 +451,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void unreferenced()
   {
-    session.unreferenced();
+    if (session != null)
+      {
+	session.unreferenced();
+      }
   }
 
   /**
@@ -601,6 +605,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (!processSchema(nextElement))
 	      {
 		return;
+	      }
+	    else
+	      {
+		this.success = true;
 	      }
 
 	    nextElement = getNextItem();
@@ -769,6 +777,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	// 1.  calculate what name spaces need to be created, edited, or removed
 
+	if (schemadebug)
+	  {
+	    err.println("1. calculate what name spaces need to be created, edited, or removed");
+	  }
+
 	if (namespaceTree != null)
 	  {
 	    if (!calculateNameSpaces())
@@ -780,6 +793,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// calculateNameSpaces() filled in spacesToAdd, spacesToRemove, and spacesToEdit
 
 	// 2. create new name spaces
+
+	if (schemadebug)
+	  {
+	    err.println("2. create new name spaces");
+	  }
 
 	for (int i = 0; i < spacesToAdd.size(); i++)
 	  {
@@ -805,6 +823,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	// 3. calculate what bases we need to create, edit, or remove
 
+	if (schemadebug)
+	  {
+	    err.println("3. calculate what bases we need to create, edit, or remove");
+	  }
+
 	if (categoryTree == null || !calculateBases())
 	  {
 	    return false;
@@ -813,6 +836,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// calculateBases filled in basesToAdd, basesToRemove, and basesToEdit.
 
 	// 4. delete any bases that are not at least mentioned in the XML schema tree
+
+	if (schemadebug)
+	  {
+	    err.println("4. delete any bases that are not at least mentioned in the XML schema tree");
+	  }
 
 	for (int i = 0; i < basesToRemove.size(); i++)
 	  {
@@ -824,7 +852,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      }
 	  }
 
-	// 5. rename any bases that need to be renamed
+	// 5. rename any bases that need to be renamedn
+
+	if (schemadebug)
+	  {
+	    err.println("5. rename any bases that need to be renamed");
+	  }
 
 	if (!handleBaseRenaming())
 	  {
@@ -832,6 +865,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
 
 	// 6. create all bases on the basesToAdd list
+
+	if (schemadebug)
+	  {
+	    err.println("6. create all bases on the basesToAdd list");
+	  }
 
 	for (int i = 0; i < basesToAdd.size(); i++)
 	  {
@@ -856,7 +894,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    // don't yet try to resolve invid links, since we haven't
 	    // done a pass through basesToEdit to fix up fields yet
 
-	    if (!handleReturnVal(_newBase.setXML(_entry, false)))
+	    if (!handleReturnVal(_newBase.setXML(_entry, false, err)))
 	      {
 		return false;
 	      }
@@ -864,6 +902,16 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	// 7. fix up fields in pre-existing bases
 
+	if (schemadebug)
+	  {
+	    err.println("7. fix up fields in pre-existing bases");
+	  }
+
+	if (schemadebug)
+	  {
+	    err.println("7. pass 1");
+	  }
+ 
 	for (int i = 0; i < basesToEdit.size(); i++)
 	  {
 	    XMLItem _entry = (XMLItem) basesToEdit.elementAt(i);
@@ -878,14 +926,24 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		return false;
 	      }
 
+	    if (schemadebug)
+	      {
+		err.println("7. pass 1 - fixups on " + _oldBase);
+	      }
+
 	    // don't yet try to resolve invid links, since we haven't
 	    // done a complete pass through basesToEdit to fix up
 	    // fields yet
 
-	    if (!handleReturnVal(_oldBase.setXML(_entry, false)))
+	    if (!handleReturnVal(_oldBase.setXML(_entry, false, err)))
 	      {
 		return false;
 	      }
+	  }
+
+	if (schemadebug)
+	  {
+	    err.println("7. pass 2");
 	  }
 
 	// now that we have completed our first pass through fields in
@@ -907,10 +965,20 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		return false;
 	      }
 
-	    if (!handleReturnVal(_oldBase.setXML(_entry, true)))
+	    if (schemadebug)
+	      {
+		err.println("7. pass 2 - fixups on " + _oldBase);
+	      }
+
+	    if (!handleReturnVal(_oldBase.setXML(_entry, true, err)))
 	      {
 		return false;
 	      }
+	  }
+
+	if (schemadebug)
+	  {
+	    err.println("7. pass 3");
 	  }
 
 	for (int i = 0; i < basesToEdit.size(); i++)
@@ -927,7 +995,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		return false;
 	      }
 
-	    if (!handleReturnVal(_oldBase.setXML(_entry, true)))
+	    if (schemadebug)
+	      {
+		err.println("7. pass 3 - fixups on " + _oldBase);
+	      }
+
+	    if (!handleReturnVal(_oldBase.setXML(_entry, true, err)))
 	      {
 		return false;
 	      }
@@ -935,12 +1008,22 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	// 8. Shuffle the category tree to match the XML file
 
+	if (schemadebug)
+	  {
+	    err.println("8. Shuffle the category tree to match the XML file");
+	  }
+
 	if (!handleReturnVal(reshuffleCategories(categoryTree)))
 	  {
 	    return false;
 	  }
 
 	// 9. Clear out any namespaces that need it
+
+	if (schemadebug)
+	  {
+	    err.println("9. Clear out any namespaces that need it");
+	  }
 
 	for (int i = 0; i < spacesToRemove.size(); i++)
 	  {
@@ -955,6 +1038,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// 10. Need to flip case sensitivity on namespaces that
 	// need it
 
+	if (schemadebug)
+	  {
+	    err.println("10. Need to flip case sensitivity on namespaces that need it");
+	  }
+
 	for (int i = 0; i < spacesToEdit.size(); i++)
 	  {
 	    XMLItem _entry = (XMLItem) spacesToEdit.elementAt(i);
@@ -968,7 +1056,21 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	// 11. Woohoo, Martha, I is a-coming home!
 
+	if (schemadebug)
+	  {
+	    err.println("11. Woohoo, Martha, I is a-coming home!");
+	  }
+
 	_success = true;
+      }
+    catch (Exception ex)
+      {
+	err.println("Caught exception during xml schema editing");
+	err.println(ex.getMessage());
+	ex.printStackTrace();
+
+	_success = false;
+	return false;
       }
     finally
       {
@@ -1936,6 +2038,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     Hashtable inactivateCount = new Hashtable();
 
     /* -- */
+
+    // first, set this.success to false, to reset our success indicator after
+    // doing any schema editing
+
+    this.success = false;
 
     attempt = session.openTransaction("xmlclient client (" + session.username + ")", false); // non-interactive
 	    
