@@ -52,7 +52,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
   CardLayout
     cards;
 
-  QueryResult 
+  Vector
     result = null;
 
   public ownershipPanel(invid_field field, boolean editable, framePanel parent)
@@ -70,7 +70,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
     try
       {
-	result = field.encodedValues();
+	result = field.encodedValues().getListHandles();
       }
     catch (RemoteException rx)
       {
@@ -81,11 +81,11 @@ public class ownershipPanel extends JPanel implements ItemListener {
     objects_owned = new Hashtable();
     for (int i = 0; i< result.size(); i++)
       {
-	Invid invid = (Invid)result.getInvid(i);
+	listHandle lh = (listHandle)result.elementAt(i);
+       
+	Invid invid = (Invid)lh.getObject();
 	Short type = new Short(invid.getType());
 
-	listHandle lh = result.getListHandle(i);
-	
 	if (objects_owned.containsKey(type))
 	  {
 	    ((Vector)objects_owned.get(type)).addElement(lh);
