@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 1999/07/23 04:52:33 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 1999/08/02 21:49:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -83,6 +83,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private Date now = null;
   private boolean backedup = false;
   private SharedStringBuffer result = new SharedStringBuffer();
+
+  private Invid normalCategory = null;
 
   /* -- */
 
@@ -561,6 +563,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String username;
     String signature;
     String socSecurity;
+    Invid category = null;
     StringBuffer socBuffer = new StringBuffer();
 
     /* -- */
@@ -570,8 +573,25 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
     signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
     socSecurity = (String) object.getFieldValueLocal(userSchema.SOCIALSECURITY);
+    category = (Invid) object.getFieldValueLocal(userSchema.CATEGORY);
 
-    if (username != null && signature != null && socSecurity != null)
+    if (normalCategory == null)
+      {
+	if (category != null)
+	  {
+	    String label;
+
+	    label = getLabel(category);
+
+	    if (label != null && label.equals("normal"))
+	      {
+		normalCategory = category;
+	      }
+	  }
+      }
+    
+    if (username != null && signature != null && socSecurity != null && 
+	category != null && category == normalCategory)
       {
 	for (int i = 0; i < socSecurity.length(); i++)
 	  {

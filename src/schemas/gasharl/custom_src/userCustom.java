@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 1999/07/22 05:33:59 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 1999/08/02 21:49:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1814,6 +1814,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     /* -- */
 
+    // if the system log is null, we're running in the direct loader, and we
+    // don't want to create anything external.
+
+    if (Ganymede.log == null)
+      {
+	return;
+      }
+
     if (debug)
       {
 	System.err.println("userCustom: " + getLabel() + ", in createUserExternals().");
@@ -1843,6 +1851,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void user_added_to_vol(Invid entryInvid)
   {
+    // if the system log is null, we're running in the direct loader, and we
+    // don't want to create anything external.
+
+    if (Ganymede.log == null)
+      {
+	return;
+      }
+
     DBObject entryObj = getSession().viewDBObject(entryInvid);
 
     Invid volumeInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.VOLUME);
@@ -1962,9 +1978,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void mail_user_added_to_vol(Invid entryInvid, boolean need_to_create)
   {
-    StringBuffer buffer = new StringBuffer();
+    // if the system log is null, we're running in the direct loader, and we
+    // don't want to create anything external.
 
-    /* -- */
+    if (Ganymede.log == null)
+      {
+	return;
+      }
+
+    StringBuffer buffer = new StringBuffer();
 
     DBObject entryObj = getSession().viewDBObject(entryInvid);
 
@@ -2041,6 +2063,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void deleteUserExternals()
   {
+    // if the system log is null, we're running in the direct loader, and we
+    // don't want to create anything external.
+
+    if (Ganymede.log == null)
+      {
+	return;
+      }
+
     if (debug)
       {
 	System.err.println("userCustom: " + getLabel() + ", in deleteUserExternals().");
@@ -2071,9 +2101,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void mail_user_removed_from_vol(Invid entryInvid)
   {
-    StringBuffer buffer = new StringBuffer();
+    // if the system log is null, we're running in the direct loader, and we
+    // don't want to create anything external.
 
-    /* -- */
+    if (Ganymede.log == null)
+      {
+	return;
+      }
+
+    StringBuffer buffer = new StringBuffer();
 
     DBObject entryObj = getSession().viewDBObject(entryInvid, true);
 
@@ -2132,6 +2168,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void handleVolumeChanges()
   {
+    // if the system log is null, we're running in the direct loader, and we
+    // don't want to create anything external.
+
+    if (Ganymede.log == null)
+      {
+	return;
+      }
+
     Hashtable oldEntryMap = new Hashtable();
     Hashtable newEntryMap = new Hashtable();
 
@@ -2314,6 +2358,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void user_moved_from_vol_to_vol(Invid oldVolume, Invid newVolume, String mapName)
   {
+    // if the system log is null, we're running in the direct loader, and we
+    // don't want to create anything external.
+
+    if (Ganymede.log == null)
+      {
+	return;
+      }
+
     DBObject volumeObj;
     DBObject sysObj;
 
@@ -2390,11 +2442,23 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    buffer.toString());
   }
 
+  /**
+   * This method handles external actions for renaming a user.
+   */
+
   private void handleUserRename(String orig, String newname)
   {
     boolean success = false;
 
     /* -- */
+
+    // if the system log is null, we're running in the direct loader, and we
+    // don't want to create anything external.
+
+    if (Ganymede.log == null)
+      {
+	return;
+      }
 
     if (debug)
       {
