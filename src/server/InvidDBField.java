@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,7 +30,7 @@ public class InvidDBField extends DBField {
 
   /* -- */
 
-  InvidDBField(DataInputStream in, DBObjectBaseField definition) throws IOException
+  InvidDBField(DataInput in, DBObjectBaseField definition) throws IOException
   {
     this.definition = definition;
     receive(in);
@@ -42,13 +42,13 @@ public class InvidDBField extends DBField {
     this.value = value;
   }
 
-  void emit(DataOutputStream out) throws IOException
+  void emit(DataOutput out) throws IOException
   {
     out.writeShort(value.getType());
     out.writeInt(value.getNum());
   }
 
-  void receive(DataInputStream in) throws IOException
+  void receive(DataInput in) throws IOException
   {
     value = new Invid(in.readShort(), in.readInt());
   }

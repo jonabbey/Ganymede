@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,7 +29,7 @@ public class DateDBField extends DBField {
 
   /* -- */
 
-  DateDBField(DataInputStream in, DBObjectBaseField definition) throws IOException
+  DateDBField(DataInput in, DBObjectBaseField definition) throws IOException
   {
     this.definition = definition;
     receive(in);
@@ -41,12 +41,12 @@ public class DateDBField extends DBField {
     this.value = value;
   }
 
-  void emit(DataOutputStream out) throws IOException
+  void emit(DataOutput out) throws IOException
   {
     out.writeLong(value.getTime());
   }
 
-  void receive(DataInputStream in) throws IOException
+  void receive(DataInput in) throws IOException
   {
     value = new Date(in.readLong());
   }
