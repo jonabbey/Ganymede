@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -950,7 +950,8 @@ public class DBEditSet {
 	  {
 	    Ganymede.log.logTransaction(logEvents, gSession.username, 
 					(gSession.personaInvid == null ?
-					 gSession.userInvid : gSession.personaInvid));
+					 gSession.userInvid : gSession.personaInvid),
+					this);
 	  }
 
 	if (debug)
