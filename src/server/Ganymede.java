@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,6 +52,8 @@ public class Ganymede {
   public static String returnaddrProperty = null;
   public static String signatureFileProperty = null;
   public static String helpbaseProperty = null;
+  public static String monitornameProperty = null;
+  public static String defaultmonitorpassProperty = null;
 
   /* -- */
 
@@ -596,6 +598,8 @@ public class Ganymede {
     signatureFileProperty = props.getProperty("ganymede.signaturefile");
     returnaddrProperty = props.getProperty("ganymede.returnaddr");
     helpbaseProperty = props.getProperty("ganymede.helpbase");
+    monitornameProperty = props.getProperty("ganymede.monitorname");
+    defaultmonitorpassProperty = props.getProperty("ganymede.defaultmonitorpass");
 
     if (serverHostProperty == null)
       {
@@ -637,6 +641,18 @@ public class Ganymede {
       {
 	System.err.println("Couldn't get the help base property.. setting to null");
 	helpbaseProperty = null;
+      }
+
+    if (monitornameProperty == null)
+      {
+	System.err.print("Couldn't get the monitor name property.. ");
+	System.err.println("may have problems if initializing a new db");
+      }
+
+    if (defaultmonitorpassProperty == null)
+      {
+	System.err.print("Couldn't get the default monitor password property.. ");
+	System.err.println("may have problems if initializing a new db");
       }
 
     return success;
