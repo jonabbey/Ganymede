@@ -1,7 +1,29 @@
-Ganymede Release 1.0.8
-November 16, 2001
+Ganymede Release 1.0.9
+December 4, 2001
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.0.8 to 1.0.9 -------------------
+
+RELEASE DATE: December 4, 2001
+
+1. [SERVER] Fixed xml parser error introduced in 1.0.8
+
+The server side XML parsing code in Ganymede 1.0.8 had a major bug.
+The 'addIfNotPresent' vector field mode was made the default, but
+support for handling the addIfNotPresent mode was not implemented for
+invid vector fields.  Loading data into invid vector fields silently
+failed.
+
+This has been fixed, and the xml file processing now works properly
+for all kinds of vector fields.
+
+In addition, the server's xml code now reports whenever it sees an
+<invid> element that it is not able to resolve during the data
+consolidation phase.
+
+Apologies to all and thanks to Gaurav Bhargava at Villanova University
+for reporting this brown paper bag bug.
 
 -------------------- Changes from 1.0.7 to 1.0.8 -------------------
 
