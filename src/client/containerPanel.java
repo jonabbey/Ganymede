@@ -5,14 +5,14 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.24 $ %D%
+    Version: $Revision: 1.25 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
 */
 package arlut.csd.ganymede.client;
 
-import tablelayout.*;
+//import tablelayout.*;
 import com.sun.java.swing.*;
 import com.sun.java.swing.event.*;
 
@@ -43,6 +43,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   gclient
     parent;			// our interface to the server
 
+  JPanel
+    panel; //This is the panel that holds everything
+
   db_object
     object;			// the object we're editing
   
@@ -56,11 +59,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     rowHash, 
     objectHash;
   
-  JPanel 
-    panel;			// currently not very useful.. ?
+  //  TableLayout 
+  // layout;
+
+  GridBagLayout
+    gbl;
   
-  TableLayout 
-    layout;
+  GridBagConstraints
+    gbc;
   
   db_field[] 
     fields = null;
@@ -78,12 +84,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   JProgressBar
     progressBar;
+
+  public boolean
+    loaded = false;
   
   /* -- */
 
   /**
    *
-   * Main constructor for containerPanel
+   * Constructor for containerPanel
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
@@ -92,10 +101,25 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
   public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame)
-
   {
-    this(object, editable, parent, window, frame, null);
+    this(object, editable, parent, window, frame, null, true);
   }
+
+  /**
+   *
+   * Constructor for containerPanel
+   *
+   * @param object   The object to be displayed
+   * @param editable If true, the fields presented will be enabled for editing
+   * @param parent   Parent gclient of this container
+   * @param window   windowPanel containing this containerPanel
+   * @param progressBar JProgressBar to be updated, can be null
+   */
+  public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame, JProgressBar progressBar)
+  {
+    this(object, editable, parent, window, frame, progressBar, true);
+  }
+
   /**
    *
    * Main constructor for containerPanel
@@ -105,10 +129,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param parent   Parent gclient of this container
    * @param window   windowPanel containing this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
+   * @param loadNow  If true, container panel will be loaded immediately
    *
    */
 
-  public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame, JProgressBar progressBar)
+  public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame, JProgressBar progressBar, boolean loadNow)
   {
 
     /* -- */
@@ -127,15 +152,38 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     this.frame = frame;
     this.progressBar = progressBar;
 
+    if (loadNow)
+      {
+	load();
+      }
+  }
+  
+  public void load() 
+  {
+    if (loaded)
+      {
+	System.out.println("Container panel is already loaded!");
+	return;
+      }
+
     objectHash = new Hashtable();
     rowHash = new Hashtable();
 
-    //    setLayout(new BorderLayout());
+    //setLayout(new BorderLayout());
 
     //panel = new JPanel();
-    layout = new TableLayout(false);
-    layout.rowSpacing(5);
-    setLayout(layout);
+    //layout = new TableLayout(false);
+    //layout.rowSpacing(5);
+    setLayout(new BorderLayout());
+    
+    gbl = new GridBagLayout();
+    gbc = new GridBagConstraints();
+    panel = new JPanel(gbl);
+    add("North", panel);
+    gbc.anchor = GridBagConstraints.NORTHWEST;
+    gbc.insets = new Insets(4,4,4,4);
+    
+    panel.setLayout(gbl);
       
     // Get the list of fields
     
@@ -152,7 +200,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     if (progressBar != null)
       {
 	progressBar.setMinimum(0);
-	progressBar.setMaximum(fields.length);
+	progressBar.setMaximum(fields.length +2);
+	progressBar.setValue(1);
       }
 
     if (debug)
@@ -166,7 +215,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (progressBar != null)
 	      {
-		progressBar.setValue(i);
+		progressBar.setValue(i + 2);
 	      }
 
 	    try
@@ -199,7 +248,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     if (progressBar != null)
       {
-	progressBar.setValue(0);
+	progressBar.setValue(fields.length + 2);
       }
 
     if (debug)
@@ -208,6 +257,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     //setViewportView(panel);
+
+    loaded = true;
+  }
+
+  public boolean isLoaded()
+  {
+    return loaded;
   }
 
   /**
@@ -645,7 +701,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     rowHash.put(comp, l);
     
     //comp.setBackground(ClientColor.ComponentBG);
-    add("0 " + row + " 2 lthH", comp); // span 2 columns, no label
+    //add("0 " + row + " 2 lthH", comp); // span 2 columns, no label
+    gbc.gridwidth = 2;
+    gbc.gridx = 0;
+    gbc.gridy = row;
+
+    gbc.weightx = 1.0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbl.setConstraints(comp, gbc);
+    panel.add(comp);
+
     row++;
 
     setRowVisible(comp, visible);
@@ -660,9 +725,24 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     comp.setBackground(ClientColor.ComponentBG);
 
-    add("0 " + row + " lthH", l);
-    add("1 " + row + " lthH", comp);
+    //add("0 " + row + " lthH", l);
+    //add("1 " + row + " lthH", comp);
+
+    gbc.gridwidth = 1;
+
+    gbc.weightx = 0.0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridx = 0;
+    gbc.gridy = row;
+    gbl.setConstraints(l, gbc);
+    panel.add(l);
     
+    gbc.gridx = 1;
+    gbc.weightx = 1.0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbl.setConstraints(comp, gbc);
+    panel.add(comp);
+
     row++;
 
     setRowVisible(comp, visible);
@@ -988,6 +1068,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     vectorPanel vp = new vectorPanel(field, winP, editable, isEditInPlace, this);
+    
 
     try
       {
@@ -1041,10 +1122,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      }
 		  }
 		
-		if (debug)
+		/*if (debug)
 		  {
 		    System.out.println("Adding " + (String)choices.elementAt(j));
-		  }
+		  }*/
 	      }
 	    
 	    // if the current value wasn't in the choice, add it in now
@@ -1436,10 +1517,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 	    
-	    if (debug)
+	    /*	    if (debug)
 	      {
 		System.out.println("Adding " + (listHandle)choices.elementAt(j));
-	      }
+	      }*/
 	  }
 	
 	// if the current value wasn't in the choice, add it in now
