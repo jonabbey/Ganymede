@@ -246,7 +246,8 @@ public class FileOps {
 
 		try
 		  {
-		    iStream.skip(iStream.available());
+		    int size = iStream.available();
+		    iStream.skip(size);
 		  }
 		catch (IOException exc)
 		  {
@@ -255,7 +256,8 @@ public class FileOps {
 
 		try
 		  {
-		    eStream.skip(eStream.available());
+		    int size = eStream.available();
+		    eStream.skip(size);
 		  }
 		catch (IOException exc)
 		  {
