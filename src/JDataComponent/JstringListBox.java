@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.15 $ %D%
+ Version: $Revision: 1.16 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -621,6 +621,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	    {
 	      popup.show(e.getComponent(), e.getX(), e.getY());
 	    }
+
+	  e.consume();
 	}
       
     }
