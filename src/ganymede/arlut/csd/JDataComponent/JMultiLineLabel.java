@@ -55,6 +55,7 @@ package arlut.csd.JDataComponent;
 
 import java.awt.Dimension;
 import java.awt.FontMetrics;
+import java.awt.Insets;
 import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
@@ -69,28 +70,24 @@ import arlut.csd.Util.WordWrap;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>A simple word-wrapping multiline label.  Actually implemented as
+ * a JTextArea, as that Swing class has built-in support for the word
+ * wrapping.</p>
+ */
+
 public class JMultiLineLabel extends JTextArea {
 
-  // ---
-
   /**
-   * Alignment stuff.
-   */
-  public final static int LEFT = SwingConstants.LEFT;
-  public final static int RIGHT = SwingConstants.RIGHT;
-  public final static int CENTER = SwingConstants.CENTER;
-
-  /**
-   * Controls the default word wrap length.  The default value of 96
+   * Controls the default word wrap length.  The default value of 128
    * columns should hopefully be wide enough to handle exception
    * traces gracefully.
    */
 
   int 
-    columns = 96;
+    columns = 128;
 
-  FontMetrics
-    metric;
+
 
   /*
    * Constructors
@@ -103,8 +100,6 @@ public class JMultiLineLabel extends JTextArea {
 
   public JMultiLineLabel(String label)
   {
-    metric = getFontMetrics(getFont());
-
     setEditable(false);
     setOpaque(false);
     setBorder(null); 
@@ -131,14 +126,24 @@ public class JMultiLineLabel extends JTextArea {
     /* -- */
 
     // First, find out how wide this puppy should be, based on our
-    // preferred wrap
+    // preferred wrap.  Note that the wrap algorithm we're using may
+    // not be precisely the same as that used by JTextArea, so this
+    // calculation might not match exactly what you'd think it should
+    // be.
 
-    width = getLongestLineWidth(wrap(getText()));
-    
+    Insets x = this.getInsets();
+
+    width = getLongestLineWidth(wrap(getText())) + x.left + x.right;
+
     // Now, the height
     height = super.getPreferredSize().height;
 
     return new Dimension(width, height);
+  }
+
+  public Dimension getPreferredScrollableViewportSize()
+  {
+    return this.getPreferredSize();
   }
 
   /**
@@ -170,15 +175,31 @@ public class JMultiLineLabel extends JTextArea {
   // Private functions
   ///////////////////////////////////////////////////////////////////////////////
 
+  /**
+   * <p>This function is designed to return the number of pixels wide
+   * this JMultiLineLabel needs to be in order to fit all the lines if
+   * they are wrapped by the {@link arlut.csd.Util.WordWrap} algorithm at
+   * the fixed wrap length set for this JMultiLineLabel.</p>
+   *
+   * <p>In theory, this should be enough for getPreferredSize() to give
+   * us the elbow room we need, but for some reason that doesn't seem to be
+   * happening properly when we are used in StringDialog.</p>
+   */
+
   private int getLongestLineWidth(String wrappedText)
   {
     int length = 0;
     int maxLength = 0;
     StringTokenizer tk = new StringTokenizer(wrappedText, "\n");
 
+    FontMetrics metric = getFontMetrics(getFont());
+
     while (tk.hasMoreElements())
       {
-	length = metric.stringWidth((String)tk.nextElement());
+	String nextToken = WordWrap.deTabify((String) tk.nextElement());
+
+	length = metric.stringWidth(nextToken);
+
 	if (length > maxLength)
 	  {
 	    maxLength = length;
