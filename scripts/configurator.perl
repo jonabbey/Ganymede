@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.12 $
-# $Date: 1999/01/16 06:16:25 $
+# $Revision: 1.13 $
+# $Date: 1999/01/18 22:11:30 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -117,10 +117,35 @@ classfiles:
 	build
 	\@cd $rootdir/src/client; \\
 	build
-	\@cd $rootdir/src/schemas; \\
-	build
 	\@cd $rootdir/src
 	\@echo "Built Ganymede classes"
+
+schemas:
+	\@echo "Building schemas"
+	\@echo "Compiling BSD schema kit"
+	\@cd $rootdir/schemas/bsd/custom_src \\
+	build \\
+	buildCustomJar
+	\@echo "Compiling GASH schema kit"
+	\@cd $rootdir/schemas/gash/custom_src \\
+	build \\
+	buildCustomJar
+	\@echo "Compiling GASHARL schema kit"
+	\@cd $rootdir/schemas/gasharl/custom_src \\
+	build \\
+	buildCustomJar
+	\@echo "Compiling LINUX schema kit"
+	\@cd $rootdir/schemas/linux/custom_src \\
+	build \\
+	buildCustomJar
+	\@echo "Compiling Solaris NIS schema kit"
+	\@cd $rootdir/schemas/nisonly/custom_src \\
+	build \\
+	buildCustomJar
+	\@echo "Compiling NextGeneration schema kit"
+	\@cd $rootdir/schemas/ganymede.old/custom_src \\
+	build \\
+	buildCustomJar
 
 clean:
 	\@echo "Removing class files (except gnu-regexp files)"
@@ -172,14 +197,12 @@ sub write_rebuild {
 # input: $dir - absolute pathname directory to write config.sh into.
 #        $name - name of component being configured
 #        $targetdir - where is the class directory for this package?
-#        $packagetarget - where are the class files for this package
-#        ultimately going to wind up?  Used for rebuild.
 #
 #########################################################################
 
 sub write_config {
 
-    my($dir, $name, $targetdir, $packagetarget) = @_;
+    my($dir, $name, $targetdir) = @_;
 
     open(CONFIGFILE, ">$dir/config.sh") || die("Can't create the $dir/config.sh");
 
@@ -215,17 +238,11 @@ CLASSDIR=$rootdir/src/classes
 
 TARGETDIR=$targetdir
 
-# Ultimate location for class files from the .java files in this
-# directory.  Basically TARGETDIR/<package-hierarchy>.  Used by
-# rebuild to do partial rebuilds.
-
-PACKAGETARGET=$packagetarget
-
 ENDCONFIG
 
     close(CONFIGFILE);
 }
-
+ 
 ###
 ### Let's do it, then.
 ###
@@ -239,46 +256,48 @@ $javadir = $ENV{GJAVA};
 # identify the four pieces.
 
 @configs=("$rootdir/src/Qsmtp", "Qsmtp Mail Class",
-	  "$rootdir/src/classes", "$rootdir/src/classes",
+	  "$rootdir/src/classes",
 	  "$rootdir/src/jcrypt", "jcrypt Class",
-	  "$rootdir/src/classes", "$rootdir/src/classes",
+	  "$rootdir/src/classes",
 	  "$rootdir/src/jdj", "Image Resources Class",
-	  "$rootdir/src/classes", "$rootdir/src/classes/jdj",
+	  "$rootdir/src/classes",
 	  "$rootdir/src/Util", "Ganymede Utility Classes",
-	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/Util",
+	  "$rootdir/src/classes",
 	  "$rootdir/src/JTable", "Ganymede Table Classes",
-	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/JTable",
+	  "$rootdir/src/classes",
 	  "$rootdir/src/JTree", "Ganymede Tree Classes",
-	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/JTree",
+	  "$rootdir/src/classes",
 	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes",
-	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/JDataComponent",
+	  "$rootdir/src/classes",
 	  "$rootdir/src/server", "Ganymede Server Classes",
-	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/ganymede",
+	  "$rootdir/src/classes",
 	  "$rootdir/src/client", "Ganymede Client Classes",
-	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/ganymede/client",
-	  "$rootdir/src/schemas/bsd", "BSD Schema Classes",
-	  "$rootdir/src/schemas/bsd/custom_src/classes",
-	  "$rootdir/src/schemas/bsd/custom_src/classes/arlut/csd/ganymede/custom", 
-	  "$rootdir/src/schemas/gash", "GASH Schema Classes",
-	  "$rootdir/src/schemas/gash/custom_src/classes",
-	  "$rootdir/src/schemas/gash/custom_src/classes/arlut/csd/ganymede/custom", 
-	  "$rootdir/src/schemas/gasharl", "GASHARL Schema Classes",
-	  "$rootdir/src/schemas/gasharl/custom_src/classes",
-	  "$rootdir/src/schemas/gasharl/custom_src/classes/arlut/csd/ganymede/custom", 
-	  "$rootdir/src/schemas/linux", "Linux Schema Classes",
-	  "$rootdir/src/schemas/linux/custom_src/classes",
-	  "$rootdir/src/schemas/linux/custom_src/classes/arlut/csd/ganymede/custom", 
-	  "$rootdir/src/schemas/nisonly", "NIS Schema Classes",
-	  "$rootdir/src/schemas/nisonly/custom_src/classes",
-	  "$rootdir/src/schemas/nisonly/custom_src/classes/arlut/csd/ganymede/custom", 
-	  "$rootdir/src/schemas/ganymede.old", "Old Ganymede Schema Classes",
-	  "$rootdir/src/schemas/ganymede.old/custom_src/classes",
-	  "$rootdir/src/schemas/ganymede.old/custom_src/classes/arlut/csd/ganymede/custom");
+	  "$rootdir/src/classes");
 
 print "Generating config.sh files in source directories.\n\n";
 
 while ($#configs > 0) {
     write_config(shift @configs, shift @configs, shift @configs, shift @configs);
+}
+
+@schemas=("$rootsir/src/schemas/bsd", "BSD",
+	  "$rootdir/src/schemas/gash", "GASH",
+	  "$rootdir/src/schemas/gasharl", "ARL GASH",
+	  "$rootdir/src/schemas/linux", "LINUX",
+	  "$rootdir/src/schemas/nisonly", "Solaris NIS",
+	  "$rootdir/src/schemas/ganymede.old", "Developmental Next-generation");
+
+print "Generating config.sh files for schema kits.\n\n";
+
+while ($#schemas > 0) {
+    $schemadir = shift @schemas;
+    $schemaname = shift @schemas;
+
+    write_config("$schemadir/custom_src", "$schemaname Schema Classes", 
+		 "$schemadir/custom_src/classes");
+
+    write_config("$schemadir/loader/source", "$schemaname Loader Classes", 
+		 "$schemadir/loader/classes");
 }
 
 # Now we need to write out the rebuild scripts.  The only reason we're
