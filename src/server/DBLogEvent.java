@@ -7,7 +7,7 @@
    email..
    
    Created: 31 October 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,6 +45,10 @@ public class DBLogEvent {
   String notifyList;
   Vector notifyVect;
 
+  // the following field is used when we are initialized as a mail event.
+
+  String subject = null;
+
   // the following are used when loading an event from the on-disk log
 
   String transactionID;		// used for DBLog.retrieveHistory()
@@ -68,22 +72,25 @@ public class DBLogEvent {
 
   /**
    *
+   * Constructor to be used for a mailout event.
+   *
+   * @param addresses A vector of Strings listing email addresses to send notification
+   * of this event to.
    * @param eventClassToken a short string specifying a DBObject
    * record describing the general category for the event
    * @param description Descriptive text to be entered in the record of the event
    * @param admin Invid pointing to the adminPersona that fired the event, if any
    * @param adminName String containing the name of the adminPersona that fired the event, if any
    * @param objects A vector of invids of objects involved in this event.
-   * @param notifyList A vector of Strings listing email addresses to send notification
-   * of this event to.
-   * 
    */
 
-  public DBLogEvent(String eventClassToken, String description,
+  public DBLogEvent(Vector addresses, String subject, String description,
 		    Invid admin, String adminName,
-		    Vector objects, Vector notifyList)
+		    Vector objects)
   {
-    this(eventClassToken, description, admin, adminName, objects, notifyList, null);
+    this("mailout", description, admin, adminName, objects, addresses, null);
+
+    this.subject = subject;
   }
 
   /**
@@ -94,7 +101,27 @@ public class DBLogEvent {
    * @param admin Invid pointing to the adminPersona that fired the event, if any
    * @param adminName String containing the name of the adminPersona that fired the event, if any
    * @param objects A vector of invids of objects involved in this event.
-   * @param notifyList A vector of Strings listing email addresses to send notification
+   * @param notifyVec A vector of Strings listing email addresses to send notification
+   * of this event to.
+   * 
+   */
+
+  public DBLogEvent(String eventClassToken, String description,
+		    Invid admin, String adminName,
+		    Vector objects, Vector notifyVec)
+  {
+    this(eventClassToken, description, admin, adminName, objects, notifyVec, null);
+  }
+
+  /**
+   *
+   * @param eventClassToken a short string specifying a DBObject
+   * record describing the general category for the event
+   * @param description Descriptive text to be entered in the record of the event
+   * @param admin Invid pointing to the adminPersona that fired the event, if any
+   * @param adminName String containing the name of the adminPersona that fired the event, if any
+   * @param objects A vector of invids of objects involved in this event.
+   * @param notifyVec A vector of Strings listing email addresses to send notification
    * of this event to.
    * @param multibuffer A SharedStringBuffer that this event can use to avoid an extra object create.
    * If you provide a StringBuffer here, be aware that this object may use it both when this
@@ -107,7 +134,7 @@ public class DBLogEvent {
 
   public DBLogEvent(String eventClassToken, String description,
 		    Invid admin, String adminName,
-		    Vector objects, Vector notifyList,
+		    Vector objects, Vector notifyVec,
 		    SharedStringBuffer multibuffer)
   {
     this.eventClassToken = eventClassToken;
@@ -126,18 +153,18 @@ public class DBLogEvent {
 	this.multibuffer.setLength(0);
       }
 
-    this.notifyVect = notifyList;
+    this.notifyVect = notifyVec;
 
-    if (notifyList != null)
+    if (notifyVec != null)
       {
-	for (int i = 0; i < notifyList.size(); i++)
+	for (int i = 0; i < notifyVec.size(); i++)
 	  {
 	    if (i > 0)
 	      {
 		multibuffer.append(", ");
 	      }
 	    
-	    multibuffer.append((String) notifyList.elementAt(i));
+	    multibuffer.append((String) notifyVec.elementAt(i));
 	  }
 
 	this.notifyList = multibuffer.toString();
