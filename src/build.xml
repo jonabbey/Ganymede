@@ -260,6 +260,7 @@ refresh the jar files.
 
       <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JDialog/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/client/**"/>
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
@@ -284,10 +285,11 @@ refresh the jar files.
            reference variable. -->
 
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/server/GanymedeScheduler.class"/>
-      
-      <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/admin/**"/>
-      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/**"/>
+
       <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JDialog/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/admin/**"/>
 
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
 
