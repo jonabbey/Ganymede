@@ -6,7 +6,7 @@
    from a field.
    
    Created: 17 April 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,14 +41,15 @@ public interface BaseField extends Remote {
   public String getName() throws RemoteException;
   public String getClassName() throws RemoteException;
   public String getComment() throws RemoteException;
-  public byte getVisibility() throws RemoteException;
   public short getID() throws RemoteException;
   public short getDisplayOrder() throws RemoteException;
+
+  // all of the setter methods below can only be called when a SchemaEdit
+  // is in progress.
 
   public void setName(String name) throws RemoteException;
   public void setClassName(String name) throws RemoteException;
   public void setComment(String s) throws RemoteException;
-  public void setVisibility(byte b) throws RemoteException;
   public void setID(short id) throws RemoteException;
   public void setDisplayOrder(short order) throws RemoteException;
 
