@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2000/10/03 06:30:59 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2000/10/03 06:47:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -939,16 +939,6 @@ public class DBEditSet {
       {
 	if (debug)
 	  {
-	    System.err.println(session.key + ": DBEditSet.commit(): write lock established");
-	  }
-
-	// This yield is here to allow me to verify that the locking logic
-	// works properly on a non-preemptive VM.
-
-	Thread.yield();
-
-	if (debug)
-	  {
 	    System.err.println(session.key +
 			       ": DBEditSet.commit(): established write lock");
 	  }
@@ -1035,11 +1025,6 @@ public class DBEditSet {
 	      {
 		eObj = (DBEditObject) enum.nextElement();
 
-		// signal that this object is finalized, and no further
-		// changes will be made to it
-
-		eObj.finalized = true;
-
 		// and try to commit this object
 
 		retVal = eObj.commitPhase1();
@@ -1099,8 +1084,8 @@ public class DBEditSet {
 		// into the object without using the normal field
 		// modification methods.. this lets us set field
 		// values at a time when the object would reject
-		// changes from the user because the finalized bit is
-		// set.
+		// changes from the user because the committing flag
+		// is set.
 
 		switch (eObj.getStatus())
 		  {
