@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.80 $ %D%
+   Version: $Revision: 1.81 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -260,6 +260,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     cloneObjectMI,
     deleteObjectMI,
     inactivateObjectMI,
+    showLogMI,
     menubarQueryMI = null;
 
   String
@@ -297,6 +298,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   public gclient(Session s, glogin g)
   {
     super("Ganymede Client: "+g.my_client.getName()+" logged in");
+
+    setIconImage(pencil);
 
     client = this;
     debug = g.debug;
@@ -385,7 +388,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     menubarQueryMI = new JMenuItem("Query");
     menubarQueryMI.addActionListener(this);
 
+    showLogMI = new JMenuItem("Show Log");
+    showLogMI.addActionListener(this);
+
     actionMenu.add(menubarQueryMI);
+    actionMenu.add(showLogMI);
     actionMenu.addSeparator();
     actionMenu.add(editObjectMI);
     //actionMenu.add(cloneObjectMI);
@@ -1307,6 +1314,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     // Check for objects that need to be rescanned
     if (retVal != null)
       {
+	if (debug)
+	  {
+	    System.err.println("** gclient: rescan dump: " +retVal.dumpRescanInfo());
+	  }
+
 	Hashtable rescan = retVal.getObjResultSet();
 	if (rescan != null)
 	  {
@@ -2024,21 +2036,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    return;
 	  }
 
-	if (deleteHash.containsKey(invid))
+	// The order here matters, because it might be in more than
+	// one hash.  So put the most important stuff first
+
+	if (expireHash.containsKey(invid))
 	  {
 	    if (debug)
 	      {
-		System.out.println("Setting icon to delete.");
+		System.out.println("expire");
 	      }
-	    node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
-	  }
-	else if (createHash.containsKey(invid))
-	  {
-	    if (debug)
-	      {
-		System.out.println("Setting icon to create.");
-	      }
-	    node.setImages(OPEN_FIELD_CREATE, CLOSED_FIELD_CREATE);
+
+	    node.setImages(OPEN_FIELD_EXPIRESET, CLOSED_FIELD_EXPIRESET);
 	  }
 	else if (removeHash.containsKey(invid))
 	  {
@@ -2048,15 +2056,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	      }
 
 	    node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
-	  }
-	else if (expireHash.containsKey(invid))
-	  {
-	    if (debug)
-	      {
-		System.out.println("expire");
-	      }
-
-	    node.setImages(OPEN_FIELD_EXPIRESET, CLOSED_FIELD_EXPIRESET);
 	  }
 	else if (inactivateHash.containsKey(invid))
 	  {
@@ -2082,6 +2081,22 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
 	    tree.refresh();
 	  }
+	else if (createHash.containsKey(invid))
+	  {
+	    if (debug)
+	      {
+		System.out.println("Setting icon to create.");
+	      }
+	    node.setImages(OPEN_FIELD_CREATE, CLOSED_FIELD_CREATE);
+	  }
+	else if (deleteHash.containsKey(invid))
+	  {
+	    if (debug)
+	      {
+		System.out.println("Setting icon to delete.");
+	      }
+	    node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
+	  }
 	else if (changedHash.containsKey(invid))
 	  {
 	    if (debug)
@@ -2104,7 +2119,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	      }
 	    node.setMenu(objectInactivatePM);
 	    node.setImages(OPEN_FIELD, CLOSED_FIELD);
-	    tree.refresh();
 	  }
 	else if (handle != null)
 	  {
@@ -2196,7 +2210,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
       }
     setIconForNode(invid);
-
+    tree.refresh();
   }
 
   /********************************************************************************
@@ -2352,7 +2366,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     
     ObjectHandle handle = new ObjectHandle(label, invid, false, false, false, true);
        
-    wp.addWindow(obj, true);
+    wp.addWindow(obj, true, null, true);
     
     if (invid == null)
       {
@@ -2396,7 +2410,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    invidNodeHash.put(invid, objNode);
 	    setIconForNode(invid);
 	    
-	    tree.insertNode(objNode, true);
+	    tree.insertNode(objNode, true);  // the true means the tree will refresh
+	    
 	  }
 	else
 	  {
@@ -2681,6 +2696,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
 	    objectList list = cachedLists.getList(type);
 	    h = list.getObjectHandle(invid);
+
 	    try
 	      {
 		oh = (ObjectHandle)h.clone();
@@ -2770,6 +2786,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
     
     setIconForNode(invid);
+    tree.refresh();
     setNormalCursor();
     return ok;
   }
@@ -3576,7 +3593,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	System.out.println("Woo-woo the hashes are all empty");
       }
-    
+
+    tree.refresh(); // To catch all the icon changing.
     setSomethingChanged(false);
     cancel.setEnabled(false);
     commit.setEnabled(false);
@@ -3630,6 +3648,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
 	
 	commitTransaction();
+      }
+    else if (source == showLogMI)
+      {
+	logPanel lp = new logPanel(this);
+	lp.showLogPanel();
       }
     else if (source == menubarQueryMI)
       {
