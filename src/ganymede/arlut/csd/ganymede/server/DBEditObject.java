@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -56,6 +56,7 @@ package arlut.csd.ganymede.server;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -3517,7 +3518,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @return null if no difference was found
    */
 
-  public synchronized String diff(Hashtable changedFieldDefs)
+  public synchronized String diff(HashMap changedFieldDefs)
   {
     boolean diffFound = false;
     StringBuffer result = new StringBuffer();

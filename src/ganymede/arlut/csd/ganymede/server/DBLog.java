@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -60,10 +60,12 @@ package arlut.csd.ganymede.server;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import Qsmtp.Qsmtp;
@@ -129,7 +131,7 @@ public class DBLog {
    *
    */
 
-  Hashtable sysEventCodes = new Hashtable();
+  Map sysEventCodes = Collections.synchronizedMap(new HashMap());
 
   /**
    *
@@ -151,7 +153,7 @@ public class DBLog {
    *
    */
 
-  Hashtable objEventCodes = new Hashtable();
+  Map objEventCodes = Collections.synchronizedMap(new HashMap());
 
   /**
    *
@@ -180,6 +182,52 @@ public class DBLog {
    */
 
   GanymedeSession gSession = null;
+
+  /**
+   * <p>This instance variable is used to track the transaction identifier
+   * across a sequence of startTransactionLog(), streamLogEvent(), and endTransactionLog()
+   * calls.</p>
+   */
+
+  private String transactionID;
+
+  /**
+   * <p>This instance variable is used to track the timestamp for a transaction
+   * log across a sequence of startTransactionLog(), streamLogEvent(), and endTransactionLog()
+   * calls.</p>
+   */
+
+  private Date transactionTimeStamp;
+
+  /**
+   * <p>This instance variable is used to track all mail messages that we accumulate
+   * during the course of logging events for a transaction between startTransactionLog()
+   * and endTransactionLog(), by mapping email address to MailOut objects, which hold
+   * the mail that we are composing for users who need to know about a full transaction's
+   * worth of email.</p>
+   */
+
+  private HashMap transactionMailOuts;
+
+  /**
+   * <p>This instance variable is used to track all mail messages that
+   * we accumulate during the course of logging events for a
+   * transaction between startTransactionLog() and
+   * endTransactionLog(), by mapping objevent tags to HashMaps which
+   * in turn map email addresses to the MailOut objects that we are
+   * accumulating.</p>
+   */
+
+  private HashMap objectOuts;
+
+  /**
+   * <p>This instance variable is used to track the transaction
+   * logging instruction in the Ganymede server's System Event
+   * DBStore, so that we don't have to keep looking it up during
+   * transaction processing.</p>
+   */
+
+  private systemEventType transactionControl;
 
   /* -- */
 
@@ -500,25 +548,25 @@ public class DBLog {
   }
 
   /**
-   * <P>This method is used to log all events associated with a transaction.</P>
+   * <P>This method is used to start logging events for a transaction.  It is called from
+   * {@link arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)},
+   * which is responsible for sequencing this call with calls to streamLogEvent() and
+   * endTransactionLog().</P>
    *
-   * @param logEvents a Vector of DBLogEvent objects.
+   * <p>DBEditSet.commit_logTransaction() is responsible for synchronizing on Ganymede.log,
+   * and thereby excluding all other log calls from being initiated during a transaction's
+   * commit.</p>
+   *
+   * @param invids a HashMap mapping Invid objects to identity
+   * @param adminName Human readable string identifying the admin responsible for this transaction
+   * @param admin Invid representing the user or admin responsible for this transaction
+   * @param transaction The {@link arlut.csd.ganymede.server.DBEditSet} representing the transaction to be logged
+   *
+   * @return The transaction token for this transaction, used to terminate the transaction log
    */
 
-  public synchronized void logTransaction(Vector logEvents, String adminName, 
-					  Invid admin, DBEditSet transaction)
+  public synchronized void startTransactionLog(Vector invids, String adminName, Invid admin, DBEditSet transaction)
   {
-    String transactionID;
-    String transdescrip = transaction.description;
-    DBLogEvent event;
-    Enumeration en;
-    Hashtable mailOuts = new Hashtable(); // maps address to MailOut objects
-    Hashtable objectOuts = new Hashtable(); // objevent tag to hash mapping address to MailOut objects
-    Object ref;
-    Date currentTime;
-
-    /* -- */
-    
     if (closed)
       {
 	throw new RuntimeException("log already closed.");
@@ -526,76 +574,76 @@ public class DBLog {
 
     if (debug)
       {	
-	System.err.println("DBLog.logTransaction(): Logging transaction for  " + adminName);
+	System.err.println("DBLog.startTransactionLog(): Logging transaction for  " + adminName);
       }
 
     updateSysEventCodeHash();
     updateObjEventCodeHash();
 
-    currentTime = new Date(System.currentTimeMillis());
-    transactionID = adminName + ":" + currentTime.getTime();
-
-    HashMap objects = new HashMap();
-
-    // get a list of all objects affected by this transaction
-    
-    for (int i = 0; i < logEvents.size(); i++)
-      {
-	ref = logEvents.elementAt(i);
-
-	if (ref instanceof DBLogEvent)
-	  {
-	    event = (DBLogEvent) ref;
-
-	    if (event.objects != null)
-	      {
-		for (int j = 0; j < event.objects.size(); j++)
-		  {
-		    Invid inv = (Invid) event.objects.elementAt(j);
-
-		    objects.put(inv, inv);
-		  }
-	      }
-	  }
-      }
+    this.transactionTimeStamp = new Date(System.currentTimeMillis());
+    this.transactionID = adminName + ":" + this.transactionTimeStamp.getTime();
 
     // write out a start-of-transaction line to the log
 
     DBLogEvent start = new DBLogEvent("starttransaction",
-				      "Start Transaction: " + transdescrip,
+				      "Start Transaction: " + transaction.description,
 				      admin,
 				      adminName,
-				      new Vector(objects.values()),
+				      invids,
 				      null);
 
-    objects.clear();
-    objects = null;
+    start.setTransactionID(this.transactionID);
+    start.setLogTime(this.transactionTimeStamp);
 
-    start.setTransactionID(transactionID);
-    start.setLogTime(currentTime);
     logController.writeEvent(start);
+
+    this.transactionMailOuts = new HashMap();
+    this.objectOuts = new HashMap();
 
     // check out the 'starttransaction' system event object to see if we're going
     // to do mailing for transaction summaries
 
-    systemEventType transactionType = (systemEventType) sysEventCodes.get("starttransaction");
+    this.transactionControl = (systemEventType) sysEventCodes.get("starttransaction");
+  }
 
-    // write out all the log events in this transaction
+  /**
+   * <p>This method should only be called after a
+   * startTransactionLog() call and before the corresponding
+   * endTransactionLog() call, made by {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)}.</p>
+   *
+   * <p>DBEditSet.commit_logTransaction() is responsible for synchronizing on Ganymede.log,
+   * and thereby excluding all other log calls from being initiated during a transaction's
+   * commit.</p>
+   */
 
-    for (int i = 0; i < logEvents.size(); i++)
+  public synchronized void streamEvent(DBLogEvent event, DBEditSet transaction)
+  {
+    if (closed)
       {
-	event = (DBLogEvent) logEvents.elementAt(i);
-	event.setTransactionID(transactionID);
-	event.setLogTime(currentTime);
+	throw new RuntimeException("log already closed.");
+      }
 
-	if (debug)
-	  {
-	    System.err.println("DBLog.logTransaction(): logging event: \n** " + 
-			       event.eventClassToken + " **\n" + event.description);
-	  }
+    if (transactionID == null)
+      {
+	throw new RuntimeException("not in a transaction.");
+      }
 
-	// if the event has its own subject set, assume that it is a
-	// mailout event with its own list of designated email targets
+    event.setTransactionID(this.transactionID);
+    event.setLogTime(this.transactionTimeStamp);
+
+    if (debug)
+      {
+	System.err.println("DBLog.streamEvent(): logging event: \n** " + 
+			   event.eventClassToken + " **\n" + event.description);
+      }
+
+    if (mailer != null)
+      {
+	// if the event doesn't have its own subject set, we'll assume
+	// that it is not a pregenerated mail message, and that we
+	// need to calculate the list of email targets from the
+	// Ganymede server's system and object event control objects.
 
 	if (event.subject == null)
 	  {
@@ -606,16 +654,17 @@ public class DBLog {
 	    Vector sentTo = new Vector();
 
 	    // first, if we have a recognizable object-specific event
-	    // happening, queue up notification for it to any intersted
+	    // happening, queue up notification for it to any interested
 	    // parties, for later transmission with sendObjectMail().
 
-	    sentTo = VectorUtils.union(sentTo, appendObjectMail(event, objectOuts,
-								transdescrip, transaction.session));
+	    sentTo = VectorUtils.union(sentTo, appendObjectMail(event, this.objectOuts,
+								transaction.description,
+								transaction.session));
 
 	    // we may have a system event instead, in which case we handle
 	    // mailing it here
 
-	    sentTo = VectorUtils.union(sentTo, sendSysEventMail(event, transdescrip));
+	    sentTo = VectorUtils.union(sentTo, sendSysEventMail(event, transaction.description));
 	
 	    // now, go ahead and add to the mail buffers we are prepping
 	    // to describe this whole transaction
@@ -632,33 +681,27 @@ public class DBLog {
 	    // calculating who needs to receive owner-group related
 	    // generic email about this event.
 	
-	    sentTo = VectorUtils.union(sentTo, appendMailOut(event, mailOuts, 
+	    sentTo = VectorUtils.union(sentTo, appendMailOut(event, this.transactionMailOuts, 
 							     transaction.session,
-							     transactionType));
+							     this.transactionControl));
 
 	    // and we want to make sure and send this event to any
 	    // addresses listed in the starttransaction system event
 	    // object.
 
-	    sentTo = VectorUtils.union(sentTo, transactionType.addressVect);
+	    sentTo = VectorUtils.union(sentTo, this.transactionControl.addressVect);
 
 	    // now we record in the event who we actually sent the
 	    // mail to, so it is logged properly
 
 	    event.setMailTargets(sentTo);
-
-	    // and write it to our log
-
-	    logController.writeEvent(event);
 	  }
-	else if (mailer != null)
+	else
 	  {
 	    // we've got a generic transactional mail event and we're
 	    // allowed to send out emails, so we can process
 	    // it.. note that we don't lump it with the transaction
 	    // summary.
-
-	    logController.writeEvent(event);
 
 	    String returnAddr = null;
 
@@ -696,16 +739,43 @@ public class DBLog {
 	  }
       }
 
-    // write out an end-of-transaction line to the log
+    // and write it to our log
 
+    logController.writeEvent(event);
+  }
+
+  /**
+   * <p>This method should only be called after a
+   * startTransactionLog() call and any corresponding
+   * endTransactionLog() calls, made by {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)}.</p>
+   *
+   * <p>DBEditSet.commit_logTransaction() is responsible for synchronizing on Ganymede.log,
+   * and thereby excluding all other log calls from being initiated during a transaction's
+   * commit, when calling this function</p>
+   *
+   * @param adminName Human readable string identifying the admin responsible for this transaction
+   * @param admin Invid representing the user or admin responsible for this transaction
+   * @param transaction The {@link arlut.csd.ganymede.server.DBEditSet} representing the transaction to be logged
+   */
+
+  public synchronized void endTransactionLog(String adminName, Invid admin, DBEditSet transaction)
+  {
+    Iterator iter;
+
+    /* -- */
+
+    // write out an end-of-transaction line to the log
+    
     DBLogEvent finish = new DBLogEvent("finishtransaction",
-				       "Finish Transaction: " + transdescrip,
+				       "Finish Transaction: " + transaction.description,
 				       admin,
 				       adminName,
 				       null,
 				       null);
     finish.setTransactionID(transactionID);
-    finish.setLogTime(currentTime);
+    finish.setLogTime(this.transactionTimeStamp);
+
     logController.writeEvent(finish);
 
     // now, for each distinct set of recipients, mail them their summary
@@ -732,23 +802,24 @@ public class DBLog {
 
     if (mailer != null) 
       {
-      	sendObjectMail(returnAddr, adminName, objectOuts, currentTime);
+      	sendObjectMail(returnAddr, adminName, this.objectOuts, this.transactionTimeStamp);
       }
 
-    objectOuts.clear();
+    this.objectOuts.clear();
+    this.objectOuts = null;
 
     // send out the transaction summaries if the starttransaction
     // system event has the mail checkbox turned on.
 
-    if (mailer != null && transactionType.mail)
+    if (mailer != null && this.transactionControl.mail)
       {
-	en = mailOuts.elements();
+	iter = this.transactionMailOuts.values().iterator();
 
-	while (en.hasMoreElements())
+	while (iter.hasNext())
 	  {
-	    MailOut mailout = (MailOut) en.nextElement();
+	    MailOut mailout = (MailOut) iter.next();
 	    String description = "Transaction summary: User " + adminName + ":" + 
-	      currentTime.toString() + "\n\n" + 
+	      this.transactionTimeStamp.toString() + "\n\n" + 
 	      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + signature;
 
 	    // we don't want any \n's between wordwrap and signature above,
@@ -774,7 +845,23 @@ public class DBLog {
 	  }
       }
 
-    mailOuts.clear();
+    this.transactionMailOuts.clear();
+    this.transactionMailOuts = null;
+  }
+
+  /**
+   * <p>Emergency cleanup function called by {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)} in
+   * the event of a problem during logging.</p>
+   */
+
+  public synchronized void cleanupTransaction()
+  {
+    this.transactionID = null;
+    this.transactionTimeStamp = null;
+    this.transactionMailOuts = null;
+    this.objectOuts = null;
+    this.transactionControl = null;
   }
 
   /**
@@ -823,6 +910,7 @@ public class DBLog {
     /* -- */
 
     // If we're suppressing sending out all email, then do a no-op
+
     if (mailer == null)
       {
       	return emailList;
@@ -960,7 +1048,7 @@ public class DBLog {
    * system event notification
    */
 
-  private Vector appendObjectMail(DBLogEvent event, Hashtable objectOuts,
+  private Vector appendObjectMail(DBLogEvent event, HashMap objectOuts,
 				  String transdescrip, DBSession transSession)
   {
     if (event == null || event.objects == null || event.objects.size() != 1)
@@ -1035,11 +1123,11 @@ public class DBLog {
     // users, in case one transaction involves objects with different
     // owner groups
 
-    Hashtable addresses = (Hashtable) objectOuts.get(key);
+    HashMap addresses = (HashMap) objectOuts.get(key);
 
     if (addresses == null)
       {
-	addresses = new Hashtable();
+	addresses = new HashMap();
 
 	objectOuts.put(key, addresses);
       }
@@ -1070,20 +1158,20 @@ public class DBLog {
     return mailList;
   }
 
-  private void sendObjectMail(String returnAddr, String adminName, Hashtable objectOuts, Date currentTime)
+  private void sendObjectMail(String returnAddr, String adminName, HashMap objectOuts, Date currentTime)
   {
-    Enumeration en = objectOuts.keys();
+    Iterator iter = objectOuts.keySet().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	String key = (String) en.nextElement();
-	Hashtable addresses = (Hashtable) objectOuts.get(key);
+	String key = (String) iter.next();
+	HashMap addresses = (HashMap) objectOuts.get(key);
 
-	Enumeration enum2 = addresses.keys();
+	Iterator iter2 = addresses.keySet().iterator();
 
-	while (enum2.hasMoreElements())
+	while (iter2.hasNext())
 	  {
-	    String address = (String) enum2.nextElement();
+	    String address = (String) iter2.next();
 	    MailOut mailout = (MailOut) addresses.get(address);
 
 	    objectEventType type = (objectEventType) objEventCodes.get(key);
@@ -1428,10 +1516,10 @@ public class DBLog {
    * system event notification
    */
 
-  private Vector appendMailOut(DBLogEvent event, Hashtable map, 
+  private Vector appendMailOut(DBLogEvent event, HashMap map, 
 			       DBSession session, systemEventType transactionType)
   {
-    Enumeration en;
+    Iterator iter;
     String str;
     MailOut mailout;
 
@@ -1447,11 +1535,11 @@ public class DBLog {
 			     transactionType.ccToOwners);
       }
     
-    en = event.notifyVect.elements();
+    iter = event.notifyVect.iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	str = (String) en.nextElement();
+	str = (String) iter.next();
 
 	if (debug)
 	  {
@@ -1553,13 +1641,13 @@ public class DBLog {
 
   static public Vector calculateOwnerAddresses(Vector objects, boolean mailToObjects, boolean mailToOwners, DBSession session)
   {
-    Enumeration objectsEnum, ownersEnum;
+    Iterator objectsIter, ownersIter;
     Invid invid, ownerInvid;
     InvidDBField ownersField;
     DBObject object;
     Vector vect;
     Vector results = new Vector();
-    Hashtable seenOwners = new Hashtable();
+    HashMap seenOwners = new HashMap();
 
     /* -- */
 
@@ -1568,11 +1656,11 @@ public class DBLog {
 	System.err.println("DBLog.java: calculateOwnerAddresses");
       }
 
-    objectsEnum = objects.elements();
+    objectsIter = objects.iterator();
 
-    while (objectsEnum.hasMoreElements())
+    while (objectsIter.hasNext())
       {
-	invid = (Invid) objectsEnum.nextElement();
+	invid = (Invid) objectsIter.next();
 	object = session.viewDBObject(invid);
 
 	if (object == null)
@@ -1695,11 +1783,11 @@ public class DBLog {
 	// of these owners, we need to see what email lists and addresses are 
 	// to receive notification
 
-	ownersEnum = vect.elements(); // this object's owner list
+	ownersIter = vect.iterator(); // this object's owner list
 
-	while (ownersEnum.hasMoreElements())
+	while (ownersIter.hasNext())
 	  {
-	    ownerInvid = (Invid) ownersEnum.nextElement();
+	    ownerInvid = (Invid) ownersIter.next();
 
 	    if (!seenOwners.containsKey(ownerInvid))
 	      {

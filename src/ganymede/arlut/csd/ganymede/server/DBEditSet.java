@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -57,7 +57,9 @@ package arlut.csd.ganymede.server;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import arlut.csd.Util.NamedStack;
@@ -170,7 +172,7 @@ public class DBEditSet {
    * pre-Java 2 HashSet.</p>
    */
 
-  private Hashtable basesModified;
+  private HashMap basesModified;
 
   /**
    * Who's our daddy?
@@ -261,7 +263,7 @@ public class DBEditSet {
     this.interactive = interactive;
     objects = new Hashtable();
     logEvents = new Vector();
-    basesModified = new Hashtable(dbStore.objectBases.size());
+    basesModified = new HashMap(dbStore.objectBases.size());
   }
 
   /**
@@ -485,6 +487,77 @@ public class DBEditSet {
   public void logMail(Vector addresses, String subject, String message)
   {
     logEvents.addElement(new DBLogEvent(addresses, subject, message, null, null, null));
+  }
+
+  /**
+   * <p>This method is used to transmit a log event during successful
+   * transaction commit.  The provided log event is recorded in the
+   * Ganymede log file and mail notification is sent out if
+   * appropriate.</p>
+   *
+   * @param eventClassToken a short string specifying a DBObject record describing
+   * the general category for the event
+   * @param description Descriptive text to be entered in the record of the event
+   * @param admin Invid pointing to the adminPersona that fired the event, if any
+   * @param adminName String containing the name of the adminPersona that fired the event, if any
+   * @param objects A vector of invids of objects involved in this event.
+   * @param notifyList A vector of Strings listing email addresses to send notification
+   * of this event to.
+   */
+
+  private void streamLogEvent(String eventClassToken, String description,
+			      Invid admin, String adminName,
+			      Vector objects, Vector notifyList)
+  {
+    DBLogEvent event = new DBLogEvent(eventClassToken, description,
+				      admin, adminName,
+				      objects, notifyList);
+
+    Ganymede.log.streamEvent(event, this);
+  }
+
+  /**
+   * <p>This method is used to transmit a log event during successful
+   * transaction commit.  The provided log event is recorded in the
+   * Ganymede log file and mail notification is sent out if
+   * appropriate.</p>
+   *
+   * @param event A pre-formed log event to register with this transaction.
+   */
+
+  private void streamLogEvent(DBLogEvent event)
+  {
+    Ganymede.log.streamEvent(event, this);
+  }
+
+  /**
+   * <p>This method is used to transmit a message during transaction commit.</p>
+   *
+   * @param addressList Vector of Strings, the address list
+   * @param subject The subject line of the message
+   * @param message The body of the message
+   * @param admin The invid of the admin whose action resulted in the mail
+   * @param adminName The name of the admin whose actin resulted in the mail
+   * @param objects A vector of invids of objects involved in the mail
+   */
+
+  private void streamLogMail(Vector addresses, String subject, String message, 
+			     Invid admin, String adminName, Vector objects)
+  {
+    Ganymede.log.streamEvent(new DBLogEvent(addresses, subject, message, admin, adminName, objects), this);
+  }
+
+  /**
+   * <p>This method is used to transmit a message during transaction commit.</p>
+   *
+   * @param addressList Vector of Strings, the address list
+   * @param subject The subject line of the message
+   * @param message The body of the message
+   */
+
+  private void streamLogMail(Vector addresses, String subject, String message)
+  {
+    Ganymede.log.streamEvent(new DBLogEvent(addresses, subject, message, null, null, null), this);
   }
 
   /**
@@ -1034,15 +1107,15 @@ public class DBEditSet {
   private final Vector commit_lockBases() throws CommitNonFatalException
   {
     Vector baseSet = new Vector();
-    Enumeration en;
+    Iterator iter;
 
     /* -- */
 
-    en = this.basesModified.keys();
+    iter = this.basesModified.keySet().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	baseSet.addElement(en.nextElement());
+	baseSet.addElement(iter.next());
       }
 
     // and try to lock the bases down.
@@ -1313,15 +1386,42 @@ public class DBEditSet {
 
   private final void commit_integrateChanges() throws CommitFatalException
   {
-    Hashtable fieldsTouched = new Hashtable();
+    HashMap fieldsTouched = new HashMap();
 
-    commit_createLogEvents(fieldsTouched);
+    /* -- */
+
     commit_persistTransaction();
-    commit_logTransaction();
+    commit_logTransaction(fieldsTouched);
     commit_replaceObjects();
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
     commit_updateBases(fieldsTouched);
+  }
+
+  /**
+   * <p>This private helper method for commit() writes the transaction
+   * to the on-disk transactions journal, which will persist our
+   * transaction's changes.</p>
+   *
+   * <p>Will throw a CommitException if a failure was detected.</p>
+   */
+
+  private final void commit_persistTransaction() throws CommitFatalException
+  {
+    try
+      {
+	if (!dbStore.journal.writeTransaction(getObjectList()))
+	  {
+	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.error"),
+								      ts.l("commit_persistTransaction.error_text")));
+	  }
+      }
+    catch (IOException ex)
+      {
+	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
+								  ts.l("commit_persistTransaction.exception_text",
+								       ex.getMessage())));
+      }
   }
 
   /**
@@ -1337,13 +1437,13 @@ public class DBEditSet {
    * that were touched.</p>
    */
 
-  private final void commit_createLogEvents(Hashtable fieldsTouched)
+  private final void commit_log_events(HashMap fieldsTouched)
   {
     Enumeration en = objects.elements();
 
     while (en.hasMoreElements())
       {
-	commit_createLogEvent((DBEditObject) en.nextElement(), fieldsTouched);
+	commit_log_event((DBEditObject) en.nextElement(), fieldsTouched);
       }
   }
 
@@ -1360,7 +1460,7 @@ public class DBEditSet {
    * that were touched.</p>
    */
 
-  private final void commit_createLogEvent(DBEditObject eObj, Hashtable fieldsTouched)
+  private final void commit_log_event(DBEditObject eObj, HashMap fieldsTouched)
   {
     if (Ganymede.log == null)
       {
@@ -1437,16 +1537,16 @@ public class DBEditSet {
 		  {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
-		    logEvent("objectchanged",
-			     ts.l("commit_createLogEvent.embedded_modified",
-				  parentObj.getTypeName(),
-				  parentObj.getLabel(),
-				  eObj.getTypeName(),
-				  eObj.getLabel(),
-				  eObj.getInvid(),
-				  diff),
-			     responsibleInvid, responsibleName,
-			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+		    streamLogEvent("objectchanged",
+				   ts.l("commit_createLogEvent.embedded_modified",
+					parentObj.getTypeName(),
+					parentObj.getLabel(),
+					eObj.getTypeName(),
+					eObj.getLabel(),
+					eObj.getInvid(),
+					diff),
+				   responsibleInvid, responsibleName,
+				   invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
 		    logNormal = false;
 		  }
@@ -1465,14 +1565,14 @@ public class DBEditSet {
 
 	    if (logNormal)
 	      {
-		logEvent("objectchanged",
-			 ts.l("commit_createLogEvent.modified",
-			      eObj.getTypeName(),
-			      eObj.getLabel(),
-			      String.valueOf(eObj.getInvid()),
-			      diff),
-			 responsibleInvid, responsibleName,
-			 invids, eObj.getEmailTargets());
+		streamLogEvent("objectchanged",
+			       ts.l("commit_createLogEvent.modified",
+				    eObj.getTypeName(),
+				    eObj.getLabel(),
+				    String.valueOf(eObj.getInvid()),
+				    diff),
+			       responsibleInvid, responsibleName,
+			       invids, eObj.getEmailTargets());
 	      }
 	  }
 		    
@@ -1533,16 +1633,16 @@ public class DBEditSet {
 		  {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
-		    logEvent("objectcreated",
-			     ts.l("commit_createLogEvent.embedded_created",
-				  parentObj.getTypeName(),
-				  parentObj.getLabel(),
-				  eObj.getTypeName(),
-				  eObj.getLabel(),
-				  eObj.getInvid(),
-				  diff),
-			     responsibleInvid, responsibleName,
-			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+		    streamLogEvent("objectcreated",
+				   ts.l("commit_createLogEvent.embedded_created",
+					parentObj.getTypeName(),
+					parentObj.getLabel(),
+					eObj.getTypeName(),
+					eObj.getLabel(),
+					eObj.getInvid(),
+					diff),
+				   responsibleInvid, responsibleName,
+				   invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
 		    logNormal = false;
 		  }
@@ -1561,14 +1661,14 @@ public class DBEditSet {
 
 	    if (logNormal)
 	      {
-		logEvent("objectcreated",
-			 ts.l("commit_createLogEvent.created",
-			      eObj.getTypeName(),
-			      eObj.getLabel(),
-			      String.valueOf(eObj.getInvid()),
-			      diff),
-			 responsibleInvid, responsibleName,
-			 invids, eObj.getEmailTargets());
+		streamLogEvent("objectcreated",
+			       ts.l("commit_createLogEvent.created",
+				    eObj.getTypeName(),
+				    eObj.getLabel(),
+				    String.valueOf(eObj.getInvid()),
+				    diff),
+			       responsibleInvid, responsibleName,
+			       invids, eObj.getEmailTargets());
 	      }
 	  }
 
@@ -1621,17 +1721,17 @@ public class DBEditSet {
 		  {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
-		    logEvent("deleteobject",
-			     ts.l("commit_createLogEvent.embedded_deleted",
-				  parentObj.getTypeName(),
-				  parentObj.getLabel(),
-				  eObj.getTypeName(),
-				  eObj.getLabel(),
-				  eObj.getInvid(),
-				  oldVals),
-			     responsibleInvid, responsibleName,
-			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
-
+		    streamLogEvent("deleteobject",
+				   ts.l("commit_createLogEvent.embedded_deleted",
+					parentObj.getTypeName(),
+					parentObj.getLabel(),
+					eObj.getTypeName(),
+					eObj.getLabel(),
+					eObj.getInvid(),
+					oldVals),
+				   responsibleInvid, responsibleName,
+				   invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+		    
 		    logNormal = false;
 		  }
 		catch (IntegrityConstraintException ex)
@@ -1649,14 +1749,14 @@ public class DBEditSet {
 
 	    if (logNormal)
 	      {
-		logEvent("deleteobject",
-			 ts.l("commit_createLogEvent.deleted",
-			      eObj.getTypeName(),
-			      eObj.getLabel(),
-			      String.valueOf(eObj.getInvid()),
-			      oldVals),
-			 responsibleInvid, responsibleName,
-			 invids, eObj.getEmailTargets());
+		streamLogEvent("deleteobject",
+			       ts.l("commit_createLogEvent.deleted",
+				    eObj.getTypeName(),
+				    eObj.getLabel(),
+				    String.valueOf(eObj.getInvid()),
+				    oldVals),
+			       responsibleInvid, responsibleName,
+			       invids, eObj.getEmailTargets());
 	      }
 
 	    // and calculate the fields that we touched by losing them
@@ -1696,15 +1796,15 @@ public class DBEditSet {
 		  {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
-		    logEvent("deleteobject",
-			     ts.l("commit_createLogEvent.embedded_deleted_nodiff",
-				  parentObj.getTypeName(),
-				  parentObj.getLabel(),
-				  eObj.getTypeName(),
-				  eObj.getLabel(),
-				  eObj.getInvid()),
-			     responsibleInvid, responsibleName,
-			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+		    streamLogEvent("deleteobject",
+				   ts.l("commit_createLogEvent.embedded_deleted_nodiff",
+					parentObj.getTypeName(),
+					parentObj.getLabel(),
+					eObj.getTypeName(),
+					eObj.getLabel(),
+					eObj.getInvid()),
+				   responsibleInvid, responsibleName,
+				   invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
 		    logNormal = false;
 		  }
@@ -1723,13 +1823,13 @@ public class DBEditSet {
 
 	    if (logNormal)
 	      {
-		logEvent("deleteobject",
-			 ts.l("commit_createLogEvent.deleted_nodiff",
-			      eObj.getTypeName(),
-			      eObj.getLabel(),
-			      String.valueOf(eObj.getInvid())),
-			 responsibleInvid, responsibleName,
-			 invids, eObj.getEmailTargets());
+		streamLogEvent("deleteobject",
+			       ts.l("commit_createLogEvent.deleted_nodiff",
+				    eObj.getTypeName(),
+				    eObj.getLabel(),
+				    String.valueOf(eObj.getInvid())),
+			       responsibleInvid, responsibleName,
+			       invids, eObj.getEmailTargets());
 	      }
 	  }
 
@@ -1738,37 +1838,11 @@ public class DBEditSet {
   }
 
   /**
-   * <p>This private helper method for commit() writes the transaction
-   * to the on-disk transactions journal, which will persist our
-   * transaction's changes.</p>
-   *
-   * <p>Will throw a CommitException if a failure was detected.</p>
-   */
-
-  private final void commit_persistTransaction() throws CommitFatalException
-  {
-    try
-      {
-	if (!dbStore.journal.writeTransaction(getObjectList()))
-	  {
-	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.error"),
-								      ts.l("commit_persistTransaction.error_text")));
-	  }
-      }
-    catch (IOException ex)
-      {
-	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
-								  ts.l("commit_persistTransaction.exception_text",
-								       ex.getMessage())));
-      }
-  }
-
-  /**
    * <p>This method handles the on-disk and email logging for events
    * that have built up over the course of this transaction.</p>
    */
 
-  private final void commit_logTransaction()
+  private final void commit_logTransaction(HashMap fieldsTouched)
   {
     Invid responsibleInvid;
     String responsibleName;
@@ -1796,18 +1870,54 @@ public class DBEditSet {
 	responsibleInvid = null;
       }
 
-    // exceptions during logging aren't important enough to break a
-    // transaction commit in progress, but we do want to record any
-    // such
+    // collect the list of invids that we know were touched in this
+    // transaction for the start transaction log record
 
-    try
+    Vector invids = new Vector(objects.size());
+    Enumeration en = objects.elements();
+
+    while (en.hasMoreElements())
       {
-	Ganymede.log.logTransaction(this.logEvents, responsibleName, 
-				    responsibleInvid, this);
+	invids.add(((DBEditObject) en.nextElement()).getInvid());
       }
-    catch (Throwable ex)
+
+    synchronized (Ganymede.log)
       {
-	Ganymede.debug(Ganymede.stackTrace(ex));
+	try
+	  {
+	    // exceptions during logging aren't important enough to break a
+	    // transaction commit in progress, but we do want to record any
+	    // such
+
+	    Ganymede.log.startTransactionLog(invids, responsibleName, responsibleInvid, this);
+
+	    // then transmit/log any pre-recorded log events that we
+	    // have accumulated during the user's session/transaction
+
+	    for (int i = 0; i < logEvents.size(); i++)
+	      {
+		streamLogEvent((DBLogEvent) logEvents.elementAt(i));
+	      }
+
+	    logEvents.setSize(0);
+	    logEvents = null;
+
+	    // then create and stream log events describing the
+	    // objects that are in this transaction at the time of
+	    // commit
+
+	    commit_log_events(fieldsTouched);
+
+	    // finish the transaction to disk and send out any email
+	    // that we need to send
+
+	    Ganymede.log.endTransactionLog(responsibleName, responsibleInvid, this);
+	  }
+	catch (Throwable ex)
+	  {
+	    Ganymede.debug(Ganymede.stackTrace(ex));
+	    Ganymede.log.cleanupTransaction();
+	  }
       }
 
     // for garbage collection
@@ -1951,13 +2061,13 @@ public class DBEditSet {
    * created, changed, or deleted during this transaction
    */
 
-  private final void commit_updateBases(Hashtable fieldsTouched)
+  private final void commit_updateBases(HashMap fieldsTouched)
   {
-    Enumeration en = this.basesModified.keys();
+    Iterator iter = this.basesModified.keySet().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	DBObjectBase base = (DBObjectBase) en.nextElement();
+	DBObjectBase base = (DBObjectBase) iter.next();
 	
 	base.updateTimeStamp();
 	
@@ -1971,11 +2081,11 @@ public class DBEditSet {
     // And in addition to updating the time stamps on the object
     // bases, update the time stamps on each field.
 
-    en = fieldsTouched.keys();
+    iter = fieldsTouched.keySet().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	DBObjectBaseField fieldDef = (DBObjectBaseField) en.nextElement();
+	DBObjectBaseField fieldDef = (DBObjectBaseField) iter.next();
 	fieldDef.updateTimeStamp();
       }
   }
