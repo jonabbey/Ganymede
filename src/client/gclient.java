@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.65 $ %D%
+   Version: $Revision: 1.66 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -77,6 +77,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   glogin _myglogin;
 
   long lastClick = 0;
+
+  // This keeps track of the current persona
+  String 
+    currentPersonaString;
 
   // set up a bunch of borders
 
@@ -225,7 +229,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   treeMenu 
     pMenuAll = new treeMenu(),
-    pMenuEditable= new treeMenu();
+    pMenuEditable= new treeMenu(),
+    pMenuEditableCreatable = new treeMenu(),
+    pMenuAllCreatable = new treeMenu();
   
   JMenuBar 
     menubar;
@@ -267,6 +273,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   PersonaListener
     personaListener = null;
+
+  ButtonGroup
+    personaGroup;  // This is the group of persona menu items.  Only one can be chosen.
 
   WindowBar
     windowBar;
@@ -325,12 +334,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     // File menu
 
     fileMenu = new JMenu("File");
-    logoutMI = new JMenuItem("Logout", new MenuShortcut(KeyEvent.VK_L));
+    logoutMI = new JMenuItem("Logout");//, new MenuShortcut(KeyEvent.VK_L));
     logoutMI.addActionListener(this);
 
     removeAllMI = new JMenuItem("Remove All Windows");
     removeAllMI.addActionListener(this);
-    clearTreeMI = new JMenuItem("Clear Tree", new MenuShortcut(KeyEvent.VK_T));
+    clearTreeMI = new JMenuItem("Clear Tree");
     clearTreeMI.addActionListener(this);
 
     filterQueryMI = new JMenuItem("Filter Query");
@@ -349,27 +358,27 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     actionMenu = new JMenu("Actions");
 
-    editObjectMI = new JMenuItem("Edit Object", new MenuShortcut(KeyEvent.VK_E));
+    editObjectMI = new JMenuItem("Edit Object");
     editObjectMI.setActionCommand("open object for editing");
     editObjectMI.addActionListener(this);
 
-    viewObjectMI = new JMenuItem("View Object", new MenuShortcut(KeyEvent.VK_V));
+    viewObjectMI = new JMenuItem("View Object");
     viewObjectMI.setActionCommand("open object for viewing");
     viewObjectMI.addActionListener(this);
     
-    cloneObjectMI = new JMenuItem("Clone Object", new MenuShortcut(KeyEvent.VK_C));
+    cloneObjectMI = new JMenuItem("Clone Object");
     cloneObjectMI.setActionCommand("choose an object for cloning");
     cloneObjectMI.addActionListener(this);
 
-    deleteObjectMI = new JMenuItem("Delete Object", new MenuShortcut(KeyEvent.VK_D));
+    deleteObjectMI = new JMenuItem("Delete Object");
     deleteObjectMI.setActionCommand("delete an object");
     deleteObjectMI.addActionListener(this);
 
-    inactivateObjectMI = new JMenuItem("Inactivate Object", new MenuShortcut(KeyEvent.VK_I));
+    inactivateObjectMI = new JMenuItem("Inactivate Object");
     inactivateObjectMI.setActionCommand("inactivate an object");
     inactivateObjectMI.addActionListener(this);
 
-    menubarQueryMI = new JMenuItem("Query", new MenuShortcut(KeyEvent.VK_Q));
+    menubarQueryMI = new JMenuItem("Query");
     menubarQueryMI.addActionListener(this);
 
     actionMenu.add(menubarQueryMI);
@@ -406,7 +415,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     if (personae != null)
       {
 	PersonaMenu = new JMenu("Persona");
-	ButtonGroup personaGroup = new ButtonGroup();
+	personaGroup = new ButtonGroup();
 	
 	for (int i = 0; i < personae.size(); i++)
 	  {
@@ -415,6 +424,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    if (p.equals(my_username))
 	      {
+		currentPersonaString = p;
 		mi.setState(true);
 	      }
 
@@ -429,7 +439,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     // Help menu
 
     helpMenu = new JMenu("Help");
-    showHelpMI = new JMenuItem("Help", new MenuShortcut(KeyEvent.VK_H));
+    showHelpMI = new JMenuItem("Help");
     showHelpMI.addActionListener(this);
     helpMenu.add(showHelpMI);
 
@@ -438,7 +448,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     menubar.add(actionMenu);
     menubar.add(windowMenu);
     menubar.add(helpMenu);
-    menubar.setHelpMenu(helpMenu);
+    // menubar.setHelpMenu(helpMenu);
 
     if (personasExist)
       {
@@ -451,15 +461,25 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     pMenuAll.add(new MenuItem("List editable"));
     pMenuAll.add(new MenuItem("List all"));
-    pMenuAll.add(new MenuItem("Create"));
     pMenuAll.add(new MenuItem("Query"));
     pMenuAll.add(new MenuItem("Hide Non-Editables"));
 
     pMenuEditable.add(new MenuItem("List editable"));
     pMenuEditable.add(new MenuItem("List all"));
-    pMenuEditable.add(new MenuItem("Create"));
     pMenuEditable.add(new MenuItem("Query"));
     pMenuEditable.add(new MenuItem("Show All Objects"));
+
+    pMenuEditableCreatable.add(new MenuItem("List editable"));
+    pMenuEditableCreatable.add(new MenuItem("List all"));
+    pMenuEditableCreatable.add(new MenuItem("Create"));
+    pMenuEditableCreatable.add(new MenuItem("Query"));
+    pMenuEditableCreatable.add(new MenuItem("Show All Objects"));
+
+    pMenuAllCreatable.add(new MenuItem("List editable"));
+    pMenuAllCreatable.add(new MenuItem("List all"));
+    pMenuAllCreatable.add(new MenuItem("Create"));
+    pMenuAllCreatable.add(new MenuItem("Query"));
+    pMenuAllCreatable.add(new MenuItem("Hide Non-Editables"));
 
     if (debug)
       {
@@ -745,6 +765,25 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     cachedLists.clearCaches();
   }
 
+  /**
+   * Update the persona menu so it shows the correct persona as chosen.
+   */
+  public void updatePersonaMenu()
+  {
+    Enumeration buttons = personaGroup.getElements();
+
+    while (buttons.hasMoreElements())
+      {
+	JCheckBoxMenuItem mi = (JCheckBoxMenuItem)buttons.nextElement();
+	if (mi.getText().equals(currentPersonaString))
+	  {
+	    mi.setState(true);
+	    break; // Don't need to set the rest of false, because only one can be selected via the ButtonGroup
+	    // besides, if I do some setState(false)'s, then actions will be performed.
+	  }
+      }
+  }
+
   public void update(Graphics g)
   {
     paint(g);
@@ -754,7 +793,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    * Get the session
    */
 
-  public Session getSession()
+  public final Session getSession()
   {
     return session;
   }
@@ -1255,11 +1294,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     if (node instanceof Base)
       {
 	Base base = (Base)node;
+	boolean canCreate = base.canCreate(getSession());
 	newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
 			       true, 
 			       OPEN_BASE, 
 			       CLOSED_BASE,
-			       pMenuEditable);
+			       canCreate ? pMenuEditableCreatable : pMenuEditable,
+			       canCreate);
 	shortToBaseNodeHash.put(new Short(base.getTypeID()), newNode);
       }
     else if (node instanceof Category)
@@ -1317,8 +1358,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	id = base.getTypeID();
 	//Now get all the children
-	_query = new Query(id, null, false);// include all, even non-editables
-	node.setQuery(_query);
+	_query = new Query(id, null, true);// include all, even non-editables
+	node.setEditableQuery(_query);
+	node.setAllQuery(new Query(id, null, false));
       }
     catch (RemoteException rx)
       {
@@ -1335,7 +1377,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	try
 	  {
-	    QueryResult qr = session.query(_query);
+	    QueryResult qr = null;
+	    if (node.isShowAll())
+	      {
+		qr = session.query(node.getAllQuery());
+	      }
+	    else
+	      {
+		qr = session.query(node.getEditableQuery());
+	      }
 
 	    if (qr != null)
 	      {
@@ -1349,8 +1399,24 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    throw new RuntimeException("Could not get dump: " + rx);
 	  }
       }
+
+    if (node.isShowAll())
+      {
+	System.out.println("node is show all");
+
+	if (!objectlist.containsNonEditable())
+	  {
+	    QueryResult qr = session.query(node.getAllQuery());
+	    
+	    if (qr != null)
+	      {
+		System.out.println("augmenting");
+		objectlist.augmentListWithNonEditables(qr);
+	      }
+	  }
+      }
     
-    objectHandles = objectlist.getObjectHandles(true); // include inactives, non-editables
+    objectHandles = objectlist.getObjectHandles(true, node.isShowAll()); // include inactives
 
     // **
     //
@@ -1870,6 +1936,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	chooseDefaultOwner(false);
       }
+    
+    setWaitCursor();
+
     try
       {
 	obj = session.create_db_object(type);
@@ -1887,6 +1956,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     if (showNow)
       {
 	showNewlyCreatedObject(obj, invid, new Short(type));
+      }
+    else
+      {
+	setNormalCursor();
       }
 
     somethingChanged();
@@ -1907,6 +1980,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   public void showNewlyCreatedObject(db_object obj, Invid invid, Short type)
   {
+    setWaitCursor();
+    
     ObjectHandle handle = new ObjectHandle("New Object", invid, false, false, false, true);
        
     wp.addWindow(obj, true);
@@ -1956,6 +2031,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    tree.insertNode(objNode, true);
 	  }
       }
+
+    setNormalCursor();
   }
 
   /**
@@ -1995,6 +2072,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     boolean ok = false;
 
     /* -- */
+
+    setWaitCursor();
 
     try
       {
@@ -2076,6 +2155,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	throw new RuntimeException("Could not delete base: " + rx);
       }
 
+    setNormalCursor();
+
     return ok;
   }
 
@@ -2111,6 +2192,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    else
 	      {
 		setStatus("inactivating " + invid);
+		setWaitCursor();
 
 		retVal = session.inactivate_db_object(invid);
 
@@ -2153,6 +2235,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
       }
 
+    setNormalCursor();
     return ok;
   }
 
@@ -2170,6 +2253,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     try
       {
+	setWaitCursor();
 	retVal = session.reactivate_db_object(invid);
 
 	if (retVal == null)
@@ -2279,6 +2363,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     
     setIconForNode(invid);
+    setNormalCursor();
     return ok;
   }
   /**
@@ -2886,11 +2971,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 		list.removeInvid(invid);
 		handle = info.getOriginalObjectHandle();
-		list.addObjectHandle(handle);
-		node = (InvidNode)invidNodeHash.get(invid);
-		if (node != null)
+		if (handle == null)
 		  {
-		    node.setHandle(handle);
+		    System.out.println("Null original handle, bummer.");
+		  }
+		else
+		  {
+		    list.addObjectHandle(handle);
+		    node = (InvidNode)invidNodeHash.get(invid);
+		    if (node != null)
+		      {
+			node.setHandle(handle);
+		      }
 		  }
 	      }
 	    changedHash.remove(invid);
@@ -3221,11 +3313,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    try
 	      {
-		Query _query = new Query(baseN.getBase().getTypeID(), null, true);
+		//Query _query = new Query(baseN.getBase().getTypeID(), null, true);
+
 
 		setStatus("Sending query for base " + node.getText() + " to server");
 
-		DumpResult buffer = session.dump(_query);
+		DumpResult buffer = session.dump(baseN.getEditableQuery());
 
 		if (buffer == null)
 		  {
@@ -3238,7 +3331,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 		    System.out.println();
 
-		    wp.addTableWindow(session, baseN.getQuery(), buffer, "Query Results");
+		    wp.addTableWindow(session, baseN.getEditableQuery(), buffer, "Query Results");
 		  }
 	      }
 	    catch (RemoteException rx)
@@ -3266,11 +3359,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    
 	    try
 	      {
-		Query _query = new Query(baseN.getBase().getTypeID(), null, false);
+		//Query _query = new Query(baseN.getBase().getTypeID(), null, false);
 
 		setStatus("Sending query for base " + node.getText() + " to server");
 
-		DumpResult buffer = session.dump(_query);
+		DumpResult buffer = session.dump(baseN.getAllQuery());
 		
 		if (buffer == null)
 		  {
@@ -3283,7 +3376,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 		    System.out.println();
 		    
-		    wp.addTableWindow(session, baseN.getQuery(), buffer, "Query Results");
+		    wp.addTableWindow(session, baseN.getAllQuery(), buffer, "Query Results");
 		  }
 	      }
 	    catch (RemoteException rx)
@@ -3348,6 +3441,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	Short id;
 
 	/* -- */
+
+	System.out.println("show all objects");
+
 	setWaitCursor();
 
 	try
@@ -3360,12 +3456,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
 
 	bn.showAll(true);
-	node.setMenu(pMenuAll);
+	node.setMenu(((BaseNode)node).canCreate() ? pMenuAllCreatable : pMenuAll);
 
 	if (bn.isOpen())
 	  {
 	    try
 	      {
+		System.out.println("Refreshing objects");
 		refreshObjects(bn, true);
 	      }
 	    catch (RemoteException ex)
@@ -3393,7 +3490,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
 
 	bn.showAll(false);
-	bn.setMenu(pMenuEditable);
+	bn.setMenu(((BaseNode)node).canCreate() ? pMenuEditableCreatable : pMenuEditable);
 
 	if (bn.isOpen())
 	  {
@@ -3661,18 +3758,20 @@ class InvidNode extends arlut.csd.JTree.treeNode {
 class BaseNode extends arlut.csd.JTree.treeNode {
 
   private Base base;
-  private Query query;
+  private Query editableQuery, allQuery;
   private boolean loaded = false;
   private boolean canBeInactivated = false;
   private boolean showAll = false;
+  private boolean canCreate;
 
   /* -- */
 
   BaseNode(treeNode parent, String text, Base base, treeNode insertAfter,
-	   boolean expandable, int openImage, int closedImage, treeMenu menu)
+	   boolean expandable, int openImage, int closedImage, treeMenu menu, boolean canCreate)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.base = base;
+    this.canCreate = canCreate();
     
     try
       {
@@ -3694,6 +3793,11 @@ class BaseNode extends arlut.csd.JTree.treeNode {
     return canBeInactivated;
   }
 
+  public boolean canCreate()
+  {
+    return canCreate;
+  }
+
   public boolean isShowAll()
   {
     return showAll;
@@ -3709,14 +3813,24 @@ class BaseNode extends arlut.csd.JTree.treeNode {
     this.base = base;
   }
 
-  public void setQuery(Query query)
+  public void setEditableQuery(Query query)
   {
-    this.query = query;
+    this.editableQuery = query;
   }
 
-  public Query getQuery()
+  public void setAllQuery(Query query)
   {
-    return query;
+    this.allQuery = query;
+  }
+
+  public Query getEditableQuery()
+  {
+    return editableQuery;
+  }
+
+  public Query getAllQuery()
+  {
+    return allQuery;
   }
 
   public boolean isLoaded()
@@ -3778,6 +3892,17 @@ class PersonaListener implements ActionListener{
       {
 	System.out.println("Persona Listener doesn't understand that action.");
       }
+
+
+    if (newPersona.equals(gc.currentPersonaString))
+      {
+	System.out.println("You are already in that persona.");
+	
+	gc.showErrorMessage("You are already in that persona.");
+
+	gc.updatePersonaMenu();
+	return;
+      }
     
     if (gc.getSomethingChanged())
       {
@@ -3792,6 +3917,7 @@ class PersonaListener implements ActionListener{
 	if (result == null)
 	  {
 	    gc.setStatus("Persona change cancelled");
+	    gc.updatePersonaMenu();
 	    return;
 	  }
 	else
@@ -3825,6 +3951,7 @@ class PersonaListener implements ActionListener{
 	}
       else
 	{
+	  gc.updatePersonaMenu();
 	  return;		// they canceled.
 	}
 
@@ -3836,14 +3963,17 @@ class PersonaListener implements ActionListener{
 	      
 	      if (personaChangeSuccessful)
 		{
+		  gc.setWaitCursor();
 		  gc.setStatus("Successfully changed persona.");
 		  gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
 		  //gc.setPersonaCombo(newPersona);
 		  gc.ownerGroups = null;
 		  gc.clearCaches();
 		  gc.loader.clear();  // This reloads the hashes
-		  gc.commitTransaction();
+		  gc.cancelTransaction();
 		  gc.buildTree();
+		  gc.currentPersonaString = newPersona;
+		  gc.setNormalCursor();
 		}
 	      else
 		{
@@ -3861,7 +3991,10 @@ class PersonaListener implements ActionListener{
 	    }
 
 	}
+      gc.updatePersonaMenu();
     }
+
+
 }
 
 /*------------------------------------------------------------------------------
