@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 2001/11/15 01:28:42 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 2002/02/28 21:00:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -99,6 +99,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   static String deleteFilename = null;
   static File deleteHandler = null;
+
+  static final int lowUID = 1001;
 
   static int file_identifier = 0;
 
@@ -237,7 +239,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (uidVal == null)
 	      {
-		uidVal = new Integer(1001);
+		uidVal = new Integer(lowUID);
 	      }
 	  }
       }
@@ -264,11 +266,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // the most efficient at all.
 
     int count = 0;
-    uidVal = new Integer(rand.nextInt(31767) + 1001);
+    uidVal = new Integer(rand.nextInt(31767) + lowUID);
     
     while (!namespace.reserve(getEditSet(), uidVal, true) && count < 30000)
       {
-	uidVal = new Integer(rand.nextInt(31767) + 1001);
+	uidVal = new Integer(rand.nextInt(31767) + lowUID);
 	count++;
       }
 
@@ -277,7 +279,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// we've been looping too long, maybe there's no
 	// uid's free?  let's do an exhaustive search
 	
-	uidVal = new Integer(1001);
+	uidVal = new Integer(lowUID);
 	
 	while (!namespace.reserve(getEditSet(), uidVal, true))
 	  {
