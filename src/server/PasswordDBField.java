@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -459,6 +459,29 @@ public class PasswordDBField extends DBField implements pass_field {
 
   /**
    *
+   * This method returns the UNIX-encrypted password text.
+   *
+   */
+
+  public String getUNIXCryptText()
+  {
+    if (value == null)
+      {
+	return null;
+      }
+
+    if (crypted())
+      {
+	return (String) value;
+      }
+    else
+      {
+	return jcrypt.crypt((String) value);
+      }
+  }
+
+  /**
+   *
    * Method to obtain the SALT for a stored crypted password.  If the
    * client is going to submit a pre-crypted password, it must be
    * salted by the salt returned by this method.  If the password
@@ -482,17 +505,14 @@ public class PasswordDBField extends DBField implements pass_field {
   /**
    *
    * Sets the value of this field, if a scalar.
-   * Returns true on success, false on failure.
-   * If false is returned, the DBSession's
-   * last error value will have been set to
-   * indicate the reason for failure.
    *
-   * @see arlut.csd.ganymede.DBSession
-   * @see arlut.csd.ganymede.db_field
+   * The ReturnVal object returned encodes
+   * success or failure, and may optionally
+   * pass back a dialog.
    *
    */
 
-  public ReturnVal setValue(Object value)
+  public ReturnVal setValue(Object value, boolean local)
   {
     throw new IllegalArgumentException("can't directly set the value on a password field");
   }
