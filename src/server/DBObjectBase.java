@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -229,6 +229,14 @@ public class DBObjectBase {
     return new DBEnum(this);
   }
 
+  /**
+   * Print a debugging summary of the type information encoded
+   * in this objectbase to a PrintStream.
+   *
+   * @param out PrintStream to print to.
+   *
+   */
+
   public void print(PrintStream out)
   {
     Enumeration enum;
@@ -243,6 +251,36 @@ public class DBObjectBase {
 	out.print("\t");
 	((DBObjectBaseField) enum.nextElement()).print(out);
       }
+  }
+
+  /**
+   *
+   * Returns the field definitions for the objects stored in this
+   * ObjectBase.
+   *
+   */
+
+  public DBObjectBaseField[] getFields()
+  {
+    DBObjectBaseField[] result;
+
+    /* -- */
+
+    result = new DBObjectBaseField[fieldHash.size()];
+
+    for (short i = 0; i < result.length; i++)
+      {
+	result[i] = (DBObjectBaseField) fieldHash.get(new Short(i));
+
+	// missing field?
+
+	if (debug && (result[i] == null))
+	  {
+	    throw new RuntimeException("missing field definition");
+	  }
+      }
+
+    return result;
   }
 }
 
