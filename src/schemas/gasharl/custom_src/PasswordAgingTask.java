@@ -7,8 +7,8 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2001/06/15 21:37:40 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2001/06/15 21:55:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -217,6 +217,11 @@ public class PasswordAgingTask implements Runnable {
 	invid = result.getInvid();
 
 	object = mySession.getSession().viewDBObject(invid);
+
+	if (object.isInactivated())
+	  {
+	    continue;
+	  }
 
 	// get the password expiration threshold for this user, if any
 
