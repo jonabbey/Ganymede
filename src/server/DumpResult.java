@@ -8,8 +8,8 @@
    
    Created: 25 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2001/01/01 18:05:04 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2001/05/07 05:57:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,6 @@ public class DumpResult implements java.io.Serializable {
 
   // for use post-serialized
 
-  transient private boolean postTransport = true;
   transient Vector headers = null;
   transient Vector types = null;
   transient Vector invids = null;
@@ -94,7 +93,6 @@ public class DumpResult implements java.io.Serializable {
 
     /* -- */
 
-    postTransport = false;
     this.fieldDefs = fieldDefs;
     buffer = new StringBuffer();
 
@@ -616,11 +614,6 @@ public class DumpResult implements java.io.Serializable {
       }
 
     unpacked = true;
-
-    if (postTransport)
-      {
-	buffer = null;		// for GC
-      }
   }
 
   /**

@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 2001/04/16 04:54:28 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 2001/05/07 05:57:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -514,29 +514,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	key = enum.nextElement();
 
-	if (debug)
-	  {
-	    System.err.print("PermissionMatrixDBField: copying ");
-
-	    if (key instanceof DBObjectBase)
-	      {
-		System.err.print("base " + ((DBObjectBase) key).getName());
-	      }
-	    else if (key instanceof DBObjectBaseField)
-	      {
-		System.err.print("basefield " + ((DBObjectBaseField) key).getName());
-	      }
-	    else
-	      {
-		System.err.print("unrecognized key");
-	      }
-	  }
-
 	entry = (PermEntry) field.matrix.get(key);
 
 	if (debug)
 	  {
-	    System.err.println(" contents: " + entry);
+	    System.err.println("PermissionMatrixDBField: copying " + key + ", contents: " + entry);
 	  }
 
 	this.matrix.put(key, entry);
@@ -1598,21 +1580,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 class PermMatrixCkPoint {
 
-  Hashtable matrix = new Hashtable();
+  Hashtable matrix;
 
   /* -- */
 
   public PermMatrixCkPoint(PermissionMatrixDBField field)
   {
-    Enumeration enum = field.matrix.keys();
-    Object key;
-
-    /* -- */
-
-    while (enum.hasMoreElements())
-      {
-	key = enum.nextElement();
-	matrix.put(key, field.matrix.get(key));
-      }
+    this.matrix = (Hashtable) field.matrix.clone();
   }
 }

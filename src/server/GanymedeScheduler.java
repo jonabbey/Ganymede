@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2001/03/27 07:30:31 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2001/05/07 05:57:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -381,7 +381,6 @@ public class GanymedeScheduler extends Thread {
 	handle.startTime = null;
 	handle.setInterval(0);
 	handle.task = task;
-	handle.reregister = true;
       }
 
     onDemand.put(handle.name, handle);
@@ -419,7 +418,6 @@ public class GanymedeScheduler extends Thread {
 	handle.startTime = time;
 	handle.setInterval(0);
 	handle.task = task;
-	handle.reregister = true;
       }
 
     scheduleTask(handle);
@@ -479,7 +477,6 @@ public class GanymedeScheduler extends Thread {
 	handle.startTime = time;
 	handle.setInterval(minsPerDay);
 	handle.task = task;
-	handle.reregister = true;
       }
 
     scheduleTask(handle);
@@ -527,7 +524,6 @@ public class GanymedeScheduler extends Thread {
 	handle.startTime = firstTime;
 	handle.setInterval(intervalMinutes);
 	handle.task = task;
-	handle.reregister = true;
       }
 
     scheduleTask(handle);

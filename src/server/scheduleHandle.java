@@ -7,8 +7,8 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2001/03/27 07:30:32 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2001/05/07 05:57:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -149,14 +149,6 @@ public class scheduleHandle implements java.io.Serializable {
    */
 
   transient int interval;
-
-  /**
-   * if this field is set to false, the Ganymede Scheduler will
-   * not register this task for subsequent execution on completion
-   * of execution.
-   */
-
-  transient boolean reregister = true;
 
   /**
    * The task to run
@@ -417,7 +409,6 @@ public class scheduleHandle implements java.io.Serializable {
 	throw new IllegalArgumentException("can't run this method on the client");
       }
 
-    reregister = false;
     rerun = false;
   }
 

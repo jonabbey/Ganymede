@@ -7,8 +7,8 @@
    
    Created: 3 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2001/01/11 23:36:02 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2001/05/07 05:57:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -164,7 +164,11 @@ public class PermMatrix implements java.io.Serializable {
 	return new PermMatrix(this);
       }
 
-    result = new PermMatrix(orig);
+    // duplicate orig as our starting point.  we'll then union
+    // anything in this PermMatrix on top of orig in result
+
+    //    result = new PermMatrix(orig);
+    result = new PermMatrix();
 
     // now go through our matrix and for any entries in this.matrix,
     // put the union of that and the matching entry already in result
@@ -177,7 +181,7 @@ public class PermMatrix implements java.io.Serializable {
 	key = enum.nextElement();
 
 	entry1 = (PermEntry) this.matrix.get(key);
-	entry2 = (PermEntry) result.matrix.get(key);
+	entry2 = (PermEntry) orig.matrix.get(key);
 
 	if (entry2 != null)
 	  {
@@ -185,6 +189,8 @@ public class PermMatrix implements java.io.Serializable {
 	  }
 	else
 	  {
+	    // okay, orig didn't have any entry for key
+
 	    if (!isBasePerm((String)key))
 	      {
 		// We are union'ing a field entry.. since orig doesn't
@@ -194,75 +200,60 @@ public class PermMatrix implements java.io.Serializable {
 		// this will serve to maintain the permission inheritance
 		// issues
 
-		entry3 = (PermEntry) result.matrix.get(baseEntry((String)key));
+		entry3 = (PermEntry) orig.matrix.get(baseEntry((String)key));
 
-		if (entry3 == null)
-		  {
-		    // there is no entry for this field's base.. put in
-		    // the original from our matrix
+		// union will handle a null entry3
 
-		    result.matrix.put(key, entry1);
-		  }
-		else
-		  {
-		    // there is an entry for this field's base.. put it in
-		    // so that we properly handle permission inheritance
-
-		    result.matrix.put(key, entry1.union(entry3));
-		  }
+		result.matrix.put(key, entry1.union(entry3));
 	      }
 	    else
 	      {
+		// we've got a base entry from this.matrix that wasn't in orig,
+		// so we need to just copy it into result
+
 		result.matrix.put(key, entry1);
 	      }
 	  }
       }
 
-    // result now contains all of the records from orig, with all of
-    // the records from this.matrix union'ed in.  The only problem now
-    // is that it's possible that orig contained field records that
-    // this.matrix didn't have a match for, which means that we should
-    // have unioned in the corresponding base record from this.matrix
-    // at that point, but we didn't since we were looping over the
-    // entries in this.matrix rather than in orig.
+    // result now contains all of the records from this.matrix,
+    // union'ed with the orig versions.  The only problem now is that
+    // we haven't covered entries in orig that weren't in this.matrix.
 
-    enum = result.matrix.keys();
+    // loop over the orig values for completeness
+
+    enum = orig.matrix.keys();
 
     while (enum.hasMoreElements())
       {
 	key = enum.nextElement();
 
-	entry1 = (PermEntry) result.matrix.get(key);
+	entry1 = (PermEntry) orig.matrix.get(key);
 	entry2 = (PermEntry) this.matrix.get(key);
 
 	if (entry2 != null)
 	  {
-	    continue; // we already took care of this above
+	    result.matrix.put(key, entry1.union(entry2));
 	  }
 	else
 	  {
 	    if (!isBasePerm((String)key))
 	      {
-		// This is the case we are concerned with.. the result
-		// matrix has a field entry that we don't have a match
-		// for in this.matrix.. we need to check to see
-		// if we have a base entry for the corresponding base
-		// that we need to union in to reflect the default base
-		// -> field inheritance
+		// the orig matrix has a field entry that we didn't
+		// have a match for in this.matrix.. we need to check
+		// to see if we have a base entry for the corresponding
+		// base that we need to union in to reflect the default
+		// base -> field inheritance
 
 		entry3 = (PermEntry) this.matrix.get(baseEntry((String)key));
 
-		if (entry3 == null)
-		  {
-		    continue;	// no inheritance to be had here
-		  }
-		else
-		  {
-		    // there is an entry for this field's base.. put it in
-		    // so that we properly handle permission inheritance
+		// union will handle a null entry3
 
-		    result.matrix.put(key, entry1.union(entry3));
-		  }
+		result.matrix.put(key, entry1.union(entry3));
+	      }
+	    else
+	      {
+		result.matrix.put(key, entry1);
 	      }
 	  }
       }
@@ -463,5 +454,94 @@ public class PermMatrix implements java.io.Serializable {
       {
 	return super.toString();
       }
+  }
+
+  public String toString(boolean t)
+  {
+    StringBuffer result = new StringBuffer();
+    Enumeration enum;
+    String key;
+    PermEntry entry;
+    String basename;
+    Hashtable baseHash = new Hashtable();
+    Vector vec;
+
+    /* -- */
+
+    result.append("PermMatrix DebugDump\n");
+
+    enum = matrix.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	entry = (PermEntry) matrix.get(key);
+
+	basename = key;
+
+	if (baseHash.containsKey(basename))
+	  {
+	    vec = (Vector) baseHash.get(basename);
+	  }
+	else
+	  {
+	    vec = new Vector();
+	    baseHash.put(basename, vec);
+	  }
+
+	vec.addElement(key + " -- " + entry.toString());
+      }
+
+    enum = baseHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	//	result.append("\nBase - " + key + "\n");
+
+	vec = (Vector) baseHash.get(key);
+
+	for (int i = 0; i < vec.size(); i++)
+	  {
+	    result.append(vec.elementAt(i) + "\n");
+	  }
+
+	result.append("\n");
+      }
+
+    return result.toString();
+  }
+
+  public static void main(String argv[])
+  {
+    PermMatrix x = new PermMatrix();
+
+    x.matrix.put(x.matrixEntry((short) 267), PermEntry.getPermEntry(true, false, false, false));
+    x.matrix.put(x.matrixEntry((short) 267, (short) 1), PermEntry.getPermEntry(true, false, false, true));
+    x.matrix.put(x.matrixEntry((short) 267, (short) 2), PermEntry.getPermEntry(true, false, false, true));
+    x.matrix.put(x.matrixEntry((short) 267, (short) 3), PermEntry.getPermEntry(true, false, false, true));
+    x.matrix.put(x.matrixEntry((short) 267, (short) 4), PermEntry.getPermEntry(true, true, true, false));
+
+    System.err.println("Matrix 1: " + x.toString(true));
+
+    PermMatrix y = new PermMatrix();
+    y.matrix.put(y.matrixEntry((short) 267), PermEntry.getPermEntry(false, true, false, false));
+    y.matrix.put(y.matrixEntry((short) 267, (short) 1), PermEntry.getPermEntry(true, false, false, false));
+    y.matrix.put(y.matrixEntry((short) 267, (short) 2), PermEntry.getPermEntry(true, false, false, false));
+    y.matrix.put(y.matrixEntry((short) 267, (short) 5), PermEntry.getPermEntry(true, false, false, false));
+    y.matrix.put(y.matrixEntry((short) 267, (short) 6), PermEntry.getPermEntry(true, false, false, false));
+
+
+    System.err.println("Matrix 2: " + y.toString(true));
+
+    PermMatrix z = x.union(y);
+
+    System.err.println("Matrix 1 union 2: " + z.toString(true));
+
+    PermMatrix a = y.union(x);
+
+    System.err.println("Matrix 2 union 1: " + a.toString(true));
   }
 }

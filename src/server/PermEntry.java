@@ -6,8 +6,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2001/01/11 23:36:02 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2001/05/07 05:57:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -104,6 +104,13 @@ public class PermEntry implements java.io.Serializable {
 
   static final long serialVersionUID = 1595596943430809895L;
 
+  public static void main(String argv[])
+  {
+    PermEntry x = getPermEntry(true, false, false, false);
+
+    System.err.println(x.union(x));
+  }
+
   /**
    * <p>This static method returns a reference to an immutable PermEntry
    * object with the requested privilege bits set.</p>
@@ -187,7 +194,6 @@ public class PermEntry implements java.io.Serializable {
   private boolean editable;
   private boolean create;
   private boolean delete;
-  private transient byte index = -1;
 
   /* -- */
 
@@ -197,8 +203,6 @@ public class PermEntry implements java.io.Serializable {
     this.editable = editable;
     this.create = create;
     this.delete = delete;
-
-    calcIndex();
   }
 
   public PermEntry(DataInput in) throws IOException
@@ -212,8 +216,6 @@ public class PermEntry implements java.io.Serializable {
     this.editable = orig.editable;
     this.create = orig.create;
     this.delete = orig.delete;
-
-    calcIndex();
   }
 
   public boolean equals(Object obj)
@@ -271,8 +273,6 @@ public class PermEntry implements java.io.Serializable {
       {
 	delete = false;
       }
-
-    calcIndex();
   }
 
   /**
@@ -336,12 +336,7 @@ public class PermEntry implements java.io.Serializable {
 
   public byte indexNum()
   {
-    if (index == -1)
-      {
-	calcIndex();
-      }
-
-    return index;
+    return calcIndex();
   }
 
   /**
@@ -357,10 +352,10 @@ public class PermEntry implements java.io.Serializable {
 	return this;
       }
 
-    byte val = p.indexNum();
+    byte pVal = p.indexNum();
     byte myVal = indexNum();
 
-    return permObs[p.indexNum() | indexNum()];
+    return permObs[pVal | myVal];
   }
 
   /**
@@ -376,10 +371,10 @@ public class PermEntry implements java.io.Serializable {
 	return PermEntry.noPerms;
       }
 
-    byte val = p.indexNum();
+    byte pVal = p.indexNum();
     byte myVal = indexNum();
 
-    return permObs[p.indexNum() & indexNum()];
+    return permObs[pVal & myVal];
   }
 
   /**
@@ -503,9 +498,9 @@ public class PermEntry implements java.io.Serializable {
     return result.toString();
   }
 
-  private void calcIndex()
+  private byte calcIndex()
   {
-    index = 0;
+    byte index = 0;
     
     if (visible)
       {
@@ -526,5 +521,7 @@ public class PermEntry implements java.io.Serializable {
       {
 	index += 8;
       }
+
+    return index;
   }
 }

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.235 $
-   Last Mod Date: $Date: 2001/04/11 05:53:07 $
+   Version: $Revision: 1.236 $
+   Last Mod Date: $Date: 2001/05/07 05:57:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.235 $ $Date: 2001/04/11 05:53:07 $
+ * @version $Revision: 1.236 $ $Date: 2001/05/07 05:57:52 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -545,7 +545,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // server up to date
 
     String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
-
+    
     if (sessionLabel.startsWith("builder:"))
       {
 	if (disabledMessage != null && !disabledMessage.equals("shutdown"))
@@ -2015,7 +2015,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    System.err.println("getCategoryTree(): generated custom category tree");
 	  }
 
-	if (permsdebug)
+	if (false)
 	  {
 	    System.err.println("%%% Printing PersonaPerms");
 	    PermissionMatrixDBField.debugdump(personaPerms);
@@ -5335,6 +5335,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public PermEntry getPerm(DBObject object)
   {
+    boolean doDebug = permsdebug && object.getInvid().getType() == 267;
     boolean useSelfPerm = false;
     PermEntry result;
 
@@ -5352,9 +5353,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // find the top-level object if we were passed an embedded object
 
-    if (false)
+    if (doDebug)
       {
-	System.err.println("GanymedeSession.getPerm(object): calling getContainingObj()");
+	System.err.println("GanymedeSession.getPerm(" + object + ")");
       }
     
     object = getContainingObj(object);
@@ -5365,6 +5366,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (result != null)
       {
+	if (doDebug)
+	  {
+	    System.err.println("getPerm(): found an object override, returning " + result);
+	  }
+
 	return result;
       }
 
@@ -5394,6 +5400,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(this, object))
       {
+	if (doDebug)
+	  {
+	    System.err.println("getPerm(): grantOwnership() returned true");
+	  }
+
 	useSelfPerm = true;
       }
 
@@ -5403,11 +5414,55 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (useSelfPerm || personaMatch(object))
       {
-	return result.union(personaPerms.getPerm(object.getTypeID()));
+	if (doDebug)
+	  {
+	    System.err.println("getPerm(): personaMatch or useSelfPerm returned true");
+	  }
+
+	PermEntry temp = personaPerms.getPerm(object.getTypeID());
+
+	if (doDebug)
+	  {
+	    System.err.println("getPerm(): personaPerms.getPerm(" + object + ") returned " + temp);
+
+	    System.err.println("%%% Printing PersonaPerms");
+	    PermissionMatrixDBField.debugdump(personaPerms);
+	  }
+
+	PermEntry val = result.union(temp);
+
+	if (doDebug)
+	  {
+	    System.err.println("getPerm(): returning " + val);
+	  }
+
+	return val;
       }
     else
       {
-	return result.union(defaultPerms.getPerm(object.getTypeID()));
+	if (doDebug)
+	  {
+	    System.err.println("getPerm(): personaMatch and useSelfPerm returned false");
+	  }
+
+	PermEntry temp = defaultPerms.getPerm(object.getTypeID());
+
+	if (doDebug)
+	  {
+	    System.err.println("getPerm(): defaultPerms.getPerm(" + object + ") returned " + temp);
+
+	    System.err.println("%%% Printing DefaultPerms");
+	    PermissionMatrixDBField.debugdump(defaultPerms);
+	  }
+
+	PermEntry val = result.union(temp);
+
+	if (doDebug)
+	  {
+	    System.err.println("getPerm(): returning " + val);
+	  }
+
+	return val;
       }
   }
 
@@ -5783,6 +5838,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// clear our time stamp to force an update further on
 
 	personaTimeStamp = null;
+
+	if (permsdebug)
+	  {
+	    System.err.println("updatePerms(true)");
+	  }
+      }
+    else
+      {
+	if (permsdebug)
+	  {
+	    System.err.println("updatePerms(false)");
+	  }
       }
 
     if (permBase == null)
@@ -5943,6 +6010,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 	else
 	  {
+	    if (permsdebug)
+	      {
+		System.err.println("updatePerms(): calculating new personaPerms");;
+	      }
+
 	    InvidDBField idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
 	    Invid inv;
 		
@@ -6042,6 +6114,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 			
 			if (pObj != null)
 			  {
+			    if (permsdebug)
+			      {
+				System.err.println("updatePerms(): unioning " + pObj + " into personaPerms and defaultPerms");
+
+				System.err.println("personaPerms is currently:");
+
+				PermissionMatrixDBField.debugdump(personaPerms);
+			      }
+
 			    // The default permissions for this
 			    // administrator consists of the union of
 			    // all default perms fields in all
@@ -6053,9 +6134,42 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 			    // are owned by this persona
 
 			    pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleMatrix);
+
 			    pmdbf2 = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleDefaultMatrix);
 
-			    personaPerms = personaPerms.union(pmdbf).union(pmdbf2);
+			    if (permsdebug)
+			      {
+				PermMatrix pm = new PermMatrix(pmdbf);
+
+				System.err.println("updatePerms(): RoleMatrix for " + pObj + ":");
+
+				PermissionMatrixDBField.debugdump(pm);
+
+				pm = new PermMatrix(pmdbf2);
+
+				System.err.println("updatePerms(): RoleDefaultMatrix for " + pObj + ":");
+
+				PermissionMatrixDBField.debugdump(pm);
+			      }
+
+			    personaPerms = personaPerms.union(pmdbf);
+
+			    if (permsdebug)
+			      {
+				System.err.println("updatePerms(): personaPerms after unioning with RoleMatrix is");
+
+				PermissionMatrixDBField.debugdump(personaPerms);
+			      }
+
+			    personaPerms = personaPerms.union(pmdbf2);
+
+			    if (permsdebug)
+			      {
+				System.err.println("updatePerms(): personaPerms after unioning with RoleDefaultMatrix is");
+
+				PermissionMatrixDBField.debugdump(personaPerms);
+			      }
+
 			    defaultPerms = defaultPerms.union(pmdbf2);
 
 			    // we want to maintain our notion of
