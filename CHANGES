@@ -48,7 +48,12 @@ localization resource files:
 	DBStore                dumpTask
 	Ganymede               gcTask
 	GanymedeServer         memoryStatusTask
-        DBEditObject
+        DBEditObject           DBJournal
+        IPDBField              XMLTransmitter
+        SyncRunner             GASHAdmin
+        GASHAdminFrame         fieldoption_button
+        fieldoption_editor     GanymedeValidationTask
+        xmlclient
 
 The default, American English versions of these localization files are
 simply called <classname>.properties.  When the Ganymede server is run
@@ -572,6 +577,27 @@ whatever directory service the Sync Channel is intended to support.
 
 At this writing (14 February 2005), I still need to write
 documentation for the Sync Channel system.
+
+30. [SERVER] Forced java.rmi.server.randomIDs on by default
+
+In conjunction with the adoption of SSL in Ganymede 2.0, the
+definition of the property statement 'java.rmi.server.randomIDs=true'
+is necessary to avoid direct JRMP wire-level access to RMI objects
+intended to be published by Ganymede for the benefit of a single
+client.
+
+With this property defined in the runServer script, Ganymede RMI
+objects will be given cryptographically secure 64 bit random object id
+numbers.  Anyone wishing to hijack an RMI-published object would have
+to have some way of guessing a 64 bit random number in order to send a
+JRMP message to the Ganymede server forcing an unauthenticated
+operation.
+
+In theory turning off java.rmi.server.randomIDs should make the
+Ganymede server startup marginally faster, but any modern system that
+provides high entropy random numbers through a /dev/random device
+shouldn't see any delay to speak of anyway, and the Ganymede server is
+much, much, much more secure with SSL+randomIDs turned on.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
