@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/09/14 23:17:18 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/09/17 07:25:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1087,21 +1087,5 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	done = true;
 	buffer.notifyAll();
       }
-  }
-}
-
-/**
- * This class is a simple subclassing of java.io.PipedInputStream that specifies
- * a much larger buffer size, in order to make server-side XML parsing efficient.
- */
-
-class BigPipedInputStream extends PipedInputStream {
-
-  protected byte buffer[] = new byte[1048576]; // 16 * 64k
-
-  /* -- */
-
-  public BigPipedInputStream(PipedOutputStream src) throws IOException {
-    connect(src);
   }
 }
