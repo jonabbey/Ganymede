@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1232,11 +1232,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * IMPORTANT NOTE: If a custom object's inactivate() logic decides
    * to enter into a wizard interaction with the user, that logic is
-   * responsible for calling editset.rollback("inactivate" +
-   * getLabel()) in the case of a failure to properly do all the inactivation
-   * stuff, where getLabel() must be the name of the object
-   * prior to any attempts to clear fields which could impact the
-   * returned label.
+   * responsible for calling finalizeInactivate() with a boolean
+   * indicating ultimate success of the operation.
    *
    * Finally, it is up to commitPhase1() and commitPhase2() to handle
    * any external actions related to object inactivation when
@@ -1249,9 +1246,51 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @see #commitPhase2() 
    */
 
-  public ReturnVal inactivate(boolean interactive)
+  public ReturnVal inactivate()
   {
     return null;
+  }
+
+  /**
+   *
+   * This method is to be called by the custom DBEditObject inactivate()
+   * logic when the inactivation is performed so that logging can be
+   * done.
+   *
+   * If inactivation of an object causes the label to be null, this
+   * won't work as well as we'd really like.
+   *
+   */
+
+  protected void finalizeInactivate(boolean success)
+  {
+    if (success)
+      {
+	Vector invids = new Vector();
+
+	invids.addElement(this.getInvid());
+	
+	StringBuffer buffer = new StringBuffer();
+
+	buffer.append(getTypeDesc());
+	buffer.append(" ");
+	buffer.append(getLabel());
+	buffer.append(" has been inactivated.\n\nThe object is due to be removed from the database at");
+	buffer.append(getFieldValueLocal(SchemaConstants.RemovalField).toString());
+	buffer.append(".");
+	
+	editset.logEvents.addElement(new DBLogEvent("inactivateobject",
+						    buffer.toString(),
+						    (gSession.personaInvid == null ?
+						     gSession.userInvid : gSession.personaInvid),
+						    gSession.username,
+						    invids,
+						    null));
+      }
+    else
+      {
+	editset.rollback("inactivate" + getLabel());
+      }
   }
 
   /**
@@ -1272,13 +1311,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * user, then DBSEssion.inactivateDBObject() method will rollback any changes
    * made by this method.<br><br>
    *
-   * IMPORTANT NOTE: If a custom object's reactivate() logic decides
+   * IMPORTANT NOTE: If a custom object's inactivate() logic decides
    * to enter into a wizard interaction with the user, that logic is
-   * responsible for calling editset.rollback("reactivate" +
-   * getLabel()) in the case of a failure to properly do all the reactivation
-   * stuff, where getLabel() must be the name of the object
-   * prior to any attempts to clear fields which could impact the
-   * returned label.<br><br>
+   * responsible for calling finalizeInactivate() with a boolean
+   * indicating ultimate success of the operation.<br><br>
    *
    * Finally, it is up to commitPhase1() and commitPhase2() to handle
    * any external actions related to object reactivation when
@@ -1291,6 +1327,43 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public ReturnVal reactivate()
   {
     return null;
+  }
+
+  /**
+   *
+   * This method is to be called by the custom DBEditObject reactivate()
+   * logic when the reactivation is performed so that logging can be
+   * done.
+   *
+   */
+
+  protected void finalizeReactivate(boolean success)
+  {
+    if (success)
+      {
+	Vector invids = new Vector();
+
+	invids.addElement(this.getInvid());
+
+	StringBuffer buffer = new StringBuffer();
+
+	buffer.append(getTypeDesc());
+	buffer.append(" ");
+	buffer.append(getLabel());
+	buffer.append(" has been reactivated.\n");
+	
+	editset.logEvents.addElement(new DBLogEvent("reactivateobject",
+						    buffer.toString(),
+						    (gSession.personaInvid == null ?
+						     gSession.userInvid : gSession.personaInvid),
+						    gSession.username,
+						    invids,
+						    null));
+      }
+    else
+      {
+	editset.rollback("reactivate" + getLabel());
+      }
   }
 
   /**
@@ -1315,16 +1388,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * enter into a wizard interaction with the user, that logic is
    * responsible for calling finalizeRemove() on the object when
    * it is determined that the object really should be removed,
-   * *or* calling editset.rollback("del" + getLabel()), where
-   * getLabel() must be the name of the object prior to any attempts
-   * to clear fields which could impact the returned label.
-   * 
-   * @param interactive If true, the remove() logic can present
-   * a wizard to the client to customize the inactivation logic.
+   * with a boolean indicating whether success was had.
    *
    */
 
-  public ReturnVal remove(boolean interactive)
+  public ReturnVal remove()
   {
     return null;
   }
@@ -1348,96 +1416,128 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * fields and what not to cause the object to be unlinked from
    * other objects.
    *
+   * @param success If true, this method will clean up all fields and
+   * do logging.  If false, this method will return an error condition
+   * to the code that called us, which should take care of rollback.
+   *
    * @see #commitPhase1()
    * @see #commitPhase2() 
    */
 
-  public final synchronized ReturnVal finalizeRemove()
+  public final synchronized ReturnVal finalizeRemove(boolean success)
   {
     ReturnVal retVal = null;
     DBField field;
     Enumeration enum;
     DBSession session;
+    String label = getLabel();	// remember the label before we clear it
 
     /* -- */
 
-    // we want to delete / null out all fields.. this will take care
-    // of invid links, embedded objects, and namespace allocations.
-
-    // set the deleting flag to true so that our subclasses won't
-    // freak about values being set to null.
-
-    this.deleting = true;
-
-    try
+    if (success)
       {
-	enum = fields.elements();
+	// we want to delete / null out all fields.. this will take care
+	// of invid links, embedded objects, and namespace allocations.
 
-	while (enum.hasMoreElements())
+	// set the deleting flag to true so that our subclasses won't
+	// freak about values being set to null.
+
+	this.deleting = true;
+
+	try
 	  {
-	    field = (DBField) enum.nextElement();
+	    enum = fields.elements();
 
-	    if (field.isVector())
+	    while (enum.hasMoreElements())
 	      {
-		while (field.size() > 0)
+		field = (DBField) enum.nextElement();
+
+		if (field.isVector())
 		  {
-		    retVal = field.deleteElement(0);
-
-		    if (retVal != null && !retVal.didSucceed())
+		    while (field.size() > 0)
 		      {
-			session = editset.getSession();
-		    
-			if (session != null)
+			retVal = field.deleteElement(0);
+
+			if (retVal != null && !retVal.didSucceed())
 			  {
-			    session.setLastError("DBEditObject disapproved of deleting element from field " + 
-						 field.getName());
-			  }
-
-			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							  "DBEditObject disapproved of deleting element from field " + 
-							  field.getName());
-		      }
-		  }
-	      }
-	    else
-	      {
-		// permission matrices and passwords don't
-		// allow us to call set value directly.
-
-		if (field.getType() != PERMISSIONMATRIX &&
-		    field.getType() != PASSWORD)
-		  {
-		    retVal = field.setValue(null);
-
-		    if (retVal != null && !retVal.didSucceed())
-		      {
-			session = editset.getSession();
+			    session = editset.getSession();
 		    
-			if (session != null)
-			  {
-			    session.setLastError("DBEditObject could not clear field " + 
-						 field.getName());
-			  }
+			    if (session != null)
+			      {
+				session.setLastError("DBEditObject disapproved of deleting element from field " + 
+						     field.getName());
+			      }
 
-			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							  "DBEditObject could not clear field " + 
-							  field.getName());
+			    editset.rollback("del" + label);
+
+			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							      "DBEditObject disapproved of deleting element from field " + 
+							      field.getName());
+			  }
 		      }
 		  }
 		else
 		  {
-		    field.defined = false;
+		    // permission matrices and passwords don't
+		    // allow us to call set value directly.
+
+		    if (field.getType() != PERMISSIONMATRIX &&
+			field.getType() != PASSWORD)
+		      {
+			retVal = field.setValue(null);
+
+			if (retVal != null && !retVal.didSucceed())
+			  {
+			    session = editset.getSession();
+		    
+			    if (session != null)
+			      {
+				session.setLastError("DBEditObject could not clear field " + 
+						     field.getName());
+			      }
+
+			    editset.rollback("del" + label);
+
+			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							      "DBEditObject could not clear field " + 
+							      field.getName());
+			  }
+		      }
+		    else
+		      {
+			field.defined = false;
+		      }
 		  }
 	      }
+
+	    // ok, we should be successful if we get here.  log the object deletion.
+
+	    Vector invids = new Vector();
+	    invids.addElement(this.getInvid());
+
+	    editset.logEvents.addElement(new DBLogEvent("deleteobject",
+							getTypeDesc() + ":" + label,
+							(gSession.personaInvid == null ?
+							 gSession.userInvid : gSession.personaInvid),
+							gSession.username,
+							invids,
+							null));
+
+	    return retVal;
 	  }
+	finally
+	  {
+	    // make sure we clear deleting before we return
 
-	return retVal;
+	    deleting = false;
+	  }
       }
-    finally
+    else
       {
-	// make sure we clear deleting before we return
+	editset.rollback("del" + label);
 
-	deleting = false;
+	return Ganymede.createErrorDialog("DBEditObject.finalizeRemove() error",
+					  "Custom object logic could not do the remove properly");
       }
   }
 
