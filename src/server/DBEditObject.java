@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -88,7 +88,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @see arlut.csd.ganymede.DBField
    */
 
-  DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
+  public DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
   {
     super(objectBase, invid.getNum());
 
@@ -174,7 +174,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  DBEditObject(DBObject original, DBEditSet editset) throws RemoteException
+  public DBEditObject(DBObject original, DBEditSet editset) throws RemoteException
   {
     super(original.objectBase);
 
@@ -1021,5 +1021,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public void release()
   {
     return;
+  }
+
+  /*----------------------------------------------------------
+
+    Convenience methods for our customization subclasses
+
+  ----------------------------------------------------------*/
+
+  protected GanymedeSession internalSession()
+  {
+    return Ganymede.internalSession;
   }
 }
