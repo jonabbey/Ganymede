@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 1999/10/29 21:45:49 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 1999/11/16 08:00:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -233,7 +233,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // now, find a uid.. unfortunately, we have to use immutable Integers here.. not
     // the most efficient at all.
 
-    while (!namespace.reserve(editset, uidVal, true))
+    while (!namespace.reserve(getEditSet(), uidVal, true))
       {
 	uidVal = new Integer(uidVal.intValue()+1);
       }
