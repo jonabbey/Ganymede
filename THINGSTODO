@@ -1,5 +1,5 @@
-Ganymede Release 1.0.7
-October 11, 2001
+Ganymede Release 1.0.8
+November ??, 2001
 THINGSTODO
 ---------------------------------------------
 
@@ -137,6 +137,30 @@ emitted files, and would allow for easy retrieval of the emitted files
 for any given moment in time.
 
 Schema kits should be developed in this direction.
+
+7) Eliminate the 'objects owned' field in the owner group object [bugzilla #23]
+
+It might be a good idea to make the object ownership linkages
+non-symmetric, with the invid's in each object pointing to its owners
+through a non-symmetric relationship.  This would allow simultaneous
+adding or deleting of objects from the owner group by distinct
+transactions, would reduce the size of the database on disk, and would
+simplify further the XML representation of the Ganymede database.  The
+cost would be that the once-per-login getOwnerGroups() method in
+GanymedeSession would have to be either reworked to perform discrete
+queries, or an alternative recursive algorithm that started from the
+leafs and traversed up the ownership tree piece-wise to try and
+construct a reverse-transitive closure would have to be implemented.
+
+In addition, the client's objects owned panel would have to either be
+abandoned, making mass object adds or deletes for an owner group more
+difficult, or implemented using completely custom logic to handle the
+process of editing all objects thus added/deleted and modifying the
+owner field.
+
+Finally, there would need to be custom logic that would enforce the
+current permission logic, allowing only users who can edit the
+'Objects Owned' field for an owner group to add objects to that list.
 
 ---
 

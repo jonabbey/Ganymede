@@ -158,6 +158,13 @@ XML field handling logic simply saw that the "jonabbey" string
 was already in the vector (at least) once, and so didn't bother
 to remove the redundant copy.
 
+8. [ADMIN CONSOLE/SERVER] More fixes to prevent memory pinning with schema editor
+
+The admin console's schema editing code has continued to cause memory
+on the server to be pinned after the schema editor window has been
+closed.  I've added a great deal of manual object dissolution and
+reference clearing to prevent memory pinning in the server.
+
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
 RELEASE DATE: October 11, 2001
