@@ -2,7 +2,7 @@
    Ganymede Logo
    
                           Ganymede Installation Guide
-                         Release 1.0.10 - 2 April 2002
+                       Release 1.0.11 - 9 December 2002
                                        
      _________________________________________________________________
                                       
@@ -97,9 +97,8 @@ _1. Requirements_
    available when running the Ganymede clients on a UNIX-type system such
    as Linux, FreeBSD, Solaris, etc. However, be aware that Java version
    1.2 and 1.3 have extremely bad performance when you use X Windows to
-   display the clients on a remote display. Java 1.4 (now in beta on
-   Linux and Solaris) is much faster when using networked X Windows, and
-   is recommended.
+   display the clients on a remote display. Java 1.4 is much faster when
+   using networked X Windows, and is recommended.
    
    The Ganymede clients will also run using JDK 1.1.7 and 1.1.8, and you
    may find that this gives you the best performance when using X Windows
