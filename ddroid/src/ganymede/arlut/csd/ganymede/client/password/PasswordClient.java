@@ -2,7 +2,7 @@
 
    PasswordClient.java
 
-   The core of a gui/text password changing client for Directory Droid.
+   The core of a gui/text password changing client for Ganymede.
    
    Created: 28 January 1998
 
