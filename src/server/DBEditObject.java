@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -452,7 +452,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public Invid createNewEmbeddedObject(InvidDBField field)
   {
-    return null;		// default
+    throw new IllegalArgumentException("Error: createNewEmbeddedObject called on base DBEditObject");
   }
 
   /* -------------------- pseudo-static Customization hooks -------------------- 
@@ -863,12 +863,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * 
    */
 
-  public StringBuffer obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field)
   {
     if (field.isEditable() && (field instanceof InvidDBField) && 
 	!field.isEditInPlace())
       {
-	StringBuffer results = new StringBuffer();
 	DBObjectBaseField fieldDef;
 	short baseId;
 
@@ -892,9 +891,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	// and we want to return a list of choices.. can use the regular
 	// query output here
 
-	results.append(Ganymede.internalSession.query(new Query(baseId)));
-
-	return results;
+	return Ganymede.internalSession.query(new Query(baseId));
       }
     
     //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
@@ -1033,8 +1030,59 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @see #commitPhase2()
    */
 
-  public boolean remove()
+  public synchronized boolean remove()
   {
+    DBField field;
+    Enumeration enum;
+    DBSession session;
+
+    /* -- */
+
+    // we want to delete / null out all fields.. this will take care
+    // of invid links and namespace allocations.
+
+    enum = fields.elements();
+
+    while (enum.hasMoreElements())
+      {
+	field = (DBField) enum.nextElement();
+
+	if (field.isVector())
+	  {
+	    while (field.size() > 0)
+	      {
+		if (!field.deleteElement(0))
+		  {
+		    session = editset.getSession();
+		    
+		    if (session != null)
+		      {
+			session.setLastError("DBEditObject disapproved of deleting element from field " + field.getName());
+		      }
+
+		    return false;
+		  }
+	      }
+	  }
+	else
+	  {
+	    if (field.getType() != PERMISSIONMATRIX)
+	      {
+		if (!field.setValue(null))
+		  {
+		    session = editset.getSession();
+		    
+		    if (session != null)
+		      {
+			session.setLastError("DBEditObject could not clear field " + field.getName());
+		      }
+
+		    return false;
+		  }
+	      }
+	  }
+      }
+
     return true;
   }
 
@@ -1130,234 +1178,4 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   {
     return Ganymede.internalSession;
   }
-
-  // the first line of every parseDump() compatible dump
-  // needs to indicate whether invid's will be encoded
-  // into the dump or not.
-
-  protected static String objectDumpHeader(boolean includeInvid)
-  {
-    if (includeInvid)
-      {
-	return "inv\n";
-      }
-    else
-      {
-	return "str\n";
-      }
-  }
-
-  // this method produces a parseDump() compatible,
-  // newline terminated string representation of 
-  // a result entry.
-
-  protected static String resultDump(Result result)
-  {
-    StringBuffer buffer = new StringBuffer();
-    char[] chars;
-
-    /* -- */
-
-    chars = result.getInvid().toString().toCharArray();
-    
-    for (int j = 0; j < chars.length; j++)
-      {
-	if (chars[j] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (chars[j] == '\n')
-	  {
-	    buffer.append("\\\n");
-	  }
-	else if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
-      }
-
-    buffer.append("|");
-
-    chars = result.toString().toCharArray();
-    
-    for (int j = 0; j < chars.length; j++)
-      {
-	if (chars[j] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (chars[j] == '\n')
-	  {
-	    buffer.append("\\\n");
-	  }
-	else if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
-      }
-
-    buffer.append("\n");
-
-    return buffer.toString();
-  }
-
-  // this method dumps an object to a string representation suitable
-  // for use with parseDump().  If includeInvid is true, the object's
-  // primary label will be preceded by an invid encoding, otherwise
-  // the string returned will be an escaped form of the object's
-  // label, followed by a newline.
-
-  protected static String objectDump(DBObject obj, boolean includeInvid, DBSession session)
-  {
-    if (includeInvid)
-      {
-	// use the normal object dump format for this object
-
-	return obj.resultDump(session);
-      }
-    else
-      {
-	return stringDump(obj.getLabel());
-      }
-  }
-
-  // this method generates an escaped form of
-  // a string, suitable for use in an object dump.
-  //
-  // note that a trailing newline is returned here.
-
-  protected static String stringDump(String val)
-  {
-    StringBuffer buffer = new StringBuffer();
-
-    char[] chars = val.toCharArray();
-    
-    for (int j = 0; j < chars.length; j++)
-      {
-	if (chars[j] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (chars[j] == '\n')
-	  {
-	    buffer.append("\\\n");
-	  }
-	else if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
-      }
-
-    buffer.append("\n");
-
-    return buffer.toString();
-  }
-
-  // A static convenience method to allow server-side code
-  // to get a parsed form of a choice dump.
-
-  static Vector parseDump(StringBuffer buffer)
-  {
-    StringBuffer tempString = new StringBuffer();
-    char[] chars = buffer.toString().toCharArray();
-    int index = 0;
-    Vector results = new Vector();
-    Invid invid = null;
-    boolean includeInvid;
-
-    /* -- */
-
-    tempString.setLength(0);
-
-    while (index < chars.length && chars[index] != '\n')
-      {
-	tempString.append(chars[index++]);
-      }
-
-    if (tempString.toString().equals("inv"))
-      {
-	includeInvid = true;
-      }
-    else
-      {
-	includeInvid = false;
-      }
-
-    index++;			// skip over newline
-
-    while (index < chars.length)
-      {
-	if (includeInvid)
-	  {
-	    // first read in the Invid
-
-	    tempString.setLength(0); // truncate the buffer
-
-	    // System.err.println("Parsing row " + rows++);
-
-	    while (chars[index] != '|')
-	      {
-		// if we have a backslashed character, take the backslashed char
-		// as a literal
-	    
-		if (chars[index] == '\n')
-		  {
-		    throw new RuntimeException("parse error in row");
-		  }
-	    
-		tempString.append(chars[index++]);
-	      }
-
-	    //	System.err.println("Invid string: " + tempString.toString());
-	    
-	    invid = new Invid(tempString.toString());
-	    
-	    index++;		// skip over |
-	  }
-
-	// now read in the label
-
-	tempString.setLength(0); // truncate the buffer
-
-	while (chars[index] != '\n')
-	  {
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
-
-	    if (chars[index] == '\\')
-	      {
-		index++;
-	      }
-
-	    tempString.append(chars[index++]);
-	  }
-
-	if (includeInvid)
-	  {
-	    results.addElement(new Result(invid, tempString.toString()));
-	  }
-	else
-	  {
-	    results.addElement(tempString.toString());
-	  }
-
-	index++;		// skip newline
-      }
-
-    return results;
-  }
-
-
 }
