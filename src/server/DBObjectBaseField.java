@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,6 +43,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   boolean editable = true;	// can this field be edited in the schema editor?
   boolean removable = true;	// can this field be removed from the owning Base in the schema editor?
+  boolean visibility = true;	// should this field be displayed to the client?
 
   String classname = null;	// name of class to manage user interactions with this field
   String comment = null;
@@ -153,6 +154,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     editable = original.editable;
     removable = original.removable;
     editInPlace = original.editInPlace;
+    visibility = original.visibility;
 
     classname = original.classname; // name of class to manage user interactions with this field
     comment = original.comment;
@@ -188,6 +190,11 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     out.writeUTF(comment);
     out.writeBoolean(editable);
     out.writeBoolean(removable);
+
+    if ((base.store.major_version >= 1) && (base.store.minor_version >= 6))
+      {
+	out.writeBoolean(visibility); // added at file version 1.6
+      }
 
     if ((base.store.major_version >= 1) && (base.store.minor_version >= 1))
       {
@@ -299,6 +306,17 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
     editable = in.readBoolean();
     removable = in.readBoolean();
+
+    // at file version 1.6, we introduced field visibility
+
+    if ((base.store.file_major >= 1) && (base.store.file_minor >= 6))
+      {
+	visibility = in.readBoolean();
+      }
+    else
+      {
+	visibility = true;
+      }
 
     // at file version 1.1, we introduced field_order
 
@@ -414,6 +432,20 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   public boolean isRemovable()
   {
     return removable;
+  }
+
+  /**
+   *
+   * This method returns true if this field
+   * is intended to be visible to the client normally,
+   * false otherwise.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isVisible()
+  {
+    return visibility;
   }
 
   /**
