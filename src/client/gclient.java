@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -274,6 +274,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     menubar.add(PersonaMenu);
     this.setMenuBar(menubar);
 
+    // Create menus for the tree
+
     createMI = new MenuItem("Create");
     viewMI = new MenuItem("List editable");
     viewAllMI = new MenuItem("List all");
@@ -406,6 +408,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rightTop.add("West", rightL);
 
     timerLabel = new JLabel();
+    timerLabel.setMinimumSize(new Dimension(100,5));
     timer = new connectedTimer(timerLabel, 5000);
     rightTop.add("East", timerLabel);
 
