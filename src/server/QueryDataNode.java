@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -205,6 +205,7 @@ public class QueryDataNode extends QueryNode {
   
   public String dumpToString ()
   {
+    
     String operator, returnVal;
 
     /* -- */
@@ -212,6 +213,13 @@ public class QueryDataNode extends QueryNode {
     // The following is designed to make the query string
     // more readable by using the operator instad of its
     // mapped numeric value
+
+    // Note - the operators differ for vectors. We'll have check to see
+    // what the field is first
+
+
+    // Insert Vector operation stuff here :-)
+
 
     if (this.comparator == 1)
       {
@@ -233,6 +241,20 @@ public class QueryDataNode extends QueryNode {
       {
 	operator = ">=";
       }
+    else if (this.comparator == 6)
+      {
+	operator = "= [Case Insensitive]";
+      }
+    else if (this.comparator == 7)
+      {
+	operator = "Start With";
+      }
+    else if (this.comparator == 8)
+      {
+	operator = "End With";
+      }
+
+
     else
       {
 	operator = "Error: Operator undefined";
