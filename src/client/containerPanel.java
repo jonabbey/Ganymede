@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.63 $ %D%
+    Version: $Revision: 1.64 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -392,6 +392,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    update(updatesWhileLoading);
 	  }
+
 	gc.containerPanelFinished(this);
       }
   }
@@ -569,14 +570,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     // them after the load is finished.
     if (!loaded)
       {
-	for (int i = 0; i < fields.size(); i++)
+	// If we are not loading yet, then we don't need to worry
+	// about keeping track of the fields.  They will current when
+	// they are first loaded.
+	if (loading)
 	  {
-	    updatesWhileLoading.addElement(fields.elementAt(i));
-	  }
-
-	if (!loading)
-	  {
-	    load();
+	    for (int i = 0; i < fields.size(); i++)
+	      {
+		updatesWhileLoading.addElement(fields.elementAt(i));
+	      }
 	  }
 
 	return;
@@ -1018,6 +1020,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	else if (comp instanceof vectorPanel)
 	  {
 	    ((vectorPanel)comp).refresh();
+	  }
+	else if (comp instanceof JIPField)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Updating JIPField.");
+	      }
+	    
+	    ((JIPField)comp).setValue((Byte[]) field.getValue());
+
 	  }
 	else 
 	  {
