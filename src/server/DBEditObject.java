@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.93 $ %D%
+   Version: $Revision: 1.94 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.93 $ %D%
+ * @version $Revision: 1.94 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -583,12 +583,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	field = (DBField) enum.nextElement();
 
 	// we don't want to emit fields that don't have anything in them..
-	// DBField.defined is supposed to be a flag that keeps track of that,
-	// but there seems to be a bug in the system someplace.  The value/values
-	// checks is supposed to make up for this.. this is really not the way
-	// to do it.  THis is rank laziness.
+	// DBField.isDefined() is supposed to tell us whether a field should
+	// be kept.
 
-	if (!field.defined)
+	if (!field.isDefined())
 	  {
 	    removeList.addElement(field);
 
@@ -2146,7 +2144,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		  }
 		else
 		  {
-		    field.defined = false;
+		    // catchall for permission matrix and password
+		    // fields, which do this their own way.
+
+		    field.setUndefined(true);
 		  }
 	      }
 	  }
@@ -2488,14 +2489,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	currentField = (DBField) this.getField(fieldDef.getID());
 
-	if ((origField == null || !origField.defined) && 
-	    (currentField == null || !currentField.defined))
+	if ((origField == null || !origField.isDefined()) && 
+	    (currentField == null || !currentField.isDefined()))
 	  {
 	    continue;
 	  }
 
-	if (((origField == null) || !origField.defined) &&
-	    ((currentField != null) && currentField.defined))
+	if (((origField == null) || !origField.isDefined()) &&
+	    ((currentField != null) && currentField.isDefined()))
 	  {
 	    added.append("\t");
 	    added.append(fieldDef.getName());
@@ -2511,8 +2512,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 				   currentField.getValueString() + "\n");
 	      }
 	  }
-	else if (((currentField == null) || !currentField.defined) &&
-		 ((origField != null) && origField.defined))
+	else if (((currentField == null) || !currentField.isDefined()) &&
+		 ((origField != null) && origField.isDefined()))
 
 	  {
 	    deleted.append("\t");
