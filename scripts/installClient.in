@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.4 $
-# $Date: 1999/01/29 23:08:52 $
+# $Revision: 1.5 $
+# $Date: 1999/04/06 21:36:02 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -26,7 +26,7 @@ use File::Copy;
 @steps = ("JVM", "SWINGJARS", "SYSTEMNAME","CLIENTINSTALL", "SUPERNAME");
 
 %vars = ("JVM" => "<#JAVADIR#>",
-	 "SWINGJARS" => "/opt/depot/swing-1.1",
+	 "SWINGJARS" => "<#SWINGDIR#>",
          "SYSTEMNAME" => "",
          "CLIENTINSTALL" => "",
          "SUPERNAME" => "supergash");

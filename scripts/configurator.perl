@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.37 $
-# $Date: 1999/04/06 20:53:57 $
+# $Revision: 1.38 $
+# $Date: 1999/04/06 21:36:02 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -256,6 +256,7 @@ sub write_install {
     while (<INSTIN>){
 	s/\/opt\/bin\/perl5/$perlname/;
 	s/\<\#JAVADIR\#\>/$javadir/;
+	s/\<\#SWINGDIR\#\>/$swingdir/;
 	print INSTOUT $_;
     }
 
@@ -384,6 +385,7 @@ sub copydir{
 $perlname = $ENV{GPERL};
 $rootdir = &resolve(cwd(), $ENV{GROOTDIR});
 $javadir = $ENV{GJAVA};
+$swingdir = $ENV{GSWING};
 
 # See if there's a user-defined target location
 # for the classes. Otherwise, use default.
@@ -398,6 +400,7 @@ if ($classdir eq "") {
 }
 
 removelastslash($javadir);
+removelastslash($swingdir);
 
 # First we need to put out all the config.sh files that the build and
 # rebuild scripts depend on.  See the header for write_config() to
