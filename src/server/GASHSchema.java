@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -728,8 +728,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
 	dialogResource.addBoolean("Case Insensitive:");
 
 	StringDialog dialog = new StringDialog(dialogResource);
-	Hashtable results = new Hashtable();
-	results = dialog.DialogShow();
+	Hashtable results = dialog.DialogShow();
 
 	String newNameSpace = null;
 	Boolean insensitive = null;
@@ -1308,29 +1307,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     targetC = new Choice();
     targetC.addItemListener(this);
-    targetC.addItem("<none>");
-
-    Base[] baseList;
-    try
-      {
-	baseList = owner.getSchemaEdit().getBases();
-      }
-    catch (RemoteException rx)
-      {
-	throw new IllegalArgumentException("Exception getting Bases: " + rx);
-      }
-    for (int i = 0 ; i < baseList.length ; i++)
-      {
-	try
-	  {
-	    targetC.addItem(baseList[i].getName());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Exception getting bases name: " + rx);
-	  }
-
-      }
+    refreshTargetChoice();
     addRow(editPanel, targetC, "Target Object:", 16);
 
     symmetryCF = new checkboxField(null, false, ca, true);
@@ -1339,7 +1316,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     fieldC = new Choice();
     fieldC.addItemListener(this);
-    fieldC.addItem("<none>");
+    refreshFieldChoice();
     addRow(editPanel, fieldC, "Target Field:", 18);
 
     booleanShowing = true;
@@ -1510,6 +1487,105 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       
     }
     
+  void refreshTargetChoice()
+    {
+      Base[] baseList;
+      targetC.removeAll();
+      try
+	{
+	  baseList = owner.getSchemaEdit().getBases();
+	}
+      catch (RemoteException rx)
+	{
+	  throw new IllegalArgumentException("Exception getting Bases: " + rx);
+	}
+      targetC.addItem("<none>");
+      for (int i = 0 ; i < baseList.length ; i++)
+	{
+	  try
+	    {
+	      targetC.addItem(baseList[i].getName());
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new IllegalArgumentException("Exception getting bases name: " + rx);
+	    }
+	  
+	}
+    }
+
+  void refreshFieldChoice()
+    {
+      String target = targetC.getSelectedItem();
+
+      Base targetBase;
+      Vector fields = null;
+      try
+	{
+	  targetBase = owner.getSchemaEdit().getBase(target);
+	  if (targetBase == null)
+	    {
+	      System.out.println("targetBase is null");
+	    }
+	  else
+	    {
+	      fields = targetBase.getFields();
+	    }
+	}
+      catch (RemoteException rx)
+	{
+	  throw new IllegalArgumentException("Exception getting bases in refreshFieldChoice " + rx);
+	}
+      fieldC.removeAll();
+      fieldC.addItem("<none>");
+
+      if (fields == null)
+	{
+	  System.out.println("fields == null");
+	  fieldC.select("<none>");
+	}
+      else
+	{
+	  for (int i = 0; i < fields.size(); ++i)
+	    {
+	      BaseField bf = (BaseField)fields.elementAt(i);
+	      String type;
+	      try
+		{
+		  type = bf.getTypeDesc();
+		}
+	      catch (RemoteException rx)
+		{
+		  throw new IllegalArgumentException("Exception getting type description " + rx);
+		}
+	      System.out.println("checking type: " + type);
+	      if (type.equals("invid"))
+		{
+		  try
+		    {
+		      System.out.println("adding " + bf.getName());
+		      fieldC.add(bf.getName());
+		    }
+		  catch (RemoteException rx)
+		    {
+		      throw new IllegalArgumentException("Exception getting base field name " + rx);
+		    }
+		}
+	      else
+		{
+		  System.out.println("Skipping " + type);
+		}
+	    }
+
+
+	}
+
+      
+
+
+    }
+
+
   void changeTypeChoice(String selectedItem)
   {
     booleanShowing = false;
@@ -1610,7 +1686,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    if (fieldDef.getNameSpaceLabel() == null)
 	      {
 		namespaceC.select("<none>");
-		System.out.println("selecting <none>");
+		System.out.println("selecting <none> for NameSpace");
 	      }
 	    else
 	      {
@@ -1640,26 +1716,81 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	  {
 	    if (fieldDef.isTargetRestricted())
 	      {
-		targetLimitCF.setState(true);
-		targetC.removeAll();
-
-		if (fieldDef.isSymmetric())
+		refreshTargetChoice();
+		SchemaEdit se = owner.getSchemaEdit();
+		short targetB = fieldDef.getTargetBase();
+		System.out.println("target: " + targetB);
+		if (targetB == -1)
 		  {
-		    symmetryCF.setState(true);
-		    fieldC.removeAll();
+		    System.out.println("unknown target type");
+		    targetC.select("<none>");
 		  }
 		else
 		  {
+		    Base targetBase = null;
+		    targetBase = se.getBase(targetB);
+		    if (targetBase == null)
+		      System.out.println("targetbase is null");
+		    String string = targetBase.getName();
+		    System.out.println("Choosing " + string);
+		    targetC.select(string);
+		  }
+		
+		targetLimitCF.setState(true);
+		
+
+		if (fieldDef.isSymmetric())
+		  {
+		    refreshFieldChoice();
+		    System.out.println("fieldDef is symmetric");
+		    symmetryCF.setState(true);
+		    short targetF = fieldDef.getTargetField();
+		    Base targetBase = null;
+		    se = owner.getSchemaEdit();
+		    targetBase = se.getBase(targetB);
+		    if (targetF == -1)
+		      {
+			System.out.println("unknown target field");
+			fieldC.select("<none>");
+		      }
+		    else
+		      {
+			if (targetBase == null)
+			  {
+			    System.out.println("targetBase==null");
+			  }
+			else
+			  {
+			    BaseField targetField;
+			    try
+			      {
+				targetField = targetBase.getField(targetF);
+			      }
+			    catch (RemoteException rx)
+			      {
+				throw new IllegalArgumentException("exception getting field " + rx);
+			      }
+			    System.out.println("selecting " + targetField.getName());
+			    fieldC.select(targetField.getName());
+			  }
+			    
+			
+		      }
+
+		  }
+		else
+		  {
+		    System.out.println("fieldDef is not symmetric");
 		    symmetryCF.setState(false);
-		    fieldC.removeAll();
 		  }
 	      }
 	    else
 	      {
 		targetLimitCF.setState(false);
-		targetC.removeAll();
-		fieldC.removeAll();
+		refreshTargetChoice();
 	      }
+
+	    //refreshFieldChoice();
 
 	    typeC.select("Object Reference");
 	    referenceShowing = true;
@@ -1766,6 +1897,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	else if (comp == symmetryCF)
 	  {
 	    System.out.println("symmetryCF");
+	    fieldDef.setSymmetry(((Boolean)v.getValue()).booleanValue());
 	    checkVisibility();
 	  }
 	return true;
@@ -1799,7 +1931,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
     else if (e.getItemSelectable() == targetC)
       {
-	System.out.println("target: " + e.getItem());
+	//System.out.println("target: " + e.getItem());
 	
 	Base[] baseList;
 	Base currentBase = null;
@@ -1829,7 +1961,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 		throw new RuntimeException("Remote Exception setting Target: " + rx);
 	      }
 	  }
-	if (currentBase = null)
+	if (currentBase == null)
 	  {
 	    throw new IllegalArgumentException("Could not match selection with a Base");
 	  }
@@ -1838,7 +1970,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    try
 	      {
 		System.out.println("Setting target field to " + currentBase.getName());
-		fieldDef.setTargetField(currentBase.getTypeID());
+		fieldDef.setTargetBase(currentBase.getTypeID());
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -1852,6 +1984,26 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     else if (e.getItemSelectable() == fieldC)
       {
 	System.out.println("field: " + e.getItem());
+
+	System.out.println("Setting field to " + fieldC.getSelectedItem());
+
+	String item = fieldC.getSelectedItem();
+
+	try
+	  {
+	    if (item.equals("<none>"))
+	      {
+		fieldDef.setTargetField(null);
+	      }
+	    else
+	      {
+		fieldDef.setTargetField(item);
+	      } 
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new IllegalArgumentException ("Exception setting TargetField: " + rx);
+	  }
       }
     checkVisibility();
   }
