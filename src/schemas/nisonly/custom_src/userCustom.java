@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 1999/08/18 23:48:54 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 1999/10/25 21:29:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -210,7 +210,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public boolean fieldRequired(DBObject object, short fieldid)
   {
-    if (isInactivated())
+    if (object.isInactivated())
       {
 	switch (fieldid)
 	  {
