@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -626,7 +626,7 @@ final class DBNameSpace extends UnicastRemoteObject implements NameSpace {
   public synchronized boolean rollback(DBEditSet editSet, String name)
   {
     Object value1, value2;
-    Vector currentVals;
+    Vector currentVals, elementsToRemove;
     Hashtable transpoints;
     DBNameSpaceCkPoint point;
     DBNameSpaceHandle handle1, handle2;
@@ -667,6 +667,8 @@ final class DBNameSpace extends UnicastRemoteObject implements NameSpace {
     // ok, now we need to take the state of currentVals and roll it back
     // to the state we had at time point.
 
+    elementsToRemove = new Vector();
+
     for (int i = 0; i < currentVals.size(); i++)
       {
 	value1 = currentVals.elementAt(i);
@@ -696,6 +698,7 @@ final class DBNameSpace extends UnicastRemoteObject implements NameSpace {
 	    else
 	      {
 		uniqueHash.remove(value1);
+		elementsToRemove.addElement(value1);
 	      }
 	  }
 	else
@@ -704,6 +707,15 @@ final class DBNameSpace extends UnicastRemoteObject implements NameSpace {
 
 	    uniqueHash.put(value2, handle2);
 	  }
+      }
+
+    // now clean out the vector of values for this editset, removing
+    // any values that are being freed up by this rollback.
+
+    for (int i = 0; i < elementsToRemove.size(); i++)
+      {
+	value1 = elementsToRemove.elementAt(i);
+	currentVals.removeElement(value1);
       }
 
     // that should be all we have to do, since once a value in the name space
