@@ -6,7 +6,7 @@
    GASH hosts_info file
    
    Created: 18 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -121,6 +121,25 @@ public class SystemLoader {
     System.err.println("\nTotal interfaces created: " + interfaceCount);
   }
 
+  /**
+   *
+   * The gash hosts_info file has the domain name attached to all system
+   * and host names.  We don't want them in our database, so we provide
+   * this handy function to strip any domain info off of a host name.
+   *
+   */
+
+  public static String stripDomain(String name)
+  {
+    if (name.indexOf('.') == -1)
+      {
+	return name;
+      }
+    else
+      {
+	return name.substring(0, name.indexOf('.'));
+      }
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -154,6 +173,7 @@ class system {
     token = tokens.nextToken();
 
     systemName = getString(tokens);
+    systemName = SystemLoader.stripDomain(systemName);
 
     token = tokens.nextToken();
 
@@ -446,7 +466,9 @@ class interfaceObj {
       }
     else
       {
-	interfaceName = getString(tokens); // this will be the empty string
+	interfaceName = getString(tokens);
+	interfaceName = SystemLoader.stripDomain(interfaceName);
+
 	token = tokens.nextToken();
       }
 
@@ -459,6 +481,7 @@ class interfaceObj {
     token = tokens.nextToken();
 
     systemName = getString(tokens);
+    systemName = SystemLoader.stripDomain(systemName);
 
     token = tokens.nextToken();
 
