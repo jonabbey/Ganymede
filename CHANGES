@@ -216,11 +216,10 @@ system when many objects are owned by a single owner group.
 This change was made possible by the (now quite old) change described
 in 0.99.8, #17.
 
-The client was also changed so as not to show the 'objects owned' pane
-when viewing or editing an Owner Group object.  I plan on putting that
-pane back in, but it will be implemented with discrete query logic,
-rather than the old InvidDBField lookup, again for the benefit of
-avoiding owner group locking.
+The 'Objects Owned' pane is still present in the client when viewing
+or editing an Owner Group object, but this is now done using discrete
+query logic rather than the old InvidDBField lookup, again for the
+benefit of avoiding Owner Group locking.
 
 12. [SERVER] Added a per-DBObjectBaseField lastChange variable
 
