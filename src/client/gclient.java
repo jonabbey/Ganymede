@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.105 $ %D%
+   Version: $Revision: 1.106 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3886,6 +3886,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    my_querybox = new querybox(this, this, "Query Panel");
 	  }
 
+	// need some final variables for the inner class
+	// to use.
+
 	final Query q = my_querybox.myshow();
 	final Session s = getSession();
 	final gclient thisGclient = this;
@@ -3899,15 +3902,28 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		
 		try
 		  {
-		    buffer = s.dump(q);
+		    try
+		      {
+			buffer = s.dump(q);
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("caught remote: " + ex);
+		      }
+		    catch (Error ex)
+		      {
+			new JErrorDialog(thisGclient, 
+					 "Could not complete query.. may have run out of memory.\n\n" +
+					 ex.getMessage());
+			throw ex;
+		      }
+
+		    thisGclient.wp.addTableWindow(session, q, buffer, "Query Results");
 		  }
-		catch (RemoteException ex)
+		finally
 		  {
-		    throw new RuntimeException("caught remote: " + ex);
+		    thisGclient.wp.removeWaitWindow(this);
 		  }
-		
-		thisGclient.wp.addTableWindow(session, q, buffer, "Query Results");
-		thisGclient.wp.removeWaitWindow(this);
 	      }
 	  }});
 
@@ -4246,30 +4262,42 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		
 		thisGclient.wp.addWaitWindow(this);
 		DumpResult buffer = null;
-		
+
 		try
 		  {
-		    buffer = thisGclient.getSession().dump(q);
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("caught remote: " + ex);
-		  }
+		    try
+		      {
+			buffer = thisGclient.getSession().dump(q);
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("caught remote: " + ex);
+		      }
+		    catch (Error ex)
+		      {
+			new JErrorDialog(thisGclient, 
+					 "Could not complete query.. may have run out of memory.\n\n" +
+					 ex.getMessage());
+			throw ex;
+		      }
 		    
-		if (buffer == null)
-		  {
-		    setStatus("No results from list operation on base " + tempText);
-		  }
-		else
-		  {
-		    setStatus("List returned from server on base " + tempText +
-			      " - building table");
+		    if (buffer == null)
+		      {
+			setStatus("No results from list operation on base " + tempText);
+		      }
+		    else
+		      {
+			setStatus("List returned from server on base " + tempText +
+				  " - building table");
 		    
-		    thisGclient.wp.addTableWindow(thisGclient.getSession(), q,
-						  buffer, "Query Results");
+			thisGclient.wp.addTableWindow(thisGclient.getSession(), q,
+						      buffer, "Query Results");
+		      }
 		  }
-
-		thisGclient.wp.removeWaitWindow(this);
+		finally
+		  {
+		    thisGclient.wp.removeWaitWindow(this);
+		  }
 	      }});
 
 	    t.start();
@@ -4315,28 +4343,40 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		    
 		    try
 		      {
-			thisGclient.setStatus("Sending query for base " + text + " to server");
+			try
+			  {
+			    thisGclient.setStatus("Sending query for base " + text + " to server");
 			
-			buffer = thisGclient.getSession().dump(q);
-		      }
-		    catch (RemoteException ex)
-		      {
-			throw new RuntimeException("caught remote: " + ex);
-		      }
+			    buffer = thisGclient.getSession().dump(q);
+			  }
+			catch (RemoteException ex)
+			  {
+			    throw new RuntimeException("caught remote: " + ex);
+			  }
+			catch (Error ex)
+			  {
+			    new JErrorDialog(thisGclient, 
+					     "Could not complete query.. may have run out of memory.\n\n" +
+					     ex.getMessage());
+			    throw ex;
+			  }
 		    
-		    if (buffer != null)
-		      {
-			thisGclient.setStatus("Server returned results for query on base " + 
-					      text + " - building table");
+			if (buffer != null)
+			  {
+			    thisGclient.setStatus("Server returned results for query on base " + 
+						  text + " - building table");
 			
-			thisGclient.addTableWindow(session, q, buffer, "Query Results");
+			    thisGclient.addTableWindow(session, q, buffer, "Query Results");
+			  }
+			else
+			  {
+			    thisGclient.setStatus("results == null");
+			  }
 		      }
-		    else
+		    finally
 		      {
-			thisGclient.setStatus("results == null");
+			thisGclient.wp.removeWaitWindow(this);
 		      }
-
-		    thisGclient.wp.removeWaitWindow(this);
 		  }
 	      }});
 	      
