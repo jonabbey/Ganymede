@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -297,6 +297,48 @@ public class DBQueryHandler {
 	    if (n.comparator == n.EQUALS)
 	      {
 		return i1.equals(i2);
+	      }
+	    else
+	      {
+		return false;	// invalid comparator
+	      }
+	  }
+
+	if (value instanceof Byte[])
+	  {
+	    Byte[] fBytes;
+	    Byte[] oBytes;
+
+	    /* -- */
+
+	    if (n.comparator == n.EQUALS)
+	      {
+		try
+		  {
+		    fBytes = (Byte[]) value;
+		    oBytes = (Byte[]) n.value;
+		  }
+		catch (ClassCastException ex)
+		  {
+		    return false;
+		  }
+
+		if (fBytes.length != oBytes.length)
+		  {
+		    return false;
+		  }
+		else
+		  {
+		    for (int i = 0; i < fBytes.length; i++)
+		      {
+			if (fBytes[i].byteValue() != oBytes[i].byteValue())
+			  {
+			    return false;
+			  }
+		      }
+
+		    return true;
+		  }
 	      }
 	    else
 	      {
