@@ -28,7 +28,10 @@ INSTALLDIR=/var/ganymede
 
 # DEBUG controls whether the JVM that runs the Ganymede server will
 # allow a Java debugger to attach to it.  If you want to allow a Java
-# debugger to attach to the server, set 'DEBUG=-Xdebug'.
+# debugger to attach to the server, set 'DEBUG=-Xdebug'.  If you want
+# to allow a debugger to attach to the server and you want to force
+# the JVM to run in interpreted mode for some reason, set
+# 'DEBUG=-Xdebug -Xint'.
 
 DEBUG=
 
