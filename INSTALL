@@ -1,279 +1,384 @@
-Ganymede Developer Release 0.99.2
-June 18, 1999
-INSTALL notes
----------------------------------------------
 
-Installing Ganymede breaks down into five steps:
-
-  1) Configuring the distribution for your site
-
-  2) Installing server files
-
-  3) Installing client files
-
-  4) Configuring the server
-
-  5) Loading the server
-
-Each of these topics is discussed in its own section below.
-
-1. Configuring the distribution for your site
-
-  You will notice a configure script in this directory.  This script
-  does two main things.  First, it unpacks three scripts you can
-  immediately use to install the client and server, called installClient,
-  installClient2 (for JDK 1.2), and installServer.  Second, configure
-  goes through the source tree and builds and configures the makefiles
-  and build scripts used to build the source.
-
-  See README.source for information on building the source tree.
-
-1. Installing Server Files
-
-  The server files should be in a location that is not accessible
-  to the average user.  On UNIX, you'll probably want to be running
-  the Ganymede server as root so that Ganymede can properly build
-  NIS maps and DNS tables.  There is nothing intrinsic to the
-  Ganymede server that requires root privileges, but the build scripts
-  that you install to propagate network information may need to be
-  installed as root.
-
-  The Ganymede server consists primarily of:
-
-    a jar file that contains the Ganymede server code (ganymedeServer.jar)
-    a jar file that contains custom plug-in code
-    a ganymede.properties file that sets configuration parameters
-    a ganymede.db file
-    a script that invokes java on arlut.csd.ganymede.Ganymede to run the server
-
-  While running, the server will also produce:
-
-    a running journal file that records all transactions made by the
-      server so that the server can fully recover if it ever crashes
-      or if the system running it goes down
-
-    a comprehensive log file
-
-    NIS and/or DNS source files, depending on the schema configuration <optional>
-
-    a schematic listing of the database definition <optional>
-
-  Of these, ganymede.db, ganymede.properties, journal, log file, and
-  the NIS and DNS source files are sensitive. The ganymede.db file is
-  not difficult to analyze, and passwords may be stored in plaintext
-  therein, depending on your database configuration.  As shipped with
-  the current release, the five sample database configurations do not
-  store plaintext passwords.  The ganymede.properties file must be
-  protected, as it has the the root (supergash) password chosen at
-  install time in plaintext.  If desired, the ganymede.properties
-  file can be edited to remove the ganymede.defaultrootpass entry.
-
-  With those notes out of the way, run installServer to install
-  the server.  installServer will ask you for a directory to
-  install the server under, and will ask you if you want to use one
-  of the schema configurations that we have included.  The gash
-  configuration is the most full-featured, and includes support
-  for users, groups, netgroups, email aliasing, systems, NFS volumes,
-  and automounter configuration.  The nisonly configuration includes
-  Solaris-style passwd and group support only.  The gash configuration
-  is what we are concentrating on developing at ARL, but using it
-  right now is difficult if you don't already have a set of gash data
-  files to import.  The linux and bsd schemas are designed for doing
-  simple managment of passwd and group files under those operating
-  systems.
-
-  In either case, if you choose a default schema, the installServer
-  script will configure the server to run with a ganymede.db and
-  custom.jar file built for the chosen schema.
+   Ganymede
    
-  After you have run installServer and installClient
-  (below), you can immediately run the server and connect with
-  the client, but the database will be empty.  You will need
-  to see section 3) below to get data bulk-loaded into Ganymede.
+         Ganymede UNIX Installation Guide Release 0.99.4 - 8 July 1999
+                                       
+     _________________________________________________________________
+                                      
+   Installing Ganymede breaks down into five steps:
+   
+    1. Configuring the distribution for your site
+    2. Installing server files
+    3. Installing client files
+    4. Configuring the server
+    5. Loading the server
+       
+   Each of these topics is discussed in its own section below.
+   
+_1. Configuring the distribution for your site_
 
-2. Installing Client Files
+   When you first unpack the Ganymede UNIX distribution, you will see
+   that there is a configure script under the ganymede-xx directory. This
+   script does two main things. First, it unpacks four scripts you can
+   immediately use to install the client and server, called
+   installClient, installClient2 (for JDK 1.2), installWeb and
+   installServer. Second, configure goes through the source tree and
+   builds and configures the makefiles and build scripts used to build
+   the source.
+   
+   Run configure to get these install scripts built and to get the source
+   tree configured for building.
+   
+   See README.source for information on building the source tree.
+   
+_2. Installing server files_
 
-  There are two primary clients for Ganymede.  We will call these the
-  end-user client and the admin console.  Both can be run from a UNIX
-  command line with a shell script that will run java on them, or from
-  a web browser with support for the full 1.1 JDK standard.  There is
-  nothing to stop you from running either client on a Win32 box, but
-  you will have to develop .bat files to run the code on your own.  The
-  clients are themselves totally portable, however, as they are simply
-  Java jar files.
+   The server files should be in a location that is not accessible to the
+   average user. On UNIX, you'll probably want to be running the Ganymede
+   server as _root_ so that Ganymede can properly build NIS maps and DNS
+   tables. There is nothing intrinsic to the Ganymede server that
+   requires root privileges, but the build scripts that you install to
+   propagate network information may need to be installed as root.
+   
+   The Ganymede server consists primarily of:
+   
+     * a jar file that contains the Ganymede server code (
+       ganymedeServer.jar)
+     * a jar file that contains custom plug-in code, custom.jar
+     * a ganymede.properties file that sets configuration parameters
+     * a ganymede.db file
+     * a script, runServer, that invokes java on
+       _arlut.csd.ganymede.Ganymede_ to run the server
+     * a script, stopServer, that can be used to cleanly shut the server
+       down.
+       
+   While running, the server will also produce:
+   
+     * a running journal file that records all transactions made by the
+       server so that the server can fully recover if it ever crashes or
+       if the system running it goes down
+     * a comprehensive log file, log
+     * NIS and/or DNS source files, depending on the schema configuration
+       <optional>
+     * a schematic listing of the database definition <optional>
+       
+   Of these, ganymede.db, ganymede.properties, journal, log, and the NIS
+   and DNS source files are sensitive. The ganymede.db file is not
+   difficult to analyze, and passwords may be stored in plaintext
+   therein, depending on your database configuration. As shipped with the
+   current release, the five sample database configurations do not store
+   plaintext passwords. The ganymede.properties file must be protected,
+   as it has the the root (supergash) password chosen at install time in
+   plaintext. If desired, the ganymede.properties file can be edited to
+   remove the ganymede.defaultrootpass entry. If you do this, you will
+   not be able to use stopServer to cleanly shut the server down from the
+   command line.
+   
+   With those notes out of the way, run installServer to install the
+   server. installServer will ask you a number of questions, including
+   the following:
+   
+     * Where are the jdk binaries located?
+     * Where should the server's directory be installed?
+     * What is the name of the system that the server will run on?
+     * What port should the RMI registry supporting Ganymede run on?
+     * What mailhost should Ganymede use to send out diagnostic mail?
+     * What email address should Ganymede sign on email that it sends
+       out?
+     * What name do you want the Ganymede superuser account to have?
+     * What password do you want the superuser account to have?
+     * What name do you want the Ganymede monitor account to have?
+     * What password do you want the monitor account to have?
+     * What schema do you want to initialize the database with?
+       (gash,nisonly,bsd,linux,gasharl)
+       
+   Depending on the schema chosen, if any, additional questions may be
+   asked.
+   
+   When you have answered all questions, installServer will customize and
+   install the server and all its files specified server directory. A
+   file named README.custom will be created in the server directory with
+   detailed instructions on how to load data into the Ganymede system
+   using the schema you have chosen, if any.
+   
+   At the present time, the following schema kits are available as
+   options when you run installServer:
+   
+   gash
+          A complex schema based on the GASH system, the gash schema is
+          designed to work with data files from GASH, to manage
+          ARL-formatted sources files for the NIS passwd, group,
+          netgroup, aliases, auto.vol, and auto.home.* maps, as well as
+          the ARL-custom hosts_info system information database, used for
+          DNS management.
+          
+          The gash schema kit has not been maintained recently, in favor
+          of the gasharl schema kit, which is more customized for ARL's
+          use. Proper use of the gash schema kit requires a set of custom
+          scripts that take the GASH datafiles and propagate them into
+          NIS and DNS. These files are included in the Ganymede
+          distribution, but they are not documented or supported. We are
+          working on some new integration scripts that will be much
+          better documented and included with the Ganymede distribution
+          by time of 1.0.
+          
+   nisonly
+          A simple schema to manage UNIX passwd and group files, using
+          Solaris-formatted gecos fields in the passwd file.
+          
+   bsd
+          A simple schema for managing users and groups under BSD 4.4
+          derived operating systems, with support for the BSD
+          master.passwd file. Includes a builder script that you can use
+          to allow Ganymede to actively manage your /etc/master.passwd
+          and /etc/group files.
+          
+   linux
+          A simple schema for managing users and groups under Linux.
+          Includes a builder script that you can use to allow Ganymede to
+          actively manage your /etc/passwd and /etc/group files.
+          
+   gasharl
+          Like the gash schema, this schema is designed to manage a
+          complex NIS/DNS environment using files defined in the GASH
+          system.
+          
+          Unlike the gash schema, this schema has been under recent
+          active development and maintenance, and has some ARL-specific
+          features that will not be of much use even to other GASH users,
+          including code for the ARL contract database.
+          
+          This schema kit does have a lot of good custom code that might
+          be of interest to people looking to create their own schema
+          kits, including a number of wizard examples.
+          
+   ganymede.only
+          An experimental schema done some time ago, ganymede.only
+          separates personal information from the user accounts, and does
+          not include any useful builder scripts.
+          
+          The ganymede.only schema has not been touched for many months.
+          
+   Whichever kind of schema you choose, the installServer script will
+   configure the server to run with a ganymede.db and custom.jar file
+   built for the chosen schema.
+   
+   If you don't choose any schema, installServer will install the
+   Ganymede server without any ganymede.db file. The first time you run
+   the server, a new ganymede.db will be created with nothing defined
+   except the basic object and field types needed by the server for basic
+   operations. This may be a useful option if you want to create a new
+   schema from scratch.
+   
+   After you have run installServer, installClient, and/or installWeb
+   (below), you can immediately run the server and connect with the
+   client, but the database will be empty. You will need to see section
+   5) below to get data bulk-loaded into Ganymede.
+   
+_3. Installing client files_
 
-  We have provided two install scripts.  installClient is for
-  Java 1.1 and installClient2 is for Java 1.2.  Either script
-  which will prompt you for the name of the machine that will be
-  running your Ganymede server, and the directory which will contain
-  the bin, html, and jars directories. The install script will
-  customize web pages and scripts for you so that the end-user client
-  and admin console can easily be run.  Of course, that the server has
-  to be up and running to run either the main client or the console.
+   There are two primary clients for Ganymede. We will call these the
+   end-user client and the admin console. Both can be run from a UNIX
+   command line with a shell script that will run java on them, or from a
+   web browser with support for the full 1.1 JDK standard. There is
+   nothing to stop you from running either client on a Win32 box, but you
+   will have to develop .bat files to run the code on your own. The
+   clients are themselves totally portable, however, as they are simply
+   Java jar files.
+   
+   We have provided two install scripts for installing the Ganymede
+   clients on a UNIX system. installClient is for Java 1.1 and
+   installClient2 is for Java 1.2. Either script which will prompt you
+   for the name of the machine that will be running your Ganymede server,
+   and the directory which will contain the bin, html, and jars
+   directories. The install script will then customize and install
+   scripts for you so that the end-user client and admin console can
+   easily be run. Of course, that the server has to be up and running to
+   run either the main client or the console.
+   
+   Don't try to install the client and server into the same directory..
+   the two are meant to be installed separately, in separate directories.
+   This is important because the server files need to be kept out of the
+   reach of non-privileged users, while the client files are intended to
+   be available for anyone to run.
+   
+   The installWeb script is used to install the files necessary on your
+   web server to run the Ganymede clients from a web-browser. installWeb
+   installs a bunch of files into a designated directory, including an
+   index.html file, the ganymede.jar and ganymedeAdmin.jar, and a bunch
+   of individual html files linked to the index.html file, all customized
+   for your Ganymede server's location.
+   
+   The installed web files include versions of the Ganymede client pages
+   designed for use with the Java plug-in on Windows (version 1.2.2 or
+   better is really best.. see java.sun.com/products/jdk/1.2/jre/ to
+   download the Java plug-in), as well as a version of the client pages
+   designed for use with a browser with built-in RMI and Swing support.
+   
+   _IMPORTANT NOTE_: If your users do not install the Java plug-in before
+   trying to run the Plug-In clients, their web browser will help them
+   download the Plug-In as needed. Internet Explorer users will be given
+   the chance to automatically download and install the Plug-In for use
+   with IE. Netscape users will be taken to a page from which they can
+   download the Plug-In. Once the Java Plug-In is downloaded, you'll want
+   to quit out of your browser and run the Plug-In control panel.
+   Configure the Plug-In so that your network and class access is
+   unrestricted and unsigned applets are allowed. Apply the preference
+   changes, and restart your browser. The next time you visit one of the
+   activator pages, you should see the appropriate client come up.
+   
+   We have also included a simple password-change utility, which can be
+   either run from a web page, or from the command line. We have included
+   source and build scripts for this program.
+   
+_4. Configuring the server_
 
-  Don't try to install the client and server into the same
-  directory.. the two are meant to be installed separately, in separate
-  directories. This is important because the server files need to
-  be kept out of the reach of non-privileged users, while the client
-  files are intended to be available for anyone to run.
+   The server may be configured in two ways. The first is by using the
+   admin console to edit the server's schema and the second is by
+   authoring and/or modifying plug-in classes.
+   
+   The server schema is specified in the ganymede.db file, and includes
+   definitions of the object types to be stored in the database, their
+   fields, and any plug-in classes that are to manage particular object
+   types. We will occasionally talk about a 'schema file'. A schema file
+   is simply a ganymede.db file that just contains the data definition
+   specification, but no custom objects. Each of the sample schemas
+   included with Ganymede include a ganymede.schema file that you can use
+   in your evaluation of Ganymede.
+   
+   The plug-in classes themselves are typically packaged in a file named
+   custom.jar. As with the ganymede.schema files, both the gash and
+   nisonly schema directories contain a custom.jar file.
+   
+   Ganymede schema/db files and custom class sets (custom.jar) need to be
+   matched together. Whenever you run the server, you will want to
+   specify both a ganymede.db file and a custom.jar file. You can run the
+   Ganymede server with no ganymede.db or custom.jar files, and the
+   Ganymede server will initialize a simple ganymede.db file for you.
+   
+   If you chose one of the sample schemas when you ran installServer, you
+   should have a ganymede.db and a custom.jar file in place. You should
+   be able to start the server and have it come up with the object types
+   and custom code from whichever of the schemas you chose. If you did
+   not choose a schema, but rather just hit return when prompted, the
+   Ganymede server will create you a bare-bones ganymede.db file when you
+   run the server for the first time. See src/schemas/README for a
+   description of the various schema kits.
+   
+   In order to edit the server's schema, start the Ganymede server on
+   your server machine. The server will load its database, come up, and
+   tell you that it is ready to operate. You can now run the adminConsole
+   from your client install. Log in using the root name and password you
+   specified when you ran installServer. After a moment, you'll see the
+   admin console come up. Go to the control menu and select 'Edit
+   Schema'. After a bit, you'll see the schema editor come up. You can
+   add, remove, or modify object definitions. Each object definition has
+   a 'Classname' field. You can enter the name of a class in this field,
+   and the next time that the Ganymede server is restarted, Ganymede will
+   load that class and use it to manage the object type that you
+   associated it with.
+   
+   When you have made all the changes to the schema that you want, hit OK
+   and the Ganymede server will integrate the changes you made. You
+   should then use the Admin console to tell the server to dump the
+   database. If you are going to be loading the database from scratch
+   using the database definition you just created, you should also tell
+   the admin console to have the server dump the schema. This will cause
+   the server to emit a schema file (empty db file) according to the
+   ganymede.properties file that the server was started with. You can
+   then take this schema file and copy it for use with the loader code,
+   as discussed in section 5.
+   
+   The sample schemas each specify a builder task to be run when a
+   transaction is committed.
+   
+   gasharl
+          arlut.csd.ganymede.custom.GASHBuilderTask
+          
+   linux
+          arlut.csd.ganymede.custom.LinuxBuilderTask
+          
+   bsd
+          arlut.csd.ganymede.custom.BSDBuilderTask
+          
+   nisonly
+          arlut.csd.ganymede.custom.NISBuilderTask
+          
+   gash
+          arlut.csd.ganymede.custom.GASHBuilderTask
+          
+   ganymede.only
+          arlut.csd.ganymede.custom.DNSBuilderTask and
+          arlut.csd.ganymede.custom.NISBuilderTask
+          
+   In addition, each schema by default will look for a script to run in
+   the <installdir>/db directory. If you like, you can edit the server's
+   properties file to change ganymede.builder.scriptlocation, which
+   specifies where the build scripts are to be found.
+   
+   gasharl
+          gashbuilder
+          
+   bsd
+          bsd_builder
+          
+   linux
+          linux_builder
+          
+   nisonly
+          nisbuilder
+          
+   gash
+          gashbuilder
+          
+   ganymede.only
+          nisbuilder,dnsbuilder (not maintained currently)
+          
+   These scripts should be executable by the user under which the
+   Ganymede server is run. The appropriate script will be run after the
+   corresponding builder task has emitted fresh copies of the data files
+   to <installdir>/db/out. The scripts are intended to do an NIS/DNS
+   push, or to copy passwd and group files to /etc, depending on the
+   schema, and how you wish to use them.
+   
+   No matter which schema you choose, the class file for the builder task
+   is bundled as part of the schema's custom.jar file, and you can view
+   and alter the source code in schema/custom_src.
+   
+_5. Loading the server_
 
-  The installClient script will build an html directory, which
-  includes two subdirectories, one labeled activator and one labeled
-  hotjava.  The activator subdirectory contains versions of the
-  client.html, console.html, and password.html files that work with
-  Sun's Java Plug-In package, version 1.1 or later.  The Plug-In
-  is an embeddable JVM from Sun that includes all of the JDK 1.1
-  features needed to run the Ganymede clients.  This is currently the
-  recommended means of running the Ganymede clients from Netscape or
-  Internet Explorer versions 3 or 4.  NOTE: As installed, the html
-  files produced in html/activator just includes the ganymede.jar and
-  ganymedeAdmin.jar files for the client and console pages,
-  respectively.  If you try running a version of the Java plug-in
-  that does not include one of the newer javax.swing releases, you
-  will need to modify these .html files to include swing.jar as well
-  as ganymede.jar or ganymedeAdmin.jar, and you will need to copy the
-  swing.jar file from the Swing 1.1 beta 3 (or better) package into
-  html/activator.
-
-  IMPORTANT NOTE: If you go to one of the activator pages, Netscape
-  and/or Internet Explorer will take you to the web page where you
-  can download the Java Plug-In software to your PC.  Once you download
-  the Java Plug-In, you'll want to quit out of your browser and run
-  the Plug-In control panel.  Configure the Plug-In so that your
-  network and class access is unrestricted and unsigned applets are
-  allowed.  Apply the preference changes, and restart your browser.
-  The next time you visit one of the activator pages, you should
-  see the appropriate client come up.
-
-  The other subdirectory is labeled 'hotjava', and these versions of
-  the html pages for the Ganymede clients are appropriate for any
-  browser with _full_ native 1.1 JDK support, including RMI.  To date,
-  hotjava is the only browser that provides full native RMI support.
-  
-  We have also included a simple password-change utility, which can
-  be either run from a web page, or from the command line.  We
-  have included source and build scripts for this program.
-
-3. Configuring the Server
-
-  The server may be configured in two ways.  The first is by using the
-  admin console to edit the server's schema and the second is by
-  authoring and/or modifying plug-in classes.  
-
-  The server schema is specified in the ganymede.db file, and includes 
-  definitions of the object types to be stored in the database, their
-  fields, and any plug-in classes that are to manage particular object
-  types.  We will occasionally talk about a 'schema file'.  A schema
-  file is simply a ganymede.db file that just contains the data 
-  definition specification, but no custom objects.  Each of the sample
-  schemas included with Ganymede include a ganymede.schema file
-  that you can use in your evaluation of Ganymede.
-  
-  The plug-in classes themselves are typically packaged in a file
-  named custom.jar.  As with the ganymede.schema files, both the
-  gash and nisonly schema directories contain a custom.jar file.
-  
-  Ganymede schema/db files and custom class sets (custom.jar) need
-  to be matched together.  Whenever you run the server, you will want
-  to specify both a ganymede.db file and a custom.jar file.  You
-  can run the Ganymede server with no ganymede.db or custom.jar files,
-  and the Ganymede server will initialize a simple ganymede.db file
-  for you.
-
-  If you chose one of the sample schemas when you ran installServer,
-  you should have a ganymede.db and a custom.jar file in place.  You
-  should be able to start the server and have it come up with the
-  object types and custom code from whichever of the schemas you
-  chose.  If you did not choose a schema, but rather just hit return
-  when prompted, the Ganymede server will create you a bare-bones
-  ganymede.db file when you run the server for the first time.  See
-  src/schemas/README for a description of the various schema kits.
-
-  In order to edit the server's schema, start the Ganymede server on
-  your server machine.  The server will load its database, come up,
-  and tell you that it is ready to operate.  You can now run the
-  adminConsole from your client install.  Log in using the root name
-  and password you specified when you ran installServer.  After
-  a moment, you'll see the admin console come up.  Go to the control
-  menu and select 'Edit Schema'.  After a bit, you'll see the schema
-  editor come up.  You can add, remove, or modify object definitions.
-  Each object definition has a 'Classname' field.  You can enter
-  the name of a class in this field, and the next time that the 
-  Ganymede server is restarted, Ganymede will load that class and
-  use it to manage the object type that you associated it with.
-
-  When you have made all the changes to the schema that you want,
-  hit OK and the Ganymede server will integrate the changes you made.
-  You should then use the Admin console to tell the server to dump
-  the database.  If you are going to be loading the database from
-  scratch using the database definition you just created, you should
-  also tell the admin console to have the server dump the schema.
-  This will cause the server to emit a schema file (empty db file)
-  according to the ganymede.properties file that the server was
-  started with.  You can then take this schema file and copy it
-  for use with the loader code, as discussed in section 4.
-
-  The sample schemas each specify a builder task to
-  be run when a transaction is committed.
-
-  gasharl - arlut.csd.ganymede.custom.GASHBuilderTask
-  linux - arlut.csd.ganymede.custom.LinuxBuilderTask
-  bsd - arlut.csd.ganymede.custom.BSDBuilderTask
-  nisonly - arlut.csd.ganymede.custom.NISBuilderTask
-  gash - arlut.csd.ganymede.custom.GASHBuilderTask
-  ganymede.only - arlut.csd.ganymede.custom.DNSBuilderTask and
-	          arlut.csd.ganymede.custom.NISBuilderTask
-
-  In addition, each schema by default will look for a script
-  to run in the <installdir>/db directory.  If you like, you
-  can edit the server's properties file to change
-  ganymede.builder.scriptlocation, which specifies where the
-  build scripts are to be found.
-
-  gasharl - gashbuilder
-  bsd - bsd_builder
-  linux - linux_builder
-  nisonly - nisbuilder
-  gash - gashbuilder
-  ganymede.only - nisbuilder,dnsbuilder (not maintained currently)
-
-  These scripts should be executable by the user under which the
-  Ganymede server is run.  The appropriate script will be run
-  after the corresponding builder task has emitted fresh copies
-  of the data files to <installdir>/db/out.  The scripts are intended
-  to do an NIS/DNS push, or to copy passwd and group files to /etc,
-  depending on the schema, and how you wish to use them.
-
-  No matter which schema you choose, the class file for the builder
-  task is bundled as part of the schema's custom.jar file, and you can
-  view and alter the source code in schema/custom_src.
- 
-4. Loading the Server
-
-  When you run the installServer script, you are prompted for
-  which sample schema you want to use.  Whichever you choose is copied
-  to your server install directory under 'schema'.
-
-  The schema directory contains the sample schema file as discussed above,
-  a custom_src directory with the source code for the custom plug-ins to
-  go with the object definitions in the ganymede.schema file, and a loader
-  directory.
-
-  The loader directory contains the following:
-
-    a ganymede.properties file that you will want to customize
-    an input directory
-    a db directory
-    a runDirectLoader script
-
-  In order to load the Ganymede server, copy your input files to the
-  input directory, and run the runDirectLoader script.  This will
-  produce a loader.db file in the schema/loader/db directory.  You
-  can then copy this file to db/ganymede.db, remove any journal file
-  in db, and start the server.  The server will load the new database,
-  and you will then be able to log in as supergash and take a look
-  at your database.
-
-  Take a look at the README file in the schema directory for details
-  on how the schema you installed works.
-  
+   When you run the installServer script, you are prompted for which
+   sample schema you want to use. Whichever you choose is copied to your
+   server install directory under '_schema_', and a file providing
+   customized and detailed instructions is placed in the README.custom
+   file in the server install directory.
+   
+   The _schema_ directory contains the sample schema file as discussed
+   above, a _custom_src_ directory with the source code for the custom
+   plug-ins to go with the object definitions in the ganymede.schema
+   file, and a _loader_ directory.
+   
+   The _loader_ directory contains the following:
+   
+     * a ganymede.properties file that you will want to customize
+     * an _input_ directory
+     * a _db_ directory
+     * a runDirectLoader script
+       
+   In order to load the Ganymede server, copy your input files to the
+   _input_ directory, and run the runDirectLoader script. This will
+   produce a _loader.db_ file in the _schema/loader/db_ directory. You
+   can then copy this file to db/ganymede.db, remove any journal file in
+   _db_, and start the server. The server will load the new database, and
+   you will then be able to log in as supergash and take a look at your
+   database.
+   
+   Take a look at the README file in the schema directory for details on
+   how the schema you installed works.
+   
+     _________________________________________________________________
+                                      
+   
+    Jonathan Abbey
+    
+   Last modified: Thu Jul 8 21:27:43 CDT 1999

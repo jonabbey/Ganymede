@@ -1,11 +1,11 @@
 Ganymede Release 0.99.4
-July ??, 1999
+July 8, 1999
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.3 to 0.99.4 -------------------
 
-RELEASE DATE: July ??, 1999
+RELEASE DATE: July 8, 1999
 
 1. [SERVER] Optimizations to permissions system
 
@@ -77,7 +77,13 @@ of the old activator and hotjava directories, added a nice set of web
 frames to allow the installer to bring up their browser and directly
 visit the directory where they installed the web resources.
 
-6. [SCHEMA] Fixed BSD schema master.passwd parser, Linux passwd parser
+6. [WEB FILES] Updated plugin client files for 1.2
+
+The plugin client files were re-generated from the 1.2 htmlconvertor
+utility, and now include proper links to the latest version of
+Sun's java plug-in for Solaris and Windows.
+
+7. [SCHEMA] Fixed BSD schema master.passwd parser, Linux passwd parser
 
 The old Linux and BSD passwd file parsers would break if they
 encountered a user record with a blank password field.
@@ -91,7 +97,7 @@ If a Ganymede user record has no password set, that user will not be
 able to login to the Ganymede server.  Unlike UNIX, Ganymede never
 lets anyone log in without a password.
 
-7. [ADMIN CONSOLE, SERVER] Reworked admin console, server's admin API
+8. [ADMIN CONSOLE, SERVER] Reworked admin console, server's admin API
 
 Fixed the admin console so that it will properly log itself out when
 it is closed through the window system.
@@ -116,6 +122,15 @@ server's response to admin console operations.
 Admins other than supergash and monitor will need to log into the
 server via the admin console using their full persona name.. i.e.,
 'broccol:GASH Admin'.
+
+9. [DOCUMENTATION] Revised, improved the install guide
+
+Significantly revised and enhanced the install guide, corrected some
+mistakes, included information on the use of installWeb.
+
+The text INSTALL file is now a lynx-generated version of the HTML
+file.. it was too much work and too error-prone trying to maintain
+both independently.
 
 -------------------- Changes from 0.99.2 to 0.99.3 -------------------
 

@@ -1,12 +1,13 @@
-Ganymede Developer Release 0.99.3
-June 23, 1999
+Ganymede Developer Release 0.99.4
+July 8, 1999
 KNOWNBUGS
 ----------------------------------------------
 
-Ganymede release 0.99.3 requires Swing 1.1 or later, as it
-is built to expect the Swing libraries to be in the package
-javax.swing, rather than com.sun.java.swing, as it was in prior
-versions.
+Ganymede release 0.99.4 requires Swing 1.1 or later, as it is built to
+expect the Swing libraries to be in the package javax.swing, rather
+than com.sun.java.swing, as it was in prior versions.  Use of Java JRE
+1.2.2 for the clients is highly recommended, as many Swing bugs are
+fixed in this release.
 
 --
 
@@ -15,7 +16,7 @@ account name/ password is not properly reset.  It is, instead, user:
 monitor, password: display.  If you start a new ganymede.db file
 from scratch, the monitor account should be configured properly.
 
-2) The gash and gasharl schemas are provided in 0.99.2 is intended to
+2) The gash and gasharl schemas are provided in 0.99.4 is intended to
 enable the use of Ganymede as a 'drop-in' replacement for GASH.  There
 are, however, a relatively small number of functions that are not
 performed by Ganymede with the gash schemas.  These include the
@@ -41,11 +42,11 @@ if you have just used the schema editor to attach a plug-in class to
 an object type, but it can't actually reload classes that were
 previously loaded.
 
-4) The bsd schema is preliminary.. it works, but the larger assumptions
-embodied by the bsd schema code is still modeled closely on the
-GASH model.  For instance, if you have users in the master.passwd
-file whose gid references a group in the group file for which
-that group does not have an explicit reference to the user.  All
+4) The bsd and linux schemas are preliminary.. it works, but the
+larger assumptions embodied by the bsd schema code is still modeled
+closely on the GASH model.  For instance, if you have users in the
+master.passwd file whose gid references a group in the group file for
+which that group does not have an explicit reference to the user.  All
 of the wizards and schema logic embodied in the bsd schema still
 assume that there won't be any purely implicit group membership
 references in the user's gid field.

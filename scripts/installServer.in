@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.10 $
-# $Date: 1999/07/05 20:58:51 $
+# $Revision: 1.11 $
+# $Date: 1999/07/09 02:36:10 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -596,14 +596,14 @@ The Ganymede Server was successfully installed in $installdir.
 
 In order to get started with Ganymede, you need to do the following:
 
-1. Run the data loader to create a ganymede.db file from your passwd and group files.
+1. Run the data loader to create a loader.db file from your passwd and group files.
 
   a.   cd $installdir/schema/loader
   b.   cp /etc/passwd /etc/group $installdir/schema/loader/input
   c.   Run ./runDirectLoader
-  d.   If runDirectLoader succeeds, you'll have a ganymede.db file in
-       $installdir/schema/loader/db/ganymede.db
-  e.   cp $installdir/schema/loader/db/ganymede.db $installdir/db
+  d.   If runDirectLoader succeeds, you'll have a loader.db file in
+       $installdir/schema/loader/db/loader.db
+  e.   cp $installdir/schema/loader/db/loader.db $installdir/db/ganymede.db
 
 2. [OPTIONAL] Create a linux_builder script in $installdir/db.
 
@@ -637,14 +637,14 @@ The Ganymede Server was successfully installed in $installdir.
 
 In order to get started with Ganymede, you need to do the following:
 
-1. Run the data loader to create a ganymede.db file from your passwd and group files.
+1. Run the data loader to create a loader.db file from your passwd and group files.
 
   a.   cd $installdir/schema/loader
   b.   cp /etc/master.passwd /etc/group $installdir/schema/loader/input
   c.   Run ./runDirectLoader
-  d.   If runDirectLoader succeeds, you'll have a ganymede.db file in
-       $installdir/schema/loader/db/ganymede.db
-  e.   cp $installdir/schema/loader/db/ganymede.db $installdir/db
+  d.   If runDirectLoader succeeds, you'll have a loader.db file in
+       $installdir/schema/loader/db/loader.db
+  e.   cp $installdir/schema/loader/db/loader.db $installdir/db/ganymede.db
 
 2. [OPTIONAL] Create a bsd_builder script in $installdir/db.
 
@@ -679,14 +679,14 @@ The Ganymede Server was successfully installed in $installdir.
 
 In order to get started with Ganymede, you need to do the following:
 
-1. Run the data loader to create a ganymede.db file from your passwd and group files.
+1. Run the data loader to create a loader.db file from your passwd and group files.
 
   a.   cd $installdir/schema/loader
   b.   Copy your GASH files, including networks_by_room.cpp to $installdir/schema/loader/input
   c.   Run ./runDirectLoader
-  d.   If runDirectLoader succeeds, you'll have a ganymede.db file in
-       $installdir/schema/loader/db/ganymede.db
-  e.   cp $installdir/schema/loader/db/ganymede.db $installdir/db
+  d.   If runDirectLoader succeeds, you'll have a loader.db file in
+       $installdir/schema/loader/db/loader.db
+  e.   cp $installdir/schema/loader/db/loader.db $installdir/db/ganymede.db
 
 2. [OPTIONAL] Create a gashbuilder script in $installdir/db.
 
@@ -718,14 +718,14 @@ The Ganymede Server was successfully installed in $installdir.
 
 In order to get started with Ganymede, you need to do the following:
 
-1. Run the data loader to create a ganymede.db file from your passwd and group files.
+1. Run the data loader to create a loader.db file from your passwd and group files.
 
   a.   cd $installdir/schema/loader
   b.   Copy your passwd and group NIS source files to $installdir/schema/loader/input
   c.   Run ./runDirectLoader
-  d.   If runDirectLoader succeeds, you'll have a ganymede.db file in
-       $installdir/schema/loader/db/ganymede.db
-  e.   cp $installdir/schema/loader/db/ganymede.db $installdir/db
+  d.   If runDirectLoader succeeds, you'll have a loader.db file in
+       $installdir/schema/loader/db/loader.db
+  e.   cp $installdir/schema/loader/db/loader.db $installdir/db/ganymede.db
 
 2. [OPTIONAL] Create a nisbuilder script in $installdir/db.
 

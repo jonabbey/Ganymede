@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.99.3
-June 23, 1999
+Ganymede Developer Release 0.99.4
+July 8, 1999
 README
 ---------------------------------------------
 
@@ -71,8 +71,7 @@ Things you will need:
 
   If you want to run the Ganymede client or admin console on a Win32
   machine, download the latest version of the Java Runtime Environment
-  (1.2.1 at this writing) from
-  http://java.sun.com/products/jdk/1.2/jre/download-windows.html.
+  (1.2.2 at this writing) from http://java.sun.com/products/jdk/1.2/jre/.
   
 --
 
