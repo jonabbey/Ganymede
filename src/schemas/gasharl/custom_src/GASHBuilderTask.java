@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 2003/07/16 23:00:09 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 2003/07/16 23:09:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -190,7 +190,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      }
 	  }
 
-	writeMailDirect();
+	//	writeMailDirect();
 	writeMailDirect2();
 	writeSambafileVersion1();
 	writeNTfile();
