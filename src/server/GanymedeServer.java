@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 2000/03/03 02:30:55 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 2000/03/04 00:54:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -353,7 +353,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		GanymedeSession session = new GanymedeSession(client, clientName, user, persona);
 
-		Ganymede.debug(session.username + " logged in");
+		Ganymede.debug(session.username + " logged in from " + session.clienthost);
 
 		Vector objects = new Vector();
 

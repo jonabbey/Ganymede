@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2000/03/03 02:04:59 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2000/03/04 00:54:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -281,7 +281,7 @@ public class DBLog {
 
     if (mailToOwners)
       {
-	calculateMailTargets(event, session);
+	calculateMailTargets(event, session, null);
       }
 
     // log the event to the log file.
@@ -396,7 +396,7 @@ public class DBLog {
     boolean found;
     DBLogEvent event;
     Enumeration enum;
-    Hashtable mailOuts = new Hashtable();
+    Hashtable mailOuts = new Hashtable(); // maps address to vector of MailOut objects
     Object ref;
 
     /* -- */
@@ -456,6 +456,10 @@ public class DBLog {
 		   null,
 		   multibuffer).writeEntry(logWriter, currentTime, transactionID);
 
+    // check out what kind of emailing we're going to do for a transaction
+
+    systemEventType transactionType = (systemEventType) sysEventCodes.get("starttransaction");
+
     // write out all the log events in this transaction
 
     for (int i = 0; i < logEvents.size(); i++)
@@ -468,6 +472,9 @@ public class DBLog {
 			       event.eventClassToken + " **\n" + event.description);
 	  }
 
+	// if the event has its own subject set, assume that it is a
+	// mailout event with its own list of designated email targets
+
 	if (event.subject == null)
 	  {
 	    Vector sentTo = new Vector();
@@ -477,7 +484,7 @@ public class DBLog {
 	    // doing so, we are doing this independently of the
 	    // transaction notification consolidation done by
 	    // appendMailOut()..
-	
+
 	    sentTo = VectorUtils.union(sentTo, sendObjectMail(event, transdescrip));
 
 	    // we may have a system event instead, in which case we handle
@@ -499,7 +506,9 @@ public class DBLog {
 	    // calculating who needs to receive owner-group related
 	    // generic email about this event.
 	
-	    sentTo = VectorUtils.union(sentTo, appendMailOut(event, mailOuts, transaction.session));
+	    sentTo = VectorUtils.union(sentTo, appendMailOut(event, mailOuts, 
+							     transaction.session,
+							     transactionType));
 
 	    // now we record who we actually sent the mail to, so it is logged
 	    // properly
@@ -579,35 +588,41 @@ public class DBLog {
       {
 	returnAddr = Ganymede.returnaddrProperty;
       }
-    
-    enum = mailOuts.elements();
 
-    while (enum.hasMoreElements())
+    // send out the mail if the starttransaction system event has the
+    // mail checkbox turned on.
+
+    if (transactionType.mail)
       {
-	MailOut mailout = (MailOut) enum.nextElement();
-	String description = "Transaction summary: User " + adminName + ":" + 
-	  currentTime.toString() + "\n\n" + 
-	  arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + signature;
+	enum = mailOuts.elements();
 
-	// we don't want any \n's between wordwrap and signature above,
-	// since appendMailOut() adds "\n\n" at the end of each transaction
-	// summary segment
+	while (enum.hasMoreElements())
+	  {
+	    MailOut mailout = (MailOut) enum.nextElement();
+	    String description = "Transaction summary: User " + adminName + ":" + 
+	      currentTime.toString() + "\n\n" + 
+	      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + signature;
 
-	if (debug)
-	  {
-	    System.err.println("Sending mail to " + (String) mailout.addresses.elementAt(0));
-	  }
+	    // we don't want any \n's between wordwrap and signature above,
+	    // since appendMailOut() adds "\n\n" at the end of each transaction
+	    // summary segment
 
-	try
-	  {
-	    mailer.sendmsg(returnAddr,
-			   mailout.addresses,
-			   "Ganymede: Transaction Log",
-			   description);
-	  }
-	catch (IOException ex)
-	  {
-	    Ganymede.debug("DBLog.logTransaction(): mailer error " + ex);
+	    if (debug)
+	      {
+		System.err.println("Sending mail to " + (String) mailout.addresses.elementAt(0));
+	      }
+
+	    try
+	      {
+		mailer.sendmsg(returnAddr,
+			       mailout.addresses,
+			       "Ganymede: Transaction Log",
+			       description);
+	      }
+	    catch (IOException ex)
+	      {
+		Ganymede.debug("DBLog.logTransaction(): mailer error " + ex);
+	      }
 	  }
       }
   }
@@ -1260,7 +1275,8 @@ public class DBLog {
    * code that originally generated the log event.</P>
    */
 
-  private void calculateMailTargets(DBLogEvent event, DBSession session)
+  private void calculateMailTargets(DBLogEvent event, DBSession session, 
+				    systemEventType eventType)
   {
     Vector 
       notifyVect,
@@ -1282,20 +1298,30 @@ public class DBLog {
 	System.err.println(event.toString());
       }
 
-    // first we calculate what email addresses we should notify based
-    // on the ownership of the objects
-
-    notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects,
-									     session));
-
-    // always include the email address for the admin who initiated the
-    // action.
-
-    if (event.admin != null)
+    if (eventType == null || eventType.ccToOwners)
       {
-	VectorUtils.unionAdd(notifyVect, 
-			     adminPersonaCustom.convertAdminInvidToString(event.admin, 
-									  session));
+	// first we calculate what email addresses we should notify
+	// based on the ownership of the objects
+
+	notifyVect = VectorUtils.union(event.notifyVect, calculateOwnerAddresses(event.objects,
+										 session));
+      }
+    else
+      {
+	notifyVect = new Vector();
+      }
+
+    if (eventType == null || eventType.ccToSelf)
+      {
+	// always include the email address for the admin who
+	// initiated the action.
+
+	if (event.admin != null)
+	  {
+	    VectorUtils.unionAdd(notifyVect, 
+				 adminPersonaCustom.convertAdminInvidToString(event.admin, 
+									      session));
+	  }
       }
 
     // now update notifyList
@@ -1515,7 +1541,8 @@ public class DBLog {
    * system event notification
    */
 
-  private Vector appendMailOut(DBLogEvent event, Hashtable map, DBSession session)
+  private Vector appendMailOut(DBLogEvent event, Hashtable map, 
+			       DBSession session, systemEventType transactionType)
   {
     Enumeration enum;
     String str;
@@ -1523,7 +1550,7 @@ public class DBLog {
 
     /* -- */
 
-    calculateMailTargets(event, session);
+    calculateMailTargets(event, session, transactionType);
     
     enum = event.notifyVect.elements();
 
@@ -1736,7 +1763,7 @@ class systemEventType {
 
 /**
  * <P>This class is used to store object event information derived from
- * the Ganymede database.</P>
+ * the Ganymede database for the {@link arlut.csd.ganymede.DBLog DBLog} class.</P>
  */
 
 class objectEventType {
@@ -1863,7 +1890,7 @@ class objectEventType {
 
 /**
  * <P>This class is used to store event information derived from the Ganymede
- * database.</P>
+ * database for the {@link arlut.csd.ganymede.DBLog DBLog} class.</P>
  */
 
 class MailOut {

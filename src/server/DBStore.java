@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 2000/03/01 05:03:08 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 2000/03/04 00:54:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.108 $ %D%
+ * @version $Revision: 1.109 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2169,7 +2169,31 @@ public class DBStore {
 	createSysEventObj(session, "shutdown", "Server shutdown", 
 			  "The Ganymede server was cleanly shut down", false);
 
-	createSysEventObj(session, "starttransaction", "transaction start", null, false);
+	// Create the start transaction oBject.  This object is
+	// consulted by the DBLog class to guide how mail should be
+	// handled for transaction logs.
+
+	DBEditObject transactionEvent = createSysEventObj(session, 
+							  "starttransaction", 
+							  "transaction start", null, false);
+
+	if (transactionEvent != null)
+	  {
+	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailBoolean, new Boolean(true));
+	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailToSelf, new Boolean(true));
+	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailOwners, new Boolean(true));
+	    transactionEvent.setFieldValueLocal(SchemaConstants.NotesField, 
+						"This system event object is consulted to determine whether " +
+						"mail should be sent\nout when a transaction is committed.\n\n" +
+						"If the 'Event Mail' checkbox is set to false, no transaction log " +
+						"mail will be sent\nfrom the Ganymede server, ever.\n\nIf the " +
+						"'Cc: Admin' checkbox is set to true, the admin who committed the " +
+						"transaction will receive a copy of the transaction log.\n\n" +
+						"If the 'Cc: Owner Groups' checkbox is set to true, the members of " +
+						"the owner groups whose objects were affected by the transaction " +
+						"committed will each receive a copy of that portion of the transaction " +
+						"log that concerns objects owned by those admins.");
+	  }
 
 	// we commit the transaction at the DBStore level because we don't
 	// want to mess with running builder tasks
@@ -2210,9 +2234,9 @@ public class DBStore {
    * Convenience method for initializeObjects().
    */
 
-  private void createSysEventObj(DBSession session, 
-				 String token, String name, String description,
-				 boolean ccAdmin)
+  private DBEditObject createSysEventObj(DBSession session, 
+					 String token, String name, String description,
+					 boolean ccAdmin)
 				 
   {
     DBEditObject eO = null;
@@ -2220,7 +2244,7 @@ public class DBStore {
 
     if (sysEventExists(token))
       {
-	return;
+	return null;
       }
 
     System.err.println("Creating " + token + " system event object");
@@ -2257,6 +2281,8 @@ public class DBStore {
 	    throw new RuntimeException("Error, could not set description system event object " + token);
 	  }
       }
+
+    return eO;
   }
 
   /**
