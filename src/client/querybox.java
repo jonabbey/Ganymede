@@ -5,7 +5,7 @@
    Description.
    
    Created: 23 July 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -92,6 +92,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   Panel query_panel = new Panel();
   Panel base_panel = new Panel();
   Panel inner_choice = new Panel();
+  Panel outer_choice = new Panel();
  
   ScrollPane choice_pane = new ScrollPane();
   
@@ -115,7 +116,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   // - imput fields
 
-  TextField inputField = new TextField(6);
+  TextField inputField = new TextField(12);
   TextField dateField;
 
   // - Vectors
@@ -177,6 +178,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     
     /* -- */
     
+    System.out.println("Hi! I'm your happy query friend!");
+
     // Main constructor for the querybox window
     
     this.baseHash = baseHash;  
@@ -280,12 +283,20 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     
     inner_choice.setLayout(new TableLayout(false));
     inner_choice.setBackground(Color.white);
-    choice_pane.add(inner_choice);
+    
+    outer_choice.setLayout(new FlowLayout());
+    outer_choice.setBackground(Color.white);
+    outer_choice.add(inner_choice);
+
+    choice_pane.add(outer_choice);
 
     query_panel.add("North", baseBox);
     query_panel.add("Center", choiceBox);
       
     addChoiceRow(defaultBase); // adds the initial row   
+    
+    this.pack();
+
   }
 
   /**
@@ -326,7 +337,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   {
     // Method to set the perm_editor to visible or invisible
     
-    setSize(600,300);
+    setSize(800,350);
     setVisible(true);		// our thread will wait at this point
     
     return this.returnVal; // once setVisible is set to false
@@ -490,7 +501,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      
 	    if (! tempField.isEditInPlace())
 	      {	 
-		if (tempField.getID() != 0)
+		if (! (tempField.getID() == 0 || tempField.getID() == 8))
 		  {
 		    // ignore containing objects and the like...
 
@@ -582,15 +593,22 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      }
 	    else
 	      {
+
+		if (! (basefield.getID() == 0 || basefield.getID() == 8))
+		  {
+		    // ignore containing objects and the like...
+
 		String Name = basefield.getName();
-		myChoice.add(Name);
-		  
+		myChoice.add(Name);		  
+		
 		// To avoid a whole bunch of string comparisons, 
 		// we'll put the name of the field in the nameHash
 		// with it's own name as the value (since it's not
 		// an edit-in-place)
 		  
 		nameHash.put(Name, Name);
+	      
+		  }
 	      }
 	  }
 	  
@@ -636,10 +654,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   
   private void addChoiceRow (Base base)
   {
-    Label label1 = new Label("      ");
-    Label label2 = new Label("      ");
-    Label label3 = new Label("      ");
-    Label label4 = new Label("      ");
+    Label label1 = new Label("   ");
+    Label label2 = new Label("     ");
+    Label label3 = new Label("     ");
+    Label label4 = new Label("     ");
     
     /* -- */
 
@@ -716,7 +734,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 	if (myField == null)
 	  {
-	    System.out.println("LIFE SUCKS!!");
+	    System.out.println("Not Good. MyField == null.");
 	    myField = this.defaultBase.getField(field);  
 	  }
 
@@ -771,7 +789,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    // Probably fix this...make it bring up an error dialog or
 	    // something
    
-	    inputField = new qTextField(6);
+	    inputField = new qTextField(12);
 	    
 	    return inputField; 
 	  }
@@ -799,7 +817,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {
 	    // It ain't no date
 	    
-	    inputField = new qTextField(6);
+	    inputField = new qTextField(12);
 	    
 	    return inputField; 
 	  }
@@ -962,12 +980,12 @@ class querybox extends Dialog implements ActionListener, ItemListener {
            fieldName,
            operator;
 
-    TextField tempText = new TextField();
-    TextField tempDate = new TextField();
-
     BaseField tempField;
     Integer tempInt = new Integer(0);
-    Checkbox tempBox = new Checkbox();
+    TextField tempText = new TextField();
+    TextField tempDate = new TextField();
+    Checkbox tempBox = new Checkbox(); 
+    JIPField tempIP = new JIPField(true); // allow possible V6 IPs
 
     boolean editInPlace;
     Short baseID;
@@ -999,8 +1017,14 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       {
 	tempBox = (Checkbox) tempAry[7];
       }
+    else if (tempObj instanceof JIPField)
+      {
+	tempIP = (JIPField) tempAry[7];
+      }
+
     else 
-      { // default
+      { 
+	// default
 	tempText = (qTextField) tempAry[7];    
       }
 
@@ -1021,8 +1045,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {
 	    // The hash has a defined value for the base ID, therefore
 	    // it's an edit in place
-	    
-	    System.out.println("Creating Edit In Pace Query!");
 	    
 	    tempField = (BaseField) fieldHash.get(fieldName);
 	    fieldName = (String) nameHash.get(fieldName); // keep only the last field 
@@ -1046,6 +1068,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	else if (tempField.isBoolean())
 	  {
 	    value = new Boolean(tempBox.getState());
+	  }
+	else if (tempField.isIP())
+	  {
+	    value = tempIP.getValue();
 	  }
 	else 
 	  {
@@ -1093,6 +1119,9 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	    myNode = dataNode;
 	  }
 	
+
+
+
 	if (allRows == 1)
 	  {
 	    // Special case -- return only a single query node
@@ -1158,11 +1187,80 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		tempChoice3 =  (Choice) tempAry[5];
 		operator = tempChoice3.getSelectedItem();
 	 
-		tempText = (TextField) tempAry[7];
-    
-		// -- set the type for the text entered in the TextField
+		if (tempObj instanceof qTextField)
+		  {
+		    tempText = (qTextField) tempAry[7];    
+		  }
+		else if (tempObj instanceof Date)
+		  {
+		    tempDate = (qTextField) tempAry[7];
+		  }
+		else if (tempObj instanceof Checkbox)
+		  {
+		    tempBox = (Checkbox) tempAry[7];
+		  }
+		else if (tempObj instanceof JIPField)
+		  {
+		    tempIP = (JIPField) tempAry[7];
+		  }
+		
+		else 
+		  { 
+		    // default
+		    tempText = (qTextField) tempAry[7];    
+		  }
+		
+		// Now that we have tempObj, find out what it is and
+		// use that information to assign a value to the query.
 
-		tempField = defaultBase.getField(fieldName);
+
+		if (tempObj instanceof qTextField)
+		  {
+		    tempText = (qTextField) tempAry[7];    
+		  }
+		else if (tempObj instanceof Date)
+		  {
+		    tempDate = (qTextField) tempAry[7];
+		  }
+		else if (tempObj instanceof Checkbox)
+		  {
+		    tempBox = (Checkbox) tempAry[7];
+		  }
+		else if (tempObj instanceof JIPField)
+		  {
+		    tempIP = (JIPField) tempAry[7];
+		  }
+		
+		else 
+		  { 
+		    // default
+		    tempText = (qTextField) tempAry[7];    
+		  }
+
+		
+	/* Here's some code to deal with edit-in-place fields again
+	 * what we need to do here is get the actual field from the 
+	 * name, using the shortID of the base preovided by the
+	 * fieldname Hash.
+	 *
+	 */ 
+		
+		baseID = (Short) baseIDHash.get(fieldName);
+		
+		if (baseID != null)
+		  {
+		    // The hash has a defined value for the base ID, therefore
+		    // it's an edit in place
+		    
+		    tempField = (BaseField) fieldHash.get(fieldName);
+		    fieldName = (String) nameHash.get(fieldName); // keep only the last field 
+		    editInPlace = true;
+		  }
+		else
+		  {
+		    tempField = defaultBase.getField(fieldName);
+		    editInPlace = false;
+		  }
 		
 		if (tempField.isNumeric())
 		  {
@@ -1170,13 +1268,22 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		  }
 		else if (tempField.isDate())
 		  {
+		    // Fix THIS!!!!
 		    value = new Date();
+		  }
+		else if (tempField.isBoolean())
+		  {
+		    value = new Boolean(tempBox.getState());
+		  }
+		else if (tempField.isIP())
+		  {
+		    value = tempIP.getValue();
 		  }
 		else 
 		  {
 		    value = tempText.getText(); // default is string
 		  }
-
+		
 		// -- get the correct operator
     
 		if (operator == "=")
@@ -1248,6 +1355,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	  {
 	    myQuery = setFields(myQuery);
 	  }
+
+	// TESTING dumpToString
+	
+	System.out.println("Results: " + myQuery.dumpToString());
 
 	return myQuery;
       }
