@@ -5,7 +5,7 @@
    perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,6 +40,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
   boolean debug = false;
 
   boolean enabled;
+  boolean viewOnly;
   Session session;
   perm_field permField;
   PermMatrix matrix, templateMatrix;
@@ -98,7 +99,8 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     this.permField = permField;
     this.enabled = enabled;
     this.gc = gc;
-    
+    this.viewOnly = !enabled;
+
     if (!debug)
       {
 	this.debug = gc.debug;
@@ -231,10 +233,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     getContentPane().remove(waitPanel);
     getContentPane().setLayout(new BorderLayout());
 
-    TreeTableModel permEditor = new PermEditorModel(rowRootNode);
+    TreeTableModel permEditor = new PermEditorModel(rowRootNode, viewOnly);
     treeTable = new JTreeTable(permEditor);
-
-
+ 
     // Expand all visible base nodes on startup 
 
     JTree tree = treeTable.getTree();
@@ -260,11 +261,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
      }
 
      // Uses custom renderers for Booleans
-     treeTable.setDefaultRenderer(Boolean.class, new BoolRenderer((TreeTableModelAdapter)treeTable.getModel())); 
-     
-
-     treeTable.setShowHorizontalLines(false);
-
+     treeTable.setDefaultRenderer(Boolean.class, new BoolRenderer((TreeTableModelAdapter)treeTable.getModel(), viewOnly)); 
 
     // leave column reordering enabled for now to make sure all is well...
     // Can disable it later- it's not really useful in this 
@@ -274,15 +271,13 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
 
     edit_pane = new JScrollPane(treeTable);
-    //JPanel button_panel = new JPanel(new GridLayout(2,1));
-  
+    edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+    getContentPane().setBackground(Color.white);
     getContentPane().add("Center", edit_pane);
     getContentPane().add("North", Expansion_Buttons);
-    //   buttonPanel.add(Expansion_Buttons);
-    //buttonPanel.add(Choice_Buttons);
-
     getContentPane().add("South", Choice_Buttons);
-    //getContentPane().add("South", ButtonPanel);
+
     gc.setWaitCursor();
     
     progressDialog.setVisible(false);    
@@ -534,7 +529,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
   {
     if (truth_value)
       {
-	setSize(550,500);
+	setSize(550,550);
       }
 
     setVisible(truth_value);
@@ -587,10 +582,11 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	    System.out.println("Ok was pushed");
 	  }
 
-	Enumeration enum = rowVector.elements();
-	
+	Enumeration enum = rowRootNode.preorderEnumeration();
+
 	while (enum.hasMoreElements()) {
-	  ref = (PermRow)enum.nextElement();
+	  DefaultMutableTreeNode node = (DefaultMutableTreeNode)enum.nextElement();
+	  ref = (PermRow)node.getUserObject();
 
 	  if (!ref.isChanged()) {
 	    continue;
@@ -679,136 +675,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
   
 }
   
-//   public void setValueAt(Object value, int row, int col) {
-//       PermRow myRow = (PermRow)rows.elementAt(row);
-
-//       switch(col) {
-	
-//       case VISIBLE:
-// 	myRow.setVisible((Boolean)value);
-// 	myRow.setChanged(true);
-
-
-// 	// If making a base selection
-// 	// update children too 
-
-// 	if (myRow.isBase()) {
-// 	  setBaseChildren(row, VISIBLE, value);
-	  
-
-// 	  // Take care of visibility of creatable
-// 	  // and editable children too
-
-// 	  if (myRow.isCreatable()) {
-// 	    setBaseChildren(row, CREATABLE, value);
-// 	  }
-	  
-// 	  if (myRow.isEditable()) {
-// 	    setBaseChildren(row, EDITABLE, value);
-// 	  }
-	  
-// 	}
-// 	break;
-	
-//       case CREATABLE:
-// 	myRow.setCreatable((Boolean)value);
-// 	myRow.setChanged(true);
-// 	// If base, update children too
-
-// 	if ((myRow.isBase()) && (myRow.isVisible())) {
-// 	  setBaseChildren(row, CREATABLE, value);
-// 	}
-// 	break;
-	
-//       case EDITABLE:
-// 	myRow.setEditable((Boolean)value);
-// 	myRow.setChanged(true);
-// 	// If base, update children too
-
-// 	if ((myRow.isBase()) && (myRow.isVisible())) {
-// 	  setBaseChildren(row, EDITABLE, value);
-// 	}
-// 	break;
-	
-//       case DELETABLE:
-// 	myRow.setDeletable((Boolean)value);
-// 	myRow.setChanged(true);
-
-// 	// No update of children for deletable
-// 	break;
-//       }
-
-//       // Update table to reflect these changes
-//       fireTableDataChanged();
-//   }
-
-
-//   /* Programmatically updates status of children when a 
-//      base is toggled 
-//   */
-
-//   public void setBaseChildren(int row, int col, Object value) {
-    
-//     for (int i = row+1; i<rows.size(); i++) {
-//       PermRow myRow = (PermRow) rows.elementAt(i);
-
-//       if (myRow.isBase()) { // stop updating at next base 
-// 	break;
-//       } else {
-	
-// 	switch(col) {
-
-// 	case VISIBLE:
-
-// 	  // If checkbox not an "X", update it
-// 	  if (myRow.canSeeView()) {
-// 	    myRow.setVisible((Boolean)value);	    
-// 	    myRow.setEnabled((Boolean)value);
-
-// 	    // If View base was toggled to false
-// 	    // then all children in each col are set to false
-// 	    if (!myRow.isEnabled()) {
-
-// 	      Boolean toFalse = new Boolean(false);
-
-// 	      myRow.setVisible(toFalse);
-// 	      myRow.setCreatable(toFalse);
-// 	      myRow.setEditable(toFalse);
-// 	      myRow.setDeletable(toFalse);
-// 	    }
-
-// 	    // Lets us know we need to write this row out
-// 	    // when we're finished
-// 	    myRow.setChanged(true);
-// 	  }
-// 	  break;
-
-// 	case CREATABLE:
-// 	  if (myRow.canSeeCreate()) {
-// 	    myRow.setCreatable((Boolean)value);
-// 	    myRow.setChanged(true);
-// 	  }
-// 	  break;
-
-// 	case EDITABLE:
-// 	  if (myRow.canSeeEdit()) {
-// 	    myRow.setEditable((Boolean)value);
-// 	    myRow.setChanged(true);
-// 	  }
-// 	  break;
-
-// 	case DELETABLE:
-// 	  if (myRow.canSeeDelete()){
-// 	    myRow.setDeletable((Boolean)value);
-// 	    myRow.setChanged(true);
-// 	  }
-// 	  break;
-// 	}
-//       }
-//     }
-//   }
-// }
-
 
 /* BoolRenderer
 
@@ -819,17 +685,19 @@ class BoolRenderer extends JCheckBox
     implements TableCellRenderer {
   
   TreeTableModelAdapter tntModel;
+  boolean viewOnly;
 
   // This is a lighter gray than Color.lightGray
-  Color lightGray2 = new Color(224,224,224); 
+  Color lightGray2 = new Color(234,234,234); 
 
   // This is the "X" which replaces the checkbox
   ImageIcon noAccess = 
     new ImageIcon(PackageResources.getImageResource(this, "noaccess.gif", getClass()));
 
-  public BoolRenderer(TreeTableModelAdapter tntModel) {
+  public BoolRenderer(TreeTableModelAdapter tntModel, boolean viewOnly) {
     super();
     this.tntModel = tntModel;
+    this.viewOnly = viewOnly;
     setOpaque(true); //do this for background to show up.
   }
   
@@ -844,9 +712,14 @@ class BoolRenderer extends JCheckBox
     boolean enabled = myRow.isEnabled();
     
     String columnName = table.getColumnName(column);
-    
+
+    //    if (myRow.isBase()) 
+    //      setBackground(lightGray2);
+    //    else
       setBackground(Color.white);
-      setContentAreaFilled(false);
+
+
+
     // Check if viewOK, etc. If not, put
     // noAccess icon ("X") instead of checkbox
 
@@ -856,7 +729,7 @@ class BoolRenderer extends JCheckBox
 
       if (myRow.canSeeView()) {
 	setIcon(null);
-	setEnabled(enabled);
+	setEnabled(viewOnly ? false : enabled);
 	setSelected(selected.booleanValue());	
       } else {
 	setIcon(noAccess);
@@ -870,7 +743,7 @@ class BoolRenderer extends JCheckBox
 
       if (myRow.canSeeCreate()) {
 	setIcon(null);
-	setEnabled(enabled);
+	setEnabled(viewOnly ? false : enabled);
 	setSelected(selected.booleanValue());	
       } else {
 	setIcon(noAccess);
@@ -884,7 +757,7 @@ class BoolRenderer extends JCheckBox
 
       if (myRow.canSeeEdit()) {
 	setIcon(null);
-	setEnabled(enabled);
+	setEnabled(viewOnly ? false : enabled);
 	setSelected(selected.booleanValue());	
       } else {
 	setIcon(noAccess);
@@ -898,7 +771,7 @@ class BoolRenderer extends JCheckBox
 
       if (myRow.canSeeDelete()) {
 	setIcon(null);
-	setEnabled(enabled);
+	setEnabled(viewOnly ? false : enabled);
 	setSelected(selected.booleanValue());	
       } else {
 	setIcon(noAccess);
@@ -1059,7 +932,7 @@ class PermEditorModel extends AbstractTreeTableModel
   static final int CREATABLE = 2;
   static final int EDITABLE = 3;
   static final int DELETABLE = 4;
-
+  boolean viewOnly;
 
     // Names of the columns.
     static protected String[]  cNames =  {"Name", 
@@ -1071,8 +944,9 @@ class PermEditorModel extends AbstractTreeTableModel
     // Types of the columns.
     static protected Class[]  cTypes = {TreeTableModel.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class};
 
-    public PermEditorModel(DefaultMutableTreeNode root) {
+    public PermEditorModel(DefaultMutableTreeNode root, boolean viewOnly) {
 	super(root); 
+	this.viewOnly = viewOnly;
     }
 
     //
@@ -1127,41 +1001,49 @@ class PermEditorModel extends AbstractTreeTableModel
 
   public boolean isCellEditable(Object node, int col) {
     PermRow myRow = (PermRow)((DefaultMutableTreeNode)node).getUserObject(); 
-
-      // name string or disabled checkbox is not editable  
-      if ((getColumnClass(col) == String.class) || (!myRow.isEnabled()))  
-	return false;
-
-      // otherwise, if it's not an "X", it is editable  
-      else { 
+    
+    // tree column is always editable (expansion and contraction)
+    if (getColumnClass(col) == TreeTableModel.class)  
+      return true;
+    
+    // If we entered from gclient "View Permissions" button, then can't edit
+    if (viewOnly) 
+      return false;
+    
+    // name string or disabled checkbox is not editable
+    if ((getColumnClass(col) == String.class) || (!myRow.isEnabled()))  
+      return false;
+    
+    // otherwise, if it's not an "X", it is editable  
+    else { 
+      
+      switch(col) {
 	
-	switch(col) {
-
-	case NAME:
+      case NAME:
+	return true;
+	
+      case VISIBLE:
+	if (myRow.canSeeView()) 
 	  return true;
-
-	case VISIBLE:
-	  if (myRow.canSeeView()) 
-	    return true;
-	  break;
-
-	case CREATABLE:
-	  if (myRow.canSeeCreate()) 
-	    return true;
-	  break;	  
-	  
-	case EDITABLE:
-	  if (myRow.canSeeEdit()) 
-	    return true;
-	  break;
-	  
-	case DELETABLE:
-	  if (myRow.canSeeDelete()) 
-	    return true;
-	  break;
-	}
-	return false;
+	break;
+	
+      case CREATABLE:
+	if (myRow.canSeeCreate()) 
+	  return true;
+	break;	  
+	
+      case EDITABLE:
+	if (myRow.canSeeEdit()) 
+	  return true;
+	break;
+	
+      case DELETABLE:
+	if (myRow.canSeeDelete()) 
+	  return true;
+	break;
       }
+      return false;
+    }
   }
   
   public void setValueAt(Object value, Object node, int col) {
@@ -1232,6 +1114,7 @@ class PermEditorModel extends AbstractTreeTableModel
 
     
   public void setBaseChildren(Object node, int col, Object value) {
+
     for (Enumeration e = ((DefaultMutableTreeNode)node).children(); e.hasMoreElements();) {
 
       PermRow myRow = (PermRow)((DefaultMutableTreeNode)e.nextElement()).getUserObject(); 
