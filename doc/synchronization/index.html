@@ -305,6 +305,11 @@
     
     <h4 id="buildertask_whaaaa">What A Builder Task Looks Like</h4>
 
+    <p>What follows is the complete UNIXBuilderTask class from the
+    Ganymede userKit.  It will illustrate a lot of the principles of
+    writing a full-state builder task with the GanymedeBuilderTask
+    class.</p>
+
     <pre>
 package arlut.csd.ganymede.userKit;
 
@@ -315,6 +320,14 @@ import arlut.csd.Util.FileOps;
 import java.util.*;
 import java.text.*;
 import java.io.*;
+
+</pre>
+<p>First we have our beginning declarations.  Generally speaking,
+you'll create a separate package for your custom schema classes, and
+you'll need to import everything from the
+<code>arlut.csd.ganymede.server</code> and
+<code>arlut.csd.ganymede.common</code> packages.</p>
+<pre>
 
 /**
  * This class is intended to dump the Ganymede datastore to the
@@ -351,6 +364,16 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
 
     taskDefObjInvid = _taskObjInvid;
   }
+
+</pre>
+<p>And here we see the class declaration subclassing
+GanymedeBuilderTask, member variable declarations, and our
+constructor, which must take an <a
+href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a>
+parameter, and set the <a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#taskDefObjInvid">taskDefObjInvid</a>
+variable from the GanymedeBuilderTask class.</p>
+<pre>
 
   /**
    * This method runs with a dumpLock obtained for the builder task.
@@ -506,6 +529,39 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
 
     return result;
   }
+</pre>
+<p>And here we have our <a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
+method.  The important things to note here are the use of the <a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#getOptionValue(java.lang.String)">getOptionValue()</a>
+method to look for option strings from our Task object, the use of the
+<a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#baseChanged(short)">baseChanged()</a>
+method to determine whether any objects of a given type have changed
+since this builder task was last run, the use of the <a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#openOutFile(java.lang.String,
+java.lang.String)">openOutFile()</a> method for opening files for
+writing, and the use of the <a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#enumerateObjects(short)">enumerateObjects()</a>
+method for iterating over objects of a given type.  Each of these
+methods take advantage of logic built in to the GanymedeBuilderTask
+class, and will help your builder task code behave properly.</p>
+
+<p>As you may notice above, baseChanged() and enumerateObjects() both
+take a numeric parameter (a short) to describe what object type the method is to operate on.</p>
+
+<p>The overall effect of builderPhase1() is to look to see whether any
+users or groups, as defined in the userKit schema, have changed since
+this builder task was last run, and if so, to write out passwd and
+group files suitable for integration into a simple NIS or <code
+class="filename">/etc/passwd</code>, <code
+class="filename">/etc/group</code> type environment.</p>
+
+<p>If no users or groups have changed, this builderPhase1() method
+will return false, which will tell the GanymedeBuilderTask base class
+not to bother running builderPhase2().</p>
+
+<pre>
 
   /**
    *
@@ -562,6 +618,38 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
 
     return true;
   }
+</pre>
+
+<p><a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2()</a>,
+by contrast, is much simpler.  It uses the <a
+href="../javadoc/arlut/csd/Util/FileOps.html#runProcess(java.lang.String)">runProcess()</a>
+method to try to run a builder script that is designated in the Task
+object's <code class="type">Option Strings</code> field.  Finding and
+running the external script is all that builderPhase2() is responsible
+for.  The external builder script is responsible for making sure that
+everything is set up for it to run.  The Ganymede server makes no
+guarantees as to the working directory the script will be run in, and
+no guarantees about what any environment variables will be set to.  If
+your external builder script needs to worry about things like that,
+you should make sure that your external builder script sets all that
+up for itself.</p>
+
+<p>The other thing you need to know when writing your external builder
+script is that it should block until it finishes with its build.  The
+Ganymede Scheduler creates an independent thread for each builder task
+that runs, and it is expected that that thread will block until your
+external builder task has completely finished its work.  If your
+external builder script were to put itself into the background and
+return early, the Ganymede Scheduler would consider the builder task
+completely finished, and it would feel free to run the task all over
+again, which might cause your builderPhase1() method to overwrite
+files that your external builder script is still working with.</p>
+
+<p>What I say to you three times is true.  Never let your external
+builder script return until it is truly finished with its build.</p>
+
+<pre>
 
   // ***
   //
@@ -820,6 +908,14 @@ public class UNIXBuilderTask extends GanymedeBuilderTask {
   }
 }
 </pre>
+
+<p>All of the rest of the class is dedicated to utility helper methods
+that are used to handle chores for the <a
+href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
+method.  Remember, in the end, a builder task is just a Java class,
+and you can write whatever methods and declare whatever member
+variables you like in order to implement your builder task's
+logic.</p>
 
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
