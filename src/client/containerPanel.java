@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.129 $
-   Last Mod Date: $Date: 2001/10/11 23:26:36 $
+   Version: $Revision: 1.130 $
+   Last Mod Date: $Date: 2002/02/26 19:30:48 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.129 $ $Date: 2001/10/11 23:26:36 $ $Name:  $
+ * @version $Revision: 1.130 $ $Date: 2002/02/26 19:30:48 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1013,7 +1013,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	
 	setRowVisible(comp, true);
-
+	
 	if (comp instanceof JstringField)
 	  {
 	    // we don't need to worry about turning off callbacks

@@ -163,6 +163,112 @@ showing what the expiration/removal field was set to in the calendar
 panel can now be used to jump the calendar back to the calendar page
 containing the selected time.
 
+11. [SERVER/XML] Liberalized the server's behavior with xmlclient deletions
+
+The server was previously rejecting any XML transaction that attempted
+to delete a non-existent object.  Now, the server will merely transmit
+a warning to the xmlclient that an attempt to delete a non-existent
+object was attempted, without completely rejecting the valid deletion
+commands.
+
+This change was made in response to a comment by Gaurav Bhargava at
+Villanova University.
+
+12. [SERVER] Fixed slight inconsistency in object change logging
+
+The Ganymede server's logging and email notification logic had a small
+inconsistency in it.  When logging changes to invid (object reference)
+fields, the Ganymede server logged old values removed using the label
+for those objects that pertained at the end of the transaction in
+question.  If an object's name changed during the transaction due to
+other editing, something like the following would be logged:
+
+ objectchanged
+ -------------
+ 
+ I.P. Network ATL - Outgoing Inet Access Only, <267:96> was modified.
+ 
+ Fields changed:
+ 
+ Records
+        Deleted: [10.5.16.132  - 08:00:20:9a:16:f2]
+ 
+ objectchanged
+ -------------
+ 
+ I.P. Network ADG/OMG - Outgoing Inet Access Only, <267:79> was modified.
+ 
+ Fields changed:
+ 
+ Records
+        Added: [10.5.16.132  - 08:00:20:9a:16:f2]
+ 
+ objectchanged
+ -------------
+ 
+ System corona's Embedded System Interface, '[10.5.16.132  -
+ 08:00:20:9a:16:f2]',  <265:970> was modified.
+ 
+ Fields changed:
+ 
+ I.P. Address
+        Old: 10.8.16.186
+        New: 10.5.16.132
+ Ethernet Info
+        Old: 8-0-20-9a-16-f2
+        New: 08:00:20:9a:16:f2
+ I.P. Network
+        Old: ATL - Outgoing Inet Access Only
+        New: ADG/OMG - Outgoing Inet Access Only
+
+In this case, the 'Records Deleted' part of the 'ATL - Outgoing Inet
+Access Only' objectchanged log entry is showing that the new name
+for the interface that was deleted, even though when that interface
+was in the ATL network, it had a different name.
+
+This has been changed so that whenever an object is removed from
+an invid field, the removal will be logged using the object's name
+as of the start of the transaction.  This would make the above logging
+sequence look like this:
+
+ objectchanged
+ -------------
+ 
+ I.P. Network ATL - Outgoing Inet Access Only, <267:96> was modified.
+ 
+ Fields changed:
+ 
+ Records
+        Deleted: [10.8.16.186  - 8-0-20-9a-16-f2]
+ 
+ objectchanged
+ -------------
+ 
+ I.P. Network ADG/OMG - Outgoing Inet Access Only, <267:79> was modified.
+ 
+ Fields changed:
+ 
+ Records
+        Added: [10.5.16.132  - 08:00:20:9a:16:f2]
+ 
+ objectchanged
+ -------------
+ 
+ System corona's Embedded System Interface, '[10.5.16.132  -
+ 08:00:20:9a:16:f2]',  <265:970> was modified.
+ 
+ Fields changed:
+ 
+ I.P. Address
+        Old: 10.8.16.186
+        New: 10.5.16.132
+ Ethernet Info
+        Old: 8-0-20-9a-16-f2
+        New: 08:00:20:9a:16:f2
+ I.P. Network
+        Old: ATL - Outgoing Inet Access Only
+        New: ADG/OMG - Outgoing Inet Access Only
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001
