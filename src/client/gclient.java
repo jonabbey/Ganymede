@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.107 $ %D%
+   Version: $Revision: 1.108 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -372,16 +372,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     // File menu
 
     fileMenu = new JMenu("File");
+    fileMenu.setMnemonic('f');
     fileMenu.setDelay(0);
-    logoutMI = new JMenuItem("Logout");//, new MenuShortcut(KeyEvent.VK_L));
+    logoutMI = new JMenuItem("Logout");
+    logoutMI.setMnemonic('l');
     logoutMI.addActionListener(this);
 
     clearTreeMI = new JMenuItem("Clear Tree");
     clearTreeMI.addActionListener(this);
 
     filterQueryMI = new JMenuItem("Filter Query");
+    filterQueryMI.setMnemonic('a');
     filterQueryMI.addActionListener(this);
     defaultOwnerMI = new JMenuItem("Set Default Owner");
+    defaultOwnerMI.setMnemonic('s');
     defaultOwnerMI.addActionListener(this);
 
     fileMenu.add(clearTreeMI);
@@ -393,6 +397,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     // Action menu
 
     actionMenu = new JMenu("Actions");
+    actionMenu.setMnemonic('a');
 
     createObjectMI = new JMenuItem("Create Object");
     createObjectMI.setMnemonic('c');
@@ -424,6 +429,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     inactivateObjectMI.addActionListener(this);
 
     menubarQueryMI = new JMenuItem("Query");
+    menubarQueryMI.setMnemonic('q');
     menubarQueryMI.addActionListener(this);
 
     actionMenu.add(menubarQueryMI);
@@ -445,6 +451,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     // windowMenu
 
     windowMenu = new JMenu("Windows");
+    windowMenu.setMnemonic('w');
 
     // Look and Feel menu
 
