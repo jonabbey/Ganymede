@@ -78,7 +78,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import arlut.csd.JDataComponent.JAddValueObject;
