@@ -7,7 +7,7 @@
    world, via NIS, DNS, NIS+, LDAP, JNDI, JDBC, X, Y, Z, etc.
    
    Created: 17 February 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,7 +35,7 @@ import java.util.*;
 
 public abstract class GanymedeBuilderTask implements Runnable {
 
-  Date lastRunTime;
+  protected Date lastRunTime;
   GanymedeSession session = null;
   DBDumpLock lock;
 
@@ -51,7 +51,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   public final void run()
   {
-    boolean success = false;
+    boolean
+      success1 = false,
+      success2 = false;
 
     /* -- */
 
@@ -75,7 +77,21 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    Ganymede.debug("Could not run task " + this.getClass().toString() + ", couldn't get dump lock");
 	  }
 
-	success = this.builder();
+	success1 = this.builderPhase1();
+
+	// release the lock, and so on
+
+	if (session != null)
+	  {
+	    session.logout();
+	    session = null;
+	    lock = null;
+	  }
+
+	if (success1)
+	  {
+	    success2 = this.builderPhase2();
+	  }
       }
     finally
       {
@@ -86,7 +102,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    session.logout();
 	  }
 
-	if (success)
+	if (success2)
 	  {
 	    if (lastRunTime == null)
 	      {
@@ -143,19 +159,55 @@ public abstract class GanymedeBuilderTask implements Runnable {
    *
    */
 
-  protected final Vector enumerateObjects(short baseid)
+  protected final Enumeration enumerateObjects(short baseid)
   {
-    QueryResult result;
-    Query query;
+    // this works only because we've already got our lock
+    // established..  otherwise, we'd have to use the query system.
 
-    /* -- */
+    if (lock == null)
+      {
+	throw new IllegalArgumentException("Can't call enumerateObjects without a lock");
+      }
 
-    // since we are using an internal session, our query
-    // will pick up all objects
+    DBObjectBase base = Ganymede.db.getObjectBase(baseid);
 
-    query = new Query(baseid);
-    result = session.queryDispatch(query, true, false, lock);
-    return result.getObjects();
+    return base.objectHash.elements();
+  }
+
+  /**
+   *
+   * This method is used by subclasses of GanymedeBuilderTask to
+   * obtain a reference to a DBObject matching a given invid.
+   *
+   * @param invid The object id of the object to be viewed
+   *
+   */
+
+  protected final DBObject getObject(Invid invid)
+  {
+    // this works only because we've already got our lock
+    // established..  otherwise, we'd have to use the query system.
+
+    if (lock == null)
+      {
+	throw new IllegalArgumentException("Can't call enumerateObjects without a lock");
+      }
+
+    return session.session.viewDBObject(invid);
+  }
+
+  /**
+   *
+   * This method is used by subclasses of GanymedeBuilderTask to
+   * obtain the label for an object.
+   *
+   * @param baseid The object id of the object label to be retrieved
+   *
+   */
+
+  protected final String getLabel(Invid invid)
+  {
+    return session.viewObjectLabel(invid);
   }
 
   /**
@@ -163,11 +215,45 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * This method is intended to be overridden by subclasses of
    * GanymedeBuilderTask.
    *
-   * This method actually performs the work of the builder task.  The
-   * builder task is intended to take advantage of the methods defined
-   * in this class to do the work.
+   * This method runs with a dumpLock obtained for the builder task.
+   *
+   * Code run in builderPhase1() can call enumerateObjects() and
+   * baseChanged().
+   *
+   * @return true if builderPhase1 made changes necessitating the
+   * execution of builderPhase2.
    *
    */
 
-  abstract public boolean builder();
+  abstract public boolean builderPhase1();
+
+  /**
+   * This method is intended to be overridden by subclasses of
+   * GanymedeBuilderTask.
+   *
+   * This method runs after this task's dumpLock has been
+   * relinquished.  This method is intended to be used to finish off a
+   * build process by running (probably external) code that does not
+   * require direct access to the database.
+   *
+   * For instance, for an NIS builder task, builderPhase1() would scan
+   * the Ganymede object store and write out NIS-compatible source
+   * files.  builderPhase1() would return, the run() method drops the
+   * dump lock so that other transactions can be committed, and then
+   * builderPhase2() can be run to turn those on-disk files written by
+   * builderPhase1() into NIS maps.  This generally involves executing
+   * an external Makefile, which can take an indeterminate period of
+   * time.
+   *
+   * By releasing the dumpLock before we get to that point, we
+   * minimize contention for users of the system.
+   *
+   * As a result of having dropped the dumpLock, enumerateObjects()
+   * cannot be called by this method.
+   *
+   * builderPhase2 is only run if builderPhase1 returns true.
+   *  
+   */
+
+  abstract public boolean builderPhase2();
 }
