@@ -5,7 +5,7 @@
    Remote interface definition.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,14 @@ import java.rmi.*;
 
 public interface ip_field extends db_field {
 
+  /**
+   *
+   * Returns true if this field is permitted to hold IPv6 addresses.
+   *
+   */
+
+  boolean v6Allowed() throws RemoteException;
+  
   /**
    *
    * Returns true if the (scalar) value stored in this IP field is an
