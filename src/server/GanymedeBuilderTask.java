@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/12/02 10:34:02 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/12/03 05:38:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,11 +52,14 @@
 package arlut.csd.ganymede;
 
 import java.util.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.zip.*;
 import java.io.*;
 
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.zipIt;
+import arlut.csd.Util.FileOps;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -523,6 +526,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	return (Vector) options.clone();
       }
+
+    return null;
   }
 
   /**
@@ -612,10 +617,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (file.exists())
       {
-	backupFileName = currentBackUpDirectory + filename.replace(File.separator, "_");
+	backupFileName = currentBackUpDirectory + filename.replace(File.separatorChar, '_');
       }
 
-    if (!arlut.csd.Util.copyFile(filename, backupFileName))
+    if (!arlut.csd.Util.FileOps.copyFile(filename, backupFileName))
       {
 	return null;
       }

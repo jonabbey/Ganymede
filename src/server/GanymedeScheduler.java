@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/12/02 10:34:02 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/12/03 05:38:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -50,6 +50,7 @@
 package arlut.csd.ganymede;
 
 import java.util.*;
+import java.lang.reflect.*;
 
 import arlut.csd.Util.VectorUtils;
 
@@ -122,18 +123,20 @@ public class GanymedeScheduler extends Thread {
     currentTime = new Date(currentTime.getTime() + 1000*60);
 
     scheduler.addPeriodicAction(currentTime, 1,
-				new sampleTask("sample task 2"), "sample task 2");
+				new sampleTask("sample task 2"), 
+				"sample task 2");
 
     currentTime = new Date(currentTime.getTime() + 1000*60);
-
+    
     scheduler.addTimedAction(currentTime,
-			new sampleTask("sample task 3"),
-			"sample task 3");
+			     new sampleTask("sample task 3"),
+			     "sample task 3");
 
     currentTime = new Date(currentTime.getTime() + 1000*60);
 
     scheduler.addPeriodicAction(currentTime, 1,
-				new sampleTask("sample task 4"), "sample task 4");
+				new sampleTask("sample task 4"), 
+				"sample task 4");
   }
 
   // --- end statics
@@ -213,30 +216,27 @@ public class GanymedeScheduler extends Thread {
     // see if we can find a new-style constructor to take the Invid
     // parameter
 
+    Constructor c = null;
+    
     try
       {
-	Constructor c = null;
-
+	c = classdef.getConstructor(new Class[] {arlut.csd.ganymede.Invid.class});
+      }
+    catch (NoSuchMethodException ex)
+      {
+	// oh, well
+      }
+    
+    if (c != null)
+      {
 	try
 	  {
-	    c = classdef.getConstructor(new Class[] {arlut.csd.ganymede.Invid.class});
+	    task = (Runnable) c.newInstance(new Object[] {taskDefInvid});
 	  }
-	catch (NoSuchMethodException ex)
+	catch (Exception ex)
 	  {
-	    // oh, well
-	  }
-
-	if (c != null)
-	  {
-	    try
-	      {
-		task = (Runnable) c.newInstance(new Object[] {taskDefInvid});
-	      }
-	    catch (Exception ex)
-	      {
-		System.err.println("Error, ran into exception trying to construct task with Invid constructor");
-		ex.printStackTrace();
-	      }
+	    System.err.println("Error, ran into exception trying to construct task with Invid constructor");
+	    ex.printStackTrace();
 	  }
       }
 
