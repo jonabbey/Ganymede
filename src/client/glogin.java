@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -291,6 +291,9 @@ public class glogin extends java.applet.Applet implements Runnable {
 
     username.setEnabled(true);
     passwd.setEnabled(true);
+    passwd.requestFocus();
+
+
   }
 
   public void stop() 
