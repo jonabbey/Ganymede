@@ -6,7 +6,7 @@
    GASH netgroup_ file
    
    Created: 17 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,6 +70,8 @@ public class UserNetgroup {
 
     netgroup_name = getNextBit(tokens);
 
+    //    System.err.println("Netgroup Name: " + netgroup_name);
+
     // if the netgroup name ends in -s, we've got 
     // a system netgroup and we want to skip it
 
@@ -87,6 +89,8 @@ public class UserNetgroup {
 	  }
 
 	netgroup_name = getNextBit(tokens);
+
+	//	System.err.println("Netgroup Name: " + netgroup_name);
       }
 
     // okay, we're in a line that has a user netgroup. figure
@@ -103,11 +107,13 @@ public class UserNetgroup {
 	  {
 	    //	    System.out.print(" " + tokens.sval);
 
-	    String tmp = tokens.sval;
+	    String tmp = getNextBit(tokens);
 
 	    if (tmp.indexOf('(') == -1)
 	      {
 		// absence of parens mean this is a sub netgroup reference
+
+		//		System.err.println("Sub ref: " + tmp);
 
 		subnetgroups.addElement(tmp);
 	      }
@@ -116,6 +122,8 @@ public class UserNetgroup {
 		// we've got a user entry
 
 		String tmp2 = tmp.substring(tmp.indexOf(',') + 1, tmp.lastIndexOf(','));
+
+		// System.err.println("User: " + tmp2);
 		users.addElement(tmp2);
 	      }
 	  }
@@ -162,6 +170,8 @@ public class UserNetgroup {
 
 	System.out.print((String)subnetgroups.elementAt(i));
       }
+
+    System.out.println();
   }
   
   private String getNextBit(StreamTokenizer tokens) throws IOException
