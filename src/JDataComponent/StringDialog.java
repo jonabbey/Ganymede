@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ import javax.swing.border.*;
  * @see DialogRsrc
  */
 
-public class StringDialog extends JCenterDialog implements ActionListener {
+public class StringDialog extends JCenterDialog implements ActionListener, WindowListener {
 
   static final boolean debug = false;
 
@@ -163,6 +163,7 @@ public class StringDialog extends JCenterDialog implements ActionListener {
   public StringDialog(DialogRsrc Resource) 
   {
     super(Resource.frame, Resource.title, true);
+    this.addWindowListener(this);
 
     if (debug)
       {
@@ -213,6 +214,20 @@ public class StringDialog extends JCenterDialog implements ActionListener {
     mainPanel.add(textLabel);
 
     //
+    // Separator goes all the way accross
+    // 
+
+    arlut.csd.JDataComponent.JSeparator sep = new arlut.csd.JDataComponent.JSeparator();
+
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+    gbc.gridwidth = 2;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(sep, gbc);
+    mainPanel.add(sep);
+
+    //
     // ButtonPanel takes up the bottom of the dialog
     //
 
@@ -230,20 +245,6 @@ public class StringDialog extends JCenterDialog implements ActionListener {
 	CancelButton.addActionListener(this);
 	buttonPanel.add(CancelButton);
       }
-
-    //
-    // Separator goes all the way accross
-    // 
-
-    arlut.csd.JDataComponent.JSeparator sep = new arlut.csd.JDataComponent.JSeparator();
-
-    gbc.gridx = 0;
-    gbc.gridy = 3;
-    gbc.gridwidth = 2;
-    gbc.gridheight = 1;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbl.setConstraints(sep, gbc);
-    mainPanel.add(sep);
 
     //
     // buttonPanel goes underneath
@@ -278,6 +279,8 @@ public class StringDialog extends JCenterDialog implements ActionListener {
     gbc.gridy = 1;
     gbc.gridwidth = 1;
     gbc.gridheight = 2;
+    gbc.weightx = 0.0;
+    gbc.fill = GridBagConstraints.NONE;
     gbl.setConstraints(imagePanel, gbc);
     mainPanel.add(imagePanel);
 
@@ -290,12 +293,15 @@ public class StringDialog extends JCenterDialog implements ActionListener {
     // because we have to add space to to it for the stupid activator.
 
     panel = new JPanel();
+    panel.setBorder(null);
 
     gbc.gridx = 1;
     gbc.gridy = 2;
     gbc.gridwidth = 1;
     gbc.gridheight = 1;
-    panel.setBorder(null);
+    gbc.weightx = 1.0;
+    //    gbc.weighty = 1.0;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(panel, gbc);
     mainPanel.add(panel);
 
@@ -648,7 +654,7 @@ public class StringDialog extends JCenterDialog implements ActionListener {
 
   public Hashtable DialogShow()
   {
-    pack();
+    mainPanel.revalidate();
     show();
 
     // at this point we're frozen, since we're a modal dialog.. we'll continue
@@ -680,6 +686,8 @@ public class StringDialog extends JCenterDialog implements ActionListener {
       }
 
     // pop up down so that DialogShow() can proceed to completion.
+
+    done = true;
 
     setVisible(false);
   }
@@ -764,15 +772,57 @@ public class StringDialog extends JCenterDialog implements ActionListener {
     JLabel l = new JLabel(label, SwingConstants.LEFT);
 
     compgbl.setConstraints(l, compgbc);
-    compgbc.gridwidth = GridBagConstraints.REMAINDER;
     parent.add(l);
 
     compgbc.gridx = 1;
     compgbc.weightx = 1.0;
+    compgbc.fill = GridBagConstraints.HORIZONTAL;
 
     compgbl.setConstraints(comp, compgbc);
     parent.add(comp);
 
     parent.invalidate();
+  }
+
+  // WindowListener methods
+
+  public void windowActivated(WindowEvent event)
+  {
+  }
+
+  public void windowClosed(WindowEvent event)
+  {
+  }
+
+  public void windowClosing(WindowEvent event)
+  {
+    if (!done)
+      {
+	if (debug)
+	  {
+	    System.err.println("Window is closing and we haven't done a cancel.");
+	  }
+
+	// by setting valueHash to null, we're basically treating
+	// this window close as a cancel.
+	
+	valueHash = null;
+      }
+  }
+
+  public void windowDeactivated(WindowEvent event)
+  {
+  }
+
+  public void windowDeiconified(WindowEvent event)
+  {
+  }
+
+  public void windowIconified(WindowEvent event)
+  {
+  }
+
+  public void windowOpened(WindowEvent event)
+  {
   }
 }
