@@ -3,7 +3,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -301,165 +301,136 @@ public class JnumberField extends JentryField {
 
   public void sendCallback()
   {
-    if (processingCallback)
+    synchronized (this)
       {
-	return;
+	if (processingCallback)
+	  {
+	    return;
+	  }
+	
+	processingCallback = true;
       }
-
-    Integer currentValue;
 
     try
       {
-	currentValue = getValue();
-      }
-    catch (NumberFormatException ex)
-      {
-	if (allowCallback)
+	Integer currentValue;
+
+	try
 	  {
-	    synchronized (this)
-	      {
-		if (processingCallback)
-		  {
-		    return;
-		  }
-
-		processingCallback = true;
-	      }
-
-	    try
-	      {
-		my_parent.setValuePerformed(new JValueObject(this, 0,
-							     JValueObject.ERROR,
-							     "Not a valid number: " + getText()));
-	      }
-	    catch (java.rmi.RemoteException rx)
-	      {
-		System.out.println("Could not send an error callback.");
-	      }
-	    finally
-	      {
-		processingCallback = false;
-	      }
+	    currentValue = getValue();
 	  }
-
-	// revert the text field
-
-	setValue(oldvalue);
-	return;
-      }
-
-    if ((currentValue == null && oldvalue == null) ||
-	(oldvalue != null && oldvalue.equals(currentValue)))
-      {
-	if (debug)
+	catch (NumberFormatException ex)
 	  {
-	    System.out.println("The field was not changed.");
-	  }
-	return;
-      }
-
-    // check to see if it's in bounds, if we have bounds set.
-
-    if (limited)
-      {
-	int value = currentValue.intValue();
-
-	if ((value > maxSize) || (value < minSize))
-	  {
-	    // nope, revert.
-
 	    if (allowCallback)
 	      {
-		synchronized (this)
-		  {
-		    if (processingCallback)
-		      {
-			return;
-		      }
-
-		    processingCallback = true;
-		  }
-
 		try
 		  {
 		    my_parent.setValuePerformed(new JValueObject(this, 0,
 								 JValueObject.ERROR,
-								 "Number out of range."));
+								 "Not a valid number: " + getText()));
 		  }
 		catch (java.rmi.RemoteException rx)
 		  {
 		    System.out.println("Could not send an error callback.");
 		  }
-		finally
-		  {
-		    processingCallback = false;
-		  }
 	      }
 
-	    // revert
+	    // revert the text field
 
 	    setValue(oldvalue);
 	    return;
 	  }
-      }
 
-    // now, tell somebody, if we need to.
-
-    if (allowCallback)
-      {
-	// Do a callback
-
-	if (debug)
+	if ((currentValue == null && oldvalue == null) ||
+	    (oldvalue != null && oldvalue.equals(currentValue)))
 	  {
-	    System.out.println("Sending callback");
-	  }
-
-	boolean success = false;
-
-	synchronized (this)
-	  {
-	    if (processingCallback)
+	    if (debug)
 	      {
-		return;
+		System.out.println("The field was not changed.");
 	      }
 
-	    processingCallback = true;
+	    return;
 	  }
 
-	try
+	// check to see if it's in bounds, if we have bounds set.
+
+	if (limited)
 	  {
-	    success = my_parent.setValuePerformed(new JValueObject(this,currentValue));
-	  }
-	catch (java.rmi.RemoteException re)
-	  {
-	    // success will still be false, that's good enough for us.
-	  }
-	finally
-	  {
-	    processingCallback = false;
+	    int value = currentValue.intValue();
+
+	    if ((value > maxSize) || (value < minSize))
+	      {
+		// nope, revert.
+
+		if (allowCallback)
+		  {
+		    try
+		      {
+			my_parent.setValuePerformed(new JValueObject(this, 0,
+								     JValueObject.ERROR,
+								     "Number out of range."));
+		      }
+		    catch (java.rmi.RemoteException rx)
+		      {
+			System.out.println("Could not send an error callback.");
+		      }
+		  }
+
+		// revert
+
+		setValue(oldvalue);
+		return;
+	      }
 	  }
 
-	if (!success)
-	  {
-	    // revert
+	// now, tell somebody, if we need to.
 
-	    setValue(oldvalue);
+	if (allowCallback)
+	  {
+	    // Do a callback
+
+	    if (debug)
+	      {
+		System.out.println("Sending callback");
+	      }
+
+	    boolean success = false;
+
+	    try
+	      {
+		success = my_parent.setValuePerformed(new JValueObject(this,currentValue));
+	      }
+	    catch (java.rmi.RemoteException re)
+	      {
+		// success will still be false, that's good enough for us.
+	      }
+
+	    if (!success)
+	      {
+		// revert
+
+		setValue(oldvalue);
+	      }
+	    else
+	      {
+		// good to go.  We've already got the text set in the text
+		// field, the user did that for us.  Remember the value of
+		// it, so we can revert if we need to later.
+
+		oldvalue = currentValue;
+	      }
 	  }
 	else
 	  {
-	    // good to go.  We've already got the text set in the text
-	    // field, the user did that for us.  Remember the value of
-	    // it, so we can revert if we need to later.
+	    // no one to say no.  Odd, guess nobody cares.. remember our
+	    // value anyway.
 
 	    oldvalue = currentValue;
 	  }
       }
-    else
+    finally
       {
-	// no one to say no.  Odd, guess nobody cares.. remember our
-	// value anyway.
-
-	oldvalue = currentValue;
+	processingCallback = false;
       }
   }
 }

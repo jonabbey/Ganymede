@@ -9,7 +9,7 @@
    preset.
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -390,127 +390,122 @@ public class JstringField extends JentryField implements KeyListener{
 
   public void sendCallback()
   {
-    if (processingCallback)
+    synchronized (this)
       {
-	return;
-      }
-
-    String str;
-
-    /* -- */
-
-    // if nothing in the JstringField has changed,
-    // we don't need to worry about this event.
-    
-    str = getText();
-    
-    if (value != null)
-      {
-	if (debug)
+	if (processingCallback)
 	  {
-	    System.err.println("JstringField.processFocusEvent: old value != null");
+	    return;
 	  }
 	
-	changed = !value.equals(str);
-      }
-    else
-      {
-	if (debug)
-	  {
-	    System.err.println("JstringField.processFocusEvent: old value == null");
-	  }
-	
-	changed = true;
-      }
-    
-    if (!changed)
-      {
-	if (debug)
-	  {
-	    System.err.println("JstringField.processFocusEvent: no change, ignoring");
-	  }
-	
-	return;
-      }
-    
-    if (!allowCallback) 
-      {
-	value = str;
-	return;
+	processingCallback = true;
       }
 
-    boolean b = false;
-	  
-    try 
+    try
       {
-	if (debug)
+	String str;
+
+	/* -- */
+
+	// if nothing in the JstringField has changed,
+	// we don't need to worry about this event.
+    
+	str = getText();
+    
+	if (value != null)
 	  {
-	    System.err.println("JstringField.processFocusEvent: making callback");
-	  }
-	
-	synchronized (this)
-	  {
-	    if (processingCallback)
+	    if (debug)
 	      {
-		return;
+		System.err.println("JstringField.processFocusEvent: old value != null");
 	      }
-
-	    processingCallback = true;
-	  }
-
-	try
-	  {
-	    b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
-	  }
-	finally
-	  {
-	    processingCallback = false;
-	  }
-      }
-    catch (RemoteException re)
-      {
-      }
-
-    // If the setValuePerformed callback failed, we'll revert the value to our last
-    // approved value
-    
-    if (!b) 
-      {
-	if (debug)
-	  {
-	    System.err.println("JstringField.processFocusEvent: setValue rejected");
-		
-	    if (value == null)
-	      {
-		System.err.println("JstringField.processFocusEvent: resetting to empty string");
-	      }
-	    else
-	      {
-		System.err.println("JstringField.processFocusEvent: resetting to " + value);
-	      }
-	  }
-	    
-	if (value == null)
-	  {
-	    super.setText("");
+	
+	    changed = !value.equals(str);
 	  }
 	else
 	  {
-	    super.setText(value);
+	    if (debug)
+	      {
+		System.err.println("JstringField.processFocusEvent: old value == null");
+	      }
+	
+	    changed = true;
 	  }
-	    
-	changed = false;
-      }
-    else 
-      {
-	if (debug)
+    
+	if (!changed)
 	  {
-	    System.err.println("JstringField.processFocusEvent: setValue accepted");
+	    if (debug)
+	      {
+		System.err.println("JstringField.processFocusEvent: no change, ignoring");
+	      }
+	
+	    return;
+	  }
+    
+	if (!allowCallback) 
+	  {
+	    value = str;
+	    return;
 	  }
 
-	value = str;
+	boolean b = false;
+	  
+	try 
+	  {
+	    if (debug)
+	      {
+		System.err.println("JstringField.processFocusEvent: making callback");
+	      }
+
+	    b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
+	  }
+	catch (RemoteException re)
+	  {
+	  }
+
+	// If the setValuePerformed callback failed, we'll revert the value to our last
+	// approved value
+    
+	if (!b) 
+	  {
+	    if (debug)
+	      {
+		System.err.println("JstringField.processFocusEvent: setValue rejected");
 		
-	changed = false;
+		if (value == null)
+		  {
+		    System.err.println("JstringField.processFocusEvent: resetting to empty string");
+		  }
+		else
+		  {
+		    System.err.println("JstringField.processFocusEvent: resetting to " + value);
+		  }
+	      }
+	    
+	    if (value == null)
+	      {
+		super.setText("");
+	      }
+	    else
+	      {
+		super.setText(value);
+	      }
+	    
+	    changed = false;
+	  }
+	else 
+	  {
+	    if (debug)
+	      {
+		System.err.println("JstringField.processFocusEvent: setValue accepted");
+	      }
+
+	    value = str;
+		
+	    changed = false;
+	  }
+      }
+    finally
+      {
+	processingCallback = false;
       }
   }
   
