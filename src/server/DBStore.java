@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.61 $ %D%
+   Version: $Revision: 1.62 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,15 +26,15 @@ import java.rmi.*;
 
 /**
  * <p>DBStore is the main data store class.  Any code that intends to make use
- * of the arlut.csd.ganymede package needs to instantiate an object of type DBStore.
+ * of the arlut.csd.ganymede package needs to instantiate an object of type DBStore.</p>
  *
- * A user can have any number of DBStore objects active, but there is probably
+ * <p>A user can have any number of DBStore objects active, but there is probably
  * no good reason for doing so since a single DBStore can store and cross reference
  * up to 32k different kinds of objects.</p>
  *
- * IMPORTANT NOTE: All synchronized methods in this class must do a this.notifyAll()
+ * <p>IMPORTANT NOTE: All synchronized methods in this class must do a this.notifyAll()
  * on exiting a synchronized block because the DBLock classes use DBStore as their
- * synchronization object.  If any do not, then the server can deadlock.
+ * synchronization object.  If any do not, then the server can deadlock.</p>
  *
  */
 
@@ -78,7 +78,7 @@ public class DBStore {
 
   /**
    *
-   * This is the constructor for DBStore.
+   * This is the constructor for DBStore.<br><br>
    *
    * Currently, once you construct a DBStore object, all you can do to
    * initialize it is call load().  This API needs to be extended to
@@ -108,7 +108,7 @@ public class DBStore {
 
   /**
    *
-   * Load the database from disk.
+   * Load the database from disk.<br><br>
    *
    * This method loads both the database type
    * definition and database contents from a single disk file.
@@ -312,14 +312,14 @@ public class DBStore {
 
   /**
    *
-   * Dump the database to disk
+   * Dump the database to disk<br><br>
    *
    * This method dumps the entire database to disk.  The thread that calls the
    * dump method will be suspended until there are no threads performing update
    * writes to the in-memory database.  In practice this will likely never be
    * a long interval.  Note that this method *will* dump the database, even
    * if no changes have been made.  You should check the DBStore journal's 
-   * clean() method to determine whether or not a dump is really needed.
+   * clean() method to determine whether or not a dump is really needed.<br><br>
    *
    * The dump is guaranteed to be transaction consistent.
    *
@@ -520,9 +520,9 @@ public class DBStore {
 
   /**
    *
-   * Dump the schema to disk
+   * Dump the schema to disk<br><br>
    *
-   * This method dumps the entire database to disk, minus any actual objects.
+   * This method dumps the entire database to disk, minus any actual objects.<br><br>
    *
    * The thread that calls the dump method will be suspended until
    * there are no threads performing update writes to the in-memory
@@ -625,7 +625,7 @@ public class DBStore {
 
 		if (base.type_code == SchemaConstants.OwnerBase ||
 		    base.type_code == SchemaConstants.PersonaBase ||
-		    base.type_code == SchemaConstants.PermBase ||
+		    base.type_code == SchemaConstants.RoleBase ||
 		    base.type_code == SchemaConstants.EventBase)
 		  {
 		    base.partialEmit(out); // gotta retain admin login ability
@@ -696,9 +696,9 @@ public class DBStore {
 
   /**
    *
-   * <p>Get a session handle on this database</p>
+   * Get a session handle on this database<br><br>
    *
-   * <p>This is intended primarily for internal use
+   * This is intended primarily for internal use
    * for database initialization, hence the 'protected'.
    *
    * @param key Identifying key
@@ -735,8 +735,7 @@ public class DBStore {
 
   /**
    *
-   * <p>Do a printable dump of the category hierarchy</p>
-   *
+   * Do a printable dump of the category hierarchy
    *
    * @param out PrintStream to print to
    *
@@ -764,7 +763,7 @@ public class DBStore {
 
   /**
    *
-   * <p>Do a printable dump of the object databases</p>
+   * Do a printable dump of the object databases
    *
    * @param out PrintStream to print to
    *
@@ -944,6 +943,12 @@ public class DBStore {
       }
   }
 
+  /**
+   *
+   * Method to locate a registered namespace by name.
+   *
+   */
+
   public synchronized DBNameSpace getNameSpace(String name)
   {
     DBNameSpace namespace;
@@ -1056,12 +1061,9 @@ public class DBStore {
    *
    * Initialization method for a newly created DBStore.. this
    * method creates a new Schema from scratch, defining the
-   * mandatory Ganymede object types.
+   * mandatory Ganymede object types, registering their customization
+   * classes, defining fields, and all the rest.<br><br>
    *
-   *
-   * Note that editing this method to redefine the default bases
-   * and fields should be matched by editing of DBObjectBase.isRemovable()
-   * and DBObjectBaseField.isRemovable() and DBObjectBaseField.isEditable()
    */
 
   void initializeSchema()
@@ -1097,17 +1099,22 @@ public class DBStore {
 	ns = new DBNameSpace("buildertask", true);
 	nameSpaces.addElement(ns);
 
+	DBBaseCategory permCategory = new DBBaseCategory(this, "Permissions", adminCategory);
+	adminCategory.addNode(permCategory, false, false);
+
 	// create owner base
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Owner Group";
+	b.classname = "arlut.csd.ganymede.custom.ownerCustom";
 	b.type_code = (short) SchemaConstants.OwnerBase; // 0
 	b.displayOrder = b.type_code;
 
-	adminCategory.addNode(b, false, false);
+	permCategory.addNode(b, false, false);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.OwnerNameField;
+	bf.field_code = SchemaConstants.OwnerNameField;
+	bf.field_order = 1;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
 	bf.loading = true;
@@ -1119,7 +1126,8 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.OwnerMembersField;
+	bf.field_code = SchemaConstants.OwnerMembersField;
+	bf.field_order = 2;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Members";
 	bf.array = true;
@@ -1131,19 +1139,20 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.OwnerObjectsOwned;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Objects owned";
-	bf.allowedTarget = -2;	// any
-	bf.targetField = SchemaConstants.OwnerListField;	// owner list field
+	bf.field_code = SchemaConstants.OwnerCcAdmins;
+	bf.field_order = 3;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Cc: All Admins";
+	bf.loading = true;
+	bf.loading = false;
 	bf.removable = false;
 	bf.editable = false;
-	bf.array = true;
-	bf.comment = "What objects are owned by this owner set";
+	bf.comment = "If checked, mail to this owner group will be sent to the admins";
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.OwnerMailList;
+	bf.field_code = SchemaConstants.OwnerMailList;
+	bf.field_order = 4;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Mail List";
 	bf.allowedTarget = -2;	// any (we'll depend on subclassing to refine this)
@@ -1154,7 +1163,26 @@ public class DBStore {
 	bf.comment = "What email addresses should be notified of changes to objects owned?";
 	b.fieldTable.put(bf);
 
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.OwnerObjectsOwned;
+	bf.field_order = 999;	// the custom class makes this a hidden field
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Objects owned";
+	bf.allowedTarget = -2;	// any
+	bf.targetField = SchemaConstants.OwnerListField;	// owner list field
+	bf.removable = false;
+	bf.editable = false;
+	bf.array = true;
+	bf.comment = "What objects are owned by this owner set";
+	b.fieldTable.put(bf);
+
 	b.setLabelField(SchemaConstants.OwnerNameField);
+
+	// link in the class we specified
+
+	b.createHook();
+
+	// and link in the base to this DBStore
 
 	setBase(b);
 
@@ -1162,10 +1190,11 @@ public class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Admin Persona";
+	b.classname = "arlut.csd.ganymede.custom.adminPersonaCustom";
 	b.type_code = (short) SchemaConstants.PersonaBase; // 1
 	b.displayOrder = b.type_code;
 
-	adminCategory.addNode(b, false, false); // add it to the end is ok
+	permCategory.addNode(b, false, false); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.PersonaNameField;
@@ -1220,8 +1249,8 @@ public class DBStore {
 	bf.field_order = bf.field_code = SchemaConstants.PersonaPrivs;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Privilege Sets";
-	bf.allowedTarget = SchemaConstants.PermBase;
-	bf.targetField = SchemaConstants.PermPersonae;
+	bf.allowedTarget = SchemaConstants.RoleBase;
+	bf.targetField = SchemaConstants.RolePersonae;
 	bf.array = true;
 	bf.removable = false;
 	bf.editable = false;
@@ -1250,19 +1279,26 @@ public class DBStore {
 
 	b.setLabelField(SchemaConstants.PersonaNameField);
 
+	// link in the class we specified
+
+	b.createHook();
+
+	// and link in the base to this DBStore
+
 	setBase(b);
 
 	// create Role base
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Role";
-	b.type_code = (short) SchemaConstants.PermBase; // 2
+	b.classname = "arlut.csd.ganymede.custom.permCustom";
+	b.type_code = (short) SchemaConstants.RoleBase; // 2
 	b.displayOrder = b.type_code;
 
-	adminCategory.addNode(b, false, false); // add it to the end is ok
+	permCategory.addNode(b, false, false); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PermName;
+	bf.field_order = bf.field_code = SchemaConstants.RoleName;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
 	bf.loading = true;
@@ -1274,7 +1310,7 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PermMatrix;
+	bf.field_order = bf.field_code = SchemaConstants.RoleMatrix;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
 	bf.field_name = "Objects Owned Access Bits";
 	bf.removable = false;
@@ -1283,7 +1319,7 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PermDefaultMatrix;
+	bf.field_order = bf.field_code = SchemaConstants.RoleDefaultMatrix;
 	bf.field_type = FieldType.PERMISSIONMATRIX;
 	bf.field_name = "Default Access Bits";
 	bf.removable = false;
@@ -1292,7 +1328,7 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.PermPersonae;
+	bf.field_order = bf.field_code = SchemaConstants.RolePersonae;
 	bf.field_type = FieldType.INVID;
 	bf.field_name = "Persona entities";
 	bf.allowedTarget = SchemaConstants.PersonaBase;
@@ -1303,7 +1339,13 @@ public class DBStore {
 	bf.comment = "What personae are using this permission matrix?";
 	b.fieldTable.put(bf);
 
-	b.setLabelField(SchemaConstants.PermName);
+	b.setLabelField(SchemaConstants.RoleName);
+
+	// link in the class we specified
+
+	b.createHook();
+
+	// and link in the base to this DBStore
 
 	setBase(b);
 
@@ -1314,6 +1356,7 @@ public class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "System Event";
+	b.classname = "arlut.csd.ganymede.custom.eventCustom";
 	b.type_code = (short) SchemaConstants.EventBase;  
 	b.displayOrder = b.type_code;
 
@@ -1391,12 +1434,19 @@ public class DBStore {
 
 	b.setLabelField(SchemaConstants.EventToken);
     
+	// link in the class we specified
+
+	b.createHook();
+
+	// and link in the base to this DBStore
+
 	setBase(b);
 
 	// create Object Events base
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Object Event";
+	b.classname = "arlut.csd.ganymede.custom.objectEventCustom";
 	b.type_code = (short) SchemaConstants.ObjectEventBase;  
 	b.displayOrder = b.type_code;
 
@@ -1500,6 +1550,12 @@ public class DBStore {
 	bf.visibility = false;	// we don't want this to be seen by the client
 	bf.comment = "The type code of the object that this event is tracking";
 	b.fieldTable.put(bf);
+
+	// link in the class we specified
+
+	b.createHook();
+
+	// and link in the base to this DBStore
 
 	setBase(b);
 
@@ -1693,19 +1749,19 @@ public class DBStore {
 
     // create SchemaConstants.PermDefaultObj
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase, null); 
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.RoleBase, null); 
 
-    s = (StringDBField) eO.getField(SchemaConstants.PermName);
+    s = (StringDBField) eO.getField(SchemaConstants.RoleName);
     s.setValue("Default");
 
     // what can users do with objects they own?  Includes users themselves
 
-    pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermMatrix);
+    pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.RoleMatrix);
     pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); // view self, nothing else
 
     // what can arbitrary users do with objects they don't own?  nothing by default
 
-    // pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermDefaultMatrix);
+    // pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.RoleDefaultMatrix);
 
     session.commitTransaction();
     gSession.logout();
