@@ -219,14 +219,12 @@ public class FileOps {
     Process p = java.lang.Runtime.getRuntime().exec(commandLine);
     InputStream iStream = p.getInputStream();
     InputStream eStream = p.getErrorStream();
-    byte[] buffer = new byte[4096];
+    byte[] buffer = new byte[4096]; // our own skip buffer
 
     try
       {
 	while (true)
 	  {
-	    System.err.println("Looping waiting for subprocess to exit");
-
 	    // this bletcherousness is so that we can consume anything
 	    // the sub process writes to its stdout or stderr, rather
 	    // than allowing the subprocess to block waiting in vain
@@ -238,18 +236,26 @@ public class FileOps {
 
 	    try
 	      {
-		System.err.println("Calling subprocess exitValue()");
 		return p.exitValue();
 	      }
 	    catch (IllegalThreadStateException ex)
 	      {
-		System.err.println("Processing IllegalThreadStateException from exitValue() call");
-
 		try
 		  {
+		    // iStream is actually BufferedInputStream, and as
+		    // such, the skip() method on it doesn't actually
+		    // do anything useful if you never read from the
+		    // stream.
+
+		    // Of course, the base class InputStream skip()
+		    // function works just fine, but for
+		    // BufferedInputStream, Sun decided to break it
+		    // for grins.
+
+		    // Thanks, Sun!
+
 		    int size = iStream.available();
 		    iStream.read(buffer, 0, (int) Math.min(4096, size));
-		    //		    iStream.skip(size);
 		  }
 		catch (IOException exc)
 		  {
@@ -259,14 +265,12 @@ public class FileOps {
 		try
 		  {
 		    int size = eStream.available();
-		    eStream.skip(size);
+		    eStream.read(buffer, 0, (int) Math.min(4096, size));
 		  }
 		catch (IOException exc)
 		  {
 		    // screw you, copper
 		  }
-
-		System.err.println("Completed processing of IllegalThreadStateException from exitValue() call");
 	      }
 
 	    try
@@ -277,8 +281,6 @@ public class FileOps {
 	      {
 		// screw you, copper
 	      }
-
-	    System.err.println("Completed processing IllegalThreadStateException from exitValue() call");
 	  }
       }
     finally
