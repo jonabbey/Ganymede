@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.19 $ %D%
+ Version: $Revision: 1.20 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,6 +28,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   // -- 
 
   int 
+    width,
     numberOfStrings = 0;
 
   DefaultListModel 
@@ -92,8 +93,14 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public JstringListBox(Vector items, boolean sorted, JPopupMenu popup)
   {
+    this(items, sorted, popup, 200);
+  }
+
+  public JstringListBox(Vector items, boolean sorted, JPopupMenu popup, int width)
+  {
     this.sorted = sorted;
     this.popup = popup;
+    this.width = width;
 
     if (popup != null)
       {
@@ -241,7 +248,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     // I don't know if these things do anything.
 
     setPrototypeCellValue("This is just used to calculate cell height");
-    setFixedCellWidth(15);
+    setFixedCellWidth(width);
     setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
   }
 
