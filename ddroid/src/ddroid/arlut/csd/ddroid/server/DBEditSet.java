@@ -1107,7 +1107,30 @@ public class DBEditSet {
       {
 	eObj = (DBEditObject) en.nextElement();
 
-	retVal = eObj.commitPhase1();
+	try
+	  {
+	    retVal = eObj.commitPhase1();
+	  }
+	catch (Throwable ex)
+	  {
+	    retVal = Ganymede.createErrorDialog(ts.l("commit_handlePhase1.exception"),
+						ex.getMessage());
+
+	    eObj.release(false);
+
+	    for (int i = 0; i < committedObjects.size(); i++)
+	      {
+		eObj2 = (DBEditObject) committedObjects.elementAt(i);
+		eObj2.release(false); // unlock commit mode
+	      }
+
+	    // let DBSession/the client know they can retry
+	    // things.. but if we've got an error in an object's
+	    // commitPhase1, committing again will probably just
+	    // repeat the problem.
+
+	    throw new CommitNonFatalException(retVal);
+	  }
 
 	// the object has now been locked to commit mode, and will not
 	// allow further modifications from the client
@@ -1267,7 +1290,7 @@ public class DBEditSet {
 	  {
 	    eObj.commitPhase2();
 	  }
-	catch (RuntimeException ex)
+	catch (Throwable ex)
 	  {
 	    // if we get a runtime exception here, we want to
 	    // go ahead and commit the rest of the objects,
