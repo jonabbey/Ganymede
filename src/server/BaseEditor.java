@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -381,6 +381,7 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
+    gbc.anchor = GridBagConstraints.WEST;
 
     gbc.weightx = 0.0;
     gbc.gridx = 0;
@@ -388,6 +389,7 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     gbl.setConstraints(l, gbc);
     parent.add(l);
 
+    gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridx = 1;
     gbc.weightx = 1.0;
     gbl.setConstraints(comp, gbc);

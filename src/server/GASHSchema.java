@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.78 $ %D%
+   Version: $Revision: 1.79 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2790,6 +2790,7 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
 
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
+    gbc.anchor = GridBagConstraints.WEST;
 
     gbc.weightx = 0.0;
     gbc.gridx = 0;
@@ -2797,6 +2798,7 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     gbl.setConstraints(l, gbc);
     parent.add(l);
 
+    gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridx = 1;
     gbc.weightx = 1.0;
     gbl.setConstraints(comp, gbc);
