@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.158 $
-   Last Mod Date: $Date: 2001/08/18 06:16:28 $
+   Version: $Revision: 1.159 $
+   Last Mod Date: $Date: 2001/08/27 17:47:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.158 $ %D%
+ * @version $Revision: 1.159 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1271,16 +1271,29 @@ public final class InvidDBField extends DBField implements invid_field {
 	
 	if (oldRefField == null)
 	  {
-	    // editDBObject() will create undefined fields for all fields defined
-	    // in the DBObjectBase, so if we got a null result we have a schema
-	    // corruption problem.
+	    // editDBObject() will create undefined fields for all
+	    // fields defined in the DBObjectBase as long as the user
+	    // had permission to create those fields, so if we got a
+	    // null result we either have a schema corruption problem
+	    // or a permission to create field problem
 
-	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink old reference",
-					      "Your operation could not succeed due to a possible inconsistency in the " +
-					      "server database.  Target field number " + targetField +
-					      " in object " + oldRef.getLabel() +
-					      " does not exist, or you do not have permission to access " +
-					      "this field.");
+	    DBObjectBaseField fieldDef = oldRef.getFieldDef(targetField);
+
+	    if (fieldDef == null)
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink old reference",
+						  "Your operation could not succeed due to a possible inconsistency in the " +
+						  "server database.  Target field number " + targetField +
+						  " in object " + oldRef.getLabel() +
+						  " does not exist.");
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink old reference",
+						  "Your operation could not succeed due to a possible inconsistency in the " +
+						  "server database.  Target field " + fieldDef.getName() +
+						  " is undefined in object " + oldRef.getLabel() + ".");
+	      }
 	  }
       }
 
@@ -1412,16 +1425,30 @@ public final class InvidDBField extends DBField implements invid_field {
     
     if (newRefField == null)
       {
-	// editDBObject() will create undefined fields for all fields defined
-	// in the DBObjectBase, so if we got a null result we have a schema
-	// corruption problem.
-	
-	return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link new reference",
-					  "Your operation could not succeed due to a possible inconsistency in the " +
-					  "server database.  Target field number " + targetField +
-					  " in object " + newRef.getLabel() +
-					  " does not exist, or you do not have permission to access " +
-					  "this field.");
+	// editDBObject() will create undefined fields for all
+	// fields defined in the DBObjectBase as long as the user
+	// had permission to create those fields, so if we got a
+	// null result we either have a schema corruption problem
+	// or a permission to create field problem
+
+	DBObjectBaseField fieldDef = newRef.getFieldDef(targetField);
+
+	if (fieldDef == null)
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link new reference",
+					      "Your operation could not succeed due to a possible inconsistency in the " +
+					      "server database.  Target field number " + targetField +
+					      " in object " + newRef.getLabel() +
+					      " is not defined.");
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link new reference",
+					      "Your operation could not succeed because you do not have permission " +
+					      "to create the (previously undefined) " + fieldDef.getName() + 
+					      " field in the " + newRef.getLabel() + " " + newRef.getTypeName() +
+					      " object.");
+	  }
       }
 
     // okay, at this point we should have oldRefField pointing to the
@@ -1666,16 +1693,29 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (oldRefField == null)
       {
-	// editDBObject() will create undefined fields for all fields defined
-	// in the DBObjectBase, so if we got a null result we have a schema
-	// corruption problem.
+	// editDBObject() will create undefined fields for all
+	// fields defined in the DBObjectBase as long as the user
+	// had permission to create those fields, so if we got a
+	// null result we either have a schema corruption problem
+	// or a permission to create field problem
 
-	return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
-					  "Your operation could not succeed due to a possible inconsistency in the " +
-					  "server database.  Target field number " + targetField +
-					  " in object " + oldRef.getLabel() +
-					  " does not exist, or you do not have permission to access " +
-					  "this field.");
+	DBObjectBaseField fieldDef = oldRef.getFieldDef(targetField);
+	
+	if (fieldDef == null)
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
+					      "Your operation could not succeed due to a possible inconsistency in the " +
+					      "server database.  Target field number " + targetField +
+					      " in object " + oldRef.getLabel() +
+					      " does not exist.");
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
+					      "Your operation could not succeed due to a possible inconsistency in the " +
+					      "server database.  Target field " + fieldDef.getName() +
+					      " is undefined in object " + oldRef.getLabel() + ".");
+	  }
       }
 
     try
