@@ -6,8 +6,8 @@
    
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/10/04 22:56:38 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/10/13 22:08:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -144,6 +144,12 @@ public class userInactivateWizard extends GanymediatorWizard {
 
   public ReturnVal cancel()
   {
+    // failure.. need to do the rollback that would have
+    // originally been done for us if we hadn't gone through
+    // the wizard process.
+
+    userObject.finalizeInactivate(false);
+
     return fail("User Inactivation Canceled",
 		"User Inactivation Canceled",
 		"OK",
@@ -222,20 +228,11 @@ public class userInactivateWizard extends GanymediatorWizard {
       {
 	// failure.. need to do the rollback that would have
 	// originally been done for us if we hadn't gone through
-	// the wizard process.  Look at DBEditObject.inactivate()
-	// method for documentation on this.
-
-	// DBSession.inactivate() checkpoints, we rollback here.
+	// the wizard process.
 	
-	if (!session.getSession().rollback(key))
-	  {
-	    return Ganymede.createErrorDialog("userInactivateWizard: Error",
-					      "Ran into a problem during user inactivation, and rollback failed");
-	  }
+	userObject.finalizeInactivate(false);
       }
     
     return retVal;
   }
-
-
 }
