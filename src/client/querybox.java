@@ -270,7 +270,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       Checkbox newCheck; 
       Panel inner_panel = new Panel();
       
-      Vector tmpAry = new Vector();
+      Vector tmpAry;
       
       /* -- */
       
@@ -293,6 +293,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       try
 	{
 	  Vector fields = base.getFields();
+	  tmpAry = new Vector();
 
 	  int count = 0;
 	  int tmpRow = 0;
@@ -304,9 +305,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	      newCheck = new Checkbox(Name);
 	      newCheck.setState(true);
 	      
-	      System.out.println("Going to the FOr loop");
-	      System.out.println("The array Length is: " + tmpAry.size());
-
 	      if (count <= 2) // we've got space in the current row)
 		{
 		  tmpAry.insertElementAt(newCheck, count);
@@ -319,9 +317,15 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		  for (int n = 0; n < tmpAry.size(); n++)
 		    {
 		      inner_panel.add( n + "  " + tmpRow + " lhwHW", (Component) tmpAry.elementAt(n));
-		      System.out.println("Adding A ROW!!!!!");
 		    }
 		  
+		  // Here we're saving the row of components in the fieldOptions vector
+		 
+		  if (! tmpAry.isEmpty())
+		    {
+		      fieldOptions.insertElementAt(tmpAry, tmpRow);
+		      tmpAry = new Vector();
+		    }
 		  count = 0;
 		  tmpRow ++;
 		  tmpAry.removeAllElements(); // Clear out the other array elements
@@ -329,15 +333,20 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 		  count++;
 		}     
 	    }
-
+	  
 	  // Now add the final row
-
-	   System.out.println("AND THE ARRAY LENGTH IS: " + tmpAry.size());
-
+	  
+	  System.out.println("BEFORE: " + fieldOptions.size());
+	  
 	  for (int n = 0; n < tmpAry.size(); n++)
 	   {
 	    inner_panel.add( n + "  " + tmpRow + " lhwHW", (Component) tmpAry.elementAt(n));
-	  }
+	  
+	   }
+
+	  // Here we're saving the row of components in the fieldOptions vector
+	  // (again)
+	    fieldOptions.insertElementAt(tmpAry, tmpRow);
 	  
 	}
       catch (RemoteException ex)
@@ -592,7 +601,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
   }
   
-
   public Query createQuery(){
     
     // * -- * //
@@ -808,9 +816,73 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	myQuery = new Query( baseName, myNode);
       }
     
+
+    myQuery = setFields(myQuery);
+
     return myQuery;
     
   }
+  
+  
+  public Query setFields (Query someQuery)
+    {
+      BaseField tempField;
+      short tempShort;
+      String tempString;
+      Checkbox tempBox;
+      Vector tempVector;
+
+   // Time to make the doughnuts -- uh, or set the return options for the fields
+
+      System.out.println("Here's how many rows we've got " + fieldOptions.size());
+
+    for (int x = 0; x < fieldOptions.size(); x ++)
+      {
+	try
+	  {
+	    tempVector = (Vector) fieldOptions.elementAt(x);
+	    
+	    for (int y = 0; y < tempVector.size(); y ++)
+	      {
+		// here we process each checkbox in the row
+		
+		    tempBox = (Checkbox) tempVector.elementAt(y);
+
+		    if (tempBox.getState() == true)
+		      // the box has been checked -- we want this field
+		  
+		      {
+			tempString = tempBox.getLabel();
+			tempField = defaultBase.getField(tempString);
+			tempShort = tempField.getID();
+			someQuery.addField(tempShort); // add the field to the query return
+		
+			System.out.println("Here's: " + tempField.getName());
+		      }
+		
+		    else {
+
+		      // else just skip this box
+	      
+		      System.out.println("Skipping " + tempBox.getLabel()); 
+		    }
+		
+	      }
+	  }
+
+
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote exception: " + ex);	
+	  }
+	
+      }
+
+
+    return someQuery;
+    
+    }
+
 
 
   /////////////////////
@@ -829,7 +901,8 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     }
 
     if (e.getSource() == OkButton) {
-      System.out.println("You will submit");      
+      System.out.println("You will submit");   
+      optionsFrame.setVisible(false); // close the options frame if it isn't closed already
       this.returnVal = createQuery();
       setVisible(false);
     } else if (e.getSource() == CancelButton){
