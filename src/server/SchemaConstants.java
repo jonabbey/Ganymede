@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,6 +34,7 @@ public interface SchemaConstants {
   final static short OwnerListField = 0; // list of admin accounts with authority over this object
   final static short ExpirationField = 1; // date that this object will expire
   final static short RemovalField = 2; // date that this object will be removed.
+  final static short HistoryField = 3; // vector of history objects relating to this object
 
   /* all embedded objects have these fields */
 
@@ -43,27 +44,35 @@ public interface SchemaConstants {
 
   final static short AdminBase = 0; // an administrator account
 
-  final static short AdminGroupField = 3; // boolean, true if this is an admin group 
-  final static short AdminNameField = 4; // name of this admin account, null if associated with a user
-  final static short AdminPasswordField = 5; // password for this admin account
-  final static short AdminMembersField = 6; // members of this admin account if an admin group
-  final static short AdminGroupsField = 7; // list of admin groups that this admin is a member of
-  final static short AdminAssocUser = 8; // if associated with a user, here's the reference.
-  final static short AdminPrivs = 9; // vector of permission invids for this admin account
-  final static short AdminObjectsOwned = 10; // list of objects owned by this admin account
+  final static short AdminGroupField = 100; // boolean, true if this is an admin group 
+  final static short AdminNameField = 101; // name of this admin account, null if associated with a user
+  final static short AdminPasswordField = 102; // password for this admin account
+  final static short AdminMembersField = 103; // members of this admin account if an admin group
+  final static short AdminGroupsField = 104; // list of admin groups that this admin is a member of
+  final static short AdminAssocUser = 105; // if associated with a user, here's the reference.
+  final static short AdminPrivs = 106; // vector of permission invids for this admin account
+  final static short AdminObjectsOwned = 107; // list of objects owned by this admin account
 
   /* permission */
 
   final static short PermBase = 1;
 
-  final static short PermName = 3;
-  final static short PermMatrix = 4;
+  final static short PermName = 100;
+  final static short PermMatrix = 101;
 
   /* users have a defined set of fields */
 
   final static short UserBase = 2;
 
-  final static short UserUserName = 3; // username string
-  final static short UserPassword = 4; // password
-  final static short UserAdminRole = 5;	// pointer to associated admin account, if any
+  final static short UserUserName = 100; // username string
+  final static short UserPassword = 101; // password
+  final static short UserAdminRole = 102; // pointer to associated admin account, if any
+
+  /* history trace */
+
+  final static short HistoryBase = 3;
+
+  final static short HistoryDescrip = 100; // the description of this event
+  final static short HistoryObjects = 101; // a vector of invid's for the objects involved in this event
+  final static short HistoryDate = 102;	// the time that this event happened
 }
