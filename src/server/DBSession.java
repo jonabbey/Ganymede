@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 2002/11/12 20:24:47 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 2002/11/12 20:25:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,7 +93,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.115 $ %D%
+ * @version $Revision: 1.116 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1564,7 +1564,7 @@ final public class DBSession {
       {
 	if (description != null)
 	  {
-	    Ganymede.debug(key + ": committed transaction " + description);n
+	    Ganymede.debug(key + ": committed transaction " + description);
 	  }
 	else
 	  {
