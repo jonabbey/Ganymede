@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1087,8 +1087,14 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
   }
 
+  // **
+  // The following methods comprise the implementation of arlut.csd.Tree.treeDragDropCallback,
+  // and provide the intelligence behind the Schema Editor tree's drag and drop behavior.
+  // **
+
   /**
    *
+   * This method determines which nodes may be dragged.
    *
    * @see arlut.csd.Tree.treeDragDropCallback
    */
@@ -1100,6 +1106,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   /**
    *
+   * This method doesn't truly apply to the drag and drop behavior implemented in
+   * the Schema Editor.
    *
    * @see arlut.csd.Tree.treeDragDropCallback
    */
@@ -1111,6 +1119,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   /**
    *
+   * This method doesn't truly apply to the drag and drop behavior implemented in
+   * the Schema Editor.
    *
    * @see arlut.csd.Tree.treeDragDropCallback
    */
@@ -1121,27 +1131,28 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   /**
    *
+   * Method to control whether the drag line may be moved between a pair of given
+   * nodes.
    *
    * @see arlut.csd.Tree.treeDragDropCallback
    */
 
   public boolean dragLineTween(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
   {
-
     treeNode parent = dragNode.getParent();
-    return (((aboveNode instanceof FieldNode) && (aboveNode.getParent() == parent)) || 
-	     ((belowNode instanceof FieldNode) && (belowNode.getParent() == parent)));
+    return (((aboveNode instanceof FieldNode) && (aboveNode != null) && (aboveNode.getParent() == parent)) || 
+	     ((belowNode instanceof FieldNode) && (belowNode != null) && (belowNode.getParent() == parent)));
   }
 
   /**
    *
+   * This method is called when a drag and drop operation in the Schema Editor's tree is completed.
    *
    * @see arlut.csd.Tree.treeDragDropCallback
    */
 
   public void dragLineRelease(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
   {
-
     System.out.println("dragNode = " + dragNode.getText());
     System.out.println("aboveNode = " + aboveNode.getText());
     System.out.println("belowNode = " + belowNode.getText());
@@ -1215,15 +1226,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	  {
 	    System.err.println("No children to renumber, something not right");
 	  }
-
-
-
       }
-    
-
   }
-
-
 }
 
 /*------------------------------------------------------------------------------
