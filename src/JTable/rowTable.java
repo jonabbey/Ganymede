@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.3 $ %D% 
+ * @version $Revision: 1.4 $ %D% 
  */
 
 public class rowTable extends baseTable {
@@ -122,7 +122,6 @@ public class rowTable extends baseTable {
     tableAttrib.calculateMetrics();
 
     calcFonts();
-    calcCols();
   }
 
   /**
@@ -154,9 +153,9 @@ public class rowTable extends baseTable {
 
 	for (int i = 0; i < rows.size(); i++)
 	  {
-	    if (testRowSelected(y))
+	    if (testRowSelected(i))
 	      {
-		unSelectRow(y);
+		unSelectRow(i);
 		if (callback != null)
 		  {
 		    // if we get a nullpointer exception on
@@ -164,7 +163,7 @@ public class rowTable extends baseTable {
 		    // code didn't properly check to make sure that
 		    // the location clicked on corresponded to
 		    // a proper row
-		    callback.rowUnSelected(element.key, true);
+		    callback.rowUnSelected(((rowHandle)crossref.elementAt(i)).key, true);
 		  }
 	      }
 	  }
@@ -298,7 +297,7 @@ public class rowTable extends baseTable {
 
   public tableCell getCell(Object key, int col)
   {
-    return super.getCell(((rowHandle)index.get(key)).rownum, col);
+    return super.getCell(col, ((rowHandle)index.get(key)).rownum);
   }
 
   // -------------------- convenience methods --------------------
@@ -454,6 +453,9 @@ class rowHandle {
   {
     parent.addRow(false);	// don't repaint table
     rownum = parent.rows.size() - 1; // we always add the new row to the end
+
+    System.err.println("New rowHandle created, key = " + key + ", num = " + rownum);
+
     this.key = key;
 
     // crossref's index for RowHash element should be same as
