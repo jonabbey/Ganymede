@@ -5,13 +5,13 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package gash;
+package arlut.csd.ganymede;
 
 import java.rmi.*;
 import java.rmi.registry.*;

@@ -8,13 +8,13 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package gash;
+package arlut.csd.ganymede;
 
 import java.util.*;
 import java.io.*;
@@ -68,7 +68,9 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	  }
 	catch (RemoteException ex)
 	  {
-	    Ganymede.debug("Couldn't update Status on an admin console" + ex);
+	    // don't call Ganymede.debug() here or we'll get into an infinite
+	    // loop if we have any problems.
+	    System.err.println("Couldn't update Status on an admin console" + ex);
 	    badConsoles.addElement(temp);
 	  }
       }
@@ -121,7 +123,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	  }
 	catch (RemoteException ex)
 	  {
-	    Ganymede.debug("Couldn't update Status on an admin console" + ex);
+	    Ganymede.debug("Couldn't update user list on an admin console" + ex);
 	    badConsoles.addElement(temp);
 	  }
       }
