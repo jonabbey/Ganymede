@@ -406,9 +406,16 @@ public class DBLog {
     // a mail log if we're keeping one, otherwise log it to our primary
     // log
 
-    if (event.eventClassToken.equals("mailout") && mailController != null)
+    if (event.eventClassToken.equals("mailout"))
       {
-	mailController.writeEvent(event);
+	if (mailController != null)
+	  {
+	    mailController.writeEvent(event);
+	  }
+	else
+	  {
+	    Ganymede.debug("DBLog.mailNotify(): Skipping mailout event due to mail being disabled at startup.");
+	  }
       }
     else
       {
