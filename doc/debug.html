@@ -69,20 +69,25 @@
     errors of this sort.  Java's object oriented structure helps
     encourage good design principles, but debugging these types of
     problems is just about the same in Java as it is in any other
-    language.</p>
+    language.  Maybe a little harder in some ways, since Java programs,
+    and Ganymede in particular, tend to be multithreaded.  The best
+    tool I've found for debugging a lot of stuff is to edit the
+    code, throw some intelligent System.err.println()'s in, and
+    run through the code live and see what comes out.</p>
 
     <h3>Threads and Exceptions</h3>
 
-    <p>Another class of errors is where the code encounters a
-    condition that just <b>can't</b> be right.  A null pointer.  An
-    attempt to cast an object pointer to an incompatible type.  An
-    attempt to loop one element past the end of an array.  These sorts
-    of things are handled in a far more robust way in Java than in C
-    or C++.  In Java, the thread that encounters such a condition
-    throws an exception.  What that means is that the thread that
-    encountered the fault goes and looks for someone to report the
-    fault to.  If function A calls function B which calls function C,
-    a fault that occurs inside function C might be handled by error
+    <p>Beyond simple Dumb Code, that does the wrong thing but does it
+    successfully, there is that class of errors where the code
+    encounters a condition that just <b>can't</b> be right.  A null
+    pointer.  An attempt to cast an object pointer to an incompatible
+    type.  An attempt to loop one element past the end of an array.
+    These sorts of things are handled in a far more robust way in Java
+    than in C or C++.  In Java, the thread that encounters such a
+    condition throws an exception.  What that means is that the thread
+    that encountered the fault goes and looks for someone to report
+    the fault to.  If function A calls function B which calls function
+    C, a fault that occurs inside function C might be handled by error
     checking code in function C, then in function B, then in function
     A.  If none of these functions catch the error, a general error
     reporting facility handles the problem.</p>
@@ -287,7 +292,7 @@
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
     <!-- hhmts start -->
-Last modified: Wed Jan 31 02:40:38 CST 2001
+Last modified: Wed Jan 31 02:43:08 CST 2001
 <!-- hhmts end -->
   </body>
 </html>
