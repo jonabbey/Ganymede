@@ -1,11 +1,11 @@
 /*
 
-   clientMessage.java
+   clientAsyncMessage.java
 
    Created: 4 September 2003
    Release: $Name:  $
    Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/09/04 23:20:28 $
+   Last Mod Date: $Date: 2003/09/05 00:38:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,21 +57,21 @@ import java.rmi.server.Unreferenced;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                   clientMessage
+                                                              clientAsyncMessage
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>The clientMessage class is used by the Ganymede server to pass
+ * <p>The clientAsyncMessage class is used by the Ganymede server to pass
  * asynchronous messages to the Ganymede client.  The Ganymede client repeatedly
  * calls {@link arlut.csd.ganymede.serverClientAsyncResponder#getNextMsg()} to
  * receive asynchonous notifications from the server.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2003/09/04 23:20:28 $
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
+ * @version $Revision: 1.1 $ $Date: 2003/09/05 00:38:38 $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class clientMessage {
+public class clientAsyncMessage {
 
   static final int FIRST = 0;
   static final int SENDMESSAGE = 1;
@@ -95,7 +95,7 @@ public class clientMessage {
 
   /* -- */
 
-  public clientMessage(byte method, Object param)
+  public clientAsyncMessage(byte method, Object param)
   {
     if (method < FIRST || method > LAST)
       {
@@ -107,7 +107,7 @@ public class clientMessage {
     params[0] = param;
   }
 
-  public clientMessage(byte method, Object param[])
+  public clientAsyncMessage(byte method, Object param[])
   {
     if (method < FIRST || method > LAST)
       {

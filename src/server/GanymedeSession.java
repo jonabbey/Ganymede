@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.266 $
-   Last Mod Date: $Date: 2003/07/03 21:36:35 $
+   Version: $Revision: 1.267 $
+   Last Mod Date: $Date: 2003/09/05 00:38:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.266 $ $Date: 2003/07/03 21:36:35 $
+ * @version $Revision: 1.267 $ $Date: 2003/09/05 00:38:37 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -148,10 +148,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   Client client;
 
   /**
-   * Async partial proxy for sending messages to the client.
+   * Async responder for sending async messages to the client.
    */
 
-  serverClientProxy clientProxy;
+  serverClientAsyncResponder asyncPort = null;
 
   /**
    * if this session is on the GanymedeServer's lSemaphore, this boolean
@@ -624,7 +624,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (client != null)
       {
-	clientProxy = new serverClientProxy(client);
+	asyncPort = new serverClientAsyncResponder();
       }
 
     if (userObject != null)
@@ -1036,11 +1036,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	throw new IllegalArgumentException("type out of range");
       }
 
-    if (clientProxy != null)
+    if (asyncPort != null)
       {
 	try
 	  {
-	    clientProxy.sendMessage(type, message);	// async proxy
+	    asyncPort.sendMessage(type, message);	// async proxy
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1383,6 +1383,28 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
 
     return GanymedeServer.getTextMessage(key, invidToCompare, true);
+  }
+
+  /**
+   * <p>This method is used to allow the client to retrieve a remote reference to
+   * a {@link arlut.csd.ganymede.serverClientAsyncResponder}, which will allow
+   * the client to poll the server for asynchronous messages from the server.</p>
+   *
+   * <p>This is used to allow the server to send build status change notifications and
+   * shutdown notification to the client, even if the client is behind a network
+   * or personal system firewall.  The serverClientAsyncResponder blocks while there
+   * is no message to send, and the client will poll for new messages.</p>
+   */
+
+  public synchronized ClientAsyncResponder getAsyncPort()
+  {
+    if (asyncPort != null)
+      {
+	return asyncPort;
+      }
+
+    asyncPort = new serverClientAsyncResponder();
+    return asyncPort;
   }
 
   /**

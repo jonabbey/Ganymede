@@ -16,8 +16,8 @@
    
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2003/09/05 00:15:37 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2003/09/05 00:38:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,8 +88,8 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientMessage
  *
- * @version $Revision: 1.2 $ $Date: 2003/09/05 00:15:37 $
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
+ * @version $Revision: 1.3 $ $Date: 2003/09/05 00:38:38 $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class serverClientAsyncResponder implements ClientAsyncResponder, Remote {
@@ -151,7 +151,6 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
 
   public serverClientAsyncResponder()
   {
-    this.client = client;
     eventBuffer = new clientMessage[maxBufferSize];
     lookUp = new clientMessage[clientMessage.LAST - clientMessage.FIRST + 1];
   }
