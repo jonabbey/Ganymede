@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -229,11 +229,12 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     //
     //
 
-    treeImages = new Image[3];
+    treeImages = new Image[4];
 
     treeImages[0] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
     treeImages[1] = PackageResources.getImageResource(this, "folder.gif", getClass());
     treeImages[2] = PackageResources.getImageResource(this, "list.gif", getClass());
+    treeImages[3] = PackageResources.getImageResource(this, "i043.gif", getClass());
 
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, SystemColor.window, this, treeImages,
@@ -340,8 +341,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   /**
    *
-   *
-   *
    */
 
   public SchemaEdit getSchemaEdit()
@@ -366,7 +365,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
 
     refreshNamespaces();
-    tree.refresh();
   }
 
   void recurseDownCategories(CatTreeNode node) throws RemoteException
@@ -388,13 +386,10 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     c = node.getCategory();
 
-    // update the current tree node in case the category was renamed
-
     node.setText(c.getName());
 
     // get this category's children
 
-    //    c.resort();
     children = c.getNodes();
 
     prevNode = null;
@@ -452,6 +447,12 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     return newNode;
   }
+
+  /**
+   *
+   * This method generates the per-field children of the specified baseNode.
+   *
+   */
 
   void refreshFields(BaseNode node, boolean doRefresh) throws RemoteException
   {
@@ -534,7 +535,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    // insert a new field node
 
 	    newNode = new FieldNode(parentNode, field.getName(), field,
-				    oldNode, false, 2, 2, fieldMenu);
+				    oldNode, false, 3, 3, fieldMenu);
 
 	    tree.insertNode(newNode, true);
 
@@ -625,7 +626,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     showingBase = true;
     showingField = false;
 
-    // attach the button pane to the base editor
+    fe.fieldNode = null;
     
     validate();
   }
@@ -638,7 +639,10 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     showingBase = false;
     showingField = true;
 
-    // attach the button pane to the field editor
+    // if we switch back to the base editor, it'll need to know that
+    // it needs to refresh
+
+    be.baseNode = null;
     
     validate();
   }
@@ -650,6 +654,13 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     showingBase = false;
     showingField = false;
 
+    // if we switch back to the field editor
+    // or base editor, they need to know that they'll
+    // need to refresh
+
+    fe.fieldNode = null;
+    be.baseNode = null;
+
     validate();
   }
 
@@ -660,6 +671,13 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     showingBase = false;
     showingField = false;
+
+    // if we switch back to the field editor
+    // or base editor, they need to know that they'll
+    // need to refresh
+
+    fe.fieldNode = null;
+    be.baseNode = null;
 
     validate();
   }
@@ -698,6 +716,13 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     else
       {
 	card.show(attribCardPane, "empty");
+
+	// if we switch back to the field editor
+	// or base editor, they need to know that they'll
+	// need to refresh
+
+	fe.fieldNode = null;
+	be.baseNode = null;
       }
   }
 
@@ -763,7 +788,9 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    CatTreeNode newNode = new CatTreeNode(node, newCategory.getName(), newCategory,
 						  n, true, 0, 1, categoryMenu);
 
-	    tree.insertNode(newNode, true);
+	    tree.insertNode(newNode, false);
+	    
+	    tree.expandNode(node, true);
 
 	    editCategory(newNode);
 	  }
@@ -783,7 +810,9 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
 					    null, false, 2, 2, baseMenu);
 
-	    tree.insertNode(newNode, true);
+	    tree.insertNode(newNode, false);
+
+	    tree.expandNode(node, false);
 
 	    refreshFields(newNode, true);
 
@@ -1092,8 +1121,10 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	      }
 
 	    FieldNode newNode = new FieldNode(node, newname, bF, n,
-					      false, 2, 2, fieldMenu);
-	    tree.insertNode(newNode, true);
+					      false, 3, 3, fieldMenu);
+	    tree.insertNode(newNode, false);
+	    tree.expandNode(node, true);
+
 	    editField(newNode);
 	    System.err.println("Called editField");
 	  }
@@ -1246,8 +1277,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   /**
    *
-   * This method doesn't truly apply to the drag and drop behavior implemented in
-   * the Schema Editor.
+   * This method provides intelligence to the tree, determining which
+   * nodes the dragNode may be dropped on.
    *
    * @see arlut.csd.Tree.treeDragDropCallback
    */
@@ -1294,14 +1325,106 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   /**
    *
-   * This method doesn't truly apply to the drag and drop behavior implemented in
-   * the Schema Editor.
+   * This method provides intelligence to the tree, determining what
+   * action is to be taken if a node is dropped on another node.
    *
    * @see arlut.csd.Tree.treeDragDropCallback
    */
 
   public void iconDragDrop(treeNode dragNode, treeNode targetNode)
   {
+    if (dragNode instanceof BaseNode)
+      {
+	try
+	  {
+	    BaseNode bn = (BaseNode) dragNode;
+	    Base base = bn.getBase();
+	    Category oldCategory = base.getCategory();
+
+	    Category newCategory = null;
+
+	    if (targetNode instanceof CatTreeNode)
+	      {
+		// it had better be
+
+		newCategory = ((CatTreeNode) targetNode).getCategory();
+
+		System.err.println("Dropping base " + base.getName() + " from " +
+				   oldCategory.getName() + " onto " + newCategory.getName());
+
+		base.setDisplayOrder(0);
+
+		oldCategory.removeNode(base.getName());
+		newCategory.addNode((CategoryNode) base, false, true);
+
+		BaseNode newNode = new BaseNode(targetNode, base.getName(), base,
+						null, true, 2, 2, baseMenu);
+
+		tree.deleteNode(dragNode, false);
+		tree.insertNode(newNode, false);
+
+		refreshFields(newNode, true);
+
+		if (be.baseNode == dragNode)
+		  {
+		    be.baseNode = newNode;
+		  }
+	      }
+	    else
+	      {
+		throw new RuntimeException("what?  dropped on a non-category node..");
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote: " + ex);
+	  }
+      }
+    else if (dragNode instanceof CatTreeNode)
+      {
+	try
+	  {
+	    CatTreeNode cn = (CatTreeNode) dragNode;
+	    Category category = cn.getCategory();
+	    Category oldCategory = category.getCategory();
+	    
+	    Category newCategory = null;
+
+	    if (targetNode instanceof CatTreeNode)
+	      {
+		// it had better be
+
+		newCategory = ((CatTreeNode) targetNode).getCategory();
+
+		System.err.println("Dropping category " + category.getName() + " from " +
+				   oldCategory.getName() + " onto " + newCategory.getName());
+
+		category.setDisplayOrder(0);
+
+		oldCategory.removeNode(category.getName());
+		newCategory.addNode((CategoryNode) category, false, true);
+
+		CatTreeNode newNode = new CatTreeNode(targetNode, category.getName(), category,
+						      null, true, 0, 1, categoryMenu);
+
+		tree.deleteNode(dragNode, false);
+		tree.insertNode(newNode, true);
+
+		if (ce.catNode == dragNode)
+		  {
+		    ce.catNode = newNode;
+		  }
+	      }
+	    else
+	      {
+		throw new RuntimeException("what?  dropped on a non-category node..");
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote: " + ex);
+	  }
+      }
   }
 
   /**
@@ -1405,6 +1528,12 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     System.out.println("aboveNode = " + aboveNode.getText());
     System.out.println("belowNode = " + belowNode.getText());
 
+    if (aboveNode.equals(dragNode) || belowNode.equals(dragNode))
+      {
+	System.err.println("No change necessary");
+	return;
+      }
+
     if (dragNode instanceof FieldNode)
       {
 	FieldNode oldNode = (FieldNode)dragNode;
@@ -1417,10 +1546,15 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	      {
 		//Insert below the aboveNode
 		FieldNode newNode = new FieldNode(parentNode, oldNode.getText(), oldNode.getField(),
-						  aboveNode, false, 2, 2, fieldMenu);
+						  aboveNode, false, 3, 3, fieldMenu);
 		
 		tree.deleteNode(dragNode, false);
 		tree.insertNode(newNode, true);
+
+		if (fe.fieldNode == dragNode)
+		  {
+		    fe.fieldNode = newNode;
+		  }
 	      }
 	    else
 	      {
@@ -1433,9 +1567,15 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	      {
 		//First node, insert below parent
 		FieldNode newNode = new FieldNode(parentNode, oldNode.getText(), oldNode.getField(),
-						  null, false, 2, 2, fieldMenu);
+						  null, false, 3, 3, fieldMenu);
+
 		tree.deleteNode(dragNode, false);
 		tree.insertNode(newNode, true);
+
+		if (fe.fieldNode == dragNode)
+		  {
+		    fe.fieldNode = newNode;
+		  }
 	      }
 	    else
 	      {
@@ -1478,40 +1618,240 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
     else if (dragNode instanceof BaseNode)
       {
+	System.err.println("Releasing baseNode");
+
 	try
 	  {
 	    BaseNode bn = (BaseNode) dragNode;
 	    Base base = bn.getBase();
-	    Category parent = base.getCategory();
+	    Category oldCategory = base.getCategory();
 
-	    Category newCategory;
+	    Category newCategory = null;
+	    CatTreeNode newParent = null;
+	    treeNode previousNode = null;
+	    int displayOrder = 0;
 
 	    if (aboveNode instanceof CatTreeNode)
 	      {
-		newCategory = ((CatTreeNode) aboveNode).getCategory();
+		if (aboveNode == objects)
+		  {
+		    newCategory = rootCategory;
+		    newParent = (CatTreeNode) aboveNode;
+		    previousNode = null;
+		    displayOrder = 0;
+		  }
+		else
+		  {
+		    if (aboveNode.isOpen())
+		      {
+			newCategory = ((CatTreeNode) aboveNode).getCategory();
+			newParent = (CatTreeNode) aboveNode;
+			previousNode = null;
+			displayOrder = 0;
+		      }
+		    else
+		      {
+			newParent = (CatTreeNode) aboveNode.getParent();
+			newCategory = newParent.getCategory();
+			previousNode = aboveNode;
+			displayOrder = ((CatTreeNode) aboveNode).getCategory().getDisplayOrder() + 1;
+		      }
+		  }
 	      }
 	    else if (aboveNode instanceof BaseNode)
 	      {
 		newCategory = ((BaseNode) aboveNode).getBase().getCategory();
+		newParent = (CatTreeNode) aboveNode.getParent();
+		displayOrder = ((BaseNode) aboveNode).getBase().getDisplayOrder() + 1;
+
+		previousNode = aboveNode;
 	      }
-	    else
+	    else if (aboveNode instanceof FieldNode)
 	      {
-		// if the node below us is the namespaces node,
-		// we're going to be moving this base down to the
-		// bottom of the top level category hierarchy
+		newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
+		newParent = (CatTreeNode) aboveNode.getParent().getParent();
+		displayOrder = ((FieldNode) aboveNode).getField().getBase().getDisplayOrder() + 1;
+		previousNode = aboveNode.getParent();
+	      }
 
-		//		if (belowNode == namespaces)
+	    if (false)
+	      {
+		System.err.println("New Category = " + newCategory.getPath());
+		System.err.println("new parent = " + newParent.getText());
 
+		if (previousNode != null)
+		  {
+		    System.err.println("new prevNode = " + previousNode.getText());
+		  }
+	      }
+
+	    if (newCategory.equals(oldCategory))
+	      {
+		if (false)
+		  {
+		    System.err.println("Moving within the same category");
+		  }
+
+		if (base.getDisplayOrder() < displayOrder)
+		  {
+		    displayOrder--;
+		  }
+	      }
+
+	    if (false)
+	      {
+		System.err.println("new displayOrder = " + displayOrder);
+	      }
+
+	    oldCategory.removeNode(base.getName());
+
+	    base.setDisplayOrder(displayOrder);
+	    newCategory.addNode((CategoryNode) base, true, true);
+
+	    tree.deleteNode(dragNode, false);
+
+	    BaseNode newNode = new BaseNode(newParent, base.getName(), base, previousNode,
+					    false, 2, 2, baseMenu);
+
+	    tree.insertNode(newNode, false);
+
+	    refreshFields(newNode, true);
+
+	    if (be.baseNode == dragNode)
+	      {
+		be.baseNode = newNode;
+	      }
+
+	    if (false)
+	      {
+		System.err.println("Reinserted base " + base.getName());
+		System.err.println("reinserted order = " + base.getDisplayOrder());
+		System.err.println("reinserted category = " + base.getCategory().getName());
 	      }
 
 	  }
 	catch (RemoteException ex)
 	  {
+	    throw new RuntimeException("caught remote : " + ex);
 	  }
 	
       }
     else if (dragNode instanceof CatTreeNode)
       {
+	System.err.println("Releasing CatTreeNode");
+
+	try
+	  {
+	    CatTreeNode cn = (CatTreeNode) dragNode;
+	    Category category = cn.getCategory();
+	    Category oldCategory = category.getCategory();
+
+	    Category newCategory = null;
+	    CatTreeNode newParent = null;
+	    treeNode previousNode = null;
+	    int displayOrder = 0;
+
+	    if (aboveNode instanceof CatTreeNode)
+	      {
+		if (aboveNode == objects)
+		  {
+		    newCategory = rootCategory;
+		    newParent = (CatTreeNode) aboveNode;
+		    previousNode = null;
+		    displayOrder = 0;
+		  }
+		else
+		  {
+		    if (aboveNode.isOpen())
+		      {
+			newCategory = ((CatTreeNode) aboveNode).getCategory();
+			newParent = (CatTreeNode) aboveNode;
+			previousNode = null;
+			displayOrder = 0;
+		      }
+		    else
+		      {
+			newParent = (CatTreeNode) aboveNode.getParent();
+			newCategory = newParent.getCategory();
+			previousNode = aboveNode;
+			displayOrder = ((CatTreeNode) aboveNode).getCategory().getDisplayOrder() + 1;
+		      }
+		  }
+	      }
+	    else if (aboveNode instanceof BaseNode)
+	      {
+		newCategory = ((BaseNode) aboveNode).getBase().getCategory();
+		newParent = (CatTreeNode) aboveNode.getParent();
+		displayOrder = ((BaseNode) aboveNode).getBase().getDisplayOrder() + 1;
+
+		previousNode = aboveNode;
+	      }
+	    else if (aboveNode instanceof FieldNode)
+	      {
+		newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
+		newParent = (CatTreeNode) aboveNode.getParent().getParent();
+		displayOrder = ((FieldNode) aboveNode).getField().getBase().getDisplayOrder() + 1;
+		previousNode = aboveNode.getParent();
+	      }
+
+	    if (false)
+	      {
+		System.err.println("New Category = " + newCategory.getPath());
+		System.err.println("new parent = " + newParent.getText());
+
+		if (previousNode != null)
+		  {
+		    System.err.println("new prevNode = " + previousNode.getText());
+		  }
+	      }
+
+	    if (newCategory.equals(oldCategory))
+	      {
+		if (false)
+		  {
+		    System.err.println("Moving within the same category");
+		  }
+
+		if (category.getDisplayOrder() < displayOrder)
+		  {
+		    displayOrder--;
+		  }
+	      }
+
+	    if (false)
+	      {
+		System.err.println("new displayOrder = " + displayOrder);
+	      }
+
+	    oldCategory.removeNode(category.getName());
+
+	    category.setDisplayOrder(displayOrder);
+	    newCategory.addNode((CategoryNode) category, true, true);
+	    tree.deleteNode(dragNode, false);
+
+	    CatTreeNode newNode = new CatTreeNode(newParent, category.getName(), category, previousNode,
+						  false, 0, 1, categoryMenu);
+
+	    tree.insertNode(newNode, false);
+
+	    if (ce.catNode == dragNode)
+	      {
+		ce.catNode = newNode;
+	      }
+
+	    if (false)
+	      {
+		System.err.println("Reinserted category " + category.getName());
+		System.err.println("reinserted order = " + category.getDisplayOrder());
+		System.err.println("reinserted category = " + category.getCategory().getName());
+	      }
+
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote : " + ex);
+	  }
+
       }
   }
 }
@@ -1741,6 +2081,7 @@ class CategoryEditor extends ScrollPane implements setValueCallback {
 	    if (category.setName((String) v.getValue()))
 	      {
 		catNode.setText((String) v.getValue());
+		owner.tree.refresh();
 		return true;
 	      }
 	    else
