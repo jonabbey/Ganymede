@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -332,9 +332,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     createPanel(general_index);
     showTab(general_index);
 
-    pane.setForeground(Color.black);
-    pane.setBackground(Color.lightGray);
-    setContentPane(pane);
+    JPanel contentPanel = new JPanel();
+    contentPanel.setLayout(new BorderLayout());
+    contentPanel.add("Center", pane);
+
+    setContentPane(contentPanel);
     
     // Need to add the menubar at the end, so the user doesn't get
     // into the menu items before the tabbed pane is all set up
