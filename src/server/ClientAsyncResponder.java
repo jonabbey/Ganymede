@@ -6,8 +6,8 @@
 
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/09/05 00:06:25 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/09/05 00:39:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -79,5 +79,5 @@ public interface ClientAsyncResponder extends Remote {
    * server.  Returns null if isAlive() is false.</p>
    */
 
-  public clientMessage getNextMsg() throws RemoteException;
+  public clientAsyncMessage getNextMsg() throws RemoteException;
 }

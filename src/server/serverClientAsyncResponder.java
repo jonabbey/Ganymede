@@ -16,8 +16,8 @@
    
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2003/09/05 00:38:38 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2003/09/05 00:39:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,19 +86,19 @@ import java.rmi.server.Unreferenced;
  * notification to the client, even if the client is running behind a
  * system-level firewall.</p>
  *
- * @see arlut.csd.ganymede.clientMessage
+ * @see arlut.csd.ganymede.clientAsyncMessage
  *
- * @version $Revision: 1.3 $ $Date: 2003/09/05 00:38:38 $
+ * @version $Revision: 1.4 $ $Date: 2003/09/05 00:39:53 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class serverClientAsyncResponder implements ClientAsyncResponder, Remote {
 
   /**
-   * <p>Our queue of {@link arlut.csd.ganymede.clientMessage clientMessage} objects.</p>
+   * <p>Our queue of {@link arlut.csd.ganymede.clientAsyncMessage clientAsyncMessage} objects.</p>
    */
 
-  private final clientMessage[] eventBuffer;
+  private final clientAsyncMessage[] eventBuffer;
 
   /**
    * <p>Index pointer to the slot for the next item to be place in</p>
@@ -145,14 +145,14 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
    * <p>Handy direct look-up table for events in eventBuffer</p>
    */
 
-  private clientMessage lookUp[];
+  private clientAsyncMessage lookUp[];
 
   /* -- */
 
   public serverClientAsyncResponder()
   {
-    eventBuffer = new clientMessage[maxBufferSize];
-    lookUp = new clientMessage[clientMessage.LAST - clientMessage.FIRST + 1];
+    eventBuffer = new clientAsyncMessage[maxBufferSize];
+    lookUp = new clientAsyncMessage[clientAsyncMessage.LAST - clientAsyncMessage.FIRST + 1];
   }
 
   /**
@@ -182,7 +182,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
     params[0] = new Integer(type);
     params[1] = message;
 
-    addEvent(new clientMessage(clientMessage.SENDMESSAGE, params));
+    addEvent(new clientAsyncMessage(clientAsyncMessage.SENDMESSAGE, params));
   }
 
 
@@ -200,7 +200,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
 	return;
       }
 
-    addEvent(new clientMessage(clientMessage.SHUTDOWN, message));
+    addEvent(new clientAsyncMessage(clientAsyncMessage.SHUTDOWN, message));
 
     synchronized (eventBuffer)
       {
@@ -214,9 +214,9 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
    * server.  Returns null if isAlive() is false.</p>
    */
 
-  public clientMessage getNextMsg()
+  public clientAsyncMessage getNextMsg()
   {
-    clientMessage event;
+    clientAsyncMessage event;
 
     /* -- */
 
@@ -257,7 +257,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
    * Client, in chronological order.</p>
    */
 
-  private void addEvent(clientMessage newEvent) throws RemoteException
+  private void addEvent(clientAsyncMessage newEvent) throws RemoteException
   {
     if (done)
       {
@@ -285,7 +285,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
    * will never be notified of the old event's contents.</p>
    */
 
-  private void replaceEvent(clientMessage newEvent) throws RemoteException
+  private void replaceEvent(clientAsyncMessage newEvent) throws RemoteException
   {
     if (done)
       {
@@ -361,7 +361,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
    * private enqueue method.
    */
 
-  private void enqueue(clientMessage item)
+  private void enqueue(clientAsyncMessage item)
   {
     synchronized (eventBuffer)
       {
@@ -381,11 +381,11 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
    * bounds.
    */
 
-  private clientMessage dequeue()
+  private clientAsyncMessage dequeue()
   {
     synchronized (eventBuffer)
       {
-	clientMessage result = eventBuffer[dequeuePtr];
+	clientAsyncMessage result = eventBuffer[dequeuePtr];
 	eventBuffer[dequeuePtr] = null;
 	
 	if (++dequeuePtr >= maxBufferSize)
