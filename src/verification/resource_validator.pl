@@ -446,7 +446,7 @@ sub examine_java {
 	if ($arg_count < $prop_param_count) {
 	  print "Error, ts.l($key) call takes $prop_param_count params in properties, but has $arg_count args in java code on line $line_number\n";
 	  $result = 1;
-	} else if ($arg_count > $prop_param_count) {
+	} elsif ($arg_count > $prop_param_count) {
 	  print "Warning, ts.l($key) call has more parameters ($arg_count) than are needed for the property ($prop_param_count).  Line number $line_number\n";
 	}
 
