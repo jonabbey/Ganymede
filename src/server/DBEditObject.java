@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.74 $ %D%
+   Version: $Revision: 1.75 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1716,8 +1716,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public ReturnVal reactivate()
   {
+    if (isInactivated())
+      {
+	// by default, we'll just clear the removal field
+
+	setFieldValueLocal(SchemaConstants.RemovalField, null);
+	return null;		// success
+      }
+
     return Ganymede.createErrorDialog("DBEditObject.reactivate() error",
-				      "Base DBEditObject does not support reactivation");
+				      "Object not inactivated.");
   }
 
   /**
