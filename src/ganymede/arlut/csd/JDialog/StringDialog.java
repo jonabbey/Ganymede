@@ -91,6 +91,8 @@ import arlut.csd.JDataComponent.JstringArea;
 import arlut.csd.JDataComponent.JstringField;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                     StringDialog
@@ -118,6 +120,13 @@ import arlut.csd.JDataComponent.TimedKeySelectionManager;
 public class StringDialog extends JCenterDialog implements ActionListener, WindowListener {
 
   static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.JDialog.StringDialog");
 
   // --
 
@@ -176,7 +185,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   public StringDialog(Frame frame, String Title, String Text, boolean ShowCancel)
   {
-    this (frame, Title, Text, "Ok", ShowCancel ? "Cancel" : null, null);
+    this (frame, Title, Text, ts.l("global.ok"), ShowCancel ? ts.l("global.cancel") : null, null);
   }
 
   /**
@@ -191,7 +200,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   public StringDialog(Frame frame, String Title, String Text)
   {
-    this(frame, Title, Text, "Ok", "Cancel", null);
+    this(frame, Title, Text, ts.l("global.ok"), ts.l("global.cancel"), null);
   }
 
   /**
