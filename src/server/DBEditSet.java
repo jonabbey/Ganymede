@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,7 +39,7 @@ import java.rmi.*;
 
 public class DBEditSet {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   Vector
     objects = null,
@@ -274,7 +274,10 @@ public class DBEditSet {
 
     /* -- */
 
-    System.err.println("DBEditSet.rollback(): rollback key " + name);
+    if (debug)
+      {
+	System.err.println("DBEditSet.rollback(): rollback key " + name);
+      }
 
     point = popCheckpoint(name);
 
@@ -297,7 +300,10 @@ public class DBEditSet {
       {
 	objck = (DBCheckPointObj) point.objects.elementAt(i);
 
-	System.err.println("Object in transaction at checkpoint time: " + objck.invid.toString());
+	if (debug)
+	  {
+	    System.err.println("Object in transaction at checkpoint time: " + objck.invid.toString());
+	  }
 
 	found = false;
 
@@ -334,8 +340,11 @@ public class DBEditSet {
       {
 	obj = (DBEditObject) objects.elementAt(i);
 
-	System.err.println("DBEditSet.rollback(): object in transaction at rollback time: " + obj.getLabel() +
-			   " (" + obj.getInvid().toString() + ")");
+	if (debug)
+	  {
+	    System.err.println("DBEditSet.rollback(): object in transaction at rollback time: " + obj.getLabel() +
+			       " (" + obj.getInvid().toString() + ")");
+	  }
 
 	found = false;
 
@@ -375,12 +384,15 @@ public class DBEditSet {
 		break;
 	      }
 
-	    System.err.println("DBEditSet.rollback(): dropping object " + obj.getLabel() + " (" 
-			       + obj.getInvid().toString() + ")");
+	    if (debug)
+	      {
+		System.err.println("DBEditSet.rollback(): dropping object " + obj.getLabel() + " (" 
+				   + obj.getInvid().toString() + ")");
+	      }
 
 	    drop.addElement(obj);
 	  }
-	else
+	else if (debug)
 	  {
 	    System.err.println("DBEditSet.rollback(): keeping object " + obj.getLabel() + " (" 
 			       + obj.getInvid().toString() + ")");
@@ -666,36 +678,39 @@ public class DBEditSet {
 	  {
 	    eObj = (DBEditObject) objects.elementAt(i);
 
-	    if ((eObj.getStatus() != DBEditObject.DELETING) &&
-		(eObj.getStatus() != DBEditObject.DROPPING))
+	    if (eObj.getGSession().enableOversight)
 	      {
-		retVal = eObj.checkRequiredFields();
-	      }
-
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		// we're not going to clear out the transaction, 
-		// as there is a chance the user can fix things
-		// up.  We need to clear the committing flag on
-		// all objects that we've called commitPhase1()
-		// on so that they will accept future changes.
-		
-		for (int j = 0; j < i; j++)
+		if ((eObj.getStatus() != DBEditObject.DELETING) &&
+		    (eObj.getStatus() != DBEditObject.DROPPING))
 		  {
-		    eObj2 = (DBEditObject) objects.elementAt(j);
-		    eObj2.release(); // undo committing flag
+		    retVal = eObj.checkRequiredFields();
 		  }
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    // we're not going to clear out the transaction, 
+		    // as there is a chance the user can fix things
+		    // up.  We need to clear the committing flag on
+		    // all objects that we've called commitPhase1()
+		    // on so that they will accept future changes.
 		
-		releaseWriteLock("transaction commit rejected in phase 1 for missing fields");
+		    for (int j = 0; j < i; j++)
+		      {
+			eObj2 = (DBEditObject) objects.elementAt(j);
+			eObj2.release(); // undo committing flag
+		      }
 		
-		// undo the time stamp changes and what-not.
+		    releaseWriteLock("transaction commit rejected in phase 1 for missing fields");
 		
-		rollback(checkpointLabel);
+		    // undo the time stamp changes and what-not.
 		
-		// let DBSession/the client know they can retry things.
+		    rollback(checkpointLabel);
 		
-		retVal.doNormalProcessing = true;
-		return retVal;
+		    // let DBSession/the client know they can retry things.
+		
+		    retVal.doNormalProcessing = true;
+		    return retVal;
+		  }
 	      }
 
 	    retVal = eObj.commitPhase1();
@@ -1099,6 +1114,10 @@ public class DBEditSet {
 
 class DBCheckPoint {
 
+  static final boolean debug = false;
+
+  // ---
+
   String 
     name;
 
@@ -1127,8 +1146,11 @@ class DBCheckPoint {
       {
 	obj = (DBEditObject) transaction.objects.elementAt(i);
 
-	System.err.println("DBCheckPoint: add " + obj.getLabel() + 
-			   " (" + obj.getInvid().toString() + ")");
+	if (debug)
+	  {
+	    System.err.println("DBCheckPoint: add " + obj.getLabel() + 
+			       " (" + obj.getInvid().toString() + ")");
+	  }
 
 	objects.addElement(new DBCheckPointObj(obj));
       }
