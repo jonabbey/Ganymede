@@ -5,7 +5,7 @@
    Description.
    
    Created: 18 November 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
   static final int VISIBLE = 1;
   static final int EDITABLE = 2;
   static final int DELETABLE = 3;
-  boolean debug = true;
+  boolean debug = false;
 
   // --
 
@@ -239,7 +239,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 			     new BoolRenderer(rowVector));
 
     table.setShowHorizontalLines(false);
-    table.getTableHeader().setReorderingAllowed(false);
+    //    table.getTableHeader().setReorderingAllowed(false);
 
     edit_pane = new JScrollPane(table);
     
@@ -362,17 +362,10 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 
 	// Initialize a PermRow object for this base and
 	// add it to the rows vector 
+	boolean[] basePermBitsAry = {baseView, baseCreate, baseEdit, baseDelete};
+ 	boolean[] basePermBitsOKAry = {viewOK, createOK, editOK, deleteOK};
 
-	PermRow	basePermRow = new PermRow(base, null, enabled);
-
-	basePermRow.viewOK = viewOK;
-	basePermRow.createOK = createOK;
-	basePermRow.editOK = editOK;
-	basePermRow.deleteOK = deleteOK;
-	basePermRow.visible = new Boolean(baseView);
-	basePermRow.creatable = new Boolean(baseCreate);
-	basePermRow.editable = new Boolean(baseEdit);
-	basePermRow.deletable = new Boolean(baseDelete);
+	PermRow	basePermRow = new PermRow(base, null, basePermBitsAry, basePermBitsOKAry, enabled);
 
 	rows.addElement(basePermRow);
 
@@ -455,16 +448,10 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	// Initialize a PermRow object for this field and
 	// add it to the rows vector 
 
-	    PermRow templatePermRow = new PermRow(base, template, visibleField);
+	    boolean[] fieldPermBitsAry = {view, create, edit, delete};
+	    boolean[] fieldPermBitsOKAry = {viewOK, createOK, editOK, deleteOK};
 
-	    templatePermRow.viewOK = viewOK;
-	    templatePermRow.createOK = createOK;
-	    templatePermRow.editOK = editOK;
-	    templatePermRow.deleteOK = deleteOK;
-	    templatePermRow.visible = new Boolean(view);
-	    templatePermRow.creatable = new Boolean(create);
-	    templatePermRow.editable = new Boolean(edit);
-	    templatePermRow.deletable = new Boolean(delete);
+	    PermRow templatePermRow = new PermRow(base, template, fieldPermBitsAry, fieldPermBitsOKAry, visibleField);
 	    
 	    rows.addElement(templatePermRow);
 	  }
@@ -527,76 +514,76 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	    System.out.println("Ok was pushed");
 	  }
 
-	Enumeration enum = rowVector.elements();
+// 	Enumeration enum = rowVector.elements();
 	
-	while (enum.hasMoreElements()) {
-	  ref = (PermRow)enum.nextElement();
+// 	while (enum.hasMoreElements()) {
+// 	  ref = (PermRow)enum.nextElement();
 
-	  if (!ref.changed) {
-	    continue;
+// 	  if (!ref.changed) {
+// 	    continue;
 
-	  } else {
+// 	  } else {
 
-	    gc.somethingChanged();	    
+// 	    gc.somethingChanged();	    
 
-	    if (ref.isBase()) {
-	      bd = (BaseDump) ref.reference;
-	      baseid = bd.getTypeID();
-	      baseName = bd.getName();
+// 	    if (ref.isBase()) {
+// 	      bd = (BaseDump) ref.reference;
+// 	      baseid = bd.getTypeID();
+// 	      baseName = bd.getName();
 	      
-	      view = ref.visible.booleanValue();
-	      create = ref.creatable.booleanValue();
-	      edit = ref.editable.booleanValue();
-	      delete = ref.deletable.booleanValue();
+// 	      view = ref.visible.booleanValue();
+// 	      create = ref.creatable.booleanValue();
+// 	      edit = ref.editable.booleanValue();
+// 	      delete = ref.deletable.booleanValue();
 
-	      if (debug)
-		{
-		  System.err.println("setting base perms for " + baseName+ " ("+baseid+")");
-		  System.out.println(baseName + " " + view + ", " + create + ", " + edit + ", " + delete); 
-		}
+// 	      if (debug)
+// 		{
+// 		  System.err.println("setting base perms for " + baseName+ " ("+baseid+")");
+// 		  System.out.println(baseName + " " + view + ", " + create + ", " + edit + ", " + delete); 
+// 		}
 
 	
-	      try
-		{
-		  gc.handleReturnVal(permField.setPerm(baseid, new PermEntry (view, edit, create, delete)));
-		}
-	      catch (RemoteException ex)
-		{
-		  throw new RuntimeException("Caught RemoteException" + ex);
-		}
+// 	      try
+// 		{
+// 		  gc.handleReturnVal(permField.setPerm(baseid, new PermEntry (view, edit, create, delete)));
+// 		}
+// 	      catch (RemoteException ex)
+// 		{
+// 		  throw new RuntimeException("Caught RemoteException" + ex);
+// 		}
 	    
-	    } 
-	    else  {
-	      template = (FieldTemplate) ref.reference;
-	      templateName = template.getName();
+// 	    } 
+// 	    else  {
+// 	      template = (FieldTemplate) ref.reference;
+// 	      templateName = template.getName();
 	      
-	      view = ref.visible.booleanValue();
-	      create = ref.creatable.booleanValue();
-	      edit = ref.editable.booleanValue();
-	      delete = ref.deletable.booleanValue();
+// 	      view = ref.visible.booleanValue();
+// 	      create = ref.creatable.booleanValue();
+// 	      edit = ref.editable.booleanValue();
+// 	      delete = ref.deletable.booleanValue();
 
-	      if (debug)
-		{
-		  System.err.println("setting basefield perms for field " + templateName);
-		  System.out.println("   " + templateName + " "+view + ", " + create + ", " + edit + ", " + delete); 
-		}
+// 	      if (debug)
+// 		{
+// 		  System.err.println("setting basefield perms for field " + templateName);
+// 		  System.out.println("   " + templateName + " "+view + ", " + create + ", " + edit + ", " + delete); 
+// 		}
 	      
 	      
-	      try
-		{
-		  gc.handleReturnVal(permField.setPerm(template.getBaseID(), template.getID(), new PermEntry (view, edit, create, delete)));
-		}
-	      catch (RemoteException ex)
-		{
-		  throw new RuntimeException("Caught RemoteException" + ex);
-		}
+// 	      try
+// 		{
+// 		  gc.handleReturnVal(permField.setPerm(template.getBaseID(), template.getID(), new PermEntry (view, edit, create, delete)));
+// 		}
+// 	      catch (RemoteException ex)
+// 		{
+// 		  throw new RuntimeException("Caught RemoteException" + ex);
+// 		}
 
-	    }
-	  }
-	}	      
+// 	    }
+// 	  }
+// 	}	      
            
-	myshow(false);
-	return;
+// 	myshow(false);
+// 	return;
       }
     else 
       {
@@ -660,19 +647,19 @@ class BPermTableModel extends AbstractTableModel {
       }
       
     case 1:
-      return myRow.visible;
+      return new Boolean(myRow.isVisible());
       
     case 2:
-      return myRow.creatable;
+      return new Boolean(myRow.isCreatable());
       
     case 3:
-      return myRow.editable;
+      return new Boolean(myRow.isEditable());
       
     case 4:
-      return myRow.deletable;
+      return new Boolean(myRow.isDeletable());
       
     default:
-      return new Integer(col);
+      return new Integer(col); // should be exception stuff here, I think.
     }
   }
 
@@ -684,52 +671,47 @@ class BPermTableModel extends AbstractTableModel {
   public boolean isCellEditable(int row, int col) {
 
       PermRow myRow = (PermRow)rows.elementAt(row);
-      if ((!myRow.enabled) || (col < 1)) {
+      if ((!myRow.isEnabled()) || (getColumnClass(col) == String.class)) { //(col < 1)) { 
 	return false;
       } else {
 	
 	switch(col) {
 	  
 	case 1:
-	  if (!myRow.viewOK) 
-	    return false;
-	  else 
+	  if (myRow.canView()) 
 	    return true;
+	  break;
 
 	case 2:
-	  if (!myRow.createOK) 
-	    return false;
-	  else 
+	  if (myRow.canCreate()) 
 	    return true;
-
+	  break;	  
 	  
 	case 3:
-	  if (!myRow.editOK) 
-	    return false;
-	  else 
+	  if (myRow.canEdit()) 
 	    return true;
-
+	  break;
 	  
 	case 4:
-	  if (!myRow.deleteOK) 
-	    return false;
-	  else 
+	  if (myRow.canDelete()) 
 	    return true;
+	  break;
  
+	default:
+	  return false;
 	}
-	return true;
+	return false;
       }
   }
   
   public void setValueAt(Object value, int row, int col) {
-    if (col > 0) {
       PermRow myRow = (PermRow)rows.elementAt(row);
 
       switch(col) {
 	
       case 1:
-	myRow.visible = (Boolean)value;
-	myRow.changed=true;
+	myRow.setVisible((Boolean)value);
+	myRow.setChanged(true);
 	// If making a base selection
 	// update children too 
 
@@ -739,11 +721,11 @@ class BPermTableModel extends AbstractTableModel {
 	  // Take care of visibility of creatable
 	  // and editable children too
 
-	  if (myRow.creatable.booleanValue()) {
+	  if (myRow.isCreatable()) {
 	    setBaseChildren(row, col+1, value);
 	  }
 	  
-	  if (myRow.editable.booleanValue()) {
+	  if (myRow.isEditable()) {
 	    setBaseChildren(row, col+2, value);
 	  }
 	  
@@ -751,28 +733,28 @@ class BPermTableModel extends AbstractTableModel {
 	break;
 	
       case 2:
-	myRow.creatable = (Boolean)value;
-	myRow.changed=true;
+	myRow.setCreatable((Boolean)value);
+	myRow.setChanged(true);
 	// If base, update children too
 
-	if ((myRow.isBase()) && (myRow.visible.booleanValue())) {
+	if ((myRow.isBase()) && (myRow.isVisible())) {
 	  setBaseChildren(row, col, value);
 	}
 	break;
 	
       case 3:
-	myRow.editable = (Boolean)value;
-	myRow.changed=true;
+	myRow.setEditable((Boolean)value);
+	myRow.setChanged(true);
 	// If base, update children too
 
-	if ((myRow.isBase()) && (myRow.visible.booleanValue())) {
+	if ((myRow.isBase()) && (myRow.isVisible())) {
 	  setBaseChildren(row, col, value);
 	}
 	break;
 	
       case 4:
-	myRow.deletable = (Boolean)value;
-	myRow.changed=true;
+	myRow.setDeletable((Boolean)value);
+	myRow.setChanged(true);
 	// No update of children for deletable
 	break;
 	
@@ -780,7 +762,7 @@ class BPermTableModel extends AbstractTableModel {
 	// do nothing;
       }
       fireTableDataChanged();
-    }
+      //}
   }
 
 
@@ -801,38 +783,41 @@ class BPermTableModel extends AbstractTableModel {
 	
 	switch(col) {
 	case 1:
-	  if (myRow.viewOK) {
-	    myRow.visible = (Boolean)value;
+	  if (myRow.canView()) {
+	    myRow.setVisible((Boolean)value);
 	    
-	    myRow.enabled = ((Boolean)value).booleanValue();
-	    if (!myRow.enabled) {
-	      myRow.visible = new Boolean(false);
-	      myRow.creatable = new Boolean(false);
-	      myRow.editable = new Boolean(false);
-	      myRow.deletable = new Boolean(false);
+	    myRow.setEnabled((Boolean)value);
+	    if (!myRow.isEnabled()) {
+
+	      Boolean toFalse = new Boolean(false);
+
+	      myRow.setVisible(toFalse);
+	      myRow.setCreatable(toFalse);
+	      myRow.setEditable(toFalse);
+	      myRow.setDeletable(toFalse);
 	    }
-	    myRow.changed=true;
+	    myRow.setChanged(true);
 	  }
 	  break;
 
 	case 2:
-	  if (myRow.createOK) {
-	    myRow.creatable = (Boolean)value;
-	    myRow.changed=true;
+	  if (myRow.canCreate()) {
+	    myRow.setCreatable((Boolean)value);
+	    myRow.setChanged(true);
 	  }
 	  break;
 
 	case 3:
-	  if (myRow.editOK) {
-	    myRow.editable = (Boolean)value;
-	    myRow.changed=true;
+	  if (myRow.canEdit()) {
+	    myRow.setEditable((Boolean)value);
+	    myRow.setChanged(true);
 	  }
 	  break;
 
 	case 4:
-	  if (myRow.deleteOK){
-	    myRow.deletable = (Boolean)value;
-	    myRow.changed=true;
+	  if (myRow.canDelete()){
+	    myRow.setDeletable((Boolean)value);
+	    myRow.setChanged(true);
 	  }
 	  break;
 	  
@@ -912,9 +897,10 @@ class BoolRenderer extends JCheckBox
         
     PermRow myRow = (PermRow) rows.elementAt(row);
     Boolean selected = (Boolean)table.getValueAt(row,column);
-    boolean enabled = myRow.enabled;
+    boolean enabled = myRow.isEnabled();
     Object ref = myRow.reference; 
 
+    String columnName = table.getColumnName(column);
 
     // Take care of background colors
 
@@ -927,63 +913,66 @@ class BoolRenderer extends JCheckBox
 
     // Check if viewOK, etc. If not, put
     // noAccess icon ("X") instead of checkbox
+
+
+
+    // Visible Column    
+    if (columnName.equals("Visible")) {
+
+      if (myRow.canView()) {
+	setIcon(null);
+	setEnabled(enabled);
+	setSelected(selected.booleanValue());	
+      } else {
+	setIcon(noAccess);
+	setEnabled(true);
+      }
+
+    }
     
-    switch(column) {
-    
-    case 1:
-      if (myRow.viewOK) {
-	setIcon(null);
-	setEnabled(enabled);
-	setSelected(selected.booleanValue());
+    // Creatable Column
+    else if (columnName.equals("Creatable")) {
 
+      if (myRow.canCreate()) {
+	setIcon(null);
+	setEnabled(enabled);
+	setSelected(selected.booleanValue());	
       } else {
 	setIcon(noAccess);
 	setEnabled(true);
       }
-      break;
-      
-    case 2:
-      if (myRow.createOK) {
-	setIcon(null);
-	setEnabled(enabled);
-	setSelected(selected.booleanValue());
 
-      } else {
-	setIcon(noAccess);
-	setEnabled(true);
-      }
-      break;
-      
-    case 3:
-      if (myRow.editOK) {
-	setIcon(null);
-	setEnabled(enabled);
-	setSelected(selected.booleanValue());
-	
-      } else {
-	setIcon(noAccess);
-	setEnabled(true);
-      }
-      break;
+    }
+  
+    // Editable Column
+    else if (columnName.equals("Editable")) {
 
-    case 4:
-      if (myRow.deleteOK) {
+      if (myRow.canEdit()) {
 	setIcon(null);
 	setEnabled(enabled);
-	setSelected(selected.booleanValue());
-	
+	setSelected(selected.booleanValue());	
       } else {
 	setIcon(noAccess);
 	setEnabled(true);
       }
-      break;
-      
+
     }
 
-    
+    // Deletable Column
+    else if (columnName.equals("Deletable")){
 
+      if (myRow.canDelete()) {
+	setIcon(null);
+	setEnabled(enabled);
+	setSelected(selected.booleanValue());	
+      } else {
+	setIcon(noAccess);
+	setEnabled(true);
+      }
+
+    }
+  
     // Center checkbox
-
     setHorizontalAlignment(CENTER);   
 
     return this;
@@ -999,8 +988,15 @@ class PermRow {
   boolean changed;
   boolean createOK, viewOK, editOK, deleteOK;
   boolean enabled;
+  boolean[] permBitsAry;
+  boolean[] permBitsOKAry;
 
-  public PermRow(BaseDump base, FieldTemplate field, boolean enabled) {
+  static final int VISIBLE = 0;
+  static final int CREATABLE = 1;
+  static final int EDITABLE = 2;
+  static final int DELETABLE = 3;
+
+  public PermRow(BaseDump base, FieldTemplate field, boolean[] permBitsAry, boolean[] permBitsOKAry, boolean enabled) {
     if (field == null) {   
       this.reference = base;
     } else {
@@ -1009,6 +1005,8 @@ class PermRow {
     this.enabled = enabled;
     this.base = base;
     this.field = field;
+    this.permBitsAry = permBitsAry;
+    this.permBitsOKAry = permBitsOKAry;
   }
 
   public boolean isBase() {
@@ -1017,5 +1015,65 @@ class PermRow {
     else
       return false;
   }
+
+  public boolean isEnabled() {
+    return this.enabled;
+  }
+
+ public void setChanged(boolean value) {
+    this.changed = value;
+  }
+
+  public boolean isChanged() {
+    return this.changed;
+  }
+
+ public void setEnabled(Boolean value) {
+    this.enabled = value.booleanValue();
+  }
+
+
+  public boolean isVisible() {
+    return permBitsAry[VISIBLE];
+  }
+
+  public void setVisible(Boolean value) {
+    permBitsAry[VISIBLE] = value.booleanValue();
+  }
+
+ public void setCreatable(Boolean value) {
+    permBitsAry[CREATABLE] = value.booleanValue();
+  }
+
+ public void setEditable(Boolean value) {
+    permBitsAry[EDITABLE] = value.booleanValue();
+  }
+
+ public void setDeletable(Boolean value) {
+    permBitsAry[DELETABLE] = value.booleanValue();
+  }
+
+  public boolean isCreatable() {
+    return permBitsAry[CREATABLE];
+  }
+  public boolean isEditable() {
+    return permBitsAry[EDITABLE];
+  }
+  public boolean isDeletable() {
+    return permBitsAry[DELETABLE];
+  }
+  public boolean canView() {
+    return permBitsOKAry[VISIBLE];
+  }
+  public boolean canCreate() {
+    return permBitsOKAry[CREATABLE];
+  }
+  public boolean canEdit() {
+    return permBitsOKAry[EDITABLE];
+  }
+  public boolean canDelete() {
+    return permBitsOKAry[DELETABLE];
+  }
+
 
 }
