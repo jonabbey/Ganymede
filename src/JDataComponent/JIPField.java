@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ public class JIPField extends JentryField {
 
   public static final boolean debug = false;
 
-  public static int DEFAULT_COLS = 15;
+  public static int DEFAULT_COLS = 20;
 
   private static String IPv4allowedChars = "1234567890.";
   private static String IPv6allowedChars = "1234567890.ABCDEF:";
@@ -131,25 +131,29 @@ public class JIPField extends JentryField {
   }
 
   /**
-   *  determines whether a given character is valid or invalid for a JIPField
+   *  returns the character located at position n in the JIPField value
    *
-   * @param ch the character which is being tested for its validity
+   * @param n position in the JIPField value from which to retrieve character
    */
 
-  private static final boolean isAllowedV4(char ch)
+  public void setValue(Byte[] bytes, boolean v6)
   {
-    return !(IPv4allowedChars.indexOf(ch) == -1);
-  }
+    if (bytes == null)
+      {
+	setText("");
+	return;
+      }
+    
+    if (!v6)
+      {
+	setText(genIPV4string(bytes));
+      }
+    else
+      {
+	setText(genIPV6string(bytes));
+      }
 
-  /**
-   *  determines whether a given character is valid or invalid for a JIPField
-   *
-   * @param ch the character which is being tested for its validity
-   */
-
-  private static final boolean isAllowedV6(char ch)
-  {
-    return !(IPv6allowedChars.indexOf(ch) == -1);
+    return;
   }
 
   /**
@@ -163,6 +167,7 @@ public class JIPField extends JentryField {
   public void processFocusEvent(FocusEvent e)
   {
     String str;
+    Byte[] bytes;
 
     /* -- */
 
@@ -180,26 +185,18 @@ public class JIPField extends JentryField {
 
 	str = getText();
 
-	if (value != null)
+	if (value == null || !value.equals(str))
 	  {
-	    if (debug)
+	    if (str.indexOf(':') != -1)
 	      {
-		System.err.println("JIPField.processFocusEvent: old value != null");
+		bytes = genIPV6bytes(str);
 	      }
-
-	    changed = !value.equals(str);
+	    else
+	      {
+		bytes = genIPV4bytes(str);
+	      }
 	  }
 	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("JIPField.processFocusEvent: old value == null");
-	      }
-
-	    changed = true;
-	  }
-
-	if (!changed)
 	  {
 	    if (debug)
 	      {
@@ -220,10 +217,11 @@ public class JIPField extends JentryField {
 		    System.err.println("JIPField.processFocusEvent: making callback");
 		  }
 
-		b = my_parent.setValuePerformed(new JValueObject(this, str));
+		b = my_parent.setValuePerformed(new JValueObject(this, bytes));
 	      }
 	    catch (RemoteException re)
 	      {
+		throw new RuntimeException("failure in callback dispatch: " + re); 
 	      }
 	    
 	    if (!b) 
@@ -244,11 +242,11 @@ public class JIPField extends JentryField {
 		
 		if (value == null)
 		  {
-		    super.setText("");
+		    setText("");
 		  }
 		else
 		  {
-		    super.setText(value);
+		    setText(value);
 		  }
 
 		changed = false;
@@ -273,6 +271,13 @@ public class JIPField extends JentryField {
   // to follow.
   //
 
+  /**
+   *
+   * This method maps an int value between 0 and 255 inclusive
+   * to a legal signed byte value.
+   *
+   */
+
   private final static byte u2s(int x)
   {
     if ((x < 0) || (x > 255))
@@ -283,9 +288,38 @@ public class JIPField extends JentryField {
     return (byte) (x - 128);
   }
 
+  /**
+   *
+   * This method maps a u2s-encoded signed byte value to an
+   * int value between 0 and 255 inclusive.
+   *
+   */
+
   private final static short s2u(byte b)
   {
     return (short) (b + 128);
+  }
+
+  /**
+   *  determines whether a given character is valid or invalid for a JIPField
+   *
+   * @param ch the character which is being tested for its validity
+   */
+
+  private static final boolean isAllowedV4(char ch)
+  {
+    return !(IPv4allowedChars.indexOf(ch) == -1);
+  }
+
+  /**
+   *  determines whether a given character is valid or invalid for a JIPField
+   *
+   * @param ch the character which is being tested for its validity
+   */
+
+  private static final boolean isAllowedV6(char ch)
+  {
+    return !(IPv6allowedChars.indexOf(ch) == -1);
   }
 
   /**
