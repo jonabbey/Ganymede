@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,6 +51,7 @@ public class Ganymede {
   public static String mailHostProperty = null;
   public static String returnaddrProperty = null;
   public static String signatureFileProperty = null;
+  public static String helpbaseProperty = null;
 
   /* -- */
 
@@ -594,6 +595,7 @@ public class Ganymede {
     mailHostProperty = props.getProperty("ganymede.mailhost");
     signatureFileProperty = props.getProperty("ganymede.signaturefile");
     returnaddrProperty = props.getProperty("ganymede.returnaddr");
+    helpbaseProperty = props.getProperty("ganymede.helpbase");
 
     if (serverHostProperty == null)
       {
@@ -629,6 +631,12 @@ public class Ganymede {
       {
 	System.err.println("Couldn't get the signature file property");
 	success = false;
+      }
+
+    if (helpbaseProperty == null || helpbaseProperty.equals(""))
+      {
+	System.err.println("Couldn't get the help base property.. setting to null");
+	helpbaseProperty = null;
       }
 
     return success;
