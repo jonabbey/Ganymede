@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,7 +17,7 @@ import arlut.csd.Util.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.*;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 import tablelayout.*;
 

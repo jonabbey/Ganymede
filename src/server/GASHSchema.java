@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.71 $ %D%
+   Version: $Revision: 1.72 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,8 +20,8 @@ import arlut.csd.JDialog.*;
 import arlut.csd.JDialog.JInsetPanel;
 import arlut.csd.JTree.*;
 
-import com.sun.java.swing.*;
-import com.sun.java.swing.border.*;
+import javax.swing.*;
+import javax.swing.border.*;
 import java.awt.*;
 
 import tablelayout.*;
