@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2000/09/15 00:52:40 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2000/09/15 01:58:03 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -96,7 +96,7 @@ import arlut.csd.Util.PackageResources;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.26 $ $Date: 2000/09/15 00:52:40 $ $Name:  $
+ * @version $Revision: 1.27 $ $Date: 2000/09/15 01:58:03 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey */
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
@@ -670,8 +670,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	throw new RuntimeException("Got an exception in in.reload: " + e);
       }
-    
-    System.out.println("Done updating.");
   }
 
   /**
