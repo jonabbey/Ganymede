@@ -8,8 +8,8 @@
 
    Created: 28 April 1999
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/06/28 03:29:48 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2001/02/08 22:52:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -348,6 +348,10 @@ class stopServerAdmin extends UnicastRemoteObject implements Admin {
   }
 
   public void setLocksHeld(int locks)
+  {
+  }
+
+  public void setMemoryState(long free, long total)
   {
   }
 

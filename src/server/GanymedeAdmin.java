@@ -9,15 +9,15 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 2000/11/02 22:39:08 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 2001/02/08 22:52:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -79,7 +79,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.49 $ $Date: 2000/11/02 22:39:08 $
+ * @version $Revision: 1.50 $ $Date: 2001/02/08 22:52:13 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -114,6 +114,19 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    */
 
   private static Date lastDumpDate;
+
+  /**
+   * Free memory statistic that the server sends to admin consoles
+   */
+
+  private static long freeMem;
+
+  /**
+   * Total memory statistic that the server sends to admin consoles
+   */
+
+  private static long totalMem;
+
 
   /* --- */
 
@@ -258,7 +271,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   }
 
   /**
-   * This method updates the last dump time on a all
+   * This method updates the last dump time to all
    * consoles.
    */
 
@@ -297,6 +310,63 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	// don't call Ganymede.debug() here or we'll get into an infinite
 	// loop if we have any problems.
 	System.err.println("Couldn't update dump date on an admin console" + ex);
+	badConsoles.addElement(console);
+      }
+  }
+
+  /**
+   * This static method is used to update and transmit the server's
+   * memory status to the consoles.
+   */
+
+  public static void updateMemState(long freeMem, long totalMem)
+  {
+    GanymedeAdmin.freeMem = freeMem;
+    GanymedeAdmin.totalMem = totalMem;
+    updateMemState();
+  }
+
+  /**
+   * This method is used to send the server's memory status to all
+   * connected admin consoles.
+   */
+
+  public static void updateMemState()
+  {
+    GanymedeAdmin temp;
+
+    /* -- */
+
+    synchronized (GanymedeAdmin.consoles)
+      {
+	for (int i = 0; i < consoles.size(); i++)
+	  {
+	    temp = (GanymedeAdmin) consoles.elementAt(i);
+
+	    updateMemState(temp);
+	  }
+      }
+
+    detachBadConsoles();
+  }
+
+
+  /**
+   * This method updates the server's memory status on a
+   * single connected admin console.
+   */
+
+  public static void updateMemState(GanymedeAdmin console)
+  {
+    try
+      {
+	console.proxy.setMemoryState(GanymedeAdmin.freeMem, GanymedeAdmin.totalMem);
+      }
+    catch (RemoteException ex)
+      {
+	// don't call Ganymede.debug() here or we could get into an infinite
+	// loop if we have any problems.
+	System.err.println("Couldn't update memory state on an admin console" + ex);
 	badConsoles.addElement(console);
       }
   }
@@ -537,6 +607,14 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   {
     super();			// UnicastRemoteObject initialization
 
+    // if the timeOutTask hasn't previously updated the 
+
+    if (GanymedeAdmin.freeMem == 0 && GanymedeAdmin.totalMem == 0)
+      {
+	GanymedeAdmin.freeMem = Runtime.getRuntime().freeMemory();
+	GanymedeAdmin.totalMem = Runtime.getRuntime().totalMemory();
+      }
+
     this.proxy = new serverAdminProxy(admin);
     this.fullprivs = fullprivs;
     this.adminName = adminName;
@@ -549,6 +627,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
     updateLastDump(this);
     updateCheckedOut(this);
     updateLocksHeld(this);
+    updateMemState(this);
     setState(this);
     
     refreshUsers();
@@ -626,6 +705,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
     updateLastDump(this);
     updateCheckedOut(this);
     updateLocksHeld(this);
+    updateMemState(this);
     proxy.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
     setState(this);
 

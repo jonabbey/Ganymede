@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 2001/01/31 10:05:27 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 2001/02/08 22:52:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -919,6 +919,11 @@ public class Ganymede {
 				1,
 				new timeOutTask(),
 				"Idle Timer");
+
+    scheduler.addPeriodicAction(new Date(System.currentTimeMillis() + 60000),
+				1,
+				new memoryStatusTask(),
+				"Memory Status Updater");
   }
 
   static void registerBuilderTask(String taskName)
@@ -1471,5 +1476,34 @@ class timeOutTask implements Runnable {
   public void run()
   {
     Ganymede.server.clearIdleSessions();
+    GanymedeAdmin.updateMemState(Runtime.getRuntime().freeMemory(),
+				 Runtime.getRuntime().totalMemory());
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                memoryStatusTask
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>Runnable class to update the memory status fields in the admin
+ * console.  Registered with the {@link
+ * arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler} by {@link
+ * arlut.csd.ganymede.Ganymede#registerTasks() registerTasks()}, to
+ * run every minute.</p> 
+ */
+
+class memoryStatusTask implements Runnable {
+
+  public memoryStatusTask()
+  {
+  }
+
+  public void run()
+  {
+    GanymedeAdmin.updateMemState(Runtime.getRuntime().freeMemory(),
+				 Runtime.getRuntime().totalMemory());
   }
 }

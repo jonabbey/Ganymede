@@ -11,15 +11,15 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/02/16 11:32:02 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2001/02/08 22:52:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -77,7 +77,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.16 $ $Date: 2000/02/16 11:32:02 $
+ * @version $Revision: 1.17 $ $Date: 2001/02/08 22:52:14 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -259,6 +259,21 @@ public class serverAdminProxy implements Admin, Runnable {
   public void setLocksHeld(int locks) throws RemoteException
   {
     replaceEvent(new adminEvent(adminEvent.SETLOCKSHELD, new Integer(locks)));
+  }
+
+  /**
+   * <p>This method is called by the Ganymede server to update the memory
+   * status display in the admin console.</p>
+   */
+
+  public void setMemoryState(long freeMem, long totalMem) throws RemoteException
+  {
+    long[] parmAry = new long[2];
+
+    parmAry[0] = freeMem;
+    parmAry[1] = totalMem;
+
+    replaceEvent(new adminEvent(adminEvent.SETMEMORYSTATE, parmAry));
   }
 
   /**
@@ -608,7 +623,8 @@ class adminEvent {
   static final byte CHANGEADMINS = 7;
   static final byte CHANGEUSERS = 8;
   static final byte CHANGETASKS = 9;
-  static final byte LAST = 9;
+  static final byte SETMEMORYSTATE = 10;
+  static final byte LAST = 10;
 
 
   /* --- */
@@ -621,9 +637,10 @@ class adminEvent {
   byte method;
 
   /**
-   * <p>Generic RMI call parameter to be sent to the remote admin console.  If
-   * an RMI call normally takes more than one parameter, param should be a Vector
-   * which contains the parameters internally.</p>
+   * <p>Generic RMI call parameter to be sent to the remote admin
+   * console.  If an RMI call normally takes more than one parameter,
+   * param should be some sort of composite object (Vector, Array,
+   * object) which contains the parameters internally.</p>
    */
 
   Object param;
@@ -686,6 +703,9 @@ class adminEvent {
       case CHANGETASKS:
 	result.append("changeTasks");
 	break;
+
+      case SETMEMORYSTATE:
+	result.append("setMemoryState");
 	
       default:
 	result.append("??");
@@ -741,6 +761,11 @@ class adminEvent {
       case CHANGETASKS:
 	remoteConsole.changeTasks((Vector) param);
 	break;
+
+      case SETMEMORYSTATE:
+	long[] parms = (long[]) param;
+
+	remoteConsole.setMemoryState(parms[0], parms[1]);
       }
   }
 }

@@ -10,8 +10,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/06/09 04:03:55 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2001/02/08 22:52:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -83,6 +83,7 @@ public interface Admin extends Remote {
   void setTransactionsInJournal(int trans) throws RemoteException;
   void setObjectsCheckedOut(int objs) throws RemoteException;
   void setLocksHeld(int locks) throws RemoteException;
+  void setMemoryState(long freeMemory, long totalMemory) throws RemoteException;
 
   void changeState(String state) throws RemoteException;
   void changeStatus(String status) throws RemoteException;

@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 2000/12/10 09:45:04 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 2001/02/08 22:52:12 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -686,6 +686,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JLabel locksLabel = null;
   JTextField locksField = null;
 
+  JLabel freeMemLabel = null;
+  JTextField freeMemField = null;
+  JTextField totalMemField = null;
+
   JButton clearLogButton;
   JTextArea statusArea = null;
 
@@ -787,6 +791,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     // text field showing the server we're connected
     // to.
 
+    /* Ganymede Server Host */
+
     hostLabel = new JLabel("Ganymede Server Host:");
 
     hostField = new JTextField(GASHAdmin.url, 40);
@@ -818,7 +824,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     gbl.setConstraints(hostField, gbc);
     topPanel.add(hostField);
 
-    //
+    /* Admin consoles connected to server */
 
     adminLabel = new JLabel("Admin consoles connected to server:");
 
@@ -842,6 +848,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     gbl.setConstraints(adminField, gbc);
     topPanel.add(adminField);
 
+    /* Server State */
+
     stateLabel = new JLabel("Server State:");
 
     stateField = new JTextField("", 40);
@@ -863,6 +871,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     gbc.gridheight = 1;
     gbl.setConstraints(stateField, gbc);
     topPanel.add(stateField);
+
+    /* Server Start Time */
 
     startLabel = new JLabel("Server Start Time:");
 
@@ -886,6 +896,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     gbl.setConstraints(startField, gbc);
     topPanel.add(startField);
 
+    /* Last Dump Time */
+
     dumpLabel = new JLabel("Last Dump Time:");
 
     dumpField = new JTextField("", 40);
@@ -907,6 +919,42 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     gbc.gridheight = 1;
     gbl.setConstraints(dumpField, gbc);
     topPanel.add(dumpField);
+
+    /* Free / Total Memory on Server */
+
+    freeMemLabel = new JLabel("Free / Total Memory on Server: ");
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(freeMemLabel, gbc);
+    topPanel.add(freeMemLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    JPanel memPanel = new JPanel();
+    memPanel.setLayout(new BorderLayout());
+
+    freeMemField = new JTextField("", 20);
+    freeMemField.setEditable(false);
+
+    totalMemField = new JTextField("", 20);
+    totalMemField.setEditable(false);
+
+    memPanel.add("West", freeMemField);
+    memPanel.add("Center", new JLabel("/"));
+    memPanel.add("East", totalMemField);
+
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridheight = 1;
+    gbl.setConstraints(memPanel, gbc);
+    topPanel.add(memPanel);
+
+    /* Transactions in Journal */
 
     journalLabel = new JLabel("Transactions in Journal:");
 
@@ -930,6 +978,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     gbl.setConstraints(journalField, gbc);
     topPanel.add(journalField);
 
+    /* Objects Checked Out */
+
     checkedOutLabel = new JLabel("Objects Checked Out:");
 
     checkedOutField = new JTextField("", 40);
@@ -951,6 +1001,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     gbc.gridheight = 1;
     gbl.setConstraints(checkedOutField, gbc);
     topPanel.add(checkedOutField);
+
+    /* Locks held */
 
     locksLabel = new JLabel("Locks held:");
 
@@ -1709,6 +1761,34 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
 	frame.locksField.setText("" + lLocks);
+      }
+    });
+  }
+
+  /**
+   * <p>This method is remotely called by the Ganymede server to update the
+   * memory statistics display in the admin console.</p>
+   */
+
+  public void setMemoryState(long freeMemory, long totalMemory)
+  {
+    if (debug)
+      {
+	System.err.println("GASHAdmin.setMemoryState()");
+      }
+
+    if (frame == null)
+      {
+	return;
+      }
+
+    final long lFreeMemory = freeMemory;
+    final long lTotalMemory = totalMemory;
+
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	frame.freeMemField.setText("" + lFreeMemory);
+	frame.totalMemField.setText("" + lTotalMemory);
       }
     });
   }
