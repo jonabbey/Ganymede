@@ -5,8 +5,8 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2001/06/26 06:11:25 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2001/07/14 01:04:58 $
    Release: $Name:  $
 
    Module By: Navin Manohar
@@ -115,8 +115,8 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
   protected GregorianCalendar 
     _myCalendar;
 
-  protected SimpleTimeZone
-    _myTimeZone = (SimpleTimeZone)(SimpleTimeZone.getDefault());
+  protected TimeZone
+    _myTimeZone = (TimeZone)(SimpleTimeZone.getDefault());
 
   private SimpleDateFormat
     _dateformat = new SimpleDateFormat("MM/dd/yyyy");
