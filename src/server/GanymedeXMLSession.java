@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2000/12/04 06:04:54 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2000/12/04 09:36:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -352,7 +352,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// that we feed into the pipe.
 
 	pipe = new PipedOutputStream();
-	reader = new XMLReader(pipe, bufferSize, true);
+	reader = new XMLReader(pipe, bufferSize, true, err);
       }
     catch (IOException ex)
       {
@@ -410,23 +410,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		  }
 
 		waitCount++;
-	      }
-
-	    if (reader.isDone())
-	      {
-		System.err.println("Reader has shut down");
-
-		System.err.println("errBuffer: ");
-		System.err.println(errBuf.getBuffer().toString());
-		System.err.println("done with errBuffer");
-	      }
-	    else
-	      {
-		System.err.println("Reader was hanging");
-
-		System.err.println("errBuffer: ");
-		System.err.println(errBuf.getBuffer().toString());
-		System.err.println("done with errBuffer");
 	      }
 
 	    return getReturnVal("pipe writing: " + ex.getMessage(), false);
@@ -2191,7 +2174,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    incCount(editCount, newObject.typeString);
 
-	    System.err.println("Editing pre-existing " + newObject);
+	    //	    System.err.println("Editing pre-existing " + newObject);
 
 	    attempt = newObject.editOnServer(session);
 
@@ -2630,6 +2613,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     else
       {
+	// we depend on createErrorDialog() to dump the progress to the server log
+
 	return Ganymede.createErrorDialog("XML submit errors",
 					  progress);
       }
