@@ -7,8 +7,8 @@
    
    Created: 15 March 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/03/15 22:23:23 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/10/07 17:38:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -83,6 +83,10 @@ public class Contract {
   public Date startDate;
   public Date stopDate;
   public String description;
+  public String group;
+  public String researchUnit;
+  public String status;
+  public String UTaccount;
   public Invid invid = null;
 
   /* -- */
@@ -121,6 +125,23 @@ public class Contract {
     
     index2 = line.indexOf(';', index);
     description = line.substring(index, index2);
+    index = index2 + 1;
+
+    index2 = line.indexOf(';', index);
+    group = line.substring(index, index2);
+    index = index2 + 1;
+
+    index2 = line.indexOf(';', index);
+    researchUnit = line.substring(index, index2);
+    index = index2 + 1;
+
+    index2 = line.indexOf(';', index);
+    status = line.substring(index, index2);
+    index = index2 + 1;
+
+    index2 = line.indexOf(';', index);
+    UTaccount = line.substring(index, index2);
+    index = index2 + 1;
     
     if (debug)
       {
@@ -128,7 +149,11 @@ public class Contract {
 			   "Number: " + number + "\n" +
 			   "Start: " + startDate + "\n" +
 			   "Stop: " + stopDate + "\n" +
-			   "Description: " + description + "\n");
+			   "Description: " + description + "\n" +
+			   "Group: " + group + "\n" +
+			   "Research Unit: " + researchUnit + "\n" +
+			   "Status: " + status + "\n" +
+			   "UT account number: " + UTaccount + "\n");
       }
   }
 

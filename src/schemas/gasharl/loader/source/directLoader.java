@@ -11,8 +11,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 1999/06/19 04:10:34 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 1999/10/07 17:38:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -158,7 +158,7 @@ public class directLoader {
 
   /* -- */
 
-  public static void main (String args[])
+  public static void main(String args[])
   {
     if (args.length < 1)
       {
@@ -890,7 +890,7 @@ public class directLoader {
       {
 	try
 	  {
-	    inReader = new BufferedReader(new FileReader("input/activecontracts.txt"));
+	    inReader = new BufferedReader(new FileReader("input/arlcontracts.txt"));
 	  }
 	catch (FileNotFoundException ex)
 	  {
@@ -2193,6 +2193,10 @@ public class directLoader {
 	current_obj.setFieldValueLocal((short) 258, contract.startDate);
 	current_obj.setFieldValueLocal((short) 259, contract.stopDate);
 	current_obj.setFieldValueLocal((short) 260, contract.description);
+	current_obj.setFieldValueLocal((short) 262, contract.status);
+	current_obj.setFieldValueLocal((short) 263, contract.group);
+	current_obj.setFieldValueLocal((short) 264, contract.researchUnit);
+	current_obj.setFieldValueLocal((short) 265, contract.UTaccount);
       }
   }
 
