@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -849,6 +849,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	
 	return transport;
       }
+  }
+
+  /**
+   *
+   * Returns a serialized representation of the object types
+   * defined on the server.
+   *
+   * @see arlut.csd.ganymede.BaseListTransport
+   *
+   */
+
+  public BaseListTransport getBaseList()
+  {
+    return Ganymede.baseTransport;
   }
 
   /**
