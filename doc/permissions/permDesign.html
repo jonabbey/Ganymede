@@ -1,0 +1,78 @@
+<HTML>
+<HEAD>
+   <TITLE>Ganymede Permissions Model Design Document</TITLE>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.02 [en] (X11; I; SunOS 5.5.1 sun4d) [Netscape]">
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Permissions Model</b></h2></td>
+      </tr>
+    </table> 
+
+<p>One of the critical elements of Ganymede's design is the
+permissions model.  Ganymede needs a universal permissions model that
+allows complete flexibility in apportioning privileges to classes of
+users/adminstrators, without becoming so unwieldy as to be
+impractical.</p>
+
+<p>The solution is a 2 level object model, where individual 
+<font color="#FF0000">Users</font> are associated with multiple
+<font color="#FF0000">Admin Personae</font>.  Upon logging into Ganymede, a
+user will be able to select which Persona he or she wishes to work as,
+with an 'su'-like facility for switching Personae.  Each of these
+Admin Persona may be a member of multiple <font color="#FF0000">Owner
+Groups</font>.  All objects are owned by these owner groups, which
+allows adminstrators to be granted privileges to a wide range of
+objects without having to have someone go through all the objects in
+the Ganymede database and change the owner list.  An invidual object
+in the Ganymede database may be owned by multiple owner groups.</p>
+
+<p>The Admin Persona object is associated with a Ganymede login,
+confers membership in a variable number of Owner Groups, and has an
+associated list of <font color = "#FF0000">Role</font> objects.  Each
+Role object contains two <font color = "#FF0000">Permissions
+Matrices</font>: one for objects owned, and one for default
+persmissions.  These permission matrices contain an array of booleans
+which allow access to the database by object type and field, with
+create, edit, view permissions categories.  These permissions bits are
+OR'ed together across all of an Admin Persona's permission matrices,
+and filters the admin Persona's permissions when accessing any object
+in the Ganymede database.  A large set of Admin Personae may be
+configured with the same Permissions Matrix object, allowing for
+central permissions administration.</p>
+
+<p>The combination of the <font color = "#FF0000">Owner Groups</font>,
+which determine which objects are accessible, and the <font color =
+"#FF0000">Roles</font>, which determine what can be done to those
+objects, provides complete flexibility while maintaining the ability
+to make wide-ranging changes in the authorization schema by the simple
+editing of one or two objects in the Ganymede database.</p>
+
+<p>Although it is not shown explicitly in the below diagram, all of
+the objects shown are themselves owned by Owner Groups, so the system
+is self-administering.  The same permissions system that
+controls access to the Ganymede database also controls access to the
+controls themselves.  There is a special owner group, called
+'supergash', in the system.  All Admin Personae that are members of
+this owner group have full privileges in the system, and can bootstrap
+this authorization schema.</p>
+
+<p>As powerful as this system is, it is not complete.  There will be
+cases where a more specialized permissions model is required.  Take
+for instance the case of maintaining a public mailing list that users
+should be able to add and remove themselves, but not touch any other
+user in the list.  This can be accomplished through the authoring of
+custom plug-in classes which can provide any level of intelligence
+needed to objects of a given type.</p>
+
+<P><IMG SRC="permSchema.gif" HSPACE=20></P>
+<BR>
+<P><A HREF="../index.html">Back to Ganymede Top-Level</A></P>
+<HR WIDTH="100%"><BR>
+Last modified <!--#exec cgi="/cgi-bin/lastmod.pl" --></P>
+</BODY>
+</HTML>

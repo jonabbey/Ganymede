@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede Privileges, Ownership, and Admin Personae</title>
+  </head>
+
+  <body BGCOLOR="#FFFFFF">
+    <h1>Ganymede Privileges, Ownership, and Admin Personae</h1>
+    <hr>
+    <p>One of the lessons learned from the development and use of GASH
+    was that it is important to have as flexible a permissions system
+    as possible.  GASH's permissions model was highly <i>ad hoc</i>, and
+    differed for each kind of object managed by GASH.  The Ganymede
+    Server uses a much more detailed and flexible permissions model.</p>
+
+    <p>You can read a detailed discussion of the Ganymede permissions model
+    <a href="permDesign.html">here</a>.  This document will illustrate
+    the prinicples through screen shots of the client in action.</p>
+
+    <hr>
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Screenshots</b></h2></td>
+      </tr>
+    </table> 
+
+    <table>
+    <tr>
+    <td>The Ganymede Server uses a 3 level permissions model, featuring
+        ownergroups, admin personae, and role objects.</td>
+	<td>
+<img align=left src="perm-tree.gif"></td>
+    </tr>
+      <tr BGCOLOR="#CCFFCC">
+	<td border="1" colspan="2"><h2><b>Owner Groups</b></h2></td>
+      </tr>
+
+    <tr>
+    <td>All objects in the server are owned by owner groups.  Each owner group
+        has a name, a set of admin personae as members, and a set of objects that
+	it (nonexclusively) owns.</td>
+
+	<td><img align=left src="edit-owner-group.gif"></td>
+    </tr>
+
+    <tr>
+    <td>This screen shot shows a list of user objects that are owned by this owner group.</td>
+    <td><img align=left src="objectsOwnedPanel.gif"></td>
+    </tr>
+
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="2"><h2><b>Admin Personae</b></h2></td>
+      </tr>
+    <tr>
+    <td>The members of owner groups are known as admin personae.  Each admin persona is
+        associated with a Ganymede user account, with the exception of the special
+        supergash and monitor admin personae.<p>
+        An admin persona is a member of 0 or more owner groups, and is said to own
+        all objects owned by those owner groups (and by owner groups owned by those
+        owner groups and so on, recursively).</td>
+    <td><img align=left src="admin-persona.gif"></td>
+    </tr>
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="2"><h2><b>Roles</b></h2></td>
+      </tr>
+    <tr>
+	<td>
+
+
+	  <p>An admin persona's access to fields is controlled by the
+	  permission sets in the Role the admin persona is associated
+	  with.  Each admin persona can be associated with one or more
+	  Roles, which collectively grant permission to access certain
+	  object types and certain fields of those objects.</p>
+
+	  <p> Each Role contains two permission arrays.  One array
+	  determines the permissions that an admin persona has on
+	  objects owned by that admin (through the owner groups), and
+	  one determines what access an admin has to objects not
+	  specifically owned by that admin.  This can be used to give
+	  an admin the ability to view certain pieces of information
+	  about any user, group, system, etc., in the Ganymede
+	  server.</p>
+
+	  <p>Finally, there is a default Role, with its own permission
+	  sets, which controls what minimum privileges all users have,
+	  and specifically what permission end users have.</p>
+
+	  <p> All users registered in Ganymede have the nominal right
+	  to log in to the server, and will generally be able to do
+	  things like change their phone number, password, and so on.
+	    </p>
+
+</td> 
+
+
+<td><img align=left src="role.gif"></td>
+    </tr>
+
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="2"><h2><b>Permission Matrices</b></h2></td>
+      </tr>
+
+    <tr>
+    <td>The permission arrays in each permission matrix object provide selective permissions
+	to create, edit, and delete both object types and fields.</td>
+    <td><img align=left src="perm-editor.gif"></td>
+    </tr>
+
+    </table>
+
+    <hr>
+    <address><a href="mailto:ganymede@arlut.utexas.edu">Ganymede mailing list</a></address>
+  </body>
+</html>
