@@ -6,7 +6,7 @@
    GASH user_info file
    
    Created: 22 August 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,6 +33,7 @@ public class User {
     tokens.ordinaryChar(':');
     tokens.ordinaryChar(',');
     tokens.ordinaryChar('\n');
+    tokens.ordinaryChar('\\');
   }
 
   /**
@@ -75,6 +76,8 @@ public class User {
   {
     parser = new Parser(tokens);
 
+    // eat the EOL if that's where we are
+
     if (parser.EOFnext())
       {
 	valid = false;
@@ -82,7 +85,12 @@ public class User {
       }
 
     name = parser.getNextBit();
+
+    //    System.out.println("User = " + name);
+
     password = parser.getNextBit();
+
+    //    System.out.println("Password = " + password);
 
     try
       {
@@ -91,8 +99,8 @@ public class User {
       }
     catch (NumberFormatException ex)
       {
-	System.err.println("** Warning, bad uid or gid field for user " + name);
-	System.err.println("** Skipping user_info entry for user " + name);
+	System.err.println("** Warning, bad uid or gid field for user " + name + ":" + ex);
+	System.err.println("** Skipping user_info entry for user " + name + ":" + ex);
 
 	parser.skipToEndLine();
 	valid = false;
@@ -143,11 +151,15 @@ public class User {
     if (parser.checkNextToken() == ':')
       {
 	socialsecurity = parser.getNextBit();
+
+	//	System.err.println("Social Security = " + socialsecurity);
       }
 
     if (parser.checkNextToken() == ':')
       {
 	category = parser.getNextBit();
+
+	//	System.err.println("Category = " + category);
       }
 
     parser.skipToEndLine();

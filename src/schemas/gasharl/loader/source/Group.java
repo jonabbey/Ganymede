@@ -6,7 +6,7 @@
    GASH group_info file
    
    Created: 29 August 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,8 @@ package arlut.csd.ganymede.loader;
 
 import java.io.*;
 import java.util.*;
+
+import arlut.csd.Util.Parser;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -33,6 +35,7 @@ public class Group {
     tokens.ordinaryChar(':');
     tokens.ordinaryChar(',');
     tokens.ordinaryChar('\n');
+    tokens.ordinaryChar('\\');
   }
 
   /**
@@ -66,7 +69,9 @@ public class Group {
   {
     parser = new Parser(tokens);
 
-    if (parser.EOFnext())
+    // eat the EOL if that's where we are
+
+    if (parser.atEOF())
       {
 	valid = false;
 	return true;
