@@ -36,12 +36,17 @@ import gjt.Box;
 class querybox extends Dialog implements ActionListener, ItemListener {
 
   static final boolean debug = false;
+  static final int MAXCOMPONENTS = 7; // the maximum number of components that
+                                      // can appear in a query choice
 
   // --
 
-  Hashtable baseHash, changeHash;
-
-  // - Buttons
+  Hashtable 
+  
+    baseHash,
+    changeHash;
+ 
+   // - Buttons
   
   Button OkButton = new Button ("Submit");
   Button CancelButton = new Button("Cancel");
@@ -60,16 +65,22 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   Panel Choice_Buttons = new Panel(); 
   Panel query_Buttons = new Panel();
 
-  // - Choice menu
+  // - Choice menus
 
   Choice baseChoice = new Choice();
   
+  // - text fields
+
+  TextField inputField = new TextField(6);
+
+
   // - variables
 
-  int row = 0;  
+  int row = 0;
+  Component[] myAry = new Component[MAXCOMPONENTS];
+  Hashtable myHash = new Hashtable();
 
   /* -- */
-
 
   public querybox (Base defaultBase, Hashtable baseHash, Frame parent, String DialogTitle)
     {
@@ -81,7 +92,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       
       // Main constructor for the querybox window
       
-      this.baseHash = baseHash;
+      this.baseHash = baseHash;  
 
       // - Define the main window
 
@@ -96,7 +107,6 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       Choice_Buttons.add(CancelButton);
       this.add("South", Choice_Buttons); 
 
-
       query_panel.setLayout(new BorderLayout());
       query_panel.setBackground(Color.lightGray); 
       this.add("Center", query_panel); 
@@ -107,7 +117,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       addButton.setBackground(Color.lightGray);
       removeButton.addActionListener(this);
       removeButton.setBackground(Color.lightGray);
-       query_Buttons.setLayout(new FlowLayout ());
+      query_Buttons.setLayout(new FlowLayout ());
       query_Buttons.add(addButton);
       query_Buttons.add(removeButton);
       query_panel.add("South", query_Buttons);  
@@ -116,9 +126,45 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
       base_panel.setSize(100,100);
       base_panel.setLayout(new FlowLayout());
-      baseChoice.addItem("first Base");
-      baseChoice.addItem("second Base");      
+     
+      Choice intChoice = new Choice();
+        intChoice.add("="); 
+        intChoice.add(">="); 
+        intChoice.add("<="); 
+        intChoice.add("<"); 
+        intChoice.add(">");
+  
+      Choice dateChoice = new Choice();
+	dateChoice.add("Same Day As");
+	dateChoice.add("Same Week As");
+	dateChoice.add("Same Month As");
+	dateChoice.add("Before");
+	dateChoice.add("After");
+
+      Enumeration enum = baseHash.keys();
+      
+      try
+	{
+	  while (enum.hasMoreElements()){
+	    Base key = (Base) enum.nextElement();
+	    String choiceToAdd = new String(key.getName());
+	    baseChoice.addItem(choiceToAdd);
+	    myHash.put(choiceToAdd, key);
+	  }
+	  
+	  if ((defaultBase != null) && (baseHash.get(defaultBase) != null))
+	    {
+	      baseChoice.select(defaultBase.getName()) ; 
+	    }
+	}
+      catch (RemoteException ex)
+	{
+	  throw new RuntimeException("caught remote exception setting perms " + ex);
+	  
+	}
+         
       baseChoice.setBackground(Color.white);
+      baseChoice.addItemListener(this);
       base_panel.add(baseChoice);
       base_panel.add(new Label("     "));
       base_panel.add(new Checkbox("Editable"));
@@ -131,7 +177,26 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       query_panel.add("Center", choiceBox);
       query_panel.add("North", baseBox);
    
-      this.myshow(true);
+      // Add a row and see how it goes
+
+      Label separate; // used purely for aesthetics
+
+      Choice isNot = new Choice();
+      isNot.add("is");
+      isNot.add("is not");
+
+      myAry[0] = getChoiceFields(defaultBase);
+      separate = new Label("   ");
+      myAry[1] = separate;
+      myAry[2] = isNot; 
+      separate = new Label("   ");
+      myAry[3] = separate;
+      myAry[4] = intChoice; 
+      separate = new Label("   ");
+      myAry[5] = separate;
+      myAry[6] = inputField; 
+      
+      addRow(myAry, true, inner_choice);
     }
 
   public querybox (Hashtable baseHash, Frame parent, String myTitle) {
@@ -139,6 +204,34 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   } 
 
  
+  Choice getChoiceFields (Base base){
+    // Method to return a choice menu containing the fields for
+    // a particular base
+
+    BaseField basefield;
+    Choice myChoice = new Choice();
+    int i = 0; // counter variable
+
+    try
+      {
+	Vector fields = base.getFields();
+      	for (int j=0; fields != null && (j < fields.size()); j++) 
+	  {
+	    basefield = (BaseField) fields.elementAt(j);
+	    String Name = basefield.getName();
+	    myChoice.add(Name);
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote exception setting perms " + ex);	
+      }
+
+    return myChoice;  
+  }
+  
+  
+
   void addRow (Component[] myRow, boolean visible, Panel myPanel) 
     {
       for (int n = 0; n < myRow.length; n++)
@@ -148,23 +241,38 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 	}
       
       this.row++;
+      System.out.println("Row: " + this.row);
     }
   
   void setRowVisible (Component[] myAry, boolean b)
-  {
-    /* This takes an array of components and sets their visibility values to
-     * true or false, depending on the boolean value passed to the method
-     */
-
-    for (int i = 0; i < myAry.length; i++)
-      {
-	if (myAry[i] != null)
-	  {
-	    myAry[i].setVisible(b);
-	  }
-      }
-  }
+    {
+      /* This takes an array of components and sets their visibility values to
+       * true or false, depending on the boolean value passed to the method
+       */
+      
+      for (int i = 0; i < myAry.length; i++)
+	{
+	  if (myAry[i] != null)
+	    {
+	      myAry[i].setVisible(b);
+	    }
+	}
+    }
   
+  void setRowEnabled (Component[] myAry, boolean b)
+    { 
+      /* This takes an array of components and sets their enabled values to
+       * true or false, depending on the boolean value passed to the method
+       */
+      
+      for (int i = 0; i < myAry.length; i++)
+	{
+	  if (myAry[i] != null)
+	    {
+	      myAry[i].setEnabled(b);
+	    }
+	}
+    }
 
   public void myshow(boolean truth_value){
     
@@ -184,7 +292,15 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       System.out.println("Cancel was pushed");
       myshow(false);
       return;
-    }    
+    } 
+
+    if (e.getSource() == addButton){
+      setRowEnabled(myAry, false);
+    }
+
+    if (e.getSource() == removeButton){
+      setRowEnabled(myAry, true);
+    }
   } 
   
   public void itemStateChanged(ItemEvent e)
@@ -193,10 +309,28 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       /* -- */
 
       // To handle the state of the checkboxes
-    
-    
+      
+      Choice myChoice = (Choice) e.getSource();
+      String compString = new String(myChoice.getSelectedItem());
+      if (myHash.get(compString) != null){
+	Base newBase = (Base) myHash.get(compString);
+
+	// remove the current row
+	inner_choice.remove(myAry[0]);
+	inner_choice.remove(myAry[1]);
+	row --;
+	
+	myAry[0] =  (Component) getChoiceFields(newBase);
+	addRow(myAry, true, inner_choice);	  
+	repaint();
+      }
+      
+      if (compString.equals("Group")){
+	{
+	  System.out.println("Ninja: " + myChoice.getSelectedItem());
+	}
+      }
+      
     }
-
 }
-
 
