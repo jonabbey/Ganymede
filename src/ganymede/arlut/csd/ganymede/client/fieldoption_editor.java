@@ -31,7 +31,7 @@ class fieldoption_editor extends JDialog
    */
   public static Color treeBG;
 
-  boolean debug = true;
+  public static boolean debug = false;
 
   /* Flag that indicated whether or not the widget it currently being
    * displayed or not. */
@@ -242,21 +242,16 @@ class fieldoption_editor extends JDialog
 	id = base.getTypeID();
 	name = base.getName();
 
-	if (debug)
-	  {
-	    System.err.println("init_hash: processing " + name);
-	  }
-
-	entry = matrix.getOption(id);
-	
-	if (entry == null)
-	  {
-	    basevalue = 0;
-	  }
-	else
-	  {
-            basevalue = Integer.parseInt(entry);
-	  }
+        /* We'll go ahead and hard-code the option value of this object base as
+         * "0", aka "Never". A future call to the fixObjectBaseNodes() method
+         * will make sure that the checkbox for this object base has the
+         * appropriate state.
+         *
+         * We do this because if we go ahead and set the value of this object
+         * base to anything other than 0, the GUI will automatically flip all
+         * of its constituent fields to "1", aka "When changed". We don't want
+         * this, so we'll skip reading the object base's value from the db. */
+        basevalue = 0;
 
 	baseNode = new DefaultMutableTreeNode(new FieldOptionRow(base, null, basevalue));
 	rootNode.add(baseNode);
@@ -290,6 +285,9 @@ class fieldoption_editor extends JDialog
              * for the DBObjectBase. */
 	    fieldNode = new DefaultMutableTreeNode(new FieldOptionRow(base, template, fieldvalue));
 	    baseNode.add(fieldNode);
+
+            if (debug)
+              System.err.println("Reading " + name + "." + template.getName() + " from db, value of " + basevalue);
 	  }
       }
     
@@ -426,7 +424,19 @@ class fieldoption_editor extends JDialog
         
             if (ref.isBase()) 
               {
-                /* No need to set options for object bases */
+                bd = (BaseDump) ref.getReference();
+                value = ref.getOptionValue();
+                try
+                  {
+                    if (debug)
+                      System.err.println("Setting " + bd.getName() + " to " + value);
+
+                    gc.handleReturnVal(opField.setOption(bd.getTypeID(), String.valueOf(value)));
+                  }
+                catch (RemoteException ex)
+                  {
+                    throw new RuntimeException("Caught RemoteException" + ex);
+                  }
               } 
             else 
               {
@@ -436,9 +446,7 @@ class fieldoption_editor extends JDialog
                 value = ref.getOptionValue();
           
                 if (debug)
-                  {
-                    System.err.println("setting basefield option for field " + templateName);
-                  }
+                  System.err.println("Setting " + templateName + " to " + value);
           
                 try
                   {
@@ -659,6 +667,10 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
   public void setValueAt(Object value, Object node, int col) 
   {
     FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
+
+    if (fieldoption_editor.debug)
+      System.err.println("SETVALUE: " + myRow.toString() + " :: " + value.toString());
+
     int newVal;
 
     if (((String)value).equals("Never"))
