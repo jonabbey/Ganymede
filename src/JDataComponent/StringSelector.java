@@ -1,10 +1,14 @@
 /*
+
    StringSelector.java
 
+   A two list box for adding strings to lists.
+
    Created: 10 October 1997
-   Version: 1.10 98/01/20
+   Version: $Revision: 1.12 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
+
 */
 
 package arlut.csd.JDataComponent;
@@ -25,7 +29,7 @@ import arlut.csd.JTable.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                 StringSelector
+                                                                  StringSelector
 
 
 ------------------------------------------------------------------------------*/
@@ -89,8 +93,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   
   int rowWidth;
 
-
-  ////  Constructors  ////
+  /* -- */
 
   public StringSelector(Vector available, Vector chosen, Container parent, 
 			boolean editable, boolean canChoose, boolean mustChoose, int rowWidth)
@@ -108,7 +111,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 			boolean editable, int rowWidth,
 			 String inLabel, String outLabel)
   {
-    this(available, chosen, parent, editable, true, false, rowWidth, inLabel, outLabel, null, null);
+    this(available, chosen, parent, editable, true, false, rowWidth, 
+	 inLabel, outLabel, null, null);
   }
   
   public StringSelector(Vector available, Vector chosen, Container parent, boolean editable, int rowWidth)
@@ -116,10 +120,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     this(available, chosen, parent, editable, (available != null), false, rowWidth);
   }
 
-  public StringSelector(Vector available, Vector chosen, Container parent, boolean editable, String inLabel, String outLabel)
+  public StringSelector(Vector available, Vector chosen, Container parent, boolean editable, 
+			String inLabel, String outLabel)
   {
-    this(available, chosen, parent, editable, (available != null), false, 10, inLabel, outLabel, null, null);
+    this(available, chosen, parent, editable, (available != null), false, 10,
+	 inLabel, outLabel, null, null);
   }
+
   /**
    *
    * Fully specified Constructor for StringSelector
@@ -141,8 +148,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    */
 
   public StringSelector(Vector available, Vector chosen, Container parent, 
-			 boolean editable, boolean canChoose, boolean mustChoose, int rowWidth,
-			 String inLabel, String outLabel, JPopupMenu inPopup, JPopupMenu outPopup)
+			boolean editable, boolean canChoose, boolean mustChoose, int rowWidth,
+			String inLabel, String outLabel, JPopupMenu inPopup, JPopupMenu outPopup)
   {
     if (debug)
       {
@@ -166,26 +173,46 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     // Set up the inPanel, which holds the in list and button
 
-    // chosen is a vector of listhandles or Strings.  If it is strings,
-    // create a vector of listhandles.
-    if ((chosen != null) && (chosen.size() > 0))
+    // chosen is a vector of listhandles or Strings.  If it is
+    // strings, create a vector of listhandles.
+
+    if (chosen != null && chosen.size() > 0)
       {
 	if ((chosen.elementAt(0) == null) || (chosen.elementAt(0) instanceof listHandle))
 	  {
+	    if (debug)
+	      {
+		if (chosen.elementAt(0) instanceof listHandle)
+		  {
+		    System.err.println("arlut.csd.JDataComponent.StringSelector(): chosen = listHandle vector");
+		  }
+		else
+		  {
+		    System.err.println("arlut.csd.JDataComponent.StringSelector(): chosen[0] = null");
+		  }
+	      }
+
 	    inVector = chosen;
 	  }
 	else
 	  {
+	    if (debug)
+	      {
+		System.err.println("arlut.csd.JDataComponent.StringSelector(): chosen = String vector");
+	      }
+
 	    String label;
+
 	    for (int i = 0; i < chosen.size(); i++)
 	      {
 		label = (String) chosen.elementAt(i);
 		inVector.addElement(new listHandle(label, label));
-	      }	    
+	      }
 	  }
       }
 
     // JstringListBox does the sorting
+
     in = new JstringListBox(inVector, false, inPopup, rowWidth);
     in.setCallback(this);
 
@@ -319,16 +346,18 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    *
    * Non-editable StringSelector's only have the chosen list.
    * Editable StringSelector's have both the chosen and available
-   * lists.  
+   * lists.
    */
+
   public boolean isEditable()
-    {
-      return editable;
-    }
+  {
+    return editable;
+  }
 
   /**
    * Update the StringSelector.
    */
+
   public void update(Vector available, Vector chosen)
   {
     if (available == null)
@@ -340,6 +369,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     // If there is no out box, then we don't need to worry about available stuff
+
     if (out != null)
       {
 	if ((chosen != null) && (available != null)) // If's it null, nothing is chosen.
@@ -347,6 +377,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    for (int i = 0; i < chosen.size(); i++)
 	      {
 		// What whill this do if it is not in available?  I don't know.
+
 		try
 		  {
 		    available.removeElement(chosen.elementAt(i));
@@ -379,13 +410,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
     
     System.out.println("Done updating.");
-
   }
-
 
   /**
    * Change the text on the add button.
    */
+
   public void setButtonText(String text)
   {
     if (addCustom == null)
@@ -400,6 +430,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   /**
    * This doesn't work anymore.
    */
+
   public void setVisibleRowCount(int numRows)
   {
     if (debug)
@@ -417,6 +448,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * @param item Item to be added.  Can be listHandle or String
    * @param ShouldBeIn If true, object will be placed in in list.  Otherwise, it goes in out list.
    */
+
   public void addNewItem(Object item, boolean ShouldBeIn)
   {
     listHandle lh = null;
@@ -442,20 +474,18 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	out.addItem(lh);
       }
-
-
   }
 
   /**
    *  sets the parent of this component for callback purposes
    *
    *  Return types:  (Note that the index is always 0, so ignore it.)
-   <ul>
-   <li><b>PARAMETER</B>  Action from a PopupMenu.  The Paramter is the ActionCommand string.
-   <li><b>ADD</b>  Object has been chosen
-   <li><b>DELETE</b>  Object has been removed from chosen list.
-   <li><b>ERROR</b>  Something went wrong.  Check the error message.
-   </ul>
+   *  <ul>
+   *  <li><b>PARAMETER</B>  Action from a PopupMenu.  The Paramter is the ActionCommand string.
+   *  <li><b>ADD</b>  Object has been chosen
+   *  <li><b>DELETE</b>  Object has been removed from chosen list.
+   *  <li><b>ERROR</b>  Something went wrong.  Check the error message.
+   *  </ul>
    */
 
   public void setCallback(JsetValueCallback parent)
@@ -471,9 +501,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   *
    * Sets the data for the out box.
    *
    * I'm not sure if this will work well.
+   *
    */
 
   public void setAvailableData(Vector available)
@@ -485,21 +517,28 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    available.removeElementAt(i);
 	  }
       }
-    out.setListData(available);
 
+    out.setListData(available);
   }
 
   /**
    * Sets the data for the in box.
    *
    * Use with caution, it might not work at all.
-   */  
+   */
+  
   public void setChosenData(Vector chosen)
   {
     in.setListData(chosen);
   }
 
-  // Event handling
+  /**
+   *
+   * This method handles events from the Add and Remove
+   * buttons, and from hitting enter/loss of focus in the
+   * custom JstringField.
+   *
+   */
 
   public void actionPerformed(ActionEvent e)
   {
@@ -545,7 +584,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  }
 
 	if (mustChoose) 
-	  {	    // Check to see if it is in there
+	  {	    
+	    // Check to see if it is in there
+
 	    if (debug)
 	      {
 		System.out.println("Checking to see if this is a viable option");
@@ -553,7 +594,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    
 	    if (out != null)
 	      {
-		if (out.containsLabel(item)) {
+		if (out.containsLabel(item)) 
+		  {
 		    out.setSelectedLabel(item);
 		    listHandle handle = out.getSelectedHandle();
 			
@@ -562,6 +604,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		    if (allowCallback)
 		      {
 			ok = false;
+
 			try
 			  {
 			    ok = my_parent.setValuePerformed(new JValueObject(this, 
@@ -606,15 +649,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 			throw new RuntimeException("Could not tell parent what is wrong: " + rx);
 		      }
 		  }
-		
 	      }
-	
 	  }
-	// not mustChoose, so you can stick it in there.
-	// But see, I need to see if it's in there first, because if it is, IF IT IS, then you have
-	// to move the String over.  HA!
-	else 
+	else
 	  {
+	    // not mustChoose, so you can stick it in there.  But see,
+	    // I need to see if it's in there first, because if it is,
+	    // IF IT IS, then you have to move the String over.  HA!
+
 	    if ((out != null) && out.containsLabel(item))
 	      {
 		out.setSelectedLabel(item);
@@ -625,6 +667,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		if (allowCallback)
 		  {
 		    ok = false;
+
 		    try
 		      {
 			ok = my_parent.setValuePerformed(new JValueObject(this, 
@@ -636,7 +679,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		      {
 			throw new RuntimeException("Could not setValuePerformed: " + rx);
 		      }
-		
+		    
 		    if (ok)
 		      {
 			putItemIn(handle);
@@ -650,10 +693,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		    custom.setText("");
 		  }	
 	      }
-	    else  //Not in the out box, send up the String
+	    else 
 	      {
+		//Not in the out box, send up the String
 		
 		boolean ok = false;
+
 		try
 		  {
 		    ok = my_parent.setValuePerformed(new JValueObject(this, 
@@ -689,11 +734,18 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
 
-  // Internal method to move item from out to in  
+  /**
+   *
+   * Internal method to move item from out to in  
+   *
+   */
+
   void addItem()
   {
     boolean ok = false;
     Vector handles;
+
+    /* -- */
 
     if (out == null)
       {
@@ -711,7 +763,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	
     for (int i = 0; i < handles.size(); i++)
       {
-	
 	if (allowCallback)
 	  {
 	    try
@@ -748,7 +799,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     parent.validate();
   }
 
-  // internal method to move item from in to out
+  /**
+   *
+   * internal method to move item from in to out
+   *
+   */
   
   void removeItem()
   {
@@ -768,6 +823,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     for (int i =0; i < handles.size(); i++)
       {
 	handle = (listHandle)handles.elementAt(i);
+
 	if (allowCallback)
 	  {
 	    boolean ok = false;
@@ -803,8 +859,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
   }
 
-  // this actuall does the inserting
-  //
+  /**
+   *
+   * this actually does the inserting
+   *
+   */
 
   void putItemIn(listHandle item)
   {
@@ -856,7 +915,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   }
 
-  // this actually moves it from from in to out
+  /**
+   *
+   * this actually moves it from from in to out
+   *
+   */
   
   void takeItemOut(listHandle item)
   {
@@ -873,18 +936,23 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     in.removeItem(item);
 
     // If the item is already in there, don't add it.
+
     if ((out != null)  &&  (! out.containsItem(item)))
       {
 	out.addItem(item);
       }
 
     in.invalidate();
+
     if (out != null)
       {
 	out.invalidate();
       }
+
     invalidate();
+
     //parent.validate();
+
     if (parent.getParent() != null)
       {
 	parent.getParent().validate();
