@@ -6,7 +6,7 @@
    create a new object in the client.
    
    Created: 17 September 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -95,33 +95,27 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 	for (int i = 0; i < bases.size(); i++)
 	  {
 	    thisBase = (Base)bases.elementAt(i);
+	    
+	    String name = (String)baseNames.get(thisBase);
+		
+	    // For some reason, baseNames.get is returning null sometimes.
 
-	    // We don't want Admin Persona to show up in there.
-
-	    if (thisBase.getTypeID() != SchemaConstants.PersonaBase)
+	    if (name == null)
 	      {
-		String name = (String)baseNames.get(thisBase);
+		name = thisBase.getName();
+	      }
 		
-		// For some reason, baseNames.get is returning null sometimes.
-
-		if (name == null)
+	    if (name.startsWith("Embedded:"))
+	      {
+		if (debug)
 		  {
-		    name = thisBase.getName();
+		    System.out.println("Skipping embedded field: " + name);
 		  }
-		
-		if (name.startsWith("Embedded:"))
-		  {
-		    if (debug)
-		      {
-			System.out.println("Skipping embedded field: " + name);
-		      }
-		  }
-		else if (thisBase.canCreate(null))
-		  {
-		    listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
-		    listHandles.addElement(lh);
-		    
-		  }
+	      }
+	    else if (thisBase.canCreate(null))
+	      {
+		listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
+		listHandles.addElement(lh);
 	      }
 	  }
       }
@@ -145,7 +139,6 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     gbl.setConstraints(types, gbc);
     p.add(types);
     
-
     JPanel buttonP = new JPanel();
     ok = new JButton("Ok");
     ok.addActionListener(this);
