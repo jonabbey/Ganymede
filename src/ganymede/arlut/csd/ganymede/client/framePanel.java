@@ -2023,7 +2023,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     creator_field = null;
     modifier_field = null;
     persona_field = null;
-    objects_owned_field = null;
+    //    objects_owned_field = null;
     server_object = null;
     wp = null;
     gc = null;
