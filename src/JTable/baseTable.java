@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.22 $ %D%
+  Version: $Revision: 1.23 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.22 $ %D%
+ * @version $Revision: 1.23 $ %D%
  */
 
 public class baseTable extends JBufferedPane implements AdjustmentListener, ActionListener {
@@ -2243,14 +2243,9 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
      Ok, we need to draw our table into the backing store.
 
-     The rendering algorithm has been optimized to use the minimum
-     number of Graphics contexts for clipping.  The original algorithm
-     for rendering obtained a separate Graphics object and clipRect
-     for each cell in the table, which took an enormous amount of time
-     under Netscape 3.0b4 on Solaris.  The current algorithm sets up
-     an cellImage object for each cell of a particular column, and
-     this cellImage object is used for all cell rendering and
-     clipping.
+     The rendering algorithm uses a single large backing store image, with
+     each cell drawn directly onto the backing store using the 1.1 setClip()
+     routine.
      
      For now we're just going to center our strings within each
      header.  Later on maybe we'll make this modifiable.
@@ -2291,24 +2286,13 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
     
     /* ------------------------------------------------------------------------
 
-       General algortithm: clear our backing image, draw cells, draw headers,
-       draw lines.
-
-       Detailed cell drawing algorithm: since all cells in a column are the
-       same size, we can allocate an image of the appropriate size for all
-       cells in the column, draw the cells one at a time into the cell Image,
-       allowing the image's graphics context to do the clipping, then paste
-       that cell Image onto the backing image in the right location.  We
-       retain the cell Image object for as long as we can, reusing it for
-       multiple columns if they have the same cell size.  We don't attempt
-       to do any manual/explicit clipping.. we depend on the edges of the
-       backing image doing clipping for us, and we will draw our headers
-       last, which will take care of clipping the table area against
-       the headers.
+       General algorithm: reallocate/initialize our backing store if our size
+       has changed, draw cells, draw headers, draw lines.  Note that we don't
+       perform an explicit backing store erase step.  We depend on the cell
+       rendering algorithm to clear the table.
 
        ------------------------------------------------------------------------ */
        
-
     if (debug)
       {
 	System.err.println("render called");
