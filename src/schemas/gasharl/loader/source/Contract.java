@@ -7,8 +7,8 @@
    
    Created: 15 March 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/10/07 17:38:48 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/10/09 01:00:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -75,7 +75,7 @@ import java.io.*;
 
 public class Contract {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
   static Calendar myCal = Calendar.getInstance();
 
   public String name;

@@ -11,8 +11,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 1999/10/07 17:38:48 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 1999/10/09 01:00:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -944,8 +944,24 @@ public class directLoader {
 		continue;
 	      }
 
-	    String groupName = line.substring(4,10).toLowerCase();
-	    String contractNumber = line.substring(65,72);
+	    // skip blank lines
+
+	    if (line.trim().equals(""))
+	      {
+		continue;
+	      }
+
+	    String groupName = null, contractNumber = null;
+
+	    try
+	      {
+		groupName = line.substring(4,10).toLowerCase();
+		contractNumber = line.substring(65,72);
+	      }
+	    catch (Exception ex)
+	      {
+		System.err.println("Exception: " + ex + "\n\nLine: " + line);
+	      }
 
 	    groupContracts.put(groupName, contractNumber);
 	  }
@@ -1399,7 +1415,9 @@ public class directLoader {
 		v = new Volume(line);
 		volumes.put(v.volumeName, v);
 
-		System.err.println("Created: " + v);
+		System.err.print(".");
+
+		//		System.err.println("Created: " + v);
 	      }
 	  }
 	catch (EOFException ex)
@@ -1412,7 +1430,7 @@ public class directLoader {
 	  }
       }
 
-    System.out.println("\nDone scanning auto.vol");
+    System.out.println("\n\nDone scanning auto.vol");
 
     System.out.println("\nScanning directory for auto.home.* files\n");
 
@@ -1465,7 +1483,9 @@ public class directLoader {
 		    m = new MapEntry(sAry[i], line);
 		    mapEntries.addElement(m);
 
-		    System.err.println("Created: " + m);
+		    //    System.err.println("Created: " + m);
+
+		    System.err.print(".");
 		  }
 	      }
 	    catch (EOFException ex)
@@ -1478,7 +1498,7 @@ public class directLoader {
 	      }
 	  }
 
-	System.out.println("\nDone scanning " + sAry[i]);
+	System.out.println("\n\nDone scanning " + sAry[i]);
       }
   }
 

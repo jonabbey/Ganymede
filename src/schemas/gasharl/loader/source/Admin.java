@@ -7,8 +7,8 @@
    
    Created: 29 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/03/03 00:33:45 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/10/09 01:00:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -191,12 +191,15 @@ public class Admin {
 
     if (address != null)
       {
-	System.out.println("Hey, found address: " + address);
+	if (debug)
+	  {
+	    System.out.println("Hey, found address: " + address);
+	  }
 
 	approval_address = getNextBit(tokens);
       }
 
-    if (approval_address != null)
+    if (debug && approval_address != null)
       {
 	System.out.println("Hey, found address: " + approval_address);
       }
