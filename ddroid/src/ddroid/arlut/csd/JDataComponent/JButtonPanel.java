@@ -54,11 +54,12 @@
 package arlut.csd.JDataComponent;
 
 import java.awt.event.ActionListener;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JLabel;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -194,7 +195,7 @@ public class JButtonPanel extends JPanel {
 
     col = col + 1;
 
-    list.add(col);
+    list.add(comp);
   }
 
   /**
@@ -205,6 +206,11 @@ public class JButtonPanel extends JPanel {
 
   public synchronized void addListeners(ActionListener listener)
   {
+    if (list == null)
+      {
+	return;
+      }
+
     Iterator it = list.iterator();
 
     while (it.hasNext())
@@ -220,5 +226,7 @@ public class JButtonPanel extends JPanel {
     gbl = null;
     gbc = null;
     gPanel = null;
+    list.clear();
+    list = null;
   }
 }
