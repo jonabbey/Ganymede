@@ -16,6 +16,7 @@ import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.RemoteException;
 import java.util.Arrays;
 
 import org.python.core.PyException;
@@ -150,8 +151,37 @@ class JythonServerProtocol {
     interp.exec("import sys");
     interp.exec("sys.path.append( sys.prefix + '" + System.getProperty("file.separator") + "' + 'jython-lib.jar' )");
     
-    /* Seed the interpreter with a pointer to our DBStore */
-    interp.set("db", Ganymede.db);
+    /* Seed the interpreter with a pointer to Ganymede */
+    interp.exec("from arlut.csd.ddroid.server import Ganymede");
+    
+  }
+
+  public void createSession(String personaName)
+  {
+    GanymedeSession session;
+    try
+      {
+      	/* Snag the appropriate Admin Persona from the database */
+        DBObject persona = (DBObject) ((DBObjectBase) Ganymede.db.get("Admin Persona")).get(personaName);
+        
+        /* If there is a user associated with this persona, snag it */
+        DBObject user = null;
+        InvidDBField userField = (InvidDBField) persona.get("User");
+        if (userField != null)
+          {
+            user = (DBObject) userField.getVal();
+          }
+        
+        /* Now we have all we need to create the session */
+        session = new GanymedeSession(personaName, user, persona, false, true);
+      }
+    catch (RemoteException ex)
+      {
+        Ganymede.stackTrace(ex);
+        return;
+      }
+
+    interp.set("session", session);
   }
   
   public String processInput(String input)
@@ -277,7 +307,7 @@ class JythonServerWorker extends Thread {
             out.print(ts.l("run.username"));
 	    out.print(": ");
             out.flush();
-            String username = in.readLine();
+            String loginName = in.readLine();
 
             /* Telnet terminal codes */
             
@@ -326,7 +356,7 @@ class JythonServerWorker extends Thread {
               }
 
             /* Authenticate the user */
-            int validationResult = Ganymede.server.validateAdminUser(username,
+            int validationResult = Ganymede.server.validateAdminUser(loginName,
                                                                      password);
 
             /* A result of 3 means that this user has interpreter access
@@ -349,11 +379,14 @@ class JythonServerWorker extends Thread {
                 socket.close();
                 return;
               }
-
+    
             /* Send the HELO */
             outputLine = protocol.processInput(null);
             out.print(outputLine);
             out.flush();
+
+            /* Setup the interpreter session variable */
+            protocol.createSession(loginName);
 
             /* Here is the read-eval-print loop */
             while ((inputLine = in.readLine()) != null)
