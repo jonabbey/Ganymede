@@ -64,11 +64,7 @@ echo
 # client or with the admin console, the RMI debug log will capture
 # the exception's stack trace.
 #
-# The optional -doXML parameter causes the Ganymede server to dump
-# out the entire contents of ganymede.db to a ganymede.db.xml file,
-# according to the xml document format discussed in doc/xml.html.
-#
-# The -resetadmin, -doXML, and debug=XXX parameters should be placed
+# The -resetadmin and debug=XXX parameters should be placed
 # on the invocation line after arlut.csd.ganymede.Ganymede.
 #
 # Other options included below include the -Xms32m and -Xmx128m jvm
