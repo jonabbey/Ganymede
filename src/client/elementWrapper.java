@@ -164,6 +164,43 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     
   }
 
+  public void checkValidation()
+  {
+    if (my_component instanceof containerPanel)
+      {
+	//setValidated(( (containerPanel)my_component ).getObject().isValid());
+      }
+  }
+
+  private void setValidated(boolean valid)
+  {
+    if (valid)
+      {
+	buttonPanel.setBackground(ClientColor.vectorTitles);
+      }
+    else
+      {
+	buttonPanel.setBackground(ClientColor.vectorTitlesInvalid);
+      }
+  }
+
+  public void refreshTitle()
+  {
+    if (my_component instanceof containerPanel)
+      {
+	try
+	  {
+	    containerPanel cp = (containerPanel)my_component;
+	    String oldTitle = title.getText();
+	    title.setText(oldTitle.substring(0, oldTitle.indexOf(".")) + ". " + cp.getObject().getLabel());
+	  }
+	catch (java.rmi.RemoteException rx)
+	  {
+	    throw new RuntimeException("RemoteException getting label: " + rx);
+	  }
+      }
+  }
+
   /**
    *  Expand this element wrapper.
    *
