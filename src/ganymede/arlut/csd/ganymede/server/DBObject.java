@@ -366,6 +366,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     short count = 0;
 
+    if (eObj.fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
+      }
+
     synchronized (eObj.fieldAry)
       {
 	for (short i = 0; i < eObj.fieldAry.length; i++)
@@ -437,6 +442,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     myInvid = original.myInvid;
 
     shadowObject = null;
+
+    if (original.fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
+      }
 
     synchronized (original.fieldAry)
       {
@@ -530,6 +540,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     /* -- */
 
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	for (int i = 0; i < fieldAry.length; i++)
@@ -573,6 +588,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     DBField field;
 
     /* -- */
+
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
 
     synchronized (fieldAry)
       {
@@ -684,6 +704,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     PermEntry result = null;
 
     /* -- */
+
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
 
     if (gSession == null)
       {
@@ -994,6 +1019,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     /* -- */
 
     //    System.err.println("Emitting " + objectBase.getName() + " <" + id + ">");
+
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
 
     out.writeInt(getID());	// write out our object id
 
@@ -1388,6 +1418,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     /* -- */
 
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	for (int i = 0; i < objectBase.customFields.size(); i++)
@@ -1466,6 +1501,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final void saveField(DBField field)
   {
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	if (field == null)
@@ -1521,6 +1561,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final void replaceField(DBField field)
   {
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	if (field == null)
@@ -1582,6 +1627,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final void clearField(short id)
   {
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
@@ -1625,6 +1675,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final DBField retrieveField(short id)
   {
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
@@ -1663,6 +1718,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final short findField(short id)
   {
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
@@ -1699,6 +1759,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final void clearFieldPerm(short id)
   {
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
@@ -1760,6 +1825,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     /* -- */
 
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	for (int i = 0; i < fieldAry.length; i++)
@@ -1806,6 +1876,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     /* -- */
 
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	for (int i = 0; i < fieldAry.length; i++)
@@ -1833,6 +1908,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     db_field result[];
     short count = 0;
+
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
 
     synchronized (fieldAry)
       {
@@ -1923,6 +2003,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     // sync on fieldAry since we are looping over our fields and since retrieveField itself
     // sync's on fieldAry
+
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
 
     synchronized (fieldAry)
       {
@@ -2235,6 +2320,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     // sync on fieldAry so we can loop over fields
 
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     synchronized (fieldAry)
       {
 	if (customOnly)
@@ -2324,6 +2414,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     // we need to be double-synchronized because we are looping
     // over fieldAry and because we are replacing fieldAry in midstream
 
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
     DBField oldAry[] = fieldAry;
 
     synchronized (oldAry)
@@ -2410,6 +2505,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     Vector results = new Vector();
     DBField field;
     InvidDBField invField;
+
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
 
     synchronized (fieldAry)
       {
@@ -2750,6 +2850,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		  }
 	      }
 	  }
+      }
+
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
