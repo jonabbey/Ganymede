@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.123 $
-   Last Mod Date: $Date: 2001/05/23 05:05:06 $
+   Version: $Revision: 1.124 $
+   Last Mod Date: $Date: 2001/06/03 09:21:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.123 $ $Date: 2001/05/23 05:05:06 $
+ * @version $Revision: 1.124 $ $Date: 2001/06/03 09:21:14 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -824,7 +824,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * {@link arlut.csd.ganymede.DBStore DBStore} writing stream.
    */
 
-  synchronized void emit(DataOutput out) throws IOException
+  void emit(DataOutput out) throws IOException
   {
     DBField field;
 
@@ -874,6 +874,13 @@ public class DBObject implements db_object, FieldType, Remote {
    * {@link arlut.csd.ganymede.DBStore DBStore}
    * from disk.  receive() reads an object from the given in stream and
    * instantiates it into the DBStore.</p>
+   *
+   * <p>This method is synchronized, but there are a lot of other methods
+   * in DBObject which are not synchronized and which could cause problems
+   * if they are run concurrently with receive.  All the ones that
+   * play in the fieldAry array.  This is only workable because receive
+   * is not called on an object after it has been loaded into the
+   * database.</p>
    */
 
   synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
@@ -1620,7 +1627,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public final db_field getField(String fieldname)
+  public final db_field getField(String fieldname)
   {
     DBField field;
 
@@ -1666,7 +1673,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * field could not be found.</p>
    */
 
-  synchronized public final short getFieldId(String fieldname)
+  public final short getFieldId(String fieldname)
   {
     DBField field;
 
@@ -1695,7 +1702,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * @see arlut.csd.ganymede.db_object
    */
 
-  public synchronized db_field[] listFields()
+  public db_field[] listFields()
   {
     db_field result[];
     short count = 0;
@@ -1780,7 +1787,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * this method will not be called at transaction commit time.</p>
    */
 
-  public final synchronized Vector checkRequiredFields()
+  public final Vector checkRequiredFields()
   {
     Vector localFields = new Vector();
     DBObjectBaseField fieldDef;
@@ -1788,33 +1795,39 @@ public class DBObject implements db_object, FieldType, Remote {
 
     /* -- */
 
-    // assume that the customFields will not be changed at a time when
-    // this method is called.  A reasonable assumption, as
-    // customFields is only altered when the schema is being edited.
+    // sync on fieldAry since we are looping over our fields and since retrieveField itself
+    // sync's on fieldAry
 
-    for (int i = 0; i < objectBase.customFields.size(); i++)
+    synchronized (fieldAry)
       {
-	fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
-
-	try
+	// assume that the customFields will not be changed at a time when
+	// this method is called.  A reasonable assumption, as
+	// customFields is only altered when the schema is being edited.
+	
+	for (int i = 0; i < objectBase.customFields.size(); i++)
 	  {
-	    if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
-	      {
-		field = retrieveField(fieldDef.getID());
+	    fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
 	    
-		if (field == null || !field.isDefined())
+	    try
+	      {
+		if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
 		  {
-		    localFields.addElement(fieldDef.getName());
+		    field = retrieveField(fieldDef.getID());
+		    
+		    if (field == null || !field.isDefined())
+		      {
+			localFields.addElement(fieldDef.getName());
+		      }
 		  }
 	      }
-	  }
-	catch (NullPointerException ex)
-	  {
-	    System.err.println("Null pointer exception in checkRequiredFields().");
-	    ex.printStackTrace();
-	    System.err.println("\n");
-
-	    System.err.println("My type is " + getTypeName() + "\nMy invid is " + getInvid());
+	    catch (NullPointerException ex)
+	      {
+		System.err.println("Null pointer exception in checkRequiredFields().");
+		ex.printStackTrace();
+		System.err.println("\n");
+		
+		System.err.println("My type is " + getTypeName() + "\nMy invid is " + getInvid());
+	      }
 	  }
       }
 
@@ -2091,49 +2104,51 @@ public class DBObject implements db_object, FieldType, Remote {
    * checked.</p>
    */
 
-  synchronized public Vector getFieldVector(boolean customOnly)
+  public Vector getFieldVector(boolean customOnly)
   {
     Vector results = new Vector();
     DBField field;
 
     /* -- */
 
-    if (customOnly)
-      {
-	// return the custom fields only, in display order
+    // sync on fieldAry so we can loop over fields
 
-	for (int i = 0; i < objectBase.customFields.size(); i++)
+    synchronized (fieldAry)
+      {
+	if (customOnly)
 	  {
-	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
+	    // return the custom fields only, in display order
 	    
-	    field = retrieveField(fieldDef.getID());
-	    
-	    if (field != null)
+	    for (int i = 0; i < objectBase.customFields.size(); i++)
 	      {
-		results.addElement(field);
+		DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
+		
+		field = retrieveField(fieldDef.getID());
+		
+		if (field != null)
+		  {
+		    results.addElement(field);
+		  }
 	      }
 	  }
-      }
-    else			// all fields in this object
-      {
-	// first the display fields
-
-	for (int i = 0; i < objectBase.customFields.size(); i++)
+	else			// all fields in this object
 	  {
-	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
+	    // first the display fields
 	    
-	    field = retrieveField(fieldDef.getID());
-	    
-	    if (field != null)
+	    for (int i = 0; i < objectBase.customFields.size(); i++)
 	      {
-		results.addElement(field);
+		DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
+		
+		field = retrieveField(fieldDef.getID());
+		
+		if (field != null)
+		  {
+		    results.addElement(field);
+		  }
 	      }
-	  }
-
-	// then tack on the built-in fields
-
-	synchronized (fieldAry)
-	  {
+	    
+	    // then tack on the built-in fields
+	    
 	    for (int i = 0; i < fieldAry.length; i++)
 	      {
 		field = fieldAry[i];
@@ -2145,7 +2160,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	      }
 	  }
       }
-
+    
     return results;
   }
 
@@ -2154,7 +2169,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * suitable for printing to a debug or log stream.</p>
    */
 
-  public synchronized void print(PrintStream out)
+  public void print(PrintStream out)
   {
     DBField field;
 
@@ -2234,7 +2249,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * a vector to a scalar field, or vice-versa.</p>
    */
 
-  synchronized void updateBaseRefs(DBObjectBase newBase)
+  void updateBaseRefs(DBObjectBase newBase)
   {
     this.objectBase = newBase;
 
@@ -2244,7 +2259,9 @@ public class DBObject implements db_object, FieldType, Remote {
     // we need to be double-synchronized because we are looping
     // over fieldAry and because we are replacing fieldAry in midstream
 
-    synchronized (fieldAry)
+    DBField oldAry[] = fieldAry;
+
+    synchronized (oldAry)
       {
 	for (int i = 0; i < fieldAry.length; i++)
 	  {
@@ -2260,28 +2277,36 @@ public class DBObject implements db_object, FieldType, Remote {
 		count++;
 	      }
 	  }
-    
-	DBField oldAry[] = fieldAry;
 
-	fieldAry = new DBField[count];
-	permCacheAry = null;	// okay in synchronized block
+	DBField tmpFieldAry[] = new DBField[count];
 
-	for (int i = 0; i < oldAry.length; i++)
+	// we sync on the new field ary before we update the fieldAry ref so
+	// that we can preemptively block other threads from messing
+	// with fieldAry until we get it set the way we want
+
+	synchronized (tmpFieldAry)
 	  {
-	    field = oldAry[i];
+	    fieldAry = tmpFieldAry;
 
-	    if (field == null)
-	      {
-		continue;
-	      }
+	    permCacheAry = null;	// okay in synchronized block
 
-	    if (newBase.getField(field.getID()) != null && field.isDefined())
+	    for (int i = 0; i < oldAry.length; i++)
 	      {
-		saveField(field);
-	      }
-	    else
-	      {
-		System.err.println(getTypeName() + ":" + getLabel() + " dropping field " + field.getID());
+		field = oldAry[i];
+		
+		if (field == null)
+		  {
+		    continue;
+		  }
+		
+		if (newBase.getField(field.getID()) != null && field.isDefined())
+		  {
+		    saveField(field);
+		  }
+		else
+		  {
+		    System.err.println(getTypeName() + ":" + getLabel() + " dropping field " + field.getID());
+		  }
 	      }
 	  }
       }
@@ -2537,13 +2562,16 @@ public class DBObject implements db_object, FieldType, Remote {
    * adding it to the buffer.
    */
 
-  private synchronized void appendObjectInfo(StringBuffer buffer, String prefix, boolean local)
+  private void appendObjectInfo(StringBuffer buffer, String prefix, boolean local)
   {
     String name;
     DBObjectBaseField fieldDef;
     DBField field;
 
     /* -- */
+
+    // customFields shouldn't be changing unless we are in the middle of
+    // schema editing
 
     Vector customFields = objectBase.customFields;
 
