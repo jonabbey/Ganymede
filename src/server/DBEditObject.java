@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.72 $ %D%
+   Version: $Revision: 1.73 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1817,6 +1817,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public final synchronized ReturnVal finalizeRemove(boolean success)
   {
+    ReturnVal finalResult = new ReturnVal(true); // we use this to track rescan requests
     ReturnVal retVal = null;
     DBField field;
     Enumeration enum;
@@ -1903,6 +1904,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 							  "DBEditObject disapproved of deleting element from field " + 
 							  field.getName());
 		      }
+		    else
+		      {
+			finalResult.unionRescan(retVal);
+		      }
 		  }
 	      }
 	    else
@@ -1937,6 +1942,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
 							  "DBEditObject could not clear field " + 
 							  field.getName());
+		      }
+		    else
+		      {
+			finalResult.unionRescan(retVal);
 		      }
 		  }
 		else
@@ -1979,6 +1988,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
 							  "DBEditObject disapproved of deleting element from field " + 
 							  field.getName());
+		      }
+		    else
+		      {
+			finalResult.unionRescan(retVal);
 		      }
 		  }
 	      }
@@ -2023,7 +2036,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 						    invids,
 						    null));
 
-	return retVal;
+	return finalResult;
       }
     finally
       {
