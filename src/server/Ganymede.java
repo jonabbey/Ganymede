@@ -12,7 +12,7 @@
    start method.
 
    Created: 17 January 1997
-   Version: $Revision: 1.53 $ %D%
+   Version: $Revision: 1.54 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -135,6 +135,7 @@ public class Ganymede {
   public static String helpbaseProperty = null;
   public static String monitornameProperty = null;
   public static String defaultmonitorpassProperty = null;
+  public static String messageDirectoryProperty = null;
 
   public static boolean resetadmin = false;
   public static boolean firstrun = false;
@@ -786,6 +787,7 @@ public class Ganymede {
     helpbaseProperty = System.getProperty("ganymede.helpbase");
     monitornameProperty = System.getProperty("ganymede.monitorname");
     defaultmonitorpassProperty = System.getProperty("ganymede.defaultmonitorpass");
+    messageDirectoryProperty = System.getProperty("ganymede.messageDirectory");
 
     if (dbFilename == null)
       {
