@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.34 $
-# $Date: 1999/01/26 19:13:21 $
+# $Revision: 1.35 $
+# $Date: 1999/01/27 23:11:59 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -14,6 +14,7 @@
 
 die "We require Perl 5.003 or greater to install Ganymede." if $] < 5.003;
 
+use File::Copy;
 use Cwd;
 use English;
 
@@ -315,7 +316,69 @@ ENDCONFIG
 
     close(CONFIGFILE);
 }
- 
+
+
+######################################################################### 
+#
+#                                                                 makedir
+#
+# input: 1) a directory to make
+#        2) octal chmod bits
+#
+######################################################################### 
+sub makedir{
+  my ($dirpath, $chmod) = @_;
+
+  if (!-e $dirpath) {
+    mkdir ($dirpath, $chmod) or die("*Couldn't make $dirpath*");
+  }
+} 
+######################################################################### 
+#
+#                                                                 copydir
+#
+# input: 1) a directory to copy from
+#        2) directory target
+#
+######################################################################### 
+sub copydir{
+  my ($source, $target) = @_;
+  my (@dirs, $file);
+
+  &removelastslash($source);
+  &removelastslash($target);
+
+  if (!-e $target) {
+    &makedir($target, 0750);
+  }
+
+  opendir SOURCE, $source || die "Failure in copydir";
+  @dirs = readdir SOURCE;
+  closedir SOURCE;
+
+  foreach $file (@dirs) {
+    if (($file eq ".") || ($file eq "..")) {
+      next;
+    }
+
+    if (-d "$source/$file") {
+      &copydir("$source/$file", "$target/$file"); #recurse
+    } else {
+      if (!-e "$target/$file") {
+	@stats = stat "$source/$file";
+
+	# Get permissions info
+	$mymode = $stats[2] & 0777;
+
+	copy("$source/$file", "$target/$file");
+	chmod($mymode, "$target/$file");
+      }
+    }
+  }
+}
+
+
+
 ###
 ### Let's do it, then.
 ###
@@ -327,8 +390,13 @@ $javadir = $ENV{GJAVA};
 # See if there's a user-defined target location
 # for the classes. Otherwise, use default.
 $classdir = $ENV{GCLASSDIR};
+
 if ($classdir eq "") {
   $classdir = "$rootdir/src/classes";
+} else {
+  # If there is a user-set classes path, make sure it has 
+  # the necessary directory structure and support files.
+  &copydir("$rootdir/src/classes","$classdir");
 }
 
 removelastslash($javadir);
@@ -345,7 +413,7 @@ removelastslash($javadir);
 	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes", "$classdir",
 	  "$rootdir/src/server", "Ganymede Server Classes", "$classdir",
 	  "$rootdir/src/client", "Ganymede Client Classes", "$classdir",
-	  "$rootdir/src/classes", "Ganymede Jars", "$classdir",
+	  "$classdir", "Ganymede Jars", "$classdir",
 	  "$rootdir/src/password", "Ganymede Sample Password Client", "$rootdir/src/password/classes",
 	  "$rootdir/doc", "Javadoc", "$classdir");
 
