@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 2001/03/29 05:33:59 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 2001/07/14 01:50:42 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -83,7 +83,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.75 $ $Date: 2001/03/29 05:33:59 $ $Name:  $
+ * @version $Revision: 1.76 $ $Date: 2001/07/14 01:50:42 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -364,79 +364,88 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     gc.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-    if (editable)
-      {
-	setStatus("Opening object for edit");
-      }
-    else
-      {
-	setStatus("Opening object for viewing");
-      }
-
-    // First figure out the title, and put it in the hash
-    
     try
       {
-	if (objectType == null)
-	  {
-	    objectType = object.getTypeName();
-	  }
 
-	if (isNewlyCreated)
+	if (editable)
 	  {
-	    title = "Create: " + objectType + " - " + "New Object";
+	    setStatus("Opening object for edit");
 	  }
 	else
 	  {
-	    title = objectType + " - " + object.getLabel();
+	    setStatus("Opening object for viewing");
+	  }
 
-	    if (editable)
+	// First figure out the title, and put it in the hash
+    
+	try
+	  {
+	    if (objectType == null)
 	      {
-		title = "Edit: " + title;
+		objectType = object.getTypeName();
+	      }
+
+	    if (isNewlyCreated)
+	      {
+		title = "Create: " + objectType + " - " + "New Object";
 	      }
 	    else
 	      {
-		title = "View: " + title;
+		title = objectType + " - " + object.getLabel();
+
+		if (editable)
+		  {
+		    title = "Edit: " + title;
+		  }
+		else
+		  {
+		    title = "View: " + title;
+		  }
+	      }
+
+	    if (debug)
+	      {
+		System.out.println("Setting title to: " + title);
 	      }
 	  }
-
-	if (debug)
+	catch (RemoteException rx)
 	  {
-	    System.out.println("Setting title to: " + title);
+	    throw new RuntimeException("Could not get label of object: " + rx);
 	  }
+    
+	// Create a unique title for the new window
+
+	temp = title;
+	int num = 2;
+
+	while (windowList.containsKey(title))
+	  {
+	    title = temp + num++;
+	  }
+
+	framePanel w = new framePanel(object, editable, this, title, isNewlyCreated);
+	w.setOpaque(true);
+    
+	windowList.put(title, w);
+	
+	w.setBounds(0, 0, 500,400);
+	placeWindow(w);
+	
+	w.setLayer(new Integer(topLayer));
+	
+	add(w);
+	w.setVisible(true);		// for Kestrel
+	setSelectedWindow(w);
+	
+	updateMenu();
       }
-    catch (RemoteException rx)
+    finally
       {
-	throw new RuntimeException("Could not get label of object: " + rx);
+	// if we have an exception creating the framePanel, don't leave
+	// the cursor frozen in wait
+
+	gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
       }
-    
-    // Create a unique title for the new window
-
-    temp = title;
-    int num = 2;
-
-    while (windowList.containsKey(title))
-      {
-	title = temp + num++;
-      }
-
-    framePanel w = new framePanel(object, editable, this, title, isNewlyCreated);
-    w.setOpaque(true);
-
-    windowList.put(title, w);
-
-    w.setBounds(0, 0, 500,400);
-    placeWindow(w);
-
-    w.setLayer(new Integer(topLayer));
-    
-    add(w);
-    w.setVisible(true);		// for Kestrel
-    setSelectedWindow(w);
-
-    updateMenu();
-    
-    gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
 
   /**
