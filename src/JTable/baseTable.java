@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.12 $ %D%
+  Version: $Revision: 1.13 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.12 $ %D%
+ * @version $Revision: 1.13 $ %D%
  */
 
 public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
@@ -1190,6 +1190,42 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
   }
 
   /**
+   * Reinitializes the table with a new set of columns / headers
+   *
+   */
+
+  public void reinitialize(int[] colWidths, String[] headers)
+  {
+    reinitialize((tableAttr[]) null, colWidths, headers);
+  }
+
+  /**
+   * Reinitializes the table with a new set of columns / headers
+   *
+   */
+
+  public synchronized void reinitialize(tableAttr[] colAttribs, int[] colWidths, String[] headers)
+  {
+    clearCells();
+
+    cols = new tableCol[colWidths.length];
+    colPos = new int[colWidths.length+1];
+    origTotalWidth = 0;
+
+    for (int i = 0; i < colWidths.length; i++)
+      {
+	cols[i] = new tableCol(this, headers[i], colWidths[i],
+				colAttribs != null?colAttribs[i]:null);
+	origTotalWidth += colWidths[i];
+      }
+
+    rows = new Vector();
+
+    reShape();
+    refreshTable();
+  }
+
+  /**
    *
    * Override this method to implement the popup menu hook.
    *
@@ -1522,7 +1558,10 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
 	// and set the last column's width directly to avoid the same
 
-	cols[cols.length-1].width = colPos[cols.length] - colPos[cols.length-1];
+	if (cols.length > 0)
+	  {
+	    cols[cols.length-1].width = colPos[cols.length] - colPos[cols.length-1];
+	  }
       }
     else
       {
@@ -1574,7 +1613,10 @@ public class baseTable extends JPanel implements AdjustmentListener, ActionListe
 
 	colPos[cols.length] = canvas.getBounds().width - 1;
 
-	cols[cols.length-1].width = colPos[cols.length] - colPos[cols.length - 1] - vLineThickness;
+	if (cols.length > 0)
+	  {
+	    cols[cols.length-1].width = colPos[cols.length] - colPos[cols.length - 1] - vLineThickness;
+	  }
       }
 
     if (debug)
