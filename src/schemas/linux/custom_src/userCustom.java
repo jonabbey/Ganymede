@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   static final boolean debug = false;
   static QueryResult shellChoices = new QueryResult();
   static Date shellChoiceStamp = null;
+
+  static String homedir = null;
 
   // ---
 
@@ -150,6 +152,44 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     retVal = numField.setValueLocal(uidVal);
 
     return (retVal == null || retVal.didSucceed());
+  }
+
+  /**
+   *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    if (isInactivated())
+      {
+	switch (fieldid)
+	  {
+	  case userSchema.USERNAME:
+	  case userSchema.UID:
+	  case userSchema.HOMEDIR:
+	  case userSchema.LOGINSHELL:
+	    return true;
+	  }
+      }
+    else
+      {
+	switch (fieldid)
+	  {
+	  case userSchema.USERNAME:
+	  case userSchema.UID:
+	  case userSchema.LOGINSHELL:
+	  case userSchema.HOMEDIR:
+	  case userSchema.PASSWORD:
+	    return true;
+	  }
+      }
+
+    return false;
   }
 
   /**
@@ -593,6 +633,43 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     /* -- */
 
+    if (field.getID() == HOMEDIR)
+      {
+	String dir = (String) value;
+
+	/* -- */
+
+	sf = (StringDBField) getField(USERNAME);
+
+	if (homedir == null)
+	  {
+	    homedir = System.getProperty("ganymede.homedirprefix");
+	  }
+
+	// we will only check against a defined prefix if
+	// we have set one in our properties file.
+	
+	if (homedir != null && homedir.length() != 0)
+	  {
+	    sf = (StringDBField) getField(USERNAME);
+
+	    if (sf != null)
+	      {
+		if (sf.getNewValue() != null)
+		  {
+		    String expected = homedir + (String) sf.getNewValue();
+		    
+		    if (!dir.equals(expected))
+		      {
+			return false;
+		      }
+		  }
+	      }
+	  }
+
+	return true;
+      }
+
     if (field.getID() == USERNAME)
       {
 	// if we are being told to clear the user name field, go ahead and
@@ -609,6 +686,25 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	if (inv == null)
 	  {
 	    return true;
+	  }
+
+	sf = (StringDBField) getField(USERNAME); // old user name
+
+	oldName = (String) sf.getValueLocal();
+
+	// update the home directory location.. we assume that if
+	// the user has permission to rename the user, they can
+	// automatically execute this change to the home directory.
+
+	if (homedir == null)
+	  {
+	    homedir = System.getProperty("ganymede.homedirprefix");
+	  }
+
+	if (homedir != null)
+	  {
+	    sf = (StringDBField) getField(HOMEDIR);
+	    sf.setValueLocal(homedir + (String) value);
 	  }
 
 	// rename all the associated persona with the new user name
@@ -800,6 +896,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     if (field.getValue() == null)
       {
 	return null;
+      }
+
+    // if we have not previously committed this user, we don't care if the
+    // user's name is set.
+
+    if ((field.getValue() == null) || (getStatus() == ObjectStatus.CREATING))
+      {
+	result = new ReturnVal(true, true); // have setValue() do the right thing
+
+	result.addRescanField(userSchema.HOMEDIR);
+
+	return result;
       }
 
     if (!gSession.enableWizards)
