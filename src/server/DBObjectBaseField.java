@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,7 +30,7 @@ import java.rmi.server.UnicastRemoteObject;
  * an object field, along with any namespace information pertaining to the field.
  */
 
-public class DBObjectBaseField extends UnicastRemoteObject implements BaseField, FieldType {
+public final class DBObjectBaseField extends UnicastRemoteObject implements BaseField, FieldType {
 
   DBObjectBase base;		// definition for the object type we are part of
 
@@ -614,14 +614,14 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
    * <p>Where type is one of the following
    * constants defined in the FieldType interface:</p>
    *
-   *   static final short BOOLEAN = 0;
-   *   static final short NUMERIC = 1;
-   *   static final short DATE = 2;
-   *   static final short STRING = 3;
-   *   static final short INVID = 4;
-   *   static final short PERMISSIONMATRIX = 5;
-   *   static final short PASSWORD = 6;
-   *   static final short IP = 7;
+   *   static short BOOLEAN = 0;
+   *   static short NUMERIC = 1;
+   *   static short DATE = 2;
+   *   static short STRING = 3;
+   *   static short INVID = 4;
+   *   static short PERMISSIONMATRIX = 5;
+   *   static short PASSWORD = 6;
+   *   static short IP = 7;
    *
    * @see arlut.csd.ganymede.DBStore
    * @see arlut.csd.ganymede.BaseField
@@ -642,7 +642,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public synchronized void setType(short type)
+  public  synchronized void setType(short type)
   {
     if (editor == null)
       {

@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.rmi.server.*;
  *
  */
 
-class GanymedeSession extends UnicastRemoteObject implements Session {
+final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   static final boolean debug = false;
 
@@ -942,15 +942,9 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized db_object edit_db_object(Invid invid)
+  public db_object edit_db_object(Invid invid)
   {
-    db_object result;
-
-    /* -- */
-    
-    result = session.editDBObject(invid);
-
-    return result;
+    return session.editDBObject(invid);
   }
 
   /**
