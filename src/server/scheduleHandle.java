@@ -6,7 +6,7 @@
    Ganymede Server.  It is also used to pass data to the admin console.
    
    Created: 3 February 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -106,6 +106,7 @@ public class scheduleHandle implements java.io.Serializable {
     if (suspend)
       {
 	System.err.println("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
+	scheduler.notifyCompletion(this);
 	return;
       }
 
