@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -155,7 +155,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // - Define the main window
     
     contentPane.setLayout(new BorderLayout());
-    contentPane.setBackground(Color.white);
+    //    contentPane.setBackground(Color.white);
     
     OkButton.addActionListener(this);
     CancelButton.addActionListener(this);
@@ -169,7 +169,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     this.editOnly = false;
 
     query_panel.setLayout(new BorderLayout());
-    query_panel.setBackground(Color.lightGray); 
+    //    query_panel.setBackground(Color.lightGray); 
     contentPane.add("Center", query_panel); 
 
     // - Define the inner window with the query choice buttons
@@ -231,7 +231,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       }
       
     displayButton.addActionListener(this);
-    baseChoice.setBackground(Color.white);
+    //    baseChoice.setBackground(Color.white);
     baseChoice.addItemListener(this);
     base_panel.add(baseChoice);
     base_panel.add(new JLabel("  "));
@@ -240,17 +240,25 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     base_panel.add(displayButton);
     
     inner_choice.setLayout(gbl);
-    inner_choice.setBackground(Color.white);
+    //    inner_choice.setBackground(Color.white);
     
     outer_choice.setLayout(new FlowLayout());
-    outer_choice.setBackground(Color.white);
+    //    outer_choice.setBackground(Color.white);
     outer_choice.add(inner_choice);
 
-    choice_pane.setBorder(new TitledBorder("Query Fields"));
     choice_pane.setViewportView(outer_choice);
 
     query_panel.add("North", base_panel);
-    query_panel.add("Center", choice_pane);
+
+    // hack for Swing 1.0.2 to prevent TitledBorder from trying to
+    // be clever with colors when surrounding a scrollpane
+
+    JPanel titledPanel = new JPanel();
+    titledPanel.setBorder(new TitledBorder("Query Fields"));
+    titledPanel.setLayout(new BorderLayout());
+    titledPanel.add("Center", choice_pane);
+
+    query_panel.add("Center", titledPanel);
 
     resetFieldChoices();
     addRow();
@@ -530,31 +538,79 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   {
     QueryNode myNode;
     QueryRow row;
-    String baseName;
+    String myBaseName;
+    Hashtable baseQueries = new Hashtable();
+    Vector baseQVec;
+    Query result = null;
+    short returnType;
 
     /* -- */
 
-    row = (QueryRow) Rows.elementAt(0);
-    myNode = row.getQueryNode();
+    returnType = selectedBase.getTypeID();
 
-    try
+    for (int i = 0; i < Rows.size(); i++)
       {
-	baseName = row.getBase().getName();
+	row = (QueryRow) Rows.elementAt(i);
 
-	for (int i = 1; i < Rows.size(); i++)
+	try
 	  {
-	    row = (QueryRow) Rows.elementAt(i);
-	    myNode = new QueryAndNode(myNode, row.getQueryNode());
-	    baseName = row.getBase().getName();
+	    myBaseName = row.getBase().getName();
 	  }
-	
-	return new Query(baseName, myNode, editOnly);
+	catch (RemoteException ex)
+	  {
+	    System.err.println("Whoah, guess Base really was remote! " + ex.getMessage());
+	    return null;
+	  }
+
+	if (baseQueries.get(myBaseName) == null)
+	  {
+	    baseQVec = new Vector();
+	    baseQVec.addElement(row.getQueryNode());
+	    baseQueries.put(myBaseName, baseQVec);
+	  }
+	else
+	  {
+	    baseQVec = (Vector) baseQueries.get(myBaseName);
+	    baseQVec.addElement(row.getQueryNode());
+	  }
       }
-    catch (RemoteException ex)
+
+    // ok, we now have a hash of base names that we're going
+    // to need to issue queries on.. 
+
+    Enumeration enum = baseQueries.keys();
+
+    while (enum.hasMoreElements())
       {
-	System.err.println("Whoah, guess Base really was remote! " + ex.getMessage());
-	return null;
+	myBaseName = (String) enum.nextElement();
+	baseQVec = (Vector) baseQueries.get(myBaseName);
+
+	myNode = (QueryNode) baseQVec.elementAt(0);
+
+	for (int i = 1; i < baseQVec.size(); i++)
+	  {
+	    myNode = new QueryAndNode(myNode, (QueryNode) baseQVec.elementAt(i));
+	  }
+
+	if (result == null)
+	  {
+	    result = new Query(myBaseName, myNode, editOnly);
+	    result.setReturnType(returnType);
+	    
+	    System.err.println("Creating primary Query on base " + myBaseName);
+	  }
+	else
+	  {
+	    Query adjunctQuery = new Query(myBaseName, myNode, editOnly);
+	    adjunctQuery.setReturnType(returnType);
+
+	    result.addQuery(adjunctQuery);
+
+	    System.err.println("Creating adjunct Query on base " + myBaseName);
+	  }
       }
+
+    return result;
   }
 
   /**
@@ -668,6 +724,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     QueryRow row = (QueryRow) Rows.lastElement();
     row.removeRow();
     Rows.removeElementAt(Rows.size()-1);
+    inner_choice.refresh();
   }
 
   private void addRow()
@@ -884,6 +941,8 @@ class QueryRow implements ItemListener {
 
   String fieldName;
 
+  boolean showDoes = false;
+
   /* -- */
 
   QueryRow(JPanel panel, querybox parent)
@@ -904,7 +963,7 @@ class QueryRow implements ItemListener {
     GridBagConstraints gbc = parent.gbc;
     GridBagLayout gbl = parent.gbl;
 
-    gbc.gridy = gbc.RELATIVE;
+    gbc.gridy = parent.Rows.size();
     gbc.gridx = gbc.RELATIVE;
     gbc.gridheight = 1;
     gbc.gridwidth = 1;
@@ -964,7 +1023,7 @@ class QueryRow implements ItemListener {
     String fieldName = (String) fieldChoice.getSelectedItem();
     FieldTemplate field = parent.getTemplateFromName(fieldName);
 
-    setField(field);
+    setField(field, fieldName);
 
     fieldChoice.addItemListener(this);
   }
@@ -978,12 +1037,20 @@ class QueryRow implements ItemListener {
    *
    */
 
-  void setField(FieldTemplate field)
+  void setField(FieldTemplate field, String fieldName)
   {
     // ok, now update our is/is not, comparator, and operand fields
 
     this.field = field;
-    fieldName = field.getName();
+
+    if (fieldName == null)
+      {
+	this.fieldName = field.getName();
+      }
+    else
+      {
+	this.fieldName = fieldName;
+      }
 
     if (debug)
       {
@@ -1015,26 +1082,32 @@ class QueryRow implements ItemListener {
 
     // don't show us changing it
 
-    boolChoice.setVisible(false);
-
-    boolChoice.removeAllItems();
-
     does = opName.equalsIgnoreCase("Start With") ||
       opName.equalsIgnoreCase("End With") ||
       opName.equalsIgnoreCase("Contain");
 
-    if (does)
+    if (does && (!showDoes || boolChoice.getItemCount() == 0))
       {
+	boolChoice.setVisible(false);
+	boolChoice.removeAllItems();
+
 	boolChoice.addItem("does");
 	boolChoice.addItem("does not");
+
+	boolChoice.setVisible(true);
+	showDoes = true;
       }
-    else
+    else if (!does && (showDoes || boolChoice.getItemCount() == 0))
       {
+	boolChoice.setVisible(false);
+	boolChoice.removeAllItems();
+
 	boolChoice.addItem("is");
 	boolChoice.addItem("is not");
-      }
 
-    boolChoice.setVisible(true);
+	boolChoice.setVisible(true);
+	showDoes = false;
+      }
   }
 
   /**
@@ -1114,11 +1187,9 @@ class QueryRow implements ItemListener {
 
   void resetOperand(FieldTemplate field, String opName)
   {
-    if (operand != null)
-      {
-	operand.setVisible(false);
-	operandContainer.remove(operand);
-      }
+    boolean addOperand = false;
+
+    /* -- */
 
     if (debug)
       {
@@ -1129,28 +1200,85 @@ class QueryRow implements ItemListener {
 
     if (opName.equals("Defined"))
       {
+	if (operand != null)
+	  {
+	    operand.setVisible(false);
+	    operandContainer.remove(operand);
+	    operand = null;
+	  }
+
 	return;
       }
 
     if (opName.startsWith("Length"))
       {
-	operand = new JnumberField();
+	if (!(operand instanceof JnumberField))
+	  {
+	    if (operand != null)
+	      {
+		operand.setVisible(false);
+		operandContainer.remove(operand);
+	      }
+
+	    operand = new JnumberField();
+	    addOperand = true;
+	  }
       }
     else if (field.isDate())
       {
-	operand = new JdateField(new Date(), true, false, null, null);
+	if (!(operand instanceof JdateField))
+	  {
+	    if (operand != null)
+	      {
+		operand.setVisible(false);
+		operandContainer.remove(operand);
+	      }
+
+	    operand = new JdateField(new Date(), true, false, null, null);
+	    addOperand = true;
+	  }
       }
     else if (field.isString())
       {
-	operand = new JstringField();
+	if (!(operand instanceof JstringField))
+	  {
+	    if (operand != null)
+	      {
+		operand.setVisible(false);
+		operandContainer.remove(operand);
+	      }
+
+	    operand = new JstringField();
+	    addOperand = true;
+	  }
       }
     else if (field.isNumeric())
       {
-	operand = new JnumberField();
+	if (!(operand instanceof JnumberField))
+	  {
+	    if (operand != null)
+	      {
+		operand.setVisible(false);
+		operandContainer.remove(operand);
+	      }
+
+	    operand = new JnumberField();
+	    addOperand = true;
+	  }
       }
     else if (field.isBoolean())
       {
-	operand = new JCheckBox();
+	if (!(operand instanceof JCheckBox))
+	  {
+	    if (operand != null)
+	      {
+		operand.setVisible(false);
+		operandContainer.remove(operand);
+	      }
+
+	    operand = new JCheckBox();
+	    addOperand = true;
+	  }
       }
     else if (field.isInvid())
       {
@@ -1158,7 +1286,17 @@ class QueryRow implements ItemListener {
 
 	if (targetBase < 0)
 	  {
-	    operand= new JstringField();
+	    if (!(operand instanceof JstringField))
+	      {
+		if (operand != null)
+		  {
+		    operand.setVisible(false);
+		    operandContainer.remove(operand);
+		  }
+		
+		operand= new JstringField();
+		addOperand = true;
+	      }
 	  }
 	else
 	  {
@@ -1169,7 +1307,14 @@ class QueryRow implements ItemListener {
 
 	    /* -- */
 
-	    operand = invidChooser = new JInvidChooser(null, targetBase);
+	    // we always want to reset the invid chooser
+
+	    if (operand != null)
+	      {
+		operand.setVisible(false);
+		operandContainer.remove(operand);
+	      }
+
 
 	    if (parent.gc.cachedLists.containsList(Target))
 	      {
@@ -1209,11 +1354,16 @@ class QueryRow implements ItemListener {
 	    choices = list.getListHandles(false); // no inactives
 	    choices = parent.gc.sortListHandleVector(choices);
 
-	    for (int i = 0; i < choices.size(); i++)
-	      {
-		listHandle thisChoice = (listHandle) choices.elementAt(i);
-		invidChooser.addItem(thisChoice);
-	      }
+	    operand = invidChooser = new JInvidChooser(choices, null, targetBase);
+
+	    addOperand = true;
+
+	    /*	    for (int i = 0; i < choices.size(); i++)
+		    {
+		    listHandle thisChoice = (listHandle) choices.elementAt(i);
+		    invidChooser.addItem(thisChoice);
+		    }
+	    */
 
 	    invidChooser.setMaximumRowCount(12);
 	    invidChooser.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
@@ -1222,7 +1372,17 @@ class QueryRow implements ItemListener {
       }
     else if (field.isIP())
       {
-	operand = new JIPField(null, true, true);
+	if (!(operand instanceof JIPField))
+	  {
+	    if (operand != null)
+	      {
+		operand.setVisible(false);
+		operandContainer.remove(operand);
+	      }
+	    
+	    operand = new JIPField(null, true, true);
+	    addOperand = true;
+	  }
       }
 
     if (operand == null)
@@ -1230,8 +1390,11 @@ class QueryRow implements ItemListener {
 	throw new NullPointerException("null operand");
       }
 
-    operandContainer.add(operand);
-    operand.setVisible(true);
+    if (addOperand)
+      {
+	operandContainer.add(operand);
+	operand.setVisible(true);
+      }
   }
 
   /**
@@ -1262,6 +1425,8 @@ class QueryRow implements ItemListener {
 
   public Base getBase()
   {
+    System.err.println("querybox: getBase(): fieldName = " + fieldName);
+    System.err.println("Id = " + parent.getIdFromName(fieldName));
     return parent.getBaseFromShort(parent.getIdFromName(fieldName));
   }
 
@@ -1279,6 +1444,8 @@ class QueryRow implements ItemListener {
 
     boolean editInPlace;
     Short baseID;
+
+    String localFieldName = parent.getFieldFromEmbedded(fieldName);
 
     /* -- */
 
@@ -1345,7 +1512,7 @@ class QueryRow implements ItemListener {
 	    return null;
 	  }
 	    
-	myNode = new QueryDataNode(fieldName, opValue, value);
+	myNode = new QueryDataNode(localFieldName, opValue, value);
 	    
 	// -- if not is true then add a not node
 	    
@@ -1403,7 +1570,7 @@ class QueryRow implements ItemListener {
 	    return null;
 	  }
 	    
-	myNode = new QueryDataNode(fieldName, opValue, value);
+	myNode = new QueryDataNode(localFieldName, opValue, value);
 	    
 	// -- if not is true then add a not node
 	    
@@ -1468,8 +1635,8 @@ class QueryRow implements ItemListener {
 	    return null;
 	  }
 
-	myNode = new QueryAndNode(new QueryDataNode(fieldName, QueryDataNode.GREATEQ, lowDate),
-				  new QueryDataNode(fieldName, QueryDataNode.LESS, hiDate));
+	myNode = new QueryAndNode(new QueryDataNode(localFieldName, QueryDataNode.GREATEQ, lowDate),
+				  new QueryDataNode(localFieldName, QueryDataNode.LESS, hiDate));
 	    
 	// -- if not is true then add a not node
 	    
@@ -1490,7 +1657,8 @@ class QueryRow implements ItemListener {
 
   private boolean isNot()
   {
-    return (boolChoice.equals("is not") || boolChoice.equals("does not"));
+    return (boolChoice.getSelectedItem().equals("is not") ||
+	    boolChoice.getSelectedItem().equals("does not"));
   }
 
   /**
@@ -1513,7 +1681,8 @@ class QueryRow implements ItemListener {
 
     if (e.getSource() == fieldChoice)
       {
-	setField(parent.getTemplateFromName((String) fieldChoice.getSelectedItem()));
+	setField(parent.getTemplateFromName((String) fieldChoice.getSelectedItem()), 
+		 (String) fieldChoice.getSelectedItem());
       }
     else if (e.getSource() == compareChoice)
       {
@@ -1536,14 +1705,6 @@ class OptionsFrame extends JFrame implements ActionListener {
   static final boolean debug = false;
 
   // ---
-
-  JButton qSave = new JButton("Save");
-  JButton qLoad = new JButton("Load");
-  JButton qDone = new JButton("Done");
-  JButton qCancel = new JButton("Cancel");
-  JButton lCancel = new JButton("Cancel");
-  JButton lRename = new JButton("Rename");
-  JButton lSelect = new JButton("Select");
 
   JButton optionClose = new JButton("Close");
   querybox parent;
@@ -1568,64 +1729,66 @@ class OptionsFrame extends JFrame implements ActionListener {
 
   OptionsFrame(querybox parent)
   {
-    super("Options");
+    super("Fields To Return");
 
     // ---
 
-    JScrollPane option_pane = new JScrollPane();
-    option_pane.setBorder(new TitledBorder("Return Options"));
-
-    JPanel save_panel = new JPanel(); // holds query options
-    save_panel.setBorder(new TitledBorder("Query Options"));
+    JScrollPane custom_pane = new JScrollPane();
+    JScrollPane builtin_pane = new JScrollPane();
 
     JPanel option_panel = new JPanel();
     JPanel choice_option = new JPanel(); // basically holds the Close button
     JPanel contain_panel = new JPanel(); // Holds the boxes
 
     FieldTemplate template;
-    JCheckBox newCheck; 
+    JCheckBox newCheck;
+
+    JPanel builtInPanel = new JPanel();
     JPanel inner_panel = new JPanel();
     
     Vector tmpAry = new Vector();
 
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
+
+    JPanel titledPanel = new JPanel();
+    JPanel titledPanel2 = new JPanel();
     
     /* -- */
 
     this.parent = parent;
       
-    setSize(500,300);
+    setSize(500,400);
   
-    optionClose.setBackground(Color.lightGray);
     optionClose.addActionListener(this);
     
-    choice_option.setBackground(Color.white);
     choice_option.setLayout(new FlowLayout());
     choice_option.add(optionClose);
     
     contain_panel.setLayout(new BorderLayout());
-    contain_panel.add("South", save_panel);
-    contain_panel.add("Center", option_pane);
+    contain_panel.add("Center", titledPanel);
+    contain_panel.add("North", titledPanel2);
     
     option_panel.setLayout(new BorderLayout());
     option_panel.add("South",choice_option);
     option_panel.add("Center", contain_panel);
   
-    option_pane.setViewportView(inner_panel);
+    custom_pane.setViewportView(inner_panel);
+
+    // hack for Swing 1.0.2 to prevent TitledBorder from trying to
+    // be clever with colors when surrounding a scrollpane
+
+    titledPanel.setBorder(new TitledBorder("Custom Fields"));
+    titledPanel.setLayout(new BorderLayout());
+    titledPanel.add("Center", custom_pane);
+
     inner_panel.setLayout(gbl);
     
-    save_panel.setLayout(new FlowLayout());
-    save_panel.add(qSave);
-    save_panel.add(qLoad);
-
-    qSave.addActionListener(this);
-    qLoad.addActionListener(this);
-
     gbc.gridy = 0;
     gbc.gridx = gbc.RELATIVE;
     gbc.gridheight = 1;
     gbc.gridwidth = 1;
+    gbc.anchor = gbc.WEST;
 
     fields = parent.gc.getTemplateVector(parent.selectedBase.getTypeID());
 
@@ -1635,6 +1798,12 @@ class OptionsFrame extends JFrame implements ActionListener {
     for (int j=0; fields != null && (j < fields.size()); j++) 
       {	
 	template = (FieldTemplate) fields.elementAt(j);
+
+	if (template.isBuiltIn())
+	  {
+	    continue;
+	  }
+
 	newCheck = new JCheckBox(template.getName());
 	newCheck.setSelected(true);
 
@@ -1649,6 +1818,49 @@ class OptionsFrame extends JFrame implements ActionListener {
 	gbl.setConstraints(newCheck, gbc);
 
 	inner_panel.add(newCheck);
+
+	count++;
+      }
+
+    // we're going to add the built-ins separately
+
+    // hack for Swing 1.0.2 to prevent TitledBorder from trying to
+    // be clever with colors when surrounding a scrollpane
+
+    titledPanel2.setBorder(new TitledBorder("Built-In Fields"));
+    titledPanel2.setLayout(new BorderLayout());
+    titledPanel2.add("Center", builtin_pane);
+
+    gbl = new GridBagLayout();
+    builtin_pane.setViewportView(builtInPanel);
+    builtInPanel.setLayout(gbl);
+
+    count = 0;
+    tmpRow = 0;
+
+    for (int j=0; fields != null && (j < fields.size()); j++) 
+      {	
+	template = (FieldTemplate) fields.elementAt(j);
+
+	if (!template.isBuiltIn())
+	  {
+	    continue;
+	  }
+
+	newCheck = new JCheckBox(template.getName());
+	newCheck.setSelected(false); // built-ins will be hidden by default
+
+	checkboxes.put(template.getName(), newCheck);
+	      
+	if (count == 3) // we've got space in the current row
+	  {
+	    gbc.gridy = ++tmpRow;
+	    count = 0;
+	  }
+
+	gbl.setConstraints(newCheck, gbc);
+
+	builtInPanel.add(newCheck);
 
 	count++;
       }
@@ -1702,152 +1914,6 @@ class OptionsFrame extends JFrame implements ActionListener {
 	setVisible(false);
 
 	return;
-      }
-
-    if (e.getSource() == qSave)
-      {
-	if (debug)
-	  {
-	    System.out.println("Save Clicked");
-	  }
-
-	saveBox = new JDialog(this, "Save As", true);
-
-	JPanel button_panel = new JPanel();
-	JPanel mid_panel = new JPanel();
-
-	button_panel.setLayout(new FlowLayout());
-	button_panel.add(qDone);
-	button_panel.add(new JLabel("   "));
-	button_panel.add(qCancel);
-
-	saveText = new JTextField(10);
-	mid_panel.add(saveText);
-
-	Font f = new Font("TimesRoman", Font.BOLD, 14);
-	JLabel SaveJLabel = new JLabel("Enter Name For Query");
-	SaveJLabel.setFont(f);
-	
-	saveBox.getContentPane().setLayout(new BorderLayout());
-	saveBox.getContentPane().add("North", SaveJLabel);
-	saveBox.getContentPane().add("Center", mid_panel);
-	saveBox.getContentPane().add("South", button_panel);
-	saveBox.setSize(300, 135);
-
-	qDone.addActionListener(this);
-	qCancel.addActionListener(this);
-
-	saveBox.setVisible(true);
-      }		   
-    
-    if (e.getSource() == qCancel)
-      {
-	// Cancel the save transaction and close the save dialog
-
-	saveBox.setVisible(false);
-      }
-    
-    if (e.getSource() == qDone)
-      {
-	// -- We want to save the current query under the current name
-
-	String outPut = saveText.getText();
-
-	if (debug)
-	  {
-	    System.out.println("save name is: " + outPut);
-	  }
-
-	saveBox.setVisible(false);
-      }
-
-    if (e.getSource() == qLoad)
-      {
-	// We gots to create the dialog for loading queries.
-	
-	if (debug)
-	  {
-	    System.out.println("Load Button Clicked");
-	  }
-	
-	JLabel l;
-	int n;
-	JPanel listPanel = new JPanel();
-	JPanel centeringPanel = new JPanel();
-
-	GridBagLayout gbl = new GridBagLayout();
-	GridBagConstraints gbc = new GridBagConstraints();
-  	JPanel button_panel = new JPanel();
-	JPanel outPanel = new JPanel();
-
-	button_panel.setLayout(gbl);
-	button_panel.setSize(100, 50);
-	button_panel.setBackground(Color.white);
-	
-	centeringPanel.setLayout(new FlowLayout());
-	JDialog loadBox = new JDialog(this, "Load Query", true);	
-	List queryList = new List(10);
-
-	l = new JLabel("");
-	gbc.gridy = n = 0;
-	gbl.setConstraints(l, gbc);
-	button_panel.add(l);
-
-	n = 6;
-
-	gbc.gridy = n++;
-	gbl.setConstraints(lSelect, gbc);
-	button_panel.add(lSelect);
-	lSelect.addActionListener(this);
-	lSelect.setBackground(Color.lightGray);
-
-	gbc.gridy = n++;
-	gbl.setConstraints(lRename, gbc);
-	button_panel.add(lRename);
-	lRename.addActionListener(this);
-	lRename.setBackground(Color.lightGray);
-
-	gbc.gridy = n++;
-	gbl.setConstraints(lCancel, gbc);
-	button_panel.add(lCancel);
-	lCancel.addActionListener(this);
-	lCancel.setBackground(Color.lightGray);
-
-	n = 17;
-	l = new JLabel("");
-	gbc.gridy = n;
-	gbl.setConstraints(l, gbc);
-	button_panel.add(l);
- 
-	// -- Add the elements to the choice list
-
-	listPanel.setBackground(Color.blue);
-	listPanel.setLayout(new BorderLayout());
-	listPanel.add(queryList);
-
-	// - add identifying label
-	
-	Font f = new Font("TimesRoman", Font.BOLD, 14);
-	JLabel qJLabel = new JLabel("Saved Queries");
-	qJLabel.setFont(f);
-	qJLabel.setForeground(Color.white);
-	centeringPanel.add(qJLabel);
-	listPanel.add("North", centeringPanel);
-
-	queryList.setBackground(Color.white);
-	queryList.setForeground(Color.blue);
-	queryList.setSize(100, 100);
-	queryList.add("Testing 1");
-	queryList.add("Testing 2");
-	queryList.add("Testing 3");
-
-	listPanel.add("Center", queryList);
-
-	JSplitPane loadPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, listPanel, button_panel);
-
-	loadBox.setSize(275, 175);
-	loadBox.getContentPane().add(loadPane);
-	loadBox.setVisible(true);
       }
   }
 }
