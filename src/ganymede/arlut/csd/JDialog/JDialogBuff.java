@@ -98,13 +98,31 @@ public class JDialogBuff implements java.io.Serializable {
 
   // client side code
 
-  public DialogRsrc extractDialogRsrc(Frame frame)
+  /**
+   * <p>frame is an AWT Frame that can be used to format graphics
+   * for.</p>
+   *
+   * <p>refClass, if not null, serves is used as a reference point for
+   * finding the image resources specified by this JDialogBuff.  The
+   * imageName will be looked for from the same place (a jar file or a
+   * classpath directory) that the refClass was pulled from.  If
+   * refClass belongs to a Java package, the image will be looked for
+   * relative to that package in the jar file or classpath directory
+   * from which refClass was loaded.</p>
+   *
+   * <p>If refClass is null, the class of the frame passed in will be
+   * used as the reference class.  This is only useful if the frame is
+   * a custom subclass located in the jar or classpath directory from
+   * which we wish to load the image.</p>
+   */
+
+  public DialogRsrc extractDialogRsrc(Frame frame, Class refClass)
   { 
     DialogRsrc rsrc;
 
     /* -- */
 
-    rsrc = new DialogRsrc(frame, title, text.toString(), okText, cancelText, imageName);
+    rsrc = new DialogRsrc(frame, title, text.toString(), okText, cancelText, imageName, refClass);
 
     rsrc.objects = resources;
 

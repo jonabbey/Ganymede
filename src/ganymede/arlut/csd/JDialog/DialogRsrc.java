@@ -117,6 +117,8 @@ public class DialogRsrc {
     OKText,
     CancelText;
 
+  Class refClass;
+
   /* -- */
 
   /**
@@ -148,7 +150,8 @@ public class DialogRsrc {
   }
 
   /** 
-   * Constructor with special "Ok" and "Cancel" strings
+   * Constructor with special "Ok" and "Cancel" strings, and a provided Image
+   * to display
    *
    * @param frame Parent frame.
    * @param Title String for title of Dialog box.
@@ -156,6 +159,7 @@ public class DialogRsrc {
    * @param OK String for Ok button 
    * @param Cancel String for Cancel button
    * @param image Image to display next to text
+
    */
 
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, Image image)
@@ -167,12 +171,13 @@ public class DialogRsrc {
     this.OKText = OK;
     this.CancelText = Cancel;
     this.image = image;
-      
+
     objects = new Vector();
   }
 
   /** 
-   * Constructor with special "Ok" and "Cancel" strings
+   * Constructor with special "Ok" and "Cancel" strings, and the name
+   * of an Image to pull out of CLASSPATH resources.
    *
    * @param frame Parent frame.
    * @param Title String for title of Dialog box.
@@ -180,9 +185,16 @@ public class DialogRsrc {
    * @param OK String for Ok button 
    * @param Cancel String for Cancel button
    * @param imageName Image to display next to text
+   * @param refClass Class to use to act as a reference point for finding the resources.  The imageName
+   * will be looked for from the same place (a jar file or a classpath directory) that the refClass
+   * was pulled from.  If refClass belongs to a Java package, the image will be looked for relative to
+   * that package in the jar file or classpath directory from which refClass was loaded.   If refClass
+   * is null, the class of the frame passed in will be used as the reference class.  This is only
+   * useful if the frame is a custom subclass located in the jar or classpath directory from which
+   * we wish to load the image.
    */
 
-  public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, String imageName)
+  public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, String imageName, Class refClass)
   {
     this.frame = frame;
     
@@ -190,6 +202,15 @@ public class DialogRsrc {
     this.text = Text;
     this.OKText = OK;
     this.CancelText = Cancel;
+
+    if (refClass == null)
+      {
+	this.refClass = frame.getClass();
+      }
+    else
+      {
+	this.refClass = refClass;
+      }
 
     if (imageName != null)
       {
@@ -199,7 +220,7 @@ public class DialogRsrc {
 	  }
 	else
 	  {
-	    image = arlut.csd.Util.PackageResources.getImageResource(frame, imageName, frame.getClass());
+	    image = arlut.csd.Util.PackageResources.getImageResource(frame, imageName, refClass);
 
 	    imageCache.put(imageName, image);
 	  }
