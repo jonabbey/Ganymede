@@ -90,6 +90,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
     // Build the combo box from the baseList
     JPanel bp = new JPanel(false);
     bases = new JComboBox();
+    bp.add(new JLabel("Object type:"));
     bp.add(bases);
 
     Vector baseList = parent.getgclient().getBaseList();
@@ -332,7 +333,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	  }
 	else
 	  {
-	    parent.parent.getgclient().setStatus("Downloading list of all objects, hold yer horses");
+	    parent.parent.getgclient().setStatus("Downloading list of all objects.");
 
 	    result = parent.parent.getgclient().getSession().query(new Query(type));
 
