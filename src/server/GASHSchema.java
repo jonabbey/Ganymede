@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -722,7 +722,7 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
     else if (event.getSource() == createNameMI)
       {
 	System.out.println("Create namespace chosen");
-	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namespace", "Ok", "Cancel");
+	DialogRsrc dialogResource = new DialogRsrc(this, "Create new namespace", "Create a new namespace", "Create", "Cancel");
 
 	dialogResource.addString("Namespace:");
 	dialogResource.addBoolean("Case Insensitive:");
@@ -844,23 +844,8 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener {
       {
 	System.out.println("deleting Namespace");
 	treeNode tNode = (treeNode)node;
-	/*try
-	  {
-	    editor.deleteNameSpace(tNode.getText());
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't delete namespace: remote exception " + ex);
-	  }
-	refreshNamespaces();
-	*/
-	
+		
 	deleteNameDialog.setVisible(true);
-	
-	if (showingField)
-	  {
-	    fe.refreshFieldEdit();
-	  }
 	
       }
 
@@ -1323,6 +1308,29 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     targetC = new Choice();
     targetC.addItemListener(this);
+    targetC.addItem("<none>");
+
+    Base[] baseList;
+    try
+      {
+	baseList = owner.getSchemaEdit().getBases();
+      }
+    catch (RemoteException rx)
+      {
+	throw new IllegalArgumentException("Exception getting Bases: " + rx);
+      }
+    for (int i = 0 ; i < baseList.length ; i++)
+      {
+	try
+	  {
+	    targetC.addItem(baseList[i].getName());
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new IllegalArgumentException("Exception getting bases name: " + rx);
+	  }
+
+      }
     addRow(editPanel, targetC, "Target Object:", 16);
 
     symmetryCF = new checkboxField(null, false, ca, true);
@@ -1792,6 +1800,54 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     else if (e.getItemSelectable() == targetC)
       {
 	System.out.println("target: " + e.getItem());
+	
+	Base[] baseList;
+	Base currentBase = null;
+	try
+	  {
+	    baseList = owner.getSchemaEdit().getBases();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new IllegalArgumentException("Exception listing bases: " + rx);
+	  }
+	//Find the right base
+	for (int i = 0 ; i < baseList.length ; i++)
+	  {
+	    String string = (String)e.getItem();
+	    try
+	      {
+		if (string.equals(baseList[i].getName()))
+		  {
+		    currentBase = baseList[i];
+		    break;
+		  }
+	      } 
+	    
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Remote Exception setting Target: " + rx);
+	      }
+	  }
+	if (currentBase = null)
+	  {
+	    throw new IllegalArgumentException("Could not match selection with a Base");
+	  }
+	else
+	  {
+	    try
+	      {
+		System.out.println("Setting target field to " + currentBase.getName());
+		fieldDef.setTargetField(currentBase.getTypeID());
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Remote Exception setting Target: " + rx);
+	      }
+	  }
+	
+	
+	
       }
     else if (e.getItemSelectable() == fieldC)
       {
@@ -1861,16 +1917,18 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
       this.owner = owner;
 
       namePanel = new Panel();
-      namePanel.setLayout(new ColumnLayout());
+      namePanel.setLayout(new TableLayout(false));
 
       ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
 			     Color.black, Color.white);
       
-      nameS = new stringField(20, 100, ca, true, false, null, null);
-      namePanel.add(new FieldWrapper("Namespace:", nameS));
+      nameS = new stringField(20, 100, ca, false, false, null, null);
+      addRow(namePanel, nameS, "Namespace:", 0);
       
       caseCB = new Checkbox();
-      namePanel.add(new FieldWrapper("Case Insensitive:", caseCB));
+      caseCB.setEnabled(false);
+      
+      addRow(namePanel, caseCB, "Case insensitive:", 1);
 
       add(namePanel);
     }
@@ -1891,6 +1949,14 @@ class NameSpaceEditor extends ScrollPane implements ActionListener {
   public void actionPerformed(ActionEvent e)
     {
       System.out.println("action Performed in NameSpaceEditor");
+    }
+
+  void addRow(Panel parent, Component comp,  String label, int row)
+    {
+      Label l = new Label(label);
+      
+      parent.add("0 " + row + " lhwHW", l);
+      parent.add("1 " + row + " lhwHW", comp);
     }
 }
 
