@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2001/06/29 22:00:33 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2001/07/02 19:26:41 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.34 $ $Date: 2001/06/29 22:00:33 $ $Name:  $
+ * @version $Revision: 1.35 $ $Date: 2001/07/02 19:26:41 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
@@ -395,8 +395,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	ensureIndexIsVisible(topIndex);
       }
-    
-    //    setSelectedValue(lh, true);
   }
 
   /**
@@ -553,7 +551,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     return false;
   }
-   
+
   /**
    *
    * This selects the item with the given label.
@@ -561,6 +559,17 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    */
 
   public void setSelectedLabel(String s)
+  {
+    this.setSelectedLabel(s, false);
+  }
+   
+  /**
+   *
+   * This selects the item with the given label.
+   *
+   */
+
+  public void setSelectedLabel(String s, boolean ensureVisible)
   {
     int size = model.getSize();
     listHandle lh = null;
@@ -572,6 +581,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	if (lh.getLabel().equals(s))
 	  {
 	    setSelected(lh);
+
+	    if (ensureVisible)
+	      {
+		ensureIndexIsVisible(i);
+	      }
+
 	    break;
 	  }
       }
