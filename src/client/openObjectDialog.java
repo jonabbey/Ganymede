@@ -6,15 +6,16 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/11/02 23:42:14 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2000/12/06 23:40:52 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -225,23 +226,16 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     Hashtable baseToShort = client.getBaseToShort();
     Hashtable baseNames = client.getBaseNames();
 
-    Base thisBase = null;
+    BaseDump thisBase = null;
 
     Vector listHandles = new Vector();
 
     for (int i = 0; i < bases.size(); i++)
       {
-	thisBase = (Base)bases.elementAt(i);
+	thisBase = (BaseDump)bases.elementAt(i);
 	String name = (String) baseNames.get(thisBase);
 	
-	if (name.startsWith("Embedded:"))
-	  {
-	    if (debug)
-	      {
-		System.out.println("Skipping embedded field: " + name);
-	      }
-	  }
-	else
+	if (!thisBase.isEmbedded())
 	  {
 	    listHandle lh = new listHandle(name, (Short) baseToShort.get(thisBase));
 	    listHandles.addElement(lh);
@@ -623,5 +617,4 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
   public void mouseReleased(MouseEvent e) {}
   public void mouseEntered(MouseEvent e) {}
   public void mouseExited(MouseEvent e) {}
-
 }
