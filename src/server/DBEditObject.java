@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.144 $
-   Last Mod Date: $Date: 2001/01/25 07:25:56 $
+   Version: $Revision: 1.145 $
+   Last Mod Date: $Date: 2001/01/26 23:06:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.144 $ $Date: 2001/01/25 07:25:56 $ $Name:  $
+ * @version $Revision: 1.145 $ $Date: 2001/01/26 23:06:41 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2601,6 +2601,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			  {
 			    editset.rollback("del" + label); // *sync*
 			    
+			    if (retVal.getDialog() != null)
+			      {
+				return retVal;
+			      }
+			    
 			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
 							      "DBEditObject disapproved of deleting element from field " + 
 							      field.getName());
@@ -2631,6 +2636,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 			if (retVal != null && !retVal.didSucceed())
 			  {
 			    editset.rollback("del" + label); // *sync*
+
+			    if (retVal.getDialog() != null)
+			      {
+				return retVal;
+			      }
 
 			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
 							      "DBEditObject could not clear field " + 
