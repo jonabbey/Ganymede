@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -113,6 +113,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   
   boolean
     somethingChanged = false;
+  
+  protected Vector
+    filter = new Vector();    // List of owner groups to show, these are listHandles
+
+  Vector
+    ownerGroups = null;  // Vector of owner groups
+
+  JFilterDialog
+    filterDialog = null;
+
+  JDefaultOwnerDialog
+    defaultOwnerDialog = null;
 
   Image images[];
 
@@ -170,8 +182,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   JMenuItem 
     logoutMI,
     removeAllMI,
-    rebuildTreeMI;
+    rebuildTreeMI,
+    filterQueryMI,
+    defaultOwnerMI;
 
+  private boolean
+    defaultOwnerChosen = false;
 
   JMenuItem
     editObjectMI,
@@ -217,6 +233,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     System.out.println("Starting gclient");
 
+
+    enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+
     if (s == null)
       {
 	throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");;
@@ -247,8 +266,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     
     // File menu
     fileMenu = new JMenu("File");
-    //fileMenu.setBackground(ClientColor.menu);
-    //fileMenu.setForeground(ClientColor.menuText);
     logoutMI = new JMenuItem("Logout");
     logoutMI.addActionListener(this);
     removeAllMI = new JMenuItem("Remove All Windows");
@@ -256,11 +273,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     rebuildTreeMI = new JMenuItem("Rebuild Tree");
     rebuildTreeMI.addActionListener(this);
 
+    filterQueryMI = new JMenuItem("Filter Query");
+    filterQueryMI.addActionListener(this);
+    defaultOwnerMI = new JMenuItem("Set Default Owner");
+    defaultOwnerMI.addActionListener(this);
 
     fileMenu.add(rebuildTreeMI);
     fileMenu.add(removeAllMI);
+    fileMenu.add(filterQueryMI);
+    fileMenu.add(defaultOwnerMI);
     fileMenu.addSeparator();
     fileMenu.add(logoutMI);
+
 
     // Action menu
     actionMenu = new JMenu("Actions");
@@ -565,6 +589,89 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     show();
   }
 
+  /**
+   * Returns the templateHash.
+   *
+   * Template Hash is a hash of object type ID's (Short) -> Vector of FieldTemplates
+   */
+  public Hashtable getTemplateHash()
+  {
+    return templateHash;
+  }
+  
+  /**
+   * Returns a vector of FieldTemplates.
+   *
+   * The id number is the base id.
+   */
+  public Vector getTemplateVector(Short id)
+  {
+    Vector result = null;
+
+    if (templateHash.containsKey(id))
+      {
+	if (debug)
+	  {
+	    System.out.println("Found the template, using cache.");
+	  }
+	result = (Vector)templateHash.get(id);
+
+      }
+    else
+      {
+	try
+	  {
+	    if (debug)
+	      {
+		System.out.println("template not found, downloading and caching: " + id);
+	      }
+
+	    result = session.getFieldTemplateVector(id.shortValue());
+	    templateHash.put(id, result);
+
+
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get field templates: " + rx);
+	  }
+
+      }
+    
+    return result;
+
+  }
+
+  public void clearCaches()
+  {
+    cachedLists.clear();
+  }
+
+  /*  public Vector getHandleVector(Object id)
+  {
+    Vector result = null;
+
+    if (cachedLists.containsKey(id))
+      {
+	result = (Vector)cachedLists.get(id);
+	setStatus("Using cached copy");
+      }
+    else
+      {
+	try
+	{
+	setStatus("Downloading new copy");
+	    
+	    }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not load template vector: " + rx);
+	  }
+      }
+    return result;
+    
+  }*/
+
   /*
   public void invalidate()
   {
@@ -744,7 +851,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     try
       {
-	recurseDownCatagories(firstNode);
+	recurseDownCategories(firstNode);
       }
     catch (RemoteException rx)
       {
@@ -764,7 +871,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
-  void recurseDownCatagories(CatTreeNode node) throws RemoteException
+  void recurseDownCategories(CatTreeNode node) throws RemoteException
   {
     Vector
       children;
@@ -806,7 +913,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	if (prevNode instanceof CatTreeNode)
 	  {
-	    recurseDownCatagories((CatTreeNode)prevNode);
+	    recurseDownCategories((CatTreeNode)prevNode);
 	  }
       }
   }
@@ -869,7 +976,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     while (deleted.hasMoreElements())
       {
-	InvidNode node = (InvidNode)deleteHash.get(deleted.nextElement());
+	InvidNode node = ((CacheInfo)deleteHash.get(deleted.nextElement())).getNode();
 	if (committed)
 	  {
 	    System.out.println("Deleteing node: " + node.getText());
@@ -893,7 +1000,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     while (created.hasMoreElements())
       {
 	Invid invid = (Invid)created.nextElement();
-	InvidNode node = (InvidNode)createHash.get(invid);
+	InvidNode node = ((CacheInfo)createHash.get(invid)).getNode();
 	if (committed)
 	  {
 	    System.out.println("Committing created node: " + node.getText());
@@ -919,11 +1026,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     while (changed.hasMoreElements())
       {
 	Invid invid = (Invid)changed.nextElement();
-	InvidNode node = (InvidNode)changedHash.get(invid);
+	CacheInfo info = (CacheInfo)changedHash.get(invid);
+	InvidNode node = info.getNode();
 	if (committed)
 	  {
-	    System.out.println("Updating node: " + node.getText() + " to " + session.viewObjectLabel(invid));
-	    node.setText(session.viewObjectLabel(invid));
+	    if (debug)
+	      {
+		// This shouldn't be the original label.
+		System.out.println("Updating node: " + node.getText() + " to " + info.getOriginalLabel());
+	      }
+	    node.setText(info.getOriginalLabel());
 	  }
 	else
 	  {
@@ -975,86 +1087,92 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	throw new IllegalArgumentException("It's the Query! " + rx);
       }
 
-    try
+    if (_query == null)
       {
-	if (_query == null)
+	System.out.println("query == null");
+      }
+    else
+      {
+	Short Id = new Short(id);
+	//Vector resultDump = getHandleVector(Id);
+
+	Vector resultDump = null;
+	if (cachedLists.containsKey(Id))
 	  {
-	    System.out.println("query == null");
+	    resultDump = (Vector)cachedLists.get(Id);
 	  }
 	else
 	  {
-	    Short Id = new Short(id);
-	    Vector resultDump = null;  //a vector of listHandles
-	    if (cachedLists.containsKey(Id))
+	    try
 	      {
-		resultDump = (Vector)cachedLists.get(Id);
-		setStatus("Using cached copy");
-	      }
-	    else
-	      {
-		setStatus("Downloading new copy");
-
-		QueryResult qr = session.query(_query);
-		resultDump =  qr.getListHandles();
+		Query q = new Query(id);
+		QueryResult qr = session.query(q);
+		resultDump = qr.getListHandles();
 		if (resultDump != null)
 		  {
-		    if (debug)
-		      {
-			System.out.println("Caching list for key: " + Id);
-		      }
-
+		    System.out.println("Caching copy");
 		    cachedLists.put(Id, resultDump);
 		  }
+
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not get dump: " + rx);
 	      }
 
-	    for (int i = 0; i < resultDump.size(); i++)
-	      {
-		listHandle lh = (listHandle)resultDump.elementAt(i);
-		unsorted_objects.addElement(new Result((Invid)lh.getObject(), lh.getLabel()));
-	      }
-
-	    //System.out.println("There are " + unsorted_objects.size() + " objects in the query");
-
-	    if (unsorted_objects.size()  == 0)
-	      {
-		System.out.println("unsorted_objects or sorted_results == null");
-	      }
-	    else
-	      {
-		(new VecQuickSort(unsorted_objects, 
-				  new arlut.csd.Util.Compare() 
-				  {
-				    public int compare(Object a, Object b) 
-				      {
-					Result aF, bF;
-				     
-					aF = (Result) a;
-					bF = (Result) b;
-					int comp = 0;
-				     
-					comp =  aF.toString().compareTo(bF.toString());
-				     
-					if (comp < 0)
-					  {
-					    return -1;
-					  }
-					else if (comp > 0)
-					  { 
-					    return 1;
-					  } 
-					else
-					  { 
-					    return 0;
-					  }
-				      }
-			       }
-			       )).sort();
-	      }
 	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get object labels: " + rx);
+
+	int resultDumpSize = resultDump.size();
+	for (int i = 0; i < resultDumpSize; i++)
+	  {
+	    listHandle lh = (listHandle)resultDump.elementAt(i);
+	    String l = lh.getLabel();
+	    //System.out.println(" Checking: " + l);
+	    if ((l == null) || (l.equals("")))
+	      {
+		l = "null str";
+		System.out.println("Setting string to null str");
+	      }
+	    unsorted_objects.addElement(new Result((Invid)lh.getObject(), l));
+	  }
+
+	//System.out.println("There are " + unsorted_objects.size() + " objects in the query");
+
+	if (unsorted_objects.size()  == 0)
+	  {
+	    System.out.println("unsorted_objects or sorted_results == null");
+	  }
+	else
+	  {
+	    (new VecQuickSort(unsorted_objects, 
+			      new arlut.csd.Util.Compare() 
+			      {
+				public int compare(Object a, Object b) 
+				  {
+				    Result aF, bF;
+				     
+				    aF = (Result) a;
+				    bF = (Result) b;
+				    int comp = 0;
+				     
+				    comp =  aF.toString().compareTo(bF.toString());
+				     
+				    if (comp < 0)
+				      {
+					return -1;
+				      }
+				    else if (comp > 0)
+				      { 
+					return 1;
+				      } 
+				    else
+				      { 
+					return 0;
+				      }
+				  }
+			      }
+			      )).sort();
+	  }
       }
 
     parentNode = node;
@@ -1071,7 +1189,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    invid = ((Result) unsorted_objects.elementAt(i)).getInvid();
 	    label = unsorted_objects.elementAt(i).toString();
-	    //System.out.println("Dealing with " + object.getLabel());
 	  }
 	else
 	  {
@@ -1136,11 +1253,117 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
+  
+
+  // Actions on objects
+
+  public void editObject(Invid invid, InvidNode node)
+  {
+    try
+      {
+	db_object o = session.edit_db_object(invid);
+	wp.addWindow(o, true);
+	changedHash.put(invid, new CacheInfo(new Short(o.getTypeID()), session.viewObjectLabel(invid), null, node));
+	if (node != null)
+	  {
+	    node.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
+	    tree.refresh();
+	  }
+      }
+    catch(RemoteException rx)
+      {
+	throw new RuntimeException("Could not edit object: " + rx);
+      }
+  }
+
+  public void viewObject(Invid invid)
+  {
+    try
+      {
+	wp.addWindow(session.view_db_object(invid), false);
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not edit object: " + rx);
+      }
+    
+
+  }
+
+  public boolean deleteObject(Invid invid, InvidNode node)
+  {
+    boolean ok = false;
+    try
+      {
+	Short id = new Short(invid.getType());
+	if (debug)
+	  {
+	    System.out.println("Deleting invid= " + invid);
+	  }
+
+	// Delete the object
+	ok = session.remove_db_object(invid);
+	if (ok)
+	  {
+	    // Check out the deleteHash.  If this one is already on there,
+	    // then I don't know what to do.  If it isn't, then add a new
+	    // cache info.  I guess maybe update the name or something,
+	    // if it is on there.
+	    if (deleteHash.containsKey(invid))
+	      {
+		System.out.println("already deleted, nothing to change, right?");
+	      }
+	    else
+	      {
+		deleteHash.put(invid, new CacheInfo(id, session.viewObjectLabel(invid), null,node));
+	      }
+
+	    // Take this object out of the cachedLists, if it is in there
+	    if (cachedLists.containsKey(id))
+	      {
+		String label = session.viewObjectLabel(invid);
+		System.out.println("This base has been hashed.  Removing: " + label);
+		Vector lhs = (Vector)cachedLists.get(id);
+		for (int i = 0; i < lhs.size(); i++)
+		  {
+		    //System.out.println("Checking " + ((listHandle)lhs.elementAt(i)).getLabel());
+		    if (((Invid)((listHandle)lhs.elementAt(i)).getObject()) == invid)
+		      {
+			System.out.println("Found it!");
+			lhs.removeElementAt(i);
+			break;
+		      }
+		  }
+	      }
+
+	    if (node != null)
+	      {
+		node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
+		tree.refresh();
+	      }
+
+	    setStatus("Object will be deleted when commit is clicked.");
+	  }
+	else
+	  {
+	    String error = session.getLastError();
+	    System.out.println("Could not delete object: " + error);
+	    setStatus("Delete Failed: " + error);
+	  }
+      }
+    catch(RemoteException rx)
+      {
+	throw new RuntimeException("Could not delete base: " + rx);
+      }
+
+    return ok;
+  }
+
   /**
    * Show a panel which takes a string, and a combo box of types.
    *
    */
-  void editObject()
+  void editObjectDialog()
   {
     if (openDialog == null)
       {
@@ -1175,7 +1398,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    * This displays a window with a chooser for the base and field for the name.
    *
    */
-  void viewObject()
+  void viewObjectDialog()
   {
     if (openDialog == null)
       {
@@ -1192,20 +1415,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else
       {
-	try
-	  {
-	    wp.addWindow(session.view_db_object(invid), false);
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not edit object: " + rx);
-	  }
+	viewObject(invid);
       }
   
 
   }
 
-  void cloneObject()
+  void cloneObjectDialog()
   {
     if (openDialog == null)
       {
@@ -1233,7 +1449,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
-  void inactivateObject()
+  void inactivateObjectDialog()
   {
     if (openDialog == null)
       {
@@ -1280,7 +1496,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
   }
 
-  void deleteObject()
+  void deleteObjectDialog()
   {
     if (openDialog == null)
       {
@@ -1307,18 +1523,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      }
 	    else
 	      {
-		setStatus("deleting " + invid);
-		
-		boolean ok = session.remove_db_object(invid);
-		if (ok)
-		  {
-		    setStatus("Object deleted.");
-		  }
-		else
-		  {
-		    setStatus("Could not delete object.");
-		    arlut.csd.JDialog.JErrorDialog ed = new arlut.csd.JDialog.JErrorDialog(this, "Could not delete object: " + session.getLastError());
-		  }
+		deleteObject(invid, null);
 	      }
 	  }
 	catch (RemoteException rx)
@@ -1342,6 +1547,90 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	throw new IllegalArgumentException("could not logout: " + rx);
       }
+  }
+
+
+  public void chooseFilter()
+  {
+    // This could be moved, only cache is filter is changed?
+    System.out.println("Clearing caches");
+    cachedLists.clear();
+    if (filterDialog == null)
+      {
+	filterDialog = new JFilterDialog(this);
+      }
+    else
+      {
+	filterDialog.setVisible(true);
+      }
+    rebuildTree();
+    
+  }
+
+  public void chooseDefaultOwner(boolean forcePopup)
+  {
+    // What to do here?  don't check for null, because maybe forcePopup was false.
+    // Have to think about this one, maybe keep groups Vector in gclient (ie not local here)
+
+    if (ownerGroups == null)
+      {
+	try
+	  {
+	    ownerGroups = session.getOwnerGroups().getListHandles();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Can't figure out owner groups: " + rx);
+	  }
+	if (ownerGroups == null)
+	  {
+	    throw new RuntimeException("Whoa!  groups is null");
+	  }
+      }
+
+    if (ownerGroups.size() == 0)
+      {
+	throw new RuntimeException("Whoa!  groups is empty");
+      }
+    else if (ownerGroups.size() == 1)
+      {
+	if (!forcePopup) //Otherwise, just show the dialog.
+	  {
+	    defaultOwnerChosen = true;
+
+	    Vector owners = new Vector();
+	    for (int i = 0; i < ownerGroups.size(); i++)
+	      {
+		owners.addElement(((listHandle)ownerGroups.elementAt(i)).getObject());
+	      }
+	    try
+	      {
+		session.setDefaultOwner(owners);
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not set default owner: " + rx);
+	      }
+	    return;
+	  }
+      }
+  	
+    if (defaultOwnerDialog == null)
+      {
+	defaultOwnerDialog = new JDefaultOwnerDialog(this, ownerGroups);
+      }
+    else
+      {
+	defaultOwnerDialog.setVisible(true);
+      }
+
+    defaultOwnerChosen =  true;
+
+  }
+
+  public boolean defaultOwnerChosen()
+  {
+    return defaultOwnerChosen;
   }
 
   /*
@@ -1409,9 +1698,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	wp.closeEditables();
 	somethingChanged = false;
 	session.commitTransaction();
+	
 	wp.refreshTableWindows();
 	session.openTransaction("gclient");
-	
+
 	System.out.println("Done committing");
 	this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
@@ -1435,9 +1725,80 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	wp.closeEditables();
 	session.abortTransaction();
+
+	// Now we need to fix up the caches, and clean up all the changes made
+	// during the transaction
+	Enumeration dels = deleteHash.keys();
+	while (dels.hasMoreElements())
+	  {
+	    Invid invid = (Invid)dels.nextElement();
+	    CacheInfo info = (CacheInfo)deleteHash.get(invid);
+
+	    if (cachedLists.containsKey(info.getBaseID()))
+		{
+		  System.out.println("This one is hashed, sticking it back in.");
+		  Vector list = (Vector)cachedLists.get(info.getBaseID());
+		  list.addElement(new listHandle(info.getOriginalLabel(), invid));
+		}
+
+	  }
+	
+	// Next up is created list: remove all the added stuff.
+	Enumeration created = createHash.keys();
+	while (created.hasMoreElements())
+	  {
+	    Invid invid = (Invid)created.nextElement();
+	    CacheInfo info = (CacheInfo)createHash.get(invid);
+
+	    if (cachedLists.containsKey(info.getBaseID()))
+	      {
+		System.out.println("This one is hashed, taking a created object out.");
+		Vector list = (Vector)cachedLists.get(info.getBaseID());
+		for (int i = 0; i < list.size(); i++)
+		  {
+		    if (invid == (Invid)((listHandle)list.elementAt(i)).getObject())
+		      {
+			System.out.println("Found it! removing it.");
+			list.removeElementAt(i);
+			break;
+		      }
+		  }
+	      }
+	  }
+
+
+
+	// Now go through changed list and revert any names that may be needed
+	Enumeration changed = changedHash.keys();
+	while (changed.hasMoreElements())
+	  {
+	    Invid invid = (Invid)changed.nextElement();
+	    CacheInfo info = (CacheInfo)changedHash.get(invid);
+
+	    if (cachedLists.containsKey(info.getBaseID()))
+	      {
+		System.out.println("This changed base is cached, fixing it back.");
+		Vector list = (Vector)cachedLists.get(info.getBaseID());
+		for (int i = 0; i < list.size(); i++)
+		  {
+		    if (invid == (Invid)((listHandle)list.elementAt(i)).getObject())
+		      {
+			System.out.println("Found it! removing it.");
+			list.removeElementAt(i);
+			list.addElement(new listHandle(info.getOriginalLabel(), invid));
+			break;
+		      }
+		  }
+	      }
+	  }
+
 	somethingChanged = false;
 	session.openTransaction("glient");
+	// This will fix up the tree (remove the trash cans)
 	refreshTree(false);
+
+	// Now we are done
+	deleteHash.clear();
       }
     catch (RemoteException rx)
       {
@@ -1498,41 +1859,39 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else if (event.getActionCommand().equals("open object for editing"))
       {
-	editObject();
+	editObjectDialog();
       }
     else if (event.getActionCommand().equals("open object for viewing"))
       {
-	viewObject();
+	viewObjectDialog();
       }
     else if (event.getActionCommand().equals("choose an object for cloning"))
       {
-	cloneObject();
+	cloneObjectDialog();
       }
     else if (event.getActionCommand().equals("delete an object"))
       {
-	deleteObject();
+	deleteObjectDialog();
       }
     else if (event.getActionCommand().equals("inactivate an object"))
       {
-	inactivateObject();
+	inactivateObjectDialog();
       }
+    else if (event.getActionCommand().equals("Filter Query"))
+      {
+	chooseFilter();
+      }
+    else if (event.getActionCommand().equals("Set Default Owner"))
+      {
+	chooseDefaultOwner(true);
+      }
+    
+
     else if (event.getSource() == logoutMI)
       {
 	if (OKToProceed())
 	  {
 	    logout();
-	    /*
-	      try
-	      {
-	      session.logout();
-	      this.dispose();
-	      _myglogin.connector.setEnabled(true);
-	      _myglogin._quitButton.setEnabled(true);
-	      }
-	      catch (RemoteException rx)
-	      {
-	      throw new IllegalArgumentException("could not logout: " + rx);
-	      }*/
 	  }
       }
     else if (event.getSource() == roseMI)
@@ -1546,6 +1905,29 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     else
       {
 	System.err.println("Unknown action event generated");
+      }
+  }
+
+  protected void processWindowEvent(WindowEvent e) 
+  {
+    super.processWindowEvent(e);
+
+    if (e.getID() == WindowEvent.WINDOW_CLOSING)
+      {
+	System.out.println("Window closing");
+	if (OKToProceed())
+	  {
+	    if (debug)
+	      {
+		System.out.println("It's ok to log out.");
+	      }
+	    logout();
+	  }
+	else if (debug)
+	  {
+	    System.out.println("No log out!");
+	  }
+
       }
   }
 
@@ -1607,12 +1989,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    try
 	      {
+		Short id = new Short(baseN.getBase().getTypeID());
+
+		if (!defaultOwnerChosen)
+		  {
+		    chooseDefaultOwner(false);
+		  }
 		db_object obj = session.create_db_object(baseN.getBase().getTypeID());
 		wp.addWindow(obj, true);
 
+		Invid invid = obj.getInvid();
+
 		InvidNode objNode = new InvidNode(baseN, 
 						  "New Object", 
-						  obj.getInvid(),
+						  invid,
 						  null, false,
 						  OPEN_FIELD_CREATE,
 						  CLOSED_FIELD_CREATE,
@@ -1625,9 +2015,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		    tree.expandNode(baseN, false);
 		  }
 
+		if (cachedLists.containsKey(id))
+		  {
+		    Vector list = (Vector)cachedLists.get(id);
+		    list.addElement(new listHandle("New Object", invid));
+
+		  }
+
 		// Redraw the tree now
 		tree.insertNode(objNode, true);
-		createHash.put(obj.getInvid(), objNode);
+		createHash.put(obj.getInvid(), new CacheInfo(id, "New Object", null, objNode));
+		somethingChanged = true;
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -1747,14 +2145,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    InvidNode invidN = (InvidNode)node;
 	  
-	    try
-	      {
-		wp.addWindow(session.view_db_object(invidN.getInvid()), false);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not create object: " + rx);
-	      }
+	    viewObject(invidN.getInvid());
 	  }
 	else
 	  {
@@ -1769,17 +2160,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    InvidNode invidN = (InvidNode)node;
 	  
-	    try
-	      {	
-		wp.addWindow(session.edit_db_object(invidN.getInvid()), true);
-		changedHash.put(invidN.getInvid(), invidN);
-		invidN.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
-		tree.refresh();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not create object: " + rx);
-	      }
+	    Invid invid = invidN.getInvid();
+		
+	    editObject(invid, invidN);
 	  }
 	else
 	  {
@@ -1793,29 +2176,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	if (node instanceof InvidNode)
 	  {
 	    InvidNode invidN = (InvidNode)node;
+	    Invid invid = invidN.getInvid();
 
-	    try
-	      {
-		if (debug)
-		  {
-		    System.out.println("Deleting invid= " + invidN.getInvid());
-		  }
-		if (session.remove_db_object(invidN.getInvid()))
-		  {
-		    deleteHash.put(invidN.getInvid(), invidN);
-		    invidN.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
-		    tree.refresh();
-		    setStatus("Object will be deleted when commit is clicked.");
-		  }
-		else
-		  {
-		    setStatus(session.getLastError());
-		  }
-	      }
-	    catch(RemoteException rx)
-	      {
-		throw new RuntimeException("Could not delete base: " + rx);
-	      }
+	    deleteObject(invid, invidN);
+
 	  }
 	else  // Should never get here, but just in case...
 	  {
@@ -1960,7 +2324,7 @@ class PersonaListener implements ActionListener{
 
   public void actionPerformed(ActionEvent event)
     {
-
+      //Check to see if we need to commit the transaction first.
       if (gc.somethingChanged)
 	{
 	  // need to ask: commit, cancel, abort?
@@ -1982,7 +2346,7 @@ class PersonaListener implements ActionListener{
 	    }
 	}
 
-
+      // Now change the persona
       boolean personaChangeSuccessful = false;
       if (resource == null)
 	{
@@ -2016,7 +2380,10 @@ class PersonaListener implements ActionListener{
 		{
 		  gc.setStatus("Successfully changed persona.");
 		  gc.setTitle("Ganymede Client: " + event.getActionCommand() + " logged in.");
+		  gc.ownerGroups = null;
+		  gc.clearCaches();
 		  gc.commitTransaction();
+		  gc.rebuildTree();
 		}
 	      else
 		{
@@ -2038,4 +2405,56 @@ class PersonaListener implements ActionListener{
 
     }
 
+}
+
+//-------------------------------------------------------------------------
+class CacheInfo {
+
+  private String
+    originalLabel,
+    currentLabel;
+
+  private InvidNode
+    node;
+
+  private Short
+    baseID;
+
+  public CacheInfo(Short baseID, String originalLabel, String currentLabel, InvidNode node)
+  {
+    this.baseID = baseID;
+    this.originalLabel = originalLabel;
+    this.currentLabel = currentLabel;
+    this.node = node;
+  }
+
+  public void setOriginalLabel(String label)
+  {
+    originalLabel = label;
+  }
+
+  public void changeLabel(String newLabel)
+  {
+    currentLabel = newLabel;
+  }
+    
+  public Short getBaseID()
+  {
+    return baseID;
+  }
+
+  public String getOriginalLabel()
+  {
+    return originalLabel;
+  }
+
+  public String getCurrentLabel()
+  {
+    return currentLabel;
+  }
+
+  public InvidNode getNode()
+  {
+    return node;
+  }
 }
