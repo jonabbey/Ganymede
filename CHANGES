@@ -23,7 +23,7 @@ convert < and > to the XML entity escapes &lt; and &gt;, which could
 cause the server's XML parser to reject password changes that involved
 those characters.
 
-3. [SERVER] Fixed object deletion journal processing on server start-up
+3. [SERVER] Fixed journal processing on server start-up
 
 The server had a bug that prevented successful startup if the server
 was killed without getting a chance to consolidate the database into a
@@ -35,6 +35,14 @@ This was due to an attempt to use Ganymede.internalSession before that
 variable was defined.  This has been fixed by making the
 DBNameSpaceHandle.getField() method look up objects directly out of
 the DBStore tables without using a GanymedeSession, if needed.
+
+I also fixed a bad bug that caused transaction processing in the
+journal handling code to repeatedly process object records in the
+journal.  The journal processing code was not clearing the entry
+vector at the end of each transaction's processing, which caused the
+server to do a lot of repetitive work and to generate misleading
+warnings about 'objects already deleted' in the object deletion
+case.  Ugh.
 
 -------------------- Changes from 1.04 to 1.0.5 -------------------
 

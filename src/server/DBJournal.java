@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2001/05/21 07:21:42 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2001/08/13 21:02:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -383,11 +383,11 @@ public class DBJournal implements ObjectStatus {
 		    status = "Reading created object " + i;
 
 		    obj = new DBObject(base, jFile, true);
-		
-		    System.err.print("Create: " + obj.getInvid());
 
 		    if (debug)
 		      {
+			System.err.println("Create: " + obj.getInvid());
+
 			obj.print(System.err);
 		      }
 
@@ -463,6 +463,10 @@ public class DBJournal implements ObjectStatus {
 	      {
 		((JournalEntry) entries.elementAt(i)).process(store);
 	      }
+
+	    // clear the entries we've now processed
+
+	    entries.setSize(0);
 
 	    EOFok = true;
 	  }
