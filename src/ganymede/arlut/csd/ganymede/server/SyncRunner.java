@@ -83,16 +83,16 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * Channel-style incremental synchronization.  Unlike the full-state
  * {@link arlut.csd.ganymede.server.GanymedeBuilderTask} system,
  * SyncRunner is not designed to be customized through subclassing.
- * All SyncRunner objects generate a standard format XML file for
- * writing out synchronization data, instead.  SyncRunner objects are
- * registered in the server for execution automatically when a Sync
- * Channel object (using the {@link
+ * Instead, all SyncRunner objects generate a common XML file format
+ * for writing out synchronization data.  SyncRunner objects are
+ * registered in the server for execution automatically when a
+ * <code>Sync Channel</code> object (using the {@link
  * arlut.csd.ganymede.server.syncChannelCustom} DBEditObject subclass
- * for management) is created in the Ganymede data store.  This Sync
- * Channel object provides all of the configuration controls which
- * determine where the XML synchronization files are written, what
- * external program should be used to process the files, and what data
- * needs to be written out for synchronization.</p>
+ * for management) is created in the Ganymede data store.  This
+ * <code>Sync Channel</code> object provides all of the configuration
+ * controls which determine where the XML synchronization files are
+ * written, what external program should be used to process the files,
+ * and what data needs to be written out for synchronization.</p>
  *
  * <p>Like {@link arlut.csd.ganymede.server.GanymedeBuilderTask},
  * SyncRunner synchronization is done in a split phase manner, in
@@ -101,34 +101,36 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * SyncRunner's step 1 is done synchronously with transaction commit.
  * Every time a transaction is committed, the Ganymede server compares
  * the objects involved in the transaction against every registered
- * Sync Channel object.  If any of the objects or fields created,
- * deleted, or edited during the transaction matches against the list
- * of object and fields being monitored by the Sync Channel, the Sync
- * Channel writes an XML file to the Sync Channel's output directory.</p>
+ * <code>Sync Channel</code> object.  If any of the objects or fields
+ * created, deleted, or edited during the transaction matches against
+ * a Sync Channel's so-called <code>Field Options</code> matrix of
+ * objects and fields to sync, that Sync Channel will write an XML
+ * file to the directory configured in the Sync Channel's
+ * <code>Directory Path</code> field.</p>
  *
  * <p>Each XML file that is created in a Sync Channel output directory
  * is given a unique filename, based on the number of transactions
- * committed by the Ganymede server since the server was setup.  The
- * first transaction committed is transaction 0, the second is 1, and
- * so forth.  These transaction numbers are global in the Ganymede
- * server.. every time any transaction is committed, the transaction
- * number is incremented, whether or not any Sync Channel matches
- * against the transaction.</p>
+ * committed by the Ganymede server since the server's database was
+ * first initialized.  The first transaction committed is transaction
+ * 0, the second is 1, and so forth.  These transaction numbers are
+ * global in the Ganymede server.  Every time any transaction is
+ * committed, the transaction number is incremented, whether or not
+ * any Sync Channels match against the transaction.</p>
  *
  * <p>These XML files are written out synchronously with the
  * transaction commit.  What this means is that the transaction is not
- * counted as successfully committed until all Sync Channels that
- * match against the transaction successfully write and flush their
- * XML files to the proper output directory.  If a problem prevents
- * any of the Sync Channels from being successfully written, the
+ * counted as successfully committed until all SyncRunners that match
+ * against the transaction successfully write and flush their XML
+ * files to the proper output directory.  If a problem prevents any of
+ * the SyncRunners from successfully writing its XML files, the
  * transaction will be aborted as if it never happened.  All of this
- * is done with proper ACID transactional guarantees.  The Sync
- * Channel implementation is designed so that the Ganymede server can
- * be killed at any time without leaving a transaction partially
- * committed between the sync channels and the Ganymede journal file.
- * Either a transaction is completely recorded to the sync channels
- * and the journal, or it will not be recorded to any sync channel or
- * the journal.</p>
+ * is done with proper ACID transactional guarantees.  The SyncRunner
+ * implementation is designed so that the Ganymede server can be
+ * killed at any time without leaving a transaction partially
+ * committed between the Sync Channels and the Ganymede journal file.
+ * Either a transaction is successfully recorded to all relevant Sync
+ * Channels and the journal, or it will not be recorded to any of
+ * them.</p>
  *
  * <p>All of this behavior corresponds to the logic that is
  * implemented in the {@link
@@ -136,39 +138,42 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * method in the GanymedeBuilderTask class.  The SyncRunner equivalent
  * to the {@link
  * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase2()}
- * method is provided by the Service Program specified in the
- * corresponding Sync Channel object in the Ganymede data store.</p>
+ * method is provided by the <code>Service Program</code> specified in
+ * the corresponding <code>Sync Channel</code> object in the Ganymede
+ * data store.</p>
  *
  * <p>Whenever any transaction is successfully committed, each Sync
- * Runner is requested for execution by the {@link
- * arlut.csd.ganymede.server.GanymedeScheduler}.  When the Sync Runner
- * is scheduled, it calls its external Service Program, passing the
- * most recently committed transaction number as a single command line
- * argument.  The Service Program is meant to examine the Directory
- * Path specified in the Sync Channel object, and to process any XML
- * files with numbers less than or equal to its command line argument.
- * As is the case with GanymedeBuilderTask, the GanymedeScheduler will
- * not relaunch a SyncRunner until the previous execution of the
+ * Runner is scheduled for execution by the {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler}.  When the Sync
+ * Runner's {@link arlut.csd.ganymede.server.SyncRunner#run()} method
+ * is called, it runs its external <code>Service Program</code>,
+ * passing the most recently committed transaction number as a single
+ * command line argument.  The <code>Service Program</code> is meant
+ * to examine the <code>Directory Path</code> specified in the
+ * <code>Sync Channel</code> object, and to process any XML files with
+ * numbers less than or equal to its command line argument.  As is the
+ * case with GanymedeBuilderTask, the GanymedeScheduler will not
+ * relaunch a SyncRunner until the previous execution of the
  * SyncRunner completes.  Unlike GanymedeBuilderTask, the Ganymede
  * server does not prevent new files from being written out while the
- * Service Program is being executed.  It is the responsibility of the
- * Service Program to ignore any XML files that it finds with
- * transaction numbers higher than that passed to it on the command
- * line.</p>
+ * <code>Service Program</code> is being executed.  It is the
+ * responsibility of the <code>Service Program</code> to ignore any
+ * XML files that it finds with transaction numbers higher than that
+ * passed to it on the command line.</p>
  *
  * <p>In this way, the Sync Channel system allows transactions to be
- * committed at a rapid rate, while allowing the Service Program to
- * take as little or as much time as is required to process
- * transactions.  The principle of back-to-back builds is very much
- * part of this Ganymede synchronization mechanism as well.</p>
+ * committed at a rapid rate, while allowing the <code>Service
+ * Program</code> to take as little or as much time as is required to
+ * process transactions.  The principle of back-to-back builds is very
+ * much part of this Ganymede synchronization mechanism as well.</p>
  *
  * <p>Because the Sync Channel transaction files are generated while
  * the transaction is being committed, the Sync Channel writing code
  * has complete access to the before and after state of all objects in
  * the transaction.  This before and after information is incorporated
- * into each XML file, so that the external Service Program has access
- * to the change context in order to apply the appropriate changes
- * against the directory service target.</p>
+ * into each XML file, so that the external <code>Service
+ * Program</code> has access to the change context in order to apply
+ * the appropriate changes against the directory service target.</p>
  *
  * <p>Because Sync Channel synchronization is based on applying
  * changes to a directory service target, it works best on directory
@@ -331,7 +336,8 @@ public class SyncRunner implements Runnable {
    * @param transaction The DBEditSet that is being committed.
    */
 
-  public void writeSync(DBJournalTransaction transRecord, DBEditObject[] objectList, DBEditSet transaction) throws IOException
+  public void writeSync(DBJournalTransaction transRecord, DBEditObject[] objectList,
+			DBEditSet transaction) throws IOException
   {
     XMLDumpContext xmlOut = null;
 
