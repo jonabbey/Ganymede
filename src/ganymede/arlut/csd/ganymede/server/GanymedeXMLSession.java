@@ -953,13 +953,24 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    XMLItem _space = (XMLItem) spacesToAdd.elementAt(i);
 
 	    String _name = _space.getAttrStr("name");
-	    boolean _sensitive = _space.getAttrBoolean("case-sensitive");
 
 	    if (_name == null || _name.equals(""))
 	      {
 		err.println("Error, namespace item " + _space + " has no name.");
 		return false;
 	      }
+
+	    // make sure we have a case-sensitive attribute, just to
+	    // get in the user's face a bit so he doesn't have the
+	    // system doing something unexpected
+
+	    if (_space.getAttrStr("case-sensitive") == null)
+	      {
+		err.println("Error, namespace item " + _space + " has no case-sensitive attribute.");
+		return false;
+	      }
+
+	    boolean _sensitive = _space.getAttrBoolean("case-sensitive");
 
 	    err.println("\tCreating " + _name);
 
