@@ -6,15 +6,16 @@
    
    Created: 9 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:59 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/01/31 02:24:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -42,7 +43,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -168,6 +170,23 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     return false;
   }
+
+  /**
+   * <p>This method should be defined to return true in DBEditObject subclasses
+   * which provide a getLabelHook() method.</p>
+   *
+   * <p>If this method is not redefined to return true in any subclasses which
+   * define a getLabelHook() method, then searches on objects of this type
+   * may not properly reflect the desired label.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean useLabelHook()
+  {
+    return true;
+  }
+
 
   /**
    *
