@@ -15,13 +15,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-import oreilly.Label.*;
-
 import com.sun.java.swing.*;
-
-import gjt.ImageCanvas;
-
-import gjt.*;
+import com.sun.java.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -42,7 +37,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
   boolean
     done;
 
-  ImageCanvas
+  JLabel
     imageCanvas;
 
   JButton 
@@ -55,13 +50,8 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     mainPanel,
     buttonPanel;
 
-  //JMultiLineLabel
   JLabel
     textLabel;
-
-  EtchedBorder panelBorder;
-  EtchedBorder textBorder;
-  EtchedBorder mainBorder;
 
   TableLayout table;
   Image image;
@@ -146,7 +136,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     if (image != null)
       {
 	//	System.out.println("add image");
-	imageCanvas = new ImageCanvas(image);
+	imageCanvas = new JLabel(new ImageIcon(image));
 	textPanel.add("West", imageCanvas);
       }
 
@@ -173,9 +163,9 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     mainPanel.add("South", buttonPanel);
     this.setSize(600, 600);
 
-    mainBorder = new EtchedBorder(mainPanel, 3, 10);
-      
-    add(mainBorder);
+    mainPanel.setBorder(new EtchedBorder());
+
+    add(mainPanel);
 
     // add stuff to panel here
 
@@ -288,11 +278,11 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 			valueHash.put(ct.getLabel(), (String)items.elementAt(0));
 		      }
 		  }
-		else if (element instanceof Separator)
-		  {
-		    Separator sep = (Separator)element;
-		    addSeparator(panel, sep, i);
-		  }
+		//		else if (element instanceof Separator)
+		//		  {
+		//		    Separator sep = (Separator)element;
+		//		    addSeparator(panel, sep, i);
+		//		  }
 		else
 		  {
 		    System.out.println("Item " + i + " is of unknown type");
@@ -330,11 +320,6 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
   public Hashtable DialogShow()
   {
     pack();
-
-    if (image != null)
-      {
-	imageCanvas.setSize(image.getHeight(null), image.getWidth(null));
-      }
 
     repaint();
     show();

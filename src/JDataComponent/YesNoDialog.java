@@ -5,27 +5,35 @@
    A 1.1 compatible YesNoDialog box
    
    Created: 6 February 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package arlut.csd.Dialog;
+package arlut.csd.JDialog;
 
 import java.awt.*;
 import java.awt.event.*;
 
-import gjt.ButtonPanel;
+import com.sun.java.swing.*;
 
-public class YesNoDialog extends Dialog implements ActionListener {
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                     YesNoDialog
 
-  Button yesButton;
-  Button noButton;
+------------------------------------------------------------------------------*/
+
+public class YesNoDialog extends JDialog implements ActionListener {
+
+  JButton yesButton;
+  JButton noButton;
   ButtonPanel buttonPanel;
   ActionListener listener;
 
   boolean answer = false;
+
+  /* -- */
 
   public YesNoDialog(Frame frame, String title, String message, ActionListener listener)
   {
@@ -43,7 +51,6 @@ public class YesNoDialog extends Dialog implements ActionListener {
     setLayout(new BorderLayout());
     add("Center", new MessagePanel(message));
     add("South", buttonPanel);
-    
   }
 
   /**
@@ -51,10 +58,10 @@ public class YesNoDialog extends Dialog implements ActionListener {
    *@deprecated
    */
   public void show()
-    {
-      pack();
-      super.show();
-    }
+  {
+    pack();
+    super.show();
+  }
 
   public void setVisible(boolean b)
   {
@@ -63,6 +70,7 @@ public class YesNoDialog extends Dialog implements ActionListener {
 	answer = false;
 	yesButton.requestFocus();
       }
+
     pack();
     super.setVisible(b);
   }
@@ -89,7 +97,7 @@ public class YesNoDialog extends Dialog implements ActionListener {
 
 }
 
-class MessagePanel extends Panel {
+class MessagePanel extends JPanel {
 
   public MessagePanel(String message)
   {
@@ -100,4 +108,60 @@ class MessagePanel extends Panel {
   {
     return new Insets(10,10,10,10);
   }
+}
+
+/**
+ * Button panel employs a BorderLayout to lay out a Separator in 
+ * the north, and a Panel to which Buttons are added in the 
+ * center.<p>
+ *
+ * Buttons may be added to the panel via two methods:
+ * <dl>
+ * <dd> void   add(Button)
+ * <dd> Button add(String)
+ * </dl>
+ * <p>
+ *
+ * Button add(String) creates a Button and adds it to the
+ * panel, then returns the Button created, as a convenience to
+ * clients so that they do not have to go through the pain
+ * and agony of creating an ImageButton.<p>
+ *
+ * @version 1.0, Apr 1 1996
+ * @author  David Geary
+ * @see     MessageDialog
+ * @see     QuestionDialog
+ * @see     YesNoDialog
+ * @see     gjt.test.DialogTest
+ * @see     gjt.test.ComponentScrollerTest
+ */
+
+class ButtonPanel extends JPanel {
+    JPanel     buttonPanel = new JPanel();
+    //    Separator separator   = new Separator();
+
+    public ButtonPanel() 
+    {
+      setLayout(new BorderLayout(0,5));
+      //      add("North",  separator);
+      add("Center", buttonPanel);
+    }
+
+    public void add(JButton button) 
+    {
+      buttonPanel.add(button);
+    }
+
+    public JButton add(String buttonLabel) 
+    {
+      JButton addMe = new JButton(buttonLabel);
+      buttonPanel.add(addMe);
+      return addMe;
+    }
+
+    protected String paramString() 
+    {
+      return super.paramString() + "buttons=" +
+        countComponents();
+    }
 }
