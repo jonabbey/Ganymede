@@ -7,8 +7,8 @@
    
    Created: 13 October 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/07/14 21:51:51 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/05/19 20:18:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -447,7 +447,7 @@ public class userCategoryWizard extends GanymediatorWizard {
 
     tempBuffer.append("Category ");
     tempBuffer.append(newCategory.getLabel());
-    tempBuffer.append("requires that an expiration date be set.");
+    tempBuffer.append(" requires that an expiration date be set.");
 
     if (terminationDate != null)
       {
