@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.49 $ %D%
+   Version: $Revision: 1.50 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1403,6 +1403,7 @@ public class DBStore {
     PasswordDBField p;
     InvidDBField i;
     BooleanDBField b;
+    GanymedeSession gSession = null;
     DBSession session;
     PermissionMatrixDBField pm;
     
@@ -1410,10 +1411,16 @@ public class DBStore {
 
     // manually insert the root (supergash) admin object
 
-    session = login(Ganymede.rootname);
+    try
+      {
+	gSession = new GanymedeSession();
+      }
+    catch (RemoteException ex)
+      {
+	throw new Error("RMI system could not initialize GanymedeSession");
+      }
 
-    session.id = "internal";
-
+    session = gSession.session;
     session.openTransaction("DBStore bootstrap initialization");
 
     eO =(DBEditObject) session.createDBObject(SchemaConstants.OwnerBase, null); // create a new owner group 
@@ -1490,6 +1497,7 @@ public class DBStore {
     // pm = (PermissionMatrixDBField) eO.getField(SchemaConstants.PermDefaultMatrix);
 
     session.commitTransaction();
+    gSession.logout();
   }
 
   /*
