@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,7 @@ import arlut.csd.JDialog.*;
 public class framePanel extends JInternalFrame implements ChangeListener, Runnable, ActionListener {
   
   // This will be loaded from gclient anyway.
+
   boolean debug = true;
 
   // Indexes for the tabs in the JTabbedPane These numbers have to
@@ -160,6 +161,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     setStatus("Building window.");
     
     // Window properties
+
     setMaximizable(true);
     setResizable(true);
     setClosable(true);
@@ -172,8 +174,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     progressBar = new JProgressBar();
     progressPanel.add(new JLabel("Loading..."));
     progressPanel.add(progressBar);
-    progressPanel.setForeground(Color.black);
-    progressPanel.setBackground(Color.lightGray);
     
     setContentPane(progressPanel);
     
@@ -208,12 +208,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     // windowPanel wants to know if framePanel is changed
     // Maybe this should be replaced with InternalFrameListener?
+
     addInternalFrameListener(getWindowPanel());
     
     // Now setup the framePanel layout
+
     pane = new JTabbedPane();
     
-    // Add the panels to the tabbedPane (add just the panels that every object has.)
+    // Add the panels to the tabbedPane (add just the panels that
+    // every object has.)
+
     general = new JScrollPane();
     pane.addTab("General", null, general);
     general_index = current++;
@@ -257,9 +261,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    // If the field is null, then that means that the aren't
 	    // any personas, and this is jsut a view window, so we
 	    // don't need the panel at all
+
 	    if (persona_field != null)
 	      {
-
 		personae = new JPanel(false);
 		pane.addTab("Personae", null, personae);
 		personae_index = current++;
@@ -327,6 +331,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
     createPanel(general_index);
     showTab(general_index);
+
     pane.setForeground(Color.black);
     pane.setBackground(Color.lightGray);
     setContentPane(pane);
@@ -728,21 +733,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     // Adding a menu bar, checking it out
     JMenuBar menuBar = new JMenuBar();
     menuBar.setBorderPainted(true);
-    //menuBar.setBackground(ClientColor.WindowBG.darker());
     
     JMenu fileM = new JMenu("File");
-    //JMenu editM = new JMenu("Edit");
-    menuBar.add(fileM);
-    //menuBar.add(editM);
-    
-    /*
-    JMenuItem iconifyMI = new JMenuItem("Iconify");
-    iconifyMI.addActionListener(this);
 
-    JMenuItem closeMI = null;
-    closeMI = new JMenuItem("Close");
-    closeMI.addActionListener(this);
-    */
+    menuBar.add(fileM);
 
     JMenu deleteM = new JMenu("Delete");
     JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
