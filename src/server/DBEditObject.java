@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -437,6 +437,20 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       }
   }
 
+  /**
+   *
+   * Hook to have this object create a new embedded object
+   * in the given field.  
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public Invid createNewEmbeddedObject(InvidDBField field)
+  {
+    return null;		// default
+  }
+
   /* -------------------- pseudo-static Customization hooks -------------------- 
 
 
@@ -596,6 +610,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   {
     return false;
   }
+
 
   /**
    *
