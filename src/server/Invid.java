@@ -10,13 +10,30 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
 package arlut.csd.ganymede;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                           Invid
+
+------------------------------------------------------------------------------*/
+
+/**
+ *
+ * An Invid is an immutable object id (an INVariant ID) in the
+ * Ganymede system.  All objects created in the database have a unique
+ * and permanent Invid that identify the object's type and identity.
+ * These invid's are used extensively in the server to track object
+ * relationships and are used on the client to identify objects
+ * on the server.
+ *
+ */
 
 public final class Invid implements java.io.Serializable {
 
