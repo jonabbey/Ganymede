@@ -6,8 +6,8 @@
    Like a JComboBox, but just for Invid's.  It has a couple of pretty
    buttons on the sides.
    
-   Created: ?
-   Version: $Revision: 1.9 $ %D%
+   Created: Before May 7, 1998
+   Version: $Revision: 1.10 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,9 +34,9 @@ import java.util.Vector;
  * buttons on the sides.
  */
 
-public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener {
+public class JInvidChooser extends JPanelCombo implements ActionListener {
 
-  private final static boolean debug = false;
+  private final static boolean debug = true;
 
   JMenuItem
     view,
@@ -125,6 +125,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
     if (allowNone && (!allow) && (!removedNone))
       {
 	Object item = getCombo().getSelectedItem();
+
 	if ((item != null) && (!item.equals(noneHandle)))
 	  {
 	    if (debug)
@@ -190,18 +191,6 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	  }
       }
 
-    // The item listener will remove the <none> if it is deselected.
-
-    if ((!allow) && (!removedNone))
-      {
-	if (debug)
-	  {
-	    System.out.println("Adding item listener.");
-	  }
-
-	getCombo().addItemListener(this);
-      }
-
     allowNone = allow;
   }
 
@@ -219,85 +208,24 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   {
     return allowNone;
   }
-
-  public void itemStateChanged(ItemEvent e)
-  {
-    if (allowNone)
-      {
-	if (debug)
-	  {
-	    System.out.println("None is ok, not changing.");
-	  }
-
-	return;
-      }
-
-    if (e.getStateChange() == ItemEvent.DESELECTED)
-      {
-	if (debug)
-	  {
-	    System.out.println("Something was deslected, was it the noneHandle?");
-	  }
-
-	if ((e.getItem() != null) && e.getItem().equals(noneHandle))
-	  {
-	    if (getCombo().getSelectedItem() == null)
-	      {
-		if (debug)
-		  {
-		    System.out.println("There isn't even a noneHanedle in this one!");
-		  }
-	      }
-	    else if (getCombo().getSelectedItem().equals(noneHandle))
-	      {
-		if (debug)
-		  {
-		    System.out.println("noneHandle is still selected.");
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.out.println("Yes, it is the noneHandle.  Removing now.");
-		  }
-		
-		try
-		  {
-		    getCombo().removeItem(noneHandle);
-		  }
-		catch (ArrayIndexOutOfBoundsException ae)
-		  {
-		    // noneHAndle wasn't in there.
-		    System.out.println("ArrayIndexOutOfBoundsException: must not be in there.");
-		  }
-		catch (IllegalArgumentException asdf)
-		  {
-		    // why does Swing throw this?  To be difficult, I think.
-		    System.out.println("IllegalArgumentException: must not be in there.  Or Swing's screwing with us.");
-		  }
-		
-		getCombo().removeItemListener(this);
-	      }
-	  }
-
-      }
-  }
-
   public void actionPerformed(ActionEvent e)
   {
     if (e.getSource() == view)
       {
 	listHandle lh = (listHandle)getSelectedItem();
-	Invid invid = (Invid)lh.getObject();
+
+	if (lh != null)
+	  {
+	    Invid invid = (Invid)lh.getObject();
 	
-	if (invid == null)
-	  {
-	    showErrorMessage("You don't have permission to view that object.");
-	  }
-	else
-	  {
-	    cp.gc.viewObject(invid);
+	    if (invid == null)
+	      {
+		showErrorMessage("You don't have permission to view that object.");
+	      }
+	    else
+	      {
+		cp.gc.viewObject(invid);
+	      }
 	  }
       }
     else if (e.getSource() == create)
