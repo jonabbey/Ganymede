@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -311,7 +311,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   public void setStatus(String status)
   {
     statusLabel.setText(status);
-    statusLabel.repaint();
   }
 
   /**
