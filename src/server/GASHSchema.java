@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.54 $ %D%
+   Version: $Revision: 1.55 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,10 +79,12 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     deleteCategoryMI = null,
     createObjectMI = null,
     createInternalObjectMI = null,
+    createLowObjectMI = null,
     deleteObjectMI = null,
     createNameMI = null,
     deleteNameMI = null,
     createFieldMI = null,
+    createLowFieldMI = null,
     deleteFieldMI = null,
     createBuiltInMI = null;
   
@@ -293,11 +295,17 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     deleteCategoryMI = new MenuItem("Delete Category");
     createObjectMI = new MenuItem("Create Object Type");
     createInternalObjectMI = new MenuItem("Create Embedded Object Type");
+    createLowObjectMI = new MenuItem("Create Low Range Object Type");
 
     categoryMenu.add(createCategoryMI);
     categoryMenu.add(deleteCategoryMI);
     categoryMenu.add(createObjectMI);
     categoryMenu.add(createInternalObjectMI);
+
+    if (developMode)
+      {
+	categoryMenu.add(createLowObjectMI);
+      }
 
     // builtIn menu
 
@@ -323,7 +331,15 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     baseMenu = new treeMenu("Base Menu");
     deleteObjectMI = new MenuItem("Delete Object Type");
     createFieldMI = new MenuItem("Create Field");
+    createLowFieldMI = new MenuItem("Create low-range Field");
+
     baseMenu.add(createFieldMI);
+
+    if (developMode)
+      {
+	baseMenu.add(createLowFieldMI);
+      }
+
     baseMenu.add(deleteObjectMI);
 
     // field menu
@@ -1101,7 +1117,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	  {
 	    CatTreeNode cNode = (CatTreeNode) node;
 	    Category category = cNode.getCategory();
-	    Base newBase = editor.createNewBase(category, false);
+	    Base newBase = editor.createNewBase(category, false, false);
 	    
 	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
 					    null, false, 2, 2, baseMenu);
@@ -1119,13 +1135,37 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    System.err.println("couldn't create new base." + ex);
 	  }
       }
+    else if (event.getSource() == createLowObjectMI)
+      {
+	try
+	  {
+	    CatTreeNode cNode = (CatTreeNode) node;
+	    Category category = cNode.getCategory();
+	    Base newBase = editor.createNewBase(category, false, true);
+	    
+	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
+					    null, false, 2, 2, baseMenu);
+
+	    tree.insertNode(newNode, false);
+
+	    tree.expandNode(node, false);
+
+	    refreshFields(newNode, true);
+
+	    editBase(newNode);
+	  }
+	catch (RemoteException ex)
+	  {
+	    System.err.println("couldn't create new low-range base." + ex);
+	  }
+      }
     else if (event.getSource() == createInternalObjectMI)
       {
 	try
 	  {
 	    CatTreeNode cNode = (CatTreeNode) node;
 	    Category category = cNode.getCategory();
-	    Base newBase = editor.createNewBase(category, true);
+	    Base newBase = editor.createNewBase(category, true, false);
 	    
 	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
 					    null, false, 4, 4, baseMenu);
@@ -1358,7 +1398,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 			     null).DialogShow();
 	  }
       }
-    else if (event.getSource() == createFieldMI)
+    else if ((event.getSource() == createFieldMI) ||
+	     (event.getSource() == createLowFieldMI))
       {
 	// find the base that asked for the field
 
@@ -1405,7 +1446,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 		j++;
 	      }
 
-	    bF = b.createNewField();
+	    bF = b.createNewField((event.getSource() == createLowFieldMI));
 	    bF.setName(newname);
 
 	    // we want to insert the child's field node
