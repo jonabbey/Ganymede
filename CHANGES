@@ -132,6 +132,22 @@ Now, the admin console will append the stack trace information for
 any RMI remote exception to the console's log area, where it may be
 seen.
 
+11. [Client] Cleaned up resource retention on the Ganymede GUI client
+
+The Ganymede client was doing very little in the way of cleaning up
+allocated structures.  So little, in fact, that it was retaining
+references to remotely exported fields from the server, even if the
+client had been logged out.
+
+The client has had some extensive work done to disassemble object
+structures when appropriate.  This will very significantly reduce
+memory loading on the client, and may help forestall memory usage
+growth on the Ganymede server.
+
+I need to do some experimentation with the modified client to be sure,
+however.  Either this change to the client will help reduce memory
+bloat on the server, or I'm running into an RMI bug, I think.
+
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
 RELEASE DATE: January 30, 2001
