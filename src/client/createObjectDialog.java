@@ -11,6 +11,7 @@ import com.sun.java.swing.*;
 import java.util.*;
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
+import arlut.csd.JDialog.JCenterDialog;
 
 
 public class createObjectDialog extends JCenterDialog implements ActionListener {
