@@ -3,6 +3,28 @@ March 10, 2003
 CHANGES
 ---------------------------------------------
 
+-------------------- Changes from 1.0.11 to 1.0.13 -------------------
+
+RELEASE DATE: ?, 2003
+
+1. [CLIENT/CONSOLE/SERVER] Reworked RMI API to be system firewall transparent
+
+This is an extension of the 1.0.12#7 work.  It used to be that the
+server used RMI calls to the client and admin console to send
+notification for build status and force off (on the client) and all of
+the data displays on the admin console.  The problem with this is that
+it required the client/console to open a socket and wait for an RMI
+call from the server to send update information.
+
+I have now reworked the server, client, and admin console so that all
+transmission of data from the server to the client is done by having
+the client/console run a polling thread which repeatedly calls an
+asynchronous message port on the server.  Since the data is flowing
+through the result of a forward RMI call, no socket needs to be opened
+up for listening on the client/console system, and full functionality
+is achieved even in the presence of a client-side system/personal
+firewall.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 10, 2003
