@@ -4,7 +4,7 @@
   A test framework for the baseTable GUI component
 
   Created: 5 June 1996
-  Version: $Revision: 1.4 $ %D%
+  Version: $Revision: 1.5 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -113,7 +113,7 @@ public class testTable extends Applet implements rowSelectCallback, ActionListen
   {
     setLayout(new BorderLayout());
 
-    statusField = new TextField("rowTable Testing", 40, null);
+    statusField = new TextField("rowTable Testing", 40);
     statusField.setEditable(false);
     statusField.setBackground(Color.red);
     statusField.setForeground(Color.white);
@@ -124,7 +124,7 @@ public class testTable extends Applet implements rowSelectCallback, ActionListen
 	System.err.println("testTable constructor: constructing gridTable");
       }
 
-    table = new csd.Table.rowTable(colWidths, headers, this);
+    table = new csd.Table.rowTable(colWidths, headers, this, null);
 
     if (debug)
       {
