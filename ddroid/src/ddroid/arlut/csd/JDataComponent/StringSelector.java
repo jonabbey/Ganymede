@@ -909,8 +909,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     
     if (handles.size() > 1)
       {
-	ok = true;
-
 	if (my_callback != null)
 	  {
 	    Vector objVector = new Vector(handles.size());
@@ -920,6 +918,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		objVector.addElement(((listHandle) handles.elementAt(i)).getObject());
 	      }
 
+	    ok = false;		// if we get an exception, that's not okay
+
 	    try
 	      {
 		ok = my_callback.setValuePerformed(new JAddVectorValueObject(this, objVector));
@@ -928,7 +928,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		throw new RuntimeException("Could not setValuePerformed: " + rx);
 	      }
-	  } 
+	  }
+	else
+	  {
+	    ok = true;
+	  }
 
 	if (ok)
 	  {
@@ -947,10 +951,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
     else
       {
-	ok = true;
-
 	if (my_callback != null)
 	  {
+	    ok = false;
+
 	    try
 	      {
 		ok = my_callback.setValuePerformed(new JAddValueObject(this,
@@ -960,7 +964,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		throw new RuntimeException("Could not setValuePerformed: " + rx);
 	      }
-	    
+	  }
+	else
+	  {
+	    ok = true;
 	  }
 
 	if (ok)
@@ -1002,8 +1009,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (handles.size() > 1)
       {
-	ok = true;
-
 	if (my_callback != null)
 	  {
 	    Vector objVector = new Vector(handles.size());
@@ -1013,6 +1018,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		objVector.addElement(((listHandle) handles.elementAt(i)).getObject());
 	      }
 
+	    ok = false;
+
 	    try
 	      {
 		ok = my_callback.setValuePerformed(new JDeleteVectorValueObject(this, objVector));
@@ -1021,7 +1028,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		throw new RuntimeException("Could not setValuePerformed: " + rx);
 	      }
-	  } 
+	  }
+	else
+	  {
+	    ok = true;
+	  }
 
 	if (ok)
 	  {
@@ -1040,10 +1051,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
     else
       {
-	ok = true;
-
 	if (my_callback != null)
 	  {
+	    ok = false;
+
 	    try
 	      {
 		ok = my_callback.setValuePerformed(new JDeleteValueObject(this, 
@@ -1053,6 +1064,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		throw new RuntimeException("Could not setValuePerformed: " + rx);
 	      }
+	  }
+	else
+	  {
+	    ok = true;
 	  }
 
 	if (ok)
@@ -1185,9 +1200,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   private void addNewString()
   {
-    String item = custom.getText();
+    String inputText = custom.getText();
 
-    if (item.equals("") || in.containsLabel(item))
+    if (inputText.equals("") || in.containsLabel(inputText))
       {
 	if (debug)
 	  {
@@ -1206,12 +1221,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Checking to see if this is a viable option");
 	  }
 	    
-	if (out.containsLabel(item)) 
+	if (out.containsLabel(inputText)) 
 	  {
-	    out.setSelectedLabel(item);
+	    out.setSelectedLabel(inputText);
 	    listHandle handle = out.getSelectedHandle();
 	    
-	    boolean ok = true;
+	    boolean ok;
 	    
 	    if (my_callback != null)
 	      {
@@ -1225,6 +1240,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  {
 		    throw new RuntimeException("Could not setValuePerformed: " + rx);
 		  }
+	      }
+	    else
+	      {
+		ok = true;
 	      }
 	    
 	    if (ok)
@@ -1263,12 +1282,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	// I need to see if it's in there first, because if it is,
 	// IF IT IS, then you have to move the String over.  HA!
 
-	if ((out != null) && out.containsLabel(item))
+	if ((out != null) && out.containsLabel(inputText))
 	  {
-	    out.setSelectedLabel(item);
+	    out.setSelectedLabel(inputText);
 	    listHandle handle = out.getSelectedHandle();
 		
-	    boolean ok = true;
+	    boolean ok;
 		
 	    if (my_callback != null)
 	      {
@@ -1282,40 +1301,45 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  {
 		    throw new RuntimeException("Could not setValuePerformed: " + rx);
 		  }
-		    
-		if (ok)
-		  {
-		    putItemIn(handle);
-		    custom.setText("");
-		  }	
 	      }
-	    else //no callback to check
+	    else
 	      {
-		in.addItem(new listHandle(item, item));
-		//		    in.setSelectedValue(item, true);
+		ok = true;
+	      }
+
+	    if (ok)
+	      {
+		putItemIn(handle);
 		custom.setText("");
 	      }	
 	  }
 	else 
 	  {
-	    //Not in the out box, send up the String
+	    // Not in the out box, send up the String as-is, with no attached data
 		
-	    boolean ok = false;
+	    boolean ok;
 
-	    try
+	    if (my_callback != null)
 	      {
-		ok = my_callback.setValuePerformed(new JAddValueObject(this, item));
+		ok = false;
+
+		try
+		  {
+		    ok = my_callback.setValuePerformed(new JAddValueObject(this, inputText));
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not setValuePerformed: " + rx);
+		  }
 	      }
-	    catch (RemoteException rx)
+	    else
 	      {
-		throw new RuntimeException("Could not setValuePerformed: " + rx);
+		ok = true;
 	      }
 		
 	    if (ok)
 	      {
-		in.addItem(new listHandle(item, item));
-		    
-		//	in.setSelectedValue(item, true);
+		in.addItem(new listHandle(inputText, inputText));
 		custom.setText("");
 	      }
 	    else
