@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2002/01/14 22:25:31 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2002/01/14 22:25:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ public class VectorUtils {
 	threshold += vectB.size();
       }
 
-    if (threshold < 6)
+    if (threshold < 6)		// I pulled 6 out of my ass
       {
 	Vector result = new Vector();
 
