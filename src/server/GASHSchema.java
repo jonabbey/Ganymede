@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -797,6 +797,54 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	catch (RemoteException ex)
 	  {
 	    System.err.println("couldn't create new base." + ex);
+	  }
+      }
+    else if (event.getSource() == deleteCategoryMI)
+      {
+	CatTreeNode cNode = (CatTreeNode) node;
+	Category category = cNode.getCategory();
+	DialogRsrc dialogResource;
+
+	if (node == objects)
+	  {
+	    new StringDialog(this,
+			     "Error:  Category not removable",
+			     "You are not allowed to remove the root category node.",
+			     "Ok",
+			     null).DialogShow();
+	    return;
+	  }
+
+	try
+	  {
+	    if (category.getNodes().size() != 0)
+	      {
+		new StringDialog(this,
+				 "Error:  Category not removable",
+				 "This category has nodes under it.  You must remove the contents before deleting this category.",
+				 "Ok",
+				 null).DialogShow();
+		return;
+	      }
+
+	    dialogResource = new DialogRsrc(this, 
+					    "Delete category", 
+					    "Are you sure you want to delete category " + category.getPath() + "?",
+					    "Delete", "Cancel", 
+					    questionImage);
+
+	    Hashtable results = new StringDialog(dialogResource).DialogShow();
+
+	    if (results != null)
+	      {
+		Category parent = category.getCategory();
+		parent.removeNode(category.getName());
+		tree.deleteNode(node, true);
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote " + ex);
 	  }
       }
     else if (event.getSource() == createObjectMI)
