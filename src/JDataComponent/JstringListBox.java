@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2001/07/03 21:07:46 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2001/07/03 21:55:43 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.37 $ $Date: 2001/07/03 21:07:46 $ $Name:  $
+ * @version $Revision: 1.38 $ $Date: 2001/07/03 21:55:43 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
@@ -221,11 +221,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     try
       {
-	if (items == null || items.size() == 0)
-	  {
-	    return;
-	  }
-
 	doSort = sort;
 
 	if (comparator == null)
@@ -237,13 +232,18 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	    this.comparator = comparator;
 	  }
 
-	if (doSort)
+	if (items == null || items.size() == 0)
 	  {
-	    new VecQuickSort(items, comparator).sort();
+	    return;
 	  }
 	
 	if (items.elementAt(0) instanceof listHandle)
 	  {
+	    if (doSort)
+	      {
+		new VecQuickSort(items, comparator).sort();
+	      }
+
 	    for (int i = 0; i < items.size(); i++)
 	      {
 		listHandle handle = (listHandle) items.elementAt(i);
@@ -258,6 +258,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  }
 	else  //It must be a string, or it will throw a ClassCastException
 	  {
+	    Vector convertedVect = new Vector(items.size());
+
 	    for (int i = 0; i < items.size(); i++)
 	      {
 		String s = (String)items.elementAt(i);
@@ -266,8 +268,20 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 		  {
 		    maxWidthString = s;
 		  }
+
+		convertedVect.addElement(new listHandle(s,s));
+	      }
+
+	    if (doSort)
+	      {
+		new VecQuickSort(convertedVect, comparator).sort();
+	      }
+	    
+	    for (int i = 0; i < convertedVect.size(); i++)
+	      {
+		listHandle handle = (listHandle) convertedVect.elementAt(i);
 		
-		insertHandleAt(new listHandle(s,s), i);
+		insertHandleAt(handle, i);
 	      }
 	  }
       }
