@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -216,15 +216,31 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       owner_index = current++;
       
       // Check to see if this gets an objects_owned panel
+      //
+      // Only OwnerBase objects get an objects_owned panel.  The
+      // supergash OwnerBase does not get an objects_owned panel.
+      //
+      // Only user objects get a persona panel.
+
       short id = -1;
       try
 	{
 	  id = object.getTypeID();
 	  if (id == SchemaConstants.OwnerBase)
 	    {
-	      objects_owned = new JScrollPane();
-	      pane.addTab("Objects Owned", null, objects_owned);
-	      objects_owned_index = current++;
+	      if (getObjectInvid().equals(new Invid((short)0, 1)))
+		{
+		  if (debug)
+		    {
+		      System.out.println("framePanel:  Supergash doesn't get an ownership panel.");
+		    }
+		}
+	      else
+		{
+		  objects_owned = new JScrollPane();
+		  pane.addTab("Objects Owned", null, objects_owned);
+		  objects_owned_index = current++;
+		}
 	    }
 	  else if (id == SchemaConstants.UserBase)
 	    {
