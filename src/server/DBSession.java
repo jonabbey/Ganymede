@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 2000/10/03 06:31:00 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 2000/10/04 09:38:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.94 $ %D%
+ * @version $Revision: 1.95 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -743,17 +743,14 @@ final public class DBSession {
    * is in the middle of being deleted 
    */
 
-  public synchronized DBObject viewDBObject(short baseID, int objectID, boolean getOriginal)
+  public DBObject viewDBObject(short baseID, int objectID, boolean getOriginal)
   {
     DBObjectBase base;
     DBObject     obj = null;
-    Short      baseKey;
-    Integer      objKey;
 
     /* -- */
 
-    baseKey = new Short(baseID);
-    base = Ganymede.db.getObjectBase(baseKey);
+    base = Ganymede.db.getObjectBase(baseID);
 
     if (base == null)
       {
@@ -780,35 +777,41 @@ final public class DBSession {
 	return obj;
       }
 
-    if (obj == null)
+    // if we are editing something, we need to be more careful about
+    // synchronization with editing methods
+
+    synchronized (this)
       {
-	// not in transaction.. maybe we created it?
+	if (obj == null)
+	  {
+	    // not in transaction.. maybe we created it?
+	    
+	    return editSet.findObject(new Invid(baseID, objectID));
+	  }
+	
+	// okay, we found it and we've got a transaction open.. see if the
+	// object is being edited and, if so, if it is us that is doing it
+	
+	DBEditObject shadow = obj.shadowObject;
+	
+	if (shadow == null || shadow.getSession() != this)
+	  {
+	    return obj;
+	  }
 
-	return editSet.findObject(new Invid(baseID, objectID));
+	// okay, the object is being edited by us.. if we are supposed to
+	// return the original version of an object being deleted, and
+	// this one is, return the original
+	
+	if (getOriginal && shadow.getStatus() == ObjectStatus.DELETING)
+	  {
+	    return obj;
+	  }
+	
+	// else return the object being edited
+	
+	return shadow;
       }
-
-    // okay, we found it and we've got a transaction open.. see if the
-    // object is being edited and, if so, if it is us that is doing it
-
-    DBEditObject shadow = obj.shadowObject;
-
-    if (shadow == null || shadow.getSession() != this)
-      {
-	return obj;
-      }
-
-    // okay, the object is being edited by us.. if we are supposed to
-    // return the original version of an object being deleted, and
-    // this one is, return the original
-
-    if (getOriginal && shadow.getStatus() == ObjectStatus.DELETING)
-      {
-	return obj;
-      }
-
-    // else return the object being edited
-
-    return shadow;
   }
 
   /**
