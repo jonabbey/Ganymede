@@ -18,6 +18,8 @@ if test ! -d $GROOTDIR/src/classes; then
 fi
 export GROOTDIR
 
+
+
 # Find perl (GPERL)
 
 guessperl=`which perl5`
@@ -26,7 +28,7 @@ guessperl=`which perl5`
   guessperl=`which perl`
  fi
 
-echo "Where is perl5 installed? [$guessperl] \c" 
+echo "\nWhere is perl5 installed? [$guessperl] \c" 
 
 read userperl
 
@@ -40,12 +42,14 @@ fi
 # echo $GPERL
 export GPERL
 
+
+
 # Find java
 
 guessjava=`which java`
 guessjava=`dirname ${guessjava}`
 
-echo "What is the location of the directory where java is installed? [$guessjava] \c"
+echo "\nWhat is the location of the directory where java is installed? [$guessjava] \c"
 
 read userjava
 
@@ -57,5 +61,19 @@ fi
 
 # echo $GJAVA
 export GJAVA
+
+
+
+# Get desired location of generated class files
+
+if [ "$1" = "-develop" ]
+    then
+    echo "\nWhere should the class files be located? \c"
+    read GCLASSDIR
+fi
+
+# echo $GCLASSDIR
+export GCLASSDIR
+
 
 $GPERL $GROOTDIR/scripts/configurator.perl
