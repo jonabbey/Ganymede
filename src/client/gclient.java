@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.77 $ %D%
+   Version: $Revision: 1.78 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -184,8 +184,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     commit,
     cancel;
   
-  JTextField
-    statusLabel;
+  final JTextField
+    statusLabel = new JTextField();
+
 
   private JSplitPane
     sPane;
@@ -673,7 +674,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     JPanel bottomBar = new JPanel(false);
     bottomBar.setLayout(new BorderLayout());
 
-    statusLabel = new JTextField();
     statusLabel.setEditable(false);
     statusLabel.setOpaque(false);
     statusLabel.setBorder(statusBorder);
@@ -794,6 +794,72 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
 
     cachedLists.clearCaches();
+  }
+
+  public objectList getObjectList(Short id, boolean showAll)
+  {
+    objectList objectlist = null;
+
+    if (cachedLists.containsList(id))
+      {
+	if (debug)
+	  {
+	    System.out.println("++ getting objectlist from the cachedLists.");
+	  }
+
+	objectlist = cachedLists.getList(id);
+	if (showAll)
+	  {
+	    if (!objectlist.containsNonEditable())
+	      {
+		try
+		  {
+		    QueryResult qr = session.query(new Query(id.shortValue(), null, !showAll));
+		    
+		    if (qr != null)
+		      {
+			if (debug)
+			  {
+			    System.out.println("augmenting");
+			  }
+			objectlist.augmentListWithNonEditables(qr);
+		      }
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not do the query: " + rx);
+		  }
+	      }
+
+	    cachedLists.putList(id, objectlist);
+	  }
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.out.println("++ objectlist not in cached lists, downloading a new one.");
+	  }
+
+	try
+	  {
+	    QueryResult qr = session.query(new Query(id.shortValue(), null, !showAll));
+
+	    if (debug)
+	      {
+		System.out.println("Caching copy");
+	      }
+	    
+	    objectlist = new objectList(qr);
+	    cachedLists.putList(id, objectlist);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get dump: " + rx);
+	  }
+      }
+
+    return objectlist;
   }
 
   /**
@@ -967,8 +1033,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	System.out.println("Setting status: " + status);
       }
 
-    statusLabel.setText(status);
-    statusLabel.paintImmediately(statusLabel.getVisibleRect());
+    final String fStatus = status;
+
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+	statusLabel.setText(fStatus);
+	statusLabel.paintImmediately(statusLabel.getVisibleRect());
+      }
+    });
   }
 
   /**
@@ -1584,77 +1656,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     base = node.getBase();    
     Id = node.getTypeID();
 
-    if (cachedLists.containsList(Id))
-      {
-	if (debug)
-	  {
-	    System.out.println("++ getting objectlist from the cachedLists.");
-	  }
-
-	objectlist = cachedLists.getList(Id);
-
-      }
-    else
-      {
-	if (debug)
-	  {
-	    System.out.println("++ objectlist not in cached lists, downloading a new one.");
-	  }
-
-	try
-	  {
-	    QueryResult qr = null;
-	    if (node.isShowAll())
-	      {
-		qr = session.query(node.getAllQuery());
-	      }
-	    else
-	      {
-		qr = session.query(node.getEditableQuery());
-	      }
-
-	    if (qr != null)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Caching copy");
-		  }
-
-		objectlist = new objectList(qr);
-		cachedLists.putList(Id, objectlist);
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get dump: " + rx);
-	  }
-      }
-
-    if (node.isShowAll())
-      {
-	if (debug)
-	  {
-	    System.out.println("node is show all");
-	  }
-
-	if (!objectlist.containsNonEditable())
-	  {
-	    QueryResult qr = session.query(node.getAllQuery());
-	    
-	    if (qr != null)
-	      {
-		if (debug)
-		  {
-		    System.out.println("augmenting");
-		  }
-		objectlist.augmentListWithNonEditables(qr);
-	      }
-	  }
-      }
-    else if (debug)
-      {
-	System.out.println("node is not show all.");
-      }
+    objectlist = getObjectList(Id, node.isShowAll());
 
     objectHandles = objectlist.getObjectHandles(true, node.isShowAll()); // include inactives
 
@@ -2207,10 +2209,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     try
       {
-	db_object o = session.edit_db_object(invid);
+	ReturnVal rv = handleReturnVal(session.edit_db_object(invid));
+
+	db_object o = rv.getObject();
 	if (o == null)
 	  {
-	    showErrorMessage("Cannot edit that object.");
+	    // Assume the returnVal threw up a dialog for us
 	    return;
 	  }
 	wp.addWindow(o, true, objectType);
@@ -2259,7 +2263,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     try
       {
-	obj = session.create_db_object(type);
+	ReturnVal rv = handleReturnVal(session.create_db_object(type));
+	obj = rv.getObject();
       }
     catch (RemoteException rx)
       {
@@ -2395,7 +2400,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   {
     try
       {
-	db_object object = session.view_db_object(invid);
+	ReturnVal rv = handleReturnVal(session.view_db_object(invid));
+	db_object object = rv.getObject();
 	if (object == null)
 	  {
 	    showErrorMessage("You are not allowed to \nview that object.");
@@ -2837,7 +2843,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	try
 	  {
-	    wp.addWindow(session.clone_db_object(invid), true);
+	    ReturnVal rv = handleReturnVal(session.clone_db_object(invid));
+	    wp.addWindow(rv.getObject(), true);
 	  }
 	catch (RemoteException rx)
 	  {
@@ -3611,23 +3618,32 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    my_querybox = new querybox(this, this, "Query Panel");
 	  }
 
-	Query q = my_querybox.myshow();
+	final Query q = my_querybox.myshow();
+	final Session s = getSession();
+	final gclient thisGclient = this;
 
-	if (q != null)
-	  {
-	    DumpResult buffer = null;
-
-	    try
+	Thread t = new Thread(new Runnable() {
+	  public void run() {
+	    if (q != null)
 	      {
-		buffer = session.dump(q);
+		thisGclient.wp.addWaitWindow(this);
+		DumpResult buffer = null;
+		
+		try
+		  {
+		    buffer = s.dump(q);
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("caught remote: " + ex);
+		  }
+		
+		thisGclient.wp.addTableWindow(session, q, buffer, "Query Results");
+		thisGclient.wp.removeWaitWindow(this);
 	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("caught remote: " + ex);
-	      }
+	  }});
 
-	    wp.addTableWindow(session, q, buffer, "Query Results");
-	  }
+	t.start();
       }
     else if (source == clearTreeMI)
       {
@@ -3713,6 +3729,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     viewObject(invid);
 
 
+  }
+
+  public void addTableWindow(Session session, Query query, DumpResult buffer, String title)
+  {
+    wp.addTableWindow(session, query, buffer, title);
   }
   
   protected void processWindowEvent(WindowEvent e) 
@@ -3947,35 +3968,46 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    querybox box = new querybox(base, this,  this, "Query Panel");
 
 	    setNormalCursor();
-	    Query q = box.myshow();
+	    final Query q = box.myshow();
+	    final gclient thisGclient = this;
+	    final String text = node.getText();
 
-	    if (q != null)
-	      {
-		DumpResult buffer = null;
-
-		try
+	    Thread t = new Thread(new Runnable() {
+	      public void run() {
+		if (q != null)
 		  {
-		    setStatus("Sending query for base " + node.getText() + " to server");
+		    thisGclient.wp.addWaitWindow(this);
 
-		    buffer = session.dump(q);
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("caught remote: " + ex);
-		  }
-
-		if (buffer != null)
-		  {
-		    setStatus("Server returned results for query on base " + 
-			      node.getText() + " - building table");
+		    DumpResult buffer = null;
 		    
-		    wp.addTableWindow(session, q, buffer, "Query Results");
+		    try
+		      {
+			thisGclient.setStatus("Sending query for base " + text + " to server");
+			
+			buffer = thisGclient.getSession().dump(q);
+		      }
+		    catch (RemoteException ex)
+		      {
+			throw new RuntimeException("caught remote: " + ex);
+		      }
+		    
+		    if (buffer != null)
+		      {
+			thisGclient.setStatus("Server returned results for query on base " + 
+					      text + " - building table");
+			
+			thisGclient.addTableWindow(session, q, buffer, "Query Results");
+		      }
+		    else
+		      {
+			thisGclient.setStatus("results == null");
+		      }
+
+		    thisGclient.wp.removeWaitWindow(this);
 		  }
-		else
-		  {
-		    setStatus("results == null");
-		  }
-	      }
+	      }});
+	      
+	      t.start();
 	  }
       }
     else if (event.getActionCommand().equals("Show All Objects"))
