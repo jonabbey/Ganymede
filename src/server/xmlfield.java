@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2001/11/15 01:45:56 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2001/11/15 02:01:03 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.15 $ $Date: 2001/11/15 01:45:56 $ $Name:  $
+ * @version $Revision: 1.16 $ $Date: 2001/11/15 02:01:03 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -918,8 +918,8 @@ public class xmlfield implements FieldType {
 		// any that are missing
 
 		Vector currentValues = field.getValues();
-		Vector removeValues = VectorUtils.difference(currentValues, setValues);
-		Vector newValues = VectorUtils.difference(setValues, currentValues);
+		Vector removeValues = VectorUtils.minus(currentValues, setValues);
+		Vector newValues = VectorUtils.minus(setValues, currentValues);
 
 		if (removeValues.size() != 0)
 		  {
@@ -1024,6 +1024,10 @@ public class xmlfield implements FieldType {
 		invid_field field = (invid_field) owner.objref.getField(fieldDef.getID());
 
 		/* -- */
+
+		/* note that we use VectorUtils.difference() here
+		   rather than VectorUtils.minus(), as we don't allow
+		   duplicate invid's in an invid field. */
 
 		if (setValues != null)
 		  {
