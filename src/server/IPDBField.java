@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -675,7 +675,9 @@ public class IPDBField extends DBField implements ip_field {
 
   public boolean v6Allowed()
   {
-    return definition.base.objectHook.isIPv6OK(this);
+    DBEditObject eObj = (DBEditObject) owner;
+
+    return eObj.isIPv6OK(this);
   }
 
   /**
