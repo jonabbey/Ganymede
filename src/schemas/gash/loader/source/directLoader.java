@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -926,7 +926,7 @@ public class directLoader {
       }
 
     System.out.println();
-    System.out.println("Done scanning internet_assignment file for system type objects");
+    System.out.println("Done scanning rooms for networks");
   }
 
   /**
@@ -2042,6 +2042,21 @@ public class directLoader {
 	for (int i = 0; i < sysObj.interfaces.size(); i++)
 	  {
 	    iO = (interfaceObj) sysObj.interfaces.elementAt(i);
+
+	    if (debug)
+	      {
+		System.err.print("Creating interface for system " + sysObj.systemName);
+		
+		if (iO.interfaceName != null && !iO.interfaceName.equals(""))
+		  {
+		    System.err.print(" : ");
+		    System.err.println(iO.interfaceName);
+		  }
+		else
+		  {
+		    System.err.println();
+		  }
+	      }
 
 	    intInvid = ((invid_field) current_field).createNewEmbedded().getInvid();
 	    interfaceRef = (DBEditObject) my_client.session.edit_db_object(intInvid);
