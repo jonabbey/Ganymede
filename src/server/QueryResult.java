@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -88,7 +88,11 @@ public class QueryResult implements java.io.Serializable {
 	System.err.println("QueryResult: addRow(" + invid + "," + label + ")");
       }
 
-    buffer.append(invid.toString());
+    if (invid != null)
+      {
+	buffer.append(invid.toString());       
+      }
+
     buffer.append("|");
     char[] chars = label.toCharArray();
     
@@ -249,7 +253,14 @@ public class QueryResult implements java.io.Serializable {
 	    tempString.append(chars[index++]);
 	  }
 
-	invids.addElement(new Invid(tempString.toString()));
+	if (tempString.toString().length() != 0)
+	  {
+	    invids.addElement(new Invid(tempString.toString()));
+	  }
+	else
+	  {
+	    invids.addElement(null);
+	  }
 
 	index++;		// skip over |
 
