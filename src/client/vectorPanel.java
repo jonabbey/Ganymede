@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.11 $ %D%
+  Version: $Revision: 1.12 $ %D%
   Module By: Navin Manohar
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -22,7 +22,6 @@ import arlut.csd.ganymede.*;
 
 import java.awt.event.*;
 import java.awt.*;
-import gjt.*;
 
 import arlut.csd.JDataComponent.*;
 import java.util.*;
@@ -32,6 +31,7 @@ import java.net.*;
 import jdj.PackageResources;
 
 import com.sun.java.swing.*;
+import com.sun.java.swing.border.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -47,7 +47,7 @@ import com.sun.java.swing.*;
  *
  */
 
-public class vectorPanel extends JBufferedPane implements JsetValueCallback, ActionListener {
+public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener {
 
   private final static boolean debug = true;
 
@@ -77,12 +77,9 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
   short 
     type;
 
-  JBufferedPane
+  JPanel
     bottomPanel,
     centerPanel;
-
-  JBorderedPane
-    border;
 
   boolean 
     editable,
@@ -146,9 +143,9 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
     this.parent = parent;
     this.container = container;
 
-    bottomPanel = new JBufferedPane(false);
+    bottomPanel = new JPanel(false);
     bottomPanel.setLayout(new BorderLayout());
-    centerPanel = new JBufferedPane(false);
+    centerPanel = new JPanel(false);
 
     //centerPanel.setLayout(new ColumnLayout(Orientation.LEFT,Orientation.TOP));
     centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
@@ -177,7 +174,7 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
       }
     
     setLayout(new BorderLayout());
-    setBorderStyle(2);
+    setBorder(new EtchedBorder());
     //add("South", addB);
     
     compVector = new Vector();
@@ -330,7 +327,7 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 							   invidfield.isEditable() && editable,
 							   parent.parent,
 							   parent, container.frame);
-		    cp.setBorderStyle(1);
+		    cp.setBorder(new LineBorder(Color.black));
 
 		    addElement(cp);
 		  }
@@ -411,7 +408,7 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
 						       my_field.isEditable() && editable,
 						       parent.parent,
 						       parent, container.frame);
-		cp.setBorderStyle(1);
+		cp.setBorder(new LineBorder(Color.black));
 		addElement(cp);
 	      }
 	    catch (RemoteException rx)
@@ -753,13 +750,13 @@ public class vectorPanel extends JBufferedPane implements JsetValueCallback, Act
    *
    */ 
 
-class elementWrapper extends JBufferedPane implements ActionListener {
+class elementWrapper extends JPanel implements ActionListener {
 
   // class variables
 
   private Component my_component = null;
   
-  JBufferedPane 
+  JPanel 
     buttonPanel;
 
   JButton 
@@ -788,12 +785,12 @@ class elementWrapper extends JBufferedPane implements ActionListener {
 
     setLayout(new BorderLayout());
       
-    buttonPanel = new JBufferedPane();
+    buttonPanel = new JPanel();
       
     buttonPanel.setLayout(new BorderLayout());
       
     minus = new JButton(new ImageIcon(removeImage));
-    minus.setPad(new Insets(0,0,0,0));
+    minus.setMargin(new Insets(0,0,0,0));
     //minus = new JButton("X");
     minus.addActionListener(this);
       
