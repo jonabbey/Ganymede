@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -632,7 +632,7 @@ class iClient extends UnicastRemoteObject implements Client {
     
     applet._infoD.show();
 
-    my_glogin.connector.setEnabled(true);
-    my_glogin._quitButton.setEnabled(true);
+    applet.connector.setEnabled(true);
+    applet._quitButton.setEnabled(true);
   }
 }
