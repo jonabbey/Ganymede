@@ -27,6 +27,21 @@ The server now gives a better error message if a user tries to link an
 object to a (previously undefined) field that the user does not have
 permission to create.
 
+3. [SERVER] Made sessions smarter about refusing to edit objects during commit
+
+The DBSession class has been modified to disallow editing of new
+objects during a transaction's commit or abort process.  This is to
+help make sure that any code during the commitPhase1() and
+commitPhase2() DBEditObject customization methods that seeks to bring
+new objects into the transaction after the commit has already started
+will trigger a runtimeException, rather than silently confusing the
+commit logic.
+
+This change shouldn't have any effect on any code provided with the
+Ganymede distribution or the userKit, but might force an error in
+custom code if the customizers were doing some sort of dangerous
+activities during the commit process.
+
 -------------------- Changes from 1.0.5 to 1.0.6 -------------------
 
 RELEASE DATE: August 15, 2001
