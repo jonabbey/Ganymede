@@ -8,7 +8,7 @@
    Result is serializable.
    
    Created: 21 October 1996 
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -20,23 +20,15 @@ import java.rmi.RemoteException;
 
 public class Result implements java.io.Serializable {
   
-  db_object object;	// remote reference to an object on the server
+  Invid invid;	// remote reference to an object on the server
   String label = null;
 
   /* -- */
 
-  public Result(db_object object)
+  public Result(Invid invid, String label)
   {
-    this.object = object;
-
-    try
-      {
-	label = object.getLabel();
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't get label" + ex);
-      }
+    this.invid = invid;
+    this.label = label;
   }
 
   public String toString()
@@ -44,52 +36,15 @@ public class Result implements java.io.Serializable {
     return label;
   }
 
-  public db_object getObject()
+  public Invid getInvid()
   {
-    return object;
-  }
-
-  // ditto equals
-
-  public boolean equals(Object object)
-  {
-    try
-      {
-	if (object instanceof Result)
-	  {
-	    return ((Result) object).object.equals(object);
-	  }
-	else if (object instanceof db_object)
-	  {
-	    return ((db_object) object).equals(object);
-	  }
-	else
-	  {
-	    return false;
-	  }
-      }
-    catch (Exception ex)
-      {
-	return false;
-      }
+    return invid;
   }
 
   // and hashCode
 
   public int hashCode()
   {
-    try
-      {
-	return object.getInvid().hashCode();
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught a remote exception: " + ex);
-      }
-  }
-
-  public Invid getInvid() throws RemoteException
-  {
-    return object.getInvid();
+    return invid.hashCode();
   }
 }
