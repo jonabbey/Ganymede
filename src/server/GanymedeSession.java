@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.242 $
-   Last Mod Date: $Date: 2001/07/27 01:38:37 $
+   Version: $Revision: 1.243 $
+   Last Mod Date: $Date: 2001/07/27 02:19:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.242 $ $Date: 2001/07/27 01:38:37 $
+ * @version $Revision: 1.243 $ $Date: 2001/07/27 02:19:41 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -5627,10 +5627,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     fieldPerm = applicablePerms.getPerm(object.getTypeID(), fieldId);
 
     // if we don't have an explicit permissions entry for the field,
-    // return the effective one for the object.. this default
-    // permissions inheritance will apply for the built-in field
-    // types, which do not have permissions set by the Ganymede
-    // client's permissions editor code.
+    // return the effective one for the object.
     
     if (fieldPerm == null)
       {
@@ -5669,8 +5666,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	System.err.println("objectPerm = " + objectPerm);
 	System.err.println("expandFieldPerm = " + expandFieldPerm);
       }
-    
-    return fieldPerm.union(expandFieldPerm).intersection(objectPerm);
+
+    // we never want to allow users who don't own an object to edit
+    // the object ownership list, nor do we ever want to allow
+    // non-privileged end users to edit the ownership list.
+
+    if (fieldId == SchemaConstants.OwnerListField &&
+	(!objectIsOwned || personaObj == null))
+      {
+	return fieldPerm.union(expandFieldPerm).intersection(objectPerm).intersection(PermEntry.viewPerms);
+      }
+    else
+      {
+	return fieldPerm.union(expandFieldPerm).intersection(objectPerm);
+      }
   }
 
   /**
