@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,8 +34,9 @@ public class DBObjectBase {
 
   static boolean debug = false;
 
-  static void setDebug(boolean val)
+  public static void setDebug(boolean val)
   {
+    System.err.println("DBObjectBase.setDebug(): " + val);
     debug = val;
   }
 
@@ -176,6 +177,11 @@ public class DBObjectBase {
 
 	objectHash.put(new Integer(tempObject.id), tempObject);
       }
+
+    if (debug)
+      {
+	System.err.println("DBObjectBase.receive(): maxid for " + object_name + " is " + maxid);
+      }
   }
 
   /**
@@ -186,7 +192,11 @@ public class DBObjectBase {
 
   synchronized int getNextId()
   {
-    return maxid++;
+    if (debug)
+      {
+	System.err.println("DBObjectBase.getNextId(): " + object_name + "'s maxid is " + maxid);
+      }
+    return ++maxid;
   }
 
   /** release an id if an object initially
