@@ -24,16 +24,16 @@
       them, as well as how to manage all the details along the way.
       The server has been written so that all of these details are
       handled by the <a
-	href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+	href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       class.  <a
-	href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+	href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       handles these details, and provides hooks to allow adopters to
       customize the management of object types by writing subclasses
       of <a
-	href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>.
+	href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>.
     </p>
     
-    Among other things, <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> handles:
+    Among other things, <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> handles:
 
     <ul>
       <li>
@@ -50,7 +50,7 @@
 
       <li>
 	Providing a list of choices for string and <a
-	href="../javadoc/arlut/csd/ganymede/Invid.html">invid</a>
+	href="../javadoc/arlut/csd/ganymede/common/Invid.html">invid</a>
 	fields.
       </li>
       
@@ -77,7 +77,7 @@
     <p>
       Typically, all but the most simple of object types in the
       Ganymede database will have a custom subclass of <a
-	href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+	href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       associated with it to manage the special requirements of that
       object type.
     </p>
@@ -114,15 +114,15 @@
       
     <p>
       At present, we are interested in the <a
-	href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+	href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       subclasses.  The way to identify these files is simply by
       looking at the top of the file.  If a file is a <a
-	href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+	href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       subclass, you will something similar to the following:
     </p>
 
     <pre>
-	public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> implements SchemaConstants, userSchema {
+	public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> implements SchemaConstants, userSchema {
     </pre>
 
     <p>
@@ -185,7 +185,7 @@
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b>OK, But What Does A <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> Subclass Look Like?</b></h2></td>
+	<td colspan="1"><h2><b>OK, But What Does A <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> Subclass Look Like?</b></h2></td>
       </tr>
     </table> 
     
@@ -202,12 +202,12 @@ package arlut.csd.ganymede.custom;
 
 import arlut.csd.ganymede.*;
 
-public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> {
+public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> {
     </pre>
       
     <p>
       The section above defines this class as being a subclass of
-      <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>, and defines the package as
+      <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>, and defines the package as
       arlut.csd.ganymede.custom.  The package could in fact be
       anything you like, but it should be consistent among your files
       to keep things clear.
@@ -216,7 +216,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     <p>
       The import statement is mandatory, as the Java
       compiler needs to know where to go to look for the definition of
-      the <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> class that we are extending,
+      the <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> class that we are extending,
       which is defined in package arlut.csd.ganymede.
     </p>
 
@@ -267,28 +267,28 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     <p>
       Now we get into the meat of the subclass.. the method
       definitions.  The whole point of creating a subclass of
-      <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> is
+      <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> is
       to redefine methods that are called by other
       objects during the course of operation of the Ganymede server.
     </p>
     
     <p>
       In this example, we redefine one of the simplest methods in
-      <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>,
-      <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#fieldRequired(arlut.csd.ganymede.DBObject, short)">fieldRequired()</a>.
+      <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>,
+      <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#fieldRequired(arlut.csd.ganymede.server.DBObject, short)">fieldRequired()</a>.
       An non-redefinable method
-      in <a href="../javadoc/arlut/csd/ganymede/DBObject.html">DBObject</a>,
-      <a href="../javadoc/arlut/csd/ganymede/DBObject.html#checkRequiredFields()">checkRequiredFields()</a>,
+      in <a href="../javadoc/arlut/csd/ganymede/server/DBObject.html">DBObject</a>,
+      <a href="../javadoc/arlut/csd/ganymede/server/DBObject.html#checkRequiredFields()">checkRequiredFields()</a>,
       calls this method to see
       whether a given field must be defined when an object of this
       type is committed during the course of server's commit logic.
-      By redefining <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#fieldRequired(arlut.csd.ganymede.DBObject, short)">fieldRequired()</a> 
+      By redefining <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#fieldRequired(arlut.csd.ganymede.server.DBObject, short)">fieldRequired()</a> 
       in the subclass we are creating, we
       effectively modify how the commit operation proceeds.  In this
       case, we are telling the server what fields in a user object
       must be filled out when a transaction is committed.  Note that
       we make use of other methods defined in the server
-      (<a href="../javadoc/arlut/csd/ganymede/DBObject.html#isInactivated()">isInactivated()</a>),
+      (<a href="../javadoc/arlut/csd/ganymede/server/DBObject.html#isInactivated()">isInactivated()</a>),
       and an <a href="userSchema.java">interface</a> that we have (manually) defined
       that contains the numeric id's for the fields in our user object.
     </p>
@@ -299,7 +299,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
    * Customization method to control whether a specified field
    * is required to be defined at commit time for a given object.
    *
-   * To be overridden in <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> subclasses.
+   * To be overridden in <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    *
@@ -343,11 +343,11 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       Now, of course, the devil is in the details.  There are some
-      basic things you need to know about how the <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> class
+      basic things you need to know about how the <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> class
       is used in the server in order to properly approach the task of
       creating or editing your own management subclass.  First and
       foremost, you need to understand the different circumstances in
-      which the Ganymede server turns to an instance of a <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      which the Ganymede server turns to an instance of a <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       class to get things done.
     </p>
     
@@ -358,7 +358,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     </table> 
     
     <p>
-      There are two circumstances in which a <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> class (or
+      There are two circumstances in which a <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> class (or
       subclass) gets brought in to manage objects in the database.
     </p>
     
@@ -370,7 +370,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	    outside of the context of an editing transaction.  In this case,
 	    code in the query engine, permissions code, or capabilities code
 	    (is this object of a type that may be inactivated and
-	    reactivated?) consult a single instance of the <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> class
+	    reactivated?) consult a single instance of the <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> class
 	    or subclass that has been created in the server to serve as a
 	    reference for objects of that type.
 	  </p>
@@ -383,8 +383,8 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	    is busy preparing a list of objects with their labels to
 	    be sent to the client.  In our case, we haven't overridden
 	    the 
-	    <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#getLabelHook(arlut.csd.ganymede.DBObject)">getLabelHook()</a>
-	    method, so the default <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> method is called, and
+	    <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getLabelHook(arlut.csd.ganymede.server.DBObject)">getLabelHook()</a>
+	    method, so the default <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> method is called, and
 	    the objects in the database simply look in their label
 	    field (specified in the schema editor) to return their
 	    default label.
@@ -404,22 +404,22 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	<td>
 	  <p>
 	    The other, and more significant case in which a
-	    <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> subclass is involved is when an object is
+	    <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> subclass is involved is when an object is
 	    being edited.  In this case, the <a
-	      href="../javadoc/arlut/csd/ganymede/db_object.html">db_object</a>
+	      href="../javadoc/arlut/csd/ganymede/rmi/db_object.html">db_object</a>
 	    remote handle actually references an instance of the
-	    <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> class or subclass.  The client can actually
+	    <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> class or subclass.  The client can actually
 	    call methods (such as <a
-	      href="../javadoc/arlut/csd/ganymede/db_object.html#canInactivate(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBEditObject)">
+	      href="../javadoc/arlut/csd/ganymede/rmi/db_object.html#canInactivate(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBEditObject)">
 	      canInactivate()</a>) that you yourself may override in your
-	    <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> subclass.
+	    <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> subclass.
 	  </p>
 	  
 	  <p>
 	    For the most part, however, the methods that you will write to guide
 	    the actual editing process will not be called directly by the client.
 	    Instead, the methods you write will be called by the transaction logic
-	    in the <a href="../javadoc/arlut/csd/ganymede/DBEditSet.html">DBEditSet</a>
+	    in the <a href="../javadoc/arlut/csd/ganymede/server/DBEditSet.html">DBEditSet</a>
 	    transaction class, or by the field objects that the client directly manipulates.
 	  </p>
 	</td>
@@ -432,10 +432,10 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	  <p>
 	    Mostly, the client will interact with your custom methods by
 	    calling the ordinary remote methods defined in the 
-	    <a href="../javadoc/arlut/csd/ganymede/db_field.html">db_field</a>
+	    <a href="../javadoc/arlut/csd/ganymede/rmi/db_field.html">db_field</a>
 	    remote interface.  These methods, implemented on the server in the
-	    <a href="../javadoc/arlut/csd/ganymede/DBField.html">DBField</a> class
-	    and its type-specific sub-classes, call many methods in the <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+	    <a href="../javadoc/arlut/csd/ganymede/server/DBField.html">DBField</a> class
+	    and its type-specific sub-classes, call many methods in the <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
 	    object that they belong to in order to coordinate the editing process.
 	  </p>
 	</td>
@@ -449,7 +449,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       The most important difference between the two cases above is
       that in the 'reference object' case, the methods you write must
       be sure not to try to examine the state of the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       the methods are contained in.  Such methods are labeled
       <b>*PSEUDOSTATIC*</b>.  If you override a method labeled
       <b>*PSEUDOSTATIC*</b>, you should pretend that the method is
@@ -463,14 +463,14 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     <p>
       In the methods for customizing the editing process (the
       non-<b>*PSEUDOSTATIC*</b>, non-final methods in <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>),
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>),
       you are free to check out the current state of the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       (userCustom, etc.) object your methods are operating on.
       Because <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       is itself inherited from the basic <a
-      href="../javadoc/arlut/csd/ganymede/DBObject.html">DBObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBObject.html">DBObject</a>
       class used to store data in the server, you can look at the
       fields defined in the object to decide whether the overall
       context is propitious for the operation the client is
@@ -487,7 +487,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     <p>
       One more point.  The three mandatory constructors discussed in
       the example above correspond to the contexts in which a <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       subclass will be instantiated.  The first constructor is used
       for the reference objectHook methods, the second for when a
       wholly new object is created, and the third when an previously
@@ -504,24 +504,24 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     
     <p>
       Most of the time, <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       objects exist in the server because an object from the database
       is being edited by the client.  This section talks about how the
       various non-pseudostatic non-final methods in <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       subclasses get involved along the way from creation/check-out to
       editing to the end of an editing <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>'s
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>'s
       lifetime, at transaction commit/release time.
     </p>
 
     <p>
       For the rest of this document, we're going to ignore the
       instance of <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       that is created by the server to service the pseudostatic
       methods and just talk about <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>'s
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>'s
       in the editing context.
     </p>
 
@@ -531,10 +531,10 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       All objects held in the server's database have their fields defined by the
-      <a href="../javadoc/arlut/csd/ganymede/DBObjectBase.html">DBObjectBase</a>
+      <a href="../javadoc/arlut/csd/ganymede/server/DBObjectBase.html">DBObjectBase</a>
       class.  This class is what the schema editor actually manipulates when you
       edit an object definition in the server, and it includes definitions for
-      all the <a href="../javadoc/arlut/csd/ganymede/DBObjectBaseField.html">fields</a>
+      all the <a href="../javadoc/arlut/csd/ganymede/server/DBObjectBaseField.html">fields</a>
       that may appear in objects of that type in the server.
     </p>
 
@@ -543,46 +543,46 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       second constructor shown in the example above.  The second
       constructor in any custom object is responsible for calling the
       corresponding <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       constructor (the <b>super()</b> constructor).  That constructor examines the <a
-      href="../javadoc/arlut/csd/ganymede/DBObjectBase.html">DBObjectBase</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBObjectBase.html">DBObjectBase</a>
       for that object type to determine what <a
-      href="../javadoc/arlut/csd/ganymede/DBField.html">field
+      href="../javadoc/arlut/csd/ganymede/server/DBField.html">field
       objects</a> should be constructed for the new object.  The <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       subclass gets a say here.  The <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#instantiateNewField(short)">instantiateNewField()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#instantiateNewField(short)">instantiateNewField()</a>
       method can be overridden to control whether certain fields are
       created or not.  By the time <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#instantiateNewField(short)">instantiateNewField()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#instantiateNewField(short)">instantiateNewField()</a>
       is called, the new <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       object will have gotten a reference to the <a
-      href="../javadoc/arlut/csd/ganymede/GanymedeSession.html">GanymedeSession</a>
+      href="../javadoc/arlut/csd/ganymede/server/GanymedeSession.html">GanymedeSession</a>
       object containing information about the administrator's privileges, and can make decisions
       about whether a particular admin should see a particular field.
     </p>
 
     <p>
       One of the things that the second constructor takes is the <a
-      href="../javadoc/arlut/csd/ganymede/Invid.html">Invid</a> for
+      href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a> for
       the new object.  This is the unique, unchanging,
       <b>Invariant</b> ID for the new object.  Once this Invid is
       assigned to a new object and that object is committed into the
       database, that <a
-      href="../javadoc/arlut/csd/ganymede/Invid.html">Invid</a> will
+      href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a> will
       belong forever to that object.  It will never be re-used.
       Because of this, the server (and the client) can always use that
-      <a href="../javadoc/arlut/csd/ganymede/Invid.html">Invid</a> to
+      <a href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a> to
       track the newly created object, for as long as it is held in the
       database.
     </p>
 
     <p>
       Once the new <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> is
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> is
       created, the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#initializeNewObject()">initializeNewObject()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#initializeNewObject()">initializeNewObject()</a>
       method is called to do whatever custom initialization logic is appropriate.
     </p>
 
@@ -590,36 +590,36 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       If a pre-existing object is being checked out for editing, the
       process is very similar, except that the third constructor is
       called.  The new <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       object created will have copies of all of the fields present in
-      the <a href="../javadoc/arlut/csd/ganymede/DBObject.html">stored
+      the <a href="../javadoc/arlut/csd/ganymede/server/DBObject.html">stored
       object</a> created, and any fields defined in the <a
-      href="../javadoc/arlut/csd/ganymede/DBObjectBase.html">DBObjectBase</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBObjectBase.html">DBObjectBase</a>
       that were not in the original will be created exactly as in the
       new object creation case.  Note that the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> created
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> created
       from the original object does not get its own <a
-      href="../javadoc/arlut/csd/ganymede/Invid.html">Invid</a>.  The <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> does not
+      href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a>.  The <a
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> does not
       have its own identity in this sense. Rather, it is a tool used to make changes
       to the original object in the database.  If you ask the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> what
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> what
       its <a
-      href="../javadoc/arlut/csd/ganymede/Invid.html">Invid</a> is via the <a
-      href="../javadoc/arlut/csd/ganymede/DBObject.html#getInvid()">getInvid()</a>
+      href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a> is via the <a
+      href="../javadoc/arlut/csd/ganymede/server/DBObject.html#getInvid()">getInvid()</a>
       call, you will get back the <a
-      href="../javadoc/arlut/csd/ganymede/Invid.html">Invid</a> of the original object.
+      href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a> of the original object.
     </p>
     
     <p>
       An object in the database can only be edited by one client at a
       time. When an pre-existing object is being edited, the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       object will have a <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#getOriginal()">reference</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getOriginal()">reference</a>
       to the original object, and the original object will have a
       reference to it (the shadowObject object field in <a
-      href="../javadoc/arlut/csd/ganymede/DBObject.html">DBObject</a>).
+      href="../javadoc/arlut/csd/ganymede/server/DBObject.html">DBObject</a>).
       The server checks shadowObject when an attempt is made to edit
       an object.  If shadowObject is not null, the object is already
       being edited by someone, and the edit attempt fails.
@@ -627,19 +627,19 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       Notice that the second and third constructors both take a <a
-      href="../javadoc/arlut/csd/ganymede/DBEditSet.html">DBEditSet</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditSet.html">DBEditSet</a>
       reference as a parameter.  This object is the transactional
       context within which this object is being created or edited.  We'll
       have more to say about the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditSet.html">DBEditSet</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditSet.html">DBEditSet</a>
       class when we talk about <b>Transaction Commit</b>.
     </p>
     
     <p>
       In either case, creating or editing, once the new <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       object is created, a <a
-      href="../javadoc/arlut/csd/ganymede/db_object.html">remote
+      href="../javadoc/arlut/csd/ganymede/rmi/db_object.html">remote
       reference</a> to it is passed to the client, which can then start
       editing the fields contained by the object.  But by then we are in
       the brave new world of <b>Object Editing</b>.
@@ -651,73 +651,73 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       When an object is checked out for editing, the client obtains a
-      <a href="../javadoc/arlut/csd/ganymede/db_object.html">remote
+      <a href="../javadoc/arlut/csd/ganymede/rmi/db_object.html">remote
       reference</a> to the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       and proceeds to call methods on it to obtain <a
-      href="../javadoc/arlut/csd/ganymede/db_field.html">db_field</a>
+      href="../javadoc/arlut/csd/ganymede/rmi/db_field.html">db_field</a>
       remote references, which the client then calls methods on to set
       values for scalar fields, or to add, remove, or set values in
       vector fields.  This process, of the client calling methods on
       fields contained within the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       object, is the way in which changes to the database are
       performed.  The client does not generally call methods on the <a
-      href="../javadoc/arlut/csd/ganymede/db_object.html">db_object</a>
+      href="../javadoc/arlut/csd/ganymede/rmi/db_object.html">db_object</a>
       reference.  Everything is done to the fields.  There is one
       method, <a
-      href="../javadoc/arlut/csd/ganymede/db_object.html#setFieldValue(short, java.lang.Object)">setFieldValue</a>,
+      href="../javadoc/arlut/csd/ganymede/rmi/db_object.html#setFieldValue(short, java.lang.Object)">setFieldValue</a>,
       that may be called on the <a
-      href="../javadoc/arlut/csd/ganymede/db_object.html">db_object</a>
+      href="../javadoc/arlut/csd/ganymede/rmi/db_object.html">db_object</a>
       reference, but this is just a short cut, saving the client a
       separate remote method call to get a reference to the field to
       be changed.  All of the logic in the server is still done
       through the <a
-      href="../javadoc/arlut/csd/ganymede/DBField.html">DBField</a>.
+      href="../javadoc/arlut/csd/ganymede/server/DBField.html">DBField</a>.
     </p>
 
     <p>
       The <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       class has many methods that get called during the process of
       changing the fields which can provide opportunities to customize
       the editing process.  Many of these methods are fairly
       straightforward, providing guidance to the <a
-      href="../javadoc/arlut/csd/ganymede/db_field.html">DBField</a>
+      href="../javadoc/arlut/csd/ganymede/rmi/db_field.html">DBField</a>
       objects as to what sort of constraints should be placed on
       values and the like.  There are some methods that are worth
       calling out specially for discussion.
     </p>
 
-    <h3>The <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> method</h3>
+    <h3>The <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> method</h3>
 
     <p>
       The <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
       method is the main hook that DBEditObject subclasses use to take
       control of a requested operation on a field.  The wizardHook()
       method can refuse to perform the operation, it can take other
       actions behind the scene in response to the request, or it can
       allow the operation to proceed to completion.  <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>,
-      like several other <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>,
+      like several other <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       methods, returns a
-      <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a> object.
+      <a href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a> object.
     </p>
 
     <p>
       <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a>
       is the result object returned by most significant operations
       that the client can perform on the server.  A <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a>
       object carries information back to the client about the success
       or failure of the operation attempted.  This information can
       include a list of objects and fields for the client to refresh,
       and it can include a <a
       href="../javadoc/arlut.csd.JDialog.JDialogBuff.html">JDialogBuff</a>
       object, and a <a
-      href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">wizard
+      href="../javadoc/arlut/csd/ganymede/server/GanymediatorWizard.html">wizard
       callback</a>.
     </p>
 
@@ -727,44 +727,44 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       client to display, including a title, text message, an icon, an
       optional set of fields for the user to fill in, and text for the
       Ok and optional Cancel buttons.  When the client receives a <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a>
       for which the <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html#getDialog()">getDialog()</a>
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html#getDialog()">getDialog()</a>
       method returns a non-null value, it will present the encoded dialog to the
       user.
     </p>
 
     <p>
       This can be incredibly useful if the <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a> also carries a
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a> also carries a
       remote reference to a server-side <a
-      href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">wizard</a>.  If
+      href="../javadoc/arlut/csd/ganymede/server/GanymediatorWizard.html">wizard</a>.  If
       this is the case, the client will wrap up the input from the user to the dialog
       in a Hashtable and send it back to the wizard, which can in return send back
       another dialog with callback, and so on.  In this way, wizard code on the server
       can walk the client through a series of dialogs along the way to completing a
       task that was originally initiated by an arbitrary operation on a field in the
       <a
-	href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>.  All
+	href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>.  All
       of this back-and-forth interaction happens before the client acknowledges the
       original operation on the appropriate GUI field, so at any time during this
       sequence, the wizard code on the server can return a <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a> with a failure
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a> with a failure
       value to undo the original change.
     </p>
 
     <p>
       When the wizard code on the server finally returns a <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a>
       object for which the <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html#didSucceed()">didSucceed()</a>
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html#didSucceed()">didSucceed()</a>
       method returns true, or for which the <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html#didSucceed()">didSucceed()</a>
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html#didSucceed()">didSucceed()</a>
       method returns false and the <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.html#getCallback()">getCallback()</a>
+      href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html#getCallback()">getCallback()</a>
       method returns null, the wizard sequence is considered finished.  If the 
       final ReturnVal's didSucceed method does return true, the client will check
-      the <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a> object for
+      the <a href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a> object for
       refresh/rescan information.  In this way, the wizard code on the server can make
       changes throughout the database and the client will update its display to
       reflect the changes made.
@@ -772,7 +772,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       Writing wizards and <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
       methods can be somewhat tricky.  See the <a href="wizards.html">Ganymede Wizard Guide</a>
     for details on the wizard process.  You can also
       look at a couple of examples from the GASH schema: a <a
@@ -787,12 +787,12 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       The 
-      <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#finalizeSetValue(arlut.csd.ganymede.DBField, java.lang.Object)">finalizeSetValue()</a>,
-      <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#finalizeSetElement(arlut.csd.ganymede.DBField, int, java.lang.Object)">finalizeSetElement()</a>,
-      <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#finalizeAddElement(arlut.csd.ganymede.DBField, java.lang.Object)">finalizeAddElement()</a>, and
-      <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#finalizeDeleteElement(arlut.csd.ganymede.DBField, int)">finalizeDeleteElement()</a>
+      <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeSetValue(arlut.csd.ganymede.server.DBField, java.lang.Object)">finalizeSetValue()</a>,
+      <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeSetElement(arlut.csd.ganymede.server.DBField, int, java.lang.Object)">finalizeSetElement()</a>,
+      <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeAddElement(arlut.csd.ganymede.server.DBField, java.lang.Object)">finalizeAddElement()</a>, and
+      <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeDeleteElement(arlut.csd.ganymede.server.DBField, int)">finalizeDeleteElement()</a>
       methods provide hooks to allow you to have final oversight when a field is actually changed.  These methods
-      can return a <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a> object with
+      can return a <a href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a> object with
       a false success value to refuse the operation, but more generally these methods are used
       not to refuse an operation, but rather to take contingent actions to other objects or other
       fields within the same object.
@@ -801,15 +801,15 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     <p>
       The reason you would one of the finalize methods instead of the
       <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
       method is that you might want it to always be called when a
       field changes, whereas the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
       method is bypassed if the server changes a field directly using
       the <a
-      href="../javadoc/arlut/csd/ganymede/DBField.html#setValueLocal(java.lang.Object)">DBField.setValueLocal()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBField.html#setValueLocal(java.lang.Object)">DBField.setValueLocal()</a>
       method, etc.  The <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
       method is really designed to interact with the user to pass back
       dialogs and/or field rescan information.  The finalize methods
       are the very last thing done before a change to a field is
@@ -821,47 +821,47 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       The <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> and
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> and
       finalize methods in a <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> can have a fairly
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> can have a fairly
       complex and incestuous relationship, with the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> method
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> method
       doing initial review of the operation, and the appropriate finalize method taking assorted 
       actions once the operation is approved.
     </p>
       
     <p>
       Actually, there's another very important difference between <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
       and the finalize methods.  And that is that the finalize methods
       are called after all default validity checking is performed.
       For instance, if the client tries to rename a user, the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
       method will be called to approve the operation up front, but the
       <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>'s
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>'s
       approval doesn't mean the operation will actually be done.  The
       default <a
-      href="../javadoc/arlut/csd/ganymede/DBField.html">DBField()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBField.html">DBField()</a>
       and <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       logic checks the submitted value against the field's constraints
       (using many of the methods in <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>),
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>),
       and against the controlling <a
-      href="../javadoc/arlut/csd/ganymede/DBNameSpace.html">namespace</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBNameSpace.html">namespace</a>,
       if any.  If it is an <a
-      href="../javadoc/arlut/csd/ganymede/InvidDBField.html">Invid
+      href="../javadoc/arlut/csd/ganymede/server/InvidDBField.html">Invid
       field</a>, the old and/or new link targets will be bound
       together via the bi-directional linking logic.  By the time the
       appropriate finalize method is called, the server logic has
       validated everything about the operation aside from the custom
       <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>'s
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>'s
       sign-off.  The finalize methods are always the last word on the operation, and
       you can be sure that if one of your finalize methods is called, the server <b>will</b>
-      make the change if its <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>'s
-      <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html#didSucceed()">didSucceed()</a>
+      make the change if its <a href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html">ReturnVal</a>'s
+      <a href="../javadoc/arlut/csd/ganymede/common/ReturnVal.html#didSucceed()">didSucceed()</a>
       method returns <code>true</code>.
     </p>
 
@@ -871,17 +871,17 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       All editable <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObjects</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObjects</a>
       exist in the context of a Ganymede transaction, which is
       represented in the server by a <a
-      href="../javadoc/arlut/csd/ganymede/DBEditSet.html">DBEditSet</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditSet.html">DBEditSet</a>
       object.  When a transaction is committed, the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObjects</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObjects</a>
       are converted into <a
-      href="../javadoc/arlut/csd/ganymede/DBObject.html">DBObjects</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBObject.html">DBObjects</a>
       and stored in the Ganymede object tables.  There are a few methods defined
       in <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       that are specifically designed to allow for transactions in Ganymede to be
       tied to transactions in other databases, or to other external actions.
     </p>
@@ -889,11 +889,11 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     <p>
       When a transaction is committed, the first thing the server does
       is to check each object in the transaction by consulting the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#fieldRequired(arlut.csd.ganymede.DBObject, short)">fieldRequired()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#fieldRequired(arlut.csd.ganymede.server.DBObject, short)">fieldRequired()</a>
       method to make sure that all required fields for each object
       actually are defined.  If one or more objects do not have fields
       defined that the object's <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#fieldRequired(arlut.csd.ganymede.DBObject, short)">fieldRequired()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#fieldRequired(arlut.csd.ganymede.server.DBObject, short)">fieldRequired()</a>
       method reports as being required, the commit will fail, and the client will
       be given a list of objects and fields that need to be filled out.
     </p>
@@ -907,41 +907,41 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       The Ganymede server uses a <b>two phase commit protocol</b> to handle transaction commit.  What
       this means is simply that the server first checks all objects involved in the transaction and
       asks them if they are ok for commit, using the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a> method.
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a> method.
       If all of the objects in the transaction confirm that they are ok to be checked back in, the
       server goes back through all the objects and calls <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a> on them.
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase2()">commitPhase2()</a> on them.
     </p>
 
     <p>
       If, instead, one of the objects reported that it was <b>not</b> ready to be checked in when its
       <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a> method
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a> method
       was called, the server will go through all the objects in the transaction and call the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a> method on the
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#release(boolean)">release()</a> method on the
       objects, instead.
     </p>
 
     <p>
       The two phase commit protocol allows transactions to be
       coordinated between multiple databases.  The <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>
       method for an object might talk to an external transactional
       database, for example, making changes in that database to
       reflect the changes made to the object in the Ganymede
       transaction.  If that external database refused the change, the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>
       method would return false, blocking the incompatible Ganymede transaction from being
       committed.
     </p>
 
     <p>
       If all of the objects in the transaction give their OK, objects whose <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>
       methods initiated external transactions will commit those transactions when their <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase2()">commitPhase2()</a>
       methods are called. If, instead, their <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#release(boolean)">release()</a>
       methods are called, they would abort their remote transactions.
     </p>
 
@@ -949,31 +949,31 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       Note that if you want to take a <b>non-transactional external
       action</b> on commit (such as creating a user's home directory
       when a new user is created), you should do so in <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
       not in <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>.
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>.
     </p>
 
     <p>
       In any case, your <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>,
       <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
       and <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#release(boolean)">release()</a>
       methods will need to be able to tell what happened to the object
       during the transaction.  There are two parts to this.  The first
       is by the use of the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#getStatus()">getStatus()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getStatus()">getStatus()</a>
       method, which can tell you if the object has been newly created,
       edited, or deleted.  The second method you should use to
       determine what has happened during the transaction is the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#getOriginal()">getOriginal()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getOriginal()">getOriginal()</a>
       method, which will give you a reference to the object as it
       existed before it was checked out for editing.  You can then
       compare the values of various fields in the original and the
       fields in the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       being committed, and make your decision as to what action needs
       to be taken in each of the two-phase commit methods based on
       that information.
@@ -981,14 +981,14 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       Of course, since you are subclassing <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> to customize
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> to customize
       the two-phase commit logic anyway, you can always define new variables in your subclass
       to keep track of things, either between  <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>,
       <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
       and <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a> methods, or by
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#release(boolean)">release()</a> methods, or by
       having the various finalize methods keep notes as to what has been done as the user edits
       the object.  You have a lot of flexibility as to how you implement your logic, be creative.
     </p>
@@ -996,11 +996,11 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     <p>
       One word of caution.. it is possible to dead-lock the Ganymede server from within the
     <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>,
     <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
     and <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a> methods,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#release(boolean)">release()</a> methods,
     as portions of the database are locked during the time that these methods are executing.
     Under no circumstances should you use any methods that involve locks in GanymedeSession
     from within these methods.  In particular, it is forbidden to use any GanymedeSession
@@ -1010,13 +1010,13 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     <p>
       Of course, if you are not doing something special, you shouldn't have to
       override any of these methods.  The default <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>
       method defined in <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       will call <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#consistencyCheck(arlut.csd.ganymede.DBObject)">consistencyCheck()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#consistencyCheck(arlut.csd.ganymede.server.DBObject)">consistencyCheck()</a>
       to verify the object's state, so by overriding <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#consistencyCheck(arlut.csd.ganymede.DBObject)">consistencyCheck()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#consistencyCheck(arlut.csd.ganymede.server.DBObject)">consistencyCheck()</a>
       you can gain control over whether an object is fit to be checked into the database without
       having to mess with the two-phase stuff.
     </p>
@@ -1029,7 +1029,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 
     <p>
       In addition to everything else, the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a>
       class is involved when an object in the database is inactivated,
       reactivated, or removed from the database.
     </p>
@@ -1038,30 +1038,30 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       When an object is inactivated, reactivated, or removed, the
       server checks the object out of the database for editing, and
       calls the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#inactivate()">inactivate()</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#inactivate()">inactivate()</a>,
       <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#reactivate()">reactivate()</a>,
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#reactivate()">reactivate()</a>,
       and/or <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#remove()">remove()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#remove()">remove()</a>
       methods on the object.  These methods may be overridden to
       perform special actions on object inactivation, reactivation,
       and removal.  These methods should only take action within the
       Ganymede server itself.  Any special external actions to
       accompany these actions should be checked for and performed in
       the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>
       or <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase2()">commitPhase2()</a>
       methods when the transaction in which the object was changed is
       committed.  Typically, the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#inactivate()">inactivate()</a> method
+      href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#inactivate()">inactivate()</a> method
       will set the removal date for the object, and you can look for this in your commit
       logic if you need to perform external actions for inactivated or reactivated objects.
     </p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b><a href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a> Method Quick Reference</b></h2></td>
+	<td colspan="1"><h2><b><a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> Method Quick Reference</b></h2></td>
       </tr>
     </table> 
     
@@ -1078,7 +1078,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	<th>Purpose</th>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#anonymousLinkOK(arlut.csd.ganymede.DBObject, short, arlut.csd.ganymede.GanymedeSession)">anonymousLinkOK()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#anonymousLinkOK(arlut.csd.ganymede.server.DBObject, short, arlut.csd.ganymede.server.GanymedeSession)">anonymousLinkOK()</a>
 	</td>
 	<td>
 	  This method is used to control whether or not it is
@@ -1089,7 +1089,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#anonymousUnlinkOK(arlut.csd.ganymede.DBObject, short, arlut.csd.ganymede.GanymedeSession)">anonymousUnlinkOK()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#anonymousUnlinkOK(arlut.csd.ganymede.server.DBObject, short, arlut.csd.ganymede.server.GanymedeSession)">anonymousUnlinkOK()</a>
 	</td>
 	<td>
 	  This method is used to control whether or not it is acceptable to
@@ -1100,7 +1100,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#permOverride(arlut.csd.ganymede.GanymedeSession, arlut.csd.ganymede.DBObject)">permOverride()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#permOverride(arlut.csd.ganymede.server.GanymedeSession, arlut.csd.ganymede.server.DBObject)">permOverride()</a>
 	</td>
 	<td>
 	  Customization method to allow this Ganymede object type to
@@ -1113,7 +1113,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#permExpand(arlut.csd.ganymede.GanymedeSession, arlut.csd.ganymede.DBObject)">permExpand()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#permExpand(arlut.csd.ganymede.server.GanymedeSession, arlut.csd.ganymede.server.DBObject)">permExpand()</a>
 	</td>
 	<td>
 	  Customization method to allow this Ganymede object type to grant
@@ -1126,7 +1126,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#grantOwnership(arlut.csd.ganymede.GanymedeSession, arlut.csd.ganymede.DBObject)">grantOwnership()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#grantOwnership(arlut.csd.ganymede.server.GanymedeSession, arlut.csd.ganymede.server.DBObject)">grantOwnership()</a>
 	</td>
 	<td>
 	  Hook to allow subclasses to grant ownership privileges to a given
@@ -1138,7 +1138,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#consistencyCheck(arlut.csd.ganymede.DBObject)">consistencyCheck()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#consistencyCheck(arlut.csd.ganymede.server.DBObject)">consistencyCheck()</a>
 	</td>
 	<td>
 	  Customization method to verify overall consistency of a
@@ -1147,7 +1147,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#fieldRequired(arlut.csd.ganymede.DBObject, short)">fieldRequired()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#fieldRequired(arlut.csd.ganymede.server.DBObject, short)">fieldRequired()</a>
 	</td>
 	<td>
 	  Customization method to control whether a specified field
@@ -1156,7 +1156,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canRead(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject)">canRead()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canRead(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject)">canRead()</a>
 	</td>
 	<td>
 	  Customization method to verify whether the user has permission
@@ -1168,7 +1168,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canWrite(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject)">canWrite()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canWrite(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject)">canWrite()</a>
 	</td>
 	<td>
 	  Customization method to verify whether the user has permission
@@ -1180,7 +1180,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canBeInactivated()">canBeInactivated()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canBeInactivated()">canBeInactivated()</a>
 	</td>
 	<td>
 	  Customization method to verify whether this object type has
@@ -1189,7 +1189,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canInactivate(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBEditObject)">canInactivate()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canInactivate(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBEditObject)">canInactivate()</a>
 	</td>
 	<td>
 	  Customization method to verify whether the user has permission
@@ -1209,7 +1209,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canRemove(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject)">canRemove()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canRemove(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject)">canRemove()</a>
 	</td>
 	<td>
 	  Customization method to verify whether the user has permission
@@ -1222,7 +1222,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canClone(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject)">canClone()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canClone(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject)">canClone()</a>
 	</td>
 	<td>
 	  Customization method to verify whether the user has permission
@@ -1234,7 +1234,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canCloneField(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject, arlut.csd.ganymede.DBField)">canCloneField()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canCloneField(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject, arlut.csd.ganymede.server.DBField)">canCloneField()</a>
 	</td>
 	<td>
 	  Customization method used to indicate whether a given field in an object
@@ -1243,7 +1243,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#cloneObject(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject)">cloneObject()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#cloneObject(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject)">cloneObject()</a>
 	</td>
 	<td>
 	  Hook to allow the cloning of an object.  If this object type
@@ -1254,7 +1254,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canCreate(arlut.csd.ganymede.Session)">canCreate()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canCreate(arlut.csd.ganymede.Session)">canCreate()</a>
 	</td>
 	<td>
 	  Customization method to verify whether the user has permission
@@ -1263,36 +1263,41 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#getLabelHook(arlut.csd.ganymede.DBObject)">getLabelHook()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#useLabelHook()">useLabelHook()</a>
 	</td>
 	<td>
-	  Hook to allow intelligent generation of labels for DBObjects
-	  of this type.
-	</td>
-      </tr>
-      <tr>
-	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#virtualizeField(short)">virtualizeField()</a>
-	</td>
-	<td>
-	  This method provides a hook that can be used to indicate that a
-	  particular field's value should be filtered by a particular
-	  subclass of DBEditObject.
+	  Hook to indicate that objects of this type should use synthetic labels generated by the getLabelHook() call.
 	</td>
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#getVirtualValue(arlut.csd.ganymede.DBField)">getVirtualValue()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#labelHookGuaranteedUnique()">labelHookGuaranteedUnique()</a>
 	</td>
 	<td>
-	  This method provides a hook to return interposed values for
-	  fields that have their data massaged by a DBEditObject
-	  subclass.
+          <p>Hook to signify that the labels generated by getLabelHook()
+          are guaranteed to be unique.  if labelHookGuaranteedUnique()
+          returns true for objects of this type, the labels provided
+          by getLabelHook() will be trusted as being unique, and will
+          be used in xmlclient dumps and other places where the label
+          must be unique.</p>
+
+          <p>If labelHookGuaranteedUnique() returns false, then in
+          those cases where a unique label is required, an algorithm will
+          be used to generate a unique label based on the object's type and
+          Invid.</p>
 	</td>
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#hasEmailTarget(arlut.csd.ganymede.DBObject)">hasEmailTarget()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getLabelHook(arlut.csd.ganymede.server.DBObject)">getLabelHook()</a>
+	</td>
+	<td>
+	  Hook to allow intelligent generation of labels for DBObjects of this type.
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#hasEmailTarget(arlut.csd.ganymede.server.DBObject)">hasEmailTarget()</a>
 	</td>
 	<td>
 	  This method provides a hook to allow custom DBEditObject subclasses to
@@ -1303,7 +1308,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#getEmailTargets(arlut.csd.ganymede.DBObject)">getEmailTargets()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getEmailTargets(arlut.csd.ganymede.server.DBObject)">getEmailTargets()</a>
 	</td>
 	<td>
 	  This method provides a hook to allow custom DBEditObject subclasses to
@@ -1328,7 +1333,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	<th>Purpose</th>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#instantiateNewField(short)">instantiateNewField()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#instantiateNewField(short)">instantiateNewField()</a>
 	</td>
 	<td>
 	  Used to decide whether an undefined field defined in the
@@ -1337,7 +1342,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#initializeNewObject()">initializeNewObject()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#initializeNewObject()">initializeNewObject()</a>
 	</td>
 	<td>
 	  Used to do type-specific object initialization after the Ganymede server
@@ -1353,17 +1358,17 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	<th>Purpose</th>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#cloneFromObject(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject, boolean)">cloneFromObject()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#cloneFromObject(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject, boolean)">cloneFromObject()</a>
 	</td>
 	<td>
 	<p>This method actually does the work to clone an object.  The default logic in this
 	method clones all fields in the source object for which
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canCloneField(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject, arlut.csd.ganymede.DBField)">canCloneField()</a> returns true.  For some
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canCloneField(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject, arlut.csd.ganymede.server.DBField)">canCloneField()</a> returns true.  For some
 	custom subclasses, you will want to override this method, call super.cloneObject(),
 	and then provide logic to initialize new fields.</p>
 
 	<p>This method is called on a newly created instance of DBEditObject, and fills
-	its fields in by calling <a href="../javadoc/arlut/csd/ganymede/DBField.html#copyFieldTo(arlut.csd.ganymede.DBField,boolean)">copyFieldTo()</a> on each field in the original object.</p>
+	its fields in by calling <a href="../javadoc/arlut/csd/ganymede/server/DBField.html#copyFieldTo(arlut.csd.ganymede.server.DBField,boolean)">copyFieldTo()</a> on each field in the original object.</p>
 	</td>
       </tr>
     </table>
@@ -1375,7 +1380,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	<th>Purpose</th>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#wizardHook(arlut.csd.ganymede.server.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a>
 	</td>
 	<td>
 	  This method is called whenever any fields in this object are
@@ -1394,7 +1399,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#finalizeDeleteElement(arlut.csd.ganymede.DBField, int)">finalizeDeleteElement()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeDeleteElement(arlut.csd.ganymede.server.DBField, int)">finalizeDeleteElement()</a>
 	</td>
 	<td>
 	  This method allows the DBEditObject to have executive approval
@@ -1404,7 +1409,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#finalizeAddElement(arlut.csd.ganymede.DBField, java.lang.Object)">finalizeAddElement()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeAddElement(arlut.csd.ganymede.server.DBField, java.lang.Object)">finalizeAddElement()</a>
 	</td>
 	<td>
 	  This method allows the DBEditObject to have executive approval
@@ -1414,7 +1419,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#finalizeSetElement(arlut.csd.ganymede.DBField, int, java.lang.Object)">finalizeSetElement()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeSetElement(arlut.csd.ganymede.server.DBField, int, java.lang.Object)">finalizeSetElement()</a>
 	</td>
 	<td>
 	  This method allows the DBEditObject to have executive approval
@@ -1424,7 +1429,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#finalizeSetValue(arlut.csd.ganymede.DBField, java.lang.Object)">finalizeSetValue()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeSetValue(arlut.csd.ganymede.server.DBField, java.lang.Object)">finalizeSetValue()</a>
 	</td>
 	<td>
 	  This method allows the DBEditObject to have executive
@@ -1434,7 +1439,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#verifyNewValue(arlut.csd.ganymede.DBField, java.lang.Object)">verifyNewValue()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#verifyNewValue(arlut.csd.ganymede.server.DBField, java.lang.Object)">verifyNewValue()</a>
 	</td>
 	<td>
 	  This method provides a hook that can be used to check any
@@ -1448,7 +1453,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#obtainChoicesKey(arlut.csd.ganymede.DBField)">obtainChoicesKey()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#obtainChoicesKey(arlut.csd.ganymede.server.DBField)">obtainChoicesKey()</a>
 	</td>
 	<td>
 	  This method returns a key that can be used by the client to
@@ -1462,7 +1467,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#obtainChoiceList(arlut.csd.ganymede.DBField)">obtainChoiceList()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#obtainChoiceList(arlut.csd.ganymede.server.DBField)">obtainChoiceList()</a>
 	</td>
 	<td>
 	  This method provides a hook that can be used to generate
@@ -1476,7 +1481,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#mustChoose(arlut.csd.ganymede.DBField)">mustChoose()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#mustChoose(arlut.csd.ganymede.server.DBField)">mustChoose()</a>
 	</td>
 	<td>
 	  InvidDBFields and StringDBFields under this object will call this method to determine
@@ -1486,7 +1491,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#createNewEmbeddedObject(arlut.csd.ganymede.InvidDBField)">createNewEmbeddedObject()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#createNewEmbeddedObject(arlut.csd.ganymede.server.InvidDBField)">createNewEmbeddedObject()</a>
 	</td>
 	<td>
 	  Hook to have this object create a new embedded object in a given field.  This is used
@@ -1495,7 +1500,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#isIPv6OK(arlut.csd.ganymede.DBField)">isIPv6OK()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#isIPv6OK(arlut.csd.ganymede.server.DBField)">isIPv6OK()</a>
 	</td>
 	<td>
 	  IPDBFields under this object will call this method to determine whether they should
@@ -1504,7 +1509,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#isDateLimited(arlut.csd.ganymede.DBField)">isDateLimited()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#isDateLimited(arlut.csd.ganymede.server.DBField)">isDateLimited()</a>
 	</td>
 	<td>
 	  DateDBFields under this object will call this method to determine whether they
@@ -1513,7 +1518,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#minDate(arlut.csd.ganymede.DBField)">minDate()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#minDate(arlut.csd.ganymede.server.DBField)">minDate()</a>
 	</td>
 	<td>
 	  DateDBFields under this object will call this method to determine whether they
@@ -1522,7 +1527,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#maxDate(arlut.csd.ganymede.DBField)">maxDate()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#maxDate(arlut.csd.ganymede.server.DBField)">maxDate()</a>
 	</td>
 	<td>
 	  DateDBFields under this object will call this method to determine whether they
@@ -1531,7 +1536,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#isIntLimited(arlut.csd.ganymede.DBField)">isIntLimited()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#isIntLimited(arlut.csd.ganymede.server.DBField)">isIntLimited()</a>
 	</td>
 	<td>
 	  NumericDBFields under this object will call this method to determine whether they
@@ -1540,7 +1545,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#minInt(arlut.csd.ganymede.DBField)">minInt()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#minInt(arlut.csd.ganymede.server.DBField)">minInt()</a>
 	</td>
 	<td>
 	  NumericDBFields under this object will call this method to determine whether they
@@ -1549,7 +1554,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#maxInt(arlut.csd.ganymede.DBField)">maxInt()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#maxInt(arlut.csd.ganymede.server.DBField)">maxInt()</a>
 	</td>
 	<td>
 	  NumericDBFields under this object will call this method to determine whether they
@@ -1565,7 +1570,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	<th>Purpose</th>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>
 	</td>
 	<td>
 	  This method performs verification for the first phase of
@@ -1589,7 +1594,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase2()">commitPhase2()</a>
 	</td>
 	<td>
 	  This method is a hook for subclasses to override to
@@ -1608,7 +1613,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#release(boolean)">release()</a>
 	</td>
 	<td>
 	      A hook for subclasses to use to clean up any external
@@ -1632,19 +1637,19 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	<th>Purpose</th>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#inactivate()">inactivate()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#inactivate()">inactivate()</a>
 	</td>
 	<td>
 	  This method handles inactivation logic for this object type.
 	  See the link to this method for details.  This method will
 	  never be called if <a
-	  href="../javadoc/arlut/csd/ganymede/DBEditObject.html#canBeInactivated()">canBeInactivated()</a>
+	  href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canBeInactivated()">canBeInactivated()</a>
 	  returns <code>false</code>.
 	</td>
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#reactivate()">reactivate()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#reactivate()">reactivate()</a>
 	</td>
 	<td>
 	  This method handles inactivation logic for this object type.  See the link to
@@ -1654,7 +1659,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#remove()">remove()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#remove()">remove()</a>
 	</td>
 	<td>
 	  This method handles deletion logic for this object type.
