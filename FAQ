@@ -9,24 +9,22 @@ Questions Answered:
 2) Great!  Then I can just jump right in and use it, right?
 3) Who should be thinking of using Ganymede?
 4) Is Ganymede secure from packet-sniffing?
-5) That's dumb.  I'm an ISP, I can't use this.. what were you thinking?
-6) Any hope of a secure Ganymede for use in insecure networks?
-7) What do I need to run Ganymede?
-8) How scalable is Ganymede, with its memory-based database?
-9) Why isn't Ganymede LDAP-based?  What about replication?
-10) What's up with DNS management?  The current stuff is weak.
-11) What's this rpcpass thing in the client bin directory?
-12) Where's the documentation?
-13) How can I help?
-14) Why is it called Ganymede?
-15) What is Ganymede's development history like?
-16) I see a bunch of messages about missing fonts when I run the
+5) What do I need to run Ganymede?
+6) How scalable is Ganymede, with its memory-based database?
+7) Why isn't Ganymede LDAP-based?  What about replication?
+8) What's up with DNS management?  The current stuff is weak.
+9) What's this rpcpass thing in the client bin directory?
+10) Where's the documentation?
+11) How can I help?
+12) Why is it called Ganymede?
+13) What is Ganymede's development history like?
+14) I see a bunch of messages about missing fonts when I run the
     Ganymede client or admin console GUI under Linux, what's up?
-17) When I try to start the Ganymede server, I see a message complaining about
+15) When I try to start the Ganymede server, I see a message complaining about
     the system hostname resolving to the 127.0.0.1 loopback address and
     the server quits.  What's going on?
-18) Where's the Ganymede web site?
-19) What's the best way to report bugs?  How should I ask questions?
+16) Where's the Ganymede web site?
+17) What's the best way to report bugs?  How should I ask questions?
 
 --====================================================================--
 
@@ -116,68 +114,28 @@ small.
 
 4) Is Ganymede secure from packet-sniffing?
 
-   No. Ganymede has an effective internal security model, but all
-communications between the client/console and the Ganymede server are
-carried unencrypted.
+  Yes.  The Ganymede 2.0 server opens two TCP ports for communication
+with the Ganymede client and admin console.  Communications to the first
+port (the RMI registry) is unencrypted, but the only traffic to that port
+is the server telling the clients where to find the second port.
+
+  The second port is what the clients use to log in and talk to the
+server.  Communications to and from this port are protected with
+SSL.  The Ganymede client and server are cryptographically mated.
+The server contains a private key that is generated when you build
+the software, along with a matching public key certificate.  This
+certificate is incorporated into the client so that the client can
+validate the server's identity.
+
+  In addition to protecting the data communications with SSL, the
+server is configured to cryptographically randomize the RMI-level
+object identifiers, to prevent attackers from attempting to inject
+commands to objects on the Ganymede server that are published for
+someone else's client.
 
      ------------------------------------------------------------
 
-5) That's dumb.  I'm an ISP, I can't use this.. what were you thinking?
-
-   Ganymede is being developed in a laboratory in which a relatively
-high level of trust is assumed behind the firewall.  Ganymede's
-security and permissions model in this environment are designed for
-administrative separation rather than to prevent hacking, although
-everything possible short of transport-layer encryption has been
-done to keep everything as safe as possible.
-
-   We have had luck running Ganymede clients through both the Nortel
-and Cisco VPN products, so if you are using a VPN system today, you
-should be able to leverage that to at least be able to access
-Ganymede safely from outside your trusted network.
-
-     ------------------------------------------------------------
-
-6) Any hope of a secure Ganymede for use in insecure networks?
-
-   Quite possibly, yes.  The Java 1.2 platform includes support for
-RMI over custom socket types, which could theoretically include SSL
-encrypted sockets.
-
-   Sun has put out an early access version of their Java Secure Socket
-Extension (JSSE) which provides SSL and TLS socket encryption.  No
-word on whether anyone has gotten RMI to run over it successfully yet.
-
-See http://developer.java.sun.com/developer/earlyAccess/jsse/ for
-this.
-
-  A number of other organizations have done work on implementing SSL
-sockets within Java.. there is at least one free implementation
-underway, being done by Claymore Systems, Inc. You can read about
-their free implementation at
-
-http://www.rtfm.com/puretls/
-
-  It looks as though they have a good bit of work left to do for a
-turn-key SSL socket implementation on Java, but when this work is
-further along is should be fairly straight-forward to implement a
-secure Ganymede.
-
-  People interested in spending some cash can get working SSL on Java
-today.  Here are some links to SSL implementors for Java.. note that
-some of these links include explicit details on how to support RMI
-over SSL.
-
-http://vonnieda.org/jSSL/        - Another free work.. still in progress?
-http://www.ixworld.com/javassl/  - Not portable, requires binary NT SSLeay libs
-http://www.phaos.com/            - Commercial, their SSLava stuff mentions RMI
-
-  I am hoping to look at running Ganymede over SSL sockets in the
-Ganymede 1.1 timeframe.
-
-     ------------------------------------------------------------
-
-7) What do I need to run Ganymede?
+5) What do I need to run Ganymede?
 
    The Ganymede distribution is packaged as a gzipped UNIX tar file,
 and requires GNU tar to decompress it, due to extremely long
@@ -222,7 +180,7 @@ Java Web Start product at http://java.sun.com/products/javawebstart/.
 
      ------------------------------------------------------------
 
-8) How scalable is Ganymede, with its memory-based database?
+6) How scalable is Ganymede, with its memory-based database?
 
    Fairly scalable.  At ARL, we use Ganymede to manage a rather
 complex NIS domain containing around 800 users and our DNS domain with
@@ -267,7 +225,7 @@ the Ganymede mailing list.
 
      ------------------------------------------------------------
 
-9) Why isn't Ganymede LDAP-based?  What about replication?
+7) Why isn't Ganymede LDAP-based?  What about replication?
 
    For a number of reasons, most having to do with the fact that
 development on Ganymede started in early 1996, before LDAP was as
@@ -313,7 +271,7 @@ non-Ganymede-mastered LDAP data in a single server.
 
      ------------------------------------------------------------
 
-10) What's up with DNS management?  The current stuff is weak.
+8) What's up with DNS management?  The current stuff is weak.
 
    Yes, that's true.  We're working on code to support arbitrary DNS
 management.  Instead of the current hosts_info file-of-evil that we
@@ -323,7 +281,7 @@ play our cards right, even flexible BIND file importing.  It's coming.
 
      ------------------------------------------------------------
 
-11) What's this rpcpass thing in the client bin directory?
+9) What's this rpcpass thing in the client bin directory?
 
    It's a proxy utility to allow integrating the NIS rpc.yppasswd
 daemon with Ganymede, so users can change their Ganymede (Samba, NT,
@@ -337,7 +295,7 @@ and the entry for 0.99.1 in the CHANGES file.
 
      ------------------------------------------------------------
 
-12) Where's the documentation?
+10) Where's the documentation?
 
    What documentation do you want?  I know more and better docs are
 needed, but feedback is pretty scarce.  Are the current docs adequate
@@ -353,7 +311,7 @@ struggling to get more operational documentation written.
 
      ------------------------------------------------------------
 
-13) How can I help?
+11) How can I help?
 
    Send in bug reports and success reports, to
 jonabbey@arlut.utexas.edu or, preferably, ganymede@arlut.utexas.edu to
@@ -370,7 +328,7 @@ know.
 
      ------------------------------------------------------------
 
-14) Why is it called Ganymede?
+12) Why is it called Ganymede?
 
    It's actually an acronym, standing for GAsh Network Manager, Deluxe
 Edition.  I wanted a name that connected this project to GASH, and I
@@ -379,7 +337,7 @@ fashion (I did come up with a lot of really bad names, though...)
 
      ------------------------------------------------------------
 
-15) What is Ganymede's development history like?
+13) What is Ganymede's development history like?
 
    Ganymede is the successor to GASH, the Group Admin Shell, which was
 developed at ARL starting in early 1993, and which was presented at
@@ -404,7 +362,7 @@ to people.
 
      ------------------------------------------------------------
 
-16) I see a bunch of messages about missing fonts when I run the
+14) I see a bunch of messages about missing fonts when I run the
     Ganymede client or admin console GUI under Linux, what's up?
 
    The common implementations of the JVM provided by both Sun and the
@@ -422,7 +380,7 @@ http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.ht
 
      ------------------------------------------------------------
 
-17) When I try to start the Ganymede server, I see a message complaining about
+15) When I try to start the Ganymede server, I see a message complaining about
     the system hostname resolving to the 127.0.0.1 loopback address and
     the server quits.  What's going on?
 
@@ -466,13 +424,13 @@ script and add the -forcelocalhost option to the Java invocation line.
 
      ------------------------------------------------------------
 
-18) Where's the Ganymede web site?
+16) Where's the Ganymede web site?
 
     http://www.arlut.utexas.edu/gash2/
 
      ------------------------------------------------------------
 
-19) What's the best way to report bugs?  How should I ask questions?
+17) What's the best way to report bugs?  How should I ask questions?
 
     We have a bugzilla database running at the Ganymede web site.  You should
 visit the bugzilla database and report bugs there.  
