@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -91,9 +91,15 @@ public interface XMLSession extends java.rmi.Remote {
    * <p>This method is called by the XML client once the end of the XML
    * stream has been transmitted, whereupon the server will attempt
    * to finalize the XML transaction and return an overall success or
-   * failure message in the ReturnVal.  The xmlEnd() method will block
-   * until the server finishes processing all the XML data previously
-   * submitted by xmlSubmit().</p>
+   * failure message in the ReturnVal.</p>
+   *
+   * <p>Because the GanymedeXMLSession will still be chewing on the
+   * XML transmitted by the client, the client will need to loop on
+   * this call in order to get more output while the chewing occurs.
+   * If the ReturnVal returned has doNormalProcessing set to true,
+   * this means that the server has not transmitted its final
+   * ReturnVal, and the client should sleep for a bit and call
+   * xmlEnd() again to get more output.</p>
    */
 
   ReturnVal xmlEnd() throws RemoteException;

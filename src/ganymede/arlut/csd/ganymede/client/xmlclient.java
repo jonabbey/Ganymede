@@ -674,6 +674,26 @@ public final class xmlclient implements ClientListener {
       {
 	retVal = xSession.xmlEnd();
 
+	while (retVal != null && retVal.doNormalProcessing)
+	  {
+	    String message = retVal.getDialogText();
+
+	    if (message != null)
+	      {
+		System.err.println(message);
+	      }
+
+	    try
+	      {
+		Thread.sleep(2500);	// sleep for 2.5 seconds before calling back
+	      }
+	    catch (InterruptedException ex)
+	      {
+	      }
+
+	    retVal = xSession.xmlEnd();
+	  }
+
 	if (retVal != null)
 	  {
 	    String message = retVal.getDialogText();

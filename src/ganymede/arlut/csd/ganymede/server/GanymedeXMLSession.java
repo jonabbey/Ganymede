@@ -489,27 +489,31 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * <p>This method is called by the XML client once the end of the XML
    * stream has been transmitted, whereupon the server will attempt
    * to finalize the XML transaction and return an overall success or
-   * failure message in the ReturnVal.  The xmlEnd() method will block
-   * until the server finishes processing all the XML data previously
-   * submitted by xmlSubmit().</p>
-   * 
-   * <p>This method is synchronized to cause it to block until the
-   * background parser completes.</p>
+   * failure message in the ReturnVal.</p>
+   *
+   * <p>Because the GanymedeXMLSession will still be chewing on the
+   * XML transmitted by the client, the client will need to loop on
+   * this call in order to get more output while the chewing occurs.
+   * If the ReturnVal returned has doNormalProcessing set to true,
+   * this means that the server has not transmitted its final
+   * ReturnVal, and the client should sleep for a bit and call
+   * xmlEnd() again to get more output.</p>
    *
    * @see arlut.csd.ganymede.rmi.XMLSession
    */
 
-  public synchronized ReturnVal xmlEnd()
+  public ReturnVal xmlEnd()
   {
-    // note again that we are synchronized, so that we won't start to
-    // execute this method until the (also synchronized) run() method
-    // terminates.. in this way, xmlEnd will block until the parsing
-    // process completes, and the transaction has been committed or
-    // aborted
-
-    // return a summation of what happened
-
-    return getReturnVal(null, success);
+    if (!parsing.isSet())
+      {
+	ReturnVal retVal = getReturnVal(null, success);
+	retVal.doNormalProcessing = true; // tell the client to loop back to check us
+	return retVal;
+      }
+    else
+      {
+	return getReturnVal(null, success);
+      }
   }
 
   /**
@@ -1880,7 +1884,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	System.err.println("\n\n");
 
-	err.println("Done scanning XML for <ganydata>, integrating transaction for " + totalCount + " <object> elements.");
+	err.println("\nDone scanning XML for <ganydata>, integrating transaction for " + totalCount + " <object> elements.\n");
+	err.flush();
 
 	committedTransaction = integrateXMLTransaction();
 

@@ -283,7 +283,12 @@ public class xmlfield implements FieldType {
 	      }
 	    else
 	      {
-		value = owner.xSession.reader.getFollowingString(openElement, true).intern();
+		value = owner.xSession.reader.getFollowingString(openElement, true);
+
+		if (value != null)
+		  {
+		    value = ((String) value).intern();
+		  }
 
 		// getFollowingString automatically consumes the field
 		// close element after the string text
@@ -859,7 +864,14 @@ public class xmlfield implements FieldType {
 	owner.xSession.err.println("\nError, found a non-empty vector string element: " + item);
       }
 
-    return item.getAttrStr("val").intern();
+    String result = item.getAttrStr("val");
+
+    if (result != null)
+      {
+	result = result.intern();
+      }
+
+    return result;
   }
 
   public String parseIP(XMLItem item) throws SAXException
@@ -1668,7 +1680,7 @@ class xInvid {
 	throw new NullPointerException("Bad item!");
       }
 
-    String typeString = item.getAttrStr("type").intern();
+    String typeString = item.getAttrStr("type");
 
     if (typeString == null)
       {
@@ -1676,8 +1688,12 @@ class xInvid {
 
 	throw new NullPointerException("Bad item!");
       }
+    else
+      {
+	typeString = typeString.intern();
+      }
 
-    objectId = item.getAttrStr("id").intern();
+    objectId = item.getAttrStr("id");
 
     if (objectId == null)
       {
@@ -1692,6 +1708,10 @@ class xInvid {
 	    getXSession().err.println("Unknown object target in invid field element: " + item);
 	    throw new NullPointerException("Bad item!");
 	  }
+      }
+    else
+      {
+	objectId = objectId.intern();
       }
 
     try
@@ -1957,7 +1977,12 @@ class xPerm {
 	item = getXSession().getNextItem();
       }
 
-    label = ((XMLElement) item).getName().intern();
+    label = ((XMLElement) item).getName();
+
+    if (label != null)
+      {
+	label = label.intern();
+      }
 
     String permbits = item.getAttrStr("perm");
 

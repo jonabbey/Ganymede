@@ -214,8 +214,19 @@ public class xmlobject {
 
     // handle any attributes in the element
 
-    actionMode = openElement.getAttrStr("action").intern();
-    typeString = openElement.getAttrStr("type").intern();
+    actionMode = openElement.getAttrStr("action");
+
+    if (actionMode != null)
+      {
+	actionMode = actionMode.intern();
+      }
+
+    typeString = openElement.getAttrStr("type");
+
+    if (typeString != null)
+      {
+	typeString = typeString.intern();
+      }
 
     try
       {
