@@ -128,6 +128,19 @@ includes the name of the top-level object which holds the embedded
 object.  For our usage, this makes it possible to tell what system
 was involved when an interface definition was changed.
 
+8. [SERVER] Clean ups and optimizations to the admin console handling
+
+I found that there was some really ugly code in the GanymedeAdmin
+class that handles communications to and from attached admin consoles.
+
+I substantially reworked this class for better encapsulation, and
+while doing so wound up removing an extra RMI call that the server was
+attempt to make to each admin console for every line of log
+information sent to the console.  The serverAdminProxy was eliminating
+a lot of these calls if lines of logging information were being sent
+rapidly to the admin consoles, but there was no call for updating that
+information all the time.
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001
