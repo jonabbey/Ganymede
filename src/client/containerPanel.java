@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.55 $ %D%
+    Version: $Revision: 1.56 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -58,9 +58,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   gclient
     gc;				// our interface to the server
 
-  db_object
+  private db_object
     object;			// the object we're editing
-  
+
+  private Invid                 // the object we're editing/viewing's invid
+    invid;
+
   windowPanel
     winP;			// for interacting with our containing context
 
@@ -73,6 +76,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   Hashtable
     shortToComponentHash = new Hashtable(),	// maps field id's to AWT/Swing component
     rowHash = new Hashtable(), 
+    invidChooserHash = new Hashtable(),
     objectHash = new Hashtable();
   
   GridBagLayout
@@ -427,6 +431,37 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * Get the object contained in this containerPanel.
+   */
+
+  public  db_object getObject()
+  {
+    return object;
+  }
+
+  /**
+   *
+   * Get the invid for the object in this containerPanel.
+   *
+   */
+  public Invid getObjectInvid()
+  {
+    if (invid == null)
+      {
+	try
+	  {
+	    invid = object.getInvid();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get the object's Invid in containerPanel: " + rx);
+	  }
+      }
+
+    return invid;
+  }
+
+  /**
    *
    * This method returns true if this containerPanel has already
    * been loaded.
@@ -482,6 +517,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     invalidate();
     frame.validate();
 
+    if (debug)
+      {
+	System.out.println("Done updating container panel");
+      }
+  
     gc.setNormalCursor();
   }
 
@@ -513,6 +553,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	if (c == null)
 	  {
 	    System.out.println("Could not find this component: ID = " + (Short)fields.elementAt(i));
+	    System.out.println("There are " + infoVector.size() + " things in the info vector.");
+	    System.out.println("There are " + rowHash.size() + " things in the row hash.");
+	    System.out.println("Valid ids: ");
+	    Enumeration k = shortToComponentHash.keys();
+	    while (k.hasMoreElements())
+	      {
+		System.out.println("   " + k.nextElement());
+	      }
 	  }
 	else
 	  {
@@ -522,6 +570,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     invalidate();
     frame.validate();
+
+    if (debug)
+      {
+	System.out.println("Done updating container panel");
+      }
 
     gc.setNormalCursor();
   }
@@ -537,14 +590,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   private void updateComponent(Component comp)
   {
-    if (debug)
-      {
-	System.out.println("Updating: " + comp);
-      }
-
     try
       {
 	db_field field = (db_field) objectHash.get(comp);
+
+	if (debug)
+	  {
+	    System.out.println("Updating " + field.getName() + " " + comp); 
+	  }
+	
 
 	if (field == null)
 	  {
@@ -628,7 +682,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (key == null)
 	      {
-		choiceHandles = sf.choices().getListHandles();
+		QueryResult qr = sf.choices();
+		if (qr != null)
+		  {
+		    choiceHandles = qr.getListHandles();
+		  }
 	      }
 	    else
 	      {
@@ -670,8 +728,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 
-	    String o = (String) sf.getValue();
-
 	    // remove all the current values, add the choices that we
 	    // just got
 
@@ -687,12 +743,66 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    // we're assuming here that none is a valid choice.. we shouldn't
 	    // really assume this, should we?
+	    boolean mustChoose = sf.mustChoose();
 	    
-	    cb.addItem("<none>");
+	    if (!mustChoose)
+	      {
+		if (!comboBoxContains(cb, "<none>"))
+		  {
+		    cb.addItem("<none>");
+		  }
+	      }
 
 	    // and select the current value
+	    String o = (String) sf.getValue();
 	    
-	    cb.setSelectedItem(o);
+	    if (o == null)
+	      {
+		try
+		  {
+		    if (debug)
+		      {
+			System.out.println(" selected is null");
+		      }
+
+		    cb.setSelectedItem("<none>");
+		  }
+		catch (Exception e)
+		  {
+		    // <none> is not in there.
+		    cb.addItem("<none>");
+		    cb.setSelectedItem("<none>");
+		  }
+
+		if (mustChoose)
+		  {
+		    
+		    /*
+		     * Currently, string_fields aren't smart enough to
+		     * tell us whether or not they should allow
+		     * <none>, so we leave it in.  the
+		     * stringComboNoneListener could be used here, if
+		     * the string_fields had some kind of allowNone()
+		     * method.
+		     *
+		    if (debug) 
+		      {
+			System.out.println("Adding new stringComboNoneListener"); 
+		      }
+		    
+		    cb.addItemListener(new stringComboNoneListener(cb));
+		    */
+		  }
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println(" setting selected to : " + o);
+		  }
+
+		cb.setSelectedItem(o);
+	      }
 
 	    // put us back on as an item listener so we are live for updates
 	    // from the user again
@@ -703,6 +813,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    JInvidChooser chooser = (JInvidChooser) comp;
 	    invid_field invf = (invid_field) field;
+	    listHandle none = new listHandle("<none>", null);
+	    boolean mustChoose;
 
 	    /* -- */
 
@@ -730,8 +842,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    System.out.println("key is null, getting new copy, not caching.");
 		  }
-
-		choiceHandles = invf.choices().getListHandles();
+		
+		QueryResult qr = invf.choices();
+		if (qr != null)
+		  {
+		    choiceHandles = qr.getListHandles();
+		  }
 	      }
 	    else
 	      {
@@ -773,38 +889,62 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 
-	    Invid o = (Invid) invf.getValue();
-	    
+	    if (debug)
+	      {
+		System.out.println("Removing all items.");
+	      }
+
 	    chooser.removeAllItems();
 
 	    for (int i = 0; i < choiceHandles.size(); i++)
 	      {
+		if (debug)
+		  {
+		    System.out.println("Adding item " + (listHandle)choiceHandles.elementAt(i));
+		  }
+
 		chooser.addItem((listHandle)choiceHandles.elementAt(i));
 	      }
 
-	    // we're assuming here that none is a valid choice.. we shouldn't
-	    // really assume this, should we?
+	    // mustChoose invid_fields don't get a <none>
+	    mustChoose = invf.mustChoose();
 
-	    listHandle none = new listHandle("<none>", null);
-		  
-	    chooser.addItem(none);
+	    if (!mustChoose)
+	      {
+		if (!comboBoxContains(chooser.getCombo(), none))
+		  {
+		    chooser.addItem(none);
+		  }
+	      }
 
-	    // We assume that the choices list *does not include*
-	    // the currently selected value, unless o is null.
-	    // Even if the choices list does include the currently
-	    // selected value, the JInvidChooser, which is derived
-	    // from the JComboBox, shouldn't freak out too much.
-	    // If it ever does, we might need to take care here to
-	    // make sure that we don't create a new one if the
-	    // value is already in the list of choices.
+	    // If the current value is null, we set the choice to
+	    // <none>.  Otherwise, make sure the listHandle is in
+	    // there, then set the current selection.
+
+	    Invid o = (Invid) invf.getValue();
 	    
 	    if (o == null)
 	      {
+		if (mustChoose) 
+		  {
+		    // If the JInvidChooser is mustChoose, then it
+		    // wouldn't have a none item.  We need to add the
+		    // none item, because nothing is selecting it.
+
+		    chooser.addItem(none);
+		  }
+
 		chooser.setSelectedItem(none);
 	      }
 	    else
 	      {
 		listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid)o), o);
+		// Make sure the listHandle is in there
+		if (!comboBoxContains(chooser.getCombo(), lh))
+		  {
+		    chooser.addItem(lh);
+		  }
+
 		chooser.setSelectedItem(lh);
 	      }
 
@@ -819,15 +959,25 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else if (comp instanceof JpassField)
 	  {
-	    System.out.println("Passfield, ingnoring");
+	    if (debug)
+	      {
+		System.out.println("Passfield, ingnoring");
+	      }
 	  }
 	else if (comp instanceof StringSelector)
 	  {
-	    System.out.println("Skipping over StringSelector.");
+	    if (field instanceof invid_field)
+	      {
+		updateInvidStringSelector((StringSelector)comp, (invid_field)field);
+	      }
+	    else // must be a string_field
+	      {
+		updateStringStringSelector((StringSelector)comp, (string_field)field);
+	      }
 	  }
 	else if (comp instanceof vectorPanel)
 	  {
-	    System.out.println("VectorPanel: anything to do?");
+	    ((vectorPanel)comp).refresh();
 	  }
 	else 
 	  {
@@ -839,10 +989,142 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	throw new RuntimeException("Could not check visibility in updateComponent: " + rx);
       }
     
-    if (debug)
+  }
+
+
+  public void updateStringStringSelector(StringSelector ss, string_field field) throws RemoteException
+  {
+    Vector available = null;
+    Vector chosen = null;
+    Object key = null;
+
+    /* -- */
+
+    // If the field is not editable, there will be no available vector
+    if (ss.isEditable())
       {
-	System.out.println("Done updating container panel");
+	
+	key = field.choicesKey();
+	
+	if (key == null)
+	  {
+	    QueryResult qr = field.choices();
+	    if (qr != null)
+	      {
+		available = qr.getListHandles();
+	      }
+	  }
+	else
+	  {
+	    if (gc.cachedLists.containsList(key))
+	      {
+		if (debug)
+		  {
+		    System.out.println("key in there, using cached list");
+		  }
+	    
+		available = gc.cachedLists.getListHandles(key, false);
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println("It's not in there, downloading a new one.");
+		  }
+	    
+		QueryResult choicesV = field.choices();
+	    
+		// if we got a null result, assume we have no choices
+		// otherwise, we're going to cache this result
+	    
+		if (choicesV == null)
+		  {
+		    available = new Vector();
+		  }
+		else
+		  {
+		    gc.cachedLists.putList(key, choicesV);
+		    available = choicesV.getListHandles();
+		  }
+	      }
+	  }
       }
+
+    // now find the chosen vector
+    chosen = field.getValues();
+
+
+    ss.update(available, chosen);
+
+  }
+
+  public void updateInvidStringSelector(StringSelector ss, invid_field field) throws RemoteException
+  {
+    Vector available = null;
+    Vector chosen = null;
+    Object key = null;
+
+    /* -- */
+
+    // Only editable fields have available vectors
+    if (ss.isEditable())
+      {
+
+	key = field.choicesKey();
+    
+	if (key == null)
+	  {
+	    QueryResult qr = field.choices();
+	    if (qr != null)
+	      {
+		available = qr.getListHandles();
+	      }
+	  }
+	else
+	  {
+	    if (gc.cachedLists.containsList(key))
+	      {
+		if (debug)
+		  {
+		    System.out.println("key in there, using cached list");
+		  }
+	    
+		available = gc.cachedLists.getListHandles(key, false);
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println("It's not in there, downloading a new one.");
+		  }
+	    
+		QueryResult choicesV = field.choices();
+	    
+		// if we got a null result, assume we have no choices
+		// otherwise, we're going to cache this result
+	    
+		if (choicesV == null)
+		  {
+		    available = new Vector();
+		  }
+		else
+		  {
+		    gc.cachedLists.putList(key, choicesV);
+		    available = choicesV.getListHandles();
+		  }
+	      }
+	  }
+
+      }
+    
+    QueryResult res = field.encodedValues();
+    if (res != null)
+      {
+	chosen = res.getListHandles();
+      }
+
+    ss.update(available, chosen);
+
   }
 
   /**
@@ -929,7 +1211,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else if (v.getSource() instanceof vectorPanel)
 	  {
-	    System.out.println("Something happened in the vector panel");
+	    if (debug)
+	      {
+		System.out.println("Something happened in the vector panel");
+	      }
 	  }
 	else if (v.getSource() instanceof StringSelector)
 	  {
@@ -1364,11 +1649,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return;
       }
 
+    // Find the field that is associated with this combo box.  Some
+    // combo boxes are all by themselves, and they will be inthe
+    // objectHash.  Other comboBoxes are part of JInvidChoosers, and
+    // they will be in the invidChooserHash
+
     db_field field = (db_field) objectHash.get(cb);
 
     if (field == null)
       {
-	throw new RuntimeException("Whoa, null field for a JComboBox: " + e);
+	field = (db_field) invidChooserHash.get(cb);
+	
+	if (field == null)
+	  {
+	    throw new RuntimeException("Whoa, null field for a JComboBox: " + e);
+	  }
       }
 
     try
@@ -1419,6 +1714,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println("field setValue returned true!!");
 	      }
 
+	    gc.somethingChanged();
 	    checkReturnValForRescan(returnValue);
 	  }
 	else
@@ -1459,7 +1755,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *  
    */
 
-  private void checkReturnValForRescan(ReturnVal rv)
+  public void checkReturnValForRescan(ReturnVal rv)
   {
     if (debug)
       {
@@ -1802,7 +2098,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.out.println("Adding StringSelector, its a vector of invids!");
       }
 
-    valueHandles = field.encodedValues().getListHandles();
+    QueryResult qres = field.encodedValues();
+    if (qres != null)
+      {
+	valueHandles = qres.getListHandles();
+      }
 
     if (! keepLoading)
       {
@@ -2016,6 +2316,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     JstringField
       sf;
 
+    boolean
+      mustChoose;
+
     /* -- */
 
     if (field.canChoose())
@@ -2079,7 +2382,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    String thisChoice = (String)choices.elementAt(j);
 	    combo.addItem(thisChoice);
-		
+
 	    if (!found && (currentChoice != null))
 	      {
 		if (thisChoice.equals(currentChoice))
@@ -2088,10 +2391,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 		
-	    /*if (debug)
-	      {
-	      System.out.println("Adding " + (String)choices.elementAt(j));
-	      }*/
 	  }
 	    
 	// if the current value wasn't in the choice, add it in now
@@ -2106,30 +2405,52 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	try
 	  {
-	    boolean mustChoose = field.mustChoose();
-	    combo.setEditable(mustChoose); // this should be setEditable(mustChoose());
-
-	    if (debug)
-	      {
-		System.out.println("Setting editable to + " + mustChoose);
-	      }
+	    mustChoose = field.mustChoose();
 	  }
 	catch (RemoteException rx)
 	  {
 	    throw new RuntimeException("Could not check to see if field was mustChoose.");
 	  }
 
-	//combo.setVisible(true);  // This line is not necessary, right?
-	    
-	if (currentChoice != null)
+	combo.setEditable(mustChoose); 
+
+	if (currentChoice == null)
 	  {
+	    if (debug)
+	      {
+		System.out.println("Setting current value to <none>, because the current choice is null. " + currentChoice);
+	      }	  
+	    combo.addItem("<none>");
+	    combo.setSelectedItem("<none>");
+	    if (mustChoose)
+	      {
+		/*
+		 * Currently, string_fields aren't smart enough to
+		 * tell us whether or not they should allow
+		 * <none>, so we leave it in.  the
+		 * stringComboNoneListener could be used here, if
+		 * the string_fields had some kind of allowNone()
+		 * method.
+		 *
+		combo.addItemListener(new stringComboNoneListener(combo));
+		if (debug)
+		  {
+		    System.out.println("Adding new stringComboNoneListener");
+		  }
+		*/
+	      }
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.out.println("Setting current value: " + currentChoice);
+	      }	  
+
 	    combo.setSelectedItem(currentChoice);
 	  }
 
-	if (debug)
-	  {
-	    System.out.println("Setting current value: " + currentChoice);
-	  }	  
+
 
 	if (editable && fieldInfo.isEditable())
 	  {
@@ -2138,10 +2459,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	objectHash.put(combo, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
-	if (debug)
-	  {
-	    System.out.println("Adding to panel");
-	  }
 	    
 	addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	    	    
@@ -2413,6 +2730,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (editable && fieldInfo.isEditable())
       {
+
 	Object key = field.choicesKey();
 	
 	Vector choices = null;
@@ -2462,11 +2780,24 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	listHandle noneHandle = new listHandle("<none>", null);
 	boolean found = false;
 	JInvidChooser combo = new JInvidChooser(this, fieldTemplate.getTargetBase());
+	boolean mustChoose = false;
 	
 	/* -- */
 
-	combo.addItem(noneHandle);
+	try
+	  {
+	    mustChoose = field.mustChoose();
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get mustChoose: " + rx);
+	  }
 	
+	if (!mustChoose)
+	  {
+	    combo.addItem(noneHandle);
+	  }
+
 	choices = gc.sortListHandleVector(choices);
 
 	for (int j = 0; j < choices.size(); j++)
@@ -2523,6 +2854,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("currentChoice is null");
 	      }
+
+	    // If the field is must choose, we wouldn't have added the
+	    // noneHandle earlier.
+	    if (mustChoose)
+	      {
+		if (debug)
+		  {
+		    System.out.println("Adding noneHAndle, because the currentchoice is null.");
+		  }
+
+		combo.addItem(noneHandle);
+	      }
+
 	    combo.setSelectedItem(noneHandle);
 	  }	  
 
@@ -2531,9 +2875,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    combo.addItemListener(this); // register callback
 	  }
 
-	objectHash.put(combo.getCombo(), field); // We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
+	combo.setAllowNone(!mustChoose);
+
+	invidChooserHash.put(combo.getCombo(), field); // We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
 	objectHash.put(combo, field); // The update method still need to be able to find this JInvidChooser.
 	
+	System.out.println("** Adding new JInvidChooser: field ID: " + fieldInfo.getID());
 	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
 
 
@@ -2545,7 +2892,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
 	
       }
-    else
+    else //It's not editable, so add a button
       {
 	if (fieldInfo.getValue() != null)
 	  {
@@ -2558,7 +2905,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (label == null)
 	      {
-		System.out.println("-you don't have permission to view this object.");
+		if (debug)
+		  {
+		    System.out.println("-you don't have permission to view this object.");
+		  }
+
 		label = "Permission denied!";
 	      }
 
@@ -2644,5 +2995,65 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	   templates.indexOf(fieldTemplate), 
 	   fieldTemplate.getName(), 
 	   fieldInfo.isVisible());
+  }
+
+  public static boolean comboBoxContains(JComboBox combo, Object o)
+  {
+    boolean found = false;
+    for (int i = 0; i < combo.getItemCount(); i++)
+      {
+	if (combo.getItemAt(i).equals(o))
+	  {
+	    found = true;
+	    break;
+	  }
+      }
+    return found;	
+  }
+}
+
+/**
+ * Simple item listener to remove the <none> from a JComboBox of strings
+ *
+ * For some choices, after the initial value is set, the <none> should
+ * be gone.
+ * 
+ */
+class stringComboNoneListener implements ItemListener {
+  private final boolean debug = false;
+
+  JComboBox combo;
+  
+  public stringComboNoneListener(JComboBox combo)
+  {
+    this.combo = combo;
+  }
+
+  public void itemStateChanged(ItemEvent e)
+  {
+    if (e.getStateChange() == ItemEvent.DESELECTED)
+      {
+	Object item = combo.getSelectedItem();
+	if (item == null)
+	  {
+	    // If <none> is not already in there, add it
+	    if (!containerPanel.comboBoxContains(combo, "<none>"))
+	      {
+		combo.addItem("<none>");
+	      }
+
+	    combo.setSelectedItem("<none>");
+	  }
+	else if (item.equals("<none>"))
+	  {
+	    combo.removeItem("<none>");
+	    if (debug)
+	      {
+		System.out.println("stringComboNoneListener: I'm outta here!");
+	      }
+
+	    combo.removeItemListener(this);
+	  }
+      }
   }
 }
