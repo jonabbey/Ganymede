@@ -31,6 +31,10 @@ import gjt.*;
 
 public class StringDialog extends Dialog implements ActionListener, JsetValueCallback, ItemListener {
 
+  static final boolean debug = false;
+
+  // --
+
   Hashtable
     componentHash,
     valueHash;
@@ -271,12 +275,12 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 		  }
 	      }
 	  }
-	else 
+	else if (debug)
 	  {
 	    System.out.println("No objects to add to StringDialog");
 	  }
       }
-    else
+    else if (debug)
       {
 	System.out.println("null objects vector");
       }
