@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -782,6 +782,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Enumeration vols, maps, entries;
     StringBuffer buf = new StringBuffer();
     String mountopts, mapname;
+    String volName, sysName;
     Vector tempVect;
     Invid ref, userRef;
 
@@ -807,7 +808,16 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	obj = (DBObject) vols.nextElement();
 
 	buf.setLength(0);
-	buf.append((String) obj.getFieldValueLocal(volumeSchema.LABEL)); // volume label
+
+	volName = (String) obj.getFieldValueLocal(volumeSchema.LABEL);
+
+	if (volName == null)
+	  {
+	    Ganymede.debug("Couldn't emit a volume definition.. null label");
+	    continue;
+	  }
+
+	buf.append(volName); // volume label
 	buf.append("\t\t");
 
 	mountopts = (String) obj.getFieldValueLocal(volumeSchema.MOUNTOPTIONS); // mount options.. NeXT's like this.  Ugh.
@@ -818,7 +828,16 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    buf.append(" ");
 	  }
 
-	buf.append(getLabel((Invid) obj.getFieldValueLocal(volumeSchema.HOST))); // hostname
+	sysName = getLabel((Invid) obj.getFieldValueLocal(volumeSchema.HOST));
+
+	if (sysName == null)
+	  {
+	    Ganymede.debug("Couldn't emit proper volume definition for " + 
+			   volName + ", no system found");
+	    continue;
+	  }
+
+	buf.append(sysName);
 	buf.append(dnsdomain);
 
 	buf.append(":");
@@ -1482,7 +1501,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // and the DNS info
 
     hostname = (String) object.getFieldValueLocal(interfaceSchema.NAME);
-    hostname += dnsdomain;
 
     hostAliases = object.getFieldValuesLocal(interfaceSchema.ALIASES);
 
@@ -1493,6 +1511,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (hostname != null)
       {
 	result.append(hostname);
+	result.append(dnsdomain);
       }
 
     result.append(", ");
