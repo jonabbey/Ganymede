@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,6 +42,7 @@ public class Query implements java.io.Serializable {
 
   String objectName = null;
   String returnName = null;
+  String saveName = null;
   short objectType = -1;
   short returnType = -1;
   QueryNode root;
@@ -223,11 +224,71 @@ public class Query implements java.io.Serializable {
        * until the number of nodes in the query has been exhausted
        *
        */
-
-
-
+      
       String queryString = null;
- 
+
+      saveName = "Testing";
+
+      // Attach the name of the saved query first...
+
+      if (saveName == null)
+	{  
+	  System.err.println("Error: No name given to saved query");
+	  queryString = "(No name):";
+	}
+      else 
+	{
+	  queryString = saveName + ":";
+	}
+      
+      // Then add the object type by id or name
+      
+      /*  If the object is denoted by its ID, throw a 
+       *  # sign before it to indicate it. Remember to 
+       *  back-slash any pound signs in object name field
+       *  to avoid confusion	 
+       */
+      
+      if (objectName != null)
+	{
+	  // The query object is denoted by its name
+	  
+	  queryString = queryString + objectName + ":";
+	
+	}
+      else if (objectType != -1)
+	{
+	  // The object is assigned by short ID
+
+	  queryString = queryString + "#" + objectType + ":";
+
+	}
+      else 
+	{
+	  System.err.println("Error: No object given for Query");
+	  
+	  // Whoops! Time to leave
+	  
+	  return null;
+	}
+
+      // Then add editable only value...
+     
+      if (editableOnly == true)
+	{
+	  queryString = queryString + "editTrue:(";
+	}
+      else 
+	{
+	  queryString = queryString + "editFalse:(";
+	}
+      
+      // Now dump it..
+      
+      if (root != null)
+	{
+	  queryString = queryString + root.dumpToString() + ")";
+	}
       
       return queryString;
       
