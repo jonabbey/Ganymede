@@ -21,7 +21,7 @@ _1. Configuring the distribution for your site_
 
    When you first unpack the Ganymede UNIX distribution, you will see
    that there is a configure script under the ganymede-xx directory. This
-   script does two main things. First, it unpacks four scripts you can
+   script does two main things. First, it unpacks three scripts you can
    immediately use to install the client and server, called
    installClient, installWeb and installServer. Second, configure goes
    through the source tree and builds and configures the makefiles and
