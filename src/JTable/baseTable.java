@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.19 $ %D%
+  Version: $Revision: 1.20 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.19 $ %D%
+ * @version $Revision: 1.20 $ %D%
  */
 
 public class baseTable extends JBufferedPane implements AdjustmentListener, ActionListener {
@@ -1267,13 +1267,19 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	oldRow = (tableRow) rows.lastElement();
 	newVal = oldRow.getBottomEdge() + hRowLineThickness;
 
-	System.err.println("Setting topEdge for row " + rows.size() + " to " + newVal);
+	if (debug)
+	  {
+	    System.err.println("Setting topEdge for row " + rows.size() + " to " + newVal);
+	  }
 	newRow.setTopEdge(newVal);
       }
 
     bottom =  newRow.getTopEdge() + (newRow.getRowSpan() * (row_height + hRowLineThickness));
 
-    System.err.println("Setting bottomEdge for row " + rows.size() + " to " + bottom);
+    if (debug)
+      {
+	System.err.println("Setting bottomEdge for row " + rows.size() + " to " + bottom);
+      }
 
     newRow.setBottomEdge(bottom);
 
@@ -1333,12 +1339,19 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
 	scaledWidth = scalefact * col.origWidth;
 
-	System.err.println("Column " + i + " has nominalWidth of " + nominalWidth[i] + 
-			   " and a current scaled width of " + scaledWidth);
+	if (debug)
+	  {
+	    System.err.println("Column " + i + " has nominalWidth of " + nominalWidth[i] + 
+			       " and a current scaled width of " + scaledWidth);
+	  }
 
 	if (nominalWidth[i] < scaledWidth)
 	  {
-	    System.err.println("Reducing column " + i + " to nominal + 5");
+	    if (debug)
+	      {
+		System.err.println("Reducing column " + i + " to nominal + 5");
+	      }
+
 	    spareSpace += scaledWidth;
 	    col.origWidth = (float) (nominalWidth[i] + 5) / scalefact;
 	    spareSpace -= col.origWidth * scalefact;
@@ -1349,7 +1362,10 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	  }
       }
 
-    System.err.println("spareSpace = " + spareSpace + ", totalOver = " + totalOver);
+    if (debug)
+      {
+	System.err.println("spareSpace = " + spareSpace + ", totalOver = " + totalOver);
+      }
 
     // we've shrunk the columns as much as we can.. now let's take
     // our spareSpace and apportion it out to those columns whose
@@ -1365,7 +1381,10 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	    percentOver = (nominalWidth[i] - scaledWidth) / totalOver;
 	    growthFactor = (spareSpace * percentOver) / scalefact;
 
-	    System.err.print("Column " + i + ": percentOver = " + percentOver + " , growing by " + growthFactor);
+	    if (debug)
+	      {
+		System.err.print("Column " + i + ": percentOver = " + percentOver + " , growing by " + growthFactor);
+	      }
 
 	    col.origWidth += growthFactor;
 
@@ -1401,8 +1420,6 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
       row;
 
     /* -- */
-
-    System.err.println("****************************************** reCalcRowPos ******");
 
     if (startRow > rows.size() - 1)
       {
@@ -1803,8 +1820,6 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
     if (vbar_visible && (canvas.getBounds().height != 0))
       {
-	System.err.println("adjusting vertical scrollbar configuration");
-
 	vbar.setValues(vbar.getValue(),
 		       canvas.getBounds().height - headerAttrib.height - (2 * hHeadLineThickness),
 		       0,
@@ -2210,14 +2225,8 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
     String
       cellText = null;
 
-    Graphics
-      g = null;
-
-    Image 
-      cellImage = null;
-
     Rectangle
-      cellRect = null;
+      cellRect = new Rectangle();
 
     tableRow
       tr = null;
@@ -2300,6 +2309,10 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	  {
 	    System.err.println("rendering new scroll pos");
 	  }
+
+	// paint() uses hbar_old and vbar_old to decide
+	// whether it needs to call render
+
 	hbar_old = rt.hbar.getValue();
 	vbar_old = rt.vbar.getValue();
       }
@@ -2375,7 +2388,10 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	    tr = (tableRow) rt.rows.elementAt(++first_row);
 	  }
 
-	System.err.println("Calculated first_row as " + first_row);
+	if (debug)
+	  {
+	    System.err.println("Calculated first_row as " + first_row);
+	  }
 
 	/* what is the last row we can see?  that is, the last row
 	   whose first line is < getBounds().height  */
@@ -2389,7 +2405,10 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	    last_row++;
 	  }
 
-	System.err.println("Calculated last_row as " + last_row);
+	if (debug)
+	  {
+	    System.err.println("Calculated last_row as " + last_row);
+	  }
       }
     else
       {
@@ -2418,46 +2437,19 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
     /* ------------------- okay, we've got our general parameters.
                            we can start doing our drawing. ------------------ */
-
-    /* draw a column at a time, to take advantage of the fact that all cells
-       in a column are even multiples of a single rowSpan block.. that is, we can
-       create an image the width of the column and the height of a single standard
-       row and use it to blit rows or parts of rows onto the backing image */
-
     if (debug)
       {
 	System.err.println("Rendering cols: first_col = " + first_col + ", last_col = " + last_col);
       }
 
+    tableCol column;
+    tableRow row;
+    int topLine;
+    int leftEdge;
+
     for (int j = first_col; j <= last_col; j++)
       {
-	tableCol element = (tableCol) rt.cols.elementAt(j);
-
-	/* -- */
-
-	/* prep our cellImage for doing clipping */
-
-	if ((cellImage == null) || (g == null))
-	  {
-	    cellRect = new Rectangle(0, 0, ((tableCol)rt.cols.elementAt(j)).width, rt.row_height);
-	    cellImage = createImage(cellRect.width, cellRect.height);
-	    g = cellImage.getGraphics();
-	  }
-	else
-	  {
-	    /* if we already have an image of the right size, we don't
-	       have to do anything.  Otherwise, flush the old image and
-	       create a new image and Graphics object for rendering
-	       this column */
-
-	    if ((cellRect != null) && (cellRect.width != element.width))
-	      {
-		cellImage.flush();
-		cellRect = new Rectangle(0, 0, element.width, rt.row_height);
-		cellImage = createImage(cellRect.width, cellRect.height);
-		g = cellImage.getGraphics();
-	      }
-	  }
+	column = (tableCol) rt.cols.elementAt(j);
 
 	/* render the column 
 
@@ -2471,116 +2463,45 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	    System.err.println("Rendering rows: first_row = " + first_row + ", last_row = " + last_row);
 	  }
 
-	int leftEdge = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset + rt.vLineThickness;
-
-	int topLine;
+	leftEdge = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset + rt.vLineThickness;
 
 	for (int i = first_row; i <= last_row; i++)
 	  {
-	    // loop through and blit each regular row slice of
-	    // this cell
+	    row = (tableRow) rt.rows.elementAt(i);
 
-	    for (int k = 0; k < ((tableRow) rt.rows.elementAt(i)).getRowSpan(); k++)
-	      {
-		topLine = ((tableRow) rt.rows.elementAt(i)).getTopEdge() - v_offset + k * (rt.row_height + rt.hRowLineThickness);
+	    topLine = row.getTopEdge() - v_offset;
 
-		// if this is a multi-line cell, we need to wipe out the line between
-		// the two line chunks
-
-		if (k > 0)
-		  {
-		    if (i < rt.rows.size())
-		      {
-			cell = rt.getCell(j, i);
-
-			setCellBackColor(bg, cell, element);
-
-			//			System.err.println("Clearing midline");
-
-			bg.drawLine(leftEdge, topLine - 1, leftEdge+element.width, topLine - 1);
-		      }
-		  }
-
-		renderBlitCell(cellImage, g, j, i, k, element, cellRect);
-
-		// okay, we're done drawing into our cell.  Now we need to
-		// blit the cell into the main backing image.
-
-		if (debug)
-		  {
-		    System.err.println("Rendering row " + i + ", spanSect " + k + " leftEdge = " + leftEdge +
-				       " topLine = " + topLine);
-		  }
-
-		bg.drawImage(cellImage, 
-			     leftEdge,
-			     topLine,
-			     this);
-	      }
-	  }
-      }
-
-    // Drawing headers ------------------------------------------------------------
-
-    if (debug)
-      {
-	System.err.println("\tDrawing headers");
-      }
-
-    cellImage = null;
-
-    for (int j = first_col; j <= last_col; j++)
-      {
-	tableCol element = (tableCol) rt.cols.elementAt(j);
-
-	/* -- */
-
-	if (cellImage == null)
-	  {
-	    cellRect = new Rectangle(0, 0, element.width, rt.headerAttrib.height);
-	    cellImage = createImage(element.width, rt.headerAttrib.height);
-	    g = cellImage.getGraphics();
-	  }
-	else
-	  {
-	    // if we already have an image of the right size, we don't
-	    // have to do anything.  Otherwise, flush the old image and
-	    // create a new image and Graphics object for rendering
-	    // this column
-
-	    if (cellRect.width != element.width)
-	      {
-		cellImage.flush();
-		cellRect = new Rectangle(0, 0, element.width, rt.headerAttrib.height);
-		cellImage = createImage(element.width, rt.headerAttrib.height);
-		g = cellImage.getGraphics();
-	      }
-	  }
-
-	cellText = element.header;
-
-	g.setFont(rt.headerAttrib.font);
-	g.setColor(rt.headerAttrib.bg);
-	g.fillRect(0, 0, cellRect.width, cellRect.height);
-
-	if (cellText != null)
-	  {
-	    g.setColor(rt.headerAttrib.fg);
+	    cellRect.setBounds(leftEdge, topLine, column.width, row.getHeight() + 1);
+	    bg.setClip(cellRect);
 	    
-	    strwidth = rt.headerAttrib.fontMetric.stringWidth(cellText);
-	    g.drawString(cellText, cellRect.width / 2 - (strwidth/2), rt.headerAttrib.baseline);
+	    renderBlitCell(cellRect, bg, j, i, column);
 	  }
 
-	// okay, we're done drawing into our cell.  Now we need to
-	// blit the cell into the main backing image.
-	
-	bg.drawImage(cellImage,
-		     ((Integer) rt.colPos.elementAt(j)).intValue() +
-		     rt.vLineThickness - h_offset,
-		     rt.hHeadLineThickness, this);
+	// and now render the header
+
+	cellRect.setBounds(leftEdge, 0, column.width, rt.headerAttrib.height + 1);
+	bg.setClip(cellRect);
+
+	bg.setFont(rt.headerAttrib.font);
+
+	bg.setColor(rt.headerAttrib.bg);
+	bg.fillRect(cellRect.x, cellRect.y, cellRect.width, cellRect.height);
+
+	if (column.header != null)
+	  {
+	    bg.setColor(rt.headerAttrib.fg);
+	    
+	    strwidth = rt.headerAttrib.fontMetric.stringWidth(column.header);
+	    bg.drawString(column.header, cellRect.x + cellRect.width / 2 - (strwidth/2), 
+			  cellRect.y + rt.headerAttrib.baseline);
+	  }
       }
 
     // Draw lines ------------------------------------------------------------
+
+    // max out our clip so we can draw the lines
+
+    bg.setClip(0,0, getBounds().width, getBounds().height);
 
     // draw horizontal lines
 
@@ -2605,21 +2526,12 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
       }
     else
       {
-	// bottom of the last row defined
+	// bottom of the last row defined (this makes a difference in fill mode)
 
-	ypos = rt.hHeadLineThickness * 2 + rt.headerAttrib.height + 
-	  rt.rows.size() * (rt.row_height + rt.hRowLineThickness); 
+	ypos = ((tableRow) rt.rows.lastElement()).getBottomEdge() - v_offset;
       }
-    
-    if (!rt.vbar_visible)
-      {
-	bg.drawLine(0, ypos, getBounds().width - 1, ypos);
-      }
-    else
-      {
-	ypos = ypos - v_offset;
-	bg.drawLine(0, ypos, getBounds().width - 1, ypos);
-      }
+
+    drawHorizLine(ypos);
     
     // if rt.horizLines is true, draw the horizontal lines
     // in the body of the table
@@ -2629,14 +2541,9 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
     if (rt.horizLines)
       {
-	int topLine = rt.headerAttrib.height + 2 * rt.hHeadLineThickness;
-	int horizlinePos = topLine - v_offset - 1;
+	topLine = rt.headerAttrib.height + 2 * rt.hHeadLineThickness;
 
-	for (int i = 0; i < first_row; i++)
-	  {
-	    tr = (tableRow) rt.rows.elementAt(i);
-	    horizlinePos += (rt.row_height + rt.hRowLineThickness) * tr.getRowSpan();
-	  }
+	int horizlinePos = topLine;
 
 	for (int i = first_row; i <= last_row; i++)
 	  {
@@ -2648,24 +2555,19 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 		    if (horizlinePos > topLine)
 		      {
-			bg.drawLine(0,
-				    horizlinePos,
-				    getBounds().width-1, 
-				    horizlinePos);
+			drawHorizLine(horizlinePos);
 		      }
 		  }
 	      }
 	    else
 	      {
-		tr = (tableRow) rt.rows.elementAt(i);
-		horizlinePos += (rt.row_height + rt.hRowLineThickness) * tr.getRowSpan();
+		row = (tableRow) rt.rows.elementAt(i);
+
+		horizlinePos = row.getBottomEdge() - v_offset;
 
 		if (horizlinePos > topLine)
 		  {
-		    bg.drawLine(0,
-				horizlinePos,
-				getBounds().width-1, 
-				horizlinePos);
+		    drawHorizLine(horizlinePos);
 		  }
 	      }
 	  }
@@ -2690,6 +2592,11 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
       {
 	System.err.println("Exiting render");
       }
+  }
+
+  private final void drawHorizLine(int y)
+  {
+    bg.drawLine(0, y, getBounds().width - 1, y);
   }
 
   private void setCellForeColor(Graphics g, tableCell cell, tableCol element)
@@ -2815,13 +2722,14 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
    *
    */
 
-  private void renderBlitCell(Image cellImage, Graphics g, 
-			      int col, int row, int spanSubset,
-			      tableCol element, Rectangle cellRect)
+  private void renderBlitCell(Rectangle cellRect, Graphics g, 
+			      int col, int row,
+			      tableCol element)
   {
     tableCell cell;
 
     int 
+      baseLine,
       strwidth,
       just;
 
@@ -2841,27 +2749,33 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
     
     // fill in our background
 
-    setCellBackColor(g, cell, element);    
+    setCellBackColor(g, cell, element);	// note this is the canvas' setCBC, not the tables
 	    
-    g.fillRect(0, 0, cellRect.width, cellRect.height);
+    g.fillRect(cellRect.x, cellRect.y, cellRect.width, cellRect.height);
+
+    if (cell == null)
+      {
+	return;
+      }
 
     // render the contents of our cell if it is not empty
 
-    if (cell != null)
+    // set our font
+
+    g.setFont(cell.getFont());
+    strwidth = cell.getCurrentWidth();
+	    
+    // set our color
+
+    setCellForeColor(g, cell, element);
+
+    for (int i = 0; i < cell.getRowSpan(); i++)
       {
-	// set our font
-	
-	renderString = cell.getText(spanSubset);
+	renderString = cell.getText(i);
+	baseLine = cellRect.y + rt.row_baseline + ((rt.row_height + rt.hRowLineThickness) * i);
 
 	if (renderString != null)
 	  {
-	    g.setFont(cell.getFont());
-	    strwidth = cell.getCurrentWidth();
-	    
-	    // set our color
-
-	    setCellForeColor(g, cell, element);
-
 	    // and draw
 
 	    just = cell.getJust();
@@ -2869,17 +2783,15 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	    switch (just)
 	      {
 	      case tableAttr.JUST_LEFT:
-		g.drawString(renderString, 2, rt.row_baseline);
+		g.drawString(renderString, cellRect.x + 2, baseLine);
 		break;
 			
 	      case tableAttr.JUST_RIGHT:
-		g.drawString(renderString, cellRect.width - strwidth - 2, 
-			     rt.row_baseline);
+		g.drawString(renderString, cellRect.x + cellRect.width - strwidth - 2, baseLine);
 		break;
 			
 	      case tableAttr.JUST_CENTER:
-		g.drawString(renderString, cellRect.width / 2 - (strwidth/2),
-			     rt.row_baseline);
+		g.drawString(renderString, cellRect.x + cellRect.width / 2 - (strwidth/2), baseLine);
 		break;
 	      }
 	  }
@@ -4064,7 +3976,7 @@ class tableRow {
 
   /**
    *
-   * tableCell constructor
+   * size constructor
    *
    * @param rt The baseTable this row belongs to
    * @param size The number of cells to create in this row
@@ -4197,6 +4109,11 @@ class tableRow {
   int getBottomEdge()
   {
     return bottomEdge;
+  }
+
+  int getHeight()
+  {
+    return rowSpan * (rt.row_height + rt.hRowLineThickness);
   }
 }
 
