@@ -727,35 +727,35 @@ public final class DBNameSpace implements NameSpace {
 
 		    return false;
 		  }
-		else
+
+		// if we're not interactive, we'll remember the proposed
+		// new field association in our handle's shadowFieldB
+		// variable.. if we later unmark the original association,
+		// we'll promote the shadowFieldB association to
+		// shadowField 'A'.
+		
+		if (handle.getShadowFieldB() != null && handle.getShadowFieldB() != field)
 		  {
-		    // if we're not interactive, we'll remember the proposed
-		    // new field association in our handle's shadowFieldB
-		    // variable.. if we later unmark the original association,
-		    // we'll promote the shadowFieldB association to
-		    // shadowField 'A'.
+		    // we've already speculatively associated
+		    // ourselves with this value with another
+		    // field.. we can't do more than one
+		    // speculative association in one
+		    // non-interactive transaction and have any
+		    // chance of consistency at the end, so just
+		    // go ahead and reject this attempt
 
-		    if (handle.getShadowFieldB() != null && handle.getShadowFieldB() != field)
-		      {
-			// we've already speculatively associated
-			// ourselves with this value with another
-			// field.. we can't do more than one
-			// speculative association in one
-			// non-interactive transaction and have any
-			// chance of consistency at the end, so just
-			// go ahead and reject this attempt
-
-			return false;
-		      }
-
-		    if (handle.owner == null)
-		      {
-			handle.owner = editSet;	// yoinks!  ours!
-			remember(editSet, value);
-		      }
-
-		    handle.setShadowFieldB(field);
+		    return false;
 		  }
+
+		if (handle.owner == null)
+		  {
+		    handle.owner = editSet;	// yoinks!  ours!
+		    remember(editSet, value);
+		  }
+
+		handle.setShadowFieldB(field);
+
+		Ganymede.debug("Set shadowFieldB for value " + String.valueOf(value) + " -- handle = " + handle.toString());
 	      }
 	    else
 	      {
