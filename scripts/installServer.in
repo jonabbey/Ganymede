@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.25 $
-# $Date: 2000/11/24 06:25:23 $
+# $Revision: 1.26 $
+# $Date: 2000/11/30 03:23:06 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -256,6 +256,8 @@ while (<INPUT>) {
 
 close INPUT;
 close OUTPUT;
+
+chmod 0640, "$installdir/ganymede.properties";
 
 # Copy and process the runServer script into place
 

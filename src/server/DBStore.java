@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.137 $
-   Last Mod Date: $Date: 2000/11/24 04:43:38 $
+   Version: $Revision: 1.138 $
+   Last Mod Date: $Date: 2000/11/30 03:23:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.137 $ %D%
+ * @version $Revision: 1.138 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -340,7 +340,9 @@ public final class DBStore {
 	catch (IOException ex)
 	  {
  	    System.err.println("DBStore initialization error: DBStore id read failure for " + filename);
-	    System.err.println("IOException: " + ex);
+	    System.err.println("IOException: ");
+	    ex.printStackTrace();
+
 	    throw new RuntimeException("DBStore initialization error (" + filename + ")");
 	  }
 
