@@ -2,10 +2,10 @@
 
    permCustom.java
 
-   This file is a management class for event-class records in Ganymede.
+   This file is a management class for Role records in Ganymede.
    
    Created: 21 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,6 +23,12 @@ import java.rmi.*;
                                                                       permCustom
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This file is a management class for Role records in Ganymede.
+ *
+ */
 
 public class permCustom extends DBEditObject implements SchemaConstants {
 
@@ -94,9 +100,9 @@ public class permCustom extends DBEditObject implements SchemaConstants {
 
   public boolean instantiateNewField(short fieldID)
   {
-    if (fieldID == SchemaConstants.PermPersonae)
+    if (fieldID == SchemaConstants.RolePersonae)
       {
-	if (id == SchemaConstants.PermDefaultObj)
+	if (id == SchemaConstants.RoleDefaultObj)
 	  {
 	    return false;
 	  }

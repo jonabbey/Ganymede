@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,6 +23,12 @@ import java.rmi.*;
                                                               adminPersonaCustom
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This file is a management class for admin personae objects in Ganymede.
+ *
+ */
 
 public class adminPersonaCustom extends DBEditObject implements SchemaConstants {
   
@@ -212,8 +218,8 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
 	QueryNode root = new QueryNotNode(new QueryDataNode(QueryDataNode.INVIDVAL,
 							    QueryDataNode.EQUALS,
-							    new Invid(SchemaConstants.PermBase,
-								      SchemaConstants.PermDefaultObj)));
+							    new Invid(SchemaConstants.RoleBase,
+								      SchemaConstants.RoleDefaultObj)));
 
 	// note that the query we are submitting here *will* be filtered by the
 	// current visibilityFilterInvid field in GanymedeSession.
