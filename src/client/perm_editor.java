@@ -5,7 +5,7 @@
    Description.
    
    Created: 18 November 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
   static final int VISIBLE = 1;
   static final int EDITABLE = 2;
   static final int DELETABLE = 3;
-  boolean debug = false;
+  boolean debug = true;
 
   // --
 
@@ -169,8 +169,6 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	throw new RuntimeException("couldn't get permission matrix\n" + ex.getMessage());
       }
     
-    //    setBackground(Color.white); 
-
     if (debug)
       {
 	System.out.println("Starting Permissions Editor Initialization");
@@ -241,11 +239,10 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 			     new BoolRenderer(rowVector));
 
     table.setShowHorizontalLines(false);
-
+    table.getTableHeader().setReorderingAllowed(false);
 
     edit_pane = new JScrollPane(table);
     
-    //    edit_pane.setBackground(Color.lightGray);
     getContentPane().add("Center", edit_pane);
     getContentPane().add("South", Choice_Buttons);
     gc.setWaitCursor();
@@ -267,9 +264,6 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
     PermEntry entry, templateEntry;
     BaseDump base;
     FieldTemplate template;
-    //    Hashtable results = new Hashtable(); 
-    //    Component[] myAry;
-    //    PermRow myPermRow;
     Vector rows = new Vector();
     boolean create, view, edit, delete;
     boolean createOK, viewOK, editOK, deleteOK;
@@ -370,6 +364,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	// add it to the rows vector 
 
 	PermRow	basePermRow = new PermRow(base, null, enabled);
+
 	basePermRow.viewOK = viewOK;
 	basePermRow.createOK = createOK;
 	basePermRow.editOK = editOK;
@@ -461,6 +456,7 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	// add it to the rows vector 
 
 	    PermRow templatePermRow = new PermRow(base, template, visibleField);
+
 	    templatePermRow.viewOK = viewOK;
 	    templatePermRow.createOK = createOK;
 	    templatePermRow.editOK = editOK;
@@ -510,9 +506,10 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
   
   public void actionPerformed(ActionEvent e)
   {
-    Object ref;
+    PermRow ref;
     short baseid;
     BaseDump bd;
+    String baseName, templateName;
     FieldTemplate template;
     boolean view, edit, create, delete;
    
@@ -529,10 +526,78 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 	  {
 	    System.out.println("Ok was pushed");
 	  }
-            
+
+	Enumeration enum = rowVector.elements();
+	
+	while (enum.hasMoreElements()) {
+	  ref = (PermRow)enum.nextElement();
+
+	  if (!ref.changed) {
+	    continue;
+
+	  } else {
+
+	    gc.somethingChanged();	    
+
+	    if (ref.isBase()) {
+	      bd = (BaseDump) ref.reference;
+	      baseid = bd.getTypeID();
+	      baseName = bd.getName();
+	      
+	      view = ref.visible.booleanValue();
+	      create = ref.creatable.booleanValue();
+	      edit = ref.editable.booleanValue();
+	      delete = ref.deletable.booleanValue();
+
+	      if (debug)
+		{
+		  System.err.println("setting base perms for " + baseName+ " ("+baseid+")");
+		  System.out.println(baseName + " " + view + ", " + create + ", " + edit + ", " + delete); 
+		}
+
+	
+	      try
+		{
+		  gc.handleReturnVal(permField.setPerm(baseid, new PermEntry (view, edit, create, delete)));
+		}
+	      catch (RemoteException ex)
+		{
+		  throw new RuntimeException("Caught RemoteException" + ex);
+		}
+	    
+	    } 
+	    else  {
+	      template = (FieldTemplate) ref.reference;
+	      templateName = template.getName();
+	      
+	      view = ref.visible.booleanValue();
+	      create = ref.creatable.booleanValue();
+	      edit = ref.editable.booleanValue();
+	      delete = ref.deletable.booleanValue();
+
+	      if (debug)
+		{
+		  System.err.println("setting basefield perms for field " + templateName);
+		  System.out.println("   " + templateName + " "+view + ", " + create + ", " + edit + ", " + delete); 
+		}
+	      
+	      
+	      try
+		{
+		  gc.handleReturnVal(permField.setPerm(template.getBaseID(), template.getID(), new PermEntry (view, edit, create, delete)));
+		}
+	      catch (RemoteException ex)
+		{
+		  throw new RuntimeException("Caught RemoteException" + ex);
+		}
+
+	    }
+	  }
+	}	      
+           
 	myshow(false);
 	return;
-      } 
+      }
     else 
       {
 	if (debug)
@@ -556,11 +621,12 @@ class brian_editor extends JDialog implements ActionListener, Runnable {
 class BPermTableModel extends AbstractTableModel {
 
   Vector rows; 
+  Vector changedRowVector = new Vector();
   String[] columnNames = {"Name", 
-			    "Visible",
-			    "Creatable",
-			    "Editable",
-			    "Deletable"};
+			  "Visible",
+			  "Creatable",
+			  "Editable",
+			  "Deletable"};
 
   public BPermTableModel(Vector rowVector) {
     this.rows = rowVector;
@@ -663,11 +729,11 @@ class BPermTableModel extends AbstractTableModel {
 	
       case 1:
 	myRow.visible = (Boolean)value;
-
+	myRow.changed=true;
 	// If making a base selection
 	// update children too 
 
-	if (myRow.field == null) {
+	if (myRow.isBase()) {
 	  setBaseChildren(row, col, value);
 	  
 	  // Take care of visibility of creatable
@@ -686,27 +752,27 @@ class BPermTableModel extends AbstractTableModel {
 	
       case 2:
 	myRow.creatable = (Boolean)value;
-
+	myRow.changed=true;
 	// If base, update children too
 
-	if ((myRow.field == null) && (myRow.visible.booleanValue())) {
+	if ((myRow.isBase()) && (myRow.visible.booleanValue())) {
 	  setBaseChildren(row, col, value);
 	}
 	break;
 	
       case 3:
 	myRow.editable = (Boolean)value;
-
+	myRow.changed=true;
 	// If base, update children too
 
-	if ((myRow.field == null) && (myRow.visible.booleanValue())) {
+	if ((myRow.isBase()) && (myRow.visible.booleanValue())) {
 	  setBaseChildren(row, col, value);
 	}
 	break;
 	
       case 4:
 	myRow.deletable = (Boolean)value;
-
+	myRow.changed=true;
 	// No update of children for deletable
 	break;
 	
@@ -725,10 +791,10 @@ class BPermTableModel extends AbstractTableModel {
   public void setBaseChildren(int row, int col, Object value) {
     PermRow baseRow = (PermRow) rows.elementAt(row);
     
-    for (int i = row+1; i<=rows.size(); i++) {
+    for (int i = row+1; i<rows.size(); i++) {
       PermRow myRow = (PermRow) rows.elementAt(i);
-      if (myRow.field == null) { // stop updating when we run 
-	                         // out of children
+      if (myRow.isBase()) { // stop updating when we run 
+	                    // out of children
 	break;
 
       } else {
@@ -745,24 +811,28 @@ class BPermTableModel extends AbstractTableModel {
 	      myRow.editable = new Boolean(false);
 	      myRow.deletable = new Boolean(false);
 	    }
+	    myRow.changed=true;
 	  }
 	  break;
 
 	case 2:
 	  if (myRow.createOK) {
 	    myRow.creatable = (Boolean)value;
+	    myRow.changed=true;
 	  }
 	  break;
 
 	case 3:
 	  if (myRow.editOK) {
 	    myRow.editable = (Boolean)value;
+	    myRow.changed=true;
 	  }
 	  break;
 
 	case 4:
 	  if (myRow.deleteOK){
 	    myRow.deletable = (Boolean)value;
+	    myRow.changed=true;
 	  }
 	  break;
 	  
@@ -940,4 +1010,12 @@ class PermRow {
     this.base = base;
     this.field = field;
   }
+
+  public boolean isBase() {
+    if (field == null)    
+      return true;
+    else
+      return false;
+  }
+
 }
