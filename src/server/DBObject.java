@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -49,7 +49,7 @@ import java.rmi.server.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.14 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.15 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -274,6 +274,8 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     /* -- */
 
+    //    System.err.println("Emitting " + objectBase.getName() + " <" + id + ">");
+
     out.writeInt(id);
     out.writeShort(fields.size());
 
@@ -288,12 +290,17 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
       {
 	out.writeLong(removalDate.getTime());
       }
+
+    //    System.err.println("emitting fields");
    
     enum = fields.keys();
 
     while (enum.hasMoreElements())
       {
 	key = (Short) enum.nextElement();
+
+	//	System.err.println("field:" + key);
+
 	out.writeShort(key.shortValue());
 	((DBField) fields.get(key)).emit(out);
       }
@@ -358,7 +365,14 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	removalDate = null;
       }
 
-    fields = new Hashtable(tmp_count);
+    if (tmp_count > 0)
+      {
+	fields = new Hashtable(tmp_count);
+      }
+    else
+      {
+	fields = new Hashtable(); 
+      }
 
     for (int i = 0; i < tmp_count; i++)
       {
