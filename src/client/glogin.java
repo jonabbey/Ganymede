@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -392,6 +392,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       }
     finally
       {
+	try
+	  {
+	    g_client.statusThread.shutdown();
+	  }
+	catch (NullPointerException ex)
+	  {
+	  }
+
 	try
 	  {
 	    g_client.setVisible(false);
