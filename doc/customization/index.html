@@ -909,7 +909,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       <a
       href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a> method
       was called, the server will go through all the objects in the transaction and call the <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release()">release()</a> method on the
+      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a> method on the
       objects, instead.
     </p>
 
@@ -932,7 +932,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       methods initiated external transactions will commit those transactions when their <a
       href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>
       methods are called. If, instead, their <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release()">release()</a>
+      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a>
       methods are called, they would abort their remote transactions.
     </p>
 
@@ -951,7 +951,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       <a
       href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
       and <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release()">release()</a>
+      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a>
       methods will need to be able to tell what happened to the object
       during the transaction.  There are two parts to this.  The first
       is by the use of the <a
@@ -979,7 +979,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       <a
       href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
       and <a
-      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release()">release()</a> methods, or by
+      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a> methods, or by
       having the various finalize methods keep notes as to what has been done as the user edits
       the object.  You have a lot of flexibility as to how you implement your logic, be creative.
     </p>
@@ -1524,16 +1524,19 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release()">release()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a>
 	</td>
 	<td>
-
-	  This method is a hook for subclasses to do clean up action if the
-	  commit process is not able to go to completion for some reason.
-	  Generally, release() should be responsible for doing cleanup for
-	  processes initiated by commitPhase1().  If commitPhase1() does
-	  not do anything external to Ganymede, release() shouldn't either.
-	  release() should return immediately if isCommitting() is false;
+	      A hook for subclasses to use to clean up any external
+	      resources allocated for this object.  This method can be called
+	      after commitPhase1() has been called, or it may be called at any
+	      time to indicate that this object is being withdrawn from the
+	      transaction (as by a checkpoint rollback).  This method <b>will
+              not</b> be called after commitPhase2() has been called.  If you
+	      do anything external in commitPhase2(), make sure that all
+              resources allocated for this object (at any time in this object's
+	      editing life-cycle) are released before commitPhase2()
+	      completes.
 	</td>
       </tr>
     </table>
