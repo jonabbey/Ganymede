@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -456,6 +456,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     statusLabel = new JTextField();
     statusLabel.setOpaque(true);
+    statusLabel.setEditable(false);
     statusLabel.setBackground(ClientColor.menu);
     statusLabel.setForeground(ClientColor.menuText);
     statusLabel.setBorder(statusBorder);
@@ -463,9 +464,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     JLabel l = new JLabel("Status: ");
     l.setBackground(ClientColor.menu);
     l.setForeground(ClientColor.menuText);
-    //l.setBorder(statusBorder);
+    JPanel lP = new JPanel(new BorderLayout());
+    lP.setBorder(statusBorder);
+    lP.add("Center", l);
 
-    bottomBar.add("West", l);
+    bottomBar.add("West", lP);
     bottomBar.add("Center", statusLabel);
     mainPanel.add("South", bottomBar);
 
