@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -332,7 +332,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
     else
       {
-	key = key + ".text";
+	key = key + ".txt";
       }
 
     if (Ganymede.messageDirectoryProperty == null)
