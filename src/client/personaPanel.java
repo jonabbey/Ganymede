@@ -239,6 +239,8 @@ class personaContainer extends JScrollPane implements Runnable{
   JPanel
     progressPane;
 
+  /* -- */
+
   public personaContainer(Invid invid, int index, boolean editable,personaPanel pp)
   {
     this(invid, index, editable, pp, false);
@@ -257,7 +259,6 @@ class personaContainer extends JScrollPane implements Runnable{
     progressPane.add(new JLabel("Loading..."));
     progressPane.add(progressBar);
     setViewportView(progressPane);
-
   }
 
   public synchronized void run()
@@ -272,7 +273,8 @@ class personaContainer extends JScrollPane implements Runnable{
 	if (createNew)
 	  {
 	    // Make sure the default owner is chosen
-	    if (! pp.fp.getgclient().defaultOwnerChosen())
+
+	    if (!pp.fp.getgclient().defaultOwnerChosen())
 	      {
 		pp.fp.getgclient().chooseDefaultOwner(false);
 	      }
@@ -299,7 +301,9 @@ class personaContainer extends JScrollPane implements Runnable{
 	    pp.middle.setTitleAt(index, object.getLabel());
 	    containerPanel cp = new containerPanel(object,
 						   editable,
-						   pp.fp.getgclient(), pp.fp.getWindowPanel(), pp.fp,
+						   pp.fp.getgclient(), 
+						   pp.fp.getWindowPanel(), 
+						   pp.fp,
 						   progressBar);
 	    cp.setBorder(pp.empty);
 	    setViewportView(cp);
