@@ -1384,7 +1384,7 @@ public final class DBNameSpace implements NameSpace {
 		results = new Vector();
 	      }
 
-	    results.addElement(this.getName() + " -- " + String.valueOf(value));
+	    results.addElement(this.getName() + " -- " + String.valueOf(value) + "\n");
 	  }
       }
 
