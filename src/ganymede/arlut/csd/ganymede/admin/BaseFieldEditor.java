@@ -149,6 +149,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     md5cryptedCF,		// password
     apachemd5cryptedCF,		// password
     winHashcryptedCF,		// password
+    sshaHashcryptedCF,		// password
     plainTextCF,		// password
     multiLineCF;		// string
 
@@ -251,6 +252,9 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     winHashcryptedCF = new JcheckboxField(null, false, true);
     winHashcryptedCF.setCallback(this);
 
+    sshaHashcryptedCF = new JcheckboxField(null, false, true);
+    sshaHashcryptedCF.setCallback(this);
+
     plainTextCF = new JcheckboxField(null, false, true);
     plainTextCF.setCallback(this);
 
@@ -312,6 +316,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel.addFillRow("FreeBSD-style MD5 Crypted:", md5cryptedCF);
     editPanel.addFillRow("Apache-style MD5 Crypted:", apachemd5cryptedCF);
     editPanel.addFillRow("Windows/Samba Crypted:", winHashcryptedCF);
+    editPanel.addFillRow("SSHA Crypted:", sshaHashcryptedCF);
     editPanel.addFillRow("Store PlainText:", plainTextCF);
     editPanel.addFillRow("MultiLine Field:", multiLineCF);
     editPanel.addFillRow("Minimum String Size:", minLengthN);
@@ -387,6 +392,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	editPanel.setRowVisible(md5cryptedCF, true);
 	editPanel.setRowVisible(apachemd5cryptedCF, true);
 	editPanel.setRowVisible(winHashcryptedCF, true);
+	editPanel.setRowVisible(sshaHashcryptedCF, true);
 	editPanel.setRowVisible(plainTextCF, true);
       }
     else
@@ -395,6 +401,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	editPanel.setRowVisible(md5cryptedCF, false);
 	editPanel.setRowVisible(apachemd5cryptedCF, false);
 	editPanel.setRowVisible(winHashcryptedCF, false);
+	editPanel.setRowVisible(sshaHashcryptedCF, false);
 	editPanel.setRowVisible(plainTextCF, false);
       }
 
@@ -1037,6 +1044,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    md5cryptedCF.setValue(fieldDef.isMD5Crypted());
 	    apachemd5cryptedCF.setValue(fieldDef.isApacheMD5Crypted());
 	    winHashcryptedCF.setValue(fieldDef.isWinHashed());
+	    sshaHashcryptedCF.setValue(fieldDef.isSSHAHashed());
 	    plainTextCF.setValue(fieldDef.isPlainText());
 
 	    // if a password is not crypted, it *must* keep
@@ -1359,6 +1367,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	md5cryptedCF.setEnabled(true);
 	apachemd5cryptedCF.setEnabled(true);
 	winHashcryptedCF.setEnabled(true);
+	sshaHashcryptedCF.setEnabled(true);
 
 	if (passwordShowing)
 	  {
@@ -1366,7 +1375,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    // we have to use plaintext
 
 	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected())
+		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+		  sshaHashcryptedCF.isSelected())
 		&& plainTextCF.isSelected())
 	      {
 		plainTextCF.setEnabled(false);
@@ -1663,14 +1673,16 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		// is not to store the password in crypted form.
 		
 		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
-		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
+		    !sshaHashcryptedCF.isSelected()
 		    && !plainTextCF.isSelected())
 		  {
 		    plainTextCF.setValue(true);
 		  }
 
 		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+		      sshaHashcryptedCF.isSelected()))
 		  {
 		    plainTextCF.setEnabled(false);
 		  }
@@ -1697,12 +1709,14 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		// is not to store the password in crypted form.
 
 		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+		    && !sshaHashcryptedCF.isSelected()
 		    && !plainTextCF.isSelected())
 		  {
 		    plainTextCF.setValue(true);
 		  }
 
-		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+		      sshaHashcryptedCF.isSelected()))
 		  {
 		    plainTextCF.setEnabled(false);
 		  }
@@ -1729,14 +1743,16 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		// is not to store the password in crypted form.
 		
 		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
-		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
+		    !sshaHashcryptedCF.isSelected()
 		    && !plainTextCF.isSelected())
 		  {
 		    plainTextCF.setValue(true);
 		  }
 		
 		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+		      sshaHashcryptedCF.isSelected()))
 		  {
 		    plainTextCF.setEnabled(false);
 		  }
@@ -1771,6 +1787,42 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		
 		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
 		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+		  {
+		    plainTextCF.setEnabled(false);
+		  }
+		else
+		  {
+		    plainTextCF.setEnabled(true);
+		  }
+	      }
+	    else
+	      {
+		refreshFieldEdit(false);
+	      }
+	  }
+	else if (comp == sshaHashcryptedCF)
+	  {
+	    if (debug)
+	      {
+		System.out.println("sshaHashcryptedCF");
+	      }
+
+	    if (handleReturnVal(fieldDef.setSSHAHashed((sshaHashcryptedCF.isSelected()))))
+	      {
+		// a password field has to have plaintext stored if it
+		// is not to store the password in crypted form.
+		
+		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
+		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
+		    !sshaHashcryptedCF.isSelected()
+		    && !plainTextCF.isSelected())
+		  {
+		    plainTextCF.setValue(true);
+		  }
+		
+		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+		      sshaHashcryptedCF.isSelected()))
 		  {
 		    plainTextCF.setEnabled(false);
 		  }
@@ -2134,6 +2186,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     this.md5cryptedCF = null;
     this.apachemd5cryptedCF = null;
     this.winHashcryptedCF = null;
+    this.sshaHashcryptedCF = null;
     this.plainTextCF = null;
     this.multiLineCF = null;
 
