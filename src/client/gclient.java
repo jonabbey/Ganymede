@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1135,7 +1135,10 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 	    try
 	      {
 		Query _query = new Query(baseN.getBase().getTypeID());
-		Vector results =  session.query(_query);
+		//		Vector results =  session.query(_query);
+
+		Vector results = session.dump(_query);
+		StringBuffer buffer = new StringBuffer();
 
 		if (results == null)
 		  {
@@ -1143,7 +1146,15 @@ treeNode insertCategoryNode(CategoryNode node, treeNode prevNode, treeNode paren
 		  }
 		else
 		  {
-		    wp.addTableWindow(session, baseN.getQuery(), results, "Query Results");
+		    for (int i = 0; i < results.size(); i++)
+		      {
+			buffer.append((String) results.elementAt(i));
+			// System.out.print((String) results.elementAt(i));
+		      }
+
+		    System.out.println();
+
+		    wp.addTableWindow(session, baseN.getQuery(), buffer.toString(), "Query Results");
 		  }
 	      }
 	    catch (RemoteException rx)
