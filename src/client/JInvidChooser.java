@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: Before May 7, 1998
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,7 +17,7 @@ package arlut.csd.ganymede.client;
 
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
-import com.sun.java.swing.*;
+import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.util.Vector;
