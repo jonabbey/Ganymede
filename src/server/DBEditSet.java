@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -469,12 +469,14 @@ public class DBEditSet {
 	// list of touched objects, in which case we'll need to keep looping
 	// until things settle out.
 
+	// clone the object list so that we don't loop
+	// over a list of objects that is going to change on us
+
+	Vector objList = (Vector) objects.clone();
+
 	while (!done)
 	  {
-	    // clone the object list so that we don't loop
-	    // over a list of objects that is going to change on us
-
-	    Vector objList = (Vector) objects.clone();
+	    System.err.println("DBEditSet.commit(): looping the loop");
 
 	    // assume we're done, until we find out otherwise
 
@@ -500,7 +502,7 @@ public class DBEditSet {
 		    if (!eObj.getBase().isEmbedded())
 		      {
 			df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
-			df.setValue(modDate);
+			df.setValueLocal(modDate);
 			
 			sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
 			
@@ -511,7 +513,7 @@ public class DBEditSet {
 			    result += ": " + description;
 			  }
 
-			sf.setValue(result);
+			sf.setValueLocal(result);
 		      }
 
 		  case DBEditObject.EDITING:
@@ -519,7 +521,7 @@ public class DBEditSet {
 		    if (!eObj.getBase().isEmbedded())
 		      {
 			df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
-			df.setValue(modDate);
+			df.setValueLocal(modDate);
 
 			sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
 
@@ -530,7 +532,7 @@ public class DBEditSet {
 			    result += ": " + description;
 			  }
 
-			sf.setValue(result);
+			sf.setValueLocal(result);
 		      }
 
 		    eObj.finalized = true;
@@ -599,19 +601,23 @@ public class DBEditSet {
 		      }
 		    
 		    String diff = eObj.diff();
-		    
-		    if (debug)
+
+		    if (diff != null)
 		      {
-			System.err.println("**** DIFF (" + eObj.getLabel() + "):" + diff + " : ENDDIFF****");
+			
+			if (debug)
+			  {
+			    System.err.println("**** DIFF (" + eObj.getLabel() + "):" + diff + " : ENDDIFF****");
+			  }
+			
+			logEvents.addElement(new DBLogEvent("objectchanged",
+							    eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
+							    (gSession.personaInvid == null ?
+							     gSession.userInvid : gSession.personaInvid),
+							    gSession.username,
+							    invids,
+							    null));
 		      }
-		    
-		    logEvents.addElement(new DBLogEvent("objectchanged",
-							eObj.getTypeDesc() + ":" + eObj.getLabel() + " --\n" + diff,
-							(gSession.personaInvid == null ?
-							 gSession.userInvid : gSession.personaInvid),
-							gSession.username,
-							invids,
-							null));
 		  }
 	      }
 	  }
