@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,7 +45,7 @@ import arlut.csd.JDialog.*;
  * there may be an informational dialog returned and/or a list of fields that
  * need to be updated in the relevant object in response to the successful update.
  *
- * Alternatively, didSucceed() ma return false, in which case the operation either
+ * Alternatively, didSucceed() may return false, in which case the operation either
  * could not succeed or is incomplete.  In this case, doRescan() will return false,
  * and getDialog() should return a valid JDialogBuff().  If the operation is
  * simply incomplete pending more data from the user, getCallback() will return
