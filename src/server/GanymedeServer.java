@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 2000/09/13 06:06:53 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 2000/09/15 23:32:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -601,6 +601,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     return entries;
   }
+
+  /**
+   * <p>Used by the Ganymede server to transmit build status notifications
+   * to connected clients.</p>
+   */
 
   public static void sendMessageToRemoteSessions(int type, String message)
   {

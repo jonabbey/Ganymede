@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.125 $
-   Last Mod Date: $Date: 2000/08/31 03:51:08 $
+   Version: $Revision: 1.126 $
+   Last Mod Date: $Date: 2000/09/15 23:32:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.125 $ %D%
+ * @version $Revision: 1.126 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -936,16 +936,53 @@ public final class DBStore {
    * <p>The dump is guaranteed to be transaction consistent.</p>
    *
    * @param filename Name of the database file to emit
-
+   *
+   * @param outStream Stream to write the XML to @param
+   * dumpDataObjects if false, only the schema definition will be
+   * written
+   *
    * @see arlut.csd.ganymede.DBEditSet
    * @see arlut.csd.ganymede.DBJournal
    */
 
-  public synchronized void dumpXML(String filename, boolean dumpDataObjects) throws IOException
+  public void dumpXML(String filename, boolean dumpDataObjects) throws IOException
   {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
-    DataOutputStream out = null;
+
+    /* -- */
+
+    outStream = new FileOutputStream(filename);
+    bufStream = new BufferedOutputStream(outStream);
+
+    this.dumpXML(bufStream, dumpDataObjects);
+  }
+
+  /**
+   * <p>Dumps the database and/or database schema to an OutputStream
+   * as an XML file</p>
+   *
+   * <p>This method dumps the entire database to the OutputStream.
+   * The thread that calls the dump method will be suspended until
+   * there are no threads performing update writes to the in-memory
+   * database.  In practice this will likely never be a long interval.
+   * Note that this method *will* dump the database, even if no
+   * changes have been made.  You should check the DBStore journal's
+   * isClean() method to determine whether or not a dump is really
+   * needed, if you're not sure.</p>
+   *
+   * <p>The dump is guaranteed to be transaction consistent.</p>
+   *
+   * @param outStream Stream to write the XML to @param
+   * dumpDataObjects if false, only the schema definition will be
+   * written
+   *
+   * @see arlut.csd.ganymede.DBEditSet
+   * @see arlut.csd.ganymede.DBJournal
+   */
+
+  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects) throws IOException
+  {
     XMLDumpContext xmlOut = null;
     
     Enumeration basesEnum;
@@ -974,18 +1011,15 @@ public final class DBStore {
     
     try
       {
-	outStream = new FileOutputStream(filename);
-	bufStream = new BufferedOutputStream(outStream);
-
-	xmlOut = new XMLDumpContext(new UTF8XMLWriter(bufStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
 				    false, // don't dump plaintext passwords needlessly
 				    false); // don't include creator/modifier data
 	// start writing
-
+    
 	xmlOut.startElement("ganymede");
 	xmlOut.attribute("major", Byte.toString(major_xml_version));
 	xmlOut.attribute("minor", Byte.toString(minor_xml_version));
-
+    
 	xmlOut.indentOut();
 	xmlOut.startElementIndent("ganyschema");
 
@@ -1004,20 +1038,20 @@ public final class DBStore {
 	xmlOut.endElementIndent("namespaces");
 
 	// write out our category tree
-
+    
 	xmlOut.skipLine();
-
+    
 	xmlOut.startElementIndent("object_type_definitions");
-
+    
 	xmlOut.indentOut();
 	rootCategory.emitXML(xmlOut);
-
+    
 	xmlOut.indentIn();
 	xmlOut.endElementIndent("object_type_definitions");
-
+    
 	xmlOut.indentIn();
 	xmlOut.endElementIndent("ganyschema");
-
+    
 	if (dumpDataObjects)
 	  {
 	    xmlOut.startElementIndent("ganydata");
@@ -1054,12 +1088,6 @@ public final class DBStore {
 	xmlOut.close();
 	xmlOut = null;
       }
-    catch (IOException ex)
-      {
-	System.err.println("DBStore error dumping XML to " + filename);
-	
-	throw ex;
-      }
     finally
       {
 	if (lock != null)
@@ -1072,11 +1100,6 @@ public final class DBStore {
 	    xmlOut.close();
 	  }
 
-	if (bufStream != null)
-	  {
-	    bufStream.close();
-	  }
-	   
 	if (outStream != null)
 	  {
 	    outStream.close();
