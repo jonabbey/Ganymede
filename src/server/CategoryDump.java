@@ -13,7 +13,7 @@
    as we would if we were truly a remote object.
    
    Created: 12 February 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -108,13 +108,15 @@ public class CategoryDump implements Category, CategoryNode {
 	    lastIndex = baseChild.getLastIndex();
 	    contents.addElement(baseChild);
 	  }
-      }
 
-    token = getChunk(src, lastIndex);
+	// get the close category chunk
+
+	token = getChunk(src, lastIndex);
+      }
     
     if (!token.equals(">"))
       {
-	throw new RuntimeException("parse error, couldn't find end of category in dump");
+	throw new RuntimeException("parse error, couldn't find end of category in dump: " + token);
       }
   }
 
