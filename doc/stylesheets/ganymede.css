@@ -1,180 +1,181 @@
 /*
-   Stylesheet for Ganymede documentation
+Stylesheet for Ganymede documentation
 
-   Jonathan Abbey, jonabbey@arlut.utexas.edu
+Jonathan Abbey, jonabbey@arlut.utexas.edu
 
-   $Rev$
-   $Date$
-   $Author$
+$Rev$
+$Date$
+$Author$
 */
 
 @media all {
- body { 
-     background: white; 
-     font: smaller lucida grande, verdana;
-     width: 80%;
-     margin: auto;
- }
-
- #header {
-     margin-top: 2em;
-     margin-bottom: 3em;
-     width: 100%;
-     padding: 0em;
- }
- 
- #header h1 {
-     color: #900;
-     margin: 0px;
- }
-
- #header img {
-     width: 30%;
-     float: right;
- }
-
- #title {
-     border: 1px solid #c9d1d7;
-     background-color: #ffe;
-     width: 60%;
-     padding: 0.7em;
-     margin-bottom: 1em;
- }
-
- #title p {
-     margin: 0em;
-     margin-top: 1em;
- }
- 
- #abstract {
-    margin-top: 1.5em;
-    margin-bottom: 1.5em;
-    border: 1px solid #c9d1d7;
-    background-color: #f1f5f9;
-    color: #006;
-    width: 30%;
-    padding-left: 0.7em;
-    padding-right: 0.7em;
-    font-style: italic;
-}
-
-#abstract p {
-    margin-top: 0.7em;
-    margin-bottom: 0.7em;
-}
-
-#abstract p:first-child:before {
-    content: "Abstract:";
-    display: block;
-    margin-bottom: 0.7em;
-    color: black;
-    font-weight: bold;
-    font-style: normal;
-}
-
- h1 {
-     font-family: Arial, Helvetica;
- }
-
- h2 {
-    margin-top: 3em;
-    font-variant: small-caps;
-    font-size: x-large;
-}
-
-  h3 {
-    margin-top: 2em;
-    font-variant: small-caps;
-      font-size: large;
-  }
-
-  h4 {
-      margin-top: 2em;
-    color: #900;
-  }
-
-  code.filename {
-    font-weight: bold;
-  }
-
-  code.type {
-    font-family: monospace;
-    font-weight: bold;
-  }
-
- a {
-     color: #03c;
-     font-weight: bold;
-     text-decoration: none;
- }
-
- a:hover {
-     border-bottom: 1px solid red;
- }
-
- ul, ol {
-     width: 75%;
- }
- 
- li {
-     padding: 0.25em;
- }
-
- p.address { font-family: Arial, Helvetica; font-style: italic; }
-
- p.note { 
-    margin: auto;
-    margin-top: 1.5em;
-    margin-bottom: 1.5em;
-    background-color: #ff9;
-    border: 1px solid #f90;
-    padding: 0.7em;
-    width: 80%;
- }
-
- p.note:before {
-     content: "Note: ";
-     font-weight: bold;
- }
-
- pre.listing, xmp.listing { 
-    margin: auto;
-    border: 1px solid #c9d1d7;
-    background-color: #f1f5f9;
-    padding: 0.7em;
-    color: #006;
- }
-
- xmp.listing {
-    white-space: pre-wrap;       /* css-3 */
-    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
- }
-
-table {
-    margin: auto;
-    margin-top: 1.5em;
-    margin-bottom: 1.5em;
-    border: 2px solid #c9d1d7;
-    border-collapse: collapse;
-    font-size: small;
+    body { 
+        background: white; 
+        font-size: small;
+        width: 80%;
+        margin: auto;
     }
-    
-th {
+
+    #header {
+        margin-top: 2em;
+        margin-bottom: 3em;
+        width: 100%;
+        padding: 0em;
+    }
+
+    #header h1 {
+        color: #900;
+        margin: 0px;
+    }
+
+    #header img {
+        width: 30%;
+        float: right;
+    }
+
+    #title {
+        border: 1px solid #c9d1d7;
+        background-color: #ffe;
+        width: 60%;
+        padding: 0.7em;
+        margin-bottom: 1em;
+    }
+
+    #title p {
+        margin: 0em;
+        margin-top: 1em;
+    }
+
+    #abstract {
+        margin-top: 1.5em;
+        margin-bottom: 1.5em;
+        border: 1px solid #c9d1d7;
+        background-color: #f1f5f9;
+        color: #006;
+        width: 30%;
+        padding-left: 0.7em;
+        padding-right: 0.7em;
+        font-style: italic;
+    }
+
+    #abstract p {
+        margin-top: 0.7em;
+        margin-bottom: 0.7em;
+    }
+
+    #abstract p:first-child:before {
+        content: "Abstract:";
+        display: block;
+        margin-bottom: 0.7em;
+        color: black;
+        font-weight: bold;
+        font-style: normal;
+    }
+
+    h1 {
+        font-family: Arial, Helvetica;
+    }
+
+    h2 {
+        margin-top: 3em;
+        font-variant: small-caps;
+        font-size: x-large;
+    }
+
+    h3 {
+        margin-top: 2em;
+        font-variant: small-caps;
+        font-size: large;
+        color: #900;
+    }
+
+    h4 {
+        margin-top: 2em;
+        color: #900;
+    }
+
+    code.filename {
+        font-weight: bold;
+    }
+
+    code.type {
+        font-family: monospace;
+        font-weight: bold;
+    }
+
+    a {
+        color: #03c;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    a:hover {
+        border-bottom: 1px solid red;
+    }
+
+    ul, ol {
+        width: 75%;
+    }
+
+    li {
+        padding: 0.25em;
+    }
+
+    p.address { font-family: Arial, Helvetica; font-style: italic; }
+
+    p.note { 
+        margin: auto;
+        margin-top: 1.5em;
+        margin-bottom: 1.5em;
+        background-color: #ff9;
+        border: 1px solid #f90;
+        padding: 0.7em;
+        width: 80%;
+    }
+
+    p.note:before {
+        content: "Note: ";
+        font-weight: bold;
+    }
+
+    pre.listing, xmp.listing { 
+        margin: auto;
+        border: 1px solid #c9d1d7;
+        background-color: #f1f5f9;
+        padding: 0.7em;
+        color: #006;
+    }
+
+    xmp.listing {
+        white-space: pre-wrap;       /* css-3 */
+        white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+        white-space: -pre-wrap;      /* Opera 4-6 */
+        white-space: -o-pre-wrap;    /* Opera 7 */
+        word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    }
+
+    table {
+        margin: auto;
+        margin-top: 1.5em;
+        margin-bottom: 1.5em;
+        border: 2px solid #c9d1d7;
+        border-collapse: collapse;
+        font-size: small;
+    }
+
+    th {
         margin: 0em;
         padding: 0.5em;
         color: navy;
         border: 2px solid #c9d1d7;
         background-color: #f1f5f9;
-      }
+    }
 
-td {
+    td {
         margin: 0em;
         padding: 0.5em;
         border: 1px solid #ddd; 
-      }
+    }
 }
 
 
@@ -184,26 +185,26 @@ td {
 
 @media print {
 
-   body { background: white; font-size: smaller; }
+    body { background: white; font-size: smaller; }
 
-  img.screenshot {
-    width: 80%;
-    page-break-inside: avoid;
-  }
+    img.screenshot {
+        width: 80%;
+        page-break-inside: avoid;
+    }
 
-  pre.listing { 
-    white-space: pre-wrap;       /* css-3 */
-    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
-  }
+    pre.listing { 
+        white-space: pre-wrap;       /* css-3 */
+        white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+        white-space: -pre-wrap;      /* Opera 4-6 */
+        white-space: -o-pre-wrap;    /* Opera 7 */
+        word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    }
 
-  xmp.listing { 
-    white-space: pre-wrap;       /* css-3 */
-    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
-  }
+    xmp.listing { 
+        white-space: pre-wrap;       /* css-3 */
+        white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+        white-space: -pre-wrap;      /* Opera 4-6 */
+        white-space: -o-pre-wrap;    /* Opera 7 */
+        word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    }
 }
