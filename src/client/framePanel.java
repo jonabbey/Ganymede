@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,7 @@ import java.rmi.*;
 import java.util.*;
 
 import com.sun.java.swing.*;
+import com.sun.java.swing.border.*;
 import com.sun.java.swing.event.*;
 
 import jdj.PackageResources;
@@ -40,7 +41,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     EXPIRATION_DATE = -1,
     HISTORY = -1,
     OWNER = -1,
-    NOTES = -1;
+    NOTES = -1,
+    OBJECTS_OWNED = -1,
+    PERSONAE = -1;
   
 
   JTabbedPane 
@@ -52,7 +55,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     expiration_date,       // Holds a datePanel
     removal_date, 
     owner,       // Holds an ownerPanel
-    notes;       // holds a notePanel
+    notes,       // holds a notePanel
+    objects_owned;  // Holds an ownershipPanel
+
+  JPanel
+    personae;
 
   boolean
   // _created booleans are true after the corresponding panes are created
@@ -60,7 +67,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     expiration_date_created = false,
     removal_date_created = false,
     owner_created = false,
-    notes_created = false;
+    notes_created = false,
+    objects_owned_created = false,
+    personae_created = false;;
   
   date_field
     exp_field,
@@ -72,6 +81,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     notes_field,
     creator_field,
     modifier_field;
+
+  invid_field 
+    objects_owned_field;
 
   Container
     contentPane;
@@ -124,7 +136,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       setClosable(!editable);
       setIconifiable(true);
 
-      setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
+      //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
 
       
       Thread thread = new Thread(this);
@@ -144,7 +156,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       // windowPanel wants to know if framePanel is changed
 
-      addPropertyChangeListener(parent);
+      addPropertyChangeListener(getWindowPanel());
       
       setBackground(ClientColor.WindowBG);
       
@@ -158,43 +170,45 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       pane.addChangeListener(this);
 
       // Create all the panes
-      general = new JScrollPane();
-      expiration_date = new JScrollPane();
-      removal_date = new JScrollPane();
-      owner = new JScrollPane();
-      notes = new JScrollPane();
 
-      try
-	{
-	  fields = object.listFields();
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get list of fields in framPanel: " + rx);
-	}
+      
+      
+      //fields = (Vector)parent.parent.getBaseHash().get(object);
+	
 
       // Add the panels to the tabbedPane
+      general = new JScrollPane();
       pane.addTab("General", null, general);
       GENERAL = current++;
+      owner = new JScrollPane();
       pane.addTab("Owner", null, owner);
       OWNER = current++;
-
+      
+      // Check to see if this gets an objects_owned panel
       try
 	{
-	  exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
-	  rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
-	  notes_field = (string_field)object.getField(SchemaConstants.NotesField);
-	  creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
-	  creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
-	  modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
-	  modifier_field = (string_field)object.getField(SchemaConstants.ModifierField);
-
+	  short id = object.getTypeID();
+	  if (id == SchemaConstants.OwnerBase)
+	    {
+	      objects_owned = new JScrollPane();
+	      pane.addTab("Objects Owned", null, objects_owned);
+	      OBJECTS_OWNED = current++;
+	    }
+	  else if (id == SchemaConstants.UserBase)
+	    {
+	      personae = new JPanel(false);
+	      pane.addTab("Personae", null, personae);
+	      PERSONAE = current++;
+	    }
 	}
       catch (RemoteException rx)
 	{
-	  throw new RuntimeException("Could not get field information: " + rx);
+	  throw new RuntimeException("Could not check if this is ownerbase: " + rx);
 	}
 
+
+      // Add the notes panel
+      notes = new JScrollPane();
       addNotesPanel();
 
       showGeneralTab();
@@ -223,7 +237,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       
       containerPanel cp = new containerPanel(object, editable, parent.parent, parent, this);
 
-      cp.setInsets(new Insets(5,5,10,5));
+      cp.setBorder(new EmptyBorder(new Insets(5,5,10,5)));
 
       general.setViewportView(cp);
       general_created = true;
@@ -263,31 +277,22 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       validate();
     }
 
-
   void create_owner_panel()
     {
       if (debug)
 	{
 	  System.out.println("Creating owner panel");
 	}
-      if (fields != null)
+
+      try
 	{
-	  try
-	    {
-	      for (int i = 0; i < fields.length ; i++)
-		{
-		  if (fields[i].getID() == SchemaConstants.OwnerListField)
-		    {
-		      owner.setViewportView(new ownerPanel((invid_field)fields[i], editable, this));
-		      break;
-		    }
-		}
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new RuntimeException("Could not generate Owner field: " + rx);
-	    }
+	  owner.setViewportView(new ownerPanel((invid_field)object.getField(SchemaConstants.OwnerListField), editable, this));
 	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not generate Owner field: " + rx);
+	}
+	
       owner_created = true;
 
       owner.invalidate();
@@ -300,9 +305,26 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	{
 	  System.out.println("Creating notes panel");
 	}
+
+      try
+	{
+	  exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
+	  rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
+	  notes_field = (string_field)object.getField(SchemaConstants.NotesField);
+	  creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
+	  creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
+	  modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
+	  modifier_field = (string_field)object.getField(SchemaConstants.ModifierField);
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get field information: " + rx);
+	}
+
       my_notesPanel = new notesPanel(notes_field, creator_field, creation_date_field, 
 				     modifier_field,
 				     modification_date_field, editable, this);
+
       notes.setViewportView(my_notesPanel);
 
       notes_created = true;
@@ -311,6 +333,55 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       validate();
     }
 
+  void create_objects_owned_panel()
+    {
+      if (debug)
+	{
+	  System.out.println("Creating ownership panel");
+	}
+
+      invid_field oo = null;
+      try
+	{
+	  oo = (invid_field)object.getField(SchemaConstants.OwnerObjectsOwned);
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get owner objects owned: " + rx);
+	}
+
+      objects_owned.setViewportView(new ownershipPanel(oo, editable, this));
+      objects_owned_created = true;
+
+      objects_owned.invalidate();
+      validate();
+
+    }
+
+  void create_personae_panel()
+    {
+      if (debug)
+	{
+	  System.out.println("Creating personae panel()");
+	}
+
+      invid_field p = null;
+      try
+	{
+	  p = (invid_field)object.getField(SchemaConstants.UserAdminPersonae);
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get persona field: " + rx);
+	}
+      personae.setLayout(new BorderLayout());
+      personae.add("Center", new personaPanel(p, editable, this));
+      personae_created = true;
+      
+      personae.invalidate();
+      validate();
+
+    }
 
   /**
    * These add the tabs to the framePanel, but they don't create the content
@@ -326,7 +397,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    {
 	      System.out.println("Adding date tabs");
 	    }
-	  
+	  expiration_date = new JScrollPane();
 	  pane.addTab("Expiration", null, expiration_date);
 	  EXPIRATION_DATE = current++;
 	}
@@ -340,6 +411,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	      System.out.println("Adding removal date tabs");
 	    }
 	  
+	  removal_date = new JScrollPane();
 	  pane.addTab("Removal", null, removal_date);
 	  REMOVAL_DATE = current++;
 	}
@@ -356,17 +428,24 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       
       try
 	{
-	  String notesText = (String)notes_field.getValue();
-	  if ((notesText != null) && (! notesText.trim().equals("")))
+	  if (notes_field != null)
 	    {
-	      if (debug)
+	      String notesText = (String)notes_field.getValue();
+	      if ((notesText != null) && (! notesText.trim().equals("")))
 		{
-		  System.out.println("Setting notes test to *" + notesText + "*.");
+		  if (debug)
+		    {
+		      System.out.println("Setting notes test to *" + notesText + "*.");
+		    }
+		  
+		  ImageIcon noteIcon = new ImageIcon((Image)PackageResources.getImageResource(this, "note02.gif", getClass()));
+		  
+		  pane.setIconAt(NOTES, noteIcon);
 		}
-	      
-	      ImageIcon noteIcon = new ImageIcon((Image)PackageResources.getImageResource(this, "note02.gif", getClass()));
-	      
-	      pane.setIconAt(NOTES, noteIcon);
+	    }
+	  else
+	    {
+	      System.err.println("notes_field is null in framePanel");
 	    }
 	}
       catch (RemoteException rx)
@@ -429,12 +508,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   // For the ChangeListener
   public void stateChanged(ChangeEvent e)
     {
-      if (general_created && owner_created && expiration_date_created && removal_date_created && notes_created)
-	{
-	  pane.removeChangeListener(this);
-	  return;
-	}
-      
       int index = pane.getSelectedIndex();
 	
       if (index == GENERAL)
@@ -477,6 +550,22 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	      create_owner_panel();
 	    }
 	}
+      else if (index == OBJECTS_OWNED)
+	{
+	  if (! objects_owned_created)
+	    {
+	      setStatus("Creating objects owned panel");
+	      create_objects_owned_panel();
+	    }
+	}
+      else if (index == PERSONAE)
+	{
+	  if (! personae_created)
+	    {
+	      setStatus("Creating persona panel");
+	      create_personae_panel();
+	    }
+	}
       else
 	{
 	  System.err.println("Unknown pane index: " + pane.getSelectedIndex());
@@ -486,9 +575,21 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       
     }
 
-  /*  private void parent.parent.setStatus(String status)
+  // Convienence methods
+
+  gclient getgclient()
     {
-      parent.parent.parent.parent.setStatus(status);
-    }*/
-  
-}//framePanel
+      return getWindowPanel().getgclient();
+    }
+
+  windowPanel getWindowPanel()
+    {
+      return parent;
+    }
+
+  private void setStatus(String status)
+    {
+      parent.parent.setStatus(status);
+    }
+      }
+	  //framePanel
