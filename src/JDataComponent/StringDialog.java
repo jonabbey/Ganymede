@@ -64,12 +64,10 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
       
       //add stuff to panel here
       int numberOfObjects = objects.size();
-      System.out.println("There are " + numberOfObjects + " things in objects");
       if (numberOfObjects > 0) 
 	{
 	  for(int i = 0; i < numberOfObjects; ++i) 
 	    {
-	      //System.out.println("Dealing with object " + i);
 	      Object element = objects.elementAt(i);
 	      if (element instanceof stringThing)
 		{
@@ -88,7 +86,7 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 		  booleanThing bt = (booleanThing)element;
 		  checkboxField cb = new checkboxField();
 		  cb.setCallback(this);
-		  //cb.setState(bt.getDefault().booleanValue());
+		  cb.setState(bt.getDefault().booleanValue());
 		  addRow(panel, cb, bt.getLabel(), i);
 
 		  componentHash.put(cb, bt.getLabel());
@@ -99,8 +97,6 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 		{
 		  choiceThing ct = (choiceThing)element;
 		  Choice ch = new Choice();
-		  //choice.setCallback(this);
-		  //iterate through vector add use choice.add
 		  Vector items = ct.getItems();
 		  if (items == null)
 		    {
@@ -154,7 +150,7 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
       
       mainPanel = new Panel();
 
-      //add it and pack it
+      
       mainPanel.setLayout(new BorderLayout());
       mainPanel.add("North", textBorder);
       mainPanel.add("Center", panel); 
@@ -185,8 +181,6 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
       show();
       this.dispose();
 
-      System.out.println("Done showing Dialog");
-
       return valueHash;
     }
 
@@ -196,12 +190,12 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
       System.out.println("There was some action performed in StringDialog");
       if (e.getSource() == OKButton)
 	{
-	  System.out.println("OKButton clicked, returning Hashtable");
+	  //System.out.println("OKButton clicked, returning Hashtable");
 
 	}
       else
 	{
-	  System.out.println("CancelButton clicked, returning null Hashtable");
+	  //System.out.println("CancelButton clicked, returning null Hashtable");
 
 
 	  valueHash = null;
@@ -233,8 +227,6 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
   public boolean setValuePerformed(ValueObject v)
     {
       Component comp = v.getSource();
-
-      System.out.println("Something changed");
 
       if (comp instanceof stringField)
 	{
