@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -206,6 +206,7 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 
     JInsetPanel center = new JInsetPanel(1,1,1,1);
     center.setLayout(new BorderLayout());
+    center.setBackground(ClientColor.WindowBG);
     center.add("Center", new containerPanel(object, editable, parent, this));
     w.add("Center", center);
     if (editable)
@@ -287,6 +288,8 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 	rt.setClosable(true);
 	rt.setMaxable(true);
 
+	rt.addPropertyChangeListener(this);
+
 	if (windowCount > 10)
 	  {
 	    windowCount = 0;
@@ -331,7 +334,7 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
       // Adding a menu bar, checking it out
       JMenuBar menuBar = new JMenuBar();
       menuBar.setBorderPainted(true);
-      menuBar.setBackground(ClientColor.WindowBG.darker());
+      //menuBar.setBackground(ClientColor.WindowBG.darker());
       
       JMenu fileM = new JMenu("File");
       JMenu editM = new JMenu("Edit");
@@ -770,6 +773,10 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 		    }
 		  updateMenu();
 		}
+	    }
+	  else
+	    {
+	      System.out.println("propertyChange from something other than a JInternalFrame");
 	    }
 	}
 
