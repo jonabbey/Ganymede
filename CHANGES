@@ -3,6 +3,17 @@ May 31, 2001
 CHANGES
 ---------------------------------------------
 
+-------------------- Changes from 1.0 to 1.01 -------------------
+
+RELEASE DATE: June 7, 2001
+
+1. [SERVER] Fixed an IllegalArgumentException with empty namespaces
+
+Michael Jung (mikej@confluenttech.com) reported an exception thrown
+during startup.  It turned out to be due to some of the checkpoint
+code trying to deal with an empty namespace.  Easily fixed, so
+I did.
+
 -------------------- Changes from 1.0pre1 to 1.0 -------------------
 
 RELEASE DATE: May 31, 2001
