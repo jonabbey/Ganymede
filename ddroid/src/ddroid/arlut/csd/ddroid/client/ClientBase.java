@@ -281,11 +281,12 @@ public class ClientBase implements Runnable {
   }
 
   /**
-   * <p>This method is used by a client to actually get logged into the
-   * server.  The {@link arlut.csd.ddroid.rmi.Session Session} handle
-   * returned is then used to do all server operations appropriate 
-   * for a normal client.  Calling the Session logout() method will
-   * end the client's connection to the server.</p>
+   * <p>This method is used by a client to actually get logged into
+   * the server.  The {@link arlut.csd.ddroid.rmi.XMLSession
+   * XMLSession} handle returned is then used to do all server
+   * operations appropriate for the xml client.  Calling the XMLSession
+   * xmlEnd() method will end the client's connection to the
+   * server.</p>
    *
    * @return null if login failed, else a valid server Session reference
    *
