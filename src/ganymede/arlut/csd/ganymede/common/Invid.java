@@ -89,10 +89,11 @@ public final class Invid implements java.io.Serializable {
   static final long serialVersionUID = 5357151693275369893L;
   static private InvidAllocator allocator = null;
   static private int counter = 0;
+  static private int reuseCounter = 0;
 
   static final public void printCount()
   {
-    System.err.println("I've seen " + counter + " invids created.");
+    System.err.println("I've seen " + counter + " invids created, and seen " + reuseCounter + " reuses of interned invids.");
   }
 
   static final public int getCount()
@@ -136,7 +137,11 @@ public final class Invid implements java.io.Serializable {
 
 	if (newInvid == internedInvid)
 	  {
-	    counter++; // we want to count only unique invids, if we are interning
+	    counter++;		// we're the initial creation of this invid
+	  }
+	else
+	  {
+	    reuseCounter++;
 	  }
 
 	return internedInvid;

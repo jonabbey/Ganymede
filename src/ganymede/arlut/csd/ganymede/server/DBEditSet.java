@@ -55,11 +55,13 @@
 package arlut.csd.ganymede.server;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.Util.NamedStack;
@@ -153,7 +155,7 @@ public class DBEditSet {
    * care of this transaction.</p>
    */
 
-  private Hashtable objects = null;
+  private Map objects = null;
 
   /**
    * <p>A list of {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvent}'s
@@ -261,7 +263,7 @@ public class DBEditSet {
     this.dbStore = dbStore;
     this.description = description;
     this.interactive = interactive;
-    objects = new Hashtable();
+    objects = Collections.synchronizedMap(new HashMap());
     logEvents = new Vector();
     basesModified = new HashMap(dbStore.objectBases.size());
   }
@@ -315,9 +317,12 @@ public class DBEditSet {
    * <p>To allow the GanymedeSession to get a copy of our object hash.</p>
    */
 
-  public Hashtable getObjectHashClone()
+  public HashMap getObjectHashClone()
   {
-    return (Hashtable) objects.clone();
+    synchronized (objects)
+      {
+	return new HashMap(objects);
+      }
   }
 
   /**
@@ -332,11 +337,11 @@ public class DBEditSet {
 
 	DBEditObject[] results = new DBEditObject[size];
 	
-	Enumeration en = objects.elements();
-	
+	Iterator iter = objects.values().iterator();
+
 	for (int i = 0; i < size; i++)
 	  {
-	    results[i] = (DBEditObject) en.nextElement();
+	    results[i] = (DBEditObject) iter.next();
 	  }
 
 	return results;
@@ -901,11 +906,11 @@ public class DBEditSet {
 
 	System.err.println("\nDBEditSet.rollback() Now:");
 
-	Enumeration en = objects.elements();
+	Iterator iter = objects.values().iterator();
 
-	while (en.hasMoreElements())
+	while (iter.hasNext())
 	  {
-	    System.err.println(en.nextElement());
+	    System.err.println(iter.next());
 	  }
       }
 
@@ -929,11 +934,11 @@ public class DBEditSet {
 	oldvalues.put(chkinvid, chkinvid);
       }
 
-    Enumeration en = objects.elements();
+    Iterator iter = objects.values().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	DBEditObject eobjRef = (DBEditObject) en.nextElement();
+	DBEditObject eobjRef = (DBEditObject) iter.next();
 
 	Invid tmpvid = eobjRef.getInvid();
 	
@@ -1166,7 +1171,7 @@ public class DBEditSet {
   private final void commit_handlePhase1() throws CommitNonFatalException
   {
     Vector committedObjects;
-    Enumeration en;
+    Iterator iter;
     DBEditObject eObj, eObj2;
     ReturnVal retVal;
 
@@ -1174,11 +1179,11 @@ public class DBEditSet {
 
     committedObjects = new Vector();
 
-    en = this.objects.elements();
+    iter = this.objects.values().iterator();
     
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	eObj = (DBEditObject) en.nextElement();
+	eObj = (DBEditObject) iter.next();
 
 	try
 	  {
@@ -1316,11 +1321,11 @@ public class DBEditSet {
     
     result = result.intern();
 
-    Enumeration en = objects.elements();
+    Iterator iter = objects.values().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	eObj = (DBEditObject) en.nextElement();
+	eObj = (DBEditObject) iter.next();
 	
 	// force a change of date and modifier information
 	// into the object without using the normal field
@@ -1392,7 +1397,6 @@ public class DBEditSet {
 
     commit_persistTransaction();
     commit_logTransaction(fieldsTouched);
-    commit_replaceObjects();
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
     commit_updateBases(fieldsTouched);
@@ -1439,11 +1443,36 @@ public class DBEditSet {
 
   private final void commit_log_events(HashMap fieldsTouched)
   {
-    Enumeration en = objects.elements();
+    // iterate over the objects in our objects Map, logging changes to
+    // each object, updating our persistent hashes, and dropping the
+    // object from our objects Map as we go.
 
-    while (en.hasMoreElements())
+    // we are doing the logging and the object replacement in one loop
+    // so that we can discard objects from our transaction as fast as
+    // possible, to make it possible to handle bigger single
+    // transactions without running out of memory
+
+    Iterator iter = objects.keySet().iterator();
+
+    while (iter.hasNext())
       {
-	commit_log_event((DBEditObject) en.nextElement(), fieldsTouched);
+	DBEditObject eObj = (DBEditObject) iter.next();
+
+	try
+	  {
+	    commit_log_event(eObj, fieldsTouched);
+	  }
+	catch (Throwable ex)
+	  {
+	    // we're already committed, so we just warn about the log
+	    // failure and move on
+
+	    // "Error!  Problem occured while writing log entry, continuing with transaction commit.\n{0}"
+	    Ganymede.debug(ts.l("commit_log_events.log_failure", ex));
+	  }
+
+	commit_replace_object(eObj);
+	iter.remove();
       }
   }
 
@@ -1874,11 +1903,11 @@ public class DBEditSet {
     // transaction for the start transaction log record
 
     Vector invids = new Vector(objects.size());
-    Enumeration en = objects.elements();
+    Iterator iter = objects.values().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	invids.add(((DBEditObject) en.nextElement()).getInvid());
+	invids.add(((DBEditObject) iter.next()).getInvid());
       }
 
     synchronized (Ganymede.log)
@@ -1931,103 +1960,91 @@ public class DBEditSet {
    * objects back into the DBStore hashes.</p>
    */
 
-  private final void commit_replaceObjects()
+  private final void commit_replace_object(DBEditObject eObj)
   {
-    DBEditObject eObj;
     DBObjectBase base;
 
     /* -- */
 
-    Enumeration en = objects.elements();
+    base = eObj.getBase();
 
-    while (en.hasMoreElements())
+    // Create a new DBObject from our DBEditObject and insert
+    // into the object hash
+
+    switch (eObj.getStatus())
       {
-	eObj = (DBEditObject) en.nextElement();
+      case ObjectStatus.CREATING:
+      case ObjectStatus.EDITING:
 
-	base = eObj.getBase();
+	// we need to update DBStore.backPointers to take into account
+	// the changes made to this object.
 
-	// Create a new DBObject from our DBEditObject and insert
-	// into the object hash
+	syncObjBackPointers(eObj);
 
-	switch (eObj.getStatus())
+	// Create a read-only version of eObj, with all fields
+	// reset to checked-in status, put it into our object hash
+
+	// note that this new DBObject will not include any
+	// transient fields which self-identify as undefined
+
+	base.objectTable.put(new DBObject(eObj));
+
+	// (note that we can't use a no-sync put above, since
+	// we don't prevent asynchronous viewDBObject().
+
+	if (getGSession() != null)
 	  {
-	  case ObjectStatus.CREATING:
-	  case ObjectStatus.EDITING:
-
-	    // we need to update DBStore.backPointers to take into account
-	    // the changes made to this object.
-
-	    syncObjBackPointers(eObj);
-
-	    // Create a read-only version of eObj, with all fields
-	    // reset to checked-in status, put it into our object hash
-
-	    // note that this new DBObject will not include any
-	    // transient fields which self-identify as undefined
-
-	    base.objectTable.put(new DBObject(eObj));
-
-	    // (note that we can't use a no-sync put above, since
-	    // we don't prevent asynchronous viewDBObject().
-
-	    if (getGSession() != null)
-	      {
-		getGSession().checkIn();
-	      }
-
-	    base.store.checkIn(); // update checkout count
-
-	    break;
-
-	  case ObjectStatus.DELETING:
-
-	    // we need to update DBStore.backPointers to take into account
-	    // the changes made to this object.
-
-	    syncObjBackPointers(eObj);
-
-	    // Deleted objects had their deletion finalization done before
-	    // we ever got to this point.  
-
-	    // Note that we don't try to release the id for previously
-	    // registered objects.. the base.releaseId() method really
-	    // can only handle popping object id's off of a stack, and
-	    // can't do anything for object id's unless the id was the
-	    // last one allocated in that base, which is unlikely
-	    // enough that we don't worry about it here.
-
-	    base.objectTable.remove(eObj.getID());
-
-	    // (note that we can't use a no-sync remove above, since
-	    // we don't prevent asynchronous viewDBObject().
-
-	    session.GSession.checkIn();
-	    base.store.checkIn(); // count it as checked in once it's deleted
-	    break;
-
-	  case ObjectStatus.DROPPING:
-
-	    // don't need to update backpointers, since this object was
-	    // created and destroyed within this transaction
-
-	    // dropped objects had their deletion finalization done before
-	    // we ever got to this point.. 
-
-	    base.releaseId(eObj.getID()); // relinquish the unused invid
-
-	    if (getGSession() != null)
-	      {
-		getGSession().checkIn();
-	      }
-
-	    base.store.checkIn(); // count it as checked in once it's deleted
-	    break;
+	    getGSession().checkIn();
 	  }
+
+	base.store.checkIn(); // update checkout count
+
+	break;
+
+      case ObjectStatus.DELETING:
+
+	// we need to update DBStore.backPointers to take into account
+	// the changes made to this object.
+
+	syncObjBackPointers(eObj);
+
+	// Deleted objects had their deletion finalization done before
+	// we ever got to this point.  
+
+	// Note that we don't try to release the id for previously
+	// registered objects.. the base.releaseId() method really
+	// can only handle popping object id's off of a stack, and
+	// can't do anything for object id's unless the id was the
+	// last one allocated in that base, which is unlikely
+	// enough that we don't worry about it here.
+
+	base.objectTable.remove(eObj.getID());
+
+	// (note that we can't use a no-sync remove above, since
+	// we don't prevent asynchronous viewDBObject().
+
+	session.GSession.checkIn();
+	base.store.checkIn(); // count it as checked in once it's deleted
+	break;
+
+      case ObjectStatus.DROPPING:
+
+	// don't need to update backpointers, since this object was
+	// created and destroyed within this transaction
+
+	// dropped objects had their deletion finalization done before
+	// we ever got to this point.. 
+
+	base.releaseId(eObj.getID()); // relinquish the unused invid
+
+	if (getGSession() != null)
+	  {
+	    getGSession().checkIn();
+	  }
+
+	base.store.checkIn(); // count it as checked in once it's deleted
+	break;
       }
-
-    // success, void the object hash
-
-    objects.clear();
   }
 
   /**
@@ -2252,11 +2269,11 @@ public class DBEditSet {
 	throw new RuntimeException(ts.l("global.already"));
       }
 
-    Enumeration en = objects.elements();
+    Iterator iter = objects.values().iterator();
 
-    while (en.hasMoreElements())
+    while (iter.hasNext())
       {
-	eObj = (DBEditObject) en.nextElement();
+	eObj = (DBEditObject) iter.next();
 	eObj.release(true);
 	
 	switch (eObj.getStatus())

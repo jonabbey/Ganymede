@@ -4819,7 +4819,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     else
       {
 	Vector iterationSet;
-	Hashtable objects;
+	Map objects;
 
 	// grab a snapshot reference to the vector of objects
 	// checked into the database
@@ -4860,11 +4860,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 	// look to see if there are any objects that are newly created
 	// in our transaction's object list and add them as well.
 	    
-	Enumeration en = objects.elements();
+	Iterator iter = objects.values().iterator();
 	    
-	while (en.hasMoreElements())
+	while (iter.hasNext())
 	  {
-	    DBEditObject eObj = (DBEditObject) en.nextElement();
+	    DBEditObject eObj = (DBEditObject) iter.next();
 	    
 	    if ((eObj.getStatus() == ObjectStatus.CREATING) && (eObj.getTypeID()==baseid))
 	      {
