@@ -5,7 +5,7 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,25 +14,22 @@
 package arlut.csd.ganymede;
 
 import arlut.csd.Util.*;
-import arlut.csd.DataComponent.*;
-import arlut.csd.Dialog.*;
+import arlut.csd.JDataComponent.*;
+import arlut.csd.JDialog.*;
+
+import com.sun.java.swing.*;
 
 import tablelayout.*;
 
 import java.rmi.*;
 import java.rmi.server.*;
-import java.awt.*;
+//import java.awt.*;
 import java.awt.event.*;
-import java.net.*;
-import java.applet.*;
+//import java.net.*;
+//import java.applet.*;
 import java.util.*;
 
 import jdj.PackageResources;
-
-import gjt.Box;
-import gjt.Util;
-import gjt.RowLayout;
-import gjt.ColumnLayout;
 
 import arlut.csd.JTree.*;
 
@@ -42,7 +39,10 @@ import arlut.csd.JTree.*;
 
 ------------------------------------------------------------------------------*/
 
-class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListener, TextListener {
+class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener, TextListener {
+
+  boolean
+    listenToCallbacks = true;
 
   FieldNode
     fieldNode;
@@ -50,10 +50,10 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
   BaseField 
     fieldDef;
 
-  CardLayout
-    card;
+  //  java.awt.CardLayout
+  // card;
 
-  Panel 
+  JPanel 
     editPanel;
 
   GASHSchema 
@@ -62,10 +62,10 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
   StringDialog
     changeLabelTypeDialog;
 
-  TextArea
+  JTextArea
     commentT;			// all
 
-  stringField
+  JstringField
     nameS,			// all
     classS,			// all
     trueLabelS,			// boolean
@@ -73,25 +73,25 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     OKCharS,			// string
     BadCharS;			// string
 
-  numberField
+  JnumberField
     idN,			// all
     maxArrayN,			// all
     minLengthN,			// string
     maxLengthN;			// string
 
-  checkboxField
+  JcheckboxField
     vectorCF,			// all but password, boolean
     labeledCF,			// boolean
     editInPlaceCF,		// invid
     cryptedCF;			// password
 
-  Choice
+  JComboBox
     typeC,			// all
     namespaceC,			// string
     targetC,			// invid
     fieldC;			// invid
 
-  componentAttr 
+  JcomponentAttr 
     ca;
 
   Hashtable
@@ -126,98 +126,100 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     fieldDef = null;
     this.owner = owner;
     
-    editPanel = new InsetPanel(10, 10, 10, 10);
+    editPanel = new JPanel();
+    editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
     editPanel.setLayout(new TableLayout(false));
     
-    ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
-			   Color.black, Color.white);
+    ca = new JcomponentAttr(this, new java.awt.Font("SansSerif", java.awt.Font.BOLD, 12),
+			    java.awt.Color.black, java.awt.Color.white);
     
-    idN = new numberField(20, ca, false, false, 0, 0);
+    idN = new JnumberField(20, ca, false, false, 0, 0);
     idN.setCallback(this);
     addRow(editPanel, idN, "Field ID:", 0);
     
-    nameS = new stringField(20, 100, ca, true, false, null, null);
+    nameS = new JstringField(20, 100, ca, true, false, null, null);
     nameS.setCallback(this);
     addRow(editPanel, nameS, "Field Name:", 1);
 
-    classS = new stringField(20, 100, ca, true, false, null, null);
+    classS = new JstringField(20, 100, ca, true, false, null, null);
     classS.setCallback(this);
     addRow(editPanel, classS, "Class name:", 2);
 
-    commentT = new TextArea(4, 20);
-    commentT.addTextListener(this);
-    addRow(editPanel, commentT, "Comment:", 3);
+    commentT = new JTextArea(4, 20);
+    JScrollPane commentScroll = new JScrollPane(commentT);
+    //commentT.addTextListener(this);
+    addRow(editPanel, commentScroll, "Comment:", 3);
     
     // This one is different:
-    vectorCF = new checkboxField(null, false, ca, true);
+    vectorCF = new JcheckboxField(null, false, true);
     vectorCF.setCallback(this);
     addRow(editPanel, vectorCF, "Vector:", 4);
 
-    maxArrayN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
+    maxArrayN = new JnumberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     maxArrayN.setCallback(this);
     addRow(editPanel, maxArrayN, "Max Array Size:", 5);
 
-    typeC = new Choice();
-    typeC.add("Boolean");
-    typeC.add("Numeric");
-    typeC.add("Date");
-    typeC.add("String");
-    typeC.add("Object Reference");
-    typeC.add("Password");
-    typeC.add("I.P.");
+    typeC = new JComboBox();
+    typeC.addItem("Boolean");
+    typeC.addItem("Numeric");
+    typeC.addItem("Date");
+    typeC.addItem("String");
+    typeC.addItem("Object Reference");
+    typeC.addItem("Password");
+    typeC.addItem("I.P.");
     typeC.addItemListener(this);
 
     //choose the one that is the default
     changeTypeChoice("Boolean");
 
-    cryptedCF = new checkboxField(null, false, ca, true);
+    cryptedCF = new JcheckboxField(null, false, true);
     cryptedCF.setCallback(this);
     addRow(editPanel, cryptedCF, "Stored Crypted:" , 7);
    
     addRow(editPanel, typeC, "Field Type:", 6);
 
-    minLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
+    minLengthN = new JnumberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     minLengthN.setCallback(this);
     addRow(editPanel, minLengthN, "Minimum String Size:", 8);
     
-    maxLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
+    maxLengthN = new JnumberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     maxLengthN.setCallback(this);
     addRow(editPanel, maxLengthN, "Maximum String Size:", 9);
    
-    OKCharS = new stringField(20, 100, ca, true, false, null, null);
+    OKCharS = new JstringField(20, 100, ca, true, false, null, null);
     OKCharS.setCallback(this);
     addRow(editPanel, OKCharS, "Allowed Chars:", 10);
 
-    BadCharS = new stringField(20, 100, ca, true, false, null, null);
+    BadCharS = new JstringField(20, 100, ca, true, false, null, null);
     BadCharS.setCallback(this);
     addRow(editPanel, BadCharS, "Disallowed Chars:", 11);
 
-    namespaceC = new Choice();
+    namespaceC = new JComboBox();
     namespaceC.addItemListener(this);
 
     addRow(editPanel, namespaceC, "Namespace:", 12);
     
-    labeledCF = new checkboxField(null, false, ca, true);
+    labeledCF = new JcheckboxField(null, false, true);
     labeledCF.setCallback(this);
     addRow(editPanel, labeledCF, "Labeled:", 13);
 
-    trueLabelS = new stringField(20, 100, ca, true, false, null, null);
+    trueLabelS = new JstringField(20, 100, ca, true, false, null, null);
     trueLabelS.setCallback(this);
     addRow(editPanel, trueLabelS, "True Label:", 14);
 
-    falseLabelS = new stringField(20, 100, ca, true, false, null, null);
+    falseLabelS = new JstringField(20, 100, ca, true, false, null, null);
     falseLabelS.setCallback(this);
     addRow(editPanel, falseLabelS, "False Label:", 15);
 
-    editInPlaceCF = new checkboxField(null, false, ca, true);
+    editInPlaceCF = new JcheckboxField(null, false, true);
     editInPlaceCF.setCallback(this);
     addRow(editPanel, editInPlaceCF, "Edit In Place:", 16);
 
-    targetC = new Choice();
+    targetC = new JComboBox();
     targetC.addItemListener(this);
     addRow(editPanel, targetC, "Target Object:", 17);
 
-    fieldC = new Choice();
+    fieldC = new JComboBox();
     fieldC.addItemListener(this);
     addRow(editPanel, fieldC, "Target Field:", 18);
 
@@ -250,14 +252,14 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     maxLengthN.setText("");
   }
 
-  void addRow(Panel parent, Component comp,  String label, int row)
+  void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
   {
     addRow(parent, comp, label, row, true);
   }
 
-  void addRow(Panel parent, Component comp,  String label, int row, boolean visible)
+  void addRow(JPanel parent, java.awt.Component comp,  String label, int row, boolean visible)
   {
-    Label l = new Label(label);
+    JLabel l = new JLabel(label);
 
     rowHash.put(comp, l);
     parent.add("0 " + row + " lhwHW", l);
@@ -266,9 +268,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     setRowVisible(comp, visible);
   }
 
-  void setRowVisible(Component comp, boolean b)
+  void setRowVisible(java.awt.Component comp, boolean b)
   {
-    Component c = (Component) rowHash.get(comp);
+    java.awt.Component c = (java.awt.Component) rowHash.get(comp);
 
     if (c == null)
       {
@@ -292,7 +294,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     else
       {
 	setRowVisible(vectorCF, true);
-	setRowVisible(maxArrayN, vectorCF.getState());
+	setRowVisible(maxArrayN, vectorCF.isSelected());
       }
 
     if (passwordShowing)
@@ -308,8 +310,8 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
     if (booleanShowing)
       {
-	setRowVisible(trueLabelS, labeledCF.getState());
-	setRowVisible(falseLabelS, labeledCF.getState());
+	setRowVisible(trueLabelS, labeledCF.isSelected());
+	setRowVisible(falseLabelS, labeledCF.isSelected());
       }
     else
       {
@@ -328,7 +330,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	setRowVisible(editInPlaceCF, true);
 	setRowVisible(targetC, true);
 
-	if (targetC.getSelectedItem().equalsIgnoreCase("<any>"))
+	if (((String)targetC.getModel().getSelectedItem()).equalsIgnoreCase("<any>"))
 	  {
 	    setRowVisible(fieldC, false);
 	  }
@@ -355,7 +357,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
      /* -- */
       
-     namespaceC.removeAll();
+     namespaceC.removeAllItems();
 
      SchemaEdit test = owner.getSchemaEdit();
 
@@ -408,7 +410,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
     /* -- */
 
-    targetC.removeAll();
+    targetC.removeAllItems();
 
     try
       {
@@ -465,7 +467,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
     /* -- */
     
-    target = targetC.getSelectedItem();
+    target = (String)targetC.getModel().getSelectedItem();
 
     try
       {
@@ -492,7 +494,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	throw new IllegalArgumentException("Exception getting bases in refreshFieldChoice " + rx);
       }
 
-    fieldC.removeAll();
+    fieldC.removeAllItems();
     fieldC.addItem("<none>");
     
     if (fields == null)
@@ -530,7 +532,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 		
 		    if (bf.getID() == SchemaConstants.ContainerField)
 		      {
-			fieldC.add(bf.getName());
+			fieldC.addItem(bf.getName());
 		      }
 		  }
 		else
@@ -540,7 +542,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 			try
 			  {
 			    System.out.println("adding " + bf.getName());
-			    fieldC.add(bf.getName());
+			    fieldC.addItem(bf.getName());
 			  }
 			catch (RemoteException rx)
 			  {
@@ -639,6 +641,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
   {
     System.err.println(" -in FieldEditor.editField()");
 
+    listenToCallbacks = false;
+    owner.setWaitCursor();
+
     clearFields();
 
     if (!forceRefresh && (fieldNode == this.fieldNode))
@@ -694,12 +699,12 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
         if (fieldDef.isArray())
 	  {
-	    vectorCF.setState(true);
+	    vectorCF.setSelected(true, false);
 	    maxArrayN.setValue(fieldDef.getMaxArraySize());
 	  }
 	else
 	  {
-	    vectorCF.setState(false);
+	    vectorCF.setSelected(false, false);
 	  }
 
 	if (fieldDef.isString())
@@ -709,7 +714,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	    OKCharS.setText(fieldDef.getOKChars());
 	    BadCharS.setText(fieldDef.getBadChars());
 	    
-	    typeC.select("String");
+	    typeC.getModel().setSelectedItem("String");
 	    stringShowing = true;
 
 	    // add all defined namespaces here
@@ -720,12 +725,12 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
 	    if (fieldDef.getNameSpaceLabel() == null)
 	      {
-		namespaceC.select("<none>");
+		namespaceC.getModel().setSelectedItem("<none>");
 		System.out.println("selecting <none> for NameSpace");
 	      }
 	    else
 	      {
-		namespaceC.select(fieldDef.getNameSpaceLabel());
+		namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
 		System.out.println("selecting " + fieldDef.getNameSpaceLabel());
 	      }
 	  }
@@ -736,43 +741,43 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	    OKCharS.setText(fieldDef.getOKChars());
 	    BadCharS.setText(fieldDef.getBadChars());
 	    
-	    typeC.select("Password");
+	    typeC.getModel().setSelectedItem("Password");
 	    passwordShowing = true;
 
-	    cryptedCF.setState(fieldDef.isCrypted());
+	    cryptedCF.setValue(fieldDef.isCrypted());
 	  }
 	else if (fieldDef.isIP())
 	  {
-	    typeC.select("I.P.");
+	    typeC.getModel().setSelectedItem("I.P.");
 	    ipShowing = true;
 	  }
 	else if (fieldDef.isBoolean())
 	  {
 	    if (fieldDef.isLabeled())
 	      {
-		labeledCF.setState(true);
+		labeledCF.setValue(true);
 		trueLabelS.setText(fieldDef.getTrueLabel());
 		falseLabelS.setText(fieldDef.getFalseLabel());
 	      }
 	    else
 	      {
-		labeledCF.setState(false);
+		labeledCF.setValue(false);
 		trueLabelS.setText("");
 		falseLabelS.setText("");
 	      }
 
-	    typeC.select("Boolean");
+	    typeC.getModel().setSelectedItem("Boolean");
 	    booleanShowing = true;
 	  }
 	else if (fieldDef.isInvid())
 	  {
-	    editInPlaceCF.setState(fieldDef.isEditInPlace());
+	    editInPlaceCF.setValue(fieldDef.isEditInPlace());
 
 	    // all edit in place references are vectors
 
 	    if (fieldDef.isEditInPlace())
 	      {
-		vectorCF.setState(true);
+		vectorCF.setSelected(true, false);
 		fieldDef.setArray(true);
 	      }
 
@@ -784,7 +789,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	    if (targetB == -1)
 	      {
 		System.out.println("unknown target base");
-		targetC.select("<any>");
+		targetC.getModel().setSelectedItem("<any>");
 	      }
 	    else
 	      {
@@ -800,7 +805,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 		    
 		    System.out.println("new 'alltarget' base");
 		    targetC.addItem("<all>");
-		    targetC.select("<all>");
+		    targetC.getModel().setSelectedItem("<all>");
 
 		    string = "<all>";
 
@@ -818,7 +823,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 		    string = targetBase.getName();
 		    
 		    System.out.println("Choosing " + string);
-		    targetC.select(string);
+		    targetC.getModel().setSelectedItem(string);
 		  }
 
 		// regenerate the list of choices in fieldC
@@ -835,7 +840,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 		if (targetF == -1)
 		  {
 		    System.out.println("unknown target field");
-		    fieldC.select("<none>");
+		    fieldC.getModel().setSelectedItem("<none>");
 		  }
 		else
 		  {
@@ -852,7 +857,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 			  {
 			    string = targetField.getName();
 			    System.out.println("selecting " + string);
-			    fieldC.select(string);
+			    fieldC.getModel().setSelectedItem(string);
 			  }
 		      }
 		    catch (RemoteException rx)
@@ -862,26 +867,28 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 		  }
 	      } // else targetB != -1
 		
-	    typeC.select("Object Reference");
+	    typeC.getModel().setSelectedItem("Object Reference");
 	    referenceShowing = true;
 	  }
 	else if (fieldDef.isDate())
 	  {
-	    typeC.select("Date");
+	    typeC.getModel().setSelectedItem("Date");
 	    dateShowing = true;
 	  }
 	else if (fieldDef.isNumeric())
 	  {
-	    typeC.select("Numeric");
+	    typeC.getModel().setSelectedItem("Numeric");
 	    numericShowing = true;
 	  }
 	else if (fieldDef.isPermMatrix())
 	  {
 	    typeC.addItem("Permission Matrix");
-	    typeC.select("Permission Matrix");
+	    typeC.getModel().setSelectedItem("Permission Matrix");
 	  }
 
 	//Here is where the editability is checked.
+
+	System.out.println("+Setting enabled to: " + isEditable);
 
 	commentT.setEditable(isEditable);
 	nameS.setEditable(isEditable);
@@ -899,6 +906,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	vectorCF.setEnabled(isEditable);
 	labeledCF.setEnabled(isEditable);
 	editInPlaceCF.setEnabled(isEditable);
+
 	typeC.setEnabled(isEditable);
 	namespaceC.setEnabled(isEditable);
 	targetC.setEnabled(isEditable);
@@ -911,6 +919,15 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
       {
 	System.err.println("remote exception in FieldEditor.editField: " + ex);
       }
+    /*
+    typeC.addItemListener(this);
+    fieldC.addItemListener(this);
+    targetC.addItemListener(this);
+    namespaceC.addItemListener(this);
+    */
+
+    owner.setNormalCursor();
+    listenToCallbacks = true;
 
     System.out.println(" done in editField");
   }
@@ -934,9 +951,15 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
    *
    */
 
-  public boolean setValuePerformed(ValueObject v)
+  public boolean setValuePerformed(JValueObject v)
   {
-    Component comp = v.getSource();
+    if (!listenToCallbacks)
+      {
+	System.out.println("I'm not listening!");
+	return true;  //return true because we want to component to change, just don't act on callback
+      }
+
+    java.awt.Component comp = v.getSource();
 
     try
       {
@@ -964,9 +987,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	  }
 	else if (comp == vectorCF)
 	  {
-	    //setRowVisible(maxArrayN, vectorCF.getState());
+	    //setRowVisible(maxArrayN, vectorCF.getValue());
 	    System.out.println("vectorCF");
-	    fieldDef.setArray(vectorCF.getState());
+	    fieldDef.setArray(vectorCF.isSelected());
 	    checkVisibility();
 	  }
 	else if (comp == OKCharS)
@@ -1002,19 +1025,19 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	else if (comp == labeledCF)
 	  {
 	    System.out.println("labeledCF");
-	    fieldDef.setLabeled(labeledCF.getState());
+	    fieldDef.setLabeled(labeledCF.isSelected());
 	    checkVisibility();
 	  }
 	else if (comp == editInPlaceCF)
 	  {
 	    System.out.println("editInPlaceCF");
-	    fieldDef.setEditInPlace(editInPlaceCF.getState());
+	    fieldDef.setEditInPlace(editInPlaceCF.isSelected());
 	    editField(fieldNode, true);	// force full recalc and refresh
 	  }
 	else if (comp == cryptedCF)
 	  {
 	    System.out.println("cryptedCF");
-	    fieldDef.setCrypted(cryptedCF.getState());
+	    fieldDef.setCrypted(cryptedCF.isSelected());
 	  }
 	return true;
       }
@@ -1032,6 +1055,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
   public void itemStateChanged(ItemEvent e)
   {
+    if (!listenToCallbacks)
+      {
+	System.out.println("I'm not listening to callbacks right now.");
+	return;
+      }
     String item = null;
     Base newBase = null;
     String oldBaseName = null;
@@ -1046,7 +1074,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
     if (e.getItemSelectable() == typeC)
       {
 	boolean okToChange = true;
-	item = typeC.getSelectedItem();
+	item = (String)typeC.getModel().getSelectedItem();
 
 	if (!item.equals("Numeric") && !item.equals("String"))
 	  {
@@ -1111,11 +1139,11 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 		      {
 			if (fieldDef.isNumeric())
 			  {
-			    typeC.select("Numeric");
+			    typeC.getModel().setSelectedItem("Numeric");
 			  }
 			else if (fieldDef.isString())
 			  {
-			    typeC.select("String");
+			    typeC.getModel().setSelectedItem("String");
 			  }
 			else
 			  {
@@ -1130,8 +1158,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 	      }
 	    else
 	      {
-		    System.out.println("not the label, ok to change");
-		    
+		System.out.println("not the label, ok to change");
 	      }
 	  }
 
@@ -1143,7 +1170,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
       }
     else if (e.getItemSelectable() == namespaceC)
       {
-	item = namespaceC.getSelectedItem();
+	item = (String)namespaceC.getModel().getSelectedItem();
 
 	System.out.println("Namespace: " + item);
 	System.out.println("Setting namespace to " + item);
@@ -1166,7 +1193,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
       }
     else if (e.getItemSelectable() == targetC)
       {
-	item = targetC.getSelectedItem();
+	item = (String)targetC.getModel().getSelectedItem();
 
 	try
 	  {
@@ -1239,7 +1266,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
       }
     else if (e.getItemSelectable() == fieldC)
       {
-	item = fieldC.getSelectedItem();
+	item = (String)fieldC.getSelectedItem();
 
 	System.out.println("Setting field to " + item);
 
@@ -1265,11 +1292,15 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ItemListen
 
   public void textValueChanged(TextEvent e)
   {
+    if (!listenToCallbacks)
+      {
+	return;
+      }
     Object obj = e.getSource();
 
     if (obj == commentT)
       {
-	TextComponent text = (TextComponent)obj;
+	java.awt.TextComponent text = (java.awt.TextComponent)obj;
 
 	try
 	  {
