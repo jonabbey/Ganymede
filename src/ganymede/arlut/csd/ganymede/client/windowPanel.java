@@ -277,6 +277,21 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     /* -- */
 
+    /*
+      XXX
+
+      This method is a prime target for pulling off of the AWT/Swing
+      Event Dispatch Thread through the use of something like Foxtrot,
+      so that we don't block the GUI while we're doing our RMI calls.
+      Note, of course, that if we use Foxtrot we have to make sure
+      that whatever we send to the Foxtrot worker thread does not try
+      to do GUI calls.  In principle, this means wrapping the calls to
+      the RMI server without including any logic that needs to be
+      executed on the EDT.
+
+      XXX
+    */
+
     if (object == null)
       {
 	gc.showErrorMessage("null object passed to addWindow.");
@@ -342,7 +357,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     try
       {
-
 	if (editable)
 	  {
 	    setStatus("Opening object for edit");
