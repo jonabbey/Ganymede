@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 2002/01/15 07:13:15 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 2002/02/26 22:10:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1188,7 +1188,6 @@ public class DBEditSet {
 	    // called
 
 	    GanymedeSession gSession = session.getGSession();
-	    Vector invids;
 
 	    for (int i = 0; i < committedObjects.size(); i++)
 	      {
@@ -1202,178 +1201,11 @@ public class DBEditSet {
 		// we'll want to log the before/after state of any objects
 		// edited by this transaction
 
-		if (Ganymede.log != null)
-		  {
-		    switch (eObj.getStatus())
-		      {
-		      case DBEditObject.EDITING:
-
-			invids = new Vector();
-			invids.addElement(eObj.getInvid());
-
-			// if we changed an embedded object, make a
-			// note that the containing object was
-			// involved so that we show changes to
-			// embedded objects in a log search for the
-			// containing object
-
-			if (eObj.isEmbedded())
-			  {
-			    DBObject container = session.getContainingObj(eObj);
-			    
-			    if (container != null)
-			      {
-				invids.addElement(container.getInvid());
-			      }
-			  }
-		   
-			if (debug)
-			  {
-			    System.err.println("Logging event for " + eObj.getLabel());
-			  }
-		    
-			String diff = eObj.diff();
-
-			if (diff != null)
-			  {
-			    if (debug)
-			      {
-				System.err.println("**** DIFF (" + eObj.getLabel() +
-						   "):" + diff + " : ENDDIFF****");
-			      }
-
-			    boolean logNormal = true;
-
-			    if (eObj.isEmbedded())
-			      {
-				try
-				  {
-				    DBObject parentObj = session.getContainingObj(eObj);
-
-				    logEvent("objectchanged",
-					     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
-					     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
-					     "<" +  eObj.getInvid() + "> was modified.\n\n" +
-					     diff,
-					     (gSession.personaInvid == null ?
-					      gSession.userInvid : gSession.personaInvid),
-					     gSession.username,
-					     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
-
-				    logNormal = false;
-				  }
-				catch (IntegrityConstraintException ex)
-				  {
-				    // We might catch this from
-				    // getContainingObj if the
-				    // embedded object doesn't have a
-				    // proper container.  Won't be
-				    // fatal, as we'll just leave
-				    // logNormal true and handle it below
-
-				    ex.printStackTrace();
-				  }
-			      }
-
-			    if (logNormal)
-			      {
-				logEvent("objectchanged",
-					 eObj.getTypeDesc() + " " + eObj.getLabel() +
-					 ", <" +  eObj.getInvid() + "> was modified.\n\n" +
-					 diff,
-					 (gSession.personaInvid == null ?
-					  gSession.userInvid : gSession.personaInvid),
-					 gSession.username,
-					 invids, eObj.getEmailTargets());
-			      }
-			  }
-		    
-			break;
-
-		      case DBEditObject.CREATING:
-
-			invids = new Vector();
-			invids.addElement(eObj.getInvid());
-		   
-			if (debug)
-			  {
-			    System.err.println("Logging event for " + eObj.getLabel());
-			  }
-
-			// DBEditObject.diff() also works with newly created objects
-
-			diff = eObj.diff();
-
-			if (diff != null)
-			  {
-			    if (debug)
-			      {
-				System.err.println("**** DIFF (" + eObj.getLabel() +
-						   "):" + diff + " : ENDDIFF****");
-			      }
-			
-			    logEvent("objectcreated",
-				     eObj.getTypeDesc() + " " + eObj.getLabel() +
-				     ", <" +  eObj.getInvid() + "> was created.\n\n" +
-				     diff,
-				     (gSession.personaInvid == null ?
-				      gSession.userInvid : gSession.personaInvid),
-				     gSession.username,
-				     invids, eObj.getEmailTargets());
-			  }
-
-			break;
-
-		      case DBEditObject.DELETING:
-
-			invids = new Vector();
-			invids.addElement(eObj.getInvid());
-		   
-			if (debug)
-			  {
-			    System.err.println("Logging event for " + eObj.getLabel());
-			  }
-
-			String oldVals = null;
-
-			try
-			  {
-			    oldVals = eObj.getOriginal().getPrintString();
-			  }
-			catch (NullPointerException ex)
-			  {
-			    ex.printStackTrace();
-			  }
-
-			if (oldVals != null)
-			  {
-			    logEvent("deleteobject",
-				     eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
-				     eObj.getInvid() + "> was deleted.\n\n" +
-				     oldVals + "\n",
-				     (gSession.personaInvid == null ?
-				      gSession.userInvid : gSession.personaInvid),
-				     gSession.username,
-				     invids, eObj.getEmailTargets());
-			  }
-			else
-			  {
-			    logEvent("deleteobject",
-				     eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
-				     eObj.getInvid() + "> was deleted.\n\n",
-				     (gSession.personaInvid == null ?
-				      gSession.userInvid : gSession.personaInvid),
-				     gSession.username,
-				     invids, eObj.getEmailTargets());
-			  }
-
-			break;
-		      }
-		  }
+		logCommittedObject(gSession, eObj);
 	      }
 
-	    // the logging was successful, now write this transaction
-	    // out to the Journal
+	    // the logging was successful (no exceptions thrown), so
+	    // we can now write this transaction out to the Journal
 
 	    try
 	      {
@@ -1477,7 +1309,8 @@ public class DBEditSet {
 	    System.err.println(session.key + ": DBEditSet.commit(): phase 2 committed");
 	  }
 
-	// and make the changes in our in-memory hashes..
+	// okay, all the preliminaries are out of the way.  now we make
+	// the changes in our in-memory hashes..
 
 	// create new, non-editable versions of our newly created objects
 	// and insert them into the appropriate slots in our DBStore
@@ -1674,10 +1507,334 @@ public class DBEditSet {
       }
     finally
       {
-	// just to be sure we don't leave a write lock hanging somehow
+	// just to be sure we don't leave a write lock hanging somehow.
 	// if we successfully released before, this is a no-op
 
 	releaseWriteLock("problem in commit");
+      }
+  }
+
+  /**
+   * <p>This private helper method is executed in the middle of the
+   * commit() method, and handles logging for any changes made to
+   * objects during the committed transaction.</p>
+   */
+
+  private final void logCommittedObject(GanymedeSession gSession, DBEditObject eObj)
+  {
+    if (Ganymede.log == null)
+      {
+	return;
+      }
+
+    Vector invids;
+    String diff;
+
+    /* -- */
+
+    switch (eObj.getStatus())
+      {
+      case DBEditObject.EDITING:
+
+	invids = new Vector();
+	invids.addElement(eObj.getInvid());
+
+	// if we changed an embedded object, make a
+	// note that the containing object was
+	// involved so that we show changes to
+	// embedded objects in a log search for the
+	// containing object
+
+	if (eObj.isEmbedded())
+	  {
+	    DBObject container = session.getContainingObj(eObj);
+			    
+	    if (container != null)
+	      {
+		invids.addElement(container.getInvid());
+	      }
+	  }
+		   
+	if (debug)
+	  {
+	    System.err.println("Logging event for " + eObj.getLabel());
+	  }
+		    
+	diff = eObj.diff();
+
+	if (diff != null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("**** DIFF (" + eObj.getLabel() +
+				   "):" + diff + " : ENDDIFF****");
+	      }
+
+	    boolean logNormal = true;
+
+	    if (eObj.isEmbedded())
+	      {
+		try
+		  {
+		    DBObject parentObj = session.getContainingObj(eObj);
+
+		    logEvent("objectchanged",
+			     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
+			     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
+			     "<" +  eObj.getInvid() + "> was modified.\n\n" +
+			     diff,
+			     (gSession.personaInvid == null ?
+			      gSession.userInvid : gSession.personaInvid),
+			     gSession.username,
+			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+
+		    logNormal = false;
+		  }
+		catch (IntegrityConstraintException ex)
+		  {
+		    // We might catch this from
+		    // getContainingObj if the
+		    // embedded object doesn't have a
+		    // proper container.  Won't be
+		    // fatal, as we'll just leave
+		    // logNormal true and handle it below
+
+		    ex.printStackTrace();
+		  }
+	      }
+
+	    if (logNormal)
+	      {
+		logEvent("objectchanged",
+			 eObj.getTypeDesc() + " " + eObj.getLabel() +
+			 ", <" +  eObj.getInvid() + "> was modified.\n\n" +
+			 diff,
+			 (gSession.personaInvid == null ?
+			  gSession.userInvid : gSession.personaInvid),
+			 gSession.username,
+			 invids, eObj.getEmailTargets());
+	      }
+	  }
+		    
+	break;
+
+      case DBEditObject.CREATING:
+
+	invids = new Vector();
+	invids.addElement(eObj.getInvid());
+
+	// if we created an embedded object, make a
+	// note that the containing object was
+	// involved so that we show changes to
+	// embedded objects in a log search for the
+	// containing object
+
+	if (eObj.isEmbedded())
+	  {
+	    DBObject container = session.getContainingObj(eObj);
+			    
+	    if (container != null)
+	      {
+		invids.addElement(container.getInvid());
+	      }
+	  }
+   
+	if (debug)
+	  {
+	    System.err.println("Logging event for " + eObj.getLabel());
+	  }
+
+	// DBEditObject.diff() also works with newly created objects
+
+	diff = eObj.diff();
+
+	if (diff != null)
+	  {
+	    if (debug)
+	      {
+		System.err.println("**** DIFF (" + eObj.getLabel() +
+				   "):" + diff + " : ENDDIFF****");
+	      }
+			
+	    boolean logNormal = true;
+
+	    if (eObj.isEmbedded())
+	      {
+		try
+		  {
+		    DBObject parentObj = session.getContainingObj(eObj);
+
+		    logEvent("objectcreated",
+			     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
+			     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
+			     "<" +  eObj.getInvid() + "> was created.\n\n" +
+			     diff,
+			     (gSession.personaInvid == null ?
+			      gSession.userInvid : gSession.personaInvid),
+			     gSession.username,
+			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+
+		    logNormal = false;
+		  }
+		catch (IntegrityConstraintException ex)
+		  {
+		    // We might catch this from
+		    // getContainingObj if the
+		    // embedded object doesn't have a
+		    // proper container.  Won't be
+		    // fatal, as we'll just leave
+		    // logNormal true and handle it below
+
+		    ex.printStackTrace();
+		  }
+	      }
+
+	    if (logNormal)
+	      {
+		logEvent("objectcreated",
+			 eObj.getTypeDesc() + " " + eObj.getLabel() +
+			 ", <" +  eObj.getInvid() + "> was created.\n\n" +
+			 diff,
+			 (gSession.personaInvid == null ?
+			  gSession.userInvid : gSession.personaInvid),
+			 gSession.username,
+			 invids, eObj.getEmailTargets());
+	      }
+	  }
+
+	break;
+
+      case DBEditObject.DELETING:
+
+	invids = new Vector();
+	invids.addElement(eObj.getInvid());
+
+	// if we deleted an embedded object, make a
+	// note that the containing object was
+	// involved so that we show changes to
+	// embedded objects in a log search for the
+	// containing object
+
+	if (eObj.isEmbedded())
+	  {
+	    DBObject container = session.getContainingObj(eObj);
+			    
+	    if (container != null)
+	      {
+		invids.addElement(container.getInvid());
+	      }
+	  }
+		   
+	if (debug)
+	  {
+	    System.err.println("Logging event for " + eObj.getLabel());
+	  }
+
+	String oldVals = null;
+
+	try
+	  {
+	    oldVals = eObj.getOriginal().getPrintString();
+	  }
+	catch (NullPointerException ex)
+	  {
+	    ex.printStackTrace();
+	  }
+
+	if (oldVals != null)
+	  {
+	    boolean logNormal = true;
+
+	    if (eObj.isEmbedded())
+	      {
+		try
+		  {
+		    DBObject parentObj = session.getContainingObj(eObj);
+
+		    logEvent("deleteobject",
+			     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
+			     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
+			     "<" +  eObj.getInvid() + "> was deleted.\n\n" +
+			     oldVals + "\n",
+			     (gSession.personaInvid == null ?
+			      gSession.userInvid : gSession.personaInvid),
+			     gSession.username,
+			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+
+		    logNormal = false;
+		  }
+		catch (IntegrityConstraintException ex)
+		  {
+		    // We might catch this from
+		    // getContainingObj if the
+		    // embedded object doesn't have a
+		    // proper container.  Won't be
+		    // fatal, as we'll just leave
+		    // logNormal true and handle it below
+
+		    ex.printStackTrace();
+		  }
+	      }
+
+	    if (logNormal)
+	      {
+		logEvent("deleteobject",
+			 eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
+			 eObj.getInvid() + "> was deleted.\n\n" +
+			 oldVals + "\n",
+			 (gSession.personaInvid == null ?
+			  gSession.userInvid : gSession.personaInvid),
+			 gSession.username,
+			 invids, eObj.getEmailTargets());
+	      }
+	  }
+	else
+	  {
+	    boolean logNormal = true;
+
+	    if (eObj.isEmbedded())
+	      {
+		try
+		  {
+		    DBObject parentObj = session.getContainingObj(eObj);
+
+		    logEvent("deleteobject",
+			     parentObj.getTypeDesc() + " " + parentObj.getLabel() + 
+			     "'s " + eObj.getTypeDesc() + ", '" + eObj.getLabel() + "',  " +
+			     "<" +  eObj.getInvid() + "> was deleted.\n\n",
+			     (gSession.personaInvid == null ?
+			      gSession.userInvid : gSession.personaInvid),
+			     gSession.username,
+			     invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+
+		    logNormal = false;
+		  }
+		catch (IntegrityConstraintException ex)
+		  {
+		    // We might catch this from
+		    // getContainingObj if the
+		    // embedded object doesn't have a
+		    // proper container.  Won't be
+		    // fatal, as we'll just leave
+		    // logNormal true and handle it below
+
+		    ex.printStackTrace();
+		  }
+	      }
+
+	    if (logNormal)
+	      {
+		logEvent("deleteobject",
+			 eObj.getTypeDesc() + " " + eObj.getLabel() + ", <" + 
+			 eObj.getInvid() + "> was deleted.\n\n",
+			 (gSession.personaInvid == null ?
+			  gSession.userInvid : gSession.personaInvid),
+			 gSession.username,
+			 invids, eObj.getEmailTargets());
+	      }
+	  }
+
+	break;
       }
   }
 
