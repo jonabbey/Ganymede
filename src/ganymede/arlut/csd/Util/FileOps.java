@@ -220,38 +220,11 @@ public class FileOps {
     InputStream iStream = p.getInputStream();
     InputStream eStream = p.getErrorStream();
 
-    try
-      {
-	iStream.close();
-      }
-    catch (IOException ex)
-      {
-      }
-
-    try
-      {
-	eStream.close();
-      }
-    catch (IOException ex)
-      {
-      }
-
-    try
-      {
-	return p.waitFor();
-      }
-    finally
-      {
-	cleanupProcess(p);
-      }
-
-    /*
-
     byte[] buffer = new byte[4096]; // our own skip buffer
 
     try
       {
-	while (true)
+ 	while (true)
 	  {
 	    // this bletcherousness is so that we can consume anything
 	    // the sub process writes to its stdout or stderr, rather
@@ -268,36 +241,25 @@ public class FileOps {
 	      }
 	    catch (IllegalThreadStateException ex)
 	      {
-		try
+		while (iStream.available() > 0 || eStream.available() > 0)
 		  {
-		    // iStream is actually BufferedInputStream, and as
-		    // such, the skip() method on it doesn't actually
-		    // do anything useful if you never read from the
-		    // stream.
-
-		    // Of course, the base class InputStream skip()
-		    // function works just fine, but for
-		    // BufferedInputStream, Sun decided to break it
-		    // for grins.
-
-		    // Thanks, Sun!
-
-		    int size = iStream.available();
-		    iStream.read(buffer, 0, (int) Math.min(4096, size));
-		  }
-		catch (IOException exc)
-		  {
-		    // so we couldn't eat the bytes, what else can we do?
-		  }
-
-		try
-		  {
-		    int size = eStream.available();
-		    eStream.read(buffer, 0, (int) Math.min(4096, size));
-		  }
-		catch (IOException exc)
-		  {
-		    // screw you, copper
+		    try
+		      {
+			iStream.read(buffer, 0, (int) Math.min(buffer.length, iStream.available()));
+		      }
+		    catch (IOException exc)
+		      {
+			// so we couldn't eat the bytes, what else can we do?
+		      }
+		    
+		    try
+		      {
+			eStream.read(buffer, 0, (int) Math.min(buffer.length, eStream.available()));
+		      }
+		    catch (IOException exc)
+		      {
+			// screw you, copper
+		      }
 		  }
 	      }
 
@@ -315,7 +277,6 @@ public class FileOps {
       {
 	FileOps.cleanupProcess(p);
       }
-    */
   }
 
   /**
