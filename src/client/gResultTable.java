@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2001/05/30 22:56:57 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2004/02/27 22:38:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import javax.swing.*;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
- * @version $Revision: 1.33 $ $Date: 2001/05/30 22:56:57 $ $Name:  $
+ * @version $Revision: 1.34 $ $Date: 2004/02/27 22:38:32 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -376,21 +376,25 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     Object cellResult;
     Object data = null;
     DateFormat format = new SimpleDateFormat("M/d/yyyy");
+    int rows = 0;
 
     /* -- */
 
     setStatus("Loading table", 0);
 
     headerVect = results.getHeaders();
-    headers = new String[headerVect.size()];
-    used = new boolean[headerVect.size()];
+    rows = headerVect.size();
+    headers = new String[rows];
+    used = new boolean[rows];
+
+    this.setTitle("Query results: " + rows + " entries");
 
     if (debug)
       {
-	System.err.println("gResultTable: " + headers.length + " headers returned by query");
+	System.err.println("gResultTable: " + rows + " headers returned by query");
       }
     
-    for (int i = 0; i < headers.length; i++)
+    for (int i = 0; i < rows; i++)
       {
 	headers[i] = (String) headerVect.elementAt(i);
 	used[i] = false;
@@ -418,7 +422,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     // now read in all the result lines
 
-    for (int i = 0; i < results.resultSize(); i++)
+    for (int i = 0; i < rows; i++)
       {
 	invid = results.getInvid(i);
 	table.newRow(invid);
