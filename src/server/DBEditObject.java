@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.77 $ %D%
+   Version: $Revision: 1.78 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2242,6 +2242,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     StringBuffer result = new StringBuffer();
     DBObjectBaseField fieldDef;
     DBField origField, currentField;
+    StringBuffer added = new StringBuffer();
+    StringBuffer deleted = new StringBuffer();
+    StringBuffer changed = new StringBuffer();
 
     /* -- */
 
@@ -2308,8 +2311,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	if (((origField == null) || !origField.defined) &&
 	    ((currentField != null) && currentField.defined))
 	  {
-	    result.append("Field added: " + fieldDef.getName() + "\nValue: " +
-			  currentField.getValueString() + "\n");
+	    added.append("\t");
+	    added.append(fieldDef.getName());
+	    added.append(":");
+	    added.append(currentField.getValueString());
+	    added.append("\n");
 
 	    diffFound = true;
 
@@ -2323,8 +2329,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		 ((origField != null) && origField.defined))
 
 	  {
-	    result.append("Field deleted: " + fieldDef.getName() + "\nValue: " +
-			  origField.getValueString() + "\n");
+	    deleted.append("\t");
+	    deleted.append(fieldDef.getName());
+	    deleted.append(":");
+	    deleted.append(origField.getValueString());
+	    deleted.append("\n");
 
 	    diffFound = true;
 
@@ -2340,9 +2349,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	    if (diff != null)
 	      {
-		result.append("Field changed: " + 
-			      fieldDef.getName() + "\n" +
-			      diff);
+		changed.append(fieldDef.getName());
+		changed.append("\n");
+		changed.append(diff);
 
 		diffFound = true;
 
@@ -2358,6 +2367,27 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     if (diffFound)
       {
+	if (added.length() > 0)
+	  {
+	    result.append("Fields Added:\n\n");
+	    result.append(added);
+	    result.append("\n");
+	  }
+
+	if (changed.length() > 0)
+	  {
+	    result.append("Fields changed:\n\n");
+	    result.append(changed);
+	    result.append("\n");
+	  }
+
+	if (deleted.length() > 0)
+	  {
+	    result.append("Fields Deleted:\n\n");
+	    result.append(deleted);
+	    result.append("\n");
+	  }
+
 	return result.toString();
       }
     else
