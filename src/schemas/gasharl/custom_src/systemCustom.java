@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 2002/08/21 04:47:24 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 2002/08/21 04:53:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -582,13 +582,17 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * is not yet taken.  The direction of host id scanning depends on the
    * system category attached to this object.</p>
    *
+   * <p>Note that this private helper method should only be called from
+   * within synchronization on this object.</p>
+   *
    * @param start The octet value to start seeking from, or -1 if not
    * used
    *
    * @param stop The octet value to stop seeking at, or -1 if not
    * used
    *
-   * @return An IP address if one could be allocated, null otherwise */
+   * @return An IP address if one could be allocated, null otherwise 
+   */
 
   private Byte[] getIPAddress(Invid netInvid, int start, int stop)
   {
@@ -644,14 +648,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       {
 	address = (Byte[]) ipAddresses.elementAt(i);
 
-	if (range.matches(address))
+	if (range.matches(address, start, stop))
 	  {
 	    ipAddresses.removeElementAt(i);
-	    break;
-	  }
-	else
-	  {
-	    address = null;
+	    return address;
 	  }
       }
 
