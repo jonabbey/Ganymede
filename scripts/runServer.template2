@@ -19,6 +19,22 @@ INSTALLDIR=/var/ganymede
 
 ############################################### 
 
+# These options control how frequently the Ganymede server will
+# perform full heap GC to insure release of remote (client-side) RMI
+# objects.  The Java 1.3 JDK defaults to doing full GC for RMI server
+# apps once a minute, but the Ganymede server never releases
+# references to clients or admin consoles unless the client or admin
+# console quits/disconnects, in which case there's no need for the
+# Ganymede server to tell the client/console that it can release
+# objects.
+#
+# By setting the RMIGC control values to 3600000, we make the Ganymede
+# server only perform mandatory full-heap GC once an hour, letting the
+# lower impact generational garbage collection logic handle clean-up of
+# transient objects
+
+RMIGC=-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000
+
 trap "echo Aborted" 2
 
 echo "Running Ganymede Server"
@@ -105,7 +121,7 @@ echo
 #
 # For JDK 1.2 and 1.3
 
-$JAVA -Xms32m -Xmx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
+$JAVA -Xms32m -Xmx128m $RMIGC arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
 
 #			     ----====----
 
@@ -122,7 +138,7 @@ $JAVA -Xms32m -Xmx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR
 #
 # For JDK 1.2 and 1.3
 
-#$JAVA -Xdebug -Djava.compiler=NONE -Xms32m -Xmx128m -Xbootclasspath:/usr/java1.2/jre/lib/rt.jar:/usr/java1.2/lib/tools.jar arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
+#$JAVA -Xdebug -Djava.compiler=NONE -Xms32m -Xmx128m $RMIGC -Xbootclasspath:/usr/java1.2/jre/lib/rt.jar:/usr/java1.2/lib/tools.jar arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
 
 #			     ----====----
 
