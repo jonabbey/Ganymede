@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 17 June 1996
-  Version: $Revision: 1.7 $ %D%
+  Version: $Revision: 1.8 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,6 +30,8 @@ package arlut.csd.JTable;
 
 import java.awt.*;
 import java.util.*;
+
+import com.sun.java.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -44,7 +46,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.7 $ %D% 
+ * @version $Revision: 1.8 $ %D% 
  */
 
 public class gridTable extends baseTable {
@@ -87,8 +89,8 @@ public class gridTable extends baseTable {
 		   String[] headers,
 		   boolean horizLines, boolean vertLines,
 		   boolean vertFill, boolean hVertFill,
-		   PopupMenu menu,
-		   PopupMenu headerMenu)
+		   JPopupMenu menu,
+		   JPopupMenu headerMenu)
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
 	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
@@ -110,7 +112,7 @@ public class gridTable extends baseTable {
    *
    */
 
-  public gridTable(int[] colWidths, String[] headers, PopupMenu menu)
+  public gridTable(int[] colWidths, String[] headers, JPopupMenu menu)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 			     Color.white, Color.blue, tableAttr.JUST_CENTER),
