@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -612,7 +612,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     invidTestDialog = new StringDialog(this,
 				       "Invid Test",
-				       "Are you you want to trigger a full invid sweep?  It'll take forever.",
+				       "Are you sure you want to trigger a full invid sweep?  It'll take forever.",
 				       "Yes", "No", question);
 
     //    setBackground(Color.white);
