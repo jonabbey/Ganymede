@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -149,8 +149,8 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
 	return;
       }
 
-    
     parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
     // First figure out the title, and put it in the hash
     
     try
@@ -253,6 +253,7 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
 	rt.setResizable(true);
 	rt.setClosable(true);
 	rt.setMaximizable(true);
+	rt.setIconifiable(true);
 
 	rt.addPropertyChangeListener(this);
 
@@ -275,7 +276,7 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
 	    title = temp + num++;
 	  }
 	  
-	//System.out.println("Setting title to " + title);
+	// System.out.println("Setting title for query table to " + title);
 
 	rt.setTitle(title);
 
