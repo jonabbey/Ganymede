@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,6 +31,7 @@ public class Ganymede {
   
   public static GanymedeServer server;
   public static GanymedeSession internalSession;
+  public static GanymedeScheduler scheduler;
   public static DBStore db;
   public static String dbFilename;
   public static final boolean debug = true;
@@ -199,6 +200,36 @@ public class Ganymede {
 				      null));
 
     startupHook();
+
+    // start the background scheduler
+
+    scheduler = new GanymedeScheduler(true);
+    new Thread(scheduler).start();
+
+    // throw in a couple of tasks, just for grins
+
+    Date time, currentTime;
+    Calendar cal = Calendar.getInstance();
+
+    currentTime = new Date();
+
+    cal.setTime(currentTime);
+
+    cal.add(Calendar.MINUTE, 5);
+
+    scheduler.addPeriodicAction(cal.get(Calendar.HOUR),
+				cal.get(Calendar.MINUTE),
+				1440, 
+				new gcTask(), "Garbage Collection Task");
+
+    cal.add(Calendar.MINUTE, 10);
+
+    scheduler.addPeriodicAction(cal.get(Calendar.HOUR),
+				cal.get(Calendar.MINUTE),
+				120, 
+				new dumpTask(), "Database Dumper Task");
+
+    // and wa-la
 
     if (debug)
       {
@@ -393,4 +424,61 @@ public class Ganymede {
 	  }
       }
   }
+}
+
+class dumpTask implements Runnable {
+
+  public dumpTask()
+  {
+  }
+
+  public void run()
+   {
+     boolean started = false;
+     boolean completed = false;
+
+     try
+       {
+	 started = true;
+	 Ganymede.debug("Running dump task");
+
+	 try
+	   {
+	     Ganymede.db.dump(Ganymede.dbFilename, true);
+	   }
+	 catch (IOException ex)
+	   {
+	     Ganymede.debug("dump could not succeed.. IO error " + ex.getMessage());
+	   }
+
+	 Ganymede.debug("Completed dump task");
+	 completed = true;
+       }
+     finally
+       {
+	 // we'll go through here if our task was stopped
+	 // note that the DBStore dump code will handle
+	 // thread death ok.
+
+	 if (started && !completed)
+	   {
+	     Ganymede.debug("dumpTask forced to stop");
+	   }
+       }
+   }
+}
+
+class gcTask implements Runnable {
+
+  public gcTask()
+  {
+  }
+
+  public void run()
+   {
+     Ganymede.debug("Running garbage collection task");
+     System.gc();
+     Ganymede.debug("Garbage collection task finished");
+   }
+
 }
