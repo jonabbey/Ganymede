@@ -6,8 +6,8 @@
    
    Created: 28 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/04/28 09:32:41 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/10/29 16:12:54 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -161,7 +161,7 @@ public class PasswordClient implements ClientListener {
 	    // the Session object.
 
 	    ReturnVal retVal = session.edit_db_object(invid);
-	    db_object user = retVal.getObject(); 
+	    db_object user = (db_object) retVal.getObject(); 
 
 	    // If edit_db_object returns a null object, it usually
 	    // means someone else is editing the object.  It could
