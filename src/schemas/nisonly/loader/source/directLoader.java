@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -142,7 +142,7 @@ public class directLoader {
 
 	my_client.session.checkpoint("GASHAdmin");
 
-	current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.PermBase);
+	current_obj = (DBEditObject) createObject(SchemaConstants.PermBase);
 	gashadminPermInvid = current_obj.getInvid();
 
 	System.err.println("Trying to create a new GASHAdmin perm object: " + gashadminPermInvid.toString());
@@ -397,7 +397,7 @@ public class directLoader {
 
 	System.out.print("Creating " + key);
 
-	current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.UserBase);
+	current_obj = (DBEditObject) createObject(SchemaConstants.UserBase);
 	invid = current_obj.getInvid();
 
 	System.out.println(" [" + invid + "] ");
@@ -471,7 +471,7 @@ public class directLoader {
 	
 	System.out.print("Creating " + key);
 	
-	current_obj = (DBEditObject) my_client.session.create_db_object((short) 257);	// base 257 is for groups
+	current_obj = (DBEditObject) createObject((short) 257);	// base 257 is for groups
 	objInvid = current_obj.getInvid();
 	
 	System.out.println(" [" + objInvid + "]");
@@ -532,6 +532,11 @@ public class directLoader {
 	      }
 	  }
       }
+  }
+
+  private static db_object createObject(short type)
+  {
+    return my_client.session.create_db_object(type).getObject();
   }
 }  
 
