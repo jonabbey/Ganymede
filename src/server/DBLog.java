@@ -11,7 +11,7 @@
    StringBuffer.
    
    Created: 31 October 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1141,6 +1141,10 @@ public class DBLog {
 
 	vect = ownersField.getValuesLocal();
 
+	// *** Caution!  getValuesLocal() does not clone the field's contents..
+	// 
+	// DO NOT modify vect here!
+
 	if (vect == null)
 	  {
 	    if (debug)
@@ -1269,6 +1273,12 @@ public class DBLog {
       }
     else
       {
+	// we don't have to clone externalAddresses.getValuesLocal()
+	// since union() will copy the elements rather than just
+	// setting result to the vector returned by
+	// externalAddresses.getValuesLocal() if result is currently
+	// null.
+
 	result = VectorUtils.union(result, externalAddresses.getValuesLocal());
       }
 
@@ -1520,6 +1530,12 @@ class systemEventType {
 
     if (strF != null)
       {
+	// we don't have to clone strF.getValuesLocal()
+	// since union() will copy the elements rather than just
+	// setting addressVect to the vector returned by
+	// strF.getValuesLocal() if addressVect is currently
+	// null.
+
 	addressVect = VectorUtils.union(addressVect, strF.getValuesLocal());
       }
 	
@@ -1645,6 +1661,12 @@ class objectEventType {
 
     if (strF != null)
       {
+	// we don't have to clone strF.getValuesLocal()
+	// since union() will copy the elements rather than just
+	// setting addressVect to the vector returned by
+	// strF.getValuesLocal() if addressVect is currently
+	// null.
+
 	addressVect = VectorUtils.union(addressVect, strF.getValuesLocal());
 
 	// and create the address string
