@@ -387,7 +387,7 @@ public class SyncRunner implements Runnable {
 	invocation = myServiceProgram + " " + String.valueOf(myTransactionNumber);
       }
 
-    // "SyncChannel {0} running"
+    // "SyncRunner {0} running"
     Ganymede.debug(ts.l("run.running", myName));
 
     file = new File(myServiceProgram);
@@ -405,22 +405,22 @@ public class SyncRunner implements Runnable {
 	  }
 	catch (IOException ex)
 	  {
-	    // "Couldn''t exec SyncChannel {0}''s service program "{1}" due to IOException: {2}"
+	    // "Couldn''t exec SyncRunner {0}''s service program "{1}" due to IOException: {2}"
 	    Ganymede.debug(ts.l("run.ioException", myName, myServiceProgram, ex));
 	  }
 	catch (InterruptedException ex)
 	  {
-	    // "Failure during exec of SyncChannel {0}''s service program "{1}""
+	    // "Failure during exec of SyncRunner {0}''s service program "{1}""
 	    Ganymede.debug(ts.l("run.interrupted", myName, myServiceProgram));
 	  }
       }
     else
       {
-	// ""{0}" doesn''t exist, not running external service program for SyncChannel {1}"
+	// ""{0}" doesn''t exist, not running external service program for SyncRunner {1}"
 	Ganymede.debug(ts.l("run.nonesuch", myServiceProgram, myName));
       }
 
-    // "SyncChannel {1} finished"
+    // "SyncRunner {0} finished"
     Ganymede.debug(ts.l("run.done", myName));
   }
 }
