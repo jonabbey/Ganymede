@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.125 $
-   Last Mod Date: $Date: 1999/01/29 20:17:27 $
+   Version: $Revision: 1.126 $
+   Last Mod Date: $Date: 1999/02/02 22:00:45 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -1327,6 +1327,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		  {
 		    release_number = release_name.substring(release_name.indexOf('_') + 1, release_name.length());
 		  }
+	      }
+
+	    if (release_number == null)
+	      {
+		release_number = "unknown";
 	      }
 	    
 	    StringBuffer buffer = new StringBuffer();
