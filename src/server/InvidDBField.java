@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.174 $
-   Last Mod Date: $Date: 2003/03/12 02:53:06 $
+   Version: $Revision: 1.175 $
+   Last Mod Date: $Date: 2003/11/08 01:39:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.174 $ %D%
+ * @version $Revision: 1.175 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -288,7 +288,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		if (values.contains(superOwner))
 		  {
 		    System.err.println("InvidDBField.emit(fixup): omitting supergash owner link: " + 
-				       owner.getTypeName() + ": " + owner.getLabel() + " " + getName());
+				       owner.getTypeDesc() + ": " + owner.getLabel() + " " + getName());
 		  }
 
 		for (int i = 0; i < values.size(); i++)
@@ -543,7 +543,7 @@ public final class InvidDBField extends DBField implements invid_field {
     else
       {
 	xmlOut.startElement("invid");
-	xmlOut.attribute("type", XMLUtils.XMLEncode(target.getTypeName()));
+	xmlOut.attribute("type", XMLUtils.XMLEncode(target.getTypeDesc()));
 
 	// if the object that we are targetting has a label field
 	// which is handled by a namespace, we can use the object's
@@ -558,7 +558,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
-	    xmlOut.attribute("id", target.getTypeName() + "[" + invid.getNum() + "]");
+	    xmlOut.attribute("id", target.getTypeDesc() + "[" + invid.getNum() + "]");
 	  }
     
 	xmlOut.endElement("invid");
@@ -1229,7 +1229,7 @@ public final class InvidDBField extends DBField implements invid_field {
 			return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink from old reference",
 							  "Field " + this.toString() +
 							  " could not be unlinked from the " + remobj.toString() + 
-							  " " + remobj.getTypeName() + " object, which is busy " +
+							  " " + remobj.getTypeDesc() + " object, which is busy " +
 							  "being edited by " + edit_username + " on system " +
 							  edit_hostname);
 		      }
@@ -1237,7 +1237,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink from old reference",
 						      "Field " + this.toString() +
 						      " could not be unlinked from the " + remobj.toString() + 
-						      " " + remobj.getTypeName() + " object, which is busy " +
+						      " " + remobj.getTypeDesc() + " object, which is busy " +
 						      "being edited by another user.");
 		  }
 		else
@@ -1245,7 +1245,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink from old reference",
 						      "Field " + this.toString() +
 						      " could not be unlinked from the " + remobj.toString() + 
-						      " " + remobj.getTypeName() + " object.  This is probably a temporary "+
+						      " " + remobj.getTypeDesc() + " object.  This is probably a temporary "+
 						      "condition due to other user activity on the Ganymede server.");
 		  }
 	      }
@@ -1254,7 +1254,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink from old reference",
 						  "Field " + this.toString() +
 						  " could not be unlinked from the " + remobj.toString() + 
-						  " " + remobj.getTypeName() + " object.  This is probably a temporary "+
+						  " " + remobj.getTypeDesc() + " object.  This is probably a temporary "+
 						  "condition due to other user activity on the Ganymede server.");
 	      }
 	  }
@@ -1367,9 +1367,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
 					      "Field " + this.toString() +
 					      " could not be linked to the " + remobj.toString() + 
-					      " " + remobj.getTypeName() + " object.  You do not have permission to edit " +
+					      " " + remobj.getTypeDesc() + " object.  You do not have permission to edit " +
 					      "the " + remobj.toString() + 
-					      " " + remobj.getTypeName() + " object.");
+					      " " + remobj.getTypeDesc() + " object.");
 	  }
       }
     
@@ -1401,7 +1401,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
 						      "Field " + this.toString() +
 						      " could not be linked to the " + remobj.toString() + 
-						      " " + remobj.getTypeName() + " object, which is busy " +
+						      " " + remobj.getTypeDesc() + " object, which is busy " +
 						      "being edited by " + edit_username + " on system " +
 						      edit_hostname);
 		  }
@@ -1409,7 +1409,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
 						  "Field " + this.toString() +
 						  " could not be linked to the " + remobj.toString() + 
-						  " " + remobj.getTypeName() + " object, which is busy " +
+						  " " + remobj.getTypeDesc() + " object, which is busy " +
 						  "being edited by another user.");
 	      }
 	    else
@@ -1417,7 +1417,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
 						  "Field " + this.toString() +
 						  " could not be linked to the " + remobj.toString() + 
-						  " " + remobj.getTypeName() + " object.  This is probably a temporary "+
+						  " " + remobj.getTypeDesc() + " object.  This is probably a temporary "+
 						  "condition due to other user activity on the Ganymede server.");
 	      }
 	  }
@@ -1426,7 +1426,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
 					      "Field " + this.toString() +
 					      " could not be linked to the " + remobj.toString() + 
-					      " " + remobj.getTypeName() + " object.  This is probably a temporary "+
+					      " " + remobj.getTypeDesc() + " object.  This is probably a temporary "+
 					      "condition due to other user activity on the Ganymede server.");
 	  }
       }
@@ -1480,7 +1480,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link new reference",
 					      "Your operation could not succeed because you do not have permission " +
 					      "to create the (previously undefined) " + fieldDef.getName() + 
-					      " field in the " + newRef.getLabel() + " " + newRef.getTypeName() +
+					      " field in the " + newRef.getLabel() + " " + newRef.getTypeDesc() +
 					      " object.");
 	  }
       }
@@ -1685,7 +1685,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink from old reference",
 						      "Field " + this.toString() +
 						      " could not be unlinked from the " + remobj.toString() + 
-						      " " + remobj.getTypeName() + " object, which is busy " +
+						      " " + remobj.getTypeDesc() + " object, which is busy " +
 						      "being edited by " + edit_username + " on system " +
 						      edit_hostname);
 		  }
@@ -1694,7 +1694,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink from old reference",
 						      "Field " + this.toString() +
 						      " could not be unlinked from the " + remobj.toString() + 
-						      " " + remobj.getTypeName() + " object.  This is probably a temporary "+
+						      " " + remobj.getTypeDesc() + " object.  This is probably a temporary "+
 						      "condition due to other user activity on the Ganymede server.");
 		  }
 	      }

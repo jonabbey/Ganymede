@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 2003/09/05 21:09:39 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 2003/11/08 01:35:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1715,7 +1715,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		  }
 		catch (IntegrityConstraintException ex)
 		  {
-		    Ganymede.debug("Couldn't find containing object for " + object.getTypeName() + ": " + object.getLabel());
+		    Ganymede.debug("Couldn't find containing object for " + object.getTypeDesc() + ": " + object.getLabel());
 		    ok = false;
 		  }
 	      }

@@ -8,8 +8,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2003/07/24 18:14:49 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2003/11/08 01:36:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -508,7 +508,7 @@ public class GanymedeWarningTask implements Runnable {
   {
     StringBuffer tempString = new StringBuffer();
     Date actionDate = (Date) object.getFieldValue(SchemaConstants.ExpirationField);
-    String typeName = object.getTypeName();
+    String typeName = object.getTypeDesc();
     String label = object.getLabel();
 
     tempString.append("\n\n");

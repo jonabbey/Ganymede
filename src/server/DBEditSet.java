@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.129 $
-   Last Mod Date: $Date: 2003/05/19 20:15:07 $
+   Version: $Revision: 1.130 $
+   Last Mod Date: $Date: 2003/11/08 01:34:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -362,7 +362,7 @@ public class DBEditSet {
   {
     if (false)
       {
-	System.err.println("DBEditSet adding " + object.getTypeName() + " " + object.getLabel());
+	System.err.println("DBEditSet adding " + object.getTypeDesc() + " " + object.getLabel());
       }
 
     // if this transaction is in the middle of commit(), don't let the
@@ -1170,7 +1170,7 @@ public class DBEditSet {
 	StringBuffer errorBuf = new StringBuffer();
 	    
 	errorBuf.append("Error, ");
-	errorBuf.append(eObj.getTypeName());
+	errorBuf.append(eObj.getTypeDesc());
 	errorBuf.append(" object ");
 	errorBuf.append(eObj.getLabel());
 	errorBuf.append(" has not been completely filled out.  The following fields need ");
