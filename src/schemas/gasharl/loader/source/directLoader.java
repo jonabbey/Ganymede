@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,15 @@ public class directLoader {
   static Hashtable adminUsers = new Hashtable();
   static Vector ownerGroups = new Vector();
   static Hashtable personaMap = new Hashtable();
+
+  /**
+   *
+   * maps user category names to invid's.
+   *
+   */
+
+  static Hashtable userCategories = new Hashtable();
+  static Hashtable categoryInvids = new Hashtable();
 
   static Hashtable users = new Hashtable();
   static Hashtable userInvids = new Hashtable();
@@ -86,7 +95,6 @@ public class directLoader {
   static FileInputStream inStream = null;
   static boolean done = false;
 
-  static User userObj;
   static Group groupObj;
   static UserNetgroup uNetObj;
   static SystemNetgroup sNetObj;
@@ -150,6 +158,7 @@ public class directLoader {
     System.err.println("---------------------------------------- Initiating GASH file scan --------------------");
 
     scanOwnerGroups();
+    scanUserCategories();
     scanUsers();
     scanEmail();
     scanGroups();
@@ -321,10 +330,16 @@ public class directLoader {
 	  }
 
 	commitTransaction();
+
+	System.out.println("\nRegistering user categories\n");
+
 	my_client.session.openTransaction("GASH directLoader");
+	registerUserCategories();
+	commitTransaction();
 
 	System.out.println("\nRegistering users\n");
 
+	my_client.session.openTransaction("GASH directLoader");
 	registerUsers();
 	commitTransaction();
 
@@ -333,37 +348,44 @@ public class directLoader {
 	commitTransaction();
 
 	System.out.println("\nRegistering groups\n");
+
 	my_client.session.openTransaction("GASH directLoader");
 	registerGroups();
 	commitTransaction();
 
 	System.out.println("\nRegistering user netgroups\n");
+
 	my_client.session.openTransaction("GASH directLoader");
 	registerUserNetgroups();
 	commitTransaction();
 
 	System.out.println("\nRegistering System Types\n");
+
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystemTypes();
 	commitTransaction();
 
 	System.out.println("\nRegistering networks and rooms\n");
+
 	my_client.session.openTransaction("GASH directLoader");
 	registerNets();
 	registerRooms();
 	commitTransaction();
 
 	System.out.println("\nRegistering systems\n");
+
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystems();
 	commitTransaction();
 
 	System.out.println("\nRegistering system netgroups\n");
+
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystemNetgroups();
 	commitTransaction();
 
 	System.out.println("\nRegistering automounter configuration\n");
+
 	my_client.session.openTransaction("GASH directLoader");
 	registerAutomounter();
 	commitTransaction();
@@ -532,11 +554,91 @@ public class directLoader {
 
   /**
    *
+   * Scan the GASH user_categories file, load the userCategories
+   * hash.
+   *
+   */
+
+  private static void scanUserCategories()
+  {
+    UserCategory categoryObj;
+
+    /* -- */
+
+    try
+      {
+	inStream = new FileInputStream("input/user_categories");
+	done = false;
+      }
+    catch (FileNotFoundException ex)
+      {
+	System.err.println("Couldn't find user_categories");
+	done = true;
+      }
+
+    StreamTokenizer tokens = new StreamTokenizer(inStream);
+
+    UserCategory.initTokenizer(tokens);
+
+    System.out.println("Scanning user_categories");
+
+    while (!done)
+      {
+	try
+	  {
+	    categoryObj = new User();
+	    done = categoryObj.loadLine(tokens);
+
+	    if (!done && categoryObj.valid)
+	      {
+		userCategories.put(categoryObj.name, categoryObj);
+
+		if (debug)
+		  {
+		    System.out.println("\n\n");
+		    categoryObj.display();
+		  }
+		else
+		  {
+		    System.out.print(".");
+		  }
+	      }
+	  }
+	catch (EOFException ex)
+	  {
+	    done = true;
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("unknown IO exception caught: " + ex);
+	  }
+      }
+
+    System.out.println();
+    System.out.println("Done scanning user_categories");
+
+    try
+      {
+	inStream.close();
+      }
+    catch (IOException ex)
+      {
+	System.err.println("unknown IO exception caught: " + ex);
+      }    
+  }
+
+  /**
+   *
+   * This method scans the users from the GASH user_info file
+   * and saves them in the users hash.
+   *
    */
 
   private static void scanUsers()
   {
-    // now process the user_info file
+    User userObj;
+
+    /* -- */
 
     try
       {
@@ -562,10 +664,19 @@ public class directLoader {
 	    userObj = new User();
 	    done = userObj.loadLine(tokens);
 
-	    if (!done)
+	    if (!done && userObj.valid)
 	      {
-		System.out.print(".");
 		users.put(userObj.name, userObj);
+
+		if (debug)
+		  {
+		    System.out.println("\n\n");
+		    userObj.display();
+		  }
+		else
+		  {
+		    System.out.print(".");
+		  }
 	      }
 	  }
 	catch (EOFException ex)
@@ -697,7 +808,6 @@ public class directLoader {
 	done = true;
       }
 
-
     StreamTokenizer tokens = new StreamTokenizer(inStream);
 
     Group.initTokenizer(tokens);
@@ -711,11 +821,20 @@ public class directLoader {
 	    groupObj = new Group();
 	    done = groupObj.loadLine(tokens);
 
-	    if (!done)
+	    if (!done && groupObj.valid)
 	      {
-		System.out.print(".");
 		groups.put(groupObj.name, groupObj);
 		groupID.put(new Integer(groupObj.gid), groupObj);
+
+		if (debug)
+		  {
+		    System.out.println("\n\n");
+		    groupObj.display();
+		  }
+		else
+		  {
+		    System.out.print(".");
+		  }
 	      }
 	  }
 	catch (EOFException ex)
@@ -739,7 +858,6 @@ public class directLoader {
 
     System.out.println();
     System.out.println("Done scanning group_info");
-
   }
 
   /**
@@ -1318,6 +1436,69 @@ public class directLoader {
 
   /**
    *
+   * This method creates User Category objects in the server, and 
+   * records a name-to-invid mapping in the categoryInvids hash.
+   *
+   */
+
+  private static void registerUserCategories() throws RemoteException
+  {
+    String key;
+    Enumeration enum;
+    UserCategory category;
+    DBEditObject obj;
+    Invid invid;
+
+    /* -- */
+
+    System.err.println("\nCreating user categories in server: ");
+
+    enum = userCategories.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+	category = (UserCategory) userCategories.get(key);
+
+	System.out.print("Creating " + key);
+
+	obj = (DBEditObject) createObject((short) 279);
+	invid = obj.getInvid();
+
+	System.out.println(" [" + invid + "] ");
+
+	// save the invid in our categoryInvids hash for later
+	// reference
+
+	categoryInvids.put(category.name, invid);
+
+	obj.setFieldValueLocal(userCategorySchema.TITLE, category.name);
+	obj.setFieldValueLocal(userCategorySchema.SUMMARY, category.shortdescrip);
+	obj.setFieldValueLocal(userCategorySchema.DESCRIPTION, category.longdescrip);
+
+	if (category.maillist != null && !category.maillist.equals(""))
+	  {
+	    obj.setFieldValueLocal(userCategorySchema.APPROVALREQ, new Boolean(true));
+	    obj.setFieldValueLocal(userCategorySchema.APPROVALLIST, category.maillist);
+	  }
+	
+	if (category.days_limit != 0)
+	  {
+	    obj.setFieldValueLocal(userCategorySchema.EXPIRE, new Boolean(true));
+	    obj.setFieldValueLocal(userCategorySchema.LIMIT, new Integer(category.days_limit));
+	  }
+
+	if (category.ssrequired)
+	  {
+	    obj.setFieldValueLocal(userCategorySchema.SSREQUIRED, new Boolean(true));
+	  }
+      }
+
+    System.err.println("\nFinished creating user categories in server");
+  }
+
+  /**
+   *
    */
 
   private static void registerUsers() throws RemoteException
@@ -1391,6 +1572,19 @@ public class directLoader {
 	// set the shell
 
 	current_obj.setFieldValueLocal(userSchema.LOGINSHELL, userObj.shell);
+
+	// set the user category
+
+	Invid categoryInvid = (Invid) categoryInvids.get(userObj.category);
+
+	if (categoryInvid != null)
+	  {
+	    current_obj.setFieldValueLocal(userSchema.CATEGORY, categoryInvid);
+	  }
+
+	// set the social security #
+
+	current_obj.setFieldValueLocal(userSchema.SOCIALSECURITY, userObj.socialsecurity);
 
 	// register email aliases for this user
 
