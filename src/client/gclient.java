@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.195 $
-   Last Mod Date: $Date: 2001/10/31 02:01:32 $
+   Version: $Revision: 1.196 $
+   Last Mod Date: $Date: 2001/10/31 02:08:15 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.195 $ $Date: 2001/10/31 02:01:32 $ $Name:  $
+ * @version $Revision: 1.196 $ $Date: 2001/10/31 02:08:15 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/10/31 02:01:32 $";
+  static String release_date = "$Date: 2001/10/31 02:08:15 $";
   static String release_number = null;
 
   /**
@@ -5587,6 +5587,12 @@ class PersonaListener implements ActionListener {
 	  }
 
 	personaChangeSuccessful = session.selectPersona(newPersona, password);
+
+	// when we change personas, we lose our filter.  Clear the
+	// reference to our filterDialog so that we will recreate it
+	// from scratch if we need to.
+
+	gc.filterDialog = null;
 
 	if (gc.getPersonaDialog().debug)
 	  {

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.247 $
-   Last Mod Date: $Date: 2001/10/31 00:00:48 $
+   Version: $Revision: 1.248 $
+   Last Mod Date: $Date: 2001/10/31 02:07:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.247 $ $Date: 2001/10/31 00:00:48 $
+ * @version $Revision: 1.248 $ $Date: 2001/10/31 02:07:15 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1574,6 +1574,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	personaName = null;
 	updatePerms(true);
 	ownerList = null;
+	visibilityFilterInvids = null;
 	userInfo = null;	// null our admin console cache
 	setLastEvent("selectPersona: " + persona);
 	return true;
@@ -1646,6 +1647,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	updatePerms(true);
 	ownerList = null;
 	userInfo = null;	// null our admin console cache
+	visibilityFilterInvids = null;
 	setLastEvent("selectPersona: " + persona);
 	return true;
       }
