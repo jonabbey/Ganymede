@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -129,8 +129,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     bf.field_code = SchemaConstants.OwnerListField;
     bf.field_type = FieldType.INVID;
     bf.field_order = 0;
-    bf.allowedTarget = 0;
-    bf.targetField = 8;
+    bf.allowedTarget = SchemaConstants.AdminBase;
+    bf.targetField = SchemaConstants.AdminObjectsOwned;
     bf.editable = false;
     bf.removable = false;
     bf.array = true;
@@ -690,19 +690,19 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    *
    */
 
-  public synchronized void print(PrintStream out)
+  public synchronized void print(PrintWriter out, String indent)
   {
     Enumeration enum;
 
     /* -- */
 
-    out.println("ObjectBase: " + object_name + "(" + type_code + ")");
+    out.println(indent + object_name + "(" + type_code + ")");
     
     enum = fieldHash.elements();
+
     while (enum.hasMoreElements())
       {
-	out.print("\t");
-	((DBObjectBaseField) enum.nextElement()).print(out);
+	((DBObjectBaseField) enum.nextElement()).print(out, indent + "\t");
       }
   }
 

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1608,7 +1608,15 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   /**
    *
-   * @see arlut.csd.ganymede.BaseField
+   * This method is intended to produce a human readable
+   * representation of this field definition's type attributes.  This
+   * method should not be used programatically to determine this
+   * field's type information.
+   *
+   * This method is only for human elucidation, and the precise
+   * results returned are subject to change at any time.
+   *
+   * @see arlut.csd.ganymede.BaseField 
    */
 
   public String getTypeDesc()
@@ -1630,11 +1638,87 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	break;
 
       case STRING:
-	result = "string";
+	result = "string <min: " + minLength + ", max:" + maxLength + ">";
+	
+	if (okChars != null)
+	  {
+	    result += ", okChars: '" + okChars + "'";
+	  }
+
+	if (badChars != null)
+	  {
+	    result += ", badChars: '" + badChars + "'";
+	  }
+
+	if (namespace != null)
+	  {
+	    result += ", namespace: " + namespace.getName();
+	  }
+
+	if (caseInsensitive)
+	  {
+	    result += ", case insensitive"; 
+	  }
+	else
+	  {
+	    result += ", case sensitive"; 
+	  }
+
 	break;
 
       case INVID:
 	result = "invid";
+
+	if (editInPlace)
+	  {
+	    result += " <edit-in-place> ";
+	  }
+
+	if (allowedTarget >= 0)
+	  {
+	    DBObjectBase refBase;
+
+	    refBase = base.store.getObjectBase(allowedTarget);
+	    result += ", -->" + refBase.getName();
+
+	    if (targetField != -1)
+	      {
+		try
+		  {
+		    result += ", <--" + refBase.getField(targetField).getName();
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("caught remote: " + ex);
+		  }
+	      }
+	  }
+	else if (allowedTarget == -1)
+	  {
+	    result += ", -->any";
+	  }
+	else if (allowedTarget == -2)
+	  {
+	    result += ", -->any";
+
+	    // if allowed Target == -2 and targetField != -1, we assume
+	    // that we've got a field that's guaranteed to be present in
+	    // all bases, including our parent.
+	    
+	    if (targetField != -1)
+	      {
+		try
+		  {
+		    result += ", <--" + base.getField(targetField).getName();
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("caught remote: " + ex);
+		  }
+	      }
+
+	  }
+	
 	break;
 
       case PERMISSIONMATRIX:
@@ -1643,6 +1727,12 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
       case PASSWORD:
 	result = "password";
+
+	if (crypted)
+	  {
+	    result += " <crypted>";
+	  }
+
 	break;
 
       default:
@@ -1659,10 +1749,10 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
       }
   }
 
-  public void print(PrintStream out)
+  public void print(PrintWriter out, String indent)
   {
-    out.print(field_name + "(" + field_code + "):");
-    out.print(getTypeDesc());
+    out.print(indent + field_name + "(" + field_code + "):");
+    out.print(indent + getTypeDesc());
     out.println();
   }
 }
