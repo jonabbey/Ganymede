@@ -6,15 +6,16 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 1999/08/18 23:47:58 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2000/01/08 03:22:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -87,6 +88,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   // ---
 
   QueryResult groupChoices = null;
+
+  // this will hold the new username while we are doing chaining on a user change
+  // op.
+
+  String newUsername;
 
   /**
    *
@@ -412,20 +418,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	if (homedir != null && homedir.length() != 0)
 	  {
-	    sf = (StringDBField) getField(USERNAME);
-
-	    if (sf != null)
+	    if (newUsername != null)
 	      {
-		if (sf.getNewValue() != null)
-		  {
-		    String expected = homedir + (String) sf.getNewValue();
+		String expected = homedir + newUsername;
 		    
-		    if (!dir.equals(expected))
-		      {
-			return Ganymede.createErrorDialog("Schema Error",
-							  "Home directory should be " + expected + ".\n" +
-							  "This is a restriction encoded in userCustom.java.");
-		      }
+		if (!dir.equals(expected))
+		  {
+		    return Ganymede.createErrorDialog("Schema Error",
+						      "Home directory should be " + expected + ".\n" +
+						      "This is a restriction encoded in userCustom.java.");
 		  }
 	      }
 	  }
@@ -435,50 +436,59 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (field.getID() == USERNAME)
       {
-	// if we are being told to clear the user name field, go ahead and
-	// do it.. we assume this is being done by user removal logic,
-	// so we won't force everything to go through a wizard.
+	try
+	  {
+	    newUsername = (String) value;
+
+	    // if we are being told to clear the user name field, go ahead and
+	    // do it.. we assume this is being done by user removal logic,
+	    // so we won't force everything to go through a wizard.
 	
-	if (deleting && (value == null))
-	  {
-	    return null;
-	  }
+	    if (deleting && (value == null))
+	      {
+		return null;
+	      }
 
-	// update the home directory location.. we assume that if
-	// the user has permission to rename the user, they can
-	// automatically execute this change to the home directory.
+	    // update the home directory location.. we assume that if
+	    // the user has permission to rename the user, they can
+	    // automatically execute this change to the home directory.
 
-	if (homedir == null)
-	  {
-	    homedir = System.getProperty("ganymede.homedirprefix");
-	  }
+	    if (homedir == null)
+	      {
+		homedir = System.getProperty("ganymede.homedirprefix");
+	      }
 
-	if (homedir != null)
-	  {
-	    sf = (StringDBField) getField(HOMEDIR);
-	    sf.setValueLocal(homedir + (String) value);
-	  }
+	    if (homedir != null)
+	      {
+		sf = (StringDBField) getField(HOMEDIR);
+		sf.setValueLocal(homedir + (String) value);
+	      }
 
-	// rename all the associated persona with the new user name
+	    // rename all the associated persona with the new user name
 
-	inv = (InvidDBField) getField(PERSONAE);
+	    inv = (InvidDBField) getField(PERSONAE);
 	
-	if (inv == null)
-	  {
-	    return null;
+	    if (inv == null)
+	      {
+		return null;
+	      }
+
+	    sf = (StringDBField) getField(USERNAME); // old user name
+
+	    oldName = (String) sf.getValueLocal();
+
+	    personaeInvids = inv.getValues();
+
+	    for (int i = 0; i < personaeInvids.size(); i++)
+	      {
+		adminPersonaCustom adminObj = (adminPersonaCustom) session.editDBObject((Invid) personaeInvids.elementAt(i));
+
+		adminObj.refreshLabelField(null, null, (String) value);
+	      }
 	  }
-
-	sf = (StringDBField) getField(USERNAME); // old user name
-
-	oldName = (String) sf.getValueLocal();
-
-	personaeInvids = inv.getValues();
-
-	for (int i = 0; i < personaeInvids.size(); i++)
+	finally
 	  {
-	    adminPersonaCustom adminObj = (adminPersonaCustom) session.editDBObject((Invid) personaeInvids.elementAt(i));
-
-	    adminObj.refreshLabelField(null, null, (String) value);
+	    newUsername = null;
 	  }
       }
 
