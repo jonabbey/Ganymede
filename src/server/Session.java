@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.19 $ %D%
+ * @version $Revision: 1.20 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -50,6 +50,22 @@ public interface Session extends Remote {
   String      getLastError() throws RemoteException;
 
   void        logout() throws RemoteException;
+
+  /**
+   *
+   * This method is used to allow a client to request that wizards
+   * not be provided in response to actions by the client.  This
+   * is intended to allow non-interactive or non-gui clients to
+   * do work without having to go through a wizard interaction
+   * sequence.<br><br>
+   *
+   * Wizards are enabled by default.
+   *
+   * @param val If true, wizards will be enabled.
+   *
+   */
+
+  void        enableWizards(boolean val) throws RemoteException;
 
   /**
    *
