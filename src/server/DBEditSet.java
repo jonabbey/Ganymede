@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,13 +23,16 @@ import java.util.*;
 
 ------------------------------------------------------------------------------*/
 
-/*
- * DBEditSet is the basic transactional unit.  All changes to the database during
- * normal operations are made in the context of a DBEditSet, which may then be
- * committed or rolledback as an atomic operation.
+/**
+ *
+ * <p>DBEditSet is the basic transactional unit.  All changes to the
+ * database during normal operations are made in the context of a
+ * DBEditSet, which may then be committed or rolledback as an atomic
+ * operation.</p>
+ *
  * 
- * When DBEditSet commits, the datastore is changed, and information is written
- * to the DBStore journal.
+ * <p>When DBEditSet commits, the datastore is changed, and
+ * information is written to the DBStore journal.</p>
  *
  */
 
