@@ -6,15 +6,16 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 1999/11/16 08:00:24 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 2000/01/08 03:23:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -102,6 +103,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   // ---
 
   QueryResult groupChoices = null;
+
+  String newUsername = null;
 
   /**
    *
@@ -1164,7 +1167,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// signature alias without having the StringDBField for the
 	// signature alias reject the new name.
 
-	String name = (String) ((DBField) getField(USERNAME)).getNewValue();
+	String name = newUsername;
 
 	if (name != null)
 	  {
@@ -1414,20 +1417,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (homedir != null && homedir.length() != 0)
 	  {
-	    sf = (StringDBField) getField(USERNAME);
-
-	    if (sf != null)
+	    if (newUsername != null)
 	      {
-		if (sf.getNewValue() != null)
-		  {
-		    String expected = homedir + (String) sf.getNewValue();
+		String expected = homedir + (String) newUsername;
 		    
-		    if (!dir.equals(expected))
-		      {
-			return Ganymede.createErrorDialog("Schema Error",
-							  "Home directory should be " + expected + ".\n" +
-							  "This is a restriction encoded in userCustom.java.");
-		      }
+		if (!dir.equals(expected))
+		  {
+		    return Ganymede.createErrorDialog("Schema Error",
+						      "Home directory should be " + expected + ".\n" +
+						      "This is a restriction encoded in userCustom.java.");
 		  }
 	      }
 	  }
@@ -1494,106 +1492,119 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (field.getID() == USERNAME)
       {
-	// if we are being told to clear the user name field, go ahead and
-	// do it.. we assume this is being done by user removal logic,
-	// so we won't press the issue.
-	
-	if (deleting && (value == null))
+	// remember the new user name we are changing to, so that the
+	// other fields that we will change as a result of the
+	// username change will be able to get the new name.
+
+	newUsername = (String) value;
+
+	try
 	  {
-	    return null;
-	  }
+	    // if we are being told to clear the user name field, go ahead and
+	    // do it.. we assume this is being done by user removal logic,
+	    // so we won't press the issue.
 
-	// signature alias field will need to be rescanned
-
-	sf = (StringDBField) getField(USERNAME); // old user name
-
-	oldName = (String) sf.getValueLocal();
-
-	if (oldName != null)
-	  {
-	    sf = (StringDBField) getField(SIGNATURE); // signature alias
-
-	    // if the signature alias was the user's name, we'll want
-	    // to continue that.
-		
-	    if (oldName.equals((String) sf.getValueLocal()))
+	    if (deleting && (value == null))
 	      {
-		sf.setValueLocal(value); // set the signature alias to the user's new name
+		return null;
+	      }
+
+	    // signature alias field will need to be rescanned
+
+	    sf = (StringDBField) getField(USERNAME); // old user name
+
+	    oldName = (String) sf.getValueLocal();
+
+	    if (oldName != null)
+	      {
+		sf = (StringDBField) getField(SIGNATURE); // signature alias
+
+		// if the signature alias was the user's name, we'll want
+		// to continue that.
+		
+		if (oldName.equals((String) sf.getValueLocal()))
+		  {
+		    sf.setValueLocal(value); // set the signature alias to the user's new name
+		  }
+	      }
+
+	    // update the home directory location.. we assume that if
+	    // the user has permission to rename the user, they can
+	    // automatically execute this change to the home directory.
+
+	    if (homedir == null)
+	      {
+		homedir = System.getProperty("ganymede.homedirprefix");
+	      }
+
+	    // do we have a homedir prefix?  if so, set the home dir here
+
+	    if (homedir != null && homedir.length() != 0)
+	      {
+		sf = (StringDBField) getField(HOMEDIR);
+
+		sf.setValueLocal(homedir + (String) value);	// ** ARL
+	      }
+
+	    // if we don't have a signature set, set it to the username.
+
+	    sf = (StringDBField) getField(SIGNATURE);
+
+	    String sigVal = (String) sf.getValueLocal();
+
+	    if (sigVal == null || sigVal.equals(oldName))
+	      {
+		sf.setValueLocal(value);
+	      }
+
+	    // update the email target field.  We want to look for
+	    // oldName@arlut.utexas.edu and replace it if we find it.
+
+	    sf = (StringDBField) getField(EMAILTARGET);
+
+	    if (mailsuffix == null)
+	      {
+		mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
+	      }
+
+	    if (mailsuffix == null)
+	      {
+		Ganymede.debug("Error in userCustom: couldn't find property ganymede.defaultmailsuffix!");
+	      }
+
+	    String oldMail = oldName + mailsuffix;
+
+	    if (sf.containsElement(oldMail))
+	      {
+		sf.deleteElement(oldMail);
+		sf.addElement(value + mailsuffix);
+	      }
+	    else if (sf.size() == 0)
+	      {
+		sf.addElement(value + mailsuffix);
+	      }
+	
+	    inv = (InvidDBField) getField(PERSONAE);
+	
+	    if (inv == null)
+	      {
+		return null;	// success
+	      }
+
+	    // rename all the associated personae with the new user name
+
+	    personaeInvids = inv.getValues();
+
+	    for (int i = 0; i < personaeInvids.size(); i++)
+	      {
+		adminPersonaCustom adminObj = (adminPersonaCustom) session.editDBObject((Invid) personaeInvids.elementAt(i));
+
+		adminObj.refreshLabelField(null, null, (String) value);
 	      }
 	  }
-
-	// update the home directory location.. we assume that if
-	// the user has permission to rename the user, they can
-	// automatically execute this change to the home directory.
-
-	if (homedir == null)
+	finally
 	  {
-	    homedir = System.getProperty("ganymede.homedirprefix");
-	  }
-
-	// do we have a homedir prefix?  if so, set the home dir here
-
-	if (homedir != null && homedir.length() != 0)
-	  {
-	    sf = (StringDBField) getField(HOMEDIR);
-
-	    sf.setValueLocal(homedir + (String) value);	// ** ARL
-	  }
-
-	// if we don't have a signature set, set it to the username.
-
-	sf = (StringDBField) getField(SIGNATURE);
-
-	String sigVal = (String) sf.getValueLocal();
-
-	if (sigVal == null || sigVal.equals(oldName))
-	  {
-	    sf.setValueLocal(value);
-	  }
-
-	// update the email target field.  We want to look for
-	// oldName@arlut.utexas.edu and replace it if we find it.
-
-	sf = (StringDBField) getField(EMAILTARGET);
-
-	if (mailsuffix == null)
-	  {
-	    mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
-	  }
-
-	if (mailsuffix == null)
-	  {
-	    Ganymede.debug("Error in userCustom: couldn't find property ganymede.defaultmailsuffix!");
-	  }
-
-	String oldMail = oldName + mailsuffix;
-
-	if (sf.containsElement(oldMail))
-	  {
-	    sf.deleteElement(oldMail);
-	    sf.addElement(value + mailsuffix);
-	  }
-	else if (sf.size() == 0)
-	  {
-	    sf.addElement(value + mailsuffix);
-	  }
-	
-	inv = (InvidDBField) getField(PERSONAE);
-	
-	if (inv == null)
-	  {
-	    return null;	// success
-	  }
-
-	// rename all the associated personae with the new user name
-
-	personaeInvids = inv.getValues();
-
-	for (int i = 0; i < personaeInvids.size(); i++)
-	  {
-	    adminPersonaCustom adminObj = (adminPersonaCustom) session.editDBObject((Invid) personaeInvids.elementAt(i));
-
-	    adminObj.refreshLabelField(null, null, (String) value);
+	    newUsername = null;
 	  }
       }
 

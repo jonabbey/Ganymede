@@ -6,15 +6,16 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 1999/10/29 21:45:48 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2000/01/08 03:23:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -405,7 +406,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  }
 	
 	// free the old net for others to use.. note that at this point, 
-	// field.getOldValue() holds the field's old value and value is the
+	// field.getValueLocal() holds the field's old value and value is the
 	// proposed new value
 
 	if (debug)
@@ -413,7 +414,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	    System.err.println("interfaceCustom.finalizeSetValue(): about to check net stuff");
 	  }
 	
-	if (!sysObj.freeNet((Invid) field.getOldValue()))
+	if (!sysObj.freeNet((Invid) field.getValueLocal()))
 	  {
 	    if (debug)
 	      {
@@ -430,7 +431,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 		System.err.println("interfaceCustom.finalizeSetValue(): couldn't alloc new net num");
 	      }
 	
-	    sysObj.allocNet((Invid) field.getOldValue()); // take it back
+	    sysObj.allocNet((Invid) field.getValueLocal()); // take it back
 
 	    return Ganymede.createErrorDialog("schema error",
 					      "interfaceCustom.finalizeSetValue(): couldn't alloc new net num");

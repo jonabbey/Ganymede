@@ -6,15 +6,16 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 1999/12/15 00:22:33 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2000/01/08 03:23:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -494,6 +495,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     uid = ((Integer) object.getFieldValueLocal(userSchema.UID)).intValue();
+
+    // extra security precaution.. homey don't play no root accounts in NIS games.
+
+    if (uid == 0)
+      {
+	Ganymede.debug("GASHBuilder.writeUserLine(): *** root uid in user " + username + ", skipping!! ***");
+	return;			// no writeLine
+      }
 
     // get the gid
     
