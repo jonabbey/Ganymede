@@ -2131,6 +2131,7 @@ class xPassword {
     apachemd5text = item.getAttrStr("apachemd5crypt");
     lanman = item.getAttrStr("lanman");
     ntmd4 = item.getAttrStr("ntmd4");
+    sshatext = item.getAttrStr("ssha");
   }
 
   public xPassword(String plaintext, String crypttext, String md5text, String apachemd5text, String lanman, String ntmd4, String sshatext)
