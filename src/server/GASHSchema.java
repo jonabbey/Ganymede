@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.59 $ %D%
+   Version: $Revision: 1.60 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1006,6 +1006,20 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
 
     System.out.println("node " + node.getText() + " unselected");
+  }
+
+  /**
+   *
+   * Called when an item in the tree is double-clicked.
+   *
+   * @param node The node selected in the tree.
+   *
+   * @see arlut.csd.JTree.treeCallback
+   */
+
+  public void treeNodeDoubleClicked(treeNode node)
+  {
+    return;
   }
 
   public void treeNodeMenuPerformed(treeNode node,
