@@ -32,8 +32,20 @@
     <j2se version="1.2"/>
     <jar href="ganymede.jar"/>
   </resources>
+
+  <!-- We need to set all-permissions so that the client can connect
+       to an RMI server that is not necessarily running on the same
+       host as the web server the applet was downloaded from.  These
+       permissions also enable the use of Foxtrot
+       (foxtrot.sourceforge.net) to perform some asynchronous GUI
+       operations in the client.
+
+       You can remove this <security> element entirely if you want to
+       restrict the client from being able to do anything mischevious,
+       but if you do that, the Foxtrot GUI stuff will break. -->
+
   <security>
-    <j2ee-application-client-permissions/>
+    <all-permissions/>
   </security>
   <applet-desc 
     documentBase="#WEBROOT"
