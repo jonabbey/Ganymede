@@ -5,7 +5,7 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -94,10 +94,25 @@ public class notesPanel extends JPanel{
 
       try
 	{
-	  creator = (String)creator_field.getValue();
-	  creation_date = (Date)creation_date_field.getValue();
-	  modifier = (String)modifier_field.getValue();
-	  mod_date = (Date)modification_date_field.getValue();
+	  if (creator_field != null)
+	    {
+	      creator = (String)creator_field.getValue();
+	    }
+
+	  if (creation_date != null)
+	    {
+	      creation_date = (Date)creation_date_field.getValue();
+	    }
+
+	  if (modifier != null)
+	    {
+	      modifier = (String)modifier_field.getValue();
+	    }
+
+	  if (mod_date != null)
+	    {
+	      mod_date = (Date)modification_date_field.getValue();
+	    }
 	}
       catch ( RemoteException rx)
 	{
@@ -195,7 +210,10 @@ public class notesPanel extends JPanel{
     {
       try
 	{
-	  notes_field.setValue(notesArea.getText().trim());
+	  if (notes_field != null)
+	    {
+	      notes_field.setValue(notesArea.getText().trim());
+	    }
 	}
       catch (RemoteException rx)
 	{
