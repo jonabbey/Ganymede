@@ -5,7 +5,7 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -96,6 +96,33 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
   public JdateField()
   {
     this(null,true,false,null,null);
+  }
+
+  /**
+   * Contructor that creates a JdateField based on the Date object it is given.  This
+   * constructor can be used if the JdateField will be making callbacks to pass its data
+   * to the appropriate container.
+   *
+   * @param parent the container which implements the callback function for this JdateField
+   * @param date the Date object to use
+   * @param iseditable true if the datefield can be edited by the user
+   * @param islimited true if there is to be a restriction on the range of dates
+   * @param minDate the oldest possible date that can be entered into this JdateField
+   * @param maxDate the newest possible date that can be entered into this JdateField
+   */
+
+  public JdateField(Date date,
+		    boolean iseditable,
+		    boolean islimited,
+		    Date minDate,
+		    Date maxDate,
+		    JsetValueCallback parent)
+  {
+    this(date,iseditable,islimited,minDate,maxDate);
+
+    setCallback(parent);
+    
+    _date.setCallback(this);
   }
   
   /**
@@ -254,42 +281,9 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	  }
       }
   }
-  
-   /**
-   * Contructor that creates a JdateField based on the Date object it is given.  This
-   * constructor can be used if the JdateField will be making callbacks to pass its data
-   * to the appropriate container.
-   *
-   * @param parent the container which implements the callback function for this JdateField
-   * @param date the Date object to use
-   * @param iseditable true if the datefield can be edited by the user
-   * @param islimited true if there is to be a restriction on the range of dates
-   * @param minDate the oldest possible date that can be entered into this JdateField
-   * @param maxDate the newest possible date that can be entered into this JdateField
-   */
-
-  public JdateField(Date date,
-		    boolean iseditable,
-		    boolean islimited,
-		    Date minDate,
-		    Date maxDate,
-		    JsetValueCallback parent)
-  {
-    this(date,iseditable,islimited,minDate,maxDate);
-
-    setCallback(parent);
-    
-    _date.setCallback(this);
-  }
-
- /************************************************************/
-  ///////////////////
-  // Class Methods //
-  ///////////////////
 
   /**
-   *
-   *
+   * May this field be edited?
    */
 
   public void setEditable(boolean editable)
@@ -300,6 +294,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
   /**
    * Passes enabled to all components in the date field.
    */
+
   public void setEnabled(boolean enabled)
   {
     try
@@ -369,6 +364,24 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 
     unset = false;
     changed = true;
+  }
+
+  /**
+   *
+   * This method is to be called when the containerPanel holding this
+   * date field is being closed down.  This method is responsible for
+   * popping down any connected calendar panel.
+   * 
+   */
+
+  public void unregister()
+  {
+    if (pCal != null)
+      {
+	pCal.setVisible(false);
+      }
+
+    callback = null;
   }
 
   /**
@@ -442,10 +455,11 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		  {
 		    if (d.after(maxDate) || d.before(minDate))
 		      {
-		    
-			// This means that the date chosen was not within the limits specified by the
-			// constructor.  Therefore, we just reset the selected Components of the chooser
-			// to what they were before they were changed.
+			// This means that the date chosen was not
+			// within the limits specified by the
+			// constructor.  Therefore, we just reset the
+			// selected Components of the chooser to what
+			// they were before they were changed.
 		    
 			JErrorDialog _infoD = new JErrorDialog(new JFrame(),
 							   "Date Field Error",
@@ -575,12 +589,12 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
     return retval;
   }
 
-  /************************************************************/
-
   /**
    *
+   * Tie into the focus event handling.
    *
    */
+
   public void processFocusEvent(FocusEvent e)
   {
     super.processFocusEvent(e);
@@ -588,52 +602,48 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
     switch (e.getID())
       {
       case FocusEvent.FOCUS_LOST:
-	{
-	 
-	  // When the JdateField looses focus, any changes
-	  // made to the value in the JdateField must be
-	  // propogated to the db_field on the server.
-	  
-	  
-	  // But first, if nothing in the JstringField has changed
-	  // then there is no reason to do anything.
-	  
-	  if (!changed)
-	    {
-	      break;
-	    }
-	  
-	  if (!unset && allowCallback)
-	    {
-	      // Do a callback to talk to the server
-	      
-	      try 
-		{
-		  callback.setValuePerformed(new JValueObject(this,my_date));
-		}
-	      catch (java.rmi.RemoteException re) 
-		{
+	// When the JdateField looses focus, any changes
+	// made to the value in the JdateField must be
+	// propogated to the db_field on the server.
+	
+	// But first, if nothing in the JstringField has changed
+	// then there is no reason to do anything.
+	
+	if (!changed)
+	  {
+	    break;
+	  }
+	
+	if (!unset && allowCallback)
+	  {
+	    // Do a callback to talk to the server
+	    
+	    try 
+	      {
+		callback.setValuePerformed(new JValueObject(this,my_date));
+	      }
+	    catch (java.rmi.RemoteException re) 
+	      {
+		// throw up an information dialog here
 		
-		  // throw up an information dialog here
-		
-		  JErrorDialog _infoD = new JErrorDialog(new JFrame(),"Date Field Error","There was an error communicating with the server!\n"+re.getMessage());
+		JErrorDialog _infoD = new JErrorDialog(new JFrame(),
+						       "Date Field Error",
+						       "There was an error communicating with the server!\n" + 
+						       re.getMessage());
+	      }
+	  }
+	
+	// Now, the new value has propogated to the server, so we set
+	// changed to false, so that the next time we loose focus from
+	// this widget, we won't unnecessarily update the server value
+	// if nothing has changed locally.
+	
+	changed = false;
 
-		}
-	    }
-    
-	  // Now, the new value has propogated to the server, so we set
-	  // changed to false, so that the next time we loose focus from
-	  // this widget, we won't unnecessarily update the server value
-	  // if nothing has changed locally.
+	break;
 
-	  changed = false;
-
-	  break;
-	}
       case FocusEvent.FOCUS_GAINED:
-	{
-	  // nothing yet
-	}
+	break;
       }
   }
 }
