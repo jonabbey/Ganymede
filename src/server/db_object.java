@@ -8,7 +8,7 @@ import java.rmi.RemoteException;
  *
  * Base class for GANYMEDE client-visible objects.
  *
- * @version $Revision: 1.11 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.12 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -71,6 +71,17 @@ public interface db_object extends java.rmi.Remote {
    */
 
   public db_field getField(String fieldname) throws RemoteException;
+
+  /**
+   *
+   * <p>Get access to the field that serves as this object's label</p>
+   *
+   * <p>Not all objects use simple field values as their labels.  If an
+   * object has a calculated label, this method will return null.</p>
+   *
+   */
+
+  public db_field getLabelField() throws RemoteException;
 
   /**
    *
