@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -140,7 +140,7 @@ final public class DBSession {
    *
    */
 
-  public synchronized DBEditObject createDBObject(short object_type, Invid chosenSlot)
+  public synchronized DBEditObject createDBObject(short object_type, Invid chosenSlot, Vector owners)
   {
     DBObjectBase base;
     DBEditObject e_object;
@@ -159,6 +159,60 @@ final public class DBSession {
     base = (DBObjectBase) store.objectBases.get(new Short(object_type));
 
     e_object = base.createNewObject(editSet, chosenSlot);
+
+    if (e_object == null)
+      {
+	return null;
+      }
+
+    // set ownership for this new object
+
+    if (owners != null)
+      {
+	InvidDBField inf = (InvidDBField) e_object.getField(SchemaConstants.OwnerListField);
+	
+	for (int i = 0; i < owners.size(); i++)
+	  {
+	    inf.addElementLocal(owners.elementAt(i));
+	  }
+      }
+
+    // set any inital fields, register the object as created
+
+    if (!e_object.initializeNewObject())
+      {
+	return null;
+      }
+
+    // add this object to the transaction
+
+    editSet.addObject(e_object);
+
+    // update admin consoles
+
+    store.checkOut();
+
+    // set the following false to true to view the initial state of the object
+    
+    if (false)
+      {
+	try
+	  {
+	    Ganymede.debug("Created new object : " + e_object.getLabel());
+	    db_field[] fields = e_object.listFields(false);
+	    
+	    for (int i = 0; i < fields.length; i++)
+	      {
+		Ganymede.debug("field: " + i + " is " + fields[i].getID() + ":" + fields[i].getName());
+	      }
+	  }
+	catch (java.rmi.RemoteException ex)
+	  {
+	    Ganymede.debug("Whoah!" + ex);
+	  }
+      }
+
+    // finish initialization of the object
 
     if (!base.isEmbedded())
       {
@@ -221,9 +275,9 @@ final public class DBSession {
    *
    */
 
-  public DBEditObject createDBObject(short object_type)
+  public DBEditObject createDBObject(short object_type, Vector owners)
   {
-    return createDBObject(object_type, null);
+    return createDBObject(object_type, null, owners);
   }
 
   /**

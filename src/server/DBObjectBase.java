@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.60 $ %D%
+   Version: $Revision: 1.61 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1021,43 +1021,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
       }
 
-    if (e_object == null)
-      {
-	return null;
-      }
-
-    if (e_object.initializeNewObject())
-      {
-	editset.addObject(e_object);
-
-	store.checkOut();
-
-	// set the following false to true to view the initial state of the object
-
-	if (false)
-	  {
-	    try
-	      {
-		Ganymede.debug("Created new object : " + e_object.getLabel());
-		db_field[] fields = e_object.listFields(false);
-		
-		for (int i = 0; i < fields.length; i++)
-		  {
-		    Ganymede.debug("field: " + i + " is " + fields[i].getID() + ":" + fields[i].getName());
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		Ganymede.debug("Whoah!" + ex);
-	      }
-	  }
-
-	return e_object;
-      }
-    else
-      {
-	return null;
-      }
+    return e_object;
   }
 
   /**
