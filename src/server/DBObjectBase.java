@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.124 $
-   Last Mod Date: $Date: 2000/11/04 02:17:59 $
+   Version: $Revision: 1.125 $
+   Last Mod Date: $Date: 2000/11/04 03:42:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,7 +111,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    */
 
   final static boolean debug2 = false;
-  final static boolean xmldebug = true;
+  final static boolean xmldebug = false;
 
   public static void setDebug(boolean val)
   {
@@ -970,7 +970,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 					  root.getTreeString());
       }
 
-    if (false)
+    if (xmldebug)
       {
 	err.println("Setting id");
       }
@@ -986,7 +986,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // names and id's, build up a list of Integer field id's for us to
     // compare against the list of field id's currently defined
 
-    if (false)
+    if (xmldebug)
       {
 	err.println("Scanning fields");
       }
@@ -1051,7 +1051,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
       }
 
-    if (false)
+    if (xmldebug)
       {
 	err.println("Calculating fields to delete");
       }
@@ -1075,10 +1075,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldID.shortValue());
 
-	if (xmldebug)
-	  {
-	    err.println("Deleting field " + _field.getName());
-	  }
+	err.println("\t\tDeleting field " + _field.getName());
 
 	retVal = deleteField(_field.getName());
 
@@ -1132,10 +1129,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	    if (newField == null)
 	      {
-		if (xmldebug)
-		  {
-		    err.println("Creating field " + item);
-		  }
+		err.println("\t\tCreating field " + item.getAttrStr("name"));
 
 		try
 		  {
@@ -1147,12 +1141,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		    throw new RuntimeException("UnicastRemoteObject initialization error " + ex.getMessage());
 		  }
 
-		if (false)
+		if (xmldebug)
 		  {
 		    err.println("Setting XML on new field " + item);
 		  }
 
-		retVal = newField.setXML(item, resolveInvidLinks);
+		retVal = newField.setXML(item, resolveInvidLinks, err);
 		
 		if (retVal != null && !retVal.didSucceed())
 		  {
@@ -1163,12 +1157,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	      }
 	    else
 	      {
-		if (false)
-		  {
-		    err.println("Setting XML on field " + item);
-		  }
+		err.println("\t\tEditing field " + item.getAttrStr("name"));
 		
-		retVal = newField.setXML(item, resolveInvidLinks);
+		retVal = newField.setXML(item, resolveInvidLinks, err);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
@@ -1186,7 +1177,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // and set or clear the label and class options
 
-    if (false)
+    if (xmldebug)
       {
 	err.println("Setting label field");
       }
@@ -1205,7 +1196,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	return retVal;
       }
 
-    if (false)
+    if (xmldebug)
       {
 	err.println("Setting class name");
       }
@@ -1222,7 +1213,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     embedded = _embedded;	// XXX need to work on this
 
-    if (false)
+    if (xmldebug)
       {
 	err.println("Setting object name");
       }
@@ -1237,7 +1228,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // and we need to order the fields in customFields in the same
     // order they appeared in the XML
 
-    if (false)
+    if (xmldebug)
       {
 	err.println("Sorting fields");
       }
@@ -1267,6 +1258,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if ((_intersection.size() != customFields.size()) ||
 	(_intersection.size() != _newCustom.size()))
       {
+	err.println("Consistency error while resorting customFields in base " + getName());
+
+	err.println("customFields.size() = " + customFields.size());
+	err.println("_newCustom.size() = " + _newCustom.size());
+	err.println("_intersection.size() = " + _intersection.size());
+
 	return Ganymede.createErrorDialog("xml",
 					  "Consistency error while resorting customFields.");
       }
@@ -2837,7 +2834,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public String toString()
   {
-    return "objectBase:" + object_name;
+    return object_name;
   }
 
   /**
@@ -2975,7 +2972,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     fieldTable.remove(field.getID());
 
-    if (field.getID() < SchemaConstants.FinalSystemField)
+    if (field.getID() > SchemaConstants.FinalSystemField)
       {
 	customFields.removeElement(field);
       }

@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 2000/11/04 02:12:06 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 2000/11/04 03:42:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1063,7 +1063,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * DBObjectBaseField from a &lt;fielddef&gt; XMLItem tree.</P>
    */
 
-  synchronized ReturnVal setXML(XMLItem root, boolean doLinkResolve)
+  synchronized ReturnVal setXML(XMLItem root, boolean doLinkResolve, PrintWriter err)
   {
     XMLItem item, nextItem;
     Integer field_codeInt;
@@ -1142,7 +1142,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (item.matches("classname"))
 	  {
 	    _classname = item.getAttrStr("name");
-
 	  }
 	else if (item.matches("comment"))
 	  {

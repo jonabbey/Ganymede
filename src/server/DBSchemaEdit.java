@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 2000/10/31 09:20:46 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 2000/11/04 03:42:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -693,6 +693,13 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
     
     tmpBase = (DBObjectBase) newBases.get(new Short(id));
+
+    if (tmpBase.objectTable.size() > 0)
+      {
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "deleteBase() called on object type " + tmpBase.getName() + 
+					  " that is still in use.");
+      }
 
     if (tmpBase != null)
       {

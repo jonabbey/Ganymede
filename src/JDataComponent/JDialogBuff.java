@@ -6,8 +6,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/11/04 00:22:19 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/11/04 03:42:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -148,7 +148,7 @@ public class JDialogBuff implements java.io.Serializable {
   {
     this.title = Title;
 
-    if (Text == null)
+    if (Text != null)
       {
 	this.text = new StringBuffer();
 	this.text.append(Text);

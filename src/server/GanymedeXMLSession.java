@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/11/04 02:12:08 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/11/04 03:42:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -812,6 +812,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		return false;
 	      }
 
+	    err.println("\tCreating " + _name);
+
 	    NameSpace _aNewSpace = editor.createNewNameSpace(_name,!_sensitive);
 
 	    if (_aNewSpace == null)
@@ -846,6 +848,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    String _basename = (String) basesToRemove.elementAt(i);
 
+	    err.println("\tDeleting " + _basename);
+
 	    if (!handleReturnVal(editor.deleteBase(_basename)))
 	      {
 		return false;
@@ -874,6 +878,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	for (int i = 0; i < basesToAdd.size(); i++)
 	  {
 	    XMLItem _entry = (XMLItem) basesToAdd.elementAt(i);
+
+	    err.println("\tCreating " + _entry.getAttrStr("name"));
+
 	    Integer _id = _entry.getAttrInt("id");
 
 	    boolean _embedded = false;
@@ -921,11 +928,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    err.println("7. fix up fields in pre-existing bases");
 	  }
-
-	if (schemadebug)
-	  {
-	    err.println("7. pass 1");
-	  }
  
 	for (int i = 0; i < basesToEdit.size(); i++)
 	  {
@@ -941,10 +943,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		return false;
 	      }
 
-	    if (schemadebug)
+	    if (false)
 	      {
 		err.println("7. pass 1 - fixups on " + _oldBase);
 	      }
+
+	    err.println("\tEditing " + _oldBase);
 
 	    // don't yet try to resolve invid links, since we haven't
 	    // done a complete pass through basesToEdit to fix up
@@ -954,11 +958,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		return false;
 	      }
-	  }
-
-	if (schemadebug)
-	  {
-	    err.println("7. pass 2");
 	  }
 
 	// now that we have completed our first pass through fields in
@@ -985,15 +984,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		err.println("7. pass 2 - fixups on " + _oldBase);
 	      }
 
+	    //	    err.println("\tResolving " + _oldBase);
+
 	    if (!handleReturnVal(_oldBase.setXML(_entry, true, err)))
 	      {
 		return false;
 	      }
-	  }
-
-	if (schemadebug)
-	  {
-	    err.println("7. pass 3");
 	  }
 
 	for (int i = 0; i < basesToEdit.size(); i++)
@@ -1043,6 +1039,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	for (int i = 0; i < spacesToRemove.size(); i++)
 	  {
 	    String _name = (String) spacesToRemove.elementAt(i);
+
+	    err.println("\tDeleting " + _name);
 
 	    if (!handleReturnVal(editor.deleteNameSpace(_name)))
 	      {
@@ -1416,6 +1414,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// didn't put two bases by the same name in the xml <ganyschema>
 	// section, so if swap the names, we'll fix up the second name
 	// when we get to it
+
+	err.println("\tRenaming " + numBaseRef.getName() + " to " + name);
 
 	if (nameBaseRef != null)
 	  {
