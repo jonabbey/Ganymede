@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -75,8 +75,6 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     this.server = server;
     this.adminName = name;
     this.adminPass = pass;
-
-    System.out.println("adminName = " + adminName + " adminPass = " + adminPass);
 
     try
       {
@@ -162,10 +160,6 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	    frame.dumpField.setText(date.toString());
 	  }
       }
-    else
-      {
-	System.out.println("frame is null");
-      }
   }
 
   public void setTransactionsInJournal(int trans)
@@ -173,10 +167,6 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     if (frame != null)
       {
 	frame.journalField.setText("" + trans);
-      }
-    else
-      {
-	System.out.println("frame is null");
       }
   }
 
@@ -186,10 +176,6 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       {
 	frame.checkedOutField.setText("" + objs);
       }
-    else
-      {
-	System.out.println("frame is null");
-      }
   }
 
   public void setLocksHeld(int locks)
@@ -197,10 +183,6 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     if (frame != null)
       {
 	frame.locksField.setText("" + locks);
-      }
-    else
-      {
-	System.out.println("frame is null");
       }
   }
 
@@ -1030,7 +1012,11 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	finally
 	  {
 	    adminPanel.quitButton.setEnabled(true);
+	    adminPanel.loginButton.setEnabled(true);
 	    setVisible(false);
+	    // This shouldn't kill everything off, but it does for now.  Need to fix this later.
+	    System.exit(0);
+
 	  }
       }
     else if (event.getSource() == dumpMI)
@@ -1262,6 +1248,7 @@ public class GASHAdmin extends JApplet {
   final private JTextField username = new JTextField();
   final private JPasswordField password = new JPasswordField();
   final public JButton quitButton = new JButton("Quit");
+  final public JButton loginButton = new JButton("Login");
 
   /* -- */
 
@@ -1399,7 +1386,6 @@ public class GASHAdmin extends JApplet {
     gbl.setConstraints(buttonPanel, gbc);
     panel.add(buttonPanel);
     
-    JButton loginButton = new JButton("Connect");
     loginButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e)
 	{
@@ -1409,6 +1395,7 @@ public class GASHAdmin extends JApplet {
 	      username.setText("");
 	      password.setText("");
 	      quitButton.setEnabled(false);
+	      loginButton.setEnabled(false);
 	      frame = new GASHAdminFrame("Ganymede Admin Console", false, admin, applet);
 	    }
 	  else
@@ -1473,14 +1460,8 @@ public class GASHAdmin extends JApplet {
 
       System.err.println("Bound to server object");
 
-      System.out.println("name = " + username + " pass=" + password);
-
       try
 	{
-	  if (frame == null)
-	    {
-	      System.out.println("Frame is null.");
-	    }
 	  admin = new iAdmin(frame, server, username, password);
 	}
       catch ( RemoteException rx)
