@@ -1,20 +1,40 @@
 
 /*
-  Like a JComboBox, but just for Invid's.  It has a couple of pretty buttons on the sides.
+
+   JInvidChooser.java
+
+   Like a JComboBox, but just for Invid's.  It has a couple of pretty
+   buttons on the sides.
+   
+   Created: ?
+   Version: $Revision: 1.2 $ %D%
+   Module By: Mike Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
 
 */
 
 package arlut.csd.ganymede.client;
 
+import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import com.sun.java.swing.*;
 import java.awt.event.*;
 import java.awt.*;
-import arlut.csd.ganymede.*;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                   JInvidChooser
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Like a JComboBox, but just for Invid's.  It has a couple of pretty
+ * buttons on the sides.
+ */
 
 public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener {
 
-  private final boolean debug = false;
+  private final static boolean debug = false;
 
   JMenuItem
     view,
