@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -675,11 +675,19 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * sensitive check to see if this object feels like being
    * available for inactivating by the client.<br><br>
    *
+   * Note that unlike canRemove(), canInactivate() takes
+   * a DBEditObject instead of a DBObject.  This is because
+   * inactivating an object is based on editing the object,
+   * and so we have the GanymedeSession/DBSession classes
+   * go ahead and check the object out for editing before
+   * calling us.  This serves to force the session classes
+   * to check for write permission before attempting inactivation.
+   *
    * To be overridden in DBEditObject subclasses.
    *
    */
 
-  public boolean canInactivate(DBSession session, DBObject object)
+  public boolean canInactivate(DBSession session, DBEditObject object)
   {
     return false;
   }
