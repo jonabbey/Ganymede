@@ -11,8 +11,8 @@
 
    Created: 20 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 1999/01/22 18:05:16 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 1999/02/26 22:52:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -362,6 +362,13 @@ public class directLoader {
 	    // edit them through the client
 
 	    current_obj.setFieldValueLocal(SchemaConstants.OwnerNameField, ogRec.prefix);
+
+	    // field 256 is the start range for user and group id's
+	    // when we're using GASH compatibility..  GASH has separate
+	    // ranges for uid's and gid's, but in practice they never
+	    // differed..
+
+	    current_obj.setFieldValueLocal((short) 256, new Integer(ogRec.lowuid));
 	  }
 
 	commitTransaction();
@@ -528,7 +535,7 @@ public class directLoader {
 		    
 		    if (ogRec.compatible(adminObj))
 		      {
-			ogRec.addAdmin(adminObj.name, adminObj.password);
+			ogRec.addAdmin(adminObj.name, adminObj.password, adminObj.code);
 			found = true;
 		      }
 		  }
@@ -547,7 +554,7 @@ public class directLoader {
 			ogRec = supergash;
 		      }
 
-		    ogRec.addAdmin(adminObj.name, adminObj.password);
+		    ogRec.addAdmin(adminObj.name, adminObj.password, adminObj.code);
 		  }
 		
 		// System.out.println("Putting " + adminObj.name + " : " + ogRec);
@@ -1798,6 +1805,10 @@ public class directLoader {
 	    newPersona.setFieldValueLocal(SchemaConstants.PersonaAdminConsole, new Boolean(true));
 
 	    newPersona.setFieldValueLocal(SchemaConstants.PersonaAdminPower, new Boolean(false));
+
+	    // with GASH compatibility mode, we store the admin's 3 char prefix code
+
+	    newPersona.setFieldValueLocal((short) 256, ogRec.code(key));
 
 	    db_field personaField = newPersona.getField(SchemaConstants.PersonaGroupsField);
 	    ((DBField) personaField).addElementLocal(ogRec.getInvid());

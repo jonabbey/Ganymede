@@ -7,8 +7,8 @@
    
    Created: 29 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:11 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/02/26 22:52:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -83,6 +83,7 @@ public class Admin {
   int highuid;
   int lowgid;
   int highgid;
+  String code;
   String mask;
 
   // instance constructor
@@ -128,7 +129,12 @@ public class Admin {
 	System.out.println("password = '" + password + "'");
       }
 
-    getNextBit(tokens);		// skip admin code
+    code = getNextBit(tokens);
+
+    if (debug)
+      {
+	System.out.println("admin code = '" + code + "'");
+      }
 
     getNextBit(tokens);		// skip bitfield
 

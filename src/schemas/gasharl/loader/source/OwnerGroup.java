@@ -7,8 +7,8 @@
    
    Created: 30 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:13 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/02/26 22:52:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -165,9 +165,9 @@ public class OwnerGroup {
     return this.equals(entry.lowuid, entry.highuid, entry.lowgid, entry.highgid, entry.mask);
   }
 
-  public synchronized void addAdmin(String adminName, String password)
+  public synchronized void addAdmin(String adminName, String password, String code)
   {
-    admins.addElement(new adminRec(adminName, password));
+    admins.addElement(new adminRec(adminName, password, code));
   }
 
   /**
@@ -276,6 +276,23 @@ public class OwnerGroup {
     throw new IllegalArgumentException(name + " is not an admin in this group!");
   }
 
+  public synchronized String code(String name)
+  {
+    adminRec a;
+
+    for (int i = 0; i < admins.size(); i++)
+      {
+	a = (adminRec) admins.elementAt(i);
+
+	if (a.adminName.equals(name))
+	  {
+	    return a.code;
+	  }
+      }
+
+    throw new IllegalArgumentException(name + " is not an admin in this group!");
+  }
+
   public void setInvid(Invid inv)
   {
     this.objInvid = inv;
@@ -305,20 +322,21 @@ public class OwnerGroup {
 
     return result;
   }
-
-
-
 }
 
 class adminRec {
 
   String adminName;
   String password;
+  String code;
 
-  adminRec(String name, String pass)
+  /* -- */
+
+  adminRec(String name, String pass, String code)
   {
     this.adminName = name;
     this.password = pass;
+    this.code = code;
   }
 
   public String toString()
