@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.124 $
-   Last Mod Date: $Date: 2001/10/05 19:44:39 $
+   Version: $Revision: 1.125 $
+   Last Mod Date: $Date: 2001/10/05 19:48:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -575,7 +575,7 @@ public class Ganymede {
 						 java.net.InetAddress.getLocalHost().getHostName() +
 						 ") and\nthe ganymede.serverhost definition (" + 
 						 serverHostProperty + ") resolve to the 127.0.0.1 loopback address", 
-						 70, null));
+						 70));
 		    Ganymede.debug("\nThe Ganymede server must have an externally accessible IP address or else clients");
 		    Ganymede.debug("will not be able to communicate with the Ganymede server from other than localhost.");
 
@@ -588,11 +588,11 @@ public class Ganymede {
 			GanymedeServer.shutdown();
 		      }
 		  }
-	      }
-	    else
-	      {
-		Ganymede.debug("Avoiding loopback " + java.net.InetAddress.getLocalHost().getHostName() + 
-			       " definition, binding to " + hostname);
+		else
+		  {
+		    Ganymede.debug(WordWrap.wrap("Avoiding loopback " + java.net.InetAddress.getLocalHost().getHostName() + 
+						 " definition, binding to " + hostname, 70));
+		  }
 	      }
 	  }
 
