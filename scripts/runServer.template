@@ -27,7 +27,7 @@ export CLASSPATH
 
 # Run the RMI registry to provide remote name lookup for the server
 
-$RMIREGISTRY &
+$RMIREGISTRY $RMIPORT &
 
 # The -resetadmin parameter forces the Ganymede server to reset the supergash and
 # monitor passwords from the properties file

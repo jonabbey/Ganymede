@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.6 $
-# $Date: 1999/01/29 23:08:52 $
+# $Revision: 1.7 $
+# $Date: 1999/05/07 05:34:04 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -244,6 +244,34 @@ close INPUT;
 close OUTPUT;
 
 chmod 0750, "$installdir/bin/ganymedeAdmin";
+
+# Copy and process the rpcpass script into place
+
+print "\nCustomizing rpcpass script\n";
+  
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "PROPERTIES" => "$installdir/client.properties",
+	       "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymede.jar");
+  
+open INPUT, "scripts/rpcpass.template" or die "Couldn't open rpcpass template!";
+open OUTPUT, ">$installdir/bin/rpcpass" or die "Couldn't write rpcpass";
+  
+while (<INPUT>) {
+    
+    if (!/^([A-Z]*)=/) {
+	print OUTPUT $_;
+    } elsif (defined $runconvert{$1}) {
+	print OUTPUT "$1=$runconvert{$1}\n";
+    } else {
+	print "Error.. unrecognized template entry $1 - copying template value\n";
+	print OUTPUT $_;
+    }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/rpcpass";
 
 # Copy and process the changePassword script into place
 

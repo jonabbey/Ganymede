@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# Ganymede rpcpass client script
+#
+# This script is designed to run the Ganymede rpcpass client,
+# which is designed to work with the patched rpc.yppasswdd
+# from the Linux NIS kit.
+#
+# When run, this program reads a single line from stdin,
+# which should be of the form
+#
+# <username> o:<oldpass> p:<new cryptpass> s:<shell> g:<gcos>\n
+#
+# Where the p:, s:, and g: fields are each optional.
+#
+# After reading this line from stdin, rpcpass will connect to
+# the Ganymede server and change the password and/or shell.  If
+# this operation succeeds, rpcpass will emit a single line
+# to stdout,
+#
+# OK\n
+#
+# which is to be read by rpc.yppasswdd to signal success.  If
+# there are any problems, these will be described in a 
+# report to stdout, which rpc.yppasswdd will take as a failure
+# signal.
+#
+# 7 May 1999
+# Jonathan Abbey
+# jonabbey@arlut.utexas.edu
+#
+########################
+
+## This section is customized by the client install script
+
+# These lines should be in the form X=Y, with nothing else on
+# the line.. they are customized by the installClient.perl
+# script
+
+JAVA=/opt/bin/java
+CLASSPATH=/v/site/packages/ganymede/etc/ganymede.jar:/v/site/packages/swing-1.0/swingall.jar
+PROPERTIES=/opt/depot/ganymede/etc/ganymede.properties
+
+############################################### 
+
+trap "echo Aborted" 2
+
+export CLASSPATH
+
+$JAVA -mx32m arlut.csd.ganymede.client.rpcpass properties=$PROPERTIES
