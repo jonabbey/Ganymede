@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 2002/03/15 03:40:21 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 2002/03/15 03:40:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,7 +55,6 @@ import java.io.*;
 import java.util.*;
 
 import arlut.csd.JDialog.*;
-import arlut.csd.Util.booleanSemaphore;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -94,7 +93,7 @@ import arlut.csd.Util.booleanSemaphore;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.109 $ %D%
+ * @version $Revision: 1.110 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
