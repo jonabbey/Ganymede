@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1217,7 +1217,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	if (q != null)
 	  {
-	    StringBuffer buffer = null;
+	    DumpResult buffer = null;
 
 	    try
 	      {
@@ -1228,7 +1228,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		throw new RuntimeException("caught remote: " + ex);
 	      }
 
-	    wp.addTableWindow(session, q, buffer.toString(), "Query Results");
+	    wp.addTableWindow(session, q, buffer, "Query Results");
 	  }
       }
     else if (event.getSource() == removeAllMI)
@@ -1406,7 +1406,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    try
 	      {
 		Query _query = new Query(baseN.getBase().getTypeID());
-		StringBuffer buffer = session.dump(_query);
+		DumpResult buffer = session.dump(_query);
 
 		if (buffer == null)
 		  {
@@ -1416,7 +1416,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		  {
 		    System.out.println();
 
-		    wp.addTableWindow(session, baseN.getQuery(), buffer.toString(), "Query Results");
+		    wp.addTableWindow(session, baseN.getQuery(), buffer, "Query Results");
 		  }
 	      }
 	    catch (RemoteException rx)
@@ -1443,7 +1443,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    if (q != null)
 	      {
-		StringBuffer buffer = null;
+		DumpResult buffer = null;
 
 		try
 		  {
@@ -1454,7 +1454,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		    throw new RuntimeException("caught remote: " + ex);
 		  }
 
-		wp.addTableWindow(session, q, buffer.toString(), "Query Results");
+		wp.addTableWindow(session, q, buffer, "Query Results");
 	      }
 	  }
       }
