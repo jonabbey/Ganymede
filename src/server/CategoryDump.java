@@ -13,7 +13,7 @@
    as we would if we were truly a remote object.
    
    Created: 12 February 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -291,6 +291,21 @@ public class CategoryDump implements Category, CategoryNode {
    */
 
   public void addNode(CategoryNode node, boolean resort, boolean adjustNodes) 
+  {
+    throw new IllegalArgumentException("can't call modification methods on CategoryDump.");
+  }
+
+  /**
+   *
+   * This method can be used to move a Category from another Category to this Category,
+   * or to move a Category around within this Category.
+   *
+   * @param catPath the fully specified path of the node to be moved
+   * @param displayOrder where to place this node within this category.
+   *
+   */
+
+  public void moveCategoryNode(String catPath, int displayOrder)
   {
     throw new IllegalArgumentException("can't call modification methods on CategoryDump.");
   }
