@@ -236,3 +236,12 @@ ganymede.defaultmailsuffix=@arlut.utexas.edu
 # Used by the server
 
 ganymede.homedirprefix=/home/
+
+# ganymede.md5
+#
+# If 'yes', the Linux and BSD schema kits will write out MD5-compatible
+# passwords when doing a build.
+#
+# Used by the server
+
+ganymede.md5=no
