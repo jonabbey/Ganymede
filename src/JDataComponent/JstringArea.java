@@ -23,9 +23,13 @@ import javax.swing.text.*;
 ------------------------------------------------------------------------------*/
 
 public class JstringArea extends JTextArea implements FocusListener{
-  final boolean debug = false;
+
+  final static boolean debug = false;
+
+  // ---
 
   public boolean allowCallback = false;
+
   protected boolean changed = false; 
 
   protected JsetValueCallback my_parent = null;
@@ -35,9 +39,7 @@ public class JstringArea extends JTextArea implements FocusListener{
     allowedChars = null,
     disallowedChars = null;
 
-  //////////////////
-  // Constructors //
-  //////////////////
+  /* -- */
 
   public JstringArea() 
   {
@@ -48,7 +50,6 @@ public class JstringArea extends JTextArea implements FocusListener{
     setBorder(BorderFactory.createLineBorder(Color.black));
 
     enableEvents(AWTEvent.KEY_EVENT_MASK); 
-
   }
 
   public JstringArea(int rows, int columns) 
@@ -61,7 +62,6 @@ public class JstringArea extends JTextArea implements FocusListener{
     addFocusListener(this);
 
     enableEvents(AWTEvent.KEY_EVENT_MASK); 
-
   }
 
   ///////////////////
@@ -86,7 +86,6 @@ public class JstringArea extends JTextArea implements FocusListener{
 
   public void setDisallowedChars(String s)
   {
-
     disallowedChars = s;
   }
 
@@ -110,6 +109,7 @@ public class JstringArea extends JTextArea implements FocusListener{
   /**
    * sendCallback is called when focus is lost.
    */
+
   public  void sendCallback()
   {
     String str;
@@ -125,7 +125,7 @@ public class JstringArea extends JTextArea implements FocusListener{
       {
 	if (debug)
 	  {
-	    System.err.println("JstringField.processFocusEvent: old value != null");
+	    System.err.println("JstringArea.sendCallback: old value != null");
 	  }
 	
 	changed = !value.equals(str);
@@ -134,17 +134,22 @@ public class JstringArea extends JTextArea implements FocusListener{
       {
 	if (debug)
 	  {
-	    System.err.println("JstringField.processFocusEvent: old value == null");
+	    System.err.println("JstringArea.sendCallback: old value == null");
 	  }
 	
 	changed = true;
+      }
+
+    if (debug)
+      {
+	System.err.println("JstringArea.sendCallback(): str == " + str);
       }
     
     if (!changed)
       {
 	if (debug)
 	  {
-	    System.err.println("JstringField.processFocusEvent: no change, ignoring");
+	    System.err.println("JstringArea.sendCallback: no change, ignoring");
 	  }
 	
 	return;
@@ -162,7 +167,7 @@ public class JstringArea extends JTextArea implements FocusListener{
       {
 	if (debug)
 	  {
-	    System.err.println("JstringField.processFocusEvent: making callback");
+	    System.err.println("JstringArea.sendCallback: making callback");
 	  }
 	
 	b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
@@ -178,15 +183,15 @@ public class JstringArea extends JTextArea implements FocusListener{
       {
 	if (debug)
 	  {
-	    System.err.println("JstringField.processFocusEvent: setValue rejected");
+	    System.err.println("JstringArea.sendCallback: setValue rejected");
 		
 	    if (value == null)
 	      {
-		System.err.println("JstringField.processFocusEvent: resetting to empty string");
+		System.err.println("JstringArea.sendCallback: resetting to empty string");
 	      }
 	    else
 	      {
-		System.err.println("JstringField.processFocusEvent: resetting to " + value);
+		System.err.println("JstringArea.sendCallback: resetting to " + value);
 	      }
 	  }
 	    
@@ -205,7 +210,7 @@ public class JstringArea extends JTextArea implements FocusListener{
       {
 	if (debug)
 	  {
-	    System.err.println("JstringField.processFocusEvent: setValue accepted");
+	    System.err.println("JstringArea.sendCallback: setValue accepted");
 	  }
 
 	value = str;
@@ -226,6 +231,11 @@ public class JstringArea extends JTextArea implements FocusListener{
       {
 	if (disallowedChars.indexOf(ch) != -1)
 	  {
+	    if (debug)
+	      {
+		System.err.println("JstringArea.isAllowed() rejecting char " + ch + " as disallowed");
+	      }
+
 	    return false;
 	  }
       }
@@ -234,6 +244,11 @@ public class JstringArea extends JTextArea implements FocusListener{
       {
 	if (allowedChars.indexOf(ch) == -1)
 	  {
+	    if (debug)
+	      {
+		System.err.println("JstringArea.isAllowed() rejecting char " + ch + " as not allowed");
+	      }
+
 	    return false;
 	  }
       }
@@ -263,6 +278,7 @@ public class JstringArea extends JTextArea implements FocusListener{
 	(e.getKeyCode() == KeyEvent.VK_HOME))
       {
 	super.processKeyEvent(e);
+	return;
       }
 
     // We check against KeyEvent.CHAR_UNDEFINED so that we pass
@@ -271,13 +287,20 @@ public class JstringArea extends JTextArea implements FocusListener{
     if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
       {
 	super.processKeyEvent(e);
+	return;
       }
     else if (isAllowed(e.getKeyChar()))
       {
 	super.processKeyEvent(e);
+	return;
       }
 
     // otherwise, we ignore it
+
+    if (debug)
+      {
+	System.err.println("JstringArea: skipping key event " + e);
+      }
   }
 
   public void focusLost(FocusEvent e)
@@ -298,15 +321,19 @@ public class JstringArea extends JTextArea implements FocusListener{
       }
   }
 
+  /**
+   *
+   * Debug rig
+   *
+   */
+
   public static final void main(String argv[]) 
   {
-
     JFrame frame = new JFrame();
 
     JstringArea area = new JstringArea();
     area.setDisallowedChars("asdf");
     frame.getContentPane().add(area);
-    
 
     area.setCallback(new JsetValueCallback() {
       public boolean setValuePerformed(JValueObject o) {
@@ -318,13 +345,5 @@ public class JstringArea extends JTextArea implements FocusListener{
     frame.pack();
     frame.setSize(200,200);
     frame.setVisible(true);
-
   }
-
 }
-
-
-
-
-
-
