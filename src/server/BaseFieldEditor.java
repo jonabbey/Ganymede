@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 2004/03/03 05:23:02 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2004/03/03 06:46:38 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    The University of Texas at Austin.
 
    Contact information
@@ -1444,6 +1444,20 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener 
   public void refreshFieldEdit(boolean updateTargetC)
   {
     this.editField(fieldNode, true, updateTargetC);
+  }
+
+
+  /*
+   * <p>This method is called when we switch away from editing this
+   * field.. this gives us a chance to process the stringArea
+   * components.. they, like the one-line string fields, are
+   * focus-sensitive, but it's generally not as obvious to people that
+   * a multi-line string component is focus sensitive in the same way.</p>
+   */
+
+  public void switchAway()
+  {
+    commentT.sendCallback();
   }
 
   /**
