@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -59,6 +59,9 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   private String adminName = null;
   private String adminPass = null;
 
+  private DialogRsrc permResrc;
+  private StringDialog permDialog;
+
   JFrame schemaFrame;
 
   /* -- */
@@ -87,6 +90,12 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	System.exit(0);
       }
 
+    DialogRsrc loginResrc;
+    StringDialog loginDialog;
+
+    permResrc = new DialogRsrc(frame, "Permissions Error", "You don't have permission to perform that operation",
+			       "OK", null, "error.gif");
+    permDialog = new StringDialog(permResrc);
 
     System.err.println("Got Admin");
   }
@@ -298,21 +307,45 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void runTaskNow(String taskName) throws RemoteException
   {
+    if (!adminName.equals("supergash"))
+      {
+	permDialog.DialogShow();
+	return;
+      }
+
     aSession.runTaskNow(taskName);
   }
 
   void stopTask(String taskName) throws RemoteException
   {
+    if (!adminName.equals("supergash"))
+      {
+	permDialog.DialogShow();
+	return;
+      }
+
     aSession.stopTask(taskName);
   }
 
   void disableTask(String taskName) throws RemoteException
   {
+    if (!adminName.equals("supergash"))
+      {
+	permDialog.DialogShow();
+	return;
+      }
+
     aSession.disableTask(taskName);
   }
 
   void enableTask(String taskName) throws RemoteException
   {
+    if (!adminName.equals("supergash"))
+      {
+	permDialog.DialogShow();
+	return;
+      }
+
     aSession.enableTask(taskName);
   }
 
@@ -549,7 +582,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     mbar.add(controlMenu);
 
     setJMenuBar(mbar);
-
 
     question = PackageResources.getImageResource(this, "question.gif", getClass());
 
