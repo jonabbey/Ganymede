@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -39,7 +40,7 @@ public class DBStore {
 
   static final String id_string = "Gstore";
   static final byte major_version = 1;
-  static final byte minor_version = 0;
+  static final byte minor_version = 1;
 
   static final boolean debug = true;
 
@@ -55,6 +56,8 @@ public class DBStore {
   Hashtable objectBases;	// hash mapping object type to DBObjectBase's
   Hashtable lockHash;		// identifier keys for current locks
   Vector nameSpaces;		// unique valued hashes
+
+  byte file_major, file_minor;
 
   DBJournal journal = null;
 
@@ -92,7 +95,7 @@ public class DBStore {
    *
    */
 
-  public void load(String filename)
+  public synchronized void load(String filename)
   {
     FileInputStream inStream = null;
     DataInputStream in;
@@ -102,7 +105,6 @@ public class DBStore {
     String namespaceID;
     boolean caseInsensitive;
     String file_id;
-    byte file_major, file_minor;
 
     /* -- */
 
@@ -163,7 +165,7 @@ public class DBStore {
 	  {
 	    tempBase = new DBObjectBase(in, this);
 	    
-	    objectBases.put(new Short(tempBase.type_code), tempBase);
+	    setBase(tempBase);
 	  }
 
 	maxBaseId = baseCount;
@@ -253,7 +255,7 @@ public class DBStore {
    *
    */
 
-  public void dump(String filename, boolean releaseLock) throws IOException
+  public synchronized void dump(String filename, boolean releaseLock) throws IOException
   {
     File dbFile = null;
     FileOutputStream outStream = null;
@@ -271,7 +273,14 @@ public class DBStore {
       }
 
     lock = new DBDumpLock(this);
-    lock.establish("System");	// wait until we get our lock 
+
+    try
+      {
+	lock.establish("System");	// wait until we get our lock 
+      }
+    catch (InterruptedException ex)
+      {
+      }
     
     // Move the old version of the file to a backup
     
@@ -377,7 +386,7 @@ public class DBStore {
    *
    */
 
-  public void printBases(PrintStream out)
+  public synchronized void printBases(PrintStream out)
   {
     Enumeration enum;
 
@@ -439,6 +448,137 @@ public class DBStore {
   public synchronized void setBase(DBObjectBase base)
   {
     objectBases.put(base.getKey(), base);
+  }
+
+  /**
+   *
+   * Initialization method for a newly created DBStore.. this
+   * method creates a new Schema from scratch, defining the
+   * mandatory Ganymede object types.
+   *
+   *
+   * Note that editing this method to redefine the default bases
+   * and fields should be matched by editing of DBObjectBase.isRemovable()
+   * and DBObjectBaseField.isRemovable() and DBObjectBaseField.isEditable()
+   */
+
+  void initialize()
+  {
+    DBObjectBase b;
+    DBObjectBaseField bf;
+    DBNameSpace ns;
+
+    /* -- */
+
+    try
+      {
+	ns = new DBNameSpace("username", true);
+	nameSpaces.addElement(ns);
+
+	b = new DBObjectBase(this);
+	b.object_name = "Admin";
+	b.type_code = getNextBaseID(); // 0
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 1;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Group";
+	bf.field_order = 1;
+	bf.comment = "If this boolean is true, this administrator object represents a group of administrators";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 2;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Name";
+	bf.field_order = 2;
+	bf.loading = true;
+	bf.setNameSpace("username");
+	bf.loading = false;
+	bf.comment = "Name of this admin group.. if this admin represents a user's admin privs, name is null";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 3;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Password";
+	bf.maxLength = 8;
+	bf.field_order = 3;
+	bf.comment = "Name of this admin group.. if this admin represents a user's admin privs, name is null";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 4;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Member(s)";
+	bf.array = true;
+	bf.field_order = 4;
+	bf.comment = "Name of this admin group.. if this admin represents a user's admin privs, name is null";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 5;
+	bf.field_type = FieldType.PERMISSIONMATRIX;
+	bf.field_name = "Privileges";
+	bf.field_order = 5;
+	bf.comment = "Permissions for this admin entity";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 6;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Objects owned";
+	bf.allowedTarget = -2;	// any
+	bf.targetField = 0;
+	bf.field_order = 6;
+	bf.comment = "Permissions for this admin entity";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	setBase(b);
+
+	b = new DBObjectBase(this);
+	b.object_name = "User";
+	b.type_code = getNextBaseID(); // 1
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 1;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Username";
+	bf.minLength = 2;
+	bf.maxLength = 8;
+	bf.badChars = " :";
+	bf.field_order = 1;
+	bf.loading = true;
+	bf.setNameSpace("username");
+	bf.loading = false;
+	bf.comment = "User name for an individual privileged to log into Ganymede and/or the network";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 2;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Password";
+	bf.maxLength = 8;
+	bf.field_order = 2;
+	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 3;
+	bf.field_type = FieldType.INVID;
+	bf.allowedTarget = 0;
+	bf.targetField = 4;
+	bf.field_name = "Admin Role";
+	bf.field_order = 3;
+	bf.comment = "If this user can act as an administrator, this field points to the admin object for this user";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+    
+	setBase(b);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("remote :" + ex);
+      }
   }
 
 }
