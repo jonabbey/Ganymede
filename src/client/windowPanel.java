@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -93,6 +93,9 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     eWrapperBorder = new CompoundBorder(emptyBorder3, new LineBorder(ClientColor.vectorTitles, 2)),
     lineEmptyBorder = new CompoundBorder(blackLineB, emptyBorder15);
 
+  JMenuItem
+    removeAllMI;
+
   /* -- */
 
   /**
@@ -112,7 +115,10 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	System.out.println("Initializing windowPanel");
       }
 
+    removeAllMI = new JMenuItem("Remove All Windows");
+    removeAllMI.addActionListener(this);
 
+    updateMenu();
 
     setBackground(ClientColor.background);
 
@@ -630,6 +636,11 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     /* -- */
 
     windowMenu.removeAll();
+
+    windowMenu.add(removeAllMI);
+    windowMenu.addSeparator();
+
+
     windows = windowList.keys();      
 
     while (windows.hasMoreElements())
@@ -727,13 +738,19 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   {
     if (e.getSource() instanceof JMenuItem)
       {
-	JMenuItem MI = (JMenuItem)e.getSource();
-
-	if (e.getActionCommand().equals("showWindow"))
+	if (e.getSource() == removeAllMI)
 	  {
-	    showWindow(MI.getText());
+	    closeAll();
 	  }
-
+	else
+	  {
+	    JMenuItem MI = (JMenuItem)e.getSource();
+	    
+	    if (e.getActionCommand().equals("showWindow"))
+	      {
+		showWindow(MI.getText());
+	      }
+	  }
       }
     else
       {
