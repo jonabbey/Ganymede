@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.238 $
-   Last Mod Date: $Date: 2001/05/23 05:15:58 $
+   Version: $Revision: 1.239 $
+   Last Mod Date: $Date: 2001/06/23 02:22:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.238 $ $Date: 2001/05/23 05:15:58 $
+ * @version $Revision: 1.239 $ $Date: 2001/06/23 02:22:01 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -5812,15 +5812,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (pField == null)
       {
-	Ganymede.debug("resetDefaultPerms(): Error: no Default matrix field in default permission object");
-	throw new RuntimeException("resetDefaultPerms(): Error: no  Default matrix field in default permission object");
+	defaultPerms = new PermMatrix();
+	delegatableDefaultPerms = new PermMatrix();
       }
-    
-    defaultPerms = pField.getMatrix();
+    else
+      {
+	defaultPerms = pField.getMatrix();
 
-    // default permissions are implicitly delegatable
+	// default permissions are implicitly delegatable
 
-    delegatableDefaultPerms = pField.getMatrix();
+	delegatableDefaultPerms = pField.getMatrix();
+      }
   }
 
   /**
