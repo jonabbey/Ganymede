@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -94,8 +94,7 @@ public class glogin extends JApplet implements Runnable {
     WeAreApplet = false;
 
     debug = ParseArgs.switchExists("-debug", args);
-    properties_file = ParseArgs.getArg("-properties", args);
-
+    properties_file = ParseArgs.getArg("properties", args);
 
     if (properties_file == null)
       {
@@ -103,7 +102,6 @@ public class glogin extends JApplet implements Runnable {
       }
 
     my_glogin = new glogin();
-
 
     if (properties_file != null)
       {
