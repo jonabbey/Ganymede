@@ -731,7 +731,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    *
    * Provide easy server-side access to this object's name in a String
-   * context.
+   * context for debug and non-critical output.
    *
    */
 
