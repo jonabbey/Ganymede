@@ -2,10 +2,18 @@
 
    querybox
 
-   Description.
+   This class implements a modal dialog that is popped up to generate
+   a Query object that will be used by the rest of the ganymede.client
+   package to submit the query to the server for handling.
+
+   Once an instance of querybox is constructed, the client code will
+   call myShow() to pop up the dialog and retrieve the Query object.
+
+   If the user chooses not to submit a Query after all, myShow() will
+   return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -22,7 +30,6 @@ import java.awt.event.*;
 import java.util.*;
 import java.rmi.RemoteException;
 
-import tablelayout.*;
 import arlut.csd.JDataComponent.*;
 
 import com.sun.java.swing.*;
@@ -51,14 +58,12 @@ import com.sun.java.swing.border.*;
 class querybox extends JDialog implements ActionListener, ItemListener {
   
   static final boolean debug = false;
-  static final int MAXCOMPONENTS = 8; // the number of components that
-                                      // can appear in a query choice
-  // --
+
+  // ---
 
   JFrame optionsFrame = null;	// to hold the frame that we popup to get a list of
 				// desired fields in the query's results
-
-  private gclient gc;
+  gclient gc;
 
   Hashtable 
     shortHash;			// Key: Base ID    *--*  Value: Corresponding Base
@@ -67,106 +72,37 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   // methods to avoid confusion
   
   private Hashtable baseIDHash = new Hashtable();
-  private Hashtable fieldHash = new Hashtable();  
-  private Hashtable  nameHash = new Hashtable();   
+  private Hashtable fieldHash = new Hashtable();
+  private Hashtable nameHash = new Hashtable();
   private Hashtable myHash = new Hashtable();
 
-  // - Buttons
-  
-  JButton OkButton = new JButton ("Submit");
-  JButton CancelButton = new JButton("Cancel");
-  JButton addButton = new JButton("Add Choices");
-  JButton removeButton = new JButton("Remove Choices");
-  JButton displayButton = new JButton("Options");
-  JButton optionClose = new JButton("Close");
+  JButton 
+    OkButton = new JButton ("Submit"),
+    CancelButton = new JButton("Cancel"),
+    addButton = new JButton("Add Choices"),
+    removeButton = new JButton("Remove Choices"),
+    displayButton = new JButton("Options");
 
-  //----------- more Buttons, this time used by the save/load menu
-
-  JButton qSave = new JButton("Save");
-  JButton qLoad = new JButton("Load");
-  JButton qDone = new JButton("Done");
-  JButton qCancel = new JButton("Cancel");
-  JButton lCancel = new JButton("Cancel");
-  JButton lRename = new JButton("Rename");
-  JButton lSelect = new JButton("Select");
-
-  //-----------
-
-  // - Panels and Panes
-
-  JPanel query_panel = new JPanel();
-
-  JPanel base_panel = new JPanel();
+  GridBagLayout gbl = new GridBagLayout();
+  GridBagConstraints gbc = new GridBagConstraints();
 
   JPanel inner_choice = new JPanel();
-  JPanel outer_choice = new JPanel();
- 
-  JScrollPane choice_pane = new JScrollPane();
-
-  JPanel Choice_Buttons = new JPanel();
-  JPanel query_Buttons = new JPanel();
-
   JCheckBox editBox = new JCheckBox("Editable");
+  JComboBox baseChoice = new JComboBox();
 
-  // - Choice menus
-  
-  qChoice baseChoice = new qChoice(); // there's only one of these
-  qfieldChoice fieldChoice; // but there's liable to be a whole slew of these
+  Vector fieldsToReturn = null;
 
-  qaryChoice isNot; // will either be a boolean choice, or a list of operators
-                    // depending on whether the field is an array
+  Vector
+    fieldChoices = new Vector(), // A vector of strings for the field choice menus in QueryRow
+    Rows = new Vector(),	// store the QueryRows
+    fields;			// FieldTemplates for the selectedBase
 
-  // - imput fields
+  BaseDump selectedBase;
+  String baseName;
+  boolean editOnly;
 
-  JTextField inputField = new JTextField(12);
-  JTextField saveText;
-  JTextField dateField;
-  
-  // - Vectors
-
-  Vector fieldOptions = new Vector(); // keeps track of which fields will
-                                      // be used in the query results 
-
-  Vector Rows = new Vector(); // store the rows 
-
-  Vector Embedded = new Vector(); // keep track of fields referring to 
-                                  // embedded objects
-  // - Booleans
-
-  boolean 
-      editOnly,
-      booleanField;
-
-  // - ints
-
-  int row = 0;
-
-  // - other variables
-
-  Query returnVal;
-  Base defaultBase;
-  Component[] myAry = new Component[MAXCOMPONENTS]; // stores a single row
- 
-  // - Strings
-
-  String
-    currentBase,
-    currentField,
-    baseName;
-
-  // -- read query stuff (strings)
-  
-    String
-      queryString; // qeuryString is used in the loading of queries
-
-  // - Dialog Boxes
-
-  JDialog saveBox;
-  JDialog loadBox;
-
-  // our dialog's content pane
-
-  private Container contentPane;
+  Query
+    returnVal;
 
   /* -- */
 
@@ -185,13 +121,21 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    */
 
-  public querybox (Base defaultBase, gclient gc,
+  public querybox (BaseDump defaultBase, gclient gc,
 		   Frame parent, String DialogTitle)
   {
     super(parent, DialogTitle, true); // the boolean value is to make the dialog modal
+
+    // ---
       
-    Vector Bases;
-    
+    JPanel Choice_Buttons = new JPanel();
+    JPanel query_panel = new JPanel();
+    JPanel base_panel = new JPanel();
+    JPanel outer_choice = new JPanel();
+    JPanel query_Buttons = new JPanel();
+    JScrollPane choice_pane = new JScrollPane();
+    Container contentPane;
+
     /* -- */
 
     if (debug)
@@ -204,8 +148,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // Main constructor for the querybox window
     
     this.gc = gc;
+    this.selectedBase = defaultBase;
+
     this.shortHash = gc.getBaseMap();
-    this.defaultBase = defaultBase;
 
     // - Define the main window
     
@@ -213,9 +158,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     contentPane.setBackground(Color.white);
     
     OkButton.addActionListener(this);
-    OkButton.setBackground(Color.lightGray);
     CancelButton.addActionListener(this);
-    CancelButton.setBackground(Color.lightGray);
     Choice_Buttons.setLayout(new FlowLayout ());
     Choice_Buttons.add(OkButton);
     Choice_Buttons.add(CancelButton);
@@ -232,10 +175,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // - Define the inner window with the query choice buttons
 
     addButton.addActionListener(this);
-    addButton.setBackground(Color.lightGray);
     removeButton.addActionListener(this);
-    removeButton.setBackground(Color.lightGray);
-    query_Buttons.setLayout(new FlowLayout ());
+    query_Buttons.setLayout(new FlowLayout());
     query_Buttons.add(addButton);
     query_Buttons.add(removeButton);
     query_panel.add("South", query_Buttons);  
@@ -248,54 +189,45 @@ class querybox extends JDialog implements ActionListener, ItemListener {
      
     // - Create the choice window containing the fields 
 
-    Enumeration enum = gc.getBaseList().elements();
+    Enumeration enum = shortHash.elements();
       
-    try
+    while (enum.hasMoreElements())
       {
-	while (enum.hasMoreElements())
+	BaseDump key = (BaseDump) enum.nextElement();
+
+	// we want to ignore embedded objects -- for now
+	    
+	if (key.isEmbedded())
 	  {
-	    Base key = (Base) enum.nextElement();
-
-	    // we want to ignore embedded objects -- for now
-	    
-	    if (key.isEmbedded())
-	      {
-		// get a base that works...this embedded would cause
-		// problems [null pointer exceptions, that kind of thing]
+	    // get a base that works...this embedded would cause
+	    // problems [null pointer exceptions, that kind of thing]
 		
-		continue;
-	      }
-	    else
-	      {
-		String choiceToAdd = new String(key.getName());
-
-		baseChoice.addItem(choiceToAdd);
-		mapNameToBase(choiceToAdd, key);
-	      }
-	  
-	    if (defaultBase != null)
-	      {
-		baseChoice.setSelectedItem(defaultBase.getName());
-		this.baseName = defaultBase.getName();
-	      }
-	    else 
-	      { 
-		// no default given. pick the one that's there.
-	    
-		currentBase = (String) baseChoice.getSelectedItem();
-		this.defaultBase = getBaseFromName(currentBase);
-		defaultBase = this.defaultBase;
-		this.baseName = defaultBase.getName();
-	      }
-
-	    // preload our field cache
-
-	    mapBaseNamesToTemplates(defaultBase.getTypeID());
+	    continue;
 	  }
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote exception: " + ex);
+	else
+	  {
+	    String choiceToAdd = key.getName();
+
+	    baseChoice.addItem(choiceToAdd);
+	    mapNameToBase(choiceToAdd, key);
+	  }
+	  
+	if (selectedBase != null)
+	  {
+	    baseChoice.setSelectedItem(selectedBase.getName());
+	    this.baseName = selectedBase.getName();
+	  }
+	else 
+	  { 
+	    // no default given. pick the one that's there.
+	    
+	    this.selectedBase = getBaseFromName((String) baseChoice.getSelectedItem());
+	    this.baseName = selectedBase.getName();
+	  }
+
+	// preload our field cache
+
+	mapBaseNamesToTemplates(selectedBase.getTypeID());
       }
       
     displayButton.addActionListener(this);
@@ -307,7 +239,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     base_panel.add(new JLabel("  "));
     base_panel.add(displayButton);
     
-    inner_choice.setLayout(new TableLayout(false));
+    inner_choice.setLayout(gbl);
     inner_choice.setBackground(Color.white);
     
     outer_choice.setLayout(new FlowLayout());
@@ -319,8 +251,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     query_panel.add("North", base_panel);
     query_panel.add("Center", choice_pane);
-      
-    addChoiceRow(defaultBase); // adds the initial row   
+
+    resetFieldChoices();
+    addRow();
     
     this.pack();
   }
@@ -352,7 +285,13 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    * This is the main interface to the querybox, and is used to
    * synchronously display the querybox and return the Query
-   * generated by it. 
+   * generated by it.<br><br>
+   *
+   * XXX - This method is inadequate, as embedded fields will actually
+   * need to be made queries on separate bases.. this method should
+   * really either perform the query itself, or return a vector of
+   * queries, the results of which will be intersected together to
+   * provide the desired result. - XXX
    *
    */
 
@@ -373,146 +312,123 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
   /**
    *
-   * This internal method is used to create a frame which will
-   * present a matrix of checkboxes corresponding to the fields
-   * available in the specified object base.  The user will
-   * be able to select various checkboxes to control which fields
-   * are to be returned by the query generated by this querybox.
+   * This method updates the fieldChoices vector to contain a list of
+   * Strings corresponding to fields in the selectedBase that can
+   * be chosen in QueryRow's.  We are a little fancy here, in that
+   * we include fields from embedded objects.
    *
    */
 
-  private JFrame createOptionFrame (Base base)
+  private void resetFieldChoices()
   {
-    /* Method to return a choice menu containing the fields for
-     * a particular base, along with the query saving options
-     */
-    
-    JScrollPane option_pane = new JScrollPane();
-    option_pane.setBorder(new TitledBorder("Return Options"));
-
-    JPanel save_panel = new JPanel(); // holds query options
-    save_panel.setBorder(new TitledBorder("Query Options"));
-
-    JPanel option_panel = new JPanel();
-    JPanel choice_option = new JPanel(); // basically holds the Close button
-    JPanel contain_panel = new JPanel(); // Holds the boxes
-
+    Base tempBase;                            // Used when handling embedded objs
     FieldTemplate template;
-    JFrame myFrame = new JFrame("Options");
-    JCheckBox newCheck; 
-    JPanel inner_panel = new JPanel();
-    
-    Vector tmpAry;
-    
+    Vector EIPfields = new Vector(); // edit-in-place
+    Vector Embedded = new Vector();
+
     /* -- */
-      
-    myFrame.setSize(500,300);
-  
-    optionClose.setBackground(Color.lightGray);
-    optionClose.addActionListener(this);
-    
-    choice_option.setBackground(Color.white);
-    choice_option.setLayout(new FlowLayout());
-    choice_option.add(optionClose);
-    
-    contain_panel.setLayout(new BorderLayout());
-    contain_panel.add("South", save_panel);
-    contain_panel.add("Center", option_pane);
-    
-    option_panel.setLayout(new BorderLayout());
-    option_panel.add("South",choice_option);
-    option_panel.add("Center", contain_panel);
-  
-    option_pane.setViewportView(inner_panel);
-    inner_panel.setLayout(new TableLayout());
-    
-    save_panel.setLayout(new FlowLayout());
-    save_panel.add(qSave);
-    save_panel.add(new JLabel("   "));
-    save_panel.add(qLoad);
 
-    qSave.addActionListener(this);
-    qLoad.addActionListener(this);
-
-    try
+    if (debug)
       {
-	Vector fields = gc.getTemplateVector(base.getTypeID());
+	System.err.println("querybox.resetFieldChoices(): basename = " + baseName);
+      }
 
-	tmpAry = new Vector();
+    fieldChoices.removeAllElements();
 
-	int count = 0;
-	int tmpRow = 0;
-	  
-	for (int j=0; fields != null && (j < fields.size()); j++) 
-	  {	
-	    template = (FieldTemplate) fields.elementAt(j);
-	    String Name = template.getName();
-	    newCheck = new JCheckBox(Name);
-	    newCheck.setSelected(true);
-	      
-	    if (count <= 2) // we've got space in the current row)
-	      {
-		tmpAry.insertElementAt(newCheck, count);
-		count ++;
-	      }
-	    else 
-	      {
-		// add the row to the panel
-		  
-		for (int n = 0; n < tmpAry.size(); n++)
-		  {
-		    inner_panel.add( n + "  " + tmpRow + " lhwHW", (Component) tmpAry.elementAt(n));
-		  }
-		  
-		// Here we're saving the row of components in the fieldOptions vector
-		 
-		if (! tmpAry.isEmpty())
-		  {
-		    fieldOptions.insertElementAt(tmpAry, tmpRow);
-		    tmpAry = new Vector();
-		  }
-
-		count = 0;
-		tmpRow ++;
-		tmpAry.removeAllElements(); // Clear out the other array elements
-		tmpAry.insertElementAt(newCheck, count);
-		count++;
-	      }     
-	  }
-	  
-	// Now add the final row
-	
-	for (int n = 0; n < tmpAry.size(); n++)
+    for (int i=0; fields != null && (i < fields.size()); i++) 
+      {
+	template = (FieldTemplate) fields.elementAt(i);
+	    
+	if (template.isEditInPlace())
 	  {
-	    inner_panel.add( n + "  " + tmpRow + " lhwHW", (Component) tmpAry.elementAt(n));
+	    // We're an edit in place.. we want to recurse down
+	    // to the bottom of this edit-in-place tree, and
+	    // add the terminals to the global Embedded vector
+
+	    // because getEmbedded is recursive, we need to pass
+	    // a vector of FieldTemplate's so that getEmbedded
+	    // can recurse down with it.  Hence EIPfields.
+		 
+	    EIPfields.addElement(template);
+	    getEmbedded(EIPfields, template.getName(), null, Embedded);
+	    EIPfields.removeElement(template);
+	  }
+	else
+	  {
+	    // ignore containing objects and the like...
+
+	    if (template.getID() == SchemaConstants.OwnerListField ||
+		template.getID() == SchemaConstants.BackLinksField)
+	      {
+		continue;
+	      }
+
+	    String name = template.getName();
+
+	    // Keep a shortcut for our later fieldname parsing
+	    // This was Erik's idea.. 
+	    
+	    mapEmbeddedToField(name, name);
+
+	    // And keep a map from the elaborated field name to
+	    // the field template.
+
+	    mapNameToTemplate(name, template);
+
+	    // and to the base
+
+	    mapNameToId(name, new Short(selectedBase.getTypeID()));
+
+	    // and finally add to fieldChoices
+
+	    if (debug)
+	      {
+		System.err.println("querybox: adding field " + name + " to choices for base " + 
+				   baseName);
+	      }
+
+	    fieldChoices.addElement(name);
+	  }
+      }
+    
+    // If we wound up with any embedded (edit-in-place) fields from
+    // contained objects, add those fields to our embedded map.
+
+    // note that we don't try to get fancy with where these extra
+    // field possibilities are added in the fieldChoices vector.
+    
+    if (!Embedded.isEmpty())
+      {
+	for (int i = 0; (i < Embedded.size()); i++)
+	  {
+	    String embedName = (String) Embedded.elementAt(i);
+
+	    // Ok, let's do our string processing for our field name,
+	    // once and for all by removing the slashes and saving
+	    // the result. Erik again.
+		  
+	    String noSlash = embedName.substring(embedName.lastIndexOf("/") + 1,
+						 embedName.length());
+
+	    // Add the slash-less name to the name hash, with the key
+	    // being the slash filled name
+		  
+	    mapEmbeddedToField(embedName, noSlash);
+
+	    // and finally add to fieldChoices
+
+	    fieldChoices.addElement(embedName);
 	  }
 
-	// Here we're saving the row of components in the fieldOptions vector
-	// (again)
-	
-	fieldOptions.insertElementAt(tmpAry, tmpRow);
+	// and we're done with Embedded.  Clear it out.
+
+	Embedded.removeAllElements();
       }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote exception: " + ex);	
-      }
-            
-    //option_pane.add(option_panel);
-
-    myFrame.getContentPane().add(option_panel);
-      
-    // overkill?
-
-    myFrame.invalidate();
-    myFrame.validate();
-    myFrame.repaint();
-
-    return myFrame;  
   }
 
   /**
    *
-   * A companion to the following getChoiceFields method.
+   * A companion to the prior resetFieldChoices method.
    * It allows fields with references to embedded objects
    * to display the appropriate sub-fields. 
    * 
@@ -522,7 +438,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    */
   
-  private void getEmbedded(Vector fields, String basePrefix, Short lowestBase)
+  private void getEmbedded(Vector fields, String basePrefix, 
+			   Short lowestBase, Vector Embedded)
   {
     FieldTemplate tempField;
     String myName;
@@ -548,10 +465,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		myName = tempField.getName();
 		myName = basePrefix + "/" + myName;  // slap on the prefix
 
-		// save the embedded information in our global Embedded vector
+		// save the embedded information in our Embedded vector
 
 		Embedded.addElement(myName);
-
+		
 		mapNameToTemplate(myName, tempField);
 		   
 		// Also, save the information on the target base
@@ -584,884 +501,59 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		    
 		// process embedded fields for target
 		    
-		getEmbedded(gc.getTemplateVector(tempID), basePrefix, tempIDobj);
+		getEmbedded(gc.getTemplateVector(tempID), 
+			    basePrefix, tempIDobj, Embedded);
 	      }
 	  }
       }
-  }
-
-  /**
-   *
-   * Internal method to return a choice menu containing the fields for
-   * a particular base
-   *
-   */
-    
-  private qfieldChoice getChoiceFields(short id)
-  {
-    short inVid;
-    Base tempBase;                            // Used when handeling embedded objs
-    FieldTemplate template;
-    qfieldChoice myChoice = new qfieldChoice();
-
-    /* -- */
-
-    myChoice.addItemListener(this);
-    myChoice.qRow = this.row;
-    
-    Vector fields = gc.getTemplateVector(id);
-    Vector EIPfields = new Vector();
-		  
-    for (int j=0; fields != null && (j < fields.size()); j++) 
-      {
-	template = (FieldTemplate) fields.elementAt(j);
-	    
-	if (template.isEditInPlace())
-	  {
-	    // We're an edit in place.. we want to recurse down
-	    // to the bottom of this edit-in-place tree, and
-	    // add the terminals to the global Embedded vector
-
-	    // because getEmbedded is recursive, we need to pass
-	    // a vector of FieldTemplate's so that getEmbedded
-	    // can recurse down with it.
-		 
-	    EIPfields.addElement(template);
-	    getEmbedded(EIPfields, template.getName(), null);
-	    EIPfields.removeElement(template);
-	  }
-	else
-	  {
-	    // ignore containing objects and the like...
-
-	    if (template.getID() != SchemaConstants.OwnerListField &&
-		template.getID() != SchemaConstants.BackLinksField)
-	      {
-		String Name = template.getName();
-		myChoice.addItem(Name);
-		
-		// Keep a shortcut for our later fieldname parsing
-		// This was Erik's idea.. 
-
-		mapEmbeddedToField(Name, Name);
-	      }
-	  }
-      }
-    
-    // If we wound up with any embedded (edit-in-place) fields from
-    // contained objects, add those fields to our embedded map.
-    
-    if (!Embedded.isEmpty())
-      {
-	for (int k = 0; (k < Embedded.size()); k ++)
-	  {
-	    String embedName = (String) Embedded.elementAt(k);
-
-	    myChoice.addItem(embedName); // make it so #1
-
-	    // Ok, let's do our string processing for our field name,
-	    // once and for all by removing the slashes and saving
-	    // the result. Erik again.
-		  
-	    String noSlash = embedName.substring(embedName.lastIndexOf("/") + 1,
-						 embedName.length());
-
-	    // System.out.println("Field Name for embedded: " + noSlash);
-
-	    // Add the slash-less name to the name hash, with the key
-	    // being the slash filled name
-		  
-	    mapEmbeddedToField(embedName, noSlash);
-	  }
-
-	Embedded.removeAllElements();
-      }
-
-    return myChoice;  
-  }
-
-  /**
-   *
-   * This internal method creates a new row of components and adds 'em
-   * to the choice window
-   *
-   */
-  
-  private void addChoiceRow (Base base)
-  {
-    JLabel label1 = new JLabel("   ");
-    JLabel label2 = new JLabel("     ");
-    JLabel label3 = new JLabel("     ");
-    JLabel label4 = new JLabel("     ");
-    qaryChoice opChoice;
-    
-    /* -- */
-
-    myAry = new Component[MAXCOMPONENTS];
-
-    try
-      {
-	fieldChoice = getChoiceFields(base.getTypeID());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not load fieldChoice: " + rx);
-      }
-
-    currentField = (String) fieldChoice.getSelectedItem();  
-    opChoice = getOpChoice(currentField);
-    isNot = getIsNot(currentField);
-    opChoice.qRow = this.row;
-    Component newInput = getInputField(currentField);
-      
-    // - set visible to false so they don't appear
-    // as they're added. just for looks.
-
-    fieldChoice.setVisible(false);
-    isNot.setVisible(false);
-    opChoice.setVisible(false);
-    newInput.setVisible(false);
-    label1.setVisible(false);
-    label2.setVisible(false);
-    label3.setVisible(false);
-    label4.setVisible(false);
-      
-    myAry[0] = label1;
-    myAry[1] = fieldChoice;
-    myAry[2] = label2;
-    myAry[3] = isNot; 
-    myAry[4] = label3;
-    myAry[5] = opChoice; 
-    myAry[6] = label4;
-    myAry[7] = newInput; 
-    
-    addRow(myAry, true, inner_choice, this.row);
-  }
-
-  /**
-   *
-   * This internal method generates the GUI choice component
-   * displaying the 'is/is not' strings appropriate type for the type
-   * of field in the currently selected object base with name <field>.
-   * 
-   */
-
-  private qaryChoice getIsNot(String field)
-  {
-    qaryChoice returnChoice = new qaryChoice();
-    returnChoice.qRow = this.row;
-
-    // Look it up in the fieldHash. if it's there, then goodie!
-
-    FieldTemplate myField = getTemplateFromName(field);
-    
-    // If the field contains slashes, then we'll remove 'em
-    // by using the name hash
-    
-    field = getFieldFromEmbedded(field);
-    
-    // easy as cake
-    
-    if (myField == null)
-      {
-	// It's not an edit in place.
-	
-      }
-    else 
-      {
-	//System.out.println("Yes, brothers and sisters, we have an EIP!!!");
-      }
-  
-    returnChoice.addItem("is");
-    returnChoice.addItem("is not");
- 
-    returnChoice.addItemListener(this);
-    return returnChoice;
-  }  
-  
-  /**
-   *
-   * This internal method generates the GUI choice component
-   * displaying the 'does/does not' strings appropriate type for the type
-   * of field selected. Purely for grammatical purposes
-   * 
-   */
-
-  private qaryChoice getDoesNot ()
-  {
-    qaryChoice returnChoice = new qaryChoice();
-    returnChoice.qRow = this.row;
-    
-    returnChoice.addItem("does");
-    returnChoice.addItem("does not");
-
-    if (debug)
-      {
-	System.out.println("Does not selected");
-      }
-    
-    returnChoice.addItemListener(this);
-    return returnChoice;
-  }
-  
-  /**
-   *
-   * This internal method generates a GUI input component of
-   * the appropriate type for the field in the
-   * currently selected object base with name <field>.
-   *
-   */
-
-  private Component getInputField (String field)
-  {
-    FieldTemplate myField = getTemplateFromName(field);
-	
-    // If the field contains slashes, then we'll remove 'em
-    // by using the name hash
-    
-    field = getFieldFromEmbedded(field);
-
-    if (debug)
-      {
-	System.out.println("And We have put gotten it from NameHash: " + field);
-      }
-    
-    // easy as pie
-    
-    if (myField == null)
-      {
-	myField = getTemplateFromName(field);
-
-	// Probably fix this...make it bring up an error dialog or
-	// something
-   
-	inputField = new JTextField(12);
-	    
-	return inputField; 
-      }
-
-    if (myField.isDate())
-      {
-	dateField = new JTextField("dd/mm/yyyy");
-	
-	return dateField;   
-      }
-    else if (myField.isBoolean())
-      {
-	JCheckBox boolBox = new JCheckBox("True");
-
-	if (debug)
-	  {
-	    System.out.println("It's a Boolean!");
-	  }
-
-	boolBox.setSelected(true);
-
-	return boolBox;
-      }
-    else if (myField.isIP())
-      {
-	JIPField IPField = new JIPField(true); // allow V6
-	
-	return IPField;
-      }
-    else 
-      {
-	// It ain't no date
-	
-	inputField = new JTextField(12);
-	
-	return inputField; 
-      }
-  }
-
-  /**
-   *
-   * This internal method generates a GUI choice component with
-   * the appropriate possibilities loaded for the field in the
-   * currently selected object base with name <field>.
-   *
-   */
-
-  private qaryChoice getOpChoice(String field)
-  {
-    qaryChoice 
-      intChoice,
-      dateChoice,
-      vectorChoice;
-
-    FieldTemplate myField = getTemplateFromName(field);
-
-    /* -- */
-
-    // Check to see if the damn thing has slashes in it
-
-    field = getFieldFromEmbedded(field);
-
-    // easy as fish
-    
-    if (myField == null)
-      {
-	// It's not an edit in place. Engage.
-	
-	myField = getTemplateFromName(field);
-      }
-    
-    intChoice = new qaryChoice();
-    intChoice.addItem("=");
-    intChoice.addItem(">=");
-    intChoice.addItem("<=");
-    intChoice.addItem("<");
-    intChoice.addItem(">");
-    intChoice.addItem("= [Case Insensitive]");
-    intChoice.addItem("Start With");
-    intChoice.addItem("End With");
-    intChoice.addItemListener(this);
-    
-    // NOTE - HANDLE VECTORS, IPs, etc
-    
-    if (myField.isDate())
-      {
-	dateChoice = new qaryChoice();
-	dateChoice.addItem("Same Day As");
-	dateChoice.addItem("Same Week As");
-	dateChoice.addItem("Same Month As");
-	dateChoice.addItem("Before");
-	dateChoice.addItem("After");
-
-	dateChoice.addItemListener(this);
-	return dateChoice;   
-      }
-    else if (myField.isNumeric())
-      {
-	return intChoice; 
-      }
-    else if (myField.isArray())
-      {
-	vectorChoice = new qaryChoice();
-	vectorChoice.addItem("Contain");
-	vectorChoice.addItem("Length <");
-	vectorChoice.addItem("Length >");
-	vectorChoice.addItem("Length =");
-	vectorChoice.addItemListener(this);
-
-	return vectorChoice;
-      }
-    else 
-      {
-	return intChoice; // Numeric operators are the default
-      }
-  }
-
-  /**
-   *
-   * This is an internal method to add a row to the main
-   * query composition panel.
-   *
-   */
-
-  private void addRow (Component[] myRow, boolean visible, JPanel myPanel, int Row) 
-  {
-    for (int n = 0; n < myRow.length; n++)
-      {
-	myPanel.add( n + "  " + Row + " lhwHW", myRow[n]);
-      }
-
-    for (int i = 0; i < myRow.length; i++)
-      {
-	if (myAry[i] != null)
-	  {
-	    myAry[i].setVisible(visible);
-	  }
-      }
-
-    this.row++;
-    this.Rows.insertElementAt(myRow, Row); // add component array to vector
-    
-    // make sure the scroll pane is correctly spacing things
-    
-    choice_pane.invalidate();
-    choice_pane.validate();   
-  }
-
-  /**
-   *
-   * This is an internal method to remove a row from the main
-   * query composition panel.
-   *
-   */
-
-  private void removeRow(Component[] myRow, JPanel myPanel, int Row)
-  {
-    for (int n = 0; n < myRow.length ; n++)
-      {
-	myPanel.remove(myRow[n]);
-      }  
-  
-    this.Rows.removeElementAt(Row); // remove row from vector of rows
-    this.row--;
   }
 
   /**
    *
    * This internal method takes the current state of the rows in the
    * main query composition panel and generates an appropriate Query
-   * structure from them.
+   * structure from them.<br><br>
+   *
+   * Note that this is a private method.. our 'Ok' handler will call
+   * this method before hiding this dialog, at which time myShow will
+   * return the Query produced by this method.<br><br>
+   *
+   * XXX - This method is inadequate, as embedded fields will actually
+   * need to be made queries on separate bases.. this method should
+   * really either perform the query itself, or return a vector of
+   * queries, the results of which will be intersected together to
+   * provide the desired result. - XXX
    *  
    */
   
   private Query createQuery()
   {
-    // * -- * //
-    
-    Query myQuery;
-    QueryNode myNode, tempNode;
-    QueryNotNode notNode;
-    QueryDataNode dataNode;
-    QueryAndNode andNode;
-    Object value;
-    byte opValue;
-    Component[] tempAry;
+    QueryNode myNode;
+    QueryRow row;
+    String baseName;
 
-    JComboBox
-      tempChoice1,
-      tempChoice2,
-      tempChoice3;
+    /* -- */
 
-    String notValue,
-           fieldName,
-           operator;
+    row = (QueryRow) Rows.elementAt(0);
+    myNode = row.getQueryNode();
 
-    FieldTemplate tempField;
-    Integer tempInt = new Integer(0);
-    JTextField tempText = new JTextField();
-    JTextField tempDate = new JTextField();
-    JCheckBox tempBox = new JCheckBox(); 
-    JIPField tempIP = new JIPField(true); // allow possible V6 IPs
-
-    boolean editInPlace;
-    Short baseID;
-
-    // -- //
-
-    int allRows = this.Rows.size();
-
-    if (debug)
-      {
-	System.out.println("NUMBER OF ROWS: " + allRows);
-      }
-       
-    tempAry = (Component[]) this.Rows.elementAt(0); // This is the first row in the Vector
-
-    tempChoice1 = (JComboBox) tempAry[1];
-    fieldName = (String) tempChoice1.getSelectedItem();
-
-    tempChoice2 = (JComboBox) tempAry[3];
-    notValue = (String) tempChoice2.getSelectedItem();
-
-    tempChoice3 =  (JComboBox) tempAry[5];
-    operator = (String)tempChoice3.getSelectedItem();
-    
-    Object tempObj = tempAry[7];
-
-    if (tempObj instanceof JTextField)
-      {
-	tempText = (JTextField) tempAry[7];    
-      }
-    else if (tempObj instanceof Date)
-      {
-	tempDate = (JTextField) tempAry[7];
-      }
-    else if (tempObj instanceof JCheckBox)
-      {
-	tempBox = (JCheckBox) tempAry[7];
-      }
-    else if (tempObj instanceof JIPField)
-      {
-	tempIP = (JIPField) tempAry[7];
-      }
-    else 
-      { 
-	// default
-	tempText = (JTextField) tempAry[7];    
-      }
-
-    // -- set the type for the text entered in the JTextField
-    
     try
-      {      
-	/* Here's some code to deal with edit-in-place fields again
-	 * what we need to do here is get the actual field from the 
-	 * name, using the shortID of the base preovided by the
-	 * fieldname Hash.
-	 *
-	 */ 
+      {
+	baseName = row.getBase().getName();
 
-	baseID = getIdFromName(fieldName);
+	for (int i = 1; i < Rows.size(); i++)
+	  {
+	    row = (QueryRow) Rows.elementAt(i);
+	    myNode = new QueryAndNode(myNode, row.getQueryNode());
+	    baseName = row.getBase().getName();
+	  }
 	
-	if (baseID != null)
-	  {
-	    // The hash has a defined value for the base ID, therefore
-	    // it's an edit in place
-	    
-	    tempField = getTemplateFromName(fieldName);
-	    fieldName = getFieldFromEmbedded(fieldName); // keep only the last field 
-	    editInPlace = true;
-	  }
-	else
-	  {
-	    tempField = getTemplateFromName(fieldName);
-	    editInPlace = false;
-	  }
-
-	if (tempField.isNumeric())
-	  {
-	    value = new Integer(tempText.getText());
-	  }
-	else if (tempField.isDate())
-	  {
-	    // **NOTE: This will have to be implemented when we decide how
-	    // ** we're going to do dates
-	    value = new Date();
-	  }
-	else if (tempField.isBoolean())
-	  {
-	    value = new Boolean(tempBox.isSelected());
-	  }
-	else if (tempField.isIP())
-	  {
-	    value = tempIP.getValue();
-	  }
-	else 
-	  {
-	    value = tempText.getText(); // default is string
-	  }
-
-	// -- get the correct operator
-	// -- Note: you'll have to do this agian for vectors.
-        //    Don't do them here!!
-
-	if (! tempField.isArray())
-	  {
-	    if (operator.equals("="))
-	      {
-		opValue = 1;
-	      } 
-	    else if (operator.equals("<"))
-	      {
-		opValue = 2;
-	      } 
-	    else if (operator.equals("<="))
-	      {
-		opValue = 3;
-	      } 
-	    else if (operator.equals(">"))
-	      {
-		opValue = 4;
-	      } 
-	    else if (operator.equals(">="))
-	      {
-		opValue = 5;
-	      } 
-	    else if (operator.equals("= [Case Insesitive]"))
-	      {
-		opValue = 6;
-	      }
-	    else if (operator.equals("Start With"))
-	      {
-		opValue = 7;
-	      }
-	    else if (operator.equals("End With"))
-	      {
-		opValue = 8;
-	      }
-	    else
-	      {
-		opValue = 9; // UNDEFINED
-	      }    
-	  }
-	else
-	  {
-	    // we have a vector, so use vector operators
-	  
-	    if (operator.equals("Contain"))
-	      {
-		opValue = 1;
-	      } 
-	    else if (operator.equals("Length =")) 
-	      {
-		opValue = 4;
-	      } 
-	    else if (operator.equals("Length >")) 
-	      {
-		opValue = 5;
-	      } 
-	    else if (operator.equals("Length <"))
-	      {
-		opValue = 6;
-	      }
-	    else
-	      {
-		opValue = 7; // Undefined
-	      } 
-	  }
-
-	// -- if not is true then add a not node
-    
-	dataNode = new QueryDataNode(fieldName, opValue, value);
-    
-	if (notValue.equalsIgnoreCase("is not") || notValue.equalsIgnoreCase("does not"))
-	  {
-	    notNode = new QueryNotNode(dataNode); // if NOT then add NOT node
-	    myNode = notNode;
-	  } 
-	else 
-	  {
-	    myNode = dataNode;
-	  }
-
-	if (allRows == 1)
-	  {
-	    // Special case -- return only a single query node
-	    
-	    // We'll also have to use a different query constructor if
-	    // we're dealin with an edit in place field
-
-	    if (baseID != null)
-	      {
-		short baseid = baseID.shortValue();
-
-		myQuery = new Query(baseid, myNode, editOnly);
-		myQuery.setReturnType(defaultBase.getTypeID());
-
-		if (debug)
-		  {
-		    // Debug stuff
-		    
-		    System.out.println("My Query: Embedded");
-		    System.out.println("------------------");
-		    System.out.println("");
-		    System.out.println("Field Name: " + fieldName);
-		    
-		    String bName = getBaseFromShort(baseID).getName();
-		    
-		    System.out.println("Low Base: " + bName);
-		    System.out.println("Top Base: " + defaultBase.getName());
-		    System.out.println("Operator: " + opValue);
-		    System.out.println("Value: " + value);
-		  }
-	      }
-	    else
-	      {
-		myQuery = new Query(baseName, myNode, editOnly); 
-	      }
-	  }
-	else // Multiple Rows
-	  {
-	    /* we have the first node already, so we can simply use AND nodes to 
-	     * attach the query nodes to one another
-	     */
-	    
-	    for (int i = 1; i < allRows; i ++) 
-	      {
-		tempAry = (Component[]) this.Rows.elementAt(i);
-
-		tempChoice1 = (JComboBox) tempAry[1];
-		fieldName = (String) tempChoice1.getSelectedItem();
-
-		tempChoice2 = (JComboBox) tempAry[3];
-		notValue = (String) tempChoice2.getSelectedItem();
-
-		tempChoice3 =  (JComboBox) tempAry[5];
-		operator = (String) tempChoice3.getSelectedItem();
-	 
-		if (tempObj instanceof JTextField)
-		  {
-		    tempText = (JTextField) tempAry[7];    
-		  }
-		else if (tempObj instanceof Date)
-		  {
-		    tempDate = (JTextField) tempAry[7];
-		  }
-		else if (tempObj instanceof JCheckBox)
-		  {
-		    tempBox = (JCheckBox) tempAry[7];
-		  }
-		else if (tempObj instanceof JIPField)
-		  {
-		    tempIP = (JIPField) tempAry[7];
-		  }
-		else 
-		  { 
-		    // default
-		    tempText = (JTextField) tempAry[7];    
-		  }
-		
-		// Now that we have tempObj, find out what it is and
-		// use that information to assign a value to the query.
-
-		if (tempObj instanceof JTextField)
-		  {
-		    tempText = (JTextField) tempAry[7];    
-		  }
-		else if (tempObj instanceof Date)
-		  {
-		    tempDate = (JTextField) tempAry[7];
-		  }
-		else if (tempObj instanceof JCheckBox)
-		  {
-		    tempBox = (JCheckBox) tempAry[7];
-		  }
-		else if (tempObj instanceof JIPField)
-		  {
-		    tempIP = (JIPField) tempAry[7];
-		  }
-		else 
-		  { 
-		    // default
-		    tempText = (JTextField) tempAry[7];    
-		  }
-		
-		/*
-		 * Here's some code to deal with edit-in-place fields again
-		 * what we need to do here is get the actual field from the 
-		 * name, using the shortID of the base preovided by the
-		 * fieldname Hash.
-		 */ 
-		
-		baseID = getIdFromName(fieldName);
-		
-		if (baseID != null)
-		  {
-		    // The hash has a defined value for the base ID, therefore
-		    // it's an edit in place
-		    
-		    tempField = getTemplateFromName(fieldName);
-		    fieldName = getFieldFromEmbedded(fieldName); // keep only the last field 
-		    editInPlace = true;
-		  }
-		else
-		  {
-		    tempField = getTemplateFromName(fieldName);
-		    editInPlace = false;
-		  }
-		
-		if (tempField.isNumeric())
-		  {
-		    value = new Integer(tempText.getText());
-		  }
-		else if (tempField.isDate())
-		  {
-		    // XXX Fix THIS!!!!
-		    value = new Date();
-		  }
-		else if (tempField.isBoolean())
-		  {
-		    value = new Boolean(tempBox.isSelected());
-		  }
-		else if (tempField.isIP())
-		  {
-		    value = tempIP.getValue();
-		  }
-		else 
-		  {
-		    value = tempText.getText(); // default is string
-		  }
-		
-		// -- get the correct operator
-    
-		if (operator.equals("="))
-		  {
-		    opValue = 1;
-		  } 
-		else if (operator.equals("<"))
-		  {
-		    opValue = 2;
-		  } 
-		else if (operator.equals("<="))
-		  {
-		    opValue = 3;
-		  } 
-		else if (operator.equals(">"))
-		  {
-		    opValue = 4;
-		  } 
-		else if (operator.equals(">="))
-		  {
-		    opValue = 5;
-		  } 
-		else 
-		  {
-		    opValue = 7; // UNDEFINED
-		  }  
- 
-		// -- if not is true then add a not node
-		
-		dataNode = new QueryDataNode(fieldName, opValue, value);
-		
-		if (notValue == "is not" || notValue == "does not")
-		  {
-		    notNode = new QueryNotNode(dataNode); // if NOT then add NOT node
-		    tempNode = notNode;
-		  } 
-		else 
-		  {
-		    tempNode = dataNode;
-		  }    
-	    
-		andNode = new QueryAndNode(myNode, tempNode);
-		myNode = andNode;
-	      }
-	
-	    // Again, use the alternate constructor for EIP fields
-
-	    if (baseID != null)
-	      {
-		short baseid = baseID.shortValue();
-		myQuery = new Query(baseid, myNode, editOnly);
-  
-		// make sure the server knows what the top level base is
-	    
-		myQuery.setReturnType(defaultBase.getTypeID()); 
-	      }
-	    else
-	      {
-		myQuery = new Query(baseName, myNode, editOnly);
-	      }
-	  }
-
-	// if we have popped up the optionsFrame, go ahead and
-	// explicitly specify the fields to be returned.  Otherwise,
-	// we'll skip this step and allow the server to return to us
-	// the default fields.
-	
-	if (optionsFrame != null)
-	  {
-	    myQuery = setFields(myQuery);
-	  }
-
-	// this section below here is for the purpose of testing the
-	// query serialization/de-serialization logic, which we don't
-	// yet use. 
-
-	if (false)
-	  {
-	    // TESTING dumpToString
-	
-	    System.out.println("Results: " + myQuery.dumpToString());
-
-	    // TESTING readQuery
-
-	    Query testResult = readQuery(myQuery.dumpToString());
-
-	    System.out.println("Reprocessed results: " + testResult.dumpToString());
-	  }
-
-	return myQuery;
+	return new Query(baseName, myNode, editOnly);
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote exception: " + ex);	
+	System.err.println("Whoah, guess Base really was remote! " + ex.getMessage());
+	return null;
       }
   }
 
@@ -1478,78 +570,1083 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   public Query setFields(Query someQuery)
   {
     FieldTemplate tempField;
-    short tempShort;
     String tempString;
-    JCheckBox tempBox;
-    Vector tempVector;
 
     /* -- */
 
-    // Time to make the doughnuts -- uh, or set the return options for the fields
-
-    if (debug)
+    if (fieldsToReturn == null)
       {
-	System.out.println("Here's how many rows we've got " + fieldOptions.size());
+	return someQuery;
       }
 
-    fieldLoop :for (int x = 0; x < fieldOptions.size(); x ++)
+    for (int i = 0; i < fieldsToReturn.size(); i++)
       {
-	tempVector = (Vector) fieldOptions.elementAt(x);
-	    
-	for (int y = 0; y < tempVector.size(); y ++)
-	  {
-	    // here we process each checkbox in the row
-		
-	    tempBox = (JCheckBox) tempVector.elementAt(y);
-
-	    if (tempBox.isSelected())
-	      {
-		// the box has been checked -- we want this field
-
-		tempString = tempBox.getText();
-		tempField = getTemplateFromName(tempString);
-			
-		// Sometimes this next lines gives us fits...why?
-
-		if (tempField == null) 
-		  {  
-		    if (debug)
-		      {
-			System.out.println("It's a cold, null world,");
-			System.out.println("Therefore, we're breaking out of loop");
-		      }
-
-		    break fieldLoop;
-		  }
-		else 
-		  {
-		    tempShort = tempField.getID();
-		    someQuery.addField(tempShort); // add the field to the query return
-			
-		    if (debug)
-		      {
-			System.out.println("Setting Return: " + tempField.getName());
-		      }
-		  }
-	      }
-	    else 
-	      {
-		// else just skip this box
-
-		if (debug)
-		  {
-		    System.out.println("Skipping " + tempBox.getText()); 
-		  }
-	      }
-	  }
+	tempString = (String) fieldsToReturn.elementAt(i);
+	tempField = getTemplateFromName(tempString);
+	
+	someQuery.addField(tempField.getID());
       }
 
     return someQuery;
   }
 
-  /////////////////////
-  // Event Handlers //
-  /////////////////////
+  /**
+   *
+   * This is the standard ActionListener callback method.  This method
+   * catches events from the various buttons used by querybox.
+   *
+   * @see java.awt.event.ActionListener
+   * 
+   */
+  
+  public void actionPerformed(ActionEvent e)
+  {
+
+    if (e.getSource() == displayButton)
+      {
+	if (debug)
+	  {
+	    System.out.println("Field Display Selected");
+	  }
+
+	if (optionsFrame == null)
+	  {
+	    optionsFrame = new OptionsFrame(this);
+	  }
+
+	optionsFrame.setVisible(true);
+      }
+    
+    if (e.getSource() == OkButton) 
+      {
+	if (optionsFrame != null)
+	  {
+	    optionsFrame.setVisible(false);
+	  }
+
+	returnVal = createQuery();
+	returnVal = setFields(returnVal);
+	setVisible(false);	// close down
+      } 
+    else if (e.getSource() == CancelButton)
+      {
+	if (debug)
+	  {
+	    System.out.println("Cancel was pushed");
+	  }
+
+	if (optionsFrame != null)
+	  {
+	    optionsFrame.setVisible(false);
+	  }
+
+	returnVal = null;
+	setVisible(false);
+      } 
+
+    if (e.getSource() == addButton)
+      {
+	addRow();
+      }
+
+    if (e.getSource() == removeButton)
+      {
+	if (Rows.size() <= 1)
+	  {
+	    // need some sort of gui notify here
+	    System.out.println("Error: cannot remove any more rows");
+	  }  
+	else
+	  {
+	    removeRow();
+	  }
+      }
+  } 
+
+  private void removeRow()
+  {
+    QueryRow row = (QueryRow) Rows.lastElement();
+    row.removeRow();
+    Rows.removeElementAt(Rows.size()-1);
+  }
+
+  private void addRow()
+  {
+    Rows.addElement(new QueryRow(inner_choice, this));
+  }
+
+  /**
+   *
+   * This is the standard ItemListener callback method.  This method
+   * catches events from Checkboxes and various choice components.
+   * 
+   * @see java.awt.event.ItemListener
+   *
+   */
+  
+  public void itemStateChanged(ItemEvent e)
+  {
+    qaryChoice opChoice;
+
+    /* -- */
+
+    if (e.getSource() == editBox)
+      {
+	this.editOnly = editBox.isSelected();
+
+	if (debug)
+	  {
+	    System.out.println("Edit Box Clicked: " + editOnly);
+	  }
+      }
+
+    if (e.getSource() == baseChoice)
+      {
+	if (debug)
+	  {
+	    System.out.println("Base selected");
+	  }
+
+	// First, change the base
+	  
+	selectedBase = getBaseFromName((String) baseChoice.getSelectedItem());
+
+	this.baseName = selectedBase.getName();
+
+	// update field name map
+	
+	mapBaseNamesToTemplates(selectedBase.getTypeID());
+	  
+	// remove all rows in vector of component arrays
+
+	while (Rows.size() > 0)
+	  {
+	    removeRow();
+	  }
+
+	addRow();
+
+	// Now update optionsFrame
+
+	if (optionsFrame != null)
+	  {
+	    optionsFrame.setVisible(false);
+	    optionsFrame.removeAll(); // for GC
+	    optionsFrame = null; // we'll reload it next time the popup is requested
+	  }
+      }
+  }
+
+  // ***
+  //
+  // private convenience methods
+  //
+  // ***
+
+  // we have a map from base name to base id
+
+  /**
+   *
+   * This method maps the name of a (possibly embedded)
+   * field to the Short id of the Base that it
+   * belongs to.<br><br>
+   *
+   * This is used to support embedded fields.. as
+   * getEmbedded() recurses down through the
+   * embedded base hierarchy under selectedBase,
+   * it records the Base for each embedded field
+   * as it goes along creating names for the
+   * embedded fields.
+   *
+   */
+
+  private void mapNameToId(String name, Short id)
+  {
+    if (id != null)
+      {
+	baseIDHash.put(name, id);
+      }
+  }
+
+  /**
+   *
+   * This method returns the Short id of the Base
+   * that corresponds to the field with name
+   * &lt;name&gt;.<br><br>
+   *
+   * This is used to support embedded fields.. as
+   * getEmbedded() recurses down through the
+   * embedded base hierarchy under selectedBase,
+   * it records the Base for each embedded field
+   * as it goes along creating names for the
+   * embedded fields.
+   *
+   */
+
+  Short getIdFromName(String name)
+  {
+    return (Short) baseIDHash.get(name);
+  }
+
+  private void mapBaseNamesToTemplates(short id)
+  {
+    FieldTemplate template;
+
+    /* -- */
+
+    fields = gc.getTemplateVector(id);
+    
+    if (fields != null)
+      {
+	fieldHash.clear();
+
+	for (int i = 0; i < fields.size(); i++)
+	  {
+	    template = (FieldTemplate) fields.elementAt(i);
+	    mapNameToTemplate(template.getName(), template);
+	  }
+      }
+  }
+
+  // we have a map from fieldname to field template
+
+  void mapNameToTemplate(String name, FieldTemplate template)
+  {
+    fieldHash.put(name, template);
+  }
+
+  FieldTemplate getTemplateFromName(String name)
+  {
+    return (FieldTemplate) fieldHash.get(name);
+  }
+
+  // we have a map from embedded fieldname (with slashes) to the name
+  // template after the last slash
+
+  void mapEmbeddedToField(String name, String fieldName)
+  {
+    nameHash.put(name, fieldName);
+  }
+
+  String getFieldFromEmbedded(String name)
+  {
+    return (String) nameHash.get(name);
+  }
+
+  // we have a map from base names to Base
+
+  void mapNameToBase(String name, BaseDump base)
+  {
+    myHash.put(name, base);
+  }
+
+  BaseDump getBaseFromName(String name)
+  {
+    return (BaseDump) myHash.get(name);
+  }
+
+  BaseDump getBaseFromShort(Short id)
+  {
+    return (BaseDump) shortHash.get(id);
+  }
+
+  BaseDump getBaseFromShort(short id)
+  {
+    return (BaseDump) shortHash.get(new Short(id));
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class 
+                                                                        QueryRow
+
+------------------------------------------------------------------------------*/
+
+class QueryRow implements ItemListener {
+
+  static final boolean debug = false;
+
+  // ---
+
+  querybox parent;
+  JPanel panel;
+  FieldTemplate field = null;
+
+  Vector fields;		// FieldTemplate Vector for the selectedBase
+
+  JComboBox
+    fieldChoice = new JComboBox(),
+    boolChoice = new JComboBox(),
+    compareChoice = new JComboBox();
+
+  JPanel operandContainer= new JPanel();
+  JComponent operand = null;
+
+  String fieldName;
+
+  /* -- */
+
+  QueryRow(JPanel panel, querybox parent)
+  {
+    this.panel = panel;
+    this.parent = parent;
+
+    try
+      {
+	fields = parent.gc.getTemplateVector(parent.selectedBase.getTypeID());
+	resetFieldChoices();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("remote exception in QueryRow constructor:" + ex.getMessage());
+      }
+
+    GridBagConstraints gbc = parent.gbc;
+    GridBagLayout gbl = parent.gbl;
+
+    gbc.gridy = gbc.RELATIVE;
+    gbc.gridx = gbc.RELATIVE;
+    gbc.gridheight = 1;
+    gbc.gridwidth = 1;
+
+    gbl.setConstraints(fieldChoice, gbc);
+    panel.add(fieldChoice);
+
+    gbl.setConstraints(boolChoice, gbc);
+    panel.add(boolChoice);
+
+    gbl.setConstraints(compareChoice, gbc);
+    panel.add(compareChoice);
+
+    // we have to wrap the operand component in a container so that
+    // we can change the operand component later
+
+    operandContainer.add(operand);
+
+    gbl.setConstraints(operandContainer, gbc);
+    panel.add(operandContainer);
+  }
+
+  /**
+   *
+   * Internal method to return a choice menu containing the fields for
+   * a particular base
+   *
+   */
+    
+  private void resetFieldChoices() throws RemoteException
+  {
+    // we don't want to be bothered while we configure our components
+
+    fieldChoice.removeItemListener(this);
+
+    // ok, refresh fieldChoice
+
+    fieldChoice.removeAllItems();
+
+    // we want to be able to allow the user to search on fields in
+    // embedded objects
+
+    for (int i = 0; i < parent.fieldChoices.size(); i++)
+      {
+	if (debug)
+	  {
+	    System.err.println("QueryRow: adding field choice <" + i + ">:" + 
+			       parent.fieldChoices.elementAt(i));
+	  }
+
+	fieldChoice.addItem(parent.fieldChoices.elementAt(i));
+      }
+
+    // now, what field wound up being shown?
+
+    String fieldName = (String) fieldChoice.getSelectedItem();
+    FieldTemplate field = parent.getTemplateFromName(fieldName);
+
+    setField(field);
+
+    fieldChoice.addItemListener(this);
+  }
+
+  /**
+   *
+   * This method takes care of matters when we change or set our
+   * field combo box.  Note that we don't set the fieldChoice
+   * contents here, as we assume it will be done by the user
+   * or by resetFieldChoices().
+   *
+   */
+
+  void setField(FieldTemplate field)
+  {
+    // ok, now update our is/is not, comparator, and operand fields
+
+    this.field = field;
+    fieldName = field.getName();
+
+    if (debug)
+      {
+	System.err.println("QueryRow.setField(" + fieldName + ")");
+      }
+
+    resetCompare(field);
+    resetBoolean(field, (String) compareChoice.getSelectedItem());
+    resetOperand(field, (String) compareChoice.getSelectedItem());
+    panel.revalidate();
+  }
+
+  /**
+   *
+   * This method sets up the boolean choice combobox.
+   *
+   */
+
+  void resetBoolean(FieldTemplate field, String opName)
+  {
+    boolean does;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("QueryRow.resetBoolean(" + field.getName() + ", " + opName + ")");
+      }
+
+    // don't show us changing it
+
+    boolChoice.setVisible(false);
+
+    boolChoice.removeAllItems();
+
+    does = opName.equalsIgnoreCase("Start With") ||
+      opName.equalsIgnoreCase("End With") ||
+      opName.equalsIgnoreCase("Contain");
+
+    if (does)
+      {
+	boolChoice.addItem("does");
+	boolChoice.addItem("does not");
+      }
+    else
+      {
+	boolChoice.addItem("is");
+	boolChoice.addItem("is not");
+      }
+
+    boolChoice.setVisible(true);
+  }
+
+  /**
+   *
+   * This method sets up the comparison operator combobox.
+   *
+   */
+
+  void resetCompare(FieldTemplate field)
+  {
+    if (debug)
+      {
+	System.err.println("QueryRow.resetCompare(" + field.getName() + ")");
+      }
+
+    compareChoice.removeItemListener(this);
+
+    // don't show us changing it
+
+    compareChoice.setVisible(false);
+
+    compareChoice.removeAllItems();
+
+    if (field.isArray())
+      {
+	compareChoice.addItem("Contain");
+	compareChoice.addItem("Length <");
+	compareChoice.addItem("Length >");
+	compareChoice.addItem("Length ==");
+      }
+    else if (field.isDate())
+      {
+	compareChoice.addItem("Before");
+	compareChoice.addItem("After");
+	compareChoice.addItem("Same Day As");
+	compareChoice.addItem("Same Week As");
+	compareChoice.addItem("Same Month As");
+      }
+    else if (field.isNumeric())
+      {
+	compareChoice.addItem("==");
+	compareChoice.addItem("<");
+	compareChoice.addItem(">");
+	compareChoice.addItem("<=");
+	compareChoice.addItem(">=");
+      }
+    else if (field.isBoolean())
+      {
+	compareChoice.addItem("==");
+      }
+    else if (field.isString())
+      {
+	compareChoice.addItem("==");
+	compareChoice.addItem("== [Case Insensitive]");
+	compareChoice.addItem("<");
+	compareChoice.addItem(">");
+	compareChoice.addItem("<=");
+	compareChoice.addItem(">=");
+	compareChoice.addItem("Start With");
+	compareChoice.addItem("End With");
+      }
+    else if (field.isInvid())
+      {
+	compareChoice.addItem("==");
+      }
+
+    compareChoice.addItem("Defined");
+    compareChoice.setVisible(true);
+    compareChoice.addItemListener(this);
+  }
+
+  /**
+   *
+   * This method sets up the operand GUI component.
+   *
+   */
+
+  void resetOperand(FieldTemplate field, String opName)
+  {
+    if (operand != null)
+      {
+	operand.setVisible(false);
+	operandContainer.remove(operand);
+      }
+
+    if (debug)
+      {
+	System.err.println("QueryRow.resetOperand(" + field.getName() + ", " + opName + ")");
+      }
+
+    // when we test for defined, we won't have an operand value
+
+    if (opName.equals("Defined"))
+      {
+	return;
+      }
+
+    if (opName.startsWith("Length"))
+      {
+	operand = new JnumberField();
+      }
+    else if (field.isDate())
+      {
+	operand = new JdateField(new Date(), true, false, null, null);
+      }
+    else if (field.isString())
+      {
+	operand = new JstringField();
+      }
+    else if (field.isNumeric())
+      {
+	operand = new JnumberField();
+      }
+    else if (field.isBoolean())
+      {
+	operand = new JCheckBox();
+      }
+    else if (field.isInvid())
+      {
+	short targetBase = field.getTargetBase();
+
+	if (targetBase < 0)
+	  {
+	    operand= new JstringField();
+	  }
+	else
+	  {
+	    Short Target = new Short(targetBase);
+	    objectList list;
+	    JInvidChooser invidChooser;
+	    Vector choices;
+
+	    /* -- */
+
+	    operand = invidChooser = new JInvidChooser(null, targetBase);
+
+	    if (parent.gc.cachedLists.containsList(Target))
+	      {
+		if (debug)
+		  {
+		    System.out.println("Got it from the cachedLists");
+		  }
+		
+		list = parent.gc.cachedLists.getList(Target);
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.out.println("It's not in there, downloading a new one.");
+		  }
+		
+		// need to do a query of the database here
+
+		QueryResult qr = null;
+		
+		try
+		  {
+		    qr = parent.gc.session.query(new Query(targetBase, null, false)); // include non-editables
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("Error querying the server for invid choices " + ex.getMessage());
+		  }
+
+		// cache it as a favor to the rest of the client
+		    
+		parent.gc.cachedLists.putList(Target, qr);
+		list = parent.gc.cachedLists.getList(Target);
+	      }
+
+	    choices = list.getListHandles(false); // no inactives
+	    choices = parent.gc.sortListHandleVector(choices);
+
+	    for (int i = 0; i < choices.size(); i++)
+	      {
+		listHandle thisChoice = (listHandle) choices.elementAt(i);
+		invidChooser.addItem(thisChoice);
+	      }
+
+	    invidChooser.setMaximumRowCount(12);
+	    invidChooser.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
+	    invidChooser.setEditable(false);
+	  }
+      }
+    else if (field.isIP())
+      {
+	operand = new JIPField(null, true, true);
+      }
+
+    if (operand == null)
+      {
+	throw new NullPointerException("null operand");
+      }
+
+    operandContainer.add(operand);
+    operand.setVisible(true);
+  }
+
+  /**
+   *
+   * This method is called when the querybox wants to remove this row.
+   * This method takes care of removing all components from panel, but
+   * does not take care of removing itself from the querybox Rows Vector.
+   *
+   */
+
+  void removeRow()
+  {
+    panel.remove(fieldChoice);
+    panel.remove(boolChoice);
+    panel.remove(compareChoice);
+    panel.remove(operandContainer);
+  }
+
+  /**
+   *
+   * This method returns a reference to the Base that this QueryRow
+   * is set to search on.  The Base that an individual QueryRow is
+   * set to search on may differ from the selectedBase in parent
+   * because we allow searches on fields contained in embedded
+   * objects.
+   * 
+   */
+
+  public Base getBase()
+  {
+    return parent.getBaseFromShort(parent.getIdFromName(fieldName));
+  }
+
+  /**
+   *
+   * This method returns a QueryNode corresponding to the current
+   * configuration of this QueryRow.
+   * 
+   */
+
+  public QueryNode getQueryNode()
+  {
+    QueryNode myNode;
+    Object value = null;
+
+    boolean editInPlace;
+    Short baseID;
+
+    /* -- */
+
+    if (operand instanceof JnumberField)
+      {
+	JnumberField numField = (JnumberField) operand;
+	value = numField.getValue();
+      }
+    else if (operand instanceof JdateField)
+      {
+	JdateField dateField = (JdateField) operand;
+	value = dateField.getDate();
+      }
+    else if (operand instanceof JCheckBox)
+      {
+	JCheckBox boolField = (JCheckBox) operand;
+	value = new Boolean(boolField.isSelected());
+      }
+    else if (operand instanceof JIPField)
+      {
+	JIPField ipField = (JIPField) operand;
+	value = ipField.getValue();
+      }
+    else if (operand instanceof JstringField)
+      { 
+	JstringField stringField = (JstringField) operand;
+	value = stringField.getValue();
+      }
+    else if (operand instanceof JInvidChooser)
+      {
+	JInvidChooser invidChooser = (JInvidChooser) operand;
+	value = invidChooser.getSelectedInvid();
+      }
+
+    String operator = (String) compareChoice.getSelectedItem();
+    byte opValue = QueryDataNode.NONE;
+    
+    if (field.isArray())
+      {
+	if (operator.equals("Contain"))
+	  {
+	    opValue = QueryDataNode.CONTAINS;
+	  } 
+	else if (operator.equals("Length =="))
+	  {
+	    opValue = QueryDataNode.LENGTHEQ;
+	  } 
+	else if (operator.equals("Length >"))
+	  {
+	    opValue = QueryDataNode.LENGTHGR;
+	  } 
+	else if (operator.equals("Length <"))
+	  {
+	    opValue = QueryDataNode.LENGTHLE;
+	  }
+
+	if (opValue == 0)
+	  {
+	    System.err.println("QueryRow.getQueryNode(): Unknown array comparator");
+	    return null;
+	  }
+	    
+	myNode = new QueryDataNode(fieldName, opValue, value);
+	    
+	// -- if not is true then add a not node
+	    
+	if (isNot())
+	  {
+	    myNode = new QueryNotNode(myNode); // if NOT then add NOT node
+	  } 
+	    
+	return myNode;
+      }
+    else if (!operator.startsWith("Same"))
+       {
+	// ok, normal scalar field, not a time window comparison
+
+	if (operator.equals("=="))
+	  {
+	    opValue = QueryDataNode.EQUALS;
+	  } 
+	else if (operator.equals("<") || operator.equals("Before"))
+	  {
+	    opValue = QueryDataNode.LESS;
+	  } 
+	else if (operator.equals("<="))
+	  {
+	    opValue = QueryDataNode.LESSEQ;
+	  } 
+	else if (operator.equals(">") || operator.equals("After"))
+	  {
+	    opValue = QueryDataNode.GREAT;
+	  } 
+	else if (operator.equals(">="))
+	  {
+	    opValue = QueryDataNode.GREATEQ;
+	  } 
+	else if (operator.equals("== [Case Insensitive]"))
+	  {
+	    opValue = QueryDataNode.NOCASEEQ;
+	  }
+	else if (operator.equals("Start With"))
+	  {
+	    opValue = QueryDataNode.STARTSWITH;
+	  }
+	else if (operator.equals("End With"))
+	  {
+	    opValue = QueryDataNode.ENDSWITH;
+	  }
+
+	if (opValue == 0)
+	  {
+	    System.err.println("QueryRow.getQueryNode(): Unknown scalar comparator");
+	    return null;
+	  }
+	    
+	myNode = new QueryDataNode(fieldName, opValue, value);
+	    
+	// -- if not is true then add a not node
+	    
+	if (isNot())
+	  {
+	    myNode = new QueryNotNode(myNode); // if NOT then add NOT node
+	  } 
+	    
+	return myNode;
+      }
+    else
+      {
+	if (!(value instanceof Date))
+	  {
+	    System.err.println("QueryRow.getQueryNode(): Don't have a proper date value");
+	    return null;
+	  }
+
+	Date
+	  lowDate,
+	  hiDate,
+	  dateValue = (Date) value;
+
+	Calendar cal = Calendar.getInstance();
+
+	cal.setTime(dateValue);
+
+	cal.set(Calendar.HOUR, 0);
+	cal.set(Calendar.MINUTE, 0);
+	cal.set(Calendar.SECOND, 0);
+	cal.set(Calendar.MILLISECOND, 0);
+
+	if (operator.equals("Same Day As"))
+	  {
+	    lowDate = cal.getTime();
+
+	    cal.roll(Calendar.DATE, true);
+
+	    hiDate = cal.getTime();
+	  }
+	else if (operator.equals("Same Week As"))
+	  {
+	    cal.set(Calendar.DAY_OF_WEEK, 0);
+	    lowDate = cal.getTime();
+		
+	    cal.roll(Calendar.WEEK_OF_YEAR, true);
+
+	    hiDate = cal.getTime();
+	  }
+	else if (operator.equals("Same Month As"))
+	  {
+	    cal.set(Calendar.DAY_OF_MONTH, 0);
+	    lowDate = cal.getTime();
+		
+	    cal.roll(Calendar.MONTH, true);
+
+	    hiDate = cal.getTime();
+	  }
+	else
+	  {
+	    System.err.println("QueryRow.getQueryNode(): Don't have a proper date comparator");
+	    return null;
+	  }
+
+	myNode = new QueryAndNode(new QueryDataNode(fieldName, QueryDataNode.GREATEQ, lowDate),
+				  new QueryDataNode(fieldName, QueryDataNode.LESS, hiDate));
+	    
+	// -- if not is true then add a not node
+	    
+	if (isNot())
+	  {
+	    myNode = new QueryNotNode(myNode); // if NOT then add NOT node
+	  } 
+	    
+	return myNode;
+      }
+  }
+
+  /**
+   *
+   * @return true if this QueryRow negates the basic comparison
+   *
+   */
+
+  private boolean isNot()
+  {
+    return (boolChoice.equals("is not") || boolChoice.equals("does not"));
+  }
+
+  /**
+   *
+   * This is the standard ItemListener callback method.  This method
+   * catches events from Checkboxes and various choice components.
+   *
+   * @see java.awt.event.ItemListener
+   * 
+   */
+  
+  public void itemStateChanged(ItemEvent e)
+  {
+    // we want to ignore deselect events
+
+    if (e.getStateChange() == e.DESELECTED)
+      {
+	return;
+      }
+
+    if (e.getSource() == fieldChoice)
+      {
+	setField(parent.getTemplateFromName((String) fieldChoice.getSelectedItem()));
+      }
+    else if (e.getSource() == compareChoice)
+      {
+	String compareOperator = (String) compareChoice.getSelectedItem();
+	resetBoolean(field, compareOperator);
+	resetOperand(field, compareOperator);
+	panel.revalidate();
+      }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class 
+                                                                    OptionsFrame
+
+------------------------------------------------------------------------------*/
+
+class OptionsFrame extends JFrame implements ActionListener {
+
+  static final boolean debug = false;
+
+  // ---
+
+  JButton qSave = new JButton("Save");
+  JButton qLoad = new JButton("Load");
+  JButton qDone = new JButton("Done");
+  JButton qCancel = new JButton("Cancel");
+  JButton lCancel = new JButton("Cancel");
+  JButton lRename = new JButton("Rename");
+  JButton lSelect = new JButton("Select");
+
+  JButton optionClose = new JButton("Close");
+  querybox parent;
+
+  Vector fields;
+  Hashtable checkboxes = new Hashtable();
+
+  JDialog saveBox;
+  JTextField saveText;
+
+  /* -- */
+
+  /**
+   *
+   * This internal method is used to create a frame which will
+   * present a matrix of checkboxes corresponding to the fields
+   * available in the specified object base.  The user will
+   * be able to select various checkboxes to control which fields
+   * are to be returned by the query generated by this querybox.
+   *
+   */
+
+  OptionsFrame(querybox parent)
+  {
+    super("Options");
+
+    // ---
+
+    JScrollPane option_pane = new JScrollPane();
+    option_pane.setBorder(new TitledBorder("Return Options"));
+
+    JPanel save_panel = new JPanel(); // holds query options
+    save_panel.setBorder(new TitledBorder("Query Options"));
+
+    JPanel option_panel = new JPanel();
+    JPanel choice_option = new JPanel(); // basically holds the Close button
+    JPanel contain_panel = new JPanel(); // Holds the boxes
+
+    FieldTemplate template;
+    JCheckBox newCheck; 
+    JPanel inner_panel = new JPanel();
+    
+    Vector tmpAry = new Vector();
+
+    GridBagLayout gbl = new GridBagLayout();
+    GridBagConstraints gbc = new GridBagConstraints();
+    
+    /* -- */
+
+    this.parent = parent;
+      
+    setSize(500,300);
+  
+    optionClose.setBackground(Color.lightGray);
+    optionClose.addActionListener(this);
+    
+    choice_option.setBackground(Color.white);
+    choice_option.setLayout(new FlowLayout());
+    choice_option.add(optionClose);
+    
+    contain_panel.setLayout(new BorderLayout());
+    contain_panel.add("South", save_panel);
+    contain_panel.add("Center", option_pane);
+    
+    option_panel.setLayout(new BorderLayout());
+    option_panel.add("South",choice_option);
+    option_panel.add("Center", contain_panel);
+  
+    option_pane.setViewportView(inner_panel);
+    inner_panel.setLayout(gbl);
+    
+    save_panel.setLayout(new FlowLayout());
+    save_panel.add(qSave);
+    save_panel.add(qLoad);
+
+    qSave.addActionListener(this);
+    qLoad.addActionListener(this);
+
+    gbc.gridy = 0;
+    gbc.gridx = gbc.RELATIVE;
+    gbc.gridheight = 1;
+    gbc.gridwidth = 1;
+
+    fields = parent.gc.getTemplateVector(parent.selectedBase.getTypeID());
+
+    int count = 0;
+    int tmpRow = 0;
+	  
+    for (int j=0; fields != null && (j < fields.size()); j++) 
+      {	
+	template = (FieldTemplate) fields.elementAt(j);
+	newCheck = new JCheckBox(template.getName());
+	newCheck.setSelected(true);
+
+	checkboxes.put(template.getName(), newCheck);
+	      
+	if (count == 3) // we've got space in the current row
+	  {
+	    gbc.gridy = ++tmpRow;
+	    count = 0;
+	  }
+
+	gbl.setConstraints(newCheck, gbc);
+
+	inner_panel.add(newCheck);
+
+	count++;
+      }
+
+    getContentPane().add(option_panel);
+  }
+
 
   /**
    *
@@ -1560,6 +1657,41 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   
   public void actionPerformed(ActionEvent e)
   {
+    boolean allFields = true;
+
+    /* -- */
+
+    if (e.getSource() == optionClose)
+      {
+	parent.fieldsToReturn = new Vector();
+
+	Enumeration enum = checkboxes.keys();
+
+	while (enum.hasMoreElements())
+	  {
+	    String key = (String) enum.nextElement();
+	    JCheckBox checkbox = (JCheckBox) checkboxes.get(key);
+	    
+	    if (checkbox.isSelected())
+	      {
+		parent.fieldsToReturn.addElement(key);
+	      }
+	    else
+	      {
+		allFields = false;
+	      }
+	  }
+
+	if (!allFields)
+	  {
+	    parent.fieldsToReturn = null;
+	  }
+
+	setVisible(false);
+
+	return;
+      }
+
     if (e.getSource() == qSave)
       {
 	if (debug)
@@ -1567,7 +1699,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    System.out.println("Save Clicked");
 	  }
 
-	saveBox = new JDialog(optionsFrame, "Save As", true);
+	saveBox = new JDialog(this, "Save As", true);
 
 	JPanel button_panel = new JPanel();
 	JPanel mid_panel = new JPanel();
@@ -1641,7 +1773,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	button_panel.setBackground(Color.white);
 	
 	centeringPanel.setLayout(new FlowLayout());
-	loadBox = new JDialog(optionsFrame, "Load Query", true);	
+	JDialog loadBox = new JDialog(this, "Load Query", true);	
 	List queryList = new List(10);
 
 	l = new JLabel("");
@@ -1705,790 +1837,5 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	loadBox.getContentPane().add(loadPane);
 	loadBox.setVisible(true);
       }
-
-    if (e.getSource() == displayButton)
-      {
-	if (debug)
-	  {
-	    System.out.println("Field Display Selected");
-	  }
-
-	if (optionsFrame == null)
-	  {
-	    optionsFrame = createOptionFrame(defaultBase);
-	  }
-
-	optionsFrame.setVisible(true);
-      }
-    
-    if (e.getSource() == optionClose)
-      {
-	// this check shouldn't be necessary, but..
-
-	if (optionsFrame != null)
-	  {
-	    optionsFrame.setVisible(false);
-	  }
-      }
-
-    if (e.getSource() == lCancel)
-      {
-	loadBox.setVisible(false);
-      }
-
-    if (e.getSource() == OkButton) 
-      {
-	if (debug)
-	  {
-	    System.out.println("You will submit");   
-	  }
-
-	if (optionsFrame != null)
-	  {
-	    optionsFrame.setVisible(false);
-	  }
-
-	this.returnVal = createQuery();
-	setVisible(false);	// close down
-      } 
-    else if (e.getSource() == CancelButton)
-      {
-	if (debug)
-	  {
-	    System.out.println("Cancel was pushed");
-	  }
-
-	if (optionsFrame != null)
-	  {
-	    optionsFrame.setVisible(false);
-	  }
-
-	this.returnVal = null;
-	setVisible(false);
-      } 
-
-    if (e.getSource() == addButton)
-      {
-	addChoiceRow(defaultBase);
-      }
-
-    if (e.getSource() == removeButton)
-      {
-	if (this.row <= 1)
-	  {
-	    System.out.println("Error: cannot remove any more rows");
-	  }  
-	else
-	  {
-	    Component[] tempAry = (Component[]) this.Rows.elementAt(this.row - 1);
-	    removeRow(tempAry, inner_choice, this.row - 1);
-	    tempAry = null;
-	  } 
-      }
-  } 
-
-  /**
-   *
-   * This is the standard ItemListener callback method.  This method
-   * catches events from Checkboxes and various choice components.
-   * 
-   */
-  
-  public void itemStateChanged(ItemEvent e)
-  {
-    qaryChoice opChoice;
-
-    /* -- */
-
-    if (e.getSource() == editBox)
-      {
-	this.editOnly = editBox.isSelected();
-
-	if (debug)
-	  {
-	    System.out.println("Edit Box Clicked: " + editOnly);
-	  }
-      }
-
-    if (e.getSource() == baseChoice)
-      {
-	if (debug)
-	  {
-	    System.out.println("Base selected");
-	  }
-
-	// First, change the base
-	  
-	Base defaultBase = getBaseFromName((String) baseChoice.getSelectedItem());
-	this.defaultBase = defaultBase;
-
-	try
-	  {      
-	    this.baseName = defaultBase.getName();
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote exception: " + ex);
-	  }
-	  
-	// remove all entries in vector of component arrays
-
-	for (int i = this.row - 1; i > -1; i--)
-	  {
-	    Component[] tempRow = (Component[]) this.Rows.elementAt(i);
-	    removeRow(tempRow, inner_choice, i);
-
-	    if (debug)
-	      {
-		System.out.println("Removing Row: " + i);
-	      }
-
-	    this.Rows.setSize(i);
-	  }
-	  
-	addChoiceRow(defaultBase);
-
-	// update field name map
-
-	try
-	  {
-	    mapBaseNamesToTemplates(defaultBase.getTypeID());
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote exception: " + ex);
-	  }
-
-	// Now update optionsFrame
-
-	if (optionsFrame != null)
-	  {
-	    optionsFrame.setVisible(false);
-	    optionsFrame.removeAll();
-	    optionsFrame = null; // we'll reload it next time the popup is requested
-	  }
-      }
-	
-    if (e.getSource() instanceof qfieldChoice)
-      {
-	if (debug)
-	  {
-	    System.out.println("Field Selected");
-	  }
-
-	qfieldChoice source = (qfieldChoice) e.getSource();
-
-	String fieldName = (String) source.getSelectedItem();
-
-	int currentRow = source.getRow();
-
-	if (currentRow >= Rows.size())
-	  {
-	    return;		// to handle Swing's value-set notification
-	  }
-
-	if (debug)
-	  {
-	    System.out.println("Current Row " + currentRow);
-	  }
-
-	Component[] tempRow = (Component[]) Rows.elementAt(currentRow); 
-
-	if (debug)
-	  {
-	    if (tempRow == null)
-	      {
-		System.out.println("OOOOOPS!!!");
-	      }
-	  }
-
-	removeRow(tempRow, inner_choice, currentRow);
-	opChoice = getOpChoice(fieldName);
-	Component newInput = getInputField(fieldName);
-	updateIsIsNot((String) opChoice.getSelectedItem(), tempRow);
-	tempRow[5] = opChoice;
-	tempRow[7] = newInput;
-	addRow(tempRow, true, inner_choice, currentRow);
-      }
-    else if (e.getSource() instanceof qaryChoice)
-      {
-	if (debug)
-	  {
-	    System.out.println("Other Choice selected (presumably operator choice)");
-	  }
-
-	qaryChoice source = (qaryChoice) e.getSource();
-	
-	String opName = (String) source.getSelectedItem();
-
-	if (debug)
-	  {
-	    System.out.println("Opname: " + opName);
-	  }
-
-	int currentRow = source.getRow();
-	Component[] tempRow = (Component[]) Rows.elementAt(currentRow);
-	updateIsIsNot(opName, tempRow);
-	removeRow(tempRow, inner_choice, currentRow);
-	addRow(tempRow, true, inner_choice, currentRow); // make sure the new 
-	                                                 // component makes it into the 
-	                                                 // row
-	// make sure everything's enabled
-	
-	if (!tempRow[3].isEnabled())
-	  {
-	    tempRow[3].setEnabled(true);
-	  }
-      }
-    else 
-      {
-	// ?? what the heck is it? We don't recognize this component
-      }
-  }
-
-  private void updateIsIsNot(String opName, Component[] tempRow)
-  {
-    if (opName.equalsIgnoreCase("Start With") ||
-	opName.equalsIgnoreCase("End With") ||
-	opName.equalsIgnoreCase("Contain"))
-      {
-	// For grammatical purposes, we're changing the "is/is not"
-	// choice to "does/does not"
-	
-	tempRow[3].setVisible(false);
-	tempRow[3] = getDoesNot();
-      }
-    else 
-      {
-	JComboBox tempChoice = (JComboBox) tempRow[1];
-	String myField = (String) tempChoice.getSelectedItem();
-	tempRow[3].setVisible(false);
-	tempRow[3] = getIsNot(myField);
-      }
-  }
-
-  /** 
-   *
-   * This method takes a as its parameter query and sets the 
-   * gui components of the querybox to reflect the state of 
-   * that query.
-   *
-   */
-
-  public Query readQuery (String savedQuery)
-  {
-    String 
-      temp,
-      name,
-      base,
-      edit;
-    
-    int 
-      baseInt,
-      nameBreak,
-      baseBreak,
-      editBreak,
-      queryBreak;
-
-    /* -- */
-    
-    temp = savedQuery;
-
-    nameBreak = temp.indexOf(":"); // this will get the first 
-                                     // index of the ':' character 
-
-    if (debug)
-      {
-	System.out.println("--------");
-      }
-
-    name = temp.substring(0, nameBreak); 
-
-    if (debug)
-      {
-	System.out.println("Name Found: " + name);
-      }
-
-    temp = temp.substring(nameBreak + 1, temp.length()); // The '+1' removes the colon
-
-    baseBreak = temp.indexOf(":");
-    base = temp.substring(0, baseBreak);
-
-    if (debug)
-      {
-	System.out.println("Here's base: " + base);
-      }
-      
-    temp = temp.substring(baseBreak + 1, temp.length());
-    editBreak = temp.indexOf(":");
-    edit = temp.substring(0, editBreak);
-
-    if (debug)
-      {
-	System.out.println("And Edit: " + edit);
-      }
-
-    temp = temp.substring(editBreak + 1, temp.length());
-
-    if (debug)
-      {
-	System.out.println("And the Rest: " + temp);
-	System.out.println("--------");
-      }
-
-    // Time to create the query....
-
-    // Step One: Create the root Node. Then we can make a nice query from it.
-	 
-    // First, check and see if the base is in short or string form. This is done
-    // by looking to see if a '#' sign is the first character (note: be sure to
-    // ignore backslashed characters
-
-    // <<< Insert well written and robust code here >>>
-
-    /* Step Two: Figure out what the base is, and what form it's in (ie, baseID,
-     * baseName, etc), and get the other pertinent variables. We'll use these to 
-     * create the query object.
-     */
-    
-    this.queryString = temp;	// decodeString will use the querystring to read
-				// the query
-                              
-    QueryNode root = decodeString();
-    boolean Edit;
-    
-    Query returnQuery = new Query(base, root, edit.equals("true"));
-    
-    if (debug)
-      {
-	System.out.println("");
-	System.out.println("______________");
-	System.out.println("And Here it is: " + returnQuery.dumpToString());
-      }
-    
-    return returnQuery;
-  }
-
-  /**
-   * This method will break down the LISP-y section of the
-   * query-string. In keeping with the theme, it is 
-   * recursive. The nodes of the query are set as it goes along.
-   *
-   * The outer method is a helper method, while the inner method
-   * rDecode really does all the work
-   */
-      
-  private QueryNode decodeString()
-  {
-    QueryNode returnNode;
-    String temp;
-
-    /* -- */
-     
-    returnNode = null;
-
-    if (queryString.startsWith("("))
-      {
-	if (debug)
-	  {
-	    System.out.println("YAY!!");
-	  }
-
-	// remove the outer parens
-
-	queryString = queryString.substring(1, queryString.length() - 1); 
-
-	returnNode = rDecode(); // Begin the begin (ie do the recursive stuff)
-      }
-
-    return returnNode;  
-  }
-  
-  private QueryNode rDecode () 
-  {
-    QueryNode myNode = null;
-    String temp = queryString;
-
-    /* -- */
-
-    if (debug)
-      {
-	System.out.println("rDecode recursing: here's the rest: " + temp);
-      }
-      
-    /* While we're recursing, we are chopping off bits of this.queryString,
-       which resides high (in the querybox object) above all this madness.
-       
-       So, let's begin by seeing what this level holds:
-       
-       1) if the first char is another paren, then call rDecode again after 
-          removing it
-       
-       2) if the next char is an operator (=, =<, =>, <, >, etc) then it's a
-          data note. Here, we have to get the fieldname and value too, and with
-          the fieldname we have to test to see if it's in Short or String form
-       
-       3) if the string starts with 'not' then make a not node and set it's
-          child to rDecode()
-	 
-       4) if temp begins with 'and' or 'or', then we have to set both 
-          children to rDecode(). The queryString will be 
-          shortened as we go along.
-    */
-      
-    if (queryPrefix("(") || queryPrefix(")"))
-      {
-	// we've cut off the paren..
-
-	myNode = rDecode();
-      }
-    else if (queryPrefix("not")) 
-      {
-	// make a not node, cut the 'not' off of the queryString and
-	// set the child of the not to rDecode(queryString) and remove ')'
-
-	myNode = new QueryNotNode(rDecode());
-
-	queryPrefix(")");	// cut off ) if it's left over
-
-	return myNode;
-      }
-    else if (queryPrefix("and")) 
-      {
-	// make an and node, cut the 'and' off of the queryString and
-	// set the child of the not to rDecode(queryString) and remove ')'
-
-	myNode = new QueryAndNode(rDecode(), rDecode());
-
-	queryPrefix(")");	// cut off ) if it's left over
-
-	return myNode;
-      }
-    else if (queryPrefix("or")) 
-      {
-	// make an or node, cut the 'or' off of the queryString and
-	// set the child of the not to rDecode(queryString) and remove ')'
-
-	myNode = new QueryOrNode(rDecode(), rDecode());
-
-	queryPrefix(")");	// cut off ) if it's left over
-
-	return myNode;
-      }
-    else 
-      {
-	// It should be a data node. Lets see what happens.
-	  
-	byte comparator = 0;
-	String value = null;
-	String fieldname = null;
-
-	/* -- */
-
-	if (queryPrefix("="))
-	  { 
-	    comparator = 1;
-
-	    if (debug)
-	      {
-		System.out.println("Equals Found (=)");
-	      }
-	  }
-	else if (queryPrefix("<"))
-	  {
-	    comparator = 2;
-	  } 
-	else if (queryPrefix("<="))
-	  {
-	    comparator = 3;
-	  }
-	else if (queryPrefix(">"))
-	  {
-	    comparator = 4;
-	  }
-	else if (queryPrefix(">="))
-	  {
-	    comparator = 5;
-	  }
-	else if (queryPrefix("= [Case Insensitive]"))
-	  {
-	    comparator = 6;
-	  }
-	else if (queryPrefix("Start With"))
-	  {
-	    comparator = 7;
-	  }
-	else if (queryPrefix("End With"))
-	  {
-	    comparator = 8;
-	  }
-	else
-	  {
-	    System.out.println("Help! rDecode operator not found: " + temp);
-	  }
-	  
-	// We've got the operator. Now we have to get the fieldname and value
-	
-	boolean fieldDone,
-	  valueDone;
-	
-	int nextIndex;
-
-	fieldDone = valueDone = false;
-
-	while (! (fieldDone && valueDone))
-	  {
-	    if (queryPrefix("("))
-	      {
-		// ignore parens
-		  
-		if (debug)
-		  {
-		    System.out.println("Continue");
-		  }
-
-		continue;
-	      }
-	    else if (queryPrefix("fieldname"))
-	      {
-		// Ok, space up to the fieldname in the string and 
-		// get it. Also, be sure to look for # signs.
-
-		if (debug)
-		  {
-		    System.out.println("Field");
-		  }
-
-		nextIndex = queryString.indexOf(")");
-		  
-		// Put backslash check here;
-  
-		fieldname = queryString.substring(0, nextIndex);
-		  
-		queryString = queryString.substring(nextIndex + 1, queryString.length());
-
-		if (debug)
-		  {
-		    System.out.println("Fieldname is: " + fieldname);
-		  }
-
-		fieldDone = true;
-	      }
-	    else if (queryString.startsWith("value"))
-	      {
-		// Ok, space up to the Value in the string and 
-		// get that.
-
-		if (debug)
-		  {
-		    System.out.println("Value");
-		  }
-		  
-		nextIndex = queryString.indexOf(")");
-		  
-		// Put backslash check here;
-  
-		value = queryString.substring(0, nextIndex);
-
-		queryString = queryString.substring(nextIndex + 1, queryString.length());
-
-		if (debug)
-		  {
-		    System.out.println("value is: " + value);
-		  }
-
-		valueDone = true;
-	      }
-	    else
-	      {
-		System.err.println("Error: Unknown Character Found in rDecode");
-		break;
-	      }
-	  }
-	  	
-	myNode = new QueryDataNode (fieldname, comparator, value);
-
-	queryPrefix(")");	// cut off ) if it's left over
-
-	if (debug)
-	  {
-	    System.out.println("We're in the DataNode method. Returning DataNode");
-	  }
-
-	if (myNode == null)
-	  {
-	    System.out.println("Uh oh, myNode is null. bad");
-	  }
-      }
-    
-    return myNode;
-  }
-
-  private boolean queryPrefix(String prefix)
-  {
-    if (!queryString.startsWith(prefix))
-      {
-	return false;
-      }
-
-    // cut the prefix off of the front of queryString
-
-    queryString = queryString.substring(prefix.length(), queryString.length());
-
-    return true;
-  }
-
-  // ***
-  //
-  // private convenience methods
-  //
-  // ***
-
-  // we have a map from base name to base id
-
-  private void mapNameToId(String name, Short id)
-  {
-    if (id != null)
-      {
-	baseIDHash.put(name, id);
-      }
-  }
-
-  private Short getIdFromName(String name)
-  {
-    return (Short) baseIDHash.get(name);
-  }
-
-  private void mapBaseNamesToTemplates(short id)
-  {
-    Vector fieldDefs = null;
-    FieldTemplate template;
-
-    /* -- */
-
-    fieldDefs = gc.getTemplateVector(id);
-    
-    if (fieldDefs != null)
-      {
-	fieldHash.clear();
-
-	for (int i = 0; i < fieldDefs.size(); i++)
-	  {
-	    template = (FieldTemplate) fieldDefs.elementAt(i);
-	    mapNameToTemplate(template.getName(), template);
-	  }
-      }
-  }
-
-  // we have a map from fieldname to field template
-
-  private void mapNameToTemplate(String name, FieldTemplate template)
-  {
-    fieldHash.put(name, template);
-  }
-
-  private FieldTemplate getTemplateFromName(String name)
-  {
-    return (FieldTemplate) fieldHash.get(name);
-  }
-
-  // we have a map from embedded fieldname (with slashes) to 
-  // the name 
-  // template after the last slash
-
-  private void mapEmbeddedToField(String name, String fieldName)
-  {
-    nameHash.put(name, fieldName);
-  }
-
-  private String getFieldFromEmbedded(String name)
-  {
-    return (String) nameHash.get(name);
-  }
-
-  // we have a map from base names to Base
-
-  private void mapNameToBase(String name, Base base)
-  {
-    myHash.put(name, base);
-  }
-
-  private Base getBaseFromName(String name)
-  {
-    return (Base) myHash.get(name);
-  }
-
-  private Base getBaseFromShort(Short id)
-  {
-    return (Base) shortHash.get(id);
-  }
-
-  private Base getBaseFromShort(short id)
-  {
-    return (Base) shortHash.get(new Short(id));
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class 
-                                                                         qChoice
-
-------------------------------------------------------------------------------*/
-
-class qChoice extends JComboBox {
-  
-  int qRow; // keeps track of which row the choice menu is located in
-  
-  public int getRow()
-  {
-    return qRow;
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class 
-                                                                    qfieldChoice
-
-------------------------------------------------------------------------------*/
-
-class qfieldChoice extends JComboBox {
-  
-  int qRow; // keeps track of which row the choice menu is located in
-  
-  public int getRow()
-  {
-    return qRow;
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class 
-                                                                     qbaseChoice
-
-------------------------------------------------------------------------------*/
-
-class qbaseChoice extends JComboBox {
-  
-  int qRow; // keeps track of which row the choice menu is located in
-  
-  public int getRow()
-  {
-    return qRow;
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class 
-                                                                      qaryChoice
-
-------------------------------------------------------------------------------*/
-
-class qaryChoice extends JComboBox {
-  
-  int qRow; // keeps track of which row the choice menu is located in
- 
-  public int getRow()
-  {
-    return qRow;
   }
 }
