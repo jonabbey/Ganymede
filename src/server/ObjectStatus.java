@@ -6,8 +6,8 @@
    
    Created: 15 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:49 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/04/28 06:46:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -47,6 +47,11 @@
 */
 
 package arlut.csd.ganymede;
+
+/**
+ * Interface constants used to enumerate possible editing states for
+ * a {@link arlut.csd.ganymede.DBEditObject DBEditObject}.
+ */
 
 public interface ObjectStatus {
 

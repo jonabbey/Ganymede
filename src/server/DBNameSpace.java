@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/04/14 19:07:11 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/04/28 06:46:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -753,13 +753,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   ----------------------------------------------------------------------------*/
 
   /**
-   *
    * <p>Method to checkpoint namespace changes made by a specific transaction
    * so that state can be rolled back if necessary at a later time.</p>
    *
    * @param editSet The transaction that needs to be checkpointed.
    * @param name The name of the checkpoint to be marked.
-   *
    */
 
   public synchronized void checkpoint(DBEditSet editSet, String name)

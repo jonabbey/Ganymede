@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 1999/04/20 18:21:50 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 1999/04/28 06:46:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -158,8 +158,10 @@ public class DBEditSet {
 
   DBSession session;
 
-  /**
-   * An brief description of the client associated with this tr
+  /** 
+   * A brief description of the client associated with this
+   * transaction, used in logging to identify what was done by the
+   * main client, what by a password-changing utility, etc.
    */
 
   String description;
@@ -203,10 +205,8 @@ public class DBEditSet {
   }
 
   /**
-   *
-   * Method to return the DBSession handle owning this
-   * transaction.
-   *
+   * <p>Method to return the DBSession handle owning this
+   * transaction.</p>
    */
 
   public DBSession getSession()
@@ -257,11 +257,12 @@ public class DBEditSet {
   }
 
   /**
+   * <p>Method to associate a DBEditObject with this transaction.</p>
    *
-   * Method to associate a DBEditObject with this transaction.
+   * <p>This method is called by the createDBObject and editDBObject
+   * methods in {@link arlut.csd.ganymede.DBSession DBSession}.</p>
    *
    * @param object The newly created DBEditObject.
-   *
    */
 
   public synchronized void addObject(DBEditObject object)
@@ -270,7 +271,10 @@ public class DBEditSet {
       {
 	objects.addElement(object);
 
-	// just need something to mark the slot in the hash table,
+	// just need something to mark the slot in the hash table, to
+	// indicate that this object's base is involved in the
+	// transaction.
+
 	basesModified.put(object.objectBase, this);	
       }
   }
@@ -352,28 +356,30 @@ public class DBEditSet {
   }
 
   /**
-   *
-   * This method checkpoints the current transaction at its current
-   * state.  If need be, this transaction can later be rolled back
-   * to this point by calling the rollback() method.
+   * <p>This method checkpoints the current transaction at its current
+   * state. If need be, this transaction can later be rolled back
+   * to this point by calling the rollback() method.</p>
    *
    * @param name An identifier for this checkpoint
-   *
    */
 
   public synchronized void checkpoint(String name)
   {
-    // check point our objects
-
     if (debug)
       {
 	System.err.println("DBEditSet.checkpoint(): checkpointing key " + name);
       }
 
+    // checkpoint our objects
+
     checkpoints.push(new DBCheckPoint(name, this));
 
     // and our namespaces
 
+    // we don't synchronize on dbStore, the odds are zip that a
+    // namespace will be created or deleted while we are in the middle
+    // of a transaction, since that is only done during schema editing
+    
     for (int i = 0; i < dbStore.nameSpaces.size(); i++)
       {
 	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).checkpoint(this, name);
@@ -614,9 +620,9 @@ public class DBEditSet {
 
 	if (!found)
 	  {
-	    // ok, we've got a new object.  Ditch it.
+	    // ok, we've got a new object since the checkpoint.  Ditch it.
 
-	    obj.release();
+	    obj.release(true);
 	
 	    switch (obj.getStatus())
 	      {
@@ -665,6 +671,10 @@ public class DBEditSet {
     // and our namespaces
 
     boolean success = true;
+
+    // we don't synchronize on dbStore, the odds are zip that a
+    // namespace will be created or deleted while we are in the middle
+    // of a transaction, since that is only done during schema editing
 
     for (int i = 0; i < dbStore.nameSpaces.size(); i++)
       {
@@ -954,11 +964,11 @@ public class DBEditSet {
 			// up.  We need to clear the committing flag on
 			// all objects that we've called commitPhase1()
 			// on so that they will accept future changes.
-		
+
 			for (int j = 0; j < i; j++)
 			  {
 			    eObj2 = (DBEditObject) objects.elementAt(j);
-			    eObj2.release(); // undo committing flag
+			    eObj2.release(false); // undo committing flag
 			  }
 
 			// we are going to relinquish the write lock,
@@ -969,9 +979,9 @@ public class DBEditSet {
 			// undo the time stamp changes and what-not.
 
 			rollback(checkpointLabel);
-		
+
 			// let DBSession/the client know they can retry things.
-		
+
 			retVal.doNormalProcessing = true;
 			return retVal;
 		      }
@@ -990,7 +1000,7 @@ public class DBEditSet {
 		    for (int j = 0; j <= i; j++)
 		      {
 			eObj2 = (DBEditObject) objects.elementAt(j);
-			eObj2.release(); // undo committing flag
+			eObj2.release(false); // undo committing flag
 		      }
 
 		    releaseWriteLock("transaction commit rejected in phase 1");
@@ -1308,6 +1318,10 @@ public class DBEditSet {
 	// and release namespace values that correspond with old
 	// object / field values.
 
+	// we don't synchronize on dbStore, the odds are zip that a
+	// namespace will be created or deleted while we are in the middle
+	// of a transaction, since that is only done during schema editing
+	
 	for (int i = 0; i < dbStore.nameSpaces.size(); i++)
 	  {
 	    ((DBNameSpace) dbStore.nameSpaces.elementAt(i)).commit(this);
@@ -1383,7 +1397,7 @@ public class DBEditSet {
     while (objects.size() > 0)
       {
 	eObj = (DBEditObject) objects.firstElement();
-	eObj.release();
+	eObj.release(true);
 	
 	switch (eObj.getStatus())
 	  {
@@ -1412,6 +1426,10 @@ public class DBEditSet {
     basesModified.clear();
 
     // undo all namespace modifications associated with this editset
+
+    // we don't synchronize on dbStore, the odds are zip that a
+    // namespace will be created or deleted while we are in the middle
+    // of a transaction, since that is only done during schema editing
 
     for (int i = 0; i < dbStore.nameSpaces.size(); i++)
       {

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 1999/04/14 19:07:10 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 1999/04/28 06:46:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,7 +86,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.106 $ $Date: 1999/04/14 19:07:10 $ $Name:  $
+ * @version $Revision: 1.107 $ $Date: 1999/04/28 06:46:50 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -108,8 +108,23 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /* --------------------- Instance fields and methods --------------------- */
 
+  /**
+   * <p>Unless this DBEditObject was newly created, we'll have a reference
+   * to the original DBObject which is currently registered in the DBStore.
+   * Only one DBEditObject can be connected to a DBObject at a time, giving
+   * us object-level locking.</p>
+   */
+
   protected DBObject original;
-  boolean committing;
+
+  /**
+   * true if this object has had its commitPhase1() method called,
+   * but has not yet had its commitPhase2() or release() methods
+   * called.  If committing is true, no editing will be allowed
+   * on this object.
+   */
+
+  protected boolean committing;
 
   /**
    * true if the object is in the middle of carrying
@@ -125,7 +140,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * by a DBEditSet's commit logic
    */
 
-  boolean finalized = false;	
+  boolean finalized = false;
+
+  /**
+   * tracks this object's editing status.  See
+   * {@link arlut.csd.ganymede.ObjectStatus ObjectStatus}.
+   */
 
   byte status;
 
@@ -2238,11 +2258,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   *
-   * This method returns true if this object has already gone
+   * <p>This method returns true if this object has already gone
    * through phase 1 of the commit process, which requires
-   * the DBEditObject to not accept further changes.
-   *
+   * the DBEditObject not to accept further changes.</p>
    */
 
   public final boolean isCommitting()
@@ -2272,26 +2290,68 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     return;
   }
 
-  /**
-   * <p>This method is a hook for subclasses to do clean up action if the
-   * commit process is not able to go to completion for some reason.
-   * Generally, release() should be responsible for doing cleanup for
-   * processes initiated by commitPhase1().  If commitPhase1() does
-   * not do anything external to Ganymede, release() shouldn't either.
-   * release() should return immediately if isCommitting() is false;</p>
+  /**  
+   * <p>A hook for subclasses to use to clean up any external
+   * resources allocated for this object.  This method can be called
+   * after commitPhase1() has been called, or it may be called at any
+   * time to indicate that this object is being withdrawn from the
+   * transaction (as by a checkpoint rollback).  This method <b>will
+   * not</b> be called after commitPhase2() has been called.  If you
+   * do anything external in commitPhase2(), make sure that all
+   * resources allocated for this object (at any time in this object's
+   * editing life-cycle) are released before commitPhase2()
+   * completes.</p>
    *
-   * <p>Subclasses that override this method may wish to make this method 
-   * synchronized.</p>
+   * <p>Ordinarily, there is no need for customizers to override this
+   * method.  The only reason to override the release method is if you
+   * need to do maintenance on external data structures or connections
+   * that were created in commitPhase1() or when this DBEditObject was
+   * created.</p>
    *
-   * <p>If this method is overridden, be sure and set this.committing to
-   * false as part of your release method.  If this is not done, no
-   * further changes will be possible to this object.</p>
+   * <p>If &lt;finalAbort&gt; is true, the transaction for which this
+   * DBEditObject was created is being completely abandoned (if
+   * isCommitting() returns true), or this object is being dropped out
+   * of the transaction by a checkpoint rollback.  In either case, a
+   * customizer may want to clean up all external structures or
+   * connections that were created either at the time this
+   * DBEditObject was created/checked-out and/or that were created by
+   * commitPhase1().</p>
+   *
+   * <p>If &lt;finalAbort&gt; is false, isCommitting() should always
+   * return true.  In this case, one of the DBEditObjects in the
+   * transaction returned false from a later commitPhase1() call
+   * and all objects that had their commitPhase1() methods called
+   * previously will be revisted and release(false) will be called
+   * on them.  Customizers may want to clean up any external structures
+   * or connections that were established in commitPhase1().</p>
+   *
+   * <p>Remember, you will usually want to perform external actions in
+   * commitPhase2(), in which case release() is not needed.  release()
+   * is only useful when you allocate external structures or
+   * connections when the object is created or during commitPhase1().</p>
+   *
+   * <p>It is safe to call release() from your commitPhase2() method
+   * if you wish to have one place to clean up structures allocated by
+   * initializeNewObject() or commitPhase1().</p>
+   *
+   * <p>Customizers subclassing this method may want to keep a couple of
+   * things in mind.  First, the default release method is not synchronized,
+   * and it basically just clear a boolean flag (this.committing) to
+   * indicate that edit methods on this object may once again go forward.
+   * You may want to synchronize your release method if you do anything
+   * at all fancy.  More importantly, it is essential that you clear this.committing
+   * if &lt;finalAbort&gt; is false so that this object can be edited afterwards.</p>
+   *
+   * @param finalAbort If true, this object is being dropped, either due to an
+   * aborted transaction or a checkpoint rollback.  
    */
 
-  public void release()
+  public void release(boolean finalAbort)
   {
-    committing = false;
-    return;
+    if (!finalAbort)
+      {
+	this.committing = false;
+      }
   }
 
   // ***
