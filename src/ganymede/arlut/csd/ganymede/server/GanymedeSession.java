@@ -26,7 +26,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -2354,8 +2354,9 @@ final public class GanymedeSession implements Session, Unreferenced {
    * will have a From: header indicating the identity of the
    * sender.</p>
    *
-   * <p>body and HTMLbody are StringBuffer's instead of Strings because RMI
-   * has a 64k serialization limit on the String class.</p>
+   * <p>body and HTMLbody are StringBuffer's instead of Strings
+   * because RMI (formerly had) a 64k serialization limit on the
+   * String class.</p>
    *
    * @param address The addresses to mail to, may have more than one
    * address separated by commas or spaces.
@@ -2556,6 +2557,28 @@ final public class GanymedeSession implements Session, Unreferenced {
     catch (IOException ex)
       {
 	throw new RuntimeException("IO problem " + ex);
+      }
+  }
+
+  /**
+   * <p>This method allows clients to report client-side error/exception traces to
+   * the server for logging and what-not.</p>
+   *
+   * @param clientIdentifier A string identifying any information
+   * about the client that the client feels like providing.
+   * @param exceptionReport A string holding any stack trace
+   * information that might be helpful for the server to log or
+   * transmit to a developer.
+   */
+
+  public void reportClientBug(String clientIdentifier, String exceptionReport) throws NotLoggedInException
+  {
+    // "\nCLIENT ERROR DETECTED:\nclient id string == "{0}"\nexception trace == "{1}"\n"
+    Ganymede.debug(ts.l("reportClientBug.logPattern", clientIdentifier, exceptionReport));
+
+    if (Ganymede.bugReportAddressProperty != null && !Ganymede.bugReportAddressProperty.equals(""))
+      {
+	sendMail(Ganymede.bugReportAddressProperty, "Ganymede Client Bug Report", new StringBuffer(exceptionReport));
       }
   }
 

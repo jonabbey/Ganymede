@@ -416,7 +416,7 @@ public interface Session extends Remote {
    * will have a From: header indicating the identity of the
    * sender.</p>
    *
-   * <p>body is a StringBuffer instead of a String because RMI has a 64k
+   * <p>body is a StringBuffer instead of a String because RMI (formerly had) a 64k
    * serialization limit on the String class.</p>
    *
    * @param address The addresses to mail to, may have more than one
@@ -435,7 +435,7 @@ public interface Session extends Remote {
    * sender.</p>
    *
    * <p>body and HTMLbody are StringBuffer's instead of Strings because RMI
-   * has a 64k serialization limit on the String class.</p>
+   * (formerly had) a 64k serialization limit on the String class.</p>
    *
    * @param address The addresses to mail to, may have more than one
    * address separated by commas or spaces.
@@ -446,6 +446,19 @@ public interface Session extends Remote {
    */
 
   void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody) throws RemoteException;
+
+  /**
+   * <p>This method allows clients to report client-side error/exception traces to
+   * the server for logging and what-not.</p>
+   *
+   * @param clientIdentifier A string identifying any information
+   * about the client that the client feels like providing.
+   * @param exceptionReport A string holding any stack trace
+   * information that might be helpful for the server to log or
+   * transmit to a developer.
+   */
+
+  void reportClientBug(String clientIdentifier, String exceptionReport) throws RemoteException;
 
   /**
    * <p>This method provides the hook for doing a

@@ -297,6 +297,22 @@ public class Ganymede {
   public static int timeoutIdleWithObjs = 20;
 
   /**
+   * <p>If the ganymede.bugaddress property is set, that string will
+   * be copied into this variable.  It should be an email address to
+   * send bug traces encountered by the Ganymede system.</p>
+   *
+   * <p>This system is used primarily by the client at this writing,
+   * through the {@link arlut.csd.ganymede.server.GanymedeSession#reportClientBug(java.lang.String, java.lang.String)}
+   * method.</p>
+   *
+   * <p>If this property string is null or empty, client bugs will not
+   * be emailed, but they will be written to the server's standard
+   * error stream.</p>
+   */
+
+  public static String bugReportAddressProperty = null;
+
+  /**
    * <p>If the server is started with the -resetadmin command line flag,
    * this field will be set to true and the server's startupHook() will
    * reset the supergash password to that specified in the server's
@@ -1471,6 +1487,7 @@ public class Ganymede {
     messageDirectoryProperty = System.getProperty("ganymede.messageDirectory");
     schemaDirectoryProperty = System.getProperty("ganymede.schemaDirectory");
     logHelperProperty = System.getProperty("ganymede.loghelper");
+    bugReportAddressProperty = System.getProperty("ganymede.bugsaddress");
 
     String softtimeoutString = System.getProperty("ganymede.softtimeout");
 
