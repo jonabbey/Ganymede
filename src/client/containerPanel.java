@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 2001/07/27 05:18:31 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 2001/07/27 06:13:27 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.126 $ $Date: 2001/07/27 05:18:31 $ $Name:  $
+ * @version $Revision: 1.127 $ $Date: 2001/07/27 06:13:27 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -663,30 +663,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		
 		update(updatesWhileLoading);
 	      }
-	  }
-      }
-  }
-
-  /** 
-   * This method is reponsible for cleaning up after this
-   * containerPanel when it is shut down, particularly to close any
-   * auxiliary windows attached to GUI components contained in this
-   * panel.  
-   */
-
-  public synchronized void unregister()
-  {
-    Enumeration enum = shortToComponentHash.elements();
-
-    while (enum.hasMoreElements())
-      {
-	Object x = enum.nextElement();
-
-	if (x instanceof JdateField)
-	  {
-	    JdateField df = (JdateField) x;
-
-	    df.unregister();
 	  }
       }
   }
@@ -3215,6 +3191,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	pb.setToolTipText(comment);
       }
+
+    shortToComponentHash.put(new Short(fieldInfo.getID()), pb);
     
     addRow(pb, templates.indexOf(fieldTemplate),
 	   fieldTemplate.getName(), fieldInfo.isVisible());
@@ -3591,7 +3569,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * GUI thread.</p>
    */
 
-  public final void cleanUp()
+  public synchronized final void cleanUp()
   {
     Enumeration enum;
 
@@ -3602,30 +3580,45 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.err.println("containerPanel cleanUp()");
       }
 
-    // first we pull everything out of our panel
+    // first we pull everything out of our panel and clear
+    // any resources we know of for the fields
 
-    enum = rowHash.keys();
-
-    while (enum.hasMoreElements())
+    if (rowHash != null)
       {
-	JComponent j = (JComponent) enum.nextElement();
+	enum = rowHash.keys();
 
-	if (j instanceof JCheckBox)
+	while (enum.hasMoreElements())
 	  {
-	    ((JCheckBox) j).removeActionListener(this);
+	    JComponent j = (JComponent) enum.nextElement();
+	    
+	    if (j instanceof JCheckBox)
+	      {
+		((JCheckBox) j).removeActionListener(this);
+	      }
+	    else if (j instanceof JComboBox)
+	      {
+		((JComboBox) j).removeItemListener(this);
+	      }
+	    else if (j instanceof JInvidChooser)
+	      {
+		((JInvidChooser) j).removeItemListener(this);
+	      }
+	    else if (j instanceof JdateField)
+	      {
+		JdateField df = (JdateField) j;
+		
+		df.unregister();
+	      }
+	    else if (j instanceof perm_button)
+	      {
+		perm_button pb = (perm_button) j;
+		
+		pb.unregister();
+	      }
 	  }
-	else if (j instanceof JComboBox)
-	  {
-	    ((JComboBox) j).removeItemListener(this);
-	  }
-	else if (j instanceof JInvidChooser)
-	  {
-	    ((JInvidChooser) j).removeItemListener(this);
-	  }
-	else if (j instanceof perm_button)
-	  {
-	    ((perm_button) j).cleanUp();
-	  }
+
+	rowHash.clear();
+	rowHash = null;
       }
 
     this.removeAll();
@@ -3653,12 +3646,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	shortToComponentHash.clear();
 	shortToComponentHash = null;
-      }
-
-    if (rowHash != null)
-      {
-	rowHash.clear();
-	rowHash = null;
       }
 
     /**

@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 2001/07/27 02:45:20 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 2001/07/27 06:13:27 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.70 $ $Date: 2001/07/27 02:45:20 $ $Name:  $
+ * @version $Revision: 1.71 $ $Date: 2001/07/27 06:13:27 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -1598,14 +1598,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	return;
       }
     
-    for (int i = 0; i < containerPanels.size(); i++)
-      {
-	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
-	
-	cp.stopLoading();
-	cp.unregister();
-      }
-    
     if (history_panel != null)
       {
 	history_panel.unregister();
@@ -1632,16 +1624,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	System.err.println("framePanel.internalFrameClosed(): disposed");
       }
     
-    for (int i = 0; i < containerPanels.size(); i++)
-      {
-	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
-	
-	cp.cleanUp();
-      }
-    
-    // finally, null out all references to make sure that we don't cascade
-    // any leaks.. if the run method is still going, we'll leave this alone
-    // and let run() take care of this as it leaves
+    // finally, shut down any secondary windows and null out all
+    // references to make sure that we don't cascade any leaks.. if
+    // the run method is still going, we'll leave this alone and let
+    // run() take care of this as it leaves
 
     if (!running.isSet())
       {
@@ -1808,6 +1794,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	    
 	    containerPanel cp = (containerPanel)containerPanels.elementAt(i);
 	    cp.stopLoading();
+	    cp.cleanUp();
 	  }
 
 	containerPanels = null;

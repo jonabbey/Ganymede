@@ -6,8 +6,8 @@
    
    Created: 20 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2001/07/27 05:18:32 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2001/07/27 06:13:28 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -74,7 +74,6 @@ class perm_button extends JButton implements ActionListener {
   Hashtable basehash;
   gclient gc;
   String title;
-  JCheckBox tableView;
   perm_editor editor = null;
   boolean isActiveAlready = false;
 
@@ -121,7 +120,7 @@ class perm_button extends JButton implements ActionListener {
   
   public void actionPerformed(ActionEvent e)
   {
-    if ((e.getSource() == this)) // && (tableView.isSelected()))
+    if ((e.getSource() == this))
       {
 	if (debug)
 	  {
@@ -157,11 +156,21 @@ class perm_button extends JButton implements ActionListener {
       }
   }
 
-  public void cleanUp()
+  /**
+   * <p>Calling this method makes this component get rid of any secondary
+   * windows and to do some gc reference clearing.</p>
+   */
+
+  public synchronized void unregister()
   {
-    if (editor != null && editor.isActiveEditor())
+    if (editor != null)
       {
-	editor.myshow(false);
+	editor.cleanUp();
+	editor = null;
       }
+
+    gc = null;
+    basehash = null;
+    field = null;
   }
 }

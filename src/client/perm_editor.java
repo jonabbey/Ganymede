@@ -5,8 +5,8 @@
    perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2001/07/27 04:15:15 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2001/07/27 06:13:28 $
    Release: $Name:  $
 
    Module By: Brian O'Mara omara@arlut.utexas.edu
@@ -133,10 +133,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 		      boolean enabled, gclient gc,
 		      Frame parent, String DialogTitle)
   {
-
-    super(parent, DialogTitle, true); // the boolean value is to make the dialog modal
-    
-
+    super(parent, DialogTitle, false); // the boolean value is to make the dialog nonmodal
 
     // Main constructor for the perm_editor window      
 
@@ -664,13 +661,13 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     if (truth_value)
       {
 	setSize(550,550);
+	setVisible(true);
       } 
     else 
       {
 	isActive = false;
+	cleanUp();
       }
-
-    setVisible(truth_value);
   }
 
   public boolean isActiveEditor() 
@@ -788,6 +785,28 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	myshow(false);
 	return;
       } 
+  }
+
+  /**
+   * <p>This method pops down the perm_editor and does some variable
+   * clearing to assit in garbage collection.</p>
+   */
+
+  public void cleanUp()
+  {
+    setVisible(false);
+
+    gc = null;
+    permField = null;
+    matrix = null;
+    templateMatrix = null;
+    session = null;
+    OkButton = null;
+    CancelButton = null;
+    ExpandButton = null;
+    CollapseButton = null;
+
+    stopLoading();
   }
 } 
 
