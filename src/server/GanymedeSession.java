@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.68 $ %D%
+   Version: $Revision: 1.69 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2696,7 +2696,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (result == null)
 	  {
-	    return personaPerms.getPerm(object.getTypeID());
+	    result = personaPerms.getPerm(object.getTypeID());
+
+	    if (result == null)
+	      {
+		return PermEntry.noPerms;
+	      }
+	    else
+	      {
+		return result;
+	      }
 	  }
 	else
 	  {
@@ -2707,7 +2716,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (result == null)
 	  {
-	    return defaultPerms.getPerm(object.getTypeID());
+	    result = defaultPerms.getPerm(object.getTypeID());
+
+	    if (result == null)
+	      {
+		return PermEntry.noPerms;
+	      }
+	    else
+	      {
+		return result;
+	      }
 	  }
 	else
 	  {
