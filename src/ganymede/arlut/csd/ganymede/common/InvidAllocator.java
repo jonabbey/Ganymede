@@ -77,7 +77,7 @@ public interface InvidAllocator {
    * will synthesize and return a new one.
    */
 
-  public Invid findInvid(short type, int num);
+  public Invid findInvid(Invid matchInvid);
 
   /**
    * <p>This method takes the invid given and places in whatever
