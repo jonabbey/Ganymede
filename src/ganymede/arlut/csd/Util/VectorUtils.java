@@ -84,17 +84,7 @@ public class VectorUtils {
 
   public static Vector union(Vector vectA, Vector vectB)
   {
-    int threshold = 0;
-
-    if (vectA != null)
-      {
-	threshold = vectA.size();
-      }
-
-    if (vectB != null)
-      {
-	threshold += vectB.size();
-      }
+    int threshold = vectSize(vectA) + vectSize(vectB);
 
     if (threshold < 10)		// I pulled 10 out of my ass
       {
@@ -134,7 +124,7 @@ public class VectorUtils {
 	// temporary hashtable so that we have better scalability for
 	// item lookup.
 
-	HashMap workSet = new HashMap(vectA.size() + vectB.size());
+	HashMap workSet = new HashMap(vectSize(vectA) + vectSize(vectB));
 	Vector result = new Vector(threshold);
 	Iterator iter;
 	Object item;
@@ -616,6 +606,18 @@ public class VectorUtils {
     else
       {
 	return -1;
+      }
+  }
+
+  private static int vectSize(Vector x)
+  {
+    if (x == null)
+      {
+	return 0;
+      }
+    else
+      {
+	return x.size();
       }
   }
 
