@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.140 $
-   Last Mod Date: $Date: 2002/08/21 06:58:50 $
+   Version: $Revision: 1.141 $
+   Last Mod Date: $Date: 2002/08/28 21:55:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -152,7 +152,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.140 $ $Date: 2002/08/21 06:58:50 $
+ * @version $Revision: 1.141 $ $Date: 2002/08/28 21:55:18 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1100,6 +1100,12 @@ public class DBObject implements db_object, FieldType, Remote {
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
 
     DBField labelField = (DBField) getLabelField();
+
+    // we want to guarantee that every object we dump has a unique id,
+    // even if that id is not a proper label, so that we can load
+    // this object cleanly in a from-scratch server, and so that
+    // we can do unambiguous cross-referencing within the xml file we're
+    // dumping
 
     if (labelField != null && labelField.getNameSpace() != null)
       {
