@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -920,6 +920,67 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   /**
    *
+   * This method provides a hook that a DBEditObject subclass
+   * can use to indicate that a given Date field has a restricted
+   * range of possibilities.
+   *
+   */
+
+  public boolean isDateLimited(DBField field)
+  {
+    if (field.getID() == SchemaConstants.ExpirationField)
+      {
+	return true;
+      }
+
+    return super.isDateLimited(field);
+  }
+
+  /**
+   *
+   * This method is used to specify the latest acceptable date
+   * for the specified field.
+   *
+   */
+
+  public Date maxDate(DBField field)
+  {
+    if (field.getID() != SchemaConstants.ExpirationField)
+      {
+	return super.maxDate(field);
+      }
+
+    // if we have a user category set, limit the acceptable date to
+    // current date + max days
+
+    Date currentDate = new Date();
+
+    Calendar cal = Calendar.getInstance();
+
+    cal.setTime(currentDate);
+
+    try
+      {
+	Invid catInvid = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
+
+	DBObject category = internalSession().getSession().viewDBObject(catInvid);
+
+	Integer maxDays = (Integer) category.getFieldValueLocal(userCategorySchema.LIMIT);
+	
+	cal.add(Calendar.DATE, maxDays.intValue());
+      }
+    catch (NullPointerException ex)
+      {
+	// oops, no category set.. <shrug>
+
+	return super.maxDate(field);
+      }
+
+    return cal.getTime();
+  }
+
+  /**
+   *
    * This method is called after the set value operation has been ok'ed
    * by any appropriate wizard code.
    *
@@ -977,7 +1038,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	return null;
       }
-
 
     // when we rename a user, we have lots to do.. a number of other
     // fields in this object and others need to be updated to match.
@@ -1286,12 +1346,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 	  }
 
-	//
-	//	if (field.getID() == SchemaConstants.ExpirationField)
-	//	  {
-	//	    return changeExpiration(value);
-	//	  }
-	
+
 	if ((field.getID() != USERNAME) ||
 	    (operation != SETVAL))
 	  {
