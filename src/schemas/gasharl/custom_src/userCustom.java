@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 1999/07/15 01:06:34 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 1999/07/19 20:59:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2077,6 +2077,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void handleUserRename(String orig, String newname)
   {
+    boolean success = false;
+
+    /* -- */
+
     if (debug)
       {
 	System.err.println("userCustom.handleUserRename(): user " + orig +
@@ -2087,18 +2091,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	renameFilename = System.getProperty("ganymede.builder.scriptlocation");
 
-	if (renameFilename == null)
+	if (renameFilename != null)
+	  {
+	    // make sure we've got the path separator at the end of
+	    // renameFilename, add our script name
+	    
+	    renameFilename = PathComplete.completePath(renameFilename) + "directory_namer";
+	    
+	    renameHandler = new File(renameFilename);
+	  }
+	else
 	  {
 	    Ganymede.debug("userCustom.handleUserRename(): Couldn't find ganymede.builder.scriptlocation property");
-	    return;
 	  }
-
-	// make sure we've got the path separator at the end of
-	// renameFilename, add our script name
-
-	renameFilename = PathComplete.completePath(renameFilename) + "directory_namer";
-
-	renameHandler = new File(renameFilename);
       }
 
     if (renameHandler.exists())
@@ -2136,6 +2141,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    Ganymede.debug("Couldn't handle externals for renaming user " + orig + " to " + 
 				   newname + "\n" + renameFilename + " returned a non-zero result: " + result);
 		  }
+
+		success = true;
 	      }
 	    catch (InterruptedException ex)
 	      {
@@ -2150,6 +2157,20 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			   newname + "\n" + 
 			   ex.getMessage());
 	  }
+      }
+
+    Vector addresses = new Vector();
+    Invid admin = getGSession().getPersonaInvid();
+    String adminName = getGSession().getUserMyUserName();
+    Vector objects = new Vector();
+    objects.addElement(getInvid());
+
+    if (success)
+      {
+	editset.logMail(addresses, subject, message, admin, adminName, objects)
+      }
+    else
+      {
       }
   }
 }
