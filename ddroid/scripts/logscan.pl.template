@@ -1,15 +1,15 @@
 #!/opt/bin/perl5
 #
-# This script is designed to assist the Directory Droid server by
-# quickly scanning through the Directory Droid log file and printing
+# This script is designed to assist the Ganymede server by
+# quickly scanning through the Ganymede log file and printing
 # out only those lines which relate to a specified object id.  The
-# Directory Droid server is not very efficient at doing this, and by
-# using an external filtering program the Directory Droid server can
+# Ganymede server is not very efficient at doing this, and by
+# using an external filtering program the Ganymede server can
 # provide object history from its log file much much more quickly than
 # if the server had to filter out all the irrelevant history details
 # itself with the current server code.
 #
-# $Revision: 1.2 $
+# $Revision$
 # $Date$
 # $Name:  $
 #
