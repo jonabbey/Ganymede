@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.114 $ %D%
+   Version: $Revision: 1.115 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,9 +41,36 @@ import javax.swing.border.*;
 
 public class gclient extends JFrame implements treeCallback, ActionListener, JsetValueCallback, WindowListener {
 
+  public static boolean debug = true;
+
   // we're only going to have one gclient at a time per running client
 
   public static gclient client;
+
+  // Image numbers
+
+  static final int NUM_IMAGE = 17;
+  
+  static final int OPEN_BASE = 0;
+  static final int CLOSED_BASE = 1;
+
+  static final int OPEN_FIELD = 2;
+  static final int OPEN_FIELD_DELETE = 3;
+  static final int OPEN_FIELD_CREATE = 4;
+  static final int OPEN_FIELD_CHANGED = 5;
+  static final int OPEN_FIELD_REMOVESET = 6;
+  static final int OPEN_FIELD_EXPIRESET = 7;
+  static final int CLOSED_FIELD = 8;
+  static final int CLOSED_FIELD_DELETE = 9;
+  static final int CLOSED_FIELD_CREATE = 10;
+  static final int CLOSED_FIELD_CHANGED = 11;
+  static final int CLOSED_FIELD_REMOVESET = 12;
+  static final int CLOSED_FIELD_EXPIRESET = 13;
+
+  static final int OPEN_CAT = 14;
+  static final int CLOSED_CAT = 15;
+
+  static final int OBJECTNOWRITE = 16;
 
   // ---
 
@@ -51,32 +78,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     creditsMessage = null,
     aboutMessage = null;
   
-  // Image numbers
-  final int NUM_IMAGE = 17;
-  
-  final int OPEN_BASE = 0;
-  final int CLOSED_BASE = 1;
-
-  final int OPEN_FIELD = 2;
-  final int OPEN_FIELD_DELETE = 3;
-  final int OPEN_FIELD_CREATE = 4;
-  final int OPEN_FIELD_CHANGED = 5;
-  final int OPEN_FIELD_REMOVESET = 6;
-  final int OPEN_FIELD_EXPIRESET = 7;
-  final int CLOSED_FIELD = 8;
-  final int CLOSED_FIELD_DELETE = 9;
-  final int CLOSED_FIELD_CREATE = 10;
-  final int CLOSED_FIELD_CHANGED = 11;
-  final int CLOSED_FIELD_REMOVESET = 12;
-  final int CLOSED_FIELD_EXPIRESET = 13;
-
-  final int OPEN_CAT = 14;
-  final int CLOSED_CAT = 15;
-
-  final int OBJECTNOWRITE = 16;
-
-  public static boolean debug = true;
-
   Session session;
   glogin _myglogin;
 
@@ -91,15 +92,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   // Turns out we don't need to do this anyway, since the BorderFactory does it for us.
 
   public EmptyBorder
-    emptyBorder5 = (EmptyBorder)BorderFactory.createEmptyBorder(5,5,5,5),
-    emptyBorder10 = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10);
+    emptyBorder5 = (EmptyBorder) BorderFactory.createEmptyBorder(5,5,5,5),
+    emptyBorder10 = (EmptyBorder) BorderFactory.createEmptyBorder(10,10,10,10);
 
   public BevelBorder
-    raisedBorder = (BevelBorder)BorderFactory.createBevelBorder(BevelBorder.RAISED),
-    loweredBorder = (BevelBorder)BorderFactory.createBevelBorder(BevelBorder.LOWERED);
+    raisedBorder = (BevelBorder) BorderFactory.createBevelBorder(BevelBorder.RAISED),
+    loweredBorder = (BevelBorder) BorderFactory.createBevelBorder(BevelBorder.LOWERED);
       
   public LineBorder
-    lineBorder = (LineBorder)BorderFactory.createLineBorder(Color.black);
+    lineBorder = (LineBorder) BorderFactory.createLineBorder(Color.black);
 
   public CompoundBorder
     statusBorder = BorderFactory.createCompoundBorder(loweredBorder, emptyBorder5),
@@ -195,18 +196,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   final JTextField
     statusLabel = new JTextField();
 
-  private JSplitPane
-    sPane;
-
   treeControl tree;
 
   // The top lines
-
-  JPanel
-    leftP,
-    leftTop,
-    rightTop,
-    mainPanel;   //Everything is in this, so it is double buffered
 
   Image
     errorImage = null,
@@ -217,10 +209,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     newToolbarIcon,
     ganymede_logo,
     createDialogImage;
-
-  public JLabel
-    leftL,
-    rightL;
 
   windowPanel
     wp;
@@ -287,8 +275,18 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   querybox
     my_querybox = null;
 
-  // this is true during the handleReturnVal method, while a wizard is
-  // active.  If a wizard is active, don't allow the window to close.
+  /**
+   * This thread is used to clear the statusLabel after some interval after
+   * it is set.
+   */
+
+  public StatusClearThread 
+    statusThread;
+
+  /**
+   * this is true during the handleReturnVal method, while a wizard is
+   * active.  If a wizard is active, don't allow the window to close.
+   */
 
   private boolean
     wizardActive = false;
@@ -305,6 +303,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public gclient(Session s, glogin g)
   {
+    JPanel
+      leftP,
+      leftTop,
+      rightTop,
+      mainPanel;   //Everything is in this, so it is double buffered
+
+    /* -- */
+
     try
       {
 	setTitle("Ganymede Client: " + s.getMyUserName() + " logged in");
@@ -618,11 +624,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	leftTop = new JPanel(false);
 	leftTop.setBorder(statusBorderRaised);
 	
-	leftL = new JLabel("Objects");
 	leftTop.setLayout(new BorderLayout());
-	//leftTop.setBackground(ClientColor.menu);
-	//leftTop.setForeground(ClientColor.menuText);
-	leftTop.add("Center", leftL);
+
+	leftTop.add("Center", new JLabel("Objects"));
 	
 	leftP.add("North", leftTop);
       }
@@ -703,7 +707,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     // Create the pane splitter
 
-    sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftP, rightP);
+    JSplitPane sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftP, rightP);
    
     mainPanel.add("Center",sPane);
 
@@ -715,6 +719,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     statusLabel.setEditable(false);
     statusLabel.setOpaque(false);
     statusLabel.setBorder(statusBorder);
+
+    statusThread = new StatusClearThread(statusLabel);
+    statusThread.start();
 
     JLabel l = new JLabel("Status: ");
     JPanel lP = new JPanel(new BorderLayout());
@@ -778,7 +785,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	throw new RuntimeException("Could not get motd: " + rx);
       }
     
-    setStatus("Ready.");
+    setStatus("Ready.", 0);
   }
   
   /**
@@ -1161,9 +1168,23 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * Change the text in the status bar
    *
    * @param status The text to display
+   *
    */
 
   public final void setStatus(String status)
+  {
+    setStatus(status, 5);
+  }
+
+  /**
+   * Change the text in the status bar.
+   *
+   * @param status The text to display
+   * @param timeToLive Number of seconds to wait until clearing the status bar
+   *
+   */
+
+  public final synchronized void setStatus(String status, int timeToLive)
   {
     if (debug)
       {
@@ -1178,6 +1199,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	statusLabel.paintImmediately(statusLabel.getVisibleRect());
       }
     });
+
+    statusThread.setClock(timeToLive);
   }
 
   /**
@@ -1379,7 +1402,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     final String Title = title;
     final String Message = message;
     final Image fIcon = icon;
-    
+
     SwingUtilities.invokeLater(new Runnable() 
 			       {
 				 public void run()
@@ -1388,7 +1411,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 				   }
 			       });
 
-    setStatus(title + ": " + message);
+    setStatus(title + ": " + message, 10);
   }
 
   /**
@@ -4057,7 +4080,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     if (node instanceof BaseNode && !((BaseNode) node).isLoaded())
       {
-	setStatus("Loading objects for base " + node.getText());
+	setStatus("Loading objects for base " + node.getText(), 0);
 	setWaitCursor();
 
 	try
@@ -4230,7 +4253,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    t.start();
 	    
-	    setStatus("Sending query for base " + node.getText() + " to server");
+	    setStatus("Sending query for base " + node.getText() + " to server", 0);
 	  }
 	else
 	  {
@@ -4273,7 +4296,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		      {
 			try
 			  {
-			    thisGclient.setStatus("Sending query for base " + text + " to server");
+			    thisGclient.setStatus("Sending query for base " + text + " to server", 0);
 			
 			    buffer = thisGclient.getSession().dump(q);
 			  }
@@ -5095,5 +5118,134 @@ class CacheInfo {
   public ObjectHandle getOriginalObjectHandle()
   {
     return originalHandle;
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                               StatusClearThread
+
+------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This thread is designed to clear the status label in the gclient
+ * some seconds after the setClock() method is called.
+ *
+ */
+
+class StatusClearThread extends Thread {
+
+  final static boolean debug = false;
+
+  boolean done = false;
+  boolean resetClock = false;
+
+  JTextField statusLabel;
+
+  int sleepSecs = 0;
+
+  /* -- */
+
+  public StatusClearThread(JTextField statusLabel)
+  {
+    this.statusLabel = statusLabel;
+  }
+
+  public synchronized void run()
+  {
+    while (!done)
+      {
+	if (debug)
+	  {
+	    System.err.println("StatusClearThread.run(): entering loop");
+	  }
+
+	resetClock = false;
+
+	try
+	  {
+	    if (sleepSecs > 0)
+	      {
+		if (debug)
+		  {
+		    System.err.println("StatusClearThread.run(): waiting " + sleepSecs + " seconds");
+		  }
+
+		wait(sleepSecs * 1000);
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.err.println("StatusClearThread.run(): waiting indefinitely");
+		  }
+
+		wait();
+	      }
+	  }
+	catch (InterruptedException ex)
+	  {
+	  }
+
+	if (!resetClock && !done)
+	  {
+	    // this has to be invokeLater or else we'll risk getting
+	    // deadlocked.
+
+	    if (debug)
+	      {
+		System.err.println("StatusClearThread.run(): invoking label clear");
+	      }
+
+	    SwingUtilities.invokeLater(new Runnable() {
+	      public void run() {
+		statusLabel.setText("");
+		statusLabel.paintImmediately(statusLabel.getVisibleRect());
+	      }
+	    });
+
+	    sleepSecs = 0;
+	  }
+      }
+  }
+
+  /**
+   *
+   * This method resets the clock in the StatusClearThread, such that
+   * the status label will be cleared in countDown seconds, unless
+   * another setClock follows on closely enough to interrupt the
+   * countdown, effectively.
+   *
+   */
+
+  public synchronized void setClock(int countDown)
+  {
+    if (debug)
+      {
+	System.err.println("StatusClearThread.setClock(" + countDown + ")");
+      }
+
+    resetClock = true;
+    sleepSecs = countDown;
+    notifyAll();
+
+    if (debug)
+      {
+	System.err.println("StatusClearThread.setClock(" + countDown + ") - done");
+      }
+  }
+
+  /**
+   *
+   * This method causes the run() method to gracefully terminate
+   * without taking any further action.
+   * 
+   */
+
+  public synchronized void shutdown()
+  {
+    this.done = true;
+    notifyAll();
   }
 }
