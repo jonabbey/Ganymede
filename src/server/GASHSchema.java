@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 2000/12/03 12:00:16 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 2000/12/03 12:02:14 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -344,10 +344,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     categoryMenu = new treeMenu();
 
-    createCategoryMI = new java.awt.MenuItem("Create Category");
-    deleteCategoryMI = new java.awt.MenuItem("Delete Category");
-    createObjectMI = new java.awt.MenuItem("Create Object Type");
-    createInternalObjectMI = new java.awt.MenuItem("Create Embedded Object Type");
+    createCategoryMI = new javax.swing.JMenuItem("Create Category");
+    deleteCategoryMI = new javax.swing.JMenuItem("Delete Category");
+    createObjectMI = new javax.swing.JMenuItem("Create Object Type");
+    createInternalObjectMI = new javax.swing.JMenuItem("Create Embedded Object Type");
 
     categoryMenu.add(createCategoryMI);
     categoryMenu.add(deleteCategoryMI);
@@ -357,20 +357,20 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // namespace menu
 
     nameSpaceMenu = new treeMenu("Namespace Menu");
-    createNameMI = new java.awt.MenuItem("Create Namespace");
+    createNameMI = new javax.swing.JMenuItem("Create Namespace");
     nameSpaceMenu.add(createNameMI);
 
     // namespace object menu
 
     nameSpaceObjectMenu = new treeMenu();
-    deleteNameMI = new java.awt.MenuItem("Delete Namespace");
+    deleteNameMI = new javax.swing.JMenuItem("Delete Namespace");
     nameSpaceObjectMenu.add(deleteNameMI);
 
     // base menu
 
     baseMenu = new treeMenu("Base Menu");
-    deleteObjectMI = new java.awt.MenuItem("Delete Object Type");
-    createFieldMI = new java.awt.MenuItem("Create Field");
+    deleteObjectMI = new javax.swing.JMenuItem("Delete Object Type");
+    createFieldMI = new javax.swing.JMenuItem("Create Field");
 
     baseMenu.add(createFieldMI);
 
@@ -379,7 +379,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // field menu
 
     fieldMenu = new treeMenu("Field Menu");
-    deleteFieldMI = new java.awt.MenuItem("Delete Field");
+    deleteFieldMI = new javax.swing.JMenuItem("Delete Field");
     fieldMenu.add(deleteFieldMI);
 
     //
