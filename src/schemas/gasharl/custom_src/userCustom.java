@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,7 +27,7 @@ import java.rmi.*;
 public class userCustom extends DBEditObject implements SchemaConstants {
   
   static final boolean debug = false;
-  static Vector shellChoices = new Vector();
+  static StringBuffer shellChoices = new StringBuffer();
   static Date shellChoiceStamp = null;
 
   /**
@@ -82,16 +82,11 @@ public class userCustom extends DBEditObject implements SchemaConstants {
    * 
    */
 
-  public Vector obtainChoiceList(DBField field)
+  public StringBuffer obtainChoiceList(DBField field)
   {
     if (!field.getName().equals("Shell"))
       {
-	if (debug)
-	  {
-	    System.err.println("userCustom: obtainChoice returning null for non-shell field.");
-	  }
-
-	return null;
+	return super.obtainChoiceList(field);
       }
 
     synchronized (shellChoices)
@@ -102,14 +97,15 @@ public class userCustom extends DBEditObject implements SchemaConstants {
 
 	if (shellChoiceStamp == null || shellChoiceStamp.before(base.getTimeStamp()))
 	  {
-	    shellChoices.removeAllElements();
+	    shellChoices.setLength(0);
+	    shellChoices.append(objectDumpHeader(false)); // non-invid bearing string
 
 	    Query query = new Query("Shell Choice", null, false);
-	    Vector results = internalSession().query(query);
+	    Vector results = internalSession().internalQuery(query);
 	
 	    for (int i = 0; i < results.size(); i++)
 	      {
-		shellChoices.addElement(((Result) results.elementAt(i)).toString());
+		shellChoices.append(stringDump(((Result) results.elementAt(i)).toString())); // no invid
 	      }
 
 	    if (shellChoiceStamp == null)
