@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/03/09 05:16:19 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/03/09 17:09:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -160,6 +160,54 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   }
 
   /**
+   * <P>peekNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
+   * from the XMLReader's buffer.  If the background thread's parsing has fallen
+   * behind, peekNextItem() will block until either data is made available from
+   * the parse thread, or the XMLReader is closed.</P>
+   *
+   * <P>peekNextItem() returns null when there are no more XML elements or character
+   * data to be read from the XMLReader stream.</P>
+   */
+
+  public XMLItem peekNextItem()
+  {
+    XMLItem value;
+
+    /* -- */
+
+    synchronized (buffer)
+      {
+	while (!done && pushback == null && buffer.size() == 0)
+	  {
+	    try
+	      {
+		buffer.wait();
+	      }
+	    catch (InterruptedException ex)
+	      {
+		throw new RuntimeException("interrupted, can't wait for buffer to fill.");
+	      }
+	  }
+
+	if (done && pushback == null && buffer.size() == 0)
+	  {
+	    return null;
+	  }
+
+	if (pushback != null)
+	  {
+	    value = pushback;
+	  }
+	else
+	  {
+	    value = (XMLItem) buffer.elementAt(0);
+	  }
+
+	return value;
+      }
+  }
+
+  /**
    * <P>pushbackItem() may be used to push the most recently read XMLItem back
    * onto the XMLReader's buffer.  The XMLReader code guarantees that their
    * will be room to handle a single item pushback, but two pushbacks in a row
@@ -204,11 +252,13 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
     catch (SAXException ex)
       {
+	close();
 	ex.printStackTrace();
 	throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
       }
     catch (IOException ex)
       {
+	close();
 	ex.printStackTrace();
 	throw new RuntimeException("XMLReader io error: " + ex.getMessage());
       }
