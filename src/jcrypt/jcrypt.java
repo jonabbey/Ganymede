@@ -5,6 +5,11 @@
  *
  * Based upon C source code written by Eric Young, eay@psych.uq.oz.au
  *
+ * Java version by John Dumas, jdumas@zeh.com.
+ * See http://208.223.9.21/jfd/crypt.html
+ *
+ * Distributed with Ganymede by permission of the author
+ *
  ****************************************************************************/
 
 public class jcrypt
