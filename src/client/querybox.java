@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 2001/11/05 22:30:51 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 2002/10/02 20:32:22 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -785,7 +785,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	setVisible(false);	// close down
 	doQuery();
       } 
-    else if (e.getSource() == CancelButton)
+    
+    if (e.getSource() == CancelButton)
       {
 	if (debug)
 	  {
@@ -822,6 +823,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	      removeButton.setEnabled(false);
 	    }
 	  }
+      }
+
+    if (e.getSource() instanceof JstringField)
+      {
+	OkButton.doClick();
       }
   }
 
@@ -1462,18 +1468,7 @@ class QueryRow implements ItemListener {
 
     if (opName.equals("Defined"))
       {
-	if (operand != null)
-	  {
-	    if (operand instanceof JdateField)
-	      {
-		((JdateField) operand).unregister();
-	      }
-
-	    operand.setVisible(false);
-	    operandContainer.remove(operand);
-	    operand = null;
-	  }
-
+	removeOperand();
 	return;
       }
 
@@ -1481,11 +1476,7 @@ class QueryRow implements ItemListener {
       {
 	if (!(operand instanceof JnumberField))
 	  {
-	    if (operand != null)
-	      {
-		operand.setVisible(false);
-		operandContainer.remove(operand);
-	      }
+	    removeOperand();
 
 	    operand = new JnumberField();
 	    addOperand = true;
@@ -1495,11 +1486,7 @@ class QueryRow implements ItemListener {
       {
 	if (!(operand instanceof JdateField))
 	  {
-	    if (operand != null)
-	      {
-		operand.setVisible(false);
-		operandContainer.remove(operand);
-	      }
+	    removeOperand();
 
 	    operand = new JdateField(new Date(), true, false, null, null);
 	    addOperand = true;
@@ -1509,11 +1496,7 @@ class QueryRow implements ItemListener {
       {
 	if (!(operand instanceof JstringField))
 	  {
-	    if (operand != null)
-	      {
-		operand.setVisible(false);
-		operandContainer.remove(operand);
-	      }
+	    removeOperand();
 
 	    operand = new JstringField();
 	    addOperand = true;
@@ -1523,11 +1506,7 @@ class QueryRow implements ItemListener {
       {
 	if (!(operand instanceof JnumberField))
 	  {
-	    if (operand != null)
-	      {
-		operand.setVisible(false);
-		operandContainer.remove(operand);
-	      }
+	    removeOperand();
 
 	    operand = new JnumberField();
 	    addOperand = true;
@@ -1537,12 +1516,8 @@ class QueryRow implements ItemListener {
       {
  	if (!(operand instanceof JfloatField))
  	  {
- 	    if (operand != null)
- 	      {
- 		operand.setVisible(false);
- 		operandContainer.remove(operand);
- 	      }
- 
+	    removeOperand();
+
  	    operand = new JfloatField();
  	    addOperand = true;
  	  }
@@ -1551,11 +1526,7 @@ class QueryRow implements ItemListener {
       {
 	if (!(operand instanceof JCheckBox))
 	  {
-	    if (operand != null)
-	      {
-		operand.setVisible(false);
-		operandContainer.remove(operand);
-	      }
+	    removeOperand();
 
 	    operand = new JCheckBox();
 	    addOperand = true;
@@ -1579,12 +1550,8 @@ class QueryRow implements ItemListener {
 	  {
 	    if (!(operand instanceof JstringField))
 	      {
-		if (operand != null)
-		  {
-		    operand.setVisible(false);
-		    operandContainer.remove(operand);
-		  }
-		
+		removeOperand();
+
 		operand= new JstringField();
 		addOperand = true;
 	      }
@@ -1600,11 +1567,7 @@ class QueryRow implements ItemListener {
 
 	    // we always want to reset the invid chooser
 
-	    if (operand != null)
-	      {
-		operand.setVisible(false);
-		operandContainer.remove(operand);
-	      }
+	    removeOperand();
 
 	    // get a fully expanded (non-editables included) list of objects
 	    // from our parent.
@@ -1627,11 +1590,7 @@ class QueryRow implements ItemListener {
       {
 	if (!(operand instanceof JstringField))
 	  {
-	    if (operand != null)
-	      {
-		operand.setVisible(false);
-		operandContainer.remove(operand);
-	      }
+	    removeOperand();
 	    
 	    operand = new JstringField();
 	    addOperand = true;
@@ -1651,12 +1610,36 @@ class QueryRow implements ItemListener {
   }
 
   /**
+   * <p>Private helper method to remove the operand component and
+   * handle any unregistration required.</p>
+   */
+
+  private void removeOperand()
+  {
+    if (operand != null)
+      {
+	if (operand instanceof JdateField)
+	  {
+	    ((JdateField) operand).unregister();
+	  }
+
+	if (operand instanceof JstringField)
+	  {
+	    ((JstringField) operand).removeActionListener(parent);
+	  }
+	
+	operand.setVisible(false);
+	operandContainer.remove(operand);
+	operand = null;
+      }
+  }
+
+  /**
    *
    * This method is called when the querybox wants to remove this row.
    * This method takes care of removing all components from panel, but
    * does not take care of removing itself from the querybox Rows Vector.
-   *
-   */
+   * */
 
   void removeRow()
   {
