@@ -8,8 +8,8 @@
 
    Created: 26 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/02/01 04:04:17 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/02/02 01:03:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -63,6 +63,8 @@ package arlut.csd.ganymede;
  */
 
 public final class loginSemaphore {
+
+  static final boolean debug = false;
 
   /**
    * How many users are logged in on this semaphore?
@@ -252,60 +254,80 @@ public final class loginSemaphore {
 
   public synchronized String increment(long millis) throws InterruptedException
   {
-    if (millis == 0)	// don't block.. fail if necessary
+    try
       {
-	if (disableMsg == null)
+	if (millis == 0)	// don't block.. fail if necessary
 	  {
-	    count++;
-	    return null;
-	  }
-	else
-	  {
-	    return disableMsg;
-	  }
-      }
-    else if (millis < 0)	// block indefinitely
-      {
-	while (true)
-	  {
-	    wait();
-
 	    if (disableMsg == null)
 	      {
 		count++;
 		return null;
-	      }
-	  }
-      }
-    else			// block a limited time
-      {
-	long waitTime = millis;
-	long startTime = System.currentTimeMillis();
-	long timeSoFar = 0;
-	    
-	/* -- */
-
-	while (true)
-	  {
-	    wait(waitTime);
-
-	    if (disableMsg == null)
-	      {
-		count++;
-		return null;
-	      }
-		
-	    timeSoFar = System.currentTimeMillis() - startTime;
-
-	    if (timeSoFar > millis)	// timed out
-	      {
-		return disableMsg;
 	      }
 	    else
 	      {
-		waitTime = millis - timeSoFar;
+		return disableMsg;
 	      }
 	  }
+	else if (millis < 0)	// block indefinitely
+	  {
+	    while (true)
+	      {
+		wait();	// can throw InterruptedException
+
+		if (disableMsg == null)
+		  {
+		    count++;
+		    return null;
+		  }
+	      }
+	  }
+	else			// block a limited time
+	  {
+	    long waitTime = millis;
+	    long startTime = System.currentTimeMillis();
+	    long timeSoFar = 0;
+	    
+	    /* -- */
+
+	    while (true)
+	      {
+		wait(waitTime);	// can throw InterruptedException
+
+		if (disableMsg == null)
+		  {
+		    count++;
+		    return null;
+		  }
+		
+		timeSoFar = System.currentTimeMillis() - startTime;
+
+		if (timeSoFar > millis)	// timed out
+		  {
+		    return disableMsg;
+		  }
+		else
+		  {
+		    waitTime = millis - timeSoFar;
+		  }
+	      }
+	  }
+      }
+    finally
+      {
+	if (debug)
+	  {
+	    // get a stack trace for the increment
+
+	    try
+	      {
+		throw new RuntimeException("semaphore increment");
+	      }
+	    catch (RuntimeException ex)
+	      {
+		ex.printStackTrace();
+	      }
+	  }
+	
       }
   }
 
@@ -324,7 +346,27 @@ public final class loginSemaphore {
 	throw new IllegalStateException("Error, decrement called on empty loginSemaphore");
       }
 
-    count--;
-    notifyAll();		// wake up disablers
+    try
+      {
+	count--;
+	notifyAll();		// wake up disablers
+      }
+    finally
+      {
+	if (debug)
+	  {
+	    // get a stack trace for the increment
+
+	    try
+	      {
+		throw new RuntimeException("semaphore decrement");
+	      }
+	    catch (RuntimeException ex)
+	      {
+		ex.printStackTrace();
+	      }
+	  }
+	
+      }
   }
 }

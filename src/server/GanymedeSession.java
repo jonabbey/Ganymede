@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.168 $
-   Last Mod Date: $Date: 2000/01/27 06:03:23 $
+   Version: $Revision: 1.169 $
+   Last Mod Date: $Date: 2000/02/02 01:03:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -125,7 +125,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.168 $ $Date: 2000/01/27 06:03:23 $
+ * @version $Revision: 1.169 $ $Date: 2000/02/02 01:03:00 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -520,14 +520,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    
 		throw new RuntimeException("semaphore error: " + error);
 	      }
+	    else
+	      {
+		semaphoreLocked = true;
+	      }
 	  }
 	catch (InterruptedException ex)
 	  {
 	    ex.printStackTrace();
 	    throw new RuntimeException(ex.getMessage());
 	  }
-
-	semaphoreLocked = true;
       }
 
     // construct our DBSession
@@ -572,7 +574,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // --
 
-    // GanymedeServer will have already incremented our semaphore in the login()
+    // GanymedeServer will have already incremented our semaphore in
+    // its login() method
 
     semaphoreLocked = true;
 
@@ -935,78 +938,91 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     synchronized (this)
       {
-	if (client == null)
-	  {
-	    // We don't need to update GanymedeServer's lists for internal sessions
-
-	    session.logout();	// *sync* DBSession
-	    ownerList = null;
-	    return;
-	  }
-
-	//	Ganymede.debug("User " + username + " logging off");
-
-	this.client = null;
-
-	// logout the client, abort any DBSession transaction going
-
-	session.logout();	// *sync* DBSession
-
-	// if we weren't forced off, do normal logout logging
-
-	if (!forced_off)
-	  {
-	    // Construct a vector of invid's to place in the log entry we
-	    // are about to create.  This lets us search the log easily.
-
-	    Vector objects = new Vector();
-
-	    if (userInvid != null)
-	      {
-		objects.addElement(userInvid);
-	      }
-
-	    if (personaInvid != null)
-	      {
-		objects.addElement(personaInvid);
-	      }
-
-	    if (Ganymede.log != null)
-	      {
-		Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
-							   "OK logout for username: " + username,
-							   userInvid,
-							   username,
-							   objects,
-							   null));
-	      }
-	  }
-
 	try
 	  {
+	    if (client == null)
+	      {
+		// We don't need to update GanymedeServer's lists for internal sessions
+
+		session.logout();	// *sync* DBSession
+		return;
+	      }
+
+	    //	Ganymede.debug("User " + username + " logging off");
+
+	    this.client = null;
+
+	    // logout the client, abort any DBSession transaction going
+
+	    session.logout();	// *sync* DBSession
+
+	    // if we weren't forced off, do normal logout logging
+
+	    if (!forced_off)
+	      {
+		// Construct a vector of invid's to place in the log entry we
+		// are about to create.  This lets us search the log easily.
+
+		Vector objects = new Vector();
+
+		if (userInvid != null)
+		  {
+		    objects.addElement(userInvid);
+		  }
+
+		if (personaInvid != null)
+		  {
+		    objects.addElement(personaInvid);
+		  }
+
+		if (Ganymede.log != null)
+		  {
+		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
+							       "OK logout for username: " + username,
+							       userInvid,
+							       username,
+							       objects,
+							       null));
+		  }
+	      }
+
 	    // Update the server's records, refresh the admin consoles.
 	    
 	    GanymedeServer.sessions.removeElement(this);
 
-	    // and the login semaphore
-
-	    if (semaphoreLocked)
-	      {
-		GanymedeServer.lSemaphore.decrement();
-	      }
-	    
 	    // update the admin consoles
 	    
 	    GanymedeAdmin.refreshUsers();
 	  }
 	finally
 	  {
+	    // and the login semaphore
+
+	    if (semaphoreLocked)
+	      {
+		GanymedeServer.lSemaphore.decrement();
+	      }
+	   
 	    // if we are the last user logged in and the server is in
 	    // deferred shutdown mode, clearActiveUser() will shut the
 	    // server down, so the rest of of the stuff below may not
 	    // happen
-
+	    
 	    GanymedeServer.clearActiveUser(username);
+
+	    // help the garbage collector
+
+	    ownerList = null;
+	    personaObj = null;
+	    permBase = null;
+	    defaultObj = null;
+	    newObjectOwnerInvids = null;
+	    visibilityFilterInvids = null;
+	    personaPerms = null;
+	    defaultPerms = null;
+	    delegatablePersonaPerms = null;
+	    delegatableDefaultPerms = null;
+	    lastError = null;
 	  }
 
 	// guess we're still running.  Remember the last time this
@@ -1021,22 +1037,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    GanymedeServer.userLogOuts.put(personaInvid, new Date());
 	  }
 
-	// help the garbage collector
-
-	ownerList = null;
-	personaObj = null;
-	permBase = null;
-	defaultObj = null;
-	newObjectOwnerInvids = null;
-	visibilityFilterInvids = null;
-	personaPerms = null;
-	defaultPerms = null;
-	delegatablePersonaPerms = null;
-	delegatableDefaultPerms = null;
-
 	Ganymede.debug(username + " logged off");
-
-	this.lastError = null;
       }
   }
 

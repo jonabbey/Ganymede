@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/02/01 04:16:40 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/02/02 01:03:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.5 $ $Date: 2000/02/01 04:16:40 $
+ * @version $Revision: 1.6 $ $Date: 2000/02/02 01:03:01 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -209,7 +209,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
     /* -- */
 
-    addEvent(newEvent);
+    replaceEvent(newEvent);
   }
 
   /**
@@ -223,7 +223,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
     /* -- */
 
-    addEvent(newEvent);
+    replaceEvent(newEvent);
   }
 
   /**
@@ -336,13 +336,10 @@ public class serverAdminProxy implements Admin, Runnable {
 	      }
 	  }
 
-	if (eventBuffer.size() >= maxBufferSize)
-	  {
-	    throw new RemoteException("serverAdminProxy buffer overflow");
-	  }
+	// if we didn't find an event to append to, go ahead and add a
+	// new CHANGESTATUS log update event
 
-	eventBuffer.addElement(new adminEvent(adminEvent.CHANGESTATUS, stampedLine));
-	eventBuffer.notify();
+	addEvent(new adminEvent(adminEvent.CHANGESTATUS, stampedLine));
       }
   }
 
@@ -357,7 +354,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
     /* -- */
 
-    addEvent(newEvent);
+    replaceEvent(newEvent);
   }
 
   /**
@@ -429,63 +426,21 @@ public class serverAdminProxy implements Admin, Runnable {
 
 	try
 	  {
-	    switch (event.method)
-	      {
-	      case event.SETSERVERSTART:
-		remoteConsole.setServerStart((Date) event.param);
-		break;
+	    event.dispatch(remoteConsole);
 
-	      case event.SETLASTDUMPTIME:
-		remoteConsole.setLastDumpTime((Date) event.param);
-		break;
-
-	      case event.SETTRANSACTIONS:
-		remoteConsole.setTransactionsInJournal(((Integer) event.param).intValue());
-		break;
-
-	      case event.SETOBJSCHECKOUT:
-		remoteConsole.setObjectsCheckedOut(((Integer) event.param).intValue());
-		break;
-
-	      case event.SETLOCKSHELD:
-		remoteConsole.setLocksHeld(((Integer) event.param).intValue());
-		break;
-
-	      case event.CHANGESTATE:
-		remoteConsole.changeState((String) event.param);
-		break;
-
-	      case event.CHANGESTATUS:
-		remoteConsole.changeStatus((String) event.param);
-		break;
-
-	      case event.CHANGEADMINS:
-		remoteConsole.changeAdmins((String) event.param);
-		break;
-
-	      case event.CHANGEUSERS:
-		remoteConsole.changeUsers((Vector) event.param);
-		break;
-
-	      case event.CHANGETASKS:
-		remoteConsole.changeTasks((Vector) event.param);
-		break;
-	      }
-
-	    errorCondition = null;
+	    errorCondition = null; // we won't execute this if a remote exception is thrown
 	  }
 	catch (RemoteException ex)
 	  {
 	    if (errorCondition != null)
 	      {
-		ex.printStackTrace();
 		done = true;	// two remote exceptions in a row, prevent any further events
 		return;		// exit the commThread
 	      }
 	    else
 	      {
 		errorCondition = Ganymede.stackTrace(ex);
-		Ganymede.debug(errorCondition);
+		System.err.println(errorCondition);
 	      }
 	  }
       }
@@ -504,12 +459,12 @@ public class serverAdminProxy implements Admin, Runnable {
       {
 	if (done)
 	  {
-	    return;
+	    throw new RemoteException("serverAdminProxy: console disconnected");
 	  }
 
 	if (eventBuffer.size() >= maxBufferSize)
 	  {
-	    throw new RemoteException("serverAdminProxy buffer overflow");
+	    throwOverflow();
 	  }
 
 	eventBuffer.addElement(newEvent);
@@ -536,7 +491,7 @@ public class serverAdminProxy implements Admin, Runnable {
       {
 	if (done)
 	  {
-	    return;
+	    throw new RemoteException("serverAdminProxy: console disconnected");
 	  }
 
 	for (int i = 0; i < eventBuffer.size(); i++)
@@ -549,15 +504,30 @@ public class serverAdminProxy implements Admin, Runnable {
 		return;
 	      }
 	  }
-	
+
 	if (eventBuffer.size() >= maxBufferSize)
 	  {
-	    throw new RemoteException("serverAdminProxy buffer overflow");
+	    throwOverflow();
 	  }
 	
 	eventBuffer.addElement(newEvent);
 	eventBuffer.notify();
       }
+  }
+
+  private void throwOverflow() throws RemoteException
+  {
+    StringBuffer buffer = new StringBuffer();
+    
+    for (int i = 0; i < eventBuffer.size(); i++)
+      {
+	buffer.append(i);
+	buffer.append(": ");
+	buffer.append(eventBuffer.elementAt(i));
+	buffer.append("\n");
+      }
+    
+    throw new RemoteException("serverAdminProxy buffer overflow:" + buffer.toString());
   }
 }
 
@@ -621,5 +591,108 @@ class adminEvent {
 
     this.method = method;
     this.param = param;
+  }
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    switch (method)
+      {
+      case SETSERVERSTART: 
+	result.append("setServerStart");
+	break;
+	
+      case SETLASTDUMPTIME:
+	result.append("setLastDumpTime");
+	break;
+
+      case SETTRANSACTIONS:
+	result.append("setTransactionsInJournal");
+	break;
+
+      case SETOBJSCHECKOUT:
+	result.append("setObjectsCheckedOut");
+	break;
+
+      case SETLOCKSHELD:
+	result.append("setLocksHeld");
+	break;
+
+      case CHANGESTATE:
+	result.append("changeState");
+	break;
+
+      case CHANGESTATUS:
+	result.append("changeStatus");
+	break;
+
+      case CHANGEADMINS:
+	result.append("changeAdmins");
+	break;
+
+      case CHANGEUSERS:
+	result.append("changeUsers");
+	break;
+
+      case CHANGETASKS:
+	result.append("changeTasks");
+	break;
+	
+      default:
+	result.append("??");
+      }
+
+    result.append("(");
+    result.append(param);
+    result.append(")");
+
+    return result.toString();
+  }
+
+  public void dispatch(Admin remoteConsole) throws RemoteException
+  {
+    switch (method)
+      {
+      case SETSERVERSTART:
+	remoteConsole.setServerStart((Date) param);
+	break;
+
+      case SETLASTDUMPTIME:
+	remoteConsole.setLastDumpTime((Date) param);
+	break;
+
+      case SETTRANSACTIONS:
+	remoteConsole.setTransactionsInJournal(((Integer) param).intValue());
+	break;
+
+      case SETOBJSCHECKOUT:
+	remoteConsole.setObjectsCheckedOut(((Integer) param).intValue());
+	break;
+
+      case SETLOCKSHELD:
+	remoteConsole.setLocksHeld(((Integer) param).intValue());
+	break;
+
+      case CHANGESTATE:
+	remoteConsole.changeState((String) param);
+	break;
+
+      case CHANGESTATUS:
+	remoteConsole.changeStatus((String) param);
+	break;
+
+      case CHANGEADMINS:
+	remoteConsole.changeAdmins((String) param);
+	break;
+
+      case CHANGEUSERS:
+	remoteConsole.changeUsers((Vector) param);
+	break;
+
+      case CHANGETASKS:
+	remoteConsole.changeTasks((Vector) param);
+	break;
+      }
   }
 }
