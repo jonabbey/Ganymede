@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -260,7 +260,7 @@ public class DBJournal {
 	for (int i = 0; i < object_count; i++)
 	  {
 	    obj_type = jFile.readShort();
-	    base = (DBObjectBase) store.objectBases.get(new Integer(obj_type));
+	    base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
 
 	    obj = new DBObject(base, jFile);
 
@@ -284,7 +284,7 @@ public class DBJournal {
 	for (int i = 0; i < object_count; i++)
 	  {
 	    obj_type = jFile.readShort();
-	    base = (DBObjectBase) store.objectBases.get(new Integer(obj_type));
+	    base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
 
 	    obj = new DBObject(base, jFile);
 
@@ -308,7 +308,7 @@ public class DBJournal {
 	for (int i = 0; i < object_count; i++)
 	  {
 	    obj_type = jFile.readShort();
-	    base = (DBObjectBase) store.objectBases.get(new Integer(obj_type));
+	    base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
 	    obj_id = jFile.readShort();
 
 	    if (debug)
