@@ -55,6 +55,40 @@ against SSHA hashes can be pretty successful.  The primary benefit of
 SSHA over Crypt in the LDAP context is that longer passwords can be
 supported (vs. the 8 character limit of traditional Unix Crypt).
 
+3. [SERVER] Integrated Jython interpreter support in the server
+
+XXX - to be written.  Discuss DBEditObject subclasses, tasks.
+
+4. [SERVER] Java 5.0 fixes
+
+XXX - GUI threading stuff.
+
+5. [SERVER] The return of passive password capture
+
+Thanks to Deepak, we have now re-enabled the passive password capture
+logic in the PasswordDBField class that was removed in 1.0.10.
+Previously, the big showstopper with passive password capture was that
+it was possibly to capture erroneous plaintext that nonetheless
+matched a stored hash format, particularly the 8-character-significant
+traditional UNIX 'crypt' hash function..
+
+Now, passive password capture is back, but it is smart enough not to
+capture plaintext on login if the password is not know from a hash
+with adequate specifity.  The whole point of having passive password
+capture is that it enables Ganymede to learn about plaintext from
+interacting with a user, while still allowing us to forego saving
+plaintext passwords persistently to our ganymede.db file.
+
+6. [SERVER] Made transaction commit more resilient to exceptions in commitPhase1
+
+The DBEditSet's transaction commit logic was vulnerable to getting
+into a confused and broken state if an object's commitPhase1() method
+threw an uncaught exception.  It's fixed now so that the client gets
+an exception report and the transaction unwinds itself back to a
+consistent state, ready to try committing again (though it will
+probably fail if the error condition in the plugin classes is not
+fixed).
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
