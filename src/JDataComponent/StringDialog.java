@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -392,11 +392,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 
 		    if (dt.getMaxDate() != null)
 		      {
-			dateField = new JdateField(null, true, true, null, dt.getMaxDate(), this);
+			dateField = new JdateField(dt.getDate(), true, true,
+						   null, dt.getMaxDate(), this);
 		      }
 		    else
 		      {
-			dateField = new JdateField(null, true, false, null, null);
+			dateField = new JdateField(dt.getDate(), true, false,
+						   null, null, this);
 		      }
 
 		    addRow(panel, dateField, dt.getLabel(), i);

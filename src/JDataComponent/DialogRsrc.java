@@ -1,10 +1,18 @@
-/* 
-   Resource class for use with StringDialog.java
+/*
+
+   DialogRsrc.java
+
+   Non-serializable Resource class for use with StringDialog.java
+   
+   Created: 16 June 1997
+   Version: $Revision: 1.15 $ %D%
+   Module By: Michael Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
+
 */
 
 package arlut.csd.JDialog;
 
-import java.lang.String;
 import java.util.*;
 import java.awt.*;
 
@@ -41,12 +49,17 @@ import javax.swing.*;
  * </pre></blockquote></code>
  *  @see StringDialog
  */
+
 public class DialogRsrc {
 
-  private final boolean debug = false;
+  private final static boolean debug = false;
+
+  /**
+   * A static (persistent, shared) image cache used to translate
+   * image names to Image objects.
+   */
 
   static Hashtable imageCache = new Hashtable();
-
 
   // ---
   
@@ -210,6 +223,34 @@ public class DialogRsrc {
   }
 
   /**
+   *
+   * Adds a labeled date field
+   *
+   * @param string String to use as the label
+   * @param currentDate What should the date be set to initially?
+   * @param maxDate What is the latest the date can be set to?
+   *
+   */
+  
+  public void addDate(String label, Date currentDate, Date maxDate)
+  {
+    dateThing dt = new dateThing(label, currentDate, maxDate);
+    objects.addElement(dt);
+  }
+
+  /**
+   *
+   * Adds a labeled date field
+   *
+   * @param string String to use as the label
+   */
+
+  public void addDate(String label)
+  {
+    addDate(label, null, null);
+  }
+
+  /**
    * 
    * Adds a labeled check box field
    *
@@ -263,16 +304,6 @@ public class DialogRsrc {
 
   /**
    *
-   * Adds a one line separator to the dialog
-   *
-   */
-  public void addSeparator()
-  {
-    objects.addElement(new JSeparator());
-  }
-
-  /**
-   *
    * Adds a text-hidden password string field to the dialog
    *
    * @param label String to use as label
@@ -320,6 +351,7 @@ public class DialogRsrc {
    *
    * @param newImage Image to display
    */
+
   public void setImage(Image newImage)
   {
     image = newImage;
