@@ -224,9 +224,8 @@ public class BooleanDBField extends DBField implements boolean_field {
     xmlOut.endElement("delta");
 
     xmlOut.indentIn();
-    xmlOut.indent();
 
-    xmlOut.endElement(this.getXMLName());
+    xmlOut.endElementIndent(this.getXMLName());
   }
 
   /**

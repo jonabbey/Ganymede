@@ -504,13 +504,13 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	
 	xmlOut.indentIn();
-	xmlOut.indent();
       }
     else			// edit-in-place
       {
+	// XXX Oops!  I need to code this!
       }
 
-    xmlOut.endElement(this.getXMLName());
+    xmlOut.endElementIndent(this.getXMLName());
   }
 
   /**

@@ -433,10 +433,9 @@ public class IPDBField extends DBField implements ip_field {
 	  }
 	
 	xmlOut.indentIn();
-	xmlOut.indent();
       }
 
-    xmlOut.endElement(this.getXMLName());
+    xmlOut.endElementIndent(this.getXMLName());
   }
 
   public void emitIPXML(XMLDumpContext xmlOut, Byte[] value) throws IOException

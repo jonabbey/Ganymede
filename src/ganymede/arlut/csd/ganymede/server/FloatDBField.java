@@ -222,9 +222,8 @@ public class FloatDBField extends DBField implements float_field {
     xmlOut.endElement("delta");
 
     xmlOut.indentIn();
-    xmlOut.indent();
 
-    xmlOut.endElement(this.getXMLName());
+    xmlOut.endElementIndent(this.getXMLName());
   }
 
   public void emitDoubleXML(XMLDumpContext xmlOut, double value) throws IOException

@@ -904,22 +904,20 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     xmlOut.startElementIndent(this.getXMLName());
 
     xmlOut.indentOut();
-    xmlOut.indent();
-    xmlOut.startElement("delta");
+
+    xmlOut.startElementIndent("delta");
     xmlOut.attribute("state", "before");
     ((FieldOptionDBField) orig).emitXML(xmlOut, false);
     xmlOut.endElement("delta");
     
-    xmlOut.indent();
-    xmlOut.startElement("delta");
+    xmlOut.startElementIndent("delta");
     xmlOut.attribute("state", "after");
     emitXML(xmlOut, false);
     xmlOut.endElement("delta");
 
     xmlOut.indentIn();
-    xmlOut.indent();
 
-    xmlOut.endElement(this.getXMLName());
+    xmlOut.endElementIndent(this.getXMLName());
   }
 
   public synchronized String getValueString()

@@ -337,7 +337,6 @@ public class StringDBField extends DBField implements string_field {
 	xmlOut.endElement("delta");
 
 	xmlOut.indentIn();
-	xmlOut.indent();
       }
     else
       {
@@ -389,10 +388,9 @@ public class StringDBField extends DBField implements string_field {
 	  }
 	
 	xmlOut.indentIn();
-	xmlOut.indent();
       }
 
-    xmlOut.endElement(this.getXMLName());
+    xmlOut.endElementIndent(this.getXMLName());
   }
 
   public void emitStringXML(XMLDumpContext xmlOut, String value) throws IOException

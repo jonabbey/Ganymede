@@ -222,9 +222,8 @@ public class NumericDBField extends DBField implements num_field {
     xmlOut.endElement("delta");
 
     xmlOut.indentIn();
-    xmlOut.indent();
 
-    xmlOut.endElement(this.getXMLName());
+    xmlOut.endElementIndent(this.getXMLName());
   }
 
   public void emitIntXML(XMLDumpContext xmlOut, int value) throws IOException

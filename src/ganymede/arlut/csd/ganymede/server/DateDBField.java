@@ -234,9 +234,8 @@ public class DateDBField extends DBField implements date_field {
     xmlOut.endElement("delta");
 
     xmlOut.indentIn();
-    xmlOut.indent();
 
-    xmlOut.endElement(this.getXMLName());
+    xmlOut.endElementIndent(this.getXMLName());
   }
 
   public void emitDateXML(XMLDumpContext xmlOut, Date value) throws IOException
