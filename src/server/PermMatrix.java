@@ -6,7 +6,7 @@
    object type and field id's.
    
    Created: 3 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,207 @@ public class PermMatrix implements java.io.Serializable {
 
   static final long serialVersionUID = 7354985227082627640L;
 
-  // -- 
+  /**
+   *
+   * This utility method extracts the DBObjectBase name from a coded
+   * permission entry held in a PermMatrix/PermissionMatrixDBField
+   * Matrix.
+   * 
+   */
+
+  public static String decodeBaseName(String entry)
+  {
+    int sepIndex;
+    short basenum;
+    DBObjectBase base;
+    String basename;
+
+    /* -- */
+
+    sepIndex = entry.indexOf(':');
+
+    if (sepIndex != -1)
+      {
+	try
+	  {
+	    basenum = new Short(entry.substring(0, sepIndex)).shortValue();
+	    base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+
+	    if (base == null)
+	      {
+		basename = "INVALID: " + entry;
+	      }
+	    else
+	      {
+		basename = base.getName();
+	      }
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    basename = entry;
+	  }
+      }
+    else
+      {
+	basename = entry;
+      }
+
+    return basename;
+  }
+
+  /**
+   *
+   * This method extracts the DBObjectBaseField name from a coded
+   * permission entry held in a PermMatrix/PermissionMatrixDBField
+   * Matrix.
+   * 
+   */
+
+  public static String decodeFieldName(String entry)
+  {
+    int sepIndex;
+    short basenum;
+    DBObjectBase base;
+    String basename;
+    
+    String fieldId;
+    short fieldnum;
+    DBObjectBaseField field;
+    String fieldname;
+
+    /* -- */
+
+    sepIndex = entry.indexOf(':');
+
+    if (sepIndex != -1)
+      {
+	try
+	  {
+	    basenum = new Short(entry.substring(0, sepIndex)).shortValue();
+	    base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+
+	    if (base == null)
+	      {
+		fieldname = "[error " + entry + "]";
+	      }
+	    else
+	      {
+		fieldId = entry.substring(sepIndex+1);
+	    
+		if (fieldId.equals(":"))
+		  {
+		    fieldname = "[base]";
+		  }
+		else if (fieldId.equals("default"))
+		  {
+		    fieldname = "[Default]";
+		  }
+		else
+		  {
+		    try
+		      {
+			fieldnum = new Short(fieldId).shortValue();
+
+			field = (DBObjectBaseField) base.getField(fieldnum);
+
+			if (field == null)
+			  {
+			    fieldname = "invalid:" + fieldId;
+			  }
+			else
+			  {
+			    fieldname = field.getName();
+			  }
+		      }
+		    catch (NumberFormatException ex)
+		      {
+			fieldname = fieldId;
+		      }
+		  }
+	      }
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    fieldname = "[error " + entry + "]";
+	  }
+      }
+    else
+      {
+	fieldname = "[error " + entry + "]";
+      }
+
+    return fieldname;
+  }
+
+  /**
+   *
+   * This method returns true if the given PermMatrix /
+   * PermissionMatrixDBField key refers to a currently valid 
+   * DBObjectBase/DBObjectBaseField in the loaded schema.
+   *
+   */
+
+  public static boolean isValidCode(String entry)
+  {
+    int sepIndex;
+    short basenum;
+    DBObjectBase base;
+    
+    String fieldId;
+    short fieldnum;
+    DBObjectBaseField field;
+
+    /* -- */
+
+    sepIndex = entry.indexOf(':');
+
+    if (sepIndex == -1)
+      {
+	return false;
+      }
+
+    try
+      {
+	basenum = new Short(entry.substring(0, sepIndex)).shortValue();
+	base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+
+	if (base == null)
+	  {
+	    return false;
+	  }
+	else
+	  {
+	    fieldId = entry.substring(sepIndex+1);
+	    
+	    if (!fieldId.equals(":") && !fieldId.equals("default"))
+	      {
+		try
+		  {
+		    fieldnum = new Short(fieldId).shortValue();
+		    
+		    field = (DBObjectBaseField) base.getField(fieldnum);
+		    
+		    if (field == null)
+		      {
+			return false;
+		      }
+		  }
+		catch (NumberFormatException ex)
+		  {
+		    return false;
+		  }
+	      }
+	  }
+      }
+    catch (NumberFormatException ex)
+      {
+	return false;
+      }
+
+    return true;
+  }
+
+  // ---
 
   private Hashtable matrix;
 
@@ -297,6 +497,61 @@ public class PermMatrix implements java.io.Serializable {
 
     return result;
   }
+
+  public void debugdump()
+  {
+    Enumeration enum;
+    String key;
+    PermEntry entry;
+    short basenum;
+    String basename;
+    Hashtable baseHash = new Hashtable();
+    Vector vec;
+
+    /* -- */
+
+    System.err.println("PermMatrix DebugDump");
+
+    enum = matrix.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	entry = (PermEntry) matrix.get(key);
+
+	basename = decodeBaseName(key);
+
+	if (baseHash.containsKey(basename))
+	  {
+	    vec = (Vector) baseHash.get(basename);
+	  }
+	else
+	  {
+	    vec = new Vector();
+	    baseHash.put(basename, vec);
+	  }
+
+	vec.addElement(decodeFieldName(key) + " " + entry.toString());
+      }
+
+    enum = baseHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+
+	System.err.println("Base - " + key);
+
+	vec = (Vector) baseHash.get(key);
+
+	for (int i = 0; i < vec.size(); i++)
+	  {
+	    System.err.println("\t" + vec.elementAt(i));
+	  }
+      }
+  }
+
 
   private String matrixEntry(short baseID, short fieldID)
   {
