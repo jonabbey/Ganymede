@@ -57,6 +57,7 @@ import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
