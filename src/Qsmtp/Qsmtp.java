@@ -57,6 +57,8 @@ Added javadocs (9 June 1999).
 
 ***********************************************************************/
 
+package Qsmtp;			// thanks javac 1.4
+
 import java.net.*;
 import java.io.*;
 import java.util.*;

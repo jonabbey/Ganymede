@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2002/03/15 02:25:43 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2002/03/16 02:15:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * <p>The XML parser object handling XML data from the client</p>
    */
 
-  XMLReader reader;
+  arlut.csd.Util.XMLReader reader;
 
   /**
    * <p>The data stream used to write data from the client to the
@@ -359,7 +359,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// that we feed into the pipe.
 
 	pipe = new PipedOutputStream();
-	reader = new XMLReader(pipe, bufferSize, true, err);
+	reader = new arlut.csd.Util.XMLReader(pipe, bufferSize, true, err);
       }
     catch (IOException ex)
       {

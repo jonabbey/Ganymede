@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.255 $
-   Last Mod Date: $Date: 2002/03/15 02:25:43 $
+   Version: $Revision: 1.256 $
+   Last Mod Date: $Date: 2002/03/16 02:13:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -67,7 +67,7 @@ import java.lang.reflect.*;
 import java.net.*;
 import java.io.*;
 
-import Qsmtp;
+import Qsmtp.*;
 import arlut.csd.Util.*;
 import arlut.csd.JDialog.*;
 
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.255 $ $Date: 2002/03/15 02:25:43 $
+ * @version $Revision: 1.256 $ $Date: 2002/03/16 02:13:13 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 

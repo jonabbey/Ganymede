@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2002/01/12 17:24:59 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2002/03/16 02:13:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -61,7 +61,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-import Qsmtp;
+import Qsmtp.*;
 import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
