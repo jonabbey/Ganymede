@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -234,8 +234,8 @@ public class GASHSchema extends Frame implements treeCallback, ActionListener, C
     objectsRefresh();
 
     pack();
-    show();
     setSize(800, 600);
+    show();
   }
 
   public int compare(Object a, Object b) 
