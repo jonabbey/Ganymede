@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -161,7 +161,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (found)
       {
-	GanymedeSession session = new GanymedeSession(client, user, persona);
+	GanymedeSession session = new GanymedeSession(client, clientName, user, persona);
  	Ganymede.debug("Client logged in: " + session.username);
 
 	Vector objects = new Vector();

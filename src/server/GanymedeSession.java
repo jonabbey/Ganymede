@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.60 $ %D%
+   Version: $Revision: 1.61 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -360,7 +360,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * 
    */
   
-  GanymedeSession(Client client, DBObject userObject, DBObject personaObject) throws RemoteException
+  GanymedeSession(Client client, String loginName, 
+		  DBObject userObject, DBObject personaObject) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -389,18 +390,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // Register with the server
 
-    try
-      {
-	username = GanymedeServer.registerActiveUser(client.getName());
-
-	logged_in = true;
-      }
-    catch (RemoteException ex)
-      {
-	Ganymede.debug("GanymedeSession: couldn't verify username on client" + ex);
-	logged_in = false;
-	return;
-      }
+    username = GanymedeServer.registerActiveUser(loginName);
+    logged_in = true;
 
     try
       {
