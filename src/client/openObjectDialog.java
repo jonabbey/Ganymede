@@ -98,37 +98,38 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     
     type = new JComboBox();
     Vector bases = client.getBaseList();
+    Hashtable baseToShort = client.getBaseToShort();
     Hashtable baseNames = client.getBaseNames();
 
     Base thisBase = null;
 
-    try
+    Vector listHandles = new Vector();
+
+    for (int i = 0; i < bases.size(); i++)
       {
-	for (int i = 0; i < bases.size(); i++)
+	thisBase = (Base)bases.elementAt(i);
+	String name = (String)baseNames.get(thisBase);
+	
+	if (name.startsWith("Embedded:"))
 	  {
-	    thisBase = (Base)bases.elementAt(i);
-	    String name = (String)baseNames.get(thisBase);
-	    
-	    if (name.startsWith("Embedded:"))
+	    if (debug)
 	      {
-		if (debug)
-		  {
-		    System.out.println("Skipping embedded field: " + name);
-		  }
-	      }
-	    else
-	      {
-		listHandle lh = new listHandle(name, new Short(thisBase.getTypeID()));
-		type.addItem(lh);
+		System.out.println("Skipping embedded field: " + name);
 	      }
 	  }
+	else
+	  {
+	    listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
+	    listHandles.addItem(lh);
+	  }
       }
-    catch (java.rmi.RemoteException rx)
+      
+    listHandles = client.sortListHandleVector(listHandles);
+    for (int i = 0; i < listHandles.size(); i++)
       {
-	throw new RuntimeException("Could not get type id: " + rx);
+	type.addItem(listHandles.elementAt(i));
       }
-    
-    
+
     gbc.gridx = 0;
     gbc.gridy = 1;
 
@@ -306,72 +307,98 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		System.out.println("BaseID = " + baseID + ", string = " + string);
 	      }
 	    
-	    QueryDataNode node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  
+	    // First see if this exactly matches something, then do the STARTSWITH stuff
+
+	    QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, string);  
 	    QueryResult edit_query = null;
+	    Vector edit_invids = null;
 
 	    try
 	      {
+		System.out.println("Trying exact match...");
 		edit_query = client.session.query(new Query(baseID.shortValue(), node, true));
 		
-		
-		Vector edit_invids = edit_query.getListHandles();
-		
-		if (edit_invids.size() == 1)
+		if (edit_query != null)
 		  {
+		    edit_invids = edit_query.getListHandles();
+		    System.out.println("edit_invids: " + edit_invids.size());
+		  }
+		
+		if ((edit_invids != null ) && (edit_invids.size() == 1))
+		  {
+		    System.out.println("Found it, exact match");
 		    invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
 		    close(true);
-		  }
-		else if (edit_invids.size() == 0)
-		  {
-		    client.showErrorMessage("Error finding object",
-						      "No object starts with that string.");
-		    return;
+	    
 		  }
 		else
 		  {
-		    (new VecQuickSort(edit_invids, 
-				      new arlut.csd.Util.Compare() {
-					public int compare(Object a, Object b) 
-					  {
-					    listHandle aF, bF;
-					    
-					    aF = (listHandle) a;
-					    bF = (listHandle) b;
-					    int comp = 0;
-					    
-					    comp =  aF.toString().compareTo(bF.toString());
-					    
-					    if (comp < 0)
-					      {
-						return -1;
-					      }
-					    else if (comp > 0)
-					      { 
-						return 1;
-					      } 
-					    else
-					      { 
-						return 0;
-					      }
-					  }
-		    })).sort();
-
-		       
-		    DefaultListModel model = (DefaultListModel)list.getModel();
-		    for (int i = 0; i < edit_invids.size(); i++)
+		    System.out.println("Looking for Startswith...");
+		    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  
+		    edit_query = null;
+		    
+		    edit_query = client.session.query(new Query(baseID.shortValue(), node, true));
+		    
+		    
+		    edit_invids = edit_query.getListHandles();
+		    
+		    if (edit_invids.size() == 1)
 		      {
-			model.addElement(edit_invids.elementAt(i));
+			invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
+			close(true);
 		      }
-		    
-		    
-		    gbc.gridx = 0;
-		    gbc.gridy = 3;
-		    gbc.gridwidth = GridBagConstraints.REMAINDER;
-		    gbc.fill = GridBagConstraints.HORIZONTAL;
-		    gbl.setConstraints(pane, gbc);
-		    
-		    middle.add(pane);
-		    pack();
+		    else if (edit_invids.size() == 0)
+		      {
+			client.showErrorMessage("Error finding object",
+						"No object starts with that string.");
+			return;
+		      }
+		    else
+		      {
+			(new VecQuickSort(edit_invids, 
+					  new arlut.csd.Util.Compare() {
+			  public int compare(Object a, Object b) 
+			    {
+			      listHandle aF, bF;
+			      
+			      aF = (listHandle) a;
+			      bF = (listHandle) b;
+			      int comp = 0;
+			      
+			      comp =  aF.toString().compareTo(bF.toString());
+			      
+			      if (comp < 0)
+				{
+				  return -1;
+				}
+			      else if (comp > 0)
+				{ 
+				  return 1;
+				} 
+			      else
+				{ 
+				  return 0;
+				}
+			    }
+			})).sort();
+			
+			
+			DefaultListModel model = (DefaultListModel)list.getModel();
+			for (int i = 0; i < edit_invids.size(); i++)
+			  {
+			    model.addElement(edit_invids.elementAt(i));
+			  }
+			
+			
+			gbc.gridx = 0;
+			gbc.gridy = 3;
+			gbc.gridwidth = GridBagConstraints.REMAINDER;
+			gbc.fill = GridBagConstraints.HORIZONTAL;
+			gbl.setConstraints(pane, gbc);
+			
+			middle.add(pane);
+			pack();
+		      }
 		  }
 	      }
 	    catch (java.rmi.RemoteException rx)
