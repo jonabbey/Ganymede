@@ -7,8 +7,8 @@
    
    Created: 22 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/01/22 18:05:20 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/07/06 19:12:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ public class User {
 	System.out.println("name = '" + name + "'");
       }
 
-    password = getNextBit(tokens); 
+    password = getNextBit(tokens, false); // false so we can handle empty password fields
 
     if (debug)
       {

@@ -7,8 +7,8 @@
    
    Created: 22 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/22 18:04:25 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/07/06 19:12:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -129,7 +129,9 @@ public class User {
 	System.out.println("name = '" + name + "'");
       }
 
-    password = getNextBit(tokens); 
+    // matt knopp has a master.passwd file with missing root password
+
+    password = getNextBit(tokens, false);
 
     if (debug)
       {
@@ -310,6 +312,10 @@ public class User {
    *
    * getNextBit() returns the next String from the StreamTokenizer,
    * where the bits are separated by colons and commas.
+   *
+   * Note that this version of getNextBit will skip multiple leading
+   * : or ,'s, so you shouldn't use this if you're not sure that
+   * a field will actually be there.
    *
    */
   
