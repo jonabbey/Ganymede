@@ -7,8 +7,8 @@
 
    Created: 21 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/02/22 05:06:40 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/02/22 05:08:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,6 +51,7 @@
 
 package arlut.csd.Util;
 
+import java.io.*;
 import com.jclark.xml.output.*;
 
 /*------------------------------------------------------------------------------
