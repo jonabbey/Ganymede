@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.122 $
-   Last Mod Date: $Date: 2001/05/21 07:21:43 $
+   Version: $Revision: 1.123 $
+   Last Mod Date: $Date: 2001/05/23 05:05:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.122 $ $Date: 2001/05/21 07:21:43 $
+ * @version $Revision: 1.123 $ $Date: 2001/05/23 05:05:06 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1656,8 +1656,8 @@ public class DBObject implements db_object, FieldType, Remote {
       {
 	return field.toString();
       }
-    
-    return null;
+
+    return "<<" + id + ">>";
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.155 $
-   Last Mod Date: $Date: 2001/05/12 22:05:13 $
+   Version: $Revision: 1.156 $
+   Last Mod Date: $Date: 2001/05/23 05:05:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.155 $ %D%
+ * @version $Revision: 1.156 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1638,7 +1638,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
 					      "We couldn't unlink field " + getName() +
 					      " in object " + getOwner().getLabel() +
-					      " from field " + targetField + " in object " +
+					      " from field " + remobj.getFieldName(targetField) + " in object " +
 					      getRemoteLabel(session.getGSession(), remote) +
 					      " due to a permissions problem.");
 	  }
@@ -1650,22 +1650,11 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     catch (ClassCastException ex)
       {
-	try
-	  {
-	    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
-					      "Your operation could not succeed due to an error in the " +
-					      "server's schema.  Target field " + oldRef.getField(targetField).getName() +
-					      " in object " + oldRef.getLabel() +
-					      " is not an invid field.");
-	  }
-	catch (RemoteException rx)
-	  {
-	    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
-					      "Your operation could not succeed due to an error in the " +
-					      "server's schema.  Target field " + targetField +
-					      " in object " + oldRef.getLabel() +
-					      " is not an invid field.");
-	  }
+	return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
+					  "Your operation could not succeed due to an error in the " +
+					  "server's schema.  Target field " + oldRef.getFieldName(targetField) +
+					  " in object " + oldRef.getLabel() +
+					  " is not an invid field.");
       }
 
     if (oldRefField == null)
@@ -2666,7 +2655,7 @@ public final class InvidDBField extends DBField implements invid_field {
     if (isEditInPlace())
       {
 	return Ganymede.createErrorDialog("InvidDBFIeld.addElement()",
-					  "can't manually add element to edit-in-place vector" +
+					  "can't manually add element to edit-in-place vector " +
 					  getName() + " in object " + owner.getLabel());
       }
 
@@ -2825,7 +2814,7 @@ public final class InvidDBField extends DBField implements invid_field {
     if (isEditInPlace())
       {
 	return Ganymede.createErrorDialog("InvidDBField.addElements()",
-					  "can't manually add elements to edit-in-place vector" +
+					  "can't manually add elements to edit-in-place vector " +
 					  getName() + " in object " + owner.getLabel());
       }
 
@@ -3104,7 +3093,7 @@ public final class InvidDBField extends DBField implements invid_field {
     if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
-					  "don't have permission to change field /  non-editable object: " +
+					  "Don't have permission to change field /  non-editable object: " +
 					  getName() + " in object " + owner.getLabel());
       }
 
@@ -3288,14 +3277,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    return Ganymede.createErrorDialog("Couldn't create embedded object",
 					      "The custom code for this object type refused to okay adding " +
-					      "a new embedded object.  It was created though..\n\n" +
+					      "a new embedded object.  It was created, though.\n\n" +
 					      newRetVal.getDialog().getText());
 	  }
 	else
 	  {
 	    return Ganymede.createErrorDialog("Couldn't create embedded object",
 					      "The custom code for this object type refused to okay adding " +
-					      "a new embedded object.  It was created though..");
+					      "a new embedded object.  It was created, though.");
 	  }
       }
   }
