@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -49,9 +49,8 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
     topLayer = 0,
     windowCount = 0;
 
-
   Hashtable
-    objectHash = new Hashtable(),
+    objectHash = new Hashtable(), // hash to map visible components to their associated db_fields
     windowList = new Hashtable();
 
   Menu
@@ -325,45 +324,74 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 		  case FieldType.STRING:
 		    try 
 		      {
-			if (((string_field)fields[i]).mustChoose())
-			  {
-			    System.out.println("You must choose.");
-			    // Add a choice
-			    JChoice choice = new JChoice();
-			    Vector choices = ((string_field)fields[i]).choices();
-			    for (int j = 0; j < choices.size(); j++)
-			      {
-				choice.addItem((String)choices.elementAt(j));
-			      }
-
-			  }
-			else if (((string_field)fields[i]).canChoose())
+			if (((string_field)fields[i]).canChoose())
 			  {
 			    System.out.println("You can choose");
-			    // Add a combo box
-			    JComboBox combo = new JComboBox();
-			    Vector choices = ((string_field)fields[i]).choices();
-			    for (int j = 0; j < choices.size(); j++)
+
+			    if (((string_field)fields[i]).mustChoose())
 			      {
-				combo.addPossibleValue((String)choices.elementAt(j));
+				System.out.println("You must choose.");
+
+				// Add a choice
+
+				JChoice choice = new JChoice();
+				Vector choices = ((string_field)fields[i]).choices();
+
+				for (int j = 0; j < choices.size(); j++)
+				  {
+				    choice.addItem((String)choices.elementAt(j));
+				  }
+
+				choice.setEditable(editable);
+				choice.addItemListener(this);
+				choice.setVisible(true);
+
+				try
+				  {
+				    choice.setCurrentValue(fields[i].getValue());
+				  }
+				catch (RemoteException rx)
+				  {
+				    throw new RuntimeException("Could not get value for field: " + rx);
+				  }
+
+				objectHash.put(choice, fields[i]);
+				addRow(panel, choice, name, i);
 			      }
-			    combo.setEditable(editable);
-			    combo.addItemListener(this);
+			    else
+			      {
+				// Add a combo box
+
+				JComboBox combo = new JComboBox();
+				Vector choices = ((string_field)fields[i]).choices();
+
+				for (int j = 0; j < choices.size(); j++)
+				  {
+				    combo.addPossibleValue((String)choices.elementAt(j));
+				  }
+
+				combo.setEditable(editable);
+				combo.addItemListener(this);
+				combo.setVisible(true);
+
+				try
+				  {
+				    combo.setCurrentValue(fields[i].getValue());
+				  }
+				catch (RemoteException rx)
+				  {
+				    throw new RuntimeException("Could not get value for field: " + rx);
+				  }
+				
+				objectHash.put(combo, fields[i]);
+				addRow(panel, combo, name, i);
+			      }
 			  }
 			else
 			  {
 			    // It's not a choice
 			    System.out.println("This is not a choice");
 
-			    Vector choices = ((string_field)fields[i]).choices();
-			    if (choices != null)
-			      {
-				System.out.println("Here are the choices anyway:");
-				for (int j = 0; j < choices.size(); j++)
-				  {
-				    System.out.println((String)choices.elementAt(j));
-				  }
-			      }
 			    sf = new JstringField(20,
 						  19,
 						  new JcomponentAttr(null,
@@ -909,9 +937,9 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
   }
 
   public void itemStateChanged(ItemEvent e)
-    {
-      System.out.println("Item changed: " + e.getItem());
-    }
+  {
+    System.out.println("Item changed: " + e.getItem());
+  }
 
   public  void frameDidClose(InternalFrameEvent e)
   {
