@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 1999/10/29 17:53:28 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 1999/10/29 18:43:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -325,6 +325,113 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
     
     return super.canCloneField(session, object, field);
+  }
+
+  /**
+   * <p>Hook to allow the cloning of an object.  If this object type
+   * supports cloning (which should be very much customized for this
+   * object type.. creation of the ancillary objects, which fields to
+   * clone, etc.), this customization method will actually do the work.</p>
+   */
+
+  public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
+  {
+    boolean problem = false;
+    ReturnVal tmpVal;
+    StringBuffer resultBuf = new StringBuffer();
+    ReturnVal retVal = super.cloneFromObject(session, origObj, local);
+
+    if (retVal != null && retVal.getDialog() != null)
+      {
+	resultBuf.append("\n\n");
+	resultBuf.append(retVal.getDialog().getText());
+	
+	problem = true;
+      }
+
+    // and clone the embedded objects
+
+    InvidDBField newVolumes = (InvidDBField) getField(userSchema.VOLUMES);
+    InvidDBField oldVolumes = (InvidDBField) origObj.getField(userSchema.VOLUMES);
+
+    Vector newOnes;
+    Vector oldOnes;
+
+    if (local)
+      {
+	newOnes = (Vector) newVolumes.getValuesLocal().clone();
+	oldOnes = (Vector) oldVolumes.getValuesLocal().clone();
+      }
+    else
+      {
+	newOnes = newVolumes.getValues();
+	oldOnes = oldVolumes.getValues();
+      }
+
+    DBObject origVolume;
+    DBEditObject workingVolume;
+    int i;
+
+    for (i = 0; i < newOnes.size(); i++)
+      {
+	workingVolume = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
+	origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
+	tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
+
+	if (tmpVal != null && tmpVal.getDialog() != null)
+	  {
+	    resultBuf.append("\n\n");
+	    resultBuf.append(tmpVal.getDialog().getText());
+	    
+	    problem = true;
+	  }
+      }
+
+    Invid newInvid;
+
+    if (i < oldOnes.size())
+      {
+	for (; i < oldOnes.size(); i++)
+	  {
+	    tmpVal = newVolumes.createNewEmbedded(local);
+
+	    if (!tmpVal.didSucceed())
+	      {
+		if (tmpVal != null && tmpVal.getDialog() != null)
+		  {
+		    resultBuf.append("\n\n");
+		    resultBuf.append(tmpVal.getDialog().getText());
+		    
+		    problem = true;
+		  }
+		continue;
+	      }
+
+	    newInvid = tmpVal.getInvid();
+
+	    workingVolume = (DBEditObject) session.editDBObject(newInvid);
+	    origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
+	    tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
+
+	    if (tmpVal != null && tmpVal.getDialog() != null)
+	      {
+		resultBuf.append("\n\n");
+		resultBuf.append(tmpVal.getDialog().getText());
+	    
+		problem = true;
+	      }
+	  }
+      }
+
+    retVal = new ReturnVal(true, !problem);
+
+    if (problem)
+      {
+	retVal.setDialog(new JDialogBuff("Possible Clone Problem", resultBuf.toString(),
+					 "Ok", null, "ok.gif"));
+      }
+    
+    return retVal;
   }
 
   /**
