@@ -6,8 +6,8 @@
    
    Created: 8 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 1999/07/22 05:34:19 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 1999/08/14 00:49:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -82,9 +82,10 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     /* -- */
 
-    if (adminInvid.getType() != SchemaConstants.PersonaBase)
+    if (adminInvid.getType() != SchemaConstants.PersonaBase &&
+	adminInvid.getType() != SchemaConstants.UserBase)
       {
-	throw new RuntimeException("not an administrator invid");
+	throw new RuntimeException("not an administrator or user invid");
       }
 
     if (session == null)
@@ -94,32 +95,14 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     admin = session.viewDBObject(adminInvid);
 
-    address = (String) admin.getFieldValueLocal(SchemaConstants.PersonaMailAddr);
+    Vector addresses = admin.getEmailTargets();
 
-    if (address == null)
+    if (addresses == null || addresses.size() == 0)
       {
-	// okay, we got no address pre-registered for this
-	// admin.. we need now to try to guess at one, by looking
-	// to see this admin's name is of the form user:role, in
-	// which case we can just try to send to 'user', which will
-	// work as long as Ganymede's users cohere with the user names
-	// at Ganymede.mailHostProperty.
-
-	String adminName = session.getGSession().viewObjectLabel(adminInvid);
-
-	colondex = adminName.indexOf(':');
-	
-	if (colondex == -1)
-	  {
-	    // supergash?
-
-	    return null;
-	  }
-    
-	address = adminName.substring(0, colondex);
+	return null;
       }
 
-    return address;
+    return (String) addresses.elementAt(0);
   }
 
   /**

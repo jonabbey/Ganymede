@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 1999/07/27 00:20:36 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 1999/08/14 00:49:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1349,7 +1349,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
 	catch (InvocationTargetException ex)
 	  {
-	    error_code = "Invocation Target Exception: " + ex.getTargetException() + " " + ex.getMessage();
+	    error_code = "Invocation Target Exception: " + 
+	      ex.getTargetException() + "\n" + 
+	      ex.getMessage() + "\n\n" +
+	      Ganymede.stackTrace(ex) + "\n";
 	  }
 
 	if (error_code != null)

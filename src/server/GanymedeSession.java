@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.146 $
-   Last Mod Date: $Date: 1999/07/22 03:52:36 $
+   Version: $Revision: 1.147 $
+   Last Mod Date: $Date: 1999/08/14 00:49:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.146 $ %D%
+ * @version $Revision: 1.147 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3558,6 +3558,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public ReturnVal create_db_object(short type, boolean embedded)
   {
     DBObject newObj;
+    ReturnVal retVal;
 
     /* -- */
 
@@ -3567,13 +3568,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (embedded)
 	  {
-	    newObj = session.createDBObject(type, null); // *sync* DBSession
+	    retVal = session.createDBObject(type, null); // *sync* DBSession
 
-	    if (newObj == null)
+	    if (retVal == null)
 	      {
 		return Ganymede.createErrorDialog("Can't create",
 						  "Can't create new object, the operation was refused");
 	      }
+	    else if (!retVal.didSucceed())
+	      {
+		return retVal;
+	      }
+
+	    newObj = (DBObject) retVal.getObject();
 
 	    setLastEvent("create_db_object: " + newObj.getBase().getName());
 
@@ -3644,13 +3651,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		ownerInvids.addElement(ownerList.getInvid(0));
 	      }
 
-	    newObj = session.createDBObject(type, ownerInvids); // *sync* DBSession
+	    retVal = session.createDBObject(type, ownerInvids); // *sync* DBSession
 
-	    if (newObj == null)
+	    if (retVal == null)
 	      {
 		return Ganymede.createErrorDialog("Can't create",
 						  "Can't create new object, the operation was refused");
 	      }
+	    else if (!retVal.didSucceed())
+	      {
+		return retVal;
+	      }
+
+	    newObj = (DBObject) retVal.getObject();
 	  }
       }
     else

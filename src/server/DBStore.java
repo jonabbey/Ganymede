@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 1999/08/05 22:08:45 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 1999/08/14 00:49:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.87 $ %D%
+ * @version $Revision: 1.88 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1966,6 +1966,7 @@ public class DBStore {
     GanymedeSession gSession = null;
     DBSession session;
     PermissionMatrixDBField pm;
+    ReturnVal retVal;
     
     /* -- */
 
@@ -1983,7 +1984,15 @@ public class DBStore {
     session = gSession.session;
     session.openTransaction("DBStore bootstrap initialization");
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.OwnerBase, null); // create a new owner group 
+    retVal = session.createDBObject(SchemaConstants.OwnerBase, null); // create a new owner group 
+
+    if (retVal == null || !retVal.didSucceed())
+      {
+	throw new RuntimeException("Couldn't create supergash owner group.");
+      }
+
+    eO = (DBEditObject) retVal.getObject();
+
     inv = eO.getInvid();
 
     s = (StringDBField) eO.getField("Name");
@@ -1991,7 +2000,14 @@ public class DBStore {
     
     // create a supergash admin persona object 
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase, null);
+    retVal = session.createDBObject(SchemaConstants.PersonaBase, null);
+
+    if (retVal == null || !retVal.didSucceed())
+      {
+	throw new RuntimeException("Couldn't create supergash admin persona.");
+      }
+
+    eO = (DBEditObject) retVal.getObject();
 
     s = (StringDBField) eO.getField("Name");
     s.setValueLocal(Ganymede.rootname);
@@ -2010,7 +2026,14 @@ public class DBStore {
 
     // create a monitor admin persona object 
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase, null);
+    retVal = session.createDBObject(SchemaConstants.PersonaBase, null);
+
+    if (retVal == null || !retVal.didSucceed())
+      {
+	throw new RuntimeException("Couldn't create monitor admin persona.");
+      }
+
+    eO = (DBEditObject) retVal.getObject();
 
     s = (StringDBField) eO.getField("Name");
 
@@ -2042,7 +2065,14 @@ public class DBStore {
 
     // create SchemaConstants.PermDefaultObj
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.RoleBase, null); 
+    retVal = session.createDBObject(SchemaConstants.RoleBase, null);
+
+    if (retVal == null || !retVal.didSucceed())
+      {
+	throw new RuntimeException("Couldn't create permissions default object.");
+      }
+
+    eO = (DBEditObject) retVal.getObject();
 
     s = (StringDBField) eO.getField(SchemaConstants.RoleName);
     s.setValueLocal("Default");
@@ -2116,15 +2146,17 @@ public class DBStore {
 				 boolean ccAdmin)
 				 
   {
-    DBEditObject eO;
+    DBEditObject eO = null;
     ReturnVal retVal;
 
-    eO = (DBEditObject) session.createDBObject(SchemaConstants.EventBase, null);
+    retVal = session.createDBObject(SchemaConstants.EventBase, null);
 
-    if (eO == null)
+    if (retVal == null || !retVal.didSucceed())
       {
 	throw new RuntimeException("Error, could not create system event object " + token);
       }
+
+    eO = (DBEditObject) retVal.getObject();
 
     retVal = eO.setFieldValueLocal(SchemaConstants.EventToken, token);
 

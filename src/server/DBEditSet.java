@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 1999/07/23 04:53:58 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 1999/08/14 00:49:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -49,6 +49,7 @@
 
 package arlut.csd.ganymede;
 
+import arlut.csd.Util.VectorUtils;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
@@ -594,75 +595,47 @@ public class DBEditSet {
     // note that we need a drop temp vector because it confuses things
     // if we remove elements from objects while we are iterating over it
 
-    Vector drop = new Vector();
+    Vector drop = VectorUtils.difference(objects, point.objects);
 
-    for (int i = 0; i < objects.size(); i++)
+    for (int i = 0; i < drop.size(); i++)
       {
-	obj = (DBEditObject) objects.elementAt(i);
+	// ok, we've got a new object since the checkpoint.  Ditch it.
+
+	obj = (DBEditObject) drop.elementAt(i);
+
+	obj.release(true);
+	
+	switch (obj.getStatus())
+	  {
+	  case DBEditObject.CREATING:
+	  case DBEditObject.DROPPING:
+	    obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
+
+	    session.GSession.checkIn();
+	    obj.getBase().store.checkIn(); // update checked out count
+	    break;
+		
+	  case DBEditObject.EDITING:
+	  case DBEditObject.DELETING:
+		
+	    // note that clearShadow updates the checked out count for us.
+		
+	    if (!obj.original.clearShadow(this))
+	      {
+		throw new RuntimeException("editset ownership synchronization error");
+	      }
+
+	    break;
+	  }
 
 	if (debug)
 	  {
-	    System.err.println("DBEditSet.rollback(): object in transaction at rollback time: " + 
-			       obj.getLabel() +
-			       " (" + obj.getInvid().toString() + ")");
-	  }
-
-	found = false;
-
-	for (int j = 0; !found && j < point.objects.size(); j++)
-	  {
-	    objck = (DBCheckPointObj) point.objects.elementAt(j);
-
-	    if (obj.getInvid().equals(objck.invid))
-	      {
-		found = true;
-	      }
-	  }
-
-	if (!found)
-	  {
-	    // ok, we've got a new object since the checkpoint.  Ditch it.
-
-	    obj.release(true);
-	
-	    switch (obj.getStatus())
-	      {
-	      case DBEditObject.CREATING:
-	      case DBEditObject.DROPPING:
-		obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
-
-		session.GSession.checkIn();
-		obj.getBase().store.checkIn(); // update checked out count
-		break;
-		
-	      case DBEditObject.EDITING:
-	      case DBEditObject.DELETING:
-		
-		// note that clearShadow updates the checked out count for us.
-		
-		if (!obj.original.clearShadow(this))
-		  {
-		    throw new RuntimeException("editset ownership synchronization error");
-		  }
-		break;
-	      }
-
-	    if (debug)
-	      {
-		System.err.println("DBEditSet.rollback(): dropping object " + obj.getLabel() + " (" 
-				   + obj.getInvid().toString() + ")");
-	      }
-
-	    drop.addElement(obj);
-	  }
-	else if (debug)
-	  {
-	    System.err.println("DBEditSet.rollback(): keeping object " + obj.getLabel() + " (" 
-			       + obj.getInvid().toString() + ")");
+	    System.err.println("DBEditSet.rollback(): dropping object " + obj.getLabel() + " (" +
+			       obj.getInvid().toString() + ")");
 	  }
       }
 
-    // now go ahead and clean out objects
+    // now go ahead and clean out the dropped objects
 
     for (int i = 0; i < drop.size(); i++)
       {

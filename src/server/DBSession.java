@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 1999/07/21 05:38:19 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 1999/08/14 00:49:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.72 $ %D%
+ * @version $Revision: 1.73 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -222,7 +222,6 @@ final public class DBSession {
     return store;
   }
 
-
   /**
    * <P>Create a new object in the database.</P>
    *
@@ -257,15 +256,12 @@ final public class DBSession {
    * @see arlut.csd.ganymede.DBStore
    */
 
-  public synchronized DBEditObject createDBObject(short object_type, Invid chosenSlot, Vector owners)
+  public synchronized ReturnVal createDBObject(short object_type, Invid chosenSlot, Vector owners)
   {
     DBObjectBase base;
     DBEditObject e_object;
-    DateDBField df;
-    StringDBField sf;
-    Date modDate = new Date();
-    String result;
-    Invid tmpInvid;
+    ReturnVal retVal = null;
+    boolean checkpointset = false;
 
     /* -- */
 
@@ -276,83 +272,140 @@ final public class DBSession {
 
     base = (DBObjectBase) store.objectBases.get(new Short(object_type));
 
+    // we create the object.. this just gets the DBEditObject
+    // created.. all of its fields will be created, but it won't be
+    // linked into the database or editset or anything else yet.
+
     e_object = base.createNewObject(editSet, chosenSlot);
 
     if (e_object == null)
       {
-	return null;
+	// failure?  Report it, but we don't have to do any clean up at this
+	// point.
+
+	return Ganymede.createErrorDialog("Object Creation Failure",
+					  "Couldn't create the new object in the database.");
       }
 
-    // set ownership for this new object if it is not an embedded object
+    // Checkpoint the transaction at this point so that we can
+    // recover if we can't get the object into the owner groups
+    // it needs to go into
 
-    if (!base.isEmbedded() && (owners != null))
-      {
-	InvidDBField inf = (InvidDBField) e_object.getField(SchemaConstants.OwnerListField);
-	
-	for (int i = 0; i < owners.size(); i++)
-	  {
-	    tmpInvid = (Invid) owners.elementAt(i);
-
-	    if (tmpInvid.getType() != SchemaConstants.OwnerBase)
-	      {
-		throw new RuntimeException("bad ownership invid");
-	      }
-
-	    // we don't want to explicitly record supergash ownership
-	    
-	    if (tmpInvid.getNum() == SchemaConstants.OwnerSupergash)
-	      {
-		continue;
-	      }
-
-	    inf.addElementLocal(owners.elementAt(i));
-	  }
-      }
-
-    // add this object to the transaction
-
-    String ckp_label = "create" + e_object.toString();
+    String ckp_label = "createX" + base.getName();
 
     // we're only going to do the checkpoint here if
     // oversight is enabled.. otherwise it would be far, far
     // too expensive a burden during bulk loading.
-
+    
     if (GSession.enableOversight)
       {
 	checkpoint(ckp_label);
+	checkpointset = true;
       }
 
-    // register the object as created	
-
-    editSet.addObject(e_object);
-
-    // set any inital fields
-
-    if (!e_object.initializeNewObject())
+    try
       {
-	if (GSession.enableOversight)
+	// set ownership for this new object if it is not an embedded object
+
+	if (!base.isEmbedded() && (owners != null))
 	  {
-	    rollback(ckp_label);
+	    InvidDBField inf = (InvidDBField) e_object.getField(SchemaConstants.OwnerListField);
+	    Invid tmpInvid;
+
+	    /* -- */
+	
+	    for (int i = 0; i < owners.size(); i++)
+	      {
+		tmpInvid = (Invid) owners.elementAt(i);
+
+		if (tmpInvid.getType() != SchemaConstants.OwnerBase)
+		  {
+		    throw new RuntimeException("bad ownership invid");
+		  }
+
+		// we don't want to explicitly record supergash ownership
+	    
+		if (tmpInvid.getNum() == SchemaConstants.OwnerSupergash)
+		  {
+		    continue;
+		  }
+
+		retVal = inf.addElementLocal(owners.elementAt(i));
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    if (checkpointset)
+		      {
+			rollback(ckp_label);
+			checkpointset = false;
+		      }
+
+		    try
+		      {
+			DBObject owner = viewDBObject((Invid) owners.elementAt(i));
+			String name = owner.getLabel();
+
+			String checkedOutBy = owner.shadowObject.editset.description;
+
+			retVal.getDialog().appendText("\nOwner group " + name + 
+						      " is currently checked out by:\n" + checkedOutBy);
+		      }
+		    catch (NullPointerException ex)
+		      {
+		      }
+
+		    return retVal;
+		  }
+	      }
 	  }
 
-	return null;
-      }
+	// register the object as created	
 
-    if (GSession.enableOversight)
+	editSet.addObject(e_object);
+
+	// do any work that the custom code for this object wants to have
+	// done
+
+	if (!e_object.initializeNewObject())
+	  {
+	    if (checkpointset)
+	      {
+		rollback(ckp_label);
+		checkpointset = false;
+	      }
+
+	    return Ganymede.createErrorDialog("Initialization Error",
+					      "Couldn't initialize new object");
+	  }
+
+	// okay, we're good, and we won't need to revert to the checkpoint.  
+	// Clear out the checkpoint and continue
+
+	if (checkpointset)
+	  {
+	    popCheckpoint(ckp_label);
+	    checkpointset = false;
+	  }
+      }
+    finally
       {
-	popCheckpoint(ckp_label);
+	if (checkpointset)
+	  {
+	    rollback(ckp_label);
+	    checkpointset = false;
+	  }
       }
 
     // update admin consoles
-
+    
     // update the session's checkout count first, then
     // update the database's overall checkout, which
     // will trigger a console update
-
+    
     GSession.checkOut();
-
+    
     store.checkOut();
-
+    
     // set the following false to true to view the initial state of the object
     
     if (false)
@@ -373,10 +426,18 @@ final public class DBSession {
 	  }
       }
 
-    // finish initialization of the object
-
+    // finish initialization of the object.. none of this should fail
+    // since we are just setting text and date fields
+    
     if (!base.isEmbedded())
       {
+	DateDBField df;
+	StringDBField sf;
+	Date modDate = new Date();
+	String result;
+
+	/* -- */
+
 	// set creator info to something non-null
 
 	df = (DateDBField) e_object.getField(SchemaConstants.CreationDateField);
@@ -410,7 +471,10 @@ final public class DBSession {
 	sf.setValueLocal(result);
       }
 
-    return e_object;
+    retVal = new ReturnVal(true);
+    retVal.setObject(e_object);
+    
+    return retVal;
   }
 
   /**
@@ -442,7 +506,7 @@ final public class DBSession {
    * @see arlut.csd.ganymede.DBStore
    */
 
-  public DBEditObject createDBObject(short object_type, Vector owners)
+  public ReturnVal createDBObject(short object_type, Vector owners)
   {
     return createDBObject(object_type, null, owners);
   }

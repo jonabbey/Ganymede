@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 1999/08/05 22:08:46 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 1999/08/14 00:49:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -702,6 +702,22 @@ public class Ganymede {
   }
 
   /**
+   * This is a convenience method used by the server to get a
+   * stack trace from a throwable object in String form.
+   */
+
+  static public String stackTrace(Throwable thing)
+  {
+    StringWriter stringTarget = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringTarget);
+    
+    thing.printStackTrace(writer);
+    writer.close();
+
+    return stringTarget.toString();
+  }
+
+  /**
    * This is a convenience method used by the server to return a
    * standard error dialog.
    */
@@ -813,24 +829,29 @@ public class Ganymede {
 
 	    // create SchemaConstants.RoleDefaultObj
 
-	    e_object = (DBEditObject) internalSession.session.createDBObject(SchemaConstants.RoleBase, 
-									     defaultInv,
-									     null);
-	    
-	    s = (StringDBField) e_object.getField(SchemaConstants.RoleName);
-	    s.setValueLocal("Default Permissions");
-	
-	    // By default, users will be able to view themselves and all their fields, anything
-	    // else will have to be manually configured by the supergash administrator.
-	
-	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleMatrix);
-	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); 
+	    ReturnVal retVal = internalSession.session.createDBObject(SchemaConstants.RoleBase, 
+							       defaultInv,
+							       null);
 
-	    // By default, users will not be able to view, create, or edit anything.  The supergash
-	    // administrator is free to reconfigure this.
-	
-	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleDefaultMatrix);
-	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(false, false, false, false)); 
+	    if (retVal != null && retVal.didSucceed())
+	      {
+		e_object = (DBEditObject) retVal.getObject();
+
+		s = (StringDBField) e_object.getField(SchemaConstants.RoleName);
+		s.setValueLocal("Default Permissions");
+		
+		// By default, users will be able to view themselves and all their fields, anything
+		// else will have to be manually configured by the supergash administrator.
+		
+		pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleMatrix);
+		pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false, false)); 
+		
+		// By default, users will not be able to view, create, or edit anything.  The supergash
+		// administrator is free to reconfigure this.
+		
+		pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.RoleDefaultMatrix);
+		pm.setPerm(SchemaConstants.UserBase, new PermEntry(false, false, false, false)); 
+	      }
 	  }
 	else
 	  {
