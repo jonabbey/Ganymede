@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.6 $ %D%
+ Version: $Revision: 1.7 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,7 @@ import com.sun.java.swing.*;
 import com.sun.java.swing.event.*;
 import java.awt.*;
 import java.util.Vector;
+import arlut.csd.Util.VecQuickSort;
 
 public class JstringListBox extends JListBox implements ListCellRenderer, ListSelectionListener{ 
 
@@ -34,6 +35,7 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
     label = new JLabel();
 
   boolean
+    sorted,
     allowCallback = false;
 
   JsetValueCallback 
@@ -52,23 +54,70 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
     this(null);
   }
 
+  public JstringListBox(Vector items)
+  {
+    this(items, false);
+  }
+
   /**
    *
    * Constructor with list of initial items
    *
    */
 
-  public JstringListBox(Vector items)
+  public JstringListBox(Vector items, boolean sorted)
   {
+    this.sorted = sorted;
     
     label.setBackground(Color.white);
-    //model.setSize(items.size());
+    //model setSize(items.size());
     //System.out.println("Setting size to " + items.size());
 
     if ((items != null) && (items.size() > 0))
       {	
 	if (items.elementAt(0) instanceof String)
 	  {
+	    if (sorted)
+	      {
+		if (debug)
+		  {
+		    System.out.println("Sorting...");
+		  }
+
+		(new VecQuickSort(items,
+				  new arlut.csd.Util.Compare() 
+				  {
+				    public int compare(Object a, Object b) 
+				      {
+					String aF, bF;
+					
+					aF = (String) a;
+					bF = (String) b;
+					int comp = 0;
+					
+					comp =  aF.compareTo(bF);
+					
+					if (comp < 0)
+					  {
+					    return -1;
+					  }
+					else if (comp > 0)
+					  { 
+					    return 1;
+					  } 
+					else
+					  { 
+					    return 0;
+					  }
+				      }
+				  }
+				  )	      
+		  ).sort();
+		  if (debug)
+		    {
+		      System.out.println("Done sorting strings");
+		    }
+	      }   
 	    for (int i=0 ; i<items.size() ; i++)
 	      {
 		
@@ -77,12 +126,56 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 		    System.err.println("JstringListBox: adding string " + (String) items.elementAt(i));
 		  }
 		
-		addString((String)items.elementAt(i));
+		insertHandleAt(new listHandle((String)items.elementAt(i)), i);
 		
 	      }
+	    
 	  }
 	else if (items.elementAt(0) instanceof listHandle)
 	  {
+	    if (sorted)
+	      {
+		if (debug)
+		  {
+		    System.out.println("Sorting...");
+		  }
+
+		(new VecQuickSort(items,
+				  new arlut.csd.Util.Compare() 
+				  {
+				    public int compare(Object a, Object b) 
+				      {
+					listHandle aF, bF;
+					
+					aF = (listHandle) a;
+					bF = (listHandle) b;
+					int comp = 0;
+					
+					comp =  aF.getLabel().compareTo(bF.getLabel());
+					
+					if (comp < 0)
+					  {
+					    return -1;
+					  }
+					else if (comp > 0)
+					  { 
+					    return 1;
+					  } 
+					else
+					  { 
+					    return 0;
+					  }
+				      }
+				  }
+				  )	      
+		  ).sort();
+
+		  if (debug)
+		    {
+		      System.out.println("Done sorting.");
+		    }
+	      }
+	    
 	    for (int i=0 ; i<items.size() ; i++)
 	      {
 		if (debug)
@@ -90,12 +183,12 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 		    System.err.println("JstringListBox: adding listhandle " + ((listHandle) items.elementAt(i)).getLabel());
 		  }
 		
-		addHandle((listHandle)items.elementAt(i));
+		insertHandleAt((listHandle)items.elementAt(i), i);
 	      }
 	  }
 	else
 	  {
-	    System.out.println("Unsupported item type");
+	    System.out.println("Unsupported item type passed to JstringListBox in a vector(needs to be String or ListHandle)");
 	  }
       
 
@@ -136,7 +229,18 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 
   public void addString(String label, boolean redraw)
   {
-    model.addElement(new listHandle(label));
+    int i = 0;
+    if (sorted)
+      {
+	int total = model.getSize();
+	while ((i < total) && (label.compareTo(((listHandle)model.getElementAt(i)).getLabel()) > 0))
+	  {
+	    i++;
+	  }
+      }
+
+    insertHandleAt(new listHandle(label), i);
+    
   }
 
   public void addHandle(listHandle handle)
@@ -146,7 +250,27 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 
   public void addHandle(listHandle handle, boolean redraw)
   {
-    model.addElement(handle);
+    int i = 0;
+    if (sorted)
+      {
+	int total = model.getSize();
+	while ((i < total) && (handle.getLabel().compareTo(((listHandle)model.getElementAt(i)).getLabel()) > 0))
+	  {
+	    i++;
+	  }
+      }
+    
+    insertHandleAt(handle, i);
+    
+  }
+
+  /**
+   * Use this one to skip the sorting.  Called by all the add methods.
+   *
+   */
+  public void insertHandleAt(listHandle handle, int row)
+  {
+    model.insertElementAt(handle, row);
   }
 
   public void removeString(String item)
