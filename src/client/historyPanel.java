@@ -5,7 +5,7 @@
    The tab that holds history information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -90,7 +90,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     historyText.setBackground(Color.white);
     historyText.setEditable(false);
     
-    p.add("Center", historyText);
+    p.add("Center", new JScrollPane(historyText));
 
     add("North", topPanel);
     add("Center", p);
