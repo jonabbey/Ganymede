@@ -149,18 +149,28 @@ Java code. Note that the version of Qstmp packaged with Ganymede has
 been significantly modified, to provide more convenient use and
 rudimentary MIME support.
 
-The MD5 classes used in the server were written by Santeri
-Paavolainen, and is included in Ganymede under the terms of the GNU
+Some of the MD5 classes used in the server were written by Santeri
+Paavolainen, and are included in Ganymede under the terms of the GNU
 General Public License.  See http://www.cs.hut.fi/~santtu/java/ for
 more information.  The MD5Crypt class used to support FreeBSD-style
-md5 passwords was originally written by phk@login.dknet.dk in C, and
-was translated into Java by Jonathan Abbey.
+md5 passwords was originally written by Poul-Henning Kamp
+(phk@login.dknet.dk) in C, and was translated into Java by Jonathan
+Abbey.
+
+The MD4 classes used to support Windows NT-compatible cryptographic
+hashes were written by Harry Mantakos, harry@meretrix.com.  The MD4
+classes came from Harry's JOTP project, which you can link to at
+http://www.cs.umd.edu/users/harry/jotp/. The actual "LANMAN" and "NT
+MD4 Unicode" hash support code was written by Andrew Tridgell and
+released under the GPL as part of the Samba source code, and was
+ported to Java by Jonathan Abbey, using Harry's MD4 code to perform
+the fundamental cryptographic hash function.
 
 The XML SAX reference classes and interfaces used by the Ganymede
-server's XML parsing routines was written and released into the public
-domain by David Meggison <david@megginson.com>.  More information on
-the SAX standard for XML parsing can be found at the SAX home page at
-http://www.megginson.com/SAX/.
+server's XML parsing routines were written and released into the
+public domain by David Meggison <david@megginson.com>.  More
+information on the SAX standard for XML parsing can be found at the
+SAX home page at http://www.megginson.com/SAX/.
 
 The Ganymede server uses James Clark's excellent XMLWriter and XP
 parser class libraries for XML generation and parsing.  Both are
