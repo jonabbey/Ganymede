@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.73 $ %D%
+   Version: $Revision: 1.74 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -140,6 +140,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	/* Set up our 0 field, the containing object owning us */
 
 	bf = new DBObjectBaseField(this);
+
+	// notice that we don't mark this field as builtin, because
+	// that only applies to fields present in all non-embedded
+	// objects.
 
 	bf.field_name = "Containing Object";
 	bf.field_code = SchemaConstants.ContainerField;
@@ -418,6 +422,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     this.containingHash = ht;
   }
+
+  /**
+   *
+   * This method writes out a schema-only definition of this base
+   * to disk, for use by the DBStore dumpSchema() method.<br><br>
+   *
+   * Note that some objects are emitted by this method, specifically
+   * things like the the supergash owner group, and the like.
+   *
+   */
 
   synchronized void partialEmit(DataOutput out) throws IOException
   {
@@ -766,7 +780,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	//	if (debug)
 	//	  {
-	//    System.err.println("DBObjectBase.receive(): reading object " + i);
+	//	    System.err.println("DBObjectBase.receive(): reading object " + i);
 	//	  }
 
 	tempObject = new DBObject(this, in, false);
