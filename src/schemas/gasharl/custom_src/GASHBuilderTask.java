@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 2001/07/13 20:02:17 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 2001/07/23 21:46:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -60,6 +60,7 @@ import arlut.csd.Util.FileOps;
 import java.util.*;
 import java.text.*;
 import java.io.*;
+import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -302,6 +303,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	Ganymede.debug("Need to build DNS tables");
 	writeSysFile();
+	writeSysDataFile();
 	success = true;
       }
 
@@ -2384,11 +2386,180 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
+   * <p>This method generates a file that maps i.p. addresses to mac addresses, system names,
+   * room of the system, and usernames (if any).  This method must be run during
+   * builderPhase1 so that it has access to the enumerateObjects() method
+   * from our superclass.</p>
+   */
+
+  private boolean writeSysDataFile()
+  {
+    PrintWriter sys_dataFile = null;
+    DBObject system, interfaceObj;
+    Enumeration systems, interfaces;
+
+    /* -- */
+
+    try
+      {
+	sys_dataFile = openOutFile(path + "sysdata_info", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeSysFile(): couldn't open sysdata_info file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	// the hosts_info file is kind of squirrely.  We emit all of
+	// the system lines first, followed by all of the interface
+	// lines.
+
+	systems = enumerateObjects((short) 263);
+
+	while (systems.hasMoreElements())
+	  {
+	    system = (DBObject) systems.nextElement();
+	
+	    writeSysDataLine(system, sys_dataFile);
+	  }
+      }
+    finally
+      {
+	sys_dataFile.close();
+      }
+
+    return true;
+  }
+
+  /**
+   *
+   * <p>Writes out one or more lines that maps I.P. addresses to MAC addresses,
+   * system names, room of the system, and usernames (if any).</p>
+   *
+   * <p>Format:</p>
+   *
+   * <code>129.116.224.12|01:02:03:04:05:06|sysname|room|username</code>
+   *
+   */
+
+  private void writeSysDataLine(DBObject object, PrintWriter writer)
+  {
+    String sysname;
+    Vector interfaceInvids;
+    Invid roomInvid;
+    String room;
+    String interfaceName;
+    Invid primaryUserInvid;
+    String primaryUser = null;
+    String MACstring = null;
+    String IPstring = null;
+
+    /* -- */
+
+    result.setLength(0);
+
+    sysname = (String) object.getFieldValueLocal(systemSchema.SYSTEMNAME);
+    sysname += dnsdomain;
+
+    interfaceInvids = object.getFieldValuesLocal(systemSchema.INTERFACES);
+
+    if (interfaceInvids != null)
+      {
+	for (int i = 0; i < interfaceInvids.size(); i++)
+	  {
+	    String local_sysname;
+	    DBObject interfaceObj;
+
+	    /* -- */
+
+	    interfaceObj = getObject((Invid) interfaceInvids.elementAt(i));
+
+	    interfaceName = getInterfaceHostname(interfaceObj);
+	    
+	    if (interfaceName != null)
+	      {
+		local_sysname = interfaceName;
+	      }
+	    else
+	      {
+		local_sysname = sysname;
+	      }
+
+	    roomInvid = (Invid) object.getFieldValueLocal(systemSchema.ROOM);
+	    
+	    if (roomInvid != null)
+	      {
+		room = getLabel(roomInvid);
+	      }
+	    else
+	      {
+		room = "<unknown>";
+	      }
+
+	    primaryUserInvid = (Invid) object.getFieldValueLocal(systemSchema.PRIMARYUSER);
+	    
+	    if (primaryUserInvid != null)
+	      {
+		primaryUser = getLabel(primaryUserInvid);
+	      }
+
+	    try
+	      {
+		IPstring = interfaceObj.getField(interfaceSchema.ADDRESS).getValueString();
+	      }
+	    catch (RemoteException ex)
+	      {
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+
+	    try
+	      {
+		MACstring = interfaceObj.getField(interfaceSchema.ETHERNETINFO).getValueString();
+
+		MACstring = MACstring.replace('-',':');
+	      }
+	    catch (RemoteException ex)
+	      {
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
+
+	    if (IPstring == null || MACstring == null)
+	      {
+		continue;
+	      }
+
+	    result.append(IPstring);
+	    result.append("|");
+	    result.append(MACstring);
+	    result.append("|");
+	    result.append(local_sysname);
+	    result.append("|");
+	    result.append(room);
+	    result.append("|");
+
+	    if (primaryUser != null)
+	      {
+		result.append(primaryUser);
+	      }
+
+	    writer.println(result.toString());
+	  }
+      }
+  }
+
+  /**
    *
    * This method generates a hosts_info file.  This method must be run during
    * builderPhase1 so that it has access to the enumerateObjects() method
    * from our superclass.
-   * */
+   * 
+   */
 
   private boolean writeSysFile()
   {
