@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,6 +17,7 @@ package arlut.csd.ganymede;
 
 import java.util.Vector;
 import java.util.Hashtable;
+import java.util.Enumeration;
 
 import arlut.csd.JDialog.*;
 
@@ -281,6 +282,61 @@ public class ReturnVal implements java.io.Serializable {
     dialog = null;
     callback = null;
     status = NONE;
+  }
+
+  /**
+   *
+   * unionRescan merges field and object rescan requests from
+   * the supplied ReturnVal with and rescan requests we contain.<br><br>
+   *
+   * It is used to allow multiple sources in InvidDBField to contribute
+   * rescan requests.
+   *
+   */
+
+  public void unionRescan(ReturnVal retVal)
+  {
+    if (retVal == null)
+      {
+	return;
+      }
+
+    // add any rescan fields requested by retVal
+
+    if (retVal.rescanList != null)
+      {
+	if (rescanList == null)
+	  {
+	    rescanList = new StringBuffer();
+	  }
+	
+	if (retVal.rescanList.toString().equals("all"))
+	  {
+	    setRescanAll();
+	  }
+	else
+	  {
+	    rescanList.append(retVal.rescanList.toString());
+	  }
+      }
+
+    // add any rescan objects requested by retVal
+
+    if (retVal.objRescanHash != null)
+      {
+	Enumeration enum = retVal.objRescanHash.keys();
+
+	Invid objid;
+	ReturnVal otherobj;
+
+	while (enum.hasMoreElements())
+	  {
+	    objid = (Invid) enum.nextElement();
+	    otherobj = (ReturnVal) retVal.objRescanHash.get(objid);
+
+	    addRescanObject(objid, otherobj);
+	  }
+      }
   }
 
   public void setStatus(byte status)
