@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 2000/03/27 21:54:43 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 2000/03/29 01:30:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.115 $ %D%
+ * @version $Revision: 1.116 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -948,13 +948,11 @@ public class DBStore {
 	bufStream = new BufferedOutputStream(outStream);
 
 	xmlOut = new XMLDumpContext(new UTF8XMLWriter(bufStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
-				   false, // don't dump plaintext passwords needlessly
-				   false, // don't include creator/modifier data
-				   true);
+				    false, // don't dump plaintext passwords needlessly
+				    false); // don't include creator/modifier data
 	// start writing
 
 	xmlOut.startElement("ganymede");
-
 	xmlOut.attribute("major", Byte.toString(major_xml_version));
 	xmlOut.attribute("minor", Byte.toString(minor_xml_version));
 

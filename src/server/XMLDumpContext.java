@@ -7,8 +7,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/03/27 21:54:48 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/03/29 01:30:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,12 +52,8 @@
 package arlut.csd.ganymede;
 
 import java.io.*;
-import java.util.*;
-import java.text.*;
-import java.rmi.*;
-
 import com.jclark.xml.output.*;
-import arlut.csd.Util.*;
+import arlut.csd.Util.XMLUtils;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -95,7 +91,7 @@ public class XMLDumpContext {
 
   /* -- */
   
-  public XMLDumpContext(XMLWriter xmlOut, boolean passwords, boolean historyInfo, boolean objectNumbers)
+  public XMLDumpContext(XMLWriter xmlOut, boolean passwords, boolean historyInfo)
   {
     this.xmlOut = xmlOut;
     dumpPlaintextPasswords = passwords;
