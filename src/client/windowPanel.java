@@ -21,6 +21,9 @@ import arlut.csd.JDataComponent.*;
 
 public class windowPanel extends JPanel implements ActionListener, InternalFrameListener, JsetValueCallback{
 
+  JFrame
+    parent;
+
   JLayeredPane 
     lc;
 
@@ -32,29 +35,42 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
     panel;
 
   Hashtable
-    objectHash;
-
-  Vector
+    objectHash,
     windowList;
 
   Menu
     windowMenu;
 
-  public windowPanel(Menu windowMenu)
+  WindowBar 
+    windowBar;
+
+  public windowPanel(JFrame parent, Menu windowMenu)
     {
       System.out.println("Initializing windowPanel");
       objectHash = new Hashtable();
-      windowList = new Vector();
+      windowList = new Hashtable();
+      this.windowBar = windowBar;
+
       this.setBuffered(true);
+
       this.windowMenu = windowMenu;
+      this.parent = parent;
+
       setLayout(new BorderLayout());
       lc = new JLayeredPane();
 
       add("Center", lc);
+      //windowBar.addButton("Test");
+      //add("South", windowBar);
 
 
     }
 
+  public void addWindowBar(WindowBar windowBar)
+    {
+      this.windowBar = windowBar;
+
+    }
   public void addWindow(db_object object)
     {
       this.addWindow(object, false);
@@ -67,6 +83,8 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	  System.err.println("null object passed to addWindow");
 	  return;
 	}
+
+      parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
       System.out.println("Adding new internalFrame");
       JInternalFrame w = new JInternalFrame();
@@ -100,45 +118,24 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	{
 	  throw new RuntimeException("Could not get label of object: " + rx);
 	}
-      int numberOfTitles = 0;
-      if (title == null)
+
+      String temp = title;
+      int num = 2;
+      while (windowList.containsKey(title))
 	{
-	  title = "Null";
+	  title = temp + num++;
 	}
-      for (int i = 0; i< windowList.size() ; i++)
-	{
-	  String t = null;
-	  t = ((JInternalFrame)windowList.elementAt(i)).getTitle();
-	  if (( t == null) || t.equals(""))
-	    {
-	      System.out.println("t is null");
-	    }
-	  else
-	    {
-	      if (t.lastIndexOf("-") == -1)
-		{
-		  if (t.equals(title))
-		    {
-		      numberOfTitles++;
-		    }
-		}
-	      else if (t.substring(0, (t.lastIndexOf("-"))).equals(title))
-		{
-		  numberOfTitles++;
-		}
-	    }
-	}
-      if (numberOfTitles > 0)
-	{
-	  title = title + "- " + numberOfTitles;
-	}
-      System.out.println("Setting title to " + title);
+
       w.setTitle(title);
-      windowList.addElement(w);
+      windowList.put(title, w);
+      System.out.println("   adding to windowBar " + title);
+      windowBar.addButton(title);
+
 
       w.addFrameListener(this);
       w.setLayout(new BorderLayout());
-
+      JPanel jpanel = new JPanel();
+      jpanel.setLayout(new BorderLayout());
       panel = new JTitledPane();
       panel.setLayout(new TableLayout(false));
 
@@ -156,23 +153,23 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	{
 	  for (int i = 0; i < fields.length ; i++)
 	    {
-	      String type = null;
+	      short type = -1;
 	      String name = null;
 	      try
 		{
-		  type = fields[i].getTypeDesc();
-		  System.out.println("Field type desc: " + type);
+		  type = fields[i].getType();
+		  //System.out.println("Field type desc: " + type);
 		  name = fields[i].getName();
 		}
 	      catch  (RemoteException rx)
 		{
 		  throw new RuntimeException("Could not get field info: " + rx);
 		}
-	      if (type == null)
+	      if (type == -1)
 		{
 		  System.err.println("Could not get field information");
 		}
-	      else if (type.equals("string"))
+	      else if (type == FieldType.STRING)
 		{
 		  JstringField sf = new JstringField(20,
 						     19,
@@ -195,9 +192,19 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 		  sf.setCallback(this);
 		  sf.setEditable(editable);
 
+		  try
+		    {
+		      sf.setToolTipText((String)fields[i].getComment());
+		      System.out.println("Setting tool tip to " + (String)fields[i].getComment());
+		    }
+		  catch (RemoteException rx)
+		    {
+		      throw new RuntimeException("Could not get tool tip text: " + rx);
+		    }
+
 		  addRow(panel, sf, name, i);
 		}
-	      else if (type.equals("date"))
+	      else if (type == FieldType.DATE)
 		{
 		  JdateField df = new JdateField();
 		  objectHash.put(df, fields[i]);
@@ -205,22 +212,31 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 		  df.setCallback(this);
 		  addRow(panel, df, name, i);
 		}
+	      else if (type == FieldType.BOOLEAN)
+		{
+		  //Add a boolean here
+		}
 	      else
 		{
-		  JLabel label = new JLabel(type);
+		  JLabel label = new JLabel("Other type");
 		  addRow(panel, label, name, i);
 		}
 	    }
 	}
 
-      JViewport vp = new JViewport();
-      vp.add(panel);
+      //panel.setSize(500, 500);
+
+      //JViewport vp = new JViewport();
+      //vp.add(panel);
+      jpanel.add("Center", panel);
+      //panel.setSize(500,500);
       
       JScrollPane scrollpane = new JScrollPane();
-      scrollpane.setViewport(vp);
+      //scrollpane.setViewport(vp);
+      scrollpane.getViewport().add(jpanel);
       w.add(scrollpane);
       //w.setBounds(20,20, panel.getPreferredSize().width, panel.getPreferredSize().height);
-      w.setBounds(windowCount*20, windowCount*20, 300,300);
+      w.setBounds(windowCount*20, windowCount*20, 400,250);
       if (windowCount > 10)
 	{
 	  windowCount = 0;
@@ -235,16 +251,17 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
       lc.add(w);
       lc.moveToFront(w);
       updateMenu();
-      //lc.repaint();
+      parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }
 
-  public void addTableWindow(Session session, Vector results)
+  public void addTableWindow(Session session, Vector results, String title)
     {
+      parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       gResultTable rt = null;
       try
 	{
 	  rt = new gResultTable(session, results);
-	  //windowList.add("Window " + windowCount);
+
 	}
       catch (RemoteException rx)
 	{
@@ -269,10 +286,24 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 	  rt.setResizable(true);
 	  rt.setClosable(true);
 	  rt.setMaxable(true);
+	  rt.addFrameListener(this);
+
+	  // Figure out the title
+	  String temp = title;
+	  int num = 2;
+	  while (windowList.containsKey(title))
+	    {
+	      title = temp + num++;
+	    }
+	  
+	  System.out.println("Setting title to " + title);
+	  rt.setTitle(title);
+	  windowList.put(title, rt);
+	  
 	  lc.add(rt);
 	  lc.moveToFront(rt);
 	  updateMenu();
-	  //lc.repaint();
+	  parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 	}
 
     }
@@ -283,13 +314,10 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
    */
    public void closeAll()
     {
-      System.out.println("Removing all windows");
-      int size = windowList.size();
-      System.out.println("There are " + windowList.size() + " windows to close");
-      for (int i = size - 1; i > -1; i--)
+      Enumeration windows = windowList.keys();      
+      while (windows.hasMoreElements())
 	{
-	  System.out.println("Closing number " + i);
-	  JInternalFrame w = (JInternalFrame)windowList.elementAt(i);
+	  JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
 	  w.close();
 	}
     }
@@ -303,10 +331,10 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 
   public void closeEditables()
     {
-      System.out.println("Removing editable windows");
-      for (int i = windowList.size() - 1; i > -1; i--)
+      Enumeration windows = windowList.keys();      
+      while (windows.hasMoreElements())
 	{
-	  JInternalFrame w = (JInternalFrame)windowList.elementAt(i);
+	  JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
 	  
 	  // This seems backwards, but only non-editable windows are closable.
 	  // So if isClosable is false, then it is editable, and we should
@@ -330,11 +358,10 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 
   public void closeNonEditables()
     {
-      System.out.println("Removing non-editable windows");
-      for (int i = windowList.size() - 1; i > -1; i--)
+      Enumeration windows = windowList.keys();      
+      while (windows.hasMoreElements())
 	{
-	  JInternalFrame w = (JInternalFrame)windowList.elementAt(i);
-
+	  JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
 	  if (w.isClosable())
 	    {
 	      w.close();
@@ -345,19 +372,46 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
   public Menu updateMenu()
     {
       windowMenu.removeAll();
-      for (int i = 0; i< windowList.size(); i++)
+      Enumeration windows = windowList.keys();      
+      while (windows.hasMoreElements())
 	{
-	  MenuItem MI = new MenuItem(((JInternalFrame)windowList.elementAt(i)).getTitle());
-	  MI.addActionListener(this);
-	  windowMenu.add(MI);
+	  Object obj = windowList.get(windows.nextElement());
+
+
+	  MenuItem MI = null;
+	  if (obj instanceof JInternalFrame)
+	    {
+	      MI = new MenuItem(((JInternalFrame)obj).getTitle());
+	    }
+	  else if (obj instanceof gResultTable)
+	    {
+	      MI = new MenuItem(((gResultTable)obj).getTitle());
+	    }
+	  if (MI != null)
+	    {
+	      MI.addActionListener(this);
+	      windowMenu.add(MI);
+	    }
 	}
       return windowMenu;
+    }
+
+  public void showWindow(String title)
+    {
+      Object obj = windowList.get(title);
+      if (obj instanceof JInternalFrame)
+	{
+	  ((JInternalFrame)obj).moveToFront();
+	}
+      else if (obj instanceof gResultTable)
+	{
+	  ((gResultTable)obj).moveToFront();
+	}
     }
 
   // Event handlers
   public boolean setValuePerformed(JValueObject v)
     {
-      System.out.println("setValuePerformed");
       if (v.getSource() instanceof JstringField)
 	{
 	  System.out.println((String)v.getValue());
@@ -385,28 +439,19 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 
   public void actionPerformed(ActionEvent e)
     {
-      System.out.println("Action performed");
       if (e.getSource() instanceof MenuItem)
 	{
 	  String label = ((MenuItem)e.getSource()).getLabel();
-	  for (int i = 0; i < windowList.size() ; i++)
-	    {
-	      if (((JInternalFrame)windowList.elementAt(i)).getTitle().equals(label))
-		{
-		  ((JInternalFrame)windowList.elementAt(i)).moveToFront();
-		  break;
-		}
-
-	    }
-
+	  showWindow(label);
 	}
     }
 
   public  void frameDidClose(InternalFrameEvent e)
     {
-      System.out.println("frameDidClose - removing " + e.getInternalFrame().getTitle());
-      
-      windowList.removeElement(e.getInternalFrame());
+      String oldTitle = e.getInternalFrame().getTitle();
+      windowList.remove(oldTitle);
+      System.out.println(" Removing button- " + oldTitle);
+      windowBar.removeButton(oldTitle);
       updateMenu();
     }
    
@@ -457,9 +502,7 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
   // Convenience methods
   void addRow(Panel parent, Component comp,  String label, int row)
     {
-       System.out.println("Adding a line to a Panel");
       JLabel l = new JLabel(label);
-      
       parent.add("0 " + row + " lhwHW", l);
       parent.add("1 " + row + " lhwHW", comp);
       
@@ -467,19 +510,14 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
 
   void addRow(JPanel parent, Component comp,  String label, int row)
     {
-       System.out.println("Adding a line to a JPanel");
       JLabel l = new JLabel(label);
-      
       parent.add("0 " + row + " lhwHW", l);
       parent.add("1 " + row + " lhwHW", comp);
-      
     }
 
  void addRow(JComponent parent, Component comp,  String label, int row)
     {
-      
       JLabel l = new JLabel(label);
-      
       parent.add("0 " + row + " lhwHW", l);
       parent.add("1 " + row + " lhwHW", comp);
       
@@ -487,5 +525,4 @@ public class windowPanel extends JPanel implements ActionListener, InternalFrame
   
 
 }
-
 

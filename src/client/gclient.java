@@ -6,7 +6,7 @@
    --
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,6 +28,7 @@ import gjt.Box;
 import gjt.RowLayout;
 import jdj.*;
 
+import arlut.csd.JDataComponent.*;
 import arlut.csd.DataComponent.*;
 import arlut.csd.ganymede.*;
 import arlut.csd.ganymede.client.*;
@@ -35,9 +36,9 @@ import arlut.csd.Tree.*;
 import arlut.csd.Dialog.*;
 import arlut.csd.Util.*;
 
-import com.sun.java.swing.JButton;
+import com.sun.java.swing.*;
 
-public class gclient extends Frame implements treeCallback,ActionListener {
+public class gclient extends JFrame implements treeCallback,ActionListener {
 
   Session session;
   glogin _myglogin;
@@ -77,9 +78,18 @@ public class gclient extends Frame implements treeCallback,ActionListener {
   MenuItem 
     logoutMI,
     removeAllMI;
+
+  MenuItem
+    roseMI,
+    win95MI;
+
   Menu 
     windowMenu,
-    fileMenu;
+    fileMenu,
+    LandFMenu;
+
+  WindowBar
+    windowBar;
 
   public gclient(Session s,glogin g) {
 
@@ -113,7 +123,17 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     // Window list menu
     windowMenu = new Menu("Windows");
     
+    // Look and Feel menu
+    LandFMenu = new Menu("Look and Feel");
+    roseMI = new MenuItem("Rose");
+    roseMI.addActionListener(this);
+    win95MI = new MenuItem("Win95");
+    win95MI.addActionListener(this);
+    LandFMenu.add(roseMI);
+    LandFMenu.add(win95MI);
+
     menubar.add(fileMenu);
+    menubar.add(LandFMenu);
     menubar.add(windowMenu);
     this.setMenuBar(menubar);
     
@@ -166,118 +186,45 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     objectPM.add(objEditMI);
     objectPM.add(objInactivateMI);
 
-    // Build the tree
-    /*
-    try
-      {
-	Vector  typesV = session.getTypes();
-	treeNode typesnode = new treeNode(null,"Objects",null,true,0,1);
-	tree.setRoot(typesnode);
-	
-	for (int i=0;i<typesV.size();i++)
-	  {
-	    Base tempBase = null;
-	    BaseNode t;
-	    try 
-	      {
-		tempBase = (Base)typesV.elementAt(i);
-		t = new BaseNode(typesnode,tempBase.getName(), tempBase, null,true,0,1, pMenu);
-		tree.insertNode(t,false);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("Could not get bases: " + rx);
-	      }
-	    
-   
+    buildTree();
 
-	    Query _query;
-	    try
-	      {
-	        //Now get all the children
-	        _query = new Query(tempBase.getTypeID());
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("It's the Query! " + rx);
-	      }
-	    try
-	      {
-		if (_query == null)
-		  {
-		    System.out.println("query == null");
-		  }
-		else
-		  {
-		    Vector objects =  session.query(_query);
-		    if (objects == null)
-		      {
-			System.out.println("objects == null");
-		      }
-		    else
-		      {
-			for (int j=0 ; j < objects.size(); j++)
-			  {
-			    ObjectNode objNode = new ObjectNode(t, 
-								((Result)objects.elementAt(j)).toString(), 
-								((Result)objects.elementAt(j)).getObject(),
-							    null, false, 2,2, objectPM);
-			    tree.insertNode(objNode, false); 
-			  }
-		      }
-		  }
-	      }
-	    catch (RemoteException ex) 
-	      {
-		throw new IllegalArgumentException("Could not build object part of tree: " + ex);
-	      }
-      
-
-	  }
-      }
-    catch (RemoteException ex) 
-      {
-	throw new IllegalArgumentException("Could not build whole tree: " + ex);
-      }
-      */
-    
-    refreshTree();
-
-    // The right panel which will contain the containerPanel
+    // The right panel which will contain the windowPanel
 
     Panel rightP = new Panel();
 
     rightP.setLayout(new BorderLayout());
-      
-    //    ScrollPane _scroll = new ScrollPane();
-    //    _scroll.setLayout(new BorderLayout());
-    wp = new windowPanel(windowMenu);
-    
-    //_scroll.add(wp);
 
-    //rightP.add(_scroll,"Center");
+    wp = new windowPanel(this, windowMenu);
+
     rightP.add("Center", wp);
 
-    Panel bottomButtonP = new Panel();
+    // Button bar at bottom, includes commit/cancel panel and taskbar
+    JPanel bottomButtonP = new JPanel();
+    JPanel leftButtonP = new JPanel();
+    JPanel rightButtonP = new JPanel();
+    bottomButtonP.setLayout(new BorderLayout());
+    bottomButtonP.add("West", leftButtonP);
+    bottomButtonP.add("Center", rightButtonP);
     rightP.add(bottomButtonP,"South");
-    bottomButtonP.setLayout(new RowLayout());
+    leftButtonP.setLayout(new RowLayout());
+    rightButtonP.setLayout(new RowLayout());
+    // Taskbar to track windows
+    WindowBar windowBar = new WindowBar(wp, rightButtonP);
+    wp.addWindowBar(windowBar);
 
     commit = new JButton("Commit");
+    commit.setToolTipText("Click this to commit all changes to database");
     cancel = new JButton("Cancel");
+    cancel.setToolTipText("Click this to cancel all changes");
     commit.addActionListener(this);
     cancel.addActionListener(this);
 
-    bottomButtonP.add(commit);
-    bottomButtonP.add(cancel);
-
+    leftButtonP.add(commit);
+    leftButtonP.add(cancel);
+    rightButtonP.add(windowBar);
 
    
     add("Center",rightP);
-    /*
-    Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-    setSize( d.width / 2, d.height / 2 );
-    */
-
 
     try
       {
@@ -292,7 +239,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
     show();
   }
 
-  void refreshTree()
+  void buildTree()
     {
       
       try
@@ -316,12 +263,31 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 		  throw new IllegalArgumentException("Could not get bases: " + rx);
 		}
 	      refreshObjects(t, false);
-	    }
+	    } 
 	}
       catch (RemoteException ex) 
 	{
 	  throw new IllegalArgumentException("Could not build whole tree: " + ex);
 	}
+    }
+
+  void refreshTree()
+    {
+      treeNode root = tree.getRoot();
+      BaseNode child = (BaseNode)root.getChild();
+      while (child != null)
+	{
+	  try
+	    {
+	      refreshObjects(child, false);
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not refresh tree: " + rx);
+	    }
+	  child = (BaseNode)child.getNextSibling();
+	}
+      tree.refresh();
     }
   
   void refreshObjects(BaseNode node, boolean doRefresh) throws RemoteException
@@ -361,7 +327,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	else
 	  {
 	    Vector unsorted_objects =  session.query(_query);
-	    System.out.println("There are " + unsorted_objects.size() + " objects in the query");
+	    //System.out.println("There are " + unsorted_objects.size() + " objects in the query");
 	    if (unsorted_objects.size() > 0)
 	      {
 		sorted_results = new Result[unsorted_objects.size()];
@@ -378,7 +344,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	      {
 		for (int j = 0; j < unsorted_objects.size() ; j++)
 		  {
-		    System.out.println("Adding " + (Result)unsorted_objects.elementAt(j));
+		    //System.out.println("Adding " + (Result)unsorted_objects.elementAt(j));
 		    sorted_results[j] = (Result)unsorted_objects.elementAt(j);
 		  }
 		
@@ -424,26 +390,17 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	
     while ((sorted_results != null) && ((i < sorted_results.length) || (fNode != null)))
       {
-	System.out.println("");
-	System.out.println("Looking at the next node");
-	System.out.println("i = " + i + " length = " + sorted_results.length);
-	if (fNode == null)
-	  {
-	    System.out.println("fNode is null");
-	  }
-	else
-	  {
-	    System.out.println("fNode = " +fNode.getObject().getLabel());
-	  }
+	//System.out.println("Looking at the next node");
+	//System.out.println("i = " + i + " length = " + sorted_results.length);
 	
 	if (i < sorted_results.length)
 	  {
 	    object = sorted_results[i].getObject();
-	    System.out.println("Dealing with " + object.getLabel());
+	    //System.out.println("Dealing with " + object.getLabel());
 	  }
 	else
 	  {
-	    System.out.println("Object is null");
+	    //System.out.println("Object is null");
 	    object = null;
 	  }
 
@@ -452,7 +409,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	     ((object.getLabel().compareTo(fNode.getObject().getLabel())) < 0)))
 	  {
 	    // insert a new object node
-	    System.out.println("Adding this node");
+	    //System.out.println("Adding this node");
 	    //newNode = new ObjectNode(parentNode, object.getName(), object,
 	    //			    oldNode, false, 2, 2, objectMenu);
 	    ObjectNode objNode = new ObjectNode(node, 
@@ -464,16 +421,14 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	    
 	    oldNode = objNode;
 	    fNode = (ObjectNode) oldNode.getNextSibling();
-	    if (fNode != null)
-	      System.out.println("setting fNode to " + fNode.getObject().getLabel());
-
+	    
 	    i++;
 	  }
 	else if ((object == null) ||
 		 ((object.getLabel().compareTo(fNode.getObject().getLabel())) > 0))
 	  {
 	    // delete a object node
-	    System.out.println("Removing this node");
+	    //System.out.println("Removing this node");
 	    // System.err.println("Deleting: " + fNode.getText());
 	    newNode = (ObjectNode) fNode.getNextSibling();
 	    tree.deleteNode(fNode, false);
@@ -482,7 +437,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	  }
 	else
 	  {
-	    System.out.println("No change for this node");
+	    //System.out.println("No change for this node");
 	    fNode.setText(object.getLabel());
 	    // System.err.println("Setting: " + object.getName());
 
@@ -528,7 +483,8 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	      session.commitTransaction();
 	      session.openTransaction();
 
-	      tree.refresh();
+	      refreshTree();
+	      System.out.println("Done committing");
 	    }
 	  catch (RemoteException rx)
 	    {
@@ -543,7 +499,6 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	{
 	  try
 	    {
-	      session.abortTransaction();
 	      session.logout();
 	      this.dispose();
 	      _myglogin.connector.setEnabled(true);
@@ -553,9 +508,32 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 	    {
 	      throw new IllegalArgumentException("could not logout: " + rx);
 	    }
-
-
 	}
+      else if (event.getSource() == roseMI)
+	{
+	  try
+	    {
+	      UIManager.setUIFactory("com.sun.java.swing.rose.RoseFactory", this);
+	    }
+	  catch (ClassNotFoundException ex)
+	    {
+	      System.out.println("Could not load Rose: " + ex);
+	    }
+	  
+	}
+      else if (event.getSource() == win95MI)
+	{
+
+	  try
+	    {
+	      UIManager.setUIFactory("com.sun.java.swing.basic.BasicFactory", this);
+	    }
+	  catch (ClassNotFoundException ex)
+	    {
+	      System.out.println("Could not load basic factory: " + ex);
+	    }
+	}
+	  
       else
 	{
 	  System.err.println("Unknown action event generated");
@@ -567,6 +545,7 @@ public class gclient extends Frame implements treeCallback,ActionListener {
 
   public void treeNodeSelected(treeNode node)
   {
+    validate();
   }
 
   public void treeNodeUnSelected(treeNode node, boolean otherNode)
