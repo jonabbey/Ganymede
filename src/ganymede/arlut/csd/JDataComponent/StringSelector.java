@@ -639,17 +639,17 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * made by the user before the GUI is updated to show the change.  The JsetValueCallback
    * interface is also used to pass pop-up menu commands to the client.</p>
    *
-   * <p>StringSelector uses the following value type constants from
+   * <p>StringSelector uses the following subclasses of
    * {@link arlut.csd.JDataComponent.JValueObject JValueObject} to pass status updates to
    * the callback.
    *
    * <ul>
-   * <li><b>PARAMETER</B> Action from a PopupMenu.  The Parameter is the ActionCommand
+   * <li>{@link arlut.csd.JDataComponent.JParameterValueObject} Action from a PopupMenu.  The Parameter is the ActionCommand
    * string for the pop-up menu item selected, and the value is the object
    * (or string if no object defined) associated with the item selected when the pop-up menu was fired.</li>
-   * <li><b>ADD</b> Object has been added to the selected list.  Value is the object (or string) added.</li>
-   * <li><b>DELETE</b> Object has been removed from chosen list.  Value is the object (or string) removed.</li>
-   * <li><b>ERROR</b> Something went wrong.  Value is the error message to be displayed to the user in whatever
+   * <li>{@link arlut.csd.JDataComponent.JAddValueObject} Object has been added to the selected list.  Value is the object (or string) added.</li>
+   * <li>{@link arlut.csd.JDataComponent.JDeleteValueObject} Object has been removed from chosen list.  Value is the object (or string) removed.</li>
+   * <li>{@link arlut.csd.JDataComponent.JErrorValueObject} Something went wrong.  Value is the error message to be displayed to the user in whatever
    * fashion is appropriate.</li>
    * </ul>
    * </p>
@@ -807,7 +807,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    remove.doClick();
 	    return true;
 	  }
-	else if (o.getOperationType() == JValueObject.ADD)		// selection
+	else if (o instanceof JAddValueObject)		// selection
 	  {
 	    if (add != null)
 	      {
@@ -834,7 +834,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    add.doClick();
 	    return true;
 	  }
-	else if (o.getOperationType() == JValueObject.ADD)
+	else if (o instanceof JAddValueObject)
 	  {
 	    add.setEnabled(true);
 	    remove.setEnabled(false);
@@ -906,10 +906,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	    try
 	      {
-		ok = my_callback.setValuePerformed(new JValueObject(this, 
-								  0, // we are not giving a true index
-								  JValueObject.ADDVECTOR,
-								  objVector));
+		ok = my_callback.setValuePerformed(new JAddVectorValueObject(this, objVector));
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -940,10 +937,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  {
 	    try
 	      {
-		ok = my_callback.setValuePerformed(new JValueObject(this, 
-								  0, // we are not giving a true index
-								  JValueObject.ADD,
-								  ((listHandle)handles.elementAt(0)).getObject()));
+		ok = my_callback.setValuePerformed(new JAddValueObject(this,
+								       ((listHandle)handles.elementAt(0)).getObject()));
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -1225,10 +1220,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		
 		try
 		  {
-		    ok = my_callback.setValuePerformed(new JValueObject(this, 
-									0,  //in.getSelectedIndex(),
-									JValueObject.ADD,
-									handle.getObject()));
+		    ok = my_callback.setValuePerformed(new JAddValueObject(this, handle.getObject()));
 		  }
 		catch (RemoteException rx)
 		  {
@@ -1289,10 +1281,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 		try
 		  {
-		    ok = my_callback.setValuePerformed(new JValueObject(this, 
-									0,  //in.getSelectedIndex(),
-									JValueObject.ADD,
-									handle.getObject()));
+		    ok = my_callback.setValuePerformed(new JAddValueObject(this, handle.getObject()));
 		  }
 		catch (RemoteException rx)
 		  {
@@ -1320,10 +1309,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	    try
 	      {
-		ok = my_callback.setValuePerformed(new JValueObject(this, 
-								    0,  //in.getSelectedIndex(),
-								    JValueObject.ADD,
-								    item));  //item is a String
+		ok = my_callback.setValuePerformed(new JAddValueObject(this, item));
 	      }
 	    catch (RemoteException rx)
 	      {
