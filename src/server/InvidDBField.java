@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -381,16 +381,18 @@ public final class InvidDBField extends DBField implements invid_field {
     eObj = (DBEditObject) this.owner;
     session = eObj.getSession();
 
-    // find out whether we need to do anything to maintain symmetry
+    // find out whether there is an explicit back-link field
 
-    if (!getFieldDef().isSymmetric())
+    if (getFieldDef().isSymmetric())
       {
-	return true;
+	// find out what field in remote we might need to update
+
+	targetField = getFieldDef().getTargetField();
       }
-
-    // find out what field in remote we might need to update
-
-    targetField = getFieldDef().getTargetField();
+    else
+      {
+	targetField = SchemaConstants.BackLinksField;
+      }
 
     if ((oldRemote != null) && oldRemote.equals(newRemote))
       {
@@ -519,20 +521,22 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("not an editable invid field");
       }
 
-    // find out whether we need to do anything to maintain symmetry
+    // find out whether there is an explicit back-link field
 
-    if (!getFieldDef().isSymmetric())
+    if (getFieldDef().isSymmetric())
       {
-	return true;
+	// find out what field in remote we might need to update
+
+	targetField = getFieldDef().getTargetField();
+      }
+    else
+      {
+	targetField = SchemaConstants.BackLinksField;
       }
 
     eObj = (DBEditObject) this.owner;
     session = eObj.getSession();
 
-    // find out what field in remote we might need to update
-
-    targetField = getFieldDef().getTargetField();
-    
     oldRef = session.editDBObject(remote);
 	
     if (oldRef == null)
