@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -84,7 +84,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     /* -- */
 
-    System.err.println("DBSchemaEdit constructor entered");
+    if (debug)
+      {
+	System.err.println("DBSchemaEdit constructor entered");
+      }
 
     // if we haven't been forced into schema development mode, check
     // with the Ganymede class to see whether the command line parameter
@@ -855,7 +858,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     /* -- */
 
-    Ganymede.debug("DBSchemaEdit: commit");
+    Ganymede.debug("DBSchemaEdit: commiting schema changes");
 
     if (!locked)
       {
@@ -868,7 +871,10 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       {
 	// first the object bases
 
-	Ganymede.debug("DBSchemaEdit: entered synchronized block");
+	if (debug)
+	  {
+	    Ganymede.debug("DBSchemaEdit: entered synchronized block");
+	  }
 
 	// yeah, this is cheesy.. if we can't synchronize the built in
 	// fields due to a name conflict, we're just going to release
@@ -885,19 +891,25 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	enum = newBases.elements();
 
-	Ganymede.debug("DBSchemaEdit: established enum");
+	if (debug)
+	  {
+	    Ganymede.debug("DBSchemaEdit: established enum");
+	  }
 
 	while (enum.hasMoreElements())
 	  {
 	    base = (DBObjectBase) enum.nextElement();
 
-	    if (base != null)
+	    if (debug)
 	      {
-		Ganymede.debug("got base");
-	      }
-	    else
-	      {
-		Ganymede.debug("did not got base.. this shouldn't happen");
+		if (base != null)
+		  {
+		    Ganymede.debug("got base");
+		  }
+		else
+		  {
+		    Ganymede.debug("did not got base.. this shouldn't happen");
+		  }
 	      }
 
 	    base.clearEditor(this);
@@ -930,6 +942,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
 
     locked = false;
+
+    Ganymede.debug("DBSchemaEdit: schema changes committed.");
 
     return;
   }
