@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -782,7 +782,7 @@ public class DBStore {
 	throw new IllegalArgumentException("can't deal with null pathName");
       }
 
-    System.err.println("DBStore.getCategory(): searching for " + pathName);
+    // System.err.println("DBStore.getCategory(): searching for " + pathName);
 
     StringReader reader = new StringReader(pathName);
     StreamTokenizer tokens = new StreamTokenizer(reader);
@@ -821,8 +821,10 @@ public class DBStore {
 	    
 	    if (tok == StreamTokenizer.TT_WORD)
 	      {
-		System.err.println("DBStore.getCategory(): Looking for node " + tokens.sval);
+		// System.err.println("DBStore.getCategory(): Looking for node " + tokens.sval);
+
 		bc = (DBBaseCategory) bc.getNode(tokens.sval);
+
 		if (bc == null)
 		  {
 		    System.err.println("DBStore.getCategory(): found null");
