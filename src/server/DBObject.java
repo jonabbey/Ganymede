@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.58 $ %D%
+   Version: $Revision: 1.59 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.58 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.59 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -897,7 +897,7 @@ public class DBObject implements db_object, FieldType, Remote {
 	
 	// now add the field to our fields table
 
-	if (tmp.defined)
+	if (tmp.isDefined())
 	  {
 	    fields.putNoSyncNoRemove(tmp);
 	  }
