@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -937,7 +937,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (index == -1)
 	  {
-	    throw new RuntimeException("dissolve called with an unbound invid (vector)");
+	    throw new RuntimeException("dissolve for " + 
+				       owner.getLabel() + ":" + getName() + 
+				       " called with an unbound invid (vector): " + 
+				       oldInvid.toString());
 	  }
 
 	if (eObj.finalizeDeleteElement(this, index))
@@ -1028,6 +1031,10 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
+	// ok, since we're scalar, *we* need to be unbound from *our* existing target
+	// to be free to point back to our friend who is trying to establish a link
+	// to us
+
 	if (value != null)
 	  {
 	    tmp = (Invid) value;
@@ -1369,10 +1376,11 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
+	setLastError("InvidDBField setValue: couldn't finalize");
+
 	unbind(newRemote);
 	bind(null, oldRemote);
 
-	setLastError("InvidDBField setValue: couldn't finalize");
 	return false;
       }
   }
@@ -1742,7 +1750,13 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	invid = (Invid) values.elementAt(i);
 	
-	if (Ganymede.internalSession != null)
+	if (owner.editset != null)
+	  {
+	    object = (DBObject) owner.editset.getSession().getGSession().view_db_object(invid);
+	    
+	    label = owner.lookupLabel(object);
+	  }
+	else if (Ganymede.internalSession != null)
 	  {
 	    object = (DBObject) Ganymede.internalSession.view_db_object(invid);
 	    label = owner.lookupLabel(object); // do our own interpretation of the label
