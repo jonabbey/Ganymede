@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.152 $
-   Last Mod Date: $Date: 2001/06/05 08:07:41 $
+   Version: $Revision: 1.153 $
+   Last Mod Date: $Date: 2001/07/27 01:38:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.152 $ $Date: 2001/06/05 08:07:41 $ $Name:  $
+ * @version $Revision: 1.153 $ $Date: 2001/07/27 01:38:37 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -580,7 +580,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public final boolean checkNewField(short fieldID)
   {
-    if (fieldID <= 8)
+    if (fieldID <= SchemaConstants.FinalSystemField)
       {
 	return true;		// we always allow the built in fields
       }

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.241 $
-   Last Mod Date: $Date: 2001/07/27 01:02:19 $
+   Version: $Revision: 1.242 $
+   Last Mod Date: $Date: 2001/07/27 01:38:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.241 $ $Date: 2001/07/27 01:02:19 $
+ * @version $Revision: 1.242 $ $Date: 2001/07/27 01:38:37 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -5645,7 +5645,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// owner list field, which could be used to make the object
 	// owned, and thus gain privileges
 
-	if (!objectIsOwned && (fieldId == SchemaConstants.OwnerListField))
+	// likewise, we don't want to allow non-privileged end users
+	// to edit the owner list field at all.
+
+	if (fieldId == SchemaConstants.OwnerListField &&
+	    (!objectIsOwned || personaObj == null))
 	  {
 	    return objectPerm.intersection(PermEntry.viewPerms);
 	  }
@@ -6774,5 +6778,4 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     lastActionTime.setTime(System.currentTimeMillis());
   }
-
 }
