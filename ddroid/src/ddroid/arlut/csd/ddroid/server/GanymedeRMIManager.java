@@ -71,7 +71,6 @@ import arlut.csd.ddroid.rmi.Server;
 import arlut.csd.ddroid.rmi.adminSession;
 import arlut.csd.Util.TranslationService;
 
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                               GanymedeRMIManager

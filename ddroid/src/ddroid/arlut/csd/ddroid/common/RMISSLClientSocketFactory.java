@@ -52,6 +52,7 @@
 package arlut.csd.ddroid.common;
 
 import arlut.csd.Util.PackageResources;
+import arlut.csd.ddroid.server.Ganymede;
 
 import java.io.*;
 import java.net.*;
@@ -81,6 +82,9 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 
   public Socket createSocket(String host, int port) throws IOException
   {
+    System.err.println("Creating client socket to hose " + host + " on port " + port);
+    Ganymede.printCallStack();
+
     return getSF().createSocket(host, port);
   }
 
@@ -105,6 +109,9 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
       {
 	return sf;
       }
+
+    System.err.println("Creating client socket factory");
+    Ganymede.printCallStack();
 
     try
       {
