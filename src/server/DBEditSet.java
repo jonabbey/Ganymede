@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -238,6 +238,15 @@ public class DBEditSet {
 	  {
 	    System.err.println("DBEditSet.popCheckpoint(): popping checkpoint " + point.name);
 	  }
+      }
+
+    // we don't synchronize on dbStore, the odds are zip that a
+    // namespace will be created or deleted while we are in the middle
+    // of a transaction.  Go ahead and clear out the namespace checkpoint.
+
+    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+      {
+	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).popCheckpoint(this, name);
       }
 
     if (found)
