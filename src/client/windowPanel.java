@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,7 +45,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   // --
 
   gclient
-    parent;
+    gc;
 
   int 
     topLayer = 0,
@@ -94,14 +94,14 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
    *
    */
 
-  public windowPanel(gclient parent, JMenu windowMenu)
+  public windowPanel(gclient gc, JMenu windowMenu)
   {
     if (debug)
       {
 	System.out.println("Initializing windowPanel");
       }
 
-    this.parent = parent;
+    this.gc = gc;
     this.windowMenu = windowMenu;
 
     setBackground(ClientColor.background);
@@ -114,7 +114,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   public gclient getgclient()
   {
-    return parent;
+    return gc;
   }
 
   /**
@@ -162,14 +162,14 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	return;
       }
 
-    parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    gc.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     if (editable)
       {
-	parent.setStatus("Opening object for edit");
+	setStatus("Opening object for edit");
       }
     else
       {
-	parent.setStatus("Opening object for viewing");
+	setStatus("Opening object for viewing");
       }
 
     // First figure out the title, and put it in the hash
@@ -233,7 +233,12 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     moveToFront(w);
     updateMenu();
     
-    parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+  }
+
+  public final void setStatus(String s)
+  {
+    gc.setStatus(s);
   }
 
   public void resetWindowCount()
@@ -254,8 +259,8 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
     /* -- */
 
-    parent.setStatus("Querying object types");
-    parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    setStatus("Querying object types");
+    gc.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
     try
       {
@@ -269,7 +274,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
     if (rt == null)
       {
 	System.out.println("rt == null");
-	parent.setStatus("Could not get the result table.");
+	setStatus("Could not get the result table.");
       }
     else
       {
@@ -314,8 +319,8 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	add(rt);
 	moveToFront(rt);
 	updateMenu();
-	parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	parent.setStatus("Done.");
+	setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	setStatus("Done.");
       }
     
   }
@@ -538,7 +543,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
       
     /* -- */
     
-    parent.setStatus("Closing a window");
+    setStatus("Closing a window");
     
     windows = windowList.keys();
     
@@ -561,13 +566,13 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	      }
 	    else
 	      {
-		parent.setStatus("You can't close that window.");
+		setStatus("You can't close that window.");
 	      }
 	    break;
 	  }
       }
       
-    parent.setStatus("Done");
+    setStatus("Done");
   }
 
   public void maxWindow(String title)
@@ -577,7 +582,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
       
     /* -- */
     
-    parent.setStatus("Maxing window");
+    setStatus("Maxing window");
     
     windows = windowList.keys();
       
@@ -693,11 +698,11 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 		  {
 		    System.out.println("Opening new edit window");
 		  }
-		addWindow(parent.session.edit_db_object(((db_object)menuItems.get(MI)).getInvid()), true);
+		addWindow(gc.session.edit_db_object(((db_object)menuItems.get(MI)).getInvid()), true);
 	      }
 	    catch (RemoteException rx)
 	      {
-		parent.setStatus("Something went wrong on the server.");
+		setStatus("Something went wrong on the server.");
 		throw new RuntimeException("Could not open object for edit: " + rx);
 	      }
 	  }
@@ -715,7 +720,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	    //catch (RemoteException rx)
 	    catch (Exception rx)
 	      {
-		parent.setStatus("Something went wrong on the server.");
+		setStatus("Something went wrong on the server.");
 		throw new RuntimeException("Could not clone object: " + rx);
 	      }
 	  }
@@ -727,7 +732,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 		  {
 		    System.out.println("Deleting object");
 		  }
-		parent.session.remove_db_object(((db_object)menuItems.get(MI)).getInvid());
+		gc.session.remove_db_object(((db_object)menuItems.get(MI)).getInvid());
 		try
 		  {
 		    ((JInternalFrame)Windows.get(MI)).setClosed(true);
@@ -740,7 +745,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	      }
 	    catch (RemoteException rx)
 	      {
-		parent.setStatus("Something went wrong on the server.");
+		setStatus("Something went wrong on the server.");
 		throw new RuntimeException("Could not delete object: " + rx);
 	      }
 	  }
@@ -791,6 +796,21 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	System.err.println("Unknown ActionEvent in windowPanel");
       }
   }
+
+  /*
+  public void invalidate()
+  {
+    System.out.println("-- Invalidate windowPanel");
+    super.invalidate();
+  }
+
+  public void validate()
+  {
+    System.out.println("-- validate windowPanel");
+    super.validate();
+  }
+  */    
+
 
   // This is for the beans, when a JInternalFrame closes
 
