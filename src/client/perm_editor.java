@@ -5,7 +5,7 @@
    Description.
    
    Created: 18 November 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Brian O'Mara omara@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,6 +23,7 @@ import arlut.csd.JDataComponent.JSeparator;
 
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.table.*;
 
 /*------------------------------------------------------------------------------
                                                                            class 
@@ -30,7 +31,7 @@ import javax.swing.border.*;
 
 ------------------------------------------------------------------------------*/
 
-class perm_editor extends JDialog implements ActionListener, ItemListener, Runnable {
+class brian_editor extends JDialog implements ActionListener, Runnable {
 
   static final int MAXBOXES = 4;
   static final int CREATABLE = 0;
@@ -54,8 +55,18 @@ class perm_editor extends JDialog implements ActionListener, ItemListener, Runna
 
   JButton OkButton = new JButton ("Ok");
   JButton CancelButton = new JButton("Cancel");
-  JScrollPane edit_pane = new JScrollPane();
-  JPanel edit_panel = new JPanel(); // this is where the table goes?
+  //JScrollPane edit_pane = new JScrollPane();
+  //JPanel edit_panel = new JPanel(); // this is where the table goes?
+  BPermTableModel myModel = new BPermTableModel();
+  JTable table = new JTable(myModel);
+  //table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+
+  //Create the scroll pane and add the table to it. 
+  JScrollPane edit_pane = new JScrollPane(table);
+
+  //Add the scroll pane to this window.
+  //setContentPane(scrollPane);
+
   int row = 0;
 
   boolean justShowUser = false;
@@ -90,7 +101,7 @@ class perm_editor extends JDialog implements ActionListener, ItemListener, Runna
    *
    */
 
-  public perm_editor (perm_field permField, 
+  public brian_editor (perm_field permField, 
 		      boolean enabled, gclient gc,
 		      Frame parent, String DialogTitle,
 		      boolean justShowUser)
@@ -176,10 +187,10 @@ class perm_editor extends JDialog implements ActionListener, ItemListener, Runna
     setBackground(Color.white); 
 
     edit_pane.setBackground(Color.lightGray);
-    edit_pane.setViewportView(edit_panel);
+    edit_pane.setViewportView(table);
     
-    edit_panel.setLayout(gbl);
-    edit_panel.setBackground(Color.lightGray);
+    //edit_panel.setLayout(gbl);
+    //edit_panel.setBackground(Color.lightGray);
 
     if (debug)
       {
@@ -211,7 +222,7 @@ class perm_editor extends JDialog implements ActionListener, ItemListener, Runna
 	    return;
 	  }
 	
-	edit_panel.setVisible(true);
+	//	edit_panel.setVisible(true);
 	changeHash = new Hashtable();
 	
 	System.out.println("Hash initialized");
@@ -299,8 +310,6 @@ class perm_editor extends JDialog implements ActionListener, ItemListener, Runna
 		continue;
 	      }
 	  }
-
-	//addSeparator(edit_panel);
 
 	if (debug)
 	  {
@@ -509,4 +518,67 @@ class perm_editor extends JDialog implements ActionListener, ItemListener, Runna
 }
 
 
-
+class BPermTableModel extends AbstractTableModel {
+ 
+  Object[][] data = {
+    {"Base1", new Boolean(false), 
+     new Boolean(false), new Boolean(false), new Boolean(false)},
+    {"Base2", new Boolean(false), 
+     new Boolean(false), new Boolean(false), new Boolean(false)},
+    {"Base3", new Boolean(false), 
+     new Boolean(false), new Boolean(false), new Boolean(false)},
+    {"Base4", new Boolean(false), 
+     new Boolean(false), new Boolean(false), new Boolean(false)},
+    {"Base5",new Boolean(false), 
+new Boolean(false), new Boolean(false), new Boolean(false)},
+  };
+  
+  String[] columnNames = {"Name", 
+			  "Visible",
+			  "Creatable",
+			  "Editable",
+			  "Deletable"};
+  
+  
+  public int getColumnCount() {
+    return columnNames.length;
+  }
+  
+  public int getRowCount() {
+    return data.length;
+  }
+  
+  public String getColumnName(int col) {
+    return columnNames[col];
+  }
+  
+  public Object getValueAt(int row, int col) {
+    return data[row][col];
+  }
+  
+  public Class getColumnClass(int c) {
+    return getValueAt(0, c).getClass();
+  }
+  
+  /*
+   * Don't need to implement this method unless your table's
+   * editable.
+   */
+  public boolean isCellEditable(int row, int col) {
+    //Note that the data/cell address is constant,
+    //no matter where the cell appears onscreen.
+    if (col < 1) { 
+      return false;
+    } else {
+      return true;
+    }
+  }
+  
+  /*
+   * Don't need to implement this method unless your table's
+   * data can change.
+   */
+  public void setValueAt(Object value, int row, int col) {
+    data[row][col] = value;
+  }
+}
