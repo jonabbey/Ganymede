@@ -246,7 +246,8 @@ _3. Installing the Server_
        database.
        
    The _jars/_ directory contains the compiled java classes that actually
-   comprise the Ganymede server and the server tool.
+   comprise the Ganymede server and the Java-based stopServer and
+   xmlclient clients.
    
    The _doc/_ directory contains copies of all of the Ganymede
    documentation.
@@ -573,4 +574,4 @@ _8. Prepare web access clients_
    
     Jonathan Abbey
     
-   Last modified: Thu Dec 14 22:51:38 CST 2000
+   Last modified: Thu Dec 14 22:57:46 CST 2000
