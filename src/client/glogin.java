@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 2002/08/29 02:04:45 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 2004/02/05 21:51:17 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -90,7 +90,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.73 $ $Date: 2002/08/29 02:04:45 $ $Name:  $
+ * @version $Revision: 1.74 $ $Date: 2004/02/05 21:51:17 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -410,7 +410,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbl.setConstraints(userL, gbc);
     loginBox.add(userL);
 
-    username = new JTextField(20);
+    username = new JTextField(15);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
@@ -427,7 +427,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbl.setConstraints(passL, gbc);
     loginBox.add(passL);
 
-    passwd = new JPasswordField(20);
+    passwd = new JPasswordField(15);
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 1;
@@ -439,11 +439,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbc.ipady = 0;
     
     _quitButton = new JButton("Quit");
-    _quitButton.setBackground(ClientColor.buttonBG);
 
     connector = new JButton("Connecting...");
     connector.setOpaque(true);
-    connector.setBackground(ClientColor.buttonBG);
     connector.addActionListener(this);
 
     JPanel buttonPanel = new JPanel(new BorderLayout());
@@ -549,7 +547,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		validate();
 	      }
 	    });
-
 	    
 	    // we've done our work, remember that.
 	    
@@ -916,7 +913,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.73 $ $Date: 2002/08/29 02:04:45 $ $Name:  $
+ * @version $Revision: 1.74 $ $Date: 2004/02/05 21:51:17 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1010,7 +1007,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.73 $ $Date: 2002/08/29 02:04:45 $ $Name:  $
+ * @version $Revision: 1.74 $ $Date: 2004/02/05 21:51:17 $ $Name:  $
  * @author Jonathan Abbey
  */
 

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.214 $
-   Last Mod Date: $Date: 2003/10/02 04:17:58 $
+   Version: $Revision: 1.215 $
+   Last Mod Date: $Date: 2004/02/05 21:51:17 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.214 $ $Date: 2003/10/02 04:17:58 $ $Name:  $
+ * @version $Revision: 1.215 $ $Date: 2004/02/05 21:51:17 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -894,7 +894,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // The right panel which will contain the windowPanel
 
     JPanel rightP = new JPanel(true);
-    rightP.setBackground(ClientColor.background);
+    //    rightP.setBackground(ClientColor.background);
     rightP.setLayout(new BorderLayout());
 
     wp = new windowPanel(this, windowMenu);
@@ -914,16 +914,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     commit = new JButton("Commit");
     commit.setEnabled(false);
     commit.setOpaque(true);
-    commit.setBackground(Color.lightGray);
-    commit.setForeground(Color.black);
+    //    commit.setBackground(Color.lightGray);
+    //    commit.setForeground(Color.black);
     commit.setToolTipText("Click this to commit all changes to database");
     commit.addActionListener(this);
 
     cancel = new JButton("Cancel");
     cancel.setEnabled(false);
     cancel.setOpaque(true);
-    cancel.setBackground(Color.lightGray);
-    cancel.setForeground(Color.black);
+    //    cancel.setBackground(Color.lightGray);
+    //    cancel.setForeground(Color.black);
     cancel.setToolTipText("Click this to cancel all changes");
     cancel.addActionListener(this);
 
