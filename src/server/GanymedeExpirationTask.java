@@ -6,7 +6,7 @@
    any expirations or removals.
    
    Created: 4 February 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -121,7 +121,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 		invid = result.getInvid();
 
-		retVal = mySession.inactivate_db_object(invid);
+		retVal = mySession.inactivate_db_object(invid, false);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
@@ -163,7 +163,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 		invid = result.getInvid();
 
-		retVal = mySession.remove_db_object(invid);
+		retVal = mySession.remove_db_object(invid, false);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {

@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2003,8 +2003,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * @see arlut.csd.ganymede.Session
    */
+
+  public ReturnVal inactivate_db_object(Invid invid)
+  {
+    return inactivate_db_object(invid, true);
+  }
+
+  /**
+   *
+   * As above, with an interactive parameter to allow expiration logic to
+   * tell the custom code to dispense with interactive wizards.
+   *
+   */
   
-  public synchronized ReturnVal inactivate_db_object(Invid invid) 
+  public synchronized ReturnVal inactivate_db_object(Invid invid, boolean interactive) 
   {
     DBEditObject eObj;
     DBLogEvent event;
@@ -2025,7 +2037,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Object " + eObj.getLabel() + " is not of a type that may be inactivated");
       }
 
-    return session.inactivateDBObject(eObj);
+    return session.inactivateDBObject(eObj, interactive);
   }
 
   /**
@@ -2042,8 +2054,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * @see arlut.csd.ganymede.Session
    */
+
+  public ReturnVal remove_db_object(Invid invid)
+  {
+    return remove_db_object(invid, true);
+  }
+
+  /**
+   *
+   * As above, with an interactive parameter to allow expiration logic to
+   * tell the custom code to dispense with interactive wizards.
+   *
+   */
   
-  public synchronized ReturnVal remove_db_object(Invid invid) 
+  public synchronized ReturnVal remove_db_object(Invid invid, boolean interactive) 
   {
     if (debug)
       {
@@ -2095,7 +2119,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Object Manager refused deletion for " + vObj.getLabel());
       }
     
-    return session.deleteDBObject(invid);
+    return session.deleteDBObject(invid, interactive);
   }
 
   /**

@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -409,9 +409,9 @@ final public class DBSession {
    * 
    */
 
-  public synchronized ReturnVal deleteDBObject(Invid invid)
+  public synchronized ReturnVal deleteDBObject(Invid invid, boolean interactive)
   {
-    return deleteDBObject(invid.getType(), invid.getNum());
+    return deleteDBObject(invid.getType(), invid.getNum(), interactive);
   }
 
   /**
@@ -431,7 +431,8 @@ final public class DBSession {
    *  
    */
 
-  public synchronized ReturnVal deleteDBObject(short baseID, int objectID)
+  public synchronized ReturnVal deleteDBObject(short baseID, int objectID,
+					       boolean interactive)
   {
     DBObject obj;
     DBEditObject eObj;
@@ -454,7 +455,7 @@ final public class DBSession {
 	eObj = obj.createShadow(editSet);
       }
 
-    return deleteDBObject(eObj);
+    return deleteDBObject(eObj, interactive);
   }
 
   /**
@@ -477,7 +478,7 @@ final public class DBSession {
    *   
    */
 
-  public synchronized ReturnVal deleteDBObject(DBEditObject eObj)
+  public synchronized ReturnVal deleteDBObject(DBEditObject eObj, boolean interactive)
   {
     ReturnVal retVal, retVal2;
     String key;
@@ -506,7 +507,7 @@ final public class DBSession {
 	return null;
       }
 
-    retVal = eObj.remove();
+    retVal = eObj.remove(interactive);
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -562,7 +563,7 @@ final public class DBSession {
    *  
    */
 
-  public synchronized ReturnVal inactivateDBObject(DBEditObject eObj)
+  public synchronized ReturnVal inactivateDBObject(DBEditObject eObj, boolean interactive)
   {
     ReturnVal retVal;
     String key;
@@ -584,7 +585,7 @@ final public class DBSession {
 
     editSet.checkpoint(key);
 
-    retVal = eObj.inactivate();
+    retVal = eObj.inactivate(interactive);
 
     if (retVal != null && !retVal.didSucceed())
       {
