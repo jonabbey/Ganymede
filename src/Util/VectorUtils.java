@@ -7,15 +7,15 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2001/11/17 02:23:23 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2002/01/14 22:25:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -78,43 +78,90 @@ public class VectorUtils {
 
   public static Vector union(Vector vectA, Vector vectB)
   {
-    Hashtable workSet = new Hashtable();
-    Vector result = new Vector();
-    Enumeration enum;
-    Object item;
-
-    /* -- */
+    int threshold;
 
     if (vectA != null)
       {
-	enum = vectA.elements();
-
-	while (enum.hasMoreElements())
-	  {
-	    item = enum.nextElement();
-	    workSet.put(item, item);
-	  }
+	threshold = vectA.size();
       }
-    
+
     if (vectB != null)
       {
-	enum = vectB.elements();
+	threshold += vectB.size();
+      }
+
+    if (threshold < 6)
+      {
+	Vector result = new Vector();
+
+	if (vectA != null)
+	  {
+	    for (int i = 0; i < vectA.size(); i++)
+	      {
+		Object obj = vectA.elementAt(i);
+		
+		if (!result.containsElement(obj))
+		  {
+		    result.addElement(obj);
+		  }
+	      }
+	  }
+
+	if (vectB != null)
+	  {
+	    for (int i = 0; i < vectB.size(); i++)
+	      {
+		Object obj = vectB.elementAt(i);
+		
+		if (!result.containsElement(obj))
+		  {
+		    result.addElement(obj);
+		  }
+	      }
+	  }
+
+	return result;
+      }
+    else
+      {
+	Hashtable workSet = new Hashtable();
+	Vector result = new Vector();
+	Enumeration enum;
+	Object item;
+
+	/* -- */
+
+	if (vectA != null)
+	  {
+	    enum = vectA.elements();
+
+	    while (enum.hasMoreElements())
+	      {
+		item = enum.nextElement();
+		workSet.put(item, item);
+	      }
+	  }
+    
+	if (vectB != null)
+	  {
+	    enum = vectB.elements();
+
+	    while (enum.hasMoreElements())
+	      {
+		item = enum.nextElement();
+		workSet.put(item, item);
+	      }
+	  }
+
+	enum = workSet.elements();
 
 	while (enum.hasMoreElements())
 	  {
-	    item = enum.nextElement();
-	    workSet.put(item, item);
+	    result.addElement(enum.nextElement());
 	  }
+
+	return result;
       }
-
-    enum = workSet.elements();
-
-    while (enum.hasMoreElements())
-      {
-	result.addElement(enum.nextElement());
-      }
-
-    return result;
   }
 
   /**
