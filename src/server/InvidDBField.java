@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.138 $
-   Last Mod Date: $Date: 2000/08/18 05:13:48 $
+   Version: $Revision: 1.139 $
+   Last Mod Date: $Date: 2000/08/22 06:43:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.138 $ %D%
+ * @version $Revision: 1.139 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -322,7 +322,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 	  }
 
-	Object params[] = new Object[2];
+	Object params[] = new Object[3];
 
 	params[0] = getOwner().getInvid();
 	params[1] = new Short(getID());
@@ -3402,7 +3402,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		  }
 
 		retVal.setInvid(newObj);
-		retVal.setObject(embeddedObj);
+		retVal.setLocalObject(embeddedObj);
 	    
 		return retVal.unionRescan(newRetVal);
 	      }

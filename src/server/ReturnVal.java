@@ -8,8 +8,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2000/05/19 04:42:53 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2000/08/22 06:43:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -135,6 +135,13 @@ public class ReturnVal implements java.io.Serializable {
   db_object remoteObjectRef = null;
 
   /**
+   * <p>A local reference to a returned object for server-side
+   * operations.</p>
+   */
+
+  private transient DBObject localObjectRef = null;
+
+  /**
    * <p>A Serializable StringBuffer representation of objects and fields
    * that need to be rescanned.</p>
    */
@@ -222,6 +229,21 @@ public class ReturnVal implements java.io.Serializable {
   public db_object getObject()
   {
     return remoteObjectRef;
+  }
+
+  /** 
+   * <p>This method is used to get a remote {@link
+   * arlut.csd.ganymede.db_object db_object} reference that the server
+   * wants to return to the client.  Used particularly for
+   * Session.create_db_object() / Session.edit_db_object(), or null if
+   * no db_object was returned.</p>
+   *
+   * @see arlut.csd.ganymede.Session 
+   */
+
+  public DBObject getLocalObject()
+  {
+    return localObjectRef;
   }
 
   /**
@@ -729,5 +751,19 @@ public class ReturnVal implements java.io.Serializable {
   public void setObject(db_object object)
   {
     this.remoteObjectRef = object;
+  }
+
+  /** 
+   * <p>This method is used to set a {@link
+   * arlut.csd.ganymede.DBObject DBObject} reference that the server
+   * can retrieve from us for local (non-proxied) access to an
+   * object.</p>
+   *
+   * <p>For use on the server-side.</p> 
+   */
+
+  public void setLocalObject(DBObject object)
+  {
+    this.localObjectRef = object;
   }
 }

@@ -7,8 +7,8 @@
 
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/08/18 05:13:46 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/08/22 06:43:43 $
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -235,7 +235,7 @@ public class FloatDBField extends DBField implements float_field {
 	      }
 	  }
 
-	Object params[] = new Object[2];
+	Object params[] = new Object[3];
 
 	params[0] = getOwner().getInvid();
 	params[1] = new Short(getID());

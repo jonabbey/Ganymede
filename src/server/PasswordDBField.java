@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2000/08/18 05:13:49 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2000/08/22 06:43:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -265,7 +265,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	      }
 	  }
 
-	Object params[] = new Object[2];
+	Object params[] = new Object[3];
 
 	params[0] = getOwner().getInvid();
 	params[1] = new Short(getID());

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.193 $
-   Last Mod Date: $Date: 2000/08/09 02:22:17 $
+   Version: $Revision: 1.194 $
+   Last Mod Date: $Date: 2000/08/22 06:43:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.193 $ $Date: 2000/08/09 02:22:17 $
+ * @version $Revision: 1.194 $ $Date: 2000/08/22 06:43:44 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -490,7 +490,22 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * direct access via RMI.</p>
    */
 
-  boolean remotelyAccessible;
+  boolean remotelyAccessible = false;
+
+  /**
+   * <p>If true, this GanymedeSession will default to creating proxy objects
+   * for use by remote clients.</p>
+   */
+
+  boolean useProxies = false;
+
+  /**
+   * <p>A Hashtable mapping Invid's to DBObjects that have been pulled
+   * by this GanymedeSession for accessibility by the doObjectCall and
+   * doFieldCall proxy methods.</p>
+   */
+
+  Hashtable remoteObjectCache = new Hashtable();
 
   /* -- */
 
@@ -574,6 +589,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     supergashMode = true;
     beforeversupergash = true;
+    this.remotelyAccessible = false;
 
     updatePerms(true);
   }
@@ -1158,7 +1174,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      {
 		GanymedeServer.lSemaphore.decrement();
 	      }
-	   
+
 	    // if we are the last user logged in and the server is in
 	    // deferred shutdown mode, clearActiveUser() will shut the
 	    // server down, so the rest of of the stuff below may not
@@ -1179,6 +1195,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    delegatablePersonaPerms = null;
 	    delegatableDefaultPerms = null;
 	    lastError = null;
+	    remoteObjectCache.clear();
+	    remoteObjectCache = null;
 	  }
 
 	// guess we're still running.  Remember the last time this
@@ -2011,6 +2029,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* - */
 
+    remoteObjectCache.clear();
+
+
     session.openTransaction(username + " on " + describe + ", time = " + new Date(),
 			    interactive); // *sync* DBSession
 
@@ -2099,6 +2120,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     /* - */
 
     setLastEvent("rollback:" + key);
+
+    remoteObjectCache.clear();
 
     return session.rollback(key);
   }
@@ -3003,8 +3026,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    DBObject resultobject = session.viewDBObject((Invid) node.value);
 
-	    // the whole query system is predicated on returning top-level
-	    // objects only, so we have to do it here, too.
+	    // if we are being asked to return the top-level container
+	    // object, search up the container hierarchy for the root
 
 	    if (returnContainingObject)
 	      {
@@ -3872,21 +3895,83 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal view_db_object(Invid invid)
+  public ReturnVal view_db_object(Invid invid)
+  {
+    return this.view_db_object(invid, useProxies);
+  }
+
+  /**
+   * <p>View an object from the database.  The ReturnVal returned will
+   * carry a {@link arlut.csd.ganymede.db_object db_object} reference,
+   * which can be obtained by the client
+   * calling {@link arlut.csd.ganymede.ReturnVal#getObject() ReturnVal.getObject()}.
+   * If the object could not be
+   * viewed for some reason, the ReturnVal will carry an encoded error
+   * dialog for the client to display.</p>
+   *
+   * <p>view_db_object() can be done at any time, outside of the bounds of
+   * any transaction.  view_db_object() returns a snapshot of the object's
+   * state at the time the view_db_object() call is processed, and will
+   * be transaction-consistent internally.</p>
+   *
+   * <p>If view_db_object() is called during a transaction, the object
+   * will be returned as it stands during the transaction.. that is,
+   * if the object has been changed during the transaction, that
+   * changed object will be returned, even if the transaction has
+   * not yet been committed, and other clients would not be able to
+   * see that version of the object.</p>
+   *
+   * <p>NOTE: It is critical that any code that looks at the values of
+   * fields in a {@link arlut.csd.ganymede.DBObject DBObject}
+   * go through a view_db_object() method
+   * or else the object will not properly know who owns it, which
+   * is critical for it to be able to properly authenticate field
+   * access.  Keep in mind, however, that view_db_object clones the
+   * DBObject in question, so this method is very heavyweight.</p>
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   */
+
+  public synchronized ReturnVal view_db_object(Invid invid, boolean genProxy)
   {
     ReturnVal result;
     db_object objref;
     DBObject obj;
     PermEntry perm;
-    
+
     /* -- */
 
     checklogin();
 
-    // let a NullPointerException be thrown if we were given a null
+    // we'll let a NullPointerException be thrown if we were given a null
     // Invid.
-    
-    obj = session.viewDBObject(invid);
+
+    obj = (DBObject) remoteObjectCache.get(invid);
+
+    if (obj != null)
+      {
+	result = new ReturnVal(true); // success
+	result.setLocalObject(obj);
+	result.setInvid(obj.getInvid());
+
+	if (genProxy)
+	  {
+	    result.setObject(obj.getProxy());
+	  }
+	else
+	  {
+	    // assume we've already exported it if we are remotely
+	    // accessible
+
+	    result.setObject(obj);
+	  }
+
+	return result;
+      }
+    else
+      {
+	obj = session.viewDBObject(invid);
+      }
 
     if (obj == null)
       {
@@ -3913,11 +3998,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	objref = new DBObject(obj, this);
 
+	// We need to remember that we have seen this object so that
+	// we don't pull it out again.
+
+	remoteObjectCache.put(((DBObject) objref).getInvid(), objref);
+
 	result = new ReturnVal(true); // success
-	result.setObject(objref);
+
+	result.setLocalObject((DBObject) objref);
 	result.setInvid(((DBObject) objref).getInvid());
 
-	if (this.remotelyAccessible)
+	if (genProxy)
+	  {
+	    result.setObject(((DBObject) objref).getProxy());
+	  }
+	else if (this.remotelyAccessible)
 	  {
 	    // the exportObject call will fail if the object has
 	    // already been exported.  Unfortunately, there doesn't
@@ -3935,6 +4030,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    ((DBObject) objref).exportFields();
 	  }
+
+	result.setObject(objref);
 
 	return result;
       }
@@ -3968,17 +4065,73 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal edit_db_object(Invid invid)
+  public ReturnVal edit_db_object(Invid invid)
+  {
+    return this.edit_db_object(invid, useProxies);
+  }
+
+  /**
+   * <p>Check an object out from the database for editing.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling
+   * {@link arlut.csd.ganymede.ReturnVal#getObject() ReturnVal.getObject()}.
+   * If the object could not be checked out for editing for some
+   * reason, the ReturnVal will carry an encoded error dialog for the
+   * client to display.</p>
+   *
+   * <p>Keep in mind that only one GanymedeSession can have a particular
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once checked out, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()}
+   * or {@link arlut.csd.ganymede.GanymedeSession#abortTransaction() abortTransaction()}.</p>
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   */
+
+  public synchronized ReturnVal edit_db_object(Invid invid, boolean genProxy)
   {
     ReturnVal result;
     db_object objref;
     DBObject obj;
+    boolean newCopy = false;
 
     /* -- */
 
     checklogin();
 
-    obj = session.viewDBObject(invid);
+    // look for the object in our cache.. if the object in our
+    // cache is already checked out for editing, we'll go with
+    // that, otherwise we need to get a new editable copy
+
+    obj = (DBObject) remoteObjectCache.get(invid);
+
+    if (obj!=null && (obj instanceof DBEditObject))
+      {
+	result = new ReturnVal(true);
+	result.setInvid(obj.getInvid());
+	result.setLocalObject(obj);
+
+	if (genProxy)
+	  {
+	    result.setObject(obj.getProxy());
+	  }
+	else
+	  {
+	    // assume we're already exported for RMI if need-be..
+	    // remotelyAccessible shouldn't change during the
+	    // GanymedeSession's lifetime
+
+	    result.setObject(obj);
+	  }
+
+	return result;
+      }
+    else
+      {
+	obj = session.viewDBObject(invid);
+	newCopy = true;
+      }
 
     if (obj == null)
       {
@@ -4008,25 +4161,27 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if (objref != null)
 	  {
 	    result = new ReturnVal(true);
-	    result.setObject(objref);
+	    result.setInvid(((DBObject) objref).getInvid());
+	    result.setLocalObject((DBObject) objref);
 
-	    if (this.remotelyAccessible)
+	    if (genProxy)
 	      {
-		// the exportObject call will fail if the object has
-		// already been exported.  Unfortunately, there doesn't
-		// seem to be much way to tell this beforehand, so
-		// we won't bother to try.
-
+		result.setObject(((DBObject) objref).getProxy());
+	      }
+	    else if (this.remotelyAccessible)
+	      {
 		try
 		  {
 		    UnicastRemoteObject.exportObject(objref);
 		  }
 		catch (RemoteException ex)
 		  {
-		    // ex.printStackTrace();
+		    //		    ex.printStackTrace();
 		  }
 
 		((DBObject) objref).exportFields();
+
+		result.setObject(objref);
 	      }
 
 	    return result;
@@ -4095,6 +4250,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     return this.create_db_object(type, false);
   }
 
+
   /**
    * <p>Create a new object of the given type.  The ReturnVal
    * returned will carry a db_object reference, which can be obtained
@@ -4115,7 +4271,32 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @return A ReturnVal carrying an object reference and/or error dialog
    */
 
-  public synchronized ReturnVal create_db_object(short type, boolean embedded)
+  public ReturnVal create_db_object(short type, boolean embedded)
+  {
+    return this.create_db_object(type, embedded, useProxies);
+  }
+
+  /**
+   * <p>Create a new object of the given type.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.</p>
+   *
+   * <p>Keep in mind that only one GanymedeSession can have a particular
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once created, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.GanymedeSession#commitTransaction() commitTransaction()}.</p>
+   *
+   * @param type The kind of object to create.
+   * @param embedded If true, assume the object created is embedded and
+   * does not need to have owners set.
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   */
+
+  public synchronized ReturnVal create_db_object(short type, boolean embedded, boolean genProxy)
   {
     DBObject newObj;
     ReturnVal retVal;
@@ -4146,9 +4327,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    ReturnVal result = new ReturnVal(true);
 
-	    result.setObject(newObj);
+	    result.setInvid(newObj.getInvid());
+	    result.setLocalObject(newObj);
 
-	    if (this.remotelyAccessible)
+	    if (genProxy)
+	      {
+		result.setObject(newObj.getProxy());
+	      }
+	    else if (this.remotelyAccessible)
 	      {
 		// the exportObject call will fail if the object has
 		// already been exported.  Unfortunately, there doesn't
@@ -4165,6 +4351,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		  }
 
 		((DBObject) newObj).exportFields();
+
+		result.setObject(newObj);
 	      }
 
 	    return result;
@@ -4273,15 +4461,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     ReturnVal result = new ReturnVal(true);
 
-    result.setObject(newObj);
+    result.setInvid(newObj.getInvid());
+    result.setLocalObject(newObj);
 
-    if (this.remotelyAccessible)
+    if (genProxy)
       {
-	// the exportObject call will fail if the object has
-	// already been exported.  Unfortunately, there doesn't
-	// seem to be much way to tell this beforehand, so
-	// we won't bother to try.
-
+	result.setObject(newObj.getProxy());
+      }
+    else if (this.remotelyAccessible)
+      {
 	try
 	  {
 	    UnicastRemoteObject.exportObject(newObj);
@@ -4292,6 +4480,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 
 	((DBObject) newObj).exportFields();
+
+	result.setObject(newObj);
       }
 
     return result;
@@ -4315,11 +4505,34 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal clone_db_object(Invid invid)
+  public ReturnVal clone_db_object(Invid invid)
+  {
+    return this.clone_db_object(invid, useProxies);
+  }
+
+  /**
+   * <p>Clone a new object from object &lt;invid&gt;.  The ReturnVal returned
+   * will carry a db_object reference, which can be obtained by the
+   * client calling ReturnVal.getObject().  If the object could not
+   * be checked out for editing for some reason, the ReturnVal will
+   * carry an encoded error dialog for the client to display.</p>
+   *
+   * <p>This method must be called within a transactional context.</p>
+   *
+   * <p>Typically, only certain values will be cloned.  What values are
+   * retained is up to the specific code module provided for the
+   * invid type of object.</p>
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   *    
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public synchronized ReturnVal clone_db_object(Invid invid, boolean genProxy)
   {
     DBObject vObj;
     DBEditObject newObj;
-    ReturnVal retVal;
+    ReturnVal retVal, retVal2;
 
     /* -- */
 
@@ -4331,36 +4544,38 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Error, the client attempted to clone a null invid.");
       }
 
-    retVal = view_db_object(invid); // get a copy customized for per-field visibility
+    retVal = view_db_object(invid, false); // get a copy customized for per-field visibility
 
     if (!retVal.didSucceed())
       {
 	return retVal;
       }
     
-    vObj = (DBObject) retVal.getObject();
+    vObj = (DBObject) retVal.getLocalObject();
 
-    retVal = create_db_object(invid.getType());
+    retVal = create_db_object(invid.getType(), genProxy);
     
     if (!retVal.didSucceed())
       {
 	return retVal;
       }
-    
-    newObj = (DBEditObject) retVal.getObject();
 
-    retVal = newObj.cloneFromObject(session, vObj, false);
+    newObj = (DBEditObject) retVal.getLocalObject();
+
+    retVal2 = newObj.cloneFromObject(session, vObj, false);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (retVal2 != null && !retVal2.didSucceed())
       {
-	return retVal;
+	return retVal2;
       }
-    else if (retVal == null)
+    else if (retVal2 == null)
       {
-	retVal = new ReturnVal(true, true);
+	retVal2 = new ReturnVal(true, true);
       }
-    
-    retVal.setObject(newObj);
+
+    retVal2.setInvid(retVal.getInvid());
+    retVal2.setLocalObject(retVal.getLocalObject());
+    retVal2.setObject(retVal.getObject());
     
     return retVal;
   }
@@ -4420,9 +4635,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  vObj.getTypeName() + " " + vObj.getLabel());
       }
 
-    ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
+    ReturnVal result = edit_db_object(invid, false); // *sync* DBSession DBObject
 
-    eObj = (DBEditObject) result.getObject();
+    eObj = (DBEditObject) result.getLocalObject();
 
     if (eObj == null)
       {
@@ -4497,9 +4712,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  vObj.getTypeName() + " " + vObj.getLabel());
       }
 
-    ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
+    ReturnVal result = edit_db_object(invid, false); // *sync* DBSession DBObject
 
-    eObj = (DBEditObject) result.getObject();
+    eObj = (DBEditObject) result.getLocalObject();
 
     if (eObj == null)
       {

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2000/08/18 05:13:49 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2000/08/22 06:43:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -235,7 +235,7 @@ public class NumericDBField extends DBField implements num_field {
 	      }
 	  }
 
-	Object params[] = new Object[2];
+	Object params[] = new Object[3];
 
 	params[0] = getOwner().getInvid();
 	params[1] = new Short(getID());

@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2000/06/24 18:36:40 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2000/08/22 06:43:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.87 $ %D%
+ * @version $Revision: 1.88 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -521,6 +521,8 @@ final public class DBSession {
 
     retVal = new ReturnVal(true);
     retVal.setObject(e_object);
+    retVal.setLocalObject(e_object);
+    retVal.setInvid(e_object.getInvid());
     
     return retVal;
   }
