@@ -5,7 +5,7 @@
    This file is a management class for person objects in Ganymede.
    
    Created: 25 March 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -169,6 +169,13 @@ public class personCustom extends DBEditObject implements SchemaConstants {
     dbSession = session.getSession();
 
     accounts = object.getFieldValuesLocal(personSchema.ACCOUNTS);
+
+    // no user accounts?  no permission expansion.
+
+    if (accounts == null)
+      {
+	return null;
+      }
 
     for (int i = 0; i < accounts.size(); i++)
       {
