@@ -4857,7 +4857,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public boolean setValuePerformed(JValueObject o)
   {
-    if (o.getOperationType() == JValueObject.ERROR)
+    if (o instanceof JErrorValueObject)
       {
 	showErrorMessage("Client Error",
 			 (String)o.getValue(),

@@ -127,7 +127,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
   public boolean setValuePerformed(JValueObject e)
   {
-    if (e.getOperationType() == JValueObject.ADD)
+    if (e instanceof JAddValueObject)
       {
 	if (debug)
 	  {
@@ -137,7 +137,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	changed = true;
 	filter.addElement(e.getValue());
       }
-    else if (e.getOperationType() == JValueObject.ADDVECTOR)
+    else if (e instanceof JAddVectorValueObject)
       {
 	if (debug)
 	  {
@@ -153,7 +153,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	    filter.addElement(newValues.elementAt(i));
 	  }
       }
-    else if (e.getOperationType() == JValueObject.DELETE)
+    else if (e instanceof JDeleteValueObject)
       {
 	if (debug)
 	  {
@@ -164,7 +164,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
 	filter.removeElement(e.getValue());
       }
-    else if (e.getOperationType() == JValueObject.DELETEVECTOR)
+    else if (e instanceof JDeleteVectorValueObject)
       {
 	if (debug)
 	  {

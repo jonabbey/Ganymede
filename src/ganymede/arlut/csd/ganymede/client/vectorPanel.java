@@ -1275,7 +1275,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  {
 	    short index = (short)compVector.indexOf(ew.getComponent());
 	
-	    if (v.getOperationType() == JValueObject.ERROR)
+	    if (v instanceof JErrorValueObject)
 	      {
 		setStatus((String)v.getValue());
 		returnValue = false;

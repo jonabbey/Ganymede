@@ -397,7 +397,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     if (evt.getSource() == remove) 
       {
-	JValueObject v = new JValueObject(this,"remove");
+	JValueObject v = new JSetValueObject(this,"remove");
 	vp.setValuePerformed(v);
       }
     else if (evt.getSource() == expand)

@@ -361,14 +361,14 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	return false;
       }
 
-    if (o.getOperationType() == JValueObject.ERROR)
+    if (o instanceof JErrorValueObject)
       {
 	fp.getgclient().setStatus((String)o.getValue());
       }
-    else if (o.getOperationType() == JValueObject.PARAMETER) 
+    else if (o instanceof JParameterValueObject)
       {  // From the popup menu
 	
-	JValueObject v = o; // because this code was originally used with a v
+	JParameterValueObject v = (JParameterValueObject) o; // because this code was originally used with a v
 	String command = (String)v.getParameter();
 	  
 	if (command.equals("Edit object"))
@@ -430,7 +430,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	
 	try
 	  {
-	    if (o.getOperationType() == JValueObject.ADD)
+	    if (o instanceof JAddValueObject)
 	      {
 		retVal = field.addElement(invid);
 
@@ -441,7 +441,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
 		succeeded = (retVal == null) ? true : retVal.didSucceed();
 	      }
-	    else if (o.getOperationType() == JValueObject.ADDVECTOR)
+	    else if (o instanceof JAddVectorValueObject)
 	      {
 		retVal = field.addElements((Vector) o.getValue());
 
@@ -452,7 +452,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
 		succeeded = (retVal == null) ? true : retVal.didSucceed();
 	      }
-	    else if (o.getOperationType() == JValueObject.DELETE)
+	    else if (o instanceof JDeleteValueObject)
 	      {
 		retVal = field.deleteElement(invid);
 
@@ -463,7 +463,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
 		succeeded = (retVal == null) ? true : retVal.didSucceed();
 	      }
-	    else if (o.getOperationType() == JValueObject.DELETEVECTOR)
+	    else if (o instanceof JDeleteVectorValueObject)
 	      {
 		retVal = field.deleteElements((Vector) o.getValue());
 
