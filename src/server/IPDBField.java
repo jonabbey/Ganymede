@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -627,13 +627,18 @@ public class IPDBField extends DBField implements ip_field {
     return (Byte[]) values.elementAt(index);
   }
 
-  public synchronized String getValueString()
+  public String getValueString()
+  {
+    return getValueString(false);
+  }
+
+  public synchronized String getValueString(boolean local)
   {
     String result = "";
 
     /* -- */
 
-    if (!verifyReadPermission())
+    if (!local && !verifyReadPermission())
       {
 	throw new IllegalArgumentException("permission denied to read this field");
       }
