@@ -134,6 +134,11 @@ public class JnumberField extends JentryField {
    */
   private boolean isAllowed(char c)
   {
+    if (((int)c > getMaxValue()) || ((int)c > getMinValue()))
+      {
+	return false;
+      }
+
     if (allowedChars.indexOf(c) == -1)
       return false;
 
@@ -301,55 +306,6 @@ public class JnumberField extends JentryField {
   public int getMinValue()
   {
     return minSize;
-  }
-
-  /**
-   *
-   * We only want certain keystrokes to be registered by the stringfield.
-   *
-   * This method overrides the processKeyEvent() method in JComponent and
-   * gives us a way of intercepting characters that we don't want in our
-   * string field.
-   *
-   */
-
-  protected void processKeyEvent(KeyEvent e)
-  {
-    // always pass through useful editing keystrokes.. this seems to be
-    // necessary because backspace and delete apparently have defined
-    // Unicode representations, so they don't match CHAR_UNDEFINED below
-
-    if ((e.getKeyCode() == KeyEvent.VK_BACK_SPACE) ||
-	(e.getKeyCode() == KeyEvent.VK_DELETE) ||
-	(e.getKeyCode() == KeyEvent.VK_END) ||
-	(e.getKeyCode() == KeyEvent.VK_HOME))
-      {
-	super.processKeyEvent(e);
-	System.out.println("it's a special, processing it");
-	return;
-      }
-
-    // We check against KeyEvent.CHAR_UNDEFINED so that we pass
-    // through things like backspace, arrow keys, etc.
-
-    if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
-      {
-	super.processKeyEvent(e);
-	System.out.println("it's an unknown, processing it");
-	return;
-      }
-    else if (isAllowed(e.getKeyChar())) 
-      {
-	super.processKeyEvent(e);
-	System.out.println("This one is allowed, so I am going to do it.");
-	return;
-      }
-
-
-    System.out.println("Ignoring: " + e.getKeyChar());
-    
-    
-    // otherwise, we ignore it
   }
 
   /**
