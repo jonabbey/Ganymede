@@ -4,8 +4,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/01/22 18:03:58 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2002/10/05 05:38:25 $
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -200,12 +200,14 @@ public class JnumberField extends JentryField {
 
   public Integer getValue() throws NumberFormatException
   {
-    if (getText().equals(""))
+    String str = getText();
+
+    if (str == null || str.equals(""))
       {
 	return null;
       }
 
-    return new Integer(getText());
+    return new Integer(str);
   }
 
   /**
@@ -332,15 +334,24 @@ public class JnumberField extends JentryField {
    * overrides JentryField.sendCallback().
    *
    * This is called when the number field loses focus.
+   *
+   * sendCallback is called when focus is lost, or when we are otherwise
+   * triggered.
+   *
+   * @returns -1 on change rejected, 0 on no change required, 1 on change approved
    */
 
-  public void sendCallback()
+  public int sendCallback()
   {
+    boolean success = false;
+
+    /* -- */
+
     synchronized (this)
       {
 	if (processingCallback)
 	  {
-	    return;
+	    return -1;
 	  }
 	
 	processingCallback = true;
@@ -356,24 +367,12 @@ public class JnumberField extends JentryField {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    if (allowCallback)
-	      {
-		try
-		  {
-		    my_parent.setValuePerformed(new JValueObject(this, 0,
-								 JValueObject.ERROR,
-								 "Not a valid number: " + getText()));
-		  }
-		catch (java.rmi.RemoteException rx)
-		  {
-		    System.out.println("Could not send an error callback.");
-		  }
-	      }
+	    reportError(getText() + " is not a valid number.");
 
 	    // revert the text field
 
 	    setValue(oldvalue);
-	    return;
+	    return -1;
 	  }
 
 	if ((currentValue == null && oldvalue == null) ||
@@ -384,7 +383,7 @@ public class JnumberField extends JentryField {
 		System.out.println("The field was not changed.");
 	      }
 
-	    return;
+	    return 0;
 	  }
 
 	// check to see if it's in bounds, if we have bounds set.
@@ -397,24 +396,12 @@ public class JnumberField extends JentryField {
 	      {
 		// nope, revert.
 
-		if (allowCallback)
-		  {
-		    try
-		      {
-			my_parent.setValuePerformed(new JValueObject(this, 0,
-								     JValueObject.ERROR,
-								     "Number out of range."));
-		      }
-		    catch (java.rmi.RemoteException rx)
-		      {
-			System.out.println("Could not send an error callback.");
-		      }
-		  }
+		reportError(getText() + " must be between " + minSize + " and  " + maxSize + ".");
 
 		// revert
 
 		setValue(oldvalue);
-		return;
+		return -1;
 	      }
 	  }
 
@@ -429,7 +416,7 @@ public class JnumberField extends JentryField {
 		System.out.println("Sending callback");
 	      }
 
-	    boolean success = false;
+	    success = false;
 
 	    try
 	      {
@@ -445,6 +432,7 @@ public class JnumberField extends JentryField {
 		// revert
 
 		setValue(oldvalue);
+		return -1;
 	      }
 	    else
 	      {
@@ -453,6 +441,7 @@ public class JnumberField extends JentryField {
 		// it, so we can revert if we need to later.
 
 		oldvalue = currentValue;
+		return 1;
 	      }
 	  }
 	else
@@ -461,11 +450,32 @@ public class JnumberField extends JentryField {
 	    // value anyway.
 
 	    oldvalue = currentValue;
+	    return 1;
 	  }
       }
     finally
       {
 	processingCallback = false;
+      }
+  }
+
+  /**
+   * <p>This private helper method relays a descriptive error message to
+   * our callback interface.</p>
+   */
+
+  private void reportError(String errorString)
+  {
+    if (allowCallback)
+      {
+	try
+	  {
+	    my_parent.setValuePerformed(new JValueObject(this, errorString, JValueObject.ERROR));
+	  }
+	catch (java.rmi.RemoteException rx)
+	  {
+	    System.out.println("Could not send an error callback.");
+	  }
       }
   }
 }
