@@ -7,15 +7,16 @@
    
    Created: 3 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2001/07/05 22:25:52 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2001/10/31 00:00:48 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -68,7 +69,7 @@ import java.util.Vector;
 public class JFilterDialog extends JDialog implements ActionListener, JsetValueCallback{
 
   private final boolean debug = false;
-  JButton clear, done;
+  JButton cancel, done;
   Vector filter, available = null;
   gclient gc;
 
@@ -106,15 +107,15 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
     getContentPane().add("Center", ss);
 
-    clear = new JButton("Clear");
-    clear.addActionListener(this);
     done = new JButton("Ok");
     done.addActionListener(this);
+    cancel = new JButton("Cancel");
+    cancel.addActionListener(this);
     
     JPanel p = new JPanel(false);
     p.setBorder(gc.statusBorderRaised);
-    p.add(clear);
     p.add(done);
+    p.add(cancel);
     
     getContentPane().add("South", p);
 
@@ -177,11 +178,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == clear)
-      {
-	System.out.println("clear this!");
-      }
-    else if (e.getSource() == done)
+    if (e.getSource() == done)
       {
 	try
 	  {
@@ -190,6 +187,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
 	    if ((retVal == null) || (retVal.didSucceed()))
 	      {
+		gc.clearTree();
 		this.setVisible(false);
 	      }
 	    else
@@ -202,6 +200,10 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	  {
 	    throw new RuntimeException("Could not set filter: " + rx);
 	  }
+      }
+    else if (e.getSource() == cancel)
+      {
+	this.setVisible(false);
       }
   }
 }

@@ -9,8 +9,8 @@
    
    Created: 21 October 1996
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/11/10 05:04:59 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2001/10/31 00:00:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -151,7 +151,7 @@ public class Query implements java.io.Serializable {
    *
    */
 
-  boolean filtered;
+  boolean filtered = true;
 
   /**
    *

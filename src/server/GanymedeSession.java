@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.246 $
-   Last Mod Date: $Date: 2001/09/04 23:34:11 $
+   Version: $Revision: 1.247 $
+   Last Mod Date: $Date: 2001/10/31 00:00:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.246 $ $Date: 2001/09/04 23:34:11 $
+ * @version $Revision: 1.247 $ $Date: 2001/10/31 00:00:48 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -6729,12 +6729,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method returns true if the visibility filter vector allows
+   * <p>This method returns true if the visibility filter vector allows
    * visibility of the object in question.  The visibility vector
    * works by direct ownership identity (i.e., no recursing up), so
-   * it's a simple loop-di-loop.
-   *  
+   * it's a simple loop-di-loop.</p>
    */
 
   private boolean filterMatch(DBObject obj)
@@ -6750,7 +6748,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return false;
       }
 
-    if (visibilityFilterInvids == null)
+    if (visibilityFilterInvids == null || visibilityFilterInvids.size() == 0)
       {
 	return true;		// no visibility restriction, go for it
       }
