@@ -437,7 +437,7 @@ to sweep up the XML records for the queue, up to a fixed transaction
 number, for integration into directory services oriented around change
 requests rather than complete dump and reloads.
 
-24. [SERVER] Made DBEditObject.deleting private
+24. [SERVER] Made DBEditObject.deleting variable private
 
 I've made the deleting boolean in DBEditObject private rather than
 protected, so that use of it can be controlled better.  If your custom
@@ -463,12 +463,20 @@ the placeholder in the A account.
 This kind of fine grained control over the order of operations isn't
 possible when using the xmlclient, so I have tweaked the server's
 namespace management logic so that it will allow non-interactive
-sessions to have two namespace linkages 'in flight' at a time.  Giving
-name 'A' to account B will be allowed, even though it means that for a
-brief window, both account A and the old account B will be associated
-with the 'A' name.  If the name 'A' is not unlinked from the old
-account A by the time the xmlclient's transaction commits, however, an
-exception will be reported and the transaction will be canceled.
+sessions to have an arbitrary number of namespace linkages 'in flight'
+at a time.  Giving name 'A' to account B will be allowed, even though
+it means that for a brief window, both account A and the old account B
+will be associated with the 'A' name.  If the name 'A' is not unlinked
+from the old account A by the time the xmlclient's transaction
+commits, however, an exception will be reported and the transaction
+will be canceled.
+
+This logic is even capable of resolving object renaming cycles, such
+as would occur in an XML file that required
+
+  System A to be renamed as System B
+  System B to be renamed as System C
+  System C to be renamed as System A
 
 26. [SERVER, XML] Rectified label handling for objects in XML
 
@@ -607,7 +615,7 @@ Ganymede server startup marginally faster, but any modern system that
 provides high entropy random numbers through a /dev/random device
 shouldn't see any delay to speak of anyway, and the Ganymede server is
 much, much, much more secure with both SSL and randomIDs turned on
-than it is with one or the other of them turned on.
+than it is with just one or the other of them turned on.
 
 31. [XMLCLIENT] Added sync argument to allow for constrained dumps
 
@@ -647,6 +655,70 @@ xmlclient -dumpschema output, that should just be an XLST script away.
 Getting rid of that old code helps reduce the maintenance burden on
 Ganymede, as I don't have to change schema printing logic in three
 places anymore.
+
+33. [SERVER, XML] Miscellaneous fixes to XML input processing
+
+The Ganymede server's XML input processing is now far more robust in
+terms of dealing with invid label resolution, regardless of the order
+in which objects are presented in the XML input, and especially in the
+case where objects are renamed as the XML file is processed.
+
+The status report at the end of an xmlclient data batch submission has
+been fixed.
+
+Fixed the bug that led to sshatext being ignored on XML input.
+
+Fixed the bug that caused leading or trailing white space to be
+ignored in scalar string elements.
+
+34. [SERVER, CLIENT]  The client now catches and displays exceptions reliably
+
+The Ganymede client now catches and displays exception conditions to
+the user when they happen, rather than just dumping them out the back
+door to STDERR.  When an unhandled exception occurs, the Ganymede
+client will display a dialog showing the exception.  The dialog
+includes a button to allow the user to report the exception to the
+Ganymede server for logging.
+
+35. [SERVER] Improved various error messages from Invid fields
+
+Lots of clean ups to make the error messages that occur while linking
+and unlinking objects more readable.
+
+36. [SERVER, CLIENT] The server reports bad regular expression queries to the client
+
+The server will now send a dialog to the client explaining about a
+malformed regular expression query, rather than silently failing to
+return any data.
+
+37. [SERVER] Honor DBEditObject.canClone()
+
+The canClone() method in DBEditObject wasn't being checked by
+GanymedeSession, which meant that users could clone objects that the
+schema kit author intended not to be cloneable.
+
+This bug was reported by Fredrik.A.Bergman@ericsson.com.
+
+38. [SERVER] Fixed non-namespace constrained IPDBField fields.
+
+IP fields that are not namespace constrained no longer throw a rod
+when you try to change them.
+
+This bug was reported by Fredrik.A.Bergman@ericsson.com.
+
+39. [SERVER] Properly handle regexp description in XML input
+
+Made sure to read/set the regular expression description attribute
+when processing xml input.
+                                                                                                                                                             
+This bug was reported by Fredrik.A.Bergman@ericsson.com.
+
+40. [SERVER] Properly clear qr cache in InvidDBField
+
+Made sure to clear the qr cache in a few more places so as to not
+allow lingering choice lists to be retained.
+
+This bug was reported by Fredrik.A.Bergman@ericsson.com.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
