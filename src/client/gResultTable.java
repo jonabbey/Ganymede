@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,11 +33,29 @@ import com.sun.java.swing.*;
 
 public class gResultTable extends JInternalFrame implements rowSelectCallback {
 
-  public gResultTable(Session session, Vector results) throws RemoteException
+  windowPanel parent;
+  PopupMenu popMenu;
+  MenuItem viewMI;
+  MenuItem editMI;
+  Session session;
+
+  /* -- */
+
+  public gResultTable(windowPanel parent, Session session, Vector results) throws RemoteException
   {
     super();			// JInternalFrame init
 
+    this.parent = parent;
+    this.session = session;
+
     // --
+
+    popMenu = new PopupMenu();
+    viewMI = new MenuItem("View Entry");
+    editMI = new MenuItem("Edit Entry");
+
+    popMenu.add(viewMI);
+    popMenu.add(editMI);
 
     Result result;
     Enumeration enum;
@@ -139,7 +157,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback {
 	colWidths[i] = 50;
       }
     
-    rowTable table = new rowTable(colWidths, headers, this, null);
+    rowTable table = new rowTable(colWidths, headers, this, popMenu);
 
     add("Center", table);
 
@@ -180,5 +198,26 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback {
 
   public void rowMenuPerformed(Object key, java.awt.event.ActionEvent event)
   {
+    if (event.getSource() == viewMI)
+      {
+	parent.addWindow((db_object)key);
+      }
+    else if (event.getSource() == editMI)
+      {
+	db_object eObj = null;
+
+	try
+	  {
+	    eObj = session.edit_db_object(((db_object) key).getInvid());
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+	
+	if (eObj != null)
+	  {
+	    parent.addWindow(eObj,true);
+	  }
+      }
   }
 }
