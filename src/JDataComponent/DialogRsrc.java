@@ -44,7 +44,7 @@ public class DialogRsrc {
    */
   public DialogRsrc(Frame frame, String Title, String Text)
   {
-    this(frame, Title, Text, "Ok", "Cancel", null);
+    this(frame, Title, Text, "Ok", "Cancel", (Image) null);
   }
 
   /** 
@@ -58,7 +58,7 @@ public class DialogRsrc {
    */
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel)
   {
-    this(frame, Title, Text, OK, Cancel, null);
+    this(frame, Title, Text, OK, Cancel, (Image) null);
   }
 
   /** 
@@ -83,7 +83,37 @@ public class DialogRsrc {
       
     objects = new Vector();
   }
-  
+
+  /** 
+   * Constructor with special "Ok" and "Cancel" strings
+   *
+   * @param frame Parent frame.
+   * @param Title String for title of Dialog box.
+   * @param Text String for message at top of dialog box.
+   * @param OK String for Ok button 
+   * @param Cancel String for Cancel button
+   * @param image Image to display next to text
+   */
+  public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, String imageName)
+  {
+    this.frame = frame;
+    
+    this.title = Title;
+    this.text = Text;
+    this.OKText = OK;
+    this.CancelText = Cancel;
+
+    if (imageName != null)
+      {
+	this.image = jdj.PackageResources.getImageResource(frame, imageName, frame.getClass());
+      }
+    else
+      {
+	this.image = null;
+      }
+
+    objects = new Vector();
+  }
 
   /**
    *
@@ -91,6 +121,7 @@ public class DialogRsrc {
    *
    * @param string String to use as the label
    */
+
   public void addString(String string)
   {
     objects.addElement(new stringThing(string));
