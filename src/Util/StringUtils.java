@@ -4,8 +4,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2001/04/05 04:08:53 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2001/04/05 04:23:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -101,6 +101,8 @@ public class StringUtils {
     int index = 0;
     int count = 0;
 
+    /* -- */
+
     while (true)
       {
 	index = inputString.indexOf(patternString, index);
@@ -135,10 +137,11 @@ public class StringUtils {
   {
     int index;
     int count = StringUtils.count(inputString, splitString);
-
+    int upperBound = inputString.length();
     String results[] = new String[count+1];
 
-    int upperBound = inputString.length();
+    /* -- */
+
     index = 0;
     count = 0;
 
