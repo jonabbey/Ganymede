@@ -959,11 +959,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-    // Java 5.0 seems to need these, for some reason
-
-    in.repaint();
-    out.repaint();
-
     updateTitles();
     invalidate();
     parent.validate();
@@ -976,7 +971,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   private void removeItems()
   {
     Vector handles;
-    listHandle handle;
     boolean ok;
 
     /* -- */
@@ -1042,7 +1036,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		throw new RuntimeException("Could not setValuePerformed: " + rx);
 	      }
-	    
 	  }
 
 	if (ok)
@@ -1057,11 +1050,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
       }
-
-    // Java 5.0 seems to need these, for some reason
-
-    in.repaint();
-    out.repaint();
 
     updateTitles();
     invalidate();

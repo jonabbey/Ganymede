@@ -294,6 +294,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     finally
       {
 	setModel(model);
+	repaint();
       }
   }
 
@@ -440,6 +441,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	ensureIndexIsVisible(topIndex);
       }
+
+    repaint();
   }
 
   /**
@@ -461,6 +464,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
 
     model.insertElementAt(h, targetRow);
+
+    repaint();
   }
 
   /**
@@ -511,6 +516,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	      }
 	  }
       }
+
+    repaint();
   }
 
   /**

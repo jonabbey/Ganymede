@@ -865,8 +865,6 @@ public class JIPField extends JentryField {
     StringBuffer result = new StringBuffer();
     int[] stanzas;
     String[] stanzaStrings;
-    char[] charAry;
-    StringBuffer temp;
     int i, j;
     int loCompress, hiCompress;
     Short absoctets[];
