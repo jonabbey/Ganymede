@@ -10,9 +10,10 @@
    treated as word chars.
    
    Created: 6 August 1998
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/20 17:50:08 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/01/20 17:50:30 $
    Release: $Name:  $
+
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
