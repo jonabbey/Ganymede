@@ -7,8 +7,8 @@
    
    Created: 2 December 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/12/10 11:55:09 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/12/10 22:53:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -200,7 +200,7 @@ public class FileOps {
    * process will be closed before returning.</P>
    */
 
-  public static int runProcess(String commandLine) throws IOException, InterruptedException
+  public static int runProcess(String commandLine) throws IOException
   {
     Process p = java.lang.Runtime.getRuntime().exec(commandLine);
 
@@ -209,6 +209,10 @@ public class FileOps {
 	p.waitFor();
 	
 	return p.exitValue();
+      }
+    catch (InterruptedException ex)
+      {
+	throw new IOException("Were were interrupted while waiting for the process to complete: " + ex.getMessage());
       }
     finally
       {
