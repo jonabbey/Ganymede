@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2000/08/05 17:23:03 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2000/12/03 05:16:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,6 +90,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private Invid normalCategory = null;
 
   /* -- */
+
+  public GASHBuilderTask(Invid _taskObjInvid)
+  {
+    // set the taskDefObjInvid in GanymedeBuilderTask so
+    // we can look up option strings
+
+    taskDefObjInvid = _taskObjInvid;
+  }
 
   /**
    *
