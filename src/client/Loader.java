@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -396,14 +396,16 @@ public class Loader extends Thread {
       {
 	System.out.println("Finished loading base list");
       }
-
-    if (baseList == null)
+    if (debug)
       {
-	System.out.println("****** BaseList is null after loading!!!! *****");
-      }
-    else
-      {
-	System.out.println("*** BaseList is not null.");
+	if (baseList == null)
+	  {
+	    System.out.println("****** BaseList is null after loading!!!! *****");
+	  }
+	else
+	  {
+	    System.out.println("*** BaseList is not null.");
+	  }
       }
 
     baseListLoaded = true;
