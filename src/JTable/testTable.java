@@ -20,7 +20,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 5 June 1996
-  Version: $Revision: 1.9 $ %D%
+  Version: $Revision: 1.10 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -140,7 +140,7 @@ public class testTable extends Applet implements arlut.csd.JTable.rowSelectCallb
 	System.err.println("testTable constructor: constructing gridTable");
       }
 
-    table = new arlut.csd.JTable.rowTable(colWidths, headers, this, null);
+    table = new arlut.csd.JTable.rowTable(colWidths, headers, this, null, true);
 
     if (debug)
       {

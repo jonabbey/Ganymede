@@ -22,7 +22,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.31 $ $Date: 2000/05/30 06:27:30 $
+  Version: $Revision: 1.32 $ $Date: 2001/05/30 22:55:05 $
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -49,7 +49,7 @@ import javax.swing.*;
  *
  * @see arlut.csd.JTable.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.31 $ $Date: 2000/05/30 06:27:30 $
+ * @version $Revision: 1.32 $ $Date: 2001/05/30 22:55:05 $
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -96,6 +96,8 @@ public class rowTable extends baseTable implements ActionListener {
    * 			(only applies if vertFill and horizLines are true)
    * @param callback    reference to an object that implements the rowSelectCallback interface
    * @param menu  reference to a popup menu to be associated with rows in this table
+   * @parma allowDeleteColumn if true, a 'Delete This Column' menu item will be added
+   * to the per-column popup menu
    *
    */
 
@@ -111,7 +113,8 @@ public class rowTable extends baseTable implements ActionListener {
 		  boolean horizLines, boolean vertLines,
 		  boolean vertFill, boolean hVertFill,
 		  rowSelectCallback callback,
-		  JPopupMenu menu)
+		  JPopupMenu menu,
+		  boolean allowDeleteColumn)
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
 	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
@@ -141,7 +144,11 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (colWidths.length > 1)
       {
-	rowMenu.add(DeleteColMI);
+	if (allowDeleteColumn)
+	  {
+	    rowMenu.add(DeleteColMI);
+	  }
+
 	rowMenu.add(OptimizeMI);
       }
 
@@ -150,7 +157,11 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (colWidths.length > 1)
       {
-	DeleteColMI.addActionListener(this);
+	if (allowDeleteColumn)
+	  {
+	    DeleteColMI.addActionListener(this);
+	  }
+
 	OptimizeMI.addActionListener(this);
       }
     
@@ -178,7 +189,7 @@ public class rowTable extends baseTable implements ActionListener {
   public rowTable(int[] colWidths, String[] headers, 
 		  rowSelectCallback callback, 
 		  boolean horizLines,
-		  JPopupMenu menu)
+		  JPopupMenu menu, boolean allowDeleteColumn)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 		       Color.white, Color.blue, tableAttr.JUST_CENTER),
@@ -191,7 +202,7 @@ public class rowTable extends baseTable implements ActionListener {
 	 Color.black,
 	 Color.black,
 	 headers,
-	 horizLines, true, true, false, callback, menu);
+	 horizLines, true, true, false, callback, menu, allowDeleteColumn);
 
     // we couldn't pass this to the baseTableConstructors
     // above, so we set it directly here, then force metrics
@@ -217,7 +228,7 @@ public class rowTable extends baseTable implements ActionListener {
 
   public rowTable(int[] colWidths, String[] headers, 
 		  rowSelectCallback callback, 
-		  JPopupMenu menu)
+		  JPopupMenu menu, boolean allowDeleteColumn)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 		       Color.white, Color.blue, tableAttr.JUST_CENTER),
@@ -230,7 +241,7 @@ public class rowTable extends baseTable implements ActionListener {
 	 Color.black,
 	 Color.black,
 	 headers,
-	 true, true, true, false, callback, menu);
+	 true, true, true, false, callback, menu, allowDeleteColumn);
 
     // we couldn't pass this to the baseTableConstructors
     // above, so we set it directly here, then force metrics
