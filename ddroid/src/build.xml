@@ -1,5 +1,5 @@
 <!--
-     Directory Droid Ant build file
+    Ganymede Ant build file
 
     Last Revision Changed: $Rev$
     Last Changed By: $Author$
@@ -94,7 +94,7 @@ jars          - Produces the jar files for the server, client, and admin console
 javadoc       - Builds the java doc tree
 dist          - Does build, jars, and javadoc, without cleaning
 
-validate      - Cross-checks all Directory Droid .java source files against
+validate      - Cross-checks all Ganymede .java source files against
                 default localizations.  This depends on the use of a specific
                 pattern for doing string localizations.
 
