@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.138 $
-   Last Mod Date: $Date: 1999/03/12 20:47:17 $
+   Version: $Revision: 1.139 $
+   Last Mod Date: $Date: 1999/03/17 00:22:15 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -4948,7 +4948,7 @@ class PersonaListener implements ActionListener {
 	  {
 	    throw new RuntimeException("Could not set persona to " + newPersona + ": " + rx);
 	  }
-	gc.getPersonaDialog().setVisible(false);
+	gc.getPersonaDialog().setHidden(true);
       }
     
     else
