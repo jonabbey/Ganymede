@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -175,7 +175,7 @@ public class NumericDBField extends DBField implements num_field {
       }
     else
       {
-	value = in.readInt();
+	value = new Integer(in.readInt());
       }
 
     defined = true;
@@ -216,10 +216,7 @@ public class NumericDBField extends DBField implements num_field {
   /**
    *
    * Returns true if this field has max/min
-   * limitations.  This is not set in the
-   * DBStore schema, so you'll need to subclass
-   * NumericDBField and override this method to
-   * implement a restriction.
+   * limitations.
    *
    * @see arlut.csd.ganymede.num_field
    *
@@ -244,9 +241,7 @@ public class NumericDBField extends DBField implements num_field {
   /**
    *
    * Returns the minimum acceptable value for this field if this field
-   * has max/min limitations.  This is not set in the DBStore schema,
-   * so you'll need to subclass NumericDBField and override this
-   * method to implement a restriction.
+   * has max/min limitations.  
    *
    * @see arlut.csd.ganymede.num_field
    * 
@@ -271,9 +266,7 @@ public class NumericDBField extends DBField implements num_field {
   /**
    *
    * Returns the maximum acceptable value for this field if this field
-   * has max/min limitations.  This is not set in the DBStore schema,
-   * so you'll need to subclass NumericDBField and override this
-   * method to implement a restriction.
+   * has max/min limitations.
    *
    * @see arlut.csd.ganymede.num_field
    * 
@@ -345,7 +338,7 @@ public class NumericDBField extends DBField implements num_field {
 
     // have our parent make the final ok on the value
 
-    return eObj.verifyNewValue(this, s);
+    return eObj.verifyNewValue(this, o);
   }
 
 }
