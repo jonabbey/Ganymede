@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,13 @@ import java.util.*;
  */
 
 class DBNameSpace {
+
+  static boolean debug = true;
+
+  public static void setDebug(boolean val)
+  {
+    debug = val;
+  }
 
   String    name;		// the name of this namespace
   Hashtable uniqueHash;		// index of values used in the current namespace
@@ -144,21 +151,16 @@ class DBNameSpace {
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.owner == null)
+	if (handle.owner != editSet)
 	  {
-	    return true;
+	    return false;	// we don't owns it
 	  }
 	else
 	  {
-	    if (handle.owner != editSet)
-	      {
-		return false;	// somebody else owns it
-	      }
-
 	    return !handle.inuse;
 	  }
       }
-
+    
     return true;
   }
 
@@ -189,56 +191,63 @@ class DBNameSpace {
     
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("DBNameSpace.mark(): enter");
+      }
+
     if (uniqueHash.containsKey(value))
       {
+	if (debug)
+	  {
+	    System.err.println("DBNameSpace.mark(): uniqueHash contains key " + value);
+	  }
+	
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.owner == null)
+	if (handle.owner != editSet)
 	  {
-	    // no one has claimed this, give it to the editSet
 
-	    // note that since this handle has no owner,
-	    // we know that the original state should be true,
-	    // else it wouldn't have been in the hash to begin
-	    // with
+	    // either someone else is manipulating this value, or an object
+	    // stored in the database holds this value.  We would need to
+	    // pull that object out of the database and unmark the value on
+	    // that object before we could mark that value someplace else.
 
-	    handle.owner = editSet;
-	    handle.original = true;
-	    handle.inuse = true;
-	    handle.shadowField = field;
+	    if (debug)
+	      {
+		System.err.println("DBNameSpace.mark(): we don't own handle");
+	      }
 
-	    remember(editSet, value);
+	    return false;	// somebody else owns it
 	  }
 	else
 	  {
-	    if (handle.owner != editSet)
+	    // we own it
+
+	    // if this namespace value is still being used in the
+	    // namespace, we can't mark this value.  they need to
+	    // unmark the value in one place before they can mark it
+	    // in another.
+
+	    if (handle.inuse)
 	      {
-		return false;	// somebody else owns it
+		return false;
 	      }
-	    else
-	      {
-		// we own it
 
-		// if this namespace value is still being used in
-		// the namespace, give it up.  they need to 
-		// unmark the value in one place before they
-		// can mark it in another
+	    handle.inuse = true;
+	    handle.shadowField = field;
 
-		if (handle.inuse)
-		  {
-		    return false;
-		  }
-
-		handle.inuse = true;
-		handle.shadowField = field;
-
-		// we don't have to make a note in reserved since
-		// we already have this value noted in the editset?
-	      }
+	    // we don't have to make a note in reserved since
+	    // we already have this value noted in the editset?
 	  }
       }
     else
       {
+	if (debug)
+	  {
+	    System.err.println("DBNameSpace.mark(): value not in uniqueHash");
+	  }
+
 	// we're creating a new value.. previous value
 	// is false
 
@@ -248,6 +257,11 @@ class DBNameSpace {
 	uniqueHash.put(value, handle);
 
 	remember(editSet, value);
+      }
+
+    if (debug)
+      {
+	System.err.println("DBNameSpace.mark(): mark obtained succesfully");
       }
 
     return true;
@@ -341,7 +355,15 @@ class DBNameSpace {
 
 	if (handle.owner == null)
 	  {
-	    // no one has claimed this, give it to the editSet
+	    // no one has claimed this, give it to the editSet.
+	    // Note that we are assuming here that the editset
+	    // has properly checked out the object containing
+	    // this value.  The namespace code does not check
+	    // to make sure that the editset really has the
+	    // right to acquire this value.  The DBEditObject
+	    // code should be set up to always do the right
+	    // thing.  Probably the mark methods in DBNameSpace
+	    // should not be public.
 
 	    // note that since this handle has no owner,
 	    // we know that the original state should be true,
