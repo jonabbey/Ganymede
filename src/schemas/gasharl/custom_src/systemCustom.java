@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2001/04/25 19:23:59 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2001/05/12 22:10:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -522,20 +522,21 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     // see if we have an attached system type which modifies our IP
     // search pattern
 
-    try
+    Invid systemTypeInvid = (Invid) getFieldValueLocal(systemSchema.SYSTEMTYPE);
+
+    if (systemTypeInvid != null)
       {
-	Invid systemTypeInvid = (Invid) getFieldValueLocal(systemSchema.SYSTEMTYPE);
 	DBObject systemTypeInfo = getSession().viewDBObject(systemTypeInvid);
 	
 	if (systemTypeInfo != null)
 	  {
 	    Boolean rangeRequired = (Boolean) systemTypeInfo.getFieldValueLocal(systemTypeSchema.USERANGE);
-
+	    
 	    if (rangeRequired != null && rangeRequired.booleanValue())
 	      {
 		startSearchRange = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STARTIP)).intValue();
 		stopSearchRange = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STOPIP)).intValue();
-
+		
 		if (debug)
 		  {
 		    System.err.println("systemCustom.initializeNets(): found start and stop for this type: " + 
@@ -543,10 +544,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		  }
 	      }
 	  }
-      }
-    catch (NullPointerException ex)
-      {
-	System.err.println("systemCustom.initializeNets(): null pointer exception trying to get system type info");
       }
   }
 
