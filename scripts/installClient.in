@@ -305,34 +305,6 @@ close OUTPUT;
 
 chmod 0755, "$installdir/bin/ganymedeAdmin";
 
-# Copy and process the rpcpass script into place
-
-print "\nCustomizing rpcpass script\n";
-
-%runconvert = ("JAVA" => $vars{"JVM"}."/java",
-	       "PROPERTIES" => "$installdir/client.properties",
-	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
-
-open INPUT, "scripts/rpcpass.template" or die "Couldn't open rpcpass template!";
-open OUTPUT, ">$installdir/bin/rpcpass" or die "Couldn't write rpcpass";
-
-while (<INPUT>) {
-
-    if (!/^([A-Z]*)=/) {
-	print OUTPUT $_;
-    } elsif (defined $runconvert{$1}) {
-	print OUTPUT "$1=$runconvert{$1}\n";
-    } else {
-	print "Error.. unrecognized template entry $1 - copying template value\n";
-	print OUTPUT $_;
-    }
-}
-
-close INPUT;
-close OUTPUT;
-
-chmod 0755, "$installdir/bin/rpcpass";
-
 # Copy and process the changePassword script into place
 
 print "\nCustomizing changePassword script\n";
