@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -368,7 +368,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
       {
 	invid = (Invid) inv.getElement(i);
 
-	personaObject = (DBObject) view_db_object(invid);
+	personaObject = (DBObject) Ganymede.internalSession.view_db_object(invid);
 
 	if (personaObject.getLabel().equals(persona))
 	  {
@@ -429,7 +429,11 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	  {
 	    DBObjectBase base = (DBObjectBase) enum.nextElement();
 
-	    if (getPerm(base.getTypeID()).isVisible())
+	    PermEntry perm;
+
+	    perm = getPerm(base.getTypeID());
+
+	    if (perm != null && perm.isVisible())
 	      {
 		result.addElement(base);
 	      }
@@ -543,11 +547,15 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   {
     DumpResult result;
     DBObjectBase base = null;
+    DBObjectBase containingBase = null;
     Vector baseLock = new Vector();
     Enumeration enum;
     Integer key;
     DBObject obj;
     DBReadLock rLock;
+
+    DBField dbf;
+    boolean embedded;
 
     /* -- */
 
@@ -569,10 +577,44 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	base = Ganymede.db.getObjectBase(query.objectName);
       }
 
+    if (query.returnType != -1)
+      {
+	containingBase = Ganymede.db.getObjectBase(query.returnType);
+      }
+    else if (query.returnName != null)
+      {
+	containingBase = Ganymede.db.getObjectBase(query.returnName);
+      }
+
     if (base == null)
       {
 	setLastError("No such base");
 	return null;
+      }
+
+    if (containingBase == null)
+      {
+	setLastError("No such return type");
+	return null;
+      }
+
+    embedded = base.isEmbedded();
+
+    Ganymede.debug("Processing dump query");
+    Ganymede.debug("Searching for matching objects of type " + base.getName());
+    
+    if (embedded)
+      {
+	Ganymede.debug("Searching for results of type " + containingBase.getName());
+      }
+
+    if (query.permitList == null)
+      {
+	Ganymede.debug("Returning default fields");
+      }
+    else
+      {
+	Ganymede.debug("Returning custom fields");
       }
 
     baseLock.addElement(base);
@@ -591,13 +633,15 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     Ganymede.debug("Query: " + username + " : got read lock");
 
+    // Figure out which fields we want to return
+
     Vector fieldDefs = new Vector();
     DBObjectBaseField field;
     PermEntry perm;
-    
-    for (int i = 0; i < base.sortedFields.size(); i++)
+
+    for (int i = 0; i < containingBase.sortedFields.size(); i++)
       {
-	field = (DBObjectBaseField) base.sortedFields.elementAt(i);
+	field = (DBObjectBaseField) containingBase.sortedFields.elementAt(i);
 	
 	if (query.permitList == null)
 	  {
@@ -637,6 +681,9 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	  }
       }
 
+    // Now iterate over the objects in the base we're searching on,
+    // looking for matches
+
     result = new DumpResult(fieldDefs);
 
     enum = base.objectHash.keys();
@@ -650,6 +697,31 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	if (DBQueryHandler.matches(query, obj))
 	  {
+	    if (embedded)
+	      {
+		while ((obj != null) && 
+		       obj.isEmbedded() && 
+		       (obj.getTypeID() != containingBase.getTypeID()))
+		  {
+		    dbf = (DBField) obj.getField(SchemaConstants.ContainerField);
+		    obj = (DBObject) view_db_object((Invid) dbf.getValue());
+		  }
+
+		if (obj.getTypeID() != containingBase.getTypeID())
+		  {
+		    // wrong container type
+
+		    Ganymede.debug("Error, couldn't find parent of proper type");
+		    continue;	// try next match
+		  }
+
+		if (obj == null)
+		  {
+		    Ganymede.debug("Error, couldn't find a containing object for an embedded query");
+		    continue;	// try next match
+		  }
+	      }
+
 	    if (supergashMode)
 	      {
 		result.addRow(obj);
@@ -699,12 +771,18 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   {
     QueryResult result = new QueryResult();
     DBObjectBase base = null;
+    DBObjectBase containingBase = null;
     Vector baseLock = new Vector();
     Enumeration enum;
     Integer key;
     DBObject obj;
     PermEntry perm;
     DBReadLock rLock;
+
+    // for processing embedded containment
+
+    DBField dbf;
+    boolean embedded;
 
     /* -- */
 
@@ -726,11 +804,30 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	base = Ganymede.db.getObjectBase(query.objectName);
       }
 
+    if (query.returnType != -1)
+      {
+	containingBase = Ganymede.db.getObjectBase(query.returnType);
+      }
+    else if (query.returnName != null)
+      {
+	containingBase = Ganymede.db.getObjectBase(query.returnName);
+      }
+
     if (base == null)
       {
 	setLastError("No such base");
 	return null;
       }
+
+    if (containingBase == null)
+      {
+	setLastError("No such return type");
+	return null;
+      }
+
+    // is this base corresponding to an embedded object?
+
+    embedded = base.isEmbedded();
 
     baseLock.addElement(base);
 
@@ -759,6 +856,23 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	if (DBQueryHandler.matches(query, obj))
 	  {
+	    if (embedded)
+	      {
+		while ((obj != null) && 
+		       obj.isEmbedded() && 
+		       (obj.getTypeID() != containingBase.getTypeID()))
+		  {
+		    dbf = (DBField) obj.getField(SchemaConstants.ContainerField);
+		    obj = (DBObject) view_db_object((Invid) dbf.getValue());
+		  }
+
+		if (obj == null)
+		  {
+		    Ganymede.debug("Error, couldn't find a containing object for an embedded query");
+		    continue;	// try next match
+		  }
+	      }
+
 	    if (debug)
 	      {
 	        Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
@@ -937,6 +1051,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   public synchronized db_object view_db_object(Invid invid)
   {
     DBObject obj;
+    PermEntry perm;
 
     /* -- */
 
@@ -1001,6 +1116,26 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   }
 
   /**
+   *
+   * Clone a new object from object <invid>. If the return value is null,
+   * getLastError() should be called for a description of the problem. 
+   *
+   * Typically, only certain values will be cloned.  What values are
+   * retained is up to the specific code module provided for the
+   * invid type of object.
+   *
+   * @return the newly created object for editing
+   *
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public synchronized db_object clone_db_object(Invid invid)
+  {
+    setLastError("clone_db_object is not yet implemented.");
+    return null;
+  }
+
+  /**
    * Inactivate an object in the database
    *
    * Objects inactivated will typically be altered to reflect their inactive
@@ -1014,6 +1149,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   
   public synchronized boolean inactivate_db_object(Invid invid) 
   {
+    setLastError("inactivate_db_object is not yet implemented.");
     return false;
   }
 
@@ -1111,6 +1247,10 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   final PermEntry getPerm(DBObject object)
   {
+    PermEntry result;
+
+    /* -- */
+
     if (object == null)
       {
 	return null;
@@ -1127,13 +1267,32 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
     if (!personaMatch(object))
       {
 	// Ganymede.debug("getPerm for object " + object.getLabel() + " failed.. no persona match");
-	return defaultPerms.getPerm(object.getTypeID());
+
+	result = defaultPerms.getPerm(object.getTypeID());
+
+	if (result == null)
+	  {
+	    return PermEntry.noPerms;
+	  }
+	else
+	  {
+	    return result;
+	  }
       }
 
     // ok, we know our persona has ownership.. return the
     // permission entry for this object
 
-    return personaPerms.getPerm(object.getTypeID());
+    result = personaPerms.getPerm(object.getTypeID());
+
+    if (result == null)
+      {
+	return PermEntry.noPerms;
+      }
+    else
+      {
+	return result;
+      }
   }
 
   /**
@@ -1148,6 +1307,10 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   final PermEntry getPerm(short baseID)
   {
+    PermEntry result;
+
+    /* -- */
+
     if (supergashMode)
       {
 	return PermEntry.fullPerms;
@@ -1159,7 +1322,16 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
     // base type privileges apply generically to objects of the
     // given type
 
-    return personaPerms.getPerm(baseID);
+    result = personaPerms.getPerm(baseID);
+
+    if (result == null)
+      {
+	return PermEntry.noPerms;
+      }
+    else
+      {
+	return result;
+      }
   }
 
   /**
@@ -1198,7 +1370,14 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	  }
       }
 
-    return result;
+    if (result == null)
+      {
+	return PermEntry.noPerms;
+      }
+    else
+      {
+	return result;
+      }
   }
 
   /**
@@ -1408,5 +1587,4 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
     //    Ganymede.debug("No match");
     return false;
   }
-
 }
