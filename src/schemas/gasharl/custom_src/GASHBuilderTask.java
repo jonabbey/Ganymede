@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 2003/06/13 03:05:16 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 2003/06/17 02:54:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2112,13 +2112,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * <p>The userSync.txt file contains lines of the following format:</p>
    *
    * <PRE>
-   * username|cryptTextPassword|invid
+   * username|cryptTextPassword|invid|emailAddress|fullName
    * </PRE>
    *
    * <p>i.e.,</p>
    *
    * <PRE>
-   * broccol|AmgG.XVyOvJH2|3:627
+   * broccol|AmgG.XVyOvJH2|3:627|jonabbey@arlut.utexas.edu|Jonathan Abbey
    * </PRE>
    *
    * <p>Note that if the user is inactivated or the user's password is undefined,
@@ -2152,6 +2152,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	String username;
 	Invid invid;
 	String cryptText;
+	String signature;
+	String fullname;
 	
 	while (users.hasMoreElements())
 	  {
@@ -2159,6 +2161,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    
 	    username = user.getLabel();
 	    invid = user.getInvid();
+	    signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
+	    fullname = (String) user.getFieldValueLocal(userSchema.FULLNAME);
 	    cryptText = null;
 
 	    if (!user.isInactivated())
@@ -2183,7 +2187,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      }
 
 	    out.print("|");
-	    out.println(invid);
+	    out.print(invid);
+	    out.print("|");
+	    out.print(signature);
+	    out.print("@arlut.utexas.edu");
+	    out.print("|");
+	    out.println(fullname);
 	  }
       }
     finally
