@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.214 $
-   Last Mod Date: $Date: 2000/11/14 06:19:49 $
+   Version: $Revision: 1.215 $
+   Last Mod Date: $Date: 2000/11/24 04:43:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.214 $ $Date: 2000/11/14 06:19:49 $
+ * @version $Revision: 1.215 $ $Date: 2000/11/24 04:43:40 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4786,12 +4786,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public ReturnVal getSchemaXML(FileReceiver receiver, boolean logOffOnFailure)
   {
-    return this.sendXML(receiver, false, logOffOnFailure);
+    return this.sendXML(receiver, false, true, logOffOnFailure);
   }
 
   /**
    * <p>This method is called by the XML client to initiate a dump of
-   * the server's entire database in XML format.  The FileReceiver
+   * the entire data contents of the server.  The FileReceiver
    * referenced passed as a parameter to this method will be used to
    * send the data to the client.</p>
    *
@@ -4801,15 +4801,35 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * indicates the success of the file transmission.</p>
    *
    * <p>This method is only available to a supergash-privileged
-   * GanymedeSession.</p>
+   * GanymedeSession.</p> 
    */
 
   public ReturnVal getDataXML(FileReceiver receiver, boolean logOffOnFailure)
   {
-    return this.sendXML(receiver, true, logOffOnFailure);
+    return this.sendXML(receiver, true, false, logOffOnFailure);
   }
 
-  private ReturnVal sendXML(FileReceiver receiver, boolean sendData, boolean logOffOnFailure)
+  /**
+   * <p>This method is called by the XML client to initiate a dump of
+   * the server's entire database, schema and data, in XML format.
+   * The FileReceiver referenced passed as a parameter to this method
+   * will be used to send the data to the client.</p>
+   *
+   * <p>This method will not return until the complete server data
+   * dump in XML form has been sent to the receiver, or until
+   * an exception is caught from the receiver.  The returned ReturnVal
+   * indicates the success of the file transmission.</p>
+   *
+   * <p>This method is only available to a supergash-privileged
+   * GanymedeSession.</p> 
+   */
+
+  public ReturnVal getXMLDump(FileReceiver receiver, boolean logOffOnFailure)
+  {
+    return this.sendXML(receiver, true, true, logOffOnFailure);
+  }
+
+  private ReturnVal sendXML(FileReceiver receiver, boolean sendData, boolean sendSchema, boolean logOffOnFailure)
   {
     checklogin();
 
@@ -4843,6 +4863,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// background to our pipe
 
 	final boolean doSendData = sendData;
+	final boolean doSendSchema = sendSchema;
 	final boolean logoutOnFail = logOffOnFailure;
 	final GanymedeSession mySession = this;
 
@@ -4850,7 +4871,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  public void run() {
 	    try
 	      {
-		Ganymede.db.dumpXML(outpipe, doSendData);
+		Ganymede.db.dumpXML(outpipe, doSendData, doSendSchema);
 	      }
 	    catch (IOException ex)
 	      {

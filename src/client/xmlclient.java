@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2000/11/24 03:23:43 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2000/11/24 04:43:59 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * the file to the server for server-side integration into the Ganymede
  * database.</p>
  *
- * @version $Revision: 1.34 $ $Date: 2000/11/24 03:23:43 $ $Name:  $
+ * @version $Revision: 1.35 $ $Date: 2000/11/24 04:43:59 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -155,21 +155,9 @@ public final class xmlclient implements ClientListener {
 
     try
       {
-	if (xc.dumpSchema)
+	if (xc.dumpData || xc.dumpSchema)
 	  {
-	    if (xc.doXMLDump(true, false))
-	      {
-		System.exit(0);
-	      }
-	    else
-	      {
-		System.exit(1);
-	      }
-	  }
-
-	if (xc.dumpData)
-	  {
-	    if (xc.doXMLDump(true, true))
+	    if (xc.doXMLDump(true, xc.dumpData, xc.dumpSchema))
 	      {
 		System.exit(0);
 	      }
@@ -262,12 +250,21 @@ public final class xmlclient implements ClientListener {
     if (ParseArgs.switchExists("dumpschema", argv))
       {
 	dumpSchema = true;
+	dumpData = false;
 	return;
       }
 
     if (ParseArgs.switchExists("dumpdata", argv))
       {
 	dumpData = true;
+	dumpSchema = false;
+	return;
+      }
+    
+    if (ParseArgs.switchExists("dump", argv))
+      {
+	dumpData = true;
+	dumpSchema = true;
 	return;
       }
     
@@ -293,7 +290,7 @@ public final class xmlclient implements ClientListener {
       }
   }
 
-  public boolean doXMLDump(boolean commandLine, boolean sendData) throws RemoteException
+  public boolean doXMLDump(boolean commandLine, boolean sendData, boolean sendSchema) throws RemoteException
   {
     // now we should have the username and password if we are going to
     // get them, but do what we can here..
@@ -350,15 +347,19 @@ public final class xmlclient implements ClientListener {
 
     // now do what we came for
 
-    ReturnVal retVal;
+    ReturnVal retVal = null;
 
-    if (sendData)
+    if (sendData && !sendSchema)
       {
 	retVal = session.getDataXML(new FileReceiverBase(new xmlclientPrintReceiver()), true);
       }
-    else
+    else if (sendSchema && !sendData)
       {
 	retVal = session.getSchemaXML(new FileReceiverBase(new xmlclientPrintReceiver()), true);
+      }
+    else if (sendSchema && sendData)
+      {
+	retVal = session.getXMLDump(new FileReceiverBase(new xmlclientPrintReceiver()), true);
       }
 
     if (retVal != null && !retVal.didSucceed())

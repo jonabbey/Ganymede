@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 2000/11/14 07:19:38 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 2000/11/24 04:43:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -124,8 +124,6 @@ import arlut.csd.Util.ParseArgs;
 public class Ganymede {
 
   public static boolean debug = true;
-
-  public static boolean doXML = false;
 
   /**
    * <p>If true, Ganymede.createErrorDialog() will print the
@@ -278,14 +276,6 @@ public class Ganymede {
     String propFilename = null;
 
     /* -- */
-
-    // if they gave us the -doXML sign, make a note that we're going to need
-    // to try and dump the contents of ganymede.db to ganymede.db.xml
-
-    if (ParseArgs.switchExists("doXML", argv))
-      {
-	doXML = true;
-      }
 
     propFilename = ParseArgs.getArg("properties", argv);
 
@@ -478,22 +468,6 @@ public class Ganymede {
     catch (RemoteException ex)
       {
 	throw new RuntimeException("Couldn't establish internal session: " + ex);
-      }
-
-    if (doXML)
-      {
-	debug("Dumping schema to XML");
-
-	try
-	  {
-	    db.dumpXML(dbFilename + ".xml", true);
-	    debug("XML schema dumped.");
-	  }
-	catch (IOException ex)
-	  {
-	    ex.printStackTrace();
-	    debug("IOException dumping XML schema: " + ex.getMessage());
-	  }
       }
 
     // set up the log

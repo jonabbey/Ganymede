@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.136 $
-   Last Mod Date: $Date: 2000/11/23 02:35:51 $
+   Version: $Revision: 1.137 $
+   Last Mod Date: $Date: 2000/11/24 04:43:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.136 $ %D%
+ * @version $Revision: 1.137 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -792,11 +792,17 @@ public final class DBStore {
    * dumpDataObjects if false, only the schema definition will be
    * written
    *
+   * @param dumpDataObjects If true, the emitted file will include
+   * the objects in the Ganymede database.
+   *
+   * @param dumpSchema If true, the emitted file will include the
+   * schema definition
+   *
    * @see arlut.csd.ganymede.DBEditSet
    * @see arlut.csd.ganymede.DBJournal
    */
 
-  public void dumpXML(String filename, boolean dumpDataObjects) throws IOException
+  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema) throws IOException
   {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
@@ -806,7 +812,7 @@ public final class DBStore {
     outStream = new FileOutputStream(filename);
     bufStream = new BufferedOutputStream(outStream);
 
-    this.dumpXML(bufStream, dumpDataObjects);
+    this.dumpXML(bufStream, dumpDataObjects, dumpSchema);
   }
 
   /**
@@ -828,11 +834,17 @@ public final class DBStore {
    * dumpDataObjects if false, only the schema definition will be
    * written
    *
+   * @param dumpDataObjects If true, the emitted file will include
+   * the objects in the Ganymede database.
+   *
+   * @param dumpSchema If true, the emitted file will include the
+   * schema definition
+   *
    * @see arlut.csd.ganymede.DBEditSet
    * @see arlut.csd.ganymede.DBJournal
    */
 
-  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects) throws IOException
+  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema) throws IOException
   {
     XMLDumpContext xmlOut = null;
     
@@ -846,6 +858,11 @@ public final class DBStore {
     if (debug)
       {
 	System.err.println("DBStore: Dumping XML");
+      }
+
+    if (!dumpDataObjects && !dumpSchema)
+      {
+	throw new IllegalArgumentException("not dumping data objects, not dumping schema.. what should i do?");
       }
 
     lock = new DBDumpLock(this);
@@ -875,45 +892,60 @@ public final class DBStore {
 	  }
 
 	// start writing
-    
-	xmlOut.startElement("ganymede");
-	xmlOut.attribute("major", Byte.toString(major_xml_version));
-	xmlOut.attribute("minor", Byte.toString(minor_xml_version));
-    
-	xmlOut.indentOut();
-	xmlOut.startElementIndent("ganyschema");
 
-	xmlOut.indentOut();
-	xmlOut.startElementIndent("namespaces");
-
-	xmlOut.indentOut();
-
-	for (int i = 0; i < nameSpaces.size(); i++)
+	if (dumpDataObjects)
 	  {
-	    ns = (DBNameSpace) nameSpaces.elementAt(i);
-	    ns.emitXML(xmlOut);
+	    xmlOut.startElement("ganymede");
+	    xmlOut.attribute("major", Byte.toString(major_xml_version));
+	    xmlOut.attribute("minor", Byte.toString(minor_xml_version));
 	  }
 
-	xmlOut.indentIn();
-	xmlOut.endElementIndent("namespaces");
+	if (dumpSchema)
+	  {
+	    if (dumpDataObjects)
+	      {
+		xmlOut.indentOut();
+	      }
 
-	// write out our category tree
+	    xmlOut.startElementIndent("ganyschema");
+
+	    xmlOut.indentOut();
+	    xmlOut.startElementIndent("namespaces");
+	    
+	    xmlOut.indentOut();
+	    
+	    for (int i = 0; i < nameSpaces.size(); i++)
+	      {
+		ns = (DBNameSpace) nameSpaces.elementAt(i);
+		ns.emitXML(xmlOut);
+	      }
+	    
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("namespaces");
+	    
+	    // write out our category tree
+	    
+	    xmlOut.skipLine();
+	    
+	    xmlOut.startElementIndent("object_type_definitions");
     
-	xmlOut.skipLine();
+	    xmlOut.indentOut();
+	    rootCategory.emitXML(xmlOut);
+	    
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("object_type_definitions");
     
-	xmlOut.startElementIndent("object_type_definitions");
-    
-	xmlOut.indentOut();
-	rootCategory.emitXML(xmlOut);
-    
-	xmlOut.indentIn();
-	xmlOut.endElementIndent("object_type_definitions");
-    
-	xmlOut.indentIn();
-	xmlOut.endElementIndent("ganyschema");
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("ganyschema");
+	  }
     
 	if (dumpDataObjects)
 	  {
+	    if (!dumpSchema)
+	      {
+		xmlOut.indentOut();
+	      }
+
 	    xmlOut.startElementIndent("ganydata");
 	    xmlOut.indentOut();
 
@@ -940,10 +972,11 @@ public final class DBStore {
 
 	    xmlOut.indentIn();
 	    xmlOut.endElementIndent("ganydata");
+
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("ganymede");
 	  }
-	
-	xmlOut.indentIn();
-	xmlOut.endElementIndent("ganymede");
+
 	xmlOut.write("\n");
 	xmlOut.close();
 	xmlOut = null;
