@@ -15,51 +15,59 @@
       can be used to load data and schema information into the Ganymede server, and
       which may be used to dump data from the server to an XML file.</p>
 
-    <p>Usage:</p>
+    <p>There are four ways to run the <font color="#ff0000"><code><b>xmlclient</b></code></font>:</p>
 
-    <pre>
+    <p><ol>
+	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] &lt;xmlfile&gt;</li>
+	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dump</li>
+	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpschema</li>
+	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpdata</li>
+    </ol></p>
 
-    xmlclient file.xml
+    <p>Running xmlclient with a file name for a parameter will cause
+    that file to be loaded and transmitted to the server for action.
+    The <code>-dump</code> option will cause the xmlclient to emit to
+    STDOUT a complete dump of the server's contents in XML format.
+    The <code>-dumpschema</code> option dumps out just the schema
+    definition information, and the <code>-dumpdata</code> option
+    dumps out just the data objects.</p>
 
-        This will cause the xmlclient to connect to the Ganymede server
-        and to submit the file.xml for processing.
+    <p>The xmlclient assumes that it is being run by the supergash
+    account by default.  Only supergash-level admins are allowed to
+    use the three dump options.  XML files may have the username and
+    password encoded in the &lt;ganymede&gt; document element, or
+    these may be specified with the optional <code>username=</code>
+    and <code>password=</code> command line arguments.  If you don't
+    want to expose your password on the command line, The xmlclient
+    will prompt you for your password as needed.</p>
 
-    xmlclient -dumpschema
+    <p>Examples:</p>
 
-	This will cause the xmlclient to connect to the Ganymede server
-	and to dump a &lt;ganymede&gt; xml file to stdout that includes a
-	&lt;ganyschema&gt; section defining the current schema definition in
-	the Ganymede server.
+    <dl>
+      <dt><code>xmlclient -dumpschema</code></dt>
+      <dd><p>This example will prompt for the supergash password and dump the server's schema to the screen.</p></dd>
 
-    xmlclient -dumpdata
+      <dt><code>xmlclient username=jonhart:supergash -dump >
+      database.xml</code></dt> <dd><p>This example will prompt for
+      user jonhart's personal supergash password and dump the server's
+      complete contents to the database.xml file.</p></dd>
+      
+      <dt><code>xmlclient username=broccol password=notReal changes.xml</code></dt>
+      <dd><p>This example will load the changes.xml file and send its contents to the server.</p></dd>
 
-	This will cause the xmlclient to connect to the Ganymede server
-	and to generate a complete dump of the server's data objects
-	to stdout in xml format.
+      <dt><code>xmlclient schema.xml</code></dt>
+      <dd><p>This example will load the schema.xml file and send its contents to the server, prompting
+	for the supergash password if the schema.xml file does not specify username and password.</p></dd>
+    </dl>
+    
+    <p>See the <a href="index.html" target="_top">Ganymede XML Guide</a> for complete details on
+      the XML file format used by xmlclient.</p>
 
-    xmlclient -dump
-
-        This will cause the xmlclient to connect to the Ganymede server
-	and to generate a complete dump of the server's database,
-	both schema and data, to stdout in xml format.
-
-    Optional parameters:
-
-        username=&lt;persona name&gt;
-
-        password=&lt;password&gt;
-
-      Examples:
-
-        xmlclient username=jonhart:supergash -dumpschema > schema.xml
-
-        xmlclient username=broccol password=notReal changes.xml
-</pre>
     <hr>
-    <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
+    <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Wed Jun  6 13:32:19 CDT 2001 -->
 <!-- hhmts start -->
-Last modified: Wed Jun  6 14:52:26 CDT 2001
+Last modified: Fri Jul 27 22:03:38 CDT 2001
 <!-- hhmts end -->
   </body>
 </html>
