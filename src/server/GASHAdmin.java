@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -185,12 +185,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
     frame.taskTable.clearCells();
 
-    if (tasks == null)
-      {
-	System.err.println("null tasks");
-      }
-
-    System.err.println("changeTasks: tasks size = " + tasks.size());
+    // System.err.println("changeTasks: tasks size = " + tasks.size());
     
     // Sort entries according to their incep date,
     // to prevent confusion if new tasks are put into
@@ -207,24 +202,16 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 			    aH = (scheduleHandle) a;
 			    bH = (scheduleHandle) b;
 			    
-			    try
+			    if (aH.incepDate.before(bH.incepDate))
 			      {
-				if (aH.incepDate.before(bH.incepDate))
-				  {
-				    return -1;
-				  }
-				else if (aH.incepDate.after(bH.incepDate))
-				  {
-				    return 1;
-				  }
-				else
-				  {
-				    return 0;
-				  }
+				return -1;
 			      }
-			    catch (NullPointerException ex)
+			    else if (aH.incepDate.after(bH.incepDate))
 			      {
-				System.err.println("null incepDate in sort");
+				return 1;
+			      }
+			    else
+			      {
 				return 0;
 			      }
 			  }
@@ -252,18 +239,26 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	    frame.taskTable.setCellColor(handle.name, 1, Color.red, false);
 	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
-	else
+	else if (handle.startTime != null)
 	  {
 	    frame.taskTable.setCellText(handle.name, 1, "Scheduled", false);
 	    frame.taskTable.setCellColor(handle.name, 1, Color.black, false);
 	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
-
-	frame.taskTable.setCellText(handle.name, 2, handle.startTime.toString(), false);
-
-	if (handle.intervalString == null)
+	else
 	  {
-	    System.err.println("null intervalString");
+	    frame.taskTable.setCellText(handle.name, 1, "Waiting", false);
+	    frame.taskTable.setCellColor(handle.name, 1, Color.black, false);
+	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
+	  }
+
+	if (handle.startTime != null)
+	  {
+	    frame.taskTable.setCellText(handle.name, 2, handle.startTime.toString(), false);
+	  }
+	else
+	  {
+	    frame.taskTable.setCellText(handle.name, 2, "On Demand", false);
 	  }
 
 	frame.taskTable.setCellText(handle.name, 3, handle.intervalString, false);
