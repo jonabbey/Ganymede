@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:03:59 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/02/10 04:58:00 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -225,7 +225,7 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
     previousDate = my_calendar.getTime();
     dateIsSet = true;
 
-    temp_calendar = (GregorianCalendar)my_calendar.clone();
+    temp_calendar = (GregorianCalendar) my_calendar.clone();
 
     current_year = temp_calendar.get(Calendar.YEAR);
     current_day = temp_calendar.get(Calendar.DAY_OF_MONTH);
@@ -566,6 +566,7 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
     temp_calendar.setTime(my_calendar.getTime()); // this sets all the fields properly
     
     writeDates();
+    _tPanel.update();
   }
 
   /**
@@ -909,6 +910,8 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 
   GregorianCalendar temp = null; 
 
+  /* -- */
+
   public JTimePanel(JpanelCalendar parent)
   {
     if (parent == null)
@@ -917,7 +920,6 @@ class JTimePanel extends JPanel implements JsetValueCallback {
       }
     
     _parent = parent;
-
 
     temp = _parent.temp_calendar;
 
@@ -955,7 +957,6 @@ class JTimePanel extends JPanel implements JsetValueCallback {
     panel.add("West", new JLabel("Time:"));
     panel.add("Center", p);
     
-
     add(panel);
 
     update();
