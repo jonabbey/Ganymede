@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2002/03/29 03:57:57 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2002/04/01 22:01:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1769,7 +1769,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	      {
 		_md5crypted = true;
 	      }
-	    else if (child.matches("apachemd5crypted"))
+	    else if (child.matches("apacheMd5crypted"))
 	      {
 		_apachemd5crypted = true;
 	      }
