@@ -7,8 +7,8 @@
  
    Created: 3 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/09/04 00:22:02 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/09/04 00:30:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -70,7 +70,7 @@ import java.io.*;
  * has to set this factory on the RMI system.</p>
  */
 
-final public class RMITimeoutFactory extends RMISocketFactory {
+final public class RMITimeOutFactory extends RMISocketFactory {
 
   private int timeout;
 
@@ -83,7 +83,7 @@ final public class RMITimeoutFactory extends RMISocketFactory {
    * we have failed to connect.
    */
 
-  public RMITimeoutFactory(int timeout)
+  public RMITimeOutFactory(int timeout)
   {
     this.timeout = timeout;
   }
