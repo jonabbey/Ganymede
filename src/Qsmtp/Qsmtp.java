@@ -208,7 +208,19 @@ public class Qsmtp implements Runnable {
 		System.err.println("Qstmp.stopThreaded() - waiting for background thread to die");
 	      }
 
-	    backgroundThread.join(); // wait for our email sending thread to drain
+	    // the backgroundThread variable is cleared when the
+	    // background thread terminates.  If that happens before
+	    // we wait for it, catch the NullPointerException and move
+	    // on.
+
+	    try
+	      {
+		backgroundThread.join(); // wait for our email sending thread to drain
+	      }
+	    catch (NullPointerException ex)
+	      {
+		return;
+	      }
 
 	    if (debug)
 	      {
