@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/03/12 21:06:48 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/03/15 22:54:16 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -227,13 +227,16 @@ public class JpanelCalendar extends JPanel implements ActionListener, ItemListen
     this.compact = compact;
     this.editable = editable;
 
-    if (editable)
+    if (debug)
       {
-	System.err.println("JpanelCalendar.editable == true!");
-      }
-    else
-      {
-	System.err.println("JpanelCalendar.editable == false!");
+	if (editable)
+	  {
+	    System.err.println("JpanelCalendar.editable == true!");
+	  }
+	else
+	  {
+	    System.err.println("JpanelCalendar.editable == false!");
+	  }
       }
 
     parent = callback;
