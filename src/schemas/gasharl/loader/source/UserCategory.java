@@ -6,7 +6,7 @@
    GASH user_categories file
    
    Created: 7 August 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@ package arlut.csd.ganymede.loader;
 
 import java.io.*;
 import arlut.csd.Util.Parser;
+import java.util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -53,7 +54,7 @@ public class UserCategory {
   String name;
   int days_limit;
   boolean ssrequired;
-  String maillist;
+  Vector mailvec;
   String shortdescrip;
   String longdescrip;
 
@@ -105,12 +106,14 @@ public class UserCategory {
 	ssrequired = true;
       }
 
-    maillist = parser.getNextLongBit();
+    String maillist = parser.getNextLongBit();
 
     if (debug)
       {
 	System.err.println(maillist);
       }
+
+    mailvec = arlut.csd.Util.VectorUtils.stringVector(maillist, ", ");
 
     shortdescrip = parser.getNextLongBit();
 
@@ -142,7 +145,19 @@ public class UserCategory {
 	System.out.println("Social Security # required");
       }
 
-    System.out.println("maillist = " + maillist);
+    System.out.print("mailvec = ");
+
+    for (int i = 0; i < mailvec.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    System.out.print(", ");
+	  }
+
+	System.out.print(mailvec.elementAt(i));
+      }
+    System.out.println();
+
     System.out.println("short = " + shortdescrip);
     System.out.println("long = " + longdescrip);
   }
