@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 1999/04/16 22:52:45 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 1999/04/16 23:19:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.Util.zipIt;
  * use DBStore as their synchronization object.  If any do not, then the server
  * can deadlock.</p>
  *
- * @version $Revision: 1.78 $ %D%
+ * @version $Revision: 1.79 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -218,10 +218,12 @@ public class DBStore {
    * never call load() on a DBStore with locks held.</p>
    *
    * @param filename Name of the database file
+   * @param reallyLoad if true, we'll actually fully load the database.
+   * If false, we'll just get the schema loaded so we can report on it.
    * @see arlut.csd.ganymede.DBJournal
    */
 
-  public synchronized void load(String filename, boolean loadJournal)
+  public synchronized void load(String filename, boolean reallyLoad)
   {
     FileInputStream inStream = null;
     BufferedInputStream bufStream = null;
@@ -322,7 +324,7 @@ public class DBStore {
 	
 	for (short i = 0; i < baseCount; i++)
 	  {
-	    tempBase = new DBObjectBase(in, this);
+	    tempBase = new DBObjectBase(in, this, reallyLoad);
 	    
 	    setBase(tempBase);
 
@@ -370,7 +372,7 @@ public class DBStore {
 
     lockHash = new Hashtable(baseCount); // reset lockHash
 
-    if (loadJournal)
+    if (reallyLoad)
       {
 	try 
 	  {

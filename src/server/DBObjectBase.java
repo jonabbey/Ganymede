@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 1999/04/16 22:52:45 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 1999/04/16 23:19:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -110,6 +110,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   int object_count;
   int maxid;			// highest invid to date
   Date lastChange;
+
+  boolean reallyLoading;
 
   // used by the DBLock Classes to synchronize client access
 
@@ -375,13 +377,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>receive constructor.  Used to initialize this DBObjectBase from disk
+   * and load the objects of this type in from the standing store.</p>
    *
-   * receive constructor.  Used to initialize this DBObjectBase from disk
-   * and load the objects of this type in from the standing store.
-   *
+   * @param in Input stream to read this object base from.
+   * @param store The Ganymede database object we are loading into.
+   * @param reallyLoad If false, we won't remember objects loaded.  This
+   * is used when we want to just examine a db file's schema information.
    */
 
-  public DBObjectBase(DataInput in, DBStore store) throws IOException, RemoteException
+  public DBObjectBase(DataInput in, DBStore store, boolean reallyLoad) throws IOException, RemoteException
   {
     /* assume not embedded, we'll correct that in receive()
        if we have to
@@ -389,13 +394,26 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
        we don't want to add in the built-in fields.. we assume that they
        are properly registered on disk. */
 
-    this(store, false, false);	
+    this(store, false, false);
+
+    this.reallyLoading = reallyLoad;
+
     receive(in);
 
     // need to recreate objectHook now that we have loaded our classdef info
     // from disk.
 
     objectHook = this.createHook();
+  }
+
+  /**
+   * receive constructor.  Used to initialize this DBObjectBase from disk
+   * and load the objects of this type in from the standing store.
+   */
+
+  public DBObjectBase(DataInput in, DBStore store) throws IOException, RemoteException
+  {
+    this (in, store, true);
   }
 
   /**
@@ -845,7 +863,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    maxid = tempObject.id;
 	  }
 
-	objectTable.putNoSyncNoRemove(tempObject);
+	if (reallyLoading)
+	  {
+	    objectTable.putNoSyncNoRemove(tempObject);
+	  }
       }
 
     if (debug)
