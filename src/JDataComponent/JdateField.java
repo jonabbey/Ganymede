@@ -5,7 +5,7 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -161,7 +161,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 			     null,
 			     this);
 
-    add(_date,"Center");
+    add(_date,"West");
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
@@ -197,6 +197,9 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
     unset = true;
 
     setDate(my_date);
+
+    invalidate();
+    validate();
   }
 
   public void actionPerformed(ActionEvent e) 
