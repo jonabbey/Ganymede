@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.24 $ %D%
+  Version: $Revision: 1.25 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.24 $ %D%
+ * @version $Revision: 1.25 $ %D%
  */
 
 public class baseTable extends JBufferedPane implements AdjustmentListener, ActionListener {
@@ -3500,6 +3500,9 @@ class tableCell {
     origText,
     text;
 
+  Object
+    data = null;
+
   tableAttr 
     attr;
 
@@ -3615,6 +3618,32 @@ class tableCell {
       }
 
     calcRowSpan();
+  }
+
+  /**
+   *
+   * This method is used to record a piece of random attendant
+   * data with this cell.  It is used by rowTable to facilitate
+   * type-specific sorting.
+   *
+   */
+
+  public final void setData(Object data)
+  {
+    this.data = data;
+  }
+
+  /**
+   *
+   * This method retrieves a piece of random attendant
+   * data held with this cell.  It is used by rowTable to facilitate
+   * type-specific sorting.
+   *
+   */
+
+  public final Object getData()
+  {
+    return data;
   }
 
   /**
@@ -3789,7 +3818,7 @@ class tableCell {
     FontMetrics
       fm;
 
-    /* -- */
+     /* -- */
 
     if (wrap_length < 5)
       {
