@@ -3,11 +3,11 @@ July ??, 2001
 CHANGES
 ---------------------------------------------
 
--------------------- Changes from 1.04 to 1.05 -------------------
+-------------------- Changes from 1.04 to 1.0.5 -------------------
 
 RELEASE DATE: July ??, 2001
 
-1. [DISTRIB] Fixed a number of bugs for 1.4
+1. [DISTRIB] Fixed a number of bugs for JDK 1.4 compatibility
 
 Fixed a few places that assumed SimpleTimeZone.getDefault()
 would return an object of class SimpleTimeZone.
