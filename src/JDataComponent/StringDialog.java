@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -567,6 +567,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	    // focus is usually managed by clicking or rolling the
 	    // mouse on to the dialog window.. might help on Win32.
 
+	    c.setRequestFocusEnabled(true);
 	    c.requestFocus();
 	  }
 	
