@@ -7,8 +7,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/03/25 05:36:48 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/03/25 05:50:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -82,6 +82,7 @@ public class XMLDumpContext {
   
   public XMLDumpContext(XMLWriter xmlOut, boolean passwords, boolean historyInfo, boolean objectNumbers)
   {
+    this.xmlOut = xmlOut;
     dumpPlaintextPasswords = passwords;
     dumpCreatorModifierInfo = historyInfo;
     dumpObjectNumbers = objectNumbers;
