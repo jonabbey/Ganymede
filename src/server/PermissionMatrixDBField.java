@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -214,12 +214,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public ReturnVal setValue(Object value)
   {
-    ReturnVal retVal = new ReturnVal(false);
-    retVal.setDialog(new JDialogBuff("Error",
-				     "Error.. can't call setValue() on a PermissionMatrixDBField",
-				     "OK",
-				     null));
-    return retVal;
+    return Ganymede.createErrorDialog("Server: Error in PermissionMatrixDBField.setValue()",
+				      "Error.. can't call setValue() on a PermissionMatrixDBField");
   }
 
   public Object clone()

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -508,19 +508,14 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setPlainTextPass(String text)
   {
-    ReturnVal retVal = null;
     String cryptedText = null;
 
     /* -- */
 
     if (!verifyNewValue(text))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Invalid password value\n" + getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setPlainTextPass()",
+					 "Invalid password value\n" + getLastError());
       }
 
     if (((DBEditObject)owner).finalizeSetValue(this, text))
@@ -557,12 +552,8 @@ public class PasswordDBField extends DBField implements pass_field {
       }
     else
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Could not finalize password value\n" + getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setPlainTextPass()",
+					  "Could not finalize password value\n" + getLastError());
       }
   }
 
@@ -578,30 +569,18 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setCryptPass(String text)
   {
-    ReturnVal retVal = null;
-
-    /* -- */
-
     if (!definition.isCrypted())
       {
 	owner.editset.session.setLastError("can't set a pre-crypted value into a plaintext password field");
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "can't set a pre-crypted value into a plaintext password field",
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
+					  "Can't set a pre-crypted value into a plaintext password field");
       }
 
     if (!verifyNewValue(text))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Invalid crypted password value\n" + getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
+					  "Invalid crypted password value\n" + getLastError());
       }
 
     if (((DBEditObject)owner).finalizeSetValue(this, text))
@@ -621,12 +600,8 @@ public class PasswordDBField extends DBField implements pass_field {
       }
     else
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Could not finalize crypted password value\n" + getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
+					  "Could not finalize crypted password value\n" + getLastError());
       }
   }
 
