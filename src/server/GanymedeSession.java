@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.267 $
-   Last Mod Date: $Date: 2003/09/05 00:38:37 $
+   Version: $Revision: 1.268 $
+   Last Mod Date: $Date: 2003/09/05 00:51:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.267 $ $Date: 2003/09/05 00:38:37 $
+ * @version $Revision: 1.268 $ $Date: 2003/09/05 00:51:23 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1133,8 +1133,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    this.client = null;
 
-	    this.clientProxy.shutdown();
-	    this.clientProxy = null;
+	    this.asyncPort.shutdown();
+	    this.asyncPort = null;
 
 	    // logout the client, abort any DBSession transaction going
 

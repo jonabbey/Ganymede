@@ -16,8 +16,8 @@
    
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2003/09/05 00:39:53 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2003/09/05 00:51:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,7 +88,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientAsyncMessage
  *
- * @version $Revision: 1.4 $ $Date: 2003/09/05 00:39:53 $
+ * @version $Revision: 1.5 $ $Date: 2003/09/05 00:51:24 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -185,6 +185,24 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
     addEvent(new clientAsyncMessage(clientAsyncMessage.SENDMESSAGE, params));
   }
 
+  /**
+   * <p>This method is used to shutdown the responder, without sending
+   * a message to the client so notifying it.</p>
+   */
+
+  public void shutdown()
+  {
+    if (this.done)
+      {
+	return;
+      }
+
+    synchronized (eventBuffer)
+      {
+	this.done = true;
+	eventBuffer.notifyAll(); // let the client drain and exit
+      }
+  }
 
   /**
    * <p>This method is used to send a shutdown command to the client.
@@ -297,9 +315,9 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
 	// if we have an instance of this event on our eventBuffer,
 	// update its parameter with the new event's info.
 
-	if (lookUp[newEvent.method] != null)
+	if (lookUp[newEvent.getMethod()] != null)
 	  {
-	    lookUp[newEvent.method].param = newEvent.param;
+	    lookUp[newEvent.getMethod()] = newEvent;
 	    return;
 	  }
 
@@ -316,7 +334,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
 	// remember that we have an event of this type on our eventBuffer
 	// for direct lookup by later replaceEvent calls.
 
-	lookUp[newEvent.method] = newEvent;
+	lookUp[newEvent.getMethod()] = newEvent;
 
 	eventBuffer.notify();	// wake up getNextMsg()
       }
