@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2000/09/08 01:52:33 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/09/08 22:32:44 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.20 $ $Date: 2000/09/08 01:52:33 $ $Name:  $
+ * @version $Revision: 1.21 $ $Date: 2000/09/08 22:32:44 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -193,7 +193,7 @@ public final class xmlclient {
     if (propFilename == null)
       {
 	System.err.println("Ganymede xmlclient: Error, must specify properties");
- 	System.err.println("Usage: java arlut.csd.ganymede.client xmlclient properties=<properties file> username=<username> [password=<password>] [bufsize=<buffer size>] <xmlfile>");
+ 	System.err.println("Usage: java arlut.csd.ganymede.client.xmlclient properties=<properties file> [username=<username>] [password=<password>] [bufsize=<buffer size>] <xmlfile>");
 	System.exit(1);
       }
     else
@@ -303,38 +303,23 @@ public final class xmlclient {
 	if (obj instanceof Server)
 	  {
 	    server = (Server) obj;
-	    boolean test = server.up();
 	  }
       }
     catch (NotBoundException ex)
       {
-	if (debug)
-	  {
-	    System.err.println("RMI: Couldn't bind to server url " + server_url + "\n" + ex );
-	  }
-	
-	System.err.println("RMI: Couldn't bind to server url " + server_url + "\n" + ex );
+	System.err.println("RMI: Couldn't bind to server url " + server_url + 
+			   "\n" + ex.getMessage());
 
 	return false;
       }
     catch (java.rmi.UnknownHostException ex)
       {
-	if (debug)
-	  {
-	    System.err.println("RMI: Couldn't find server\n" + server_url);
-	  }
-	
 	System.err.println("RMI: Couldn't find server\n" + server_url);
 
 	return false;
       }
     catch (java.net.MalformedURLException ex)
       {
-	if (debug)
-	  {
-	    System.err.println("RMI: Malformed URL " + server_url);
-	  }
-	
 	System.err.println("RMI: Malformed URL " + server_url);
 
 	return false;
@@ -342,9 +327,18 @@ public final class xmlclient {
 
     // we've got the server.. now get an XML session on it
 
+    System.err.println("Connected to server.. logging in");
+
     XMLSession xSession = null;
 
     xSession = server.xmlLogin(username, password);
+
+    if (xSession == null)
+      {
+	System.err.println("Error, couldn't log in to server.. bad username or password?");
+      }
+
+    System.err.println("Logged into server.. uplinking XML data");
 
     // logged in!  now we just need to spin through the xml file and
     // send it up to the server
@@ -372,6 +366,8 @@ public final class xmlclient {
 
 	try
 	  {
+	    System.err.println("Sending " + avail + " bytes of data..");
+
 	    retVal = xSession.xmlSubmit(data);
 
 	    if (retVal != null)
@@ -416,6 +412,8 @@ public final class xmlclient {
 
 	    return retVal.didSucceed();
 	  }
+
+	// a null ReturnVal signifies a successful result
 
 	return true;
       }
@@ -463,6 +461,13 @@ public final class xmlclient {
 	  {
 	    System.err.println("Error, the ganymede document element " + docElement +
 			       " does not contain a compatible major version number");
+	    return false;
+	  }
+
+	if (minorI == null)
+	  {
+	    System.err.println("Error, the ganymede document element " + docElement +
+			       " does not contain a minor version number");
 	    return false;
 	  }
 
