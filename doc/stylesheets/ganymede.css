@@ -1,8 +1,16 @@
 @media all {
  body { background: white; }
- h1 { font-family: Arial Helvetica; }
- h2 { border-style: solid; border-width: thin; border-color: black; width: 100%; background: #CCFFCC; font-weight: bold;}
- p.address { font-family: Arial Helvetica; font-weight: italic; }
+ h1 { font-family: Arial, Helvetica; }
+
+ h2 {
+    border-style: solid; border-width: thin; border-color: black;
+    width: auto;
+    background: #CCFFCC;
+    font-weight: bold;
+    padding-left: 5px; padding-bottom: 10px; padding-top: 10px;
+  }
+
+ p.address { font-family: Arial, Helvetica; font-style: italic; }
 }
 
 @media screen {
