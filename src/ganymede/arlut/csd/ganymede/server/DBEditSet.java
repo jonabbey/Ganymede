@@ -215,11 +215,15 @@ public class DBEditSet {
   private Thread currentCheckpointThread = null;
 
   /**
-   * The writelock acquired during the course of a commit attempt.  We keep
+   * <p>The writelock acquired during the course of a commit attempt.  We keep
    * this around as a DBEditSet field so that we can use the handy
    * {@link arlut.csd.ganymede.server.DBEditSet#releaseWriteLock() releaseWriteLock()}
    * method, but wLock should really never be non-null outside of the
-   * context of the commit() call.  */
+   * context of the commit() call.</p>
+   *
+   * <p>As long as the writeLock is held, no other transactions can
+   * proceed into commit on the same object bases.</p>
+   */
 
   private DBWriteLock wLock = null;
 
