@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 1999/10/08 01:56:22 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 1999/10/12 18:56:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -49,7 +49,6 @@
 
 package arlut.csd.ganymede;
 
-import arlut.csd.Util.VectorUtils;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
@@ -595,7 +594,44 @@ public class DBEditSet {
     // note that we need a drop temp vector because it confuses things
     // if we remove elements from objects while we are iterating over it
 
-    Vector drop = VectorUtils.difference(objects, point.objects);
+    if (debug)
+      {
+	System.err.println("DBEditSet.rollback() At checkpoint:");
+
+	for (int i = 0; i < point.objects.size(); i++)
+	  {
+	    System.err.println(point.objects.elementAt(i));
+	  }
+
+	System.err.println("\nDBEditSet.rollback() Now:");
+
+	for (int i = 0; i < objects.size(); i++)
+	  {
+	    System.err.println(objects.elementAt(i));
+	  }
+      }
+
+    Hashtable oldvalues = new Hashtable();
+
+    for (int i = 0; i < point.objects.size(); i++)
+      {
+	oldvalues.put(((DBCheckPointObj) point.objects.elementAt(i)).invid, 
+		      ((DBCheckPointObj) point.objects.elementAt(i)).invid);
+      }
+
+    Vector drop = new Vector();
+
+    for (int i = 0; i < objects.size(); i++)
+      {
+	DBEditObject eobjRef = (DBEditObject) objects.elementAt(i);
+
+	Invid tmpvid = eobjRef.getInvid();
+	
+	if (!oldvalues.containsKey(tmpvid))
+	  {
+	    drop.addElement(eobjRef);
+	  }
+      }
 
     for (int i = 0; i < drop.size(); i++)
       {
@@ -753,16 +789,16 @@ public class DBEditSet {
 					  "denied.. server going down?");
       }
 
-    if (debug)
-      {
-	System.err.println(session.key + ": DBEditSet.commit(): write lock established");
-      }
-
     // we don't want to have any chance of leaving commit with the
     // write lock still established.
 
     try
       {
+	if (debug)
+	  {
+	    System.err.println(session.key + ": DBEditSet.commit(): write lock established");
+	  }
+
 	// This yield is here to allow me to verify that the locking logic
 	// works properly on a non-preemptive VM.
 
@@ -774,12 +810,62 @@ public class DBEditSet {
 			       ": DBEditSet.commit(): established write lock");
 	  }
 
-	// write the creation and / or modification info into the objects,
-	// run the objects' commit routines.
+	if (session.getGSession() != null && session.getGSession().enableOversight)
+	  {
+	    // Check all the objects that we have checked out to make
+	    // sure their commit logic approves the transaction.
 
-	DateDBField df;
-	StringDBField sf;
-	String result;
+	    for (int i = 0; i < objects.size(); i++)
+	      {
+		eObj = (DBEditObject) objects.elementAt(i);
+
+		if (debug)
+		  {
+		    System.err.println("DBEditSet.commit(): checking object " + eObj.toString());
+		  }
+
+		if ((eObj.getStatus() != DBEditObject.DELETING) &&
+		    (eObj.getStatus() != DBEditObject.DROPPING))
+		  {
+		    Vector missingFields = eObj.checkRequiredFields();
+		    
+		    if (missingFields != null)
+		      {
+			StringBuffer errorBuf = new StringBuffer();
+
+			errorBuf.append("Error, ");
+			errorBuf.append(eObj.getTypeName());
+			errorBuf.append(" object ");
+			errorBuf.append(eObj.getLabel());
+			errorBuf.append(" has not been completely filled out.  The following fields need ");
+			errorBuf.append("to be filled in before this transaction can be committed:\n\n");
+			
+			for (int j = 0; j < missingFields.size(); j++)
+			  {
+			    errorBuf.append((String) missingFields.elementAt(j));
+			    errorBuf.append("\n");
+			  }
+
+			retVal = Ganymede.createErrorDialog("Error, required fields not filled in",
+							    errorBuf.toString());
+
+			// we're not going to clear out the transaction, 
+			// as there is a chance the user can fix things
+			// up.
+
+			// we are going to relinquish the write lock,
+			// however.
+
+			releaseWriteLock("transaction commit rejected in phase 1 for missing fields");
+
+			// let DBSession/the client know they can retry things.
+			
+			retVal.doNormalProcessing = true;
+			return retVal;
+		      }
+		  }
+	      }
+	  }
 
 	// this is the mother of all try clauses.. its purpose is to help
 	// us recover from any unforeseen exceptions in this area.  The
@@ -794,6 +880,10 @@ public class DBEditSet {
 
 	try
 	  {
+	    DateDBField df;
+	    StringDBField sf;
+	    String result;
+
 	    // we're going to checkpoint the transaction here so that we
 	    // can abort cleanly if something rejects go-ahead in
 	    // commitPhase1().  commitPhase1() may not make any changes
@@ -810,11 +900,17 @@ public class DBEditSet {
 	
 	    String checkpointLabel = "commit" + (new Date()).toString();
 
+	    if (debug)
+	      {
+		System.err.println("DBEditSet.commit(): checkpoint(" + checkpointLabel +
+				   "), objects.size=" + objects.size());
+	      }
+
 	    checkpoint(checkpointLabel);
 
 	    // Ok, we now need to go through the objects that are being
 	    // changed by this transaction and update their informational
-	    // fields.
+	    // fields, then try to commit the objects.
     
 	    // Note that we are assuming here that none of the changes we
 	    // make at this point (setting creation dates, modification
@@ -822,6 +918,9 @@ public class DBEditSet {
 	    // (i.e., no new objects will be brought into the transaction
 	    // by anything we do here.)
 
+	    // write the creation and / or modification info into the objects,
+	    // run the objects' commit routines.
+	    
 	    for (int i = 0; i < objects.size(); i++)
 	      {
 		eObj = (DBEditObject) objects.elementAt(i);
@@ -884,84 +983,16 @@ public class DBEditSet {
 		  case DBEditObject.DELETING:
 		  case DBEditObject.DROPPING:
 
-		    // Deletion activities for this object were done at the time of the
-		    // client's request.. the commit logic may have something to do,
+		    // Deletion activities for this object were done
+		    // at the time of the client's request.. the
+		    // commitPhase1() logic may have something to do,
 		    // however.
 
 		    eObj.finalized = true;
 		    break;
 		  }
-	      }
 
-	    // Check all the objects that we have checked out to make sure their
-	    // commit logic approves the transaction.
-
-	    for (int i = 0; i < objects.size(); i++)
-	      {
-		eObj = (DBEditObject) objects.elementAt(i);
-
-		if (eObj.getGSession().enableOversight)
-		  {
-		    if ((eObj.getStatus() != DBEditObject.DELETING) &&
-			(eObj.getStatus() != DBEditObject.DROPPING))
-		      {
-			Vector missingFields = eObj.checkRequiredFields();
-		    
-			if (missingFields != null)
-			  {
-			    StringBuffer errorBuf = new StringBuffer();
-
-			    errorBuf.append("Error, ");
-			    errorBuf.append(eObj.getTypeName());
-			    errorBuf.append(" object ");
-			    errorBuf.append(eObj.getLabel());
-			    errorBuf.append(" has not been completely filled out.  The following fields need ");
-			    errorBuf.append("to be filled in before this transaction can be committed:\n\n");
-			
-			    for (int j = 0; j < missingFields.size(); j++)
-			      {
-				errorBuf.append((String) missingFields.elementAt(j));
-				errorBuf.append("\n");
-			      }
-
-			    retVal = Ganymede.createErrorDialog("Error, required fields not filled in",
-								errorBuf.toString());
-			  }
-			else
-			  {
-			    retVal = null;
-			  }
-		      }
-
-		    if (retVal != null && !retVal.didSucceed())
-		      {
-			// we're not going to clear out the transaction, 
-			// as there is a chance the user can fix things
-			// up.  We need to clear the committing flag on
-			// all objects that we've called commitPhase1()
-			// on so that they will accept future changes.
-
-			for (int j = 0; j < i; j++)
-			  {
-			    eObj2 = (DBEditObject) objects.elementAt(j);
-			    eObj2.release(false); // undo committing flag
-			  }
-
-			// we are going to relinquish the write lock,
-			// however.
-
-			releaseWriteLock("transaction commit rejected in phase 1 for missing fields");
-
-			// undo the time stamp changes and what-not.
-
-			rollback(checkpointLabel);
-
-			// let DBSession/the client know they can retry things.
-
-			retVal.doNormalProcessing = true;
-			return retVal;
-		      }
-		  }
+		// and try to commit this object
 
 		retVal = eObj.commitPhase1();
 
@@ -998,6 +1029,9 @@ public class DBEditSet {
 
 	    // phase one complete, go ahead and have all our
 	    // objects do their 2nd level (external) commit processes
+
+	    // the whole point of 2 phase commit is that nothing can
+	    // go wrong here...
 
 	    for (int i = 0; i < objects.size(); i++)
 	      {
@@ -1206,14 +1240,9 @@ public class DBEditSet {
 	    // so DBSession and the client should know we've done a total
 	    // scrub.
 
-	    StringWriter stringWriter = new StringWriter();
-	    PrintWriter printWriter = new PrintWriter(stringWriter);
-	    ex.printStackTrace(printWriter);
-
-	    retVal = Ganymede.createErrorDialog("Couldn't commit transaction, exception " +
-						"caught in DBEditSet.commit()",
-						stringWriter.toString());
-	    return retVal;
+	    return Ganymede.createErrorDialog("Couldn't commit transaction, exception " +
+					      "caught in DBEditSet.commit()",
+					      Ganymede.stackTrace(ex));
 	  }
 	catch (Error ex)
 	  {
@@ -1227,13 +1256,9 @@ public class DBEditSet {
 	    // so DBSession and the client should know we've done a total
 	    // scrub.
 
-	    StringWriter stringWriter = new StringWriter();
-	    PrintWriter printWriter = new PrintWriter(stringWriter);
-	    ex.printStackTrace(printWriter);
-
-	    retVal = Ganymede.createErrorDialog("Couldn't commit transaction, error caught in DBEditSet.commit()",
-						stringWriter.toString());
-	    return retVal;
+	    return Ganymede.createErrorDialog("Couldn't commit transaction, error " +
+					      "caught in DBEditSet.commit()",
+					      Ganymede.stackTrace(ex));
 	  }
 
 	if (debug)
@@ -1410,6 +1435,11 @@ public class DBEditSet {
     DBEditObject eObj;
 
     /* -- */
+
+    if (debug)
+      {
+	System.err.println("DBEditSet.release()");
+      }
 
     if (objects == null)
       {

@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 1999/07/29 21:37:49 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 1999/10/12 18:56:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,6 +107,7 @@ public class DBJournal implements ObjectStatus {
   DBStore store = null;
   boolean dirty = false;	// dirty is true if the journal has any
 				// transactions written out
+  boolean headersRead = false;
   int transactionsInJournal = 0;
 
   /* -- */
@@ -611,7 +612,6 @@ public class DBJournal implements ObjectStatus {
     return true;
   }
 
-
   /**
    *  returns true if the journal does not contain any transactions
    *
@@ -624,11 +624,21 @@ public class DBJournal implements ObjectStatus {
 
   /**
    *
+   * <p>This method is used to read and check the first few fields of the journal
+   * as a sanity check on journal open/load.</p>
+   *
+   * <p>This method <b>MUST NOT</b> be called after the journal is open and active,
+   * or else the journal will become corrupted.</p>
    *
    */
 
   void readHeaders() throws IOException
   {
+    if (headersRead)
+      {
+	throw new RuntimeException("Error, DBJournal.readHeaders() called repeatedly.");
+      }
+
     if (debug)
       {
 	System.err.println("DBJournal: Loading transactions from " + filename);
@@ -658,6 +668,8 @@ public class DBJournal implements ObjectStatus {
       {
 	jFile.readLong();		// date is there for others to look at
       }
+
+    headersRead = true;
   }
 }
 

@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 1999/10/08 00:12:13 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 1999/10/12 18:56:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1101,17 +1101,47 @@ public class Ganymede {
   public static boolean loadProperties(String filename)
   {
     Properties props = new Properties(System.getProperties());
+    FileInputStream fis = null;
+    BufferedInputStream bis = null;
     boolean success = true;
 
     /* -- */
 
     try
-      {
-	props.load(new BufferedInputStream(new FileInputStream(filename)));
+      {    
+	fis = new FileInputStream(filename);
+	bis = new BufferedInputStream(fis);
+	props.load(bis);
       }
     catch (IOException ex)
       {
 	return false;
+      }
+    finally
+      {
+	// don't wait for GC to close the file descriptors
+
+	try
+	  {
+	    if (bis != null)
+	      {
+		bis.close();
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	  }
+
+	try
+	  {
+	    if (fis != null)
+	      {
+		fis.close();
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	  }
       }
 
     // make the combined properties file accessible throughout our server
@@ -1245,11 +1275,40 @@ public class Ganymede {
       {
 	try
 	  {
-	    props.load(new BufferedInputStream(new FileInputStream(schemaDirectoryProperty)));
+	    fis = new FileInputStream(schemaDirectoryProperty);
+	    bis = new BufferedInputStream(fis);
+	    props.load(bis);
 	  }
 	catch (IOException ex)
 	  {
 	  }
+	finally
+	  {
+	    // don't wait for GC to close the file descriptors
+
+	    try
+	      {
+		if (bis != null)
+		  {
+		    bis.close();
+		  }
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		if (fis != null)
+		  {
+		    fis.close();
+		  }
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+	  }
+
       }
 
     return success;

@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/09/22 22:27:54 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/10/12 18:56:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -773,15 +773,25 @@ public class DBLog {
       {
 	// eof
       }
+    finally
+      {
+	try
+	  {
+	    in.close();
+	  }
+	catch (IOException ex)
+	  {
+	    // shrug
+	  }
 
-    try
-      {
-	in.close();
-	reader.close();
-      }
-    catch (IOException ex)
-      {
-	// shrug
+	try
+	  {
+	    reader.close();
+	  }
+	catch (IOException ex)
+	  {
+	    // shrug
+	  }
       }
 
     return buffer;
