@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 2000/03/25 05:36:42 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 2000/03/27 21:54:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -744,38 +744,33 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     /* -- */
 
-    xmlOut.indent();
-    xmlOut.bumpIndentLevel();
-
-    xmlOut.startElement("fielddef");
+    xmlOut.startElementIndent("fielddef");
     xmlOut.attribute("name", XMLUtils.XMLEncode(field_name));
     xmlOut.attribute("id", java.lang.Short.toString(field_code));
 
+    xmlOut.indentOut();
+
     if (classname != null && !classname.equals(""))
       {
-	xmlOut.indent();
-	xmlOut.startElement("classname");
+	xmlOut.startElementIndent("classname");
 	xmlOut.attribute("name", classname);
 	xmlOut.endElement("classname");
       }
 
     if (comment != null && !comment.equals(""))
       {
-	xmlOut.indent();
-	xmlOut.startElement("comment");
+	xmlOut.startElementIndent("comment");
 	xmlOut.write(comment);
 	xmlOut.endElement("comment");
       }
 
     if (!visibility)
       {
-	xmlOut.indent();
-	xmlOut.startElement("invisible");
+	xmlOut.startElementIndent("invisible");
 	xmlOut.endElement("invisible");
       }
 
-    xmlOut.indent();
-    xmlOut.startElement("typedef");
+    xmlOut.startElementIndent("typedef");
     
     switch (field_type)
       {
@@ -810,13 +805,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new RuntimeException("emitXML: unrecognized field type:" + field_type);
       }
 
-    xmlOut.bumpIndentLevel();
+    xmlOut.indentOut();
 
     if (array)
       {
 	nonEmpty = true;
-	xmlOut.indent();
-	xmlOut.startElement("vector");
+	xmlOut.startElementIndent("vector");
 	xmlOut.attribute("maxSize", java.lang.Short.toString(limit));
 	xmlOut.endElement("vector");
       }
@@ -826,8 +820,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (labeled)
 	  {
 	    nonEmpty = true;
-	    xmlOut.indent();
-	    xmlOut.startElement("labeled");
+	    xmlOut.startElementIndent("labeled");
 	    xmlOut.attribute("true", trueLabel);
 	    xmlOut.attribute("false", falseLabel);
 	    xmlOut.endElement("labeled");
@@ -837,52 +830,45 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	nonEmpty = true;
 
-	xmlOut.indent();
-	xmlOut.startElement("minlength");
+	xmlOut.startElementIndent("minlength");
 	xmlOut.attribute("val", java.lang.Short.toString(minLength));
 	xmlOut.endElement("minlength");
 
-	xmlOut.indent();
-	xmlOut.startElement("maxlength");
+	xmlOut.startElementIndent("maxlength");
 	xmlOut.attribute("val", java.lang.Short.toString(maxLength));
 	xmlOut.endElement("maxlength");
 
 	if (okChars != null && !okChars.equals(""))
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("okchars");
+	    xmlOut.startElementIndent("okchars");
 	    xmlOut.attribute("val", okChars);
 	    xmlOut.endElement("okchars");
 	  }
 
 	if (badChars != null && !badChars.equals(""))
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("badchars");
+	    xmlOut.startElementIndent("badchars");
 	    xmlOut.attribute("val", badChars);
 	    xmlOut.endElement("badchars");
 	  }
 	
 	if (namespace != null)
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("namespace");
+	    xmlOut.startElementIndent("namespace");
 	    xmlOut.attribute("val", namespace.getName());
 	    xmlOut.endElement("namespace");
 	  }
 
 	if (regexpPat != null && !regexpPat.equals(""))
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("regexp");
+	    xmlOut.startElementIndent("regexp");
 	    xmlOut.attribute("val", regexpPat);
 	    xmlOut.endElement("regexp");
 	  }
 
 	if (multiLine)
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("multiline");
+	    xmlOut.startElementIndent("multiline");
 	    xmlOut.endElement("multiline");
 	  }
       }
@@ -892,8 +878,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    nonEmpty = true;
 
-	    xmlOut.indent();
-	    xmlOut.startElement("namespace");
+	    xmlOut.startElementIndent("namespace");
 	    xmlOut.attribute("val", namespace.getName());
 	    xmlOut.endElement("namespace");
 	  }
@@ -904,8 +889,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    nonEmpty = true;
 
-	    xmlOut.indent();
-	    xmlOut.startElement("namespace");
+	    xmlOut.startElementIndent("namespace");
 	    xmlOut.attribute("val", namespace.getName());
 	    xmlOut.endElement("namespace");
 	  }
@@ -917,8 +901,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    DBObjectBase targetObjectBase = null;
 	    nonEmpty = true;
 
-	    xmlOut.indent();
-	    xmlOut.startElement("targetobject");
+	    xmlOut.startElementIndent("targetobject");
 
 	    if (allowedTarget == -2)
 	      {
@@ -950,9 +933,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	      {
 		boolean wroteLabel = false;
 
-		xmlOut.indent();
-
-		xmlOut.startElement("targetfield");
+		xmlOut.startElementIndent("targetfield");
 
 		if (targetObjectBase != null)
 		  {
@@ -975,8 +956,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	    if (editInPlace)
 	      {
-		xmlOut.indent();
-		xmlOut.startElement("embedded");
+		xmlOut.startElementIndent("embedded");
 		xmlOut.endElement("embedded");
 	      }
 	  }
@@ -985,55 +965,48 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	nonEmpty = true;
 
-	xmlOut.indent();
-	xmlOut.startElement("minlength");
+	xmlOut.startElementIndent("minlength");
 	xmlOut.attribute("val", java.lang.Short.toString(minLength));
 	xmlOut.endElement("minlength");
 
-	xmlOut.indent();
-	xmlOut.startElement("maxlength");
+	xmlOut.startElementIndent("maxlength");
 	xmlOut.attribute("val", java.lang.Short.toString(maxLength));
 	xmlOut.endElement("maxlength");
 
 	if (okChars != null && !okChars.equals(""))
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("okchars");
+	    xmlOut.startElementIndent("okchars");
 	    xmlOut.attribute("val", okChars);
 	    xmlOut.endElement("okchars");
 	  }
 
 	if (badChars != null && !badChars.equals(""))
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("badchars");
+	    xmlOut.startElementIndent("badchars");
 	    xmlOut.attribute("val", badChars);
 	    xmlOut.endElement("badchars");
 	  }
 
 	if (crypted)
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("crypted");
+	    xmlOut.startElementIndent("crypted");
 	    xmlOut.endElement("crypted");
 	  }
 
 	if (md5crypted)
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("md5crypted");
+	    xmlOut.startElementIndent("md5crypted");
 	    xmlOut.endElement("md5crypted");
 	  }
 
 	if (storePlaintext)
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("plaintext");
+	    xmlOut.startElementIndent("plaintext");
 	    xmlOut.endElement("plaintext");
 	  }
       }
     
-    xmlOut.dumpIndentLevel();
+    xmlOut.indentIn();
 
     if (nonEmpty)
       {
@@ -1042,9 +1015,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     xmlOut.endElement("typedef");
 
-    xmlOut.dumpIndentLevel();
-    xmlOut.indent();
-    xmlOut.endElement("fielddef");
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("fielddef");
   }
 
   /**

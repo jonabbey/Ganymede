@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/03/25 05:36:43 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/03/27 21:54:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -179,8 +179,7 @@ public class DateDBField extends DBField implements date_field {
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    xmlOut.indent();
-    xmlOut.startElement(this.getXMLName());
+    xmlOut.startElementIndent(this.getXMLName());
     emitDateXML(xmlOut, value());
     xmlOut.endElement(this.getXMLName());
   }

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.114 $
-   Last Mod Date: $Date: 2000/03/25 05:36:43 $
+   Version: $Revision: 1.115 $
+   Last Mod Date: $Date: 2000/03/27 21:54:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.114 $ %D%
+ * @version $Revision: 1.115 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -958,15 +958,11 @@ public class DBStore {
 	xmlOut.attribute("major", Byte.toString(major_xml_version));
 	xmlOut.attribute("minor", Byte.toString(minor_xml_version));
 
-	xmlOut.bumpIndentLevel();
-	xmlOut.indent();
+	xmlOut.indentOut();
+	xmlOut.startElementIndent("ganyschema");
 
-	xmlOut.startElement("ganyschema");
-
-	xmlOut.bumpIndentLevel();
-	xmlOut.indent();
-
-	xmlOut.startElement("namespaces");
+	xmlOut.indentOut();
+	xmlOut.startElementIndent("namespaces");
 
 	for (int i = 0; i < nameSpaces.size(); i++)
 	  {
@@ -974,37 +970,28 @@ public class DBStore {
 	    ns.emitXML(xmlOut);
 	  }
 
-	xmlOut.indent();
-
-	xmlOut.endElement("namespaces");
+	xmlOut.endElementIndent("namespaces");
 
 	// write out our category tree
 
 	xmlOut.skipLine();
 
-	xmlOut.bumpIndentLevel();
-	xmlOut.indent();
-	xmlOut.startElement("object_type_definitions");
+	xmlOut.indentOut();
+	xmlOut.startElementIndent("object_type_definitions");
 
-	xmlOut.bumpIndentLevel();
+	xmlOut.indentOut();
 	rootCategory.emitXML(xmlOut);
 
-	xmlOut.dumpIndentLevel();
-	xmlOut.indent();
+	xmlOut.indentIn();
+	xmlOut.endElementIndent("object_type_definitions");
 
-	xmlOut.endElement("object_type_definitions");
-
-	xmlOut.dumpIndentLevel();
-	xmlOut.indent();
-
-	xmlOut.endElement("ganyschema");
+	xmlOut.indentIn();
+	xmlOut.endElementIndent("ganyschema");
 
 	if (dumpDataObjects)
 	  {
-	    xmlOut.indent();
-	    xmlOut.startElement("ganydata");
-	    
-	    xmlOut.bumpIndentLevel();
+	    xmlOut.startElementIndent("ganydata");
+	    xmlOut.indentOut();
 
 	    Vector bases = getBases();
 	    
@@ -1027,14 +1014,12 @@ public class DBStore {
 		  }
 	      }
 
-	    xmlOut.dumpIndentLevel();
-	    xmlOut.indent();
-	    xmlOut.endElement("ganydata");
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("ganydata");
 	  }
 	
-	xmlOut.dumpIndentLevel();
-	xmlOut.indent();
-	xmlOut.endElement("ganymede");
+	xmlOut.indentIn();
+	xmlOut.endElementIndent("ganymede");
 	xmlOut.write("\n");
 	xmlOut.close();
 	xmlOut = null;

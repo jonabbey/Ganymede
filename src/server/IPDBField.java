@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2000/03/25 05:36:44 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2000/03/27 21:54:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -285,9 +285,7 @@ public class IPDBField extends DBField implements ip_field {
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    xmlOut.indent();
-
-    xmlOut.startElement(this.getXMLName());
+    xmlOut.startElementIndent(this.getXMLName());
 
     if (!isVector())
       {
@@ -299,9 +297,10 @@ public class IPDBField extends DBField implements ip_field {
 
 	for (int i = 0; i < values.size(); i++)
 	  {
-	    xmlOut.bumpIndentLevel();
+	    xmlOut.indentOut();
 	    xmlOut.indent();
-	    xmlOut.dumpIndentLevel();
+	    xmlOut.indentIn();
+
 	    emitIPXML(xmlOut, (Byte[]) values.elementAt(i));
 	  }
 	

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2000/03/25 05:36:48 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2000/03/27 21:54:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -250,9 +250,7 @@ public class StringDBField extends DBField implements string_field {
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    xmlOut.indent();
-
-    xmlOut.startElement(this.getXMLName());
+    xmlOut.startElementIndent(this.getXMLName());
 
     if (!isVector())
       {
@@ -264,9 +262,9 @@ public class StringDBField extends DBField implements string_field {
 
 	for (int i = 0; i < values.size(); i++)
 	  {
-	    xmlOut.bumpIndentLevel();
+	    xmlOut.indentOut();
 	    xmlOut.indent();
-	    xmlOut.dumpIndentLevel();
+	    xmlOut.indentIn();
 	    emitStringXML(xmlOut, (String) values.elementAt(i));
 	  }
 

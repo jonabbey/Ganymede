@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2000/03/25 05:36:41 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2000/03/27 21:54:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.93 $ $Date: 2000/03/25 05:36:41 $
+ * @version $Revision: 1.94 $ $Date: 2000/03/27 21:54:41 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1118,11 +1118,6 @@ public class DBObject implements db_object, FieldType, Remote {
 
     /* -- */
 
-    xmlOut.indent();
-    
-    xmlOut.startElement("object");
-    xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
-
     DBField labelField = (DBField) getLabelField();
 
     if (labelField != null && labelField.getNameSpace() != null)
@@ -1134,10 +1129,12 @@ public class DBObject implements db_object, FieldType, Remote {
 	label = java.lang.Integer.toString(getID());
       }
 
+    xmlOut.startElementIndent("object");
+    xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
     xmlOut.attribute("local", label);
     xmlOut.attribute("num", java.lang.Integer.toString(getID()));
 
-    xmlOut.bumpIndentLevel();
+    xmlOut.indentOut();
 
     Vector fieldVec = getFieldVector(false);
 
@@ -1159,9 +1156,8 @@ public class DBObject implements db_object, FieldType, Remote {
 	field.emitXML(xmlOut);
       }
 
-    xmlOut.dumpIndentLevel();
-    xmlOut.indent();
-    xmlOut.endElement("object");
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("object");
   }
 
   /**

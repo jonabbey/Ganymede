@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 2000/03/25 05:36:41 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 2000/03/27 21:54:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -996,32 +996,27 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    xmlOut.indent();
-    xmlOut.bumpIndentLevel();
-
-    xmlOut.startElement("objectdef");
+    xmlOut.startElementIndent("objectdef");
     xmlOut.attribute("name", XMLUtils.XMLEncode(object_name));
     xmlOut.attribute("id", java.lang.Short.toString(type_code));
+    xmlOut.indentOut();
 
     if (classname != null && !classname.equals(""))
       {
-	xmlOut.indent();
-	xmlOut.startElement("classdef");
+	xmlOut.startElementIndent("classdef");
 	xmlOut.attribute("name", classname);
 	xmlOut.endElement("classdef");
       }
 
     if (embedded)
       {
-	xmlOut.indent();
-	xmlOut.startElement("embedded");
+	xmlOut.startElementIndent("embedded");
 	xmlOut.endElement("embedded");
       }
 
     if (label_id != -1)
       {
-	xmlOut.indent();
-	xmlOut.startElement("label");
+	xmlOut.startElementIndent("label");
 	xmlOut.attribute("fieldid", java.lang.Integer.toString(label_id));
 	xmlOut.endElement("label");
       }
@@ -1036,9 +1031,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
       }
 
-    xmlOut.dumpIndentLevel();
-    xmlOut.indent();
-    xmlOut.endElement("objectdef");
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("objectdef");
   }
 
   /**

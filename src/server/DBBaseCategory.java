@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/03/25 05:36:39 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/03/27 21:54:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -603,13 +603,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
     /* -- */
 
-    xmlOut.indent();
-
-    xmlOut.startElement("category");
+    xmlOut.startElementIndent("category");
     xmlOut.attribute("name", getName());
     xmlOut.skipLine();		// skip line after category start
 
-    xmlOut.bumpIndentLevel();
+    xmlOut.indentOut();
 
     for (int i = 0; i < contents.size(); i++)
       {
@@ -627,9 +625,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  }
       }
 
-    xmlOut.dumpIndentLevel();
-    xmlOut.indent();
-    xmlOut.endElement("category");
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("category");
   }
 
   /**

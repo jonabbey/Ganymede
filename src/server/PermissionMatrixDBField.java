@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2000/03/25 05:36:47 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2000/03/27 21:54:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -816,16 +816,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	innerTable.put(decodeFieldName(key), entry);
       }
 
-    xmlOut.indent();
+    xmlOut.startElementIndent(this.getXMLName());
+    xmlOut.indentOut();
 
-    xmlOut.startElement(this.getXMLName());
-
-    xmlOut.bumpIndentLevel();
-    xmlOut.indent();
-
-    xmlOut.startElement("permissions");
-
-    xmlOut.bumpIndentLevel();
+    xmlOut.startElementIndent("permissions");
+    xmlOut.indentOut();
 
     enum = baseHash.keys();
 
@@ -836,9 +831,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	innerTable = (Hashtable) baseHash.get(key);
 	entry = (PermEntry) innerTable.get("[base]");
 
-	xmlOut.indent();
-	xmlOut.bumpIndentLevel();
-	xmlOut.startElement(arlut.csd.Util.XMLUtils.XMLEncode(key));
+	xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
+	xmlOut.indentOut();
 
 	if (entry != null)
 	  {
@@ -858,24 +852,20 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 	    PermEntry fieldEntry = (PermEntry) innerTable.get(fieldKey);
 
-	    xmlOut.indent();
-	    xmlOut.startElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
+	    xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
 	    xmlOut.attribute("perm", fieldEntry.getXMLCode());
 	    xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
 	  }
 
-	xmlOut.dumpIndentLevel();
-	xmlOut.indent();
-	xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(key));
+	xmlOut.indentIn();
+	xmlOut.endElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
       }
 
-    xmlOut.dumpIndentLevel();
-    xmlOut.indent();
-    xmlOut.endElement("permissions");
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("permissions");
 
-    xmlOut.dumpIndentLevel();
-    xmlOut.indent();
-    xmlOut.endElement(this.getXMLName());
+    xmlOut.indentIn();
+    xmlOut.endElementIndent(this.getXMLName());
   }
 
   public synchronized String getValueString()

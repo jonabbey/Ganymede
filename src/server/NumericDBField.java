@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2000/03/25 05:36:46 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2000/03/27 21:54:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -170,11 +170,7 @@ public class NumericDBField extends DBField implements num_field {
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    /* -- */
-
-    xmlOut.indent();
-
-    xmlOut.startElement(this.getXMLName());
+    xmlOut.startElementIndent(this.getXMLName());
     emitIntXML(xmlOut, value());
     xmlOut.endElement(this.getXMLName());
   }

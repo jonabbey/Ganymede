@@ -7,8 +7,8 @@
 
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/03/25 05:36:44 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/03/27 21:54:44 $
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -170,9 +170,7 @@ public class FloatDBField extends DBField implements float_field {
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    xmlOut.indent();
-
-    xmlOut.startElement(this.getXMLName());
+    xmlOut.startElementIndent(this.getXMLName());
     emitDoubleXML(xmlOut, value());
     xmlOut.endElement(this.getXMLName());
   }

@@ -7,8 +7,8 @@
 
    Created: 24 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/03/25 05:50:07 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/03/27 21:54:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -72,10 +72,25 @@ import arlut.csd.Util.*;
 
 public class XMLDumpContext {
 
+  /**
+   * <P>If true, the Ganymede server thread using this
+   * XMLDumpContext will include plaintext passwords
+   * to the emitted XML file whenever possible</P>
+   */
+
   boolean dumpPlaintextPasswords;
+
+  /**
+   * <P>If true, the Ganymede server thread using this
+   * XMLDumpContext will include the four standard
+   * history fields for each object in the emitted XML
+   * file.</P>
+   */
+
   boolean dumpCreatorModifierInfo;
-  boolean dumpObjectNumbers;
+
   XMLWriter xmlOut;
+
   int indentLevel = 0;
 
   /* -- */
@@ -85,7 +100,6 @@ public class XMLDumpContext {
     this.xmlOut = xmlOut;
     dumpPlaintextPasswords = passwords;
     dumpCreatorModifierInfo = historyInfo;
-    dumpObjectNumbers = objectNumbers;
   }
 
   public XMLWriter getWriter()
@@ -97,21 +111,46 @@ public class XMLDumpContext {
   {
     return xmlOut;
   }
-  
-  public void bumpIndentLevel()
+
+  /**
+   * <P>Increase the indent level one step.  Successive indent(),
+   * startElementIndent(), and endElementIndent() method calls
+   * will indent one level further.</P>
+   *
+   * <P>This method itself produces no output.</P>
+   */
+
+  public void indentOut()
   {
     indentLevel++;
   }
 
-  public void dumpIndentLevel()
+  /**
+   * <P>Decreases the indent level one step.  Successive indent(),
+   * startElementIndent(), and endElementIndent() method calls
+   * will decrease one level fiewer.</P>
+   *
+   * <P>This method itself produces no output.</P>
+   */
+
+  public void indentIn()
   {
     indentLevel--;
   }
+
+  /**
+   * <P>This method directly sets the indention level for subsequent
+   * indent(), startElementIndent(), and endElementIndent() calls.</P>
+   */
 
   public void setIndentLevel(int x)
   {
     indentLevel = x;
   }
+
+  /**
+   * <P>Returns the current indentation level.</P>
+   */
 
   public int getIndent()
   {
@@ -138,9 +177,17 @@ public class XMLDumpContext {
     return dumpCreatorModifierInfo;
   }
 
-  public boolean doDumpObjectNumbers()
+  /**
+   * Starts an element, indented according to the current indent level.
+   * This may be followed by zero or more calls to <code>attribute</code>.
+   * The start-tag will be closed by the first following call to any method
+   * other than <code>attribute</code>.
+   */
+
+  public void startElementIndent(String name) throws IOException
   {
-    return dumpObjectNumbers;
+    indent();
+    startElement(name);
   }
 
   /**
@@ -191,6 +238,22 @@ public class XMLDumpContext {
   public void endAttribute() throws IOException
   {
     xmlOut.endAttribute();
+  }
+
+  /**
+   * Ends an element, indenting before emitting the end tag.  If
+   * the element comprised no content between the startElement
+   * and endElement calls, aside from attributes, then endElement
+   * should be used.  endElementIndent() will always put space
+   * between a start and end tag.
+   * This may output an end-tag or close the current start-tag as an
+   * empty element.
+   */
+
+  public void endElementIndent(String name) throws IOException
+  {
+    indent();
+    endElement(name);
   }
 
   /**

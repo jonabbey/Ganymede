@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 2000/03/25 05:36:45 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 2000/03/27 21:54:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.126 $ %D%
+ * @version $Revision: 1.127 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -419,7 +419,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * out this field to disk.  It is mated with receiveXML().</p>
    */
 
-  synchronized void emitXML(XMLDumpContext dump) throws IOException
+  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     // if we're the containing object field in an embedded object, we
     // don't need to describe ourselves to the XML file.. our
@@ -437,12 +437,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     boolean asEmbedded = isEditInPlace();
 
-    dump.indent();
-    dump.startElement(this.getXMLName());
+    xmlOut.startElementIndent(this.getXMLName());
 
     if (!isVector())
       {
-	emitInvidXML(dump, value(), asEmbedded);
+	emitInvidXML(xmlOut, value(), asEmbedded);
       }
     else
       {
@@ -452,18 +451,18 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    if (!asEmbedded)
 	      {
-		dump.bumpIndentLevel();
-		dump.indent();
-		dump.dumpIndentLevel();
+		xmlOut.indentOut();
+		xmlOut.indent();
+		xmlOut.indentIn();
 	      }
 
-	    emitInvidXML(dump, (Invid) values.elementAt(i), asEmbedded);
+	    emitInvidXML(xmlOut, (Invid) values.elementAt(i), asEmbedded);
 	  }
 
-	dump.indent();
+	xmlOut.indent();
       }
 
-    dump.endElement(this.getXMLName());
+    xmlOut.endElement(this.getXMLName());
   }
 
   /**
@@ -493,7 +492,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * numeric or unique label) in its pre-existing database.</P>
    */
 
-  public void emitInvidXML(XMLDumpContext dump, Invid invid, 
+  public void emitInvidXML(XMLDumpContext xmlOut, Invid invid, 
 			   boolean asEmbedded) throws IOException
   {
     String type;
@@ -519,7 +518,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (asEmbedded)
       {
-	target.emitXML(dump);
+	target.emitXML(xmlOut);
       }
     else
       {
@@ -541,10 +540,10 @@ public final class InvidDBField extends DBField implements invid_field {
 	    label = java.lang.Integer.toString(invid.getNum());
 	  }
     
-	dump.startElement("invid");
-	dump.attribute("type", XMLUtils.XMLEncode(type));
-	dump.attribute("local", label);
-	dump.endElement("invid");
+	xmlOut.startElement("invid");
+	xmlOut.attribute("type", XMLUtils.XMLEncode(type));
+	xmlOut.attribute("local", label);
+	xmlOut.endElement("invid");
       }
   }
 
