@@ -1,11 +1,11 @@
 Ganymede Release 1.0pre1
-May ??, 2000
+June ??, 2000
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
-RELEASE DATE: May ??
+RELEASE DATE: June ??
 
 1. [SERVER] Reworked server synchronization logic
 
@@ -270,8 +270,8 @@ Gil Kloepfer (gil@arlut.utexas.edu) pointed this out.
 I've been laying the groundwork for support for XML database
 export/import, and towards this end, I have evolved the ganymede.db
 database format and the server's DBStore data structures in a
-direction that will make it easier to load data from an XML file, and
-to make the server code simpler.
+direction that may make it easier in the future to load data from an
+XML file, and to make the server code simpler.
 
 The ganymede.db file no longer includes definitions for the mandatory
 fields in the schema section.  The server now implicitly creates these
@@ -279,18 +279,25 @@ field definitions whenever an object type definition is read from the
 ganymede.db file or created with the schema editor.
 
 This not only makes the schema editor simpler, but it also will lessen
-bulk and possibility for error when XML schema definitions are
-supported.
+bulk and possibility for error when schema importation from an XML
+file is supported, as the XML file would only need to specify custom
+object and field types.
 
-In addition, server code and the ganymede.db file format was reworked
-to make keeping track of the order of fields within an object and object
-types within a category simpler, and more robust.
+And while I was mucking around with the file format, I modified server
+code and the ganymede.db file format to make keeping track of the
+order of fields within an object and object types within a category
+simpler, and more robust.
 
 There were also a good number of RMI interface changes to simplify
 schema editing logic.  Signficant changes were made to Base,
 BaseField, Category, FieldTemplate, and SchemaEdit, and the classes
 that implement these interfaces.  A number of effects of these changes
 are discussed in change 1.0pre1#17, below.
+
+These changes in the server are wrapped in file version checks, so
+Ganymede 1.0pre1 should work fine with ganymede.db files from older
+versions of the Ganymede server.  When 1.0pre1 dumps out the
+ganymede.db file, however, it will be dumped in its new form.
 
 17. [SERVER/ADMIN CONSOLE] Made schema editing more robust
 
@@ -498,7 +505,24 @@ so that they are able to handle partial copies, and so that the
 DBField.copyFieldTo() method takes advantage of this to make object
 cloning more robust.
 
-33. [SERVER] Made the server less picky about setting owner groups ahead of time
+33. [CLIENT] Added a fabulous new XML client
+
+When installing the client, a new text-mode client program called
+xmlclient is installed.  xmlclient is able to bulk load data into the
+Ganymede server from an XML file.  Loading data through the xmlclient
+is less efficient than the old custom runDirectLoader hacks that data
+loaded depended on before, but it is far more versatile and lets you
+load in any kind of data that you can specify in your Ganymede schema
+definition with nothing more than a Perl script and this client.
+
+Ultimately, I want to make the xmlclient able to not only load
+arbitrary Ganymede data from an XML file, but for it also to be able
+to connect to an empty Ganymede server and establish a custom schema
+from an XML file.  Supporting this and converting all of the existing
+schema kits to this method of server initialization is the big goal
+left for Ganymede 1.0.
+
+34. [SERVER] Made the server less picky about setting owner groups ahead of time
 
 The Ganymede server now allows non-interactive clients (clients that
 have turned wizards off) to create objects without having previously
@@ -514,10 +538,62 @@ non-supergash user that belongs to multiple owner groups creates
 objects through a non-interactive client, the objects will be owned by
 the first owner group found by the server.
 
-All of this was done to simplify things for XML bulk loading.  See the
-next item for details.
+All of this was done to simplify things for XML bulk loading.
 
-34. [CLIENT] Added a fabulous new XML client
+35. [SERVER] Made the server not complain about redundant invid loading
+
+I'm finding that I need to make a number of tweaks to the server so
+that it behaves in a reasonable way in the XML client context.  In
+many ways, the server was designed around interactive usage, and a
+number of issues are coming up with the batch mode XML client.
+
+In this case, the server previously complained if an object reference
+(invid) was added to an vector object reference field that already
+contained that object reference.
+
+Now, the server silently discards redundant invid additions.  This
+allows the XML client to have a symmetric invid relationship in which
+both sides of the relationship show the link without having the server
+reject the second object's invid links as redundant.
+
+36. [SERVER] Improved error reporting on object editing contention
+
+The Ganymede server previously returned a misleading error message if
+during editing the user attempted to cause an object to be linked to
+an object that was already checked out for editing by another user on
+the Ganymede server.
+
+Now, if a link to an object cannot be established because the object
+is already checked out for editing by another user, the server will
+report the error properly, and will identify the user that has the
+object checked out for editing.
+
+37. [SERVER, CLIENT] Fixed the deferred shutdown option
+
+The 'shutdown the server when all users log off' mechanism was broken,
+and didn't actually shutdown the server even when all active users
+logged off.  This has been fixed.
+
+Additionally, the Ganymede ClientBase class has been reworked slightly
+so that if the server is in deferred shutdown mode, the login failure
+message will explain this, rather than the generic 'bad
+username/password?' message.
+
+38. [SERVER] Added deleteAllElements() to the db_field interface
+
+I added the deleteAllElements() method to the server's DBField class
+and db_field interface, to allow the new XML client to remove all
+values in a Vector DBField without having to do an additional
+roundtrip to the server to get the list of elements currently in the
+field.
+
+39. [SERVER] InvidDBField.createNewEmbedded() now includes a db_object ref
+
+Another change to support the XML client efficiently.  The
+InvidDBField createNewEmbedded() method now includes a db_object
+reference as well as a serialized Invid.  This removes the need for
+the XML client to make an additional round trip request to the server
+in order to get an editing handle on a newly created object.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
