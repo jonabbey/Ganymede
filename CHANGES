@@ -1042,16 +1042,46 @@ in any Java environment now.
 
 The Ganymede server no longer has to block threads from doing most
 queries on the server while a transaction has portions of the database
-locked for updates.  The Ganymede server will now only lock the
-database on a standard GanymedeSession query if the query spans
-more than one object type.
+locked for updates.  The server now makes an interal snapshot vector
+of the objects in an objectbase when transactions are committed, and
+most queries are run against these snapshots.
 
+The Ganymede server will still lock the database on a standard
+GanymedeSession query if the query spans more than one object type.
 In practice, this means that unless you or your code attempts to do a
 query that involves embedded object values (as in searching for a
 system using a give i.p. address held in an embedded interface
 object), the query will never block.  For this reason, it is now safe
 to take advantage of the Ganymede query mechanisms during all stages
 of transaction commit in DBEditObject subclasses.
+
+The main tradeoffs for doing this are a slight increase in memory usage,
+to maintain a second copy of references to all objects in the
+database, and a slight increase in transaction commit time, as the new
+snapshot is constructed.
+
+Another, more subtle trade-off is that support for this level of
+concurrency in the server might be hard to maintain if the Ganymede
+server is ever reworked to move away from its in-memory database.
+
+75. [XML] Simplified the XML schema for integer and boolean fields
+
+The XML file format used to require boolean field values to be
+expressed as <boolean val="true"/> or <boolean val="false"/>, and
+integer numeric values as <int val="123"/> and the like, which seemed
+unnecessarily wordy, since boolean and numeric fields are always
+scalar.
+
+Now you can do things like
+
+<uid>1005</uid> and <option>true</option>
+
+rather than
+
+<uid><int val="1005"/></uid> and <option><boolean val="true"/></option>
+
+The Ganymede XML loader will continue to recognize the older style
+for backwards compatibility..
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
