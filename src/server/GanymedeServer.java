@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 2001/11/09 21:36:05 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 2002/01/26 05:27:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -909,7 +909,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   }
 
   /**
-   * <P>Establishes an GanymedeAdmin object in the server.</P>
+   * <P>This public remotely accessible method is called by the Ganymede admin console and/or
+   * the Ganymede stopServer script to establish a new admin console connection
+   * to the server.  Establishes an GanymedeAdmin object in the server.</P>
    *
    * <P>Adds &lt;admin&gt; as a monitoring admin console.</P>
    *
@@ -1077,6 +1079,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   public static void setShutdown()
   {
+    // turn off the login semaphore.  this will block any new clients
+    // or admin consoles from connecting while we shut down
+
     try
       {
 	GanymedeServer.lSemaphore.disable("shutdown", false, 0);
@@ -1097,6 +1102,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	return;
       }
+
+    // otherwise by setting the shutdown variable to true, we signal
+    // clearActiveUser() to shut us down if the remote client count
+    // drops to 0
 
     shutdown = true;
 
@@ -1119,6 +1128,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     if (!"shutdown".equals(semaphoreState))
       {
+	// turn off the login semaphore.  this will block any new clients or admin consoles
+	// from connecting while we shut down
+
 	try
 	  {
 	    semaphoreState = GanymedeServer.lSemaphore.disable("shutdown", false, 0); // no blocking
@@ -1196,19 +1208,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     // disconnect the admin consoles
 
-    for (int i = 0; i < GanymedeAdmin.consoles.size(); i++)
-      {
-	atmp = (GanymedeAdmin) GanymedeAdmin.consoles.elementAt(i);
+    GanymedeAdmin.closeAllConsoles("Server going down now.");
 
-	try
-	  {
-	    atmp.proxy.forceDisconnect("Server going down now.");
-	  }
-	catch (RemoteException ex)
-	  {
-	    // don't worry about it
-	  }
-      }
+    // log our shutdown and close the log
 
     Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
 					       "Server shutdown",

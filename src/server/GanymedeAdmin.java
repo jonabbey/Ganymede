@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 2002/01/26 04:49:27 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 2002/01/26 05:27:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.54 $ $Date: 2002/01/26 04:49:27 $
+ * @version $Revision: 1.55 $ $Date: 2002/01/26 05:27:28 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -89,12 +89,9 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   /**
    * Static vector of GanymedeAdmin instances, used to
    * keep track of the attached admin consoles.  
-   *
-   * Several other classes use this Vector, so we can't keep it private.
-   * Be sure and synchronize on consoles if you loop over it.
    */
 
-  static Vector consoles = new Vector();
+  private static Vector consoles = new Vector();
 
   /**
    * Static vector of GanymedeAdmin instances for which
@@ -137,6 +134,37 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
      -----====================--------------------====================----- */
 
+  /**
+   * <p>This public static method handles sending disconnect messages
+   * to all attached consoles and cleaning up the
+   * GanymedeAdmin.consoles Vector.</p>
+   */
+
+  public static void closeAllConsoles(String reason)
+  {
+    GanymedeAdmin temp;
+
+    /* -- */
+
+    synchronized (GanymedeAdmin.consoles)
+      {
+	for (int i = 0; i < GanymedeAdmin.consoles.size(); i++)
+	  {
+	    temp = (GanymedeAdmin) GanymedeAdmin.consoles.elementAt(i);
+
+	    try
+	      {
+		temp.forceDisconnect(reason);
+	      }
+	    catch (RemoteException ex)
+	      {
+		// don't worry about it
+	      }
+	  }
+
+	GanymedeAdmin.consoles.removeAllElements();
+      }
+  }
 
   /**
    * This static method is used to send debug log info to
@@ -173,7 +201,40 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	    try
 	      {
 		temp.proxy.changeStatus(stampedLine, true);
-		temp.proxy.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
+	      }
+	    catch (RemoteException ex)
+	      {
+		handleConsoleRMIFailure(temp, ex);
+	      }
+	  }
+      }
+
+    detachBadConsoles();
+  }
+
+  /**
+   * <p>This method sends an updated console count figure to all of the
+   * attached admin consoles.</p>
+   */
+
+  public static void setConsoleCount()
+  {
+    GanymedeAdmin temp;
+    String message;
+
+    /* -- */
+
+    synchronized (GanymedeAdmin.consoles)
+      {
+	message = consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached";
+
+	for (int i = 0; i < consoles.size(); i++)
+	  {
+	    temp = (GanymedeAdmin) consoles.elementAt(i);
+
+	    try
+	      {
+		temp.proxy.changeAdmins(message);
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -545,7 +606,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * console attached to this GanymedeAdmin object.</p>
    */
 
-  serverAdminProxy proxy;
+  private serverAdminProxy proxy;
   
   /* -- */
 
@@ -583,6 +644,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
     try
       {
+	setConsoleCount();
 	admin.setServerStart(Ganymede.startTime);
 	doUpdateTransCount();
 	doUpdateTransCount();
@@ -681,6 +743,21 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
     proxy.changeTasks(scheduleHandles);
   }
 
+  /**
+   * <p>This public method forces a disconnect of the remote admin console
+   * and cleans up the proxy.</p>
+   *
+   * <p>This method *does not* handle removing this GanymedeAdmin
+   * console object from the static GanymedeAdmin.consoles Vector, so
+   * that it can be called from a loop over GanymedeAdmin.consoles in
+   * closeAllConsoles() when the server is being shut down.</p>
+   */
+
+  public void forceDisconnect(String reason) throws RemoteException
+  {
+    proxy.forceDisconnect(reason);
+  }
+
   /* -----====================--------------------====================-----
 
 			    remotely callable methods
@@ -725,6 +802,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	      {
 		Ganymede.debug("Admin console " + adminName + " detached from " + clientHost + ": " + reason);
 	      }
+
+	    setConsoleCount();
 	  }
       }
   }
