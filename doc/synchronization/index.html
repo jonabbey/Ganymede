@@ -279,18 +279,17 @@
     field is used to provide optional run-time configuration
     information for your builder task.</p>
 
-    <img src="screenshots/builder_task.png" class="screenshot"/>
-    <p>On the right is an example of a builder task that has been
+    <p>Below is an example of a builder task that has been
     registered in the Ganymede server.  It is configured to be
     scheduled for execution after transactions are committed, and it
     has a name and a class.</p>
 
-    <p>As soon as the admin were to hit the <code
-    type="button">Commit</code> button at the bottom right, the task
-    would be registered in the server, this task would be registered
-    with the Ganymede server, and would even be immediately scheduled
-    to handle synchronization of whatever changes might have occured
-    in the same transaction.</p>
+    <center><img src="screenshots/builder_task.png" class="screenshot"/></center>
+
+    <p>As soon as the admin hits the <code type="button">Commit</code>
+    button at the bottom right, the task will be registered in the
+    server.  From this commit on, the given task will be scheduled to
+    run each time a transaction is committed.</p>
 
     <hr style="clear: both"/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
