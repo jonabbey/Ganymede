@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -484,6 +484,8 @@ public class DBStore {
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Group";
 	bf.field_order = 1;
+	bf.removable = false;
+	bf.editable = false;
 	bf.comment = "If this boolean is true, this administrator object represents a group of administrators";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
@@ -495,6 +497,8 @@ public class DBStore {
 	bf.loading = true;
 	bf.setNameSpace("username");
 	bf.loading = false;
+	bf.removable = false;
+	bf.editable = false;
 	bf.comment = "Name of this admin group.. if this admin represents a user's admin privs, name is null";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
@@ -504,33 +508,68 @@ public class DBStore {
 	bf.field_name = "Password";
 	bf.maxLength = 8;
 	bf.field_order = 3;
-	bf.comment = "Name of this admin group.. if this admin represents a user's admin privs, name is null";
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Admin Password";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = 4;
 	bf.field_type = FieldType.INVID;
-	bf.field_name = "Member(s)";
+	bf.field_name = "Members";
 	bf.array = true;
 	bf.field_order = 4;
-	bf.comment = "Name of this admin group.. if this admin represents a user's admin privs, name is null";
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Members of this admin group";
+	bf.allowedTarget = 0;
+	bf.targetField = 5;
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = 5;
-	bf.field_type = FieldType.PERMISSIONMATRIX;
-	bf.field_name = "Privileges";
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Groups";
+	bf.array = true;
 	bf.field_order = 5;
-	bf.comment = "Permissions for this admin entity";
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Admin group this administrative account is a member of";
+	bf.allowedTarget = 0;
+	bf.targetField = 4;
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = 6;
 	bf.field_type = FieldType.INVID;
+	bf.field_name = "User";
+	bf.field_order = 6;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If this administrative account is a user admin, the user account";
+	bf.allowedTarget = 1;
+	bf.targetField = 3;
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 7;
+	bf.field_type = FieldType.PERMISSIONMATRIX;
+	bf.field_name = "Privileges";
+	bf.field_order = 7;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Permissions for this admin entity";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = 8;
+	bf.field_type = FieldType.INVID;
 	bf.field_name = "Objects owned";
 	bf.allowedTarget = -2;	// any
-	bf.targetField = 0;
-	bf.field_order = 6;
+	bf.targetField = 0;	// owner list field
+	bf.field_order = 8;
+	bf.removable = false;
+	bf.editable = false;
 	bf.comment = "Permissions for this admin entity";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
@@ -551,6 +590,8 @@ public class DBStore {
 	bf.loading = true;
 	bf.setNameSpace("username");
 	bf.loading = false;
+	bf.removable = false;
+	bf.editable = false;
 	bf.comment = "User name for an individual privileged to log into Ganymede and/or the network";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
@@ -560,6 +601,8 @@ public class DBStore {
 	bf.field_name = "Password";
 	bf.maxLength = 8;
 	bf.field_order = 2;
+	bf.removable = false;
+	bf.editable = false;
 	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
@@ -570,6 +613,8 @@ public class DBStore {
 	bf.targetField = 4;
 	bf.field_name = "Admin Role";
 	bf.field_order = 3;
+	bf.removable = false;
+	bf.editable = false;
 	bf.comment = "If this user can act as an administrator, this field points to the admin object for this user";
 	b.fieldHash.put(new Short(bf.field_code), bf);
     
