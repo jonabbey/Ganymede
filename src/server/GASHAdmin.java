@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -229,6 +229,16 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     aSession.dumpSchema();
   }
 
+  void reloadClasses() throws RemoteException
+  {
+    if (!adminName.equals("supergash"))
+      {
+	return;
+      }
+
+    aSession.reloadCustomClasses();
+  }
+
   void runInvidTest() throws RemoteException
   {
     if (!adminName.equals("supergash"))
@@ -301,6 +311,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
   MenuItem quitMI = null;
   MenuItem dumpMI = null;
   MenuItem dumpSchemaMI = null;
+  MenuItem reloadClassesMI = null;
   MenuItem schemaMI = null;
   MenuItem shutdownMI = null;
   MenuItem runInvidTestMI = null;
@@ -368,6 +379,9 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     dumpSchemaMI = new MenuItem("Dump Schema");
     dumpSchemaMI.addActionListener(this);
 
+    reloadClassesMI = new MenuItem("Reload Custom Classes");
+    reloadClassesMI.addActionListener(this);
+
     shutdownMI = new MenuItem("Shutdown Ganymede");
     shutdownMI.addActionListener(this);
 
@@ -386,6 +400,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     controlMenu.add(shutdownMI);
     controlMenu.add(killAllMI);
     controlMenu.add(schemaMI);
+    controlMenu.add(reloadClassesMI);
     controlMenu.add(runInvidTestMI);
     controlMenu.addSeparator();
     controlMenu.add(dumpMI);
@@ -720,6 +735,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 	controlMenu.remove(dumpMI);
 	controlMenu.remove(dumpSchemaMI);
 	controlMenu.remove(shutdownMI);
+	controlMenu.remove(reloadClassesMI);
 	controlMenu.remove(runInvidTestMI);
 	controlMenu.remove(schemaMI);
 	controlMenu.remove(killAllMI);
@@ -783,6 +799,17 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 	try
 	  {
 	    admin.dumpSchema();
+	  }
+	catch (RemoteException e)
+	  {
+	    admin.forceDisconnect("Couldn't talk to server");
+	  }
+      }
+    else if (event.getSource() == reloadClassesMI)
+      {
+	try
+	  {
+	    admin.reloadClasses();
 	  }
 	catch (RemoteException e)
 	  {

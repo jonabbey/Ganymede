@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -592,6 +592,13 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 	    // don't worry about it
 	  }
       }
+
+    Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
+					       "Server shutdown",
+					       null,
+					       null,
+					       null,
+					       null));
     
     try
       {
@@ -672,7 +679,73 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   /**
    *
-   * dump the current db schema to disk
+   * This method causes the server to reload any registered
+   * custom classes, and can be run after a schema edit
+   * to cause the new classes to take over management of
+   * their respective object types.
+   *
+   */
+
+  public synchronized boolean reloadCustomClasses()
+  {
+    Enumeration enum;
+    DBObjectBase base;
+
+    /* -- */
+    
+    synchronized (Ganymede.server)
+      {
+	if (GanymedeServer.sessions.size() != 0)
+	  {
+	    Ganymede.debug("Can't reload classes, users logged in");
+	    return false;
+	  }
+	else if (!Ganymede.db.schemaEditInProgress)
+	  {
+	    Ganymede.db.schemaEditInProgress = true;
+	  }
+	else
+	  {
+	    Ganymede.debug("Can't reload classes, schema edit already in progress. ");
+	    return false;
+	  }
+      }
+
+    synchronized (Ganymede.db)
+      {
+	Ganymede.debug("entering reloadCustomClasses synchronization block");
+
+	enum = Ganymede.db.objectBases.elements();
+
+	if (enum != null)
+	  {
+	    while (enum.hasMoreElements())
+	      {
+		base = (DBObjectBase) enum.nextElement();
+		
+		try
+		  {
+		    base.createHook();
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("argh, weird exception: " + ex);
+		  }
+	      }
+	  }
+      }
+
+    synchronized (Ganymede.server)
+      {
+	Ganymede.db.schemaEditInProgress = false;
+      }
+
+    return true;
+  }
+
+  /**
+   *
+   * run a long-running verification suite on the invid links
    *
    */
 
