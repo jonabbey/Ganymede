@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 1999/11/22 20:16:08 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2000/01/04 07:00:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -350,7 +350,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    Vector recipients = new Vector();
 
-	    recipients.addElement(clientName); // this might well bounce.  C'est la vie.
+	    //	    recipients.addElement(clientName); // this might well bounce.  C'est la vie.
 
 	    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
 						       "Bad login attempt for username: " + 

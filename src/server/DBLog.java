@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/10/21 16:01:23 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2000/01/04 07:00:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -881,6 +881,10 @@ public class DBLog {
 	    if (event.admin != null)
 	      {
 		name = adminPersonaCustom.convertAdminInvidToString(event.admin, session.getSession());
+	      }
+	    else
+	      {
+		name = event.adminName;	// hopefully this will be a valid email target.. used for bad login attempts
 	      }
 
 	    if (name != null)
