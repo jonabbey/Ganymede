@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 2001/10/01 18:37:06 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 2001/11/14 21:29:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -445,7 +445,7 @@ public class DBEditSet {
       operations in an unsafe way, we'll just have to suffer that.
     */
 
-    if (true)
+    if (false)
       {
 	Thread thisThread = java.lang.Thread.currentThread();
 
