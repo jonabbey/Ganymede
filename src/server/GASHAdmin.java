@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -233,10 +233,14 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
     //    setBackground(Color.white);
 
-    setLayout(new BorderLayout());
+    GridBagLayout topGBL = new GridBagLayout();
+    GridBagConstraints topGBC = new GridBagConstraints();
 
-    table = new rowTable(colWidths, headers, this, popMenu);
-    add("South", new Box(table, "Users Connected"));
+    setLayout(topGBL);
+
+    // set up our top panel, containing a labeled
+    // text field showing the server we're connected
+    // to.
 
     hostLabel = new Label("Ganymede Server Host:");
 
@@ -261,21 +265,49 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     topPanel.add(hostLabel);
 
     gbc.anchor = GridBagConstraints.WEST;
+
     gbc.weightx = 100;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.fill = GridBagConstraints.BOTH;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = 1;
     gbl.setConstraints(hostField, gbc);
     topPanel.add(hostField);
 
-    add("North", new Box(topPanel, "Server"));
+    Box topBox = new Box(topPanel, "Server");
+
+    //topGBC.anchor = GridBagConstraints.NORTH;
+    topGBC.fill = GridBagConstraints.HORIZONTAL;
+    topGBC.gridwidth = GridBagConstraints.REMAINDER;
+    topGBC.gridheight = 1;
+    topGBC.weightx = 1.0;
+
+    topGBC.weighty = 0;
+
+    topGBL.setConstraints(topBox, topGBC);
+    add(topBox);
+
+    // set up our middle text area
+
+    topGBC.fill = GridBagConstraints.BOTH;
+    topGBC.weighty = 50;
 
     statusArea = new TextArea("Admin Console Testing\n", 6, 50);
     statusArea.setEditable(false);
     statusArea.setBackground(SystemColor.text);
     statusArea.setForeground(SystemColor.textText);
 
-    add("Center", new Box(statusArea, "Server Log"));
+    Box statusBox = new Box(statusArea, "Server Log");
+
+    topGBL.setConstraints(statusBox, topGBC);
+    add(statusBox);
+
+    // and our bottom user table
+
+    table = new rowTable(colWidths, headers, this, popMenu);
+    Box tableBox = new Box(table, "Users Connected");
+
+    topGBL.setConstraints(tableBox, topGBC);
+    add(tableBox);
 
     pack();
     show();
