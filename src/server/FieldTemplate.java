@@ -7,18 +7,20 @@
    
    Created: 5 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/10/29 16:14:08 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/02/21 22:34:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -65,7 +67,7 @@ package arlut.csd.ganymede;
  * <p>The {@link arlut.csd.ganymede.FieldInfo FieldInfo} object is used to return
  * the value information associated with an actual instance of a field.</p>
  *
- * @version $Revision: 1.12 $ $Date: 1999/10/29 16:14:08 $ $Name:  $
+ * @version $Revision: 1.13 $ $Date: 2000/02/21 22:34:08 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 

@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 1999/10/29 16:12:25 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 2000/02/21 22:34:05 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -23,10 +23,12 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -76,17 +78,16 @@ import javax.swing.border.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <P>This class implements a modal dialog that is popped up to
+ * generate a {@link arlut.csd.ganymede.Query Query} object that will
+ * be used by the rest of the ganymede.client package to submit the
+ * query to the server for handling.</P>
  *
- * This class implements a modal dialog that is popped up to generate
- * a Query object that will be used by the rest of the ganymede.client
- * package to submit the query to the server for handling.
- *
- * Once an instance of querybox is constructed, the client code will
- * call myShow() to pop up the dialog and retrieve the Query object.
+ * <P>Once an instance of querybox is constructed, the client code will
+ * call myShow() to pop up the dialog and retrieve the Query object.</P>
  * 
- * If the user chooses not to submit a Query after all, myShow() will
- * return null.
- *  
+ * <P>If the user chooses not to submit a Query after all, myShow() will
+ * return null.</P>
  */
 
 class querybox extends JDialog implements ActionListener, ItemListener {
@@ -156,6 +157,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     returnVal;
 
   Image queryIcon;
+
   /* -- */
 
   /**
@@ -1326,7 +1328,7 @@ class QueryRow implements ItemListener {
       {
 	compareChoice.addItem("Contain");
 	
-	if (field.isString() || field.isInvid())
+	if (field.isString() || field.isInvid() || field.isIP())
 	  {
 	    compareChoice.addItem("Contain Matching [Case Insensitive]");
 	    compareChoice.addItem("Contain Matching");
@@ -1359,6 +1361,8 @@ class QueryRow implements ItemListener {
     else if (field.isIP())
       {
 	compareChoice.addItem("==");
+	compareChoice.addItem("matching [Case Insensitive]");
+	compareChoice.addItem("matching");
 	compareChoice.addItem("Start With");
 	compareChoice.addItem("End With");
       }
@@ -1565,7 +1569,7 @@ class QueryRow implements ItemListener {
       }
     else if (field.isIP())
       {
-	if (!(operand instanceof JIPField))
+	if (!(operand instanceof JstringField))
 	  {
 	    if (operand != null)
 	      {
@@ -1573,7 +1577,7 @@ class QueryRow implements ItemListener {
 		operandContainer.remove(operand);
 	      }
 	    
-	    operand = new JIPField(true, true);
+	    operand = new JstringField();
 	    addOperand = true;
 	  }
       }
@@ -1672,15 +1676,49 @@ class QueryRow implements ItemListener {
 	JCheckBox boolField = (JCheckBox) operand;
 	value = new Boolean(boolField.isSelected());
       }
-    else if (operand instanceof JIPField)
-      {
-	JIPField ipField = (JIPField) operand;
-	value = ipField.getValue();
-      }
     else if (operand instanceof JstringField)
       { 
 	JstringField stringField = (JstringField) operand;
 	value = stringField.getValue();
+
+	String strValue = (String) value;
+
+	if (field.isIP())
+	  {
+	    String opName = (String) compareChoice.getSelectedItem();
+
+	    // we only do a string operation if our operator is
+	    // "matching" or "matching [Case Insensitive]", otherwise
+	    // we'll send a binary array of Byte objects up to the
+	    // server for the IP match.
+
+	    if (!opName.equals("matching") && 
+		!opName.equals("matching [Case Insensitive]") &&
+		!opName.equals("Contain Matching [Case Insensitive]") &&
+		!opName.equals("Contain Matching"))
+	      {
+		if (strValue.indexOf(':') != -1)
+		  {
+		    try
+		      {
+			value = JIPField.genIPV6bytes(strValue);
+		      }
+		    catch (IllegalArgumentException ex)
+		      {
+		      }
+		  }
+		else
+		  {
+		    try
+		      {
+			value = JIPField.genIPV4bytes(strValue);
+		      }
+		    catch (IllegalArgumentException ex)
+		      {
+		      }
+		  }
+	      }
+	  }
       }
     else if (operand instanceof JInvidChooser)
       {

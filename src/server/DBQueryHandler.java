@@ -6,18 +6,20 @@
    
    Created: 10 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/06/19 03:21:01 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/02/21 22:34:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -73,7 +75,7 @@ import gnu.regexp.*;
  * @see QueryNode
  * @see Query
  *
- * @version $Revision: 1.23 $ $Date: 1999/06/19 03:21:01 $ $Name:  $
+ * @version $Revision: 1.24 $ $Date: 2000/02/21 22:34:08 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -434,8 +436,87 @@ public class DBQueryHandler {
 		  }
 	      }
 
-	    // i.p. address can be arrays.. note that the client's query box will
-	    // pass us a true array of Bytes.
+	    // The client can pass us a String for IP field
+	    // comparisons.. we need to turn IP values in the field
+	    // we're looking at to Strings for the compare.
+
+	    if (n.value instanceof String &&
+		(((value != null) && value instanceof Byte[]) ||
+		((values != null) && (values.size() > 0) && (values.elementAt(0) instanceof Byte[]))))
+	      {
+		String
+		  s1 = null,
+		  s2 = null;
+
+		/* -- */
+
+		if (debug)
+		  {
+		    System.err.println("Doing a string/IP address compare");
+		  }
+
+		if (n.arrayOp == n.NONE)
+		  {
+		    s1 = (String) n.value;
+		    Byte[] ipBytes = (Byte[]) value;
+		   
+		    if (ipBytes.length == 4)
+		      {
+			s2 = IPDBField.genIPV4string(ipBytes);
+		      }
+		    else if (ipBytes.length == 16)
+		      {
+			s2 = IPDBField.genIPV6string(ipBytes);
+		      }
+		    
+		    if (debug)
+		      {
+			System.err.println("Comparison: " + n + ", string check = " + s2);
+		      }
+
+		    return compareString(n, s1, s2);
+		  }
+		else if (n.arrayOp == n.CONTAINS)
+		  {
+		    s1 = (String) n.value;
+		    
+		    /* -- */
+		    
+		    if (debug)
+		      {
+			System.err.println("Doing a vector string/ip address compare against value/regexp " + s1);
+		      }
+		    
+		    for (int i = 0; i < values.size(); i++)
+		      {
+			Byte[] ipBytes = (Byte[]) values.elementAt(i)
+;
+			if (ipBytes.length == 4)
+			  {
+			    s2 = IPDBField.genIPV4string(ipBytes);
+			  }
+			else if (ipBytes.length == 16)
+			  {
+			    s2 = IPDBField.genIPV6string(ipBytes);
+			  }
+			
+			if (compareString(n, s1, s2))
+			  {
+			    return true;
+			  }
+		      }
+		  }
+		else
+		  {
+		    return false;	// invalid comparator
+		  }
+	      }
+
+	    // i.p. address can be arrays.. note that the client's
+	    // query box will pass us a true array of Bytes for
+	    // equality, starts with, or ends with tests.  if the user
+	    // is attempting a regexp match, the parameter will be a
+	    // String.
 
 	    if (n.value instanceof Byte[])
 	      {
