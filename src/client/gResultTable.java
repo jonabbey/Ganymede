@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 1999/04/01 22:16:39 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 1999/04/09 20:31:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import javax.swing.*;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
- * @version $Revision: 1.25 $ $Date: 1999/04/01 22:16:39 $ $Name:  $
+ * @version $Revision: 1.26 $ $Date: 1999/04/09 20:31:40 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -140,6 +140,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   JMenuItem viewMI;
   JMenuItem editMI;
 
+  JToolBar toolbar;
   /* -- */
 
   /**
@@ -172,7 +173,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     contentPane.setLayout(new BorderLayout());
 
+    toolbar = createToolBar();
+    contentPane.add("North",toolbar);
+
     loadResults(results);
+
   }
 
   public void actionPerformed(ActionEvent event)
@@ -754,6 +759,61 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     fileM.add(reloadMI);
     
     return menuBar;
+  }
+
+
+  /**
+   * Creates and initializes the JInternalFrame's toolbar.
+   */
+
+  private JToolBar createToolBar()
+  {
+    Image mailIcon = PackageResources.getImageResource(this, "queryTB_mail.gif", getClass());
+    Image saveIcon = PackageResources.getImageResource(this, "queryTB_save.gif", getClass());
+    Image refreshIcon = PackageResources.getImageResource(this, "queryTB_refresh.gif", getClass());
+
+    Insets insets = new Insets(0,0,0,0);
+    JToolBar toolBarTemp = new JToolBar();
+
+    toolBarTemp.setBorderPainted(true);
+    toolBarTemp.setFloatable(false);
+    toolBarTemp.setMargin(insets);
+
+    JButton b = new JButton("  Mail  ", new ImageIcon(mailIcon));
+    b.setFont(new Font("SansSerif", Font.PLAIN, 10));
+    b.setMargin(insets);
+    b.setActionCommand("Mail Report");
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
+    b.setToolTipText("Email results");
+    b.addActionListener(this);
+    toolBarTemp.add(b);
+
+    // No save feature if running from applet
+    if (!glogin.isApplet())
+      {
+	b = new JButton("  Save  ", new ImageIcon(saveIcon));
+	b.setFont(new Font("SansSerif", Font.PLAIN, 10));
+	b.setMargin(insets);
+	b.setActionCommand("Save Report");
+	b.setVerticalTextPosition(b.BOTTOM);
+	b.setHorizontalTextPosition(b.CENTER);
+	b.setToolTipText("Save results");
+	b.addActionListener(this);
+	toolBarTemp.add(b);
+      }
+    
+    b = new JButton("Refresh", new ImageIcon(refreshIcon));
+    b.setFont(new Font("SansSerif", Font.PLAIN, 10));
+    b.setMargin(insets);
+    b.setActionCommand("Refresh Query");
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
+    b.setToolTipText("Refresh query");
+    b.addActionListener(this);
+    toolBarTemp.add(b);
+
+    return toolBarTemp;
   }
 
 }
