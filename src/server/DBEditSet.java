@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.118 $
-   Last Mod Date: $Date: 2002/03/14 23:13:30 $
+   Version: $Revision: 1.119 $
+   Last Mod Date: $Date: 2002/03/15 02:10:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -148,6 +148,9 @@ public class DBEditSet {
    * <p>A record of the {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}'s
    * touched by this transaction.  These DBObjectBase's will be locked
    * when this transaction is committed.</p>
+   *
+   * <p>This Hashtable maps DBObjectBase's to this, serving as a
+   * pre-Java 2 HashSet.</p>
    */
 
   private Hashtable basesModified;
@@ -936,11 +939,6 @@ public class DBEditSet {
 
   public synchronized ReturnVal commit()
   {
-    Vector baseSet = null;
-    Vector committedObjects = null;
-
-    /* -- */
-
     if (debug)
       {
 	System.err.println(session.key + ": DBEditSet.commit(): entering");
@@ -961,10 +959,10 @@ public class DBEditSet {
 
     try
       {
-	baseSet = commit_lockBases(); // may block
-	committedObjects = commit_handlePhase1();
-	commit_handlePhase2(committedObjects);
-	commit_integrateChanges(committedObjects, baseSet);
+	commit_lockBases(); // may block
+	commit_handlePhase1();
+	commit_handlePhase2();
+	commit_integrateChanges();
 	releaseWriteLock();
 	this.deconstruct();
 
@@ -1069,7 +1067,7 @@ public class DBEditSet {
    * CommitNonFatalException with ReturnVal information encoded.</p>
    */
 
-  private final Vector commit_handlePhase1() throws CommitNonFatalException
+  private final void commit_handlePhase1() throws CommitNonFatalException
   {
     Vector committedObjects;
     Enumeration enum;
@@ -1120,8 +1118,6 @@ public class DBEditSet {
 	    committedObjects.addElement(eObj);
 	  }
       }
-
-    return committedObjects;
   }
 
   /**
@@ -1182,12 +1178,9 @@ public class DBEditSet {
    * <p>This private helper method for the commit() method records
    * the creation/modification timestamp for the vector of
    * committed objects, then calls commitPhase2() on them.</p>
-   *
-   * @param committedObjects Vector of DBEditObjects that have been
-   * created, changed, or deleted during this transaction
    */
 
-  private final void commit_handlePhase2(Vector committedObjects)
+  private final void commit_handlePhase2()
   {
     DateDBField df;
     StringDBField sf;
@@ -1202,9 +1195,11 @@ public class DBEditSet {
     
     result = result.intern();
 
-    for (int i = 0; i < committedObjects.size(); i++)
+    Enumeration enum = objects.elements();
+
+    while (enum.hasMoreElements())
       {
-	eObj = (DBEditObject) committedObjects.elementAt(i);
+	eObj = (DBEditObject) enum.nextElement();
 	
 	// force a change of date and modifier information
 	// into the object without using the normal field
@@ -1266,39 +1261,32 @@ public class DBEditSet {
    * <p>This private helper method for commit() integrates all
    * committed objects back into the DBStore, handling on-disk change
    * journaling, transaction logging, namespaces, and more.</p>
-   *
-   * @param committedObjects Vector of DBEditObjects that have been
-   * created, changed, or deleted during this transaction
-   *
-   * @param baseSet Vector of DBObjectBases that contain objects
-   * created, changed, or deleted during this transaction
    */
 
-  private final void commit_integrateChanges(Vector committedObjects, Vector baseSet) throws CommitFatalException
+  private final void commit_integrateChanges() throws CommitFatalException
   {
-    commit_createLogEvents(committedObjects);
+    commit_createLogEvents();
     commit_persistTransaction();
     commit_logTransaction();
-    commit_replaceObjects(committedObjects);
+    commit_replaceObjects();
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
-    commit_updateBases(baseSet);
+    commit_updateBases();
   }
 
   /**
    * <p>This private helper method is executed in the middle of the
    * commit() method, and handles logging for any changes made to
    * objects during the committed transaction.</p>
-   *
-   * @param committedObjects Vector of DBEditObjects that have been created, changed, or deleted
-   * during this transaction
    */
 
-  private final void commit_createLogEvents(Vector committedObjects)
+  private final void commit_createLogEvents()
   {
-    for (int i = 0; i < committedObjects.size(); i++)
+    Enumeration enum = objects.elements();
+
+    while (enum.hasMoreElements())
       {
-	commit_createLogEvent((DBEditObject) committedObjects.elementAt(i));
+	commit_createLogEvent((DBEditObject) enum.nextElement());
       }
   }
 
@@ -1693,8 +1681,19 @@ public class DBEditSet {
 	responsibleInvid = null;
       }
 
-    Ganymede.log.logTransaction(this.logEvents, responsibleName, 
-				responsibleInvid, this);
+    // exceptions during logging aren't important enough to break a
+    // transaction commit in progress, but we do want to record any
+    // such
+
+    try
+      {
+	Ganymede.log.logTransaction(this.logEvents, responsibleName, 
+				    responsibleInvid, this);
+      }
+    catch (Throwable ex)
+      {
+	Ganymede.debug(Ganymede.stackTrace(ex));
+      }
 
     // for garbage collection
     
@@ -1705,23 +1704,20 @@ public class DBEditSet {
   /**
    * <p>Private helper method for commit() that integrates committed
    * objects back into the DBStore hashes.</p>
-   *
-   * @param committedObjects Vector of DBEditObjects that have been
-   * created, changed, or deleted during this transaction
    */
 
-  private final void commit_replaceObjects(Vector committedObjects)
+  private final void commit_replaceObjects()
   {
     DBEditObject eObj;
     DBObjectBase base;
 
     /* -- */
 
-    int committedObjectsSize = committedObjects.size();
-    
-    for (int i = 0; i < committedObjectsSize; i++)
+    Enumeration enum = objects.elements();
+
+    while (enum.hasMoreElements())
       {
-	eObj = (DBEditObject) committedObjects.elementAt(i);
+	eObj = (DBEditObject) enum.nextElement();
 
 	base = eObj.getBase();
 
@@ -1803,6 +1799,10 @@ public class DBEditSet {
 	    break;
 	  }
       }
+
+    // success, void the object hash
+
+    objects.clear();
   }
 
   /**
@@ -1836,13 +1836,13 @@ public class DBEditSet {
    * created, changed, or deleted during this transaction
    */
 
-  private final void commit_updateBases(Vector baseSet)
+  private final void commit_updateBases()
   {
-    DBObjectBase base;
+    Enumeration enum = this.basesModified.keys();
 
-    for (int i = 0; i < baseSet.size(); i++)
+    while (enum.hasMoreElements())
       {
-	base = (DBObjectBase) baseSet.elementAt(i);
+	DBObjectBase base = (DBObjectBase) enum.nextElement();
 	
 	base.updateTimeStamp();
 	
