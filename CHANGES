@@ -30,7 +30,52 @@ We imported the old Ganymede CVS repository into Subversion.  I went
 through all of the source files and replaced the old CVS keywords with
 Subversion keywords.
 
-2. [SERVER] Added support for SSHA password hashing in DBPasswordField
+2. [SERVER] Localization
+
+The Ganymede server now incorporates a method for localizing message
+strings.  A new class, arlut.csd.Util.TranslationService, has been
+added which handles string lookup and templatization from string
+resource files held in the src/resources tree.  
+
+The following classes have had their message strings pulled out into
+localization resource files:
+
+	DBEditSet              GanymedeSession
+	DBField                InvidDBField
+	DBObject               JythonServerProtocol
+	DBObjectBase           JythonServerWorker
+	DBSession              dumpAndArchiveTask
+	DBStore                dumpTask
+	Ganymede               gcTask
+	GanymedeServer         memoryStatusTask
+
+The default, American English versions of these localization files are
+simply called <classname>.properties.  When the Ganymede server is run
+under a JVM that is configured with a different locality string, the
+TranslationService class will automatically read any translated
+resources from the appropriate file.
+
+For instance, if an adopter wanted to translate the messages used by
+the arlut.csd.ganymede.server.GanymedeSession class into French, he
+would create the file
+
+src/resources/arlut/csd/ganymede/server/GanymedeSession_fr.properties
+
+Ganymede uses the standard Java Internationalization method for
+handling message strings, with interpolated parameters injected into
+the message strings with tokens like {0}, {1}, and etc.
+
+The new Ant build system provides a task to cross check the
+localization resources against the Ganymede source code, to ensure
+that the localization message strings match the usage in the Ganymede
+source code.  If you run 'ant validate' in the src directory, a Perl
+script is run to do this analysis and verification.
+
+Note that the 'ant validate' task does not yet support verification of
+resources with a country or language code extension.  This means that
+translated resources are not yet properly handled.
+
+3. [SERVER] Added support for SSHA password hashing in DBPasswordField
 
 Here at ARL, we're working to move from NIS to LDAP for our Unix and
 Mac OS X systems.  Since the OpenLDAP server doesn't support md5Crypt
@@ -50,16 +95,16 @@ against SSHA hashes can be pretty successful.  The primary benefit of
 SSHA over Crypt in the LDAP context is that longer passwords can be
 supported (vs. the 8 character limit of traditional Unix Crypt).
 
-3. [SERVER] Integrated Jython interpreter support in the server
+4. [SERVER] Integrated Jython interpreter support in the server
 
 XXX - to be written.  Discuss DBEditObject subclasses, tasks.
 
-4. [SERVER] Java 5.0 fixes
+5. [SERVER] Java 5.0 fixes
 
 XXX - GUI threading stuff, use of FoxTrot for fire-and-wait GUI
 updates in the client.
 
-5. [SERVER] The return of passive password capture
+6. [SERVER] The return of passive password capture
 
 Thanks to Deepak, we have now re-enabled the passive password capture
 logic in the PasswordDBField class that was removed in 1.0.10.
@@ -75,7 +120,7 @@ capture is that it enables Ganymede to learn about plaintext from
 interacting with a user, while still allowing us to forego saving
 plaintext passwords persistently to our ganymede.db file.
 
-6. [SERVER] Made transaction commit more resilient to exceptions in commitPhase1
+7. [SERVER] Made transaction commit more resilient to exceptions in commitPhase1
 
 The DBEditSet's transaction commit logic was vulnerable to getting
 into a confused and broken state if an object's commitPhase1() method
@@ -85,7 +130,7 @@ consistent state, ready to try committing again (though it will
 probably fail if the error condition in the plugin classes is not
 fixed).
 
-7. [SERVER, CLIENT] Added SSL support, 1.4 requirement
+8. [SERVER, CLIENT] Added SSL support, 1.4 requirement
 
 Added the arlut.csd.ganymede.server.GanymedeRMIManager class to handle
 all RMI exports, which support for SSL encryption of client/server
@@ -101,7 +146,7 @@ The SSL support now present in Ganymede requires a minimum of Java 1.4
 to work.  We are therefore intending to make JDK 1.4 a minimum
 requirement of Ganymede 2.0.
 
-8. [SERVER, CLIENT] Changes to Query system (Deepak)
+9. [SERVER, CLIENT] Changes to Query system (Deepak)
 
 XXX - I forget exactly what Deepak did, but I think the whole
 QueryResults system got changed.. ? XXX
