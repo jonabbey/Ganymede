@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -644,6 +644,43 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   {
     return Ganymede.db.rootCategory;
   }
+
+  /**
+   *
+   * Returns a vector of field definition templates, in display order.
+   *
+   * This vector may be cached, as it is static for this object type.
+   *
+   * @see arlut.csd.ganymede.FieldTemplate
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public synchronized Vector getFieldTemplateVector(short baseId)
+  {
+    Vector results = new Vector();
+    Enumeration enum;
+    DBObjectBaseField fieldDef;
+    DBObjectBase base;
+
+    /* -- */
+
+    base = session.store.getObjectBase(baseId);
+
+    synchronized (base)
+      {
+	enum = base.sortedFields.elements();;
+	
+	while (enum.hasMoreElements())
+	  {
+	    fieldDef = (DBObjectBaseField) enum.nextElement();
+
+	    results.addElement(fieldDef.template);
+	  }
+      }
+
+    return results;
+  }
+
 
   /**
    *

@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.14 $ %D%
+ * @version $Revision: 1.15 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -130,6 +130,18 @@ public interface Session extends Remote {
    */
 
   Category    getRootCategory() throws RemoteException;
+
+  /**
+   *
+   * Returns a vector of field definition templates, in display order.
+   *
+   * This vector may be cached, as it is static for this object type.
+   *
+   * @see arlut.csd.ganymede.FieldTemplate
+   *
+   */
+
+  Vector      getFieldTemplateVector(short baseId) throws RemoteException;
 
   /**
    *
