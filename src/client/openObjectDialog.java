@@ -69,6 +69,10 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
   String lastValue = null;
 
+  String selectedBaseName = null;
+  String selectedObjectName = null;
+  boolean selectedFound = false;
+
   /* -- */
 
   public openObjectDialog(gclient client)
@@ -76,7 +80,15 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     super(client, "Open object", true);
 
     this.client = client;
-    
+
+    InvidNode selectedNode = client.getSelectedObjectNode();
+
+    if (selectedNode != null)
+      {
+	selectedBaseName = selectedNode.getTypeText();
+	selectedObjectName = selectedNode.getText();
+      }
+
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
     
@@ -135,10 +147,43 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     //
 
     listHandles = client.sortListHandleVector(listHandles);
-    for (int i = 0; i < listHandles.size(); i++)
+
+    if (selectedBaseName != null)
       {
-	type.addItem(listHandles.elementAt(i));
+	// the first thing we add will start off selected.. add
+	// the currently selected object type first,
+
+	for (int i = 0; i < listHandles.size(); i++)
+	  {
+	    listHandle lh = (listHandle) listHandles.elementAt(i);
+
+	    if (lh.getLabel().equals(selectedBaseName))
+	      {
+		type.addItem(lh);
+		selectedFound = true;
+	      }
+	  }
+
+	// and now add the rest, in case they change their mind.
+
+	for (int i = 0; i < listHandles.size(); i++)
+	  {
+	    listHandle lh = (listHandle) listHandles.elementAt(i);
+
+	    if (!lh.getLabel().equals(selectedBaseName))
+	      {
+		type.addItem(lh);
+	      }
+	  }
       }
+    else
+      {
+	for (int i = 0; i < listHandles.size(); i++)
+	  {
+	    type.addItem(listHandles.elementAt(i));
+	  }
+      }
+
     gbc.gridx = 0;
     gbc.gridy = 1;
 
@@ -157,6 +202,12 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     middle.add(type);
 	
     text = new JTextField(20);
+
+    if (selectedFound && selectedObjectName != null)
+      {
+	text.setText(selectedObjectName);
+      }
+
     text.addActionListener(this);
     JLabel editTextL = new JLabel("Object Name:");
     
@@ -180,7 +231,6 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     ok.addActionListener(this);
     buttonP.add(ok);
 
-
     JButton neverMind = new JButton("Cancel");
     neverMind.setActionCommand("Nevermind finding this object");
     neverMind.addActionListener(this);
@@ -195,7 +245,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   {
     pack();
     type.requestFocus();
-		    
+
     setVisible(true);
 
     return invid;
@@ -263,7 +313,6 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
       {
 	System.out.println("Action performed: " + e.getActionCommand());
       }
-    
 
     if (e.getSource() == text)
       {
@@ -329,18 +378,21 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
 	    try
 	      {
-		if (debug) {
-		  System.out.println("Trying exact match...");
-		}
+		if (debug) 
+		  {
+		    System.out.println("Trying exact match...");
+		  }
 
 		edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 		
 		if (edit_query != null)
 		  {
 		    edit_invids = edit_query.getListHandles();
-		    if (debug) {
-		      System.out.println("edit_invids: " + edit_invids.size());
-		    }
+
+		    if (debug) 
+		      {
+			System.out.println("edit_invids: " + edit_invids.size());
+		      }
 		  }
 		
 		if ((edit_invids != null ) && (edit_invids.size() == 1))
@@ -356,15 +408,15 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		  }
 		else
 		  {
-		    if (debug) {
-		      System.out.println("Looking for Startswith...");
-		    }
+		    if (debug) 
+		      {
+			System.out.println("Looking for Startswith...");
+		      }
 
 		    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  
 		    edit_query = null;
 		    
 		    edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
-		    
 		    
 		    edit_invids = edit_query.getListHandles();
 		    
@@ -376,7 +428,9 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		    else if (edit_invids.size() == 0)
 		      {
 			client.showErrorMessage("Error finding object",
-						editableOnly ? "No editable object starts with that string." : "No viewable object starts with that string.");
+						editableOnly ?
+						"No editable object starts with that string." :
+						"No viewable object starts with that string.");
 			return;
 		      }
 		    else
@@ -408,13 +462,12 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 			    }
 			})).sort();
 			
-			
 			DefaultListModel model = (DefaultListModel)list.getModel();
+
 			for (int i = 0; i < edit_invids.size(); i++)
 			  {
 			    model.addElement(edit_invids.elementAt(i));
 			  }
-			
 			
 			gbc.gridx = 0;
 			gbc.gridy = 3;
@@ -437,19 +490,16 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
       {
 	close(false);
       }
-
   }
 
   public void mouseClicked(MouseEvent e)
   {
-    
-    currentObject = (listHandle)list.getSelectedValue();
+    currentObject = (listHandle) list.getSelectedValue();
     
     if ((e.getWhen() - lastClick < 500)  && (currentObject == lastObject))
       {
 	invid = (Invid)((listHandle)currentObject).getObject();
 	close(true);
-
       }
     else
       {
