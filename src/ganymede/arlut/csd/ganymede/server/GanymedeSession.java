@@ -3226,14 +3226,26 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      }
 	    else
 	      {
+		fieldDef = null;
+
 		if (base.getLabelField() != -1)
 		  {
 		    fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
+
+		    // if we are not name-space constrained, we still
+		    // need to look at the results of the
+		    // getDefaultUniqueLabel() call.
+
+		    if (fieldDef.getNameSpace() == null)
+		      {
+			fieldDef = null;
+		      }
 		  }
-		else
+
+		if (fieldDef == null)
 		  {
-		    // this object type has no label field and no
-		    // getLabelHook() label method that guarantees
+		    // this object type has no unique label field and
+		    // no getLabelHook() label method that guarantees
 		    // uniqueness.. see if the value we're matching
 		    // against fits the pattern of an automatically
 		    // generated label, and if so do a direct look up
@@ -3282,7 +3294,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 		    DBObject resultobject = session.viewDBObject(Invid.createInvid(base.getTypeID(), index));
 
-		    if (resultobject == null || !testLabel.equals(resultobject.getLabel()))
+		    if (resultobject == null || !testLabel.equals(resultobject.getDefaultUniqueLabel()))
 		      {
 			return null;
 		      }
