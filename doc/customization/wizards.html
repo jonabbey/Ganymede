@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>GANYMEDE: Ganymede Guide To Wizards</title>
+  </head>
+
+  <BODY BGCOLOR="#FFFFFF">
+
+    <IMG SRC="ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede">
+    <H1><FONT FACE="Arial,Helvetica">Ganymede Guide To Wizards</FONT></H1>
+    
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Introduction</b></h2></td>
+      </tr>
+    </table>
+
+    <p><blockquote>Do not meddle in the affairs of wizards, for they are subtle,
+      and quick to anger. -- J.R.R. Tolkein</blockquote></p>
+
+    <p>A user of the Ganymede system uses the client to create, edit,
+    delete and, optionally, inactivate and reactivate objects.  When
+    actually editing an object, the user can change the value of
+    fields by adding or removing values (for vector fields) or by
+    replacing the contents of a field with a new value.  Normally this
+    is a very straight-forward process.  The user indicates what he
+    wants to happen, and the Ganymede server does it.</p>
+
+    <p>This isn't always the case, however.  For instance, if a user
+    attempts to change the name of a group object to a name which is
+    already being used for another group, the server will report that
+    the name is already in use and that the operation can not be
+    performed.  This is possible because all field-changing operations
+    in the <a
+      href="../javadoc/arlut/csd/ganymede/db_field.java">db_field</a>
+    remote interface return a <a
+      href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    object to indicate the results of the operation.  The <a
+      href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    object may include a dialog specification for the client to
+    display.  If an operation fails, the <a
+      href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    returned from the server will tell the client that the operation
+    failed and that the included dialog should be shown to the
+    user.  In most cases, the normal mechanisms of the Ganymede server
+    itself will generate and return such dialogs when an operation cannot
+    be performed.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Dialogs and ReturnVal Objects</b></h2></td>
+      </tr>
+    </table>
+
+    <p>Custom <a
+    href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+    code in a schema kit's <a
+    href="../glossary.html#custom.jar">custom.jar</a> file can return
+    dialogs wherever the method signature indicates that a <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    is returned.  The easiest way is to use the 
+    <a
+      href="../javadoc/arlut/csd/ganymede/Ganymede.java#createErrorDialog(java.lang.String,java.lang.String)">
+      Ganymede.createErrorDialog()</a> method to create a <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    which encodes failure and an explanatory dialog.</p>
+
+    <p>Custom dialogs can be returned by creating a <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
+    object to return and calling the <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.java#setDialog(arlut.csd.JDialog.JDialogBuff)">setDialog</a>
+    method to specify a custom <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
+    dialog definition for display by the client.</p>
+
+    <p><a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>'s
+    are general-purpose dialog definition structures.  The <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
+    constructors can take a string for the dialog's title, another
+    string for the main body, strings for the ok and optional cancel
+    buttons, and a filename for an image to be displayed on the left
+    side of the dialog, as shown below:</p>
+
+    <p><img src="dialog1.jpg"></p>
+
+    <p>Note that the string used for the title will appear in the
+    dialog itself, as well as in the dialog's title bar.  The string
+    provided for the body will be word-wrapped to fit in the displayed
+    dialog, and can include explicit newline characters to break the
+    text into paragraphs.  The image shown in the dialog is called
+    <code>error.gif</code>.  The following images are guaranteed to be
+    available to the client through its jar file:</p>
+
+    <p>
+      <table border="1" cellpadding="3">
+	<tr>
+	  <td align="center"><img src="error.gif"></td>
+	  <td align="center"><img src="ok.gif"></td>
+	  <td align="center"><img src="question.gif"></td>
+	</tr>
+	<tr>
+	  <td><code>error.gif</code></td>
+	  <td><code>ok.gif</code></td>
+	  <td><code>question.gif</code></td>
+	</tr>
+      <caption valign="bottom">Standard Dialog Images</caption>
+      </table>
+    </p>
+
+    <p><a
+      href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
+    has more tricks.  In addition to a title, icon and
+    body of text, the <a
+      href="../javadoc/arlut/csd/JDialog/StringDialog.java">StringDialog</a>
+    created on the client from the <a
+      href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
+    can display one or more GUI widgets that the user can fill in, as
+    in the following:</p>
+    
+    <p><img src="dialog2.jpg"></p>
+
+    <p><a
+    href="../javadoc/arlut/csd/JDialog/StringDialog.java">StringDialog</a>
+    is used in many places in the Ganymede client, which makes use of
+    these GUI widgets locally.  <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>'s
+    support for GUI widgets serves another purpose, however.. it makes
+    it possible for the server to support full-fledged <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.java">
+    wizards</a>.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Wizards</b></h2></td>
+      </tr>
+    </table>
+
+One of the advanced features of the Ganymede system is the
+    server's ability to engage in a special sequence of interactions
+    with the user when the normal course of interactions is not
+    adequate.  These special interaction sequences are handled by the
+    <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.java">
+      GanymediatorWizard</a> class.  Schema kit authors can write
+    their own subclasses of <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.java">
+      GanymediatorWizard</a> to handle such cases.</p>
+    
+      <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
+<!-- Created: Tue Jul 27 11:55:19 CDT 1999 -->
+    <FONT FACE="Arial,Helvetica"><i>
+<!-- hhmts start -->
+Last modified: Tue Jul 27 16:54:33 CDT 1999
+<!-- hhmts end -->
+    </i></FONT>
+  </body>
+</html>
