@@ -85,14 +85,12 @@ the basic schema, but no promises until 1.0.
 
 See doc/server.html for a guide on the new task scheduling system.
 
-6. [CLIENT] Better taskbar icons, taskbar on/off menu
+6. [CLIENT] Better taskbar icons
 
-Brian reworked the taskbar significantly, enlarging the taskbar icons
-and adding a menu item to allow the taskbar to be turned off in the
-client.
+Brian reworked the taskbar significantly, with bigger and nicer the
+taskbar icons.
 
-Moved the persona selector to the bottom of the client's main window
-to make the taskbar drag option work better.
+More work coming to the client's GUI in 0.98.
 
 7. [CLIENT] Fixes to date GUI code
 
