@@ -7,7 +7,7 @@
    used to extract the results  out of the dump.
    
    Created: 25 September 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -141,12 +141,28 @@ public class DumpResult implements java.io.Serializable {
       {
 	fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
 
+	if (debug)
+	  {
+	    System.err.print("_");
+	  }
+
 	// make sure we have permission to see this field
 
 	if (owner != null && !owner.getPerm(object, fieldDef.getID()).isVisible())
 	  {
 	    buffer.append("|");
+
+	    if (debug)
+	      {
+		System.err.println("n");
+	      }
+
 	    continue;
+	  }
+
+	if (debug)
+	  {
+	    System.err.print("y");
 	  }
 	
 	field = (DBField) object.getField(fieldDef.getID());
@@ -154,6 +170,12 @@ public class DumpResult implements java.io.Serializable {
 	if (field == null)
 	  {
 	    buffer.append("|");
+
+	    if (debug)
+	      {
+		System.err.println(" x");
+	      }
+
 	    continue;
 	  }
 
@@ -162,7 +184,17 @@ public class DumpResult implements java.io.Serializable {
 	// sorted on the client, and which can be presented in
 	// whatever fashion the client chooses.
 
+	if (debug)
+	  {
+	    System.err.println("+");
+	  }
+
 	chars = field.getEncodingString().toCharArray();
+
+	if (debug)
+	  {
+	    System.err.println(" ok");
+	  }
 		
 	for (int j = 0; j < chars.length; j++)
 	  {
