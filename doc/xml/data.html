@@ -694,8 +694,8 @@ are explained below.
 
 <dd>This attribute, if present, contains a password string in plain
 text.  The client will transmit this password to the server, which
-will generate UNIX crypt and md5Crypt encodings if necessary
-for the server's operations.</dd>
+will generate the UNIX crypt and md5Crypt and the Windows NT/Samba
+hashes according to the schema configuration for this field.</dd>
 
 <dt><b>crypt</b></dt>
 
@@ -899,7 +899,7 @@ object on the server, regardless of whatever other activity the
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 25 21:18:12 CDT 2000 -->
 <!-- hhmts start -->
-Last modified: Wed Jun  6 20:32:37 CDT 2001
+Last modified: Wed Jun  6 20:35:23 CDT 2001
 <!-- hhmts end -->
   </body>
 </html>

@@ -868,10 +868,6 @@
 	  <p>The <b>crypted</b> element is an optional, empty element.
 	  If this element is present, the Ganymede server will store
 	  the contents of this password in UNIX crypt() format.</p>
-
-	  <p>At least one of the <b>crypted</b>, <b>md5crypted</b>, or
-	  <b>plaintext</b> elements must be present or an error will
-	  result.</p>
 	</td>
 	<td>&lt;crypted/&gt;</td>
       </tr>
@@ -882,10 +878,17 @@
 	  element.  If this element is present, the Ganymede server
 	  will store the contents of this password in FreeBSD-style
 	  md5crypt() format.</p>
-
-	  <p>At least one of the <b>crypted</b>, <b>md5crypted</b>, or
-	  <b>plaintext</b> elements must be present or an error will
-	  result.</p>
+	</td>
+	<td>&lt;md5crypted/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>md5crypted</td>
+	<td>
+	  <p>The <b>winHashed</b> element is an optional, empty
+	  element.  If this element is present, the Ganymede server
+	  will store the contents of this password in the two
+          Windows NT compatible hash formats used in the Samba
+	  encrypted password file.</p>
 	</td>
 	<td>&lt;md5crypted/&gt;</td>
       </tr>
@@ -896,18 +899,14 @@
 	  element.  If this element is present, the Ganymede server
 	  will store the plaintext of passwords stored in this field
 	  to disk.  Normally, if the Ganymede server has either
-	  <b>crypted</b> or <b>md5crypted</b> set, the server will
-	  never dump the plaintext of passwords in this field to disk,
-	  as it is capable of authenticating logins against either the
-	  crypt() or md5crypt() hash.  If the <b>plaintext</b> element
-	  is present, the password will be preserved in plaintext form
-	  in the ganymede.db file, regardless of whether or not the
-	  password is also handled via one of the encryption
-	  hashes.</p>
-
-	  <p>At least one of the <b>crypted</b>, <b>md5crypted</b>, or
-	  <b>plaintext</b> elements must be present or an error will
-	  result.</p>
+	  <b>crypted</b>, <b>md5crypted</b>, or <b>winHashed</b> set,
+	  the server will never dump the plaintext of passwords in
+	  this field to disk, as it is capable of authenticating
+	  logins against any of the supported hash formats.  If
+	  the <b>plaintext</b> element is present, the password will
+	  be preserved in plaintext form in the ganymede.db file,
+	  regardless of whether or not the password is also handled
+	  via one of the encryption hashes.</p>
 	</td>
 	<td>&lt;plaintext/&gt;</td>
       </tr>
@@ -1773,15 +1772,15 @@ are explained below.
 
 <dd>This attribute, if present, contains a password string in plain
 text.  The client will transmit this password to the server, which
-will generate UNIX crypt and md5Crypt encodings if necessary
-for the server's operations.</dd>
+will generate the UNIX crypt and md5Crypt and the Windows NT/Samba
+hashes according to the schema configuration for this field.</dd>
 
 <dt><b>crypt</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
 in UNIX crypt() format.  The client will transmit this password
 to the server, and will clear any pre-existing plain text or
-md5Crypt() encoded password information stored in this field in the
+alternately hashed password information stored in this field in the
 server.</dd>
 
 <dt><b>md5crypt</b></dt>
@@ -1789,7 +1788,7 @@ server.</dd>
 <dd>This attribute, if present, contains a password string pre-hashed
 in FreeBSD-style md5Crypt() format.  The client will transmit this password
 to the server, and will clear any pre-existing plain text or
-crypt() encoded password information stored in this field in the
+alternately hashed password information stored in this field in the
 server.</dd>
 
 <dt><b>lanman</b></dt>
