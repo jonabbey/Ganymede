@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,29 +18,20 @@ import arlut.csd.Util.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.*;
 import arlut.csd.JDialog.JInsetPanel;
+import arlut.csd.JTree.*;
 
 import com.sun.java.swing.*;
+import com.sun.java.swing.border.*;
 
 import tablelayout.*;
 
 import java.rmi.*;
 import java.rmi.server.*;
-import java.awt.*;
+//import java.awt.*;
 import java.awt.event.*;
-import java.net.*;
-import java.applet.*;
 import java.util.*;
 
 import jdj.PackageResources;
-
-import gjt.Box;
-import gjt.Util;
-import gjt.RowLayout;
-
-
-import arlut.csd.JTree.*;
-
-import com.sun.java.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -59,7 +50,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   SchemaEdit 
     editor;
 
-  Image
+  java.awt.Image
     questionImage,
     treeImages[];
 
@@ -77,7 +68,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     namespaces,			// top-level node for namespace listing
     builtIns;			// top-level node for (non-embedded) built-in field defs
 
-  MenuItem
+  java.awt.MenuItem
     createCategoryMI = null,
     deleteCategoryMI = null,
     createObjectMI = null,
@@ -99,7 +90,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     nameSpaceMenu = null,
     nameSpaceObjectMenu = null;
 
-  CardLayout
+  java.awt.CardLayout
     card;
 
   JPanel 
@@ -134,8 +125,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   JButton
     okButton, cancelButton;
 
-  Color
-    bgColor = SystemColor.control;
+  java.awt.Color
+    bgColor = java.awt.SystemColor.control;
 
   /* -- */
 
@@ -162,22 +153,22 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     //
     //
     
-    getContentPane().setLayout(new BorderLayout());
+    getContentPane().setLayout(new java.awt.BorderLayout());
 
     attribPane = new JPanel();
-    attribPane.setBackground(bgColor);
-    attribPane.setLayout(new BorderLayout());
+    //attribPane.setBackground(bgColor);
+    attribPane.setLayout(new java.awt.BorderLayout());
 
-    card = new CardLayout();
+    card = new java.awt.CardLayout();
 
     attribCardPane = new JPanel();
-    attribCardPane.setBackground(bgColor);
+    //    attribCardPane.setBackground(bgColor);
     attribCardPane.setLayout(card);
 
     // set up the base editor
 
     baseEditPane = new JScrollPane();
-    baseEditPane.setBackground(bgColor);
+    //    baseEditPane.setBackground(bgColor);
 
     be = new BaseEditor(this);
     baseEditPane.setViewportView(be);
@@ -185,7 +176,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // set up the base field editor
 
     fieldEditPane = new JScrollPane();
-    fieldEditPane.setBackground(bgColor);
+    //    fieldEditPane.setBackground(bgColor);
 
     fe = new BaseFieldEditor(this);
     fieldEditPane.setViewportView(fe);
@@ -193,7 +184,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // set up the name space editor
 
     namespaceEditPane = new JScrollPane();
-    namespaceEditPane.setBackground(bgColor);
+    //    namespaceEditPane.setBackground(bgColor);
 
     ne = new NameSpaceEditor(this);
     namespaceEditPane.setViewportView(ne);
@@ -201,8 +192,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // set up the category editor
 
     categoryEditPane = new JPanel();
-    categoryEditPane.setBackground(bgColor);
-    categoryEditPane.setLayout(new BorderLayout());
+    //    categoryEditPane.setBackground(bgColor);
+    categoryEditPane.setLayout(new java.awt.BorderLayout());
 
     ce = new CategoryEditor(this);
     categoryEditPane.add("Center", ce);
@@ -210,7 +201,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // set up the empty card
 
     emptyPane = new JPanel();
-    emptyPane.setBackground(bgColor);
+    //    emptyPane.setBackground(bgColor);
 
     // Finish attribPane setup
 
@@ -221,17 +212,17 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     attribCardPane.add("category", categoryEditPane);
 
     attribPane.add("Center", attribCardPane);
-
-    gjt.Box rightBox = new gjt.Box(attribPane, "Attributes");
+    JPanel attribPaneBorder = new JPanel(new java.awt.BorderLayout());
+    attribPaneBorder.add("Center", attribPane);
+    attribPaneBorder.setBorder(new TitledBorder("Attributes"));
 
     JInsetPanel rightJPanel = new JInsetPanel(5, 5, 5, 10);
-    rightJPanel.setLayout(new BorderLayout());
-    rightJPanel.add("Center", rightBox);
+    rightJPanel.setLayout(new java.awt.BorderLayout());
+    rightJPanel.add("Center", attribPaneBorder);
 
     // Set up button pane
 
     buttonPane = new JPanel();
-    buttonPane.setLayout(new RowLayout());
 
     okButton = new JButton("ok");
     okButton.addActionListener(this);
@@ -250,7 +241,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     //
     //
 
-    treeImages = new Image[5];
+    treeImages = new java.awt.Image[5];
 
     treeImages[0] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
     treeImages[1] = PackageResources.getImageResource(this, "folder.gif", getClass());
@@ -258,8 +249,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     treeImages[3] = PackageResources.getImageResource(this, "i043.gif", getClass());
     treeImages[4] = PackageResources.getImageResource(this, "transredlist.gif", getClass());
 
-    tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
-			   Color.black, SystemColor.window, this, treeImages,
+    tree = new treeControl(new java.awt.Font("SansSerif",java.awt.Font.BOLD, 12),
+			   java.awt.Color.black, java.awt.SystemColor.window, this, treeImages,
 			   null);
     tree.setMinimumWidth(200);
     tree.setDrag(this, tree.DRAG_LINE | tree.DRAG_ICON);
@@ -270,10 +261,13 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     //
     //
 
-    gjt.Box leftBox = new gjt.Box(tree, "Schema Objects");
+    
+    JPanel leftBox = new JPanel(new java.awt.BorderLayout());
+    leftBox.add("Center", tree);
+    leftBox.setBorder(new TitledBorder("Schema Objects"));
 
     JInsetPanel leftJPanel = new JInsetPanel(5, 10, 5, 5);
-    leftJPanel.setLayout(new BorderLayout());
+    leftJPanel.setLayout(new java.awt.BorderLayout());
     leftJPanel.add("Center", leftBox);
 
     //    displayPane.add("West", leftJPanel);
@@ -294,11 +288,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     categoryMenu = new treeMenu();
 
-    createCategoryMI = new MenuItem("Create Category");
-    deleteCategoryMI = new MenuItem("Delete Category");
-    createObjectMI = new MenuItem("Create Object Type");
-    createInternalObjectMI = new MenuItem("Create Embedded Object Type");
-    createLowObjectMI = new MenuItem("Create Low Range Object Type");
+    createCategoryMI = new java.awt.MenuItem("Create Category");
+    deleteCategoryMI = new java.awt.MenuItem("Delete Category");
+    createObjectMI = new java.awt.MenuItem("Create Object Type");
+    createInternalObjectMI = new java.awt.MenuItem("Create Embedded Object Type");
+    createLowObjectMI = new java.awt.MenuItem("Create Low Range Object Type");
 
     categoryMenu.add(createCategoryMI);
     categoryMenu.add(deleteCategoryMI);
@@ -312,7 +306,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     // builtIn menu
 
-    createBuiltInMI = new MenuItem("Create Built-in Field");
+    createBuiltInMI = new java.awt.MenuItem("Create Built-in Field");
 
     builtInMenu = new treeMenu("Built-in Fields");
     builtInMenu.add(createBuiltInMI);
@@ -320,21 +314,21 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // namespace menu
 
     nameSpaceMenu = new treeMenu("Namespace Menu");
-    createNameMI = new MenuItem("Create Namespace");
+    createNameMI = new java.awt.MenuItem("Create Namespace");
     nameSpaceMenu.add(createNameMI);
 
     // namespace object menu
 
     nameSpaceObjectMenu = new treeMenu();
-    deleteNameMI = new MenuItem("Delete Namespace");
+    deleteNameMI = new java.awt.MenuItem("Delete Namespace");
     nameSpaceObjectMenu.add(deleteNameMI);
 
     // base menu
 
     baseMenu = new treeMenu("Base Menu");
-    deleteObjectMI = new MenuItem("Delete Object Type");
-    createFieldMI = new MenuItem("Create Field");
-    createLowFieldMI = new MenuItem("Create low-range Field");
+    deleteObjectMI = new java.awt.MenuItem("Delete Object Type");
+    createFieldMI = new java.awt.MenuItem("Create Field");
+    createLowFieldMI = new java.awt.MenuItem("Create low-range Field");
 
     baseMenu.add(createFieldMI);
 
@@ -348,7 +342,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // field menu
 
     fieldMenu = new treeMenu("Field Menu");
-    deleteFieldMI = new MenuItem("Delete Field");
+    deleteFieldMI = new java.awt.MenuItem("Delete Field");
     fieldMenu.add(deleteFieldMI);
 
     //
@@ -938,6 +932,17 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     validate();
   }
+
+  public void setWaitCursor()
+  {
+    this.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
+  }
+
+  public void setNormalCursor()
+  {
+    this.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
+  }
+
 
   // treeCallback methods
 
@@ -2331,8 +2336,8 @@ class NameSpaceEditor extends JPanel implements ActionListener {
     nameJPanel = new JInsetPanel(10,10,10,10);
     nameJPanel.setLayout(new TableLayout(false));
 
-    ca = new JcomponentAttr(this, new Font("SansSerif", Font.BOLD, 12),
-			   Color.black, Color.white);
+    ca = new JcomponentAttr(this, new java.awt.Font("SansSerif", java.awt.Font.BOLD, 12),
+			   java.awt.Color.black, java.awt.Color.white);
       
     nameS = new JstringField(20, 100, ca, false, false, null, null);
     addRow(nameJPanel, nameS, "Namespace:", 0);
@@ -2345,7 +2350,7 @@ class NameSpaceEditor extends JPanel implements ActionListener {
     //spaceL.setEnabled(false);
     addRow(nameJPanel, spaceL, "Fields in this space:", 2);
 
-    setLayout(new BorderLayout());
+    setLayout(new java.awt.BorderLayout());
     add("Center", nameJPanel);
   }
 
@@ -2449,7 +2454,7 @@ class NameSpaceEditor extends JPanel implements ActionListener {
       }
   }
 
-  void addRow(JPanel parent, Component comp,  String label, int row)
+  void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
   {
     JLabel l = new JLabel(label);
 
@@ -2492,13 +2497,13 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     catJPanel = new JInsetPanel(10,10,10,10);
     catJPanel.setLayout(new TableLayout(false));
     
-    ca = new JcomponentAttr(this, new Font("SansSerif", Font.BOLD, 12),
-			   Color.black, Color.white);
+    ca = new JcomponentAttr(this, new java.awt.Font("SansSerif",java.awt.Font.BOLD, 12),
+			   java.awt.Color.black, java.awt.Color.white);
     
     catNameS = new JstringField(20, 100, ca, true, false, null, null, this);
     addRow(catJPanel, catNameS, "Category Label:", 0);
     
-    setLayout(new BorderLayout());
+    setLayout(new java.awt.BorderLayout());
     add("Center", catJPanel);
   }
 
@@ -2543,7 +2548,7 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     return true;		// what the?
   }
 
-  void addRow(JPanel parent, Component comp,  String label, int row)
+  void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
   {
     JLabel l = new JLabel(label);
     
