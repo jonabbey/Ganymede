@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -152,11 +152,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  {
 	    if (format.equals("HTML"))
 	      {
-		session.sendHTMLMail(addresses, "Query Report", null, report);
+		session.sendHTMLMail(addresses, dialog.getSubject(), null, report);
 	      }
 	    else
 	      {
-		session.sendMail(addresses, "Query Report", report);
+		session.sendMail(addresses, dialog.getSubject(), report);
 	      }
 	  }
 	catch (RemoteException ex)
