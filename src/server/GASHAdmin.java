@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,16 +42,20 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   private GASHAdminFrame frame = null;
   private Server server = null;
   private adminSession aSession = null;
+  private String adminName = null;
+  private String adminPass = null;
   Frame schemaFrame;
 
   /* -- */
 
-  public iAdmin(GASHAdminFrame frame, Server server) throws RemoteException
+  public iAdmin(GASHAdminFrame frame, Server server, String name, String pass) throws RemoteException
   {
     // UnicastRemoteServer can throw RemoteException 
 
     this.frame = frame;
     this.server = server;
+    this.adminName = name;
+    this.adminPass = pass;
 
     try
       {
@@ -71,9 +75,14 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     System.err.println("Got Admin");
   }
 
+  public String getName()
+  {
+    return adminName;
+  }
+
   public String getPassword()
   {
-    return "Dilbert";
+    return adminPass;
   }
 
   public void setServerStart(Date date)
@@ -640,7 +649,9 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
     try
       {
-	admin = new iAdmin(this, server);
+	admin = new iAdmin(this, server, 
+			   (String) results.get("Account:"),
+			   (String) results.get("Password:"));
       }
     catch (RemoteException ex)
       {
