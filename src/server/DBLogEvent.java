@@ -7,7 +7,7 @@
    email..
    
    Created: 31 October 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -119,7 +119,7 @@ public class DBLogEvent {
 
     if (this.multibuffer == null)
       {
-	this.multibuffer = new StringBuffer();
+	multibuffer = this.multibuffer = new StringBuffer();
       }
     else
       {
@@ -187,7 +187,7 @@ public class DBLogEvent {
 
     if (this.multibuffer == null)
       {
-	this.multibuffer = new StringBuffer();
+	multibuffer = this.multibuffer = new StringBuffer();
       }
     else
       {
