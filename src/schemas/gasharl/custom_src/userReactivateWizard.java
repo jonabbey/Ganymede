@@ -6,8 +6,8 @@
 
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/07/14 21:51:53 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/07/15 01:06:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -287,7 +287,7 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 		       null,
 		       "ok.gif").unionRescan(retVal);
       }
-    else if (retVal.getDialog() == null)
+    else
       {
 	// failure.. need to do the rollback that would have originally
 	// been done for us if we hadn't gone through the wizard process

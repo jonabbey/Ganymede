@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 1999/07/14 21:51:51 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 1999/07/15 01:06:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -767,7 +767,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    
 	    retVal.setDialog(dialog);
 	    retVal.setCallback(reactivateWizard);
-	    reactivateWizard.state = 2;	// make sure ths wizard will be ready to process this
 	
 	    return retVal;
 	  }
