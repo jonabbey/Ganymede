@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 1999/01/22 18:05:41 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 1999/01/27 22:22:04 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -117,9 +117,6 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	return;
       }
 
-    //DialogRsrc loginResrc;
-    //StringDialog loginDialog;
-
     System.err.println("Got Admin");
   }
 
@@ -129,18 +126,19 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       {
 	if (frame == null)
 	  {
-	    DialogRsrc permResrc = new DialogRsrc(new JFrame(), "Permissions Error", "You don't have permission to perform that operation",
+	    DialogRsrc permResrc = new DialogRsrc(new JFrame(), 
+						  "Permissions Error", 
+						  "You don't have permission to perform that operation",
 						  "OK", null);
 	    permDialog = new StringDialog(permResrc);
-
-
 	  }
 	else
 	  {
-	    DialogRsrc permResrc = new DialogRsrc(frame, "Permissions Error", "You don't have permission to perform that operation",
+	    DialogRsrc permResrc = new DialogRsrc(frame, 
+						  "Permissions Error", 
+						  "You don't have permission to perform that operation",
 						  "OK", null, "error.gif");
 	    permDialog = new StringDialog(permResrc);
-
 	  }
       }
 
@@ -628,6 +626,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JLabel locksLabel = null;
   JTextField locksField = null;
 
+  JButton clearLogButton;
   JTextArea statusArea = null;
 
   // resources for the users connected table
@@ -933,8 +932,15 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     statusArea.setEditable(false);
     JScrollPane statusAreaPane = new JScrollPane(statusArea);
 
+    clearLogButton = new JButton("Clear Log");
+    clearLogButton.addActionListener(this);
+
+    JPanel clearPanel = new JPanel(new java.awt.BorderLayout());
+    clearPanel.add("East", clearLogButton);
+    
     JPanel statusBox = new JPanel(new java.awt.BorderLayout());
     statusBox.add("Center", statusAreaPane);
+    statusBox.add("South", clearPanel);
     statusBox.setBorder(new TitledBorder("Server Log"));
 
     topGBL.setConstraints(statusBox, topGBC);
@@ -1198,6 +1204,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  {
 	    admin.forceDisconnect("Couldn't talk to server");
 	  }
+      }
+    else if (event.getSource() == clearLogButton)
+      {
+	statusArea.setText("");
       }
   }
 
