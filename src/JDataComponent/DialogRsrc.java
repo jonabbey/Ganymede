@@ -8,7 +8,7 @@ import java.lang.String;
 import java.util.*;
 import java.awt.*;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class

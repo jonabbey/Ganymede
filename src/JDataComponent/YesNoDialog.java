@@ -5,7 +5,7 @@
    A 1.1 compatible YesNoDialog box
    
    Created: 6 February 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,7 +16,7 @@ package arlut.csd.JDialog;
 import java.awt.*;
 import java.awt.event.*;
 
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class

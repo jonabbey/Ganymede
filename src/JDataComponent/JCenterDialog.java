@@ -10,7 +10,7 @@
 package arlut.csd.JDialog;
 
 import java.awt.*;
-import com.sun.java.swing.*;
+import javax.swing.*;
 
 public class JCenterDialog extends JDialog {
 
