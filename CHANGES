@@ -9,13 +9,14 @@ RELEASE DATE: January 29, 1999
 
 1. [DISTRIBUTION] Fixes to the distribution set
 
-Added the missing calendar.gif used by JdateField.  Added
-doc/buildjavadoc to automate building of javadocs.
+Added the missing calendar.gif used by JdateField.  Added missing
+up.gif and down.gif used by JpanelCalendar.  Added doc/buildjavadoc to
+automate building of javadocs.
 
 Added a -develop option to the configure script, to allow doing builds
 in a CVS checkout directory, with the results of compiles put in a
 location outside the checked out tree.  For use when developing and
-maintaing Ganymede.
+maintaining Ganymede.
 
 2. [SERVER] Fixed bug in query engine
 
