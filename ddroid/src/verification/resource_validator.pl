@@ -1,4 +1,4 @@
-#!/opt/bin/perl
+#!/usr/bin/env perl
 #
 # resource_validator.pl
 #
