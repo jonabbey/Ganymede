@@ -7,8 +7,8 @@
 
    Created: 21 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/03/07 08:15:19 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/03/24 21:21:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,5 +80,81 @@ public class XMLUtils {
       {
 	xmlOut.write("  ");
       }
+  }
+
+  /**
+   * <P>This is a helper method which converts any spaces in a string
+   * to a legal underscore.  Any underscores passed in will be converted
+   * to a double underscore.</P>
+   */
+
+  public static String XMLEncode(String name)
+  {
+    StringBuffer buffer = new StringBuffer(name.length());
+
+    for (int i = 0; i < name.length(); i++)
+      {
+	char c = name.charAt(i);
+
+	if (c == '_')
+	  {
+	    buffer.append("__");
+	  }
+	else if (c == ' ')
+	  {
+	    buffer.append("_");
+	  }
+	else
+	  {
+	    buffer.append(c);
+	  }
+      }
+
+    return buffer.toString();
+  }
+
+  /**
+   * <P>This is a helper method which undoes the effects of the
+   * {@link arlut.csd.Util.XMLUtils#XMLEncode(java.lang.String) XMLEncode} method,
+   * which is used to encode all element names in the Ganymede server.  Any
+   * pair of subsequent underscores will be replaced in the returned String
+   * with a single underscore.  Any single underscore will be replaced with
+   * a space.</P>
+   */
+
+  public static String XMLDecode(String name)
+  {
+    StringBuffer buffer = new StringBuffer(name.length());
+
+    int i = 0;
+
+    while (i < name.length())
+      {
+	char c = name.charAt(i);
+
+	if (c != '_')
+	  {
+	    buffer.append(c);
+	  }
+	else
+	  {
+	    if ((i + 1) < name.length())
+	      {
+		if (name.charAt(i+1) == '_')
+		  {
+		    buffer.append("_");
+		    i++;
+		  }
+		else
+		  {
+		    buffer.append(" ");
+		  }
+	      }
+	  }
+
+	i++;	
+      }
+
+    return buffer.toString();
   }
 }
