@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -674,7 +674,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
    *
    */
 
-  public void actionPerformed(ActionEvent e)
+  public synchronized void actionPerformed(ActionEvent e)
   {
     if (e.getSource() == OKButton)
       {
@@ -794,7 +794,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
   {
   }
 
-  public void windowClosing(WindowEvent event)
+  public synchronized void windowClosing(WindowEvent event)
   {
     if (!done)
       {
@@ -808,6 +808,9 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	
 	valueHash = null;
       }
+
+    done = true;
+    this.setVisible(false);
   }
 
   public void windowDeactivated(WindowEvent event)
