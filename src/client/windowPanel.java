@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.53 $ %D%
+   Version: $Revision: 1.54 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -715,9 +715,16 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     JMenuItem MI;
 
     /* -- */
-
-    windowMenu.removeAll();
-
+    try {
+      
+      windowMenu.removeAll();
+   
+    } catch (NullPointerException e) {
+    
+      System.err.println(e + " - windowMenu.removeAll() found nothing to remove.");
+    
+    }
+  
     windowMenu.add(removeAllMI);
     windowMenu.addSeparator();
 
