@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,6 +37,8 @@ import arlut.csd.ganymede.*;
 ------------------------------------------------------------------------------*/
 
 public class glogin extends JApplet implements Runnable {
+
+  public static boolean debug = false;
 
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
@@ -78,6 +80,20 @@ public class glogin extends JApplet implements Runnable {
   public static void main (String args[])
   {
     WeAreApplet = false;
+
+    if (args.length > 0)
+      {
+	if (args[0].equals("debug"))
+	  {
+	    System.out.println("Starting up in debug mode.");
+	    debug = true;
+	  }
+	else
+	  {
+	    System.out.println("If you want debug mode, you must use the code word:  'debug'.");
+	  }
+
+      }
 
     my_glogin = new glogin();
 
