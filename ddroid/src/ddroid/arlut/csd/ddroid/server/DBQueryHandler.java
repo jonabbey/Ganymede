@@ -409,6 +409,15 @@ public class DBQueryHandler {
 		return (values.size() >= intval);		
 	      }
 
+	    // At this point, all of the pure vector-field (read: length related) operations
+	    // should be handled. So if the field we're looking at is a vector field, we'll
+	    // assume that the operator should be used against each item in the field.
+
+	    if (field.isVector() && n.arrayOp == QueryDataNode.NONE)
+	      {
+	      	n.arrayOp = QueryDataNode.CONTAINS;
+	      }
+	    
 	    // okay.  Now we check each field type
 
 	    if (n.value instanceof String &&
