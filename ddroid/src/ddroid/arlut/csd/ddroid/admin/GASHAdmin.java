@@ -101,7 +101,7 @@ import arlut.csd.ddroid.rmi.Server;
  *
  * <P>GASHAdmin connects to a running
  * {@link arlut.csd.ddroid.server.GanymedeServer GanymedeServer} using the 
- * {@link arlut.csd.ddroid.server.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin()}
+ * {@link arlut.csd.ddroid.server.GanymedeServer#admin(arlut.csd.ddroid.common.Admin) admin()}
  * method.</P>
  */
 
