@@ -336,13 +336,14 @@ Gotta love really exercising old code paths in relatively new ways.
 
 Lots of work on increasing the scalability of the Ganymede server and
 client.  At the time of this writing, we've tested the userKit to a
-loading of 150,000 users and 150,000 groups, perhaps 45 million data
-fields, with a nominal memory usage of around 230 megabytes on the
-server.  In order to get there, we had to fix some poor algorithmic
-choices in certain points in the Ganymede server.  This included a
-complete cut over from using the old cheapo QuickSort implementation I
-slapped together in a day from someone's online course notes to using
-the java.util.Arrays sort algorithm that came in Java 1.2.
+loading of 250,000 users and 250,000 groups, a total of some 7.5
+million data fields, with a nominal (fully garbage-collected rest
+state) memory usage of around 600 megabytes on the server.  In order
+to get there, we had to fix some poor algorithmic choices in certain
+points in the Ganymede server.  This included a complete cut over from
+using the old cheapo QuickSort implementation I slapped together in a
+day from someone's online course notes to using the java.util.Arrays
+sort algorithm that came in Java 1.2.
 
 I also fixed a bug in the userKit userCustom.java class that made it
 do about a bazillion times more work than it should have when doing
@@ -377,6 +378,13 @@ In addition, an InvidPool has been implemented on the server, which
 uses a hashing SoftReference data structure to efficiently implement
 Invid interning.  This seems to cut memory loading on the server with
 large datasets by 15% or more.
+
+22. [CLIENT] Reworked the client layout/rendering algorithm
+
+The layout/rendering algorithm for the client object windows and the
+admin console schema editor has been rewritten to behave better in a
+greater variety of circumstances.  In particular, bugs that were seen
+when using the multi-line label field have been addressed.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 

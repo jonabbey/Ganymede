@@ -67,7 +67,7 @@ MAXHEAP=1024m
 # should be expressed as a number followed by the letter 'm' for
 # megabyte.  I.e., 'MAXPERMSPACE=128m'.
 
-MAXPERMSPACE=128m
+MAXPERMSPACE=256m
 
 # These options control how frequently the Ganymede server will
 # perform full heap GC to insure release of remote (client-side) RMI
