@@ -33,7 +33,7 @@ INSTALLDIR=/var/ganymede
 # lower impact generational garbage collection logic handle clean-up of
 # transient objects
 
-RMIGC=-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000
+RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000'
 
 trap "echo Aborted" 2
 
