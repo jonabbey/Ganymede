@@ -8,7 +8,7 @@
    what client is written.
    
    Created: 31 March 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -143,6 +143,8 @@ public class ClientBase extends UnicastRemoteObject implements Client {
 
   public Session login(String username, String password) throws RemoteException
   {
+    // isLoggedIn always returns false, for now.  There should be a logout() method,
+    // which would fix everything up.  Maybe for dev2.
     if (isLoggedIn())
       {
 	throw new IllegalArgumentException("Already logged in.  Construct a " +
@@ -194,11 +196,15 @@ public class ClientBase extends UnicastRemoteObject implements Client {
    *
    * This method returns true if the client has already logged in.
    *
+   * This is not implemented now; it will always return false.
    */
 
   public boolean isLoggedIn()
   {
-    return session != null;
+    // This can be reinstated after a logout() method clears the session.  We
+    // don't have a logout() method yet; it is on the to-do list.
+    //return session != null;
+    return false;
   }
 
   /**
