@@ -20,7 +20,6 @@
 # script
 
 JAVA=/usr/bin/java
-RMIREGISTRY=/usr/bin/rmiregistry
 PROPERTIES=ganymede.properties
 CLASSPATH=jars/ganymedeServer.jar:jars/custom.jar
 
