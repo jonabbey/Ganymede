@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/02/21 19:50:23 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/03/21 02:41:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1043,6 +1043,7 @@ public class GanymedeScheduler extends Thread {
 	taskList.setSize(0);
 
 	enum = currentlyScheduled.elements();
+
 	while (enum.hasMoreElements())
 	  {
 	    VectorUtils.unionAdd(taskList, enum.nextElement());
@@ -1081,7 +1082,11 @@ public class GanymedeScheduler extends Thread {
 	updateTaskInfo(false);
       }
 
-    return taskList;
+    // we need to clone the taskList, since the server is now
+    // communicating with the admin consoles asynchronously, using the
+    // serverAdminProxy.
+
+    return (Vector) taskList.clone();
   }
 }
 
