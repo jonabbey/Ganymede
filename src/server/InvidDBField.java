@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.145 $
-   Last Mod Date: $Date: 2000/10/03 06:31:01 $
+   Version: $Revision: 1.146 $
+   Last Mod Date: $Date: 2000/10/09 09:19:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.145 $ %D%
+ * @version $Revision: 1.146 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1022,7 +1022,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newRemote == null)
       {
-	throw new IllegalArgumentException("null newRemote " + getName() + " in object " + owner.getLabel());
+	throw new IllegalArgumentException("null newRemote " + getName() +
+					   " in object " + owner.getLabel());
       }
 
     if (!isEditable(local))
@@ -1091,7 +1092,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	else
 	  {
 	    return Ganymede.createErrorDialog("Bind link error",
-					      "Can't forge an asymmetric link between " + this.toString() +
+					      "Can't forge an asymmetric link between " + 
+					      this.toString() +
 					      " and invid " + newRemote.toString() +
 					      ", the target object is being deleted.");
 	  }

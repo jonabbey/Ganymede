@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 2000/10/03 06:47:14 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 2000/10/09 09:19:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1669,6 +1669,7 @@ public class DBEditSet {
 	  }
       }
   }
+
   /**
    * <p>release is used to abandon all changes made in association
    * with this DBEditSet.  All DBObjects created, deleted, or
