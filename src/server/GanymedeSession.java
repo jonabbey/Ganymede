@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.209 $
-   Last Mod Date: $Date: 2000/10/09 05:51:51 $
+   Version: $Revision: 1.210 $
+   Last Mod Date: $Date: 2000/10/11 19:59:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.209 $ $Date: 2000/10/09 05:51:51 $
+ * @version $Revision: 1.210 $ $Date: 2000/10/11 19:59:48 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2749,7 +2749,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	Ganymede.debug("dump(): " + username + " : got read lock");
       }
-
 
     // search for the invid's matching the given query
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.114 $
-   Last Mod Date: $Date: 2000/09/30 23:03:01 $
+   Version: $Revision: 1.115 $
+   Last Mod Date: $Date: 2000/10/11 19:59:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2115,10 +2115,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    *
    * <P>If includeBuiltIns is false, the fields returned will be the
    * custom fields defined for this object type, and they will be
-   * returned in display order.  If includeBuiltIns is true, all
-   * fields defined on this object type will be returned (including
-   * things like owner list, last modification date, etc.), in random
-   * order.</P>
+   * returned in display order.  If includeBuiltIns is true, the
+   * built-in fields will be appended to the Vector after the custom
+   * types, in random order.</P>
    *
    * @see arlut.csd.ganymede.Base 
    */
@@ -2133,6 +2132,20 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     result = new Vector();
 
+    // first we return the custom fields, in display order
+
+    enum = customFields.elements();
+    
+    while (enum.hasMoreElements())
+      {
+	field = (DBObjectBaseField) enum.nextElement();
+	
+	result.addElement(field);
+      }
+
+    // now if we are to return the built-in fields, go ahead and add
+    // them in whatever hashing order we find them
+
     if (includeBuiltIns)
       {
 	enum = fieldTable.elements();
@@ -2140,19 +2153,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	while (enum.hasMoreElements())
 	  {
 	    field = (DBObjectBaseField) enum.nextElement();
-	    
-	    result.addElement(field);
-	  }
-      }
-    else
-      {
-	enum = customFields.elements();
-    
-	while (enum.hasMoreElements())
-	  {
-	    field = (DBObjectBaseField) enum.nextElement();
-	    
-	    result.addElement(field);
+
+	    if (!field.isBuiltIn())
+	      {	    
+		result.addElement(field);
+	      }
 	  }
       }
 

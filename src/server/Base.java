@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2000/02/29 09:35:03 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2000/10/11 19:59:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ import java.util.*;
  * <P>The {@link arlut.csd.ganymede.Category Category} interface is also vital to
  * the client and schema editor's work with object types.</P>
  *
- * @version $Revision: 1.18 $ $Date: 2000/02/29 09:35:03 $ $Name:  $
+ * @version $Revision: 1.19 $ $Date: 2000/10/11 19:59:45 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -139,17 +139,14 @@ public interface Base extends CategoryNode, Remote {
   public String getLabelFieldName() throws RemoteException;
 
   /**
-   * <p>Returns {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
+   * <p>Returns {@link arlut.csd.ganymede.BaseField BaseField}
    * base field definitions for objects of this type.
    *
    * <P>If includeBuiltIns is false, the fields returned will be the
    * custom fields defined for this object type, and they will be
-   * returned in display order.  If includeBuiltIns is true, all
-   * fields defined on this object type will be returned (including
-   * things like owner list, last modification date, etc.), in random
-   * order.</P>
-   *
-   * @see arlut.csd.ganymede.Base 
+   * returned in display order.  If includeBuiltIns is true, the
+   * built-in fields will be appended to the Vector after the custom
+   * types, in random order.</P>
    */
 
   public Vector getFields(boolean includeBuiltIns) throws RemoteException;

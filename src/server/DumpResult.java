@@ -8,8 +8,8 @@
    
    Created: 25 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/10/29 16:14:08 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/10/11 19:59:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -192,6 +192,9 @@ public class DumpResult implements java.io.Serializable {
 
 	if (owner != null && !owner.getPerm(object, fieldDef.getID()).isVisible())
 	  {
+	    // nope, no permission, just terminate this field and
+	    // continue
+
 	    buffer.append("|");
 
 	    if (debug)

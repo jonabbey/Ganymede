@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 2000/09/29 00:42:12 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 2000/10/11 19:59:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -3922,7 +3922,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 		      }
 		    catch (NullPointerException ex)
 		      {
-			System.err.println("Error, " + this.toString() + " couldn't lookup targetField (" + targetField + ")");
+			System.err.println("Error, " + this.toString() +
+					   " couldn't lookup targetField (" + 
+					   targetField + ")");
 			System.err.println("In base " + base.toString());
 			System.err.println(ex.getMessage());
 		      }
