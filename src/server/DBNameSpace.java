@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2000/05/04 04:19:22 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2000/10/02 22:00:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,6 +57,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
 
 import arlut.csd.Util.XMLUtils;
+import arlut.csd.Util.NamedStack;
 import com.jclark.xml.output.*;
 
 /*------------------------------------------------------------------------------
@@ -101,6 +102,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   Hashtable uniqueHash;		// index of values used in the current namespace
   Hashtable reserved;		// index of editSet's currently actively modifying
 				// values in this namespace
+
+  /**
+   * Hashtable mapping DBEditSet keys to Hashtables mapping
+   * name strings to DBNameSpaceCkPoint objects
+   */
 
   Hashtable checkpoints = new Hashtable();
 
@@ -785,19 +791,19 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void checkpoint(DBEditSet editSet, String name)
   {
-    Hashtable transpoints;
+    NamedStack transpoints;
 
     /* -- */
 
-    transpoints = (Hashtable) checkpoints.get(editSet);
+    transpoints = (NamedStack) checkpoints.get(editSet);
 
     if (transpoints == null)
       {
-	transpoints = new Hashtable();
+	transpoints = new NamedStack();
 	checkpoints.put(editSet, transpoints);
       }
 
-    transpoints.put(name, new DBNameSpaceCkPoint(this, editSet));
+    transpoints.push(name, new DBNameSpaceCkPoint(this, editSet));
   }
 
   /*----------------------------------------------------------------------------
@@ -822,20 +828,25 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   public synchronized void popCheckpoint(DBEditSet editSet, String name)
   {
-    Hashtable transpoints;
+    NamedStack transpoints;
 
     /* -- */
 
-    transpoints = (Hashtable) checkpoints.get(editSet);
+    transpoints = (NamedStack) checkpoints.get(editSet);
 
     if (transpoints == null)
       {
 	return;
       }
 
-    // take out the DBNameSpaceCkPoint.
+    DBNameSpaceCkPoint point = (DBNameSpaceCkPoint) transpoints.pop(name);
 
-    transpoints.remove(name);
+    if (point == null)
+      {
+	System.err.println("DBNameSpace.popCheckpoint: couldn't find checkpoint for " + name);
+	System.err.println("\nCurrently registered checkpoints:");
+	System.err.println(transpoints.toString());
+      }
   }
 
   /*----------------------------------------------------------------------------
@@ -860,13 +871,13 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   {
     Object value1, value2;
     Vector currentVals, elementsToRemove;
-    Hashtable transpoints;
+    NamedStack transpoints;
     DBNameSpaceCkPoint point;
     DBNameSpaceHandle handle1, handle2;
 
     /* -- */
 
-    transpoints = (Hashtable) checkpoints.get(editSet);
+    transpoints = (NamedStack) checkpoints.get(editSet);
 
     if (transpoints == null)
       {
@@ -875,14 +886,23 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	return false;
       }
 
-    point = (DBNameSpaceCkPoint) transpoints.get(name);
+    // try to pop off the named checkpoint we're looking for
+
+    point = (DBNameSpaceCkPoint) transpoints.pop(name);
 
     if (point == null)
       {
-	System.err.println("DBNameSpace.rollback(): In editSet: " + editSet.description);
-	System.err.println("DBNameSpace.rollback(): no checkpoint found by requested name: " + name);
+	System.err.println("DBNameSpace.rollback(): couldn't find checkpoint for " + name);
+	System.err.println("\nCurrently registered checkpoints:");
+	System.err.println(transpoints.toString());
 	return false;
       }
+
+    // now we need to set about reconstituting the state of the
+    // namespace for the values that were recorded at the time the
+    // point was established
+
+    // first we need to see what the current state is
 
     currentVals = (Vector) reserved.get(editSet);
 
@@ -939,6 +959,10 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	  }
 	else
 	  {
+	    // the checkpoint had value2 reserved.. we need to
+	    // re-instantiate the association with value2 with the
+	    // handle from the checkpoint.
+
 	    handle2 = (DBNameSpaceHandle) point.uniqueHash.get(value2);
 
 	    uniqueHash.put(value2, handle2);
@@ -1196,5 +1220,4 @@ class DBNameSpaceCkPoint {
 	uniqueHash.put(value, space.uniqueHash.get(value));
       }
   }
-
 }

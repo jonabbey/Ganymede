@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/06/26 20:38:51 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/10/02 22:00:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -74,9 +74,6 @@ class DBCheckPoint {
 
   // ---
 
-  String 
-    name;
-
   Vector
     objects = null,
     logEvents = null,
@@ -84,13 +81,11 @@ class DBCheckPoint {
 
   /* -- */
 
-  DBCheckPoint(String name, DBEditSet transaction)
+  DBCheckPoint(DBEditSet transaction)
   {
     DBEditObject obj;
 
     /* -- */
-
-    this.name = name;
 
     // assume that log events are not going to change once recorded,
     // so we can make do with a shallow copy.

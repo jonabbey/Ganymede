@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 2000/09/30 21:52:47 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 2000/10/02 22:00:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,6 +52,7 @@
 package arlut.csd.ganymede;
 
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.Util.NamedStack;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
@@ -175,7 +176,7 @@ public class DBEditSet {
    * to keep track of check points performed during the course of this transaction.
    */
 
-  Stack checkpoints = new Stack();
+  NamedStack checkpoints = new NamedStack();
 
   /**
    * <p>We keep track of the thread that is doing checkpointing.. once
@@ -496,7 +497,7 @@ public class DBEditSet {
 
     // checkpoint our objects, logEvents, and deletion locks
 
-    checkpoints.push(new DBCheckPoint(name, this));
+    checkpoints.push(name, new DBCheckPoint(this));
 
     // and our namespaces
 
@@ -560,7 +561,6 @@ public class DBEditSet {
   public synchronized DBCheckPoint popCheckpoint(String name, boolean inRollback)
   {
     DBCheckPoint point = null;
-    boolean found;
 
     /* -- */
 
@@ -578,53 +578,22 @@ public class DBEditSet {
 
     // see if we can find the checkpoint
 
-    found = false;
+    point = (DBCheckPoint) checkpoints.pop(name);
 
-    for (int i = 0; i < checkpoints.size(); i++)
-      {
-	point = (DBCheckPoint) checkpoints.elementAt(i);
-
-	if (point.name.equals(name))
-	  {
-	    found = true;
-	  }
-      }
-
-    if (!found)
+    if (point == null)
       {
 	System.err.println("DBEditSet.popCheckpoint: couldn't find checkpoint for " + name);
 	System.err.println("\nCurrently registered checkpoints:");
 
-	for (int i = 0; i < checkpoints.size(); i++)
-	  {
-	    point = (DBCheckPoint) checkpoints.elementAt(i);
-	    
-	    System.err.println(i + ": " + point.name);
-	  }
-
-	System.err.println();
+	System.err.println(checkpoints.toString());
 
 	return null;
       }
 
-    // okay, we know the checkpoint is there, go ahead and pop
-    // checkpoints off until we find it
-
-    found = false;
-
-    while (!found && !checkpoints.empty())
-      {
-	point = (DBCheckPoint) checkpoints.pop();
-
-	if (point.name.equals(name))
-	  {
-	    found = true;
-	  }
-	else if (debug)
-	  {
-	    System.err.println("DBEditSet.popCheckpoint(): popping overlaid checkpoint " + point.name);
-	  }
-      }
+    // DBEditSet.rollback() calls us to take care of getting our
+    // transactional checkpoint in the rollback case, but it doesn't
+    // want us to pop the namespace checkpoint for it, since it will
+    // want to do a rollback on the namespace checkpoint instead.
 
     if (!inRollback)
       {
@@ -647,14 +616,7 @@ public class DBEditSet {
 	this.notifyAll();
       }
 
-    if (found)
-      {
-	return point;
-      }
-    else
-      {
-	return null;
-      }
+    return point;
   }
 
   /**
@@ -759,12 +721,6 @@ public class DBEditSet {
 	  }
       }
 
-    // now, we have to sweep out any objects that are in the transaction now
-    // that weren't in the transaction at the checkpoint.
-
-    // note that we need a drop temp vector because it confuses things
-    // if we remove elements from objects while we are iterating over it
-
     if (debug)
       {
 	System.err.println("DBEditSet.rollback() At checkpoint:");
@@ -783,6 +739,12 @@ public class DBEditSet {
 	    System.err.println(enum.nextElement());
 	  }
       }
+
+    // now, we have to sweep out any objects that are in the transaction now
+    // that weren't in the transaction at the checkpoint.
+
+    // note that we need a drop temp vector because it confuses things
+    // if we remove elements from objects while we are iterating over it
 
     // calculate what DBEditObjects we have in the transaction at the
     // present time that we didn't have in the checkpoint
