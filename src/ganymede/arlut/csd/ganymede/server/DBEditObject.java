@@ -3643,6 +3643,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     xmlOut.startElementIndent("object_delta");
     xmlOut.indentOut();
 
+    xmlOut.setBeforeStateDumping(true);
     xmlOut.startElementIndent("before");
     xmlOut.indentOut();
 
@@ -3692,6 +3693,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     xmlOut.indentIn();
     xmlOut.endElementIndent("before");
+    xmlOut.setBeforeStateDumping(false);
 
     xmlOut.startElementIndent("after");
     xmlOut.indentOut();

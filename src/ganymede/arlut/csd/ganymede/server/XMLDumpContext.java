@@ -106,6 +106,19 @@ public class XMLDumpContext {
   private boolean deltaSyncing = false;
 
   /**
+   * <p>If true, this XMLDumpContext is currently writing out the
+   * before state of a transaction incremental dump.  We'll keep hold
+   * of this information so server-side code can decide whether to
+   * write information from the before or after state of a transaction
+   * in progress.</p>
+   *
+   * <p>If we're not dumping out a transactional incremental dump, this
+   * variable should always be false.</p>
+   */
+
+  private boolean beforeState = false;
+
+  /**
    * <p>The actual writer, from James Clark's XML package.</p>
    */
 
@@ -180,6 +193,26 @@ public class XMLDumpContext {
     return this.deltaSyncing;
   }
 
+  /**
+   * <p>Sets whether or not this XMLDumpContext is in the middle of writing
+   * out the before state of an incremental dump.</p>
+   */
+
+  public void setBeforeStateDumping(boolean param)
+  {
+    this.beforeState = param;
+  }
+
+  /**
+   * <p>Returns true if this XMLDumpContext is writing out the before
+   * state of an incremental dump, or false if we're either writing
+   * the after state or are not doing an incremental dump.</p>
+   */
+
+  public boolean isBeforeStateDumping()
+  {
+    return this.beforeState;
+  }
 
   /**
    * <p>Returns the name of the Sync Channel we're writing to, if we

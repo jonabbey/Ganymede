@@ -499,7 +499,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	    DBEditObject hook = getOwner().getBase().getObjectHook();
 
 	    String extras[] = hook.getForeignSyncKeys(invid, getOwner(),
-						      target, xmlOut.getSyncChannelName());
+						      target, xmlOut.getSyncChannelName(),
+						      xmlOut.isBeforeStateDumping());
 
 	    if (extras != null && extras.length > 0)
 	      {
