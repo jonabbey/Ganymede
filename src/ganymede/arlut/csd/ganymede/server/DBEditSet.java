@@ -2556,6 +2556,12 @@ public class DBEditSet {
 
     DBDeletionManager.releaseSession(session);
 
+    // make sure that we haven't somehow left a write lock
+    // hanging.. and let's do it before we deconstruct.  This is a
+    // no-op if we don't have a write lock open.
+
+    releaseWriteLock();
+
     // and help out garbage collection some
 
     this.deconstruct();
@@ -2611,6 +2617,8 @@ public class DBEditSet {
    * clean.  It's essential that wLock be released if things go
    * wrong, else next time this session tries to commit a transaction,
    * it'll wind up waiting forever for the old lock to be released.</p>
+   *
+   * <p>Note that this method will fail if called after deconstruct().</p>
    */
 
   private void releaseWriteLock()
