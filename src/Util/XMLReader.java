@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2000/12/04 04:14:10 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2000/12/04 04:36:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -748,9 +748,15 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (!done)
 	  {
-	    close();
 	    ex.printStackTrace();
+
 	    err.println("XMLReader io error: " + ex.getMessage());
+	    err.println("Leading context:");
+	    err.println(circleBuffer.getContents());
+	    
+	    close();
+
+	    throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
 	  }
       }
   }
