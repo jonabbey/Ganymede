@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -194,5 +194,24 @@ public class Query implements java.io.Serializable {
     permitList.put(new Short(id), this);
   }
 
+  
+  public String dumpToString()
+    {
+      /** 
+       *
+       * The dumpToSting method for the query creates a string representation
+       * of the query's actual values. It calls each node's dumpToString method 
+       * until the number of nodes in the query has been exhausted
+       *
+       */
+
+
+
+      String queryString = null;
+ 
+      
+      return queryString;
+      
+    }
 }
 
