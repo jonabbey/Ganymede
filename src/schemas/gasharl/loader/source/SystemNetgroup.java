@@ -2,11 +2,11 @@
 
    SystemNetgroup.java
 
-   Class to load and store the data from user netgroup lines in the
+   Class to load and store the data from system netgroup lines in the
    GASH netgroup_ file
    
    Created: 17 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,10 +70,10 @@ public class SystemNetgroup {
 
     netgroup_name = getNextBit(tokens);
 
-    // if the netgroup name ends in -s, we've got 
-    // a system netgroup and we want to skip it
+    // if the netgroup name ends in -u, we've got 
+    // a user netgroup and we want to skip it
 
-    while (netgroup_name.endsWith("-s"))
+    while (netgroup_name.endsWith("-u"))
       {
 	while ((tokens.ttype != StreamTokenizer.TT_EOL) &&
 	       (tokens.ttype != StreamTokenizer.TT_EOF))
