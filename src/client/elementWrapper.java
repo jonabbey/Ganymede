@@ -8,7 +8,7 @@
    being displayed.
    
    Created: 16 October 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -127,7 +127,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	title.addMouseListener(this);
 
 	expand = new JButton(vp.wp.closeIcon);
-	expand.setPressedIcon(vp.wp.closeIcon);
+	expand.setPressedIcon(vp.wp.openIcon);
 	expand.setToolTipText("Expand this element");
 	expand.setOpaque(false);
 	expand.setBorderPainted(false);
@@ -244,7 +244,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     my_component.setVisible(true);
 
     expand.setIcon(vp.wp.openIcon);
-    expand.setPressedIcon(vp.wp.openIcon);
+    expand.setPressedIcon(vp.wp.closeIcon);
     expand.setToolTipText("Expand this element");
     expanded = true;
   }
@@ -257,7 +257,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     my_component.setVisible(false);	
     expand.setIcon(vp.wp.closeIcon);
-    expand.setPressedIcon(vp.wp.closeIcon);
+    expand.setPressedIcon(vp.wp.openIcon);
     expand.setToolTipText("Collapse this element");
     expanded = false;
   }
