@@ -8,7 +8,7 @@
    server.
    
    Created: 6 February 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -148,5 +148,35 @@ public class ObjectHandle implements Cloneable {
   public String toString()
   {
     return label;
+  }
+
+  public String debugDump()
+  {
+    StringBuffer tmpBuf = new StringBuffer();
+
+    tmpBuf.append(label);
+    tmpBuf.append(": ");
+    
+    if (editable)
+      {
+	tmpBuf.append("editable :");
+      }
+
+    if (inactive)
+      {
+	tmpBuf.append("inactive :");
+      }
+    
+    if (expirationSet)
+      {
+	tmpBuf.append("expiration set :");
+      }
+
+    if (removalSet)
+      {
+	tmpBuf.append("removal set :");
+      }
+
+    return tmpBuf.toString();
   }
 }
