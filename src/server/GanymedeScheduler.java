@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2001/02/13 06:36:24 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2001/03/01 03:10:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -366,7 +366,7 @@ public class GanymedeScheduler extends Thread {
 
     if (task == null || name == null)
       {
-	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
+	throw new IllegalArgumentException("bad params to GanymedeScheduler.addActionOnDemand()");
       }
 
     handle = unregisterTask(name);
@@ -404,7 +404,7 @@ public class GanymedeScheduler extends Thread {
 
     if (time == null || task == null || name == null)
       {
-	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
+	throw new IllegalArgumentException("bad params to GanymedeScheduler.addTimedAction()");
       }
 
     handle = unregisterTask(name);
@@ -448,7 +448,7 @@ public class GanymedeScheduler extends Thread {
 
     if (task == null || name == null)
       {
-	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
+	throw new IllegalArgumentException("bad params to GanymedeScheduler.addDailyAction()");
       }
 
     handle = unregisterTask(name);
@@ -512,7 +512,7 @@ public class GanymedeScheduler extends Thread {
 
     if (task == null || name == null)
       {
-	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
+	throw new IllegalArgumentException("bad params to GanymedeScheduler.addPeriodicAction()");
       }
 
     handle = unregisterTask(name);
@@ -1143,6 +1143,12 @@ public class GanymedeScheduler extends Thread {
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <P>This class is used to produce test task objects for the {@link
+ * arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler} class.  It
+ * print a message when it is run, then waits one second before returning.</P>
+ */
+
 class sampleTask implements Runnable {
 
   String name;
@@ -1157,6 +1163,8 @@ class sampleTask implements Runnable {
   public synchronized void run()
   {
     System.err.println(name + " reporting in: " + new Date());
+
+    // wait to take up a bit of time for this task.
 
     try
       {

@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 2001/02/14 21:23:37 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 2001/03/01 03:10:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1497,13 +1497,60 @@ class timeOutTask implements Runnable, silentTask {
 
 class memoryStatusTask implements Runnable, silentTask {
 
+  /**
+   * <p>The debug flag in memoryStatusTask is used to control
+   * whether memoryStatusTask will log memory usage to Ganymede's
+   * standard error log.  This is useful for tracking memory usage patterns.</p>
+   */
+
+  static final boolean debug = true;
+
+  /**
+   * <p>The period value is used to set how often the memory
+   * statistics will be logged to Ganymede's standard error
+   * log.  This period value is counted in terms of the number
+   * of runs of the memoryStatusTask.  By default, memoryStatusTask
+   * is run once a minute from the Ganymede scheduler, so the
+   * period count is minutes.</p>
+   */
+
+  static final int period = 15;
+
+  static int count = 0;
+
+  // ---
+
   public memoryStatusTask()
   {
   }
 
   public void run()
   {
-    GanymedeAdmin.updateMemState(Runtime.getRuntime().freeMemory(),
-				 Runtime.getRuntime().totalMemory());
+    Runtime rt = Runtime.getRuntime();
+
+    /* -- */
+
+    if (debug)
+      {
+	if (count == period)
+	  {
+	    count = 0;
+	  }
+	
+	if (count == 0)
+	  {
+	    Ganymede.debug(">> quarter-hourly memory status dump: " +
+			   "in use = " + (rt.totalMemory() - rt.freeMemory()) +
+			   ", free = " + rt.freeMemory() +
+			   ", total = " + rt.totalMemory());
+	  }
+      }
+
+    GanymedeAdmin.updateMemState(rt.freeMemory(), rt.totalMemory());
+
+    if (debug)
+      {
+	count++;
+      }
   }
 }

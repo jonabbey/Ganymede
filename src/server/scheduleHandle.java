@@ -7,8 +7,8 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2001/02/13 06:36:26 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2001/03/01 03:10:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -563,5 +563,10 @@ class taskMonitor implements Runnable {
       {
 	handle.notifyCompletion(); // tell the scheduler it has completed
       }
+
+    // we're a one-shot monitor, forget everything for GC
+
+    this.task = null;
+    this.handle = null;
   }
 }

@@ -11,8 +11,8 @@
    
    Created: 16 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/10/05 20:06:45 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/03/01 03:10:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientEvent
  *
- * @version $Revision: 1.2 $ $Date: 2000/10/05 20:06:45 $
+ * @version $Revision: 1.3 $ $Date: 2001/03/01 03:10:55 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
 
 public class serverClientProxy implements Runnable {
@@ -171,7 +171,10 @@ public class serverClientProxy implements Runnable {
   }
 
   /**
-   * <p>This method shuts down the background thread.</p>
+   * <p>This method is used to submit a message to be sent to the
+   * client.  If the serverClientProxy has already had its shutdown()
+   * method called, sendMessage() will silently fail, and the message
+   * will not be queued.</p>
    */
 
   public void sendMessage(int type, String message) throws RemoteException
@@ -211,6 +214,9 @@ public class serverClientProxy implements Runnable {
 		    catch (InterruptedException ex)
 		      {
 		      }
+
+		    // loop back to check for done or
+		    // non-empty eventBuffer
 		
 		    continue;
 		  }
