@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2001/05/21 07:30:54 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2001/05/21 08:26:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,25 +68,39 @@ import com.jclark.xml.output.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBNameSpaces are the objects used to coordinate unique valued fields across
- * various EditSets that would possibly want to modify fields constrained
- * to have a unique value.</p>
+ * <p>DBNameSpaces are the objects used to manage unique value
+ * tracking in {@link arlut.csd.ganymede.DBField DBFields} that are
+ * unique value constrained.  DBNameSpace is smart enough to
+ * coordinate unique value allocation and management during object
+ * editing across concurrent transactions.</p>
  *
- * <p>Several different fields in different 
- * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase}'s can point to the
- * same DBNameSpace.  All such fields thus share a common name space.</p>
+ * <p>In general, transactions in Ganymede are not able to affect each other
+ * at all, save through the acquisition of exclusive editing locks on
+ * invidivual objects, and through the atomic acquisition of values
+ * for unique value constrained DBFields.  Once a transaction allocates
+ * a unique value using either the {@link arlut.csd.ganymede.DBNameSpace#mark(arlut.csd.ganymede.DBEditSet,java.lang.Object,arlut.csd.ganymede.DBField) mark()},
+ * {@link arlut.csd.ganymede.DBNameSpace#unmark(arlut.csd.ganymede.DBEditSet,java.lang.Object) unmark()},
+ * or {@link arlut.csd.ganymede.DBNameSpace#reserve(arlut.csd.ganymede.DBEditSet,java.lang.Object) reserve()}
+ * methods, no other transaction can allocate that value, until the first transaction
+ * calls the {@link arlut.csd.ganymede.DBNameSpace#commit(arlut.csd.ganymede.DBEditSet) commit()},
+ * {@link arlut.csd.ganymede.DBNameSpace#abort(arlut.csd.ganymede.DBEditSet) abort()},
+ * or {@link arlut.csd.ganymede.DBNameSpace#rollback(arlut.csd.ganymede.DBEditSet,java.lang.String) rollback()}
+ * methods.</p>
  *
- * <p>DBNameSpace is designed to coordinate transactional access in conjunction with
- * {@link arlut.csd.ganymede.DBEditSet DBEditSet}'s and 
- * {@link arlut.csd.ganymede.DBEditObject DBEditObject}'s.</p>
+ * <p>In order to perform this unique value management, DBNameSpace maintains
+ * a private Hashtable, {@link arlut.csd.ganymede.DBNameSpace#uniqueHash uniqueHash},
+ * that associates the allocated vales in the namespace with {@link arlut.csd.ganymede.DBNameSpaceHandle DBNameSpaceHandle}
+ * objects which track the transaction that is manipulating the value, if any, as well
+ * as the DBField object in the database that is checked in with that value.  The
+ * {@link arlut.csd.ganymede.GanymedeSession GanymedeSession} query logic takes
+ * advantage of this to do optimized, hashed look-ups of values for unique value
+ * constrained fields to locate objects in the database rather than having to iterate
+ * over all objects of a given type to find a particular match.</p>
  *
- * <p>When an object is pulled out from editing, it can't affect any other object,
- * except through the acquisition of values in unique contraint fields.  Such
- * an acquisition must be atomic and immediate, unlike normal DBEditObject
- * processing where nothing in the database is actually changed until the
- * DBEditSet is committed.</p>
- *
- * <p>The actual acquisition logic is in the DBEditObject's setValue method.</p>
+ * <p>DBNameSpaces may be defined in the server's schema editor to be either case sensitive
+ * or case insensitive.  The DBNameSpace class uses the {@link arlut.csd.ganymede.GHashtable GHashtable}
+ * class to handle the representational issues in the unique value hash for this, as well as
+ * for things like IP address representation.</p>
  */
 
 public final class DBNameSpace extends UnicastRemoteObject implements NameSpace {
@@ -110,16 +124,22 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
    * <p>the name of this namespace</p>
    */
 
-  private String    name;
+  private String name;
 
   /**
-   * <p>index of values used in the current namespace</p>
+   * <p>Hashtable mapping values allocated (permanently, for objects checked in to the database, or
+   * temporarily, for objects being manipulated by active transactions) in this namespace to
+   * {@link arlut.csd.ganymede.DBNameSpaceHandle DBNameSpaceHandle} objects that track
+   * the current status of the values.</p>
    */
 
   private Hashtable uniqueHash;
 
   /**
-   * <p>Index of DBEditSet's currently actively modifying values in this namespace.</p>
+   * <p>Hashtable mapping {@link arlut.csd.ganymede.DBEditSet
+   * DBEditSet's} currently active modifying values in this namespace
+   * to {@link arlut.csd.ganymede.DBNameSpaceTransaction
+   * DBNameSpaceTransaction} objects.</p>
    */
 
   private Hashtable transactions;
@@ -266,6 +286,14 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     caseInsensitive = b;
   }
 
+  /**
+   * <p>This method returns the {@link arlut.csd.ganymede.DBNameSpaceTransaction DBNameSpaceTransaction}
+   * associated with the given transaction, creating one if one was not previously
+   * so associated.</p>
+   *
+   * <p>This method will always return a valid DBNameSpaceTransaction record.</p>
+   */
+
   public synchronized DBNameSpaceTransaction getTransactionRecord(DBEditSet transaction)
   {
     DBNameSpaceTransaction transRecord = (DBNameSpaceTransaction) transactions.get(transaction);
@@ -279,20 +307,52 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     return transRecord;
   }
 
+  /**
+   * <p>Returns true if this namespace has value allocated.</p>
+   */
+
   public boolean containsKey(Object value)
   {
     return uniqueHash.containsKey(value);
   }
+
+  /**
+   * <p>Returns the DBNameSpaceHandle associated with the value
+   * in this namespace, or null if the value is not allocated in
+   * this namespace.</p>
+   */
 
   public DBNameSpaceHandle getHandle(Object value)
   {
     return (DBNameSpaceHandle) uniqueHash.get(value);
   }
 
+  /**
+   * <p>Publicly accessible function used to associate the given
+   * {@link arlut.csd.ganymede.DBNameSpaceHandle DBNameSpaceHandle}
+   * with a value in this namespace in a non-transactional fashion.</p>
+   *
+   * <p>Used by the {@link arlut.csd.ganymede.DBObject DBObject}
+   * receive() method and the {@link arlut.csd.ganymede.DBJournal
+   * DBJournal}'s {@link arlut.csd.ganymede.JournalEntry JournalEntry}
+   * class' process() method to build up the namespace during server
+   * start-up.</p>
+   */
+
   public void putHandle(Object value, DBNameSpaceHandle handle)
   {
     uniqueHash.put(value, handle);
   }
+
+  /**
+   * <p>Publicly accessible function used to clear the given
+   * value from this namespace in a non-transactional fashion.</p>
+   *
+   * <p>Used by {@link arlut.csd.ganymede.DBJournal DBJournal}'s
+   * {@link arlut.csd.ganymede.JournalEntry JournalEntry} class'
+   * process() method to rectify the namespace during server
+   * start-up.</p>
+   */
   
   public void clearHandle(Object value)
   {

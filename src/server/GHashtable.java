@@ -7,15 +7,16 @@
    
    Created: 10 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/08/31 03:51:10 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2001/05/21 08:26:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -43,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -58,16 +60,15 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * GHashtable is a Hashtable subclass that can map uppercase/lowercase keys
+ * <p>GHashtable is a Hashtable subclass that can map uppercase/lowercase keys
  * of the same string to identity.  It does this by basically mapping all
  * strings to the lowercase version internally.  The case sensitivity of
  * the hashtable is specified at hash creation time, and may not change
- * thereafter.<br><br>
+ * thereafter.</p>
  *
- * This hashtable also has special support for handling arrays of Bytes as
- * keys in the hash. 
- *
+ * <p>This hashtable also has special support for handling arrays of Bytes as
+ * keys in the hash, using the {@link arlut.csd.ganymede.IPwrap IPwrap}
+ * class for I.P. address representation.</p>
  */
 
 public class GHashtable extends Hashtable {
