@@ -8,7 +8,7 @@
    an RMI link.
    
    Created: 21 October 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,8 +40,10 @@ import java.util.*;
 
 public class Query implements java.io.Serializable {
 
-  String objectName;
-  short objectType;
+  String objectName = null;
+  String returnName = null;
+  short objectType = -1;
+  short returnType = -1;
   QueryNode root;
   boolean editableOnly;
   Hashtable permitList = null;
@@ -60,7 +62,7 @@ public class Query implements java.io.Serializable {
 
   public Query(short objectType, QueryNode root, boolean editableOnly)
   {
-    this.objectType = objectType;
+    this.returnType = this.objectType = objectType;
     this.root = root;
     this.editableOnly = editableOnly;
 
@@ -76,8 +78,8 @@ public class Query implements java.io.Serializable {
    */
 
   public Query(String objectName, QueryNode root, boolean editableOnly)
-  {
-    this.objectName = objectName;
+  {  
+    this.returnName = this.objectName = objectName;
     this.root = root;
     this.editableOnly = editableOnly;
 
@@ -93,7 +95,7 @@ public class Query implements java.io.Serializable {
 
   public Query(short objectType, QueryNode root)
   {
-    this.objectType = objectType;
+    this.returnType = this.objectType = objectType;
     this.root = root;
 
     editableOnly = true;
@@ -109,7 +111,7 @@ public class Query implements java.io.Serializable {
 
   public Query(String objectName, QueryNode root)
   {
-    this.objectName = objectName;
+    this.returnName = this.objectName = objectName;
     this.root = root;
 
     objectType = -1;
@@ -124,7 +126,7 @@ public class Query implements java.io.Serializable {
 
   public Query(short objectType)
   {
-    this.objectType = objectType;
+    this.returnType = this.objectType = objectType;
 
     objectName = null;
     root = null;
@@ -139,7 +141,7 @@ public class Query implements java.io.Serializable {
 
   public Query(String objectName)
   {
-    this.objectName = objectName;
+    this.returnName = this.objectName = objectName;
 
     objectType = -1;
     root = null;
@@ -156,6 +158,19 @@ public class Query implements java.io.Serializable {
   public void resetPermitList()
   {
     permitList = null;
+  }
+
+  /**
+   *
+   * This method sets the desired return type, for use
+   * in performing queries on embedded types when a
+   * parent type is what is desired.
+   *
+   */
+
+  public void setReturnType(short returnType)
+  {
+    this.returnType = returnType;
   }
 
   /**
