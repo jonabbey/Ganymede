@@ -5,15 +5,13 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package arlut.csd.ganymede.custom;
-
-import arlut.csd.ganymede.*;
+package arlut.csd.ganymede;
 
 import java.util.*;
 import java.rmi.*;
