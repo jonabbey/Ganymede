@@ -35,15 +35,15 @@
     <mkdir dir="${build.lib}"/>
     <mkdir dir="${build.doc}"/>
     <tstamp/>
-	<ant dir="../../" inheritall="false" target="main"/>
-    <echo message="${TSTAMP}"/>
+    <echo message="Chaining top-level build"/>
+    <ant dir="../../" inheritall="false" target="main"/>
   </target>
 
   <target name="all" depends="main"/>
 
   <target name="main" depends="prepare">
     <mkdir dir="${build.classes}"/>
-    
+    <echo message="Building schema kit"/>
     <javac destdir="${build.classes}"
            debug="${debug.flags}"
            nowarn="true"
