@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2000/03/15 03:36:51 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/03/29 01:42:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -482,6 +482,28 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
 
     return result;
+  }
+
+  /**
+   * <P>This method returns true if the next thing to be read in the
+   * input stream is non-whitespace character data rather than an
+   * open or close element tag.</P>
+   *
+   * <P>Calling this method has the side effect that if the next
+   * data in the stream is a block of all-whitespace
+   * character data, that all-whitespace character data will be
+   * silently eaten.</P>
+   *
+   * <P>This method goes well with getFollowingString();  you can
+   * call this method first to verify that the next data is indeed
+   * char data, then call getFollowingString() to get all of it.</P>
+   */
+
+  public boolean isNextCharData()
+  {
+    XMLItem next = peekNextItem(true);
+
+    return next instanceof XMLCharData;
   }
 
   /**
