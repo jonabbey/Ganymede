@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,6 +32,9 @@ public class PasswordDBField extends DBField implements pass_field {
   /* -- */
   
   static final boolean debug = false;
+
+  String cryptedPass;
+  String uncryptedPass;
 
   /**
    *
@@ -81,39 +84,11 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     this.owner = owner;
     definition = field.definition;
-    
-    if (isVector())
-      {
-	values = (Vector) field.values.clone();
-	value = null;
-      }
-    else
-      {
-	value = field.value;
-	values = null;
-      }
 
-    defined = true;
-  }
+    cryptedPass = field.cryptedPass;
+    uncryptedPass = field.uncryptedPass;
 
-  /**
-   *
-   * Scalar value constructor.
-   *
-   */
-
-  public PasswordDBField(DBObject owner, String value, DBObjectBaseField definition) throws RemoteException
-  {
-    if (definition.isArray())
-      {
-	throw new IllegalArgumentException("scalar constructor called on vector field");
-      }
-
-    this.owner = owner;
-    this.definition = definition;
-    this.value = value;
-
-    if (value == null)
+    if (cryptedPass != null || uncryptedPass != null)
       {
 	defined = true;
       }
@@ -121,19 +96,6 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	defined = false;
       }
-
-    values = null;
-  }
-
-  /**
-   *
-   * Vector value constructor.
-   *
-   */
-
-  public PasswordDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
-  {
-    throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
   public Object clone()
@@ -150,40 +112,26 @@ public class PasswordDBField extends DBField implements pass_field {
 
   void emit(DataOutput out) throws IOException
   {
-    out.writeUTF((String)value);
+    out.writeUTF(cryptedPass);
+    out.writeUTF(uncryptedPass);
   }
 
   void receive(DataInput in) throws IOException
   {
-    value = in.readUTF();
+    if ((Ganymede.db.file_major > 1) || (Ganymede.db.file_minor >= 10))
+      {
+	cryptedPass = in.readUTF();
+	uncryptedPass = in.readUTF();
+      }
+    else
+      {
+	value = in.readUTF();
+      }
   }
 
   public Object getValue()
   {
-    Object result;
-
-    /* -- */
-
-    try
-      {
-	result = super.getValue();
-      }
-    catch (IllegalArgumentException ex)
-      {
-	return null;
-      }
-
-    // we can safely return the password if it's
-    // stored in hash crypted form.
-
-    if (crypted())
-      {
-	return result;
-      }
-    else
-      {
-	return "<Password>";
-      }
+    throw new IllegalArgumentException("can't read a password field.");
   }
 
   // ****
@@ -192,26 +140,6 @@ public class PasswordDBField extends DBField implements pass_field {
   //
   // ****
 
-  public String value()
-  {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
-
-    if (isVector())
-      {
-	throw new IllegalArgumentException("scalar accessor called on vector field");
-      }
-
-    return (String) value;
-  }
-
-  public String value(int index)
-  {
-    throw new IllegalArgumentException("vector accessor called on scalar");
-  }
-
   public synchronized String getValueString()
   {
     if (!verifyReadPermission())
@@ -219,20 +147,13 @@ public class PasswordDBField extends DBField implements pass_field {
 	throw new IllegalArgumentException("permission denied to read this field");
       }
 
-    if (value == null)
+    if (cryptedPass != null || uncryptedPass != null)
       {
-	return "null";
-      }
-
-    // only return the password value if it is hash-crypted
-
-    if (crypted())
-      {
-	return (String) value;
+	return "<Password>";
       }
     else
       {
-	return "<Password>";
+	return null;
       }
   }
 
@@ -262,7 +183,6 @@ public class PasswordDBField extends DBField implements pass_field {
   public String getDiffString(DBField orig)
   {
     PasswordDBField origP;
-    String a, b;
 
     /* -- */
 
@@ -273,10 +193,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     origP = (PasswordDBField) orig;
 
-    a = (String) origP.value;
-    b = (String) this.value;
-
-    if (!(a.equals(b)))
+    if ((cryptedPass != origP.cryptedPass) || (uncryptedPass != origP.uncryptedPass))
       {
 	return "\tPassword changed";
       }
@@ -388,7 +305,6 @@ public class PasswordDBField extends DBField implements pass_field {
     return (definition.isCrypted());
   }
 
-
   /**
    *
    * Verification method for comparing a plaintext entry with a crypted
@@ -403,12 +319,16 @@ public class PasswordDBField extends DBField implements pass_field {
 
     /* -- */
 
-    if (value == null || text == null)
+    if ((cryptedPass == null && uncryptedPass == null) || text == null)
       {
 	return false;
       }
 
-    if (definition.isCrypted())
+    if (uncryptedPass != null)
+      {
+	return text.equals(uncryptedPass);
+      }
+    else
       {
 	if (debug)
 	  {
@@ -424,11 +344,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    System.err.println("comparison crypted text == " + cryptedText);
 	  }
 
-	return ((String) value).equals(cryptedText);
-      }
-    else
-      {
-	return text.equals(value);
+	return cryptedPass.equals(cryptedText);
       }
   }
 
@@ -444,17 +360,17 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public boolean matchCryptText(String text)
   {
-    if (value == null || text == null)
+    if (cryptedPass == null || text == null)
       {
 	return false;
       }
 
-    if (!((String) text).startsWith(getSalt()))
+    if (!text.startsWith(getSalt()))
       {
 	throw new IllegalArgumentException("bad salt");
       }
 
-    return (text.equals((String)value));
+    return text.equals(cryptedPass);
   }
 
   /**
@@ -465,18 +381,20 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public String getUNIXCryptText()
   {
-    if (value == null)
-      {
-	return null;
-      }
-
     if (crypted())
       {
-	return (String) value;
+	return cryptedPass;
       }
     else
       {
-	return jcrypt.crypt((String) value);
+	if (uncryptedPass != null)
+	  {
+	    return jcrypt.crypt(uncryptedPass);
+	  }
+	else
+	  {
+	    return null;
+	  }
       }
   }
 
@@ -492,9 +410,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public String getSalt()
   {
-    if (definition.isCrypted() && value != null)
+    if (definition.isCrypted() && cryptedPass != null)
       {
-	return ((String) value).substring(0,2);
+	return cryptedPass.substring(0,2);
       }
     else
       {
@@ -528,7 +446,6 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setPlainTextPass(String text)
   {
-    String cryptedText = null;
     ReturnVal retVal;
 
     /* -- */
@@ -545,30 +462,43 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	if (definition.isCrypted())
 	  {
-	    cryptedText = jcrypt.crypt(text);
-
-	    if (debug)
+	    if (text != null)
 	      {
-		System.err.println("Receiving plain text pass.. crypted = " + cryptedText + ", plain = " + text);
+		cryptedPass = jcrypt.crypt(text);
+
+		// see whether the schema editor has us trying to save
+		// plain text
+
+		if (definition.isPlainText())
+		  {
+		    uncryptedPass = text;
+		  }
+		else
+		  {
+		    uncryptedPass = null;
+		  }
+
+		if (debug)
+		  {
+		    System.err.println("Receiving plain text pass.. crypted = " + cryptedPass + ", plain = " + text);
+		  }
+
+		defined = true;
+	      }
+	    else
+	      {
+		cryptedPass = null;
+		uncryptedPass = null;
+
+		defined = false;
 	      }
 	  }
 	else
 	  {
-	    if (debug)
-	      {
-		System.err.println("Not encrypting.. plain = " + text);
-	      }
-	  }
+	    cryptedPass = null;
+	    uncryptedPass = text;
 
-	if ((text == null) || (text.equals("")))
-	  {
-	    value = null;
-	    defined = false;
-	  }
-	else
-	  {
-	    this.value = (cryptedText == null) ? text : cryptedText;
-	    defined = true;
+	    defined = (uncryptedPass != null);
 	  }
       }
 
@@ -608,14 +538,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (retVal == null || retVal.didSucceed())
       {
+	// whenever the crypt password is directly set, we lose 
+	// plaintext
+
 	if ((text == null) || (text.equals("")))
 	  {
-	    value = null;
+	    cryptedPass = null;
+	    uncryptedPass = null;
 	    defined = false;
 	  }
 	else
 	  {
-	    this.value = text;
+	    cryptedPass = text;
+	    uncryptedPass = null;
 	    defined = true;
 	  }
       }
