@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.37 $ %D%
+   Version: $Revision: 1.38 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -444,6 +444,16 @@ public class DBStore {
       }
 
     GanymedeAdmin.updateLastDump(new Date());
+
+    if (Ganymede.log != null)
+      {
+	Ganymede.log.logSystemEvent(new DBLogEvent("dump",
+						   "Database dumped",
+						   null,
+						   null,
+						   null,
+						   null));
+      }
   }
 
   /**
@@ -548,7 +558,8 @@ public class DBStore {
 
 	    if (base.type_code == SchemaConstants.OwnerBase ||
 		 base.type_code == SchemaConstants.PersonaBase ||
-		 base.type_code == SchemaConstants.PermBase)
+		 base.type_code == SchemaConstants.PermBase ||
+		 base.type_code == SchemaConstants.EventBase)
 	      {
 		base.partialEmit(out); // gotta retain admin login ability
 	      }
@@ -567,7 +578,7 @@ public class DBStore {
       }
     catch (IOException ex)
       {
-	System.err.println("DBStore error dumping to " + filename);
+	System.err.println("DBStore error dumping schema to " + filename);
 	throw ex;
       }
     finally
@@ -600,13 +611,6 @@ public class DBStore {
 	    textOutStream.close();
 	  }
       }
-
-    if (journal != null)
-      {
-	journal.reset();
-      }
-
-    GanymedeAdmin.updateLastDump(new Date());
   }
 
   /**
@@ -947,6 +951,18 @@ public class DBStore {
 	bf.comment = "What objects are owned by this owner set";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.OwnerMailList;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Mail List";
+	bf.allowedTarget = -2;	// any (we'll depend on subclassing to refine this)
+	bf.targetField = -1;	// use default backlink field
+	bf.removable = false;
+	bf.editable = false;
+	bf.array = true;
+	bf.comment = "What email addresses should be notified of changes to objects owned?";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
 	b.setLabelField(SchemaConstants.OwnerNameField);
 
 	setBase(b);
@@ -1206,9 +1222,10 @@ public class DBStore {
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.EventMailList;
-	bf.field_type = FieldType.STRING;
+	bf.field_type = FieldType.INVID;
 	bf.field_name = "Fixed Mail List";
-	bf.badChars = ":";
+	bf.allowedTarget = -2;	// any (we'll depend on subclassing to refine this)
+	bf.targetField = -1;	// use default backlink field
 	bf.field_order = 5;
 	bf.array = true;
 	bf.removable = false;
