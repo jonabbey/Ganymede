@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.38 $ %D%
+  Version: $Revision: 1.39 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -102,6 +102,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     closeAllMI,
     expandAllMI;
 
+  boolean 
+    isCreating;
+
   /* -- */
   
   /**
@@ -115,7 +118,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    *
    */
 
-  public vectorPanel(db_field field, windowPanel parent, boolean editable, boolean isEditInPlace, containerPanel container)
+  public vectorPanel(db_field field, windowPanel parent, boolean editable, boolean isEditInPlace, containerPanel container, boolean isCreating)
   {
     // Took out some checking for null stuff
 
@@ -125,7 +128,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     this.isEditInPlace = isEditInPlace;
     this.wp = parent;
     this.container = container;
-    
+    this.isCreating = isCreating;
     this.gc = container.gc;
 
     debug = gc.debug;
@@ -523,7 +526,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     centerPanel.add(ew);
 
     // Only expand if it is a containerPanel.  If it is something else, there isn't anything to expand
-    if (expand && (c instanceof containerPanel))
+    if ((c instanceof containerPanel) && (expand || isCreating))
       {
 	ew.open();
       }
