@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -375,31 +375,32 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
    *
    * This is called from the gclient.
    */
+
   public void logout() throws RemoteException
   {
     my_client.disconnect();
     enableButtons(true);
   }
 
-  /**
-   *
-   * If the applet is no longer visible on the page, we exit.
-   *
-   */
+//   /**
+//    *
+//    * If the applet is no longer visible on the page, we exit.
+//    *
+//    */
 
-  public void destroy() 
-  {
-    try 
-      {
-	if (my_glogin.my_session != null)
-	  {
-	    my_glogin.my_session.logout();
-	  }
-      }
-    catch (RemoteException ex) 
-      {
-      }
-  }
+//   public void destroy() 
+//   {
+//     try 
+//       {
+// 	if (my_glogin.my_session != null)
+// 	  {
+// 	    my_glogin.my_session.logout();
+// 	  }
+//       }
+//     catch (RemoteException ex) 
+//       {
+//       }
+//   }
   
   public String getUserName()
   {
@@ -416,6 +417,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   /**
    * Set the cursor to a wait cursor(usually a watch.)
    */
+
   public void setWaitCursor()
   {
     this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -431,6 +433,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
+
+  /**
+   *
+   * Handle button clicks, and enter being hit in the password
+   * field.
+   *
+   */
 
   public void actionPerformed(ActionEvent e)
   {
@@ -493,7 +502,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    return;
 	  }
 
-
 	connector.setEnabled(false);
 	_quitButton.setEnabled(false);
 
@@ -503,14 +511,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  }
 	else 
 	  {
-	    //This means that the user was not able to log into the server properly.
+	    // This means that the user was not able to log into the server properly.
 	    
 	    // We re-enable the "Login to server" button so that the user can try again.
+
 	    connector.setEnabled(true);
 	    _quitButton.setEnabled(true);
-	    // Why is this line here? I'm commenting it out.
-	    //connector.setEnabled(false);
 	  }
+
 	setNormalCursor();
       }
     else if (e.getSource() == _quitButton)
