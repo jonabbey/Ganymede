@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -442,16 +442,21 @@ public class ReturnVal implements java.io.Serializable {
 	else
 	  {
 	    Vector vec;
+	    Short fieldID = new Short(atom);
 
 	    if (original.containsKey(invid) && !original.get(invid).equals("all"))
 	      {
 		vec = (Vector) original.get(invid);
-		vec.addElement(new Short(atom));
+
+		if (!vec.contains(fieldID))
+		  {
+		    vec.addElement(fieldID);
+		  }
 	      }
 	    else if (!original.containsKey(invid))
 	      {
 		vec = new Vector();
-		vec.addElement(new Short(atom));
+		vec.addElement(fieldID);
 
 		original.put(invid, vec);
 	      }
