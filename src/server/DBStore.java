@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ public class DBStore {
 
   static final String id_string = "Gstore";
   static final byte major_version = 1;
-  static final byte minor_version = 6;
+  static final byte minor_version = 7;
 
   static final boolean debug = true;
 
