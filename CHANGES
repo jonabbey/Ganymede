@@ -61,6 +61,49 @@ The server now checks to make sure that it is not being bound
 to a loopback address on startup, which would prevent clients from
 being able to communicate with the server from remote systems.
 
+The server will now generate a message of the form
+
+ ** Error **
+
+  Both the system hostname (hostname) and the ganymede.serverhost
+  definition (hostname) resolve to the 127.0.0.1 loopback address
+
+  The Ganymede server must have an externally accessible IP address or
+  else clients will not be able to communicate with the Ganymede server
+  from other than localhost.
+
+  If you really want to be only usable for localhost, edit the runServer
+  script to use the -forcelocalhost option.
+
+if the server is not able to figure out a hostname that will resolve
+to a network-accessible IP address.
+
+RedHat Linux 7 systems are particularly prone to this, as the default
+configuration for such systems includes the system's hostname in
+/etc/hosts as mapping to 127.0.0.1, and the system 'hostname' function
+returns by default a non-fully-qualified hostname.  The combination
+of these two conditions resulted in the Ganymede server registering
+itself with the rmiregistry process as being on IP address 127.0.0.1.
+
+6. [SERVER] Objects in the process of being deleted may not be linked to
+
+The server's object binding logic had a bug which would allow an
+object which was being deleted to be improperly linked into an Invid
+field in another object.
+
+This occurred in a bit of custom code in the GASHARL schema kit where
+unlinking a remote object in a given context resulted in the object
+being deleted.  The client showed the unlinked object as a valid
+choice to be added back into the link field, and the object was then
+allowed to be added back in, even though the object was marked for
+deletion when the transaction committed.
+
+This resulted in an Invid field containing an Invid pointer to an
+object which no longer existed, which is a bug.
+
+The server's InvidDBField logic is now smart enough to forbid linking
+to an object which has been marked for deletion by the transaction.
+
 -------------------- Changes from 1.0.5 to 1.0.6 -------------------
 
 RELEASE DATE: August 15, 2001
