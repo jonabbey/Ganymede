@@ -5,16 +5,10 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.14 $ %D%
+ Version: $Revision: 1.15 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
-
-
- Note:
-   There needs to be a new version of this, JhandleListBox maybe, that
-   just uses listHandles.  That would make it A LOT cleaner, and easier
-   for the StringSelector.  That is the task for Monday.
 
 */
 
@@ -27,7 +21,7 @@ import java.awt.event.*;
 import java.util.Vector;
 import arlut.csd.Util.VecQuickSort;
 
-public class JstringListBox extends JList implements ListSelectionListener, MouseListener {
+public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener {
 
   static final boolean debug = false;
 
@@ -46,6 +40,9 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
   JsetValueCallback 
     my_parent;
 
+  JPopupMenu
+    popup = null;
+
   /* -- */
 
   /**
@@ -56,24 +53,65 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
 
   public JstringListBox()
   {
-    this(null);
+    this(null, false, null);
   }
 
+  /**
+   * Constructor
+   *
+   * @param items Vector of items (Strings or listHandles) to show in the list
+   */
   public JstringListBox(Vector items)
   {
-    this(items, false);
+    this(items, false, null);
   }
 
   /**
    *
-   * Constructor with list of initial items
+   * Constructor 
+   *
+   * @param items Vector of items (Strings or listHandles) to show in the list
+   * @param sorted If true, JstringListBox will not sort the vector(it is already sorted)
    *
    */
 
   public JstringListBox(Vector items, boolean sorted)
   {
+    this(items, sorted, null);
+  }
+
+  /**
+   *
+   * Constructor 
+   *
+   * @param items Vector of items (Strings or listHandles) to show in the list
+   * @param sorted If true, JstringListBox will not sort the vector(it is already sorted)
+   * @param popup JPopupMenu that will be shown on right click.  Callback is of type PARAMETER
+   *
+   */
+
+  public JstringListBox(Vector items, boolean sorted, JPopupMenu popup)
+  {
     this.sorted = sorted;
-    
+    this.popup = popup;
+
+    if (popup != null)
+      {
+	Component[] c = popup.getComponents();
+	for (int i = 0; i < c.length; i++)
+	  {
+	    if (c[i] instanceof JMenuItem)
+	      {
+		JMenuItem pm = (JMenuItem)c[i];
+		pm.addActionListener(this);
+	      }
+	    else
+	      {
+		throw new IllegalArgumentException("Hey, you are supposed to use JMenuItems in JPopupMenus, buddy.");
+	      }
+	  }
+      }
+	
     //model setSize(items.size());
     //System.out.println("Setting size to " + items.size());
 
@@ -200,18 +238,32 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     
     addMouseListener(this);
 
-    // let it know that we want 
+    // I don't know if these things do anything.
 
     setPrototypeCellValue("This is just used to calculate cell height");
     setFixedCellWidth(15);
     setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-
   }
 
+  /**
+   * Convenience method to set the size on the model.
+   *
+   */
   public void setSize(int size)
   {
     model.setSize(size);
   }
+
+  /**
+   * Register a parent to receive callbacks.
+   *
+   * There are several kinds of type you might get back:
+   * <ul>
+   * <li><b>ADD</b> This is really a selection event
+   * <li><b>INSERT</b> This is a double click
+   * <li><b>PARAMETER</b> This is a PopupMenu event.  The parameter will be the ActionCommand from the JMenuItem.
+   * </ul>
+   */
 
   public void setCallback(JsetValueCallback parent)
   {
@@ -232,6 +284,11 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     allowCallback = true;
   }
 
+  /**
+   * Add an item to the list box.
+   *
+   * @param o Can be a String or listHandle.
+   */
   public void addItem(Object o)
   {
     listHandle lh = null;
@@ -268,7 +325,11 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
   {
     model.insertElementAt(handle, row);
   }
-
+  /**
+   * Remove an item from list.
+   *
+   * @param o can be listHandle or String
+   */
   public void removeItem(Object o)
   {
     if (o instanceof listHandle)
@@ -294,6 +355,11 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
       }
   }
 
+  /**
+   * Remove an object by label
+   *
+   * @param s Label of object to remove.
+   */
 
   public void removeLabel(String s)
   {
@@ -306,16 +372,26 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
 	  }
       }
   }
-
+  /**
+   */
   public int getSizeOfList()
   {
     return model.getSize();
   }
 
+  /**
+   * Returns true if the list contains an object with the specified label.
+   */
   public boolean containsLabel(String string)
   {
     return containsString(string);
   }
+
+  /**
+   * Returns true if the list contains an object with the specified label.
+   *
+   * Since everything is a listHandle internally, this is the same as containsLabel
+   */
 
   public boolean containsString(String string)
   {
@@ -328,6 +404,12 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
       }
     return false;
   }
+
+  /**
+   * Returns true if the item is in the list
+   *
+   * @param o Can be a String(label) or listHandle
+   */
 
   public boolean containsItem(Object o)
   {
@@ -374,6 +456,12 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
 
   }
 
+  /**
+   * Sets the selected item.
+   *
+   * @param o Can be listHandle or String
+   */
+
   public void setSelected(Object o)
   {
     if (o instanceof listHandle)
@@ -407,6 +495,10 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     return (listHandle)model.elementAt(getSelectedIndex());
   }
 
+  /**
+   * Returns all the selected handles.
+   */
+
   public Vector getSelectedHandles()
   {
     Vector v = new Vector();
@@ -424,8 +516,16 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
    */
   public Object getSelectedItem()
   {
-    listHandle lh = (listHandle)model.elementAt(getSelectedIndex());
-    return lh.getObject();
+    try
+      {
+	listHandle lh = (listHandle)model.elementAt(getSelectedIndex());
+	return lh.getObject();
+
+      }
+    catch (Exception e)
+      {
+	return null;
+      }
   }
 
   // For the ListSelectionListener
@@ -468,29 +568,33 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
   {
     if (allowCallback)
       {
-	if (e.getClickCount() == 2)
+	if (SwingUtilities.isLeftMouseButton(e))
 	  {
-	    boolean ok = false;
+	    System.out.println("mouse clicked");
+	    if (e.getClickCount() == 2)
+	      {
+		boolean ok = false;
 	    
-	    int index = locationToIndex(e.getPoint());
-	    if (debug)
-	      {
-		System.out.println("Double clicked on Item " + index);
-	      }
-	    try
-	      {
-		ok = my_parent.setValuePerformed(new JValueObject(this, 
-								  index,
-								  JValueObject.INSERT));
-	      }
-	    catch (java.rmi.RemoteException rx)
-	      {
-		throw new RuntimeException("Double click produced: " + rx);
-	      }
+		int index = locationToIndex(e.getPoint());
+		if (debug)
+		  {
+		    System.out.println("Double clicked on Item " + index);
+		  }
+		try
+		  {
+		    ok = my_parent.setValuePerformed(new JValueObject(this, 
+								      index,
+								      JValueObject.INSERT));
+		  }
+		catch (java.rmi.RemoteException rx)
+		  {
+		    throw new RuntimeException("Double click produced: " + rx);
+		  }
 	    
-	    if (debug)
-	      {
-		System.out.println("setValue from JstringListBox=" + ok);
+		if (debug)
+		  {
+		    System.out.println("setValue from JstringListBox=" + ok);
+		  }
 	      }
 	  }
       }
@@ -506,11 +610,50 @@ public class JstringListBox extends JList implements ListSelectionListener, Mous
     }
   public void mousePressed(MouseEvent e)
     {
+      if (SwingUtilities.isRightMouseButton(e))
+	{
+	  if (debug)
+	    {
+	      System.out.println("Its a popup trigger!");
+	    }
 
+	  if (popup != null)
+	    {
+	      popup.show(e.getComponent(), e.getX(), e.getY());
+	    }
+	}
+      
     }
   public void mouseReleased(MouseEvent e)
     {
 
     }
+
+  public void actionPerformed(ActionEvent e)
+  {
+    System.out.println("action perfomred");
+    if (allowCallback)
+      {
+	if (e.getSource() instanceof JMenuItem)
+	  {
+	    System.out.println("Sending parameter up.");
+	    String string = ((JMenuItem)e.getSource()).getActionCommand();
+	    try
+	      {
+		my_parent.setValuePerformed(new JValueObject(this,
+							     getSelectedIndex(),
+							     JValueObject.PARAMETER,
+							     getSelectedItem(),
+							     string));
+	      }
+	    catch (java.rmi.RemoteException rx)
+	      {
+		throw new RuntimeException("Could not set value from JstringListBox: " + rx);
+	      }
+
+	  }
+
+      }
+  }
 
 }
