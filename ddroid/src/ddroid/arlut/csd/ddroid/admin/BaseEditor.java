@@ -146,7 +146,7 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     
     typeN = new JnumberField(30, false, false, 0, 0);
     typeN.setCallback(this);
-    addRow(editPanel, typeN, "ObjectType ID:", 0);
+    addRow(editPanel, typeN, "ObjectType ID:", 0, 0);
 
     // only allow characters that can be used as an XML entity name.
     // We allow the space char (which is not allowed as an XML entity
@@ -157,21 +157,21 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
 			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-", 
 			     null);
     nameS.setCallback(this);
-    addRow(editPanel, nameS, "Object Type:", 1);
+    addRow(editPanel, nameS, "Object Type:", 1, 0);
 
-    addRow(editPanel, new JSeparator(), "", 2);
+    addRow(editPanel, new JSeparator(), "", 2, 5);
 
     classL = new JLabel();
-    addRow(editPanel, classL, "Class name:", 3);
+    addRow(editPanel, classL, "Class name:", 3, 0);
 
     classOptionL = new JLabel();
-    addRow(editPanel, classOptionL, "Class Option String:", 4);
+    addRow(editPanel, classOptionL, "Class Option String:", 4, 0);
 
-    addRow(editPanel, new JSeparator(), "", 5);
+    addRow(editPanel, new JSeparator(), "", 5, 5);
 
     labelC = new JComboBox();
     labelC.addItemListener(this);
-    addRow(editPanel, labelC, "Label:", 6);
+    addRow(editPanel, labelC, "Label:", 6, 0);
 
     add(editPanel);
   }
@@ -438,13 +438,15 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     return true;
   }
 
-  synchronized void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
+  synchronized void addRow(JPanel parent, java.awt.Component comp,  String label, int row, int vertSpacing)
   {
     JLabel l = new JLabel(label);
     
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
     gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.insets = new Insets(vertSpacing, 0, vertSpacing, 0);
 
     gbc.weightx = 0.0;
     gbc.gridx = 0;
