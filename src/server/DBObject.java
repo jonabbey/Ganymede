@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.45 $ %D%
+   Version: $Revision: 1.46 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.45 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.46 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -406,7 +406,20 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	    if (f != null)
 	      {
 		// Ganymede.debug("Got field " + f);
-		return f.getValueString();
+
+		// string fields are most common for 
+		// label fields.. return as quickly as possible,
+		// without bothering with permission checking
+		// for this common case.
+
+		if (f.value instanceof String)
+		  {
+		    return (String) f.value;
+		  }
+		else
+		  {
+		    return f.getValueString();
+		  }
 	      }
 	    else
 	      {
