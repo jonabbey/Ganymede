@@ -3,8 +3,8 @@
 
    Created: 15 March 2001
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2001/03/16 06:34:33 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2001/03/16 06:44:59 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
 
@@ -616,8 +616,11 @@ public class smbdes {
 	byte tc;
 	int t;
       
-	index_i++;
+	index_i++; 
+	index_i &= 0xff;
+
 	index_j += s_box[index_i];
+	index_j &= 0xff;
       
 	tc = s_box[index_i];
 	s_box[index_i] = s_box[index_j];
