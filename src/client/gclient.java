@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.93 $ %D%
+   Version: $Revision: 1.94 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -785,10 +785,22 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     setStatus("Checking MOTD");
     try
       {
-	StringBuffer m = session.getMessageHTML("motd", true);
+	StringBuffer m;
+
+	m = session.getMessageHTML("motd", true);
+
 	if (m != null)
 	  {
-	    showMOTD(m.toString());
+	    showMOTD(m.toString(), true);
+	  }
+	else
+	  {
+	    m = session.getMessage("motd", true);
+
+	    if (m != null)
+	      {
+		showMOTD(m.toString(), false);
+	      }
 	  }
       }
     catch ( RemoteException rx)
@@ -1292,9 +1304,26 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   public void showMOTD()
   {
     // This will always get the MOTD, even if we've seen it
+
+    StringBuffer m;
+
     try
       {
-	showMOTD((session.getMessageHTML("motd", false)).toString());
+	m = session.getMessageHTML("motd", false);
+
+	if (m == null)
+	  {
+	    m = session.getMessage("motd", false);
+
+	    if (m != null)
+	      {
+		showMOTD(m.toString(), false);
+	      }
+	  }
+	else
+	  {
+	    showMOTD(m.toString(), true);
+	  }
       }
     catch (RemoteException rx)
       {
@@ -1302,14 +1331,31 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       }
   }
 
-  public void showMOTD(String message)
+  /**
+   *
+   * This method generates a message-of-the-day dialog.
+   *
+   * @param message The message to display.  May be multiline.  
+   * @param html If true, showMOTD() will display the motd with a html
+   * renderer, in Swing 1.1b2 and later.
+   * 
+   */
+
+  public void showMOTD(String message, boolean html)
   {
     if (motd == null)
       {
 	motd = new messageDialog(client, "MOTD", null);
       }
     
-    motd.setHtmlText(message);
+    if (html)
+      {
+	motd.setHtmlText(message);
+      }
+    else
+      {
+	motd.setPlainText(message);
+      }
     
     motd.setVisible(true);
   }
