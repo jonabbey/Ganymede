@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# Ganymede Server build script
+#
+# Version: $Revision: 1.1 $
+# Date: $Date: 1999/01/15 00:16:40 $
+#
+############################################################
+
+echo "Compiling Ganymede Server"
+
+currentdir=`pwd`
+
+# Change to the directory where this build script is
+
+prog=$0
+builddir=`echo $prog|sed 's%/[^/][^/]*$%%'`
+test "x$builddir" = "x$builddir" && GROOTDIR=.
+cd $builddir
+
+# Load configuration information
+
+. config.sh
+
+# And do the build
+
+umask 0133;
+
+CLASSPATH=$CLASSDIR:$CLASSPATH; export CLASSPATH
+$JAVAC -J-mx128m -deprecation -d $CLASSDIR *.java
+
+# Have to build the rmi stubs and skeletons
+
+buildrmi
+
+# Return to our last directory
+
+cd $currentdir
+
+echo "Done compiling Ganymede server"
