@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 2000/11/03 05:46:10 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 2000/11/07 09:30:43 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * the file to the server for server-side integration into the Ganymede
  * database.</p>
  *
- * @version $Revision: 1.32 $ $Date: 2000/11/03 05:46:10 $ $Name:  $
+ * @version $Revision: 1.33 $ $Date: 2000/11/07 09:30:43 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -92,10 +92,6 @@ public final class xmlclient implements ClientListener {
    * <p>This major version number is compared with the "major"
    * attribute in the Ganymede XML document element.  xmlclient won't
    * try to read Ganymede XML files whose major number is too high</p>
-   *
-   * <p>We are presuming that we'll be able to use our ganydata parsing
-   * logic to get the username and password as long as majorVersion
-   * is 1.</p>
    */
 
   public static final int majorVersion = 1;
@@ -326,6 +322,7 @@ public final class xmlclient implements ClientListener {
 	      {
 		System.err.print("Password for \"" + username + "\":");
 		password = in.readLine();
+		System.err.println();
 	      }
 	    catch (java.io.IOException ex)
 	      {
@@ -452,7 +449,7 @@ public final class xmlclient implements ClientListener {
 	// for the user's password, but since it is off, we can't
 	// really prompt for a missing user name here.
 
-	System.err.println("Ganymede xmlclient: Error, must specify ganymede account name in <ganydata> element, or on");
+	System.err.println("Ganymede xmlclient: Error, must specify ganymede account name in <ganymede> element, or on");
 	System.err.println("command line.");
  	System.err.println("Usage: xmlclient [username=<username>] [password=<password>] [bufsize=<buffer size>] <xmlfile>");
 	return false;
@@ -627,34 +624,15 @@ public final class xmlclient implements ClientListener {
 	    return false;
 	  }
 
-	// okay, we're good to go
-
-	XMLItem nextElement = getNextItem();
-
-	if (nextElement.matches("ganyschema"))
+	if (docElement.getAttrStr("persona") != null)
 	  {
-	    skipToClose("ganyschema");
-	    nextElement = getNextItem();
+	    username = docElement.getAttrStr("persona");
 	  }
 
-	if (nextElement.matches("ganydata"))
+	if (docElement.getAttrStr("password") != null)
 	  {
-	    if (nextElement.getAttrStr("persona") != null)
-	      {
-		username = nextElement.getAttrStr("persona");
-	      }
-
-	    if (nextElement.getAttrStr("password") != null)
-	      {
-		password = nextElement.getAttrStr("password");
-	      }
-
-	    skipToClose("ganydata");
-
-	    nextElement = getNextItem();
+	    password = docElement.getAttrStr("persona");
 	  }
-
-	skipToClose("ganymede");
 
 	return true;
       }
