@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 2002/03/15 22:33:23 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 2002/03/18 21:37:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,7 +93,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.112 $ %D%
+ * @version $Revision: 1.113 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1434,9 +1434,7 @@ final public class DBSession {
    * This method will not force a lock being held by another thread to
    * drop out of its establish method.. it is intended to be called by
    * the same thread that established the lock.</P>
-   *
-   * <P>This method must be synchronized to avoid conflicting with
-   * iterations on lockVect.</P> */
+   */
 
   public void releaseLock(DBLock lock)
   {
