@@ -1065,15 +1065,15 @@ need to move to an incremental model for synchronization.</p>
     object has a unique name (the <code class="type">Name</code>
     field), a path for the directory that the Ganymede server will
     write synchronization files to (the <code class="type">Directory
-    Path</code> field), a path to the exectuable external program that
+    Path</code> field), a path to the executable external program that
     will process synchronization files from the synchronization files
     directory (the <code class="type">Service Program</code> field),
     and a list of what objects and fields from the Ganymede data store
     the Sync Channel is supposed to include in its synchronization
     files (the <code class="type">Sync Data</code> field).  There's
     also an <code class="type">Allow Plaintext Passwords</code>
-    checkbox which can be selected to allow plaintext passwords to be
-    written to this Sync Channel, or deselected to prevent plaintext
+    check-box which can be selected to allow plain-text passwords to be
+    written to this Sync Channel, or deselected to prevent plain-text
     passwords from being (but allowing various hashed password to be)
     written.</p>
 
@@ -1084,7 +1084,7 @@ need to move to an incremental model for synchronization.</p>
     <p>You configure the data that will be synchronized to the Sync
     Channel by editing the <code class="type">Sync Data</code> field
     with the Ganymede client.  For each type of object defined on your
-    Ganymede server, you will see a checkbox that lets you choose
+    Ganymede server, you will see a check-box that lets you choose
     whether or not that kind of object should ever be synchronized to
     the Sync Channel.</p>
 
@@ -1113,7 +1113,7 @@ need to move to an incremental model for synchronization.</p>
     file if the object itself is modified in any way significant to
     the Sync Channel.  If you know, for instance, that your Sync
     Channel service program will always need to know the contents of a
-    user object's <code class="type">Username</code> field everytime
+    user object's <code class="type">Username</code> field every time
     anything of significance in the object changes, you can configure
     your Sync Channel's <code class="type">Sync Data</code> to always
     include it when the object is significantly changed.</p>
