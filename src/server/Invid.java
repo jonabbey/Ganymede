@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,7 +18,7 @@
 
 package arlut.csd.ganymede;
 
-public class Invid implements java.io.Serializable {
+public final class Invid implements java.io.Serializable {
 
   //  static final int FIRST = 1;
   //  static final int LAST = 9;
@@ -68,7 +68,7 @@ public class Invid implements java.io.Serializable {
 
   // equals
 
-  public final boolean equals(Object obj)
+  public boolean equals(Object obj)
   {
     if (obj instanceof Invid)
       {
@@ -80,7 +80,7 @@ public class Invid implements java.io.Serializable {
       }
   }
 
-  public final boolean equals(Invid invid)
+  public boolean equals(Invid invid)
   {
     if ((invid.type == type) &&
 	(invid.num == num))
