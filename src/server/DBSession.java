@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,6 +34,8 @@ import java.util.*;
  * */
 
 public class DBSession {
+
+  static final boolean debug = true;
   
   DBStore store;
   DBLock lock;
@@ -461,6 +463,11 @@ public class DBSession {
     // should i make it so that a writelock can be established
     // if the possessor of a readlock doesn't give it up? 
 
+    if (debug)
+      {
+	System.err.println("entering commitTransaction");
+      }
+
     if (editSet == null)
       {
 	throw new RuntimeException("commitTransaction called outside of a transaction");
@@ -468,13 +475,58 @@ public class DBSession {
 
     if (lock != null)
       {
+	if (debug)
+	  {
+	    System.err.println("commitTransaction(): holding a lock");
+	  }
+
 	if (lock instanceof DBReadLock)
 	  {
+	    if (debug)
+	      {
+		System.err.println("commitTransaction(): holding a read lock");
+	      }
 	    lock.release();
+
+	    if (debug)
+	      {
+		System.err.println("commitTransaction(): released read lock");
+	      }
+
 	    lock = null;
+
+// 	    if (debug)
+// 	      {
+// 		System.err.println("commitTransaction(): acquiring write lock");
+// 	      }
+
+// 	    lock = new DBWriteLock(store);
+
+// 	    if (debug)
+// 	      {
+// 		System.err.println("commitTransaction(): got write lock");
+// 	      }
 	  }
       }
+
+    if (debug)
+      {
+	System.err.println("commitTransaction(): committing editSet");
+      }
+
     editSet.commit();
+
+    if (debug)
+      {
+	System.err.println("commitTransaction(): editset committed");
+      }
+
+    //    lock.release();
+    //
+    //    if (debug)
+    //      {
+    //	System.err.println("commitTransaction(): writeLock released");
+    //      }
   }
 
   /**
