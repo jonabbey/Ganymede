@@ -622,6 +622,13 @@ the purpose of doing initial setup of an external directory service
 target, before setting up a sync channel to transmits deltas as they
 are committed to Ganymede.
 
+Use is simple, just type
+                                                                                                                                                             
+        xmlclient -dumpdata sync=Systems > systems.xml
+                                                                                                                                                             
+and Ganymede will dump out all data that fits the Systems Sync Channel
+constraint.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
