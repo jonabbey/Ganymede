@@ -6,8 +6,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/01/22 18:04:17 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/01/27 21:43:35 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -156,7 +156,12 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     if (selectedNode != null)
       {
 	selectedBaseName = selectedNode.getTypeText();
-	selectedObjectName = selectedNode.getText();
+
+	// if we get the handle and query it for its label, we
+	// avoid getting the "(inactive") tacked on for inactive
+	// objects.
+
+	selectedObjectName = selectedNode.getHandle().getLabel();
       }
 
     gbl = new GridBagLayout();
