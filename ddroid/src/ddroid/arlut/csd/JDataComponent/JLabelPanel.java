@@ -109,6 +109,10 @@ public class JLabelPanel extends JPanel {
 	this.setup();
       }
 
+    gbc.gridwidth = 1;
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.gridy = row;
+
     if (label != null)
       {
 	JLabel l = new JLabel(label);
@@ -116,19 +120,16 @@ public class JLabelPanel extends JPanel {
 	rowHash.put(comp, l);
 
 	gbc.fill = GridBagConstraints.NONE;
-	gbc.gridwidth = 1;
-	gbc.anchor = GridBagConstraints.WEST;
-
 	gbc.weightx = 0.0;
 	gbc.gridx = 0;
-	gbc.gridy = row;
 	gbl.setConstraints(l, gbc);
 	add(l);
       }
 
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.gridx = 1;
     gbc.weightx = 1.0;
+    gbc.gridx = 1;
+
     gbl.setConstraints(comp, gbc);
     add(comp);
 
