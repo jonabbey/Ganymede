@@ -1395,8 +1395,8 @@ public class DBEditSet {
 
     /* -- */
 
-    commit_persistTransaction();
-    commit_logTransaction(fieldsTouched);
+    commit_persistTransaction(); // persist transaction to journal
+    commit_logTransaction(fieldsTouched); // log and reabsorb objects
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
     commit_updateBases(fieldsTouched);
@@ -1439,6 +1439,14 @@ public class DBEditSet {
    * themselves been touched.  We use the fieldsTouched hashtable for
    * this purpose, storing identity maps for the DBObjectBaseFields
    * that were touched.</p>
+   *
+   * <p>When this method has finished logging information on an object
+   * in the transaction, it goes ahead and updates the persistent
+   * hashes to reflect the change to the object in this transaction,
+   * before freeing the object from the transaction.  This is intended
+   * to reduce memory usage when committing truly massive transactions,
+   * as we allow garbage collection to help out in the middle of the
+   * commit.</p>
    */
 
   private final void commit_log_events(HashMap fieldsTouched)
@@ -1934,7 +1942,7 @@ public class DBEditSet {
 
 	    // then create and stream log events describing the
 	    // objects that are in this transaction at the time of
-	    // commit
+	    // commit, freeing the objects as we go
 
 	    commit_log_events(fieldsTouched);
 
