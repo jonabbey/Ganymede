@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 1999/03/16 20:30:24 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 1999/03/17 20:12:57 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -455,7 +455,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	// ignore containing objects and the like...
 	
-	if (template.getID() == SchemaConstants.OwnerListField ||
+	if ((selectedBase.isEmbedded() && template.getID() == SchemaConstants.OwnerListField) ||
 	    template.getID() == SchemaConstants.BackLinksField)
 	  {
 	    continue;
