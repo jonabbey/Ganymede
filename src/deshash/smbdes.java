@@ -3,8 +3,8 @@
 
    Created: 15 March 2001
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2001/03/16 06:44:59 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2001/03/16 08:05:28 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
 
@@ -98,6 +98,8 @@
  */
 
 public class smbdes {
+
+  static char hexdigits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
   //[56]
   static byte perm1[] = {57, 49, 41, 33, 25, 17,  9,
@@ -214,7 +216,22 @@ public class smbdes {
   {
     return (int) b & 0xff;
   }
+
+  /**
+   * generates a two character hexadecimal string from
+   * an unsigned-encoded byte
+   */
   
+  private static String byteToHex(byte b)
+  {
+    char cary[] = new char[2];
+
+    cary[0] = hexdigits[bytes2u(b) / 16];
+    cary[1] = hexdigits[bytes2u(b) % 16];
+
+    return new String(cary);
+  }
+
   static void permute(byte[] out, byte[] in, byte[] p, int n)
   {
     for (int i=0; i<n; i++)
@@ -243,6 +260,7 @@ public class smbdes {
   static void concat(byte[] out, byte[] in1, byte[] in2, int l1, int l2)
   {
     int i = 0;
+    int j = 0;
     
     /* -- */
     
@@ -255,9 +273,10 @@ public class smbdes {
     
     while (l2-- > 0)
       {
-	out[i] = in2[i];
+	out[i] = in2[j];
 	
 	i++;
+	j++;
       }
   }
 
@@ -629,5 +648,80 @@ public class smbdes {
 	t = bytes2u(s_box[index_i]) + bytes2u(s_box[index_j]);
 	data[ind] = (byte) (data[ind] ^ s_box[t]);
       }
+  }
+
+  /**
+   * <p>This method generates a LANMAN-compatible DES hashing of
+   * the input password string, taking up to the first 14 characters
+   * into account.</p>
+   */
+
+  public static String LANMANHash(String password)
+  {
+    byte input[] = new byte[14];
+    byte output[] = new byte[16];
+
+    if (password.length() > 14)
+      {
+	password = password.substring(0,14);
+      }
+
+    char c_ary[] = password.toUpperCase().toCharArray();
+
+    int i;
+
+    for (i = 0; i < c_ary.length && i < 14; i++)
+      {
+	input[i] = (byte) c_ary[i];
+      }
+
+    E_P16(input, output);
+
+    StringBuffer result = new StringBuffer();
+
+    for (i = 0; i < 16; i++)
+      {
+	result.append(byteToHex(output[i]));
+      }
+
+    return result.toString();
+  }
+
+  public static String NTUNICODEHash(String password)
+  {
+    if (password.length() > 128)
+      {
+	password = password.substring(0, 128);
+      }
+
+    char c_ary[] = password.toCharArray();
+    byte wpwd[] = new byte[c_ary.length * 2];
+
+    for (int i = 0; i < c_ary.length; i++)
+      {
+	char c = c_ary[i];
+
+	wpwd[2*i] = (byte) (c & 0xff);
+	wpwd[2*i+1] = (byte) (c & 0xff00);
+      }
+
+    md4 m = new md4(wpwd);
+
+    m.calc();
+
+    return m.toString();
+  }
+
+  public static void main(String argv[])
+  {
+    if (argv.length != 1)
+      {
+	System.err.println("Error, must provide a password value to hash");
+	System.exit(1);
+      }
+
+    System.err.println(LANMANHash(argv[0]));
+    System.err.println(NTUNICODEHash(argv[0]));
+    System.exit(0);
   }
 }
