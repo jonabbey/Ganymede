@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/01/22 18:04:00 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/03/19 05:10:54 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -137,7 +137,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public JstringListBox(Vector items, boolean sorted, JPopupMenu popup)
   {
-    this(items, sorted, popup, 200);
+    this(items, sorted, popup, 0);
   }
 
   /**
@@ -147,7 +147,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * @param items Vector of items (Strings or listHandles) to show in the list
    * @param sorted If true, JstringListBox will not sort the vector(it is already sorted)
    * @param popup JPopupMenu that will be shown on right click.  Callback is of type PARAMETER
-   * @param width Width in pixels of the string list box
+   * @param width Width in pixels of the string list box.  If <= 0, the list box will be
+   * auto-sized
    *
    */
 
@@ -156,6 +157,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     this.sorted = sorted;
     this.popup = popup;
     this.width = width;
+
+    /* - */
+
+    String longString = null;
+
+    /* -- */
 
     if (popup != null)
       {
@@ -230,6 +237,22 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	    for (int i=0 ; i<items.size() ; i++)
 	      {
 		string = (String)items.elementAt(i);
+
+		if (width <= 0)
+		  {
+		    if (longString == null)
+		      {
+			longString = string;
+		      }
+		    else
+		      {
+			if (string.length() > longString.length())
+			  {
+			    longString = string;
+			  }
+		      }
+		  }
+
 		if (debug)
 		  {
 		    System.err.println("JstringListBox: adding string " + string);
@@ -287,6 +310,21 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	      {
 		listHandle x = (listHandle) items.elementAt(i);
 
+		if (width <= 0)
+		  {
+		    if (longString == null)
+		      {
+			longString = x.label;
+		      }
+		    else
+		      {
+			if (x.label.length() > longString.length())
+			  {
+			    longString = x.label;
+			  }
+		      }
+		  }
+
 		if (debug)
 		  {
 		    System.err.println("JstringListBox: adding listhandle " + x.getLabel() + ">>" + x.getObject());
@@ -304,13 +342,17 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
 
     setModel(model);
-    
     addMouseListener(this);
 
-    // I don't know if these things do anything.
+    if (width > 0)
+      {
+	setFixedCellWidth(width);
+      }
+    else
+      {
+	setPrototypeCellValue(longString);
+      }
 
-    setPrototypeCellValue("This is just used to calculate cell height");
-    setFixedCellWidth(width);
     setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
   }
 
