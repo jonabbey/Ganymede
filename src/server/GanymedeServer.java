@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,7 +19,7 @@ package arlut.csd.ganymede;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
-import java.rmi.server.UnicastRemoteObject;
+import java.rmi.server.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -156,11 +156,75 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	GanymedeSession session = new GanymedeSession(client, user, persona);
  	Ganymede.debug("Client logged in: " + session.username);
+
+	Vector objects = new Vector();
+
+	if (user != null)
+	  {
+	    objects.addElement(user.getInvid());
+	  }
+	else
+	  {
+	    objects.addElement(persona.getInvid());
+	  }
+
+	String clienthost;
+
+	try
+	  {
+	    clienthost = getClientHost();
+	  }
+	catch (ServerNotActiveException ex)
+	  {
+	    clienthost = "unknown";
+	  }
+
+	if (Ganymede.log != null)
+	  {
+	    Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
+						       "OK login for username: " + 
+						       clientName + 
+						       " from host " + 
+						       clienthost,
+						       null,
+						       clientName,
+						       objects,
+						       null));
+	  }
+
 	return (Session) session;
       }
     else
       {
-	Ganymede.debug("Bad login attempt: " + clientName);
+	String clienthost;
+
+	try
+	  {
+	    clienthost = getClientHost();
+	  }
+	catch (ServerNotActiveException ex)
+	  {
+	    clienthost = "unknown";
+	  }
+
+	Ganymede.debug("Bad login attempt: " + clientName + " from host " + clienthost);
+
+	if (Ganymede.log != null)
+	  {
+	    Vector recipients = new Vector();
+
+	    recipients.addElement(clientName); // this might well bounce.  C'est la vie.
+
+	    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
+						       "Bad login attempt for username: " + 
+						       clientName + " from host " + 
+						       clienthost,
+						       null,
+						       clientName,
+						       null,
+						       recipients));
+	  }
+
 	return null;
       }
   }
@@ -184,6 +248,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     DBObject obj;
     PasswordDBField pdbf;
 
+    String clienthost;
+
     /* -- */
 
     clientName = admin.getName();
@@ -206,13 +272,48 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
       }
 
+    try
+      {
+	clienthost = getClientHost();
+      }
+    catch (ServerNotActiveException ex)
+      {
+	clienthost = "unknown";
+      }
+
+
     if (!found)
       {
+	if (Ganymede.log != null)
+	  {
+	    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
+						       "Bad console attach attempt by: " + 
+						       clientName + " from host " + 
+						       clienthost,
+						       null,
+						       clientName,
+						       null,
+						       null));
+	  }
+
 	throw new RemoteException("Bad Admin Account / Password"); // do we have to throw remote here?
       }
 
     adminSession aSession = new GanymedeAdmin(admin, clientName, clientPass);
-    Ganymede.debug("Admin console attached for admin " + clientName + " " + new Date());
+    Ganymede.debug("Admin console attached for admin " + clientName + " from: " + clienthost + " " + new Date());
+
+    if (Ganymede.log != null)
+      {
+	Ganymede.log.logSystemEvent(new DBLogEvent("adminconnect",
+						   "Admin console attached by: " + 
+						   clientName + " from host " + 
+						   clienthost,
+						   null,
+						   clientName,
+						   null,
+						   null));
+      }
+
     return aSession;
   }
 
@@ -235,7 +336,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * through all invid's listed in the (loaded) database, and
    * removes any invid's that point to objects not in the database.
    *
-   * @returns true if there were any invalid invids in the database
+   * @return true if there were any invalid invids in the database
    *
    */
 
@@ -270,6 +371,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     DBSession session = Ganymede.internalSession.session;
 
     /* -- */
+
+    // make sure we're ok to sweep
     
     synchronized (Ganymede.db)
       {
@@ -282,11 +385,15 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	Ganymede.db.sweepInProgress = true;
       }
 
+    // loop 1: iterate over the object bases
+
     enum1 = Ganymede.db.objectBases.elements();
 
     while (enum1.hasMoreElements())
       {
 	base = (DBObjectBase) enum1.nextElement();
+
+	// loop 2: iterate over the objects in the current object base
 
 	enum2 = base.objectHash.elements();
 
@@ -296,6 +403,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	    removeVector = new Vector();
 
+	    // loop 3: iterate over the fields present in this object
+
 	    enum3 = object.fields.elements();
 
 	    while (enum3.hasMoreElements())
@@ -304,7 +413,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		if (!(field instanceof InvidDBField))
 		  {
-		    continue;
+		    continue;	// only check invid fields
 		  }
 
 		iField = (InvidDBField) field;
@@ -314,7 +423,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		    tempVector = iField.values;
 		    vectorEmpty = true;
 
-		    iField.values = new Vector();
+		    // clear out the invid's held in this field pending
+		    // successful lookup
+
+		    iField.values = new Vector(); 
+
+		    // iterate over the invid's held in this vector
 		    
 		    enum4 = tempVector.elements();
 
@@ -324,17 +438,21 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 			if (session.viewDBObject(invid) != null)
 			  {
-			    iField.values.addElement(invid);
+			    iField.values.addElement(invid); // keep this invid
 			    vectorEmpty = false;
-
-			    Ganymede.debug("Removing invid: " + invid + " from object " + 
-					   base.getName() + ":" + object.getLabel());
 			  }
 			else
 			  {
+			    Ganymede.debug("Removing invid: " + invid + 
+					   " from vector field " + iField.getName() +
+					   " from object " +  base.getName() + 
+					   ":" + object.getLabel());
 			    swept = true;
 			  }
 		      }
+
+		    // now, if the vector is totally empty, we'll be removing
+		    // this field from definition
 
 		    if (vectorEmpty)
 		      {
@@ -352,8 +470,10 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 			removeVector.addElement(new Short(iField.getID()));
 			iField.defined = false;
 
-			Ganymede.debug("Removing invid: " + invid + " from object " + 
-				       base.getName() + ":" + object.getLabel());
+			Ganymede.debug("Removing invid: " + invid + 
+				       " from scalar field " + iField.getName() +
+				       " from object " +  base.getName() + 
+				       ":" + object.getLabel());
 		      }
 		  }
 	      }
@@ -363,6 +483,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    for (int i = 0; i < removeVector.size(); i++)
 	      {
 		object.fields.remove(removeVector.elementAt(i));
+
+		Ganymede.debug("Undefining (now) empty field: " + 
+			       removeVector.elementAt(i) +
+			       " from object " +  base.getName() + 
+			       ":" + object.getLabel());
 	      }
 	  }
       }
@@ -387,7 +512,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * to it in the target object.. we'll just verify the existence of
    * the object listed.
    *
-   * @returns true if there were any invids without back-pointers in
+   * @return true if there were any invids without back-pointers in
    * the database
    * 
    */
