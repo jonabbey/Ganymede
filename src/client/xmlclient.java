@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/09/13 06:11:25 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/09/14 23:18:34 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.22 $ $Date: 2000/09/13 06:11:25 $ $Name:  $
+ * @version $Revision: 1.23 $ $Date: 2000/09/14 23:18:34 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -158,6 +158,10 @@ public final class xmlclient implements ClientListener {
 	if (xc.doEverything(true))
 	  {
 	    System.exit(0);
+	  }
+	else
+	  {
+	    System.err.println("\nXML submission failed.");
 	  }
       }
     catch (RemoteException ex)
@@ -306,7 +310,7 @@ public final class xmlclient implements ClientListener {
 	return false;
       }
 
-    System.err.println("Logged into server.. uplinking XML data");
+    System.out.println("Sending XML to server.");
 
     // logged in!  now we just need to spin through the xml file and
     // send it up to the server
@@ -334,11 +338,7 @@ public final class xmlclient implements ClientListener {
 
 	try
 	  {
-	    System.err.println("Sending " + avail + " bytes of data..");
-
 	    retVal = xSession.xmlSubmit(data);
-
-	    System.err.println("Processing response");
 
 	    if (retVal != null)
 	      {
