@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1466,7 +1466,7 @@ class QueryRow implements ItemListener {
 	JInvidChooser invidChooser = (JInvidChooser) operand;
 	value = invidChooser.getSelectedInvid();
       }
-    else
+    else if (operand != null)
       {
 	System.err.println("Couldn't get a value.. unknown operand type! " + operand.getClass().toString());
       }
