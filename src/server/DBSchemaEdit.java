@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 2000/11/21 12:57:26 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 2001/07/06 20:50:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -782,16 +782,6 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    * <P>This method deletes a
    *  {@link arlut.csd.ganymede.DBNameSpace DBNameSpace} object, returning true if
    * the deletion could be carried out, false otherwise.</P>
-   *
-   * <P>Currently, this method doesn't do any checking to see if the
-   * namespace has any fields created on it.  If you delete a namespace
-   * that fields are using and commit the schema change, when
-   * you stop and restart the server, the loader will complain that
-   * the fields refer to a non-existent namespace.  This code should
-   * really scan through the
-   * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField} objects
-   * in the schema editor's working set and clear any fields that point
-   * to this namespace.</P>
    *
    * @see arlut.csd.ganymede.SchemaEdit
    */

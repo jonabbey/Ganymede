@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.128 $
-   Last Mod Date: $Date: 2001/06/07 17:03:51 $
+   Version: $Revision: 1.129 $
+   Last Mod Date: $Date: 2001/07/06 20:50:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.128 $ $Date: 2001/06/07 17:03:51 $
+ * @version $Revision: 1.129 $ $Date: 2001/07/06 20:50:24 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1031,8 +1031,8 @@ public class DBObject implements db_object, FieldType, Remote {
 		  {
 		    if (definition.namespace.containsKey(tmp.key(j)))
 		      {
-			throw new RuntimeException("Duplicate unique value detected in vector field: " + 
-						   tmp.key(j));
+			throw new RuntimeException("Non-unique value " + tmp.key(j) + " detected in vector field " + 
+						   definition + " which is constrained by namespace " + definition.namespace);
 		      } 
 
 		    definition.namespace.putHandle(tmp.key(j), 
@@ -1045,8 +1045,8 @@ public class DBObject implements db_object, FieldType, Remote {
 		
 		if (definition.namespace.containsKey(tmp.key()))
 		  {
-		    throw new RuntimeException("Duplicate unique value detected in scalar field: " + 
-					       tmp.key());
+		    throw new RuntimeException("Non-unique value " + tmp.key() + " detected in scalar field " + 
+					       definition + " which is constrained by namespace " + definition.namespace);
 		  }
 
 		definition.namespace.putHandle(tmp.key(), 

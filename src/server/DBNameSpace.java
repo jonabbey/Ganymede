@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2001/06/07 15:50:50 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2001/07/06 20:50:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,6 +115,13 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   static final int TRANSCOUNT = 30;
 
   /**
+   * <p>If original is false, this namespace is a copy that is being
+   * used for manipulations during schema editing.</p>
+   */
+
+  private boolean original = true;
+
+  /**
    * <p>treat differently-cased Strings as the same for key?</p>
    */
 
@@ -175,6 +182,50 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     this.caseInsensitive = caseInsensitive;
     uniqueHash = new GHashtable(caseInsensitive); // size?
     transactions = new Hashtable(TRANSCOUNT);
+  }
+
+  /**
+   * <p>This method produces a copy of this namespace to be
+   * manipulated during schema editing as fields are attached and
+   * detached from a namespace definition.</p>
+   */
+
+  public DBNameSpace(DBNameSpace original) throws RemoteException
+  {
+    this.original = false;	// we're a copy
+
+    this.caseInsensitive = original.caseInsensitive;
+    this.name = original.name;
+    this.transactions = new Hashtable(TRANSCOUNT);
+    this.uniqueHash = new GHashtable(original.uniqueHash.size(), caseInsensitive);
+
+    Enumeration enum = original.uniqueHash.keys();
+
+    while (enum.hasMoreElements())
+      {
+	Object key = enum.nextElement();
+
+	DBNameSpaceHandle handle = (DBNameSpaceHandle) original.uniqueHash.get(key);
+
+	DBNameSpaceHandle handleCopy = (DBNameSpaceHandle) handle.clone();
+
+	// a DBNameSpace copy should only be constructed during schema
+	// editing
+
+	if (handleCopy.owner != null)
+	  {
+	    throw new RuntimeException("Error, non-null handle owner found during copy of namespace " + 
+				       this.toString() + " for key: " + key);
+	  }
+
+	if (handleCopy.shadowField != null)
+	  {
+	    throw new RuntimeException("Error, non-null handle shadowField found during copy of namespace " + 
+				       this.toString() + " for key: " + key);
+	  }
+
+	this.uniqueHash.put(key, handleCopy);
+      }
   }
 
   /**
@@ -1143,6 +1194,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 	key = enum.nextElement();
 	System.err.println("key: " + key + ", value: " + uniqueHash.get(key));
       }
+  }
+
+  public String toString()
+  {
+    return name;
   }
 }
 
