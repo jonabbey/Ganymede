@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,6 +27,7 @@ import java.rmi.*;
 import java.rmi.server.*;
 
 import arlut.csd.ganymede.*;
+import arlut.csd.ganymede.custom.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -129,7 +130,7 @@ public class directLoader {
 	String key;
 	Invid invid, objInvid;
 	Enumeration enum;
-	db_object current_obj;
+	DBEditObject current_obj;
 	db_field current_field;
 	pass_field p_field;
 	DBObjectBase base;
@@ -141,12 +142,12 @@ public class directLoader {
 
 	my_client.session.checkpoint("GASHAdmin");
 
-	current_obj = my_client.session.create_db_object(SchemaConstants.PermBase);
+	current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.PermBase);
 	gashadminPermInvid = current_obj.getInvid();
 
 	System.err.println("Trying to create a new GASHAdmin perm object: " + gashadminPermInvid.toString());
 
-	retVal = current_obj.setFieldValue(SchemaConstants.PermName, "GASH Admin");
+	retVal = current_obj.setFieldValueLocal(SchemaConstants.PermName, "GASH Admin");
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -378,7 +379,7 @@ public class directLoader {
     String key;
     Invid invid, objInvid;
     Enumeration enum;
-    db_object current_obj;
+    DBEditObject current_obj;
     db_field current_field;
     pass_field p_field;
     User userObj;
@@ -396,7 +397,7 @@ public class directLoader {
 
 	System.out.print("Creating " + key);
 
-	current_obj = my_client.session.create_db_object(SchemaConstants.UserBase);
+	current_obj = (DBEditObject) my_client.session.create_db_object(SchemaConstants.UserBase);
 	invid = current_obj.getInvid();
 
 	System.out.println(" [" + invid + "] ");
@@ -405,11 +406,11 @@ public class directLoader {
 
 	// set the username
 	    
-	current_obj.setFieldValue(SchemaConstants.UserUserName, key);
+	current_obj.setFieldValueLocal(SchemaConstants.UserUserName, key);
 
 	// set the UID
 
-	current_obj.setFieldValue((short) 256, new Integer(userObj.uid));
+	current_obj.setFieldValueLocal(userSchema.UID, new Integer(userObj.uid));
 
 	// set the password
 
@@ -418,31 +419,31 @@ public class directLoader {
 
 	// set the fullname
 
-	current_obj.setFieldValue((short) 257, userObj.fullname);
+	current_obj.setFieldValueLocal(userSchema.FULLNAME, userObj.fullname);
 
 	// set the division
 
-	current_obj.setFieldValue((short) 258, userObj.division);
+	current_obj.setFieldValueLocal(userSchema.DIVISION, userObj.division);
 
 	// set the room
 
-	current_obj.setFieldValue((short) 259, userObj.room);
+	current_obj.setFieldValueLocal(userSchema.ROOM, userObj.room);
 
 	// set the office phone
 
-	current_obj.setFieldValue((short) 260, userObj.officePhone);
+	current_obj.setFieldValueLocal(userSchema.OFFICEPHONE, userObj.officePhone);
 
 	// set the home phone
 
-	current_obj.setFieldValue((short) 261, userObj.homePhone);
+	current_obj.setFieldValueLocal(userSchema.HOMEPHONE, userObj.homePhone);
 
 	// set the home directory
 
-	current_obj.setFieldValue((short) 262, userObj.directory);
+	current_obj.setFieldValueLocal(userSchema.HOMEDIR, userObj.directory);
 
 	// set the shell
 
-	current_obj.setFieldValue((short) 263, userObj.shell);
+	current_obj.setFieldValueLocal(userSchema.LOGINSHELL, userObj.shell);
       }
   }
 
@@ -455,7 +456,7 @@ public class directLoader {
     String key;
     Invid invid, objInvid;
     Enumeration enum;
-    db_object current_obj;
+    DBEditObject current_obj;
     db_field current_field, current_field2;
     User userObj;
 
@@ -470,7 +471,7 @@ public class directLoader {
 	
 	System.out.print("Creating " + key);
 	
-	current_obj = my_client.session.create_db_object((short) 257);	// base 257 is for groups
+	current_obj = (DBEditObject) my_client.session.create_db_object((short) 257);	// base 257 is for groups
 	objInvid = current_obj.getInvid();
 	
 	System.out.println(" [" + objInvid + "]");
@@ -479,19 +480,19 @@ public class directLoader {
 
 	// set the group name
 	    
-	current_obj.setFieldValue((short) 256, key);
+	current_obj.setFieldValueLocal(groupSchema.GROUPNAME, key);
 
 	// set the GID
 
-	current_obj.setFieldValue((short) 258, new Integer(groupObj.gid));
+	current_obj.setFieldValueLocal(groupSchema.GID, new Integer(groupObj.gid));
 
 	// set the password
 
-	current_obj.setFieldValue((short) 257, groupObj.password);
+	current_obj.setFieldValueLocal(groupSchema.PASSWORD, groupObj.password);
 
 	// add users
 
-	current_field = current_obj.getField((short) 261);
+	current_field = current_obj.getField(groupSchema.USERS);
 
 	String username;
 
@@ -521,7 +522,7 @@ public class directLoader {
 		if (userObj.gid == groupObj.gid)
 		  {
 		    System.err.println("-- home group add " + username);
-		    current_field2 = current_obj.getField((short) 262);
+		    current_field2 = current_obj.getField(groupSchema.HOMEUSERS);
 		    current_field2.addElement(invid);
 		  }
 	      }
