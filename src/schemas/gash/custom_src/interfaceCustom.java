@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -679,7 +679,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       }
     catch (NullPointerException ex)
       {
-	Ganymede.debug("interfaceCustom.matchNet: NullPointer " + ex.getMessage());
+	if (debug)
+	  {
+	    Ganymede.debug("interfaceCustom.matchNet: NullPointer " + ex.getMessage());
+	  }
 	return false;
       }
     
