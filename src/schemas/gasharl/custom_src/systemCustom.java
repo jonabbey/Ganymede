@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 2001/08/01 18:31:30 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 2001/08/01 18:35:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -615,7 +615,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	    osChoices = new QueryResult();
 
-	    Query query = new Query("Shell Choice", null, false);
+	    Query query = new Query("OS Choice", null, false);
 
 	    // internalQuery doesn't care if the query has its filtered bit set
 	    
