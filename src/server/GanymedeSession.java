@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.148 $
-   Last Mod Date: $Date: 1999/09/22 22:27:56 $
+   Version: $Revision: 1.149 $
+   Last Mod Date: $Date: 1999/09/24 15:24:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.148 $ %D%
+ * @version $Revision: 1.149 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4051,6 +4051,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     InvidDBField inf = null;
     Invid inv = null;
     int loopcount = 0;
+    boolean original;
 
     /* -- */
 
@@ -4068,6 +4069,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     while (localObj != null && localObj.isEmbedded())
       {
+	original = false;		// we haven't switched to check the original yet
 	inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
 
 	// if we need to find the top-level containing object for an
@@ -4077,21 +4079,42 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (inf == null)
 	  {
+	    if (false)
+	      {
+		System.err.println("Couldn't initially get a container field for object " + localObj.toString());
+	      }
+
 	    if (localObj instanceof DBEditObject)
 	      {
+		if (false)
+		  {
+		    System.err.println("Object " + localObj.toString() + " is a DBEditObject.");
+		  }
+
 		DBEditObject localEditObj = (DBEditObject) localObj;
 
 		if (localEditObj.getStatus() == ObjectStatus.DELETING)
 		  {
+		    if (false)
+		      {
+			System.err.println("Object " + localObj.toString() + " has status DELETING.");
+		      }
+
 		    localObj = localEditObj.getOriginal();
 		  }
 
 		inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
+		original = true;
 	      }
 	  }
 
 	if (inf == null)
 	  {
+	    if (false)
+	      {
+		System.err.println("Couldn't get a container field for object " + localObj.toString() + " at all.");
+	      }
+
 	    setLastError("getContainingObj() error.. couldn't find owner of embedded object " + 
 			 localObj.getLabel());
 	    localObj = null;
@@ -4100,8 +4123,41 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	inv = (Invid) inf.getValueLocal();
 
+	if (inv == null && !original)
+	  {
+	    if (localObj instanceof DBEditObject)
+	      {
+		if (false)
+		  {
+		    System.err.println("Object " + localObj.toString() + " is a DBEditObject.");
+		  }
+
+		DBEditObject localEditObj = (DBEditObject) localObj;
+
+		if (localEditObj.getStatus() == ObjectStatus.DELETING)
+		  {
+		    if (false)
+		      {
+			System.err.println("Object " + localObj.toString() + " has status DELETING.");
+		      }
+
+		    localObj = localEditObj.getOriginal();
+		  }
+
+		inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
+		original = true;
+	      }
+
+	    inv = (Invid) inf.getValueLocal();
+	  }
+
 	if (inv == null)
 	  {
+	    if (false)
+	      {
+		System.err.println("Couldn't get a container invid for object " + localObj.toString());
+	      }
+
 	    setLastError("getContainingObj() error <2:" + loopcount +
 			 ">.. couldn't find owner of embedded object " + 
 			 localObj.getLabel());
