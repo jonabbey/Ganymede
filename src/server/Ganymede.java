@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.138 $
-   Last Mod Date: $Date: 2002/08/07 18:39:21 $
+   Version: $Revision: 1.139 $
+   Last Mod Date: $Date: 2003/01/13 17:31:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -133,6 +133,13 @@ public class Ganymede {
    */
 
   public static boolean logErrorDialogs = true;
+
+  /**
+   * <p>If true, Ganymede.createInfoDialog() will print the
+   * content of info dialogs to the server's stderr.</p>
+   */
+
+  public static boolean logInfoDialogs = true;
 
   /**
    * <p>We keep the server's start time for display in the
@@ -774,6 +781,12 @@ public class Ganymede {
 				     "OK",
 				     null,
 				     "ok.gif"));
+
+    if (logInfoDialogs)
+      {
+	System.err.println("Ganymede.createInfoDialog(): dialog says " + body);
+      }
+
     return retVal;
   }
 
