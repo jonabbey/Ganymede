@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.44 $ %D%
+   Version: $Revision: 1.45 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1413,13 +1413,15 @@ public class DBStore {
 
     session.openTransaction("DBStore bootstrap initialization");
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.OwnerBase); // create a new owner group 
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.OwnerBase, null); // create a new owner group 
     inv = eO.getInvid();
 
     s = (StringDBField) eO.getField("Name");
     s.setValue("supergash");
     
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase); // create a supergash admin persona object 
+    // create a supergash admin persona object 
+
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase, null);
 
     s = (StringDBField) eO.getField("Name");
     s.setValue("supergash");
@@ -1436,7 +1438,9 @@ public class DBStore {
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
     b.setValue(new Boolean(true));
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase); // create a monitor admin persona object 
+    // create a monitor admin persona object 
+
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase, null);
 
     s = (StringDBField) eO.getField("Name");
     s.setValue("monitor");
@@ -1452,7 +1456,7 @@ public class DBStore {
 
     // create SchemaConstants.PermDefaultObj
 
-    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase); 
+    eO =(DBEditObject) session.createDBObject(SchemaConstants.PermBase, null); 
 
     s = (StringDBField) eO.getField(SchemaConstants.PermName);
     s.setValue("Default");

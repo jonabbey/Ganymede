@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -414,7 +414,9 @@ public class Ganymede {
 
 	    // create SchemaConstants.PermDefaultObj
 
-	    e_object = (DBEditObject) internalSession.session.createDBObject(SchemaConstants.PermBase, defaultInv);
+	    e_object = (DBEditObject) internalSession.session.createDBObject(SchemaConstants.PermBase, 
+									     defaultInv,
+									     null);
 	    
 	    s = (StringDBField) e_object.getField(SchemaConstants.PermName);
 	    s.setValue("Default Permissions");

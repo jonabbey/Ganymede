@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.53 $ %D%
+   Version: $Revision: 1.54 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2058,6 +2058,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public synchronized db_object create_db_object(short type) 
   {
     DBObject newObj;
+
+    /* -- */
     
     if (getPerm(type).isCreatable())
       {
@@ -2079,29 +2081,30 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	  }
 
-	newObj = session.createDBObject(type);
+	// calculate ownership for this object
 
-	if (newObj == null)
-	  {
-	    return null;	// in case the createDBObject() method rejected for some reason
-	  }
+	Vector ownerInvids = new Vector();
 
-	// now make ourselves owner of the object
+	// we may have either a vector of Invids in newObjectOwnerInvids, or
+	// a query result containing a list of a single Invid
 	
 	if (newObjectOwnerInvids != null)
 	  {
-	    InvidDBField inf = (InvidDBField) newObj.getField(SchemaConstants.OwnerListField);
-
 	    for (int i = 0; i < newObjectOwnerInvids.size(); i++)
 	      {
-		inf.addElementLocal(newObjectOwnerInvids.elementAt(i));
+		ownerInvids.addElement(newObjectOwnerInvids.elementAt(i));
 	      }
 	  }
 	else
 	  {
-	    InvidDBField inf = (InvidDBField) newObj.getField(SchemaConstants.OwnerListField);
+	    ownerInvids.addElement(ownerList.getInvid(0));
+	  }
 
-	    inf.addElementLocal(ownerList.getInvid(0));
+	newObj = session.createDBObject(type, ownerInvids);
+
+	if (newObj == null)
+	  {
+	    return null;	// in case the createDBObject() method rejected for some reason
 	  }
       }
     else
@@ -2410,7 +2413,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	if (useSelfPerm && selfPerm != null)
 	  {
-	    return selfPerm.getPerm(localObj.getTypeID());
+	    result = selfPerm.getPerm(localObj.getTypeID());
+
+	    if (result == null)
+	      {
+		System.err.println("GanymedeSession.getPerm(object): double null result! AGH!");
+	      }
+
+	    return result;
 	  }
 	else
 	  {
@@ -2494,6 +2504,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     objPerm = getPerm(localObj);
 
+    if (objPerm == null)
+      {
+	System.err.println("GanymedeSession.getPerm(object, field): null starting point.. AGH!");
+      }
+
     // is our current persona an owner of this object in some
     // fashion?
 
@@ -2527,7 +2542,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    // System.err.println("getPerm(2): Returning self permission access for user's object, field: " + fieldId);
 
-	    return selfPerm.getPerm(localObj.getTypeID(), fieldId);
+	    result = selfPerm.getPerm(localObj.getTypeID(), fieldId);
+
+	    if (result == null)
+	      {
+		System.err.println("GanymedeSession.getPerm(object, filed): double null result AGH!");
+	      }
+
+	    return result;
 	  }
 	else
 	  {
