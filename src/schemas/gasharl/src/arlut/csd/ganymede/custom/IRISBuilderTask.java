@@ -85,6 +85,8 @@ import java.rmi.*;
 
 public class IRISBuilderTask extends GanymedeBuilderTask {
 
+  static final boolean debug = false;
+
   private static String path = null;
   private static String dnsdomain = null;
   private static String buildScript = null;
@@ -173,6 +175,11 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
 		    if (user_in_netgroup(user, "IRIS-users"))
 		      {
+			if (debug)
+			  {
+			    System.err.println("Writing out IRIS user " + user.getLabel());
+			  }
+
 			write_iris(out, user);
 		      }
 		  }
@@ -343,6 +350,12 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
     badge = (String) userObject.getFieldValueLocal(userSchema.BADGE);
     
     PasswordDBField passField = (PasswordDBField) userObject.getField(userSchema.PASSWORD);
+
+    if (passField == null)
+      {
+	return;
+      }
+
     md5Crypt = passField.getMD5CryptText();
     plaintext = passField.getPlainText();
 
