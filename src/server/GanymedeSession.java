@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.237 $
-   Last Mod Date: $Date: 2001/05/12 22:05:12 $
+   Version: $Revision: 1.238 $
+   Last Mod Date: $Date: 2001/05/23 05:15:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.237 $ $Date: 2001/05/12 22:05:12 $
+ * @version $Revision: 1.238 $ $Date: 2001/05/23 05:15:58 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4783,7 +4783,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	if (!getPerm(vObj).isDeletable())
 	  {
 	    return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					      "Don't have permission to delete object" +
+					      "You do not have permission to delete " +
+					      vObj.getTypeName() + " " +
 					      vObj.getLabel());
 	  }
 
@@ -4799,13 +4800,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    if (!isSuperGash() && objBase.objectHook.canBeInactivated())
 	      {
 		return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-						  "You do not have permission to remove " + vObj +
+						  "You do not have permission to remove " + vObj.getTypeName() + " " + vObj +
 						  ".\n\nOnly supergash-level admins can remove objects of this type," +
 						  "other admins must use inactivate.");
 	      }
 	    
 	    return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
-					      "Object Manager refused deletion for " + 
+					      "Object Manager refused deletion for " + vObj.getTypeName() + " " +
 					      vObj.getLabel());
 	  }
       }
