@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.127 $
-   Last Mod Date: $Date: 2002/10/30 22:20:27 $
+   Version: $Revision: 1.128 $
+   Last Mod Date: $Date: 2003/05/06 16:52:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -510,8 +510,9 @@ public class DBEditSet {
       subsequent client actions by the same client could be processed on separate server
       threads, making this check overly restrictive.
 
-      So, off for now.  If this lets multiple threads overlap checkpoint and rollback
-      operations in an unsafe way, we'll just have to suffer that.
+      I've left this on for now, but I'm still uncertain as to whether
+      this should be necessary.  When I've seen this tripped before,
+      it was due to a coding problem elsewhere.
     */
 
     if (true)

@@ -6,15 +6,15 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2002/03/13 20:44:48 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2003/05/06 16:52:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -44,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -200,11 +201,7 @@ public class DBJournal implements ObjectStatus {
 	  {
 	    if (jFile.readUTF().compareTo(OPENTRANS) != 0)
 	      {
-		if (debug)
-		  {
-		    System.err.println("DBJournal constructor: open string mismatch");
-		  }
-		throw new IOException();
+		throw new IOException("DBJournal constructor: open string mismatch");
 	      }
 	    else
 	      {
