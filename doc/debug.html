@@ -1,0 +1,287 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede Debug and Diagnosis Guide Release 1.0 pre-release 1 - 30 January 2001</title>
+  </head>
+
+  <body BGCOLOR="#FFFFFF">
+
+<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo">
+<h1><FONT FACE="Arial, Helvetica">Ganymede Debug and Diagnosis Release 1.0 pre-release 1 - 30 January 2001</FONT></h1>
+    <hr>
+
+    <p>The Ganymede server, like most software, is not perfect
+    (<b><a href="#wild">*</a></b>).  Learning how to diagnose problems and obtain debug
+    trace information is vital if you want to get your hands dirty
+    with things.  It may even be vital if you don't, if you're
+    unlucky.</p>
+
+    <h2>Java Failure Modes and You</h2>
+
+    <p>Just about all of Ganymede is written in Java, which means that
+    it has considerably different failure modes than you may be used
+    to if you have developed software in C or C++.</p>
+
+    <p>First of all, it is extremely rare for Java programs to crash.
+    That is, it is extremely rare for a Java program to get itself
+    into a state that results in a segmentation fault, bus error, or
+    core dump.  If that happens to your Java program, it means that
+    either the Java Virtual Machine you are using has a bug, or that
+    your program is actually a Java/C or Java/C++ hybrid, in which
+    Java code calls to poorly-written C or C++ libraries.  Nothing in
+    Ganymede is done in this way, so any time you see a catastrophic
+    program termination with a segmentation fault, bus error, or core
+    dump, you should be thinking that it is a problem with your JVM,
+    your operating system, or your hardware.  Ganymede may be doing
+    something to expose a bug in your JVM or your operating system or
+    your hardware, but it is the JVM's responsibility to keep Java
+    code running correctly and safely.  Segfaulting or dumping core
+    doesn't count.</p>
+
+    <p>At ARL:UT, our Ganymede server regularly stays up indefinitely.
+    What that means is that the server tends to keep running until the
+    machine running the Ganymede server needs to be taken down for
+    maintenance, or until I notice a bug in it that needs a server
+    shutdown and restart to fix.  It has proven quite common for our
+    Ganymede server to stay up for 6 weeks at a time before one of
+    these two things happens, even as we have been developing the
+    server.</p>
+
+    <p>So, if a Java program won't tend to dump core or otherwise
+    suddenly terminate, how do Java programs go wrong?</p>
+
+    <h3>Dumb Code</h3>
+
+    <p>Well, first of all, Java programs obviously go wrong whenever
+    part of the program's logic is wrong, even if the fault is not
+    immediately catastrophic.  Objects in the database suddenly seem
+    to vanish.  The wrong users are allowed to edit the wrong
+    objects. These things obviously will never happen to you with such
+    a well-written, tested, and bullet proof piece of software as
+    Ganymede 1.0, but I have occasionally seen this sort of thing
+    before (<b><a href="#wild">*</a></b>).</p>
+    
+    <p>In those sorts of cases, the client or the server is acting
+    funny, but it is still acting.  Nothing has happened that gives
+    the code any reason to believe that it isn't doing exactly what it
+    was told to do and that it shouldn't keep on doing it.  There's
+    not much that Java or any programming language can do to rule out
+    errors of this sort.  Java's object oriented structure helps
+    encourage good design principles, but debugging these types of
+    problems is just about the same in Java as it is in any other
+    language.</p>
+
+    <h3>Threads and Exceptions</h3>
+
+    <p>Another class of errors is where the code encounters a
+    condition that just <b>can't</b> be right.  A null pointer.  An
+    attempt to cast an object pointer to an incompatible type.  An
+    attempt to loop one element past the end of an array.  These sorts
+    of things are handled in a far more robust way in Java than in C
+    or C++.  In Java, the thread that encounters such a condition
+    throws an exception.  What that means is that the thread that
+    encountered the fault goes and looks for someone to report the
+    fault to.  If function A calls function B which calls function C,
+    a fault that occurs inside function C might be handled by error
+    checking code in function C, than in function B, than in function
+    A.  If none of these functions catch the error, a general error
+    reporting facility handles the problem.</p>
+
+    <p>What this means is that it is fairly unlikely that the Ganymede
+    server will ever just roll over and die.  The sorts of errors that
+    would immediately kill a program in C or C++ will simply cause an
+    error condition to be reported.  The thread that hit the problem
+    will terminate abnormally, but all other threads in the server
+    will continue on their way, and future network calls to the server
+    will proceed just fine, unless they hit an error themselves.</p>
+
+    <h3>Exception Logging</h3>
+
+    <p>There are two places where such an error can be reported by the
+    Ganymede server.  The first is to the context where the '<a
+    href="glossary.html#runServer">runServer</a>' command was issued.
+    If you run the '<a href="glossary.html#runServer">runServer</a>'
+    script from a system boot up script, the error messages will go
+    wherever you sent the <a
+    href="glossary.html#runServer">runServer</a> script's command line
+    output.  I recommend that you send all output from <a
+    href="glossary.html#runServer">runServer</a> to a file called
+    '<code>server.log</code>'.</p>
+
+    <p>Most errors won't be reported to the command line, however.
+    The reason for this is that the <a
+    href="glossary.html#runServer">runServer</a> command doesn't
+    directly spawn most of the threads in the running Ganymede server.
+    Most of the time that the Ganymede server is doing anything, it is
+    doing it because a remote client connected to it over the network
+    and asked it to do something.  These error messages wind up being
+    shown on the display of the client whose network request
+    encountered the problem.  Since you can't watch the console of
+    every client that talks to your Ganymede server, you'll want to
+    have them saved on the server where you can see them. If you check
+    out the <a href="glossary.html#runServer">runServer</a> script in
+    your server's <code>bin</code> directory, you will see that it
+    comes pre-configured to send debug output to a file called <a
+    href="glossary.html#debug.log">debug.log</a>.  Whenever a Java
+    error or exception occurs as a result of a client network request,
+    a complete record of the event is recorded in this file.  When you
+    look at this file, you will see what functions had been called
+    when the fault occurred.</p>
+
+    <p>These exception traces, whether they occur in the
+    <code>server.log</code> or the <a
+    href="glossary.html#debug.log">debug.log</a> file, will hopefully
+    provide the information necessary for me (or you!) to get an idea
+    of what might have happened.  What they probably won't show, if
+    you are running the server with a JVM that is using Just In Time
+    (JIT) compilation, is the line number where the exception actually
+    occurred.  If you are seeing an exception occur repeatedly, it
+    would be worthwhile to shut down the server, start it with the JIT
+    disabled, and see if you can get the same error condition to show
+    up again.  If so, cut and paste the trace information with the
+    line numbers and send email to the Ganymede mailing list at <a
+    href="mailto:ganymede@arlut.utexas.edu">ganymede@arlut.utexas.edu</a>
+    about it.</p>
+
+    <h3>Deadlock</h3>
+
+    <p>Here we get to the real achilles heel of multithreaded Java
+    programs, deadlock.  The Ganymede server may have dozens of
+    independent threads each processing a network request or doing
+    scheduled housekeeping operations.  These threads have to
+    cooperate to make sure only one thread at a time is doing
+    something that must not be interrupted or interfered with by
+    another thread.  Whenever a thread needs to do something
+    sensitive, it arranges to make sure that all other threads that
+    might have an interest in doing something that would conflict with
+    its activities stand aside and wait until the first thread is
+    done.</p>
+
+    <p>In a deadlock situation, two or more threads wind up waiting
+    for each other to finish up so that they can proceed.  Since the
+    threads are waiting for each other, no one will go anywhere.
+    Everyone needing to work with the particular data structure in
+    contention will have to wait forever, and more and more threads in
+    the program will freeze up as they stumble into the deadly embrace
+    of threads in contention.</p>
+
+    <p>It is this sort of freeze-up that poses the real problem in
+    multithreaded Java servers.  Null pointers generally can't do it,
+    bad array access attempts generally can't do it, but a thread
+    deadlock will bring the Ganymede server's party to a stop very
+    quickly.</p>
+
+    <p>When this happens, you'll pretty much know it, because things
+    will just freeze.  New logins might not be accepted, network
+    clients may become unresponsive, network builds might not get
+    made.</p>
+
+    <p>The Ganymede server was carefully designed not to get into
+    deadlock, but over the last year I've discovered a number of cases
+    in which it was vulnerable to it.  We were using the server in
+    full production for over a year before one user finally managed to
+    hit 'commit' in one client at the exact same moment that another
+    user was attempting to login, causing a deadlock.  If I hadn't
+    been logging all RMI network requests, there would have been no
+    way to determine what had happened.</p>
+
+    <p>Because of the long time that may pass until a specific race
+    condition manifests itself in deadlock, I have to assume that
+    there may yet be some rare opportunity for deadlock in the current
+    code.  I don't know of any today, and I have gone to extra effort
+    in the last few months to eliminate even the rarest
+    vulnerabilities to it that I've found, but there may still be
+    vulnerabilities that I haven't.  Even if there is no deadlock trap
+    waiting in the server today, if you write custom plug-in classes,
+    you might inadvertantly create a race condition that might lead to
+    deadlock.  So it is worth talking about how to obtain useful
+    debugging information in the event of a deadlock.</p>
+
+    <p>First, a deadlock condition will generally not involve any
+    exceptions being thrown.  In a deadlock, there is nothing
+    obviously wrong from a given thread's perspective, it's just that
+    the overall behavior of multiple threads will prevent the server
+    from progressing.  Because of this, looking in the <a
+    href="glossary.html#debug.log">debug.log</a> will not immediately
+    show you where the problem lies.  In order to really diagnose a
+    deadlock, you need to get a report of what all the threads in the
+    server are doing, and which of them are waiting to get access to
+    common resources.</p>
+
+    <p>The way to do this will vary depending on the JVM you are
+    using.  Sun's JVM on Solaris and Linux has a very handy feature in
+    this regard.  Sending the Ganymede server process a SIGQUIT signal
+    will cause the JVM running the server to print to STDOUT a
+    complete list of all threads in the server, where they are, what
+    they are doing, and what if anything they are waiting on.  With
+    any luck, you will have started the server with its output being
+    redirected to a <code>server.log</code> file, so you will have
+    this output captured and ready to ship to Ganymede central for
+    analysis.</p>
+
+    <p>To do this, do a <code>ps</code> to find the Java process that
+      is running the Ganymede server.  Keep in mind that on Linux,
+      you'll see a <b>lot</b> of Java processes running.  These
+      are actually the threads of the server being listed individually
+      in the ps output.  Find the primary process entry, and type:</p>
+
+    <pre>
+       kill -QUIT &lt;procnum&gt;
+    </pre>
+
+    <p>where <code>&lt;procnum&gt;</code> is the process number for
+    the Ganymede server.  You should see a nice long report of thread
+    information added to your <code>server.log</code> file.  Go ahead
+    and kill off the server (<code>kill &lt;procnum&gt;</code>), save
+    the <code>server.log</code> file, and send it in for analysis.</p>
+
+    <p>Note that, just as with the exception trace recording, the
+    thread dump will not include line numbers if the server is running
+    in the high performance JIT mode.  If you can reliably get the
+    server into deadlock, try to do so with the JIT disabled.  The
+    line number information may mean the difference as to whether the
+    deadlock can be tracked.</p>
+
+    <p>If the deadlock was triggered in response to client activity,
+    you should plan on sending both the <code>server.log</code> file
+    (with the thread status dump) and the <a
+    href="glossary.html#debug.log">debug.log</a> files, as the <a
+    href="glossary.html#debug.log">debug.log</a> file will include a
+    complete record of what the clients were up to when the server
+    went into deadlock.</p>
+
+    <h3>Not My Fault!</h3>
+
+    <p>The other class of error conditions you might run into is Not
+    My Fault.  This includes things like someone pulling an ethernet
+    cable out of the back of your server.  It includes things like
+    having your DNS server get corrupted so that your clients can't
+    find your Ganymede server.  It includes things like errors
+    accidentally introduced into the external build scripts or plug-in
+    classes.  Any or all of these things might result in exceptions
+    being thrown in the server, and so may look like one of the other
+    kinds of errors.  By all means send as much detail as you can get
+    to <a
+    href="mailto:ganymede@arlut.utexas.edu">ganymede@arlut.utexas.edu</a>,
+    but understand that it may not be possible for anyone else to
+    provide you quick answers to a local problem.</p>
+
+    <p>And remember that Ganymede is licensed under the Gnu General
+    Public License, and an important part of that is that there is no
+    warranty or guarantee of support for Ganymede at all.  I and
+    others will try to help if we can, but the only guarantee you get
+    is that you are free to try and figure out problems yourself, and
+    that nothing will be hidden from you in the process.</p>
+
+    <hr>
+
+    <p><a name="wild">*: wild understatement.</p>
+
+    <hr>
+    <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
+    <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
+    <!-- hhmts start -->
+Last modified: Wed Jan 31 02:32:08 CST 2001
+<!-- hhmts end -->
+  </body>
+</html>

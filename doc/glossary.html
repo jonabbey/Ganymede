@@ -33,6 +33,7 @@
       <li><a href="#log">log</a></li>
       <li><a href="#ganymedeServer.jar">ganymedeServer.jar</a></li>
       <li><a href="#custom.jar">custom.jar</a></li>
+      <li><a href="#debug.log">debug.log</a></li>
       </ul></li>
 
       <li><a href="#serverscripts">Server Scripts</a>
@@ -363,6 +364,21 @@
     and construction of <font color="#ff0000"><code><b>custom.jar</b></code></font>.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="debug.log"><b>debug.log</b></h3></td></tr></table> 
+
+    <p>The <font color="#ff0000"><code><b>debug.log</b></code></font>
+    file in the server directory records an on-going trace of all RMI
+    network calls made to the Ganymede server by remote clients.  Any
+    server exception that occurs in direct response to a client's
+    network request will be logged to this file.  This exception trace
+    information is essential if there is to be any hope of diagnosing
+    many kinds of problems in the server, so you should always be sure
+    that the <a href="#runServer">runServer</a> script is configured
+    to capture this information, even though there may be a
+    performance and disk space penalty from logging everything.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
 	<td colspan="1"><h2><a name="serverscripts"><b>Server Scripts</b></h2></td>
       </tr>
@@ -679,7 +695,7 @@
     <hr>
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- hhmts start -->
-Last modified: Fri Jan 12 03:09:11 CST 2001
+Last modified: Tue Jan 30 23:56:28 CST 2001
 <!-- hhmts end -->
   </body>
 </html>
