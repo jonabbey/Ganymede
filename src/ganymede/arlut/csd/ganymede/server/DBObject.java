@@ -2255,18 +2255,32 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * exist in the session or the persistent store.</P>
    *
    * @param target The Invid to retrieve.
-   * @param original If true and the lookup is being done in the
+   * @param forceOriginal If true and the lookup is being done in the
    * middle of an editing session, we'll return a reference to the
    * original read-only DBObject from the persistent datastore, rather
    * than the checked out DBEditObject version being edited in the
    * transaction.
    */
 
-  public DBObject lookupInvid(Invid target, boolean original)
+  public DBObject lookupInvid(Invid target, boolean forceOriginal)
   {
     if (this.gSession != null)
       {
-	return this.gSession.getSession().viewDBObject(target, original);
+	DBObject retObj = this.gSession.getSession().viewDBObject(target);
+
+	if (retObj == null)
+	  {
+	    return null;
+	  }
+
+	if (retObj instanceof DBEditObject && forceOriginal)
+	  {
+	    return ((DBEditObject) retObj).getOriginal();
+	  }
+	else
+	  {
+	    return retObj;
+	  }
       }
     else
       {

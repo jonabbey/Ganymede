@@ -452,30 +452,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    if (getOwner() instanceof DBEditObject && ((DBEditObject) getOwner()).getEditSet() != null)
-      {
-	// if we're in an editing context, we'll want to look for the
-	// object in our transaction
-
-	target = ((DBEditObject) getOwner()).getEditSet().findObject(invid);
-      }
-
-    // and if that doesn't work, pull it out of the persistent store
-
-    if (target == null)
-      {
-	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
-
-	if (base != null)
-	  {
-	    // get the object out of the DBStore
-	    
-	    target = base.getObject(invid);
-	  }
-      }
-
-    // and if that doesn't work, we've got a bad invid and there's no
-    // good that can come out of that
+    target = getOwner().lookupInvid(invid, xmlOut.isBeforeStateDumping());
 
     if (target == null)
       {
