@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 1999/11/16 08:00:57 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 1999/11/16 08:36:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -357,7 +357,7 @@ public class DBEditSet {
       }
 
 
-    if (true)
+    if (false)
       {
 	System.err.println("DBEditSet adding " + object.getTypeName() + " " + object.getLabel());
       }
@@ -378,7 +378,10 @@ public class DBEditSet {
 
 	eObj = obj.shadowObject;
 
-	System.err.println("\tDelete-locking " + session.getGSession().describe(invid));
+	if (false)
+	  {
+	    System.err.println("\tDelete-locking " + session.getGSession().describe(invid));
+	  }
 	
 	if (eObj != null)
 	  {

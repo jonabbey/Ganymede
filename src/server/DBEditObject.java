@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.121 $
-   Last Mod Date: $Date: 1999/11/16 08:00:56 $
+   Version: $Revision: 1.122 $
+   Last Mod Date: $Date: 1999/11/16 08:36:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -111,13 +111,13 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.121 $ $Date: 1999/11/16 08:00:56 $ $Name:  $
+ * @version $Revision: 1.122 $ $Date: 1999/11/16 08:36:06 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
 public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
-  static boolean debug = true;
+  static boolean debug = false;
 
   public final static int FIRSTOP = 0;
   public final static int SETVAL = 1;
@@ -2641,7 +2641,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     /* -- */
 
-    if (true)
+    if (false)
       {
 	System.err.println("Entering attemptBackLinkClear() for object " + toString());
       }
@@ -2657,7 +2657,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	targets = new Vector();
 
-	if (true)
+	if (false)
 	  {
 	    System.err.println("Deleting " + toString() + ", chasing back pointers from global hash");
 	  }
@@ -2668,7 +2668,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    remote = (Invid) enum.nextElement();
 
-	    if (true)
+	    if (false)
 	      {
 		System.err.println("\t" + getGSession().describe(remote));
 	      }
@@ -2758,7 +2758,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 					  "This is a serious logic error in the server.");
       }
 
-    if (true)
+    if (false)
       {
 	System.err.println("DBEditObject.clearBackLink(): Clearing link in " + getGSession().describe(remote));
       }
@@ -2805,7 +2805,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      }
 	  }
 
-	if (true)
+	if (false)
 	  {
 	    System.err.println("\tNeed to clear field " + tmpField.toString());
 	  }
@@ -2894,7 +2894,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    // clear all references in this field to us, if we can
 
-	    if (true)
+	    if (false)
 	      {
 		System.err.println("DBEditObject.clearBackLink(): calling dissolve on " + oldRefField);
 	      }
