@@ -1,7 +1,52 @@
-Ganymede Release 1.0.9
+Ganymede Release 1.0.10
 December 4, 2001
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.0.9 to 1.0.10 -------------------
+
+RELEASE DATE: ??
+
+1. [SERVER] Consistency checks should not be forced if 'enableOversight' not set
+
+We were having some problems with the nightly expiration task failing
+due to a consistency check failure unrelated to the actual expirations
+at hand.  This was due to the default DBEditObject commitPhase1()
+method calling consistencyCheck on each object involved in the
+expiration transaction, despite the expiration task's having elected
+to turn off enableOversight.
+
+2. [SERVER] Turned off passive password capture
+
+Turned off passive password capture.  Ganymede stores passwords in a
+variety of hashed forms, strings that can be used for validating a
+password but not in retrieving the password without the use of a
+brute-force encryption search.  Plaintext is never saved on disk.
+Things like sync'ing passwords to Windows NT which require plaintext
+passwords have to obtain them from temporary storage in the Ganymede
+server.
+ 
+Formerly, whenever a user logged into Ganymede, Ganymede would
+temporarily acquire and retain the plaintext used to login to Ganymede
+in RAM only.  This plaintext could then be passed to Windows NT for
+synchronization.  In this way, users would not necessarily have to
+change their passwords in order for their account to be sync'ed.
+ 
+Unfortunately, it turns out that the password identity validation is
+not perfect.  A UNIX password hashed using the traditional Unix
+crypt() routine is only significant to 8 characters.  If a user logged
+into Ganymede for the first time since server restart with a version
+of their password that was correct to 8 characters but then diverged
+in the ninth, then Ganymede would remember the incorrect plaintext,
+and insist on seeing it again before allowing the user to login until
+such time as the server was restarted, and the plaintext password
+information was lost.  Worse, such carelessly entered passwords could
+get propagated to our Windows NT domain controller in their erroneous
+form, and Windows NT's password hashing is significant to 14
+characters.
+ 
+This is not a tenable situation, so the passive plaintext password
+capture logic has been disabled.
 
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
