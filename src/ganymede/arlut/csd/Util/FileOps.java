@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -214,9 +214,51 @@ public class FileOps {
 
     try
       {
-	p.waitFor();
-	
-	return p.exitValue();
+	while (true)
+	  {
+	    // this bletcherousness is so that we can consume anything
+	    // the sub process writes to its stdout or stderr, rather
+	    // than allowing the subprocess to block waiting in vain
+	    // for us to read from it.
+
+	    // really if we see anything coming from subprocesses
+	    // here, it means that somebody didn't properly do
+	    // redirection on their sync stuff.
+
+	    try
+	      {
+		return p.exitValue();
+	      }
+	    catch (IllegalThreadStateException ex)
+	      {
+		try
+		  {
+		    p.getInputStream().skip(Long.MAX_VALUE);
+		  }
+		catch (IOException exc)
+		  {
+		    // so we couldn't eat the bytes, what else can we do?
+		  }
+
+		try
+		  {
+		    p.getErrorStream().skip(Long.MAX_VALUE);
+		  }
+		catch (IOException exc)
+		  {
+		    // screw you, copper
+		  }
+	      }
+
+	    try
+	      {
+		Thread.currentThread().sleep(100);	// 100 milliseconds
+	      }
+	    catch (InterruptedException ex)
+	      {
+		// screw you, copper
+	      }
+	  }
       }
     finally
       {
