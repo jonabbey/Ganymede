@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ import arlut.csd.Util.ParseArgs;
 
 ------------------------------------------------------------------------------*/
 
-public class glogin extends JApplet implements Runnable {
+public class glogin extends JApplet implements Runnable, ActionListener, ClientListener {
 
   public static boolean debug = false;
 
@@ -67,14 +67,12 @@ public class glogin extends JApplet implements Runnable {
 
   protected static Server  my_server;
 
-  protected static iClient my_client;
+  protected static ClientBase my_client;
 
   protected static Session my_session;
   protected static String my_username,my_passwd;
 
   protected static glogin my_glogin;
-
-  private LoginHandler _loginHandler;
 
   protected Thread my_thread = new Thread(this);
 
@@ -247,12 +245,11 @@ public class glogin extends JApplet implements Runnable {
     
     _quitButton = new JButton("Quit");
     _quitButton.setBackground(ClientColor.buttonBG);
-    _loginHandler = new LoginHandler(this);
 
     connector = new JButton("Connecting...");
     connector.setOpaque(true);
     connector.setBackground(ClientColor.buttonBG);
-    connector.addActionListener(_loginHandler);
+    connector.addActionListener(this);
 
     JPanel buttonPanel = new JPanel(new BorderLayout());
 
@@ -269,10 +266,10 @@ public class glogin extends JApplet implements Runnable {
     gbl.setConstraints(buttonPanel, gbc);
     appletContentPane.add(buttonPanel);
 
-    passwd.addActionListener(_loginHandler);
-    username.addActionListener(_loginHandler);
+    passwd.addActionListener(this);
+    username.addActionListener(this);
 
-    _quitButton.addActionListener(_loginHandler);
+    _quitButton.addActionListener(this);
 
     // frames like to be packed
 
@@ -310,84 +307,37 @@ public class glogin extends JApplet implements Runnable {
 	return;
       }
 
-    int state = 0;
-      
-    do {
+    int try_number = 0;
+    
+    while (!connected)
+      {
+	if (try_number++ > 10)
+	  {
+	    System.out.println("I've tried ten times to connect, but I can't do it.  Maybe the server is down.");
+	    break;
+	  }
 
-      try
-	{
-	  connected = true;
-
-	  Remote obj = Naming.lookup(server_url);
-	  
-	  if (obj instanceof Server)
-	    {
-	      my_server = (Server) obj;
-	    }
-	}
-      catch (NotBoundException ex)
-	{
-	  connected = false;
-
-	  System.err.println("RMI: Couldn't bind to server object\n" + ex );
-	}
-      catch (java.rmi.UnknownHostException ex)
-	{
-	  connected = false;
-
-	  System.err.println("RMI: Couldn't find server\n" + server_url );
-	}
-      catch (RemoteException ex)
-	{
-	  connected = false;
-	  ex.printStackTrace();
-
-	  System.err.println("RMI: RemoteException during lookup.\n" + ex);
-	}
-      catch (java.net.MalformedURLException ex)
-	{
-	  connected = false;
-	  	  
-	  System.err.println("RMI: Malformed URL " + server_url );
-	}
-
-      switch (state) 
-	{
-        case 0: 
-	  connector.setText("Connecting... |");
-	  state++;
-	  break;
-
-	case 1:
-	  connector.setText("Connecting...  /");
-	  state++;
-	  break;
-
-	case 2:
-	  connector.setText("Connecting...  -");
-	  state++;
-	  break;
-
-	case 3: 
-	  connector.setText("Connecting... \\");
-	  state = 0;
-	  break;
-	}
-
-      try 
-	{
-	  // Wait for 1 sec before retrying to connect to server
-	  Thread.sleep(1000);
-	}
-      catch (InterruptedException e) 
-	{
-	}
-
-    } while (!connected);
-
-    // At this point, a connection to the server has been established,
-    // So we allow the "Login to Server" button to be visible.
-
+	try
+	  {
+	    my_client = new ClientBase(server_url, this);  //Exception will happen here
+	    connected = true;
+	  }
+	catch (RemoteException rx)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Could not start up the ClientBase, trying again..." + rx);
+	      }
+	    try 
+	      {
+		// Wait for 1 sec before retrying to connect to server
+		Thread.sleep(1000);
+	      }
+	    catch (InterruptedException e) 
+	      {
+	      }
+	  }
+      }
 
     connector.setText("Login to server");
     username.setEnabled(true);
@@ -445,128 +395,96 @@ public class glogin extends JApplet implements Runnable {
   {
     this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
-}  
-
-/**
- *
- *
- *
- */
-
-class LoginHandler implements ActionListener {
-
-  protected glogin my_glogin;
-  
-  /**
-   * Constructor
-   */
-  public LoginHandler(glogin _glogin) 
-  {
-    super();
-
-    if (_glogin == null)
-      {
-	throw new IllegalArgumentException("LoginHandler Constructor: _glogin is null");
-      }
-
-    my_glogin = _glogin;
-  }
 
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == my_glogin.username)
+    if (e.getSource() == username)
       {
-	my_glogin.passwd.requestFocus();
+	passwd.requestFocus();
       }
-    else if (e.getSource() == my_glogin.passwd)
+    else if (e.getSource() == passwd)
       {
-	my_glogin.connector.doClick();
+	connector.doClick();
       }
     
-    else if (e.getSource() == my_glogin.connector)
+    else if (e.getSource() == connector)
       {
-	my_glogin.setWaitCursor();
+	setWaitCursor();
 
-	String uname = my_glogin.username.getText().trim();
-	String pword = my_glogin.passwd.getText();
+	String uname = username.getText().trim();
+	String pword = passwd.getText();
 
-	my_glogin.my_username = uname;
-	my_glogin.my_passwd = pword;
+	my_username = uname;
+	my_passwd = pword;
 	
 	try
 	  {
-	    my_glogin.my_client = new iClient(my_glogin, my_glogin.my_server, uname, pword);
+	    my_session = my_client.login(uname, pword);
 	  }
 	catch (RemoteException ex)
 	  {
-	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame,
+	    JErrorDialog d = new JErrorDialog(my_frame,
 					      "RMI Error: Couldn't log into server: \n" +
 					      ex.getMessage());
 	    
-	    my_glogin.connector.setEnabled(true);
-	    my_glogin._quitButton.setEnabled(true);
+	    connector.setEnabled(true);
+	    _quitButton.setEnabled(true);
 
-	    my_glogin.setNormalCursor();
+	    setNormalCursor();
 	    return;
 	  }
 	catch (NullPointerException ex)
 	  {
 
-	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame,
+	    JErrorDialog d = new JErrorDialog(my_frame,
 					      "Error: Didn't get server reference.  Please Quit and Restart");
 	    
-	    my_glogin.connector.setEnabled(true);
-	    my_glogin._quitButton.setEnabled(true);
+	    connector.setEnabled(true);
+	    _quitButton.setEnabled(true);
 
-	    my_glogin.setNormalCursor();	    
+	    setNormalCursor();	    
 	    return;
 	  }
 	catch (Exception ex) 
 	  {
-	    JErrorDialog d = new JErrorDialog(my_glogin.my_frame,
+	    JErrorDialog d = new JErrorDialog(my_frame,
 					      "Error: " + ex.getMessage());
 	    	    
-	    my_glogin.connector.setEnabled(true);
-	    my_glogin._quitButton.setEnabled(true);
+	    connector.setEnabled(true);
+	    _quitButton.setEnabled(true);
 
-	    my_glogin.setNormalCursor();
+	    setNormalCursor();
 	    return;
 	  }
 
-	my_glogin.my_session = my_glogin.my_client.session;
 
-	my_glogin.connector.setEnabled(false);
-	my_glogin._quitButton.setEnabled(false);
+	connector.setEnabled(false);
+	_quitButton.setEnabled(false);
 
-	if (my_glogin.my_session != null) 
+	if (my_session != null) 
 	  {
-	    startSession(my_glogin.my_session);
+	    startSession(my_session);
 	  }
 	else 
 	  {
 	    //This means that the user was not able to log into the server properly.
 	    
 	    // We re-enable the "Login to server" button so that the user can try again.
-	    my_glogin.connector.setEnabled(true);
-	    my_glogin._quitButton.setEnabled(true);
+	    connector.setEnabled(true);
+	    _quitButton.setEnabled(true);
 	    // Why is this line here? I'm commenting it out.
-	    //my_glogin.connector.setEnabled(false);
+	    //connector.setEnabled(false);
 	  }
-	my_glogin.setNormalCursor();
+	setNormalCursor();
       }
-    else if (e.getSource() == my_glogin._quitButton)
+    else if (e.getSource() == _quitButton)
       {
 	System.exit(1);
       }
   }
 
-  public void startSession(Session session)
+  private void startSession(Session session)
   {
-    if (session == null)
-      {
-	throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");;
-      }
-
     // try to get the URL for the help document tree
 
     try
@@ -579,9 +497,9 @@ class LoginHandler implements ActionListener {
 	glogin.helpBase = null;
       }
 
-    my_glogin.g_client = new gclient(session,my_glogin);
+    g_client = new gclient(session,this);
 
-    my_glogin.passwd.setText("");
+    passwd.setText("");
 
     /* At this point, all the login matters have been handled and we have
        a Session object in our hands.  We now instantiate the main client
@@ -591,7 +509,7 @@ class LoginHandler implements ActionListener {
       {
 	// This will get the ball rolling.
 
-	my_glogin.g_client.start();
+	g_client.start();
 
       }
     catch (Exception e)
@@ -601,6 +519,27 @@ class LoginHandler implements ActionListener {
       }
   }
 
+
+  // These are for the ClientListener
+  public void messageReceived(ClientEvent e)
+  {
+    if (debug)
+      {
+	System.out.println(e.getMessage());
+      }
+
+    JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage());
+  }
+
+  public void disconnected(ClientEvent e)
+  {
+    if (debug)
+      {
+	System.out.println(e.getMessage());
+      }
+
+    JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage());
+  }
 
 }
 
