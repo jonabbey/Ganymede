@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.95 $ %D%
+   Version: $Revision: 1.96 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.95 $ %D%
+ * @version $Revision: 1.96 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -3283,7 +3283,21 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (owner instanceof DBEditObject)
       {
-	return ((DBEditObject) owner).obtainChoicesKey(this);
+	Object key = ((DBEditObject) owner).obtainChoicesKey(this);
+
+	// we have to be careful not to let the client try to use
+	// its cache if our choices() method will return items that
+	// they would normally not be able to access
+
+	if (key != null)
+	  {
+	    if (((DBEditObject) owner).choiceListHasExceptions(this))
+	      {
+		return null;
+	      }
+	  }
+
+	return key;
       }
     else
       {
