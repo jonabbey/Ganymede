@@ -170,10 +170,10 @@ lists, slowing object editing down a great deal.  Now all QueryResult
 objects from the server are automatically sorted one time only, on
 receipt, using an efficient binary insertion sort.
 
-14. [SERVER] Reworked Password fields to support OpenBSD-style MD5 hashing
+14. [SERVER] Reworked Password fields to support FreeBSD-style MD5 hashing
 
 The Ganymede has supported 'MD5 passwords' since August, but this was
-actually just a simple MD5 hash of the plaintext.  OpenBSD, FreeBSD,
+actually just a simple MD5 hash of the plaintext.  FreeBSD, OpenBSD,
 Linux PAM, and possibly other operating systems use a much more
 involved process of generating 'MD5' passwords, including a salt field
 and a thousand round trip through MD5 to make dictionary cracks much
@@ -206,11 +206,11 @@ directly accessible variables.
 
 17. [SERVER] Major reworking of object linking
 
-I spent a few days and did major surgery on the Ganymede server's
-handling of non-symmetric object linking.  Previously, if an invid
-field did not point to an explicit field in a remote object, the
-server would automatically maintain the symmetric back pointer in the
-target object's back links field, field 8.
+I spent a week and did major surgery on the Ganymede server's handling
+of non-symmetric object linking.  Previously, if an invid field did
+not point to an explicit field in a remote object, the server would
+automatically maintain the symmetric back pointer in the target
+object's back links field, field 8.
 
 This meant that whenever an object's field was set to point to an
 object, that object had to be exclusively checked out by the server to
