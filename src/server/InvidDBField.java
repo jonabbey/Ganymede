@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.89 $ %D%
+   Version: $Revision: 1.90 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.89 $ %D%
+ * @version $Revision: 1.90 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1493,6 +1493,20 @@ public final class InvidDBField extends DBField implements invid_field {
 					      "because the vector field is already at maximum capacity");
 	  }
 
+	if (values.contains(newInvid))
+	  {
+		return Ganymede.createErrorDialog("InvidDBField.establish(): schema logic error",
+						  "The backfield pointer in vector invid field " + getName() +
+						  " in object " + getOwner().getLabel() + 
+						  "refused the pointer binding because it already points " +
+						  "back to the object requesting binding.  This sugests that " +
+						  "multiple fields in the originating object " + newInvid + 
+						  " are trying to link to one scalar field in we, the target, which " +
+						  "can't work.  If one of the fields in " + newInvid + " is ever " +
+						  "cleared or changed, we'll be cleared and the reflexive relationship " +
+						  "will be broken.\n\nHave your adopter check the schema.");
+	  }
+
 	if (eObj.finalizeAddElement(this, newInvid))
 	  {
 	    values.addElement(newInvid);
@@ -2011,6 +2025,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
+    // DBField.setElement(), DBField.setElementLocal() check the index and value
+    // params for us.
+
     if (isEditInPlace())
       {
 	throw new IllegalArgumentException("can't manually set element in edit-in-place vector: " +
@@ -2021,6 +2038,16 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object: " +
 					   getName() + " in object " + owner.getLabel());
+      }
+
+    if (this.value.equals(values.elementAt(index)))
+      {
+	if (debug)
+	  {
+	    Ganymede.debug("InvidDBField.setElement(): no change");
+	  }
+
+	return null;		// no change
       }
 
     if (!verifyNewValue(value, local))
@@ -2158,6 +2185,12 @@ public final class InvidDBField extends DBField implements invid_field {
 	setLastError("vector accessor called on scalar field");
 	throw new IllegalArgumentException("vector accessor called on scalar field " +
 					   getName() + " in object " + owner.getLabel());
+      }
+
+    if (this.values.contains(value))
+      {
+	return Ganymede.createErrorDialog("InvidDBField.addElement() - redundant value submitted",
+					  "Field " + getName() + " already contains value " + value);
       }
 
     if (!verifyNewValue(value, local))
