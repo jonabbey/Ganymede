@@ -907,7 +907,7 @@ class GASHAdminDispatch implements Runnable {
 
   public void clearSchemaEditor()
   {
-    schemaMI.setEnabled(true);
+    frame.schemaMI.setEnabled(true);
     GASHAdminFrame.schemaEditor = null;
   }
 

@@ -1522,7 +1522,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				// please
 
     this.tree = null;
-    this.schemaMI = null;
+
+    this.editor = null;
+    this.dispatch.clearSchemaEditor();
+    this.dispatch = null;
 
     this.removeAll();		// should be done on GUI thread
   }
@@ -2677,10 +2680,6 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
 
     this.gbl = null;
     this.gbc = null;
-
-    this.editor = null;
-    this.dispatch.clearSchemaEditor();
-    this.dispatch = null;
 
     // and clean up the AWT's linkages
 
