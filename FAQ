@@ -1,5 +1,5 @@
-Ganymede Release 1.0.7
-October 11, 2001
+Ganymede Release 2.0
+?? ??, 2005
 FAQ
 ---------------------------------------------
 
@@ -429,17 +429,17 @@ http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.ht
 The Ganymede server is trying to protect you from a misconfiguration
 of your system.
 
-In order for the Ganymede server to work, it needs to pass a URL to
-the rmiregistry process describing the network name that the Ganymede
-server wants to be known by.  This will look like
-rmi://myhost.domain.com:1099/ganymede.server.  When the rmiregistry on
-the server system receives a network call asking to talk to the
-Ganymede server, it will return an IP address and TCP port number that
-the client should use to talk to the server.
+In order for the Ganymede server to work, it needs to create a URL for
+its internal RMI registry describing the network name that the
+Ganymede server wants to be known by.  This will look like
+rmi://myhost.domain.com:1099/ganymede.server.  When the Ganymede
+server's internal rmiregistry receives a network call asking to talk
+to the Ganymede server's RMI entry point, it will return an IP address
+and TCP port number that the client should use to talk to the server.
 
 On some systems, the 'hostname' command returns a name that is
 associated with the 127.0.0.1 loopback address in /etc/hosts.  On such
-systems, the rmiregistry will get the idea that the I.P. address that
+systems, the RMI registry will get the idea that the I.P. address that
 the client should talk to in order to find the server is 127.0.0.1.
 127.0.0.1 is a 'magic' address, which is always interpreted to mean
 'myself'.  Remote Ganymede clients obviously won't find the server on
@@ -448,7 +448,7 @@ clients try to talk to the server.
 
 To prevent this problem, the Ganymede server checks the system's idea
 of its name against the 127.0.0.1 address.  If it finds that the
-systems' hostname would cause the rmiregistry to provide the unhelpful
+systems' hostname would cause the RMI registry to provide the unhelpful
 127.0.0.1 address, it tries instead to use the system name provided by
 the user when the Ganymede server was installed.  If that name also
 resolves to 127.0.0.1, the server prints the error message and exits,
@@ -459,7 +459,7 @@ file and change the ganymede.serverhost definition to something that
 will resolve on the server to something other than 127.0.0.1.  This
 can even be the server's network accessible I.P. address, if you like.
 
-Hopefully a future version of the Java rmiregistry utility will have
+Hopefully a future version of the Java RMI registry classes will have
 smarter behavior regarding the loopback address.  If you do find that
 you need to override this check, you can edit the server's runServer
 script and add the -forcelocalhost option to the Java invocation line.

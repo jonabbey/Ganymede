@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-?? ?, 2004
+?? ?, 2005
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATA: ?? ?, 2004
+RELEASE DATA: ?? ?, 2005
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -294,6 +294,13 @@ In testing here, this change made the new code 5 times faster at
 wall-clock time in doing a system-local xmlclient dump to /dev/null,
 even with the overhead of SSL encryption included, relative to
 previous releases.
+
+17. [SERVER] Use of external rmiregistry eliminated
+
+The Ganymede server now implements an rmiregistry in-process, rather
+than depending on an external rmiregistry support process.  This
+simplifies the startup and shutdown of the Ganymede server, as well as
+operational usage generally.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 

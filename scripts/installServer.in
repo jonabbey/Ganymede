@@ -61,7 +61,7 @@ chdir($rootdir);
 %descrip = ("JVM" => "Where are the JDK binaries installed?",
             "SERVERINSTALL" => "Where should the server tree be installed?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
-	    "REGISTRYPORT" => "What port should the RMI registry supporting Ganymede run on?",
+	    "REGISTRYPORT" => "What port should the Ganymede server use for its RMI registry?",
 	    "MAILHOST" => "What mailhost should Ganymede use to send out diagnostic mail?\n\t(Leaving this blank will cause Ganymede to not send any emails)",
 	    "RETURNADDR" => "What email address should Ganymede sign on email that it sends out?",
 	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?",
@@ -285,7 +285,6 @@ if ($version != 2) {
 # now we need to configure and install the runServer script
 
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
-	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
                "PROPERTIES" => "$installdir/ganymede.properties",
                "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/jars/gnu-regexp-1.1.4.jar:$installdir/schema/custom.jar:$installdir/jars/antlr.jar:$installdir/jython/jython.jar:$installdir/jython/jython-lib.jar",
 	       "RMIPORT" => $vars{"REGISTRYPORT"},
