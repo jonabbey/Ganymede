@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.176 $
-   Last Mod Date: $Date: 2000/03/01 22:01:12 $
+   Version: $Revision: 1.177 $
+   Last Mod Date: $Date: 2000/03/03 02:18:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.176 $ $Date: 2000/03/01 22:01:12 $
+ * @version $Revision: 1.177 $ $Date: 2000/03/03 02:18:39 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -628,7 +628,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     try
       {
-	clienthost = getClientHost();
+	String ipAddress = getClientHost();
+
+	try
+	  {
+	    java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
+	    clienthost = addr.getHostName();
+	  }
+	catch (java.net.UnknownHostException ex)
+	  {
+	    clienthost = ipAddress;
+	  }
       }
     catch (ServerNotActiveException ex)
       {
