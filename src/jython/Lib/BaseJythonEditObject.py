@@ -1,4 +1,4 @@
-from arlut.csd.ddroid.server import DBEditObject, Ganymede, DDroidManagementException
+from arlut.csd.ganymede.server import DBEditObject, Ganymede, GanymedeManagementException
 
 class BaseJythonEditObject(DBEditObject):
 
@@ -17,4 +17,4 @@ class BaseJythonEditObject(DBEditObject):
       DBEditObject.__init__( self, original, editset )
 
     else:
-      raise DDroidManagementException("Couldn't determine which constructor to call based on args.")
+      raise GanymedeManagementException("Couldn't determine which constructor to call based on args.")

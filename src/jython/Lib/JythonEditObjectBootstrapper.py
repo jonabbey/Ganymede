@@ -1,4 +1,4 @@
-from arlut.csd.ddroid.server import Ganymede
+from arlut.csd.ganymede.server import Ganymede
 import JythonURIClassLoader
 
 # This will act as our class cache. It will be a hash that
@@ -21,7 +21,7 @@ def get_jythonEditObject( uri, base, invid, editset, original ):
 
   # Snag the class definition from the default module that
   # JythonURIClassLoader created for us
-  from ddroid_hot_code import EditObject
+  from ganymede_hot_code import EditObject
 
   # Store this class in the hash. This doesn't involve any
   # synchronization because the caller should already be

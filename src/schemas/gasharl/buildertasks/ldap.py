@@ -1,8 +1,8 @@
-from arlut.csd.ddroid.server import Ganymede
-from arlut.csd.ddroid.server import GanymedeBuilderTask
-from arlut.csd.ddroid.server import PasswordDBField
+from arlut.csd.ganymede.server import Ganymede
+from arlut.csd.ganymede.server import GanymedeBuilderTask
+from arlut.csd.ganymede.server import PasswordDBField
 from arlut.csd.Util import PathComplete
-from arlut.csd.ddroid.common import SchemaConstants
+from arlut.csd.ganymede.common import SchemaConstants
 
 from java.lang import System, RuntimeException
 

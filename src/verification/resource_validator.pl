@@ -6,10 +6,10 @@
 # Last Changed By: $Author$
 # Last Mod Date: $Date$
 #
-# This perl script is designed to scan through the Directory Droid
+# This perl script is designed to scan through the Ganymede
 # source files in search of localization string retrievals, and to
-# match them against the property file resources in the Directory
-# Droid resources tree.
+# match them against the property file resources in the Ganymede
+# resources tree.
 #
 # This code does not attempt to be comprehensive in its operation..
 # there are a number of significant simplifying assumptions:
@@ -39,11 +39,11 @@ use Config::Properties;
 $| = 1;				# don't buffer stdout, to assist debug
 
 if (defined $ARGV[0]) {
-  $scan_root = "$ARGV[0]/ddroid/arlut/csd/ddroid";
+  $scan_root = "$ARGV[0]/ganymede/arlut/csd/ganymede";
   $properties_root = "$ARGV[0]/resources";
 } else {
-  $scan_root = "/home/broccol/ganymede/ddroid/src/ddroid/arlut/csd/ddroid";
-  $properties_root = "/home/broccol/ganymede/ddroid/src/resources";
+  $scan_root = "/home/broccol/ganymede/ganymede/src/ganymede/arlut/csd/ganymede";
+  $properties_root = "/home/broccol/ganymede/ganymede/src/resources";
 }
 
 $showall_props = 0;
@@ -120,7 +120,7 @@ sub countparams {
 #
 # This subroutine is designed to help us validate the number of
 # arguments that come after the property key in a ts.l() method call
-# in Directory Droid java code.
+# in Ganymede java code.
 #
 # We pass in two parameters: the first is a string containing the remaining
 # characters on the same line as the ts.l() call, after the closing double

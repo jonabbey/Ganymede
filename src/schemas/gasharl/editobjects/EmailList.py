@@ -115,12 +115,12 @@ class EditObject(BaseJythonEditObject, SchemaConstants):
     By default, the 3 variants of the DBEditObject anonymousLinkOK() method are
     chained together, so that the customizer can choose which level of detail
     he is interested in.  {@link arlut.csd.ganymede.server.InvidDBField
-    InvidDBField}'s {@link arlut.csd.ganymede.server.InvidDBField#bind(
+    InvidDBField}s {@link arlut.csd.ganymede.server.InvidDBField#bind(
     arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean)
     bind()} method calls this version.  This version calls the three parameter
     version, which calls the two parameter version, which returns false by
     default.  Customizers can implement any of the three versions, but unless
-    you maintain the version chaining yourself, there's no point to
+    you maintain the version chaining yourself, theres no point to
     implementing more than one of them.  
     '''
     # If someone tries to put this list in another email list, let them.
@@ -144,7 +144,7 @@ class EditObject(BaseJythonEditObject, SchemaConstants):
     To be overridden in DBEditObject subclasses.
    
     Note that this method will not be called if the controlling
-    GanymedeSession's enableOversight is turned off, as in bulk loading.
+    GanymedeSessions enableOversight is turned off, as in bulk loading.
     '''
     # The email list name is required
     if fieldid == self.LISTNAME_FIELD_ID:
@@ -170,7 +170,7 @@ class EditObject(BaseJythonEditObject, SchemaConstants):
    
     The DBField that called us will take care of all standard checks on the
     operation (including vector bounds, etc.) before calling this method.
-    Under normal circumstances, we won't need to do anything here.
+    Under normal circumstances, we wont need to do anything here.
     '''
     if field.getID() not in [self.MEMBERS_FIELD_ID, self.EXTERNALTARGETS_FIELD_ID]:
       return None
@@ -206,7 +206,7 @@ class EditObject(BaseJythonEditObject, SchemaConstants):
    
     The DBField that called us will take care of all standard checks on the
     operation (including vector bounds, etc.) before calling this method.
-    Under normal circumstances, we won't need to do anything here.
+    Under normal circumstances, we wont need to do anything here.
     '''
     if field.getID() not in [self.MEMBERS_FIELD_ID, self.EXTERNALTARGETS_FIELD_ID]:
       return None

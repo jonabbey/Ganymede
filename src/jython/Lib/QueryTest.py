@@ -1,5 +1,5 @@
-from arlut.csd.ddroid.server import QueryParser, QueryLexer, QueryParserTokenTypes, Ganymede
-from arlut.csd.ddroid.common import Query, QueryAndNode, QueryNotNode, QueryOrNode, QueryDataNode, QueryDeRefNode, FieldType
+from arlut.csd.ganymede.server import QueryParser, QueryLexer, QueryParserTokenTypes, Ganymede
+from arlut.csd.ganymede.common import Query, QueryAndNode, QueryNotNode, QueryOrNode, QueryDataNode, QueryDeRefNode, FieldType
 from java.lang import RuntimeException, String, Boolean
 from java.io import StringReader
 from antlr import ANTLRException, DumpASTVisitor

@@ -1,9 +1,9 @@
-from arlut.csd.ddroid.server import Ganymede
+from arlut.csd.ganymede.server import Ganymede
 import urllib
 import imp
 import sys
 
-def load( uri, name="ddroid_hot_code" ):
+def load( uri, name="ganymede_hot_code" ):
   # Grab the Jython code from the desired location
   Ganymede.debug( "Loading code from: " + uri )
   f = urllib.urlopen( uri )
