@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,10 +37,12 @@ public class QueryResult implements java.io.Serializable {
 
   static final boolean debug = false;
 
+  // ---
+
   // for use pre-serialized
 
   transient Hashtable invidHash = null;
-  transient boolean forTransport = true;
+  transient private boolean forTransport = true;
 
   // for transport
 
@@ -50,8 +52,8 @@ public class QueryResult implements java.io.Serializable {
 
   transient private boolean unpacked = false;
 
-  transient Vector invids = null;
-  transient Vector labels = null;
+  transient Vector handles = null;
+  transient Vector labelList = null;
 
   /* -- */
 
@@ -60,6 +62,15 @@ public class QueryResult implements java.io.Serializable {
     buffer = new StringBuffer();
     invidHash = new Hashtable();
   }
+
+  /**
+   *
+   * Constructor.
+   *
+   * @param forTransport If true, this QueryResult will prepare information
+   * fed into it for transport by maintaining a StringBuffer.
+   *
+   */
 
   public QueryResult(boolean forTransport)
   {
@@ -82,7 +93,10 @@ public class QueryResult implements java.io.Serializable {
 	System.err.println("QueryResult: addRow(" + object.getLabel() + ")");
       }
 
-    addRow(object.getInvid(), object.getLabel());
+    addRow(object.getInvid(), object.getLabel(),
+	   object.isInactivated(),
+	   object.willExpire(),
+	   object.willBeRemoved());
   }
 
   /**
@@ -93,7 +107,23 @@ public class QueryResult implements java.io.Serializable {
    *
    */
 
-  public synchronized void addRow(Invid invid, String label)
+  public void addRow(Invid invid, String label)
+  {
+    addRow(invid, label, false, false, false);
+  }
+
+  /**
+   *
+   * This method is used to add an object's information to
+   * the QueryResult's serializable buffer.  It is intended
+   * to be called on the server.  
+   *
+   */
+
+  public synchronized void addRow(Invid invid, String label,
+				  boolean inactive,
+				  boolean expirationSet,
+				  boolean removalSet)
   {
     if (debug)
       {
@@ -107,6 +137,25 @@ public class QueryResult implements java.io.Serializable {
 
     if (forTransport)
       {
+	// encode any true bits
+
+	if (inactive)
+	  {
+	    buffer.append("A");
+	  }
+
+	if (expirationSet)
+	  {
+	    buffer.append("B");
+	  }
+
+	if (removalSet)
+	  {
+	    buffer.append("C");
+	  }
+
+	buffer.append("|");
+
 	if (invid != null)
 	  {
 	    buffer.append(invid.toString());       
@@ -146,22 +195,34 @@ public class QueryResult implements java.io.Serializable {
       }
   }
 
-  //
+  // ***
   //
   // The following methods are intended to be called on a QueryResult
   // after it has been serialized and passed from the server to the
   // client.
   //
-  //
+  // ***
 
-  public Vector getInvids()
+  /**
+   *
+   * This method is used by arlut.csd.ganymede.client.objectList to
+   * get access to the raw vector of ObjectHandle's post-serialization.
+   *
+   * Note that this method does not clone our handles vector, we'll just
+   * assume that whatever the objectList class on the client does to this
+   * vector, we're not going to disturb anyone else who will be looking
+   * at the handle list on this query result object. 
+   *
+   */
+
+  public Vector getHandles()
   {
     if (!unpacked)
       {
 	unpackBuffer();
       }
 
-    return invids;
+    return handles;
   }
 
   public Invid getInvid(int row)
@@ -171,7 +232,7 @@ public class QueryResult implements java.io.Serializable {
 	unpackBuffer();
       }
 
-    return (Invid) invids.elementAt(row);
+    return ((ObjectHandle) handles.elementAt(row)).getInvid();
   }
 
   public Vector getLabels()
@@ -181,7 +242,17 @@ public class QueryResult implements java.io.Serializable {
 	unpackBuffer();
       }
 
-    return labels;
+    if (labelList == null)
+      {
+	labelList = new Vector();
+
+	for (int i = 0; i < handles.size(); i++)
+	  {
+	    labelList.addElement(((ObjectHandle) handles.elementAt(i)).getLabel());
+	  }
+      }
+
+    return labelList;
   }
   
   public String getLabel(int row)
@@ -191,7 +262,7 @@ public class QueryResult implements java.io.Serializable {
 	unpackBuffer();
       }
 
-    return (String) labels.elementAt(row);
+    return ((ObjectHandle) handles.elementAt(row)).getLabel();
   }
 
   public int size()
@@ -201,7 +272,7 @@ public class QueryResult implements java.io.Serializable {
 	unpackBuffer();
       }
 
-    return labels.size();
+    return handles.size();
   }
 
   /**
@@ -213,16 +284,57 @@ public class QueryResult implements java.io.Serializable {
   public synchronized Vector getListHandles()
   {
     Vector valueHandles = new Vector();
+    ObjectHandle handle;
 
     /* -- */
-    
-    for (int i = 0; i < size(); i++)
+
+    if (!unpacked)
       {
-	valueHandles.addElement(new listHandle(getLabel(i), getInvid(i)));
+	unpackBuffer();
+      }
+    
+    for (int i = 0; i < handles.size(); i++)
+      {
+	handle = (ObjectHandle) handles.elementAt(i);
+	valueHandles.addElement(handle.getListHandle());
       }
     
     return valueHandles;
   }
+
+  /**
+   * Returns the listHandle for this row.
+   */
+
+  public listHandle getListHandle(int row)
+  {
+    ObjectHandle handle;
+
+    /* -- */
+
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+
+    handle = (ObjectHandle) handles.elementAt(row);
+
+    return handle.getListHandle();
+  }
+
+  // ***
+  //
+  // pre-serialization (server-side) methods
+  //
+  // ***
+
+  /**
+   *
+   * This method is provided for the server to optimize
+   * it's QueryResult loading operations, and is not
+   * intended for use post-serialization.
+   *
+   */
 
   public synchronized boolean containsInvid(Invid invid)
   {
@@ -230,17 +342,29 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   * Returns the listHandle for this row.
+   *
+   * This is a pre-serialization method for concatenating
+   * another (for transport) QueryResult to ourself.
+   *
    */
-  public listHandle getListHandle(int row)
-  {
-    return new listHandle(getLabel(row), getInvid(row));
-  }
   
   public void append(QueryResult result)
   {
     buffer.append(result.buffer.toString());
   }
+
+  // ***
+  //
+  // private methods
+  //
+  // ***
+
+  /**
+   *
+   * Private method to handle building up our datastructure
+   * on the post-serialization side.
+   *
+   */
 
   private synchronized void unpackBuffer()
   {
@@ -248,15 +372,22 @@ public class QueryResult implements java.io.Serializable {
     String results = buffer.toString();
     StringBuffer tempString = new StringBuffer();
     int index = 0;
+    int rows = 0;
+
+    String label;
+    Invid invid;
+    boolean inactive, expirationSet, removalSet;
 
     /* -- */
 
-    invids = new Vector();
-    labels = new Vector();
+    // prepare our handle vector
+
+    handles = new Vector();
+
+    // turn our serialized buffer into an array of chars
+    // for fast processor
 
     chars = results.toCharArray();
-
-    // read in the header definition line
 
     if (debug)
       {
@@ -267,20 +398,41 @@ public class QueryResult implements java.io.Serializable {
 
     while (index < chars.length)
       {
-	// first read in the Invid
+	inactive = false;
+	expirationSet = false;
+	removalSet = false;
+
+	// first read in the bits
+
+	while (chars[index] != '|')
+	  {
+	    if (chars[index] == 'A')
+	      {
+		inactive = true;
+	      }
+	    else if (chars[index] == 'B')
+	      {
+		expirationSet = true;
+	      }
+	    else if (chars[index] == 'C')
+	      {
+		removalSet = true;
+	      }
+
+	    index++;
+	  }
+
+	index++;		// skip separator |
+
+	// now read in the Invid
 
 	tempString.setLength(0); // truncate the buffer
-
-	if (debug)
-	  {
-	    System.err.println("*** Unpacking row " + labels.size());
-	  }
 
 	while (chars[index] != '|')
 	  {
 	    if (chars[index] == '\n')
 	      {
-		throw new RuntimeException("parse error in row" + labels.size());
+		throw new RuntimeException("parse error in row" + rows);
 	      }
 	    
 	    tempString.append(chars[index++]);
@@ -288,11 +440,11 @@ public class QueryResult implements java.io.Serializable {
 
 	if (tempString.toString().length() != 0)
 	  {
-	    invids.addElement(new Invid(tempString.toString()));
+	    invid = new Invid(tempString.toString());
 	  }
 	else
 	  {
-	    invids.addElement(null);
+	    invid = null;
 	  }
 
 	index++;		// skip over |
@@ -314,8 +466,12 @@ public class QueryResult implements java.io.Serializable {
 	    tempString.append(chars[index++]);
 	  }
 
-	labels.addElement(tempString.toString());
+	label = tempString.toString();
 
+	handles.addElement(new ObjectHandle(label, invid, 
+					    inactive, expirationSet, removalSet));
+
+	rows++;
 	index++; // skip newline
       }
 
