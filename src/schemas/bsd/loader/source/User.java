@@ -7,8 +7,8 @@
    
    Created: 22 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/07/06 19:12:38 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/07/08 04:26:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -132,6 +132,11 @@ public class User {
     // matt knopp has a master.passwd file with missing root password
 
     password = getNextBit(tokens, false);
+
+    if (password == null || password.equals(""))
+      {
+	System.err.println("Warning, user " + name + " has no password set.");
+      }
 
     if (debug)
       {

@@ -7,8 +7,8 @@
    
    Created: 22 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/07/06 19:12:55 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/07/08 04:26:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -127,6 +127,11 @@ public class User {
       }
 
     password = getNextBit(tokens, false); // false so we can handle empty password fields
+
+    if (password == null || password.equals(""))
+      {
+	System.err.println("Warning, user " + name + " has no password set.");
+      }
 
     if (debug)
       {
