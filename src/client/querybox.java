@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 2001/04/12 08:23:49 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 2001/04/12 10:23:00 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -23,7 +23,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -53,7 +53,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -62,6 +63,7 @@ package arlut.csd.ganymede.client;
 import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.Util.*;
+import arlut.csd.JDialog.JErrorDialog;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -101,7 +103,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
   OptionsPanel optionsPanel = null;	// to hold the frame that we popup to get a list of
 				// desired fields in the query's results
-  gclient gc;
+  gclient gc = null;
 
   Hashtable 
     shortHash;			// Key: Base ID    *--*  Value: Corresponding Base
@@ -154,7 +156,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     showAllItems = false;
 
   Query
-    returnVal;
+    query;
 
   Image queryIcon;
 
@@ -398,15 +400,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    */
 
-  public Query myshow()
+  public void myshow()
   {
     // Method to set the querybox to visible or invisible
     
     setSize(800,400);
-    setVisible(true);		// our thread will wait at this point
-    
-    return this.returnVal; // once setVisible is set to false
-                           // the program executes this return line
+    setVisible(true);
   }
 
   ////////////////////////
@@ -783,10 +782,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   {
     if (e.getSource() == OkButton) 
       {
-	returnVal = createQuery();
-	returnVal = setFields(returnVal);
+	query = createQuery();
+	query = setFields(query);
 	unregister();
 	setVisible(false);	// close down
+	doQuery();
       } 
     else if (e.getSource() == CancelButton)
       {
@@ -795,7 +795,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    System.out.println("Cancel was pushed");
 	  }
 
-	returnVal = null;
+	query = null;
 	unregister();
 	setVisible(false);
       } 
@@ -826,7 +826,66 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    }
 	  }
       }
-  } 
+  }
+
+  private void doQuery()
+  {
+    if (query == null)
+      {
+	return;
+      }
+
+    Thread t = new Thread(new Runnable() {
+      public void run() {
+
+	final Runnable runnableKey = this;
+
+	SwingUtilities.invokeLater(new Runnable() {
+	  public void run() {
+	    gc.wp.addWaitWindow(runnableKey);
+	  }
+	});
+
+	DumpResult buffer = null;
+		
+	try
+	  {
+	    try
+	      {
+		buffer = gc.session.dump(query);
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("caught remote: " + ex);
+	      }
+	    catch (Error ex)
+	      {
+		new JErrorDialog(gc, 
+				 "Could not complete query.. may have run out of memory.\n\n" +
+				 ex.getMessage());
+		throw ex;
+	      }
+	    
+	    final DumpResult bufferRef = buffer;
+
+	    SwingUtilities.invokeLater(new Runnable() {
+	      public void run() {
+		gc.wp.addTableWindow(gc.session, query, bufferRef, "Query Results");
+	      }
+	    });
+	  }
+	finally
+	  {
+	    SwingUtilities.invokeLater(new Runnable() {
+	      public void run() {
+		gc.wp.removeWaitWindow(runnableKey);
+	      }
+	    });
+	  }
+      }});
+
+    t.start();
+  }
 
   /**
    *

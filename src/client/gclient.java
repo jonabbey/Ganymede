@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.184 $
-   Last Mod Date: $Date: 2001/04/12 08:23:48 $
+   Version: $Revision: 1.185 $
+   Last Mod Date: $Date: 2001/04/12 10:22:59 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -91,7 +91,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.184 $ $Date: 2001/04/12 08:23:48 $ $Name:  $
+ * @version $Revision: 1.185 $ $Date: 2001/04/12 10:22:59 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -131,7 +131,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/04/12 08:23:48 $";
+  static String release_date = "$Date: 2001/04/12 10:22:59 $";
   static String release_number = null;
 
   // ---
@@ -4361,48 +4361,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    return;
 	  }
 
-	// need some final variables for the inner class
-	// to use.
-
-	final Query q = my_querybox.myshow();
-	final Session s = getSession();
-	final gclient thisGclient = this;
-
-	Thread t = new Thread(new Runnable() {
-	  public void run() {
-	    if (q != null)
-	      {
-		thisGclient.wp.addWaitWindow(this);
-		DumpResult buffer = null;
-		
-		try
-		  {
-		    try
-		      {
-			buffer = s.dump(q);
-		      }
-		    catch (RemoteException ex)
-		      {
-			throw new RuntimeException("caught remote: " + ex);
-		      }
-		    catch (Error ex)
-		      {
-			new JErrorDialog(thisGclient, 
-					 "Could not complete query.. may have run out of memory.\n\n" +
-					 ex.getMessage());
-			throw ex;
-		      }
-
-		    thisGclient.wp.addTableWindow(session, q, buffer, "Query Results");
-		  }
-		finally
-		  {
-		    thisGclient.wp.removeWaitWindow(this);
-		  }
-	      }
-	  }});
-
-	t.start();
+	my_querybox.myshow();
       }
     else if (source == clearTreeMI)
       {
@@ -4813,62 +4772,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    setNormalCursor();
 
-	    // inner classes can only refer to final method variables,
-	    // so we'll make some final references to keep our inner
-	    // class happy.
-
-	    final Query q = box.myshow();
-	    final gclient thisGclient = this;
-	    final String text = node.getText();
-
-	    Thread t = new Thread(new Runnable() {
-	      public void run() {
-		if (q != null)
-		  {
-		    thisGclient.wp.addWaitWindow(this);
-
-		    DumpResult buffer = null;
-		    
-		    try
-		      {
-			try
-			  {
-			    thisGclient.setStatus("Sending query for base " + text + " to server", 0);
-			
-			    buffer = thisGclient.getSession().dump(q);
-			  }
-			catch (RemoteException ex)
-			  {
-			    throw new RuntimeException("caught remote: " + ex);
-			  }
-			catch (Error ex)
-			  {
-			    new JErrorDialog(thisGclient, 
-					     "Could not complete query.. may have run out of memory.\n\n" +
-					     ex.getMessage());
-			    throw ex;
-			  }
-		    
-			if (buffer != null)
-			  {
-			    thisGclient.setStatus("Server returned results for query on base " + 
-						  text + " - building table");
-			
-			    thisGclient.addTableWindow(session, q, buffer, "Query Results");
-			  }
-			else
-			  {
-			    thisGclient.setStatus("results == null");
-			  }
-		      }
-		    finally
-		      {
-			thisGclient.wp.removeWaitWindow(this);
-		      }
-		  }
-	      }});
-	      
-	      t.start();
+	    box.myshow();
 	  }
       }
     else if (event.getActionCommand().equals("Show Non-Editables"))
