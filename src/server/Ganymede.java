@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -17,50 +17,57 @@ import java.rmi.*;
 import java.rmi.registry.*;
 import java.rmi.server.*;
 import java.io.*;
-import csd.DBStore.*;
 
 public class Ganymede {
   
   public static GanymedeServer server;
   public static DBStore db;
-  public static GanymedeSchema schema;
   public static String dbFilename;
-  public static String schemaFilename;
   public static final boolean debug = true;
 
   /* -- */
 
   public static void main(String argv[]) 
   {
-    if (argv.length != 2)
+    File dataFile;
+
+    /* -- */
+
+    if (argv.length != 1)
       {
 	System.out.println("Error: invalid command line parameters");
-	System.out.println("Usage: java Ganymede <dbfile> <schemafile>");
+	System.out.println("Usage: java Ganymede <dbfile>");
 	return;
       }
     else
       {
 	dbFilename = argv[0];
-	schemaFilename = argv[1];
       }
 
     debug("Creating DBStore structures");
 
     db = new DBStore();
 
-    debug("Loading DBStore contents");
+    dataFile = new File(dbFilename);
     
-    db.load(dbFilename);
-
-    debug("Creating Ganymede Schema");
-
-    try
+    if (dataFile.exists())
       {
-	schema = new GanymedeSchema(schemaFilename);
+	debug("Loading DBStore contents");
+	db.load(dbFilename);
       }
-    catch (IOException ex)
+    else
       {
-	debug("Ganymede Schema creation failed.");
+	debug("No DBStore exists under filename " + dbFilename + ", not loading");
+	try 
+	  {
+	    db.journal = new DBJournal(db, "journal"); // need to parametrize filename
+	  }
+	catch (IOException ex)
+	  {
+	    // what do we really want to do here?
+	    
+	    throw new RuntimeException("couldn't initialize journal");
+	  }
       }
 
     debug("Initializing Security Manager");
