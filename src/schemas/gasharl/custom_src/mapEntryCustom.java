@@ -6,8 +6,8 @@
    
    Created: 9 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/01/22 18:05:04 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/07/21 05:40:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -359,4 +359,45 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
     return result;
   }
+
+  String getMapName()
+  {
+    return getGSession().viewObjectLabel((Invid) getFieldValueLocal(mapEntrySchema.MAP));
+  }
+
+  String getOriginalMapName()
+  {
+    return getGSession().viewObjectLabel((Invid) getOriginal().getFieldValueLocal(mapEntrySchema.MAP));
+  }
+
+  Invid getMapInvid()
+  {
+    return (Invid) getFieldValueLocal(mapEntrySchema.MAP);
+  }
+
+  Invid getOriginalMapInvid()
+  {
+    return (Invid) getOriginal().getFieldValueLocal(mapEntrySchema.MAP);
+  }
+
+  String getVolumeName()
+  {
+    return getGSession().viewObjectLabel((Invid) getFieldValueLocal(mapEntrySchema.VOLUME));
+  }
+
+  String getOriginalVolumeName()
+  {
+    return getGSession().viewObjectLabel((Invid) getOriginal().getFieldValueLocal(mapEntrySchema.VOLUME));
+  }
+
+  Invid getVolumeInvid()
+  {
+    return (Invid) getFieldValueLocal(mapEntrySchema.VOLUME);
+  }
+
+  Invid getOriginalVolumeInvid()
+  {
+    return (Invid) getOriginal().getFieldValueLocal(mapEntrySchema.VOLUME);
+  }
+
 }

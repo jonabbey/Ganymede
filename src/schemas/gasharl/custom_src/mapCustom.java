@@ -6,8 +6,8 @@
    
    Created: 6 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/01/22 18:05:03 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/07/21 05:40:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -127,7 +127,14 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
     // we want anyone to be able to link into the auto.home.default
     // map.
 
-    if (!object.getLabel().equals("auto.home.default"))
+    try
+      {
+	if (!object.getLabel().equals("auto.home.default"))
+	  {
+	    return false;
+	  }
+      }
+    catch (NullPointerException ex)
       {
 	return false;
       }

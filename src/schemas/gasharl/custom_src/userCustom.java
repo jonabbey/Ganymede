@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 1999/07/19 20:59:51 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 1999/07/21 05:40:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -52,6 +52,7 @@ import arlut.csd.ganymede.*;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.PathComplete;
+import arlut.csd.Util.VectorUtils;
 
 import java.util.*;
 import java.io.*;
@@ -981,7 +982,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    invid = (Invid) invids.elementAt(i);
 	    
-	    groupChoices.addRow(invid, gSession.viewObjectLabel(invid), true); // must be editable because the client cares
+	    // must be editable because the client cares
+
+	    groupChoices.addRow(invid, gSession.viewObjectLabel(invid), true);
 	  }
       }
   }
@@ -1753,92 +1756,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	// did we change home directory volumes?
 
-	Invid volumeId;
-	String volumeName;
-	DBObject mapEntry;
-	Invid mapInvid;
-
-	Vector newEntries = getFieldValuesLocal(userSchema.VOLUMES);
-	Vector oldEntries = original.getFieldValuesLocal(userSchema.VOLUMES);
-
-	int newSize;
-	int oldSize;
-
-	if (newEntries != null)
-	  {
-	    newSize = newEntries.size() + 1;
-	  }
-	else
-	  {
-	    newSize = 4;
-	  }
-
-	if (oldEntries != null)
-	  {
-	    oldSize = oldEntries.size() + 1;
-	  }
-	else
-	  {
-	    oldSize = 4;
-	  }
-
-	Hashtable newVolumes = new Hashtable(newSize, 1.0f);
-	Hashtable oldVolumes = new Hashtable(oldSize, 1.0f);
-
-	Vector addedVolumes = new Vector();
-	Vector deletedVolumes = new Vector();
-
-	if (oldEntries != null)
-	  {
-	    for (int i = 0; i < oldEntries.size(); i++)
-	      {
-		mapInvid = (Invid) oldEntries.elementAt(i);
-		mapEntry = (DBObject) getSession().viewDBObject(mapInvid);
-		
-		volumeId = (Invid) mapEntry.getFieldValueLocal(mapEntrySchema.VOLUME);
-		volumeName = gSession.viewObjectLabel(volumeId);
-		
-		oldVolumes.put(volumeId, volumeName);
-	      }
-	  }
-
-	if (newEntries != null)
-	  {
-	    for (int i = 0; i < newEntries.size(); i++)
-	      {
-		mapInvid = (Invid) newEntries.elementAt(i);
-		mapEntry = (DBObject) getSession().viewDBObject(mapInvid);
-		
-		volumeId = (Invid) mapEntry.getFieldValueLocal(mapEntrySchema.VOLUME);
-		volumeName = gSession.viewObjectLabel(volumeId);
-		
-		newVolumes.put(volumeId, volumeName);
-		
-		if (!oldVolumes.containsKey(volumeId))
-		  {
-		    addedVolumes.addElement(volumeName);
-		  }
-	      }
-	  }
-
-	Enumeration oldValues = oldVolumes.keys();
-
-	while (oldValues.hasMoreElements())
-	  {
-	    Object key = oldValues.nextElement();
-
-	    if (!newVolumes.containsKey(key))
-	      {
-		deletedVolumes.addElement(oldVolumes.get(key));
-	      }
-	  }
-
-	// okay, addedVolumes and deletedVolumes have a list of changes..
-
-	if (addedVolumes.size() != 0 && deletedVolumes.size() != 0)
-	  {
-	    handleUserDirectoryChange(addedVolumes, deletedVolumes);
-	  }
+	handleVolumeChanges();
       }
 
     return;
@@ -1854,166 +1772,223 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private void createUserExternals()
   {
+    boolean success = false;
+
+    /* -- */
+
     if (debug)
       {
 	System.err.println("userCustom: " + getLabel() + ", in createUserExternals().");
       }
 
-    if (createHandler == null)
-      {
-	if (debug)
-	  {
-	    System.err.println("userCustom: createUserExternals: getting createFilename");
-	  }
-
-	createFilename = System.getProperty("ganymede.builder.scriptlocation");
-
-	if (createFilename == null)
-	  {
-	    Ganymede.debug("userCustom.createUserExternals(): Couldn't find ganymede.builder.scriptlocation property");
-	    return;
-	  }
-
-	// make sure we've got the path separator at the end of
-	// createFilename, add our script name
-
-	createFilename = PathComplete.completePath(createFilename) + "directory_maker";
-
-	if (debug)
-	  {
-	    System.err.println("userCustom: createUserExternals: createFilename = " + createFilename);
-	  }
-
-	createHandler = new File(createFilename);
-      }
-
-    // we'll call our external script with the following
-    //
-    // parameters: <volumename/volume_directory> <username> <user id> <group id> <mapname>
-
-    String volName = null;
-    String username;
-    Integer id;
-    Integer gid;
-
-    /* -- */
-
-    // get the user's uid
-
-    id = (Integer) getFieldValueLocal(userSchema.UID);
-
-    if (debug)
-      {
-	System.err.println("userCustom: createUserExternals: id = " + id);
-      }
-
-    // get the user's name
-
-    username = getLabel();
-
-    if (debug)
-      {
-	System.err.println("userCustom: createUserExternals: username = " + username);
-      }
-
-    // get the user's home gid
-
-    DBObject homeGroup = getSession().viewDBObject((Invid) getFieldValueLocal(userSchema.HOMEGROUP));
-    gid = (Integer) homeGroup.getFieldValueLocal(groupSchema.GID);
-
-    if (debug)
-      {
-	System.err.println("userCustom: createUserExternals: gid = " + gid);
-      }
-
-    // get the volume name defined for the user on auto.home.default
+    // get the volumes defined for the user on auto.home.default
 
     InvidDBField mapEntries = (InvidDBField) getField(userSchema.VOLUMES);
     Vector entries = mapEntries.getValues();
 
-    if (debug)
-      {
-	System.err.println("userCustom: createUserExternals: looking for mapInvid");
-      }
-
-    if (debug)
-      {
-	System.err.println("userCustom: createUserExternals: looking for volume");
-      }
-
     if (entries.size() < 1)
       {
-	System.err.println("Couldn't handle createUserExternals for user " + username +
+	System.err.println("Couldn't handle createUserExternals for user " + getLabel() +
 			   ", because we don't have a volume defined");
 	return;
       }
 
-    // we know that the auto.home.default entry will be the first one
+    for (int i = 0; i < entries.size(); i++)
+      {
+	user_added_to_vol((Invid) entries.elementAt(i));
+      }
+  }
 
-    Invid entryInvid = (Invid) entries.elementAt(0);
+  /**
+   * Helper method to create a directory for a user
+   */
+
+  private void user_added_to_vol(Invid entryInvid)
+  {
     DBObject entryObj = getSession().viewDBObject(entryInvid);
 
     Invid volumeInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.VOLUME);
     DBObject volumeObj = getSession().viewDBObject(volumeInvid);
-    volName = (String) volumeObj.getFieldValueLocal(volumeSchema.LABEL);
+    String volName = (String) volumeObj.getFieldValueLocal(volumeSchema.LABEL);
 
-    if (debug)
+    Invid mapInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.MAP);
+    DBObject mapObj = getSession().viewDBObject(mapInvid);
+    String mapName = mapObj.getLabel();
+
+    Integer id = (Integer) getFieldValueLocal(userSchema.UID);
+    DBObject homeGroup = getSession().viewDBObject((Invid) getFieldValueLocal(userSchema.HOMEGROUP));
+    Integer gid = (Integer) homeGroup.getFieldValueLocal(groupSchema.GID);
+
+    boolean success = false;
+
+    try
       {
-	System.err.println("userCustom: createUserExternals: found volume " + volName);
-      }
-
-    // call the external creation script
-
-    if (createHandler.exists())
-      {
-	try
+	if (createHandler == null)
 	  {
-	    String execLine = createFilename + " " + volName + " " + 
-	      username + " " + id + " " + gid + 
-	      " auto.home.default";
+	    if (debug)
+	      {
+		System.err.println("userCustom: createUserExternals: getting createFilename");
+	      }
+
+	    createFilename = System.getProperty("ganymede.builder.scriptlocation");
+
+	    if (createFilename == null)
+	      {
+		Ganymede.debug("userCustom.createUserExternals(): Couldn't find " + 
+			       "ganymede.builder.scriptlocation property");
+		return;
+	      }
+
+	    // make sure we've got the path separator at the end of
+	    // createFilename, add our script name
+
+	    createFilename = PathComplete.completePath(createFilename) + "directory_maker";
 
 	    if (debug)
 	      {
-		System.err.println("createUserExternals: running " + execLine);
+		System.err.println("userCustom: createUserExternals: createFilename = " + 
+				   createFilename);
 	      }
 
-	    int result;
-	    Process p = java.lang.Runtime.getRuntime().exec(execLine);
+	    createHandler = new File(createFilename);
+	  }
 
+	if (createHandler.exists())
+	  {
 	    try
 	      {
+		// we'll call our external script with the following
+		//
+		// parameters: <volumename/volume_directory> <username> <user id> <group id> <mapname>
+		
+		String execLine = createFilename + " " + volName + " " + 
+		  getLabel() + " " + id + " " + gid + " " + mapName;
+
 		if (debug)
 		  {
-		    System.err.println("createUserExternals: blocking ");
+		    System.err.println("createUserExternals: running " + execLine);
 		  }
 
-		p.waitFor();
+		int result;
+		Process p = java.lang.Runtime.getRuntime().exec(execLine);
 
-		if (debug)
+		try
 		  {
-		    System.err.println("createUserExternals: done ");
+		    if (debug)
+		      {
+			System.err.println("createUserExternals: blocking ");
+		      }
+
+		    p.waitFor();
+
+		    if (debug)
+		      {
+			System.err.println("createUserExternals: done ");
+		      }
+
+		    result = p.exitValue();
+
+		    if (result != 0)
+		      {
+			Ganymede.debug("Couldn't handle externals for creating user " + getLabel() +
+				       "\n" + createFilename + " returned a non-zero result: " + result);
+		      }
+		    else
+		      {
+			success = true;
+		      }
 		  }
-
-		result = p.exitValue();
-
-		if (result != 0)
+		catch (InterruptedException ex)
 		  {
-		    Ganymede.debug("Couldn't handle externals for creating user " + username +
-				   "\n" + createFilename + " returned a non-zero result: " + result);
+		    Ganymede.debug("Couldn't handle externals for creating user " + getLabel() + "\n" +
+				   ex.getMessage());
 		  }
 	      }
-	    catch (InterruptedException ex)
+	    catch (IOException ex)
 	      {
-		Ganymede.debug("Couldn't handle externals for creating user " + username + "\n" +
+		Ganymede.debug("Couldn't handle externals for creating user " + getLabel() + "\n" +
 			       ex.getMessage());
 	      }
 	  }
-	catch (IOException ex)
-	  {
-	    Ganymede.debug("Couldn't handle externals for creating user " + username + "\n" +
-			   ex.getMessage());
-	  }
       }
+    finally
+      {
+	mail_user_added_to_vol(entryInvid, !success);
+      }
+  }
+
+  /**
+   * Helper method to send out mail to owners of the system that the
+   * user's home directory is being placed on.
+   */
+
+  private void mail_user_added_to_vol(Invid entryInvid, boolean need_to_create)
+  {
+    StringBuffer buffer = new StringBuffer();
+
+    /* -- */
+
+    DBObject entryObj = getSession().viewDBObject(entryInvid);
+
+    Invid mapInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.MAP);
+    DBObject mapObj = getSession().viewDBObject(mapInvid);
+    String mapName = mapObj.getLabel();
+
+    Invid volumeInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.VOLUME);
+    DBObject volumeObj = getSession().viewDBObject(volumeInvid);
+    String volName = volumeObj.getLabel();
+    String volPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
+
+    Invid sysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
+    DBObject sysObj = getSession().viewDBObject(sysInvid);
+    String sysName = sysObj.getLabel();
+
+    Vector objects = new Vector();
+    objects.addElement(sysInvid);
+    Vector addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+
+    String subject = null;
+
+    if (need_to_create)
+      {
+	buffer.append("Hi.  User ");
+	buffer.append(getLabel());
+	buffer.append(" was added to volume ");
+	buffer.append(volName);
+	buffer.append(" in the ");
+	buffer.append(mapName);
+	buffer.append(" automounter home map.\n\nSince you are listed in the Ganymede");
+	buffer.append(" system database as an administrator for a system contained in");
+	buffer.append(" volume ");
+	buffer.append(volName);
+	buffer.append(", you need to take whatever action is appropriate to create a");
+	buffer.append(" home directory for this user on ");
+	buffer.append(sysName);
+	buffer.append(", if one does not already exist..\n\n");
+	buffer.append("Volume ");
+	buffer.append(volName);
+	buffer.append(" is currently defined as:\n");
+	buffer.append(sysName);
+	buffer.append(":");
+	buffer.append(volPath);
+	buffer.append("\n\nThanks for your cooperation.\nYour friend,\n\tGanymede.\n");
+
+	subject = "User " + getLabel() + " needs a home directory on " + sysName;
+      }
+    else
+      {
+	buffer.append("A home directory for user ");
+	buffer.append(getLabel());
+	buffer.append(" has been constructed on volume ");
+	buffer.append(volName);
+	buffer.append(".  The user's home directory has been registered in the ");
+	buffer.append(mapName);
+	buffer.append(" automounter home map.");
+
+	subject = "User " + getLabel() + " home directory created";
+      }
+
+    editset.logMail(addresses, subject, buffer.toString());
   }
 
   /**
@@ -2032,47 +2007,331 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	System.err.println("userCustom: " + getLabel() + ", in deleteUserExternals().");
       }
+
+    // get the volumes defined for the user on auto.home.default
+
+    InvidDBField mapEntries = (InvidDBField) getOriginal().getField(userSchema.VOLUMES);
+    Vector entries = mapEntries.getValues();
+
+    if (entries.size() < 1)
+      {
+	System.err.println("Couldn't handle deleteUserExternals for user " + getLabel() +
+			   ", because we don't have a volume defined");
+	return;
+      }
+
+    for (int i = 0; i < entries.size(); i++)
+      {
+	mail_user_removed_from_vol((Invid) entries.elementAt(i));
+      }
   }
 
   /**
-   *
-   * This method takes care of executing whatever external code is required
-   * to handle this user being moved from volume to volume
-   *
+   * Helper method to send out mail to owners of the system that the
+   * user's home directory is being scrubbed from.
    */
 
-  private void handleUserDirectoryChange(Vector addedVolumes, Vector deletedVolumes)
+  private void mail_user_removed_from_vol(Invid entryInvid)
   {
-    if (debug)
+    StringBuffer buffer = new StringBuffer();
+
+    /* -- */
+
+    DBObject entryObj = getSession().viewDBObject(entryInvid, true);
+
+    Invid mapInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.MAP);
+    DBObject mapObj = getSession().viewDBObject(mapInvid, true);
+
+    String mapName = mapObj.getLabel();
+
+    Invid volumeInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.VOLUME);
+    DBObject volumeObj = getSession().viewDBObject(volumeInvid, true);
+    String volName = volumeObj.getLabel();
+    String volPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
+
+    Invid sysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
+    DBObject sysObj = getSession().viewDBObject(sysInvid, true);
+    String sysName = sysObj.getLabel();
+
+    Vector objects = new Vector();
+    objects.addElement(sysInvid);
+    Vector addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+
+    String subject = null;
+
+    buffer.append("User ");
+    buffer.append(getLabel());
+    buffer.append(" has been removed from volume ");
+    buffer.append(volName);
+    buffer.append(" in the ");
+    buffer.append(mapName);
+    buffer.append(" automounter home map.\n\nSince you are listed in the Ganymede");
+    buffer.append(" system database as an administrator for a system contained in");
+    buffer.append(" volume ");
+    buffer.append(volName);
+    buffer.append(", you need to take whatever action is appropriate to remove this user");
+    buffer.append(" from ");
+    buffer.append(volName);
+    buffer.append(" if you are sure that the user will no longer be using his or her directory");
+    buffer.append(" on this volume.\n\n");
+    buffer.append("Volume ");
+    buffer.append(volName);
+    buffer.append(" is currently defined as:\n");
+    buffer.append(sysName);
+    buffer.append(":");
+    buffer.append(volPath);
+    buffer.append("\n\nThanks for your cooperation.\nYour friend,\n\tGanymede.\n");
+
+    subject = "User " + getLabel() + " needs to be removed on " + sysName;
+
+    editset.logMail(addresses, subject, buffer.toString());
+  }
+
+  /**
+   * This method is designed to send out mail notifying admins of changes
+   * made to a user's volume mappings, if any
+   */
+
+  private void handleVolumeChanges()
+  {
+    Hashtable oldEntryMap = new Hashtable();
+    Hashtable newEntryMap = new Hashtable();
+
+    Hashtable oldVolMap = new Hashtable();
+    Hashtable newVolMap = new Hashtable();
+
+    Vector oldMapNames = new Vector();
+    Vector newMapNames = new Vector();
+
+    Vector oldVolumes = new Vector();
+    Vector newVolumes = new Vector();
+
+    Invid mapEntryInvid;
+    Invid volumeId;
+
+    DBObject mapEntryObj;
+    mapEntryCustom mapEntry;
+    String mapName;
+    String volName;
+
+    Vector oldEntries = original.getFieldValuesLocal(userSchema.VOLUMES);
+
+    if (oldEntries != null)
       {
-	System.err.println("userCustom.handleUserDirectoryChange(): user " + getLabel());
-	
-	if (addedVolumes != null)
+	for (int i = 0; i < oldEntries.size(); i++)
 	  {
-	    System.err.print("has been added to");
+	    mapEntryInvid = (Invid) oldEntries.elementAt(i);
 
-	    for (int i = 0; i < addedVolumes.size(); i++)
+	    mapEntryObj = getSession().viewDBObject(mapEntryInvid);
+
+	    if (mapEntryObj instanceof mapEntryCustom)
 	      {
-		System.err.print(" ");
-		System.err.print(addedVolumes.elementAt(i));
+		mapEntry = (mapEntryCustom) mapEntryObj;
+
+		mapName = mapEntry.getOriginalMapName();
+		volumeId = mapEntry.getOriginalVolumeInvid();
+	    
+		oldVolumes.addElement(volumeId);
+		oldEntryMap.put(mapName, mapEntryInvid);
+		oldMapNames.addElement(mapName);
+
+		// if we see the same volume in multiple maps, we'll just
+		// remember the last one seen.. doesn't matter much, for
+		// our purposes
+
+		oldVolMap.put(volumeId, mapEntryInvid);
+
+		System.err.println("Old entry.. " + mapName + ", " + volumeId);
 	      }
-
-	    System.err.println();
-	  }
-
-	if (addedVolumes != null)
-	  {
-	    System.err.print("has been deleted from");
-
-	    for (int i = 0; i < deletedVolumes.size(); i++)
-	      {
-		System.err.print(" ");
-		System.err.print(deletedVolumes.elementAt(i));
-	      }
-
-	    System.err.println();
 	  }
       }
+
+    Vector newEntries = getFieldValuesLocal(userSchema.VOLUMES);
+
+    if (newEntries != null)
+      {
+	for (int i = 0; i < newEntries.size(); i++)
+	  {
+	    mapEntryInvid = (Invid) newEntries.elementAt(i);
+	    mapEntryObj = getSession().viewDBObject(mapEntryInvid);
+
+	    if (mapEntryObj instanceof mapEntryCustom)
+	      {
+		mapEntry = (mapEntryCustom) mapEntryObj;
+
+		mapName = mapEntry.getMapName();
+		volumeId = mapEntry.getVolumeInvid();
+	    
+		newVolumes.addElement(volumeId);
+		newEntryMap.put(mapName, mapEntryInvid);
+		newMapNames.addElement(mapName);
+
+		// if we see the same volume in multiple maps, we'll just
+		// remember the last one seen.. doesn't matter much, for
+		// our purposes
+
+		newVolMap.put(volumeId, mapEntryInvid);
+
+		System.err.println("New entry.. " + mapName + ", " + volumeId);
+	      }
+	  }
+      }
+
+    Vector addedVolumes = VectorUtils.difference(newVolumes, oldVolumes);
+    Vector deletedVolumes = VectorUtils.difference(oldVolumes, newVolumes);
+
+    Vector keptMapNames = VectorUtils.intersection(newMapNames, oldMapNames);
+
+    for (int i = 0; i < keptMapNames.size(); i++)
+      {
+	mapName = (String) keptMapNames.elementAt(i);
+
+	System.err.println("Checking map " + mapName + " for a volume change");
+	
+	Invid oldMapEntryInvid = (Invid) oldEntryMap.get(mapName);
+	Invid newMapEntryInvid = (Invid) newEntryMap.get(mapName);
+
+	if (oldMapEntryInvid.equals(newMapEntryInvid))
+	  {
+	    // we know the map entry obj is an editing copy, don't
+	    // need to check here
+
+	    mapEntry = (mapEntryCustom) getSession().viewDBObject(oldMapEntryInvid);
+
+	    Invid oldVolInvid = mapEntry.getOriginalVolumeInvid();
+	    Invid newVolInvid = mapEntry.getVolumeInvid();
+
+	    if (!oldVolInvid.equals(newVolInvid))
+	      {
+		System.err.println("In map " + mapName + ", old vol was " + oldVolInvid +
+				   ", is now " + newVolInvid);
+
+		// we have moved the user's home directory on this map.. we won't
+		// try to create the new home directory ourselves
+
+		user_moved_from_vol_to_vol(oldVolInvid, newVolInvid, mapName);
+
+		// we've already handled notification for the moving
+		// between these volumes, don't need to do anything more
+		// for it
+
+		deletedVolumes.removeElement(oldVolInvid);
+		addedVolumes.removeElement(newVolInvid);
+	      }
+	  }
+      }
+
+    for (int i = 0; i < addedVolumes.size(); i++)
+      {
+	volumeId = (Invid) addedVolumes.elementAt(i);
+
+	System.err.println("Gained volume " + volumeId);
+
+	// the user might have the same volume registered on multiple
+	// maps, but we don't care enough to send mail out for it
+
+	user_added_to_vol((Invid) newVolMap.get(volumeId));
+      }
+
+    for (int i = 0; i < deletedVolumes.size(); i++)
+      {
+	volumeId = (Invid) deletedVolumes.elementAt(i);
+
+	System.err.println("Lost volume " + volumeId);
+
+	// the user might have had the same volume registered on
+	// multiple maps, but we don't care enough to send mail out
+	// for it
+
+	mail_user_removed_from_vol((Invid) oldVolMap.get(volumeId));
+      }
+  }
+
+  /**
+   * <P>This method takes care of executing whatever external code is required
+   * to handle this user being moved from volume to volume</P>
+   *
+   * @param oldVolume Invid for old volume listed on a given map
+   * @param newVolume Invid for new volume listed on a given map
+   * @param mapName Name of the map this user is being moved on.
+   */
+
+  private void user_moved_from_vol_to_vol(Invid oldVolume, Invid newVolume, String mapName)
+  {
+    DBObject volumeObj;
+    DBObject sysObj;
+
+    String oldVolName;
+    String oldVolPath;
+    Invid oldSysInvid;
+    String oldSysName;
+
+    String newVolName;
+    String newVolPath;
+    Invid newSysInvid;
+    String newSysName;
+
+    Vector objects = new Vector();
+
+    StringBuffer buffer = new StringBuffer();
+
+    /* -- */
+
+    volumeObj = getSession().viewDBObject(oldVolume, true);
+    
+    oldVolName = volumeObj.getLabel();
+    oldVolPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
+    oldSysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
+    objects.addElement(oldSysInvid);
+    sysObj = getSession().viewDBObject(oldSysInvid, true);
+    oldSysName = sysObj.getLabel();    
+
+    volumeObj = getSession().viewDBObject(newVolume);
+
+    newVolName = volumeObj.getLabel();
+    newVolPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
+    newSysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
+    objects.addElement(newSysInvid);
+    sysObj = getSession().viewDBObject(newSysInvid);
+    newSysName = sysObj.getLabel();    
+    
+    Vector addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+
+    buffer.append("Hi.  User ");
+    buffer.append(getLabel());
+    buffer.append(" was moved from volume ");
+    buffer.append(oldVolName);
+    buffer.append(" to volume ");
+    buffer.append(newVolName);
+    buffer.append(" in the ");
+    buffer.append(mapName);
+    buffer.append(" automounter home map.\n\nSince you are listed in the Ganymede system database");
+    buffer.append(" as an administrator for a system contained in volume ");
+    buffer.append(oldVolName);
+    buffer.append(", you need to take whatever action is appropriate to move this user's");
+    buffer.append(" directory from ");
+    buffer.append(oldVolName);
+    buffer.append(" if you are sure that the user will no longer be using his or her directory");
+    buffer.append(" on this volume.\n\n");
+    buffer.append("Volume ");
+    buffer.append(oldVolName);
+    buffer.append(" is currently defined as:\n\t");
+    buffer.append(oldSysName);
+    buffer.append(":");
+    buffer.append(oldVolPath);
+    buffer.append("\n\n");
+    buffer.append("Volume ");
+    buffer.append(newVolName);
+    buffer.append(" is currently defined as:\n\t");
+    buffer.append(newSysName);
+    buffer.append(":");
+    buffer.append(newVolPath);
+    buffer.append("\n\n");
+    buffer.append("Thanks for your cooperation.\nYour friend,\n\tGanymede.\n");
+
+    editset.logMail(addresses, 
+		    "User home directory on map " + mapName + "moved",
+		    buffer.toString());
   }
 
   private void handleUserRename(String orig, String newname)
@@ -2084,93 +2343,121 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     if (debug)
       {
 	System.err.println("userCustom.handleUserRename(): user " + orig +
-			   "has been renamed to " + newname);
+			   "is being renamed to " + newname);
       }
 
-    if (renameHandler == null)
+    try
       {
-	renameFilename = System.getProperty("ganymede.builder.scriptlocation");
-
-	if (renameFilename != null)
+	if (renameHandler == null)
 	  {
-	    // make sure we've got the path separator at the end of
-	    // renameFilename, add our script name
-	    
-	    renameFilename = PathComplete.completePath(renameFilename) + "directory_namer";
-	    
-	    renameHandler = new File(renameFilename);
-	  }
-	else
-	  {
-	    Ganymede.debug("userCustom.handleUserRename(): Couldn't find ganymede.builder.scriptlocation property");
-	  }
-      }
+	    renameFilename = System.getProperty("ganymede.builder.scriptlocation");
 
-    if (renameHandler.exists())
-      {
-	try
-	  {
-	    String execLine = renameFilename + " " + orig + " " + newname;
-
-	    if (debug)
+	    if (renameFilename != null)
 	      {
-		System.err.println("handleUserRename: running " + execLine);
+		// make sure we've got the path separator at the end of
+		// renameFilename, add our script name
+	    
+		renameFilename = PathComplete.completePath(renameFilename) + "directory_namer";
+	    
+		renameHandler = new File(renameFilename);
 	      }
+	    else
+	      {
+		Ganymede.debug("userCustom.handleUserRename(): Couldn't find " +
+			       "ganymede.builder.scriptlocation property");
+	      }
+	  }
 
-	    int result;
-	    Process p = java.lang.Runtime.getRuntime().exec(execLine);
-
+	if (renameHandler.exists())
+	  {
 	    try
 	      {
-		if (debug)
-		  {
-		    System.err.println("handleUserRename: blocking");
-		  }
-
-		p.waitFor();
+		String execLine = renameFilename + " " + orig + " " + newname;
 
 		if (debug)
 		  {
-		    System.err.println("handleUserRename: done");
+		    System.err.println("handleUserRename: running " + execLine);
 		  }
 
-		result = p.exitValue();
+		int result;
+		Process p = java.lang.Runtime.getRuntime().exec(execLine);
 
-		if (result != 0)
+		try
 		  {
-		    Ganymede.debug("Couldn't handle externals for renaming user " + orig + " to " + 
-				   newname + "\n" + renameFilename + " returned a non-zero result: " + result);
-		  }
+		    if (debug)
+		      {
+			System.err.println("handleUserRename: blocking");
+		      }
 
-		success = true;
+		    p.waitFor();
+
+		    if (debug)
+		      {
+			System.err.println("handleUserRename: done");
+		      }
+
+		    result = p.exitValue();
+
+		    if (result != 0)
+		      {
+			Ganymede.debug("Couldn't handle externals for renaming user " + orig + 
+				       " to " + newname + "\n" + renameFilename + 
+				       " returned a non-zero result: " + result);
+		      }
+
+		    success = true;
+		  }
+		catch (InterruptedException ex)
+		  {
+		    Ganymede.debug("Couldn't handle externals for renaming user " + orig + 
+				   " to " + 
+				   newname + "\n" + 
+				   ex.getMessage());
+		  }
 	      }
-	    catch (InterruptedException ex)
+	    catch (IOException ex)
 	      {
-		Ganymede.debug("Couldn't handle externals for renaming user " + orig + " to " + 
+		Ganymede.debug("Couldn't handle externals for renaming user " + orig + 
+			       " to " + 
 			       newname + "\n" + 
 			       ex.getMessage());
 	      }
 	  }
-	catch (IOException ex)
+      }
+    finally
+      {
+	Invid admin = getGSession().getPersonaInvid();
+	String adminName = getGSession().getMyUserName();
+	Vector objects = new Vector();
+	objects.addElement(getInvid());
+
+	StringBuffer buffer = new StringBuffer();
+
+	buffer.append("User ");
+	buffer.append(orig);
+	buffer.append(" has been renamed to ");
+	buffer.append(newname);
+	buffer.append(".\n\n");
+
+	if (success)
 	  {
-	    Ganymede.debug("Couldn't handle externals for renaming user " + orig + " to " + 
-			   newname + "\n" + 
-			   ex.getMessage());
+	    buffer.append("The user's main home directory has been renamed.  You may need ");
+	    buffer.append("to take some action to make sure that the user's account name change ");
+	    buffer.append("doesn't cause problems in your local scripts, etc.");
 	  }
-      }
+	else
+	  {
+	    buffer.append("The user's main home directory was not able to be properly renamed ");
+	    buffer.append("by Ganymede.  You should contact a systems administrator on the user's");
+	    buffer.append("main server to make sure his or her home directory is renamed properly.\n\n");
+	    buffer.append("In addition, you may need ");
+	    buffer.append("to take some action to make sure that the user's account name change ");
+	    buffer.append("doesn't cause problems in your local scripts, etc.");
+	  }
 
-    Vector addresses = new Vector();
-    Invid admin = getGSession().getPersonaInvid();
-    String adminName = getGSession().getUserMyUserName();
-    Vector objects = new Vector();
-    objects.addElement(getInvid());
-
-    if (success)
-      {
-	editset.logMail(addresses, subject, message, admin, adminName, objects)
-      }
-    else
-      {
+	editset.logEvent("userrenamed",
+			 buffer.toString(),
+			 admin, adminName, objects, null);
       }
   }
 }
