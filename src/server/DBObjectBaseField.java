@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 2001/05/21 07:21:43 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 2001/06/05 22:28:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -198,6 +198,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   String regexpPat = null;	// introduced in ganymede.db version 1.14
 
   /**
+   * Text description of the meaning of the regexpPat,
+   * if defined
+   */
+
+  String regexpDesc = null;
+
+  /**
    * Compiled regular expression for input-filtering
    * in {@link arlut.csd.ganymede.StringDBField}s.
    */
@@ -354,6 +361,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     namespace = original.namespace; // we point to the original namespace.. not a problem, since they are immutable
     multiLine = original.multiLine;
     regexpPat = original.regexpPat;
+    regexpDesc = original.regexpDesc;
     regexp = original.regexp;
 
     editInPlace = original.editInPlace;
@@ -464,6 +472,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	else
 	  {
 	    out.writeUTF(regexpPat); // added at file version 1.14
+	  }
+
+	if (regexpDesc == null)
+	  {
+	    out.writeUTF("");	// added at file version 2.2
+	  }
+	else
+	  {
+	    out.writeUTF(regexpDesc); // added at file version 2.2
 	  }
       }
     else if (isNumeric())
@@ -655,6 +672,17 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	else
 	  {
 	    setRegexpPat(null);
+	  }
+
+	// at file version 2.2, we introduced a description field for regexps
+
+	if ((base.store.file_major > 2) || (base.store.file_major == 2 && base.store.file_minor >= 2))
+	  {
+	    setRegexpDesc(in.readUTF());
+	  }
+	else
+	  {
+	    setRegexpDesc(null);
 	  }
       }
     else if (isNumeric())
@@ -917,6 +945,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    xmlOut.startElementIndent("regexp");
 	    xmlOut.attribute("val", regexpPat);
+
+	    if (regexpDesc != null && !regexpDesc.equals(""))
+	      {
+		xmlOut.attribute("desc", regexpDesc);
+	      }
+
 	    xmlOut.endElement("regexp");
 	  }
 
@@ -3467,6 +3501,26 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Returns the text description of the regexp pattern string
+   * constraining this string field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public String getRegexpDesc()
+  {
+    if (!isString())
+      {
+	throw new IllegalArgumentException("not a string field");
+      }
+
+    return regexpDesc;
+  }
+
+  /**
    * <p>Sets the regexp pattern string constraining this string field.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
@@ -3523,6 +3577,46 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    return null;
 	  }
       }
+  }
+
+  /**
+   * <p>Sets the text descriptionf or the regexp pattern string
+   * constraining this string field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized ReturnVal setRegexpDesc(String s)
+  {
+    if (editor == null && !loading)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
+      }
+
+    if (!isString())
+      {
+	throw new IllegalArgumentException("not a string field");
+      }
+
+    if (s == null || s.equals(""))
+      {
+	regexpDesc = null;
+      }
+    else
+      {
+	regexpDesc = s;
+      }
+
+    return null;
   }
 
   /** 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 2001/04/16 04:54:29 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 2001/06/05 22:28:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -866,13 +866,28 @@ public class StringDBField extends DBField implements string_field {
 
 	if (match == null)
 	  {
-	    return Ganymede.createErrorDialog("String Field Error",
-					      "String value " + s + " " +
-					      "does not conform to the regular expression pattern established " +
-					      "for this string field.\n\n" +
-					      "This string field only accepts strings matching the " +
-					      "following regular expression:\n\n\"" +
-					      getFieldDef().getRegexpPat() + "\"");
+	    String desc = getFieldDef().getRegexpDesc();
+
+	    if (desc == null || desc.equals(""))
+	      {
+		return Ganymede.createErrorDialog("String Field Error",
+						  "String value " + s + " " +
+						  "does not conform to the regular expression pattern established " +
+						  "for this string field.\n\n" +
+						  "This string field only accepts strings matching the " +
+						  "following regular expression:\n\n\"" +
+						  getFieldDef().getRegexpPat() + "\"");
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("String Field Error",
+						  "String value " + s + " " +
+						  "does not conform to the regular expression pattern established " +
+						  "for this string field.\n\n" +
+						  "This string field only accepts strings matching the " +
+						  "following criteria:\n\n\"" +
+						  desc + "\"");
+	      }
 	  }
       }
 

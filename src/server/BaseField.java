@@ -7,8 +7,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2001/04/20 20:27:09 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2001/06/05 22:28:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -457,6 +457,16 @@ public interface BaseField extends Remote {
   public String getRegexpPat() throws RemoteException;
 
   /**
+   * <p>Returns the text description of the regexp pattern string
+   * constraining this string field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   */
+
+  public String getRegexpDesc() throws RemoteException;
+
+  /**
    * <p>Sets the regexp pattern string constraining this string field.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
@@ -464,6 +474,16 @@ public interface BaseField extends Remote {
    */
 
   public ReturnVal setRegexpPat(String s) throws RemoteException;
+
+  /**
+   * <p>Sets the text descriptionf or the regexp pattern string
+   * constraining this string field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   */
+
+  public ReturnVal setRegexpDesc(String s) throws RemoteException;
 
   // these two apply to strings, numbers, and IP addresses
 

@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2001/04/20 20:27:09 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2001/06/05 22:28:00 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -112,7 +112,8 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     falseLabelS,		// boolean
     OKCharS,			// string, password
     BadCharS,			// string, password
-    regexpS;			// string
+    regexpS,			// string
+    regexpDescS;		// string
 
   JnumberField
     idN,			// all
@@ -260,6 +261,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     regexpS = new JstringField(20, 100, true, false, null, null);
     regexpS.setCallback(this);
     addRow(editPanel, regexpS, "Regular Expression:", rowcount++);
+
+    regexpDescS = new JstringField(20, 100, true, false, null, null);
+    regexpDescS.setCallback(this);
+    addRow(editPanel, regexpDescS, "RegExp Description:", rowcount++);
    
     OKCharS = new JstringField(20, 100,  true, false, null, null);
     OKCharS.setCallback(this);
@@ -320,6 +325,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     trueLabelS.setText("");
     falseLabelS.setText("");
     regexpS.setText("");
+    regexpDescS.setText("");
     OKCharS.setText("");
     BadCharS.setText("");
 
@@ -422,6 +428,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
     setRowVisible(multiLineCF, stringShowing  && !vectorCF.isSelected());
     setRowVisible(regexpS, stringShowing);
+    setRowVisible(regexpDescS, stringShowing);
     setRowVisible(OKCharS, stringShowing || passwordShowing);
     setRowVisible(BadCharS, stringShowing || passwordShowing);
     setRowVisible(minLengthN, stringShowing || passwordShowing);
@@ -990,6 +997,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    minLengthN.setValue(fieldDef.getMinLength());
 	    maxLengthN.setValue(fieldDef.getMaxLength());
 	    regexpS.setText(fieldDef.getRegexpPat());
+	    regexpDescS.setText(fieldDef.getRegexpDesc());
 	    OKCharS.setText(fieldDef.getOKChars());
 	    BadCharS.setText(fieldDef.getBadChars());
 	    
@@ -1341,6 +1349,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	trueLabelS.setEditable(true);
 	falseLabelS.setEditable(true);
 	regexpS.setEditable(true);
+	regexpDescS.setEditable(true);
 	OKCharS.setEditable(true);
 	BadCharS.setEditable(true);
 	maxArrayN.setEditable(true);
@@ -1495,6 +1504,22 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	    if (retVal != null && !retVal.didSucceed())
 	      {
 		regexpS.setText(fieldDef.getRegexpPat());
+	      }
+	  }
+	else if (comp == regexpDescS)
+	  {
+	    if (debug)
+	      {
+		System.out.println("regexpDescS");
+	      }
+
+	    ReturnVal retVal = fieldDef.setRegexpDesc((String) v.getValue());
+
+	    retVal = owner.handleReturnVal(retVal);
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		regexpDescS.setText(fieldDef.getRegexpDesc());
 	      }
 	  }
 	else if (comp == OKCharS)
