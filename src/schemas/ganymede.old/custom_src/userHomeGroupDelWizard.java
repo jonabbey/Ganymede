@@ -6,7 +6,7 @@
    to delete the group that they have selected for their default group.
    
    Created: 29 January 1998
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -80,7 +80,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
    * </pre>
    */
 
-  int state;
+  //  int state;  We don't want to shadow the state variable from GanymediatorWizard
 
   /**
    * The actual user object that this wizard is acting on.
