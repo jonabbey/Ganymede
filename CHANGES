@@ -1,7 +1,27 @@
-Ganymede Release 1.0 prerelease 1
-January 30, 2001
+Ganymede Release 1.0
+March ??, 2001
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.0pre1 to 1.0 -------------------
+
+RELEASE DATE: March ??, 2001
+
+1.[SERVER] Made server do server-side cleanup for abnormally stuck clients
+
+The RMI system has the ability to get into a state where a TCP/IP
+handling thread waits indefinitely for communication from a client.
+Prior to this fix, the server would wait forever for a dedicated thread
+to try and notify the client that it is being forced off, rather than
+throwing a RemoteException, which was already handled properly.
+
+Now, the server will jump in and expunge the client from the server on
+the server-side if the client notification takes longer than 15
+seconds without completing the forceDisconnect network call, one way
+or another.
+
+This 15 second time period is set in the GanymedeSession.forceOff()
+method.
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
