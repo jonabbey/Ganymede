@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.118 $
-   Last Mod Date: $Date: 2001/03/03 07:19:36 $
+   Version: $Revision: 1.119 $
+   Last Mod Date: $Date: 2001/03/21 15:11:31 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.118 $ $Date: 2001/03/03 07:19:36 $
+ * @version $Revision: 1.119 $ $Date: 2001/03/21 15:11:31 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2168,6 +2168,12 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	    out.print(field.getName());
 	    out.print(" : ");
+
+	    if (field instanceof PasswordDBField)
+	      {
+		out.println("<password>");
+		continue;
+	      }
 
 	    if (field.isVector())
 	      {
