@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -97,6 +97,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   JPanel
     history,      // holds an historyPanel
     personae;
+
+  historyPanel
+    history_panel;
 
   Vector
     // contains all of the containerPanels.  This is used to tell the
@@ -989,13 +992,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	throw new RuntimeException("Could not get field information: " + rx);
       }
 
-    history.add("Center", new historyPanel(getObjectInvid(), 
-					   getgclient(), 
-					   creator_field, 
-					   creation_date_field, 
-					   modifier_field,
-					   modification_date_field));
-	
+    history_panel = new historyPanel(getObjectInvid(),
+				     getgclient(),
+				     creator_field,
+				     creation_date_field,
+				     modifier_field,
+				     modification_date_field);
+
+    history.add("Center", history_panel);
+
+    // remember that we've already created the history panel
+
     createdList.addElement(new Integer(history_index));
       
     history.invalidate();
@@ -1457,6 +1464,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
 
 	cp.unregister();
+      }
+
+    if (history_panel != null)
+      {
+	history_panel.unregister();
       }
   }
 
