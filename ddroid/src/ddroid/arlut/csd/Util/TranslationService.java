@@ -2,8 +2,10 @@
 
    TranslationService.java
 
-   This is a resource used for loading resources.
-   
+   Utility class to provide localized string assembly services.
+   This class is designed to use localized properties files to do
+   string lookup and synthesis.
+
    Created: 7 May 2004
 
    Last Revision Changed: $Rev$
@@ -51,14 +53,14 @@
 
 */
 
-package arlut.csd.ddroid.common;
+package arlut.csd.Util;
 
 import java.util.*;
 import java.text.MessageFormat;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                             TranslationService
+                                                              TranslationService
 
 ------------------------------------------------------------------------------*/
 
@@ -74,6 +76,8 @@ import java.text.MessageFormat;
 
 public class TranslationService {
 
+  // - Statics
+
   public static getTranslationService(String resourceName, Locale locale) throws MissingResourceException
   {
     return new TranslationService(resourceName, locale);
@@ -87,6 +91,7 @@ public class TranslationService {
   String lastPattern = null;
   String lastKey = null;
   Object[] singleArgs, doubleArgs, tripleArgs;
+  String resourceName;
 
   /* -- */
 
@@ -100,6 +105,8 @@ public class TranslationService {
       {
 	this.ourLocale = Locale.getDefault();
       }
+
+    this.resourceName = resourceName;
 
     bundle = ResourceBundle.getBundle(resourceName, ourLocale);
 
@@ -382,6 +389,11 @@ public class TranslationService {
     this.tripleArgs[0] = new Integer(param3); 
 
     return formatter.format(pattern, tripleArgs);
+  }
+
+  public String toString()
+  {
+    return("TranslationService: " + resourceName + ", locale = " + ourLocale.toString());
   }
 }
 
