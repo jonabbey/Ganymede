@@ -15,6 +15,15 @@
 ganymede.database=/home/broccol/gash2/code/arlut/csd/ganymede/db/ganymede.db
 
 
+# ganymede.schemadir
+#
+# The location of the directory where the schema kit is or will be installed.
+# Should be equal to our server install directory followed by '/schema', where
+# the '/' is the operating-system appropriate file separator character.
+
+ganymede.schemadir=
+
+
 # ganymede.log
 #
 # The location and filename for the Ganymede log file.

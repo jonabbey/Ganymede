@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.32 $
-# $Date: 2000/12/09 00:20:59 $
+# $Revision: 1.33 $
+# $Date: 2000/12/10 23:05:58 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -222,6 +222,7 @@ copy("scripts/signature", "$installdir/db/signature"); print ".";
 # Copy and process the properties file into place
 
 %propconvert = ("ganymede.database" => "$installdir/db/ganymede.db",
+		"ganymede.schemadir" => "$installdir/schema",
 		"ganymede.log" => "$installdir/db/log",
 		"ganymede.loghelper" => "$installdir/bin/logscan.pl",
 		"ganymede.journal" => "$installdir/db/journal",
