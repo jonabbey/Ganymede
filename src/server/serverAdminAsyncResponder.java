@@ -17,8 +17,8 @@
    
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2003/09/09 04:18:22 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/09/09 18:34:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -89,7 +89,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientAsyncMessage
  *
- * @version $Revision: 1.5 $ $Date: 2003/09/09 04:18:22 $
+ * @version $Revision: 1.6 $ $Date: 2003/09/09 18:34:02 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -146,7 +146,7 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
    * <p>Handy direct look-up table for events in eventBuffer</p>
    */
 
-  private adminAsyncMessage lookUp[];
+  private int lookUp[];
 
   /* -- */
 
@@ -157,7 +157,12 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
     /* -- */
 
     eventBuffer = new adminAsyncMessage[maxBufferSize];
-    lookUp = new adminAsyncMessage[adminAsyncMessage.LAST - adminAsyncMessage.FIRST + 1];
+    lookUp = new int[adminAsyncMessage.LAST - adminAsyncMessage.FIRST + 1];
+
+    for (int i = 0; i < lookUp.length; i++)
+      {
+	lookUp[i] = -1;
+      }
   }
 
   /**
@@ -359,11 +364,11 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 	// go ahead and append the new log entry directly to its
 	// StringBuffer
 
-	if (lookUp[adminAsyncMessage.CHANGESTATUS] != null)
+	if (lookUp[adminAsyncMessage.CHANGESTATUS] != -1)
 	  {
 	    // coalesce this append to the log message
 
-	    StringBuffer buffer = (StringBuffer) lookUp[adminAsyncMessage.CHANGESTATUS].getParam(0);
+	    StringBuffer buffer = (StringBuffer) eventBuffer[lookUp[adminAsyncMessage.CHANGESTATUS]].getParam(0);
 	    buffer.append(status);
 	    return;
 	  }
@@ -373,16 +378,10 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 
 	newLogEvent = new adminAsyncMessage(adminAsyncMessage.CHANGESTATUS, new StringBuffer().append(status));
 
-	// queue the log event
+	// queue the log event, keep a pointer to it in lookUp so we
+	// can quickly find it next time
 
-	addEvent(newLogEvent);
-
-	// if we didn't get an exception on the addEvent call, save a
-	// pointer to the newLogEvent so that later calls to
-	// changeStatus can directly append more text until such time
-	// as our commThread can send the log event to the console
-
-	lookUp[adminAsyncMessage.CHANGESTATUS] = newLogEvent;
+	lookUp[adminAsyncMessage.CHANGESTATUS] = addEvent(newLogEvent);
       }
   }
 
@@ -436,8 +435,12 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
    * Client, in chronological order.</p>
    */
 
-  private void addEvent(adminAsyncMessage newEvent) throws RemoteException
+  private int addEvent(adminAsyncMessage newEvent) throws RemoteException
   {
+    int result;
+
+    /* -- */
+
     if (done)
       {
 	throw new RemoteException("serverAdminAsyncResponder: console disconnected");
@@ -450,10 +453,12 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 	    throwOverflow();
 	  }
 	
-	enqueue(newEvent);
+	result = enqueue(newEvent);
 	
 	eventBuffer.notify();	// wake up getNextMsg()
       }
+
+    return result;
   }
 
   /**
@@ -473,12 +478,12 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 
     synchronized (eventBuffer)
       {
-	// if we have an instance of this event on our eventBuffer,
-	// update its parameter with the new event's info.
+	// if we have an instance of this event type on our
+	// eventBuffer, replace it
 
-	if (lookUp[newEvent.getMethod()] != null)
+	if (lookUp[newEvent.getMethod()] != -1)
 	  {
-	    lookUp[newEvent.getMethod()] = newEvent;
+	    eventBuffer[lookUp[newEvent.getMethod()]] = newEvent;
 	    return;
 	  }
 
@@ -490,12 +495,10 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 	    throwOverflow();
 	  }
 
-	enqueue(newEvent);
-
 	// remember that we have an event of this type on our eventBuffer
 	// for direct lookup by later replaceEvent calls.
 
-	lookUp[newEvent.getMethod()] = newEvent;
+	lookUp[newEvent.getMethod()] = enqueue(newEvent);
 
 	eventBuffer.notify();	// wake up getNextMsg()
       }
@@ -538,12 +541,19 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 
   /**
    * private enqueue method.
+   *
+   * @return The index that the item was placed at in the eventBuffer
    */
 
-  private void enqueue(adminAsyncMessage item)
+  private int enqueue(adminAsyncMessage item)
   {
+    int result;
+
+    /* -- */
+
     synchronized (eventBuffer)
       {
+	result = enqueuePtr;
 	eventBuffer[enqueuePtr] = item;
 	
 	if (++enqueuePtr >= maxBufferSize)
@@ -553,6 +563,8 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 	
 	ebSz++;
       }
+
+    return result;
   }
 
   /**
@@ -566,6 +578,20 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
       {
 	adminAsyncMessage result = eventBuffer[dequeuePtr];
 	eventBuffer[dequeuePtr] = null;
+
+	// if we're dequeueing something that we've been using
+	// replaceEvent with, replace the dequeue'd event with the
+	// latest of that type from the lookUp array.
+
+	if (lookUp[result.getMethod()] != -1)
+	  {
+	    if (lookUp[result.getMethod()] != dequeuePtr)
+	      {
+		System.err.println("serverAdminAsyncResponder:dequeue() lookUp mismatch");
+	      }
+
+	    lookUp[result.getMethod()] = -1;
+	  }
 	
 	if (++dequeuePtr >= maxBufferSize)
 	  {
@@ -573,17 +599,6 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 	  }
 	
 	ebSz--;
-
-	// if we're dequeueing something that we've been using
-	// replaceEvent with, replace the dequeue'd event with the
-	// latest of that type from the lookUp array.
-
-	if (lookUp[result.getMethod()] != null)
-	  {
-	    result = lookUp[result.getMethod()];
-	    lookUp[result.getMethod()] = null;
-	  }
-	
 	return result;
       }
   }
