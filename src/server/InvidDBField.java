@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.87 $ %D%
+   Version: $Revision: 1.88 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,6 +25,27 @@ import arlut.csd.JDialog.*;
                                                                     InvidDBField
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This class implements one of the most fundamental pieces of logic in the
+ * Ganymede server, the object pointer/object binding logic.  Whenever the
+ * client calls setValue(), setElement(), addElement(), or deleteElement()
+ * on an InvidDBField, the object being pointed to by the Invid being set
+ * or cleared will be checked out for editing and the corresponding back
+ * pointer will be set or cleared as appropriate.<br><br>
+ *
+ * In other words, the InvidDBField logic guarantees that all objects
+ * references in the server are reflexive.  If one object points to
+ * another via an InvidDBField, the target of that pointer will point
+ * back, either through a field explicitly specified in the schema, or
+ * via the SchemaConstants.BackLinksField, which is guaranteed to be
+ * defined in every object in the database.
+ *
+ * @version $Revision: 1.88 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+ *
+ */
 
 public final class InvidDBField extends DBField implements invid_field {
 
@@ -185,6 +206,13 @@ public final class InvidDBField extends DBField implements invid_field {
       }
   }
 
+  /**
+   *
+   * This method is used to write the contents of this field to the
+   * Ganymede.db file and/or to the Journal file.
+   *
+   */
+
   void emit(DataOutput out) throws IOException
   {
     Invid temp;
@@ -301,6 +329,13 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
   }
+
+  /**
+   *
+   * This method is used to read the contents of this field from the
+   * Ganymede.db file and/or from the Journal file.
+   *
+   */
 
   void receive(DataInput in) throws IOException
   {
@@ -769,7 +804,11 @@ public final class InvidDBField extends DBField implements invid_field {
    * be null if this currently holds no value, or if this is a vector
    * field and newRemote is being added.<br><br>
    *
-   * This method should only be called from synchronized methods.
+   * This method should only be called from synchronized methods within
+   * InvidDBField.<br><br>
+   *
+   * <b>This method is private, and is not to be called by any code outside
+   * of this class.</b>
    *
    * @param oldRemote the old invid to be replaced
    * @param newRemote the new invid to be linked
@@ -782,7 +821,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  private ReturnVal bind(Invid oldRemote, Invid newRemote, boolean local)
+  private final ReturnVal bind(Invid oldRemote, Invid newRemote, boolean local)
   {
     short targetField;
 
@@ -1077,7 +1116,10 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * This method is used to unlink this field from the specified remote
-   * invid in accordance with this field's defined symmetry constraints.
+   * invid in accordance with this field's defined symmetry constraints.<br><br>
+   *
+   * <b>This method is private, and is not to be called by any code outside
+   * of this class.</b>
    *
    * @param remote An invid for an object to be checked out and unlinked
    * @param local if true, this operation will be performed without regard
@@ -1087,7 +1129,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  private ReturnVal unbind(Invid remote, boolean local)
+  private final ReturnVal unbind(Invid remote, boolean local)
   {
     short targetField;
 
@@ -1241,6 +1283,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
+	// note that we only want to remove one instance of the invid
+	// pointing back to us.. we may have multiple fields on the
+	// this object pointing to the remote, and we want to only
+	// clear one back pointer at a time.
+
 	retVal = oldRefField.dissolve(owner.getInvid(), anon||local);
 
 	if (retVal != null && !retVal.didSucceed())
@@ -1285,7 +1332,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * InvidDBFields.<br><br>
    *
    * This method will return false if the unbinding could not be performed for
-   * some reason.
+   * some reason.<br><br>
+   *
+   * <b>This method is private, and is not to be called by any code outside
+   * of this class.</b>
    *
    * @param oldInvid The invid to be unlinked from this field.  If this
    * field is not linked to the invid specified, nothing will happen.
@@ -1294,7 +1344,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  synchronized ReturnVal dissolve(Invid oldInvid, boolean local)
+  private synchronized final ReturnVal dissolve(Invid oldInvid, boolean local)
   {
     int 
       index = -1;
@@ -1321,6 +1371,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
+	// note that we only want to remove one instance of the invid pointing
+	// to us.. we may have multiple fields on the remote object pointing
+	// to us, and we want to only clear one back pointer at a time.
+
 	for (int i = 0; i < values.size(); i++)
 	  {
 	    tmp = (Invid) values.elementAt(i);
@@ -1397,7 +1451,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * InvidDBFields.<br><br>
    *
    * This method will return false if the binding could not be performed for
-   * some reason.
+   * some reason.<br><br>
+   *
+   * <b>This method is private, and is not to be called by any code outside
+   * of this class.</b>
    *
    * @param newInvid The invid to be linked to this field.
    * @param local if true, this operation will be performed without regard
@@ -1405,7 +1462,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  synchronized ReturnVal establish(Invid newInvid, boolean local)
+  private synchronized final ReturnVal establish(Invid newInvid, boolean local)
   {
     Invid 
       tmp = null;
@@ -1732,16 +1789,21 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    * Sets the value of this field, if a scalar.<br><br>
    *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
-
-   * @param value the value to set this field to.
+   * The Invid we are passed must refer to a valid object in the
+   * database.  The remote object will be checked out for
+   * editing and a backpointer will placed in it.  If this field
+   * previously held a pointer to another object, that other
+   * object will be checked out and its pointer to us cleared.<br><br>
+   *
+   * The ReturnVal object returned encodes success or failure, and may
+   * optionally pass back a dialog.
+   *
+   * @param value the value to set this field to, and Invid
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
    *
    * @see arlut.csd.ganymede.DBSession
-   *
+   * 
    */
 
   public synchronized ReturnVal setValue(Object value, boolean local)
@@ -1908,6 +1970,12 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    * Sets the value of an element of this field, if a vector.<br><br>
    *
+   * The Invid we are passed must refer to a valid object in the
+   * database.  The remote object will be checked out for
+   * editing and a backpointer will placed in it.  If this field
+   * previously held a pointer to another object, that other
+   * object will be checked out and its pointer to us cleared.<br><br>
+   *
    * The ReturnVal object returned encodes success or failure, and may
    * optionally pass back a dialog.<br><br>
    *
@@ -2033,6 +2101,12 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * Adds an element to the end of this field, if a vector.<br><br>
+   *
+   * The Invid we are passed must refer to a valid object in the
+   * database.  The remote object will be checked out for
+   * editing and a backpointer will placed in it.  If this field
+   * previously held a pointer to another object, that other
+   * object will be checked out and its pointer to us cleared.<br><br>
    *
    * The ReturnVal object returned encodes success or failure, and may
    * optionally pass back a dialog.<br><br>
@@ -2347,6 +2421,9 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * Deletes an element of this field, if a vector.<br><br>
+   *
+   * The object pointed to by the Invid in the element to be deleted 
+   * will be checked out of the database and its pointer to us cleared.<br><br>
    *
    * Returns null on success, non-null on failure.<br><br>
    *
