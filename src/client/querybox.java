@@ -23,7 +23,7 @@ import java.rmi.RemoteException;
 
 import tablelayout.*;
 
-import com.sun.java.swing.*;
+//import com.sun.java.swing.*;
 
 import gjt.Box;
 
@@ -73,9 +73,13 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   Checkbox editBox = new Checkbox("Editable");
 
   // - Choice menus
-
-  qChoice baseChoice = new qChoice();
   
+  qChoice baseChoice = new qChoice(); // there's only one of these
+  qfieldChoice fieldChoice; // but there's libel to be a whole clew of these
+  qChoice opChoice; // and these too
+  qChoice intChoice;
+  qChoice dateChoice;
+
   // - text fields
 
   qTextField inputField = new qTextField(6);
@@ -83,6 +87,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   // - misc. variables
 
   int row = 0;
+  boolean editOnly;
   Base defaultBase;
   Component[] myAry = new Component[MAXCOMPONENTS]; // stores a single row
   Vector Rows = new Vector(); // store the rows 
@@ -115,6 +120,7 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       // Main constructor for the querybox window
       
       this.baseHash = baseHash;  
+      this.defaultBase = defaultBase;
 
       // - Define the main window
 
@@ -128,6 +134,10 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       Choice_Buttons.add(OkButton);
       Choice_Buttons.add(CancelButton);
       this.add("South", Choice_Buttons); 
+
+      editBox.addItemListener(this);
+      editBox.setState(false);
+      this.editOnly = false;
 
       query_panel.setLayout(new BorderLayout());
       query_panel.setBackground(Color.lightGray); 
@@ -209,14 +219,18 @@ class querybox extends Dialog implements ActionListener, ItemListener {
   ////////////////
 
 
-  qChoice getChoiceFields (Base base)
+  qfieldChoice getChoiceFields (Base base)
     {
       /* Method to return a choice menu containing the fields for
        * a particular base
        */
 
     BaseField basefield;
-    qChoice myChoice = new qChoice();
+    qfieldChoice myChoice = new qfieldChoice();
+    myChoice.addItemListener(this);
+
+    myChoice.qRow = this.row;
+
     int i = 0; // counter variable
 
     try
@@ -242,34 +256,34 @@ class querybox extends Dialog implements ActionListener, ItemListener {
       /* This creates a new row of components and adds 'em to the 
        * choice window
        */
+      
+      myAry = new Component[MAXCOMPONENTS];
 
-  qChoice isNot = new qChoice();
+      qChoice isNot = new qChoice();
       isNot.add("is");
       isNot.add("is not");
-      
-  qChoice selectedOp = new qChoice();    
+      isNot.qRow = this.row;
 
-  qTextField newInput = new qTextField(6); 
-
-  //Label separate; // used purely for aesthetics
+      qTextField newInput = new qTextField(6); 
+      newInput.qRow = this.row;
 
       //* -- *//
 
-      Choice tempo = getChoiceFields(base);
-      myAry[0] = tempo;
-      currentField = tempo.getSelectedItem();  
-      selectedOp = getOpChoice(currentField);
+      fieldChoice = getChoiceFields(base);
+      myAry[0] = fieldChoice;
+      currentField = fieldChoice.getSelectedItem();  
+      opChoice = getOpChoice(currentField);
+      opChoice.qRow = this.row;
 
       myAry[1] = new Label("   ");
       myAry[2] = isNot; 
       myAry[3] = new Label("   ");
-      myAry[4] = selectedOp; 
+      myAry[4] = opChoice; 
       myAry[5] = new Label("   ");
       myAry[6] = newInput; 
       
-      addRow(this.myAry, true, inner_choice);
-     
-      
+      addRow(myAry, true, inner_choice, this.row);
+         
     }
   
   qChoice getOpChoice (String field)
@@ -280,34 +294,64 @@ class querybox extends Dialog implements ActionListener, ItemListener {
        * field passed as the parameter to the method
        */
       
-     qChoice intChoice = new qChoice();
-        intChoice.add("="); 
-        intChoice.add(">="); 
-        intChoice.add("<="); 
-        intChoice.add("<"); 
-        intChoice.add(">");
+      try 
+	{
+	  BaseField myField = this.defaultBase.getField(field);  
+      
+	  intChoice = new qChoice();
+	  intChoice.add("="); 
+	  intChoice.add(">="); 
+	  intChoice.add("<="); 
+	  intChoice.add("<"); 
+	  intChoice.add(">");
   
-      qChoice dateChoice = new qChoice();
-	dateChoice.add("Same Day As");
-	dateChoice.add("Same Week As");
-	dateChoice.add("Same Month As");
-	dateChoice.add("Before");
-	dateChoice.add("After");
+	  if (myField.isDate() == true){
+	    //System.out.println("Field: It's a date!!!!");
 
-	return intChoice;  // This WILL return the correct choice
+	    dateChoice = new qChoice();
+	    dateChoice.add("Same Day As");
+	    dateChoice.add("Same Week As");
+	    dateChoice.add("Same Month As");
+	    dateChoice.add("Before");
+	    dateChoice.add("After");
+
+	    return dateChoice;   
+	  }
+
+	  else if (myField.isNumeric() == true){
+	    //System.out.println("Field: It's a number!");
+	    return intChoice; 
+	  }
+	
+	  else 
+	    {
+	      return intChoice; // FIX ME
+	    }
+
+	}      
+      catch (RemoteException ex)
+	{
+	  throw new RuntimeException("caught remote exception: " + ex);	
+	}
     }
 
 
-  void addRow (Component[] myRow, boolean visible, Panel myPanel) 
+  void addRow (Component[] myRow, boolean visible, Panel myPanel, int Row) 
     {
       for (int n = 0; n < myRow.length; n++)
 	{
 	  myRow[n].setVisible(visible);
-	  myPanel.add( n + "  " + this.row + " lhwHW", myRow[n]);
+	  myPanel.add( n + "  " + Row + " lhwHW", myRow[n]);
 	}
-      
-      this.row++;
-      System.out.println("Row: " + this.row);
+
+      this.row ++;
+      this.Rows.setSize(this.row);
+      this.Rows.setElementAt(myRow, this.row - 1); // add component array to vector
+
+
+      inner_choice.invalidate();
+      inner_choice.validate();
+     
     }
   
   void setRowVisible (Component[] myAry, boolean b)
@@ -332,11 +376,72 @@ class querybox extends Dialog implements ActionListener, ItemListener {
     setSize(500,500);
     setVisible(truth_value); 
   }
+
+  public void removeRow(Component[] myRow, Panel myPanel){
+  
+
+    for (int n = 0; n < myRow.length ; n++)
+      {
+	myPanel.remove(myRow[n]);
+      }
+    
+    this.Rows.removeElementAt(this.row - 1); // remove row from vector of rows
+    this.row--;
+    System.out.println("Total Number of rows: " + this.row);
+    this.Rows.setSize(this.row);
+  }
+  
+
+  public Query createQuery(){
+
+    Query myQuery;
+    int allRows = this.Rows.size();
+    System.out.println("Look at How man Rows we have: " + allRows);
+
+    if (allRows == 1)
+      {
+	// Special case -- return only a single query node
+
+	Component[] tempAry = (Component[]) this.Rows.elementAt(allRows - 1);
+	Choice tempChoice1 = (Choice) tempAry[0];
+	String fieldName = tempChoice1.getSelectedItem();
+	Choice tempChoice2 =  (Choice) tempAry[4];
+	String operator = tempChoice2.getSelectedItem();
+	TextField tempText = (TextField) tempAry[6];
+	Object value = tempText.getText();
+
+	//QeuryDataNode singleData = 
+
+	myQuery = new Query("loser");
+
+
+      }
+
+    else 
+      {
+	myQuery = new Query("loser");
+
+	for (int i = 1; i > allRows; i ++)
+	  {
+	    // create the query
+
+	  }
+      }
+
+    return myQuery;
+    
+  }
+
+
+  /////////////////////
+  // Event Handelers //
+  /////////////////////
   
   public void actionPerformed(ActionEvent e){
      
     if (e.getSource() == OkButton) {
-      System.out.println("Ok was pushed");      
+      System.out.println("You will submit");      
+      createQuery();
       myshow(false);
       return;
     } else if (e.getSource() == CancelButton){
@@ -347,44 +452,40 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
     if (e.getSource() == addButton){
 
-    System.out.println("Add Button Clicked");
-    System.out.println("Here's the defaultBase: " + defaultBase);
+      addChoiceRow(defaultBase);
 	
     }
 
     if (e.getSource() == removeButton){
-     
-    System.out.println("Remove Button Clicked");
-    System.out.println("Here's the defaultBase: " + defaultBase);
+
+      if (this.row <= 1)
+	{
+	  System.out.println("Error: cannot remove any more rows");
 	  
+	}  
+      else
+	{
+	  Component[] tempAry = (Component[]) this.Rows.elementAt(this.row - 1);
+	  removeRow(tempAry, inner_choice);
+	  tempAry = null;
+	} 
     }
     
   } 
   
-  public void removeRow(Component[] myRow, Panel myPanel){
-
-
-    for (int n = 0; n < myRow.length; n++)
-      {
-	myPanel.remove(myRow[n]);
-      }
-    
-    this.row--;
-    System.out.println("Row: " + this.row);
-  }
-
-
   public void itemStateChanged(ItemEvent e)
     {
    
       /* -- */
 
-      /* Ok, we're assuming that the change is coming from 
-       * base choice menu. Not a bad assumption, but we'll have 
-       * incluce a couple other possibilities: the editable
-       * checkbox and the fields choice menu.
-       */
       
+      if (e.getSource() == editBox){
+	
+	this.editOnly = editBox.getState();
+	System.out.println("Edit Box Clicked: " + editOnly);
+	
+      }
+
       if (e.getSource() == baseChoice)
 	{
 
@@ -395,20 +496,37 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 	  // remove for all entries in vector of component arrays
 
-	  removeRow(myAry, inner_choice);
-	  myAry[0] = getChoiceFields(defaultBase);
-	  addRow(myAry, true, inner_choice);
-	 
-	  // remove all rows. Then, 
-	    
-	  Rows = null; // Kill the current vector of Rows
-		  
+	  for (int i = this.row - 1; i > -1; i--)
+	    {
+	      Component[] tempRow = (Component[]) this.Rows.elementAt(i);
+	      removeRow(tempRow, inner_choice);
+	      System.out.println("Removing Row: " + i);
+	      this.Rows.setSize(i);
+	    }
+	  
+	  addChoiceRow(defaultBase);
+   	  
 	}
 	
-      //if (compString.equals("Group")){
-      //    {
-      //      System.out.println("Ninja: " + myChoice.getSelectedItem());
-      //    }
+      if (e.getSource() instanceof qfieldChoice){
+
+	qfieldChoice source = (qfieldChoice) e.getSource();
+
+	String fieldName = source.getSelectedItem();
+
+	int currentRow = source.getRow();
+
+	System.out.println("Current ROw " + currentRow);
+
+	Component[] tempRow = (Component[]) Rows.elementAt(currentRow); 
+	
+	removeRow(tempRow, inner_choice);
+	opChoice = getOpChoice(fieldName);
+	tempRow[4] = opChoice;
+	addRow(tempRow, true, inner_choice, currentRow);
+	this.invalidate();
+	this.validate();
+      }
 	 
     }
 }
@@ -416,17 +534,34 @@ class querybox extends Dialog implements ActionListener, ItemListener {
 
 /*------------------------------------------------------------------------------
                                                                            class 
-                                                                         qChoice
+                                                                    qfieldChoice
 
 ------------------------------------------------------------------------------*/
 
-class qChoice extends Choice {
+class qfieldChoice extends Choice {
   
   int qRow; // keps track of which row the choice menu is located in
   
   public int getRow()
     {
-      return this.qRow;
+      return qRow;
+    }
+
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class 
+                                                                         qChoice
+
+------------------------------------------------------------------------------*/
+
+class qbaseChoice extends Choice {
+  
+  int qRow; // keps track of which row the choice menu is located in
+  
+  public int getRow()
+    {
+      return qRow;
     }
 
 }
@@ -448,7 +583,7 @@ class qTextField extends TextField {
 
   public int getRow()
     {
-      return this.qRow;
+      return qRow;
     }
 
 }
