@@ -54,6 +54,7 @@
 
 package arlut.csd.Util;
 
+import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -202,15 +203,22 @@ public class FileOps {
   }
 
   /**
-   * <P>This method is used to run an external process line for the Ganymede
-   * server.  This method waits until the external command completes before
-   * returning, and all file handles opened to communicate with the
-   * process will be closed before returning.</P>
+   * <P>This method is used to run an external process line for the
+   * Ganymede server.  This method waits until the external command
+   * completes before returning, and all file handles opened to
+   * communicate with the process will be closed before returning.</P>
+   *
+   * <p>While this method is waiting for the process to exit, it will
+   * spin on the stdout and stderr from the process, consuming and
+   * discarding anything written by the subprocess so as to prevent
+   * the subprocess from blocking due to its output piling up.</p>
    */
 
   public static int runProcess(String commandLine) throws IOException, InterruptedException
   {
     Process p = java.lang.Runtime.getRuntime().exec(commandLine);
+    InputStream iStream = p.getInputStream();
+    InputStream eStream = p.getErrorStream();
 
     try
       {
@@ -233,7 +241,7 @@ public class FileOps {
 	      {
 		try
 		  {
-		    p.getInputStream().skip(Long.MAX_VALUE);
+		    iStream.skip(iStream.available());
 		  }
 		catch (IOException exc)
 		  {
@@ -242,7 +250,7 @@ public class FileOps {
 
 		try
 		  {
-		    p.getErrorStream().skip(Long.MAX_VALUE);
+		    eStream.skip(eStream.available());
 		  }
 		catch (IOException exc)
 		  {
