@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.rmi.server.*;
  *
  */
 
-final class GanymedeSession extends UnicastRemoteObject implements Session {
+final public class GanymedeSession extends UnicastRemoteObject implements Session {
 
   static final boolean debug = false;
 
@@ -1453,6 +1453,106 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   }
 
   /**
+   *
+   * This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to <invid>, since time <since>.
+   *
+   * @param invid The invid identifier for the object whose history is sought
+   * @param since Report events since this date, or all events if this is null.
+   *
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public StringBuffer viewObjectHistory(Invid invid, Date since)
+  {
+    DBObject obj;
+
+    /* -- */
+
+    if (invid == null)
+      {
+	setLastError("Null invid passed into viewObjectHistory");
+	return null;
+      }
+
+    obj = (DBObject) session.viewDBObject(invid);
+
+    if (obj == null)
+      {
+	throw new NullPointerException("argh!! null-o in viewObjectHistory on invid " + invid.toString());
+      }
+
+    if (!getPerm(obj).isVisible())
+      {
+	setLastError("Permissions denied to view the history for this invid.");
+	return null;
+      }
+
+    if (Ganymede.log == null)
+      {
+	setLastError("Log not active, can't view invid history");
+	return null;
+      }
+
+    return Ganymede.log.retrieveHistory(invid, since, false);
+  }
+
+  /**
+   *
+   * This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to <invid>, since time <since>.
+   *
+   * @param invid The invid identifier for the admin Persona whose history is sought
+   * @param since Report events since this date, or all events if this is null.
+   *
+   * @return A String containing a record of events for the Invid in question,
+   * or null if permissions are denied to view the history.
+   *
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public StringBuffer viewAdminHistory(Invid invid, Date since)
+  {
+    DBObject obj;
+
+    /* -- */
+
+    if (invid == null)
+      {
+	setLastError("Null invid passed into viewObjectHistory");
+	return null;
+      }
+
+    if (invid.getType() != SchemaConstants.PersonaBase)
+      {
+	setLastError("Wrong type of invid passed into viewAdminHistory");
+	return null;
+      }
+
+    obj = (DBObject) session.viewDBObject(invid);
+
+    if (obj == null)
+      {
+	throw new NullPointerException("argh!! null-o in viewObjectHistory on invid " + invid.toString());
+      }
+
+    if (!getPerm(obj).isVisible())
+      {
+	setLastError("Permissions denied to view the history for this invid.");
+	return null;
+      }
+
+    if (Ganymede.log == null)
+      {
+	setLastError("Log not active, can't view invid history");
+	return null;
+      }
+
+    return Ganymede.log.retrieveHistory(invid, since, true);
+  }
+
+  /**
    * View an object from the database.  If the return value is null,
    * getLastError() should be called for a description of the problem.
    *
@@ -1479,6 +1579,11 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
     /* -- */
 
     obj = (DBObject) session.viewDBObject(invid);
+
+    if (obj == null)
+      {
+	throw new NullPointerException("argh!! null-o in view_db_object on invid " + invid.toString());
+      }
 
     if (getPerm(obj).isVisible())
       {
