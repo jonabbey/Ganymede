@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import javax.swing.border.*;
 
 public class StringDialog extends JCenterDialog implements ActionListener, JsetValueCallback, ItemListener {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // --
 
@@ -395,6 +395,14 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 		    if (dt.getDate() != null)
 		      {
 			currentDate = dt.getDate();
+
+			if (dt.getMaxDate() != null)
+			  {
+			    if (currentDate.after(dt.getMaxDate()))
+			      {
+				currentDate = dt.getMaxDate();
+			      }
+			  }
 		      }
 		    else
 		      {
