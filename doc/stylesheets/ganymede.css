@@ -9,8 +9,15 @@
 */
 
 @media all {
- body { background: white; }
- h1 { font-family: Arial, Helvetica; }
+ body { 
+     background: white; 
+     font: smaller lucida grande, verdana;
+     padding: 1em;
+ }
+ 
+ h1 {
+     font-family: Arial, Helvetica;
+ }
 
  h2 {
     border-style: solid; border-width: thin; border-color: black;
@@ -33,8 +40,27 @@
   }
 
   code.type {
+    font-family: monospace;
     font-weight: bold;
   }
+
+ a {
+     color: #03c;
+     font-weight: bold;
+     text-decoration: none;
+ }
+
+ a:hover {
+     border-bottom: 1px solid red;
+ }
+
+ ul, ol {
+     width: 75%;
+ }
+ 
+ li {
+     padding: 0.25em;
+ }
 
  p.address { font-family: Arial, Helvetica; font-style: italic; }
 
@@ -42,31 +68,58 @@
     margin-top: 1em;
     margin-bottom: 1em;
     margin: auto;
-    border: 1px solid #666;
+    background-color: #ff9;
+    border: 1px solid #f90;
     padding: 0.7em;
-    color: red;
     width: 80%;
  }
 
- pre.listing { 
-    margin-top: 1em;
-    margin-bottom: 1em;
-    border: 1px solid #666;
-    background-color: #eee;
-    padding: 0.7em;
-    color: navy;
-    font-size: 75%;
+ p.note:before {
+     content: "Note: ";
+     font-weight: bold;
  }
 
- xmp.listing { 
+ pre.listing, xmp.listing { 
+    margin: auto;
+    border: 1px solid #c9d1d7;
+    background-color: #f1f5f9;
+    padding: 0.7em;
+    color: #006;
+    width: 95%;
+ }
+
+ xmp.listing {
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+ }
+
+table {
+    margin: auto;
+    margin-left: 30px;
+    margin-right: 30px;
     margin-top: 1em;
     margin-bottom: 1em;
-    border: 1px solid #666;
-    background-color: #eee;
-    padding: 0.7em;
-    color: navy;
-    font-size: 75%;
- }
+    border: 2px solid #c9d1d7;
+    border-collapse: collapse;
+    font-size: small;
+    }
+    
+th {
+        margin: 0em;
+        padding: 0.5em;
+        color: navy;
+        border: 2px solid #c9d1d7;
+        background-color: #f1f5f9;
+      }
+
+td {
+        margin: 0em;
+        padding: 0.5em;
+        border: 1px solid #ddd; 
+      }
 }
 
 
