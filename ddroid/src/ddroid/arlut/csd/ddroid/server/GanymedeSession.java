@@ -1138,7 +1138,23 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // if we have DBObjects left exported through RMI, make
 	    // them inaccesible
 
-	    unexportObjects();
+	    unexportObjects(true);
+
+	    // if we ourselves were exported, unexport
+
+	    if (remoteClient)
+	      {
+		try
+		  {
+		    // must force, since we ourselves are probably in
+		    // the middle of an RMI call
+
+		    UnicastRemoteObject.unexportObject(this, true);
+		  }
+		catch (NoSuchObjectException ex)
+		  {
+		  }
+	      }
 
 	    // if we weren't forced off, do normal logout logging
 
@@ -1194,8 +1210,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
 	finally
 	  {
-	    // and the login semaphore
-
 	    if (semaphoreLocked)
 	      {
 		GanymedeServer.lSemaphore.decrement();
@@ -1207,20 +1221,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // happen
 	    
 	    GanymedeServer.clearActiveUser(username);
-
-	    if (remoteClient)
-	      {
-		try
-		  {
-		    // must force, since we might ourselves be being
-		    // called through RMI
-
-		    UnicastRemoteObject.unexportObject(this, true);
-		  }
-		catch (NoSuchObjectException ex)
-		  {
-		  }
-	      }
 
 	    // help the garbage collector
 
@@ -2233,7 +2233,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
 
 	Ganymede.runBuilderTasks();
-	unexportObjects();	// the client shouldn't need access any more?
+	unexportObjects(false);
       }
     else
       {
@@ -2321,7 +2321,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
       }
 
-    unexportObjects();
+    unexportObjects(false);
     return session.abortTransaction(); // *sync* DBSession 
   }
 
@@ -6368,9 +6368,13 @@ final public class GanymedeSession implements Session, Unreferenced {
    * exportObject() will only place objects in our local exported
    * ArrayList if this GanymedeSession is configured for remote access
    * with exported objects.</p>
+   *
+   * @param all if false, unexportObjects() will only unexport editing
+   * objects, leaving view-only objects exported.
+   *
    */
 
-  private void unexportObjects()
+  private void unexportObjects(boolean all)
   {
     DBObject x;
 
@@ -6378,21 +6382,26 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     synchronized (exported)
       {
+	// count down from the top so we can remove things as we go
 	for (int i = exported.size()-1; i >= 0; i--)
 	  {
 	    x = (DBObject) exported.get(i);
-	    exported.remove(i);
 
-	    try
+	    if (all || x instanceof DBEditObject)
 	      {
-		UnicastRemoteObject.unexportObject((Remote) x, true); // go ahead and force
-	      }
-	    catch (NoSuchObjectException ex)
-	      {
-		Ganymede.debug(Ganymede.stackTrace(ex)); // report but continue unexporting
-	      }
+		exported.remove(i);
 
-	    x.unexportFields();
+		try
+		  {
+		    UnicastRemoteObject.unexportObject((Remote) x, true); // go ahead and force
+		  }
+		catch (NoSuchObjectException ex)
+		  {
+		    Ganymede.debug(Ganymede.stackTrace(ex)); // report but continue unexporting
+		  }
+
+		x.unexportFields();
+	      }
 	  }
       }
   }
