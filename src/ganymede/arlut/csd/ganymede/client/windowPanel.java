@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -927,6 +927,19 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    catch (java.beans.PropertyVetoException ex)
 	      {
 		// user decided against this one..
+	      }
+	  }
+	else if (o instanceof gResultTable)
+	  {
+	    gResultTable w = (gResultTable) o;
+
+	    try
+	      {
+		w.setClosed(true);
+	      }
+	    catch (java.beans.PropertyVetoException ex)
+	      {
+		// something decided against this one.. oh well.
 	      }
 	  }
       }
