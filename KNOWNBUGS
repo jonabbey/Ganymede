@@ -1,12 +1,12 @@
-Ganymede Developer Release 6a
-December 4, 1998
+Ganymede Developer Release 0.94
+January 21, 1999
 KNOWNBUGS
 ----------------------------------------------
 
-Ganymede developer's release 6 requires Swing 1.1 beta 3 or later,
-as it is built to expect the Swing libraries to be in the
-package javax.swing, rather than com.sun.java.swing, as it was
-in prior versions.
+Ganymede developer's release 0.94 requires Swing 1.1 beta 3 or later,
+as it is built to expect the Swing libraries to be in the package
+javax.swing, rather than com.sun.java.swing, as it was in prior
+versions.
 
 --
 

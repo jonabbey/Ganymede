@@ -1,19 +1,32 @@
-Ganymede Developer Release 6a
-December 4, 1998
+Ganymede Developer Release 0.94
+January 21, 1999
 INSTALL notes
 ---------------------------------------------
 
-Installing Ganymede breaks down into four steps:
+Installing Ganymede breaks down into five steps:
 
-  1) Installing server files
+  1) Configuring the distribution for your site
 
-  2) Installing client files
+  2) Installing server files
 
-  3) Configuring the server
+  3) Installing client files
 
-  4) Loading the server
+  4) Configuring the server
+
+  5) Loading the server
 
 Each of these topics is discussed in its own section below.
+
+1. Configuring the distribution for your site
+
+  You will notice a configure script in this directory.  This script
+  does two main things.  First, it unpacks three scripts you can
+  immediately use to install the client and server, called installClient,
+  installClient2 (for JDK 1.2), and installServer.  Second, configure
+  goes through the source tree and builds and configures the makefiles
+  and build scripts used to build the source.
+
+  See README.source for information on building the source tree.
 
 1. Installing Server Files
 
@@ -55,8 +68,8 @@ Each of these topics is discussed in its own section below.
   install time in plaintext.  If desired, the ganymede.properties
   file can be edited to remove the ganymede.defaultrootpass entry.
 
-  With those notes out of the way, run installServer.perl to install
-  the server.  installServer.perl will ask you for a directory to
+  With those notes out of the way, run installServer to install
+  the server.  installServer will ask you for a directory to
   install the server under, and will ask you if you want to use one
   of the schema configurations that we have included.  The gash
   configuration is the most full-featured, and includes support
@@ -73,7 +86,7 @@ Each of these topics is discussed in its own section below.
   script will configure the server to run with a ganymede.db and
   custom.jar file built for the chosen schema.
    
-  After you have run installServer.perl and installClient.perl
+  After you have run installServer and installClient
   (below), you can immediately run the server and connect with
   the client, but the database will be empty.  You will need
   to see section 3) below to get data bulk-loaded into Ganymede.
@@ -89,8 +102,8 @@ Each of these topics is discussed in its own section below.
   clients are themselves totally portable, however, as they are simply
   Java jar files.
 
-  We have provided two install scripts.  installClient.perl is for
-  Java 1.1 and installClient2.perl is for Java 1.2.  Either script
+  We have provided two install scripts.  installClient is for
+  Java 1.1 and installClient2 is for Java 1.2.  Either script
   which will prompt you for the name of the machine that will be
   running your Ganymede server, and the directory which will contain
   the bin, html, and jars directories. The install script will
@@ -104,7 +117,7 @@ Each of these topics is discussed in its own section below.
   be kept out of the reach of non-privileged users, while the client
   files are intended to be available for anyone to run.
 
-  The installClient.perl script will build an html directory, which
+  The installClient script will build an html directory, which
   includes two subdirectories, one labeled activator and one labeled
   hotjava.  The activator subdirectory contains versions of the
   client.html, console.html, and password.html files that work with
@@ -179,7 +192,7 @@ Each of these topics is discussed in its own section below.
   your server machine.  The server will load its database, come up,
   and tell you that it is ready to operate.  You can now run the
   adminConsole from your client install.  Log in using the root name
-  and password you specified when you ran installServer.perl.  After
+  and password you specified when you ran installServer.  After
   a moment, you'll see the admin console come up.  Go to the control
   menu and select 'Edit Schema'.  After a bit, you'll see the schema
   editor come up.  You can add, remove, or modify object definitions.
@@ -230,7 +243,7 @@ Each of these topics is discussed in its own section below.
  
 4. Loading the Server
 
-  When you run the installServer.perl script, you are prompted for
+  When you run the installServer script, you are prompted for
   which sample schema you want to use.  Whichever you choose is copied
   to your server install directory under 'schema'.
 

@@ -6,12 +6,16 @@
   the License GPL.  See the LICENSE file under the gnu-regexp-1.0.5
   directory for details.
 
+  This license also does not apply to the Qstmp and jcrypt source
+  directories and attendant class files, which are in the public
+  domain.
+
 --
 
   ARL:UT Group Administration Shell Network Manager, Deluxe Edition
-			  November 9, 1998
+			  January 21, 1999
 
-  Copyright 1996, 1997, 1998. The University of Texas at Austin (UTA).
+  Copyright 1996, 1997, 1998, 1999. The University of Texas at Austin (UTA).
   All rights reserved.  By using this software the USER indicates that
   he or she has read, understood, and will comply with the following:
 

@@ -1,5 +1,5 @@
-Ganymede Developer Release 7
-January ??, 1998
+Ganymede Developer Release 0.94
+January 21, 1999
 CREDITS
 ---------------------------------------------
 
@@ -62,7 +62,7 @@ management after shortcomings in the GASH system became apparent.  Jon
 has been the primary architect and coder on the project, developing
 the Ganymede server and admin console, and well as contributing the
 table and tree GUI components used in both the admin console and
-the primary client.
+the primary client, as well as all of the CVS and build script work.
 
 --
 

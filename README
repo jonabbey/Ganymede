@@ -1,5 +1,5 @@
-Ganymede Developer Release 6a
-December 4, 1998
+Ganymede Developer Release 0.94
+January 21, 1999
 README
 ---------------------------------------------
 
@@ -51,30 +51,22 @@ This release includes:
   Ganymede server and propagate the information into NIS maps or
   DNS tables when the GASH schema is used.
 
-This release does not include:
-
-  Source code for the Ganymede server, the Admin console, or the
-  primary client.  We have not yet made a determination as to
-  what the official release status of the system will be, and as
-  such we are not releasing the source code at this time.  We are
-  including all source code that should be necessary to use and
-  customize the system.
+  Full source code for everything.
 
 Things you will need:
 
-  A JDK 1.1.5 or better compliant JVM to run the server, client, and
-  admin console.  We recommend using Sun's JDK 1.1.7 on UNIX, and
-  JDK 1.2 on Windows.  JDK 1.2 will work on UNIX as well, but the
-  versions of JDK 1.2 on UNIX thus far only seem to support 8 and
-  24 bit color displays.
+  A JDK 1.1.7 or better compliant JVM to run the server, client, and
+  admin console.  We recommend using Sun's JDK 1.2 where you can.
+  JDK 1.2 on UNIX thus far only seem to support 8 and 24 bit color
+  displays.
 
-  Swing 1.1 beta 3 (or later) from Sun. You can download this
+  Swing 1.1 (or later) from Sun. You can download this
   from http://java.sun.com/products/jfc/index.html.  Earlier versions
   of Swing will NOT work, as Ganymede is now built to use the javax
   version of the Swing libraries.  Probably the best thing to do
   is to install the latest JDK 1.2 package, which includes an
-  up-to-date Swing.  Most of the client testing on dev5c has been
-  performed with the 1.2 Release Candidate 1 JRE.
+  up-to-date Swing.  Most of the client testing on 0.94 has been
+  performed with JDK 1.2 on Solaris and Windows.
 
   Perl 5 to run the install scripts.
 
