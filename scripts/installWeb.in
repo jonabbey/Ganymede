@@ -208,6 +208,8 @@ if ($vars{"DOCS"} =~ /^y/i) {
     &copy_file($file, "$installdir/$file");
   }
 
+  &copy_file("webforms/index_doc.html", "$installdir/index.html");
+
   print "\nDone installing documentation.\nDocumentation is accessible at $doc_url.\n";
 }
 
