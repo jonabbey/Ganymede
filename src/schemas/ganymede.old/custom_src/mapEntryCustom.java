@@ -5,7 +5,7 @@
    This file is a management class for Automounter map entry objects in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,7 @@ import java.rmi.*;
 
 ------------------------------------------------------------------------------*/
 
-public class mapEntryCustom extends DBEditObject implements SchemaConstants {
+public class mapEntryCustom extends DBEditObject implements SchemaConstants, mapEntrySchema {
 
   /**
    *
@@ -81,7 +81,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants {
 
   public String getLabelHook(DBObject object)
   {
-    DBField field, field2;
+    InvidDBField field, field2;
     StringBuffer buff = new StringBuffer();
 
     /* -- */
@@ -91,8 +91,8 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants {
 	return null;
       }
 
-    field = (DBField) object.getField((short) 256); // map name
-    field2 = (DBField) object.getField((short) 257); // volume
+    field = (InvidDBField) object.getField(MAP); // map name
+    field2 = (InvidDBField) object.getField(VOLUME); // volume
 
     try
       {
