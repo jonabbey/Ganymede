@@ -17,7 +17,7 @@ import java.rmi.RemoteException;
 import gjt.ColumnLayout;
 
 import com.sun.java.swing.*;
-import arlut.csd.Dialog.*;
+import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
                                                                            class 
@@ -47,7 +47,7 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
   JButton 
     changePass = null;
 
-  JstringField 
+  JpasswordField 
     field1 = null,
     field2 = null;
 
@@ -110,13 +110,13 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 
     if (showChangeFields)
       {
-	field1 = new JstringField(columns, maxstrlen, valueAttr, 
+	field1 = new JpasswordField(columns, maxstrlen, 
 				  is_editable, true, allowed, disallowed);
 
 	field1.setCallback(this);
 	field1.setEditable(is_editable);
 
-	field2 = new JstringField(columns, maxstrlen, valueAttr, 
+	field2 = new JpasswordField(columns, maxstrlen,
 				  is_editable, true, allowed, disallowed);
 
 	field2.setCallback(this);
@@ -211,11 +211,11 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
 
   public boolean setValuePerformed(JValueObject v)
   {
-    JstringField s;
+    JpasswordField s;
 
     /* -- */
 
-    s = (JstringField) v.getSource();
+    s = (JpasswordField) v.getSource();
 
     if (s == field1)
       {
