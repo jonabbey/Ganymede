@@ -7,7 +7,7 @@
    can use it wherever.
    
    Created: 7 February 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -94,6 +94,31 @@ public class objectCache {
 
     return list.getLabels(includeInactives);
   }
+
+  /**
+   *
+   * This method retrieves an object handle matching the given
+   * invid from the specified object list.
+   *
+   * This isn't the fastest operation, but hopefully won't
+   * be too bad.
+   *
+   * @return The matching handle, or null if it wasn't found.
+   *
+   */
+
+  public ObjectHandle getInvidHandle(Object key, Invid invid)
+  {
+    objectList list = getList(key);
+
+    if (list == null)
+      {
+	return null;
+      }
+
+    return list.getInvidHandle(invid);
+  }
+
 
   public void putList(Object key, QueryResult qr)
   {

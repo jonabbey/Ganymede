@@ -8,7 +8,7 @@
    their current state in the client, and more.
    
    Created: 6 February 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -339,6 +339,41 @@ public class objectList {
 	if (invid.equals(handle.getInvid()))
 	  {
 	    activeHandles.removeElementAt(i);
+	    break;
+	  }
+      }
+
+    return resultHandle;
+  }
+
+  /**
+   *
+   * This method retrieves an object handle matching the given
+   * invid from the object list.
+   *
+   * This isn't the fastest operation, but hopefully won't
+   * be too bad.
+   *
+   * @return The matching handle, or null if it wasn't found.
+   *
+   */
+
+  public synchronized ObjectHandle getInvidHandle(Invid invid)
+  {
+    ObjectHandle handle, resultHandle = null;
+    int size;
+
+    /* -- */
+
+    size = handles.size();
+
+    for (int i = 0; i < size; i++)
+      {
+	handle = (ObjectHandle) handles.elementAt(i);
+
+	if (invid.equals(handle.getInvid()))
+	  {
+	    resultHandle = handle;
 	    break;
 	  }
       }
