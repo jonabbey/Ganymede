@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -912,8 +912,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     embedded = base.isEmbedded();
 
-    Ganymede.debug("Processing dump query");
-    Ganymede.debug("Searching for matching objects of type " + base.getName());
+    Ganymede.debug("Processing dump query\nSearching for matching objects of type " + base.getName());
 
     // if we're an end user looking at the user base, we'll want to be able to see
     // the fields that the user could see for his own record
@@ -926,21 +925,33 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     
     if (embedded)
       {
-	Ganymede.debug("Searching for results of type " + containingBase.getName());
+	if (debug)
+	  {
+	    Ganymede.debug("Searching for results of type " + containingBase.getName());
+	  }
       }
 
     if (query.permitList == null)
       {
-	Ganymede.debug("Returning default fields");
+	if (debug)
+	  {
+	    Ganymede.debug("Returning default fields");
+	  }
       }
     else
       {
-	Ganymede.debug("Returning custom fields");
+	if (debug)
+	  {
+	    Ganymede.debug("Returning custom fields");
+	  }
       }
 
     baseLock.addElement(base);
 
-    Ganymede.debug("dump(): " + username + " : opening read lock on " + base.getName());
+    if (debug)
+      {
+	Ganymede.debug("dump(): " + username + " : opening read lock on " + base.getName());
+      }
 
     try
       {
@@ -952,7 +963,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;		// we're probably being booted off
       }
 
-    Ganymede.debug("dump(): " + username + " : got read lock");
+    if (debug)
+      {
+	Ganymede.debug("dump(): " + username + " : got read lock");
+      }
 
     // Figure out which fields we want to return
 
@@ -965,19 +979,30 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	
 	if (query.permitList == null)
 	  {
-	    if (!field.isBuiltIn())
-	      {	    
+	    // If they haven't specified the list of fields they want back, make
+	    // sure we don't show them built in fields and we don't show them the
+	    // objects owned field in the OwnerBase.. that could entail many
+	    // thousands of objects listed.  If they really, really want to see
+	    // them, let them say so explicitly.
+
+	    if (!field.isBuiltIn() && 
+		!(containingBase.getTypeID() == SchemaConstants.OwnerBase &&
+		  field.getID() == SchemaConstants.OwnerObjectsOwned))
+	      {
 		if (supergashMode)
 		  {
 		    fieldDefs.addElement(field);
 		  }
 		else
 		  {
-		    // if selfPerm isn't null, we're going to want to check to see if what fields
+		    // if selfPerm isn't null, we're going to want to check to see what fields
 		    // the user would be able to see of this object type.. even though selfPerms
 		    // are only intended to apply to the user's own object record, we need to
 		    // get those fields enabled here so that when we later come across the user's
 		    // own record, we'll be able to properly dump it.
+
+		    // the getPerm() call, of course, takes into account the current persona and
+		    // associated permission objects
 
 		    if (getPerm(base.getTypeID(), field.getID()).isVisible())
 		      {
@@ -998,11 +1023,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	    else
 	      {
-		// if selfPerm isn't null, we're going to want to check to see if what fields
+		// if selfPerm isn't null, we're going to want to check to see what fields
 		// the user would be able to see of this object type.. even though selfPerms
 		// are only intended to apply to the user's own object record, we need to
 		// get those fields enabled here so that when we later come across the user's
 		// own record, we'll be able to properly dump it.
+
+		// the getPerm() call, of course, takes into account the current persona and
+		// associated permission objects
 		
 		if (getPerm(base.getTypeID(), field.getID()).isVisible())
 		  {
@@ -1023,6 +1051,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     QueryResult temp_result = queryDispatch(query, false, false);
 
+    if (debug)
+      {
+	System.err.println("dump(): processed queryDispatch, building dumpResult buffer");
+      }
+
     if (temp_result != null)
       {
 	Invid invid;
@@ -1032,6 +1065,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	while (enum.hasMoreElements())
 	  {
 	    invid = (Invid) enum.nextElement();
+
+	    if (debug)
+	      {
+		System.err.print(".");
+	      }
 
 	    // it's okay to use session.viewDBObject because
 	    // DumpResult.addRow() uses the GanymedeSession reference
@@ -1044,6 +1082,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    result.addRow(session.viewDBObject(invid), this);
 	  }
       }
+
+    Ganymede.debug("dump(): completed processing, returning buffer");
 
     return result;
   }
@@ -1265,7 +1305,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     baseLock.addElement(base);
 
-    Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
+    if (debug)
+      {
+	Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
+      }
+    else
+      {
+	System.err.println("Query: " + username + " : opening read lock on " + base.getName());
+      }
 
     try
       {
@@ -1277,7 +1324,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;		// we're probably being booted off
       }
 
-    Ganymede.debug("Query: " + username + " : got read lock");
+    if (debug)
+      {
+	Ganymede.debug("Query: " + username + " : got read lock");
+      }
+    else
+      {
+	System.err.println("Query: " + username + " : got read lock");
+      }
 
     enum = base.objectHash.keys();
 
@@ -1317,14 +1371,28 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     session.releaseReadLock(rLock);
 
-    Ganymede.debug("Query: " + username + " : completed query over primary hash, releasing read lock");
+    if (debug)
+      {
+	Ganymede.debug("Query: " + username + " : completed query over primary hash, releasing read lock");
+      }
+    else
+      {
+	System.err.println("Query: " + username + " : completed query over primary hash, releasing read lock");
+      }
 
     // find any objects created or being edited in the current transaction that
     // match our criteria
 
     if (session.isTransactionOpen())
       {
-	Ganymede.debug("Query: " + username + " : scanning intratransaction objects");
+	if (debug)
+	  {
+	    Ganymede.debug("Query: " + username + " : scanning intratransaction objects");
+	  }
+	else
+	  {
+	    System.err.println("Query: " + username + " : scanning intratransaction objects");
+	  }
 
 	synchronized(session.editSet)
 	  {
@@ -1377,9 +1445,17 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	  }
 
-	Ganymede.debug("Query: " + username + " : completed scanning intratransaction objects");
+	if (debug)
+	  {
+	    Ganymede.debug("Query: " + username + " : completed scanning intratransaction objects");
+	  }
+	else
+	  {
+	    System.err.println("Query: " + username + " : completed scanning intratransaction objects");
+	  }
       }
     
+    Ganymede.debug("Query: " + username + ", object type " + base.getName() + " completed");
     return result;
   }
 
@@ -1608,7 +1684,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized db_object view_db_object(Invid invid)
+  public db_object view_db_object(Invid invid)
   {
     return view_db_object(invid, true);
   }
@@ -2398,6 +2474,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public DBObject getPersona()
   {
     return personaObj;
+  }
+
+  /**
+   *
+   * This method returns a reference to the DBSession object encapsulated
+   * by this GanymedeSession object.  This is intended to be used by
+   * subclasses of DBEditObject that might not necessarily be in the
+   * arlut.csd.ganymede package.
+   *
+   */
+
+  public DBSession getSession()
+  {
+    return session;
   }
 
   /**
