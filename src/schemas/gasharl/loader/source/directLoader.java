@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1613,6 +1613,25 @@ public class directLoader {
 	    if (categoryInvid != null)
 	      {
 		current_obj.setFieldValueLocal(userSchema.CATEGORY, categoryInvid);
+	      }
+	    else
+	      {
+		System.err.println("Null category for user " + key);
+	      }
+	  }
+	else
+	  {
+	    System.err.println("\nNo user category registered for user " + key + ", defaulting to normal.");
+
+	    categoryInvid = (Invid) categoryInvids.get("normal");
+
+	    if (categoryInvid != null)
+	      {
+		current_obj.setFieldValueLocal(userSchema.CATEGORY, categoryInvid);
+	      }
+	    else
+	      {
+		System.err.println("Null category for user " + key);
 	      }
 	  }
 
