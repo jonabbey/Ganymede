@@ -999,6 +999,8 @@ need to move to an incremental model for synchronization.</p>
 
     <h3 id="xml_incrementals">The Sync Channel Incremental Model</h3>
 
+    <h4 id="explaining_xml_incrementals">The Sync Channel Incremental Model Explained</h4>
+
     <p>Ganymede 2.0 introduces an incremental XML-based
     synchronization system, which we call the "Sync Channel
     Incremental Model".  The Sync Channel Incremental model shares
@@ -1050,28 +1052,213 @@ need to move to an incremental model for synchronization.</p>
     out better to have this logic be outside of the Ganymede server,
     where it can more easily be maintained.</p>
 
+    <p>You can create as many Sync Channels as you like in the
+    Ganymede server, and each Sync Channel can be configured to
+    include whatever subset of data you care about for that channel in
+    particular.</p>
+
     <h4 id="configuring_sync_incremental">Configuring Sync Channels</h4>
 
     <p>All that you need to do to configure a Sync Channel in Ganymede
-    is to create a <code class="type">Sync Channel</code> object in the
-    Ganymede server.  Each <code class="type">Sync Channel</code>
-    object has a unique name, a path for the directory that the
-    Ganymede server will write synchronization files to, a path to the
-    exectuable external program that will process synchronization
-    files from the synchronization files directory, and a list of what
-    objects and fields from the Ganymede data store the Sync Channel
-    is supposed to include in its synchronization files.</p>
+    is to create a <code class="type">Sync Channel</code> object in
+    the Ganymede server.  Each <code class="type">Sync Channel</code>
+    object has a unique name (the <code class="type">Name</code>
+    field), a path for the directory that the Ganymede server will
+    write synchronization files to (the <code class="type">Directory
+    Path</code> field), a path to the exectuable external program that
+    will process synchronization files from the synchronization files
+    directory (the <code class="type">Service Program</code> field),
+    and a list of what objects and fields from the Ganymede data store
+    the Sync Channel is supposed to include in its synchronization
+    files (the <code class="type">Sync Data</code> field).  There's
+    also an <code class="type">Allow Plaintext Passwords</code>
+    checkbox which can be selected to allow plaintext passwords to be
+    written to this Sync Channel, or deselected to prevent plaintext
+    passwords from being (but allowing various hashed password to be)
+    written.</p>
 
     <p>It looks like this:</p>
 
     <center><img src="screenshots/sync_channel.png" class="screenshot"/></center>
 
-    <p>You configure the data that will be synchronizaed to the Sync
-    Channel by editing the <code class="type">Sync Data</code> field.
-    It looks like this:<?p>
+    <p>You configure the data that will be synchronized to the Sync
+    Channel by editing the <code class="type">Sync Data</code> field
+    with the Ganymede client.  For each type of object defined on your
+    Ganymede server, you will see a checkbox that lets you choose
+    whether or not that kind of object should ever be synchronized to
+    the Sync Channel.</p>
 
+    <p>If you open up the folder for a given object type, you will be
+    able to select three options for every field:</p>
+
+    <ul>
+      <li><b>Never</b> -- This field will never be synchronized to this Sync
+      Channel, and whether or not the field was changed by a given
+      transaction will have no effect on the decision as to whether or
+      not to include the containing object in a synchronization
+      file.</li>
+
+      <li><b>When Changed</b> -- This field will be written to the Sync
+      Channel whenever it changes, and if it changes, the object that
+      contains it will be included in the synchronization file.</li>
+
+      <li><b>Always</b> -- This field will always be written to the Sync
+      Channel, so long as the object it is contained in was changed
+      during the transaction and a at least one field marked "Always"
+      or "When Changed" was changed in the transaction.</li>
+    </ul>
+
+    <p>The <b>Always</b> option is intended to allow you to mark
+    fields whose data must always be included in a synchronization
+    file if the object itself is modified in any way significant to
+    the Sync Channel.  If you know, for instance, that your Sync
+    Channel service program will always need to know the contents of a
+    user object's <code class="type">Username</code> field everytime
+    anything of significance in the object changes, you can configure
+    your Sync Channel's <code class="type">Sync Data</code> to always
+    include it when the object is significantly changed.</p>
+
+    <p>A "significantly changed object," of course, means an object in
+    which any field marked with <b>Always</b> or <b>When Changed</b>
+    in the <code class="type">Sync Channel</code> definition was
+    created, changed, or removed during the transaction.</p>
+
+    <p>Here's an example of what you'll see when you edit a <code
+    class="type">Sync Data</code> field in a <code class="type">Sync
+    Channel</code> object.  This image shows a <code class="type">Sync
+    Channel</code> object that is configured to write <code
+    class="type">User</code> objects to the Sync Channel whenever any
+    field but the <code class="type">Removal Date</code> and <code
+    class="type">Expiration Date</code> fields change.  Whenever any
+    such field changes, the object record in the synchronization file
+    will include the <code class="type">Username</code> and the <code
+    class="type">Notes</code> fields.</p>
+      
     <center><img src="screenshots/sync_field_options.png" class="screenshot"/></center>
 
+    <h4>What The Sync Channel Incremental Model Writes Out</h4>
+
+    <p>The Ganymede server writes one XML file to the Sync Channel
+    synchronization directory for each relevant transaction that is
+    committed to the Ganymede server.  Each transaction is given a
+    simple numeric, integer filename, unadorned with any filename
+    extension.  The Ganymede server maintains a transaction count for
+    every transaction committed after the Ganymede server is
+    initialized, the first transaction committed being transaction
+    zero.</p>
+
+    <p>Each file that is written out looks like this:</p>
+
+    <xmp class="listing"><transaction major_version="1" minor_version="1" channel="Users" user="supergash" number="18" time="1111015745225">
+  <object_delta>
+    <before>
+      <object type="User" id="barkerr" oid="3:1175">
+        <Username>barkerr</Username>
+        <Signature_Alias>barkerr</Signature_Alias>
+      </object>
+    </before>
+    <after>
+      <object type="User" id="freeman" oid="3:1175">
+        <Username>freeman</Username>
+        <Signature_Alias>freeman</Signature_Alias>
+      </object>
+    </after>
+  </object_delta>
+</transaction>
+ </xmp>
+
+    <p>The attributes in the &lt;transaction&gt; element are as follows:</p>
+
+    <div align="center">
+      <table border="1">
+	<tr><th>Attribute</th><th>Value</th></tr>
+	<tr><td><b>major_version</b></td><td>A major version number for the Ganymede Sync Channel transaction format.</td></tr>
+	<tr><td><b>minor_version</b></td><td>A minor version number for the Ganymede Sync Channel transaction format.</td></tr>
+	<tr><td><b>channel</b></td><td>The name of the Sync Channel that generated this XML file.</td></tr>
+	<tr><td><b>user</b></td><td>The name of the Ganymede user or admin that committed this transaction.</td></tr>
+	<tr><td><b>time</b></td><td>Java time code marking the time this transaction was written.  Interpreted as the number of milliseconds since Midnight, January 1, 1970 UTC.</td></tr>
+      </table>
+    </div>
+
+    <p>Within the &lt;transaction&gt; element are a series of
+    &lt;object_delta&gt; elements.  Each &lt;object_delta&gt; element
+    contains a &lt;before&gt; element and an &lt;after&gt;
+    element.</p>
+
+    <p>The &lt;before&gt; and &lt;after&gt; elements contain one
+    &lt;object&gt; element each.  These &lt;object&gt; elements are
+    identical to the <a
+    href="../xml/data.html#OBJECT"><b>&lt;object&gt;</b></a> elements
+    as they are used with the <a
+    href="../xml.html"><b>xmlclient</b></a>, except that the <code
+    class="attribute">oid</code> attribute has been added.  The <code
+    class="attribute">oid</code> attribute may be useful to your Sync
+    Channel service program as a foreign key, constant against object
+    renames.  In the same way, the <code class="attribute">oid</code>
+    attribute is added to the <a
+    href="../xml/data.html#INVID"><b>&lt;invid&gt;</b></a> element,
+    strictly to act as a reliable reference in the face of object
+    renames.</p>
+
+    <p>The other big difference with the &lt;object&gt; elements in
+    the Sync Channel XML output is that they will only include the
+    fields that the <code class="type">Sync Channel</code> was
+    configured to write.  This will usually just be fields that have
+    changed.</p>
+
+    <p>If a field did change during the transaction, its before state
+    will be written in the &lt;before&gt; element, and its after state
+    will be written in the &lt;after&gt; element.  If a field was
+    newly created during the transaction, the field will not appear in
+    the &lt;before&gt; element but it will appear in the &lt;after&gt;
+    element.  Likewise, if a field was deleted during the transaction,
+    it will appear in the &lt;before&gt; element but not in the
+    &lt;after&gt; element.</p>
+
+    <p>If an object is created or destroyed in a transaction rather
+    than merely edited, the &lt;before&gt; or &lt;after&gt; elements,
+    respectively, will be empty.</p>
+
+    <p>Here's an example of a user in the laboratory's Ganymede server
+    being deleted:</p>
+
+<xmp class="listing"><transaction major_version="1" minor_version="1" channel="Users" user="expiration" number="21" time="1111730401435">
+  <object_delta>
+    <before>
+      <object type="User" id="raghu" oid="3:1657">
+        <Username>raghu</Username>
+        <UID>3025</UID>
+        <Global_UID>11f3a6c0-a9cd-11d8-b6ba-080020fd6b07</Global_UID>
+        <Account_Category><invid type="User_Category" id="normal" oid="279:5"/></Account_Category>
+        <Full_Name>Raj Raghu</Full_Name>
+        <Badge>5917</Badge>
+        <Division>ASD</Division>
+        <Room>N347</Room>
+        <Office_Phone>3872</Office_Phone>
+        <Groups>
+          <invid type="Group" id="asrmas" oid="257:143"/>
+        </Groups>
+        <Home_Group><invid type="Group" id="asrmas" oid="257:143"/></Home_Group>
+        <Login_Shell>/bin/bash</Login_Shell>
+        <Home_Directory>/home/raghu</Home_Directory>
+        <Directory_Volume>
+          <invid type="Embedded_Automounter_Map_Entry" id="Embedded Automounter Map Entry[1810]" oid="278:1810"/>
+        </Directory_Volume>
+        <Signature_Alias>raghu</Signature_Alias>
+        <Email_target>
+          <string val="raghu@arlmail.arlut.utexas.edu"/>
+        </Email_target>
+        <Password_Expiration><date val="Tue, 08 Mar 2005 00:00:01" timecode="1110261601003"/></Password_Expiration>
+        <Owner_list>
+          <invid type="Owner_Group" id="ATL" oid="0:9"/>
+        </Owner_list>
+      </object>
+    </before>
+    <after/>
+  </object_delta>
+</transaction>
+</xmp>
+ 
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
     <p class="address">$Date$, $Rev$, $Author$</p>
