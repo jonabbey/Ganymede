@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -60,15 +60,7 @@ public class DateDBField extends DBField implements date_field {
     
     defined = false;
     value = null;
-
-    if (isVector())
-      {
-	values = new Vector();
-      }
-    else
-      {
-	values = null;
-      }
+    values = null;
   }
 
   /**
@@ -82,16 +74,8 @@ public class DateDBField extends DBField implements date_field {
     this.owner = owner;
     definition = field.definition;
     
-    if (isVector())
-      {
-	values = (Vector) field.values.clone();
-	value = null;
-      }
-    else
-      {
-	value = field.value;
-	values = null;
-      }
+    value = field.value;
+    values = null;
 
     defined = true;
   }
@@ -104,11 +88,6 @@ public class DateDBField extends DBField implements date_field {
 
   public DateDBField(DBObject owner, Date value, DBObjectBaseField definition) throws RemoteException
   {
-    if (definition.isArray())
-      {
-	throw new IllegalArgumentException("scalar constructor called on vector field");
-      }
-
     this.owner = owner;
     this.definition = definition;
     this.value = value;
@@ -133,27 +112,7 @@ public class DateDBField extends DBField implements date_field {
 
   public DateDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
   {
-    if (!definition.isArray())
-      {
-	throw new IllegalArgumentException("vector constructor called on scalar field");
-      }
-
-    this.owner = owner;
-    this.definition = definition;
-
-    if (values == null)
-      {
-	this.values = new Vector();
-	defined = false;
-      }
-    else
-      {
-	this.values = (Vector) values.clone();
-	defined = true;
-      }
-
-    defined = true;
-    value = null;
+    throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
   public Object clone()
@@ -170,40 +129,12 @@ public class DateDBField extends DBField implements date_field {
 
   void emit(DataOutput out) throws IOException
   {
-    if (isVector())
-      {
-	out.writeShort(values.size());
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    out.writeLong(((Date) values.elementAt(i)).getTime());
-	  }
-      }
-    else
-      {
-	out.writeLong(((Date) value).getTime());
-      }
+    out.writeLong(((Date) value).getTime());
   }
 
   void receive(DataInput in) throws IOException
   {
-    int count;
-
-    /* -- */
-
-    if (isVector())
-      {
-	count = in.readShort();
-	values = new Vector(count);
-	for (int i = 0; i < count; i++)
-	  {
-	    values.addElement(new Date(in.readLong()));
-	  }
-      }
-    else
-      {
-	value = new Date(in.readLong());
-      }
-
+    value = new Date(in.readLong());
     defined = true;
   }
 
@@ -215,22 +146,12 @@ public class DateDBField extends DBField implements date_field {
 
   public Date value()
   {
-    if (isVector())
-      {
-	throw new IllegalArgumentException("scalar accessor called on vector");
-      }
-
     return (Date) value;
   }
 
   public Date value(int index)
   {
-    if (!isVector())
-      {
-	throw new IllegalArgumentException("vector accessor called on scalar");
-      }
-
-    return (Date) values.elementAt(index);
+    throw new IllegalArgumentException("vector accessor called on scalar");
   }
 
   public synchronized String getValueString()
@@ -242,30 +163,35 @@ public class DateDBField extends DBField implements date_field {
 	throw new IllegalArgumentException("permission denied to read this field");
       }
 
-    if (!isVector())
+    if (value == null)
       {
-	if (value == null)
-	  {
-	    return "null";
-	  }
+	return "null";
+      }
+    
+    return this.value.toString();
+  }
 
-	return this.value.toString();
+  /**
+   *
+   * Date fields need a special encoding that can be easily
+   * reversed to obtain a date object on the client for sorting
+   * and selection purposes.
+   *
+   */
+
+  public synchronized String getEncodingString()
+  {
+    if (!verifyReadPermission())
+      {
+	throw new IllegalArgumentException("permission denied to read this field");
       }
 
-    String result = "";
-    int size = size();
-
-    for (int i = 0; i < size; i++)
+    if (value == null)
       {
-	if (!result.equals(""))
-	  {
-	    result = result + ", ";
-	  }
-
-	result = result + this.value(i).toString();
+	return "null";
       }
 
-    return result;
+    return Long.toString(((Date) this.value).getTime());
   }
 
   // ****
