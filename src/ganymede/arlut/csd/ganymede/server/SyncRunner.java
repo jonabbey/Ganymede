@@ -478,6 +478,16 @@ public class SyncRunner implements Runnable {
   }
 
   /**
+   * <p>Returns true if the Sync Channel attached to this SyncRunner
+   * is configured to write plain text passwords.</p>
+   */
+
+  public boolean includePlaintextPasswords()
+  {
+    return includePlaintextPasswords;
+  }
+
+  /**
    * <p>Returns true if this sync channel is configured to ever
    * include objects of the given baseID.</p>
    */

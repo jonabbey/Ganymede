@@ -1058,6 +1058,7 @@ public final class DBStore implements JythonMap {
     DBDumpLock lock = null;
     DBNameSpace ns;
     SyncRunner syncConstraint = null;
+    boolean includePlaintext = false;
 
     /* -- */
     
@@ -1095,6 +1096,10 @@ public final class DBStore implements JythonMap {
 	  {
 	    // "No such sync channel defined: {0}"
 	    throw new IllegalArgumentException(ts.l("dumpXML.badSyncChannel", syncChannel));
+	  }
+	else
+	  {
+	    includePlaintext = syncConstraint.includePlaintextPasswords();
 	  }
       }
 
