@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2000/09/15 01:58:03 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2000/09/15 08:48:35 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -96,7 +96,7 @@ import arlut.csd.Util.PackageResources;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.27 $ $Date: 2000/09/15 01:58:03 $ $Name:  $
+ * @version $Revision: 1.28 $ $Date: 2000/09/15 08:48:35 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey */
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
@@ -356,7 +356,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inPanel.setLayout(new BorderLayout());
 
     inPanel.add("Center", new JScrollPane(in));
-    inTitle.setText(org_in.concat(" : " + String.valueOf(in.getSizeOfList())));
+    inTitle.setText(org_in.concat(" : " + inVector.size()));
     inPanel.add("North", inTitle);
 
     if (editable)
@@ -429,7 +429,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		      }
 		  }
 	      }
-	    outTitle.setText(org_out.concat(" : " + String.valueOf(out.getSizeOfList())));	    
+
+	    outTitle.setText(org_out.concat(" : " + outVector.size()));
 	  }
       }
 
@@ -1232,7 +1233,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	if (out != null)
 	  {
 	    out.removeItem(item);
-	    outTitle.setText(org_out.concat(" : " + String.valueOf(out.getSizeOfList())));	    
+	    outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
 	    //outPanel.add("North", outTitle
 	  }
 
@@ -1252,7 +1253,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	if (! in.containsItem(item))
 	  {
 	    in.addItem(item);
-      	    inTitle.setText(org_in.concat(" : " + String.valueOf(in.getSizeOfList())));
+      	    inTitle.setText(org_in.concat(" : " + in.getSizeOfList()));
 	  }
 
 	if (debug)
@@ -1286,14 +1287,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     in.removeItem(item);
-    inTitle.setText(org_in.concat(" : " + String.valueOf(in.getSizeOfList())));	    
+    inTitle.setText(org_in.concat(" : " + in.getSizeOfList()));
 
     // If the item is already in there, don't add it.
 
     if ((out != null)  &&  (! out.containsItem(item)))
       {
 	out.addItem(item);
-        outTitle.setText(org_out.concat(" : " + String.valueOf(out.getSizeOfList())));	    
+        outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
       }
 
     remove.setEnabled(false);
