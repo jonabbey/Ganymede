@@ -261,6 +261,8 @@ public class FileOps {
 		  {
 		    // screw you, copper
 		  }
+
+		System.err.println("Completed processing of IllegalThreadStateException from exitValue() call");
 	      }
 
 	    try
