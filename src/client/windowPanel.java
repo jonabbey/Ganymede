@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -142,32 +142,25 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
   public void addWindow(db_object object, boolean editable)
   {
     String temp, title;
-    
-    parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    if (debug)
+
+    if (object == null)
       {
-	System.out.println("Adding new internalFrame");
+	System.err.println("null object passed to addWindow.");
+	return;
       }
 
-    JInternalFrame w = new JInternalFrame();
     
-    w.addPropertyChangeListener(this);
-    
-    w.setMaxable(true);
-    w.setResizable(true);
-    w.setClosable(!editable);
-    w.setIconable(true);
-    w.setLayout(new BorderLayout());
-    
-    Image fi = PackageResources.getImageResource(this, "dynamite.gif", getClass());
-    w.setFrameIcon(new ImageIcon(fi));
-    w.setBackground(ClientColor.WindowBG);
-
+    parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     // First figure out the title, and put it in the hash
     
     try
       {
 	title = object.getLabel();
+	
+	if (title == null)
+	  {
+	    title = new String("Null string");
+	  }
 
 	if (editable)
 	  {
@@ -193,10 +186,8 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 	title = temp + num++;
       }
 
-    w.setTitle(title);
+    framePanel w = new framePanel(object, editable, this, title);
 
-    w.setLayout(new BorderLayout());
-    
     windowList.put(title, w);
       
     if (windowBar != null)
@@ -204,34 +195,6 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 	windowBar.addButton(title);
       }
 
-    JInsetPanel center = new JInsetPanel(1,1,1,1);
-    center.setLayout(new BorderLayout());
-    center.setBackground(ClientColor.WindowBG);
-    center.add("Center", new containerPanel(object, editable, parent, this));
-    w.add("Center", center);
-
-    if (editable)
-      {
-	if (debug)
-	  {
-	    System.out.println("This is editable, you get no button");
-	  }
-      }
-    else
-      {
-	if (debug)
-	  {
-	    System.out.println("Not editable, you get some buttons");
-	  }
-
-      }
-
-    JMenuBar mb = createMenuBar(editable, object, w);
-    w.setMenuBar(mb);
-
-    //System.out.println("   adding to windowBar " + title);
-    w.setBounds(windowCount*20, windowCount*20, 400,250);
-    
     if (windowCount > 10)
       {
 	windowCount = 0;
@@ -240,6 +203,8 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
       {
 	windowCount++;
       }
+
+    w.setBounds(windowCount*20, windowCount*20, 400,250);
 
     w.setLayer(topLayer);
     

@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.4 $ %D%
+    Version: $Revision: 1.5 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -154,12 +154,28 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    try
 	      {
-		tempString = fields[i].getName();
-		addFieldComponent(fields[i]);
+		if (debug)
+		  {
+		    tempString = fields[i].getName();
+		  }
+		int id = fields[i].getID();
+		if ((id == SchemaConstants.ExpirationField) || 
+		    (id == SchemaConstants.RemovalField))
+		  {
+		    // don't add these
+		    if (debug)
+		      {
+			System.out.println("Skipping Expiration or Removal fields");
+		      }
+		  }
+		else
+		  {
+		    addFieldComponent(fields[i]);
+		  }
 	      }
 	    catch (RemoteException ex)
 	      {
-		throw new RuntimeException("caught remote exception adding field " + tempString);
+		throw new RuntimeException("caught remote exception adding field " + ex);
 	      }
 	  }
       }
