@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 29 May 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,7 +52,7 @@ import java.util.*;
  * @see csd.Table.rowTable
  * @see csd.Table.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.2 $ %D%
+ * @version $Revision: 1.3 $ %D%
  */
 
 public class baseTable extends Panel implements AdjustmentListener {
@@ -1185,8 +1185,7 @@ public class baseTable extends Panel implements AdjustmentListener {
 	canvas_rect.height = bounding_rect.height;
     
 	reShape();
-  
-	this.repaint();
+	refreshTable();
       }
 
     super.setBounds(x,y,width,height);
@@ -1608,6 +1607,8 @@ public class baseTable extends Panel implements AdjustmentListener {
 class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 
   static final boolean debug = false;
+  static final int colgrab = 4;
+  static final int mincolwidth = 20;
 
   /* - */
 
@@ -2329,8 +2330,8 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
       {
 	// nice wide grab range
 	
-	if ((vx > rt.colPos[col]-4) &&
-	    (vx < rt.colPos[col]+4))
+	if ((vx > rt.colPos[col] - colgrab) &&
+	    (vx < rt.colPos[col] + colgrab))
 	  {
 	    if (debug)
 	      {
@@ -2342,11 +2343,25 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 
 	    colDrag = col;
 	  }
-	else if ((vx > rt.colPos[col]) &&
-		 (vx < rt.colPos[col+1]))
+	else if ((vx >= (rt.colPos[col] + colgrab)) &&
+		 (vx <= (rt.colPos[col+1] - colgrab)))
 	  {
 	    clickCol = col;
 	  }
+      }
+
+    // note that the above loop is mostly intended to handle the
+    // column adjustment.. since the far left column is not adjustable,
+    // the above loop misses it.  Check for it here.
+
+    if (clickCol == -1)
+      {
+	if ((vx >= rt.colPos[0]) &&
+	    (vx <= (rt.colPos[1] - colgrab)))
+	  {
+	    clickCol = 0;
+	  }
+	
       }
 
     if (clickCol != -1)
@@ -2357,6 +2372,9 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	  {
 	    clickRow = (vy - rt.headerAttrib.height - 2 * rt.hHeadLineThickness) / 
 	      (rt.row_height + rt.hRowLineThickness);
+
+	    // if the user clicked below the last defined row, we don't register
+	    // the click.
 
 	    if (clickRow >= rt.rows.size())
 	      {
@@ -2417,9 +2435,7 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	    System.err.println("colPos["+(colDrag)+"] = " + rt.colPos[colDrag]);
 	  }
 
-	// minimum col width is 20 pixels
-
-	if ((x > rt.colPos[colDrag-1] + 20) && (x < rt.colPos[colDrag+1] - 20))
+	if ((x > rt.colPos[colDrag-1] + mincolwidth) && (x < rt.colPos[colDrag+1] - mincolwidth))
 	  {
 	    if (debug)
 	      {
