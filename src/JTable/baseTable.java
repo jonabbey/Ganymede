@@ -21,16 +21,17 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.11 $ %D%
+  Version: $Revision: 1.12 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
 */
-package arlut.csd.Table;
+package arlut.csd.JTable;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import com.sun.java.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -65,13 +66,13 @@ import java.util.*;
  * incorporates a baseTable. The ability to select rows can be turned off,
  * in which case baseTable becomes strictly a display component.</p>
  *
- * @see arlut.csd.Table.rowTable
- * @see arlut.csd.Table.gridTable
+ * @see arlut.csd.JTable.rowTable
+ * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.11 $ %D%
+ * @version $Revision: 1.12 $ %D%
  */
 
-public class baseTable extends Panel implements AdjustmentListener, ActionListener {
+public class baseTable extends JPanel implements AdjustmentListener, ActionListener {
   
   static final boolean debug = false;
 
@@ -82,7 +83,7 @@ public class baseTable extends Panel implements AdjustmentListener, ActionListen
 
   // the following variables are non-private. tableCanvas accesses them.
 
-  Scrollbar 
+  JScrollBar 
     hbar, 
     vbar;
 
@@ -273,9 +274,9 @@ public class baseTable extends Panel implements AdjustmentListener, ActionListen
     // create our scroll bars, but don't add them to our
     // container until we know we need them.
 
-    hbar = new Scrollbar(Scrollbar.HORIZONTAL);
+    hbar = new JScrollBar(JScrollBar.HORIZONTAL);
     hbar.addAdjustmentListener(this);
-    vbar = new Scrollbar(Scrollbar.VERTICAL);
+    vbar = new JScrollBar(JScrollBar.VERTICAL);
     vbar.addAdjustmentListener(this);
 
     // calculate column boundaries and center points
@@ -1666,7 +1667,7 @@ public class baseTable extends Panel implements AdjustmentListener, ActionListen
 
 ------------------------------------------------------------------------------*/
 
-class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
+class tableCanvas extends JCanvas implements MouseListener, MouseMotionListener {
 
   static final boolean debug = false;
   static final int colgrab = 4;
