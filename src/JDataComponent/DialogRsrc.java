@@ -17,6 +17,10 @@ import com.sun.java.swing.*;
 ------------------------------------------------------------------------------*/
 
 public class DialogRsrc {
+
+  static Hashtable imageCache = new Hashtable();
+
+  // ---
   
   Frame frame;
   
@@ -56,6 +60,7 @@ public class DialogRsrc {
    * @param OK String for Ok button 
    * @param Cancel String for Cancel button
    */
+
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel)
   {
     this(frame, Title, Text, OK, Cancel, (Image) null);
@@ -71,6 +76,7 @@ public class DialogRsrc {
    * @param Cancel String for Cancel button
    * @param image Image to display next to text
    */
+
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, Image image)
   {
     this.frame = frame;
@@ -92,8 +98,9 @@ public class DialogRsrc {
    * @param Text String for message at top of dialog box.
    * @param OK String for Ok button 
    * @param Cancel String for Cancel button
-   * @param image Image to display next to text
+   * @param imageName Image to display next to text
    */
+
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, String imageName)
   {
     this.frame = frame;
@@ -105,7 +112,16 @@ public class DialogRsrc {
 
     if (imageName != null)
       {
-	this.image = jdj.PackageResources.getImageResource(frame, imageName, frame.getClass());
+	if (imageCache.containsKey(imageName))
+	  {
+	    image = (Image) imageCache.get(imageName);
+	  }
+	else
+	  {
+	    image = jdj.PackageResources.getImageResource(frame, imageName, frame.getClass());
+
+	    imageCache.put(imageName, image);
+	  }
       }
     else
       {
