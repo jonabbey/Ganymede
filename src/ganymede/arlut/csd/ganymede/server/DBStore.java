@@ -2305,7 +2305,9 @@ public final class DBStore implements JythonMap {
 	  {
 	    Ganymede.debug("Applying namespace constraint to task name");
 
+	    bf.loading = true;
 	    bf.setNameSpace("buildertask");
+	    bf.loading = false;
 	  }
       }
     catch (RemoteException ex)
