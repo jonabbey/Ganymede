@@ -5,7 +5,7 @@
    An interface defining constants to be used by the interface code.
    
    Created: 23 April 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,7 +15,7 @@ package arlut.csd.ganymede.custom;
 
 /*------------------------------------------------------------------------------
                                                                        interface
-                                                                    interfaceSchema
+                                                                 interfaceSchema
 
 ------------------------------------------------------------------------------*/
 
