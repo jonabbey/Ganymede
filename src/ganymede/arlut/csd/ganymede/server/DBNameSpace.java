@@ -135,7 +135,7 @@ public final class DBNameSpace implements NameSpace {
    * the current status of the values.</p>
    */
 
-  private Hashtable uniqueHash;
+  private GHashtable uniqueHash;
 
   /**
    * <p>During schema editing, we keep a copy of the uniqueHash that we had
@@ -147,7 +147,7 @@ public final class DBNameSpace implements NameSpace {
    * will always be null except during schema editing.</p>
    */
 
-  private Hashtable saveHash = null;
+  private GHashtable saveHash = null;
 
   /**
    * <p>Hashtable mapping {@link arlut.csd.ganymede.server.DBEditSet
@@ -286,22 +286,22 @@ public final class DBNameSpace implements NameSpace {
    * @see arlut.csd.ganymede.rmi.NameSpace 
    */
 
-  public void setInsensitive(boolean b)
+  public synchronized void setInsensitive(boolean b)
   {
-    if (b == caseInsensitive)
+    if (b == this.caseInsensitive)
       {
 	return;
       }
 
-    // if we are changing our case sensitivity, we need to construct
-    // a new GHashtable of the appropriate case sensitivity and copy
-    // over the old hashtable entries.. this loop should check for
-    // membership before inserting a new value in the case that
-    // we are changing from case insensitivity to case sensitivity
+    // let's see if we can do this safely.. we'll throw an
+    // IllegalStateException if changing the case sensitivity would
+    // cause a collision, otherwise this will take care of things
 
-    // right now, of course, we do none of this
+    this.uniqueHash.setInSensitivity(b);
 
-    caseInsensitive = b;
+    // if we've got here, we are okay to go
+
+    this.caseInsensitive = b;
   }
 
   /**
