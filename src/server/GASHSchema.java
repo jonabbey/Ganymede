@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -67,6 +67,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     deleteFieldMI = null;
   
   YesNoDialog 
+    deleteFieldDialog = null,
     deleteNameDialog = null;
 
   PopupMenu
@@ -259,6 +260,11 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     deleteObjectMI = new MenuItem("Delete Object Type");
     createFieldMI = new MenuItem("Create Field");
     deleteFieldMI = new MenuItem("Delete Field");
+
+    deleteFieldDialog = new YesNoDialog(this,
+					"Confirm field deletion",
+					"Are you sure you want to delete this field?",
+					this);
 
     baseMenu = new PopupMenu("Base Menu");
     baseMenu.add(createFieldMI);
@@ -477,11 +483,11 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	
 			 try
 			   {
-			     if (aF.getID() < bF.getID())
+			     if (aF.getDisplayOrder() < bF.getDisplayOrder())
 			       {
 				 return -1;
 			       }
-			     else if (aF.getID() > bF.getID())
+			     else if (aF.getDisplayOrder() > bF.getDisplayOrder())
 			       {
 				 return 1;
 			       }
@@ -932,7 +938,8 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       {
 	System.err.println("deleting field node");
 
-	
+	deleteFieldDialog.setVisible(true);
+	/*
 	try
 	  {
 	    FieldNode fNode = (FieldNode) node;
@@ -957,6 +964,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	    System.err.println("couldn't delete field" + ex);
 	  }
 	
+	  */
       }
   }
 
@@ -995,7 +1003,9 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	if (deleteNameDialog.answeredYes())
 	  {
 	    if (currentNode == null)
-	      System.err.println("currentNode is null");
+	      {
+		System.err.println("currentNode is null");
+	      }
 	    else
 	      {
 		treeNode tNode = (treeNode)currentNode;
@@ -1021,6 +1031,54 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 	  {
 	    System.out.println("Not deleting Name Space");
 	  }
+       
+
+      }
+    else if (event.getSource() == deleteFieldDialog)
+      {
+	if (deleteFieldDialog.answeredYes())
+	  {
+
+
+	    System.out.println("Answered yes");
+	    if (currentNode == null)
+	      {
+		System.out.println("currentNode is null");
+	      }
+	    else
+	      {
+		try
+		  {
+		    FieldNode fNode = (FieldNode) currentNode;
+		    BaseNode bNode = (BaseNode) currentNode.getParent();
+		    
+		    if (!bNode.getBase().fieldInUse(fNode.getField()))
+		      {
+			bNode.getBase().deleteField(fNode.getField());
+			refreshFields(bNode.getBase(), true);
+			ne.refreshSpaceList();
+			be.refreshLabelChoice();
+		      }
+		    else
+		      {
+			// field in use
+			
+			System.err.println("Couldn't delete field.. field in use");
+		      }
+		  }
+		catch (RemoteException ex)
+		  {
+		    System.err.println("couldn't delete field" + ex);
+		  }
+	      }
+	  }
+	else
+	  {
+	    System.out.println("Not deleting field");
+	  }
+
+
+
 
       }
     else
@@ -1069,7 +1127,10 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   public boolean dragLineTween(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
   {
-    return true;
+
+    treeNode parent = dragNode.getParent();
+    return (((aboveNode instanceof FieldNode) && (aboveNode.getParent() == parent)) || 
+	     ((belowNode instanceof FieldNode) && (belowNode.getParent() == parent)));
   }
 
   /**
@@ -1080,6 +1141,86 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
   public void dragLineRelease(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
   {
+
+    System.out.println("dragNode = " + dragNode.getText());
+    System.out.println("aboveNode = " + aboveNode.getText());
+    System.out.println("belowNode = " + belowNode.getText());
+
+    if (dragNode instanceof FieldNode)
+      {
+	FieldNode oldNode = (FieldNode)dragNode;
+	BaseNode parentNode = (BaseNode)oldNode.getParent();
+	System.out.println("parent = " + parentNode);
+	
+	if (aboveNode instanceof FieldNode)
+	  {
+	    if (aboveNode != dragNode)
+	      {
+		//Insert below the aboveNode
+		FieldNode newNode = new FieldNode(parentNode, oldNode.getText(), oldNode.getField(),
+						  aboveNode, false, 2, 2, fieldMenu);
+		
+		tree.deleteNode(dragNode, false);
+		tree.insertNode(newNode, true);
+	      }
+	    else
+	      {
+		System.out.println("aboveNode == dragNode, Not moving it");
+	      }
+	    
+	  }
+	else if (belowNode instanceof FieldNode)
+	  {
+	    if (belowNode != dragNode)
+	      {
+		//First node, insert below parent
+		FieldNode newNode = new FieldNode(parentNode, oldNode.getText(), oldNode.getField(),
+						  null, false, 2, 2, fieldMenu);
+		tree.deleteNode(dragNode, false);
+		tree.insertNode(newNode, true);
+	      }
+	    else
+	      {
+		System.out.println("belowNode == dragNode, Not moving it");
+	      }
+	  }
+	else
+	  {
+	    System.err.println("Dropped away from FieldNodes, shouldn't happen");
+	  }
+	
+	//Ok, that mostly works, plugging ahead
+
+	//Renumber the fields of this parent.
+	
+	FieldNode currentNode = (FieldNode)parentNode.getChild();
+	if (currentNode != null)
+	  {
+	    try
+	      {
+		short i = 0;
+		while (currentNode != null)
+		  {
+		    currentNode.getField().setDisplayOrder(++i);
+		    currentNode = (FieldNode)currentNode.getNextSibling();
+		  }
+		System.out.println("Reordered " + i + " fields");
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new IllegalArgumentException("exception reordering fields: " + rx);
+	      }
+	  }
+	else
+	  {
+	    System.err.println("No children to renumber, something not right");
+	  }
+
+
+
+      }
+    
+
   }
 
 
@@ -1383,6 +1524,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
   GASHSchema 
     owner;
+
+  StringDialog
+    changeLabelTypeDialog;
 
   TextArea
     commentT;			// all
@@ -2177,9 +2321,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     if (e.getItemSelectable() == typeC)
       {
+	boolean okToChange = true;
 	item = typeC.getSelectedItem();
-	System.out.println("  item= " + item);
-	
+
 	if (!item.equals("Numeric") && !item.equals("String"))
 	  {
 	    // Now it can't be a label.. was it a label before?
@@ -2187,7 +2331,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    try
 	      {
 		currentBase = fieldDef.getBase();
-		System.out.println("currentBase= " + currentBase.getName());
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -2197,7 +2340,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    try
 	      {
 		currentLabel = currentBase.getLabelFieldName();
-		System.out.println("currentLabel= " + currentLabel);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -2207,7 +2349,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 	    try
 	      {
 		currentFieldName = fieldDef.getName();
-		System.out.println("currentFieldName= " + currentFieldName);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -2216,25 +2357,64 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
 	    if ((currentFieldName != null) && currentLabel.equals(currentFieldName))
 	      {
-		System.out.println("problem: changing the label");
+		DialogRsrc labelRsrc = new DialogRsrc(owner, 
+						      "Warning: changing object type",
+						      "Changing the type of this field will invalidate the label for this base.  Are you sure you want to continue?",
+						      "Confirm",
+						      "Cancel");
 
-		try
+		changeLabelTypeDialog = new StringDialog(labelRsrc);
+
+		Hashtable answer = changeLabelTypeDialog.DialogShow();
+
+		if (answer != null)  //Ok button was clicked
 		  {
-		    currentBase.setLabelField(null); // we're making this field unacceptable as a label
+		    try
+		      {
+			System.out.println(" clicked ok");
+			currentBase.setLabelField(null); // we're making this field unacceptable as a label
+		      }
+		    catch (RemoteException rx)
+		      {
+			throw new IllegalArgumentException("exception setting label to null: " + rx);
+		      }
 		  }
-		catch (RemoteException rx)
+		else
 		  {
-		    throw new IllegalArgumentException("exception setting label to null: " + rx);
+		    System.out.println(" Canceled, not changing field type");
+		    okToChange = false;
+		    try 
+		      {
+			if (fieldDef.isNumeric())
+			  {
+			    typeC.select("Numeric");
+			  }
+			else if (fieldDef.isString())
+			  {
+			    typeC.select("String");
+			  }
+			else
+			  {
+			    System.err.println("Field is not String or Numeric, not changing type choice");
+			  }
+		      }
+		    catch (RemoteException rx)
+		      {
+			throw new IllegalArgumentException("exception getting old type");
+		      }
 		  }
 	      }
 	    else
 	      {
-		System.out.println("not the label, don't worry");
+		    System.out.println("not the label, ok to change");
+		    
 	      }
 	  }
-
-	changeTypeChoice(item);	// switch the visible rows to fit the new type
-	refreshFieldEdit();	// and refresh
+	if (okToChange)
+	  {
+	    changeTypeChoice(item);	// switch the visible rows to fit the new type
+	    refreshFieldEdit();	// and refresh
+	  }
       }
     else if (e.getItemSelectable() == namespaceC)
       {
