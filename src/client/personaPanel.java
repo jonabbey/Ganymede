@@ -331,7 +331,7 @@ class personaContainer extends JScrollPane implements Runnable{
       }
 
     this.invalidate();
-    //validate();
+    pp.validate();
 
     // oh man this takes a long time.
     //this.notifyAll();
