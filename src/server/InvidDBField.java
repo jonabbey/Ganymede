@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.131 $
-   Last Mod Date: $Date: 2000/05/27 02:23:55 $
+   Version: $Revision: 1.132 $
+   Last Mod Date: $Date: 2000/05/27 02:35:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.131 $ %D%
+ * @version $Revision: 1.132 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2561,10 +2561,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     Vector values = getVectVal();
 
+    // don't both adding something we've already got
+
     if (values.contains(value))
       {
-	return Ganymede.createErrorDialog("InvidDBField.addElement() - redundant value submitted",
-					  "Field " + getName() + " already contains value " + value);
+	return null;
       }
 
     retVal = verifyNewValue(value, local);
@@ -2752,13 +2753,13 @@ public final class InvidDBField extends DBField implements invid_field {
 					  " can't take " + submittedValues.size() + " new values");
       }
 
-    // make sure none of the submitted values are already in this field
+    // don't both adding values we've already got
 
-    if (VectorUtils.overlaps(values, submittedValues))
+    submittedValues = VectorUtils.difference(submittedValues, values);
+
+    if (submittedValues.size() == 0)
       {
-	return Ganymede.createErrorDialog("InvidDBField.addElement() - redundant value submitted",
-					  "Field " + getName() + " already contains values " + 
-					  VectorUtils.vectorString(VectorUtils.intersection(values, submittedValues)));
+	return null;
       }
 
     // check to see if all of the submitted values are acceptable in
