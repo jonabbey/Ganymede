@@ -257,6 +257,12 @@ public class InvidPool implements InvidAllocator {
   }
 }
 
+/**
+ * <p>This (non-public) class is used in the {@link
+ * arlut.csd.ganymede.common.InvidPool} to softly reference Invids
+ * that we are storing for purposes of interning.</p>
+ */
+
 class InvidSlot extends SoftReference {
 
   InvidSlot next;
