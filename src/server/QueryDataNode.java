@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -194,107 +194,5 @@ public class QueryDataNode extends QueryNode {
     this.value = value;
 
     this.arrayOp = NONE;
-  }
-
-  /** 
-   * This method dumps the value of the data node to a string in the form of:
-   *
-   * quote(data value)
-   *
-   */
-  
-  public String dumpToString ()
-  {
-    
-    String operator, returnVal;
-
-    /* -- */
-
-    // The following is designed to make the query string
-    // more readable by using the operator instad of its
-    // mapped numeric value
-
-    // Note - the operators differ for vectors. We'll have check to see
-    // what the field is first
-
-
-    // Insert Vector operation stuff here :-)
-
-
-    if (this.comparator == 1)
-      {
-	operator = "=";
-      }
-    else if (this.comparator == 2)
-      {
-	operator = "<"; 
-      } 
-    else if (this.comparator == 3)
-      {
-	operator = "<=";
-      }
-    else if (this.comparator == 4)
-      {
-	operator = ">";
-      }
-    else if (this.comparator == 5)
-      {
-	operator = ">=";
-      }
-    else if (this.comparator == 6)
-      {
-	operator = "= [Case Insensitive]";
-      }
-    else if (this.comparator == 7)
-      {
-	operator = "Start With";
-      }
-    else if (this.comparator == 8)
-      {
-	operator = "End With";
-      }
-
-
-    else
-      {
-	operator = "Error: Operator undefined";
-      }
-    
-    returnVal = "(" + operator;
-
-    // add fieldname
-    
-    if (fieldname != null)
-      {
-	returnVal = returnVal + "(fieldname " + fieldname + ")"; 
-      }
-    else if (fieldId != -1)
-      {
-	returnVal = returnVal + "(fieldname #" + fieldId +")"; 
-      }
-    else
-      {
-	returnVal = returnVal + "(fieldname null)";
-      }
-      
-    // add value
-      
-    if (this.value == null)
-      {
-	System.err.println("Error: Value undefined in QueryDataNode");
-	returnVal = returnVal + "(value undefined)";
-      }
-    else
-      {
-	returnVal = returnVal + "(value " + this.value + ")";
-      }
-    
-    // close parenthesis
-    
-    returnVal = returnVal + ")";
-    
-    // all done
-    
-    return returnVal;
   }
 }
