@@ -5,7 +5,7 @@
    The core of a gui/text password changing client for Ganymede.
    
    Created: 28 January 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,6 +14,7 @@
 package arlut.csd.ganymede.client.password;
 
 import arlut.csd.ganymede.*;
+import arlut.csd.ganymede.client.*;
 
 import java.util.Properties;
 import java.io.*;
@@ -26,71 +27,44 @@ import java.rmi.server.*;
 
 ------------------------------------------------------------------------------*/
 
-public class PasswordClient extends UnicastRemoteObject implements arlut.csd.ganymede.Client {
+public class PasswordClient implements ClientListener {
 
   final static boolean debug = false;
-
-  static String serverhost;
   static String url;
+
+  // ---
+
+  /**
+   *
+   * A ClientBase object forms the core of any Ganymede
+   * client.  It does the work to get us connected and
+   * logged into the server, and serves as a reference
+   * point for the server to talk to if something
+   * unusual happens.
+   *
+   */
+
+  ClientBase client = null;
 
   /* -- */
 
-  String 
-    username,
-    password;
-
-  arlut.csd.ganymede.Server 
-    my_server;
-
-  arlut.csd.ganymede.Session 
-    session;
-
-  /* -- */  
-
-  public PasswordClient() throws RemoteException
-  {
-    this("rmi://www.arlut.utexas.edu/ganymede.server");
-  }
-
   public PasswordClient(String serverURL) throws RemoteException
   {
-    super();			// UnicastRemoteObject initialization.. RemoteException may be thrown
-
-    try
-      {
-	Remote obj = Naming.lookup(serverURL);
-    
-	if (obj instanceof arlut.csd.ganymede.Server)
-	  {
-	    my_server = (arlut.csd.ganymede.Server) obj;
-	  }
-	else
-	  {
-	    throw new RuntimeException("Unrecognized object type returned: " + obj.getClass());
-	  }
-      }
-    catch (NotBoundException ex)
-      {
-	throw new RuntimeException("RMI: Couldn't bind to server object\n" + ex );
-      }
-    catch (java.rmi.UnknownHostException ex)
-      {
-	throw new RuntimeException("RMI: Couldn't find server\n");
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("RMI: RemoteException during lookup.\n" + ex);
-      }
-    catch (java.net.MalformedURLException ex)
-      {
-	throw new RuntimeException("RMI: Malformed URL ");
-      }
+    client = new ClientBase(serverURL, this);
   }
+
+  /**
+   *
+   * This method actually does the work of logging into the server,
+   * changing the password, committing the transaction, and disconnecting.
+   *
+   */
 
   public boolean changePassword(String username, String oldPassword, String newPassword)
   {
-    this.username = username;
-    this.password = oldPassword;
+    arlut.csd.ganymede.Session session;
+
+    /* -- */
 
     if (debug)
       {
@@ -99,7 +73,7 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
 
     try
       {
-	session = my_server.login(this);
+	session = client.login(username, oldPassword);
 
 	if (session != null)
 	  {
@@ -107,7 +81,7 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
 	      {
 		System.out.println(" logged in, looking for :" + username + ":");
 	      }
-
+	    
 	    session.openTransaction("PasswordClient");
 
 	    QueryResult results = session.query(new Query(SchemaConstants.UserBase,
@@ -122,13 +96,14 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
 		  }
 
 		Invid invid = results.getInvid(0);
+
 		db_object user = session.edit_db_object(invid);
 
 		if (user == null)
 		  {
 		    error("Could not get handle on user object.  Someone else might be editing it.");
 		    session.abortTransaction();
-		    session.logout();
+		    client.disconnect();
 		    return false;
 		  }
 
@@ -156,7 +131,8 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
 		      {
 			error("It didn't work.");
 		      }
-		    session.logout();
+
+		    client.disconnect();
 		    return false;
 		  }
 	      }
@@ -171,7 +147,7 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
 		    System.out.println("Error, found multiple matching user records.. can't happen?");
 		  }
 
-		session.logout();
+		client.disconnect();
 		return false;
 	      }
 
@@ -184,8 +160,7 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
 		    System.out.println("It worked.");
 		  }
 
-		this.password = newPassword;
-		session.logout();
+		client.disconnect();
 		return true;
 	      }
 	    else
@@ -207,9 +182,11 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
   }
 
   /**
+   *
    * Send output to this.  
    *
    * This just prints out the message, but could be directed to a dialog or something later.
+   *
    */
 
   public void error(String message)
@@ -217,32 +194,47 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
     System.out.println(message);
   }
 
+  // ***
+  //
+  // The following two methods comprise the ClientListener interface which
+  // we need to implement to give the ClientBase object someone to talk to.
+  //
+  // ***
+
   /**
-   * Allows the server to retrieve the username
+   *
+   * Called when the server forces a disconnect.<br><br>
+   *
+   * Call getMessage() on the ClientEvent to get the
+   * reason for the disconnect.
+   *
+   * @see arlut.csd.ganymede.client.ClientListener
+   * @see arlut.csd.ganymede.client.ClientEvent
+   *
    */
 
-  public String getName() 
+  public void disconnected(ClientEvent e)
   {
-    return username;
+    error("Error, prematurely kicked off by the server. " + e.getMessage());
   }
 
   /**
-   * Allows the server to retrieve the password
+   *
+   * Called when the ClientBase needs to report something
+   * to the client.  The client is expected to then put
+   * up a dialog or do whatever else is appropriate.<br><br>
+   *
+   * Call getMessage() on the ClientEvent to get the
+   * message.
+   *
+   * @see arlut.csd.ganymede.client.ClientListener
+   * @see arlut.csd.ganymede.client.ClientEvent
+   *
    */
 
-  public String getPassword()
+  public void messageReceived(ClientEvent e)
   {
-    return password;
-  }
-
-  /**
-   * Allows the server to force us off when it goes down
-   */
-
-  public void forceDisconnect(String reason)
-  {
-    error("Server forced disconnect: " + reason);
-    System.exit(0);
+    error("ClientBase says: " + e.getMessage());
   }
 
   /**
@@ -288,6 +280,7 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
     try
       {
 	// Get the old password
+
 	System.out.print("Old password:");
 	oldPassword = in.readLine();
 	System.out.println();
@@ -335,6 +328,7 @@ public class PasswordClient extends UnicastRemoteObject implements arlut.csd.gan
   {
     Properties props = new Properties();
     boolean success = true;
+    String serverhost;
 
     /* -- */
 
