@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 2002/08/07 03:56:45 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2002/11/01 02:25:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -336,11 +336,7 @@ public class VectorUtils {
 
   public static Vector difference(Vector vectA, Vector vectB)
   {
-    Hashtable 
-      workSetB = new Hashtable();
-
     Vector result = new Vector();
-    Enumeration enum;
     Object item;
 
     /* -- */
@@ -350,26 +346,48 @@ public class VectorUtils {
 	return result;
       }
 
-    if (vectB != null)
+    if (vectB == null)
       {
-	enum = vectB.elements();
+	return (Vector) vectA.clone();
+      }
 
+    if (vectA.size() + vectB.size() > 10) // ass
+      {
+	Hashtable workSetB = new Hashtable();
+	Enumeration enum;
+
+	/* -- */
+
+	enum = vectB.elements();
+    
 	while (enum.hasMoreElements())
 	  {
 	    item = enum.nextElement();
 	    workSetB.put(item, item);
 	  }
-      }
-
-    enum = vectA.elements();
 	
-    while (enum.hasMoreElements())
-      {
-	item = enum.nextElement();
+	enum = vectA.elements();
 	
-	if (!workSetB.containsKey(item))
+	while (enum.hasMoreElements())
 	  {
-	    result.addElement(item);
+	    item = enum.nextElement();
+	    
+	    if (!workSetB.containsKey(item))
+	      {
+		result.addElement(item);
+	      }
+	  }
+      }
+    else
+      {
+	for (int i = 0; i < vectA.size(); i++)
+	  {
+	    item = vectA.elementAt(i);
+
+	    if (!vectB.contains(item))
+	      {
+		result.addElement(item);
+	      }
 	  }
       }
 
