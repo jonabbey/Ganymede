@@ -7,10 +7,10 @@
    
    Created: 22 March 2004
 
-   Last Revision Changed: $Rev: 5456 $
-   Last Changed By: $Author: deepak $
-   Last Mod Date: $Date: 2004-07-19 15:57:58 -0500 (Mon, 19 Jul 2004) $
-   SVN URL: $HeadURL: http://db1/svn/ganymede/trunk/ddroid/src/schemas/gasharl/src/arlut/csd/ddroid/gasharl/LDAPBuilderTask.java $
+   Last Revision Changed: $Rev$
+   Last Changed By: $Author$
+   Last Mod Date: $Date$
+   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 

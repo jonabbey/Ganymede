@@ -7,7 +7,7 @@
    Created: 23 April 1998
    Release: $Name:  $
    Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:01 $
+   Last Mod Date: $Date$
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------

@@ -7,7 +7,7 @@
    Created: 15 October 1997
    Release: $Name:  $
    Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2003/03/12 03:48:40 $
+   Last Mod Date: $Date$
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -426,7 +426,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // we don't want to mess with the available-network
     // management code if we are doing bulk-loading.
     
-    if (!gSession.enableOversight || !gSession.enableWizards)
+    if (!gSession.enableOversight)
       {
 	return null;
       }
