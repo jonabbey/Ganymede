@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.52 $ %D%
+   Version: $Revision: 1.53 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -124,7 +124,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     category = null;
     sortedFields = new Vector();
     fieldHash = new Hashtable();
-    objectHash = new Hashtable();
+    objectHash = new Hashtable(4000);
     maxid = 0;
     lastChange = new Date();
 
@@ -697,7 +697,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     //	System.err.println("DBObjectBase.receive(): reading " + object_count + " objects");
     //      }
 
-    temp_val = (object_count > 0) ? object_count : 100;
+    temp_val = (object_count > 0) ? object_count : 4000;
 
     objectHash = new Hashtable(temp_val, (float) 0.5);
 
@@ -927,7 +927,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    try
 	      {
 		Ganymede.debug("Created new object : " + e_object.getLabel());
-		db_field[] fields = e_object.listFields();
+		db_field[] fields = e_object.listFields(false);
 		
 		for (int i = 0; i < fields.length; i++)
 		  {
@@ -956,10 +956,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   synchronized int getNextID()
   {
-    if (debug)
-      {
-	System.err.println("DBObjectBase.getNextID(): " + object_name + "'s maxid is " + maxid);
-      }
+    //    if (debug)
+    //      {
+    //	System.err.println("DBObjectBase.getNextID(): " + object_name + "'s maxid is " + maxid);
+    //      }
+
     return ++maxid;
   }
 
@@ -1213,24 +1214,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * Returns true if the current session is permitted to
    * create an object of this type.
    *
-   */
-
-  public boolean canCreate(DBSession session)
-  {
-    return objectHook.canCreate(session);
-  }
-
-  /**
-   *
-   * Returns true if the current session is permitted to
-   * create an object of this type.
-   *
    * @see arlut.csd.ganymede.Base
    */
 
   public boolean canCreate(Session session)
   {
-    return objectHook.canCreate((DBSession) session);
+    return objectHook.canCreate(session);
   }
 
   /**
