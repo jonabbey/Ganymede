@@ -8,8 +8,8 @@
 
    Created: 28 April 1999
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/10/13 20:02:16 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/01/14 00:52:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -138,6 +138,25 @@ public class stopServer {
 	System.exit(1);
       }
 
+    if (defaultrootpassProperty == null || defaultrootpassProperty.equals(""))
+      {
+	java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
+
+	System.out.print("Ganymede server admin password:");
+
+	try
+	  {
+	    defaultrootpassProperty = in.readLine();
+	  }
+	catch (IOException ex)
+	  {
+	    ex.printStackTrace();
+	    System.exit(1);
+	  }
+
+	System.out.println();
+      }
+
     System.out.println("Ganymede stopServer: Shutting down Ganymede server");
 
     try
@@ -215,13 +234,12 @@ public class stopServer {
     if (rootname == null)
       {
 	System.err.println("Couldn't get the root name property");
-	success = false;
+	rootname = "supergash";
       }
 
     if (defaultrootpassProperty == null)
       {
 	System.err.println("Couldn't get the default rootname password property");
-	success = false;
       }
 
     // get the registry port number

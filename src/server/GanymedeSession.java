@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.166 $
-   Last Mod Date: $Date: 2000/01/08 03:28:59 $
+   Version: $Revision: 1.167 $
+   Last Mod Date: $Date: 2000/01/14 00:52:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -125,7 +125,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.166 $ $Date: 2000/01/08 03:28:59 $
+ * @version $Revision: 1.167 $ $Date: 2000/01/14 00:52:20 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -720,6 +720,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   void forceOff(String reason)
   {
+    final String myReason = reason;
+    final GanymedeSession me = this;
+
+    /* -- */
+
     synchronized (forceLock)
       {
 	if (forcing_off || !logged_in)
@@ -750,41 +755,38 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      {
 		// ok, they're already gone.. (?)
 	      }
+
+	    // Construct a vector of invid's to place in the log entry we
+	    // are about to create.  This lets us search the log easily.
+
+	    Vector objects = new Vector();
+	    
+	    if (userInvid != null)
+	      {
+		objects.addElement(userInvid);
+	      }
+	    
+	    if (personaInvid != null)
+	      {
+		objects.addElement(personaInvid);
+	      }
+
+	    if (Ganymede.log != null)
+	      {
+		Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
+							   "Abnormal termination for username: " + username + "\n" +
+							   myReason,
+							   userInvid,
+							   username,
+							   objects,
+							   null));
+	      }
+	    
+	    me.logout(true);		// keep logout from logging a normal logout
 	  }
       }}, "Client Disconnector Thread");
 
     forceThread.start();
-
-    // and while our background thread is attempting to tell the client
-    // about the disconnect, we'll go ahead and clean up here.
-
-    // Construct a vector of invid's to place in the log entry we
-    // are about to create.  This lets us search the log easily.
-
-    Vector objects = new Vector();
-
-    if (userInvid != null)
-      {
-	objects.addElement(userInvid);
-      }
-
-    if (personaInvid != null)
-      {
-	objects.addElement(personaInvid);
-      }
-
-    if (Ganymede.log != null)
-      {
-	Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
-						   "Abnormal termination for username: " + username + "\n" +
-						   reason,
-						   userInvid,
-						   username,
-						   objects,
-						   null));
-      }
-
-    this.logout(true);		// keep logout from logging a normal logout
   }
 
   /**
