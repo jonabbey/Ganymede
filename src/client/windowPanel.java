@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,8 +42,10 @@ import arlut.csd.JDataComponent.*;
  * and maintaining the window list in the menubar.  
  */
 
-public class windowPanel extends JDesktopPane implements PropertyChangeListener, ActionListener{  
+public class windowPanel extends JDesktopPane implements InternalFrameListener, ActionListener{  
   boolean debug = true;
+
+  final boolean debugProperty = false;
   
   // --
 
@@ -114,6 +116,10 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
       {
 	System.out.println("Initializing windowPanel");
       }
+
+    // This is supposed to give us window outline dragging, instead of
+    // full window dragging.  Should be faster.
+    putClientProperty("JDesktopPane.dragMode", "outline");
 
     removeAllMI = new JMenuItem("Remove All Windows");
     removeAllMI.addActionListener(this);
@@ -470,7 +476,7 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 	rt.setMaximizable(true);
 	rt.setIconifiable(true);
 
-	rt.addPropertyChangeListener(this);
+	rt.addInternalFrameListener(this);
 
 	if (windowCount > 10)
 	  {
@@ -861,47 +867,41 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
 
   // This is for the beans, when a JInternalFrame closes
 
-  public void propertyChange(java.beans.PropertyChangeEvent event)
+  public void internalFrameClosed(InternalFrameEvent event)
   {
-    //System.out.println("propertyChange: " + event.getSource());
-    //System.out.println("getPropertyName: " + event.getPropertyName());
-    //System.out.println("getNewValue: " + event.getNewValue());
-
-    if ((event.getPropertyName().equals("isClosed")) && ((Boolean)event.getNewValue()).booleanValue())
+    if (debug)
       {
-	if (event.getSource() instanceof JInternalFrame)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Closing an internal frame");
-	      }
-
-	    if (event.getSource() instanceof framePanel)
-	      {
-		((framePanel)event.getSource()).stopLoading();
-	      }
-	    //System.out.println("It's a JInternalFrame");
-	    String oldTitle = ((JInternalFrame)event.getSource()).getTitle();
-	      
-	    if (oldTitle == null)
-	      {
-		System.out.println("Title is null");
-	      }
-	    else
-	      {
-		//System.out.println(" Removing button- " + oldTitle);
-		  
-		windowList.remove(oldTitle);
-
-		updateMenu();
-	      }
-	  }
-	else
-	  {
-	    System.out.println("propertyChange from something other than a JInternalFrame");
-	  }
+	System.out.println("Closing an internal frame");
       }
+    
+    if (event.getSource() instanceof framePanel)
+      {
+	((framePanel)event.getSource()).stopLoading();
+      }
+    //System.out.println("It's a JInternalFrame");
+    String oldTitle = ((JInternalFrame)event.getSource()).getTitle();
+    
+    if (oldTitle == null)
+      {
+	System.out.println("Title is null");
+      }
+    else
+      {
+	//System.out.println(" Removing button- " + oldTitle);
+	
+	windowList.remove(oldTitle);
+	
+	updateMenu();
+      }
+    
   }
+
+  public void internalFrameDeiconified(InternalFrameEvent e) {}
+  public void internalFrameClosing(InternalFrameEvent e) {}
+  public void internalFrameActivated(InternalFrameEvent e) {}
+  public void internalFrameDeactivated(InternalFrameEvent e) {}
+  public void internalFrameOpened(InternalFrameEvent e) {}
+  public void internalFrameIconified(InternalFrameEvent e) {}
  
   void addRow(JComponent parent, Component comp,  String label, int row)
   {
