@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.105 $ %D%
+   Version: $Revision: 1.106 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1047,15 +1047,18 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    inf = (InvidDBField) owner.getField(SchemaConstants.OwnerObjectsOwned);
 
-	    temp = inf.getValuesLocal();
-
-	    for (int j = 0; j < temp.size(); j++)
+	    if (inf != null)
 	      {
-		inv = (Invid) temp.elementAt(j);
-		
-		if (inv.getType() == SchemaConstants.OwnerBase)
+		temp = inf.getValuesLocal();
+
+		for (int j = 0; j < temp.size(); j++)
 		  {
-		    children.addElement(inv);
+		    inv = (Invid) temp.elementAt(j);
+		    
+		    if (inv.getType() == SchemaConstants.OwnerBase)
+		      {
+			children.addElement(inv);
+		      }
 		  }
 	      }
 	  }
