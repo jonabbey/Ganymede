@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2001/11/14 00:40:11 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2001/11/15 01:45:56 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.14 $ $Date: 2001/11/14 00:40:11 $ $Name:  $
+ * @version $Revision: 1.15 $ $Date: 2001/11/15 01:45:56 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -960,11 +960,14 @@ public class xmlfield implements FieldType {
 	      {
 		Vector newValues = VectorUtils.difference(addIfNotPresentValues, field.getValuesLocal());
 
-		result = field.addElements(newValues);
-
-		if (result != null && !result.didSucceed())
+		if (newValues.size() != 0)
 		  {
-		    return result;
+		    result = field.addElements(newValues);
+		    
+		    if (result != null && !result.didSucceed())
+		      {
+			return result;
+		      }
 		  }
 	      }
 
