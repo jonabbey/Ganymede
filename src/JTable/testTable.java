@@ -4,7 +4,7 @@
   A test framework for the baseTable GUI component
 
   Created: 5 June 1996
-  Version: $Revision: 1.3 $ %D%
+  Version: $Revision: 1.4 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -113,7 +113,7 @@ public class testTable extends Applet implements rowSelectCallback, ActionListen
   {
     setLayout(new BorderLayout());
 
-    statusField = new TextField("rowTable Testing", 40);
+    statusField = new TextField("rowTable Testing", 40, null);
     statusField.setEditable(false);
     statusField.setBackground(Color.red);
     statusField.setForeground(Color.white);
@@ -189,6 +189,10 @@ public class testTable extends Applet implements rowSelectCallback, ActionListen
   public void rowUnSelected(Object key, boolean endSelected)
   {
     labelField.setText(key + " unselected");
+  }
+
+  public void rowMenuPerformed(Object key, ActionEvent e)
+  {
   }
 
   public static void main(String[] argv)
