@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -253,6 +253,7 @@ public class DBJournal implements ObjectStatus {
     short obj_type, obj_id;
     DBObjectBase base;
     DBObject obj;
+    String status = null;
 
     /* - */
 
@@ -274,7 +275,8 @@ public class DBJournal implements ObjectStatus {
 		  {
 		    System.err.println("DBJournal.load(): Transaction open string mismatch");
 		  }
-		throw new IOException();
+
+		throw new IOException("DBJournal.load(): Transaction open string mismatch");
 	      }
 	    else
 	      {
@@ -283,11 +285,15 @@ public class DBJournal implements ObjectStatus {
 		    System.err.println("DBJournal.load(): Transaction open string match OK");
 		  }
 	      }
+	    
+	    status = "Reading transaction time";
 
 	    EOFok = false;
 
 	    transaction_time = jFile.readLong();
 	    transactionDate = new Date(transaction_time);
+
+	    status = "Reading object count";
 
 	    //	    if (debug)
 	    //	      {
@@ -312,7 +318,12 @@ public class DBJournal implements ObjectStatus {
 
 	    for (int i = 0; i < object_count; i++)
 	      {
+		status = "Reading operation code for object " + i;
+
 		operation = jFile.readByte();
+
+		status = "Reading object type for object " + i;
+
 		obj_type = jFile.readShort();
 		base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
 
@@ -320,6 +331,8 @@ public class DBJournal implements ObjectStatus {
 		  {
 		  case CREATE:
 		
+		    status = "Reading created object " + i;
+
 		    obj = new DBObject(base, jFile, true);
 		
 		    System.err.print("Create: " + obj.getInvid());
@@ -335,6 +348,8 @@ public class DBJournal implements ObjectStatus {
 
 		  case EDIT:
 
+		    status = "Reading edited object " + i;
+
 		    DBObjectDeltaRec delta = new DBObjectDeltaRec(jFile);
 
 		    short typecode = delta.invid.getType();
@@ -349,8 +364,6 @@ public class DBJournal implements ObjectStatus {
 			System.err.println("DBJournal.load(): modified object in the journal does not previously exist in DBStore.");
 		      }
 
-		    System.err.print("Edit: " + obj.getInvid());
-
 		    if (debug)
 		      {
 			System.err.print("Edit: ");
@@ -363,9 +376,9 @@ public class DBJournal implements ObjectStatus {
 
 		  case DELETE:
 
-		    obj_id = jFile.readShort();
+		    status = "Reading deleted object " + i;
 
-		    System.err.println("Delete: " + base.object_name + ":" + obj_id);
+		    obj_id = jFile.readShort();
 
 		    if (debug)
 		      {
@@ -377,11 +390,15 @@ public class DBJournal implements ObjectStatus {
 		  }
 	      }
 
+	    status = "Reading close transaction information";
+
 	    if ((jFile.readUTF().compareTo(CLOSETRANS) != 0) || 
 		(jFile.readLong() != transaction_time))
 	      {
-		throw new IOException();
+		throw new IOException("Transaction close timestamp mismatch");
 	      }
+
+	    status = "Finished transaction";
 
 	    if (debug)
 	      {
@@ -409,15 +426,17 @@ public class DBJournal implements ObjectStatus {
 	      {
 		System.err.println("All transactions processed successfully");
 	      }
+
 	    return true;
 	  }
 	else
 	  {
 	    if (debug)
 	      {
-		System.err.println("DBJournal file unexpectedly ended.");
+		System.err.println("DBJournal file unexpectedly ended: state = " + status);
 	      }
-	    throw new IOException();
+
+	    throw new IOException("DBJournal file unexpectedly ended: state = " + status);
 	  }
       }
   }
