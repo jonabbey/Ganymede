@@ -92,13 +92,13 @@ class GASHAdminDispatch implements Runnable {
   static final boolean debug = false;
 
   private GASHAdminFrame frame = null;
-  private Server server = null;
-  private adminSession aSession = null;
+  private Server server = null;	// remote reference
+  private adminSession aSession = null;	// remote reference
 
   private boolean tasksLoaded = false;
   private Vector tasksKnown = null;
 
-  private AdminAsyncResponder asyncPort = null;
+  private AdminAsyncResponder asyncPort = null;	// remote reference
 
   private Thread asyncPollThread = null;
   private volatile boolean okayToPoll = false;
@@ -866,7 +866,7 @@ class GASHAdminDispatch implements Runnable {
     handleReturnVal(aSession.runEmbeddedSweep());
   }
 
-  void pullSchema() throws RemoteException
+  GASHSchema pullSchema() throws RemoteException
   {
     SchemaEdit editor = null;
 
@@ -889,6 +889,7 @@ class GASHAdminDispatch implements Runnable {
     if (editor == null)
       {
 	System.err.println("null editor handle");
+	return null;
       }
     else
       {
@@ -896,13 +897,23 @@ class GASHAdminDispatch implements Runnable {
 	  {
 	    System.err.println("Got SchemaEdit handle");
 	  }
-	
-	new GASHSchema("Schema Editor", editor, frame.schemaMI);
-      }
 
-    // the GASHSchema constructor pops itself up at the end of
-    // initialization, and has its own methods for closing itself
-    // down.
+	// the GASHSchema constructor pops itself up at the end of
+	// initialization
+	
+	return new GASHSchema("Schema Editor", editor, this);
+      }
+  }
+
+  /**
+   * <p>This method is designed to be called by the GASHSchema schema editor when
+   * it closes down.</p>
+   */
+
+  public void clearSchemaEditor()
+  {
+    frame.schemaMI.setEnabled(true);
+    GASHAdminFrame.schemaEditor = null;
   }
 
   /**

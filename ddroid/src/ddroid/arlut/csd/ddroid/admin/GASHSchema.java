@@ -93,10 +93,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   // --
 
-  JMenuItem schemaMI;
-
   SchemaEdit			// remote reference
     editor;
+
+  GASHAdminDispatch
+    dispatch;
 
   java.awt.Image
     questionImage,
@@ -187,12 +188,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   /* -- */
 
-  public GASHSchema(String title, SchemaEdit editor, JMenuItem schemaMI)
+  public GASHSchema(String title, SchemaEdit editor, GASHAdminDispatch dispatch)
   {
     super(title);
 
-    this.schemaMI = schemaMI;
     this.editor = editor;
+    this.dispatch = dispatch;
 
     questionImage = PackageResources.getImageResource(this, "question.gif", getClass());
 
@@ -1393,43 +1394,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (event.getSource() == okButton)
       {
-	try
-	  {
-	    editor.commit();
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't commit: " + ex);
-	  }
-
-	editor = null;
-
-	schemaMI.setEnabled(true);
-	setVisible(false);
-
-	// speed up GC a little bit
-
-	cleanup();
+	commit();
       }
     else if (event.getSource() == cancelButton)
       {
-	try
-	  {
-	    editor.release();
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't release: " + ex);
-	  }
-
-	editor = null;
-
-	schemaMI.setEnabled(true);
-	setVisible(false);
-
-	// speed up GC a little bit
-
-	cleanup();
+	cancel();
       }
     else
       {
@@ -1454,6 +1423,48 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       {
 	super.processWindowEvent(e);
       }
+  }
+
+  public void commit()
+  {
+    if (editor == null)
+      {
+	return;
+      }
+
+    try
+      {
+	editor.commit();
+	editor = null;
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("Couldn't commit: " + ex);
+      }
+
+    setVisible(false);
+    cleanup();
+  }
+
+  public void cancel()
+  {
+    if (editor == null)
+      {
+	return;
+      }
+
+    try
+      {
+	editor.release();
+	editor = null;
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("Couldn't release: " + ex);
+      }
+
+    setVisible(false);
+    cleanup();
   }
 
   /**
@@ -1516,7 +1527,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				// please
 
     this.tree = null;
-    this.schemaMI = null;
+
+    this.editor = null;
+    this.dispatch.clearSchemaEditor();
+    this.dispatch = null;
 
     this.removeAll();		// should be done on GUI thread
   }

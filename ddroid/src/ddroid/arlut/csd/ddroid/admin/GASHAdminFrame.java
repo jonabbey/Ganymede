@@ -90,6 +90,7 @@ import arlut.csd.Util.*;
 class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
 
   static GASHAdminDispatch adminDispatch = null;
+  static GASHSchema schemaEditor = null;
   static final boolean debug = false;
   static String debugFilename = null;
 
@@ -878,11 +879,16 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
     else if (event.getSource() == schemaMI)
       {
+	if (GASHAdminFrame.schemaEditor != null)
+	  {
+	    return;
+	  }
+
 	schemaMI.setEnabled(false);
 
 	try
 	  {
-	    adminDispatch.pullSchema();
+	    GASHAdminFrame.schemaEditor = adminDispatch.pullSchema();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1056,6 +1062,14 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   {
     if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
+	// make sure that we cancel any schema editing in process if
+	// we have it open and we are made to close the main window
+
+	if (GASHAdminFrame.schemaEditor != null)
+	  {
+	    GASHAdminFrame.schemaEditor.cancel();
+	  }
+
 	disconnect();
       }
 	

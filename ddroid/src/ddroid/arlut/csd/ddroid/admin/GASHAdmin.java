@@ -131,7 +131,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   protected boolean connected = false;
 
-  static Server server = null;
+  static Server server = null;	// remote reference
   private static Container appletContentPane = null;
   static Image admin_logo = null;
 
