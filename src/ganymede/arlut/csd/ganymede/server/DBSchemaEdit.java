@@ -925,6 +925,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     try
       {
+	Ganymede.baseTransport = null; // to force internalSession to regenerate it next
 	Ganymede.baseTransport = Ganymede.internalSession.getBaseList();
       }
     catch (NotLoggedInException ex)
