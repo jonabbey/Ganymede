@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.27 $
-# $Date: 2000/12/01 17:57:02 $
+# $Revision: 1.28 $
+# $Date: 2000/12/03 11:55:19 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -282,7 +282,7 @@ if ($version == 2) {
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
                "PROPERTIES" => "$installdir/ganymede.properties",
-               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/jars/custom.jar",
+               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/schema/custom.jar",
 	       "RMIPORT" => $vars{"REGISTRYPORT"},
 	       "INSTALLDIR" => $installdir);
 
