@@ -5,7 +5,7 @@
    A simple label supporting multiple lines.
 
    Created: 28 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,7 +25,7 @@ import arlut.csd.Util.WordWrap;
 
 ------------------------------------------------------------------------------*/
 
-public class JMultiLineLabel extends JPanel {
+public class JMultiLineLabel extends JTextArea {
 
   final static boolean debug = false;
 
@@ -46,9 +46,6 @@ public class JMultiLineLabel extends JPanel {
     line_ascent,
     line_height,
     max_width;
-  
-  int[]
-    line_widths;
 
   String 
     text;  //This is the unwrapped line of text.
@@ -56,14 +53,8 @@ public class JMultiLineLabel extends JPanel {
   String[]
     lines;
 
-  JLabel[]
-    labels;
-
   boolean
     haveMeasured = false;
-
-  GridBagLayout gbl;
-  GridBagConstraints gbc;
 
   /*
    * Constructors
@@ -81,13 +72,9 @@ public class JMultiLineLabel extends JPanel {
 	System.out.println("Starting new JMLL");
       }
 
-    this.alignment = alignment;
     this.text = label;
-    gbl = new GridBagLayout();
-    gbc = new GridBagConstraints();
 
-    setLayout(gbl);
-    gbc.gridx = 0;
+    setOpaque(false);
 
     wrap(40);  // This does a newLabel call
   }
@@ -118,6 +105,11 @@ public class JMultiLineLabel extends JPanel {
    */
   public void wrap(int lineLength)
   {
+    if (text == null)
+      {
+	System.out.println("Whoa, text is null");
+      }
+    
     this.text = WordWrap.wrap(text, lineLength, null);
     newLabel(this.text);
   }
@@ -132,43 +124,17 @@ public class JMultiLineLabel extends JPanel {
       {
 	System.out.println("newLabel");
       }
+    
+    
 
-    switch (alignment)
-      {
-      case LEFT:
-	gbc.anchor = GridBagConstraints.WEST;
-	break;
-      case RIGHT:
-	gbc.anchor = GridBagConstraints.EAST;
-	break;
+    super.setText(label);
+  }
 
-      case CENTER:
-      default:
-	gbc.anchor = GridBagConstraints.CENTER;
-	break;
-      }
-
-    StringTokenizer t = new StringTokenizer(label, "\n");
-    num_lines = t.countTokens(); // Should this be +1?
-
-    labels = new JLabel[num_lines];
-    lines = new String[num_lines];
-    line_widths = new int[num_lines];
-    this.removeAll();
-
-    for (int i =0; i < num_lines; i++)
-      {
-	lines[i] = t.nextToken().trim();
-	labels[i] = new JLabel(lines[i], alignment);
-
-	if (debug)
-	  {
-	    System.out.println("Adding new label");
-	  }
-
-	gbc.gridy = i;
-	gbl.setConstraints(labels[i], gbc);
-	add(labels[i]);
-      }
+  public static void main(String[] argv)
+  {
+    JFrame frame = new JFrame();
+    frame.getContentPane().add(new JMultiLineLabel("This is a \n\n\n break.  bunch of lines all over the place, should be pretty long, i don't know, but I think it should wrap \n now."));
+    frame.pack();
+    frame.show();
   }
 }
