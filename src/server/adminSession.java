@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/06/15 02:48:31 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/07/08 04:27:45 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import java.util.Date;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Revision: 1.12 $ %D%
+ * @version $Revision: 1.13 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -92,41 +92,31 @@ public interface adminSession extends Remote {
    * Kick a user off of the Ganymede server on behalf of this admin console
    */
 
-  boolean     kill(String user) throws RemoteException;
+  ReturnVal     kill(String user) throws RemoteException;
 
   /**
    * Kick all users off of the Ganymede server on behalf of this admin console
    */
 
-  boolean     killAll() throws RemoteException;
-
-  /**
-   * <P>Get information about a particular user that 
-   * is logged in.  We will eventually want to return
-   * a db_object, probably.</P>
-   *
-   * <P>Currently a no-op.</P>
-   */
-
-  String      getInfo(String user) throws RemoteException;
+  ReturnVal     killAll() throws RemoteException;
 
   /**
    * <p>shutdown the server cleanly, on behalf of this admin console.</p>
    */
 
-  boolean     shutdown() throws RemoteException;
+  ReturnVal     shutdown() throws RemoteException;
 
   /**
    * <P>dump the current state of the db to disk</P>
    */
 
-  boolean     dumpDB() throws RemoteException;
+  ReturnVal     dumpDB() throws RemoteException;
 
   /**
    * <P>dump the current db schema to disk</P>
    */
 
-  boolean     dumpSchema() throws RemoteException;
+  ReturnVal     dumpSchema() throws RemoteException;
 
   /**
    * <P>This method causes the server to reload any registered
@@ -144,7 +134,7 @@ public interface adminSession extends Remote {
    * <P>Better to shutdown and restart the server.</P>
    */
 
-  boolean     reloadCustomClasses() throws RemoteException;
+  ReturnVal     reloadCustomClasses() throws RemoteException;
 
   /**
    *
@@ -152,20 +142,50 @@ public interface adminSession extends Remote {
    *
    */
 
-  void        runInvidTest() throws RemoteException;
+  ReturnVal        runInvidTest() throws RemoteException;
 
   /**
-   *
-   * run a long-running verification suite on the invid links
-   *
+   * <P>Removes any invid pointers in the Ganymede database whose
+   * targets are not properly defined.  Useful after dumping a
+   * schema with {@link arlut.csd.ganymede.adminSession#dumpSchema() dumpSchema()},
+   * which can leave lingering invid pointers as a result of
+   * the simplicity of its data filtering.</P>
    */
 
-  void        runInvidSweep() throws RemoteException;
+  ReturnVal     runInvidSweep() throws RemoteException;
 
-  boolean     runTaskNow(String name) throws RemoteException;
-  boolean     stopTask(String name) throws RemoteException;
-  boolean     disableTask(String name) throws RemoteException;
-  boolean     enableTask(String name) throws RemoteException;
+  /**
+   * <P>Causes a pre-registered task in the Ganymede server
+   * to be executed as soon as possible.  This method call
+   * will have no effect if the task is currently running.</P>
+   */
+
+  ReturnVal     runTaskNow(String name) throws RemoteException;
+
+  /**
+   * <P>Causes a running task to be stopped as soon as possible.
+   * This is not always a safe operation, as the task is stopped
+   * abruptly, with possible consequences.  Use with caution.</P>
+   */
+
+  ReturnVal     stopTask(String name) throws RemoteException;
+
+  /**
+   * <P>Causes a registered task to be made ineligible for execution
+   * until {@link arlut.csd.ganymede.adminSession#enableTask(java.lang.String) enableTask()}
+   * is called.  This method will not stop a task that is currently
+   * running.</P>
+   */
+
+  ReturnVal     disableTask(String name) throws RemoteException;
+
+  /**
+   * <P>Causes a task that was temporarily disabled by
+   * {@link arlut.csd.ganymede.adminSession#disableTask(java.lang.String) disableTask()}
+   * to be available for execution again.</P>
+   */
+
+  ReturnVal     enableTask(String name) throws RemoteException;
 
   /**
    *

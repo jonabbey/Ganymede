@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 1999/06/19 03:21:01 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 1999/07/08 04:27:43 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -91,8 +91,25 @@ import arlut.csd.Util.*;
 
 public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
+  /**
+   * We assume that we're only ever going to have one console running in
+   * any given JVM, we keep track of it here as a convenience.
+   */
+
   static GASHAdmin applet = null;
+
+  /**
+   * We keep track of the single admin window that gets opened up here.
+   */
+
   static GASHAdminFrame frame = null;
+
+  /**
+   * The iAdmin object is the remote reference to the Ganymede server
+   * used by the admin console.
+   */
+
+  static iAdmin admin = null;
 
   /**
    * If true, we are running as an applet and are limited by the Java sandbox.
@@ -102,17 +119,9 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
   static boolean WeAreApplet = true;
 
-  static String rootname = null;
   static String serverhost = null;
   static int registryPortProperty = 1099;
   static String url = null;
-
-  /**
-   * Background thread used to attempt to get the initial RMI connection to the
-   * Ganymede server.
-   */
-
-  protected Thread my_thread = new Thread(this);
 
   protected boolean connected = false;
 
@@ -133,6 +142,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   public GASHAdmin() 
   {
     admin_logo = PackageResources.getImageResource(this, "admin.jpg", getClass());
+    GASHAdmin.applet = this;
   }
 
   public static void main(String[] argv)
@@ -162,7 +172,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	GASHAdminFrame.debugFilename = argv[1];
       }
 
-    applet = new GASHAdmin();
+    new GASHAdmin();		// this constructor sets static admin ref
 
     JFrame loginFrame = new JFrame("Admin console login");
 
@@ -181,53 +191,50 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   
   public void init()
   {
-    applet = this;
-
-    admin_logo = PackageResources.getImageResource(this, "admin.jpg", getClass());
-
     if (WeAreApplet)
       {
-	serverhost = getParameter("ganymede.serverhost");
+	loadParameters();
 
-	String registryPort = getParameter("ganymede.registryPort");
-
-	if (registryPort != null)
-	  {
-	    try
-	      {
-		registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	      }
-	    catch (NumberFormatException ex)
-	      {
-		System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-				   registryPort);
-	      }
-	  }
-
-	if (serverhost == null)
-	  {
-	    System.err.println("Couldn't get the server host property");
-	    throw new RuntimeException("Couldn't get the server host property");
-	  }
-	else
-	  {
-	    url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
-	  }
-
-	rootname = getParameter("ganymede.rootname");
-
-	if (rootname == null)
-	  {
-	    rootname = "supergash";
-	  }
       }
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add("Center", createLoginPanel());
 
-    /* Get a reference to the server */
+    /* Spawn a thread to try to get a reference to the server */
 
-    my_thread.start();
+    new Thread(this).start();
+  }
+
+  public void stop()
+  {
+    System.err.println("applet stop()");
+
+    if (admin != null)
+      {
+	try
+	  {
+	    admin.disconnect();
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+      }
+  }
+
+  public void destroy()
+  {
+    System.err.println("applet destroy()");
+
+    if (admin != null)
+      {
+	try
+	  {
+	    admin.disconnect();
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+      }
   }
 
   public JPanel createLoginPanel()
@@ -419,62 +426,58 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
       }
     else if (e.getSource() == loginButton)
       {
-	iAdmin admin = applet.login(username.getText(), new String(password.getPassword()));
-
-	if (admin != null)
+	if (!connected)
 	  {
-	    username.setText("");
-	    password.setText("");
-	    quitButton.setEnabled(false);
-	    loginButton.setEnabled(false);
-	    frame = new GASHAdminFrame("Ganymede Admin Console", applet);
-	  
-	    // Now that the frame is completely initialized, tie the iAdmin object
-	    // to the frame, and vice-versa.
-	  
-	    frame.admin = admin;
-	    admin.setFrame(frame);
-	  
-	    try
-	      {
-		admin.refreshMe();
-	      }
-	    catch (RemoteException rx)
-	      {
-		System.out.println("Problem trying to refresh: " + rx);
-	      }
+	    return;
 	  }
-	else
+
+	try
+	  {
+	    admin = new iAdmin(server,
+			       username.getText(),
+			       new String(password.getPassword()));
+	  }
+	catch (RemoteException rx)
+	  {
+	    System.err.println("Error: Didn't get server reference.  Exiting now." + rx);
+	  }
+
+	if (admin == null)
 	  {
 	    password.setText("");
 	    System.out.println("Could not get admin.");
 	  }
+
+	username.setText("");
+	password.setText("");
+	quitButton.setEnabled(false);
+	loginButton.setEnabled(false);
+
+	frame = new GASHAdminFrame("Ganymede Admin Console", applet);
+	
+	// Now that the frame is completely initialized, tie the iAdmin object
+	// to the frame, and vice-versa.
+	
+	frame.admin = admin;
+	admin.setFrame(frame);
+	
+	try
+	  {
+	    admin.refreshMe();
+	  }
+	catch (RemoteException rx)
+	  {
+	    System.out.println("Problem trying to refresh: " + rx);
+	  }
       }
   }
 
-  public iAdmin login(String username, String password)
-  {
-    iAdmin admin = null;
-
-    /* -- */
-    
-    if (!connected)
-      {
-	return null;
-      }
-
-    try
-      {
-	admin = new iAdmin(frame, server, username, password);
-      }
-    catch (RemoteException rx)
-      {
-	System.err.println("Error: Didn't get server reference.  Exiting now." + rx);
-	return null;
-      }
-    
-    return admin;
-  }
+  /**
+   * <P>Private method to load the Ganymede console's parameters
+   * from a file.  Used when GASHAdmin is run from the command line..
+   * {@link arlut.csd.ganymede.GASHAdmin#loadParameters() loadParameters()}
+   * is for use in an applet context.</P>
+   */ 
 
   private static boolean loadProperties(String filename)
   {
@@ -521,14 +524,44 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
       }
 
-    rootname = props.getProperty("ganymede.rootname");
+    return success;
+  }
 
-    if (rootname == null)
+  /**
+   * <P>Private method to load the Ganymede console's parameters
+   * from an applet's HTML parameters.  Used when GASHAdmin is run as an applet..
+   * {@link arlut.csd.ganymede.GASHAdmin#loadProperties(java.lang.String) loadProperties()}
+   * is for use in an application context.</P>
+   */ 
+
+  private void loadParameters()
+  {
+    serverhost = getParameter("ganymede.serverhost");
+
+    String registryPort = getParameter("ganymede.registryPort");
+    
+    if (registryPort != null)
       {
-	rootname = "supergash";
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from ganymede applet parameters: " + 
+			       registryPort);
+	  }
       }
 
-    return success;
+    if (serverhost == null)
+      {
+	System.err.println("Couldn't get the server host property");
+	throw new RuntimeException("Couldn't get the server host property");
+      }
+    else
+      {
+	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
+      }
   }
 }
 
@@ -578,7 +611,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   StringDialog
     shutdownDialog = null,
     dumpDialog = null,
-    killDialog = null,
     invidTestDialog = null;
 
   String killVictim = null;
@@ -976,6 +1008,11 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     pack();
     show();
 
+    // along with processWindowEvent(), this method allows us
+    // to properly handle window system close events.
+
+    enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+
     if (debugFilename != null)
       {
 	try
@@ -989,6 +1026,35 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
   }
 
+  /**
+   * local convenience method to handle disconnecting the admin console
+   */
+
+  void disconnect()
+  {
+    try
+      {
+	admin.disconnect();
+      }
+    catch (RemoteException ex)
+      {
+	System.err.println("Couldn't logout cleanly: " + ex);
+      }
+    finally
+      {
+	adminPanel.quitButton.setEnabled(true);
+	adminPanel.loginButton.setEnabled(true);
+	setVisible(false);
+
+	// This shouldn't kill everything off, but it does for now.  Need to fix this later.
+	    
+	if (!GASHAdmin.WeAreApplet)
+	  {
+	    System.exit(0);
+	  }
+      }
+  }
+
   // our button / dialog handler
 
   public void actionPerformed(ActionEvent event)
@@ -997,27 +1063,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       {
 	System.err.println("Quitting");
 
-	try
-	  {
-	    admin.disconnect();
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("Couldn't logout cleanly: " + ex);
-	  }
-	finally
-	  {
-	    adminPanel.quitButton.setEnabled(true);
-	    adminPanel.loginButton.setEnabled(true);
-	    setVisible(false);
-
-	    // This shouldn't kill everything off, but it does for now.  Need to fix this later.
-	    
-	    if (!GASHAdmin.WeAreApplet)
-	      {
-		System.exit(0);
-	      }
-	  }
+	this.disconnect();
       }
     else if (event.getSource() == dumpMI)
       {
@@ -1128,22 +1174,27 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  {
 	    System.err.println("Affirmative shutdown request");
 
+	    boolean success = true;
+
 	    try
 	      {
-		admin.shutdown();
+		success = admin.shutdown();
 	      }
 	    catch (RemoteException ex)
 	      {
 		admin.forceDisconnect("Couldn't talk to server" + ex);
 	      }
 
-	    adminPanel.quitButton.setEnabled(true);
-	    adminPanel.loginButton.setEnabled(true);
-	    setVisible(false);
-    
-	    if (!GASHAdmin.WeAreApplet)
+	    if (success)
 	      {
-		System.exit(0);
+		adminPanel.quitButton.setEnabled(true);
+		adminPanel.loginButton.setEnabled(true);
+		setVisible(false);
+		
+		if (!GASHAdmin.WeAreApplet)
+		  {
+		    System.exit(0);
+		  }
 	      }
 	  }
       }
@@ -1214,12 +1265,10 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	killVictim = (String) key;
 
-	killDialog = new StringDialog(this,
-				      "Confirm User Kill",
-				      "Are you sure you want to disconnect user " + key + "?",
-				      "Yes", "No", question);
-
-	if (killDialog.DialogShow() != null)
+	if (new StringDialog(this,
+			     "Confirm User Kill",
+			     "Are you sure you want to disconnect user " + key + "?",
+			     "Yes", "No", question).DialogShow() != null)
 	  {
 	    System.err.println("Affirmative kill request");
 
@@ -1287,6 +1336,24 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	  }
       }
   }
+
+  /**
+   * <P>Method to handle properly logging out if the main admin
+   * frame is closed by the window system.</P>
+   *
+   * <P>We do an enableEvents(AWT.WINDOW_EVENT_MASK) in the
+   * GASHAdminFrame constructor to activate this method.</P>
+   */
+
+  protected void processWindowEvent(WindowEvent e) 
+  {
+    if (e.getID() == WindowEvent.WINDOW_CLOSING)
+      {
+	disconnect();
+      }
+	
+    super.processWindowEvent(e);
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -1302,6 +1369,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 class iAdmin extends UnicastRemoteObject implements Admin {
 
+  static final boolean debug = false;
+
   private GASHAdminFrame frame = null;
   private Server server = null;
   private adminSession aSession = null;
@@ -1315,11 +1384,10 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   /* -- */
 
-  public iAdmin(GASHAdminFrame frame, Server server, String name, String pass) throws RemoteException
+  public iAdmin(Server server, String name, String pass) throws RemoteException
   {
     // UnicastRemoteServer can throw RemoteException 
 
-    this.frame = frame;
     this.server = server;
     this.adminName = name;
     this.adminPass = pass;
@@ -1623,51 +1691,27 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void kill(String username) throws RemoteException
   {
-    aSession.kill(username);
+    handleReturnVal(aSession.kill(username));
   }
 
   void runTaskNow(String taskName) throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
-      {
-	getDialog().DialogShow();
-	return;
-      }
-
-    aSession.runTaskNow(taskName);
+    handleReturnVal(aSession.runTaskNow(taskName));
   }
 
   void stopTask(String taskName) throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
-      {
-	getDialog().DialogShow();
-	return;
-      }
-
-    aSession.stopTask(taskName);
+    handleReturnVal(aSession.stopTask(taskName));
   }
 
   void disableTask(String taskName) throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
-      {
-	getDialog().DialogShow();
-	return;
-      }
-
-    aSession.disableTask(taskName);
+    handleReturnVal(aSession.disableTask(taskName));
   }
 
   void enableTask(String taskName) throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
-      {
-	getDialog().DialogShow();
-	return;
-      }
-
-    aSession.enableTask(taskName);
+    handleReturnVal(aSession.enableTask(taskName));
   }
 
   // ------------------------------------------------------------
@@ -1676,67 +1720,43 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   void killAll() throws RemoteException
   {
-    aSession.killAll();
+    handleReturnVal(aSession.killAll());
   }
 
-  void shutdown() throws RemoteException
+  boolean shutdown() throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
+    if (debug)
       {
-	return;
       }
 
-    aSession.shutdown();
+    ReturnVal retVal = handleReturnVal(aSession.shutdown());
+
+    return (retVal == null || retVal.didSucceed());
   }
 
   void dumpDB() throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
-      {
-	return;
-      }
-
-    aSession.dumpDB();
+    handleReturnVal(aSession.dumpDB());
   }
 
   void dumpSchema() throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
-      {
-	return;
-      }
-
-    aSession.dumpSchema();
+    handleReturnVal(aSession.dumpSchema());
   }
 
   void reloadClasses() throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
-      {
-	return;
-      }
-
-    aSession.reloadCustomClasses();
+    handleReturnVal(aSession.reloadCustomClasses());
   }
 
   void runInvidTest() throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
-      {
-	return;
-      }
-
-    aSession.runInvidTest();
+    handleReturnVal(aSession.runInvidTest());
   }
 
   void runInvidSweep() throws RemoteException
   {
-    if (!adminName.equals(GASHAdmin.rootname))
-      {
-	return;
-      }
-
-    aSession.runInvidSweep();
+    handleReturnVal(aSession.runInvidSweep());
   }
 
   void pullSchema() throws RemoteException
@@ -1772,5 +1792,127 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     // down.
   }
 
+  /**
+   * <p>This method takes a ReturnVal object from the server and, if necessary,
+   * runs through a wizard interaction sequence, possibly displaying several
+   * dialogs before finally returning a final result code.</p>
+   *
+   * <p>Use the ReturnVal returned from this function after this function is
+   * called to determine the ultimate success or failure of any operation
+   * which returns ReturnVal, because a wizard sequence may determine the
+   * ultimate result.</p>
+   *
+   * <p>This method should not be synchronized, since handleReturnVal
+   * may pop up modal (thread-blocking) dialogs, and if we we
+   * synchronize this, some Swing or AWT code seems to block on our
+   * synchronization when we do pop-up dialogs.  It's not any of my
+   * code, so I assume that AWT tries to synchronize on the frame when
+   * parenting a new dialog.</p> 
+   */
+
+  public ReturnVal handleReturnVal(ReturnVal retVal)
+  {
+    Hashtable dialogResults;
+
+    /* -- */
+
+    if (debug)
+      {
+	System.err.println("iAdmin.handleReturnVal(): Entering");
+      }
+
+    while ((retVal != null) && (retVal.getDialog() != null))
+      {
+	if (debug)
+	  {
+	    System.err.println("iAdmin.handleReturnVal(): retrieving dialog");
+	  }
+
+	JDialogBuff jdialog = retVal.getDialog();
+
+	if (debug)
+	  {
+	    System.err.println("iAdmin.handleReturnVal(): extracting dialog");
+	  }
+
+	DialogRsrc resource = jdialog.extractDialogRsrc(frame);
+
+	if (debug)
+	  {
+	    System.err.println("iAdmin.handleReturnVal(): constructing dialog");
+	  }
+
+	StringDialog dialog = new StringDialog(resource);
+
+	if (debug)
+	  {
+	    System.err.println("iAdmin.handleReturnVal(): displaying dialog");
+	  }
+
+	// display the Dialog sent to us by the server, get the
+	// result of the user's interaction with it.
+	    
+	dialogResults = dialog.DialogShow();
+
+	if (debug)
+	  {
+	    System.err.println("iAdmin.handleReturnVal(): dialog done");
+	  }
+
+	if (retVal.getCallback() != null)
+	  {
+	    try
+	      {
+		if (debug)
+		  {
+		    System.out.println("iAdmin.handleReturnVal(): Sending result to callback: " + dialogResults);
+		  }
+
+		// send the dialog results to the server
+
+		retVal = retVal.getCallback().respond(dialogResults);
+
+		if (debug)
+		  {
+		    System.out.println("iAdmin.handleReturnVal(): Received result from callback.");
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("Caught remote exception: " + ex.getMessage());
+	      }
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.out.println("iAdmin.handleReturnVal(): No callback, breaking");
+	      }
+
+	    break;		// we're done
+	  }
+      }
+
+    if (debug)
+      {
+	if (retVal != null)
+	  {
+	    if (retVal.didSucceed())
+	      {
+		System.out.println("iAdmin.handleReturnVal(): returning success code");
+	      }
+	    else
+	      {
+		System.out.println("iAdmin.handleReturnVal(): returning failure code");
+	      }
+	  }
+	else
+	  {
+	    System.out.println("iAdmin.handleReturnVal(): returning null retVal (success)");
+	  }
+      }
+
+    return retVal;
+  }
 }
 

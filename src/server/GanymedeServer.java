@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 1999/06/19 03:21:02 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 1999/07/08 04:27:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -170,7 +170,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	
 	pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 	
-	if (pdbf.matchPlainText(clientPass))
+	if (pdbf != null && pdbf.matchPlainText(clientPass))
 	  {
 	    found = true;
 	  }
@@ -392,11 +392,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
   }
 
-  /**
-   *
-   * This method retrieves a message from a specified directory in the
-   * Ganymede installation and
-   * 
+  /** 
+   * <P>This method retrieves a message from a specified directory in
+   * the Ganymede installation and passes it back as a StringBuffer.
+   * Used by the Ganymede server to pass motd information to the
+   * client.</P> 
    */
 
   public static StringBuffer getTextMessage(String key, Invid userToDateCompare,
@@ -514,6 +514,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   {
     String clientName;
     String clientPass;
+    boolean fullprivs = false;
     boolean found = false;
     Query userQuery;
     QueryNode root;
@@ -559,9 +560,37 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    
 	pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
 	    
-	if (pdbf.matchPlainText(clientPass))
+	if (pdbf != null && pdbf.matchPlainText(clientPass))
 	  {
-	    found = true;
+	    if (clientName.equals(Ganymede.rootname))
+	      {
+		found = true;
+		fullprivs = true;
+	      }
+	    else
+	      {
+		BooleanDBField privField = (BooleanDBField) obj.getField(SchemaConstants.PersonaAdminConsole);
+
+		if (privField != null && privField.value())
+		  {
+		    found = true;
+		  }
+		else
+		  {
+		    continue;	// no perms for admin console
+		  }
+
+		BooleanDBField fullField = (BooleanDBField) obj.getField(SchemaConstants.PersonaAdminPower);
+
+		if (fullField != null && fullField.value())
+		  {
+		    fullprivs = true;
+		  }
+		else
+		  {
+		    fullprivs = false;
+		  }
+	      }
 	  }
       }
 
@@ -592,8 +621,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	throw new RemoteException("Bad Admin Account / Password"); // do we have to throw remote here?
       }
 
-    adminSession aSession = new GanymedeAdmin(admin, clientName, clientPass);
-    Ganymede.debug("Admin console attached for admin " + clientName + " from: " + clienthost + " " + new Date());
+    adminSession aSession = new GanymedeAdmin(admin, fullprivs, clientName, clienthost);
+    Ganymede.debug("Admin console attached for admin " + clientName + " from: " + clienthost);
 
     if (Ganymede.log != null)
       {
