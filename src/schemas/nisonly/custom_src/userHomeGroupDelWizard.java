@@ -6,7 +6,7 @@
    to delete the group that they have selected for their default group.
    
    Created: 29 January 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -304,8 +304,9 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
 		  {
 		    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 							"Ran into a problem during home group deletion, and rollback failed");
-		    this.unregister(); // we're stopping here, so we'll unregister ourselves
 		  }
+
+		this.unregister(); // we're stopping here, so we'll unregister ourselves
 	      }
 	  }
 	else if (retVal.getDialog() == null)
