@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 2001/11/17 02:41:18 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 2002/01/26 06:19:39 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -1442,9 +1442,9 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	    buffer.append("<head></head>");
 	    buffer.append("<body>");
 	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
-	    buffer.append("Release number: ");
+	    buffer.append("<p>Release number: ");
 	    buffer.append(arlut.csd.Util.CVSVersion.getReleaseString());
-	    buffer.append("<p>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 The University of Texas at Austin.</p>");
+	    buffer.append("<br>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002<br>The University of Texas at Austin.</p>");
 	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
 	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
 	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
