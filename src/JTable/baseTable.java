@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.39 $ %D%
+  Version: $Revision: 1.40 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import javax.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.39 $ %D%
+ * @version $Revision: 1.40 $ %D%
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -2471,18 +2471,23 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
   synchronized void render()
   {
-    int 
-      strwidth,
-      just,
-      xpos,
-      leftedge,
-      ypos,
-      ypos2,
-      bottomedge,
-      first_col,
-      last_col,
-      first_row,
-      last_row;
+    int strwidth;
+    int just;
+    int xpos;
+    int leftedge;
+    int ypos;
+    int ypos2;
+    int bottomedge;
+    int first_col;
+    int last_col;
+    int first_row;
+
+    /**
+     * The upper bound of the rows visible on the screen.. i.e., index of
+     * the last row visible + 1.
+     */
+
+    int last_row;
 
     tableCell
       cell = null;		// make compiler happy
@@ -2737,7 +2742,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
 	int i;
 
-	if (last_row <= rt.rows.size())
+	if (last_row < rt.rows.size())
 	  {
 	    for (i = first_row; i <= last_row; i++)
 	      {
@@ -3190,7 +3195,16 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	base += rowHeight;
       }
 
-    return row - 1;
+    if (base >= vy)
+      {
+	return row - 1;
+      }
+    else
+      {
+	// we're out of range.. return something silly
+
+	return -1;
+      }
   }
 
   // initiate column dragging and/or select row
@@ -3264,12 +3278,12 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 		if (dragRowSave != -1)
 		  {
 		    dragRowSaveY = ((tableRow) rt.rows.elementAt(dragRowSave)).getTopEdge() - v_offset;
-		  }
 
-		if (debug)
-		  {
-		    System.err.println("Remembering drag row.. row: " + dragRowSave +
-				       ", topEdge " + dragRowSaveY);
+		    if (debug)
+		      {
+			System.err.println("Remembering drag row.. row: " + dragRowSave +
+					   ", topEdge " + dragRowSaveY);
+		      }
 		  }
 	      }
 	    else if ((vx >= (colLoc + colgrab)) &&
@@ -3304,7 +3318,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	    // if the user clicked below the last defined row, unselect
 	    // anything selected and return.
 
-	    if (clickRow >= rt.rows.size())
+	    if (clickRow == -1)
 	      {
 		rt.unSelectAll();
 		return;
@@ -3608,7 +3622,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	
 	// if the user clicked below the last defined row, ignore it
 	
-	if (clickRow >= rt.rows.size())
+	if (clickRow == -1)
 	  {
 	    return;
 	  }
