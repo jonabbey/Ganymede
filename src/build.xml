@@ -130,11 +130,13 @@
         <include name="arlut/csd/ganymede/CategoryNode.class"/>
         <include name="arlut/csd/ganymede/CategoryTransport.class"/>
         <include name="arlut/csd/ganymede/Client.class"/>
+        <include name="arlut/csd/ganymede/ClientAsyncResponder.class"/>
         <include name="arlut/csd/ganymede/FieldInfo.class"/>
         <include name="arlut/csd/ganymede/FieldTemplate.class"/>
         <include name="arlut/csd/ganymede/FieldType.class"/>
         <include name="arlut/csd/ganymede/Invid.class"/>
         <include name="arlut/csd/ganymede/NameSpace.class"/>
+        <include name="arlut/csd/ganymede/NotLoggedInException.class"/>
         <include name="arlut/csd/ganymede/PermEntry.class"/>
         <include name="arlut/csd/ganymede/PermMatrix.class"/>
         <include name="arlut/csd/ganymede/Server.class"/>
@@ -156,6 +158,7 @@
         <include name="arlut/csd/ganymede/perm_field.class"/>
         <include name="arlut/csd/ganymede/string_field.class"/>
         <include name="arlut/csd/ganymede/ClientMessage.class"/>
+        <include name="arlut/csd/ganymede/clientAsyncMessage.class"/>
         <include name="arlut/csd/ganymede/FileReceiver.class"/>
 
         <!-- Deserialization stuff -->
@@ -222,6 +225,7 @@
 
       <fileset dir="${build.classes}">
         <include name="arlut/csd/ganymede/Admin.class"/>
+        <include name="arlut/csd/ganymede/AdminAsyncResponder.class"/>
         <include name="arlut/csd/ganymede/AdminEntry.class"/>
         <include name="arlut/csd/ganymede/Client.class"/>
         <include name="arlut/csd/ganymede/GanymedeScheduler.class"/>
@@ -240,6 +244,8 @@
         <include name="arlut/csd/ganymede/NameSpace.class"/>
         <include name="arlut/csd/ganymede/GASHAdmin.class"/>
         <include name="arlut/csd/ganymede/GASHAdmin$*.class"/>
+        <include name="arlut/csd/ganymede/GASHAdminDispatch.class"/>
+        <include name="arlut/csd/ganymede/GASHAdminDispatch$*.class"/>
         <include name="arlut/csd/ganymede/GASHAdminFrame.class"/>
         <include name="arlut/csd/ganymede/GASHAdminLoginFrame.class"/>
         <include name="arlut/csd/ganymede/Server.class"/>
@@ -255,6 +261,7 @@
         <include name="arlut/csd/ganymede/scheduleHandle.class"/>
         <include name="arlut/csd/ganymede/scheduleHandle$*.class"/>
         <include name="arlut/csd/ganymede/ReturnVal.class"/>
+        <include name="arlut/csd/ganymede/adminAsyncMessage.class"/>
         <include name="arlut/csd/ganymede/db_object.class"/>
         <include name="arlut/csd/ganymede/GASHSchema.class"/>
         <include name="arlut/csd/ganymede/iAdmin.class"/>
