@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 2001/03/28 23:52:49 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 2001/03/29 05:33:58 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -49,7 +49,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.ganymede.client;
@@ -88,7 +90,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.68 $ $Date: 2001/03/28 23:52:49 $ $Name:  $
+ * @version $Revision: 1.69 $ $Date: 2001/03/29 05:33:58 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -901,7 +903,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.68 $ $Date: 2001/03/28 23:52:49 $ $Name:  $
+ * @version $Revision: 1.69 $ $Date: 2001/03/29 05:33:58 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -995,7 +997,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.68 $ $Date: 2001/03/28 23:52:49 $ $Name:  $
+ * @version $Revision: 1.69 $ $Date: 2001/03/29 05:33:58 $ $Name:  $
  * @author Jonathan Abbey
  */
 

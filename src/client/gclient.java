@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.181 $
-   Last Mod Date: $Date: 2001/03/28 23:24:57 $
+   Version: $Revision: 1.182 $
+   Last Mod Date: $Date: 2001/03/29 05:33:57 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -91,7 +91,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.181 $ $Date: 2001/03/28 23:24:57 $ $Name:  $
+ * @version $Revision: 1.182 $ $Date: 2001/03/29 05:33:57 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -131,7 +131,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/03/28 23:24:57 $";
+  static String release_date = "$Date: 2001/03/29 05:33:57 $";
   static String release_number = null;
 
   // ---
@@ -2002,58 +2002,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		    System.out.println("Checking framePanel: " + fp.getTitle());
 		  }
 
-		// Loop over each containerPanel in the framePanel
-		// window.. there may be more than one due to embedded
-		// objects
-
-		// we count down here so that we can handle things if
-		// the cp.update*() call causes the count of
-		// containerPanels in this frame to decrement we'll be
-		// able to handle it.
-
-		// if the count of containerPanels increments during this
-		// loop, we'll just not see the new panel(s), which is of
-		// course just fine.
-
-		for (int i = fp.containerPanels.size() - 1; i >= 0; i--)
-		  {
-		    if (i > fp.containerPanels.size() - 1)
-		      {
-			i = fp.containerPanels.size() - 1;
-		      }
-
-		    containerPanel cp = (containerPanel) fp.containerPanels.elementAt(i);
-
-		    if (debug)
-		      {
-			System.out.println("gclient.handleReturnVal(): Checking containerPanel number " + i);
-			System.out.println("\tcp.invid= " + cp.getObjectInvid() + 
-					   " lookng for: " + invid);
-		      }
-				
-		    if (cp.getObjectInvid().equals(invid))
-		      {
-			if (debug)
-			  {
-			    System.out.println("  Found container panel for " + invid +
-					       ": " + cp.frame.getTitle());
-			  }
-			
-			if (retVal.rescanAll(invid))
-			  {
-			    cp.updateAll();
-			  }
-			else
-			  {
-			    cp.update(retVal.getRescanList(invid));
-			  }
-
-			// Don't break the loop, because there
-			// might be multiple containerPanels
-			// or multiple windows containing this
-			// invid.
-		      }
-		  }
+		fp.updateContainerPanels(invid, retVal);
 	      }
 	  }
       }

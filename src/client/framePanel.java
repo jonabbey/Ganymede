@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 2001/03/28 23:52:48 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 2001/03/29 05:33:56 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -91,7 +91,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.63 $ $Date: 2001/03/28 23:52:48 $ $Name:  $
+ * @version $Revision: 1.64 $ $Date: 2001/03/29 05:33:56 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -234,13 +234,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     history_panel;
 
   /** 
-   * A vector of {@link arlut.csd.ganymede.client.containerPanel}s,
+   * <p>A vector of {@link arlut.csd.ganymede.client.containerPanel}s,
    * used to allow the gclient to refresh containerPanels on demand,
    * and to allow the gclient to order any containerPanels contained
-   * in this framePanel to stop loading on a transaction cancel.  
+   * in this framePanel to stop loading on a transaction cancel.</p>
+   *
+   * <p>Note that the cleanUp() method in this class can null out
+   * this reference, so all methods that loop over containerPanels
+   * should be synchronized.  This is also why containerPanels
+   * is kept private.</p>
    */
 
-  Vector containerPanels = new Vector();
+  private Vector containerPanels = new Vector();
 
   /**
    * Vector of {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}s used
@@ -564,55 +569,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     pane.invalidate();
     validate();
-  }
-
-  /**
-   * <p>Stop loading all the container panels in this framePanel.</p>
-   *
-   * <p>This will not make the window go away, it simply tells all the
-   * containerPanels inside to stop loading.</p>
-   *
-   * <p>windowPanel(the propertyChangeListener/InternalFrameListener)
-   * calls this when a frame is closed.</p>
-   */
-
-  public void stopLoading()
-  {
-    if (loadingStopped)
-      {
-	if (debug)
-	  {
-	    println("framePanel.stopLoading(): loading already stopped, doing nothing.");
-	  }
-
-	return;
-      }
-
-    if (debug)
-      {
-	println("framePanel.stopLoading(): Stopping all the containerPanels.");
-      }
-
-    Runnable r = new Runnable() {
-      public void run() {
-	synchronized (containerPanels)
-	  {
-	    for (int i = 0; i < containerPanels.size(); i++)
-	      {
-		if (debug)
-		  {
-		    println("Telling a containerPanel to stop loading.");
-		  }
-		
-		containerPanel cp = (containerPanel)containerPanels.elementAt(i);
-		cp.stopLoading();
-	      }
-	  }
-      }};
-
-    Thread t = new Thread(r);
-    t.start();
-    this.loadingStopped = true;
   }
 
   /**
@@ -1508,6 +1464,84 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     gc.showErrorMessage(title, message);
   }
 
+  public synchronized void addContainerPanel(containerPanel cp)
+  {
+    if (containerPanels != null)
+      {
+	containerPanels.addElement(cp);
+      }
+  }
+
+  public synchronized void removeContainerPanel(containerPanel cp)
+  {
+    if (containerPanels != null)
+      {
+	containerPanels.removeElement(cp);
+      }
+  }
+
+  /**
+   * <p>This method is called to force an update on this framePanel in accordance
+   * with the rescan instructions encoded in retVal.  The invid passed is the
+   * one we are interested in updating in this method call.</p>
+   */
+
+  public synchronized void updateContainerPanels(Invid invid, ReturnVal retVal)
+  {
+    if (containerPanels == null)
+      {
+	return;
+      }
+
+    // Loop over each containerPanel in the framePanel
+    // window.. there may be more than one due to embedded
+    // objects
+    
+    // we count down here so that we can handle things if
+    // the cp.update*() call causes the count of
+    // containerPanels in this frame to decrement we'll be
+    // able to handle it.
+    
+    // if the count of containerPanels increments during this
+    // loop, we'll just not see the new panel(s), which is of
+    // course just fine.
+
+    for (int i = containerPanels.size() - 1; i >= 0; i--)
+      {
+	if (i > containerPanels.size() - 1)
+	  {
+	    i = containerPanels.size() - 1;
+	  }
+
+	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+
+	if (debug)
+	  {
+	    System.out.println("gclient.handleReturnVal(): Checking containerPanel number " + i);
+	    System.out.println("\tcp.invid= " + cp.getObjectInvid() + 
+			       " lookng for: " + invid);
+	  }
+				
+	if (cp.getObjectInvid().equals(invid))
+	  {
+	    if (debug)
+	      {
+		System.out.println("  Found container panel for " + invid +
+				   ": " + cp.frame.getTitle());
+	      }
+			
+	    if (retVal.rescanAll(invid))
+	      {
+		cp.updateAll();
+	      }
+	    else
+	      {
+		cp.update(retVal.getRescanList(invid));
+	      }
+	  }
+      }
+  }
+
   // InternalFrameListener methods
 
   public void internalFrameActivated(InternalFrameEvent event)
@@ -1519,7 +1553,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * internalFrames associated with fields in any contained container panels.
    */
 
-  public void internalFrameClosed(InternalFrameEvent event)
+  public synchronized void internalFrameClosed(InternalFrameEvent event)
   {
     if (debug)
       {
@@ -1540,6 +1574,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
 	
+	cp.stopLoading();
 	cp.unregister();
       }
     
@@ -1700,11 +1735,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * <p>This method should be called on the Java GUI thread.</p>
    */
 
-  public final void cleanUp()
+  public final synchronized void cleanUp()
   {
     this.removeVetoableChangeListener(this);
     this.removeInternalFrameListener(this);
-    this.removeInternalFrameListener(getWindowPanel());
+
+    if (getWindowPanel() != null)
+      {
+	this.removeInternalFrameListener(getWindowPanel());
+      }
+
     pane.removeChangeListener(this);
     
     progressBar = null;

@@ -8,8 +8,8 @@
    or edit in place (composite) objects.
 
    Created: 17 Oct 1996
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 1999/10/29 16:12:26 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2001/03/29 05:33:58 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
@@ -18,7 +18,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   The University of Texas at Austin.
 
    Contact information
 
@@ -46,7 +47,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.ganymede.client;
@@ -94,7 +97,7 @@ import javax.swing.border.*;
  * @see arlut.csd.ganymede.invid_field
  * @see arlut.csd.ganymede.ip_field
  * 
- * @version $Revision: 1.51 $ $Date: 1999/10/29 16:12:26 $ $Name:  $
+ * @version $Revision: 1.52 $ $Date: 2001/03/29 05:33:58 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -924,7 +927,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    // and let the frame know not to keep it in its
 		    // records anymore
 
-		    container.frame.containerPanels.removeElement(cp);
+		    container.frame.removeContainerPanel(cp);
 
 		    elementWrapper ew = (elementWrapper) ewHash.get(cp);
 		    centerPanel.remove(ew);

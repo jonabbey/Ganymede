@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2001/03/28 23:24:55 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2001/03/29 05:33:55 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -44,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -66,7 +67,7 @@ import arlut.csd.Util.VecQuickSort;
  * Client-side thread class for loading object and field type definitions from
  * the server in the background during the client's start-up.
  *
- * @version $Revision: 1.24 $ $Date: 2001/03/28 23:24:55 $ $Name:  $
+ * @version $Revision: 1.25 $ $Date: 2001/03/29 05:33:55 $ $Name:  $
  * @author Mike Mulvaney
  */
 
