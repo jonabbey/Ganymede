@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.23 $ %D%
+  Version: $Revision: 1.24 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,6 +33,7 @@ import arlut.csd.Util.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import com.sun.java.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -47,7 +48,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.23 $ %D% 
+ * @version $Revision: 1.24 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -61,13 +62,15 @@ public class rowTable extends baseTable implements ActionListener {
   rowSelectCallback
     callback;
 
-  PopupMenu rowMenu;
-  MenuItem SortByMI;
-  MenuItem RevSortByMI;
-  MenuItem DeleteColMI;
-  MenuItem OptimizeMI;
+  JPopupMenu rowMenu;
+  JMenuItem SortByMI;
+  JMenuItem RevSortByMI;
+  JMenuItem DeleteColMI;
+  JMenuItem OptimizeMI;
 
   boolean sortForward = true;
+
+  /* -- */
 
   /**
    * This is the base constructor for rowTable, which allows
@@ -105,26 +108,29 @@ public class rowTable extends baseTable implements ActionListener {
 		  boolean horizLines, boolean vertLines,
 		  boolean vertFill, boolean hVertFill,
 		  rowSelectCallback callback,
-		  PopupMenu menu)
+		  JPopupMenu menu)
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
 	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
 	  headers, horizLines, vertLines, vertFill, hVertFill, 
 	  menu, null);
     
-    rowMenu = new PopupMenu("Column Menu");
+    rowMenu = new JPopupMenu();
     
+    rowMenu.add(new JLabel("Column Menu"));
+    rowMenu.addSeparator();
+
     if (colWidths.length > 1)
       {
-	SortByMI = new MenuItem("Sort By This Column");
-	RevSortByMI = new MenuItem("Reverse Sort By This Column");
-	DeleteColMI = new MenuItem("Delete This Column");
-	OptimizeMI = new MenuItem("Optimize Column Widths");
+	SortByMI = new JMenuItem("Sort By This Column");
+	RevSortByMI = new JMenuItem("Reverse Sort By This Column");
+	DeleteColMI = new JMenuItem("Delete This Column");
+	OptimizeMI = new JMenuItem("Optimize Column Widths");
       }
     else
       {
-	SortByMI = new MenuItem("Sort");
-	RevSortByMI = new MenuItem("Reverse Sort");
+	SortByMI = new JMenuItem("Sort");
+	RevSortByMI = new JMenuItem("Reverse Sort");
       }
 
     rowMenu.add(SortByMI);
@@ -169,7 +175,7 @@ public class rowTable extends baseTable implements ActionListener {
   public rowTable(int[] colWidths, String[] headers, 
 		  rowSelectCallback callback, 
 		  boolean horizLines,
-		  PopupMenu menu)
+		  JPopupMenu menu)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 		       Color.white, Color.blue, tableAttr.JUST_CENTER),
@@ -208,7 +214,7 @@ public class rowTable extends baseTable implements ActionListener {
 
   public rowTable(int[] colWidths, String[] headers, 
 		  rowSelectCallback callback, 
-		  PopupMenu menu)
+		  JPopupMenu menu)
   {
     this(new tableAttr(null, new Font("Helvetica", Font.BOLD, 14), 
 		       Color.white, Color.blue, tableAttr.JUST_CENTER),
@@ -757,7 +763,6 @@ public class rowTable extends baseTable implements ActionListener {
 
     menuRow = -1;
     menuCol = -1;
-
   }
 
   /**
