@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -293,7 +293,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    object = (DBObject) Ganymede.internalSession.view_db_object(localInvid);
 	    
-	    return owner.lookupLabel(object);
+	    return owner.objectBase.getObjectHook().lookupLabel(object);
 	  }
 	else
 	  {
@@ -483,7 +483,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		      {
 			object = (DBObject) Ganymede.internalSession.view_db_object(elementA);
 			
-			result.append(owner.lookupLabel(object));
+			result.append(owner.objectBase.getObjectHook().lookupLabel(object));
 		      }
 		    else
 		      {
@@ -517,7 +517,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		      {
 			object = (DBObject) Ganymede.internalSession.view_db_object(elementA);
 			
-			result.append(owner.lookupLabel(object));
+			result.append(owner.objectBase.getObjectHook().lookupLabel(object));
 		      }
 		    else
 		      {
@@ -551,7 +551,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		object = (DBObject) Ganymede.internalSession.view_db_object(origI.value());
 		
-		result.append(owner.lookupLabel(object));
+		result.append(owner.objectBase.getObjectHook().lookupLabel(object));
 	      }
 	    else
 	      {
@@ -570,7 +570,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		object = (DBObject) Ganymede.internalSession.view_db_object(this.value());
 		
-		result.append(owner.lookupLabel(object));
+		result.append(owner.objectBase.getObjectHook().lookupLabel(object));
 	      }
 	    else
 	      {
@@ -1588,8 +1588,10 @@ public final class InvidDBField extends DBField implements invid_field {
     // now we need to do the binding as appropriate
     // note that we assume that we don't need to verify the
     // new value
-    
-    if (!bind(null, newObj))
+
+    DBEditObject embeddedObj = (DBEditObject) owner.editset.getSession().editDBObject(newObj);
+
+    if (!embeddedObj.setFieldValue((short) 0, owner.getInvid()))
       {
 	setLastError("Couldn't bind reverse pointer");
 	return null;
@@ -1610,7 +1612,7 @@ public final class InvidDBField extends DBField implements invid_field {
       } 
     else
       {
-	unbind(newObj);
+	embeddedObj.setFieldValue((short) 0, null);
 	return null;
       }
   }
@@ -1759,7 +1761,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	else if (Ganymede.internalSession != null)
 	  {
 	    object = (DBObject) Ganymede.internalSession.view_db_object(invid);
-	    label = owner.lookupLabel(object); // do our own interpretation of the label
+	    label = owner.objectBase.getObjectHook().lookupLabel(object); // do our own interpretation of the label
 	  }
 	else
 	  {
