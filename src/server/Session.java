@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.33 $ %D%
+ * @version $Revision: 1.34 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -441,12 +441,24 @@ public interface Session extends Remote {
    * fields and objects that match the given query.
    *
    * @see arlut.csd.ganymede.Query
-   *
-   * @see arlut.csd.ganymede.Session
-   *
    */
 
   DumpResult dump(Query query) throws RemoteException;
+
+  /**
+   *
+   * This method allows the client to get a status update on a
+   * specific list of invids.<br><br>
+   *
+   * If any of the invids are not currently defined in the server, or
+   * if the client doesn't have permission to view any of the invids,
+   * those invids' status will not be included in the returned
+   * QueryResult.
+   *
+   * @param invidVector Vector of Invid's to get the status for.
+   */
+
+  public QueryResult queryInvids(Vector invidVector) throws RemoteException;
 
   /**
    *

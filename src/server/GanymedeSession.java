@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.113 $ %D%
+   Version: $Revision: 1.114 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.113 $ %D%
+ * @version $Revision: 1.114 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -2276,6 +2276,59 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   /**
    *
+   * This method allows the client to get a status update on a
+   * specific list of invids.<br><br>
+   *
+   * If any of the invids are not currently defined in the server, or
+   * if the client doesn't have permission to view any of the invids,
+   * those invids' status will not be included in the returned
+   * QueryResult.
+   *
+   * @param invidVector Vector of Invid's to get the status for.
+   *
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public synchronized QueryResult queryInvids(Vector invidVector)
+  {
+    QueryResult result = new QueryResult(true);	// for transport
+    DBObject obj;
+    Invid invid;
+    PermEntry perm;
+
+    /* -- */
+
+    for (int i = 0; i < invidVector.size(); i++)
+      {
+	invid = (Invid) invidVector.elementAt(i);
+
+	// the DBSession.viewDBObject() will look in the
+	// current DBEditSet, if any, to find the version of
+	// the object as it exists in the current transaction.
+	
+	obj = session.viewDBObject(invid);
+
+	if (obj == null)
+	  {
+	    continue;
+	  }
+
+	perm = getPerm(obj);
+
+	if (!perm.isVisible())
+	  {
+	    continue;
+	  }
+
+	result.addRow(obj.getInvid(), obj.getLabel(), obj.isInactivated(),
+		      obj.willExpire(), obj.willBeRemoved(), perm.isEditable());
+      }
+
+    return result;
+  }
+
+  /**
+   *
    * This method provides the hook for doing all
    * manner of simple object listing for the Ganymede
    * database.  
@@ -2659,6 +2712,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // find any objects created or being edited in the current
     // transaction that match our criteria that we didn't see before
+
+    // note that we have to do this even though
+    // DBSession.viewDBObject() will look in our transaction's working
+    // set for us, as there may be newly created objects that are not
+    // yet held in the database.
 
     if (session.isTransactionOpen())
       {
@@ -3065,7 +3123,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // let a NullPointerException be thrown if we were given a null
     // Invid.
 
-    obj = (DBObject) session.viewDBObject(invid);
+    obj = session.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -3149,7 +3207,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     checklogin();
 
-    obj = (DBObject) session.viewDBObject(invid);
+    obj = session.viewDBObject(invid);
 
     if (obj == null)
       {
