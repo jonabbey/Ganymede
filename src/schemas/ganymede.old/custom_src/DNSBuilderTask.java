@@ -5,7 +5,7 @@
    This class is intended to dump the Ganymede datastore to DNS.
    
    Created: 18 February 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,6 +33,10 @@ import java.util.*;
 
 public class DNSBuilderTask extends GanymedeBuilderTask {
 
+  private static String path = null;
+
+  // ---
+
   /**
    *
    * This method is intended to be overridden by subclasses of
@@ -53,6 +57,16 @@ public class DNSBuilderTask extends GanymedeBuilderTask {
     boolean result = false;
 
     /* -- */
+
+    if (path == null)
+      {
+	path = System.getProperty("ganymede.dns.output");
+
+	if (path == null)
+	  {
+	    throw new RuntimeException("DNSBuilder not able to determine output directory.");
+	  }
+      }
 
     if (baseChanged((short) 263) ||
 	baseChanged((short) 267) ||
