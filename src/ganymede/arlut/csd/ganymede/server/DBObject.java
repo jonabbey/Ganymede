@@ -2237,6 +2237,44 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <P>This helper method is for use on the server, so that custom
+   * code subclasses can call a simple method to look up an Invid and
+   * get the appropriate DBObject, taking into account whether the
+   * lookup is being done within a transaction or no.</P>
+   *
+   * <P>Note that unless the object has been checked out by the current session,
+   * this method will return access to the object as it is stored directly
+   * in the main datastore hashes.  This means that the object will be
+   * read-only and will grant all accesses, as it will have no notion of
+   * what session or transaction owns it.  If you need to have access to the
+   * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
+   * view_db_object()} method to get the object.</P>
+   *
+   * @param target The Invid to retrieve.
+   * @param original If true and the lookup is being done in the
+   * middle of an editing session, we'll return a reference to the
+   * original read-only DBObject from the persistent datastore, rather
+   * than the checked out DBEditObject version being edited in the
+   * transaction.
+   */
+
+  public DBObject lookupInvid(Invid target, boolean original)
+  {
+    if (this.gSession != null)
+      {
+	return this.gSession.getSession().viewDBObject(target, original);
+      }
+    else
+      {
+	// we're not being viewed in a session context.. go ahead and
+	// look it up in the DBStore directly
+
+	return Ganymede.db.getObject(target);
+      }
+  }
+
+  /**
    * <P>This method is for use on the server, so that custom code can call a simple
    * method to test to see if a boolean field is defined and has a true value.</P>
    *
