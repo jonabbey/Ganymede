@@ -6,8 +6,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/01/22 18:03:55 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/05/07 05:18:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -154,8 +154,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   *
-   * Adds a labeled text field
+   * <p>Adds a labeled text field</p>
    *
    * @param string String to use as the label
    */
@@ -166,8 +165,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   *
-   * Adds a labeled text field
+   * <p>Adds a labeled text field</p>
    *
    * @param string String to use as the label
    * @param value Initial value for string
@@ -179,8 +177,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   *
-   * Adds a labeled multi-line text field
+   * <p>Adds a labeled multi-line text field</p>
    *
    * @param string String to use as the label
    * @param value Initial value for string
@@ -192,8 +189,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   * 
-   * Adds a labeled check box field
+   * <p>Adds a labeled check box field</p>
    *
    * @param string String to use as the label
    */
@@ -204,8 +200,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   * 
-   * Adds a labeled check box field
+   * <p>Adds a labeled check box field</p>
    *
    * @param string String to use as the label
    * @param value Initial value
@@ -217,8 +212,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   * 
-   * Adds a labeled date field
+   * <p>Adds a labeled date field</p>
    *
    * @param label String to use as the label
    * @param currentDate Date to initialize the date field to
@@ -231,8 +225,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   *
-   * Adds a choice field to the dialog
+   * <p>Adds a choice field to the dialog</p>
    *
    * @param label String to use as the label
    * @param choices Vector of Strings to add to the choice 
@@ -244,8 +237,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   *
-   * Adds a choice field to the dialog
+   * <p>Adds a choice field to the dialog</p>
    *
    * @param label String to use as the label
    * @param choices Vector of Strings to add to the choice 
@@ -257,8 +249,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   *
-   * Adds a text-hidden password string field to the dialog
+   * <p>Adds a text-hidden password string field to the dialog</p>
    *
    * @param label String to use as label
    */
@@ -269,8 +260,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   *
-   * Adds a text-hidden password string field to the dialog
+   * <p>Adds a text-hidden password string field to the dialog</p>
    *
    * @param label String to use as label
    * @param value Initial value
@@ -282,9 +272,7 @@ public class JDialogBuff implements java.io.Serializable {
   }
 
   /**
-   *
-   * This is a convenience function for the server.
-   *
+   * <p>This is a convenience function for the server.</p>
    */
 
   public String getText()
