@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.5 $
-# $Date: 1999/01/21 01:21:15 $
+# $Revision: 1.6 $
+# $Date: 1999/02/02 22:00:04 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -16,6 +16,7 @@
 @ganymede_classes = ("Admin", "AdminEntry",
 		     "Base", "BaseEditor", "BaseField", "BaseFieldEditor", "BaseNode",
 		     "CatTreeNode", "Category", "CategoryEditor", "CategoryNode",
+		     "NameSpaceEditor",
 		     "FieldNode",
 		     "Invid", "NameSpace",
 		     "GASHAdmin", "GASHAdminFrame",
