@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.42 $ %D%
+    Version: $Revision: 1.43 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -442,7 +442,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  else if (comp instanceof JComboBox)
 	    {
 	      ((JComboBox)comp).removeItemListener(this);
+
 	      Object o = field.getValue();
+
 	      if (o instanceof String)
 		{
 		  Vector choiceHandles = null;
@@ -450,12 +452,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  string_field s_field = (string_field)field;
 
 		  Object key = s_field.choicesKey();
+
 		  if (key == null)
 		    {
 		      if (debug)
 			{
-			  System.out.println("key is null, getting new copy.");
+			  System.out.println("key is null, getting new copy, not caching.");
 			}
+
 		      choices = s_field.choices().getLabels();
 		    }
 		  else
@@ -465,14 +469,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			  System.out.println("key = " + key);
 			}
 		
-		      if (gc.cachedLists.containsKey(key))
+		      if (gc.cachedLists.containsList(key))
 			{
 			  if (debug)
 			    {
 			      System.out.println("key in there, using cached list");
 			    }
-			  choiceHandles = (Vector)gc.cachedLists.get(key);
 
+			  choiceHandles = gc.cachedLists.getListHandles(key, false);
+
+			  choices = new Vector();
+
+			  for (int j = 0; j < choiceHandles.size() ; j++)
+			    {
+			      choices.addElement(((listHandle)choiceHandles.elementAt(j)).getLabel());
+			    }
 			}
 		      else
 			{
@@ -480,22 +491,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			    {
 			      System.out.println("It's not in there, downloading a new one.");
 			    }
-			  choiceHandles = s_field.choices().getListHandles();
-			  gc.cachedLists.put(key, choiceHandles);
+			  
+			  gc.cachedLists.putList(key, s_field.choices());
+			  choiceHandles = gc.cachedLists.getListHandles(key, false);
 
+			  choices = gc.cachedLists.getLabels(key, false);
 			}
-	    
-		      for (int j = 0; j < choiceHandles.size() ; j++)
-			{
-			  choices.addElement(((listHandle)choiceHandles.elementAt(j)).getLabel());
-			}		
 		    }    
 
 		  JComboBox cb = (JComboBox)comp;
 		  cb.removeAllItems();
 
-		  // sort choices here.
-		  choices = gc.sortStringVector(choices);
+		  // add choices to combo box.. remember that the choices are
+		  // sorted coming out of the object Cache
 
 		  for (int i = 0; i < choices.size(); i++)
 		    {
@@ -505,6 +513,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  cb.addItem("<none>");
 
 		  // Do I need to check to make sure that this one is possible?
+
 		  cb.setSelectedItem((String)o);
 		}
 	      else if (o instanceof Invid)
@@ -517,6 +526,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		{
 		  // This might be null.  Which means we should choose <none>.  But do
 		  // we choose (string)<none> or (listHandle)<none>?
+
 		  if (field instanceof string_field)
 		    {
 		      ((JComboBox)comp).setSelectedItem("<none>");
@@ -740,9 +750,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			    StringDialog d = new StringDialog(r);
 			    Hashtable result = d.DialogShow();
 			    ReturnVal setLabel = f.setValue((String)result.get("Label:"));
+
+			    // wizard?
+
+			    setLabel = gc.handleReturnVal(setLabel);
+
 			    if ((setLabel == null) || setLabel.didSucceed())
 			      {
 				label = (String)result.get("Label:");
+
 				if (debug)
 				  {
 				    System.out.println("The set label worked!");
@@ -1238,8 +1254,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addStringVector(string_field field, FieldInfo fieldInfo,FieldTemplate fieldTemplate) throws RemoteException
+  private void addStringVector(string_field field, FieldInfo fieldInfo,
+			       FieldTemplate fieldTemplate) throws RemoteException
   {
+    objectList list = null;
+
+    /* -- */
+
     if (debug)
       {
 	System.out.println("Adding StringSelector, its a vector of strings!");
@@ -1259,20 +1280,24 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    System.out.println("Getting choicesKey()");
 	  }
+
 	Object id = field.choicesKey();
+
 	if (id == null)
 	  {
 	    if (debug)
 	      {
 		System.out.println("Key is null, Getting choices");
 	      }
+
 	    qr = field.choices();
+	    list = new objectList(qr);
 	  }
 	else
 	  {
-	    if (gc.cachedLists.containsKey(id))
+	    if (gc.cachedLists.containsList(id))
 	      {
-		qr = (QueryResult)gc.cachedLists.get(id);
+		list = gc.cachedLists.getList(id);
 	      }
 	    else
 	      {	
@@ -1282,71 +1307,74 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 
 		qr =field.choices();
+
 		if (qr != null)
 		  {
-		    gc.cachedLists.put(id, qr.getListHandles());
+		    gc.cachedLists.putList(id, qr);
+		    list = gc.cachedLists.getList(id);
 		  }
 	      }
 	  }
     
-	if (! keepLoading)
+	if (!keepLoading)
 	  {
 	    System.out.println("Stopping containerPanel in the midst of loading a StringSelector");
 	    gc.containerPanelFinished(this);
 	    return;
 	  }
 
-	if (qr == null)
+	if (list == null)
 	  {
 	    StringSelector ss = new StringSelector(null,
 						   (Vector)fieldInfo.getValue(), 
 						   this,
 						   editable,
-						   false,  //canChoose
-						   false,  //mustChoose
+						   false,  // canChoose
+						   false,  // mustChoose
 						   160);
 
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
 
-
 	    if (editable)
 	      {
 		ss.setCallback(this);
 	      }
-	    addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
+
+	    addRow(ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
 	else
 	  {
-	    StringSelector ss = new StringSelector(qr.getLabels(),
-						     (Vector)fieldInfo.getValue(), 
-						     this,
-						     editable,
-						     true,   //canChoose
-						     false,  //mustChoose
-						     160);
+	    StringSelector ss = new StringSelector(list.getLabels(false),
+						   (Vector)fieldInfo.getValue(), 
+						   this,
+						   editable,
+						   true,   // canChoose
+						   false,  // mustChoose
+						   160);
 	    objectHash.put(ss, field);
 	    shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
+
 	    if (editable)
 	      {
 		ss.setCallback(this);
 	      }
 
-	    addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
+	    addRow(ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
       }
     else  //not editable, don't need whole list of things
       {
 	StringSelector ss = new StringSelector(null,
 					       (Vector)fieldInfo.getValue(), 
-						     this,
+					       this,
 					       editable,
-					       false,   //canChoose
-					       false,  //mustChoose
+					       false,   // canChoose
+					       false,  // mustChoose
 					       160);
 	objectHash.put(ss, field);
 	shortToComponentHash.put(new Short(fieldInfo.getID()), ss);
-	addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
+	addRow(ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
       }
   }
 
@@ -1366,6 +1394,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     Vector
       valueHandles = null,
       choiceHandles = null;
+
+    objectList
+      list = null;
 
     /* -- */
 
@@ -1393,7 +1424,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("key is null, downloading new copy");
 	      }
+
 	    QueryResult choices = field.choices();
+
 	    if (choices != null)
 	      {
 		choiceHandles = choices.getListHandles();
@@ -1404,6 +1437,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    System.out.println("choicse is null");
 		  }
+
 		choiceHandles = null;
 	      }
 	  }
@@ -1414,13 +1448,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println("key= " + key);
 	      }
 
-	    if (gc.cachedLists.containsKey(key))
+	    if (gc.cachedLists.containsList(key))
 	      {
 		if (debug)
 		  {
 		    System.out.println("It's in there, using cached list");
 		  }
-		choiceHandles = (Vector)gc.cachedLists.get(key);
+
+		choiceHandles = gc.cachedLists.getListHandles(key, false);
 	      }
 	    else
 	      {
@@ -1429,13 +1464,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    System.out.println("It's not in there, downloading anew.");
 		  }
 
-		choiceHandles = field.choices().getListHandles();
-		if (choiceHandles != null)
-		  {
-		    gc.cachedLists.put(key, choiceHandles);
-		  }
+		gc.cachedLists.putList(key, field.choices());
+		list = gc.cachedLists.getList(key);
+		choiceHandles = list.getListHandles(false);
 
 		// debuging stuff
+
 		if (debug_persona)
 		  {
 		    System.out.println();
@@ -1448,7 +1482,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    System.out.println();
 		  }
 	      }
-	      
 	  }
       }
     else
@@ -1559,6 +1592,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   private void addStringField(string_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
+    objectList
+      list;
+
     JstringField
       sf;
 
@@ -1577,12 +1613,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	Vector choices = null;
 
 	Object key = field.choicesKey();
+
 	if (key == null)
 	  {
 	    if (debug)
 	      {
 		System.out.println("key is null, getting new copy.");
 	      }
+
 	    choices = field.choices().getLabels();
 	  }
 	else
@@ -1592,14 +1630,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println("key = " + key);
 	      }
 		
-	    if (gc.cachedLists.containsKey(key))
+	    if (gc.cachedLists.containsList(key))
 	      {
 		if (debug)
 		  {
 		    System.out.println("key in there, using cached list");
 		  }
-		choiceHandles = (Vector)gc.cachedLists.get(key);
-
+		
+		list = gc.cachedLists.getList(key);
 	      }
 	    else
 	      {
@@ -1607,23 +1645,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    System.out.println("It's not in there, downloading a new one.");
 		  }
-		choiceHandles = field.choices().getListHandles();
-		gc.cachedLists.put(key, choiceHandles);
-
+		
+		gc.cachedLists.putList(key, field.choices());
+		list = gc.cachedLists.getList(key);
 	      }
-	    
-	    for (int j = 0; j < choiceHandles.size() ; j++)
-	      {
-		choices.addElement(((listHandle)choiceHandles.elementAt(j)).getLabel());
-	      }		
+
+	    choiceHandles = list.getListHandles(false);
+	    choices = list.getLabels(false);
 	  }    
 
 	String currentChoice = (String) fieldInfo.getValue();
 	boolean found = false;
 	    
-	// sort choices
-	choices = gc.sortStringVector(choices);
-
 	for (int j = 0; j < choices.size(); j++)
 	  {
 	    String thisChoice = (String)choices.elementAt(j);
@@ -1652,10 +1685,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    
 	combo.setMaximumRowCount(8);
 	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
+
 	try
 	  {
 	    boolean mustChoose = field.mustChoose();
 	    combo.setEditable(mustChoose); // this should be setEditable(mustChoose());
+
 	    if (debug)
 	      {
 		System.out.println("Setting editable to + " + mustChoose);
@@ -1665,6 +1700,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    throw new RuntimeException("Could not check to see if field was mustChoose.");
 	  }
+
 	//combo.setVisible(true);  // This line is not necessary, right?
 	    
 	if (currentChoice != null)
@@ -1928,12 +1964,17 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   private void addInvidField(invid_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
+    objectList list;
+
+    /* -- */
+
     if (fieldTemplate.isEditInPlace())
       {
 	if (debug)
 	  {
 	    System.out.println("Hey, " + fieldTemplate.getName() + " is edit in place but not a vector, what gives?");
 	  }
+
 	addRow(new JLabel("edit in place non-vector"), fieldTemplate.getName(), fieldInfo.isVisible());
 	return;
       }
@@ -1948,10 +1989,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (debug)
 	      {
-		System.out.println("key is null");
+		System.out.println("key is null, not using cache");
 	      }
 
-	    choices = field.choices().getListHandles();
+	    list = new objectList(field.choices());
+	    choices = list.getListHandles(false);
 	  }
 	else
 	  {
@@ -1960,13 +2002,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println("key = " + key);
 	      }
 
-	    if (gc.cachedLists.containsKey(key))
+	    if (gc.cachedLists.containsList(key))
 	      {
 		if (debug)
 		  {
 		    System.out.println("Got it from the cachedLists");
 		  }
-		choices = (Vector)gc.cachedLists.get(key);
+
+		list = gc.cachedLists.getList(key);
 	      }
 	    else
 	      {
@@ -1974,10 +2017,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    System.out.println("Damn, it's not in there, downloading a new one.");
 		  }
-		choices = field.choices().getListHandles();
-		gc.cachedLists.put(key, choices);
+
+		gc.cachedLists.putList(key, field.choices());
+		list = gc.cachedLists.getList(key);
 	      }
+
+	    choices = list.getListHandles(false);
 	  }
+
         Invid currentChoice = (Invid) fieldInfo.getValue();
 	listHandle currentListHandle = null;
 	listHandle noneHandle = new listHandle("<none>", null);

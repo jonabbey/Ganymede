@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.53 $ %D%
+   Version: $Revision: 1.54 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -30,7 +30,6 @@ import arlut.csd.JDataComponent.*;
 import arlut.csd.Util.*;
 import arlut.csd.JTree.*;
 
-
 import com.sun.java.swing.*;
 import com.sun.java.swing.border.*;
 
@@ -42,6 +41,8 @@ import com.sun.java.swing.border.*;
 
 public class gclient extends JFrame implements treeCallback,ActionListener {
 
+  // we're only going to have one gclient at a time per running client
+
   public static gclient client;
 
   // ---
@@ -50,13 +51,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   final int NUM_IMAGE = 12;
   
   final int OPEN_BASE = 0;
-  //  final int OPEN_BASE_DELETE = 1;
-  //final int OPEN_BASE_CREATE = 2;
-  //final int OPEN_BASE_CHANGED = 3;
   final int CLOSED_BASE = 1;
-  //final int CLOSED_BASE_DELETE = 5;
-  //final int CLOSED_BASE_CREATE = 6;
-  //final int CLOSED_BASE_CHANGED = 7;
 
   final int OPEN_FIELD = 2;
   final int OPEN_FIELD_DELETE = 3;
@@ -78,6 +73,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   long lastClick = 0;
 
   // set up a bunch of borders
+
   public EmptyBorder
     emptyBorder5 = (EmptyBorder)BorderFactory.createEmptyBorder(5,5,5,5),
     emptyBorder10 = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10);
@@ -119,8 +115,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   protected Hashtable
     shortToBaseNodeHash = new Hashtable(),
     invidNodeHash = new Hashtable(),
-    templateHash,
-    cachedLists = new Hashtable();
+    templateHash;
+
+  // our main cache, keeps information on all objects we've had
+  // references returned to us via QueryResult
+
+  protected objectCache 
+    cachedLists = new objectCache();
 
   // 
   //  Background processing thread
@@ -718,7 +719,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
         System.out.println("Clearing caches");
       }
 
-    cachedLists.clear();
+    cachedLists.clearCaches();
   }
 
   public void update(Graphics g)
@@ -877,10 +878,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     return somethingChanged;
 
   }
+
   /**
    *
    * This method takes a ReturnVal object from the server and, if necessary,
-   * displays a dialog to the user based on the server's feedback.
+   * runs through a wizard interaction sequence, possibly displaying several
+   * dialogs before finally returning a final result code.
    *
    */
 
@@ -1283,7 +1286,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     BaseNode parentNode;
     InvidNode oldNode, newNode, fNode;
     Query _query = null;
-    Vector unsorted_objects = new Vector();
+
+    ObjectHandle handle;
+    Vector objectHandles;
+    objectList objectlist = null;
+
     short id;
 
     /* -- */
@@ -1302,126 +1309,80 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	throw new IllegalArgumentException("It's the Query! " + rx);
       }
 
-    if (_query == null)
+    Short Id = new Short(id);
+
+    if (cachedLists.containsList(Id))
       {
-	System.out.println("query == null");
+	objectlist = cachedLists.getList(Id);
       }
     else
       {
-	Short Id = new Short(id);
-	//Vector resultDump = getHandleVector(Id);
-
-	Vector resultDump = null;
-
-	if (cachedLists.containsKey(Id))
+	try
 	  {
-	    resultDump = (Vector)cachedLists.get(Id);
-	  }
-	else
-	  {
-	    try
-	      {
-		Query q = new Query(id);
-		QueryResult qr = session.query(q);
-		resultDump = qr.getListHandles();
+	    Query q = new Query(id);
+	    QueryResult qr = session.query(q);
 
-		if (resultDump != null)
-		  {
-		    System.out.println("Caching copy");
-		    cachedLists.put(Id, resultDump);
-		  }
-	      }
-	    catch (RemoteException rx)
+	    if (qr != null)
 	      {
-		throw new RuntimeException("Could not get dump: " + rx);
+		System.out.println("Caching copy");
+		objectlist = new objectList(qr);
+		cachedLists.putList(Id, objectlist);
 	      }
 	  }
-
-	int resultDumpSize = resultDump.size();
-
-	for (int i = 0; i < resultDumpSize; i++)
+	catch (RemoteException rx)
 	  {
-	    listHandle lh = (listHandle)resultDump.elementAt(i);
-	    String l = lh.getLabel();
-	    //System.out.println(" Checking: " + l);
-
-	    if ((l == null) || (l.equals("")))
-	      {
-		l = "null str";
-		System.out.println("Setting string to null str");
-	      }
-
-	    unsorted_objects.addElement(new Result((Invid)lh.getObject(), l));
-	  }
-
-	//System.out.println("There are " + unsorted_objects.size() + " objects in the query");
-
-	if (unsorted_objects.size()  == 0)
-	  {
-	    System.out.println("unsorted_objects or sorted_results == null");
-	  }
-	else
-	  {
-	    (new VecQuickSort(unsorted_objects, 
-			      new arlut.csd.Util.Compare() 
-			      {
-				public int compare(Object a, Object b) 
-				  {
-				    Result aF, bF;
-				     
-				    aF = (Result) a;
-				    bF = (Result) b;
-				    int comp = 0;
-				     
-				    comp =  aF.toString().compareTo(bF.toString());
-				     
-				    if (comp < 0)
-				      {
-					return -1;
-				      }
-				    else if (comp > 0)
-				      { 
-					return 1;
-				      } 
-				    else
-				      { 
-					return 0;
-				      }
-				  }
-			      }
-			      )).sort();
+	    throw new RuntimeException("Could not get dump: " + rx);
 	  }
       }
+    
+    objectHandles = objectlist.getObjectHandles(true); // include inactives
+
+    // **
+    //
+    // The loop below goes over the sorted list of objectHandles and
+    // the sorted list of nodes in the tree under this particular baseNode,
+    // comparing as the loop progresses, adding or removing nodes from the
+    // tree to match the current contents of the objectHandles list
+    // 
+    // **
 
     parentNode = node;
     oldNode = null;
     fNode = (InvidNode) node.getChild();
     int i = 0;
 	
-    while ((i < unsorted_objects.size()) || (fNode != null))
+    while ((i < objectHandles.size()) || (fNode != null))
       {
 	//System.out.println("Looking at the next node");
 	//System.out.println("i = " + i + " length = " + unsorted_objects.length);
 	
-	if (i < unsorted_objects.size())
+	if (i < objectHandles.size())
 	  {
-	    invid = ((Result) unsorted_objects.elementAt(i)).getInvid();
-	    label = unsorted_objects.elementAt(i).toString();
+	    handle = (ObjectHandle) objectHandles.elementAt(i);
+
+	    invid = handle.getInvid();
+	    label = handle.getLabel();
 	  }
 	else
 	  {
+	    // We've gone past the end of the list of objects in this
+	    // object list.. from here on out, we're going to wind up
+	    // anything left in this subtree
+
 	    //System.out.println("Object is null");
+
 	    invid = null;
 	  }
+
+	// insert a new node in the tree, change the label, or remove
+	// a node
 
 	if ((fNode == null) ||
 	    ((invid != null) && 
 	     ((label.compareTo(fNode.getText())) < 0)))
 	  {
-	    // insert a new object node
-	    //System.out.println("Adding this node");
-	    //newNode = new InvidNode(parentNode, object.getName(), object,
-	    //			    oldNode, false, 2, 2, objectMenu);
+	    // If we have an invid/label in the object list that's not
+	    // in the tree, we need to insert it
 
 	    InvidNode objNode = new InvidNode(node, 
 					      label,
@@ -1444,7 +1405,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	else if ((invid == null) ||
 		 ((label.compareTo(fNode.getText())) > 0))
 	  {
-	    // delete a object node
+	    // delete a node in the tree without a matching
+	    // node in the object list
+
 	    //System.out.println("Removing this node");
 	    // System.err.println("Deleting: " + fNode.getText());
 
@@ -1453,9 +1416,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    fNode = newNode;
 	  }
-	else
+	else if (fNode.getInvid().equals(invid))
 	  {
-	    //System.out.println("No change for this node");
+	    // we've got a node in the tree that matches the
+	    // invid of the current object in the object list,
+	    // but the label may possibly have changed
 
 	    fNode.setText(label);
 
@@ -1473,6 +1438,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	tree.refresh();
       }
   }
+
+  /**
+   *
+   * This method changes the icon for the tree node for the
+   * provided invid.
+   *
+   */
 
   public void setIconForNode(Invid invid)
   {
@@ -1604,9 +1576,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
    *
    * obj can be null!  If it is, then this will create a new object of the type.
    *
-   * @obj the object created, can be null.  If you give a non-null object, then this method will not create a new object.
-   * @type The type of the object, used in creating.
+   * @param obj the object created, can be null.  If you give a non-null object, 
+   *            then this method will not create a new object.
+   *
+   * @param type The type of the object, used in creating.
    */
+
   public void showNewlyCreatedObject(db_object obj, Invid invid, Short type)
   {
        
@@ -1624,14 +1599,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
       }
 
-    if (cachedLists.containsKey(type))
+    if (cachedLists.containsList(type))
       {
-	Vector list = (Vector)cachedLists.get(type);
-	list.addElement(new listHandle("New Object", invid));
+	objectList list = cachedLists.getList(type);
+	list.addObjectHandle(new ObjectHandle("New Object", invid, false, false, false));
       }
     
     // If the base node is open, deal with the node.
+
     BaseNode baseN = null;
+
     if (shortToBaseNodeHash.containsKey(type))
       {
 	baseN = (BaseNode)shortToBaseNodeHash.get(type);
@@ -1728,23 +1705,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      }
 
 	    // Take this object out of the cachedLists, if it is in there
-	    if (cachedLists.containsKey(id))
+
+	    if (cachedLists.containsList(id))
 	      {
 		String label = session.viewObjectLabel(invid);
+
 		System.out.println("This base has been hashed.  Removing: " + label);
-		Vector lhs = (Vector)cachedLists.get(id);
 
-		for (int i = 0; i < lhs.size(); i++)
-		  {
-		    //System.out.println("Checking " + ((listHandle)lhs.elementAt(i)).getLabel());
+		objectList list = cachedLists.getList(id);
 
-		    if (((Invid)((listHandle)lhs.elementAt(i)).getObject()) == invid)
-		      {
-			System.out.println("Found it!");
-			lhs.removeElementAt(i);
-			break;
-		      }
-		  }
+		list.removeInvid(invid);
 	      }
 	    
 	    if (invidNodeHash.containsKey(invid))
@@ -2135,12 +2105,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	retVal = session.commitTransaction();
 
-	boolean succeeded = (retVal == null) ? true : retVal.didSucceed();
-
 	if (retVal != null)
 	  {
 	    handleReturnVal(retVal);
 	  }
+
+	boolean succeeded = (retVal == null) ? true : retVal.didSucceed();
 
 	if (succeeded)
 	  {
@@ -2172,24 +2142,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		      {
 			node.setText(label);
 		      }
-
-		    if (cachedLists.containsKey(info.getBaseID()))
-		      {
-			System.out.println("This changed base is cached, fixing it back.");
-
-			Vector list = (Vector)cachedLists.get(info.getBaseID());
-
-			for (int i = 0; i < list.size(); i++)
-			  {
-			    if (invid == (Invid)((listHandle)list.elementAt(i)).getObject())
-			      {
-				System.out.println("Found it! removing it.");
-				list.removeElementAt(i);
-				list.addElement(new listHandle(label, invid));
-				break;
-			      }
-			  }
-		      }
 		  }	    
 	      }
 	
@@ -2201,7 +2153,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	    refreshTree(true);
 
-	    cachedLists.clear();
+	    cachedLists.clearCaches();
 	
 	    wp.resetWindowCount();
 	  }
@@ -2218,6 +2170,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   public synchronized void cancelTransaction()
   {
+    ObjectHandle handle;
     ReturnVal retVal;
 
     /* -- */
@@ -2266,6 +2219,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	// Now we need to fix up the caches, and clean up all the changes made
 	// during the transaction
 
+	// any objects that we 'deleted' we'll clear the deleted bit
+
 	Enumeration dels = deleteHash.keys();
 
 	while (dels.hasMoreElements())
@@ -2273,19 +2228,22 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    Invid invid = (Invid)dels.nextElement();
 	    CacheInfo info = (CacheInfo)deleteHash.get(invid);
 
-	    if (cachedLists.containsKey(info.getBaseID()))
-		{
-		  if (createHash.containsKey(invid))
-		    {
-		      System.out.println("Can't fool me: you just created this object!");
-		    }
-		  else
-		    {
-		      System.out.println("This one is hashed, sticking it back in.");
-		      Vector list = (Vector)cachedLists.get(info.getBaseID());
-		      list.addElement(new listHandle(info.getOriginalLabel(), invid));
-		    }
-		}
+	    if (cachedLists.containsList(info.getBaseID()))
+	      {
+		if (createHash.containsKey(invid))
+		  {
+		    System.out.println("Can't fool me: you just created this object!");
+		  }
+		else
+		  {
+		    System.out.println("This one is hashed, sticking it back in.");
+
+		    objectList list = cachedLists.getList(info.getBaseID());
+
+		    handle = list.getObjectHandle(invid);
+		    handle.setDeleting(false);
+		  }
+	      }
 	  }
 	
 	// Next up is created list: remove all the added stuff.
@@ -2297,20 +2255,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    Invid invid = (Invid)created.nextElement();
 	    CacheInfo info = (CacheInfo)createHash.get(invid);
 
-	    if (cachedLists.containsKey(info.getBaseID()))
+	    if (cachedLists.containsList(info.getBaseID()))
 	      {
 		System.out.println("This one is hashed, taking a created object out.");
-		Vector list = (Vector)cachedLists.get(info.getBaseID());
 
-		for (int i = 0; i < list.size(); i++)
-		  {
-		    if (invid == (Invid)((listHandle)list.elementAt(i)).getObject())
-		      {
-			System.out.println("Found it! removing it.");
-			list.removeElementAt(i);
-			break;
-		      }
-		  }
+		objectList list = cachedLists.getList(info.getBaseID());
+
+		list.removeInvid(invid);
 	      }
 	  }
 
@@ -2323,27 +2274,22 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    Invid invid = (Invid)changed.nextElement();
 	    CacheInfo info = (CacheInfo)changedHash.get(invid);
 
-	    if (cachedLists.containsKey(info.getBaseID()))
+	    if (cachedLists.containsList(info.getBaseID()))
 	      {
 		System.out.println("This changed base is cached, fixing it back.");
-		Vector list = (Vector)cachedLists.get(info.getBaseID());
 
-		for (int i = 0; i < list.size(); i++)
-		  {
-		    if (invid == (Invid)((listHandle)list.elementAt(i)).getObject())
-		      {
-			System.out.println("Found it! removing it.");
-			list.removeElementAt(i);
-			list.addElement(new listHandle(info.getOriginalLabel(), invid));
-			break;
-		      }
-		  }
+		objectList list = cachedLists.getList(info.getBaseID());
+		
+		list.relabelObject(invid, info.getOriginalLabel());
 	      }
 	  }
 
 	somethingChanged = false;
 	session.openTransaction("glient");
-	// This will fix up the tree (remove the trash cans), and clear hashes
+
+	// This will fix up the tree (remove the trash cans), and 
+	// clear the created/changed/deleted hashes
+
 	refreshTree(false);
       }
     catch (RemoteException rx)

@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -113,6 +113,9 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
       currentOwners = null,
       availableOwners = null;
 
+    objectList
+      list;
+
     /* -- */
 
     if (debug)
@@ -124,14 +127,14 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
       {
 	Object key = field.choicesKey();
 	
-	if ((key != null) && (fp.getgclient().cachedLists.containsKey(key)))
+	if ((key != null) && (fp.getgclient().cachedLists.containsList(key)))
 	  {
 	    if (debug)
 	      {
 		System.out.println("Using cached copy...");
 	      }
-	    
-	    availableOwners = (Vector)fp.getgclient().cachedLists.get(key);
+
+	    availableOwners = fp.getgclient().cachedLists.getListHandles(key, false);
 	  }
 	else
 	  {
@@ -140,7 +143,9 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		System.out.println("Downloading copy");
 	      }
 
-	    availableOwners = field.choices().getListHandles();
+	    list = new objectList(field.choices());
+
+	    availableOwners = list.getListHandles(false);
 	    
 	    if (key != null)
 	      {
@@ -149,7 +154,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		    System.out.println("Saving this under key: " + key);
 		  }
 		
-		fp.getgclient().cachedLists.put(key, availableOwners);
+		fp.getgclient().cachedLists.putList(key, list);
 	      }
 	  }
       }

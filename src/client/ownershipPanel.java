@@ -247,6 +247,11 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
   public void run()
   {
+    objectList
+      list = null;
+
+    /* -- */
+
     isStarted = true;
 
     System.out.println("Loading one of the panels");
@@ -260,7 +265,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
 	// go back to the framePanel to get the invid
 
-	QueryDataNode node = new QueryDataNode(SchemaConstants.OwnerListField, 
+	QueryDataNode node = new QueryDataNode(SchemaConstants.OwnerListField,
 					       QueryDataNode.EQUALS, 
 					       QueryDataNode.CONTAINSANY, 
 					       parent.parent.getObjectInvid());
@@ -279,7 +284,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 	      }
 	  }
 	
-	owned = qResult.getListHandles();
+	owned = new objectList(qResult).getListHandles(false);
       }
     catch (RemoteException rx)
       {
@@ -292,21 +297,25 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 
     try
       {
-	if ((key != null) && (parent.parent.getgclient().cachedLists.containsKey(key)))
+	if ((key != null) && (parent.parent.getgclient().cachedLists.containsList(key)))
 	  {
 	    if (debug)
 	      {
 		System.out.println("using cached copy");
 	      }
 
-	    possible = (Vector)parent.parent.getgclient().cachedLists.get(key);
+	    list = parent.parent.getgclient().cachedLists.getList(key);
+
+	    possible = list.getListHandles(false);
 	  }
 	else
 	  {
 	    parent.parent.getgclient().setStatus("Downloading list of all objects, hold yer horses");
 
 	    result = parent.parent.getgclient().getSession().query(new Query(type));
-	    possible = result.getListHandles();
+
+	    list = new objectList(result);
+	    possible = list.getListHandles(false);
     
 	    if (key != null)
 	      {
@@ -315,16 +324,14 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable{
 		    System.out.println("Adding new key to cachedList: " + key);
 		  }
 
-		parent.parent.getgclient().cachedLists.put(key, possible);
+		parent.parent.getgclient().cachedLists.putList(key, list);
 	      }
 	  }
-
       }
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not get QueryResult for all objects: " + rx);
       }
-
     
     if (debug)
       {
