@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   static Vector sessions = new Vector();
   static Hashtable activeUsers = new Hashtable();
   static Hashtable userLogOuts = new Hashtable();
-  private int limit;
 
   /* -- */
 
@@ -53,13 +52,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    *
    */
 
-  public GanymedeServer(int limit) throws RemoteException
+  public GanymedeServer() throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
  
     if (server == null)
       {
-	this.limit = limit;
 	server = this;
       }
     else
