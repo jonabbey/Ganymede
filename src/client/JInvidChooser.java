@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: Before May 7, 1998
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -95,7 +95,11 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
       }
 
     buttonPanel.add("West", view);
-    buttonPanel.add("East", create);
+
+    if (create != null)
+      {
+	buttonPanel.add("East", create);
+      }
 
     // JPanelCombo already added the combo to the west.
 
