@@ -61,6 +61,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -564,7 +565,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		    else
 		      {
 			(new VecQuickSort(edit_invids, 
-					  new arlut.csd.Util.Compare() {
+					  new Comparator() {
 			  public int compare(Object a, Object b) 
 			    {
 			      listHandle aF, bF;

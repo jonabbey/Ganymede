@@ -57,6 +57,7 @@ package arlut.csd.ganymede.server;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -376,20 +377,20 @@ public class StringDBField extends DBField implements string_field {
 	entries[i] = this.value(i);
       }
     
-    new arlut.csd.Util.QuickSort(entries,
-				 new arlut.csd.Util.Compare()
-				 {
-				   public int compare(Object a, Object b)
-				     {
-				       String aS, bS;
-				       
-				       aS = (String) a;
-				       bS = (String) b;
-				       
-				       return aS.compareTo(bS);
-				     }
-				 }
-				 ).sort();
+    java.util.Arrays.sort(entries,
+			  new Comparator()
+			  {
+			    public int compare(Object a, Object b)
+			    {
+			      String aS, bS;
+			      
+			      aS = (String) a;
+			      bS = (String) b;
+			      
+			      return aS.compareTo(bS);
+			    }
+			  }
+			  );
     
     StringBuffer result = new StringBuffer();
     

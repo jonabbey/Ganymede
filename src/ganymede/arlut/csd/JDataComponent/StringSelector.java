@@ -66,6 +66,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.rmi.RemoteException;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -527,8 +528,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * Update the StringSelector.
    */
 
-  public void update(Vector available, boolean sortAvailable, Compare availComparator,
-		     Vector chosen, boolean sortChosen, Compare chosenComparator)
+  public void update(Vector available, boolean sortAvailable, Comparator availComparator,
+		     Vector chosen, boolean sortChosen, Comparator chosenComparator)
   {
     if (available == null)
       {

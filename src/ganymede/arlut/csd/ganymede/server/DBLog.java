@@ -62,6 +62,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -534,7 +535,7 @@ public class DBLog {
     currentTime = new Date(System.currentTimeMillis());
     transactionID = adminName + ":" + currentTime.getTime();
 
-    Vector objects = new Vector();
+    HashMap objects = new HashMap();
 
     // get a list of all objects affected by this transaction
     
@@ -551,11 +552,8 @@ public class DBLog {
 		for (int j = 0; j < event.objects.size(); j++)
 		  {
 		    Invid inv = (Invid) event.objects.elementAt(j);
-		    
-		    if (!objects.contains(inv))
-		      {
-			objects.addElement(inv);
-		      }
+
+		    objects.put(inv, inv);
 		  }
 	      }
 	  }
@@ -567,8 +565,12 @@ public class DBLog {
 				      "Start Transaction: " + transdescrip,
 				      admin,
 				      adminName,
-				      objects,
+				      new Vector(objects.values()),
 				      null);
+
+    objects.clear();
+    objects = null;
+
     start.setTransactionID(transactionID);
     start.setLogTime(currentTime);
     logController.writeEvent(start);

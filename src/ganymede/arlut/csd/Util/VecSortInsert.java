@@ -54,6 +54,7 @@
 
 package arlut.csd.Util;
 
+import java.util.Comparator;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -73,9 +74,9 @@ import java.util.Vector;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
-public class VecSortInsert implements Compare {
+public class VecSortInsert implements Comparator {
 
-  Compare comparator;
+  Comparator comparator;
   static final boolean debug = false;
 
   /* -- */
@@ -97,7 +98,7 @@ public class VecSortInsert implements Compare {
     test.addElement("X");
     test.addElement("Y");
 
-    VecSortInsert inserter = new VecSortInsert(new arlut.csd.Util.Compare() 
+    VecSortInsert inserter = new VecSortInsert(new Comparator()
 					       {
 						 public int compare(Object o_a, Object o_b) 
 						   {
@@ -220,7 +221,7 @@ public class VecSortInsert implements Compare {
    * This static method does the work.
    */
 
-  public static void insert(Vector objects, Object element, Compare comparator)
+  public static void insert(Vector objects, Object element, Comparator comparator)
   {
     int low, high, mid;
 
@@ -325,7 +326,7 @@ public class VecSortInsert implements Compare {
    * comparison will be performed on elements inserted.</p>
    */
 
-  public VecSortInsert(Compare comparator)
+  public VecSortInsert(Comparator comparator)
   {
     this.comparator = comparator;
 

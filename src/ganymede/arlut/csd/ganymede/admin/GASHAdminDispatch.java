@@ -55,6 +55,7 @@ package arlut.csd.ganymede.admin;
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -65,7 +66,6 @@ import javax.swing.SwingUtilities;
 import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.JDialog.StringDialog;
-import arlut.csd.Util.QuickSort;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -635,31 +635,31 @@ class GASHAdminDispatch implements Runnable {
 	// the server-side hashes, and as they are shuffled
 	// from hash to hash
 	
-	(new QuickSort(tasks, 
-		       new arlut.csd.Util.Compare() 
-		       {
-			 public int compare(Object a, Object b) 
-			 {
-			   scheduleHandle aH, bH;
-				
-			   aH = (scheduleHandle) a;
-			   bH = (scheduleHandle) b;
-				
-			   if (aH.incepDate.before(bH.incepDate))
-			     {
-			       return -1;
-			     }
-			   else if (aH.incepDate.after(bH.incepDate))
-			     {
-			       return 1;
-			     }
-			   else
-			     {
-			       return 0;
-			     }
-			 }
-		       }
-		       )).sort();
+	java.util.Arrays.sort(tasks,
+			      new Comparator() 
+			      {
+				public int compare(Object a, Object b) 
+				{
+				  scheduleHandle aH, bH;
+				  
+				  aH = (scheduleHandle) a;
+				  bH = (scheduleHandle) b;
+				  
+				  if (aH.incepDate.before(bH.incepDate))
+				    {
+				      return -1;
+				    }
+				  else if (aH.incepDate.after(bH.incepDate))
+				    {
+				      return 1;
+				    }
+				  else
+				    {
+				      return 0;
+				    }
+				}
+			      }
+			      );
       }
 
     Vector taskNames = new Vector();

@@ -61,6 +61,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.rmi.RemoteException;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -1302,7 +1303,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    if (currentHandle == null && currentValue != null)
 	      {
-		VecSortInsert inserter = new VecSortInsert(new arlut.csd.Util.Compare() 
+		VecSortInsert inserter = new VecSortInsert(new Comparator() 
 							   {
 							     public int compare(Object o_a, Object o_b) 
 							       {

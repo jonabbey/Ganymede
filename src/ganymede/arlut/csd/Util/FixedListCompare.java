@@ -53,6 +53,7 @@
 
 package arlut.csd.Util;
 
+import java.util.Comparator;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class implements the {@link arlut.csd.Util.Compare Compare}
+ * <P>This class implements the Comparator
  * interface, and provides a sort comparator that can sort things
  * according to a fixed ordering.  Items not in the original ordered
  * list will be placed after items in the original list, and in
@@ -72,14 +73,14 @@ import java.util.Vector;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class FixedListCompare implements Compare {
+public class FixedListCompare implements Comparator {
 
   final static boolean debug = false;
 
   // ---
 
   private Vector items;
-  private Compare secondaryComparator;
+  private Comparator secondaryComparator;
 
   /**
    * @param items A list of items whose sort order we will impart on comparisons
@@ -87,7 +88,7 @@ public class FixedListCompare implements Compare {
    * that are both missing from the items list.
    */
 
-  public FixedListCompare(Vector items, Compare secondaryComparator)
+  public FixedListCompare(Vector items, Comparator secondaryComparator)
   {
     this.items = items;
     this.secondaryComparator = secondaryComparator;

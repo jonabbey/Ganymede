@@ -1238,7 +1238,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	_success = true;
       }
-    catch (Exception ex)
+    catch (Throwable ex)
       {
 	err.println("Caught exception during xml schema editing");
 	err.println(ex.getMessage());

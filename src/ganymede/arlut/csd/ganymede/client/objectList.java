@@ -55,11 +55,11 @@
 
 package arlut.csd.ganymede.client;
 
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import arlut.csd.Util.Compare;
 import arlut.csd.Util.VecQuickSort;
 import arlut.csd.Util.VecSortInsert;
 import arlut.csd.ganymede.common.Invid;
@@ -87,7 +87,7 @@ public class objectList {
 
   final static boolean debug = false;
 
-  static Compare comparator = new arlut.csd.Util.Compare() 
+  static Comparator comparator = new Comparator() 
     {
       public int compare(Object o_a, Object o_b) 
 	{

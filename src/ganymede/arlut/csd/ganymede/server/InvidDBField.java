@@ -604,7 +604,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    entries[i] = getRemoteLabel(gsession, tmp, false);
 	  }
 
-	new arlut.csd.Util.QuickSort(entries, null).sort();
+	java.util.Arrays.sort(entries, null);
 
 	StringBuffer result = new StringBuffer();
 

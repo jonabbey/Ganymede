@@ -64,6 +64,7 @@ import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -165,8 +166,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     debug = val;
   }
 
-  private static arlut.csd.Util.Compare comparator =
-    new arlut.csd.Util.Compare() {
+  private static Comparator comparator =
+    new Comparator() {
     public int compare(Object a, Object b) 
       {
 	DBObjectBaseField aF, bF;

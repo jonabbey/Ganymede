@@ -61,6 +61,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Vector;
+import java.util.Comparator;
 
 import javax.swing.DefaultListModel;
 import javax.swing.DefaultListSelectionModel;
@@ -105,7 +106,7 @@ import arlut.csd.Util.VecQuickSort;
  */
 
 public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener, MouseMotionListener, 
-						     arlut.csd.Util.Compare {
+						     Comparator {
 
   static final boolean debug = false;
 
@@ -157,8 +158,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * JstringListBox was most recently with sorting request.</p>
    */
 
-  arlut.csd.Util.Compare
-    comparator;
+  Comparator comparator;
 
   /**
    * <p>The default maximum width string</p>
@@ -232,11 +232,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * @param sort  If true, the items Vector will be sorted in place before
    * being set into the listbox.
    * @param comparator Typically an instance of an inner class that implements
-   * the arlut.csd.Util.Compare interface, used to guide the sort process.  If this
+   * the Comparator interface, used to guide the sort process.  If this
    * is null, the sort will be performed using a normal string ordering sort.
    */
 
-  public void load(Vector items, int width, boolean sort, arlut.csd.Util.Compare comparator)
+  public void load(Vector items, int width, boolean sort, Comparator comparator)
   {
     this.maxWidthString = "this is the minimum!";
 

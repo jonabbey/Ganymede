@@ -59,6 +59,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -91,8 +92,8 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   private final static boolean debug = false;
 
-  private static arlut.csd.Util.Compare comparator =
-    new arlut.csd.Util.Compare() {
+  private static Comparator comparator =
+    new Comparator() {
     public int compare(Object a, Object b) 
       {
 	int valA, valB;

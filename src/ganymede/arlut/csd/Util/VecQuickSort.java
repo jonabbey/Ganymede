@@ -54,6 +54,8 @@
 
 package arlut.csd.Util;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -63,9 +65,8 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>QuickSort implementation for Vector.  Uses the
- * {@link arlut.csd.Util.Compare Compare} interface for item
- * comparisons.</P>
+ * <P>QuickSort implementation for Vector.  Uses the Comparator
+ * interface for item comparisons.</P>
  *
  * <P>Based on code by Eric van Bezooijen (eric@logrus.berkeley.edu)
  * and Roedy Green (roedy@bix.com).</P>
@@ -74,10 +75,10 @@ import java.util.Vector;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
-public class VecQuickSort implements Compare {
+public class VecQuickSort implements Comparator {
 
   Vector objects;
-  Compare comparator;
+  Comparator comparator;
 
   /* -- */
 
@@ -86,12 +87,12 @@ public class VecQuickSort implements Compare {
    * VecQuickSort constructor.
    *
    * @param objects Vector of objects to be sorted in place
-   * @param comparator Compare object.. if null, standard string compare
+   * @param comparator Comparator object.. if null, standard string compare
    * will be done.
    *
    */
 
-  public VecQuickSort(Vector objects, Compare comparator)
+  public VecQuickSort(Vector objects, Comparator comparator)
   {
     this.objects = objects;
 
@@ -105,82 +106,23 @@ public class VecQuickSort implements Compare {
       }
   }
 
-  private void quick(int first, int last)
-  {
-    int j;
-
-    /* -- */
-
-    if (first < last)
-      {
-	j = partition(first, last);
-	
-	if (j == last) 
-	  {
-	    j--;
-	  }
-	
-	quick(first,j);
-	quick(j+1,last);
-      }
-  }
-
-  /**
-   * <P>Partition by splitting this chunk to sort in two and
-   * get all big elements on one side of the pivot and all
-   * the small elements on the other.</P>
-   */
-
-  private int partition(int first, int last)
-  {
-    Object pivot = objects.elementAt(first);
-
-    while (true)
-      {
-	while (comparator.compare(objects.elementAt(last), pivot) >= 0 &&
-	       last > first)
-	  {
-	    last--;
-	  }
-
-	while (comparator.compare(objects.elementAt(first), pivot) < 0 &&
-	       first < last)
-	  {
-	    first++;
-	  }
-
-	if (first < last)
-	  {
-	    swap(first, last);	// exchange objects on either side of the pivot
-	  } 
-	else
-	  {
-	    return last;
-	  }
-      }
-  }
-
-  private void swap(int i, int j)
-  {
-    Object tmp = objects.elementAt(i);
-    Object tmp2 = objects.elementAt(j);
-
-    objects.setElementAt(tmp, j);
-    objects.setElementAt(tmp2, i);
-  }
-
   /**
    * <P>Sort the elements</P>
    */
 
   public void sort()
   {
-    if (objects.size() < 2)
+    synchronized (objects)
       {
-	return;
+	Object ary[] = objects.toArray();
+
+	java.util.Arrays.sort(ary, this.comparator);
+
+	for (int i = 0; i < ary.length; i++)
+	  {
+	    objects.setElementAt(ary[i], i);
+	  }
       }
-    
-    quick(0, objects.size()-1);
   }
 
   /**

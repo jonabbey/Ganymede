@@ -55,12 +55,12 @@
 
 package arlut.csd.ganymede.common;
 
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.JDataComponent.listHandle;
-import arlut.csd.Util.Compare;
 import arlut.csd.Util.VecSortInsert;
 
 /*------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ public class QueryResult implements java.io.Serializable {
 
   static final boolean debug = false;
 
-  public static Compare comparator = new arlut.csd.Util.Compare() 
+  public static Comparator comparator = new Comparator() 
     {
       public int compare(Object o_a, Object o_b) 
 	{

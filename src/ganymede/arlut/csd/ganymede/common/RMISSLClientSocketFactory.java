@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -73,6 +73,7 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   private static String certsResource = "client.truststore";
   private static int counter = 0;
   private static final boolean socketDebug = false;
+  private static final boolean mrShouty = false;
 
   private transient SSLSocketFactory sf;
 
@@ -99,7 +100,10 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 
     SSLSession session = sock.getSession();
 
-    System.err.println("RMISSLClientSocketFactory: created SSL socket to host " + host + " on port " + port + ", using " + session.getCipherSuite());
+    if (mrShouty)
+      {
+	System.err.println("RMISSLClientSocketFactory: created SSL socket to host " + host + " on port " + port + ", using " + session.getCipherSuite());
+      }
 
     return sock;
   }

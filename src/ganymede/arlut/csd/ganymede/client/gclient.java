@@ -69,6 +69,7 @@ import java.awt.event.WindowEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -5281,7 +5282,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   public Vector sortListHandleVector(Vector v)
   {
     (new VecQuickSort(v, 
-		      new arlut.csd.Util.Compare() {
+		      new Comparator() {
       public int compare(Object a, Object b) 
 	{
 	  listHandle aF, bF;
