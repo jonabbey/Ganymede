@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.16 $
-# $Date: 2000/10/10 06:07:46 $
+# $Revision: 1.17 $
+# $Date: 2000/10/10 06:55:48 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -138,7 +138,7 @@ ENDCONFIG
 
 if ($version == 1 && !-e $vars{"SWINGJARS"}."/swingall.jar") {
   die "Can't find the swingall jar ".$vars{"SWINGJARS"}."/swingall.jar";
-} else if ($version == 1) {
+} elsif ($version == 1) {
   print "Found the swing jar ok\n";
 }
 
@@ -202,14 +202,14 @@ print "\nCustomizing ganymede script\n";
 if ($version == 1) {
   %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 		 "PROPERTIES" => $installdir."/client.properties",
-		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:".$installdir."/jars/ganymede.jar");
+		 "CLASSPATH" => $vars{"SWINGJARS"}."/swingall.jar:$installdir/jars/ganymede.jar");
 
   $template = "scripts/ganymede.template";
 
 } else {
   %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 		 "PROPERTIES" => $installdir."/client.properties",
-		 "CLASSPATH" => "$installdir."/jars/ganymede.jar");
+		 "CLASSPATH" => $installdir."/jars/ganymede.jar");
 
   $template = "scripts/ganymede.template2";
 }
@@ -306,7 +306,7 @@ print "\nCustomizing rpcpass script\n";
   
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "PROPERTIES" => "$installdir/client.properties",
-	       "CLASSPATH" => $installdir/jars/ganymede.jar");
+	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
   
 open INPUT, "scripts/rpcpass.template" or die "Couldn't open rpcpass template!";
 open OUTPUT, ">$installdir/bin/rpcpass" or die "Couldn't write rpcpass";
