@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -54,156 +54,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     debug = val;
   }
 
-  /* -------------------- Static customization hooks -------------------- */
-
-  /**
-   *
-   * Static method to verify overall consistency of
-   * a DBObject.  While default code has not yet been
-   * written for this method, it may need to have its
-   * parameter list modified to include the controlling
-   * DBSession to allow coordination of DBLock and the
-   * the use of DBEditSet.findObject() to get a transaction
-   * consistent view of related objects.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public static boolean consistencyCheck(DBObject object)
-  {
-    return true;
-  }
-
-  /**
-   *
-   * Static method to verify whether the user has permission
-   * to view a given object.  The client's DBSession object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for viewing to the client.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public static boolean canRead(DBSession session, DBObject object)
-  {
-    return true;
-  }
-
-  /**
-   *
-   * Static method to verify whether the user has permission
-   * to edit a given object.  The client's DBSession object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for editing by the client.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public static boolean canWrite(DBSession session, DBObject object)
-  {
-    return true;
-  }
-
-  /**
-   *
-   * Static method to verify whether this object type has an inactivation
-   * mechanism.
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public static boolean canBeInactivated()
-  {
-    return false;
-  }
-
-  /**
-   *
-   * Static method to verify whether the user has permission
-   * to inactivate a given object.  The client's DBSession object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for inactivating by the client.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public static boolean canInactivate(DBSession session, DBObject object)
-  {
-    return true;
-  }
-
-  /**
-   *
-   * Static method to verify whether the user has permission
-   * to remove a given object.  The client's DBSession object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for removal by the client.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public static boolean canRemove(DBSession session, DBObject object)
-  {
-    return true;
-  }
-
-  /**
-   *
-   * Static method to verify whether the user has permission
-   * to clone a given object.  The client's DBSession object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for cloning by the client.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public static boolean canClone(DBSession session, DBObject object)
-  {
-    return false;
-  }
-
-  /**
-   *
-   * Hook to allow the cloning of an object.  If this object type
-   * supports cloning (which should be very much customized for this
-   * object type.. creation of the ancillary objects, which fields to
-   * clone, etc.), this static method will actually do the work.
-   *
-   */
-
-  public static DBEditObject cloneObject(DBSession session, DBObject object)
-  {
-    return null;
-  }
-
-  /**
-   *
-   * Static method to verify whether the user has permission
-   * to create an instance of this object type.  The client's DBSession object
-   * will call the canCreate method in the DBObjectBase for this object type
-   * to determine whether creation is allowed to the user.
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public static boolean canCreate(DBSession session)
-  {
-    return true;
-  }
-
   /* --------------------- Instance fields and methods --------------------- */
 
   DBObject original;
@@ -212,6 +62,18 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   byte status;
   boolean stored;		// true if the object has a version currently
 				// stored in the DBStore
+
+  /**
+   *
+   * Dummy constructor, is responsible for creating a DBEditObject strictly
+   * for the purpose of having a handle to call customization methods on.
+   *
+   */
+
+  public DBEditObject() throws RemoteException
+  {
+    editset = null;		// this will be our cue to our static handle status for our methods
+  }
 
   /**
    *
@@ -562,6 +424,166 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
       }
   }
 
+  /* -------------------- pseudo-static Customization hooks -------------------- 
+
+
+     The following block of methods are intended to be used in static fashion..
+     that is, a DBObjectBase can load in a class that extends DBEditObjectBase
+     and hold an instance of such as DBObjectBase.objectHook.  The following
+     methods are used in a static fashion, that is they are primarily intended
+     to perform actions on designated external DBObjects rather than on the
+     per-DBObjectBase instance.
+
+     */
+
+  /**
+   *
+   * Customization method to verify overall consistency of
+   * a DBObject.  While default code has not yet been
+   * written for this method, it may need to have its
+   * parameter list modified to include the controlling
+   * DBSession to allow coordination of DBLock and the
+   * the use of DBEditSet.findObject() to get a transaction
+   * consistent view of related objects.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean consistencyCheck(DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user has permission
+   * to view a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for viewing to the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean canRead(DBSession session, DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user has permission
+   * to edit a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for editing by the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean canWrite(DBSession session, DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Customization method to verify whether this object type has an inactivation
+   * mechanism.
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean canBeInactivated()
+  {
+    return false;
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user has permission
+   * to inactivate a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for inactivating by the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean canInactivate(DBSession session, DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user has permission
+   * to remove a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for removal by the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean canRemove(DBSession session, DBObject object)
+  {
+    return true;
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user has permission
+   * to clone a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for cloning by the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean canClone(DBSession session, DBObject object)
+  {
+    return false;
+  }
+
+  /**
+   *
+   * Hook to allow the cloning of an object.  If this object type
+   * supports cloning (which should be very much customized for this
+   * object type.. creation of the ancillary objects, which fields to
+   * clone, etc.), this customization method will actually do the work.
+   *
+   */
+
+  public DBEditObject cloneObject(DBSession session, DBObject object)
+  {
+    return null;
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user has permission
+   * to create an instance of this object type.  The client's DBSession object
+   * will call the canCreate method in the DBObjectBase for this object type
+   * to determine whether creation is allowed to the user.
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean canCreate(DBSession session)
+  {
+    return true;
+  }
+
 
   /**
    *
@@ -575,6 +597,34 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public String getLabelHook(DBObject object)
   {
     return null;		// no default
+  }
+
+  /**
+   *
+   * This method provides a hook that can be used to indicate that a
+   * particular field's value should be filtered by a particular
+   * subclass of DBEditObject.  This is intended to allow, for instance,
+   * that the Admin object's name field, if null, can have the owning
+   * user's name interposed.
+   *
+   */
+
+  public boolean virtualizeField(short fieldID)
+  {
+    return false;
+  }
+
+  /**
+   *
+   * This method provides a hook to return interposed values for
+   * fields that have their data massaged by a DBEditObject
+   * subclass.
+   *
+   */
+
+  public Object getVirtualValue(DBField field)
+  {
+    return null;
   }
 
   /**
@@ -739,46 +789,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     return true;
   }
 
-  /**
-   *
-   * This method provides a hook that can be used to indicate that a
-   * particular field's value should be filtered by a particular
-   * subclass of DBEditObject.  This is intended to allow, for instance,
-   * that the Admin object's name field, if null, can have the owning
-   * user's name interposed.
-   *
-   */
-
-  public static boolean virtualizeField(short fieldID)
-  {
-    return false;
-  }
-
-  /**
-   *
-   * This method provides a hook to return interposed values for
-   * fields that have their data massaged by a DBEditObject
-   * subclass.
-   *
-   */
-
-  public Object getVirtualValue(DBField field)
-  {
-    return null;
-  }
-
-  /**
-   *
-   * This method provides a hook to return interposed values for
-   * fields that have their data massaged by a DBEditObject
-   * subclass.
-   *
-   */
-
-  public static Object getVirtualValue(DBObject object, DBField field)
-  {
-    return null;
-  }
 
   /**
    *
