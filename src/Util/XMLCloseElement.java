@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/03/10 03:15:55 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/03/10 03:44:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,6 +76,16 @@ public class XMLCloseElement extends XMLItem {
   public String getName()
   {
     return name;
+  }
+
+  /**
+   * <P>This method returns true if this element is named
+   * &lt;name&gt;</P>
+   */
+
+  public boolean matches(String name)
+  {
+    return name != null && name.equals(this.name);
   }
 
   public String toString()

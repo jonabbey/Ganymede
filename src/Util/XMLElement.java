@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/03/10 03:15:55 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/03/10 03:44:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -71,6 +71,7 @@ public class XMLElement extends XMLItem {
 
   String name;
   Hashtable attributes;
+  boolean empty;
 
   /* -- */
 
@@ -98,6 +99,26 @@ public class XMLElement extends XMLItem {
 	    attributes.put(label, value);
 	  }
       }
+  }
+
+  /**
+   * <P>This method is called by {@link arlut.csd.Util.XMLReader XMLReader}
+   * if the open element tag for this element is immediately matched by its
+   * close element tag.</P>
+   */
+
+  void setEmpty()
+  {
+    this.empty = true;
+  }
+
+  /**
+   * <P>This method returns true if this is an empty element.</P>
+   */
+
+  public boolean isEmpty()
+  {
+    return empty;
   }
 
   /**
@@ -180,6 +201,11 @@ public class XMLElement extends XMLItem {
 	    buffer.append("\"");
 
 	    i++;
+	  }
+
+	if (empty)
+	  {
+	    buffer.append("/");
 	  }
 
 	buffer.append(">");

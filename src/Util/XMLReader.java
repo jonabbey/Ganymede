@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2000/03/10 03:15:56 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2000/03/10 03:44:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -170,6 +170,24 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		    finished = ((XMLCharData) value).containsNonWhitespace();
 		  }
 	      }
+
+	    if (value instanceof XMLElement)
+	      {
+		XMLElement element = (XMLElement) value;
+
+		XMLItem nextItem = peekNextItem(skipWhiteSpaceChars);
+
+		if (nextItem != null && nextItem instanceof XMLCloseElement)
+		  {
+		    XMLCloseElement close = (XMLCloseElement) nextItem;
+
+		    if (close.matches(element.getName()))
+		      {
+			element.setEmpty();
+			getNextItem(); // coalesce the next item
+		      }
+		  }
+	      }
 	  }
 
 	return value;
@@ -253,6 +271,24 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		  {
 		    getNextItem();	// skip the whitespace
 		    finished = false;
+		  }
+	      }
+
+	    if (value instanceof XMLElement)
+	      {
+		XMLElement element = (XMLElement) value;
+
+		XMLItem nextItem = peekNextItem(skipWhiteSpaceChars);
+
+		if (nextItem != null && nextItem instanceof XMLCloseElement)
+		  {
+		    XMLCloseElement close = (XMLCloseElement) nextItem;
+
+		    if (close.matches(element.getName()))
+		      {
+			element.setEmpty();
+			getNextItem(); // coalesce the next item
+		      }
 		  }
 	      }
 	  }
