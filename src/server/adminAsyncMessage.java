@@ -4,8 +4,8 @@
 
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2003/09/09 01:39:49 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2003/09/09 01:41:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,11 +67,13 @@ import java.rmi.server.Unreferenced;
  * calls {@link arlut.csd.ganymede.serverClientAsyncResponder#getNextMsgs()} to
  * receive asynchonous notifications from the server.</p>
  *
- * @version $Revision: 1.7 $ $Date: 2003/09/09 01:39:49 $
+ * @version $Revision: 1.8 $ $Date: 2003/09/09 01:41:46 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class adminAsyncMessage implements java.io.Serializable {
+
+  static final long serialVersionUID = -2607353339584658316L;
 
   static final int FIRST = 0;
   static public final int SETSERVERSTART = 0;
