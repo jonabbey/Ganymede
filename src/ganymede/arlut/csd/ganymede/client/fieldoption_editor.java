@@ -345,6 +345,11 @@ class fieldoption_editor extends JDialog
 		continue;
 	      }
 
+	    if (base.isEmbedded() && template.getID() == SchemaConstants.ContainerField)
+	      {
+		continue;	// the container field is always implicit for embedded objects
+	      }
+
 	    entry = matrix.getOption(id, template.getID());
 
 	    if (entry == null)
