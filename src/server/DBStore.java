@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.97 $
-   Last Mod Date: $Date: 1999/11/16 08:01:00 $
+   Version: $Revision: 1.98 $
+   Last Mod Date: $Date: 1999/11/20 00:01:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.97 $ %D%
+ * @version $Revision: 1.98 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2114,6 +2114,7 @@ public class DBStore {
     try
       {
 	gSession = new GanymedeSession();
+	gSession.enableOversight(false);
       }
     catch (RemoteException ex)
       {

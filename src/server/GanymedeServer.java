@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.46 $
-   Last Mod Date: $Date: 1999/11/05 21:07:29 $
+   Version: $Revision: 1.47 $
+   Last Mod Date: $Date: 1999/11/20 00:01:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1104,47 +1104,45 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		    continue;
 		  }
 
-		// 
-
-		if (field.getID() == SchemaConstants.BackLinksField)
+		iField = (InvidDBField) field;
+		
+		if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
 		  {
-		    iField = (InvidDBField) field;
-
-		    if (iField.isVector())
-		      {
-			enum4 = iField.values.elements();
-			
-			while (enum4.hasMoreElements())
-			  {
-			    invid = (Invid) enum4.nextElement();
-
-			    if (session.viewDBObject(invid) == null)
-			      {
-				ok = false;
-
-				Ganymede.debug("*** Backlink field in object " +
-					       base.getName() + ":" + object.getLabel() +
-					       " has an invid pointing to a non-existent object: " + invid);
-			      }
-			  }
-		      }
-		    else
-		      {
-			Ganymede.debug("*** Error, back links field isn't vector???");
-		      }
-		  }
-		else
-		  {
-		    iField = (InvidDBField) field;
-		    
-		    if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
-		      {
-			ok = false;
-		      }
+		    ok = false;
 		  }
 	      }
 	  }
       }
+
+    synchronized (Ganymede.db.backPointers)
+      {
+	Ganymede.debug("Testing Ganymede backPointers hash structure for validity");
+
+	Enumeration keys = Ganymede.db.backPointers.keys();
+
+	while (keys.hasMoreElements())
+	  {
+	    Invid key = (Invid) keys.nextElement();
+	    Hashtable ptrTable = (Hashtable) Ganymede.db.backPointers.get(key);
+	    Enumeration backpointers = ptrTable.keys();
+
+	    while (backpointers.hasMoreElements())
+	      {
+		Invid backTarget = (Invid) backpointers.nextElement();
+
+		if (session.viewDBObject(backTarget) == null)
+		  {
+		    ok = false;
+		    
+		    Ganymede.debug("*** Backpointers hash for object " +
+				   Ganymede.internalSession.describe(key) +
+				   " has an invid pointing to a non-existent object: " + backTarget);
+		  }
+	      }
+	  }
+      }
+
+    Ganymede.debug("Ganymede invid link test complete");
 
     synchronized (Ganymede.db)
       {
