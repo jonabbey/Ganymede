@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.63 $ %D%
+   Version: $Revision: 1.64 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1683,26 +1683,26 @@ public class DBStore {
     inv = eO.getInvid();
 
     s = (StringDBField) eO.getField("Name");
-    s.setValue(Ganymede.rootname);
+    s.setValueLocal(Ganymede.rootname);
     
     // create a supergash admin persona object 
 
     eO =(DBEditObject) session.createDBObject(SchemaConstants.PersonaBase, null);
 
     s = (StringDBField) eO.getField("Name");
-    s.setValue(Ganymede.rootname);
+    s.setValueLocal(Ganymede.rootname);
     
     p = (PasswordDBField) eO.getField("Password");
     p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
 
     i = (InvidDBField) eO.getField(SchemaConstants.PersonaGroupsField);
-    i.addElement(inv);
+    i.addElementLocal(inv);
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminConsole);
-    b.setValue(new Boolean(true));
+    b.setValueLocal(new Boolean(true));
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
-    b.setValue(new Boolean(true));
+    b.setValueLocal(new Boolean(true));
 
     // create a monitor admin persona object 
 
@@ -1712,7 +1712,7 @@ public class DBStore {
 
     if (Ganymede.monitornameProperty != null)
       {
-	s.setValue(Ganymede.monitornameProperty);
+	s.setValueLocal(Ganymede.monitornameProperty);
       }
     else
       {
@@ -1731,17 +1731,17 @@ public class DBStore {
       }
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminConsole);
-    b.setValue(new Boolean(true));
+    b.setValueLocal(new Boolean(true));
 
     b = (BooleanDBField) eO.getField(SchemaConstants.PersonaAdminPower);
-    b.setValue(new Boolean(false));
+    b.setValueLocal(new Boolean(false));
 
     // create SchemaConstants.PermDefaultObj
 
     eO =(DBEditObject) session.createDBObject(SchemaConstants.RoleBase, null); 
 
     s = (StringDBField) eO.getField(SchemaConstants.RoleName);
-    s.setValue("Default");
+    s.setValueLocal("Default");
 
     // what can users do with objects they own?  Includes users themselves
 
