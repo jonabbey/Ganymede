@@ -1,14 +1,13 @@
 /*
 
- JstringListBox.java
+   JstringListBox.java
 
- An implementation of JListBox used to display strings.
+   An implementation of JListBox used to display strings.
 
- Created: 21 Aug 1997
- Version: $Revision: 1.21 $ %D%
- Module By: Mike Mulvaney
- Applied Research Laboratories, The University of Texas at Austin
-
+   Created: 21 Aug 1997
+   Version: $Revision: 1.22 $ %D%
+   Module By: Mike Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
 
 */
 
@@ -21,6 +20,12 @@ import java.awt.event.*;
 import java.util.Vector;
 import arlut.csd.Util.VecQuickSort;
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                  JstringListBox
+
+------------------------------------------------------------------------------*/
+
 public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener {
 
   static final boolean debug = false;
@@ -29,6 +34,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   int 
     width,
+    popUpIndex = -1,
     numberOfStrings = 0;
 
   DefaultListModel 
@@ -58,10 +64,13 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
+   *
    * Constructor
    *
    * @param items Vector of items (Strings or listHandles) to show in the list
+   *
    */
+
   public JstringListBox(Vector items)
   {
     this(items, false, null);
@@ -96,6 +105,17 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     this(items, sorted, popup, 200);
   }
 
+  /**
+   *
+   * Constructor 
+   *
+   * @param items Vector of items (Strings or listHandles) to show in the list
+   * @param sorted If true, JstringListBox will not sort the vector(it is already sorted)
+   * @param popup JPopupMenu that will be shown on right click.  Callback is of type PARAMETER
+   * @param width Width in pixels of the string list box
+   *
+   */
+
   public JstringListBox(Vector items, boolean sorted, JPopupMenu popup, int width)
   {
     this.sorted = sorted;
@@ -105,6 +125,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     if (popup != null)
       {
 	Component[] c = popup.getComponents();
+
 	for (int i = 0; i < c.length; i++)
 	  {
 	    if (c[i] instanceof JMenuItem)
@@ -163,12 +184,14 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 				  )
 		  ).sort();
 
-		  if (debug)
-		    {
-		      System.out.println("Done sorting strings");
-		    }
+		if (debug)
+		  {
+		    System.out.println("Done sorting strings");
+		  }
 	      } 
+
 	    String string;
+
 	    for (int i=0 ; i<items.size() ; i++)
 	      {
 		string = (String)items.elementAt(i);
@@ -217,30 +240,34 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 				      }
 				  }
 				  )	      
-		  ).sort();
+		 ).sort();
 
-		  if (debug)
-		    {
-		      System.out.println("Done sorting.");
-		    }
+		if (debug)
+		  {
+		    System.out.println("Done sorting.");
+		  }
 	      }
 	    
 	    for (int i=0 ; i<items.size() ; i++)
 	      {
+		listHandle x = (listHandle) items.elementAt(i);
+
 		if (debug)
 		  {
-		    System.err.println("JstringListBox: adding listhandle " + ((listHandle) items.elementAt(i)).getLabel());
+		    System.err.println("JstringListBox: adding listhandle " + x.getLabel() + ">>" + x.getObject());
 		  }
 		
-		insertHandleAt((listHandle)items.elementAt(i), i);
+		insertHandleAt(x, i);
 	      }
 	  }
 	else
 	  {
-	    System.out.println("Unsupported item type passed to JstringListBox in a vector(needs to be String or ListHandle)");
+	    System.out.println("Unsupported item type passed to JstringListBox " +
+			       "in a vector(needs to be String or ListHandle)");
 	  }
       
       }
+
     setModel(model);
     
     addMouseListener(this);
@@ -252,13 +279,18 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
   }
 
-  /** Reload the list box.
+  /**
+   *
+   * Reload the list box.
+   *
    */
 
   public void reload(Vector items, boolean sorted)
   {
     //model.removeAllElements();
+
     model = new DefaultListModel();
+
     if ((items != null) && (items.size() > 0))
       {
 	if (items.elementAt(0) instanceof listHandle)
@@ -286,7 +318,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 		insertHandleAt(new listHandle(s,s), i);
 	      }
 	  }
-	
       }
     else 
       {
@@ -299,11 +330,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     setModel(model);
   }
 
-
   /**
+   *
    * Convenience method to set the size on the model.
    *
    */
+
   public void setSize(int size)
   {
     model.setSize(size);
@@ -344,9 +376,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    *
    * @param o Can be a String or listHandle.
    */
+
   public void addItem(Object o)
   {
     listHandle lh = null;
+
     if (o instanceof String)
       {
 	lh = new listHandle((String)o, (String)o);
@@ -373,18 +407,22 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
+   *
    * Use this one to skip the sorting.  Called by all the add methods.
    *
    */
+
   public void insertHandleAt(listHandle handle, int row)
   {
     model.insertElementAt(handle, row);
   }
+
   /**
    * Remove an item from list.
    *
    * @param o can be listHandle or String
    */
+
   public void removeItem(Object o)
   {
     if (o instanceof listHandle)
@@ -435,16 +473,18 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  }
       }
   }
-  /**
-   */
+
   public int getSizeOfList()
   {
     return model.getSize();
   }
 
   /**
+   *
    * Returns true if the list contains an object with the specified label.
+   *
    */
+
   public boolean containsLabel(String string)
   {
     return containsString(string);
@@ -454,6 +494,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * Returns true if the list contains an object with the specified label.
    *
    * Since everything is a listHandle internally, this is the same as containsLabel
+   *
    */
 
   public boolean containsString(String string)
@@ -465,6 +506,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	    return true;
 	  }
       }
+
     return false;
   }
 
@@ -494,11 +536,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	      }
 	  }
       }
-    return false;
 
+    return false;
   }
    
   /**
+   *
    * This selects the item with the given label.
    *
    */
@@ -507,6 +550,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     int size = model.getSize();
     listHandle lh = null;
+
     for (int i = 0; i < size; i++)
       {
 	lh = (listHandle)model.getElementAt(i);
@@ -516,10 +560,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	    break;
 	  }
       }
-
   }
 
   /**
+   *
    * Sets the selected item.
    *
    * @param o Can be listHandle or String
@@ -537,29 +581,36 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
     else
       {
-	System.out.println("What kinf od object? " + o);
+	System.out.println("What kind of object? " + o);
       }
-
   }
 
   /**
+   *
    * This returns just the label.
+   *
    */
+
   public String getSelectedLabel()
   {
     return ((listHandle)model.elementAt(getSelectedIndex())).getLabel();
   }
 
   /**
+   *
    * This returns the whole listHandle.
+   *
    */
+
   public listHandle getSelectedHandle()
   {
     return (listHandle)model.elementAt(getSelectedIndex());
   }
 
   /**
+   *
    * Returns all the selected handles.
+   *
    */
 
   public Vector getSelectedHandles()
@@ -571,19 +622,22 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
 	v.addElement(values[i]);
       }
+
     return v;
   }
 
   /**
-   *This returns the object, without the label.
+   *
+   * This returns the object, without the label.
+   *
    */
+
   public Object getSelectedItem()
   {
     try
       {
-	listHandle lh = (listHandle)model.elementAt(getSelectedIndex());
+	listHandle lh = (listHandle) model.elementAt(getSelectedIndex());
 	return lh.getObject();
-
       }
     catch (Exception e)
       {
@@ -591,7 +645,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
   }
 
-  // For the ListSelectionListener
+  /**
+   *
+   * For the ListSelectionListener
+   *
+   */
 
   public void valueChanged(ListSelectionEvent e)
   {
@@ -609,6 +667,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  {
 	    throw new RuntimeException("Could not setValuePerformed: " + rx);
 	  }
+
 	if (ok)
 	  {
 	    //do something
@@ -627,6 +686,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
   }
 
+  /**
+   *
+   * For the mouseListener interface
+   *
+   */
+
   public void mouseClicked(MouseEvent e)
   {
     if (allowCallback)
@@ -638,10 +703,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 		boolean ok = false;
 	    
 		int index = locationToIndex(e.getPoint());
+
 		if (debug)
 		  {
 		    System.out.println("Double clicked on Item " + index);
 		  }
+
 		try
 		  {
 		    ok = my_parent.setValuePerformed(new JValueObject(this, 
@@ -662,36 +729,68 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
   }
 
+  /**
+   *
+   * For the mouseListener interface
+   *
+   */
+
   public void mouseEntered(MouseEvent e)
-    {
+  {
+  }
 
-    }
+  /**
+   *
+   * For the mouseListener interface
+   *
+   */
+
   public void mouseExited(MouseEvent e)
-    {
+  {
+  }
 
-    }
+  /**
+   *
+   * For the mouseListener interface
+   *
+   */
+
   public void mousePressed(MouseEvent e)
-    {
-      if (SwingUtilities.isRightMouseButton(e))
-	{
-	  if (debug)
-	    {
-	      System.out.println("Its a popup trigger!");
-	    }
+  {
+    if (SwingUtilities.isRightMouseButton(e))
+      {
+	if (debug)
+	  {
+	    System.out.println("Its a popup trigger!");
+	  }
 
-	  if (popup != null)
-	    {
-	      popup.show(e.getComponent(), e.getX(), e.getY());
-	    }
+	popUpIndex = locationToIndex(e.getPoint());
 
-	  e.consume();
-	}
-      
-    }
+	if (popup != null)
+	  {
+	    popup.show(e.getComponent(), e.getX(), e.getY());
+	  }
+
+	e.consume();
+      }
+  }
+
+  /**
+   *
+   * For the mouseListener interface
+   *
+   */
+
   public void mouseReleased(MouseEvent e)
-    {
+  {
+  }
 
-    }
+  /**
+   *
+   * For the pop up menu callback.  We use the popUpIndex variable to
+   * identify the item in the list that the popup menu was issued on.
+   * 
+   */
 
   public void actionPerformed(ActionEvent e)
   {
@@ -700,30 +799,46 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	if (e.getSource() instanceof JMenuItem)
 	  {
 	    String string = ((JMenuItem)e.getSource()).getActionCommand();
+	    Object popSelectedItem = null;
+
+	    try
+	      {
+		popSelectedItem = ((listHandle) model.elementAt(popUpIndex)).getObject();
+	      }
+	    catch (ArrayIndexOutOfBoundsException ex)
+	      {
+		popSelectedItem = null;
+	      }
+
+	    if (debug)
+	      {
+		System.err.println("Forwarding selected item.. (" + popUpIndex + ": " +
+				   popSelectedItem + ")");
+	      }
+
 	    try
 	      {
 		my_parent.setValuePerformed(new JValueObject(this,
-							     getSelectedIndex(),
+							     popUpIndex,
 							     JValueObject.PARAMETER,
-							     getSelectedItem(),
+							     popSelectedItem,
 							     string));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
 		throw new RuntimeException("Could not set value from JstringListBox: " + rx);
 	      }
-
 	  }
-
       }
   }
-
+  
   /**
    * sort a vector of listHandles
    *
    * @param v Vector to be sorted
    * @return Vector of sorted listHandles(sorted by label)
    */
+
   private Vector sortListHandleVector(Vector v)
   {
     (new VecQuickSort(v, 
@@ -755,11 +870,13 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     
     return v;
   }
+
   /**
    * Sort a vector of Strings
    *
    * @return Vector of sorted Strings.
    */
+
   public Vector sortStringVector(Vector v)
   {
     (new VecQuickSort(v, 
