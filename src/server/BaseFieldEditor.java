@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 2002/03/29 04:04:46 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 2004/03/03 05:23:02 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -77,7 +77,7 @@ import arlut.csd.JTree.*;
  * responsible for displaying and editing field definitions.</p>
  */
 
-class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener, TextListener {
+class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener {
 
   static final boolean debug = false;
 
@@ -104,7 +104,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
   StringDialog
     changeLabelTypeDialog;
 
-  JTextArea
+  JstringArea
     commentT;			// all
 
   JstringField
@@ -204,9 +204,9 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     classS.setCallback(this);
     addRow(editPanel, classS, "Class name:", rowcount++);
 
-    commentT = new JTextArea(4, 20);
+    commentT = new JstringArea(4, 20);
     JScrollPane commentScroll = new JScrollPane(commentT);
-    //commentT.addTextListener(this);
+    commentT.setCallback(this);
     addRow(editPanel, commentScroll, "Comment:", rowcount++);
     
     // This one is different:
@@ -1488,6 +1488,15 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 
 	    owner.handleReturnVal(fieldDef.setClassName((String) v.getValue()));
 	  }
+	else if (comp == commentT)
+	  {
+	    if (debug)
+	      {
+		System.out.println("commentT");
+	      }
+
+	    owner.handleReturnVal(fieldDef.setComment((String) v.getValue()));
+	  }
 	else if (comp == maxArrayN)
 	  {
 	    if (debug)
@@ -2034,31 +2043,6 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	catch (RemoteException rx)
 	  {
 	    throw new IllegalArgumentException ("Exception setting TargetField: " + rx);
-	  }
-      }
-  }
-
-  // for the multiline comment field
-
-  public void textValueChanged(TextEvent e)
-  {
-    if (!listenToCallbacks)
-      {
-	return;
-      }
-    Object obj = e.getSource();
-
-    if (obj == commentT)
-      {
-	java.awt.TextComponent text = (java.awt.TextComponent)obj;
-
-	try
-	  {
-	    owner.handleReturnVal(fieldDef.setComment(text.getText()));
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Remote exception setting comment: " +rx);
 	  }
       }
   }
