@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.35 $
-# $Date: 1999/01/27 23:11:59 $
+# $Revision: 1.36 $
+# $Date: 1999/02/23 23:20:01 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -357,7 +357,7 @@ sub copydir{
   closedir SOURCE;
 
   foreach $file (@dirs) {
-    if (($file eq ".") || ($file eq "..")) {
+    if (($file eq ".") || ($file eq "..") || ($file eq "CVS")) {
       next;
     }
 
@@ -416,6 +416,8 @@ removelastslash($javadir);
 	  "$classdir", "Ganymede Jars", "$classdir",
 	  "$rootdir/src/password", "Ganymede Sample Password Client", "$rootdir/src/password/classes",
 	  "$rootdir/doc", "Javadoc", "$classdir");
+
+
 
 print "\nGenerating config.sh files in source directories.\n";
 
