@@ -323,6 +323,9 @@ The client's vertical splitter supports the OneTouchExpandable option
 as well, making it possible to entirely hide the tree if more space is
 needed for showing object windows.
 
+The client no longer bothers to show an empty, non-editable string
+field for non-editable password fields.
+
 The admin console's layout has changed very slightly, with a splitter
 bar added between the log panel and the bottom status tables panel,
 and the 'clear log' button removed and put in the Control menu, where
