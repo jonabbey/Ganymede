@@ -15,8 +15,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
-   The University of Texas at Austin.
+   Copyright (C) 1996-2004
+   The University of Texas at Austin
 
    Contact information
 
@@ -45,7 +45,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -343,7 +344,6 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
     try
       {
 	QueryResult qResult;
-	db_object object = parent.parent.getObject();
 
 	// go back to the framePanel to get the invid
 

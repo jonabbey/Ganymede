@@ -14,7 +14,8 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996 - 2004
+   The University of Texas at Austin
 
    Contact information
 
@@ -42,7 +43,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -191,10 +193,6 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
   private StringSelector createInvidSelector(invid_field field) throws RemoteException
   {
-    QueryResult
-      results,
-      choiceResults = null;
-
     Vector
       currentOwners = null,
       availableOwners = null;
@@ -290,7 +288,6 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
   {
     Vector available = null;
     Vector chosen = null;
-    Object key = null;
 
     /* -- */
 

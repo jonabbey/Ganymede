@@ -122,7 +122,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
     setBounds(50,50,50,50);
     pack();
-    show();
+    this.setVisible(true);
   }
 
   public boolean setValuePerformed(JValueObject e)

@@ -787,7 +787,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return;
       }
 
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
@@ -800,11 +800,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     try
       {
-	enum = objectHash.keys();
+	en = objectHash.keys();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    updateComponent((Component)enum.nextElement());
+	    updateComponent((Component)en.nextElement());
 	  }
 	
 	invalidate();
@@ -2166,9 +2166,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 				 FieldTemplate fieldTemplate) throws RemoteException
   {
     short fieldType;
-    String name = null;
     boolean isVector;
-    boolean isEditInPlace;
 
     /* -- */
 
@@ -2423,10 +2421,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			      FieldInfo fieldInfo, 
 			      FieldTemplate fieldTemplate) throws RemoteException
   {
-    QueryResult
-      valueResults = null,
-      choiceResults = null;
-
     Vector
       valueHandles = null,
       choiceHandles = null;
@@ -2722,7 +2716,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    println("You can choose");
 	  }
 	    
-	Vector choiceHandles = null;
 	Vector choices = null;
 
 	Object key = field.choicesKey();
@@ -2763,12 +2756,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		list = gc.cachedLists.getList(key);
 	      }
 
-	    choiceHandles = list.getListHandles(false);
 	    choices = list.getLabels(false);
 	  }    
 
 	String currentChoice = (String) fieldInfo.getValue();
-	boolean found = false;
 	    
 	JComboBox combo = new JComboBox(choices);
 	combo.setKeySelectionManager(new TimedKeySelectionManager());
@@ -3175,8 +3166,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     // note that the permissions editor does its own callbacks to
     // the server, albeit using our transaction / session.
 
-    Invid invid = object.getInvid(); // server call
-
     perm_button pb = new perm_button((perm_field) field,
 				     editable && fieldInfo.isEditable(),
 				     gc,
@@ -3574,7 +3563,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public synchronized final void cleanUp()
   {
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
@@ -3588,11 +3577,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (rowHash != null)
       {
-	enum = rowHash.keys();
+	en = rowHash.keys();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    JComponent j = (JComponent) enum.nextElement();
+	    JComponent j = (JComponent) en.nextElement();
 	    
 	    if (j instanceof JCheckBox)
 	      {
