@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1083,6 +1083,15 @@ public class InvidDBField extends DBField implements invid_field {
     if (eObj.finalizeDeleteElement(this, index))
       {
 	values.removeElementAt(index);
+
+	// if we are an editInPlace field, unlinking
+	// this object means that we should go ahead
+	// and delete the object.
+
+	if (getFieldDef().isEditInPlace())
+	  {
+	    eObj.getSession().deleteDBObject(remote);
+	  }
 
 	if (values.size() > 0)
 	  {
