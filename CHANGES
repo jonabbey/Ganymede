@@ -127,6 +127,8 @@ created.
 
 The querybox has been redesigned for clarity and user-friendliness.
 
+The querybox now allows the ownerlist field to be searched on.
+
 14. [SERVER] Optimized memory handling for strings
 
 All strings loaded into the database are now interned(), trading
@@ -155,6 +157,13 @@ should do and now does.
 Changed the verifyNewValue() methods in DBField and DBEditObject
 to return a ReturnVal so that those methods can pass back detailed
 error dialogs to the user.
+
+18. [SERVER/ADMIN CONSOLE] Added more information to admin console
+
+Added a column to the active user table to show how many objects each
+user is actively editing, to help track actual use.
+
+Added a column to the task table to show when each task was last run.
 
 -------------------- Changes from 0.96 to 0.97 -------------------
 
