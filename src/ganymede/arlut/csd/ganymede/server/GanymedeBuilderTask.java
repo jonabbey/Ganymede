@@ -86,20 +86,31 @@ import arlut.csd.ganymede.common.SchemaConstants;
 /**
  * <P>This class provides a template for code to be attached to the server to
  * handle propagating data from the Ganymede object store into the wide
- * world, via NIS, DNS, NIS+, LDAP, JNDI, JDBC, X, Y, Z, etc.</P>
+ * world, via NIS, DNS, NIS+, LDAP, JNDI, JDBC, X, Y, Z, etc., through
+ * full-state builds.</P>
  *
- * <P>Subclasses of GanymedeBuilderTask need to implement builderPhase1()
- * and builderPhase2().  builderPhase1() is run while a dumpLock is established
- * on {@link arlut.csd.ganymede.server.DBStore DBStore}, guaranteeing a 
- * transaction-consistent database state.  builderPhase1() should do whatever
- * is required to write out files or otherwise propagate data out from the
- * database.  If builderPhase1() returns true, the dump lock is released and
- * builderPhase2() is run.  This method is intended to run external scripts 
- * and/or code that can process the files/data written out by builderPhase1()
- * without needing the database to remain locked.</P>
+ * <P>Subclasses of GanymedeBuilderTask primarily need to implement
+ * the {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase1()}
+ * and {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase2()}
+ * methods.  builderPhase1() is run while a shared {@link
+ * arlut.csd.ganymede.server.DBDumpLock} is asserted on {@link
+ * arlut.csd.ganymede.server.DBStore DBStore}, guaranteeing a
+ * transaction-consistent database state.  builderPhase1() should do
+ * whatever is required to write out files or otherwise propagate data
+ * out from the database.  If builderPhase1() returns true, the dump
+ * lock is released and builderPhase2() is run.  This method is
+ * intended to run external scripts and/or code that can process the
+ * files/data written out by builderPhase1() without needing the
+ * database to remain locked.  The Ganymede server also takes care of
+ * showing the builder task's status and progress to the admin console
+ * and to the Ganymede clients (the little conveyor belt icon in the
+ * lower left corner of the Ganymede graphical client is displayed in
+ * reaction to the activity of GanymedeBuilderTask).</P>
  *
  * <P>All subclasses of GanymedeBuilderTask need to be registered in the Ganymede
- * database via the task object type.  GanymedeBuilderTasks registered to be
+ * database via the Task object type.  GanymedeBuilderTasks registered to be
  * run on database commit will automatically be issued by the
  * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} when transactions
  * commit.  The GanymedeScheduler is designed so that it will not re-issue a specific
@@ -107,6 +118,27 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * to worry about builderPhase2() taking a fair amount of time.  builderPhase1() should
  * be as fast as possible, however, as no additional transactions will be able to
  * be committed until builderPhase1() completes.</P>
+ *
+ * <p>GanymedeBuilderTask includes a set of helper methods that
+ * subclasses can take advantage of in order to facilitate their
+ * operation.  The {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#baseChanged(short)}
+ * method can be used from {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase1()}
+ * to check to see whether objects of a given type have been changed
+ * since the builder task was last run.  The {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#getOptionValue(java.lang.String)}
+ * method makes it possible for a builder task to retrieve
+ * configuration information from the task object in the Ganymede
+ * database which links the task into the server's scheduling.  The
+ * {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask#openOutFile(java.lang.String, java.lang.String)}
+ * method not only opens files for writing, it takes care to manage the archiving of
+ * old versions of the emitted file as needed, if the <code>ganymede.builder.backups</code>
+ * property is set to a path for keeping zipped copies of previous builder outputs.  Finally,
+ * the {@link arlut.csd.ganymede.server.GanymedeBuilderTask#enumerateObjects(short)}
+ * method can be used by builderPhase1() to get an Enumeration of objects of a given type
+ * to examine for writing.</p>
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
@@ -121,7 +153,6 @@ public abstract class GanymedeBuilderTask implements Runnable {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeBuilderTask");
-
 
   private static String currentBackUpDirectory = null;
   private static String oldBackUpDirectory = null;
