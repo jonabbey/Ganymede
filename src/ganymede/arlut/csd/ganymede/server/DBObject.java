@@ -1027,19 +1027,35 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	definition = objectBase.fieldTable.get(fieldcode);
 
-	if (definition == null && fieldcode != SchemaConstants.BackLinksField)
-	  {
-	    // "What the heck?  Null definition for {0}, fieldcode = {1}, {2}th field in object"
-	    System.err.println(ts.l("receive.nulldef", this.getTypeName(), new Integer(fieldcode), new Integer(i)));
-	  }
-	else if (fieldcode == SchemaConstants.BackLinksField)
+	// we used to have a couple of Invid vector fields that we
+	// have gotten rid of, for the sake of improving Ganymede's
+	// concurrency and reducing inter-object lock contention.  The
+	// BackLinksField we got rid of a long time ago, the
+	// OwnerBase's OwnerObjectsOwned field we got rid of at
+	// DBStore 2.7.
+
+	if ((fieldcode == SchemaConstants.BackLinksField) ||
+	    (getTypeID() == SchemaConstants.OwnerBase && fieldcode == SchemaConstants.OwnerObjectsOwned))
 	  {
 	    // the backlinks field was always a vector of invids, so
-	    // now that we are no longer explicitly recording asymmetric
-	    // relationships with the backlinks field, we can just skip forward
-	    // in the database file and skip the backlinks info
+	    // now that we are no longer explicitly recording
+	    // asymmetric relationships with the backlinks field, we
+	    // can just skip forward in the database file and skip the
+	    // backlinks info
 
-	    int count = in.readShort();
+	    // Ditto, starting at DBStore version 2.7, with the
+	    // OwnerBase's OwnerObjectsOwned
+
+	    int count;
+
+	    if (Ganymede.db.isLessThan(2,3))
+	      {
+		count = in.readShort();
+	      }
+	    else
+	      {
+		count = in.readInt();
+	      }
 
 	    while (count-- > 0)
 	      {
@@ -1048,6 +1064,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	      }
 
 	    continue;
+	  }
+	else if (definition == null)
+	  {
+	    // "What the heck?  Null definition for {0}, fieldcode = {1}, {2}th field in object"
+	    System.err.println(ts.l("receive.nulldef", this.getTypeName(), new Integer(fieldcode), new Integer(i)));
 	  }
 
 	type = definition.getType();

@@ -167,7 +167,7 @@ public final class DBStore implements JythonMap {
    * after id_string
    */
 
-  static final byte minor_version = 6;
+  static final byte minor_version = 7;
 
   /**
    * XML version major id
@@ -213,7 +213,7 @@ public final class DBStore implements JythonMap {
   {
     if (DBStore.db == null)
       {
-	throw new IllegalStateException("DBStore not initialized");
+	throw new IllegalStateException(ts.l("global.notinit")); // "DBStore not initialized"
       }
 
     DBObjectBase base;
@@ -233,16 +233,14 @@ public final class DBStore implements JythonMap {
    * db member in the DBStore class.</p>
    */
 
-  private static synchronized boolean setDBSingleton(DBStore store)
+  private static synchronized void setDBSingleton(DBStore store)
   {
     if (DBStore.db != null)
       {
-	return false;
+	throw new IllegalStateException(ts.l("setDBSingleton.exception")); // "DBStore already created"
       }
 
     DBStore.db = store;
-
-    return true;
   }
 
   /* --- */
@@ -347,27 +345,28 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	rootCategory = new DBBaseCategory(this, "Categories");
+	rootCategory = new DBBaseCategory(this, ts.l("init.rootcategory"));  // "Categories"
       }
     catch (RemoteException ex)
       {
 	// we shouldn't ever get here unless there is something wrong
 	// with the RMI system or the Java environment
 
-	System.err.println("Caught DBBaseCategory ex: " + ex.getMessage());
+	// "Caught DBBaseCategory exception: {0}"
+	System.err.println(ts.l("init.exception", ex.getMessage()));
+
 	ex.printStackTrace();
-	throw new Error("couldn't initialize rootCategory");
+
+	// "Couldn''t initialize rootCategory"
+	throw new Error(ts.l("init.error")); // XXX wrap earlier exception if we are JDK 1.4+ only?
       }
 
     // set the static pointer after we have at least created the basic
-    // data structures
+    // data structures.
 
-    if (!setDBSingleton(this))
-      {
-	throw new IllegalStateException("DBStore already created");
-      }
+    setDBSingleton(this);
 
-    GanymedeAdmin.setState("Normal Operation");
+    GanymedeAdmin.setState(ts.l("init.okaystate")); // "Normal Operation"
   }
 
   /**
@@ -484,8 +483,8 @@ public final class DBStore implements JythonMap {
 	    
 	    if (!file_id.equals(id_string))
 	      {
-		System.err.println("DBStore initialization error: DBStore id mismatch for " + filename);
-		throw new RuntimeException("DBStore initialization error (" + filename + ")");
+		System.err.println(ts.l("load.versionfail", filename));
+		throw new RuntimeException(ts.l("load.initerror", filename));
 	      }
 	  }
 	catch (IOException ex)
@@ -494,7 +493,7 @@ public final class DBStore implements JythonMap {
 	    System.err.println("IOException: ");
 	    ex.printStackTrace();
 
-	    throw new RuntimeException("DBStore initialization error (" + filename + ")");
+	    throw new RuntimeException(ts.l("load.initerror", filename));
 	  }
 
 	file_major = in.readByte();
@@ -591,7 +590,7 @@ public final class DBStore implements JythonMap {
 	System.err.println("DBStore initialization error: couldn't properly process " + filename);
 	System.err.println("IOException: " + ex);
 	System.err.println("Stack Trace: " + Ganymede.stackTrace(ex));
-	throw new RuntimeException("DBStore initialization error (" + filename + ")");
+	throw new RuntimeException(ts.l("load.initerror", filename));
       }
     finally
       {
@@ -1567,6 +1566,7 @@ public final class DBStore implements JythonMap {
 	bf.comment = "What external email addresses should be notified of changes to objects owned?";
 	b.addFieldToEnd(bf);
 
+	/*  XXX As of DBStore 2.7, we don't use this field any more
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.OwnerObjectsOwned;
 	bf.field_type = FieldType.INVID;
@@ -1576,6 +1576,7 @@ public final class DBStore implements JythonMap {
 	bf.array = true;
 	bf.comment = "What objects are owned by this owner set";
 	b.addFieldToEnd(bf);
+	*/
 
 	b.setLabelField(SchemaConstants.OwnerNameField);
 

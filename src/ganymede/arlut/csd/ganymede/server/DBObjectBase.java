@@ -737,6 +737,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	    continue;		// don't save the db's version of a system standard field
 	  }
 
+	if (type_code == SchemaConstants.OwnerBase && field.getID() == SchemaConstants.OwnerObjectsOwned)
+	  {
+	    continue;		// as of DBStore 2.7, we no longer symmetrically link owner groups to owned objects
+	  }
+
 	if (debug2)
 	  {
 	    System.err.println("DBObjectBaseField.receive(): " + field);
@@ -945,7 +950,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 			    FieldType.INVID);
 
 	bf.allowedTarget = SchemaConstants.OwnerBase;
-	bf.targetField = SchemaConstants.OwnerObjectsOwned;
+	bf.targetField = -1;
 	bf.array = true;
 
 	addSystemField("Expiration Date",

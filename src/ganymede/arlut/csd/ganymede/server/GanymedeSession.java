@@ -2800,6 +2800,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // listed.  If they really, really want to see them, let
 	    // them say so explicitly.
 
+	    // XXX Note that as of DBStore version 2.7, we no longer
+	    // include the OwnerObjectsOwned field in the OwnerBase,
+	    // so this bit of logic isn't really operative any
+	    // more. XXX
+
 	    if (!(base.getTypeID() == SchemaConstants.OwnerBase &&
 		  field.getID() == SchemaConstants.OwnerObjectsOwned))
 	      {

@@ -337,21 +337,10 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
   public ReturnVal verifyNewValue(DBField field, Object value)
   {
-    // We really don't want the supergash owner group ever
-    // having any explicit ownership links.
-
-    if (field.getOwner().getID() == SchemaConstants.OwnerSupergash &&
-	getID() == SchemaConstants.OwnerObjectsOwned)
-      {
-	return Ganymede.createErrorDialog("Owner Object Error",
-					  "Can't modify supergash objects owned field.");
-      }
-
     // we don't want owner groups to ever explicitly list themselves
     // as owners.
 
-    if ((field.getID() == SchemaConstants.OwnerObjectsOwned) ||
-	(field.getID() == SchemaConstants.OwnerListField))
+    if (field.getID() == SchemaConstants.OwnerListField)
       {
 	Invid testInvid = (Invid) value;
 
