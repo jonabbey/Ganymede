@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -257,6 +257,10 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
   public boolean canSeeField(DBSession session, DBField field)
   {
+    // hide the associated user field.. this cannot be changed by
+    // the client, and should be treated as a 'behind-the-scenes'
+    // field used to tie things together in the background.
+
     if (field.getID() == SchemaConstants.PersonaAssocUser)
       {
 	return false;
@@ -266,5 +270,31 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	return super.canSeeField(session, field);
       }
   }
+
+  /**
+   *
+   * This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this DBObject type when the
+   * user only has editing access for the source InvidDBField and not
+   * the target.
+   *
+   * @param object The object that the link is to be created in
+   * @param fieldID The field that the link is to be created in
+   *
+   */
+
+  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  {
+    // if they have permission to edit an owner group, who are
+    // we to say no?
+
+    if (fieldID == SchemaConstants.PersonaGroupsField)
+      {
+	return true;
+      }
+
+    return false;		// by default, permission is denied
+  }
+
 
 }
