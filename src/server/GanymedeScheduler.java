@@ -6,7 +6,7 @@
    to register tasks to be run on a periodic basis.
    
    Created: 26 January 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -186,6 +186,8 @@ public class GanymedeScheduler extends Thread {
 		catch (InterruptedException ex)
 		  {
 		    System.err.println("Scheduler caught interruption.. exiting");
+		    cleanUp();
+		    System.err.println("Ganymede Scheduler exited");
 		    return;
 		  }
 	      }
@@ -206,6 +208,8 @@ public class GanymedeScheduler extends Thread {
 			catch (InterruptedException ex)
 			  {
 			    System.err.println("Scheduler caught interruption.. exiting");
+			    cleanUp();
+			    System.err.println("Ganymede Scheduler exited");
 			    return;
 			  }
 		      }
