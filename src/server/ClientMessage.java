@@ -6,8 +6,8 @@
    
    Created: 1 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/03/01 22:01:10 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/06/30 04:35:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,5 +58,6 @@ public interface ClientMessage {
   static final int FIRST = 0;
   static final int ERROR = 0;
   static final int BUILDSTATUS = 1;
-  static final int LAST = 1;
+  static final int SOFTTIMEOUT = 2;
+  static final int LAST = 2;
 }

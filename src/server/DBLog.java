@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2000/06/28 03:29:30 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2000/06/30 04:35:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -607,8 +607,8 @@ public class DBLog {
 
     objectOuts.clear();
 
-    // send out the mail if the starttransaction system event has the
-    // mail checkbox turned on.
+    // send out the transaction summaries if the starttransaction
+    // system event has the mail checkbox turned on.
 
     if (transactionType.mail)
       {

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.131 $
-   Last Mod Date: $Date: 2000/06/29 05:03:07 $
+   Version: $Revision: 1.132 $
+   Last Mod Date: $Date: 2000/06/30 04:35:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.131 $ $Date: 2000/06/29 05:03:07 $ $Name:  $
+ * @version $Revision: 1.132 $ $Date: 2000/06/30 04:35:20 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2506,17 +2506,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     // NOTE: notice that we don't log a DBLogEvent for the object's
     // deletion anywhere in this method, as is done similarly in
-    // finalizeInactivate() and finalizeReactivate().  We currently
-    // take care of it in DBEditSet's commit() method.  I have no
-    // idea now why I didn't do it the same for object removal, but
-    // the commit() method does check to make sure that the object
-    // was previously committed to the database before logging
-    // its deletion (it doesn't log it if the object is being
-    // DROPPED rather than DELETED), so maybe I had some reason
-    // in my head.
-
-    // Probably not though.. for now, I'm leaving the object deletion
-    // logging in DBEditSet.commit() for historical flavor.
+    // finalizeInactivate() and finalizeReactivate().  Logging for
+    // object removal, like that for object creation and editing, is
+    // done in DBEditSet.commit().  We have to take care of logging
+    // for inactivation and reactivation in finalizeInactivate() and
+    // finalizeReactivate() because otherwise we have no way of
+    // determining that we inactivated or reactivated an object in the
+    // context of the DBEditSet.commit() method.
 
     if (debug)
       {

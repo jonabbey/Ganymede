@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/03/27 21:54:43 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/06/30 04:35:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -430,7 +430,7 @@ public class DateDBField extends DBField implements date_field {
 		return Ganymede.createErrorDialog("Date Field Error",
 						  "Submitted date  " + d + " is out of range for field " +
 						  getName() + " in object " + owner.getLabel() + 
-						  ".  This field will not accept dates before " + d2);
+						  ".\nThis field will not accept dates before " + d2);
 	      }
 	  }
 
@@ -442,7 +442,7 @@ public class DateDBField extends DBField implements date_field {
 		return Ganymede.createErrorDialog("Date Field Error",
 						  "Submitted date  " + d + " is out of range for field " +
 						  getName() + " in object " + owner.getLabel() + 
-						  ".  This field will not accept dates after " + d2);
+						  ".\nThis field will not accept dates after " + d2);
 	      }
 	  }
       }

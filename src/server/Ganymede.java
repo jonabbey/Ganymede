@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 2000/06/22 04:56:24 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2000/06/30 04:35:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -241,6 +241,9 @@ public class Ganymede {
   public static String schemaDirectoryProperty = null;
   public static int    registryPortProperty = 1099;
   public static String logHelperProperty = null;
+  public static boolean softtimeout = false;
+  public static int timeoutIdleNoObjs = 15;
+  public static int timeoutIdleWithObjs = 20;
 
   /**
    * <p>If the server is started with the -resetadmin command line flag,
@@ -1231,6 +1234,43 @@ public class Ganymede {
     messageDirectoryProperty = System.getProperty("ganymede.messageDirectory");
     schemaDirectoryProperty = System.getProperty("ganymede.schemaDirectory");
     logHelperProperty = System.getProperty("ganymede.loghelper");
+
+    String softtimeoutString = System.getProperty("ganymede.softtimeout");
+
+    if (softtimeoutString != null && softtimeoutString.equalsIgnoreCase("true"))
+      {
+	softtimeout = true;
+      }
+
+    String timeoutIdleNoObjsString = System.getProperty("ganymede.timeoutIdleNoObjs");
+
+    if (timeoutIdleNoObjsString != null)
+      {
+	try
+	  {
+	    timeoutIdleNoObjs = java.lang.Integer.parseInt(timeoutIdleNoObjsString);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Could not parse ganymede.timeoutIdleNoObjs property: " + 
+			       timeoutIdleNoObjsString);
+	  }
+      }
+
+    String timeoutIdleWithObjsString = System.getProperty("ganymede.timeoutIdleWithObjs");
+
+    if (timeoutIdleWithObjsString != null)
+      {
+	try
+	  {
+	    timeoutIdleWithObjs = java.lang.Integer.parseInt(timeoutIdleNoObjsString);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Could not parse ganymede.timeoutIdleWithObjs property: " + 
+			       timeoutIdleWithObjsString);
+	  }
+      }
 
     if (dbFilename == null)
       {

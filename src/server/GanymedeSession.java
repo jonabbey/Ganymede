@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.185 $
-   Last Mod Date: $Date: 2000/06/29 05:03:09 $
+   Version: $Revision: 1.186 $
+   Last Mod Date: $Date: 2000/06/30 04:35:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.185 $ $Date: 2000/06/29 05:03:09 $
+ * @version $Revision: 1.186 $ $Date: 2000/06/30 04:35:22 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -165,6 +165,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
 
   boolean logged_in = false;
+
+  /**
+   * If true, the user has had a soft timeout and needs to
+   * re-authenticate with their password, even for their
+   * non-privileged username
+   */
+
+  boolean timedout = false;
 
   /**
    * A synchronization object to make sure that we don't get confused
@@ -803,14 +811,53 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     int minutesIdle = (int) (millisIdle / 60000);
 
-    if (minutesIdle > 15 && objectsCheckedOut == 0)
+    if (Ganymede.softtimeout)
       {
-	forceOff("You have been idle for over 15 minutes with no transactions in progress. " +
+	// we don't time out users logged in without admin privileges in softtimeout
+
+	if (personaName == null && !isSuperGash())
+	  {
+	    return;
+	  }
+
+	if ((minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0) ||
+	    minutesIdle > Ganymede.timeoutIdleWithObjs)
+	  {
+	    System.err.println("Sending a timeout message to " + this.toString());
+
+	    timedout = true;
+	    sendMessage(ClientMessage.SOFTTIMEOUT, null);
+	  }
+
+	// we give the client two minutes to respond to the
+	// SOFTTIMEOUT message, then we get mean.
+
+	if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
+	  {
+	    forceOff("You have been idle for over " + Ganymede.timeoutIdleNoObjs +
+		     " minutes with no transactions in progress. " +
+		     "You are being disconnected as a security precaution.");
+	  }
+	else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
+	  {
+	    forceOff("You have been idle for over " + Ganymede.timeoutIdleWithObjs + 
+		     " minutes.  You are being disconnected as a " +
+		     "security precaution.");
+	  }
+
+	return;
+      }
+
+    if (minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0)
+      {
+	forceOff("You have been idle for over " + Ganymede.timeoutIdleNoObjs +
+		 " minutes with no transactions in progress. " +
 		 "You are being disconnected as a security precaution.");
       }
-    else if (minutesIdle > 20)
+    else if (minutesIdle > Ganymede.timeoutIdleWithObjs)
       {
-	forceOff("You have been idle for over 20 minutes.  You are being disconnected as a " +
+	forceOff("You have been idle for over " + Ganymede.timeoutIdleWithObjs + 
+		 " minutes.  You are being disconnected as a " +
 		 "security precaution.");
       }
   }
@@ -897,13 +944,21 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * <P>This method is used to send an asynchronous message
+   * <p>This method is used to send an asynchronous message
    * to the client.  It is used to update the clients so they
-   * know when a build is being processed.</P>
+   * know when a build is being processed.</p>
+   *
+   * <p>See {@link arlut.csd.ganymede.ClientMessage ClientMessage}
+   * for the list of acceptable client message types.</p>
    */
 
   void sendMessage(int type, String message)
   {
+    if (type < ClientMessage.FIRST || type > ClientMessage.LAST)
+      {
+	throw new IllegalArgumentException("type out of range");
+      }
+
     if (clientProxy != null)
       {
 	try
@@ -1271,6 +1326,15 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>This method provides a handy description of this session.</p>
+   */
+
+  public String toString()
+  {
+    return "GanymedeSession [" + username + "," + personaName + "]";
+  }
+
+  /**
    * <p>This method returns a list of personae names available
    * to the user logged in.</p>
    *
@@ -1323,7 +1387,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public synchronized boolean selectPersona(String persona, String password)
   {
-    checklogin();
+    checklogin();		// this resets lastAction
 
     /* - */
 
@@ -1349,6 +1413,30 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (user.getLabel().equals(persona))
       {
+	// we trust the client not to send us a null password when it
+	// has received a soft timeout
+
+	if (timedout && password != null)
+	  {
+	    Ganymede.debug("User " + username + " attempting timedout verification");
+
+	    pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+	    
+	    if (pdbf != null && pdbf.matchPlainText(password))
+	      {
+		timedout = false;
+	      }
+	    else
+	      {
+		Ganymede.debug("User " + username + " failed a timedout verification");
+		return false;
+	      }
+	  }
+	else
+	  {
+	    Ganymede.debug("User " + username + " switching to nonprivileged without timedout verification");
+	  }
+
 	personaObject = null;
 	personaInvid = null;
 	personaName = null;
@@ -1394,6 +1482,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (pdbf != null && pdbf.matchPlainText(password))
       {
 	Ganymede.debug("User " + username + " switched to persona " + persona);
+
+	if (timedout)
+	  {
+	    timedout = false;
+	  }
+
 	personaInvid = personaObject.getInvid();
 	updatePerms(true);
 	ownerList = null;
@@ -4410,8 +4504,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     setLastEvent("remove_db_object: " + vObj.getLabel());
 
-    // note!  the 'object deleted' DBLogEvent is currently created in
-    // the DBEditSet commit() logic.  Strange, but true.
+    // we do logging of the object deletion in DBEditSet.commit() when
+    // the transaction commits
     
     return session.deleteDBObject(invid);
   }
