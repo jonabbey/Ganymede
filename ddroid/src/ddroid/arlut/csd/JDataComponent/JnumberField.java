@@ -417,7 +417,7 @@ public class JnumberField extends JentryField {
 
 	    try
 	      {
-		success = my_parent.setValuePerformed(new JValueObject(this,currentValue));
+		success = my_parent.setValuePerformed(new JSetValueObject(this,currentValue));
 	      }
 	    catch (java.rmi.RemoteException re)
 	      {
@@ -467,7 +467,7 @@ public class JnumberField extends JentryField {
       {
 	try
 	  {
-	    my_parent.setValuePerformed(new JValueObject(this, errorString, JValueObject.ERROR));
+	    my_parent.setValuePerformed(new JErrorValueObject(this, errorString));
 	  }
 	catch (java.rmi.RemoteException rx)
 	  {

@@ -220,7 +220,7 @@ public class JpassField extends JPanel implements JsetValueCallback {
 		    // if our callback rejects the password, it will
 		    // handle informing the user of what and why
 
-		    if (my_parent != null && !my_parent.setValuePerformed(new JValueObject(this, value1)))
+		    if (my_parent != null && !my_parent.setValuePerformed(new JSetValueObject(this, value1)))
 		      {
 			value1 = null;
 			value2 = null;
@@ -326,7 +326,7 @@ public class JpassField extends JPanel implements JsetValueCallback {
       {
 	try
 	  {
-	    my_parent.setValuePerformed(new JValueObject(this, errorString, JValueObject.ERROR));
+	    my_parent.setValuePerformed(new JErrorValueObject(this, errorString));
 	  }
 	catch (java.rmi.RemoteException rx)
 	  {

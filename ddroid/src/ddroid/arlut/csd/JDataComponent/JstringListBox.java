@@ -311,6 +311,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     finally
       {
 	setModel(model);
+	repaint();
       }
   }
 
@@ -380,17 +381,19 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * made by the user before the GUI is updated to show the change.  The JsetValueCallback
    * interface is also used to pass pop-up menu commands to the client.</p>
    *
-   * <p>JstringListBox uses the following value type constants from
+   * <p>JstringListBox uses the following subclasses of
    * {@link arlut.csd.JDataComponent.JValueObject JValueObject} to pass status updates to
    * the callback.
    *
    * <ul>
-   * <li><b>PARAMETER</B>Action from a PopupMenu.  The Parameter is the ActionCommand
+   * <li>{@link arlut.csd.JDataComponent.JParameterValueObject} Action from a PopupMenu.  The Parameter is the ActionCommand
    * string for the pop-up menu item selected, and the value is the object
    * (or string if no object defined) associated with the item selected when the pop-up menu was fired.</li>
-   * <li><b>ADD</b>Object has been selected.  Value is the object (or string) selected.</li>
-   * <li><b>INSERT</b>Object has been double-clicked.  Value is the object (or string) double-clicked.</li>
-   * <li><b>MOVE</b>Object has been dragged up or down.  Value is an Integer for the index the object has been moved to.</li>
+   * <li>{@link arlut.csd.JDataComponent.JAddValueObject} Object has been selected.  Value is the object (or string) added.</li>
+   * <li>{@link arlut.csd.JDataComponent.JInsertValueObject} Object has been double-clicked.  Value is the object (or string) double-clicked.</li>
+   * <li>{@link arlut.csd.JDataComponent.JMoveValueObject} Object has been dragged up or down.  Index holds the index the object has been moved to.</li>
+   * <li>{@link arlut.csd.JDataComponent.JErrorValueObject} Something went wrong.  Value is the error message to be displayed to the user in whatever
+   * fashion is appropriate.</li>
    * </ul>
    * </p>
    *
@@ -455,6 +458,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	ensureIndexIsVisible(topIndex);
       }
+
+    repaint();
   }
 
   /**
@@ -476,6 +481,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
 
     model.insertElementAt(h, targetRow);
+
+    repaint();
   }
 
   /**
@@ -526,6 +533,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	      }
 	  }
       }
+
+    repaint();
   }
 
   /**
@@ -768,9 +777,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	try 
 	  {
-	    ok = callback.setValuePerformed(new JValueObject(this, 
-							     selectedIndex,
-							     JValueObject.ADD));
+	    ok = callback.setValuePerformed(new JAddValueObject(this, selectedIndex));
 	  }
 	catch (java.rmi.RemoteException rx)
 	  {
@@ -816,9 +823,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 		try
 		  {
-		    ok = callback.setValuePerformed(new JValueObject(this, 
-								     index,
-								     JValueObject.INSERT));
+		    ok = callback.setValuePerformed(new JInsertValueObject(this, index));
 		  }
 		catch (java.rmi.RemoteException rx)
 		  {
@@ -925,10 +930,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	    try 
 	      {
-		ok = callback.setValuePerformed(new JValueObject(this, 
-								 startDragIndex,
-								 JValueObject.MOVE,
-								 dragNode));
+		ok = callback.setValuePerformed(new JMoveValueObject(this, 
+								     startDragIndex,
+								     dragNode));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
@@ -1019,11 +1023,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	    try
 	      {
-		callback.setValuePerformed(new JValueObject(this,
-							    popUpIndex,
-							    JValueObject.PARAMETER,
-							    popSelectedItem,
-							    string));
+		callback.setValuePerformed(new JParameterValueObject(this,
+								     popUpIndex,
+								     popSelectedItem,
+								     string));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {

@@ -5,7 +5,7 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.32 $
+   Version: $Revision$
    Last Mod Date: $Date$
 
    Last Mod Date: $Date$
@@ -324,7 +324,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	  {
 	    if (callback != null)
 	      {
-		retval=callback.setValuePerformed(new JValueObject(this,null));
+		retval=callback.setValuePerformed(new JSetValueObject(this,null));
 	      }
 	    changed = false;
 	  }
@@ -580,7 +580,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	  {
 	    try 
 	      {
-		retval = callback.setValuePerformed(new JValueObject(this,d));
+		retval = callback.setValuePerformed(new JSetValueObject(this,d));
 	      }
 	    catch (RemoteException e)
 	      {
@@ -630,7 +630,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		    System.out.println("setValuePerformed called by Calendar --- passing up to container");
 		  }
 
-		retval=callback.setValuePerformed(new JValueObject(this,my_date));
+		retval=callback.setValuePerformed(new JSetValueObject(this,my_date));
 		changed = false;
 	      }
 	    catch (java.rmi.RemoteException re) 
@@ -699,7 +699,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	    
 	    try 
 	      {
-		callback.setValuePerformed(new JValueObject(this,my_date));
+		callback.setValuePerformed(new JSetValueObject(this,my_date));
 	      }
 	    catch (java.rmi.RemoteException re) 
 	      {

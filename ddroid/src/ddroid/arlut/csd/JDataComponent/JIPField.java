@@ -294,7 +294,7 @@ public class JIPField extends JentryField {
 		System.err.println("JIPField.processFocusEvent: making callback");
 	      }
 	    
-	    if (!allowCallback || my_parent.setValuePerformed(new JValueObject(this, bytes)))
+	    if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this, bytes)))
 	      {
 		if (bytes == null)
 		  {
@@ -359,8 +359,8 @@ public class JIPField extends JentryField {
 	      {
 		System.err.println("JIPField.processFocusEvent: making callback");
 	      }
-	    
-	    my_parent.setValuePerformed(new JValueObject(this, error, JValueObject.ERROR));
+
+	    my_parent.setValuePerformed(new JErrorValueObject(this, error));	    
 	  }
 	catch (RemoteException ex)
 	  {

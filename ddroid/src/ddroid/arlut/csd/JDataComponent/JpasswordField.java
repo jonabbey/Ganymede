@@ -489,7 +489,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 		System.err.println("JpasswordField.processFocusEvent: making callback");
 	      }
 
-	    b = my_parent.setValuePerformed(new JValueObject(this, str, JValueObject.SET));
+	    b = my_parent.setValuePerformed(new JSetValueObject(this, str));
 	  }
 	catch (RemoteException re)
 	  {
@@ -544,7 +544,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
       {
 	try
 	  {
-	    my_parent.setValuePerformed(new JValueObject(this, new String(getPassword()), JValueObject.ADD));
+	    my_parent.setValuePerformed(new JAddValueObject(this, new String(getPassword())));
 	  }
 	catch (RemoteException rx)
 	  {
