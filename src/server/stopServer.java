@@ -8,8 +8,8 @@
 
    Created: 28 April 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/04/28 08:20:00 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/04/28 10:22:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -101,7 +101,7 @@ public class stopServer {
 	return;
       }
 
-    server_url = "rmi://" + serverHostProperty + "/ganymede.server";
+    server_url = "rmi://" + serverHostProperty + ":" + registryPortProperty + "/ganymede.server";
 
     try
       {
@@ -114,7 +114,8 @@ public class stopServer {
       }
     catch (NotBoundException ex)
       {
-	System.err.println("Ganymede stopServer: server not running, or could not connect\n" + ex );
+	System.err.println("Ganymede stopServer: server url " + 
+			   server_url + " not running, or could not connect\n" + ex );
 	System.exit(1);
       }
     catch (java.rmi.UnknownHostException ex)
