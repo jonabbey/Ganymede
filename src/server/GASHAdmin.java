@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,14 +15,23 @@ package arlut.csd.ganymede;
 
 import java.rmi.*;
 import java.rmi.server.*;
-import java.awt.*;
+//import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.PopupMenu;
+import java.awt.SystemColor;
+import java.awt.MenuItem;
 import java.awt.event.*;
 import java.applet.*;
 import java.util.*;
 
-import gjt.Box;
+import com.sun.java.swing.*;
+import com.sun.java.swing.border.*;
 
-//import com.sun.java.swing.*
+//import gjt.Box;
 
 import arlut.csd.JTable.*;
 import arlut.csd.JDialog.*;
@@ -47,7 +56,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
   private String adminName = null;
   private String adminPass = null;
 
-  Frame schemaFrame;
+  JFrame schemaFrame;
 
   /* -- */
 
@@ -295,7 +304,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
 ------------------------------------------------------------------------------*/
 
-class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback {
+class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
 
   static iAdmin admin = null;
   static boolean WeAreApplet = true;
@@ -306,21 +315,21 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
   Server server = null;
 
-  MenuBar mbar = null;
-  Menu controlMenu = null;
-  MenuItem quitMI = null;
-  MenuItem dumpMI = null;
-  MenuItem dumpSchemaMI = null;
-  MenuItem reloadClassesMI = null;
-  MenuItem schemaMI = null;
-  MenuItem shutdownMI = null;
-  MenuItem runInvidTestMI = null;
-  MenuItem killAllMI = null;
+  JMenuBar mbar = null;
+  JMenu controlMenu = null;
+  JMenuItem quitMI = null;
+  JMenuItem dumpMI = null;
+  JMenuItem dumpSchemaMI = null;
+  JMenuItem reloadClassesMI = null;
+  JMenuItem schemaMI = null;
+  JMenuItem shutdownMI = null;
+  JMenuItem runInvidTestMI = null;
+  JMenuItem killAllMI = null;
 
   PopupMenu popMenu = null;
   MenuItem killUserMI = null;
 
-  Panel topPanel = null;
+  JPanel topPanel = null;
 
   StringDialog
     shutdownDialog = null,
@@ -330,31 +339,31 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
   String killVictim = null;
 
-  Label hostLabel = null;
-  TextField hostField = null;
+  JLabel hostLabel = null;
+  JTextField hostField = null;
 
-  Label adminLabel = null;
-  TextField adminField = null;
+  JLabel adminLabel = null;
+  JTextField adminField = null;
 
-  Label stateLabel = null;
-  TextField stateField = null;
+  JLabel stateLabel = null;
+  JTextField stateField = null;
 
-  Label startLabel = null;
-  TextField startField = null;
+  JLabel startLabel = null;
+  JTextField startField = null;
 
-  Label dumpLabel = null;
-  TextField dumpField = null;
+  JLabel dumpLabel = null;
+  JTextField dumpField = null;
 
-  Label journalLabel = null;
-  TextField journalField = null;
+  JLabel journalLabel = null;
+  JTextField journalField = null;
 
-  Label checkedOutLabel = null;
-  TextField checkedOutField = null;
+  JLabel checkedOutLabel = null;
+  JTextField checkedOutField = null;
 
-  Label locksLabel = null;
-  TextField locksField = null;
+  JLabel locksLabel = null;
+  JTextField locksField = null;
 
-  TextArea statusArea = null;
+  JTextArea statusArea = null;
   
   rowTable table = null;
 
@@ -370,31 +379,31 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
     this.WeAreApplet = WeAreApplet;
 
-    mbar = new MenuBar();
-    controlMenu = new Menu("Control", false);
+    mbar = new JMenuBar();
+    controlMenu = new JMenu("Control", false);
 
-    dumpMI = new MenuItem("Dump Database");
+    dumpMI = new JMenuItem("Dump Database");
     dumpMI.addActionListener(this);
 
-    dumpSchemaMI = new MenuItem("Dump Schema");
+    dumpSchemaMI = new JMenuItem("Dump Schema");
     dumpSchemaMI.addActionListener(this);
 
-    reloadClassesMI = new MenuItem("Reload Custom Classes");
+    reloadClassesMI = new JMenuItem("Reload Custom Classes");
     reloadClassesMI.addActionListener(this);
 
-    shutdownMI = new MenuItem("Shutdown Ganymede");
+    shutdownMI = new JMenuItem("Shutdown Ganymede");
     shutdownMI.addActionListener(this);
 
-    killAllMI = new MenuItem("Kill Off All Users");
+    killAllMI = new JMenuItem("Kill Off All Users");
     killAllMI.addActionListener(this);
 
-    schemaMI = new MenuItem("Edit Schema");
+    schemaMI = new JMenuItem("Edit Schema");
     schemaMI.addActionListener(this);
 
-    runInvidTestMI = new MenuItem("Run Invid Test");
+    runInvidTestMI = new JMenuItem("Run Invid Test");
     runInvidTestMI.addActionListener(this);
 
-    quitMI = new MenuItem("Close Console");
+    quitMI = new JMenuItem("Close Console");
     quitMI.addActionListener(this);
 
     controlMenu.add(shutdownMI);
@@ -406,11 +415,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     controlMenu.add(dumpMI);
     controlMenu.add(dumpSchemaMI);
     controlMenu.addSeparator();
+    controlMenu.add(new arlut.csd.JDataComponent.LAFMenu(this));
     controlMenu.add(quitMI);
 
     mbar.add(controlMenu);
 
-    setMenuBar(mbar);
+    setJMenuBar(mbar);
 
     popMenu = new PopupMenu();
 
@@ -436,28 +446,30 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
     //    setBackground(Color.white);
 
-    GridBagLayout topGBL = new GridBagLayout();
-    GridBagConstraints topGBC = new GridBagConstraints();
+    java.awt.GridBagLayout topGBL = new java.awt.GridBagLayout();
+    java.awt.GridBagConstraints topGBC = new java.awt.GridBagConstraints();
 
-    setLayout(topGBL);
+    getContentPane().setLayout(topGBL);
 
     // set up our top panel, containing a labeled
     // text field showing the server we're connected
     // to.
 
-    hostLabel = new Label("Ganymede Server Host:");
+    hostLabel = new JLabel("Ganymede Server Host:");
 
-    hostField = new TextField(url, 40);
+    hostField = new JTextField(url, 40);
     hostField.setEditable(false);
-    hostField.setBackground(SystemColor.text);
-    hostField.setForeground(SystemColor.textText);
+    //hostField.setBackground(SystemColor.text);
+    //hostField.setForeground(SystemColor.textText);
 
-    topPanel = new Panel();
+    topPanel = new JPanel();
 
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
 
     topPanel.setLayout(gbl);
+
+    gbc.insets = new java.awt.Insets(2,1,2,1);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -478,12 +490,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
 
     //
 
-    adminLabel = new Label("Admin consoles connected to server:");
+    adminLabel = new JLabel("Admin consoles connected to server:");
 
-    adminField = new TextField("", 40);
+    adminField = new JTextField("", 40);
     adminField.setEditable(false);
-    adminField.setBackground(SystemColor.text);
-    adminField.setForeground(SystemColor.textText);
+    //adminField.setBackground(SystemColor.text);
+    //adminField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -502,12 +514,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     gbl.setConstraints(adminField, gbc);
     topPanel.add(adminField);
 
-    stateLabel = new Label("Server State:");
+    stateLabel = new JLabel("Server State:");
 
-    stateField = new TextField("", 40);
+    stateField = new JTextField("", 40);
     stateField.setEditable(false);
-    stateField.setBackground(SystemColor.text);
-    stateField.setForeground(SystemColor.textText);
+    //stateField.setBackground(SystemColor.text);
+    //stateField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -526,12 +538,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     gbl.setConstraints(stateField, gbc);
     topPanel.add(stateField);
 
-    startLabel = new Label("Server Start Time:");
+    startLabel = new JLabel("Server Start Time:");
 
-    startField = new TextField("", 40);
+    startField = new JTextField("", 40);
     startField.setEditable(false);
-    startField.setBackground(SystemColor.text);
-    startField.setForeground(SystemColor.textText);
+    //startField.setBackground(SystemColor.text);
+    //startField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -550,12 +562,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     gbl.setConstraints(startField, gbc);
     topPanel.add(startField);
 
-    dumpLabel = new Label("Last Dump Time:");
+    dumpLabel = new JLabel("Last Dump Time:");
 
-    dumpField = new TextField("", 40);
+    dumpField = new JTextField("", 40);
     dumpField.setEditable(false);
-    dumpField.setBackground(SystemColor.text);
-    dumpField.setForeground(SystemColor.textText);
+    //dumpField.setBackground(SystemColor.text);
+    //dumpField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -574,12 +586,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     gbl.setConstraints(dumpField, gbc);
     topPanel.add(dumpField);
 
-    journalLabel = new Label("Transactions in Journal:");
+    journalLabel = new JLabel("Transactions in Journal:");
 
-    journalField = new TextField("", 40);
+    journalField = new JTextField("", 40);
     journalField.setEditable(false);
-    journalField.setBackground(SystemColor.text);
-    journalField.setForeground(SystemColor.textText);
+    //journalField.setBackground(SystemColor.text);
+    //journalField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -598,12 +610,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     gbl.setConstraints(journalField, gbc);
     topPanel.add(journalField);
 
-    checkedOutLabel = new Label("Objects Checked Out:");
+    checkedOutLabel = new JLabel("Objects Checked Out:");
 
-    checkedOutField = new TextField("", 40);
+    checkedOutField = new JTextField("", 40);
     checkedOutField.setEditable(false);
-    checkedOutField.setBackground(SystemColor.text);
-    checkedOutField.setForeground(SystemColor.textText);
+    //checkedOutField.setBackground(SystemColor.text);
+    //checkedOutField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -622,12 +634,12 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     gbl.setConstraints(checkedOutField, gbc);
     topPanel.add(checkedOutField);
 
-    locksLabel = new Label("Locks held:");
+    locksLabel = new JLabel("Locks held:");
 
-    locksField = new TextField("", 40);
+    locksField = new JTextField("", 40);
     locksField.setEditable(false);
-    locksField.setBackground(SystemColor.text);
-    locksField.setForeground(SystemColor.textText);
+    //locksField.setBackground(SystemColor.text);
+    //locksField.setForeground(SystemColor.textText);
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -652,32 +664,39 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     topGBC.weightx = 1.0;
     topGBC.weighty = 0;
     
-    Box topBox = new Box(topPanel, "Ganymede Server");
+    JPanel topBox = new JPanel(new BorderLayout());
+    topBox.add("Center",topPanel);
+    topBox.setBorder(new TitledBorder("Ganymede Server"));
     topGBL.setConstraints(topBox, topGBC);
-    add(topBox);
+    getContentPane().add(topBox);
 
     // set up our middle text area
 
     topGBC.fill = GridBagConstraints.BOTH;
     topGBC.weighty = 50;
 
-    statusArea = new TextArea("Admin Console Testing\n", 6, 50);
+    statusArea = new JTextArea("Admin Console Testing\n", 6, 50);
     statusArea.setEditable(false);
-    statusArea.setBackground(SystemColor.text);
-    statusArea.setForeground(SystemColor.textText);
+    JScrollPane statusAreaPane = new JScrollPane(statusArea);
+    //statusArea.setBackground(SystemColor.text);
+    //statusArea.setForeground(SystemColor.textText);
 
-    Box statusBox = new Box(statusArea, "Server Log");
+    JPanel statusBox = new JPanel(new java.awt.BorderLayout());
+    statusBox.add("Center", statusAreaPane);
+    statusBox.setBorder(new TitledBorder("Server Log"));
 
     topGBL.setConstraints(statusBox, topGBC);
-    add(statusBox);
+    getContentPane().add(statusBox);
 
     // and our bottom user table
 
     table = new rowTable(colWidths, headers, this, popMenu);
-    Box tableBox = new Box(table, "Users Connected");
+    JPanel tableBox = new JPanel(new BorderLayout());
+    tableBox.add("Center", table);
+    tableBox.setBorder(new TitledBorder("Users Connected"));
 
     topGBL.setConstraints(tableBox, topGBC);
-    add(tableBox);
+    getContentPane().add(tableBox);
 
     pack();
     show();
@@ -729,6 +748,13 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
     
     loginDialog = new StringDialog(loginResrc);
     Hashtable results = loginDialog.DialogShow();
+
+    if (results == null)
+      {
+	System.out.println("Good bye.");
+	quitMI.doClick();
+	return;
+      }
 
     if (!results.get("Account:").equals("supergash"))
       {
@@ -949,7 +975,7 @@ class GASHAdminFrame extends Frame implements ActionListener, rowSelectCallback 
                                                                        GASHAdmin
 
 ------------------------------------------------------------------------------*/
-public class GASHAdmin extends Applet {
+public class GASHAdmin extends JApplet {
 
   static GASHAdmin applet = null;
   static GASHAdminFrame frame = null;
