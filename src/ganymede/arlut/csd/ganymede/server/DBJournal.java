@@ -598,14 +598,13 @@ public class DBJournal implements ObjectStatus {
 		throw new IOException(ts.l("load.badclosed"));
 	      }
 
-	    // now we know that we got a transaction successfully
-	    // persisted to the journal.. now let's make sure it was
-	    // finalized so that we know whether or not we need to
-	    // retransmit to the sync channels
-
-	    // at this point, we have already read in the entries from
-	    // the journal.. make sure we don't miss replaying the
-	    // entries to the sync channels due to an IOException
+	    // we've read in all of the transaction's changes.. now we
+	    // need to see whether all active sync channels were
+	    // successfully written to.  if we don't see the complete
+	    // finalize token stream, we'll need to undo the
+	    // transaction after all, by clearing the offending
+	    // transaction from whatever of the sync channels it was
+	    // written to
 
 	    if (isAtLeast(2,2))
 	      {
@@ -616,14 +615,22 @@ public class DBJournal implements ObjectStatus {
 		    success = ((jFile.readUTF().compareTo(FINALIZE) == 0) &&
 			       (jFile.readLong() == transaction_time) &&
 			       (jFile.readInt() == nextTransactionNumber));
+
+		    if (!success)
+		      {
+			// "DBJournal: transaction {0} not finalized in journal, rejecting"
+			throw new IOException(ts.l("load.notfinalized", new Integer(nextTransactionNumber)));
+		      }
 		  }
 		catch (IOException ex)
 		  {
-		  }
+		    // XXX here is where we want to rollback any
+		    // XXX transactions in the channels that are numbered
+		    // XXX nextTransactionNumber
 
-		if (!success)
-		  {
-		    replay(entries);		    // not finalized!
+		    // then we'll throw this exception back up
+
+		    throw ex;
 		  }
 	      }
 
@@ -715,7 +722,10 @@ public class DBJournal implements ObjectStatus {
     /* - */
 
     now = new Date();
-    transRecord = new DBJournalTransaction(now.getTime(), Ganymede.db.getNextTransactionNumber(), transaction.getUsername());
+    transRecord = new DBJournalTransaction(now.getTime(),
+					   jFile.getFilePointer(),
+					   Ganymede.db.getNextTransactionNumber(),
+					   transaction.getUsername());
 
     if (debug)
       {
@@ -723,95 +733,118 @@ public class DBJournal implements ObjectStatus {
 	System.err.println(ts.l("writeTransaction.writing", now));
       }
 
-    jFile.writeUTF(OPENTRANS);
-    jFile.writeLong(transRecord.getTime());
-    jFile.writeInt(transRecord.getTransactionNumber());
-
-    if (debug)
+    try
       {
-	// "Objects in Transaction: {0}"
-	System.err.println(ts.l("writeTransaction.objcount", new Integer(objects.length)));
-      }
-	
-    jFile.writeInt(objects.length);
-    
-    for (int i = 0; i < objects.length; i++)
-      {
-	eObj = objects[i];
+	jFile.writeUTF(OPENTRANS);
+	jFile.writeLong(transRecord.getTime());
+	jFile.writeInt(transRecord.getTransactionNumber());
 
-	switch (eObj.getStatus())
+	if (debug)
 	  {
-	  case CREATING:
-	    jFile.writeByte(CREATE);
-	    jFile.writeShort(eObj.objectBase.type_code);
-	    eObj.emit(jFile);
-
-	    if (debug)
+	    // "Objects in Transaction: {0}"
+	    System.err.println(ts.l("writeTransaction.objcount", new Integer(objects.length)));
+	  }
+	
+	jFile.writeInt(objects.length);
+	
+	for (int i = 0; i < objects.length; i++)
+	  {
+	    eObj = objects[i];
+	    
+	    switch (eObj.getStatus())
 	      {
-		// "Creating object:"
-		System.err.println(ts.l("writeTransaction.creating"));
-		printObject(eObj);
-	      }
-	    break;
-
-	  case EDITING:
-	    jFile.writeByte(EDIT);
-	    jFile.writeShort(eObj.objectBase.type_code);
-
-	    DBObjectDeltaRec delta = new DBObjectDeltaRec(eObj.original, eObj);
-	    delta.emit(jFile);
+	      case CREATING:
+		jFile.writeByte(CREATE);
+		jFile.writeShort(eObj.objectBase.type_code);
+		eObj.emit(jFile);
 		
-	    if (debug)
-	      {
-		// "Wrote object edit record:\n\t{0}"
-		System.err.print(ts.l("writeTransaction.wroteobjedit",
-				      StringUtils.replaceStr(delta.toString(),"\n","\n\t")));
-
-		//		    printObject(eObj);
+		if (debug)
+		  {
+		    // "Creating object:"
+		    System.err.println(ts.l("writeTransaction.creating"));
+		    printObject(eObj);
+		  }
+		break;
+		
+	      case EDITING:
+		jFile.writeByte(EDIT);
+		jFile.writeShort(eObj.objectBase.type_code);
+		
+		DBObjectDeltaRec delta = new DBObjectDeltaRec(eObj.original, eObj);
+		delta.emit(jFile);
+		
+		if (debug)
+		  {
+		    // "Wrote object edit record:\n\t{0}"
+		    System.err.print(ts.l("writeTransaction.wroteobjedit",
+					  StringUtils.replaceStr(delta.toString(),"\n","\n\t")));
+		    
+		    //		    printObject(eObj);
+		  }
+		
+		break;
+		
+	      case DELETING:
+		jFile.writeByte(DELETE);
+		jFile.writeShort(eObj.objectBase.type_code);
+		jFile.writeShort(eObj.getID());
+		
+		if (debug)
+		  {
+		    // "Wrote object deletion record:\n\t{0} : {1}"
+		    System.err.println(ts.l("writeTransaction.wroteobjdel", eObj.objectBase.object_name, new Integer(eObj.getID())));
+		  }
+		break;
+		
+	      case DROPPING:
+		if (debug)
+		  {
+		    // "Dropping object:"
+		    System.err.println(ts.l("writeTransaction.dropping"));
+		    
+		    printObject(eObj);
+		  }
+		break;
 	      }
-
-	    break;
-
-	  case DELETING:
-	    jFile.writeByte(DELETE);
-	    jFile.writeShort(eObj.objectBase.type_code);
-	    jFile.writeShort(eObj.getID());
-
-	    if (debug)
-	      {
-		// "Wrote object deletion record:\n\t{0} : {1}"
-		System.err.println(ts.l("writeTransaction.wroteobjdel", eObj.objectBase.object_name, new Integer(eObj.getID())));
-	      }
-	    break;
-
-	  case DROPPING:
-	    if (debug)
-	      {
-		// "Dropping object:"
-		System.err.println(ts.l("writeTransaction.dropping"));
-
-		printObject(eObj);
-	      }
-	    break;
+	  }
+	
+	dirty = true;
+	
+	// write out the end of transaction stamp.. the transaction_time
+	// is used to verify that we completed this write okay.
+	
+	jFile.writeUTF(CLOSETRANS);
+	jFile.writeLong(transRecord.getTime());
+	
+	if (debug)
+	  {
+	    // "Transaction {0} persisted to Journal."
+	    System.err.println(ts.l("writeTransaction.written", now));
 	  }
       }
-
-    dirty = true;
-    
-    // write out the end of transaction stamp.. the transaction_time
-    // is used to verify that we completed this write okay.
-    
-    jFile.writeUTF(CLOSETRANS);
-    jFile.writeLong(transRecord.getTime());
-    
-    if (debug)
+    catch (IOException ex)
       {
-	// "Transaction {0} successfully written to Journal."
-	System.err.println(ts.l("writeTransaction.written", now));
+	// oops, did we run out of disk space?  roll back what we've
+	// written
+
+	try
+	  {
+	    undoTransaction(transRecord);
+	  }
+	catch (IOException inex)
+	  {
+	    // ***
+	    // *** Error in commit_finalizeTransaction()!  Couldn''t undo a transaction in the
+	    // *** journal file after catching an exception!
+	    // ***
+	    // *** The journal may not be completely recoverable!
+	    // ***
+	    //
+	    // {0}
+
+	    Ganymede.debug(ts.l("writeTransaction.badundo", inex.toString()));
+	  }
       }
-    
-    transactionsInJournal++;
-    GanymedeAdmin.updateTransCount();
     
     return transRecord;
   }
@@ -835,6 +868,24 @@ public class DBJournal implements ObjectStatus {
     jFile.writeUTF(FINALIZE);
     jFile.writeLong(transRecord.getTime());
     jFile.writeInt(transRecord.getTransactionNumber());
+
+    transactionsInJournal++;
+    GanymedeAdmin.updateTransCount();
+  }
+
+  /**
+   * <p>The undoTransaction() method is responsible for rolling back the
+   * most recent transaction written to the journal, in the event that
+   * writing to the sync channels or finalizing the transaction fails
+   * (due to a lack of disk space, presumably).</p>
+   */
+
+  public synchronized void undoTransaction(DBJournalTransaction transRecord) throws IOException
+  {
+    jFile.setLength(transRecord.getOffset()-1);
+    jFile.seek(transRecord.getOffset());
+
+    Ganymede.db.undoNextTransactionNumber(transRecord.getTransactionNumber());
   }
   
   /**
@@ -891,39 +942,6 @@ public class DBJournal implements ObjectStatus {
     else
       {
 	jFile.readLong();		// date is there for others to look at
-      }
-  }
-
-  /**
-   * <p>This method is responsible for replaying a non-finalized
-   * transaction to the sync channels.  The entries parameter should
-   * be a Vector of {@link arlut.csd.ganymede.server.JournalEntry}
-   * objects, consisting of the final state of objects that were
-   * changed in the transaction.</p>
-   */
-
-  private void replay(Vector entries)
-  {
-    // XXX
-    // XXX Making this method actually do the replays to the sync channels
-    // XXX would be a keen idea!
-    // XXX
-    // XXX What we want to do is to create DBEditObjects from all of the
-    // XXX DBObjects we've created here, link them to the versions currently
-    // XXX in the persistent store through the original reference, just as
-    // XXX happens in a normal transaction.  Then we can write the collection
-    // XXX of DBEditObjects out to the sync channels as we normally would do
-    // XXX in a normal commit, and we can even call the commitPhase2() on
-    // XXX them, as the commit failure would have occured while writing the
-    // XXX sync channels, before commitPhase2() would have been called.
-    // XXX
-
-    System.err.println("Error, non-finalized transaction found in journal!");
-
-    for (int i = 0; i < entries.size(); i++)
-      {
-	System.err.println("Object[" + i + "]");
-	printObject(((JournalEntry) entries.elementAt(i)).obj);
       }
   }
 

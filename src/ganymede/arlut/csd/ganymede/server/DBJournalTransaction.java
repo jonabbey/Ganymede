@@ -66,15 +66,39 @@ package arlut.csd.ganymede.server;
 
 class DBJournalTransaction {
 
+  /**
+   * <p>The time stamp of the transaction.</p>
+   */
+
   private long time;
+
+  /**
+   * <p>This offset records the write position in the journal that
+   * we'll want to truncate the journal to if we decide to undo the
+   * transaction from the journal, rather than finalizing it.</p>
+   */
+
+  private long fileOffset;
+
+  /**
+   * <p>The sequential transaction number.</p>
+   */
+
   private int transactionNumber;
+
+  /**
+   * <p>The admin, user, or task name which initiated the
+   * transaction.</p>
+   */
+
   private String username;
 
   /* -- */
 
-  public DBJournalTransaction(long time, int transactionNumber, String username)
+  public DBJournalTransaction(long time, long fileOffset, int transactionNumber, String username)
   {
     this.time = time;
+    this.fileOffset = fileOffset;
     this.transactionNumber = transactionNumber;
     this.username = username;
   }
@@ -82,6 +106,11 @@ class DBJournalTransaction {
   public long getTime()
   {
     return this.time;
+  }
+
+  public long getOffset()
+  {
+    return this.fileOffset;
   }
 
   public int getTransactionNumber()

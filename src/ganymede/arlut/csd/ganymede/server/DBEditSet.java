@@ -1481,9 +1481,17 @@ public class DBEditSet {
 
     /* -- */
 
-    commit_persistTransaction(); // persist transaction to journal
-    commit_writeSyncChannels();	// send the object changes to our builder queues
-    commit_finalizeTransaction(); // finalize the journal to represent that the sync channels were successfully written
+    synchronized (dbStore.journal)
+      {
+	commit_persistTransaction();
+	commit_writeSyncChannels();
+	commit_finalizeTransaction();
+      }
+
+    // we've successfully persisted the transaction, written the
+    // transaction to the sync channels, and finalized the
+    // transaction.. clean up our RAM store and carry on
+
     commit_handlePhase2();	// let the DBEditObject handle external actions, once we have finalized the transaction
     commit_logTransaction(fieldsTouched); // log and reabsorb objects
     commit_updateNamespaces();
@@ -1571,36 +1579,26 @@ public class DBEditSet {
 		  }
 	      }
 
-	    // XXX
-	    // XXX Do we really want to throw a CommitFatalException here?  The transaction
-	    // XXX *is* persisted, and if the server is restarted with the disk space
-	    // XXX issue resolved, it will be able to be replayed, and the syncs
-	    // XXX performed.
-	    // XXX
-	    // XXX Further, if this transaction fails due to an IO error, we should probably
-	    // XXX do something beyond just report a failure.. we do need to do the
-	    // XXX commit_updateNamespaces() and etc., don't we?
-	    // XXX
-	    // XXX Honestly, if we have an exception writing to the sync channels, we should
-	    // XXX probably assume that the disk is full and cease operations entirely.
-	    // XXX
-	    // XXX Otherwise, we'll try to persist more transactions, and if we were able to
-	    // XXX send syncs to the channels, we'd be implicitly skipping transactions,
-	    // XXX which violates the guarantees we need to maintain in order to make this whole
-	    // XXX delta synchronization thing work
-	    // XXX
-	    // XXX Probably what we want to do is wait until we see whether the admin
-	    // XXX wants to just skip the transaction, in which case we could mark the
-	    // XXX transaction in the journal as 'anti-finalized', meaning it never
-	    // XXX happened.
-	    // XXX
-	    // XXX If we do that, however, do we even want to bother trying to replay
-	    // XXX changes on server restart?  We could just report that the transaction
-	    // XXX could not be done at all, and be happy with the transaction-consistent
-	    // XXX outcome we get by doing that.  As long as we don't persist a transaction
-	    // XXX that we weren't able to write out to the active sync channels, we'll keep
-	    // XXX things consistent and avoid surprises.
-	    // XXX
+	    try
+	      {
+		dbStore.journal.undoTransaction(persistedTransaction);
+	      }
+	    catch (IOException inex)
+	      {
+		// This *really* shouldn't happen, since there's no writes involved
+		// in truncating the log.  If it did, we're kind of screwed, though.
+
+		// ***
+		// *** Error in commit_writeSyncChannels()!  Couldn''t undo a transaction in the
+		// *** journal file after catching an exception!
+		// ***
+		// *** The journal may not be completely recoverable!
+		// ***
+		// 
+		// {0}
+
+		Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", inex.toString()));
+	      }
 
 	    if (ex instanceof IOException)
 	      {
@@ -1631,16 +1629,39 @@ public class DBEditSet {
     try
       {
 	dbStore.journal.finalizeTransaction(persistedTransaction);
-
-	persistedTransaction = null;
       }
     catch (IOException ex)
       {
+	try
+	  {
+	    dbStore.journal.undoTransaction(persistedTransaction);
+	  }
+	catch (IOException inex)
+	  {
+	    // This *really* shouldn't happen, since there's no writes involved
+	    // in truncating the log.  If it did, we're kind of screwed, though.
+
+	    // ***
+	    // *** Error in commit_finalizeTransaction()!  Couldn''t undo a transaction in the
+	    // *** journal file after catching an exception!
+	    // ***
+	    // *** The journal may not be completely recoverable!
+	    // ***
+	    // 
+	    // {0}
+
+	    Ganymede.debug(ts.l("commit_finalizeTransaction.badundo", inex.toString()));
+	  }
+
 	// "Couldn''t finalize transaction to journal.  IOException caught writing to journal."
 	// "Couldn''t finalize transaction to journal, the server may have run out of disk space.\n\n{0}"
 	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_finalizeTransaction.exception"),
 								  ts.l("commit_finalizeTransaction.exception_text",
 								       ex.getMessage())));
+      }
+    finally
+      {
+	persistedTransaction = null;
       }
   }
 

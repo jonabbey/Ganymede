@@ -1402,6 +1402,20 @@ public final class DBStore implements JythonMap {
   }
 
   /**
+   * <p>This method is used by the
+   * {@link arlut.csd.ganymede.server.DBJournal#undoTransaction(arlut.csd.ganymede.server.DBJournalTransaction)}
+   * method to put back a transaction number when it is undone.</p>
+   */
+
+  public void undoNextTransactionNumber(int number)
+  {
+    if (number == transactionNumber)
+      {
+	--transactionNumber;
+      }
+  }
+
+  /**
    * <p>This method is used when reading journal entries to
    * bump up the transaction number.  If the nextNumber provided
    * isn't actually the next number in our transaction sequence,
