@@ -255,12 +255,12 @@
 
     <p>Once you have updated your server's <code
     class="filename">custom.jar</code> file with your new builder
-    task, you have to tell the server that your new builder task
-    exists.  You do this by creating a new <code
-    class="type">Task</code> object in the Ganymede server as <code
-    class="user">supergash</code>.  The various fields in the <code
-    class="type">Task</code> object type are documented in the <a
-    href="../server.html#servertasks">Ganymede Server Overview</a>.</p>
+    task, you have to register your new builder task with the server.
+    You do this by creating a new <code class="type">Task</code>
+    object in the Ganymede server.  The <code class="type">Task</code>
+    Object type is fully described in the <a
+    href="../server.html#servertasks">Ganymede Server
+    Overview</a>.</p>
 
     <p>For a builder task, there are four fields you need to worry
     about: <code class="type">Task Name</code>, <code
@@ -277,7 +277,8 @@
     scheduled for execution as soon as possible after each transaction
     is committed, and the <code class="type">Option Strings</code>
     field is used to provide optional run-time configuration
-    information for your builder task.</p>
+    information to builder tasks that are programmed to look for
+    it.</p>
 
     <p>Below is an example of a builder task that has been
     registered in the Ganymede server.  It is configured to be
@@ -288,25 +289,537 @@
 
     <p>As soon as the admin hits the <code type="button">Commit</code>
     button at the bottom right, the task will be registered in the
-    server.  From this commit on, the given task will be scheduled to
-    be run as soon as possible each time a transaction is
-    committed.</p>
+    server.  From this commit on, the task will be scheduled for
+    execution whenever a transaction is committed.</p>
 
-    <p>Naturally, not every transaction or sequence of transactions
+    <p>Now, not every transaction or sequence of transactions
     committed will necessarily be of interest to any given builder
-    task.  Nonetheless, every task registered to be "Run On
-    Transaction Commit" will be scheduled as soon as possible after
-    each commit.  If you subclass <a
+    task.  To help you deal with this, <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
-    to implement your builder tasks, your <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1</a>
-    method can take advantage of the GanymedeBuilderTask base class'
-    <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#baseChanged(short)">baseChanged()</a>
-    method to decide whether or not any data that you are interested
-    in has changed since the last time your builder task has run.</p>
-
+    provides a method called <a
+    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#baseChanged(short)">baseChanged()</a>,
+    which allows you to test to see whether any changes have been made
+    to a given object type since the last time your builder task was
+    run.  You'll see how this works in our example builder task in the
+    next section.</p>
+    
     <h4 id="buildertask_whaaaa">What A Builder Task Looks Like</h4>
+
+    <pre>
+package arlut.csd.ganymede.userKit;
+
+import arlut.csd.ganymede.server.*;
+import arlut.csd.ganymede.common.*;
+import arlut.csd.Util.FileOps;
+
+import java.util.*;
+import java.text.*;
+import java.io.*;
+
+/**
+ * This class is intended to dump the Ganymede datastore to the
+ * UNIX passwd and group files.
+ */
+
+public class UNIXBuilderTask extends GanymedeBuilderTask {
+
+  private String buildScript = null;
+  private String md5passwdFile =  null;
+  private String passwdFile = null;
+  private String groupFile = null;
+
+  // ---
+
+  private Date now = null;
+  private boolean backedup = false;
+
+  /* -- */
+
+  /**
+   * <p>The constructor for GanymedeBuilderTask subclasses takes an
+   * Invid for the DBObject in the Ganymede data store that defines
+   * the task.  The taskDefObjInvid member variable is comes from the
+   * GanymedeBuilderTask that we are inheriting from.  Setting it
+   * in this constructor allows us to use the getOptionValue() method to read
+   * our configuration strings for this task.</p>
+   */
+
+  public UNIXBuilderTask(Invid _taskObjInvid)
+  {
+    // set the taskDefObjInvid in GanymedeBuilderTask so
+    // we can look up option strings
+
+    taskDefObjInvid = _taskObjInvid;
+  }
+
+  /**
+   * This method runs with a dumpLock obtained for the builder task.
+   *
+   * Code run in builderPhase1() can call enumerateObjects() and
+   * baseChanged().
+   *
+   * @return true if builderPhase1 made changes necessitating the
+   * execution of builderPhase2.
+   */
+
+  public boolean builderPhase1()
+  {
+    PrintWriter out;
+    boolean result = false;
+
+    /* -- */
+
+    // initialize operational variables for the new run
+
+    backedup = false;
+    now = null;
+
+    // now see what our current option values are
+
+    passwdFile = getOptionValue("passwdFile");
+    md5passwdFile = getOptionValue("md5passwdFile");
+
+    if (passwdFile == null && md5passwdFile == null)
+      {
+	Ganymede.debug("UNIXBuilderTask: error, no passwdFile specified");
+      }
+
+    if (passwdFile != null && passwdFile.equals(md5passwdFile))
+      {
+	Ganymede.debug("UNIXBuilderTask: error, md5passwdFile and passwdFile are the same, skipping md5passwdFile");
+	md5passwdFile = null;
+      }
+
+    groupFile = getOptionValue("groupFile");
+
+    if (groupFile == null)
+      {
+	Ganymede.debug("UNIXBuilderTask: error, no groupFile specified");
+      }
+
+    // passwd
+
+    if (baseChanged(SchemaConstants.UserBase))
+      {
+	Ganymede.debug("UNIXBuilderTask: Need to build user map");
+
+	if (passwdFile != null) 
+	  {
+	    out = null;
+
+	    try
+	      {
+		out = openOutFile(passwdFile, "unix");
+	      }
+	    catch (IOException ex)
+	      {
+		ex.printStackTrace();
+		Ganymede.debug("UNIXBuilderTask.builderPhase1(): couldn't open " + passwdFile + ": " + ex);
+	      }
+	  
+	    if (out != null)
+	      {
+		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+	      
+		while (users.hasMoreElements())
+		  {
+		    DBObject user = (DBObject) users.nextElement();
+		  
+		    writeUserLine(user, out, false);
+		  }
+	      
+		out.close();
+	      }
+
+	    result = true;
+	  }
+
+	if (md5passwdFile != null) 
+	  {
+	    out = null;
+
+	    try
+	      {
+		out = openOutFile(md5passwdFile, "unix");
+	      }
+	    catch (IOException ex)
+	      {
+		ex.printStackTrace();
+		Ganymede.debug("UNIXBuilderTask.builderPhase1(): couldn't open " + md5passwdFile + ": " + ex);
+	      }
+	  
+	    if (out != null)
+	      {
+		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+	      
+		while (users.hasMoreElements())
+		  {
+		    DBObject user = (DBObject) users.nextElement();
+		  
+		    writeUserLine(user, out, true);
+		  }
+	      
+		out.close();
+	      }
+
+	    result = true;
+	  }
+      }
+
+    // group
+
+    if (baseChanged((short) 257))
+      {
+	Ganymede.debug("UNIXBuilderTask: Need to build group map");
+
+	if (groupFile != null)
+	  {
+	    out = null;
+
+	    try
+	      {
+		out = openOutFile(groupFile, "unix");
+	      }
+	    catch (IOException ex)
+	      {
+		ex.printStackTrace();
+		Ganymede.debug("UNIXBuilderTask.builderPhase1(): couldn't open " + groupFile + ": " + ex);
+	      }
+	
+	    if (out != null)
+	      {
+		Enumeration groups = enumerateObjects((short) 257);
+
+		while (groups.hasMoreElements())
+		  {
+		    DBObject group = (DBObject) groups.nextElement();
+
+		    writeGroupLine(group, out);
+		  }
+
+		out.close();
+	      }
+
+	    result = true;
+	  }
+      }
+
+    return result;
+  }
+
+  /**
+   *
+   * This method runs after this task's dumpLock has been
+   * relinquished.  This method is intended to be used to finish off a
+   * build process by running (probably external) code that does not
+   * require direct access to the database.
+   *
+   * builderPhase2 is only run if builderPhase1 returns true.
+   *
+   */
+
+  public boolean builderPhase2()
+  {
+    File
+      file;
+
+    /* -- */
+
+    buildScript = getOptionValue("buildScript");
+
+    if (buildScript == null || buildScript.equals(""))
+      {
+	Ganymede.debug("UNIXBuilderTask: no buildScript defined in task object's option string vector");
+	Ganymede.debug("                 not running any external update script.");
+	return false;
+      }
+
+    file = new File(buildScript);
+
+    if (file.exists())
+      {
+	Ganymede.debug("UNIXBuilderTask builderPhase2 running");
+
+	try
+	  {
+	    FileOps.runProcess(buildScript);
+	  }
+	catch (IOException ex)
+	  {
+	    Ganymede.debug("Couldn't exec buildScript (" + buildScript + ") due to IOException: " + ex);
+	  }
+	catch (InterruptedException ex)
+	  {
+	    Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
+	  }
+      }
+    else
+      {
+	Ganymede.debug(buildScript + " doesn't exist, not running external UNIX build script");
+      }
+
+    Ganymede.debug("UNIXBuilderTask builderPhase2 completed");
+
+    return true;
+  }
+
+  // ***
+  //
+  // The following private methods are used to support the UNIX builder logic.
+  //
+  // ***
+
+  /**
+   *
+   * This method writes out a line to the passwd UNIX source file.
+   *
+   * The lines in this file look like the following.
+   *
+   * broccol:393T6k3e/9/w2:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this user line
+   * @param useMD5 If true, passwords will be written out in md5 format if possible
+   *
+   */
+
+  private void writeUserLine(DBObject object, PrintWriter writer, boolean useMD5)
+  {
+    String username;
+    String cryptedPass = null;
+    int uid;
+    int gid;
+    String name;
+    String room;
+    String officePhone;
+    String homePhone;
+    String directory;
+    String shell;
+
+    PasswordDBField passField;
+    Vector invids;
+    Invid groupInvid;
+    DBObject group;
+
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
+
+    passField = (PasswordDBField) object.getField(SchemaConstants.UserPassword);
+
+    if (passField != null)
+      {
+	if (useMD5)
+	  {
+	    cryptedPass = passField.getMD5CryptText();
+	  }
+
+	// if the Ganymede server doesn't have an MD5 password for
+	// this user, go ahead and devolve to the crypt() password if
+	// available.  This might have been set by rpcpass and the NIS
+	// passwd daemon.
+
+	if (cryptedPass == null)
+	  {
+	    cryptedPass = passField.getUNIXCryptText();
+	  }
+      }
+    else
+      {
+	Ganymede.debug("UNIXBuilderTask.writeUserLine(): null password for user " + username);
+	cryptedPass = "**Nopass**";
+      }
+
+    uid = ((Integer) object.getFieldValueLocal(userSchema.UID)).intValue();
+
+    // get the gid
+    
+    groupInvid = (Invid) object.getFieldValueLocal(userSchema.HOMEGROUP); // home group
+
+    if (groupInvid == null)
+      {
+	Ganymede.debug("UNIXBuilderTask.writeUserLine(): null gid for user " + username);
+	gid = -1;
+      }
+    else
+      {
+	group = getObject(groupInvid);
+
+	if (group == null)
+	  {
+	    Ganymede.debug("UNIXBuilderTask.writeUserLine(): couldn't get reference to home group");
+
+	    gid = -1;
+	  }
+	else
+	  {
+	    Integer gidInt = (Integer) group.getFieldValueLocal(groupSchema.GID);
+
+	    if (gidInt == null)
+	      {
+		Ganymede.debug("UNIXBuilderTask.writeUserLine(): couldn't get gid value");
+
+		gid = -1;
+	      }
+	    else
+	      {
+		gid = gidInt.intValue();
+	      }
+	  }
+      }
+
+    name = (String) object.getFieldValueLocal(userSchema.FULLNAME);
+    room = (String) object.getFieldValueLocal(userSchema.ROOM);
+    officePhone = (String) object.getFieldValueLocal(userSchema.OFFICEPHONE);
+    homePhone = (String) object.getFieldValueLocal(userSchema.HOMEPHONE);
+    directory = (String) object.getFieldValueLocal(userSchema.HOMEDIR);
+    shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
+
+    // now build our output line
+
+    result.append(username);
+    result.append(":");
+    result.append(cryptedPass);
+    result.append(":");
+    result.append(Integer.toString(uid));
+    result.append(":");
+    result.append(Integer.toString(gid));
+    result.append(":");
+
+    result.append(name);
+
+    if (room != null && !room.equals(""))
+      {
+	result.append(",");
+	result.append(room);
+      }
+
+    if (officePhone != null && !officePhone.equals(""))
+      {
+	result.append(",");
+	result.append(officePhone);
+      }
+
+    if (homePhone != null && !homePhone.equals(""))
+      {
+	result.append(",");
+	result.append(homePhone);
+      }
+
+    result.append(":");
+    result.append(directory);
+    result.append(":");
+    result.append(shell);
+
+    if (result.length() > 1024)
+      {
+	Ganymede.debug("UNIXBuilderTask.writeUserLine(): Warning!  user " + 
+		       username + " overflows the UNIX line length!");
+      }
+
+    writer.println(result.toString());
+  }
+
+  /**
+   *
+   * This method writes out a line to the group UNIX source file.
+   *
+   * The lines in this file look like the following.
+   *
+   * adgacc:ZzZz:4015:hammp,jgeorge,dd,doodle,dhoss,corbett,monk
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this user line
+   *
+   */
+
+  private void writeGroupLine(DBObject object, PrintWriter writer)
+  {
+    String groupname;
+    String pass;
+    int gid;
+    Vector users = new Vector();
+
+    PasswordDBField passField;
+    Vector invids;
+    Invid userInvid;
+    String userName;
+
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
+
+    // currently in the Ganymede schema, group passwords aren't in passfields.
+
+    pass = (String) object.getFieldValueLocal(groupSchema.PASSWORD);
+
+    Integer gidInt = (Integer) object.getFieldValueLocal(groupSchema.GID);
+
+    if (gidInt == null)
+      {
+	Ganymede.debug("Error, couldn't find gid for group " + groupname);
+	return;
+      }
+
+    gid = gidInt.intValue();
+    
+    // we currently don't explicitly record the home group.. just take the first group
+    // that the user is in.
+
+    invids = object.getFieldValuesLocal(groupSchema.USERS);
+
+    if (invids == null)
+      {
+	// Ganymede.debug("UNIXBuilder.writeUserLine(): null user list for group " + groupname);
+      }
+    else
+      {
+	for (int i = 0; i < invids.size(); i++)
+	  {
+	    userInvid = (Invid) invids.elementAt(i);
+	    
+	    userName = getLabel(userInvid);
+
+	    if (userName != null)
+	      {
+		users.addElement(userName);
+	      }
+	  }
+      }
+
+    // now build our output line
+
+    result.append(groupname);
+    result.append(":");
+    result.append(pass);
+    result.append(":");
+    result.append(Integer.toString(gid));
+    result.append(":");
+
+    for (int i = 0; i < users.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    result.append(",");
+	  }
+
+	result.append((String) users.elementAt(i));
+      }
+
+    if (result.length() > 1024)
+      {
+	Ganymede.debug("UNIXBuilderTask.writeGroupLine(): Warning!  group " + 
+		       groupname + " overflows the UNIX line length!");
+      }
+
+    writer.println(result.toString());
+  }
+}
+</pre>
 
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
