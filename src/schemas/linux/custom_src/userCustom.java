@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -403,17 +403,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return true;
 	  }
 
-	inv = (InvidDBField) getField(PERSONAE);
-	
-	if (inv == null)
-	  {
-	    return true;
-	  }
-
-	sf = (StringDBField) getField(USERNAME); // old user name
-
-	oldName = (String) sf.getValueLocal();
-
 	// update the home directory location.. we assume that if
 	// the user has permission to rename the user, they can
 	// automatically execute this change to the home directory.
@@ -430,6 +419,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 
 	// rename all the associated persona with the new user name
+
+	inv = (InvidDBField) getField(PERSONAE);
+	
+	if (inv == null)
+	  {
+	    return true;
+	  }
+
+	sf = (StringDBField) getField(USERNAME); // old user name
+
+	oldName = (String) sf.getValueLocal();
 
 	personaeInvids = inv.getValues();
 

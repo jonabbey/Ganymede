@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,7 +22,7 @@ import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     userCustom
+                                                                      userCustom
 
 ------------------------------------------------------------------------------*/
 
@@ -177,333 +177,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public boolean fieldRequired(DBObject object, short fieldid)
   {
-    if (isInactivated())
+    switch (fieldid)
       {
-	switch (fieldid)
-	  {
-	  case userSchema.USERNAME:
-	  case userSchema.UID:
-	  case userSchema.HOMEDIR:
-	  case userSchema.LOGINSHELL:
-	    return true;
-	  }
-      }
-    else
-      {
-	switch (fieldid)
-	  {
-	  case userSchema.USERNAME:
-	  case userSchema.UID:
-	  case userSchema.LOGINSHELL:
-	  case userSchema.HOMEDIR:
-	  case userSchema.PASSWORD:
-	    return true;
-	  }
+      case userSchema.USERNAME:
+      case userSchema.UID:
+      case userSchema.LOGINSHELL:
+      case userSchema.HOMEDIR:
+      case userSchema.PASSWORD:
+	return true;
       }
 
     return false;
-  }
-
-  /**
-   *
-   * Customization method to verify whether this object type has an inactivation
-   * mechanism.
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public boolean canBeInactivated()
-  {
-    return true;
-  }
-
-  /**
-   *
-   * Customization method to verify whether the user has permission
-   * to inactivate a given object.  The client's DBSession object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for inactivating by the client.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public boolean canInactivate(DBSession session, DBEditObject object)
-  {
-    return true;
-  }
-
-  /**
-   * This method handles inactivation logic for this object type.  A
-   * DBEditObject must first be checked out for editing, then the
-   * inactivate() method can then be called on the object to put the
-   * object into inactive mode.  inactivate() will set the object's
-   * removal date and fix up any other state information to reflect
-   * the object's inactive status.<br><br>
-   *
-   * inactive() is designed to run synchronously with the user's
-   * request for inactivation.  It can return a wizard reference
-   * in the ReturnVal object returned, to guide the user through
-   * a set of interactive dialogs to inactive the object.
-   *
-   * The inactive() method can cause other objects to be deleted, can cause
-   * strings to be removed from fields in other objects, whatever.
-   *
-   * If remove() returns a ReturnVal that has its success flag set to false
-   * and does not include a JDialogBuff for further interaction with the
-   * user, then DBSEssion.inactivateDBObject() method will rollback any changes
-   * made by this method.
-   *
-   * IMPORTANT NOTE: If a custom object's inactivate() logic decides
-   * to enter into a wizard interaction with the user, that logic is
-   * responsible for calling finalizeInactivate() with a boolean
-   * indicating ultimate success of the operation.
-   *
-   * Finally, it is up to commitPhase1() and commitPhase2() to handle
-   * any external actions related to object inactivation when
-   * the transaction is committed..
-   *
-   * @param interactive If true, the inactivate() logic can present
-   * a wizard to the client to customize the inactivation logic.
-   *
-   * @see #commitPhase1()
-   * @see #commitPhase2() 
-   */
-
-  public ReturnVal inactivate()
-  {
-    return inactivate(null, false);
-  }
-
-  public ReturnVal inactivate(String forward, boolean calledByWizard)
-  {
-    ReturnVal retVal;
-    StringDBField stringfield;
-    PasswordDBField passfield;
-    DateDBField date;
-    Calendar cal = Calendar.getInstance(); 
-    Date time;
-
-    /* -- */
-
-    if (!gSession.enableWizards || calledByWizard)
-      {
-	// ok, we want to null the password field and set the
-	// removal time to current time + 3 months.
-
-	passfield = (PasswordDBField) getField(userSchema.PASSWORD);
-	retVal = passfield.setCryptPass(null); // we know our schema uses crypted pass'es
-
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    finalizeInactivate(false);
-	    return retVal;
-	  }
-
-	// set the shell to /bin/false
-	
-	stringfield = (StringDBField) getField(LOGINSHELL);
-	retVal = stringfield.setValue("/bin/false");
-
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    finalizeInactivate(false);
-	    return retVal;
-	  }
-
-	// make sure that the expiration date is cleared.. we're on
-	// the removal track now.
-
-	date = (DateDBField) getField(SchemaConstants.ExpirationField);
-	retVal = date.setValueLocal(null);
-
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    finalizeInactivate(false);
-	    return retVal;
-	  }
-
-	// determine what will be the date 3 months from now
-
-	time = new Date();
-	cal.setTime(time);
-	cal.add(Calendar.MONTH, 3);
-
-	// and set the removal date
-
-	date = (DateDBField) getField(SchemaConstants.RemovalField);
-	retVal = date.setValueLocal(cal.getTime());
-
-	finalizeInactivate(true);
-	return retVal;
-      }
-    else  // interactive, but not called by wizard
-      {
-	userInactivateWizard theWiz;
-
-	try
-	  {
-	    System.err.println("userCustom: creating inactivation wizard");
-
-	    theWiz = new userInactivateWizard(this.gSession, this);
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex); 
-	  }
-
-	System.err.println("userCustom: returning inactivation wizard");
-
-	return theWiz.getStartDialog();
-      }
-  }
-
-  /**
-   * This method handles reactivation logic for this object type.  A
-   * DBEditObject must first be checked out for editing, then the
-   * reactivate() method can then be called on the object to make the
-   * object active again.  reactivate() will clear the object's
-   * removal date and fix up any other state information to reflect
-   * the object's reactive status.<br><br>
-   *
-   * reactive() is designed to run synchronously with the user's
-   * request for inactivation.  It can return a wizard reference
-   * in the ReturnVal object returned, to guide the user through
-   * a set of interactive dialogs to reactive the object.<br>
-   *
-   * If reactivate() returns a ReturnVal that has its success flag set to false
-   * and does not include a JDialogBuff for further interaction with the
-   * user, then DBSEssion.inactivateDBObject() method will rollback any changes
-   * made by this method.<br><br>
-   *
-   * IMPORTANT NOTE: If a custom object's reactivate() logic decides
-   * to enter into a wizard interaction with the user, that logic is
-   * responsible for calling editset.rollback("reactivate" +
-   * getLabel()) in the case of a failure to properly do all the reactivation
-   * stuff, where getLabel() must be the name of the object
-   * prior to any attempts to clear fields which could impact the
-   * returned label.<br><br>
-   *
-   * Finally, it is up to commitPhase1() and commitPhase2() to handle
-   * any external actions related to object reactivation when
-   * the transaction is committed..
-   *
-   * @see arlut.csd.ganymede.DBEditObject#commitPhase1()
-   * @see arlut.csd.ganymede.DBEditObject#commitPhase2()
-   */
-
-  public ReturnVal reactivate()
-  {
-    userReactivateWizard theWiz;
-
-    /* -- */
-
-    try
-      {
-	System.err.println("userCustom: creating reactivation wizard");
-	
-	theWiz = new userReactivateWizard(this.gSession, this);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex); 
-      }
-
-    System.err.println("userCustom: returning reactivation wizard");
-    
-    return theWiz.getStartDialog();
-  }
-
-  /**
-   * This method is called by the userReactivateWizard on successfully
-   * obtaining the necessary information from the client on a
-   * reactivate operation.  We then do the actual work to reactivate
-   * the user in this method.
-   * 
-   * @see arlut.csd.ganymede.custom.userReactivateWizard
-   *
-   */
-
-  public ReturnVal reactivate(userReactivateWizard reactivateWizard)
-  {
-    ReturnVal retVal = null;
-    StringDBField stringfield;
-    PasswordDBField passfield;
-    DateDBField date;
-
-    /* -- */
-
-    if (reactivateWizard != null)
-      {
-	// reset the password
-
-	if (reactivateWizard.password != null && reactivateWizard.password.length() != 0)
-	  {
-	    passfield = (PasswordDBField) getField(userSchema.PASSWORD);
-	    retVal = passfield.setPlainTextPass(reactivateWizard.password);
-	    
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		finalizeReactivate(false);
-		return retVal;
-	      }
-	  }
-	else
-	  {
-	    retVal = new ReturnVal(false);
-	    JDialogBuff dialog = new JDialogBuff("Reactivate User",
-						 "You must set a password",
-						 "OK",
-						 "Cancel",
-						 "question.gif");
-	    dialog.addPassword("New Password", true);
-
-	    updateShellChoiceList();
-	    dialog.addChoice("Shell", userCustom.shellChoices.getLabels());
-
-	    dialog.addString("Forwarding Address");
-	    
-	    retVal.setDialog(dialog);
-	    retVal.setCallback(reactivateWizard);
-	    reactivateWizard.state = 2;	// make sure ths wizard will be ready to process this
-	
-	    return retVal;
-	  }
-
-	// reset the shell
-
-	if (reactivateWizard.shell != null)
-	  {
-	    stringfield = (StringDBField) getField(LOGINSHELL);
-	    retVal = stringfield.setValue(reactivateWizard.shell);
-	    
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		finalizeReactivate(false);
-		return retVal;
-	      }
-	  }
-
-	// make sure that the removal date is cleared..
-
-	date = (DateDBField) getField(SchemaConstants.RemovalField);
-	retVal = date.setValueLocal(null);
-
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    finalizeReactivate(false);
-	    return retVal;
-	  }
-
-	finalizeReactivate(true);
-
-	return retVal;
-      }
-
-    return Ganymede.createErrorDialog("userCustom.reactivate() error",
-				      "Error, reactivate() called without a valid user wizard");
   }
 
   /**
@@ -632,6 +316,32 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
   }
 
+  /**
+   *
+   * Customization method to verify whether the user has permission
+   * to remove a given object.  The client's DBSession object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for removal by the client.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   */
+
+  public boolean canRemove(DBSession session, DBObject object)
+  {
+    String name = (String) object.getFieldValueLocal(userSchema.USERNAME);
+
+    if (name != null && name.equals("root"))
+      {
+	return false;
+      }
+
+    return true;
+  }
+
   public synchronized boolean finalizeSetValue(DBField field, Object value)
   {
     InvidDBField inv;
@@ -693,17 +403,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return true;
 	  }
 
-	inv = (InvidDBField) getField(PERSONAE);
-	
-	if (inv == null)
-	  {
-	    return true;
-	  }
-
-	sf = (StringDBField) getField(USERNAME); // old user name
-
-	oldName = (String) sf.getValueLocal();
-
 	// update the home directory location.. we assume that if
 	// the user has permission to rename the user, they can
 	// automatically execute this change to the home directory.
@@ -720,6 +419,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 
 	// rename all the associated persona with the new user name
+
+	inv = (InvidDBField) getField(PERSONAE);
+	
+	if (inv == null)
+	  {
+	    return true;
+	  }
+
+	sf = (StringDBField) getField(USERNAME); // old user name
+
+	oldName = (String) sf.getValueLocal();
 
 	personaeInvids = inv.getValues();
 
