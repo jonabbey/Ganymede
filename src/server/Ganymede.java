@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,6 +42,35 @@ public class Ganymede {
     else
       {
 	dbFilename = argv[0];
+      }
+
+    boolean stop = true;
+
+    try
+      {
+	Naming.lookup("rmi://localhost/ganymede.server");
+      }
+    catch (NotBoundException ex)
+      {
+	stop = false;		// this is what we want to have happen
+      }
+    catch (java.net.MalformedURLException ex)
+      {
+	System.out.println("MalformedURL:" + ex);
+      }
+    catch (UnknownHostException ex)
+      {
+	System.out.println("UnknownHost:" + ex);
+      }
+    catch (RemoteException ex)
+      {
+	System.out.println("Remote:" + ex);
+      }
+
+    if (stop)
+      {
+	System.out.println("Ganymede server already bound by other process / Naming failure.");
+	System.exit(0);
       }
 
     debug("Creating DBStore structures");
