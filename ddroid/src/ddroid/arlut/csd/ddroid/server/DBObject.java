@@ -59,6 +59,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -545,6 +546,48 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    catch (RemoteException ex)
 	      {
 		return;
+	      }
+	  }
+      }
+  }
+
+
+  /**
+   *
+   * This method pulls the fields in this object from remote accessibility through
+   * RMI, possibly improving our security posture and reducing the memory loading
+   * on the RMI system.
+   *  
+   */
+
+  public final void unexportFields()
+  {
+    DBField field;
+
+    /* -- */
+
+    synchronized (fieldAry)
+      {
+	for (int i = 0; i < fieldAry.length; i++)
+	  {
+	    field = fieldAry[i];
+
+	    if (field == null)
+	      {
+		continue;
+	      }
+
+	    // unexport can fail if the object has already been
+	    // unexported, or if it was never exported.  This should
+	    // never happen, but if it does, we'll log it.
+	
+	    try
+	      {
+		UnicastRemoteObject.unexportObject(field, true);
+	      }
+	    catch (NoSuchObjectException ex)
+	      {
+		Ganymede.debug(Ganymede.stackTrace(ex)); // continue
 	      }
 	  }
       }

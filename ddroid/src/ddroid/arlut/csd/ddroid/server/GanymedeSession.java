@@ -66,11 +66,13 @@ package arlut.csd.ddroid.server;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.net.ProtocolException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -503,6 +505,13 @@ final public class GanymedeSession implements Session, Unreferenced {
    */
 
   GanymedeXMLSession xSession = null;
+
+  /**
+   * <p>List of exported DBObjects (and DBEditObjects and subclasses thereof), so we
+   * can forcibly unexport them at logout time.</p>
+   */
+
+  ArrayList exported = new ArrayList();
 
   /* -- */
 
@@ -1125,6 +1134,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // logout the client, abort any DBSession transaction going
 
 	    session.logout();	// *sync* DBSession
+
+	    // if we have DBObjects left exported through RMI, make
+	    // them inaccesible
+
+	    unexportObjects();
 
 	    // if we weren't forced off, do normal logout logging
 
@@ -2219,6 +2233,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
 
 	Ganymede.runBuilderTasks();
+	unexportObjects();	// the client shouldn't need access any more?
       }
     else
       {
@@ -2306,6 +2321,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
       }
 
+    unexportObjects();
     return session.abortTransaction(); // *sync* DBSession 
   }
 
@@ -3813,21 +3829,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (this.exportObjects)
 	  {
-	    // the exportObject call would fail if the object has
-	    // already been exported.  This should never be the case
-	    // since we are creating a new view-only copy of the
-	    // object, but we need to cover the exception anyway
-
-	    try
-	      {
-		UnicastRemoteObject.exportObject(objref);
-	      }
-	    catch (RemoteException ex)
-	      {
-		//		    ex.printStackTrace();
-	      }
-
-	    ((DBObject) objref).exportFields();
+	    exportObject((DBObject) objref);
 	  }
 
 	result.setObject(objref);
@@ -3915,16 +3917,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    if (this.exportObjects)
 	      {
-		try
-		  {
-		    UnicastRemoteObject.exportObject(objref);
-		  }
-		catch (RemoteException ex)
-		  {
-		    //		    ex.printStackTrace();
-		  }
-
-		((DBObject) objref).exportFields();
+		exportObject((DBObject) objref);
 	      }
 
 	    result.setObject(objref);
@@ -4085,16 +4078,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (this.exportObjects)
 	  {
-	    try
-	      {
-		UnicastRemoteObject.exportObject(newObj);
-	      }
-	    catch (RemoteException ex)
-	      {
-		// ex.printStackTrace();
-	      }
-
-	    ((DBObject) newObj).exportFields();
+	    exportObject((DBObject) newObj);
 	  }
 
 	retVal.setObject(newObj);
@@ -4188,16 +4172,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (this.exportObjects)
 	  {
-	    try
-	      {
-		UnicastRemoteObject.exportObject(newObj);
-	      }
-	    catch (RemoteException ex)
-	      {
-		// ex.printStackTrace();
-	      }
-
-	    ((DBObject) newObj).exportFields();
+	    exportObject((DBObject) newObj);
 	  }
 
 	retVal.setObject(newObj);
@@ -6349,6 +6324,77 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     return false;
+  }
+
+  /**
+   * <p>Export this object through RMI, so the client can make calls on it.</p>
+   *
+   * <p>Note that object may be (and often will be) a DBEditObject or subclass
+   * thereof, not just a DBObject.</p>
+   */
+
+  private void exportObject(DBObject object)
+  {
+    // the exportObject call would fail if the object has already been
+    // exported.  This should never be the case but we need to cover
+    // the exception anyway
+
+    try
+      {
+	UnicastRemoteObject.exportObject(object);
+      }
+    catch (RemoteException ex)
+      {
+	Ganymede.debug(Ganymede.stackTrace(ex));
+	return;
+      }
+
+    synchronized (exported)
+      {
+	exported.add(object);
+	object.exportFields();
+      }
+  }
+
+
+  /**
+   * <p>Unexport all exported objects, preventing any further RMI
+   * calls from reaching them (for security's sake) and possibly
+   * hastening garbage collection / lowering memory usage on the
+   * server (for performance's sake).</p>
+   *
+   * <p>This method can safely be called without regard to whether
+   * this GanymedeSession actually did export anything, as
+   * exportObject() will only place objects in our local exported
+   * ArrayList if this GanymedeSession is configured for remote access
+   * with exported objects.</p>
+   */
+
+  private void unexportObjects()
+  {
+    DBObject x;
+
+    /* -- */
+
+    synchronized (exported)
+      {
+	for (int i = exported.size()-1; i >= 0; i--)
+	  {
+	    x = (DBObject) exported.get(i);
+	    exported.remove(i);
+
+	    try
+	      {
+		UnicastRemoteObject.unexportObject((Remote) x, true); // go ahead and force
+	      }
+	    catch (NoSuchObjectException ex)
+	      {
+		Ganymede.debug(Ganymede.stackTrace(ex)); // report but continue unexporting
+	      }
+
+	    x.unexportFields();
+	  }
+      }
   }
 
   private void setLastEvent(String text)
