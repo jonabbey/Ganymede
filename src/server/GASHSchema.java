@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.73 $ %D%
+   Version: $Revision: 1.74 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -577,7 +577,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     Base base;
     BaseField field, fields[];
-    Vector vect, vect2;
+    Vector vect;
     BaseNode parentNode;
     FieldNode oldNode, newNode, fNode;
     int i;
@@ -589,70 +589,27 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     // get the list of fields we want to display
     // note that we don't want to show built-in fields
 
-    vect = base.getFields();
+    vect = base.getFields(false);
 
-    vect2 = new Vector();
-    
-    for (i = 0; i < vect.size(); i++)
-      {
-	field = (BaseField) vect.elementAt(i);
+    // we copy the fields into a local array for historical reasons,
+    // plus laziness..  no good reason to do this anymore, but no
+    // pressing reason to mess with it, either
 
-	if (!field.isBuiltIn())
-	  {
-	    vect2.addElement(field);
-	  }
-      }
-
-    fields = new BaseField[vect2.size()];
+    fields = new BaseField[vect.size()];
     
     for (i = 0; i < fields.length; i++)
       {
-	fields[i] = (BaseField) vect2.elementAt(i);
+	fields[i] = (BaseField) vect.elementAt(i);
       }
-    
-    // Sort the fields by ID, using a funky anonymous
-    // class
-    
-    (new QuickSort(fields, 
-		   new arlut.csd.Util.Compare() 
-		   {
-		     public int compare(Object a, Object b) 
-		       {
-			 BaseField aF, bF;
-      
-			 aF = (BaseField) a;
-			 bF = (BaseField) b;
-	
-			 try
-			   {
-			     if (aF.getDisplayOrder() < bF.getDisplayOrder())
-			       {
-				 return -1;
-			       }
-			     else if (aF.getDisplayOrder() > bF.getDisplayOrder())
-			       {
-				 return 1;
-			       }
-			     else
-			       {
-				 return 0;
-			       }
-			   }
-			 catch (RemoteException ex)
-			   {
-			     throw new RuntimeException("couldn't compare base fields " + ex);
-			   }
-		       }
-		   }
-		   )).sort();
 
     parentNode = node;
     oldNode = null;
     fNode = (FieldNode) node.getChild();
     i = 0;
 
-    // this loop here is intended to do a minimum-work updating
-    // of a field list
+    // this loop here is intended to do a minimum-work updating of a
+    // field list, using a ratcheting algorithm similar to that used
+    // in gclient.refreshObjects().
 	
     while ((i < fields.length) || (fNode != null))
       {
@@ -735,9 +692,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     base = editor.getBase(SchemaConstants.UserBase);
 
     // get the list of fields we want to display
-    // note that we don't want to show built-in fields
+    // note that we do want to show built-in fields
 
-    vect = base.getFields();
+    vect = base.getFields(true);
+
+    // make a copy of all the fields that are built-in
 
     vect2 = new Vector();
     
@@ -750,6 +709,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    vect2.addElement(field);
 	  }
       }
+
+    // put em in an array, sort em.
 
     fields = new BaseField[vect2.size()];
     
@@ -2216,7 +2177,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	// Renumber the fields of this parent.
 	
-	FieldNode currentNode = (FieldNode)parentNode.getChild();
+	FieldNode currentNode = (FieldNode) parentNode.getChild();
 
 	if (currentNode != null)
 	  {
@@ -2226,13 +2187,44 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 		while (currentNode != null)
 		  {
-		    currentNode.getField().setDisplayOrder(++i);
-		    currentNode = (FieldNode)currentNode.getNextSibling();
+		    i++;
+
+		    if (debug)
+		      {
+			System.out.println("Setting field " + currentNode.getText() + " to order " + i);
+		      }
+
+		    currentNode.getField().setDisplayOrder(i);
+
+		    if (debug)
+		      {
+			System.out.println("Field " + currentNode.getText() + "'s order is now " + 
+					   currentNode.getField().getDisplayOrder());
+		      }
+
+		    currentNode = (FieldNode) currentNode.getNextSibling();
 		  }
 
 		if (debug)
 		  {
-		    System.out.println("Reordered " + i + " fields");
+		    System.out.println("Reordered " + i + " fields.. rescanning order");
+
+		    currentNode = (FieldNode) parentNode.getChild();
+
+		    i = 0;
+
+		    while (currentNode != null)
+		      {
+			i++;
+		   
+			if (debug)
+			  {
+			    System.out.println("Field " + currentNode.getText() + "'s order is now " + 
+					       currentNode.getField().getDisplayOrder());
+			  }
+			
+			currentNode = (FieldNode) currentNode.getNextSibling(); 
+		      }
 		  }
 	      }
 	    catch (RemoteException rx)
