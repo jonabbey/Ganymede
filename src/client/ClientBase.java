@@ -9,8 +9,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/04/28 09:32:27 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/05/28 02:47:51 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -69,7 +69,7 @@ import java.util.Vector;
  * this class, the server will only need an RMI stub for this class,
  * regardless of what client is written.</p>
  *
- * @version $Revision: 1.10 $ $Date: 1999/04/28 09:32:27 $ $Name:  $
+ * @version $Revision: 1.11 $ $Date: 1999/05/28 02:47:51 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -334,7 +334,6 @@ public class ClientBase extends UnicastRemoteObject implements Client {
    * <p>Allows the server to force us off when it goes down.</p>
    *
    * @see arlut.csd.ganymede.Client
-   *
    */
 
   public synchronized void forceDisconnect(String reason)

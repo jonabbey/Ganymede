@@ -6,8 +6,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/22 18:05:29 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/05/28 02:48:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -50,8 +50,37 @@ package arlut.csd.ganymede;
 
 import java.rmi.*;
 
+/*------------------------------------------------------------------------------
+                                                                       interface
+                                                                          Client
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>Interface that must be implemented by client code that connects to the
+ * ganymede server.  The {@link arlut.csd.ganymede.GanymedeServer GanymedeServer}'s
+ * {@link arlut.csd.ganymede.GanymedeServer#login(arlut.csd.ganymede.Client) login method}
+ * uses this interface to authenticate a client, and to force the client to shutdown
+ * if the user is forced off or the server goes down.</p>
+ */
+
 public interface Client extends Remote {
+
+  /**
+   * <p>Allows the server to retrieve the username.</p>
+   */
+
   String getName() throws RemoteException;
+
+  /**
+   * <p>Allows the server to retrieve the password.</p>
+   */
+
   String getPassword() throws RemoteException;
+
+  /**
+   * <p>Allows the server to force us off when it goes down.</p>
+   */
+
   void forceDisconnect(String reason) throws RemoteException;
 }

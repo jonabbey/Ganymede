@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 1999/05/26 23:17:27 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 1999/05/28 02:48:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -72,7 +72,10 @@ import arlut.csd.Util.ParseArgs;
 
 /**
  * <p>This class is the main server module, providing the static main()
- * method executed to start the server.</p>
+ * method executed to start the server.  That method instantiates a
+ * {@link arlut.csd.ganymede.GanymedeServer GanymedeServer} object and publishes
+ * it in the RMI registry.  Clients and admin consoles will connect to the
+ * published GanymedeServer object to get logged into the server.</p>
  *
  * <p>This class is never instantiated, but instead provides a bunch of
  * static variables and convenience methods in addition to the main()
