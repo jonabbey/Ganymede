@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.87 $
-   Last Mod Date: $Date: 2002/03/01 23:22:01 $
+   Version: $Revision: 1.88 $
+   Last Mod Date: $Date: 2002/03/02 00:10:50 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -638,6 +638,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JMenuBar mbar = null;
   JMenu controlMenu = null;
   JMenuItem forceBuildMI = null;
+  JMenuItem clearLogMI = null;
   JMenuItem quitMI = null;
   JMenuItem dumpMI = null;
   JMenuItem killAllMI = null;
@@ -695,7 +696,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   JLabel memLabel = null;
   JTextField memField = null;
 
-  JButton clearLogButton;
   JTextArea statusArea = null;
 
   // resources for the users connected table
@@ -764,11 +764,16 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     forceBuildMI.setMnemonic('f');
     forceBuildMI.addActionListener(this);
 
+    clearLogMI = new JMenuItem("Clear Log");
+    clearLogMI.setMnemonic('l');
+    clearLogMI.addActionListener(this);
+
     quitMI = new JMenuItem("Quit Console");
     quitMI.setMnemonic('q');
     quitMI.addActionListener(this);
 
     controlMenu.add(forceBuildMI);
+    controlMenu.add(clearLogMI);
     controlMenu.add(killAllMI);
     controlMenu.add(schemaMI);
     controlMenu.add(shutdownMI);
@@ -1070,15 +1075,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     statusArea.setEditable(false);
     JScrollPane statusAreaPane = new JScrollPane(statusArea);
 
-    clearLogButton = new JButton("Clear Log");
-    clearLogButton.addActionListener(this);
-
-    JPanel clearPanel = new JPanel(new java.awt.BorderLayout());
-    clearPanel.add("East", clearLogButton);
-    
     JPanel statusBox = new JPanel(new java.awt.BorderLayout());
     statusBox.add("Center", statusAreaPane);
-    statusBox.add("South", clearPanel);
     statusBox.setBorder(new TitledBorder("Server Log"));
 
     //    topGBL.setConstraints(statusBox, topGBC);
@@ -1133,6 +1131,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
     JSplitPane splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
     splitterPane.setOneTouchExpandable(true);
+    splitterPane.setDividerLocation(0.5);
 
     topGBL.setConstraints(splitterPane, topGBC);
     getContentPane().add(splitterPane);
@@ -1427,7 +1426,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       {
 	showAboutMessage();
       }
-    else if (event.getSource() == clearLogButton)
+    else if (event.getSource() == clearLogMI)
       {
 	statusArea.setText("");
       }
