@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.116 $ %D%
+   Version: $Revision: 1.117 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.116 $ %D%
+ * @version $Revision: 1.117 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -4470,30 +4470,20 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		resetDefaultPerms();
 
-		permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.RoleMatrix);
+		// Personas do not get the default 'objects-owned'
+		// privileges for the wider range of objects under
+		// their ownership.  Any special privileges granted to
+		// admins over objects owned by them must be derived
+		// from a non-default role.
 
-		if (permField == null)
-		  {
-		    Ganymede.debug("updatePerms(): Error: no PermMatrix field in default permission object");
-		  }
-		else
-		  {
-		    selfPerm = permField.getMatrix();
-		    
-		    if (selfPerm == null)
-		      {
-			System.err.println("updatePerms(): Error: PermMatrix field's value is null in selfperm object");
-		      }
-		  }
+		// they do get the default permissions that all users have
+		// for non-owned objects, though.
 
-		personaPerms = new PermMatrix(defaultPerms).union(selfPerm);
+		personaPerms = new PermMatrix(defaultPerms);
 
-		// we initialize delegatablePersonaPerms with the
-		// permissions for owned and non-owned permissions
-		// that are part of the default permissions..  default
-		// permissions are implicitly delegatable.
+		// default permissions on non-owned are implicitly delegatable.
 
-		delegatablePersonaPerms = new PermMatrix(defaultPerms).union(selfPerm);
+		delegatablePersonaPerms = new PermMatrix(defaultPerms);
 
 		// now we loop over all permissions objects referenced
 		// by our persona, or'ing in both the objects owned
