@@ -1,10 +1,19 @@
 #!/bin/sh
 #
-# Ganymede admin console script 
+# Ganymede admin console script
+#
+# Last Mod Date: $Date$
+# Last Revision Changed: $Rev$
+# Last Changed By: $Author$
+# SVN URL: $HeadURL$
 #
 ###############################
 
-## This section is customized by the client install script
+########################################
+#
+# This section is customized by the client install script
+#
+########################################
 
 # These lines should be in the form X=Y, with nothing else on
 # the line.. they are customized by the installClient.perl
@@ -14,7 +23,36 @@ JAVA=/opt/bin/java
 CLASSPATH=/v/site/packages/ganymede/etc/ganymedeAdmin.jar
 PROPERTIES=/opt/depot/ganymede/etc/ganymede.properties
 
-############################################### 
+########################################
+#
+# Control variables for manual editing
+#
+########################################
+
+# DEBUG controls whether the JVM that runs the Ganymede admin console
+# will allow a Java debugger to attach to it.  If you want to allow a
+# Java debugger to attach to the admin console, set 'DEBUG=-Xdebug'.
+# If you want to allow a debugger to attach to the admin console and
+# you want to force the JVM to run in interpreted mode for some
+# reason, set 'DEBUG=-Xdebug -Xint'.
+
+DEBUG=
+
+# MINHEAP controls the heap size that the JVM running the Ganymede
+# admin console will initially allocate on startup, and which will be
+# kept as a minimum heap size during execution. It should be expressed
+# as a number followed by the letter 'm' for megabyte.  I.e.,
+# 'MINHEAP=32m', or 'MINHEAP=64m'.
+
+MINHEAP=32m
+
+# MAXHEAP controls the maximum size the Ganymede admin console's heap
+# can grow to.  It should be expressed as a number followed by the
+# letter 'm' for megabyte.  I.e., 'MAXHEAP=256m', or 'MAXHEAP=2048m'.
+
+MAXHEAP=48m
+
+# ------------------------------------------------------------------ #
 
 trap "echo Aborted" 2
 
@@ -22,5 +60,5 @@ echo "Running Ganymede Admin Console"
 
 export CLASSPATH
 
-$JAVA -Xmx32m arlut.csd.ganymede.admin.GASHAdmin $PROPERTIES
+$JAVA $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP arlut.csd.ganymede.admin.GASHAdmin $PROPERTIES
 
