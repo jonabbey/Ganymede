@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -1384,7 +1384,7 @@ class QueryRow implements ItemListener {
 		operandContainer.remove(operand);
 	      }
 	    
-	    operand = new JIPField(null, true, true);
+	    operand = new JIPField(true, true);
 	    addOperand = true;
 	  }
       }
