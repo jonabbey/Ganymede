@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2000/03/06 22:37:09 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2000/03/20 22:10:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -908,6 +908,14 @@ public class DBLog {
 	    else
 	      {
 		name = event.adminName;	// hopefully this will be a valid email target.. used for bad login attempts
+
+		// skip any persona info after a colon in case the
+		// user tried logging in with admin privileges
+
+		if (name != null && name.indexOf(':') != -1)
+		  {
+		    name = name.substring(0, name.indexOf(':'));
+		  }
 	      }
 
 	    if (name != null)

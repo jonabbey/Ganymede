@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 2000/03/16 06:29:51 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 2000/03/20 22:10:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -223,22 +223,22 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	synchronized (this)
 	  {
-	    // force logins to lowercase so we can keep track of things
-	    // cleanly..  we do a case insensitive match against user/persona
-	    // name later on, but we want to have a canonical name to track
-	    // multiple logins with.
+	    // force logins to lowercase so we can keep track of
+	    // things cleanly..  we do a case insensitive match
+	    // against user/persona name later on, but we want to have
+	    // a canonical name to track multiple logins with.
     
 	    clientName = client.getName().toLowerCase();
 	    clientPass = client.getPassword();
 
-	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, clientName);
+	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.NOCASEEQ, clientName);
 	    userQuery = new Query(SchemaConstants.UserBase, root, false);
 
 	    Vector results = Ganymede.internalSession.internalQuery(userQuery);
 
-	    // results.size() really shouldn't be any larger than 1, since we
-	    // are doing a match on username and username is managed by a
-	    // namespace in the schema.
+	    // results.size() really shouldn't be any larger than 1,
+	    // since we are doing a match on username and username is
+	    // managed by a namespace in the schema.
 
 	    for (int i = 0; !found && results != null && (i < results.size()); i++)
 	      {
@@ -252,32 +252,35 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		  }
 	      }
 
-	    // if we didn't find a user, perhaps they tried logging in by
-	    // entering their persona name directly?  For the time being we
-	    // are allowing this, so we'll go ahead and look for a matching
-	    // persona.
+	    // if we didn't find a user, perhaps they tried logging in
+	    // by entering their persona name directly?  For the time
+	    // being we are allowing this, so we'll go ahead and look
+	    // for a matching persona.
 
 	    if (!found)
 	      {
-		// we want to match against either the persona name field or
-		// the new persona label field.  This lets us work with old
-		// versions of the database or new.  Going forward we'll
-		// want to match here against the PersonaLabelField.
+		// we want to match against either the persona name
+		// field or the new persona label field.  This lets us
+		// work with old versions of the database or new.
+		// Going forward we'll want to match here against the
+		// PersonaLabelField.
 
 		// note.. this is a hack for compatibility.. the
-		// personalabelfield will always be good, but if it does not
-		// exist, we'll go ahead and match against the persona name
-		// field as long as we don't have an associated user in that
-		// persona.. this is to avoid confusing 'broccol:supergash'
-		// with 'supergash'
+		// personalabelfield will always be good, but if it
+		// does not exist, we'll go ahead and match against
+		// the persona name field as long as we don't have an
+		// associated user in that persona.. this is to avoid
+		// confusing 'broccol:supergash' with 'supergash'
 
-		// the persona label field would be like 'broccol:supergash',
-		// whereas the persona name would be 'supergash', which could
-		// be confused with the supergash account.
+		// the persona label field would be like
+		// 'broccol:supergash', whereas the persona name would
+		// be 'supergash', which could be confused with the
+		// supergash account.
 
-		root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName),
+		root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField, 
+							 QueryDataNode.NOCASEEQ, clientName),
 				       new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField, 
-									  QueryDataNode.EQUALS, clientName),
+									  QueryDataNode.NOCASEEQ, clientName),
 							new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
 											   QueryDataNode.DEFINED, null))));
 
@@ -285,19 +288,20 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		results = Ganymede.internalSession.internalQuery(userQuery);
 
-		// find the entry with the matching name and the matching
-		// password.  We no longer expect the PersonaNameField to be
-		// managed by a namespace, so we could conceivably get
-		// multiple matches back from our query.  This is particularly
-		// true if the user tries to log in as 'GASH Admin', which
-		// might be the "name" of many persona accounts.  In this case
-		// we'll depend on the password telling us which to match
-		// against.
+		// find the entry with the matching name and the
+		// matching password.  We no longer expect the
+		// PersonaNameField to be managed by a namespace, so
+		// we could conceivably get multiple matches back from
+		// our query.  This is particularly true if the user
+		// tries to log in as 'GASH Admin', which might be the
+		// "name" of many persona accounts.  In this case
+		// we'll depend on the password telling us which to
+		// match against.
 
-		// once we get all the ganymede.db files transitioned over to
-		// the new persona format, we'll probably want to just match
-		// against PersonaLabelField to avoid the possibility of
-		// ambiguous admin selection here.
+		// once we get all the ganymede.db files transitioned
+		// over to the new persona format, we'll probably want
+		// to just match against PersonaLabelField to avoid
+		// the possibility of ambiguous admin selection here.
 
 		for (int i = 0; !found && (i < results.size()); i++)
 		  {
@@ -307,7 +311,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		    if (pdbf == null)
 		      {
-			System.err.println("GanymedeServer.login(): Couldn't get password for persona " + persona.getLabel());
+			System.err.println("GanymedeServer.login(): Couldn't get password for persona " + 
+					   persona.getLabel());
 		      }
 		    else
 		      {
@@ -347,9 +352,9 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	    if (found)
 	      {
-		// the GanymedeSession constructor calls registerActiveUser()
-		// on us, as well as directly adding itself to our sessions
-		// Vector.
+		// the GanymedeSession constructor calls
+		// registerActiveUser() on us, as well as directly
+		// adding itself to our sessions Vector.
 
 		GanymedeSession session = new GanymedeSession(client, clientName, user, persona);
 
