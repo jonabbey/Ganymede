@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.11 $ %D%
+ Version: $Revision: 1.12 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,7 +22,7 @@ import arlut.csd.Util.VecQuickSort;
 
 public class JstringListBox extends JList implements ListSelectionListener, MouseListener {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // -- 
 
