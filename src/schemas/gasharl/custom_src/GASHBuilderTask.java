@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2000/01/26 04:48:13 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2000/03/04 00:55:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -19,6 +19,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -203,23 +204,47 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open group_info file: " + ex);
 	  }
 	
-	if (out != null)
+	PrintWriter out2 = null;
+
+	try
 	  {
-	    try
-	      {
-		DBObject group;
-		Enumeration groups = enumerateObjects((short) 257);
+	    out2 = openOutFile(path + "group.owner");
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open group.owner file: " + ex);
+	  }
+
+	try
+	  {
+	    DBObject group;
+	    Enumeration groups = enumerateObjects((short) 257);
 		
-		while (groups.hasMoreElements())
+	    while (groups.hasMoreElements())
+	      {
+		group = (DBObject) groups.nextElement();
+		
+		if (out != null)
 		  {
-		    group = (DBObject) groups.nextElement();
-		    
 		    writeGroupLine(group, out);
 		  }
+
+		if (out2 != null)
+		  {
+		    writeGroupOwnerLine(group, out2);
+		  }
 	      }
-	    finally
+	  }
+	finally
+	  {
+	    if (out != null)
 	      {
 		out.close();
+	      }
+
+	    if (out2 != null)
+	      {
+		out2.close();
 	      }
 	  }
 
@@ -817,6 +842,58 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	System.err.println("GASHBuilder.writeGroupLine(): Warning!  group " + 
 			   groupname + " overflows the GASH line length!");
+      }
+
+    writer.println(result.toString());
+  }
+
+  /**
+   *
+   * This method writes out a line to the group.owner source file.
+   *
+   * The lines in this file look like the following.
+   *
+   * adgacc:ITL,ATL
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this user line
+   *
+   */
+
+  private void writeGroupOwnerLine(DBObject object, PrintWriter writer)
+  {
+    String groupname;
+    Vector ownerList;
+    Vector ownerStringList = new Vector();
+    
+    /* -- */
+
+    result.setLength(0);
+
+    groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
+    ownerList = object.getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+    if (ownerList != null)
+      {
+	for (int i = 0; i < ownerList.size(); i++)
+	  {
+	    ownerStringList.addElement(getLabel((Invid) ownerList.elementAt(i)));
+	  }
+      }
+
+    // now build our output line
+
+    result.append(groupname);
+    result.append(":");
+    
+    for (int i = 0; i < ownerStringList.size(); i++)
+      {
+	if (i != 0)
+	  {
+	    result.append(",");
+	  }
+
+	result.append((String) ownerStringList.elementAt(i));
       }
 
     writer.println(result.toString());

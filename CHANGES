@@ -145,7 +145,7 @@ server machine was rebooted.  Now the database dumper task will go
 ahead and do the dump, even if it has to wait for transaction commits
 to finish so it can assert a DBDumpLock on the database.
 
-9. [SERVER/CLIENT] Added addElements() and deleteElements() to DBField
+9. [SERVER/CLIENT] Added bulk add/remove methods to DBField
 
 The Ganymede client has long supported moving large blocks of choices
 from the unselected panel to the selected panel in vector invid and
@@ -234,6 +234,105 @@ notification features to the client.
 This involved a change to several server classes, including the
 GanymedeBuilderTask base class.  Any task not subclassed from
 GanymedeBuilderTask will not trigger this status update.
+
+14. [SERVER] Took out deprecated thread stop() operations
+
+The Ganymede Server's background scheduler used the deprecated
+java.lang.Thread.stop() method call to shut down running tasks when
+the server is shut down.  The stop() method is deprecated in 1.2 as
+unsafe, however, so the scheduler now uses the interrupted() method
+instead.  The scheduler and all tasks included with Ganymede 1.0pre1
+are responsive to the interrupted() call, but custom background tasks
+written for use with the Ganymede scheduler may need to be reworked to
+respond to the interrupt call.
+
+The GanymedeBuilderTask base class will check for an interrupt between
+phase1 and phase2 of a build, but it will be up to a builder task
+writer to check java.lang.Thread.currentThread.isInterrupted() during
+the two phases if they want to be able to quickly interrupt their
+builder task.
+
+With this change and a couple of unrelated deprecation fixes in the
+JDataComponent and JTree packages, the Ganymede server and client
+should now build with no deprecation warnings under Java 1.2 and
+later.
+
+15. [SERVER/CLIENT] Added regexp support for IP fields in Query mechanism
+
+The Ganymede server and client did not previously support regexp
+matching for IP fields.  The client now provides a 'matching' option
+in the query box for performing regexp searches on IP address fields.
+
+16. [SERVER] Did a basic reworking of ganymede.db and DBStore structures
+
+I've been laying the groundwork for support for XML database
+export/import, and towards this end, I have evolved the ganymede.db
+database format and the server's DBStore data structures in a
+direction that will make it easier to load data from an XML file, and
+to make the server code simpler.
+
+The ganymede.db file no longer includes definitions for the mandatory
+fields in the schema section.  The server now implicitly creates these
+field definitions whenever an object type definition is read from the
+ganymede.db file or created with the schema editor.
+
+This not only makes the schema editor simpler, but it also will lessen
+bulk and possibility for error when XML schema definitions are
+supported.
+
+In addition, server code and the ganymede.db file format was reworked
+to make keeping track of the order of fields within an object and object
+types within a category simpler, and more robust.
+
+There were also a good number of RMI interface changes to simplify
+schema editing logic.  Signficant changes were made to Base,
+BaseField, Category, FieldTemplate, and SchemaEdit, and the classes
+that implement these interfaces.  A number of effects of these changes
+are discussed in change 1.0pre1#17, below.
+
+17. [SERVER/ADMIN CONSOLE] Made schema editing more robust
+
+The server now supports schema editing better.  Schema changes that
+would break the database are prevented (at least, much more than
+before).  The server now provides feedback to the admin console (with
+error dialogs, and the like) if an attempted change would cause
+problems.
+
+A lot of the interface between the graphical schema editor and the
+server has been simplified and regularized, to depend less on
+serialization of server-specific data structures.  The schema editing
+system now uses String labels to identify objects to be manipulated in
+many cases.  A number of operations during schema editing that were
+performed as an interaction between the graphical schema editor and
+the server are now done locally on the server, to reduce performance
+problems.
+
+18. [SERVER] The server now resolves client ip addresses to host names
+
+When a user or admin console logs into the Ganymede server, the server
+will now do a reverse DNS lookup to get the fully qualified name of
+the system that the user is logging in from.  
+
+The admin console will show the fully qualified domain name for
+attached clients.
+
+19. [SERVER] Transaction email can be turned off with the starttransaction event
+
+Formerly, the server would always send a transaction log to the admin
+who commited a transaction, as well as sending email to all owner
+groups that own any objects affected by the transaction.
+
+Now, this email can be turned on or off by editing the
+'starttransaction' system event object.  If the 'Event Mail' checkbox
+in the starttransaction object is not checked, no transaction logs
+will ever be mailed.  If it is checked, then the 'Cc: Admin' and 'Cc:
+Owner Groups' checkboxes are consulted to determine whether the admin
+and the owner groups of any affected objects should be notified.
+
+By default, all three checkboxes are turned on and mail will be sent
+out in the same fashion that it was in 0.99.9 and earlier.  Users with
+pre-existing Ganymede databases will have to edit this system event
+object in order to restore the previous mail behavior.
 
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
