@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.11 $
-# $Date: 2000/07/13 20:17:57 $
+# $Revision: 1.12 $
+# $Date: 2000/09/09 00:28:47 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -57,6 +57,12 @@ if (!$failure) {
   close TEST;
 } else {
   print "*error* couldn't find client properties template.  not run from install directory?\n";
+  exit;
+}
+
+if (!-f "jars/ganymede.jar") {
+  print "Error couldn't find ganymede.jar file.\n";
+  print "Be sure and do a 'make jars' after building the Ganymede server.\n";
   exit;
 }
 
