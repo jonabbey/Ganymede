@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -685,7 +685,14 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     Invid sysInvid = (Invid) getFieldValueLocal(SchemaConstants.ContainerField);
     DBObject sysObj = getSession().viewDBObject(sysInvid);
 
-    result = (Vector) sysObj.getFieldValuesLocal(systemSchema.INTERFACES).clone();
+    try
+      {
+	result = (Vector) sysObj.getFieldValuesLocal(systemSchema.INTERFACES).clone();
+      }
+    catch (NullPointerException ex)
+      {
+	return new Vector();
+      }
     
     // we are not our own sibling.
 
