@@ -1,7 +1,29 @@
-Ganymede Release 0.99.2
-June 18, 1999
+Ganymede Release 0.99.3
+June 23, 1999
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 0.99.2 to 0.99.3 -------------------
+
+RELEASE DATE: June 23, 1999
+
+1. [SERVER] Fixed value() in StringDBField.java
+
+The value() method in StringDBField.java was improperly forcing
+a permissions check, despite the fact that value() was used for
+server-side code only.
+
+This was causing a problem at transaction commit-time under certain
+conditions, caused by the PermMatrix.union() bug below.
+
+2. [SERVER] Fixed bugs in permissions system
+
+Ugh, I had screwed up PermMatrix.union() in 0.99.2, the object->field
+inheritance logic wasn't working properly.
+
+I fixed PermMatrix.union(), simplified GanymedeSession.getPerm(), and
+modified both PermEntry.union() and PermEntry.intersection() to optimize
+out a lot of new PermEntry creation.
 
 -------------------- Changes from 0.99.1 to 0.99.2 -------------------
 
