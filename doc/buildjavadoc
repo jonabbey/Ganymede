@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Ganymede javadoc build script
+#
+# Release: $Name:  $
+# Version: $Revision: 1.1 $
+# Date: $Date: 1999/01/23 01:01:37 $
+#
+############################################################
+
+currentdir=`pwd`
+
+# Change to the directory where this build script is
+
+prog=$0
+builddir=`echo $prog|sed 's%/[^/][^/]*$%%'`
+test "x$builddir" = "x$builddir" && builddir=.
+cd $builddir
+
+# Load configuration information
+
+. config.sh
+
+# And do the build
+
+echo "Compiling $COMPNAME"
+
+rm -f sourcelist
+touch sourcelist
+
+find ../src/JDataComponent -name \*.java -print >> sourcelist
+find ../src/JTable -name \*.java -print >> sourcelist
+find ../src/JTree -name \*.java -print >> sourcelist
+find ../src/Qsmtp -name \*.java -print >> sourcelist
+find ../src/Util -name \*.java -print >> sourcelist
+find ../src/client -name \*.java -print >> sourcelist
+find ../src/jcrypt -name \*.java -print >> sourcelist
+find ../src/server -name \*.java -print >> sourcelist
+
+$JAVADIR/javadoc -private -J-mx128m -d javadoc @sourcelist
+
+# Return to our last directory
+
+cd $currentdir
+
+echo "Done compiling $COMPNAME"
