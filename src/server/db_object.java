@@ -8,7 +8,7 @@ import java.rmi.RemoteException;
  *
  * Base class for GANYMEDE client-visible objects.
  *
- * @version $Revision: 1.12 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.13 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -31,6 +31,14 @@ public interface db_object extends java.rmi.Remote {
    */
 
   public short getTypeID() throws RemoteException;
+
+  /**
+   *
+   * Returns the name of the object's type
+   *
+   */
+
+  public String getTypeName() throws RemoteException;
 
   /**
    *
