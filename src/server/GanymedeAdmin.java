@@ -8,7 +8,7 @@
    status monitoring and administrative activities.
    
    Created: 17 January 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -632,7 +632,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 
   /**
    *
-   * dump the current db schema of the to disk
+   * dump the current db schema to disk
    *
    */
 
