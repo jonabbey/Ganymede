@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.103 $ %D%
+   Version: $Revision: 1.104 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1279,11 +1279,14 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    Ganymede.db.notifyAll(); // in case of locks
 	  }
 
-	//	System.err.println("%%% Printing PersonaPerms");
-	//	personaPerms.debugdump();
+	if (debug)
+	  {
+	    System.err.println("%%% Printing PersonaPerms");
+	    PermissionMatrixDBField.debugdump(personaPerms);
 
-	//	System.err.println("%%% Printing DefaultPerms");
-	//	defaultPerms.debugdump();
+	    System.err.println("%%% Printing DefaultPerms");
+	    PermissionMatrixDBField.debugdump(defaultPerms);
+	  }
 	
 	return transport;
       }
