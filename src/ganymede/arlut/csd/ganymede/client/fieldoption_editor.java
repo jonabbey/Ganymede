@@ -682,8 +682,16 @@ class FieldOptionRow {
  */
 
 class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel {
-  static protected String[]  cNames = null;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede system.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.FieldOptionModel");
+
   static protected Class[]  cTypes = {TreeTableModel.class, Integer.class};
+  static protected String[]  cNames = {ts.l("global.name"), ts.l("global.when")};
 
   fieldoption_editor foe = null;
   
@@ -692,20 +700,6 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     super(root); 
 
     this.foe = foe;
-
-    if (cNames == null)
-      {
-	// note that we are using fieldoption_editor's
-	// TranslationService like this because the
-	// resource_validator.pl script that we use in the Ganymede
-	// build environment to validate localization is not yet smart
-	// enough to handle multiple class declarations in a single
-	// .java file.
-
-	cNames = new String[2];
-	cNames[0] = fieldoption_editor.ts.l("fieldOptionModel.name");
-	cNames[1] = fieldoption_editor.ts.l("fieldOptionModel.when");
-      }
   }
   
   //
