@@ -5,7 +5,7 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -42,7 +42,7 @@ import arlut.csd.JDialog.*;
 
 public class JdateField extends JPanel implements JsetValueCallback, ActionListener {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
