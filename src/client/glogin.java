@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -298,7 +298,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     if (!WeAreApplet)
       {
 	//Applets don't like you setting the sercurity manager!
-	System.setSecurityManager(new RMISecurityManager());
+	//System.setSecurityManager(new RMISecurityManager());
       }
     
     /* Get a reference to the server */
@@ -558,11 +558,97 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     if (debug)
       {
-	System.out.println(e.getMessage());
+	System.out.println("glogin: " + e.getMessage());
+      }
+
+    // If this is not an applet, we want to call System.exit().  The
+    // problem is, if the client is waiting on something from the
+    // server, then it will wait all day without ever showing the
+    // dialog.  So we spawn this thread, to kill the client off after
+    // 2 minutes even if the dialog never shows.
+    if (! isApplet())
+      {
+	if (debug)
+	  {
+	    System.out.println("glogin: not an applet, spawning exit thread.");
+	  }
+
+	ExitThread t = new ExitThread(e.getMessage());
+	t.start();
+      }
+    else if (debug)
+      {
+	System.out.println("glogin: this is an applet, no thread for you.");
       }
 
     JErrorDialog d = new JErrorDialog(new JFrame(), e.getMessage());
+
+    if (isApplet())
+      {
+	if (debug)
+	  {
+	    System.out.println("Forced to disconnect, but not going to System.exit because you are an applet");
+	  }
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.out.println("Forced to disconnect, calling System.exit(0)");
+	  }
+	System.exit(0);
+      }
+      
   }
 
 }
+
+class ExitThread extends Thread {
+
+  final boolean debug = true;
+
+  final String message;
+
+  public ExitThread(String message)
+  {
+    super();
+    
+    this.message = message;
+  }
+
+  public void run() {
+
+    if (debug)
+      {
+	System.out.println("ExitThread: running");
+      }
+
+    int i = 30;
+    
+    try
+      {
+	while (i > 0)
+	  {
+	    
+	    sleep(1000);
+	    if (debug)
+	      {
+		System.out.println("System shutting down in " + i-- + " seconds.");
+	      }
+	  }
+      }
+    catch (InterruptedException ie)
+      {
+	System.out.println("glogin: Interupted trying to sleep and quit: " + ie);
+      }
+    
+    System.out.println("Ganymede disconnected: " + message);
+    
+    System.exit(0);
+    
+  }
+}
+
+
+
 
