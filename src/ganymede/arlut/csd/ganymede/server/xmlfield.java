@@ -2218,7 +2218,7 @@ class xOption {
 	label = label.intern();
       }
 
-    String myOption = item.getAttrStr("option");
+    String myOption = item.getAttrStr("option").intern();
 
     if (myOption == null)
       {

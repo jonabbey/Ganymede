@@ -275,7 +275,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * not a field within a DBObjectBase.</P>
    */
 
-  private boolean isBase(String matrixEntry)
+  private static boolean isBase(String matrixEntry)
   {
     return (matrixEntry.indexOf("::") != -1);
   }
@@ -765,7 +765,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     for (int i = 0; i < tableSize; i++)
       {
 	key = in.readUTF();
-	option = in.readUTF();
+	option = in.readUTF().intern();
 	matrix.put(key, option);
       }
 
@@ -1185,7 +1185,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
     else
       {
-	matrix.put(matrixEntry(baseID, fieldID), option);
+	matrix.put(matrixEntry(baseID, fieldID), option.intern());
 
 	if (debug)
 	  {
@@ -1260,7 +1260,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
     else
       {
-	matrix.put(matrixEntry(baseID), option);
+	matrix.put(matrixEntry(baseID), option.intern());
 	
 	if (debug)
 	  {
@@ -1286,7 +1286,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     Enumeration keys;
     String key;
     String option;
-
 
     /* -- */
 
