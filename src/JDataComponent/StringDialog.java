@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -179,7 +179,8 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     gbc.insets = new Insets(4,4,4,4);
 
     mainPanel = new JPanel();
-    mainPanel.setBorder(new EtchedBorder());
+    mainPanel.setBorder(new CompoundBorder(new EtchedBorder(),
+					   new EmptyBorder(10, 10, 10, 10)));
     mainPanel.setLayout(gbl);
     setContentPane(mainPanel);
 
