@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -909,8 +909,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     /* -- */
 
-    // we don't want to allow the home directory to be changed
-    // except by when the username field is being changed.
+    // we don't want to allow the home directory to be changed except
+    // by when the username field is being changed.
 
     if (field.getID() == HOMEDIR)
       {
@@ -925,7 +925,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	// we will only check against a defined prefix if
 	// we have set one in our properties file.
-	
+
 	if (homedir != null && homedir.length() != 0)
 	  {
 	    sf = (StringDBField) getField(USERNAME);
@@ -954,7 +954,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	// if we are being told to clear the user name field, go ahead and
 	// do it.. we assume this is being done by user removal logic,
-	// so we won't force everything to go through a wizard.
+	// so we won't press the issue.
 	
 	if (deleting && (value == null))
 	  {
@@ -1259,6 +1259,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     // ok, we're doing a user rename.. check to see if we need to do a
     // wizard
+    
+    // If this is a newly created user, we won't pester them about setting
+    // or changing the user name field.
 
     if ((field.getValue() == null) || (getStatus() == ObjectStatus.CREATING))
       {
@@ -1272,6 +1275,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	return result;
       }
+
+    String oldname = (String) field.getValue();
 
     if (!gSession.enableWizards)
       {
@@ -1360,7 +1365,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    renameWizard = new userRenameWizard(this.gSession,
 						this,
 						field,
-						(String) param1);
+						(String) param1,
+						oldname);
 	  }
 	catch (RemoteException ex)
 	  {
