@@ -6,8 +6,8 @@
    
    Created: 17 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/03/25 08:17:03 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/04/12 21:21:28 $
    Module By: Brian O'Mara
 
    -----------------------------------------------------------------------
@@ -64,7 +64,7 @@ import arlut.csd.JDialog.JCenterDialog;
 /**
  * <p>Persona selection dialog</p>
  *
- * @version $Revision: 1.6 $ $Date: 1999/03/25 08:17:03 $ $Name:  $
+ * @version $Revision: 1.7 $ $Date: 1999/04/12 21:21:28 $ $Name:  $
  * @author Brian O'Mara
  */
 
@@ -243,7 +243,7 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
       password.setText("");
       password.setEditable(false);
       password.setBackground(Color.lightGray);
-      login.requestFocus();
+      password.requestFocus();
     }
     else {
       password.setText("");
