@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -190,9 +190,10 @@ public class glogin extends JApplet implements Runnable {
     gbl.setConstraints(passwd, gbc);
     appletContentPane.add(passwd);
     
-    username.setEnabled(false);
+    //username.setEnabled(false);
     username.setText("supergash");
-    passwd.setEnabled(false);
+    passwd.setText("dodo");
+    //passwd.setEnabled(false);
 
     _quitButton = new JButton("Quit");
     _quitButton.setBackground(ClientColor.buttonBG);
@@ -340,8 +341,9 @@ public class glogin extends JApplet implements Runnable {
 
     connector.setText("Login to server");
     username.setEnabled(true);
+    System.out.println("Setting passwd enabled to true");
     passwd.setEnabled(true);
-    passwd.requestFocus();
+    //passwd.requestFocus();
 
     invalidate();
     validate();
@@ -362,7 +364,7 @@ public class glogin extends JApplet implements Runnable {
       {
       }
 
-    System.exit(1);
+    //System.exit(1);
   }
 
   public String getUserName()
