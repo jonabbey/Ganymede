@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2000/09/17 10:04:36 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/10/27 02:49:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -467,7 +467,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (nextElement.matches("ganyschema"))
 	  {
-	    processSchema();
+	    if (!processSchema(nextElement))
+	      {
+		return;
+	      }
 
 	    nextElement = getNextItem();
 	  }
@@ -555,15 +558,59 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * to the server.</p>
    */
 
-  public void processSchema() throws SAXException
+  public boolean processSchema(XMLItem ganySchemaItem) throws SAXException
   {
-    err.println("Skipping <ganyschema> element (no schema loading support yet)");
-
-    XMLItem item = getNextItem();
-
-    while (!item.matchesClose("ganyschema") && !(item instanceof XMLEndDocument))
+    if (!session.isSuperGash())
       {
-	item = getNextItem();
+	err.println("Skipping <ganyschema> element.. not logged in with supergash privileges");
+
+	XMLItem item = getNextItem();
+	
+	while (!item.matchesClose("ganyschema") && !(item instanceof XMLEndDocument))
+	  {
+	    item = getNextItem();
+	  }
+
+	return false;
+      }
+
+    XMLItem schemaTree = reader.getNextTree(ganySchemaItem);
+
+    if ((schemaTree instanceof XMLError) ||
+	(schemaTree instanceof XMLEndDocument))
+      {
+	return false;
+      }
+
+    DBSchemaEdit editor = editSchema();
+
+    if (editor == null)
+      {
+	return false;
+      }
+
+    // do the thing
+
+    boolean success = true;
+
+    try
+      {
+      }
+    finally
+      {
+	// either of these will clear the semaphore lock
+	// created by editSchema() above
+
+	if (success)
+	  {
+	    editor.commit();
+	    return true;
+	  }
+	else
+	  {
+	    editor.release();
+	    return false;
+	  }
       }
   }
 
@@ -1494,6 +1541,120 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	return Ganymede.createErrorDialog("XML submit errors",
 					  progress);
+      }
+  }
+
+  /**
+   * <p>This is a copy of the editSchema method from the GanymedeAdmin
+   * class which has been modified so that it will assert a schema
+   * edit lock without requiring that the login semaphore count be
+   * zero.  This way we can get a DBSchemaEdit context that we can use
+   * to do XML-based schema editing without having to have dropped our
+   * GanymedeSession's semaphore increment.  This is safe to do only
+   * because we know that the GanymedeXMLSession is single-threaded
+   * and will not do any database activity while the schema is opened
+   * for editing.</p>
+   *
+   * @return null if the server could not be put into schema edit mode.
+   */
+
+  private DBSchemaEdit editSchema()
+  {
+    Enumeration enum;
+    DBObjectBase base;
+
+    /* -- */
+
+    // first, let's check to see if we're the only session in, and
+    // if we are disable the semaphore.  We have to do all of this
+    // in a block synchronized on GanymedeServer.lSemaphore so
+    // that we won't proceed to approve the schema edit if someone
+    // else has logged into the server
+
+    synchronized (GanymedeServer.lSemaphore)
+      {
+	if (GanymedeServer.lSemaphore.getCount() != 1)
+	  {
+	    return null;	// someone else is logged in, can't do it
+	  }
+	
+	Ganymede.debug("GanymedeXMLSession entering editSchema");
+
+	// try disabling the semaphore with a false waitForZero value,
+	// so that we can go into schema edit mode while still
+	// maintaining our GanymedeSession's semaphore increment
+
+	try
+	  {
+	    String semaphoreCondition = GanymedeServer.lSemaphore.disable("schema edit", false, 0);
+	    
+	    if (semaphoreCondition != null)
+	      {
+		Ganymede.debug("GanymedeXMLSession Can't edit schema, semaphore error: " + semaphoreCondition);
+		
+		return null;
+	      }
+	  }
+	catch (InterruptedException ex)
+	  {
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
+	  }
+      }
+
+    // okay at this point we've asserted our interest in editing the
+    // schema and made sure that no one else is logged in or can log
+    // in.  Now we just need to make sure that we don't have any of
+    // the bases locked by anything that is skipping the semaphore,
+    // such as tasks.
+
+    // In fact, I believe that the server is now safe against lock
+    // races due to all tasks that might involve DBObjectBase access
+    // being guarded by the loginSemaphore, but there is little cost
+    // in sync'ing here.
+
+    // All the DBLock establish methods synchronize on the DBLockSync
+    // object referenced by Ganymede.db.lockSync, so we are safe
+    // against lock establish race conditions by synchronizing this
+    // section on Ganymede.db.lockSync.
+
+    synchronized (Ganymede.db.lockSync)
+      {
+	Ganymede.debug("entering editSchema synchronization block");
+
+	enum = Ganymede.db.objectBases.elements();
+
+	if (enum != null)
+	  {
+	    while (enum.hasMoreElements())
+	      {
+		base = (DBObjectBase) enum.nextElement();
+
+		if (base.isLocked())
+		  {
+		    Ganymede.debug("GanymedeXMLSession Can't edit Schema, lock held on " + base.getName());
+		    GanymedeServer.lSemaphore.enable("schema edit");
+		    return null;
+		  }
+	      }
+	  }
+
+	 // should be okay
+
+	 Ganymede.debug("GanymedeXMLSession Ok to create DBSchemaEdit");
+
+	 GanymedeAdmin.setState("XML Schema Edit In Progress");
+
+	 try
+	   {
+	     DBSchemaEdit result = new DBSchemaEdit(null);
+	     return result;
+	   }
+	 catch (RemoteException ex)
+	   {
+	     GanymedeServer.lSemaphore.enable("schema edit");
+	     return null;
+	   }
       }
   }
 }
