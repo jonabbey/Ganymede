@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -576,9 +576,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     returnType = selectedBase.getTypeID();
 
     // If showAllItems is true, then we need to show everything.
+
     if (showAllItems)
       {
-	return new Query((String)baseChoice.getSelectedItem(), null, false);
+	return new Query((String)baseChoice.getSelectedItem(), null, editOnly);
       }
 
     for (int i = 0; i < Rows.size(); i++)
@@ -785,14 +786,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     else if (e.getSource() == allBox)
       {
-
 	this.showAllItems = allBox.isSelected();
+
 	if (debug)
 	  {
 	    System.out.println("Show all items is selected: " + allBox.isSelected());
 	  }
-
-	editBox.setEnabled(!showAllItems);
 
 	if (showAllItems)
 	  {
