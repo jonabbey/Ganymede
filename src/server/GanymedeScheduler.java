@@ -6,7 +6,7 @@
    to register tasks to be run on a periodic basis.
    
    Created: 26 January 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -64,7 +64,7 @@ public class GanymedeScheduler extends Thread {
 			new sampleTask("sample task 1"), 
 			"sample task 1");
 
-    scheduler.addPeriodicAction(cal.get(Calendar.HOUR), 
+    scheduler.addPeriodicAction(cal.get(Calendar.HOUR_OF_DAY), 
 				cal.get(Calendar.MINUTE), 1,
 				new sampleTask("sample task 2"), "sample task 2");
 
@@ -76,7 +76,7 @@ public class GanymedeScheduler extends Thread {
 
     cal.add(Calendar.MINUTE, 1);
 
-    scheduler.addPeriodicAction(cal.get(Calendar.HOUR), 
+    scheduler.addPeriodicAction(cal.get(Calendar.HOUR_OF_DAY), 
 				cal.get(Calendar.MINUTE), 1,
 				new sampleTask("sample task 4"), "sample task 4");
   }
@@ -200,7 +200,7 @@ public class GanymedeScheduler extends Thread {
 
     cal.setTime(currentTime);
 
-    cal.set(Calendar.HOUR, hour);
+    cal.set(Calendar.HOUR_OF_DAY, hour);
     cal.set(Calendar.MINUTE, minute);
 
     time = cal.getTime();
@@ -253,7 +253,7 @@ public class GanymedeScheduler extends Thread {
 
     cal.setTime(currentTime);
 
-    cal.set(Calendar.HOUR, hour);
+    cal.set(Calendar.HOUR_OF_DAY, hour);
     cal.set(Calendar.MINUTE, minute);
 
     time = cal.getTime();
