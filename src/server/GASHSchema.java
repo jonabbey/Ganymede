@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -971,3 +971,4 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
   }
 }
+// ladj
