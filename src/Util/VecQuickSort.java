@@ -5,7 +5,7 @@
    A Vector implementation of the QuickSort algorithm.
    
    Created: 12 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,17 +22,35 @@ import java.util.Vector;
 	Rockville, Maryland
 	ISBN 0-88175-165-0 */
 
-public class VecQuickSort {
+public class VecQuickSort implements Compare {
 
   Vector objects;
   Compare comparator;
 
   /* -- */
 
+  /**
+   *
+   * VecQuickSort constructor.
+   *
+   * @param objects Vector of objects to be sorted in place
+   * @param comparator Compare object.. if null, standard string compare
+   * will be done.
+   *
+   */
+
   public VecQuickSort(Vector objects, Compare comparator)
   {
     this.objects = objects;
-    this.comparator = comparator;
+
+    if (comparator == null)
+      {
+	this.comparator = this;
+      }
+    else
+      {
+	this.comparator = comparator;
+      }
   }
 
   void quick(int first, int last)
@@ -84,6 +102,16 @@ public class VecQuickSort {
       }
     
     quick(0, objects.size()-1);
+  }
+
+  public int compare(Object a, Object b)
+  {
+    String sa, sb;
+      
+    sa = (String) a;
+    sb = (String) b;
+
+    return sa.compareTo(sb);
   }
 
 }
