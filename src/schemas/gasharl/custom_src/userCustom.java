@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 1999/10/29 16:13:38 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 1999/10/29 17:53:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -295,6 +295,36 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     return null;
+  }
+
+  /**
+   * <p>Customization method to verify whether a specific field
+   * in object should be cloned using the basic field-clone
+   * logic.</p>
+   *
+   * <p>To be overridden in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public boolean canCloneField(DBSession session, DBObject object, DBField field)
+  {
+    short fieldid = field.getID();
+
+    switch (fieldid)
+      {
+      case USERNAME:
+      case UID:
+      case userSchema.PASSWORD:
+      case HOMEDIR:
+      case PERSONAE:
+      case ALIASES:
+      case SIGNATURE:
+      case EMAILTARGET:
+	return false;
+      }
+    
+    return super.canCloneField(session, object, field);
   }
 
   /**
