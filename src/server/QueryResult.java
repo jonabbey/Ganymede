@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,12 @@ public class QueryResult implements java.io.Serializable {
 
   static final boolean debug = false;
 
-  // --
+  // for use pre-serialized
+
+  transient Hashtable invidHash = null;
+  transient boolean forTransport = true;
+
+  // for transport
 
   StringBuffer buffer;
 
@@ -53,6 +58,13 @@ public class QueryResult implements java.io.Serializable {
   public QueryResult()
   {
     buffer = new StringBuffer();
+    invidHash = new Hashtable();
+  }
+
+  public QueryResult(boolean forTransport)
+  {
+    this();
+    this.forTransport = forTransport;
   }
 
   /**
@@ -88,35 +100,42 @@ public class QueryResult implements java.io.Serializable {
 	System.err.println("QueryResult: addRow(" + invid + "," + label + ")");
       }
 
-    if (invid != null)
+    if (forTransport)
       {
-	buffer.append(invid.toString());       
+	if (invid != null)
+	  {
+	    buffer.append(invid.toString());       
+	  }
+	
+	buffer.append("|");
+	char[] chars = label.toCharArray();
+	
+	for (int j = 0; j < chars.length; j++)
+	  {
+	    if (chars[j] == '|')
+	      {
+		buffer.append("\\|");
+	      }
+	    else if (chars[j] == '\n')
+	      {
+		buffer.append("\\\n");
+	      }
+	    else if (chars[j] == '\\')
+	      {
+		buffer.append("\\\\");
+	      }
+	    else
+	      {
+		buffer.append(chars[j]);
+	      }
+	  }
+	
+	buffer.append("\n");
       }
 
-    buffer.append("|");
-    char[] chars = label.toCharArray();
-    
-    for (int j = 0; j < chars.length; j++)
-      {
-	if (chars[j] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (chars[j] == '\n')
-	  {
-	    buffer.append("\\\n");
-	  }
-	else if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
-      }
+    // Remember that we have this invid already added
 
-    buffer.append("\n");
+    invidHash.put(invid, label);
   }
 
   //
@@ -195,6 +214,11 @@ public class QueryResult implements java.io.Serializable {
       }
     
     return valueHandles;
+  }
+
+  public synchronized boolean containsInvid(Invid invid)
+  {
+    return invidHash.contains(invid);
   }
 
   /**
