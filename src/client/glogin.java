@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -425,7 +425,6 @@ class LoginHandler implements ActionListener {
 	my_glogin.connector.setEnabled(false);
 	my_glogin._quitButton.setEnabled(false);
 
-
 	if (my_glogin.my_session != null) 
 	  {
 	    startSession(my_glogin.my_session);
@@ -509,7 +508,27 @@ class iClient extends UnicastRemoteObject implements Client {
     try
       {
 	session = server.login(this);
-	System.out.println("logged in");
+
+	if (session == null)
+	  {
+	    System.err.println("Couldn't log in to server... bad username/password?");
+
+	    if (applet._infoD == null)
+	      {
+		applet._infoD = new InfoDialog(applet.my_frame,true,"","");
+	      }
+	    
+	    applet._infoD.setInfo("Couldn't log in to server... bad username/password?");
+	    Dimension d = applet._infoD.getPreferredSize();
+
+	    applet._infoD.setSize(d.width,d.height);
+	
+	    applet._infoD.show();
+	  }
+	else
+	  {
+	    System.out.println("logged in");
+	  }
       }
     catch (RemoteException ex)
       {
@@ -552,7 +571,7 @@ class iClient extends UnicastRemoteObject implements Client {
 	System.err.println("Got some other exception: " + ex);
       }
 
-    System.err.println("Got session");
+    //    System.err.println("Got session");
 
 /*    try
       {
