@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2000/11/24 06:41:46 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2001/01/03 01:48:36 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * the file to the server for server-side integration into the Ganymede
  * database.</p>
  *
- * @version $Revision: 1.36 $ $Date: 2000/11/24 06:41:46 $ $Name:  $
+ * @version $Revision: 1.37 $ $Date: 2001/01/03 01:48:36 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -695,7 +695,7 @@ public final class xmlclient implements ClientListener {
 
 	if (docElement.getAttrStr("password") != null)
 	  {
-	    password = docElement.getAttrStr("persona");
+	    password = docElement.getAttrStr("password");
 	  }
 
 	return true;
