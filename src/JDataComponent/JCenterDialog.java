@@ -1,22 +1,39 @@
-/**
- *
- * JCenterDialog.java
- *
- * A subclass of JDialog that centers itself when pack() is called.
- *
- *
- */
+/*
+
+   JCenterDialog.java
+
+   A subclass of JDialog that centers itself when pack() is called.
+   
+   Created: 17 September 1998
+   Version: $Revision: 1.3 $ %D%
+   Module By: Michael Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
+
+*/
 
 package arlut.csd.JDialog;
 
 import java.awt.*;
 import javax.swing.*;
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                   JCenterDialog
+
+------------------------------------------------------------------------------*/
+
+/**
+ * A subclass of JDialog that centers itself with respect to its parent Frame
+ * when pack() is called.
+ */
+
 public class JCenterDialog extends JDialog {
 
   private final boolean debug = false;
 
   Frame frame;
+
+  /* -- */
 
   public JCenterDialog()
   {
@@ -32,6 +49,7 @@ public class JCenterDialog extends JDialog {
   {
     this(frame, title, false);
   }
+
   public JCenterDialog(Frame frame, String title, boolean modal) 
   {
     super(frame, title, modal);
@@ -63,6 +81,7 @@ public class JCenterDialog extends JDialog {
 	      }
 	    
 	    setLocation(r.width/2 + r.x - width/2, r.height/2 + r.y - height/2);
+
 	    if (debug)
 	      {
 		int loc = r.width/2 + r.x - width/2;
@@ -79,12 +98,12 @@ public class JCenterDialog extends JDialog {
       {
 	System.out.println("Parent frame is null.");
       }
-
   }
 
   /**
    *
    * This version of pack is for dialogs where you want it to keep the preferred size.
+   *
    */
 
   public void pack()
@@ -94,7 +113,10 @@ public class JCenterDialog extends JDialog {
   }
 
   /**
-   * This pack is for dialogs where you want to set the size.
+   *
+   * If you want to set the size of this dialog to a certain size before it
+   * is centered, you need to use this pack method.
+   *
    */
 
   public void pack(int width, int height)
