@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.149 $
-   Last Mod Date: $Date: 1999/09/24 15:24:49 $
+   Version: $Revision: 1.150 $
+   Last Mod Date: $Date: 1999/10/04 18:10:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.149 $ %D%
+ * @version $Revision: 1.150 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -697,6 +697,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * @see arlut.csd.ganymede.GanymedeSession.setLastError()
    * @see arlut.csd.ganymede.Session 
+   * @deprecated
    */
   
   public String getLastError()
