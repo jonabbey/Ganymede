@@ -5,7 +5,7 @@
    This file is a management class for automounter map objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -236,7 +236,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 	    // and we need to edit the user.. we'll want to check permissions
 	    // for this.
 
-	    DBEditObject eObj = (DBEditObject) getGSession().edit_db_object(user);
+	    DBEditObject eObj = (DBEditObject) getGSession().edit_db_object(user).getObject();
 
 	    if (eObj == null)
 	      {
