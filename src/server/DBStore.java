@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.62 $ %D%
+   Version: $Revision: 1.63 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1064,6 +1064,10 @@ public class DBStore {
    * mandatory Ganymede object types, registering their customization
    * classes, defining fields, and all the rest.<br><br>
    *
+   * Note that we don't go through a DBSchemaEdit here, we just
+   * initialize the DBObjectBase/DBObjectBaseField structures
+   * manually.
+   * 
    */
 
   void initializeSchema()
@@ -1151,16 +1155,14 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.OwnerMailList;
+	bf.field_code = SchemaConstants.OwnerExternalMail;
 	bf.field_order = 4;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Mail List";
-	bf.allowedTarget = -2;	// any (we'll depend on subclassing to refine this)
-	bf.targetField = -1;	// use default backlink field
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "External Mail List";
 	bf.removable = false;
 	bf.editable = false;
 	bf.array = true;
-	bf.comment = "What email addresses should be notified of changes to objects owned?";
+	bf.comment = "What external email addresses should be notified of changes to objects owned?";
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
@@ -1275,6 +1277,16 @@ public class DBStore {
 	bf.removable = false;
 	bf.editable = false;
 	bf.comment = "If true, this persona can kill users and edit the schema";
+	b.fieldTable.put(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.PersonaMailAddr;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Email Address";
+	bf.array = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Where email to this administrator should be sent";
 	b.fieldTable.put(bf);
 
 	b.setLabelField(SchemaConstants.PersonaNameField);
@@ -1408,18 +1420,6 @@ public class DBStore {
 	bf.comment = "If true, occurrences of this event will be emailed";
 	b.fieldTable.put(bf);
 
-	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.EventMailList;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Fixed Mail List";
-	bf.allowedTarget = -2;	// any (we'll depend on subclassing to refine this)
-	bf.targetField = -1;	// use default backlink field
-	bf.field_order = 5;
-	bf.array = true;
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "List of email addresses to always send events of this type to";
-	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.EventMailToSelf;
@@ -1499,16 +1499,6 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_order = bf.field_code = SchemaConstants.ObjectEventMailBoolean;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Send Mail?";
-	bf.field_order = 5;
-	bf.removable = false;
-	bf.editable = false;
-	bf.comment = "If true, occurrences of this event will be emailed";
-	b.fieldTable.put(bf);
-
-	bf = new DBObjectBaseField(b);
 	bf.field_order = bf.field_code = SchemaConstants.ObjectEventMailToSelf;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Cc: Admin?";
@@ -1529,16 +1519,14 @@ public class DBStore {
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventMailList;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Fixed Mail List";
-	bf.allowedTarget = -2;	// any (we'll depend on subclassing to refine this)
-	bf.targetField = -1;	// use default backlink field
+	bf.field_code = SchemaConstants.ObjectEventExternalMail;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "External Email";
 	bf.field_order = 8;
 	bf.array = true;
 	bf.removable = false;
 	bf.editable = false;
-	bf.comment = "List of email addresses to always send events of this type to";
+	bf.comment = "Email addresses not stored in Ganymede";
 	b.fieldTable.put(bf);
 
 	bf = new DBObjectBaseField(b);
@@ -1550,6 +1538,7 @@ public class DBStore {
 	bf.visibility = false;	// we don't want this to be seen by the client
 	bf.comment = "The type code of the object that this event is tracking";
 	b.fieldTable.put(bf);
+
 
 	// link in the class we specified
 
