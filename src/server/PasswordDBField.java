@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 2001/10/31 04:11:50 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 2001/12/05 21:51:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -867,11 +867,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	return false;
       }
 
-    if (uncryptedPass != null)	// easiest
+    if (uncryptedPass != null)
       {
-	success = uncryptedPass.equals(plaintext);
+	success = uncryptedPass.equals(plaintext); // easiest
       }
-    else if (cryptedPass != null) // next-easiest
+    else if (cryptedPass != null)
       {
 	success = cryptedPass.equals(jcrypt.crypt(getSalt(), plaintext));
       }
@@ -888,11 +888,39 @@ public class PasswordDBField extends DBField implements pass_field {
 	success = md5CryptPass.equals(MD5Crypt.crypt(plaintext, getMD5Salt()));
       }
 
-    // if we matched against anything, go ahead and take the opportunity to 
-    // capture the plaintext and set up any hashes that we want to use but
-    // don't have initialized at this point.
+    // This section of code is turned off due to an essential unsafety
+    // about it.
 
-    if (success)
+    // This bit was intended to do passive password capture, so that
+    // Ganymede could retain memory of a password in all encryption
+    // forms when a user logged into Ganymede.
+    //
+    // The problem with this bit of code is that if the user logs into
+    // Ganymede with a password that is 'close enough' to a hashed
+    // version (i.e., a password that matches the crypt() hashed
+    // password in the first 8 characters but diverges thereafter), then
+    // Ganymede would remember the newly entered, erroneous plaintext
+    // password, and the user would never be able to log in again unless
+    // they happened to type the same incorrect variant.
+    //
+    // Worse, if the user logged into Ganymede with an incorrect but
+    // hash-compatible password, then the retention of the user's
+    // incorrect password might leak out into a builder task which
+    // needs the plaintext, thus propagating an incorrect password
+    // out, possibly to systems that consider more characters in the
+    // hash.  This would effectively lock the user out of that service
+    // until such time as Ganymede was restarted (clearing Ganymede's
+    // transient memory of the plaintext) and then visited by the user
+    // (establishing a new, and hopefully faithful version of the
+    // plaintext) and then run through the builder task
+    //
+    // The only downside to turning off passive capture here is that
+    // if the Ganymede schema is modified to retain more password hash
+    // variants (plaintext or any other hash formats), then the user
+    // would have to explicitly change their password in Ganymede, and
+    // not simply log in.
+
+    if (false && success)
       {
 	uncryptedPass = plaintext;
 
