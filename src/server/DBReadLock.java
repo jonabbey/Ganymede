@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,6 +25,10 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 public class DBReadLock extends DBLock {
+
+  static final boolean debug = true;
+
+  // --
 
   private Object key;
   private DBStore lockManager;
@@ -110,10 +114,20 @@ public class DBReadLock extends DBLock {
 		vect = (Vector) obj;
 
 		vect.addElement(this);
+
+		if (debug)
+		  {
+		    Ganymede.debug("DBReadLock (" + key + "):  added this to lockHash vector");
+		  }
 	      }
 	    else
 	      {
 		// we've got a write lock or a dump lock.. it's ok to hold off here.
+
+		if (debug)
+		  {
+		    Ganymede.debug("DBReadLock (" + key + "):  dump or write lock blocking us");
+		  }
 		
 		throw new RuntimeException("Error: read lock sought by owner of existing write or dump lockset.");
 	      }
@@ -124,6 +138,11 @@ public class DBReadLock extends DBLock {
 
 	    vect.addElement(this);
 	    lockManager.lockHash.put(key, vect);
+
+	    if (debug)
+	      {
+		Ganymede.debug("DBReadLock (" + key + "):  initialized lockHash vector");
+	      }
 	  }
 
 	this.key = key;
@@ -136,6 +155,11 @@ public class DBReadLock extends DBLock {
 	  {
 	    // if we've received an abort notification, bail.
 
+	    if (debug)
+	      {
+		Ganymede.debug("DBReadLock (" + key + "):  looping to get establish permission");
+	      }
+
 	    if (abort)
 	      {
 		vect = (Vector) lockManager.lockHash.get(key);
@@ -144,6 +168,11 @@ public class DBReadLock extends DBLock {
 		if (vect.size() == 0)
 		  {
 		    lockManager.lockHash.remove(key);
+		  }
+
+		if (debug)
+		  {
+		    Ganymede.debug("DBReadLock (" + key + "):  aborting before permission granted");
 		  }
 
 		inEstablish = false;
@@ -214,6 +243,10 @@ public class DBReadLock extends DBLock {
 	lockManager.addLock();	// notify consoles
 	lockManager.notifyAll(); // let a thread trying to release this lock proceed
 
+	if (debug)
+	  {
+	    Ganymede.debug("DBReadLock (" + key + "):  read lock established");
+	  }
       }	// synchronized (lockManager)
   }
 
@@ -229,10 +262,20 @@ public class DBReadLock extends DBLock {
 
     /* -- */
 
+    if (debug)
+      {
+	Ganymede.debug("DBReadLock (" + key + "):  attempting release");
+      }
+
     synchronized (lockManager)
       {
 	while (inEstablish)
 	  {
+	    if (debug)
+	      {
+		Ganymede.debug("DBReadLock (" + key + "):  release() looping waiting on inEstablish");
+	      }
+
 	    try
 	      {
 		lockManager.wait();
@@ -244,6 +287,11 @@ public class DBReadLock extends DBLock {
 
 	if (!locked)
 	  {
+	    if (debug)
+	      {
+		Ganymede.debug("DBReadLock (" + key + "):  release() not locked, returning");
+	      }
+
 	    return;
 	  }
 
@@ -256,6 +304,11 @@ public class DBReadLock extends DBLock {
 	locked = false;
 	lockManager.lockHash.remove(key);
 	key = null;
+
+	if (debug)
+	  {
+	    Ganymede.debug("DBReadLock (" + key + "):  release() released");
+	  }
 
 	lockManager.removeLock();	// notify consoles
 	lockManager.notifyAll();
