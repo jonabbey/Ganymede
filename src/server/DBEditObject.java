@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -423,7 +423,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	key = enum.nextElement();
 	field = (DBField) fields.get(key);
 
-	if (!field.defined)
+	// we don't want to emit fields that don't have anything in them..
+	// DBField.defined is supposed to be a flag that keeps track of that,
+	// but there seems to be a bug in the system someplace.  The value/values
+	// checks is supposed to make up for this.. this is really not the way
+	// to do it.  THis is rank laziness.
+
+	if (!field.defined || 
+	    (!(field instanceof PermissionMatrixDBField) &&
+	    ((field.value == null) && 
+	     ((field.values == null) || (field.values.size() == 0)))))
 	  {
 	    removeList.addElement(key);
 
@@ -972,6 +981,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    root = null;
 	  }
+
+	// note that the query we are submitting here *will* be filtered by the
+	// current visibilityFilterInvid field in GanymedeSession.
 
 	return editset.getSession().getGSession().query(new Query(baseId, root, true));
       }
