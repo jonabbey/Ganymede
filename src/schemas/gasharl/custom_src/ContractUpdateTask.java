@@ -6,8 +6,8 @@
    
    Created: 9 March 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/03/10 03:04:38 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/03/10 06:05:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,6 +73,7 @@ import java.io.*;
 public class ContractUpdateTask implements Runnable {
 
   static final boolean debug = true;
+  Calendar myCal = Calendar.getInstance();
 
   /* -- */
 
@@ -101,6 +102,9 @@ public class ContractUpdateTask implements Runnable {
 	try
 	  {
 	    session = new GanymedeSession();
+	    session.openTransaction("ContractUpdateTask");
+	    session.enableOversight(false);
+	    session.enableWizards(false);
 	  }
 	catch (java.rmi.RemoteException ex)
 	  {
@@ -218,7 +222,7 @@ public class ContractUpdateTask implements Runnable {
    *
    */
 
-  private static Date dateParse(String input) throws NumberFormatException
+  private Date dateParse(String input) throws NumberFormatException
   {
     int year = Integer.parseInt(input.substring(0,4));
     int month = Integer.parseInt(input.substring(4,6));
@@ -229,8 +233,7 @@ public class ContractUpdateTask implements Runnable {
 	return null;
       }
 
-    Calendar myCal = Calendar.getInstance();
-
+    myCal.clear();
     myCal.set(year, month-1, day);
 
     return myCal.getTime();
