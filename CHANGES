@@ -59,8 +59,8 @@ This method is used by client/rpcpass.java.
 Added a program 'rpcpass' to the client distribution.  rpcpass is
 designed to be used with the -x/--execute option present in versions
 1.3.6.92 and later of the Linux NISkit's rpc.yppasswdd daemon
-(included in the ypserv distribution), to allow NIS password change
-operations to be propagated to Ganymede.
+(included in the ypserv distribution), to allow users to use yppasswd
+to change their password in Ganymede.
 
 When run, rpcpass reads a single line from stdin,
 which should be of the form
@@ -109,14 +109,14 @@ EXCECUTING: src/classes/buildJar
 
 Reported by Andy Johnson (andyjohnson@engineer.com).
 
-8. [DOCUMENTATION] Miscellaneous Documentation Improvements
+8. [DOCUMENTATION] Significantly Improved Documentation
 
-Fixed all link errors in the javadocs.  Added some javadocs to several
+Fixed all link errors in the javadocs.  Added more javadocs to several
 classes.
 
-Added an HTML version of the INSTALL file.  Added the file glossary
-and log file format documentation.  Reworked the basic doc index.html
-file.
+Reworked doc/index.html.  Added an HTML version of the INSTALL file,
+cross-linked to a file glossary.  Added the log file format documentation
+to the doc distrib.
 
 -------------------- Changes from 0.98 to 0.99 -------------------
 
