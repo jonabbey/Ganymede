@@ -1,0 +1,90 @@
+#!/opt/bin/perl5
+#
+# sync_tree
+#
+# This perl script is designed to create a tree of files
+# suitable for jar'ing into a downloadable archive.  Only
+# those files that the admin Console needs are to be downloaded.
+#
+#------------------------------------------------------------
+
+# What classes in the ganymede package are necessary for the admin console?
+
+@ganymede_classes = ("Admin", "AdminEntry", 
+                     "Base", "BaseEditor", "BaseField", "BaseFieldEditor", "BaseNode",
+                     "CatTreeNode", "Category", "CategoryEditor", "CategoryNode",
+                     "Invid", "NameSpace",
+                     "GASHAdmin", "GASHAdminFrame",
+                     "Server", "Session", "SpaceNode",
+                     "SchemaEdit", "scheduleHandle");
+
+@class_families = ("GASHSchema", "NameSpaceEditor");
+
+# What directory are we handling?
+
+chdir("/home/broccol/gash2/classes/client_classes/arlut/csd/ganymede");
+
+# Clean it out
+
+system("rm -rf *");
+
+# Now link in all the base classes we need
+
+foreach $file (@ganymede_classes) {
+  print "Linking " . $file . ".class\n";
+  $result = link ("/home/broccol/gash2/classes/arlut/csd/ganymede/".$file.".class", $file.".class");
+
+  if (!$result){
+    print "$! -- $file\n";
+  }
+}
+
+# Now the class families that we need to finish up
+
+print "Attempting to link class families\n";
+
+foreach $family (@class_families) {
+  opendir SOURCEDIR, "/home/broccol/gash2/classes/arlut/csd/ganymede" or die "couldn't open dir for families";
+  @classes = grep /^$family/, readdir SOURCEDIR;
+  closedir SOURCEDIR;
+  
+  foreach $file (@classes) {
+    print "Linking " . $file . "\n";
+    
+    $result = link ("/home/broccol/gash2/classes/arlut/csd/ganymede/".$file, $file);
+    
+    if (!$result){
+      print "$! -- $file\n";
+    }
+  }
+}
+
+# Now we need to link in any stub classes
+
+print "Attempting to link stubs\n";
+
+opendir SOURCEDIR, "/home/broccol/gash2/classes/arlut/csd/ganymede" or die "couldn't open dir for stubs";
+@stubs = grep /_Stub/, readdir SOURCEDIR;
+closedir SOURCEDIR;
+
+foreach $file (@stubs) {
+  print "Linking " . $file . "\n";
+
+  $result = link ("/home/broccol/gash2/classes/arlut/csd/ganymede/".$file, $file);
+
+  if (!$result){
+    print "$! -- $file\n";
+  }
+}
+
+# And any images
+
+print "Attempting to link image resources\n";
+
+opendir SOURCEDIR, "/home/broccol/gash2/classes/arlut/csd/ganymede" or die "couldn't open dir for gifs";
+opendir SOURCEDIR, "/home/broccol/gash2/classes/arlut/csd/ganymede" or die "couldn't open dir for stubs";
+@stubs = grep /_Stub/, readdir SOURCEDIR;
+closedir SOURCEDIR;
+
+foreach $file (@stubs) {
+  print "Linking " . $file . "\n";

@@ -1,0 +1,115 @@
+#!/opt/bin/perl5
+#
+# sync_tree
+#
+# This perl script is designed to create a tree of files
+# suitable for jar'ing into a downloadable archive.  Only
+# those files that the client needs are to be downloaded.
+#
+#------------------------------------------------------------
+
+# What classes in the ganymede package are necessary for the client?
+
+@ganymede_classes = (
+		     # Basic things
+
+		     "Base", "BaseField", "BaseNode", "CatTreeNode",
+		     "Category", "CategoryNode", "Client",
+		     "CategoryDump", "CategoryTransport",
+		     "BaseDump", "BaseListTransport",
+		     "FieldInfo", "FieldTemplate", "FieldType",
+		     "Invid", "NameSpace", "PermEntry", "PermMatrix",
+		     "Server", "Session", "SpaceNode", "SchemaConstants",
+
+		     # remote interfaces for fields
+
+		     "boolean_field", "date_field", "db_field",
+		     "db_object", "invid_field", "ip_field",
+		     "num_field", "pass_field",
+		     "perm_field", "string_field",
+
+		     # things the client doesn't really need to use,
+		     # but needs so it can tell what the server
+		     # object expects.
+
+		     "adminSession", "Admin", "SchemaEdit",
+
+		     # query stuff
+
+		     "Query", "QueryAndNode", "QueryDataNode",
+		     "QueryNode", "QueryNotNode", "QueryOrNode",
+		     "QueryResult", "DumpResult", "Result",
+		     "ObjectHandle",
+
+		     # Wizard stuff
+
+		     "Ganymediator", "ReturnVal");
+
+# What directory are we handling?
+
+chdir("/home/broccol/gash2/classes/client_classes/arlut/csd/ganymede") || die "Couldn't cd to directory to clean";
+
+# Clean it out
+
+system("rm -rf *");
+
+# Now link in all the base classes we need
+
+foreach $file (@ganymede_classes) {
+  print "Linking " . $file . ".class\n";
+  $result = link ("/home/broccol/gash2/classes/arlut/csd/ganymede/".$file.".class", $file.".class");
+
+  if (!$result){
+    print "$! -- $file\n";
+  }
+}
+
+# Now we need to link in any stub classes
+
+print "Attempting to link stubs\n";
+
+opendir SOURCEDIR, "/home/broccol/gash2/classes/arlut/csd/ganymede" or die "couldn't open dir for stubs";
+@stubs = grep /_Stub/, readdir SOURCEDIR;
+closedir SOURCEDIR;
+
+foreach $file (@stubs) {
+  print "Linking " . $file . "\n";
+  $result = link ("/home/broccol/gash2/classes/arlut/csd/ganymede/".$file, $file);
+
+  if (!$result){
+    print "$! -- $file\n";
+  }
+}
+
+print "Attaching client dir\n";
+
+$clientdir="/home/broccol/gash2/classes/client_classes/arlut/csd/ganymede/client";
+$sourcedir="/home/broccol/gash2/classes/arlut/csd/ganymede/client";
+
+if (! -e $clientdir) {
+   mkdir($clientdir, 0770) or die "Couldn't build new client directory";
+}
+chmod(0770, $clientdir);
+
+chdir($clientdir) or die "Couldn't go in client directory";
+
+opendir SOURCEDIR, $sourcedir or die "Couldn't scan client directory";
+#@files = grep -f, map "$sourcedir/$_", readdir SOURCEDIR;
+@files = readdir SOURCEDIR;
+closedir SOURCEDIR;
+
+foreach $file (@files) {
+  if (!-f "$sourcedir/$file") {
+    next;
+  }
+
+  print "Linking " . $file . "\n";
+  
+  $result = link ("$sourcedir/$file", $file);
+
+  if (!$result){
+    print "$! -- $file\n";
+  }
+}
+
+print "Done.\n";

@@ -1,0 +1,5 @@
+A lot of stuff in this directory is just here to serve as scaffolding for
+the distribution build.  Mostly everything the code actually uses is
+in the arlut directory.
+
+-- Jon

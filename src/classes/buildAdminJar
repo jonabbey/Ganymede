@@ -1,0 +1,21 @@
+#!/bin/csh
+
+cd /home/broccol/gash2/classes
+
+mv ganymedeAdmin.jar ganymedeAdmin.jar.old
+
+cd admin_classes
+
+./sync_tree
+
+/opt/bin/jar -cf ../ganymedeAdmin.jar arlut jdj tablelayout
+
+cd ..
+
+# Now install the jar file where we will use it
+
+cp ganymedeAdmin.jar /home/broccol/public_html/gash2
+chmod 664 /home/broccol/public_html/gash2/ganymedeAdmin.jar
+cp ganymedeAdmin.jar /opt/depot/ganymede/etc
+chmod 664 /opt/depot/ganymede/etc/ganymedeAdmin.jar
+
