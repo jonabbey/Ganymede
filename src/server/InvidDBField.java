@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -412,7 +412,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    setLastError("couldn't check out old invid " + oldRemote + " for symmetry maintenance");
 	    return false;
 	  }
-    
+
 	try
 	  {
 	    oldRefField = (InvidDBField) oldRef.getField(targetField);
@@ -422,15 +422,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	    setLastError("InvidDBField.bind: invid target field designated in schema is not an invid field");
 	    throw new IllegalArgumentException("invid target field designated in schema is not an invid field");
 	  }
-
+	
 	if (oldRefField == null)
 	  {
 	    // editDBObject() will create undefined fields for all fields defined
 	    // in the DBObjectBase, so if we got a null result we have a schema
 	    // corruption problem.
-
-	    setLastError("InvidDBField.bind: target field not defined in schema");
-	    throw new RuntimeException("target field not defined in schema");
+	    
+	    setLastError("InvidDBField.bind: target field not defined in schema:" + targetField);
+	    
+	    throw new RuntimeException("target field not defined in schema:" + targetField);
 	  }
       }
 
@@ -451,16 +452,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	setLastError("invid target field designated in schema is not an invid field");
 	throw new IllegalArgumentException("invid target field designated in schema is not an invid field");
       }
-
+    
     if (newRefField == null)
       {
 	// editDBObject() will create undefined fields for all fields defined
 	// in the DBObjectBase, so if we got a null result we have a schema
 	// corruption problem.
-
-	setLastError("target field not defined in schema");
-
-	throw new RuntimeException("target field not defined in schema");
+	
+	setLastError("target field not defined in schema:" + targetField);
+	
+	throw new RuntimeException("target field not defined in schema:" + targetField);
       }
 
     if (oldRefField != null)
@@ -478,7 +479,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    oldRefField.establish(owner.getInvid()); // hope this works
 	  }
-
+	
 	setLastError("couldn't establish field symmetry with " + newRef);
 	return false;
       }
