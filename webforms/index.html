@@ -1,14 +1,202 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<!-- login client selector for Ganymede -->
+<!-- Created 7/22/99 - Brian O'Mara     -->
+
 <html>
   <head>
-    <title>Ganymede on #SERVERHOST</title>
+    <title>Ganymede Launcher on #SERVERHOST</title>
   </head>
+  <body bgcolor="#FFFFFF">
+    <FORM name="FORM">
+      <center>
+	<table border=2 cellspacing=2 cellpadding=2 bgcolor="#ccffcc" width="75%">
+	  <tr bgcolor="#ffffff">
+	    <td colspan = "2">
+	      <center>
+		<img src="ganymede_title2.gif">
+		<font face="Arial, Helvetica"><br>on #SERVERHOST</font>
+	      </center>
+	    </td>
+	  </tr>
+	  <tr bgcolor="#663366">
+	    <td colspan="2">
+	      <font face="Arial, Helvetica" color="ffffcc">
+	      <center>
+		<b>Please select
+		  <font color="ccffcc"> Client Type </font> 
+		  and 
+		  <font color="ccffcc"> Java Virtual Machine </font>
+		</b>
+	      </center>
+	    </font>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td>
+	      <center>
+		<font face="Arial, Helvetica">	    
+		  <SELECT NAME="client" onChange="UpdateText()">
+		    <OPTION value="Standard Client" SELECTED>Standard Client
+		    <OPTION value="Admin Console">Admin Console
+		    <OPTION value="Password Client">Password Client
+		  </SELECT>
+	      </center>
+	    </font>
+	    </td>
+	    <td>
+	      <font face="Arial, Helvetica">	    
+		<INPUT NAME="JVM" TYPE=radio VALUE="Java Plugin" CHECKED>Java Plugin<br>
+		<INPUT NAME="JVM" TYPE=radio VALUE="Native">Native
+	      </font>
+	    </td>
+	  </tr>
+
+	  <tr>
+	    <td colspan="2">
+	      <center>
+		<font face="Arial, Helvetica">
+		  <INPUT NAME="go" TYPE=button VALUE="Start Ganymede" ONCLICK="login()">
+		</font>
+	      </center>
+	    </td>
+	    
+	  </tr>
+	  <tr>
+	    <td colspan="2" bgcolor="#663366">&nbsp;</td>
+	  </tr>
+	  <tr bgcolor ="#ffffff">
+	    <td colspan="2">
+	      <font face = "Arial, Helvetica">
+		<b>Notes</b>
+	      <p>
+		Right now, almost all users will need to use the plug-in option to run the clients. If you are using a version of Mozilla with built-in Java 1.2 support, you can try selecting the native option.
+<br>&nbsp;
+	      </font>
+	    </td>
+	  </tr>
+	  <tr bgcolor ="#ffffff">
+	    <td colspan="2">
+	      <font face = "Arial, Helvetica">
+		<b>Links</b>
+	      <p>
+	      <table border=0 cellspacing=0 cellpadding=0>
+		<tr>
+		  <td>
+		    <font face = "Arial, Helvetica">
+		      Home: 
+		    </font>
+		  </td>
+		  <td>
+		    <font face = "Arial, Helvetica">
+		      <a href="http://www.arlut.utexas.edu/gash2/" target="_blank">Ganymede Home Page</a>
+		    </font>
+		  </td>
+		</tr>
+		<tr>
+		  <td>
+		    <font face = "Arial, Helvetica">
+		      Author: 
+		    </font>
+		  </td>
+		  <td>
+		    <font face = "Arial, Helvetica">
+		      <a href="mailto:jonabbey@arlut.utexas.edu">jonabbey@arlut.utexas.edu</a>
+		    </font>
+		  </td>
+		</tr>
+		<tr>
+		  <td>
+		    <font face = "Arial, Helvetica">
+		      List: 
+		    </font>
+		  </td>
+		  <td>
+		    <font face = "Arial, Helvetica">
+		      <a href="mailto:ganymede@arlut.utexas.edu">ganymede@arlut.utexas.edu</a>
+		    </font>
+		  </td>
+		</tr>
+	      </table>
+
+	    </td>
+	  </tr> 
+	</table>
+
+      </center>
+    </FORM>
+
+    <SCRIPT LANGUAGE="JavaScript"> 
+      <!-- Start script hiding
+      // Probably ways to optimize/refine this code... haven't done much JavaScript :-) 
+
+      var clientElt   = document.FORM.client;
+      var goButnElt   = document.FORM.go;
+      var jvmElt      = document.FORM.JVM;
+
+      // Update the login button with most recent choice
+      //
+      function UpdateText() {
+        var client = "";
+        client = clientElt.options[clientElt.selectedIndex].value;
+        goButnElt.value = "Start " + client;      
+      }
+      
+      // Open a new window and load the appropriate applet html
+      //
+      function login() {
+        var clientSel = "";
+        var jvmSel    = "";
+
+        var URLbase   = "";
+        var URLhead   = "";
+        var URLtail   = "";
+        var URL       = "";
+
+        // Get selected client
+        clientSel = clientElt.options[clientElt.selectedIndex].value;
   
-  <frameset rows="225, *">
-    <frame src="titleframe.html" marginheight="1">
-    <frameset cols="400, *">
-      <frame src="leftframe.html" marginwidth="1" scrolling="no">
-      <frame src="rightframe.html" name="mainwin">
-    </frameset>
-  </frameset>
+        if (clientSel == "Standard Client") { 
+          URLhead = "_client";
+        } 
+        else {
+          if (clientSel == "Admin Console") { 
+            URLhead = "_console";
+          } 
+          else {
+            if (clientSel == "Password Client") { 
+              URLhead = "_password";
+            }
+          }
+        }
+
+        // Get checked JVM
+        for (i=0; i < (jvmElt.length); i++) { 
+          if (jvmElt[i].checked) {
+            jvmSel = jvmElt[i].value;
+            break;
+          }
+        }
+      
+        if (jvmSel == "Java Plugin") { 
+          URLtail = "_plugin";
+        }
+        else {
+          if (jvmSel == "Native") { 
+            URLtail = "_native";
+          }
+        }
+
+        // Build URL from client and jvm parts
+        URL = URLbase + URLhead + URLtail + ".html";
+
+        // Open pop-up window
+        remote = window.open(URL, URLhead+URLtail, "width=320,height=350");
+        if (remote.opener == null) {
+          remote.opener = window;
+        }
+        remote.opener.name = "opener";
+      }
+      // end script hiding -->
+    </SCRIPT>
+
+  </body>
 </html>
