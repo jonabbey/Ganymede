@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -89,6 +89,8 @@ public class DBReadLock extends DBLock {
   {
     boolean done, okay;
     DBObjectBase base;
+    Vector vect;
+    Object obj;
 
     /* -- */
 
@@ -96,10 +98,34 @@ public class DBReadLock extends DBLock {
       {
 	if (lockManager.lockHash.containsKey(key))
 	  {
-	    throw new RuntimeException("Error: lock sought by owner of existing lockset.");
+	    obj = lockManager.lockHash.get(key);
+
+	    if (obj instanceof Vector)
+	      {
+		// we've got a vector, indicating that we have another read lock set
+		// open.  It's okay to add another item to this vector, since we
+		// only do read locks in the GanymedeSession query() and dump() methods.
+		// These methods have no possibility of deadlock, so we don't care.
+
+		vect = (Vector) obj;
+
+		vect.addElement(this);
+	      }
+	    else
+	      {
+		// we've got a write lock or a dump lock.. it's ok to hold off here.
+		
+		throw new RuntimeException("Error: read lock sought by owner of existing write or dump lockset.");
+	      }
 	  }
-	
-	lockManager.lockHash.put(key, this);
+	else
+	  {
+	    vect = new Vector();
+
+	    vect.addElement(this);
+	    lockManager.lockHash.put(key, vect);
+	  }
+
 	this.key = key;
 
 	inEstablish = true;
@@ -112,7 +138,9 @@ public class DBReadLock extends DBLock {
 
 	    if (abort)
 	      {
-		lockManager.lockHash.remove(key);
+		vect = (Vector) lockManager.lockHash.get(key);
+		vect.removeElement(this);
+
 		inEstablish = false;
 		lockManager.notifyAll();
 		throw new InterruptedException();
@@ -161,7 +189,9 @@ public class DBReadLock extends DBLock {
 		  }
 		catch (InterruptedException ex)
 		  {
-		    lockManager.lockHash.remove(key);
+		    vect = (Vector) lockManager.lockHash.get(key);
+		    vect.removeElement(this);
+
 		    inEstablish = false;
 		    lockManager.notifyAll();
 		    throw ex;
