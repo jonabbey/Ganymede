@@ -1,6 +1,28 @@
-#!/bin/csh
+#!/bin/sh
+#
+# Ganymede client jar build script
+#
+# Version: $Revision: 1.2 $
+# Date: $Date: 1999/01/19 23:58:20 $
+#
+############################################################
 
-cd /home/broccol/gash2/classes
+currentdir=`pwd`
+
+# Change to the directory where this build script is
+
+prog=$0
+builddir=`echo $prog|sed 's%/[^/][^/]*$%%'`
+test "x$builddir" = "x$builddir" && builddir=.
+cd $builddir
+
+# Load configuration information
+
+. config.sh
+
+# And do the build
+
+echo "Building client jar"
 
 mv ganymede.jar ganymede.jar.old
 
@@ -8,14 +30,8 @@ cd client_classes
 
 sync_tree
 
-/opt/bin/jar -cf ../ganymede.jar arlut jdj
+$JAVADIR/jar -cf ../ganymede.jar arlut jdj
 
 cd ..
 
-# Now install the jar file where we will use it
-
-cp ganymede.jar /home/broccol/public_html/gash2
-chmod 664 /home/broccol/public_html/gash2/ganymede.jar
-cp ganymede.jar /opt/depot/ganymede/etc
-chmod 664 /opt/depot/ganymede/etc/ganymede.jar
-
+echo "Done building client jar"

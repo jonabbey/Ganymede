@@ -1,6 +1,28 @@
-#!/bin/csh
+#!/bin/sh
+#
+# Ganymede server jar build script
+#
+# Version: $Revision: 1.2 $
+# Date: $Date: 1999/01/19 23:58:20 $
+#
+############################################################
 
-cd /home/broccol/gash2/classes
+currentdir=`pwd`
+
+# Change to the directory where this build script is
+
+prog=$0
+builddir=`echo $prog|sed 's%/[^/][^/]*$%%'`
+test "x$builddir" = "x$builddir" && builddir=.
+cd $builddir
+
+# Load configuration information
+
+. config.sh
+
+# And do the build
+
+echo "Building admin jar"
 
 mv ganymedeServer.jar ganymedeServer.jar.old
 
@@ -9,14 +31,9 @@ cd server_classes
 ./sync_tree
 ./sync_tree.gnu
 
-/opt/bin/jar -cf ../ganymedeServer.jar arlut gnu jcrypt.class Qsmtp.class
+$JAVADIR/jar -cf ../ganymedeServer.jar arlut gnu jcrypt.class Qsmtp.class
 
 cd ..
 
-# Now install the jar file where we will use it
-
-#cp ganymedeAdmin.jar /home/broccol/public_html/gash2
-#chmod 664 /home/broccol/public_html/gash2/ganymedeAdmin.jar
-#cp ganymedeAdmin.jar /opt/depot/ganymede/etc
-#chmod 664 /opt/depot/ganymede/etc/ganymedeAdmin.jar
+echo "Done building server jar"
 
