@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2001/07/03 21:55:43 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2001/07/04 01:06:37 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.38 $ $Date: 2001/07/03 21:55:43 $ $Name:  $
+ * @version $Revision: 1.39 $ $Date: 2001/07/04 01:06:37 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
@@ -142,6 +142,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   arlut.csd.Util.Compare
     comparator;
+
+  /**
+   * <p>The default maximum width string</p>
+   */
+
+  String maxWidthString = "this is the minimum!";
 
   /* -- */
 
@@ -215,7 +221,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public void load(Vector items, int width, boolean sort, arlut.csd.Util.Compare comparator)
   {
-    String maxWidthString = "this is the minimum!";
+    this.maxWidthString = "this is the minimum!";
 
     model = new DefaultListModel();
 
@@ -297,6 +303,24 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	  {
 	    setPrototypeCellValue(maxWidthString);
 	  }
+      }
+  }
+
+  /**
+   * <p>This method sets the default cell width for this list.</p>
+   */
+
+  public void setCellWidth(int width)
+  {
+    this.width = width;
+
+    if (width > 0)
+      {
+	setFixedCellWidth(width);
+      }
+    else if (width == 0)
+      {
+	setPrototypeCellValue(maxWidthString);
       }
   }
 
