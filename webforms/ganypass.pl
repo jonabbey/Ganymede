@@ -19,6 +19,7 @@ use CGI;
 $query = new CGI;
 $xml_path = "<#XMLPATH#>";
 $xmlclient = $xml_path . "/xmlclient";
+$tmpdir = "/tmp";
 
 #If this script is run from a different location from where the
 #image files for the HTML result pages are located, the variable
@@ -75,13 +76,24 @@ else
 
 sub make_xml
 {
-  $filename = $xml_path . time . ".xml"; #give temp xml file random name
+  # we want a really random filename
+
+  $randnum = int(rand 4096);
+
+  $filename = "$tmpdir/ganypass.$randnum.$$.xml"; #give temp xml file random name
  
   $old_pass =~ s/&/&amp;/g;   #parse passwords for " and &, replace with xml equivalents
   $new_pass =~ s/&/&amp;/g;
   $old_pass =~ s/\"/&quot;/g;
   $new_pass =~ s/\"/&quot;/g;
-  open(XMLF, ">$filename");
+  
+  if (-f $filename) {
+    die "Error, $filename already exists!";
+  }
+
+  open(XMLF, ">$filename") || die "Couldn't write to $filename";
+  chmod 0600, $filename;
+
   select XMLF;
   print <<WRITEXML;
   <ganymede major="1" minor="0" persona="$user" password="$old_pass">
