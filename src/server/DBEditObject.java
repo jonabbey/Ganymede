@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.150 $
-   Last Mod Date: $Date: 2001/06/01 01:35:00 $
+   Version: $Revision: 1.151 $
+   Last Mod Date: $Date: 2001/06/05 07:57:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.150 $ $Date: 2001/06/01 01:35:00 $ $Name:  $
+ * @version $Revision: 1.151 $ $Date: 2001/06/05 07:57:35 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -351,75 +351,63 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     this.gSession = getSession().getGSession();
 
-    synchronized (original)
-      {
-	this.original = original;
-	this.myInvid = original.myInvid;
-	this.objectBase = original.objectBase;
-      }
+    this.original = original;
+    this.myInvid = original.myInvid;
+    this.objectBase = original.objectBase;
 
     // clone the fields from the original object
     // since we own these, the field-modifying
     // methods on the copied fields will allow editing
     // to go forward
 
-    if (original.fieldAry != null)
+    Vector fieldVect = original.getFieldVect();
+
+    for (int i = 0; i < fieldVect.size(); i++)
       {
-	synchronized (original.fieldAry)
+	field = (DBField) fieldVect.elementAt(i);
+	
+	switch (field.getType())
 	  {
-	    for (int i = 0; i < original.fieldAry.length; i++)
-	      {
-		field = original.fieldAry[i];
-
-		if (field == null)
-		  {
-		    continue;
-		  }
-
-		switch (field.getType())
-		  {
-		  case BOOLEAN:
-		    tmp = new BooleanDBField(this, (BooleanDBField) field);
-		    break;
+	  case BOOLEAN:
+	    tmp = new BooleanDBField(this, (BooleanDBField) field);
+	    break;
 		    
-		  case NUMERIC:
-		    tmp = new NumericDBField(this, (NumericDBField) field);
-		    break;
+	  case NUMERIC:
+	    tmp = new NumericDBField(this, (NumericDBField) field);
+	    break;
 
-		  case FLOAT:
-		    tmp = new FloatDBField(this, (FloatDBField) field);
-		    break;
+	  case FLOAT:
+	    tmp = new FloatDBField(this, (FloatDBField) field);
+	    break;
 
-		  case DATE:
-		    tmp = new DateDBField(this, (DateDBField) field);
-		    break;
+	  case DATE:
+	    tmp = new DateDBField(this, (DateDBField) field);
+	    break;
 
-		  case STRING:
-		    tmp = new StringDBField(this, (StringDBField) field);
-		    break;
+	  case STRING:
+	    tmp = new StringDBField(this, (StringDBField) field);
+	    break;
 		    
-		  case INVID:
-		    tmp = new InvidDBField(this, (InvidDBField) field);
-		    break;
+	  case INVID:
+	    tmp = new InvidDBField(this, (InvidDBField) field);
+	    break;
 
-		  case PERMISSIONMATRIX:
-		    tmp = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
-		    break;
+	  case PERMISSIONMATRIX:
+	    tmp = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
+	    break;
 
-		  case PASSWORD:
-		    tmp = new PasswordDBField(this, (PasswordDBField) field);
-		    break;
+	  case PASSWORD:
+	    tmp = new PasswordDBField(this, (PasswordDBField) field);
+	    break;
 
-		  case IP:
-		    tmp = new IPDBField(this, (IPDBField) field);
-		    break;
-		  }
+	  case IP:
+	    tmp = new IPDBField(this, (IPDBField) field);
+	    break;
+	  }
 
-		if (tmp != null)
-		  {
-		    saveField(tmp);
-		  }
-	      }
+	if (tmp != null)
+	  {
+	    saveField(tmp);
 	  }
       }
 	
@@ -609,7 +597,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * @see arlut.csd.ganymede.ObjectStatus#DROPPING
    */
 
-  final synchronized void setStatus(byte new_status)
+  final void setStatus(byte new_status)
   {
     switch (new_status)
       {
@@ -2616,101 +2604,97 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    finalResult.unionRescan(retVal);
 	  }
 
-	synchronized (fieldAry)
+	// get a sync'ed snapshot of this object's fields
+
+	Vector fieldVect = getFieldVect();
+
+	for (int i = 0; i < fieldVect.size(); i++)
 	  {
-	    for (int i = 0; i < fieldAry.length; i++)
+	    field = (DBField) fieldVect.elementAt(i);
+
+	    // we can't clear field 0 yet, since we need that
+	    // for permissions verifications for other fields
+
+	    if (field.getID() == 0)
 	      {
-		field = fieldAry[i];
+		continue;
+	      }
 
-		if (field == null)
+	    if (field.isVector())
+	      {
+		if (debug)
 		  {
-		    continue;
+		    System.err.println("++ Attempting to clear vector field " + field.getName());
 		  }
-
-		// we can't clear field 0 yet, since we need that
-		// for permissions verifications for other fields
-	    
-		if (field.getID() == 0)
+		
+		while (field.size() > 0)
 		  {
-		    continue;
-		  }
-
-		if (field.isVector())
-		  {
-		    if (debug)
+		    // if this is an InvidDBField, deleteElement()
+		    // will convert this request into a deletion of
+		    // the embedded object.
+		    
+		    retVal = field.deleteElement(0); // *sync*
+		    
+		    if (retVal != null && !retVal.didSucceed())
 		      {
-			System.err.println("++ Attempting to clear vector field " + field.getName());
+			editset.rollback("del" + label); // *sync*
+			
+			if (retVal.getDialog() != null)
+			  {
+			    return retVal;
+			  }
+			
+			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							  "DBEditObject disapproved of deleting element from field " + 
+							  field.getName());
 		      }
-
-		    while (field.size() > 0)
+		    else
 		      {
-			// if this is an InvidDBField, deleteElement()
-			// will convert this request into a deletion of
-			// the embedded object.
+			finalResult.unionRescan(retVal);
+		      }
+		  }
+	      }
+	    else
+	      {
+		// permission matrices and passwords don't allow us to
+		// call set value directly.  We're mainly concerned
+		// with invid's (for linking), i.p. addresses and
+		// strings (for the namespace) here anyway.
+		
+		if (debug)
+		  {
+		    System.err.println("++ Attempting to clear scalar field " + field.getName());
+		  }
+		
+		if (field.getType() != PERMISSIONMATRIX &&
+		    field.getType() != PASSWORD)
+		  {
+		    retVal = field.setValueLocal(null); // *sync*
+		    
+		    if (retVal != null && !retVal.didSucceed())
+		      {
+			editset.rollback("del" + label); // *sync*
 			
-			retVal = field.deleteElement(0); // *sync*
+			if (retVal.getDialog() != null)
+			  {
+			    return retVal;
+			  }
 			
-			if (retVal != null && !retVal.didSucceed())
-			  {
-			    editset.rollback("del" + label); // *sync*
-			    
-			    if (retVal.getDialog() != null)
-			      {
-				return retVal;
-			      }
-			    
-			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							      "DBEditObject disapproved of deleting element from field " + 
-							      field.getName());
-			  }
-			else
-			  {
-			    finalResult.unionRescan(retVal);
-			  }
+			return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
+							  "DBEditObject could not clear field " + 
+							  field.getName());
+		      }
+		    else
+		      {
+			finalResult.unionRescan(retVal);
 		      }
 		  }
 		else
 		  {
-		    // permission matrices and passwords don't allow us to
-		    // call set value directly.  We're mainly concerned
-		    // with invid's (for linking), i.p. addresses and
-		    // strings (for the namespace) here anyway.
-
-		    if (debug)
-		      {
-			System.err.println("++ Attempting to clear scalar field " + field.getName());
-		      }
-
-		    if (field.getType() != PERMISSIONMATRIX &&
-			field.getType() != PASSWORD)
-		      {
-			retVal = field.setValueLocal(null); // *sync*
-
-			if (retVal != null && !retVal.didSucceed())
-			  {
-			    editset.rollback("del" + label); // *sync*
-
-			    if (retVal.getDialog() != null)
-			      {
-				return retVal;
-			      }
-
-			    return Ganymede.createErrorDialog("Server: Error in DBEditObject.finalizeRemove()",
-							      "DBEditObject could not clear field " + 
-							      field.getName());
-			  }
-			else
-			  {
-			    finalResult.unionRescan(retVal);
-			  }
-		      }
-		    else
-		      {
-			// catchall for permission matrix and password
-			// fields, which do this their own way.
-
-			field.setUndefined(true);
-		      }
+		    // catchall for permission matrix and password
+		    // fields, which do this their own way.
+		    
+		    field.setUndefined(true);
 		  }
 	      }
 	  }
@@ -2934,54 +2918,55 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     
     Invid myInvid = getInvid();
 
-    synchronized (remobj.fieldAry)
+    // get a thread sync'ed snapshot of the fields in the remote object
+
+    Vector fieldVect = remobj.getFieldVect();
+
+    for (int i = 0; i < fieldVect.size(); i++)
       {
-	for (int i = 0; i < remobj.fieldAry.length; i++)
+	DBField tmpField = (DBField) fieldVect.elementAt(i);
+	
+	if (!(tmpField instanceof InvidDBField))
 	  {
-	    DBField tmpField = remobj.fieldAry[i];
-
-	    if (tmpField == null ||!(tmpField instanceof InvidDBField))
-	      {
-		continue;
-	      }
-
-	    // if the field is symmetric and doesn't point to us, we won't
-	    // try to unlink it here.
-
-	    if (tmpField.getFieldDef().isSymmetric())
-	      {
-		continue;
-	      }
-
-	    // If the invid field we're checking out doesn't reference
-	    // us, don't bother with it.
-
-	    if (tmpField.isVector())
-	      {
-		if (!tmpField.containsElementLocal(myInvid))
-		  {
-		    continue;
-		  }
-	      }
-	    else
-	      {
-		Invid tempInvid = (Invid) tmpField.getValueLocal();
-
-		if (tempInvid == null || !tempInvid.equals(myInvid))
-		  {
-		    continue;
-		  }
-	      }
-
-	    if (false)
-	      {
-		System.err.println("\tNeed to clear field " + tmpField.toString());
-	      }
-
-	    // ok, we know we need to do the unbinding for this field.
-
-	    fieldsToUnbind.addElement(new Short(tmpField.getID()));
+	    continue;
 	  }
+
+	// if the field is symmetric and doesn't point to us, we won't
+	// try to unlink it here.
+	
+	if (tmpField.getFieldDef().isSymmetric())
+	  {
+	    continue;
+	  }
+	
+	// If the invid field we're checking out doesn't reference
+	// us, don't bother with it.
+	
+	if (tmpField.isVector())
+	  {
+	    if (!tmpField.containsElementLocal(myInvid))
+	      {
+		continue;
+	      }
+	  }
+	else
+	  {
+	    Invid tempInvid = (Invid) tmpField.getValueLocal();
+	    
+	    if (tempInvid == null || !tempInvid.equals(myInvid))
+	      {
+		continue;
+	      }
+	  }
+	
+	if (false)
+	  {
+	    System.err.println("\tNeed to clear field " + tmpField.toString());
+	  }
+	
+	// ok, we know we need to do the unbinding for this field.
+	
+	fieldsToUnbind.addElement(new Short(tmpField.getID()));
       }
 
     if (remobj instanceof DBEditObject)
@@ -3279,13 +3264,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * hashtable.</P>
    */
 
-  synchronized final Hashtable checkpoint()
+  final Hashtable checkpoint()
   {
     Object key, value;
     Hashtable result = new Hashtable();
     DBField field;
 
     /* -- */
+
+    // sync'ing on fieldAry is safe enough to do here since we don't
+    // call any methods within the sync block that should trigger any
+    // external synchronization issues
 
     synchronized (fieldAry)
       {

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 2001/06/05 04:08:35 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 2001/06/05 07:57:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.126 $ $Date: 2001/06/05 04:08:35 $
+ * @version $Revision: 1.127 $ $Date: 2001/06/05 07:57:36 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1379,6 +1379,34 @@ public class DBObject implements db_object, FieldType, Remote {
   }
 
   /**
+   * <p>This method provides a Vector of DBFields contained in this
+   * object in a fashion that does not contribute to fieldAry threadlock.</p>
+   */
+
+  public final Vector getFieldVect()
+  {
+    DBField field;
+    Vector fieldVect = new Vector(fieldAry.length);
+
+    synchronized (fieldAry)
+      {
+	for (int i = 0; i < fieldAry.length; i++)
+	  {
+	    field = fieldAry[i];
+
+	    if (field == null)
+	      {
+		continue;
+	      }
+	    
+	    fieldVect.add(field);
+	  }
+      }
+
+    return fieldVect;
+  }
+
+  /**
    * <p>This method places a DBField into a slot in this object's
    * fieldAry DBField array.  saveField() uses a hashing algorithm to
    * try and speed up field save and retrieving, but we are optimizing
@@ -1826,6 +1854,11 @@ public class DBObject implements db_object, FieldType, Remote {
 	    
 	    try
 	      {
+		// nota bene: calling fieldRequired here could
+		// potentially leave us open for threadlock, depending
+		// on how the fieldRequired method is written.  I
+		// think this is a low-level risk, but not zero.
+
 		if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
 		  {
 		    field = retrieveField(fieldDef.getID());
