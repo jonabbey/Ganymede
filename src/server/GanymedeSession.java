@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.232 $
-   Last Mod Date: $Date: 2001/02/14 21:23:37 $
+   Version: $Revision: 1.233 $
+   Last Mod Date: $Date: 2001/02/16 05:25:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.232 $ $Date: 2001/02/14 21:23:37 $
+ * @version $Revision: 1.233 $ $Date: 2001/02/16 05:25:28 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1513,6 +1513,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (inv != null)
       {
+	// it's okay to loop on this field since we should be looking
+	// at a DBObject and not a DBEditObject
+
 	for (int i = 0; i < inv.size(); i++)
 	  {
 	    results.addElement(viewObjectLabel((Invid)inv.getElement(i)));
@@ -1616,6 +1619,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // ok, we need to find out persona they are trying to switch to
 
     inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
+
+    // it's okay to loop on this field since we should be looking at a
+    // DBObject and not a DBEditObject
 
     for (int i = 0; i < inv.size(); i++)
       {
@@ -1793,6 +1799,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		// *** Caution!  getValuesLocal() does not clone the field's contents..
 		// 
 		// DO NOT modify temp here!
+
+		// it's okay to loop on this field since we should be looking
+		// at a DBObject and not a DBEditObject
 
 		for (int j = 0; j < temp.size(); j++)
 		  {
@@ -5147,7 +5156,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	synchronized (session.editSet)
 	  {
-	    // grab a snapshot of the objects checked into the database
+	    // grab a snapshot reference to the vector of objects
+	    // checked into the database
 
 	    iterationSet = base.getIterationSet();
 
@@ -5159,8 +5169,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// and generate our list
 
 	Vector results = new Vector(objects.size(), 100);
+
+	// optimize this loop a bit
+
+	int setSize = iterationSet.size();
 	
-	for (int i = 0; i < iterationSet.size(); i++)
+	for (int i = 0; i < setSize; i++)
 	  {
 	    DBObject obj = (DBObject) iterationSet.elementAt(i);
 	    
@@ -6002,6 +6016,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		// loop over the owner groups this persona is a member
 		// of, see if it includes the supergash owner group
 		    
+		// it's okay to loop on this field since we should be looking
+		// at a DBObject and not a DBEditObject
+
 		for (int i = 0; i < vals.size(); i++)
 		  {
 		    inv = (Invid) vals.elementAt(i);
@@ -6067,6 +6084,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		    /* -- */
 		    
+		    // it's okay to loop on this field since we should be looking
+		    // at a DBObject and not a DBEditObject
+
 		    for (int i = 0; i < vals.size(); i++)
 		      {
 			inv = (Invid) vals.elementAt(i);
@@ -6317,6 +6337,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    if (permsdebug)
 	      {
+		// it's okay to loop on this field since we should be
+		// looking at a DBObject and not a DBEditObject
+
 		for (int i = 0; i < values.size(); i++)
 		  {
 		    if (i > 0)
@@ -6420,6 +6443,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// 
 	// DO NOT modify members here!
 
+	// it's okay to loop on this field since we should be looking
+	// at a DBObject and not a DBEditObject
+
 	for (int j = 0; j < members.size(); j++)
 	  {
 	    if (personaInvid.equals((Invid) members.elementAt(j)))
@@ -6519,6 +6545,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// *** Caution!  getValuesLocal() does not clone the field's contents..
 	// 
 	// DO NOT modify members here!
+
+	// it's okay to loop on this field since we should be looking
+	// at a DBObject and not a DBEditObject
 
 	for (int j = 0; j < members.size(); j++)
 	  {
