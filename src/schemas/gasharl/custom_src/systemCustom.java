@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 2003/02/10 21:24:15 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 2003/02/10 22:40:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -236,7 +236,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	problem = true;
       }
 
-    // and clone the embedded objects
+    // and clone the embedded objects.  Remember,
+    // systemCustom.initializeNewObject() will create a single
+    // embedded interface as part of the normal system creation
+    // process.  We need to handle cloning into the (single) embedded
+    // interface we'll have had created, then create any new embedded
+    // interfaces necessary when cloning a multiple interface system.
 
     InvidDBField newInterfaces = (InvidDBField) getField(systemSchema.INTERFACES);
     InvidDBField oldInterfaces = (InvidDBField) origObj.getField(systemSchema.INTERFACES);
@@ -270,6 +275,20 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    resultBuf.append("\n\n");
 	    resultBuf.append(tmpVal.getDialog().getText());
 	    
+	    problem = true;
+	  }
+
+	// clear the ethernet MAC address field in the interface,
+	// since we don't want to duplicate MAC addresses when we
+	// clone a system.
+	
+	tmpVal = workingVolume.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
+	
+	if (tmpVal != null && tmpVal.getDialog() != null)
+	  {
+	    resultBuf.append("\n\n");
+	    resultBuf.append(tmpVal.getDialog().getText());
+	      
 	    problem = true;
 	  }
       }
