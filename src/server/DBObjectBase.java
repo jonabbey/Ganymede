@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.30 $ %D%
+   Version: $Revision: 1.31 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -61,6 +61,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   Hashtable objectHash;		// objects in our objectBase
   int object_count;
   int maxid;			// highest invid to date
+  Date lastChange;
 
   // used by the DBLock Classes to synchronize client access
 
@@ -75,6 +76,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
   DBObjectBase original;	
   boolean save;
   boolean changed;
+
+  // Customization Management Object
 
   DBEditObject objectHook;	// a hook to allow static method calls on a DBEditObject management subclass
 
@@ -108,6 +111,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     fieldHash = new Hashtable();
     objectHash = new Hashtable();
     maxid = 0;
+    lastChange = new Date();
 
     editor = null;
     original = null;
@@ -242,6 +246,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	// in case our classdef was set during the copy.
 
 	objectHook = this.createHook();
+
+	lastChange = new Date();
       }
   }
 
@@ -1199,6 +1205,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	
 	obj.objectBase = this;
       }
+  }
+
+  // 
+  // This method is used to allow objects in this base to notify us when
+  // their state changes.
+
+  void updateTimeStamp()
+  {
+    lastChange.setTime(Date.currentTimeMilis());
   }
 
   // the following methods are used to manage locks on this base
