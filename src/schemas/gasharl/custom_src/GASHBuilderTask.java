@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 2003/08/02 00:10:23 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 2004/01/29 02:29:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2102,17 +2102,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * <p>The userSync.txt file contains lines of the following format:</p>
    *
    * <PRE>
-   * username|cryptTextPassword|invid|emailAddress|fullName
+   * username|md5cryptTextPassword|invid|emailAddress|fullName
    * </PRE>
    *
    * <p>i.e.,</p>
    *
    * <PRE>
-   * broccol|AmgG.XVyOvJH2|3:627|jonabbey@arlut.utexas.edu|Jonathan Abbey
+   * broccol|$1$IjjphfYF$piq8kNA/b49dlrYGzN5pJ0|3:627|jonabbey@arlut.utexas.edu|Jonathan Abbey
    * </PRE>
    *
    * <p>Note that if the user is inactivated or the user's password is undefined,
-   * the cryptTextPassword field in the userSync.txt file will be empty.  This
+   * the md5cryptTextPassword field in the userSync.txt file will be empty.  This
    * should be construed as having the user be unusable, *not* having the user
    * be usable with no password.</p>
    *
@@ -2161,11 +2161,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		
 		if (passField != null)
 		  {
-		    cryptText = passField.getUNIXCryptText();
+		    cryptText = passField.getMD5CryptText();
 		  }
 	      }
 
-	    // ok, we've got a user with valid UNIXCrypt password
+	    // ok, we've got a user with valid md5CryptText password
 	    // info.  Write it.
 
 	    out.print(username);
