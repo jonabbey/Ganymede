@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,9 +35,9 @@ import com.sun.java.swing.*;
 public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
 
   windowPanel wp;
-  PopupMenu popMenu;
-  MenuItem viewMI;
-  MenuItem editMI;
+  JPopupMenu popMenu;
+  JMenuItem viewMI;
+  JMenuItem editMI;
   Session session;
   Query query;
   rowTable table = null;
@@ -58,9 +58,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     this.session = session;
     this.query = query;
 
-    popMenu = new PopupMenu();
-    viewMI = new MenuItem("View Entry");
-    editMI = new MenuItem("Edit Entry");
+    popMenu = new JPopupMenu();
+    viewMI = new JMenuItem("View Entry");
+    editMI = new JMenuItem("Edit Entry");
 
     popMenu.add(viewMI);
     popMenu.add(editMI);
