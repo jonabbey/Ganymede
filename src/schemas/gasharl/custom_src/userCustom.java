@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 1999/01/22 18:05:08 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 1999/01/27 21:44:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -455,7 +455,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    finalizeInactivate(false);
+	    if (calledByWizard)
+	      {
+		finalizeInactivate(false);
+	      }
+
 	    return retVal;
 	  }
 
@@ -466,7 +470,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    finalizeInactivate(false);
+	    if (calledByWizard)
+	      {
+		finalizeInactivate(false);
+	      }
+
 	    return retVal;
 	  }
 
@@ -482,24 +490,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		
 		if (retVal != null && !retVal.didSucceed())
 		  {
-		    finalizeInactivate(false);
+		    if (calledByWizard)
+		      {
+			finalizeInactivate(false);
+		      }
+
 		    return retVal;
 		  }
 	      }
 
 	    stringfield.addElement(forward);
-	  }
-
-	// make sure that the expiration date is cleared.. we're on
-	// the removal track now.
-
-	date = (DateDBField) getField(SchemaConstants.ExpirationField);
-	retVal = date.setValueLocal(null);
-
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    finalizeInactivate(false);
-	    return retVal;
 	  }
 
 	// determine what will be the date 3 months from now
@@ -515,11 +515,36 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    finalizeInactivate(false);
+	    if (calledByWizard)
+	      {
+		finalizeInactivate(false);
+	      }
+
 	    return retVal;
 	  }
 
-	finalizeInactivate(true);
+	// make sure that the expiration date is cleared.. we're on
+	// the removal track now.
+
+	date = (DateDBField) getField(SchemaConstants.ExpirationField);
+	retVal = date.setValueLocal(null);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    if (calledByWizard)
+	      {
+		finalizeInactivate(false);
+	      }
+
+	    return retVal;
+	  }
+
+	// success, have our DBEditObject superclass clean up.
+
+	if (calledByWizard)
+	  {
+	    finalizeInactivate(true);
+	  }
 
 	// ok, we succeeded, now we have to tell the client
 	// what to refresh to see the inactivation results
@@ -532,7 +557,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	return result;
       }
-    else  // interactive, but not called by wizard
+    else  // interactive, but not called by wizard.. return a wizard
       {
 	userInactivateWizard theWiz;
 
@@ -1117,6 +1142,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    return null;
 	  }
+
+	if (willBeRemoved())
+	  {
+	    // it's okay for us to null the expiration date, since we already
+	    // have a removal date set
+
+	    return null;
+	  }
+
+	// check to see if the user category doesn't mind not having an expiration
+	// or removal date set.
 
 	try
 	  {

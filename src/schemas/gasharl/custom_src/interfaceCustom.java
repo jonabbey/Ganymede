@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/01/22 18:05:03 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 1999/01/27 21:44:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -257,6 +257,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    *
    * To be overridden in DBEditObject subclasses.
    * 
+   * <b>*PSEUDOSTATIC*</b>
+   *
    */
 
   public boolean canSeeField(DBSession session, DBField field)
@@ -310,6 +312,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    *
    * To be overridden in DBEditObject subclasses.
    *
+   * <b>*PSEUDOSTATIC*</b>
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
@@ -321,8 +324,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// the name is required if and only if the parent
 	// object has more than one interface
 	
-	Vector siblings = getSiblingInvids();
-
+	Vector siblings = getSiblingInvids(object);
+	
 	if (siblings.size() == 0)
 	  {
 	    return false;
@@ -773,11 +776,42 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     return sysObj;
   }
 
+  /**
+   *
+   * This private method returns a vector of invids, being a list of
+   * other interfaces defined in the system we are defined in.
+   * 
+   */
+
   private Vector getSiblingInvids()
   {
+    return getSiblingInvids(this);
+  }
+
+  /**
+   *
+   * This private method returns a vector of invids, being a list of
+   * other interfaces defined in the system we are defined in.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   * 
+   */
+
+  private Vector getSiblingInvids(DBObject object)
+  {
     Vector result;
-    Invid sysInvid = (Invid) getFieldValueLocal(SchemaConstants.ContainerField);
-    DBObject sysObj = getSession().viewDBObject(sysInvid);
+    DBSession session;
+    DBObject sysObj;
+    Invid sysInvid = (Invid) object.getFieldValueLocal(SchemaConstants.ContainerField);
+
+    if (object instanceof DBEditObject)
+      {
+	sysObj = ((DBEditObject) object).getSession().viewDBObject(sysInvid);
+      }
+    else
+      {
+	sysObj = Ganymede.internalSession.getSession().viewDBObject(sysInvid);
+      }
 
     try
       {
@@ -790,11 +824,11 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     
     // we are not our own sibling.
 
-    result.removeElement(getInvid());
+    result.removeElement(object.getInvid());
 
     if (debug)
       {
-	System.err.println("interfaceCustom.getSiblingInvids(): " + getInvid() +
+	System.err.println("interfaceCustom.getSiblingInvids(): " + object.getInvid() +
 			   " has return value: " + result);
       }
 
