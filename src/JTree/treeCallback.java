@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
    
   Created: 3 March 1997
-  Version: $Revision: 1.1 $ %D%
+  Version: $Revision: 1.2 $ %D%
   Module By: Jonathan Abbey              jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,7 +41,7 @@ package arlut.csd.JTree;
  * of user activities on a treeControl.
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.1 $ %D%
+ * @version $Revision: 1.2 $ %D%
  *
  * @see arlut.csd.Tree.treeControl
  */
@@ -101,7 +101,17 @@ public interface treeCallback {
    *
    */
 
-
   public void treeNodeContracted(treeNode node);
+
+  /**
+   *
+   * Called when an item in the tree is double-clicked.
+   *
+   * @param node The node selected in the tree.
+   *
+   * @see arlut.csd.Tree.treeCanvas
+   */
+
+  public void treeNodeDoubleClicked(treeNode node);
  
 }

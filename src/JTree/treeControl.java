@@ -27,7 +27,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.3 $ %D%
+  Version: $Revision: 1.4 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import com.sun.java.swing.*;
  * an outline display.  </p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.3 $ %D%
+ * @version $Revision: 1.4 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -901,6 +901,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
 
     node.selected = true;
+  }
+
+  void doubleClickNode(treeNode node)
+  {
+    if (callback != null)
+      {
+	callback.treeNodeDoubleClicked(node);
+      }
   }
 
   void selectNode(treeNode node)
@@ -1906,6 +1914,10 @@ class treeCanvas extends JPanel implements MouseListener, MouseMotionListener {
 		ctrl.expandNode(node, true);
 	      }
 	    return;
+	  }
+	else if (!node.expandable)
+	  {
+	    ctrl.doubleClickNode(node);
 	  }
       }
     else
