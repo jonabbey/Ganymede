@@ -40,16 +40,16 @@ Modifications by Jonathan Abbey (jonabbey@arlut.utexas.edu):
 Mods integrated with 1.11 on 19 January 1999
 
 Made this class open and close connection to the mailer during the
-sendMsg() method, rather than having to do a separate close() and
+sendmsg() method, rather than having to do a separate close() and
 recreate a new Qsmtp object to send an additional message.
 
-Modified the sendMsg() to_address parameter to support a vector of
+Modified the sendmsg() to_address parameter to support a vector of
 addresses.
 
 Added the sendHTMLmsg() method to allow for sending MIME-attached
 html pages.
 
-Added the extraHeaders parameter to sendMsg() to support sendHTMLmsg().
+Added the extraHeaders parameter to sendmsg() to support sendHTMLmsg().
 
 Modified the code to use the 1.1 io and text formatting classes.
 
@@ -133,11 +133,11 @@ public class Qsmtp implements Runnable {
   }
 
   /** 
-   * <P>After this method is called, all further sendMsg() calls will
+   * <P>After this method is called, all further sendmsg() calls will
    * not directly send mail themselves, but will rather queue the mail
    * for sending by a back-ground thread.</P>
    *
-   * <P>One result of this is that after this is called, the sendMsg()
+   * <P>One result of this is that after this is called, the sendmsg()
    * methods will never throw Protcol or IO Exceptions, and no
    * success/failure results will be returned.</P> 
    *
