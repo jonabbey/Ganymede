@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -641,12 +641,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
-	ReturnVal result = new ReturnVal(false);
-	result.setDialog(new JDialogBuff("Error",
-					 "Error.. ownerInvids contains invid that the persona is not a member of.",
-					 "OK",
-					 null));
-	return result;
+	return createErrorDialog("Error",
+				 "Error.. ownerInvids contains invid that the persona is not a member of.");
       }
     else
       {
@@ -684,12 +680,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
-	ReturnVal result = new ReturnVal(false);
-	result.setDialog(new JDialogBuff("Error",
-					 "Error.. ownerInvids contains invid that the persona is not a member of.",
-					 "OK",
-					 null));
-	return result;
+	return createErrorDialog("Server Error",
+				 "Error.. ownerInvids contains invid that the persona is not a member of.");
       }
     else
       {
@@ -811,12 +803,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (session.editSet != null)
       {
-	ReturnVal result = new ReturnVal(false);
-	result.setDialog(new JDialogBuff("Error",
-					 "Error.. transaction already opened",
-					 "OK",
-					 null));
-	return result;
+	return createErrorDialog("Server: Error in openTransaction()",
+				 "Error.. transaction already opened");
       }
 
     session.openTransaction(describe);
@@ -846,12 +834,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (session.editSet == null)
       {
-	ReturnVal result = new ReturnVal(false);
-	result.setDialog(new JDialogBuff("Error",
-					 "Error.. no transaction in progress",
-					 "OK",
-					 null));
-	return result;
+	return createErrorDialog("Server: Error in commitTransaction()",
+				 "Error.. no transaction in progress");
       }
 
     return session.commitTransaction();
@@ -1929,12 +1913,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   
   public synchronized ReturnVal inactivate_db_object(Invid invid) 
   {
-    ReturnVal retVal = new ReturnVal(false);
-    retVal.setDialog(new JDialogBuff("Error",
-				     "Error.. inactivate_db_object is not yet implemented on the server",
-				     "OK",
-				     null));
-    return retVal;
+    return createErrorDialog("Server Error",
+			     "Error.. inactivate_db_object is not yet implemented on the server");
   }
 
   /**
@@ -1952,10 +1932,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   
   public synchronized ReturnVal remove_db_object(Invid invid) 
   {
-    ReturnVal retVal = null;
-
-    /* -- */
-
     if (debug)
       {
 	Ganymede.debug("Attempting to delete object: " + invid);
@@ -1964,29 +1940,19 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if ((invid.getType() == SchemaConstants.PermBase) &&
 	(invid.getNum() == SchemaConstants.PermDefaultObj))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Error.. can't delete default permissions definitions",
-					 "OK",
-					 null));
-
 	setLastError("Can't delete default permissions definitions"); // for logging
 
-	return retVal;
+	return createErrorDialog("Server: Error in remove_db_object()",
+				"Error.. can't delete default permissions definitions");
       }
 
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
 	(invid.getNum() == 0))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Error.. can't delete supergash persona",
-					 "OK",
-					 null));
-
 	setLastError("Can't delete supergash persona");	// for logging
 
-	return retVal;
+	return createErrorDialog("Server: Error in remove_db_object()",
+				 "Error.. can't delete supergash persona");
       }
 
     DBObjectBase objBase = Ganymede.db.getObjectBase(invid.getType());
@@ -1994,39 +1960,26 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (vObj == null)
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Can't delete non-existent object",
-					 "OK",
-					 null));
-
 	setLastError("Can't delete non-existent object");
 
-	return retVal;
+	return createErrorDialog("Server: Error in remove_db_object()",
+				 "Error.. can't delete non-existent object");
       }
 
     if (!getPerm(vObj).isEditable())
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Don't have permission to delete object" + vObj.getLabel(),
-					 "OK",
-					 null));
-
 	setLastError("Don't have permission to delete object" + vObj.getLabel());
-	return retVal;
+
+	return createErrorDialog("Server: Error in remove_db_object()",
+				 "Don't have permission to delete object" + vObj.getLabel());
       }
 
     if (!objBase.objectHook.canRemove(session, vObj))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Object Manager refused deletion for" + vObj.getLabel(),
-					 "OK",
-					 null));
-
 	setLastError("object manager refused deletion" + vObj.getLabel());
-	return retVal;
+
+	return createErrorDialog("Server: Error in remove_db_object()",
+				 "Object Manager refused deletion for " + vObj.getLabel());
       }
     
     session.deleteDBObject(invid);
@@ -2589,6 +2542,24 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public DBSession getSession()
   {
     return session;
+  }
+
+  /***
+   *
+   * This is a convenience method used by the server to return a
+   * standard error dialog.
+   *
+   */
+
+  public ReturnVal createErrorDialog(String title, String body)
+  {
+    ReturnVal retVal = new ReturnVal(false);
+    retVal.setDialog(new JDialogBuff(title,
+				     body,
+				     "OK",
+				     null,
+				     "error.gif"));
+    return retVal;
   }
 
   /**
