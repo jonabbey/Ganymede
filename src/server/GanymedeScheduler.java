@@ -6,7 +6,7 @@
    to register tasks to be run on a periodic basis.
    
    Created: 26 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -144,7 +144,7 @@ public class GanymedeScheduler extends Thread {
 
     if (time.before(currentTime))
       {
-	cal.roll(Calendar.DATE, true); // advance to this time tomorrow
+	cal.add(Calendar.DATE, 1); // advance to this time tomorrow
       }
 
     time = cal.getTime();
@@ -173,57 +173,66 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
-    while (true)
+    try
       {
-	if (nextAction == null)
+	while (true)
 	  {
-	    try
+	    if (nextAction == null)
 	      {
-		wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		System.err.println("Scheduler caught interruption.. exiting");
-		return;
-	      }
-	  }
-	else
-	  {
-	    currentTime = System.currentTimeMillis();
-
-	    if (currentTime > nextAction.getTime())
-	      {
-		sleepTime = nextAction.getTime() - currentTime;
-
-		if (sleepTime > 0)
+		try
 		  {
-		    try
-		      {
-			wait(sleepTime);
-		      }
-		    catch (InterruptedException ex)
-		      {
-			System.err.println("Scheduler caught interruption.. exiting");
-			return;
-		      }
+		    wait();
 		  }
-
+		catch (InterruptedException ex)
+		  {
+		    System.err.println("Scheduler caught interruption.. exiting");
+		    return;
+		  }
+	      }
+	    else
+	      {
 		currentTime = System.currentTimeMillis();
 
-		if (currentTime >= nextAction.getTime())
+		if (currentTime > nextAction.getTime())
 		  {
-		    for (int i = 0; i < currentlyScheduled.size(); i++)
+		    sleepTime = nextAction.getTime() - currentTime;
+
+		    if (sleepTime > 0)
 		      {
-			handle = (scheduleHandle) currentlyScheduled.elementAt(i);
-			
-			if (handle.startTime.getTime() <= currentTime)
+			try
 			  {
-			    runTask(handle);
+			    wait(sleepTime);
+			  }
+			catch (InterruptedException ex)
+			  {
+			    System.err.println("Scheduler caught interruption.. exiting");
+			    return;
+			  }
+		      }
+
+		    currentTime = System.currentTimeMillis();
+
+		    if (currentTime >= nextAction.getTime())
+		      {
+			for (int i = 0; i < currentlyScheduled.size(); i++)
+			  {
+			    handle = (scheduleHandle) currentlyScheduled.elementAt(i);
+			
+			    if (handle.startTime.getTime() <= currentTime)
+			      {
+				runTask(handle);
+			      }
 			  }
 		      }
 		  }
 	      }
 	  }
+      }
+    finally 
+      {
+	System.err.println("Ganymede Scheduler going down");
+	cleanUp();
+	System.err.println("Ganymede Scheduler exited");
       }
   }
 
