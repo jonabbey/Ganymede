@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.10 $ %D%
+    Version: $Revision: 1.11 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -830,7 +830,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	      }
 	    catch (RemoteException rx)
 	      {
-		throw new RuntimeException("Could not check visibility");
+		throw new RuntimeException("Could not check visibility: " + rx);
 	      }
 	  }
       }
