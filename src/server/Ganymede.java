@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 2001/02/09 00:04:44 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 2001/02/09 03:30:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1454,6 +1454,8 @@ class gcTask implements Runnable {
     Ganymede.debug("Running garbage collection task");
     System.gc();
     Ganymede.debug("Garbage collection task finished");
+    GanymedeAdmin.updateMemState(Runtime.getRuntime().freeMemory(),
+				 Runtime.getRuntime().totalMemory());
   }
 }
 
@@ -1479,8 +1481,6 @@ class timeOutTask implements Runnable, silentTask {
   public void run()
   {
     Ganymede.server.clearIdleSessions();
-    GanymedeAdmin.updateMemState(Runtime.getRuntime().freeMemory(),
-				 Runtime.getRuntime().totalMemory());
   }
 }
 

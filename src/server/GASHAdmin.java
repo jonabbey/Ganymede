@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 2001/02/09 00:22:32 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 2001/02/09 03:30:32 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -919,9 +919,9 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     gbl.setConstraints(dumpField, gbc);
     topPanel.add(dumpField);
 
-    /* Free / Total / In-use Memory */
+    /* In-use / Free / Total Memory */
 
-    memLabel = new JLabel("Free / Total / In-use Memory:");
+    memLabel = new JLabel("In-use / Free / Total Memory:");
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -1776,7 +1776,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.memField.setText(lFreeMemory + " / " + lTotalMemory + " / " + (lTotalMemory - lFreeMemory));
+	frame.memField.setText((lTotalMemory - lFreeMemory) + " / " + lFreeMemory + " / " + lTotalMemory);
       }
     });
   }

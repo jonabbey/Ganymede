@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.228 $
-   Last Mod Date: $Date: 2001/02/08 17:03:14 $
+   Version: $Revision: 1.229 $
+   Last Mod Date: $Date: 2001/02/09 03:30:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.228 $ $Date: 2001/02/08 17:03:14 $
+ * @version $Revision: 1.229 $ $Date: 2001/02/09 03:30:33 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4097,7 +4097,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (getPerm(obj).isVisible())
       {
-	setLastEvent("view_db_object: " + obj.getLabel());
+	if (!obj.isEmbedded())
+	  {
+	    setLastEvent("view " + obj.getTypeName() + ":" + obj.getLabel());
+	  }
 
 	// return a copy that knows what GanymedeSession is
 	// looking at it so that it can do per-field visibility
@@ -4203,7 +4206,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (getPerm(obj).isEditable())
       {
-	setLastEvent("edit_db_object: " + obj.getLabel());
+	if (!obj.isEmbedded())
+	  {
+	    setLastEvent("edit " + obj.getTypeName() + ":" + obj.getLabel());
+	  }
 
 	objref = session.editDBObject(invid);
 
@@ -4322,136 +4328,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     checklogin();
     
-    if (getPerm(type, true).isCreatable())
-      {
-	// i think this section of code is actually pretty unlikely to
-	// be executed, as the creation of embedded objects is pretty
-	// much universally performed by manipulating the container
-	// object, but until i verify that and/or make some kind of
-	// definitive decision on that, this code remains
-
-	if (embedded)
-	  {
-	    retVal = session.createDBObject(type, null); // *sync* DBSession
-
-	    if (retVal == null)
-	      {
-		return Ganymede.createErrorDialog("Can't create",
-						  "Can't create new object, the operation was refused");
-	      }
-	    else if (!retVal.didSucceed())
-	      {
-		return retVal;
-	      }
-
-	    newObj = (DBObject) retVal.getObject();
-
-	    setLastEvent("create_db_object: " + newObj.getBase().getName());
-
-	    ReturnVal result = new ReturnVal(true);
-
-	    result.setInvid(newObj.getInvid());
-
-	    if (this.remotelyAccessible)
-	      {
-		try
-		  {
-		    UnicastRemoteObject.exportObject(newObj);
-		  }
-		catch (RemoteException ex)
-		  {
-		    // ex.printStackTrace();
-		  }
-
-		((DBObject) newObj).exportFields();
-	      }
-
-	    result.setObject(newObj);
-
-	    return result;
-	  }
-	else
-	  {
-	    Vector ownerInvids = new Vector();
-
-	    if (newObjectOwnerInvids == null)
-	      {
-		if (ownerList == null)
-		  {
-		    getOwnerGroups(); // *sync*
-		  }
-
-		// if we have only one group possible, we'll assume we're
-		// putting it in that, otherwise since the client hasn't
-		// done a setDefaultOwner() call, if we're running with an
-		// interactive client, return an error dialog telling them
-		// to set the default owner group
-
-		// if we're running non-interactively and we have more than one
-		// choice
-
-		if (ownerList != null && ownerList.size() != 1 && enableWizards)
-		  {
-		    return Ganymede.createErrorDialog("Can't create",
-						      "Can't create new object, no way of knowing which " +
-						      "owner group to place it in");
-		  }
-	      }
-
-	    // calculate ownership for this object
-
-	    // we may have either a vector of Invids in
-	    // newObjectOwnerInvids, or a query result containing a list
-	    // of a single Invid
-	
-	    if (newObjectOwnerInvids != null)
-	      {
-		for (int i = 0; i < newObjectOwnerInvids.size(); i++)
-		  {
-		    ownerInvids.addElement(newObjectOwnerInvids.elementAt(i));
-		  }
-	      }
-	    else if (ownerList != null)
-	      {
-		// if we've only got one possible owner group, set
-		// that.  otherwise, if we're not supergashmode, go
-		// ahead and just pick one so the creator has
-		// ownership over the new object..  since we would
-		// have caught an interactive attempt at object
-		// creation with multiple possible choices before now,
-		// we must be operating in non-interactive mode, and
-		// we'll just have to trust the batch user to set the
-		// ownership of the object subequently, if they care.
-
-		// if we are operating in supergashmode, of course,
-		// the user's session will continue to have ownership
-		// privileges over the object even without setting an
-		// owner, so in that case we again will trust that the
-		// ownership will be explicitly set later on, and we
-		// won't set any owners
-
-		if (ownerList.size() == 1 || !supergashMode)
-		  {
-		    ownerInvids.addElement(ownerList.getInvid(0));
-		  }
-	      }
-
-	    retVal = session.createDBObject(type, null, ownerInvids); // *sync* DBSession
-
-	    if (retVal == null)
-	      {
-		return Ganymede.createErrorDialog("Can't create",
-						  "Can't create new object, the operation was refused");
-	      }
-	    else if (!retVal.didSucceed())
-	      {
-		return retVal;
-	      }
-
-	    newObj = (DBObject) retVal.getObject();
-	  }
-      }
-    else
+    if (!getPerm(type, true).isCreatable())
       {
 	DBObjectBase base = Ganymede.db.getObjectBase(type);
 	
@@ -4470,30 +4347,156 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  error);
       }
 
-    setLastEvent("create_db_object: " + newObj.getBase().getName());
-
-    ReturnVal result = new ReturnVal(true);
-
-    result.setInvid(newObj.getInvid());
-
-    if (this.remotelyAccessible)
+    // i think this section of code is actually pretty unlikely to
+    // be executed, as the creation of embedded objects is pretty
+    // much universally performed by manipulating the container
+    // object, but until i verify that and/or make some kind of
+    // definitive decision on that, this code remains
+    
+    if (embedded)
       {
-	try
+	retVal = session.createDBObject(type, null); // *sync* DBSession
+
+	if (retVal == null)
 	  {
-	    UnicastRemoteObject.exportObject(newObj);
+	    return Ganymede.createErrorDialog("Can't create",
+					      "Can't create new object, the operation was refused");
 	  }
-	catch (RemoteException ex)
+	else if (!retVal.didSucceed())
 	  {
-	    // ex.printStackTrace();
+	    return retVal;
 	  }
 
-	((DBObject) newObj).exportFields();
+	newObj = (DBObject) retVal.getObject();
 
+	setLastEvent("create " + newObj.getTypeName());
+
+	ReturnVal result = new ReturnVal(true);
+
+	result.setInvid(newObj.getInvid());
+
+	if (this.remotelyAccessible)
+	  {
+	    try
+	      {
+		UnicastRemoteObject.exportObject(newObj);
+	      }
+	    catch (RemoteException ex)
+	      {
+		// ex.printStackTrace();
+	      }
+
+	    ((DBObject) newObj).exportFields();
+	  }
+
+	result.setObject(newObj);
+
+	return result;
       }
+    else
+      {
+	Vector ownerInvids = new Vector();
 
-    result.setObject(newObj);
+	if (newObjectOwnerInvids == null)
+	  {
+	    if (ownerList == null)
+	      {
+		getOwnerGroups(); // *sync*
+	      }
 
-    return result;
+	    // if we have only one group possible, we'll assume we're
+	    // putting it in that, otherwise since the client hasn't
+	    // done a setDefaultOwner() call, if we're running with an
+	    // interactive client, return an error dialog telling them
+	    // to set the default owner group
+
+	    // if we're running non-interactively and we have more than one
+	    // choice
+
+	    if (ownerList != null && ownerList.size() != 1 && enableWizards)
+	      {
+		return Ganymede.createErrorDialog("Can't create",
+						  "Can't create new object, no way of knowing which " +
+						  "owner group to place it in");
+	      }
+	  }
+
+	// calculate ownership for this object
+
+	// we may have either a vector of Invids in
+	// newObjectOwnerInvids, or a query result containing a list
+	// of a single Invid
+	
+	if (newObjectOwnerInvids != null)
+	  {
+	    for (int i = 0; i < newObjectOwnerInvids.size(); i++)
+	      {
+		ownerInvids.addElement(newObjectOwnerInvids.elementAt(i));
+	      }
+	  }
+	else if (ownerList != null)
+	  {
+	    // if we've only got one possible owner group, set
+	    // that.  otherwise, if we're not supergashmode, go
+	    // ahead and just pick one so the creator has
+	    // ownership over the new object..  since we would
+	    // have caught an interactive attempt at object
+	    // creation with multiple possible choices before now,
+	    // we must be operating in non-interactive mode, and
+	    // we'll just have to trust the batch user to set the
+	    // ownership of the object subequently, if they care.
+
+	    // if we are operating in supergashmode, of course,
+	    // the user's session will continue to have ownership
+	    // privileges over the object even without setting an
+	    // owner, so in that case we again will trust that the
+	    // ownership will be explicitly set later on, and we
+	    // won't set any owners
+
+	    if (ownerList.size() == 1 || !supergashMode)
+	      {
+		ownerInvids.addElement(ownerList.getInvid(0));
+	      }
+	  }
+
+	retVal = session.createDBObject(type, null, ownerInvids); // *sync* DBSession
+
+	if (retVal == null)
+	  {
+	    return Ganymede.createErrorDialog("Can't create",
+					      "Can't create new object, the operation was refused");
+	  }
+	else if (!retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+
+	newObj = (DBObject) retVal.getObject();
+
+	setLastEvent("create " + newObj.getTypeName());
+
+	ReturnVal result = new ReturnVal(true);
+
+	result.setInvid(newObj.getInvid());
+
+	if (this.remotelyAccessible)
+	  {
+	    try
+	      {
+		UnicastRemoteObject.exportObject(newObj);
+	      }
+	    catch (RemoteException ex)
+	      {
+		// ex.printStackTrace();
+	      }
+
+	    ((DBObject) newObj).exportFields();
+	  }
+
+	result.setObject(newObj);
+	    
+	return result;
+      }
   }
 
   /**
@@ -4637,7 +4640,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  " is not of a type that may be inactivated");
       }
 
-    setLastEvent("inactivate_db_object: " + eObj.getLabel());
+    setLastEvent("inactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
 
     // note!  DBEditObject's finalizeInactivate() method does the
     // event logging
@@ -4707,7 +4710,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 					  "Couldn't check out this object for reactivation");
       }
 
-    setLastEvent("reactivate_db_object: " + eObj.getLabel());
+    setLastEvent("reactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
 
     // note!  DBEditObject's finalizeReactivate() method does the
     // event logging at transaction commit time
@@ -4818,7 +4821,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
       }
 
-    setLastEvent("remove_db_object: " + vObj.getLabel());
+    setLastEvent("delete " + vObj.getTypeName() + ":" + vObj.getLabel());
 
     // we do logging of the object deletion in DBEditSet.commit() when
     // the transaction commits
