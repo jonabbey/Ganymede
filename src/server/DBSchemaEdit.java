@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.50 $
-   Last Mod Date: $Date: 2001/07/06 20:50:24 $
+   Version: $Revision: 1.51 $
+   Last Mod Date: $Date: 2001/07/09 07:15:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -887,6 +887,16 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    base.clearEditor();
 	  }
 
+	// now the namespaces.  we won't worry about the oldNameSpaces, GC should
+	// take care of those for us.
+
+	for (int i = 0; i < store.nameSpaces.size(); i++)
+	  {
+	    DBNameSpace ns = (DBNameSpace) store.nameSpaces.elementAt(i);
+
+	    ns.schemaEditCommit();
+	  }
+
 	// ** need to unlink old objectBases / rootCategory for GC here? **
 
 	// all the bases already have containingHash pointing to
@@ -962,6 +972,13 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// restore the namespace vector
 	store.nameSpaces.setSize(0);
 	store.nameSpaces = oldNameSpaces;
+
+	for (int i = 0; i < store.nameSpaces.size(); i++)
+	  {
+	    DBNameSpace ns = (DBNameSpace) store.nameSpaces.elementAt(i);
+	    
+	    ns.schemaEditAbort();
+	  }
       }
 
     // unlock the server

@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.45 $
-   Last Mod Date: $Date: 2001/06/05 22:56:09 $
+   Version: $Revision: 1.46 $
+   Last Mod Date: $Date: 2001/07/09 07:15:50 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -1855,11 +1855,21 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	  {
 	    if (item.equalsIgnoreCase("<none>"))
 	      {
-		owner.handleReturnVal(fieldDef.setNameSpace(null));
+		ReturnVal retval = owner.handleReturnVal(fieldDef.setNameSpace(null));
+
+		if (retval != null && !retval.didSucceed())
+		  {
+		    refreshFieldEdit(true);
+		  }
 	      }
 	    else
 	      {
-		owner.handleReturnVal(fieldDef.setNameSpace(item));
+		ReturnVal retval = owner.handleReturnVal(fieldDef.setNameSpace(item));
+
+		if (retval != null && !retval.didSucceed())
+		  {
+		    refreshFieldEdit(true);
+		  }
 	      }
 	  }
 	catch (RemoteException rx)

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 2001/07/09 06:34:59 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 2001/07/09 07:15:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1282,7 +1282,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   {
     if (this.saveHash == null)
       {
-	throw new RuntimeException("not in schema edit");
+	return;
       }
 
     this.saveHash = null;
@@ -1296,7 +1296,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   {
     if (this.saveHash == null)
       {
-	throw new RuntimeException("not in schema edit");
+	return;
       }
 
     this.uniqueHash = this.saveHash;
