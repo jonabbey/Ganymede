@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -369,6 +369,11 @@ public class Ganymede {
 	throw new RuntimeException("Couldn't establish internal session: " + ex);
       }
 
+    debug("Fixing up passwords");
+
+    resetadmin = true;
+    startupHook();
+
     if (debug)
       {
 	debug("Sweeping invid links");
@@ -439,6 +444,8 @@ public class Ganymede {
 
     if (resetadmin)
       {
+	System.out.println("Resetting supergash password.");
+
 	internalSession.openTransaction("Ganymede startupHook");
 
 	e_object = (DBEditObject) internalSession.edit_db_object(new Invid(SchemaConstants.PersonaBase,
