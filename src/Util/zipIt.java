@@ -8,8 +8,8 @@
    
    Created: 3 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/02/03 22:57:06 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 1999/02/03 23:00:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ public class zipIt {
    *
    */
 
-  public static boolean createZipFile(String outputFileName, Vector fileNames) throws IOException
+  public static void createZipFile(String outputFileName, Vector fileNames) throws IOException
   {
     File outputFile;
     Vector files = new Vector();
@@ -96,7 +96,7 @@ public class zipIt {
 	files.addElement(new File((String) fileNames.elementAt(i)));
       }
 
-    return zipIt.createZipFile(outputFile, files);
+    zipIt.createZipFile(outputFile, files);
   }
 
   /**
@@ -111,15 +111,15 @@ public class zipIt {
    *
    */
 
-  public static boolean createZipFile(File outputFile, Vector files) throws IOException
+  public static void createZipFile(File outputFile, Vector files) throws IOException
   {
     ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(outputFile)));
 
     try
       {
-	for (int i = 0; i < outputFiles.size(); i++)
+	for (int i = 0; i < files.size(); i++)
 	  {
-	    addZipEntry(zipOut, (File) outputFiles.elementAt(i));
+	    addZipEntry(zipOut, (File) files.elementAt(i));
 	  }
       }
     finally
@@ -140,7 +140,7 @@ public class zipIt {
   private static void addZipEntry(ZipOutputStream zipOut, File zipIn) throws IOException
   {
     BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(zipIn));
-    byte buffer[1024];
+    byte buffer[] = new byte[1024];
     int length;
 
     /* -- */
