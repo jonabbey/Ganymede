@@ -48,9 +48,10 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     panel,
     textPanel,
     mainPanel,
+    dataPanel,
     buttonPanel;
 
-  JLabel
+  JMultiLineLabel
     textLabel;
 
   TableLayout table;
@@ -122,23 +123,32 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 
     objects = Resource.getObjects();
 
+    mainPanel = new JPanel();
+    mainPanel.setLayout(new BorderLayout());
+
+    dataPanel = new JPanel(new BorderLayout());
+    mainPanel.add("Center", dataPanel);
+
     // Set up the text box at the top
 
-    textPanel = new JPanel();
-    textPanel.setLayout(new BorderLayout());
+    JLabel titleLabel = new JLabel(Resource.title, SwingConstants.CENTER);
+    titleLabel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+    titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
+    titleLabel.setOpaque(true);
+    JPanel tPanel = new JPanel();
+    tPanel.add(titleLabel);
+    mainPanel.add("North", tPanel);
 
-    //textLabel = new JMultiLineLabel(Resource.getText());
-    textLabel = new JLabel(Resource.getText());
-    textPanel.add("Center", textLabel);
-      
+    //textPanel = new JPanel();
+    //textPanel.setLayout(new BorderLayout());
+
+    textLabel = new JMultiLineLabel(Resource.getText());
+    //textLabel = new JLabel(Resource.getText());
+    textLabel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+    //textPanel.add("Center", textLabel);
+    dataPanel.add("North", textLabel);
+
     image = Resource.getImage();
-
-    if (image != null)
-      {
-	//	System.out.println("add image");
-	imageCanvas = new JLabel(new ImageIcon(image));
-	textPanel.add("West", imageCanvas);
-      }
 
     buttonPanel = new JPanel();
 
@@ -154,13 +164,18 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	CancelButton.addActionListener(this);
 	buttonPanel.add(CancelButton);
       }
-
-    mainPanel = new JPanel();
-
-    mainPanel.setLayout(new BorderLayout());
-    mainPanel.add("North", textPanel);
-      
+    
     mainPanel.add("South", buttonPanel);
+
+    if (image != null)
+      {
+	//	System.out.println("add image");
+	imageCanvas = new JLabel(new ImageIcon(image));
+	JPanel imagePanel = new JPanel();
+	imagePanel.add(imageCanvas);
+	mainPanel.add("West", imagePanel);
+      }
+
     this.setSize(600, 600);
 
     mainPanel.setBorder(new EtchedBorder());
@@ -173,7 +188,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
       {
 	// System.out.println("objects != null");
 	int numberOfObjects = objects.size();
-
+	
 	if (numberOfObjects > 0) 
 	  {
 	    // System.out.println("objects.size() > 0"); 
@@ -182,7 +197,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	    panel.setLayout(table);
 	    table.rowSpacing(10);
 	      
-	    mainPanel.add("Center", panel); 
+	    dataPanel.add("Center", panel); 
 	      
 	    for (int i = 0; i < numberOfObjects; ++i) 
 	      {
@@ -196,11 +211,6 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		    sf.setCallback(this); 
 		    addRow(panel, sf, st.getLabel(), i);
 		    
-		    if (i == 0)
-		      {
-			sf.requestFocus();
-		      }
-  
 		    componentHash.put(sf, st.getLabel());
 		    valueHash.put(st.getLabel(), "");
 		      
@@ -219,11 +229,6 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		    sf.setCallback(this); 
 		    addRow(panel, sf, pt.getLabel(), i);
 
-		    if (i == 0)
-		      {
-			sf.requestFocus();
-		      }  
-		      
 		    componentHash.put(sf, pt.getLabel());
 		    valueHash.put(pt.getLabel(), "");
 		  }
@@ -235,11 +240,6 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 		    cb.setSelected(bt.getDefault().booleanValue());
 		    addRow(panel, cb, bt.getLabel(), i);
 		      
-		    if (i == 0)
-		      {
-			cb.requestFocus();
-		      }
-  
 		    componentHash.put(cb, bt.getLabel());
 		    valueHash.put(bt.getLabel(), bt.getDefault());
 		      
@@ -268,12 +268,6 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 			ch.addItemListener(this);
 			addRow(panel, ch, ct.getLabel(), i);
 
-			if (i == 0)
-			  {
-			    ch.requestFocus();
-			  }
-  
-			  
 			componentHash.put(ch, ct.getLabel());
 			valueHash.put(ct.getLabel(), (String)items.elementAt(0));
 		      }
@@ -298,11 +292,19 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
       {
 	System.out.println("null objects vector");
       }
+    
+    //Having problems with setting the prefered size of the 
+    // table layout
+    
+    Rectangle r = Resource.frame.getBounds();
+    System.out.println("Bounds: " + r);
+    int width = getPreferredSize().width;
+    int height = getPreferredSize().height;
 
-      //Having problems with setting the prefered size of the 
-      // table layout
-      pack();
-    }
+    
+    setLocation(r.width/2 - r.x - width/2, r.height/2 - r.y - height/2);
+    pack();
+  }
 
 
   public void setVisible(boolean b)
@@ -400,6 +402,11 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     else if (comp instanceof JcheckboxField)
       {
 	String label = (String)componentHash.get(comp);
+	if (label == null)
+	  {
+	    System.out.println("in setValuePerformed from JcheckboxField: label = null");
+	    return true;
+	  }
 	JcheckboxField cbf = (JcheckboxField)comp;
 	Boolean answer = new Boolean(cbf.getValue());
 	valueHash.put(label, answer);
