@@ -124,7 +124,7 @@ public class JErrorValueObject extends JValueObject {
 
   public Object getValue() 
   {
-    return value;
+    return message;
   }
 
   /**
@@ -136,6 +136,6 @@ public class JErrorValueObject extends JValueObject {
 
   public String toString()
   {
-    return source.toString() +  " set " + String.valueOf(value);
+    return source.toString() +  " error (" + message + ")";
   }
 }

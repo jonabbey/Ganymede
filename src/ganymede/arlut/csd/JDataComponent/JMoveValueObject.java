@@ -74,14 +74,15 @@ public class JMoveValueObject extends JValueObject {
   private Component source;
   private Object value = null;
   private int index = -1;
+  private int index2 = -1;
 
   /* -- */
 
-  public JMoveValueObject(Component source, int startIndex, Object value)
+  public JMoveValueObject(Component source, int startIndex, int targetIndex)
   {
     this.source = source;
     this.index = startIndex;
-    this.value = value;
+    this.index2 = targetIndex;
   }
 
   /**
@@ -118,7 +119,7 @@ public class JMoveValueObject extends JValueObject {
 
   public int getIndex2() 
   {
-    return -1;
+    return index2;
   }
 
   /**
@@ -127,7 +128,7 @@ public class JMoveValueObject extends JValueObject {
 
   public Object getValue() 
   {
-    return value;
+    return null;
   }
 
   /**
@@ -139,6 +140,6 @@ public class JMoveValueObject extends JValueObject {
 
   public String toString()
   {
-    return source.toString() +  " move(" + index + ", " + String.valueOf(value) + ")";
+    return source.toString() +  " move(" + index + ", " + index2 + ")";
   }
 }
