@@ -802,7 +802,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    return false;
 	  }
 
-	if (o.getOperationType() == JValueObject.INSERT)
+	if (o instanceof JInsertValueObject)
 	  {
 	    remove.doClick();
 	    return true;
@@ -829,7 +829,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
     else if (o.getSource() == out)
       {
-	if (o.getOperationType() == JValueObject.INSERT)
+	if (o instanceof JInsertValueObject)
 	  {
 	    add.doClick();
 	    return true;

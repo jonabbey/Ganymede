@@ -1,9 +1,9 @@
 
 /*
-   JAddValueObject.java
+   JInsertValueObject.java
 
-   Subclass of JValueObject that represents the addition of a specific
-   value to a list, or selection in JstringListBox or StringSelector.
+   Subclass of JValueObject that represents the double clicking of an
+   item in a JstringListBox or StringSelector.
 
    Created: 25 October 2004
 
@@ -57,42 +57,28 @@ import java.awt.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                 JAddValueObject
+                                                              JInsertValueObject
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Subclass of JValueObject that represents the addition of a specific
- * value to a list, or selection in JstringListBox or StringSelector.</p>
+ * <p>Subclass of JValueObject that represents the double clicking of an
+ * item in a JstringListBox or StringSelector.</p>
  *
  * @version $Revision$ $Date$ $Name:  $
  * @author Jonathan Abbey
  */
 
-public class JAddValueObject extends JValueObject {
+public class JInsertValueObject extends JValueObject {
 
   private Component source;
-  private Object value = null;
   private int index = -1;
 
   /* -- */
 
-  public JAddValueObject(Component source, Object value)
+  public JInsertValueObject(Component source, int index)
   {
     this.source = source;
-    this.value = value;
-  }
-
-  public JAddValueObject(Component source, int index)
-  {
-    this.source = source;
-    this.index = index;
-  }
-
-  public JAddValueObject(Component source, int index, Object value)
-  {
-    this.source = source;
-    this.value = value;
     this.index = index;
   }
 
@@ -139,7 +125,7 @@ public class JAddValueObject extends JValueObject {
 
   public Object getValue() 
   {
-    return value;
+    return null;
   }
 
   /**
@@ -151,13 +137,6 @@ public class JAddValueObject extends JValueObject {
 
   public String toString()
   {
-    if (index != -1)
-      {
-	return source.toString() +  " add(" + String.valueOf(value) + ")";
-      }
-    else
-      {
-	return source.toString() +  " add(" + index + ", " + String.valueOf(value) + ")";
-      }
+    return source.toString() +  " insert(" + index + ")";
   }
 }

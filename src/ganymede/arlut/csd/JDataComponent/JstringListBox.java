@@ -799,9 +799,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 		try
 		  {
-		    ok = callback.setValuePerformed(new JValueObject(this, 
-								     index,
-								     JValueObject.INSERT));
+		    ok = callback.setValuePerformed(new JInsertValueObject(this, index));
 		  }
 		catch (java.rmi.RemoteException rx)
 		  {
