@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.22 $ %D%
+   Version: $Revision: 1.23 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -96,6 +96,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     classname = "";
     classdef = null;
     type_code = 0;
+    label_id = -1;
     fieldHash = new Hashtable();
     objectHash = new Hashtable();
     maxid = 0;
@@ -145,11 +146,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     this(original.store);
     this.editor = editor;
 
+    DBObjectBaseField bf;
+
     synchronized (original)
       {
 	object_name = original.object_name;
 	classname = original.classname;
 	classdef = original.classdef;
+	label_id = original.label_id;
 	type_code = original.type_code;
     
 	// make copies of all the old field definitions
@@ -164,8 +168,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	while (enum.hasMoreElements())
 	  {
 	    field = (DBObjectBaseField) enum.nextElement();
-	    fieldHash.put(field.getKey(),
-			  new DBObjectBaseField(field, editor));
+	    bf = new DBObjectBaseField(field, editor);
+	    bf.base = this;
+	    fieldHash.put(field.getKey(), bf);
 	  }
 
 	// remember the objects
@@ -695,6 +700,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     
     bf = getField(label_id);
 
+    if (bf == null)
+      {
+	return null;
+      }
+
     try
       {
 	return bf.getName();
@@ -953,12 +963,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
 	fieldHash.remove(new Short(bF.getID()));
 
 	Ganymede.debug("field definition " + getName() + ":" + bF.getName() + " removed");
+
+	if (bF.getID() == label_id)
+	  {
+	    label_id = -1;
+	  }
       }
     catch (RemoteException ex)
       {
 	throw new RuntimeException("couldn't remove field due to remote error: " + ex);
       }
-
+    
     return true;
   }
 
