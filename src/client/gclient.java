@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.73 $ %D%
+   Version: $Revision: 1.74 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2240,7 +2240,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     if (obj == null)
       {
-	throw new RuntimeException("Could not create object for some reason.  Check the Admin console.");
+	showErrorMessage("Could not create object for some reason.  Check the Admin console, or the server debuggin information.");
+	throw new RuntimeException("Could not create object for some reason- server returned a null object.  Check the Admin console.");
       }
 
     if (showNow)
