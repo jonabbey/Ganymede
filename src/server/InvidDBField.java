@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.55 $ %D%
+   Version: $Revision: 1.56 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -648,11 +648,13 @@ public final class InvidDBField extends DBField implements invid_field {
    * @param oldRemote the old invid to be replaced
    * @param newRemote the new invid to be linked
    *
+   * @return null on success, or a ReturnVal with an error dialog encoded on failure
+   *
    * @see unbind
    *
    */
 
-  private boolean bind(Invid oldRemote, Invid newRemote, boolean local)
+  private ReturnVal bind(Invid oldRemote, Invid newRemote, boolean local)
   {
     short targetField;
 
@@ -671,6 +673,8 @@ public final class InvidDBField extends DBField implements invid_field {
     boolean 
       anonymous = false,
       anonymous2 = false;
+
+    ReturnVal retVal = null;
 
     /* -- */
 
@@ -704,7 +708,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if ((oldRemote != null) && oldRemote.equals(newRemote))
       {
-	return true;
+	return null;		// success
       }
 
     // check out the old object and the new object
@@ -736,7 +740,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (oldRef == null)
 	  {
 	    setLastError("couldn't check out old invid " + oldRemote + " for symmetry maintenance");
-	    return false;
+	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink old reference",
+					      "Your operation could not succeed because field " + getName() +
+					      " was linked to a remote reference " + oldRef.toString() + 
+					      " that could not be found for unlinking.\n\n" +
+					      "This is a serious logic error in the server.");
 	  }
 
 	try
@@ -746,8 +754,24 @@ public final class InvidDBField extends DBField implements invid_field {
 	catch (ClassCastException ex)
 	  {
 	    setLastError("InvidDBField.bind: invid target field designated in schema is not an invid field");
-	    throw new IllegalArgumentException("invid target field designated in schema is not an invid field: " +
-					       getName() + " in object " + owner.getLabel());
+
+	    try
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink old reference",
+						  "Your operation could not succeed due to an error in the " +
+						  "server's schema.  Target field " + 
+						  oldRef.getField(targetField).getName() +
+						  " in object " + oldRef.getLabel() +
+						  " is not an invid field.");
+	      }
+	    catch (RemoteException rx)
+	      {
+		return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink old reference",
+						  "Your operation could not succeed due to an error in the " +
+						  "server's schema.  Target field " + targetField +
+						  " in object " + oldRef.getLabel() +
+						  " is not an invid field.");
+	      }
 	  }
 	
 	if (oldRefField == null)
@@ -760,8 +784,13 @@ public final class InvidDBField extends DBField implements invid_field {
 	      ":" + getName() + "> in <" + oldRef.getLabel() + ":" + targetField + ">";
 	    
 	    setLastError(tempString);
-	    
-	    throw new RuntimeException(tempString);
+
+	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't unlink old reference",
+					      "Your operation could not succeed due to a possible inconsistency in the " +
+					      "server database.  Target field number " + targetField +
+					      " in object " + oldRef.getLabel() +
+					      " does not exist, or you do not have permission to access " +
+					      "this field.");
 	  }
       }
 
@@ -789,7 +818,11 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	setLastError("couldn't check out new invid " + newRemote + " (" + 
 		     session.getGSession().viewObjectLabel(newRemote) + ") for symmetry maintenance");
-	return false;
+
+	return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
+					  "Your operation could not succeed because field " + getName() +
+					  " could not be linked to " + newRemote.toString() + 
+					  ".  This could be due to a lack of permissions.");
       }
 
     try
@@ -799,8 +832,25 @@ public final class InvidDBField extends DBField implements invid_field {
     catch (ClassCastException ex)
       {
 	setLastError("invid target field designated in schema is not an invid field");
-	throw new IllegalArgumentException("invid target field designated in schema is not an invid field: " +
-					   getName() + " in object " + owner.getLabel());
+
+	try
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
+					      "Your operation could not succeed due to an error in the " +
+					      "server's schema.  Target field " + 
+					      newRef.getField(targetField).getName() +
+					      " in object " + newRef.getLabel() +
+					      " is not an invid field.");
+	  }
+	catch (RemoteException rx)
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
+					      "Your operation could not succeed due to an error in the " +
+					      "server's schema.  Target field " + 
+					      targetField +
+					      " in object " + newRef.getLabel() +
+					      " is not an invid field.");
+	  }
       }
     
     if (newRefField == null)
@@ -813,20 +863,28 @@ public final class InvidDBField extends DBField implements invid_field {
 	  ":" + getName() + "> in <" + newRef.getLabel() + ":" + targetField + ">";
 
 	setLastError(tempString);
-	
-	throw new RuntimeException(tempString);
+
+	return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link new reference",
+					  "Your operation could not succeed due to a possible inconsistency in the " +
+					  "server database.  Target field number " + targetField +
+					  " in object " + newRef.getLabel() +
+					  " does not exist, or you do not have permission to access " +
+					  "this field.");
       }
 
     if (oldRefField != null)
       {
- 	if (!oldRefField.dissolve(owner.getInvid(), (anonymous||local)))
+        retVal = oldRefField.dissolve(owner.getInvid(), (anonymous||local));
+
+ 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    setLastError("couldn't dissolve old field symmetry with " + oldRef);
-	    return false;
+	    return retVal;
 	  }
       }
-	    
-    if (!newRefField.establish(owner.getInvid(), (anonymous2||local)))
+    
+    retVal = newRefField.establish(owner.getInvid(), (anonymous2||local));
+
+    if (retVal != null && !retVal.didSucceed())
       {
 	// oops!  try to undo what we did.. this probably isn't critical
 	// because something above us will do a rollback, but it's polite.
@@ -837,10 +895,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	
 	setLastError("couldn't establish field symmetry with " + newRef);
-	return false;
+
+	return retVal;
       }
 
-    return true;
+    return null;		// success
   }
 
   /**
@@ -850,9 +909,11 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    * @param remote An invid for an object to be checked out and unlinked
    *
+   * @return null on success, or a ReturnVal with an error dialog encoded on failure
+   *
    */
 
-  private boolean unbind(Invid remote, boolean local)
+  private ReturnVal unbind(Invid remote, boolean local)
   {
     short targetField;
 
@@ -917,7 +978,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (oldRef == null)
 	  {
-	    return true;		// it's not there, so we are certainly unbound, no?
+	    return null;		// it's not there, so we are certainly unbound, no?
 	  }
       }
     else
@@ -928,11 +989,18 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    if (session.viewDBObject(remote) == null)
 	      {
-		return true;	// it's not there, so we are certainly unbound, no?
+		return null;	// it's not there, so we are certainly unbound, no?
 	      }
 	    else
 	      {
-		return false;	// it's there, but we can't unlink it
+		// it's there, but we can't unlink it
+
+		return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
+						  "We couldn't unlink field " + getName() +
+						  " in object " + getOwner().getLabel() +
+						  " from field " + targetField + " in object " +
+						  session.getGSession().viewObjectLabel(remote) + 
+						  " due to a permissions problem.");
 	      }
 	  }
       }
@@ -943,8 +1011,22 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     catch (ClassCastException ex)
       {
-	throw new IllegalArgumentException("invid target field designated in schema is not an invid field " +
-					   getName() + " in object " + owner.getLabel());
+	try
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
+					      "Your operation could not succeed due to an error in the " +
+					      "server's schema.  Target field " + oldRef.getField(targetField).getName() +
+					      " in object " + oldRef.getLabel() +
+					      " is not an invid field.");
+	  }
+	catch (RemoteException rx)
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
+					      "Your operation could not succeed due to an error in the " +
+					      "server's schema.  Target field " + targetField +
+					      " in object " + oldRef.getLabel() +
+					      " is not an invid field.");
+	  }
       }
 
     if (oldRefField == null)
@@ -952,16 +1034,22 @@ public final class InvidDBField extends DBField implements invid_field {
 	// editDBObject() will create undefined fields for all fields defined
 	// in the DBObjectBase, so if we got a null result we have a schema
 	// corruption problem.
-	
-	throw new RuntimeException("target field not defined in schema");
+
+	return Ganymede.createErrorDialog("InvidDBField.unbind(): Couldn't unlink old reference",
+					  "Your operation could not succeed due to a possible inconsistency in the " +
+					  "server database.  Target field number " + targetField +
+					  " in object " + oldRef.getLabel() +
+					  " does not exist, or you do not have permission to access " +
+					  "this field.");
       }
 
     try
       {
-	if (!oldRefField.dissolve(owner.getInvid(), anon||local))
+	ReturnVal retVal = oldRefField.dissolve(owner.getInvid(), anon||local);
+
+	if (retVal != null && !retVal.didSucceed())
 	  {
-	    setLastError("couldn't dissolve old field symmetry with " + oldRef);
-	    return false;
+	    return retVal;
 	  }
       }
     catch (IllegalArgumentException ex)
@@ -980,7 +1068,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw (IllegalArgumentException) ex;
       }
 	
-    return true;
+    return null;
   }
 
   /**
@@ -997,7 +1085,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  synchronized boolean dissolve(Invid oldInvid, boolean local)
+  synchronized ReturnVal dissolve(Invid oldInvid, boolean local)
   {
     int 
       index = -1;
@@ -1042,7 +1130,7 @@ public final class InvidDBField extends DBField implements invid_field {
 			   " called with an unbound invid (vector): " + 
 			   oldInvid.toString());
 
-	    return true;	// we're already dissolved, effectively
+	    return null;	// we're already dissolved, effectively
 	  }
 
 	if (eObj.finalizeDeleteElement(this, index))
@@ -1051,12 +1139,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    defined = (values.size() > 0 ? true : false);
 
-	    return true;
+	    return null;
 	  }
 	else
 	  {
 	    setLastError("InvidDBField remote dissolve: couldn't finalizeDeleteElement");
-	    return false;
+
+	    return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeDeleteElement",
+					      "The custom plug-in class for object " + eObj.getLabel() +
+					      "refused to allow us to clear out all the references in field " + 
+					      getName());
 	  }
       }
     else
@@ -1071,12 +1163,17 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (eObj.finalizeSetValue(this, null))
 	  {
 	    value = null;
-	    return true;
+	    return null;
 	  }
 	else
 	  {
 	    setLastError("InvidDBField remote dissolve: couldn't finalizeSetValue");
-	    return false;
+
+	    return Ganymede.createErrorDialog("InvidDBField.dissolve(): couldn't finalizeSetValue",
+					      "The custom plug-in class for object " + 
+					      eObj.getLabel() +
+					      "refused to allow us to clear out the reference in field " + 
+					      getName());
 	  }
       }
   }
@@ -1095,12 +1192,14 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  synchronized boolean establish(Invid newInvid, boolean local)
+  synchronized ReturnVal establish(Invid newInvid, boolean local)
   {
     Invid 
       tmp = null;
 
     DBEditObject eObj;
+    
+    ReturnVal retVal;
 
     /* -- */
 
@@ -1117,19 +1216,29 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (size() >= getMaxArraySize())
 	  {
 	    setLastError("InvidDBField remote establish: vector overrun");
-	    return false;
+
+	    return Ganymede.createErrorDialog("InvidDBField.establish(): field overrun",
+					      "Couldn't establish a new linkage in vector field " + getName() +
+					      " in object " + getOwner().getLabel() +
+					      "because the vector field is already at maximum capacity");
 	  }
 
 	if (eObj.finalizeAddElement(this, newInvid))
 	  {
 	    values.addElement(newInvid);
 	    defined = true;
-	    return true;
+
+	    return null;
 	  }
 	else
 	  {
 	    setLastError("InvidDBField remote establish: finalize returned false");
-	    return false;
+
+	    return Ganymede.createErrorDialog("InvidDBField.establish(): field addvalue refused",
+					      "Couldn't establish a new linkage in vector field " + getName() +
+					      " in object " + getOwner().getLabel() +
+					      "because the custom plug in code for this object refused to " +
+					      "approve the operation.");
 	  }
       }
     else
@@ -1144,13 +1253,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	    
 	    if (tmp.equals(newInvid))
 	      {
-		return true;	// already linked
+		return null;	// already linked
 	      }
 
-	    if (!unbind(tmp, local))
+	    retVal = unbind(tmp, local);
+
+	    if (retVal != null && !retVal.didSucceed())
 	      {
-		setLastError("InvidDBField remote establish: couldn't unbind old value");
-		return false;
+		return retVal;
 	      }
 	  }
 
@@ -1158,15 +1268,23 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    value = newInvid;
 	    defined = true;
-	    return true;
+
+	    return null;
 	  }
 	else
 	  {
-	    if (!bind(null, tmp, local))	// this should always work
+	    retVal = bind(null, tmp, local); // should always work
+
+	    if (retVal != null && !retVal.didSucceed())	
 	      {
 		throw new RuntimeException("couldn't rebind a value " + tmp + " we just unbound.. sync error");
 	      }
-	    return false;
+
+	    return  Ganymede.createErrorDialog("InvidDBField.establish(): field set value refused",
+					       "Couldn't establish a new linkage in field " + getName() +
+					       " in object " + getOwner().getLabel() +
+					       "because the custom plug in code for this object refused to " +
+					       "approve the operation.");
 	  }
       }
   }
@@ -1464,19 +1582,23 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newRemote != null)
       {
-	if (!bind(oldRemote, newRemote, local))
-	  {
-	    setLastError("InvidDBField setValue: couldn't bind");
+	newRetVal = bind(oldRemote, newRemote, local);
 
-	    return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
-					      "InvidDBField setValue: couldn't bind");
+	if (newRetVal != null && !newRetVal.didSucceed())
+	  {
+	    return newRetVal;
 	  }
       }
     else
       {
 	if (oldRemote != null)
 	  {
-	    unbind(oldRemote, local);
+	    newRetVal = unbind(oldRemote, local);
+
+	    if (newRetVal != null && !newRetVal.didSucceed())
+	      {
+		return newRetVal;
+	      }
 	  }
       }
 
@@ -1509,12 +1631,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	setLastError("InvidDBField setValue: couldn't finalize");
 
+	// we don't much care about the success of the following two
+	// operations.. they really *should* work because they are
+	// undoing what we just did, but we already have an error
+	// condition to report.
+
 	unbind(newRemote, local);
 	bind(null, oldRemote, local);
 
 	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
 					  "InvidDBField setValue: couldn't finalize");
-
       }
   }
 
@@ -1591,10 +1717,11 @@ public final class InvidDBField extends DBField implements invid_field {
     
     // try to do the binding
 
-    if (!bind(oldRemote, newRemote, local))
+    newRetVal = bind(oldRemote, newRemote, local);
+
+    if (newRetVal != null && !newRetVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setElement()",
-					  getLastError());
+	return newRetVal;
       }
 
     // check our owner, do it.  Checking our owner should
@@ -1608,6 +1735,11 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
+	// we don't much care about the success of the following two
+	// operations.. they really *should* work because they are
+	// undoing what we just did, but we already have an error
+	// condition to report.
+
 	unbind(newRemote, local);
 	bind(null, oldRemote, local);
 
@@ -1657,7 +1789,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!verifyNewValue(value))
       {
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElement()",
+	return Ganymede.createErrorDialog("InvidDBField.addElement() - bad value submitted",
 					  getLastError());
       }
 
@@ -1665,7 +1797,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	setLastError("Field " + getName() + " already at or beyond array size limit");
 
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElement()",
+	return Ganymede.createErrorDialog("InvidDBField.addElement() - vector overflow",
 					  "Field " + getName() + " already at or beyond array size limit");
       }
 
@@ -1689,22 +1821,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    if (!bind(null, remote, local))
-      {
-	setLastError("Couldn't bind reverse pointer");
+    newRetVal = bind(null, remote, local);
 
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElement()",
-					  "Couldn't bind reverse pointer\n" + getLastError());
+    if (newRetVal != null && !newRetVal.didSucceed())
+      {
+	return newRetVal;
       }
 
     if (eObj.finalizeAddElement(this, value)) 
       {
 	values.addElement(value);
-
-	//	if (debug)
-	//	  {
-	//	    setLastError("InvidDBField debug: successfully added " + value);
-	//	  }
 
 	defined = true;		// very important!
 
@@ -1712,9 +1838,14 @@ public final class InvidDBField extends DBField implements invid_field {
       } 
     else
       {
+	// we don't much care about the success of the following
+	// operation.. it really *should* work because it is
+	// undoing what we just did, but we already have an error
+	// condition to report.
+
 	unbind(remote, local);
 
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElement()",
+	return Ganymede.createErrorDialog("InvidDBField.addElement() - custom logic reject",
 					  "Couldn't finalize\n" + getLastError());
       }
   }
@@ -1881,10 +2012,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    if (!unbind(remote, local))
+    newRetVal = unbind(remote, local);
+
+    if (newRetVal != null && !newRetVal.didSucceed())
       {
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElement()",
-					  "Couldn't unbind old value\n" + getLastError());
+	return newRetVal;
       }
 
     if (eObj.finalizeDeleteElement(this, index))
@@ -1920,7 +2052,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	bind(null, remote, local);
 
-	return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElement()",
+	return Ganymede.createErrorDialog("InvidDBField.deleteElement() - custom code rejected element deletion",
 					  "Couldn't finalize\n" + getLastError());
       }
   }
