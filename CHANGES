@@ -62,10 +62,11 @@ detected on demand.
 Turned off passive password capture.  Ganymede stores passwords in a
 variety of hashed forms, strings that can be used for validating a
 password but not in retrieving the password without the use of a
-brute-force encryption search.  Plaintext is never saved on disk.
-Things like sync'ing passwords to Windows NT which require plaintext
-passwords have to obtain them from temporary storage in the Ganymede
-server.
+brute-force encryption search.  Plaintext is never saved on disk
+unless the password field is specifically configured to do so in the
+Ganymede schema.  Things like sync'ing passwords to Windows NT which
+require plaintext passwords have to obtain them from temporary storage
+in the Ganymede server.
  
 Formerly, whenever a user logged into Ganymede, Ganymede would
 temporarily acquire and retain the plaintext used to login to Ganymede
@@ -76,15 +77,15 @@ change their passwords in order for their account to be sync'ed.
 Unfortunately, it turns out that the password identity validation is
 not perfect.  A UNIX password hashed using the traditional Unix
 crypt() routine is only significant to 8 characters.  If a user logged
-into Ganymede for the first time since server restart with a version
-of their password that was correct to 8 characters but then diverged
-in the ninth, then Ganymede would remember the incorrect plaintext,
-and insist on seeing it again before allowing the user to login until
-such time as the server was restarted, and the plaintext password
-information was lost.  Worse, such carelessly entered passwords could
-get propagated to our Windows NT domain controller in their erroneous
-form, and Windows NT's password hashing is significant to 14
-characters.
+into Ganymede for the first time since the Ganymede server was
+restarted with a mistyped version of their password that was correct
+to 8 characters but then diverged in the ninth, Ganymede would
+remember the incorrect plaintext, and insist on seeing it again before
+allowing the user to login until such time as the server was
+restarted, and the plaintext password information was lost.  Worse,
+such carelessly entered passwords could get propagated to our Windows
+NT domain controller in their erroneous form, and Windows NT's
+password hashing is significant to 14 characters.
  
 This is not a reasonable or tenable situation, so the passive
 plaintext password capture logic has been disabled.
