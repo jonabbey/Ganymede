@@ -396,7 +396,7 @@ _5. Running the Ganymede Server_
    possibility of exceptions in the server, I'd recommend you leave the
    debug=xxx parameter as you find it. The _installServer_ script will
    install the runServer script with the debug option set to generate a
-   _debug.log_ file in your server's top-level directory.
+   debug.log file in your server's top-level directory.
    
    While the server is running, you should see two separate Java
    processes running, one for the rmiregistry, and one for the Ganymede
@@ -647,4 +647,4 @@ _8. Prepare web access clients_
    
     Jonathan Abbey
     
-   Last modified: Wed Jan 31 03:05:17 CST 2001
+   Last modified: Wed Jan 31 03:32:39 CST 2001
