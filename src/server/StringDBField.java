@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/01/22 18:05:55 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 1999/03/12 20:41:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -210,12 +210,12 @@ public class StringDBField extends DBField implements string_field {
 
 	for (int i = 0; i < count; i++)
 	  {
-	    values.addElement(in.readUTF());
+	    values.addElement(in.readUTF().intern());
 	  }
       }
     else
       {
-	value = in.readUTF();
+	value = in.readUTF().intern();
       }
   }
 
