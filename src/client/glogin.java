@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.69 $
-   Last Mod Date: $Date: 2001/03/29 05:33:58 $
+   Version: $Revision: 1.70 $
+   Last Mod Date: $Date: 2002/03/13 05:58:13 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -90,7 +90,7 @@ import arlut.csd.Util.PackageResources;
  * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Revision: 1.69 $ $Date: 2001/03/29 05:33:58 $ $Name:  $
+ * @version $Revision: 1.70 $ $Date: 2002/03/13 05:58:13 $ $Name:  $
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -274,7 +274,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     my_glogin.getContentPane().setLayout(new BorderLayout());
 
-    my_frame = new JFrame("Ganymede Client");
+    my_frame = new gloginFrame("Ganymede Client", my_glogin);
 
     appletContentPane = my_frame.getContentPane();
 
@@ -903,7 +903,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
- * @version $Revision: 1.69 $ $Date: 2001/03/29 05:33:58 $ $Name:  $
+ * @version $Revision: 1.70 $ $Date: 2002/03/13 05:58:13 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -997,7 +997,7 @@ class DeathWatcherThread extends Thread {
  * any case, when the timer counts down to zero, the glogin's logout() method 
  * will be called, and the client's main window will be shutdown.</p>
  *
- * @version $Revision: 1.69 $ $Date: 2001/03/29 05:33:58 $ $Name:  $
+ * @version $Revision: 1.70 $ $Date: 2002/03/13 05:58:13 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1049,5 +1049,62 @@ class ExitThread extends Thread {
   public void dieNow()
   {
     this.dieNow = true;
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+							             gloginFrame
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>JFrame subclass which is used to hold the {@link
+ * arlut.csd.ganymede.client.glogin glogin} applet when the Ganymede
+ * client is run as an application rather than an applet.</p>
+ */
+
+class gloginFrame extends JFrame {
+
+  static final boolean debug = false;
+  glogin client;
+
+  /* -- */
+  
+  public gloginFrame(String title, glogin client)
+  {
+    super(title);
+    this.client = client;
+    enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+  }
+
+  protected void processWindowEvent(WindowEvent e) 
+  {
+    if (e.getID() == WindowEvent.WINDOW_CLOSING)
+      {
+	if (debug)
+	  {
+	    System.out.println("Window closing");
+	  }
+
+	if (client._quitButton.isEnabled())
+	  {
+	    if (debug)
+	      {
+		System.out.println("It's ok to log out.");
+	      }
+
+	    System.exit(0);
+	    super.processWindowEvent(e);
+	  }
+	else if (debug)
+	  {
+	    System.out.println("No log out!");
+	  }
+      }
+    else
+      {
+	super.processWindowEvent(e);
+      }
   }
 }
