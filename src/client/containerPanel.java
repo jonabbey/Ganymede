@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.62 $ %D%
+    Version: $Revision: 1.63 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -594,7 +594,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("There are " + infoVector.size() + " things in the info vector.");
 	    System.out.println("There are " + rowHash.size() + " things in the row hash.");
 	    System.out.println("Valid ids: ");
+
 	    Enumeration k = shortToComponentHash.keys();
+
 	    while (k.hasMoreElements())
 	      {
 		System.out.println("   " + k.nextElement());
@@ -637,7 +639,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Updating " + field.getName() + " " + comp); 
 	  }
 	
-
 	if (field == null)
 	  {
 	    System.out.println("-----Field is null, skipping.");
@@ -882,6 +883,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 		
 		QueryResult qr = invf.choices();
+
 		if (qr != null)
 		  {
 		    choiceHandles = qr.getListHandles();
@@ -1193,7 +1195,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return;
       }
     
-    while(comps.hasMoreElements())
+    while (comps.hasMoreElements())
       {
 	c = (JComponent)comps.nextElement();
 	label = (JLabel)rowHash.get(c);
@@ -1714,6 +1716,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     catch (Exception ex)
       {
 	// An exception was thrown, most likely from the server.  We need to revert the check box.
+
 	System.out.println("Exception occured in containerPanel.actionPerformed: " + ex);
 
 	try
@@ -2897,7 +2900,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
         Invid currentChoice = (Invid) fieldInfo.getValue();
 	String currentChoiceLabel = gc.getSession().viewObjectLabel(currentChoice);
 
-	System.out.println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
+	if (debug)
+	  {
+	    System.out.println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
+	  }
 	
 	listHandle currentListHandle = null;
 	listHandle noneHandle = new listHandle("<none>", null);
@@ -3179,6 +3185,7 @@ class stringComboNoneListener implements ItemListener {
 	else if (item.equals("<none>"))
 	  {
 	    combo.removeItem("<none>");
+
 	    if (debug)
 	      {
 		System.out.println("stringComboNoneListener: I'm outta here!");
