@@ -1,11 +1,11 @@
 Ganymede Release 0.98
-February ??, 1999
+March 17, 1999
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.97 to 0.98 -------------------
 
-RELEASE DATE: February ??, 1999
+RELEASE DATE: March 17, 1999
 
 1. [BUILD] Ganymede build scripts moved out of db/out to db
 
@@ -70,10 +70,6 @@ wanted the client to prevent the user from ever trying to delete
 an object that can be inactivated.  And besides, the user might
 be operating with supergash privileges.
 
-In conjunction with this, took out the inactivation stubs for the
-linux and bsd schema kits, where there wasn't really any inactivation
-logic present.
-
 6. [SCHEMA] Lots of refinements to gasharl schema
 
 Modified the loader code to use BufferedReader, and to take care
@@ -82,7 +78,13 @@ be a good bit faster now.
 
 The GASHARL schema now includes fields in the admin persona and owner
 group objects to track information used for more complete GASH
-compatibility.
+compatibility.  New users and groups will be created with their
+uid and gid starting in a numeric range compatible with GASH's
+permission model if the owner group has a minimum uid/gid set.
+
+The GASHARL schema now includes support for handling ARL contract
+information, which will be of no interest to anyone outside the
+lab.
 
 7. [CLIENT] Reworked the persona select handling
 
@@ -93,6 +95,66 @@ persona selection dialog on log-in.
 
 Oops.  DBStore had my home directory path hard-coded when it
 should have been using the ganymede.htmldump property.  Fixed.
+
+9. [SERVER] Fixed a bug preventing creating new object types in develop mode
+
+The server's schema editing code had a bug that caused it to reject
+the creation of new object types when the server was run with -develop
+on the command line, which allowed for the creation of new universal
+fields.  Not a bug that anyone else should have run into, but some
+aspects of this bug had the server doing some unnecessary extra work.
+
+10. [CLIENT] Changed date representation in the query table
+
+The query table will now use 4 digit years when showing dates.
+
+11. [CLIENT] Fixed Calendar GUI
+
+Previously, viewing an object that had date fields in it was not
+handled properly.. the date field in most respects did not act
+properly (clear button, calendar popped up in edit mode, etc.).
+
+Fixed bug in JPanelCalendar which caused the calendar's year field not
+to be refreshed properly upon rejecting a date as out of range.
+
+12. [CLIENT] Fixed stupid lingering 'working guy' window bug
+
+Fixed the problem with the 'working' internal frame not being properly
+disposed of, and with it being hidden behind existing windows when
+created.
+
+13. [CLIENT] Redesigned query dialog
+
+The querybox has been redesigned for clarity and user-friendliness.
+
+14. [SERVER] Optimized memory handling for strings
+
+All strings loaded into the database are now interned(), trading
+database load time for memory/runtime efficiency.  Not sure that this
+makes a noticeable difference, but it will be of some help.
+
+15. [CLIENT] Fixed dialog placement and sizing errors
+
+The JCenterDialog placement code was broken if the dialog was larger
+than the frame parenting it.  All Ganymede dialogs should now always
+be entirely visible on screen.
+
+The JCenterDialog's pack() method improperly adjusted the size of
+centered dialogs, causing the edges of centered dialogs to be too
+small.  All dialogs should now be properly sized on NT as well as
+UNIX.
+
+16. [SERVER] Empty strings are considered undefined in StringDBField
+
+The server's required fields logic wasn't detecting an empty string (a
+string equal to "" rather than null) as an undefined field, which it
+should do and now does.
+
+17. [SERVER] Improved error reporting paths in server
+
+Changed the verifyNewValue() methods in DBField and DBEditObject
+to return a ReturnVal so that those methods can pass back detailed
+error dialogs to the user.
 
 -------------------- Changes from 0.96 to 0.97 -------------------
 
