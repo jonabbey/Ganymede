@@ -2,7 +2,7 @@
 
    LDAPBuilderTask.java
 
-   This class is intended to dump the Directory Droid datastore to a Mac OS
+   This class is intended to dump the Ganymede datastore to a Mac OS
    X/RFC 2307 LDAP environment by way of LDIF.
    
    Created: 22 March 2004
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,12 +67,12 @@ import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.crypto.Base64;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeBuilderTask;
-import arlut.csd.ddroid.server.PasswordDBField;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeBuilderTask;
+import arlut.csd.ganymede.server.PasswordDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -82,7 +82,7 @@ import arlut.csd.ddroid.server.PasswordDBField;
 
 /**
  *
- * This class is intended to dump the Directory Droid datastore to a Mac OS
+ * This class is intended to dump the Ganymede datastore to a Mac OS
  * X/RFC 2307 LDAP environment by way of LDIF.
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu

@@ -2,7 +2,7 @@
 
    GASHBuilderTask.java
 
-   This class is intended to dump the Directory Droid datastore to GASH.
+   This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
    Last Mod Date: $Date$
@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,15 +66,15 @@ import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBField;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeBuilderTask;
-import arlut.csd.ddroid.server.IPDBField;
-import arlut.csd.ddroid.server.InvidDBField;
-import arlut.csd.ddroid.server.PasswordDBField;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeBuilderTask;
+import arlut.csd.ganymede.server.IPDBField;
+import arlut.csd.ganymede.server.InvidDBField;
+import arlut.csd.ganymede.server.PasswordDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -84,7 +84,7 @@ import arlut.csd.ddroid.server.PasswordDBField;
 
 /**
  *
- * This class is intended to dump the Directory Droid datastore to GASH.
+ * This class is intended to dump the Ganymede datastore to GASH.
  *
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
@@ -411,7 +411,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * broccol:393T6k3e/9/w2:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh:ss#:normal:exp:lastadm
    *
-   * @param object An object from the Directory Droid user object base
+   * @param object An object from the Ganymede user object base
    * @param writer The destination for this user line
    *
    */
@@ -686,7 +686,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * adgacc:ZzZz:4015:hammp,jgeorge,dd,doodle,dhoss,corbett,monk
    *
-   * @param object An object from the Directory Droid user object base
+   * @param object An object from the Ganymede user object base
    * @param writer The destination for this user line
    *
    */
@@ -792,7 +792,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * adgacc:ITL,ATL
    *
-   * @param object An object from the Directory Droid user object base
+   * @param object An object from the Ganymede user object base
    * @param writer The destination for this user line
    *
    */
@@ -1243,7 +1243,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   /**
    *
    * This method generates an auto.vol file, along with auto.home.*
-   * files for all automounter records in the Directory Droid database.
+   * files for all automounter records in the Ganymede database.
    *
    */
 
@@ -1502,7 +1502,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * alias, which the GASH makefile configures sendmail to rewrite as the
    * From: line.
    *
-   * @param object An object from the Directory Droid user object base
+   * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
    */
 
@@ -1589,11 +1589,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * </pre>
    *
    * Where the leading colon identifies to the GASH makefile that it is a group
-   * line and 'oms' is the GASH ownership code.  Directory Droid won't try to emit
+   * line and 'oms' is the GASH ownership code.  Ganymede won't try to emit
    * a GASH ownership code that could be used to load the aliases_info file
    * back into GASH.
    *
-   * @param object An object from the Directory Droid user object base
+   * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
    *
    */
@@ -1665,10 +1665,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * Where the leading < identifies to GASH and the GASH makefile that
    * it is an external user line and 'omj' is the GASH ownership code.
-   * Directory Droid won't try to emit a GASH ownership code that could be
+   * Ganymede won't try to emit a GASH ownership code that could be
    * used to load the aliases_info file back into GASH.
    *
-   * @param object An object from the Directory Droid user object base
+   * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
    * 
    */
@@ -2007,7 +2007,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * sections list users and groups that have recently been deleted,
    * and which need to be removed from the Samba/NT databases.</P>
    *
-   * <P>In actuality, the way the Directory Droid server is structured, this
+   * <P>In actuality, the way the Ganymede server is structured, this
    * method has no way of reporting on users and groups that have been
    * renamed or deleted in the server; the GASHBuilderTask is executed
    * after the transaction in which a deletion or rename occurs has
@@ -2024,14 +2024,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * <P>This necessity for external scratchpad files is ugly, but
    * necessary unless very significant modifications are made to the
-   * Directory Droid server.  The Directory Droid server would have to be able
+   * Ganymede server.  The Ganymede server would have to be able
    * to provide builder tasks the ability to scan backwards in time
    * through the database, which it currently cannot do, or the
    * server would have to tie transaction commit synchronously to
    * the builder task system.  In either case, a tricky problem, so
    * for now we just work around it.</P>
    *
-   * <P>Sooner or later, the Directory Droid server may need to have some
+   * <P>Sooner or later, the Ganymede server may need to have some
    * support for differential changes added.  The current Ganymede
    * server mechanisms really only suits the case where the builder
    * tasks simply write out the current state of the database without
@@ -2042,7 +2042,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * for remembering at all times the known state of users and groups
    * created by Ganymede, and to delete users and groups that are
    * missing in a future dump.  User and group renaming would still need
-   * to be explicitly handled by the Directory Droid server in some fashion,
+   * to be explicitly handled by the Ganymede server in some fashion,
    * though.</P>
    */
 
@@ -2888,7 +2888,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * </pre>
    *
-   * @param object An object from the Directory Droid system object base
+   * @param object An object from the Ganymede system object base
    * @param writer The destination for this system line
    *
    */
@@ -3041,7 +3041,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * for a single-interface system.
    *
-   * @param object An object from the Directory Droid system object base
+   * @param object An object from the Ganymede system object base
    * @param writer The destination for this system line
    *
    */

@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,14 +50,14 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBEditObject;
-import arlut.csd.ddroid.server.DBEditSet;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.DBObjectBase;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.DBEditSet;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.DBObjectBase;
 
 
 /*------------------------------------------------------------------------------
@@ -68,13 +68,13 @@ import arlut.csd.ddroid.server.DBObjectBase;
 
 /**
  * This class is the custom plug-in to handle the user category object
- * type in the Directory Droid server.<br>
+ * type in the Ganymede server.<br>
  *
  * <br>See the userCategorySchema.java file for a list of field definitions that this
  * module expects to work with.<br>
  *
- * @see arlut.csd.ddroid.gasharl.userCategorySchema
- * @see arlut.csd.ddroid.server.DBEditObject
+ * @see arlut.csd.ganymede.gasharl.userCategorySchema
+ * @see arlut.csd.ganymede.server.DBEditObject
  * */
 
 public class userCategoryCustom extends DBEditObject implements SchemaConstants {

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.rmi.RemoteException;
 import java.util.Calendar;
@@ -60,17 +60,17 @@ import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.Result;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeServer;
-import arlut.csd.ddroid.server.GanymedeSession;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.Result;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeServer;
+import arlut.csd.ganymede.server.GanymedeSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -401,7 +401,7 @@ public class PasswordAgingTask implements Runnable {
       " will expire soon.  You will need to change your password before " + passwordChangeTime +
       " or else your user account will be inactivated.\n\n" +
       "You can change your password online by visiting http://www.arlut.utexas.edu/password/\n\n" +
-      "If you need assistance with this matter, please contact one of your lab unit's Directory Droid administrators.";
+      "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators.";
 
     Ganymede.log.sendMail(null, titleString, messageString, true, false, objVect);
   }
@@ -425,7 +425,7 @@ public class PasswordAgingTask implements Runnable {
       " will expire very soon.  The password for this user account will need to be changed before " + passwordChangeTime +
       " or else the account will be inactivated.\n\n" +
       "You can change your password online by visiting http://www.arlut.utexas.edu/password/\n\n" +
-      "If you need assistance with this matter, please contact one of your lab unit's Directory Droid administrators, " +
+      "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
     Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
@@ -453,7 +453,7 @@ public class PasswordAgingTask implements Runnable {
       " expiration deadline will be impossible, and a new password will need to be chosen to re-enable" +
       " this account.\n\n" +
       "You can change your password online by visiting http://www.arlut.utexas.edu/password/\n\n" +
-      "If you need assistance with this matter, please contact one of your lab unit's Directory Droid administrators, " +
+      "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
     Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);

@@ -2,7 +2,7 @@
 
    IRISBuilderTask.java
 
-   This class is intended to dump the Directory Droid datastore to the ARL:UT
+   This class is intended to dump the Ganymede datastore to the ARL:UT
    IRIS system.
    
    Created: 27 September 2004
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,14 +53,14 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeBuilderTask;
-import arlut.csd.ddroid.server.PasswordDBField;
-import arlut.csd.ddroid.common.SchemaConstants;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeBuilderTask;
+import arlut.csd.ganymede.server.PasswordDBField;
+import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
@@ -79,7 +79,7 @@ import java.rmi.*;
 
 /**
  *
- *  This class is intended to dump the Directory Droid datastore to the ARL:UT
+ *  This class is intended to dump the Ganymede datastore to the ARL:UT
  *  IRIS system.
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu

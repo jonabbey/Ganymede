@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.util.Date;
 import java.util.Enumeration;
@@ -58,24 +58,24 @@ import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ObjectHandle;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBEditObject;
-import arlut.csd.ddroid.server.DBEditSet;
-import arlut.csd.ddroid.server.DBField;
-import arlut.csd.ddroid.server.DBNameSpace;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.DBObjectBase;
-import arlut.csd.ddroid.server.DBSession;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeSession;
-import arlut.csd.ddroid.server.IPDBField;
-import arlut.csd.ddroid.server.InvidDBField;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ObjectHandle;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.DBEditSet;
+import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.DBNameSpace;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.DBObjectBase;
+import arlut.csd.ganymede.server.DBSession;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeSession;
+import arlut.csd.ganymede.server.IPDBField;
+import arlut.csd.ganymede.server.InvidDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -178,7 +178,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    *
    * <p>When this method is called, the DBEditObject has been created,
    * its ownership set, and all fields defined in the controlling
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * have been instantiated without defined
    * values.  If this DBEditObject is an embedded type, it will
    * have been linked into its parent object before this method
@@ -186,14 +186,14 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    *
    * <p>This method is responsible for filling in any default
    * values that can be calculated from the 
-   * {@link arlut.csd.ddroid.server.DBSession DBSession}
+   * {@link arlut.csd.ganymede.server.DBSession DBSession}
    * associated with the editset defined in this DBEditObject.</p>
    *
    * <p>If initialization fails for some reason, initializeNewObject()
    * will return a ReturnVal with an error result..  If the owning
    * GanymedeSession is not in bulk-loading mode (i.e.,
    * GanymedeSession.enableOversight is true), {@link
-   * arlut.csd.ddroid.server.DBSession#createDBObject(short, arlut.csd.ddroid.common.Invid, java.util.Vector)
+   * arlut.csd.ganymede.server.DBSession#createDBObject(short, arlut.csd.ganymede.common.Invid, java.util.Vector)
    * DBSession.createDBObject()} will checkpoint the transaction
    * before calling this method.  If this method returns a failure code, the
    * calling method will rollback the transaction.  This method has no
@@ -421,7 +421,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    *
    * <p>If no matching network is available, null is returned.</p>
    *
-   * <p>Called from {@link arlut.csd.ddroid.gasharl.interfaceCustom
+   * <p>Called from {@link arlut.csd.ganymede.gasharl.interfaceCustom
    * interfaceCustom}.</p>
    */
 
@@ -660,7 +660,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   /**
    * <p>Allocates a free I.P. address for the given network object.  This
-   * is done using the {@link arlut.csd.ddroid.server.DBNameSpace DBNameSpace}
+   * is done using the {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace}
    * attached to the interface address value field.  getIPAddress() will
    * seek through the Class-C host range looking for an IP address that
    * is not yet taken.  The direction of host id scanning depends on the
@@ -1064,7 +1064,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * <p>This method allows the DBEditObject to have executive approval of
    * any vector delete operation, and to take any special actions in
    * reaction to the delete.. if this method returns null or a success
-   * code in its ReturnVal, the {@link arlut.csd.ddroid.server.DBField DBField}
+   * code in its ReturnVal, the {@link arlut.csd.ganymede.server.DBField DBField}
    * that called us will proceed to
    * make the change to its vector.  If this method returns a
    * non-success code in its ReturnVal, the DBField that called us

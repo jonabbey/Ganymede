@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,16 +50,16 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.rmi.RemoteException;
 import java.util.Date;
 
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.GanymedeSession;
-import arlut.csd.ddroid.server.GanymediatorWizard;
-import arlut.csd.ddroid.server.StringDBField;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.GanymedeSession;
+import arlut.csd.ganymede.server.GanymediatorWizard;
+import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -76,9 +76,9 @@ import arlut.csd.ddroid.server.StringDBField;
  * not directly manipulate fields in the user object.  Instead, it works with
  * methods written for its benefit in userCustom.<br>
  *
- * @see arlut.csd.ddroid.common.ReturnVal
- * @see arlut.csd.ddroid.rmi.Ganymediator 
- * @see arlut.csd.ddroid.gasharl.userCustom
+ * @see arlut.csd.ganymede.common.ReturnVal
+ * @see arlut.csd.ganymede.rmi.Ganymediator 
+ * @see arlut.csd.ganymede.gasharl.userCustom
  */
 
 public class userInactivateWizard extends GanymediatorWizard {
@@ -124,7 +124,7 @@ public class userInactivateWizard extends GanymediatorWizard {
    * on the provided session.
    *
    * @param session The GanymedeSession object that this wizard will
-   * use to interact with the Directory Droid data store.
+   * use to interact with the Ganymede data store.
    * @param userObject The user object that this wizard will work with.
    *
    */

@@ -10,7 +10,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -47,7 +47,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
@@ -819,7 +819,7 @@ public class IPv4Range {
   /**
    *
    * This method takes an IPv4 string in standard format
-   * and generates an array of 4 bytes that the Directory Droid server
+   * and generates an array of 4 bytes that the Ganymede server
    * can accept.
    *
    */
@@ -1085,7 +1085,7 @@ public class IPv4Range {
 
 /**
  * <P>This class handles enumerating across a range of IP addresses specified
- * in an {@arlut.csd.ddroid.gasharl.IPv4Range IPv4Range} object.  An
+ * in an {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range} object.  An
  * IPv4RangeEnumerator is created as a snapshot of the state of an IPv4Range object,
  * and may be iterated over even if the source IPv4Range object is modified
  * after it has been created.</P>
@@ -1318,7 +1318,7 @@ final class IPv4RangeEnumerator implements Enumeration {
 
 /**
  * <P>This class handles enumerating across a set of IPv4Range subsets specified
- * in an {@arlut.csd.ddroid.gasharl.IPv4Range IPv4Range} object.  An
+ * in an {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range} object.  An
  * IPv4SubRangeEnumerator is created as a snapshot of the state of an IPv4Range object,
  * and may be iterated over even if the source IPv4Range object is modified
  * after it has been created.</P>
@@ -1366,7 +1366,7 @@ final class IPv4SubRangeEnumerator implements Enumeration {
 
 /**
  * <P>This class handles enumerating across a set of Class C sized (three octet prefix)
- * subsets specified in an {@arlut.csd.ddroid.gasharl.IPv4Range IPv4Range} object.  An
+ * subsets specified in an {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range} object.  An
  * IPv4ClassCEnumerator is created as a snapshot of the state of an IPv4Range object,
  * and may be iterated over even if the source IPv4Range object is modified
  * after it has been created.</P>

@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -73,33 +73,33 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ObjectStatus;
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.Result;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBEditObject;
-import arlut.csd.ddroid.server.DBEditSet;
-import arlut.csd.ddroid.server.DBField;
-import arlut.csd.ddroid.server.DBLog;
-import arlut.csd.ddroid.server.DBNameSpace;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.DBObjectBase;
-import arlut.csd.ddroid.server.DBSession;
-import arlut.csd.ddroid.server.DBStore;
-import arlut.csd.ddroid.server.DateDBField;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeSession;
-import arlut.csd.ddroid.server.InvidDBField;
-import arlut.csd.ddroid.server.NumericDBField;
-import arlut.csd.ddroid.server.PasswordDBField;
-import arlut.csd.ddroid.server.StringDBField;
-import arlut.csd.ddroid.server.adminPersonaCustom;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.Result;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.DBEditSet;
+import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.DBLog;
+import arlut.csd.ganymede.server.DBNameSpace;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.DBObjectBase;
+import arlut.csd.ganymede.server.DBSession;
+import arlut.csd.ganymede.server.DBStore;
+import arlut.csd.ganymede.server.DateDBField;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeSession;
+import arlut.csd.ganymede.server.InvidDBField;
+import arlut.csd.ganymede.server.NumericDBField;
+import arlut.csd.ganymede.server.PasswordDBField;
+import arlut.csd.ganymede.server.StringDBField;
+import arlut.csd.ganymede.server.adminPersonaCustom;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -110,15 +110,15 @@ import arlut.csd.ddroid.server.adminPersonaCustom;
 /**
  *
  * This class is the custom plug-in to handle the user object type in the
- * Directory Droid server.  It does special validations of operations on the user,
+ * Ganymede server.  It does special validations of operations on the user,
  * handles inactivation and reactivation logic, and generates Wizards as
  * needed.<br>
  *
  * <br>See the userSchema.java file for a list of field definitions that this
  * module expects to work with.<br>
  *
- * @see arlut.csd.ddroid.gasharl.userSchema
- * @see arlut.csd.ddroid.server.DBEditObject
+ * @see arlut.csd.ganymede.gasharl.userSchema
+ * @see arlut.csd.ganymede.server.DBEditObject
  *
  */
 
@@ -211,7 +211,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    * <p>When this method is called, the DBEditObject has been created,
    * its ownership set, and all fields defined in the controlling
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * have been instantiated without defined
    * values.  If this DBEditObject is an embedded type, it will
    * have been linked into its parent object before this method
@@ -219,14 +219,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    * <p>This method is responsible for filling in any default
    * values that can be calculated from the 
-   * {@link arlut.csd.ddroid.server.DBSession DBSession}
+   * {@link arlut.csd.ganymede.server.DBSession DBSession}
    * associated with the editset defined in this DBEditObject.</p>
    *
    * <p>If initialization fails for some reason, initializeNewObject()
    * will return a ReturnVal with an error result..  If the owning
    * GanymedeSession is not in bulk-loading mode (i.e.,
    * GanymedeSession.enableOversight is true), {@link
-   * arlut.csd.ddroid.server.DBSession#createDBObject(short, arlut.csd.ddroid.common.Invid, java.util.Vector)
+   * arlut.csd.ganymede.server.DBSession#createDBObject(short, arlut.csd.ganymede.common.Invid, java.util.Vector)
    * DBSession.createDBObject()} will checkpoint the transaction
    * before calling this method.  If this method returns a failure code, the
    * calling method will rollback the transaction.  This method has no
@@ -437,7 +437,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    * <p>This method does not affect those fields which are actually present
    * in the object's record in the
-   * {@link arlut.csd.ddroid.server.DBStore DBStore}.  What this method allows
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.  What this method allows
    * you to do is have a subclass decide whether it wants to instantiate
    * a potential field (one that is declared in the field dictionary for
    * this object, but which doesn't happen to be presently defined in
@@ -450,7 +450,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    * <p>There are a few specific instances of SchemaConstants.PermBase
    * that don't properly need the list of admin personae, as their
-   * object invids are hard-coded into the Directory Droid security system, and
+   * object invids are hard-coded into the Ganymede security system, and
    * their permission matrices are automatically consulted in certain
    * situations.  In order to support this, we're going to want to have
    * a DBEditObject subclass for managing permission objects.  In that
@@ -721,9 +721,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   /**
    * <p>This method is used to control whether or not it is acceptable to
    * make a link to the given field in this 
-   * {@link arlut.csd.ddroid.server.DBObject DBObject} type when the
+   * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source 
-   * {@link arlut.csd.ddroid.server.InvidDBField InvidDBField} and not
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
    * the target.</p>
    *
    * <p>This version of anonymousLinkOK takes additional parameters
@@ -734,8 +734,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK() 
    * method are chained together, so that the customizer can choose
    * which level of detail he is interested in.
-   * {@link arlut.csd.ddroid.server.InvidDBField InvidDBField}'s
-   * {@link arlut.csd.ddroid.server.InvidDBField#bind(arlut.csd.ddroid.common.Invid,arlut.csd.ddroid.common.Invid,boolean) bind()}
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
+   * {@link arlut.csd.ganymede.server.InvidDBField#bind(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean) bind()}
    * method calls this version.  This version calls the three parameter
    * version, which calls the two parameter version, which returns
    * false by default.  Customizers can implement any of the three
@@ -873,7 +873,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * <p>Customization method to verify overall consistency of
    * a DBObject.  This method is intended to be overridden
    * in DBEditObject subclasses, and will be called by
-   * {@link arlut.csd.ddroid.server.DBEditObject#commitPhase1() commitPhase1()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}
    * to verify the readiness of this object for commit.  The
    * DBObject passed to this method will be a DBEditObject,
    * complete with that object's GanymedeSession reference
@@ -1207,8 +1207,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * any external actions related to object reactivation when
    * the transaction is committed..
    *
-   * @see arlut.csd.ddroid.server.DBEditObject#commitPhase1()
-   * @see arlut.csd.ddroid.server.DBEditObject#commitPhase2()
+   * @see arlut.csd.ganymede.server.DBEditObject#commitPhase1()
+   * @see arlut.csd.ganymede.server.DBEditObject#commitPhase2()
    */
 
   public ReturnVal reactivate()
@@ -1245,7 +1245,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * reactivate operation.  We then do the actual work to reactivate
    * the user in this method.
    * 
-   * @see arlut.csd.ddroid.gasharl.userReactivateWizard
+   * @see arlut.csd.ganymede.gasharl.userReactivateWizard
    *
    */
 
@@ -1561,7 +1561,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   /**
    *
-   * Customization method to allow this Directory Droid object type to
+   * Customization method to allow this Ganymede object type to
    * override the default permissions mechanism for special
    * purposes.<br><br>
    *
@@ -1625,7 +1625,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   /**
    * This method is used to specify the earliest acceptable date
-   * for the specified {@link arlut.csd.ddroid.server.DateDBField DateDBField}.
+   * for the specified {@link arlut.csd.ganymede.server.DateDBField DateDBField}.
    */
 
   public Date minDate(DBField field)
@@ -1640,7 +1640,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   /**
    * This method is used to specify the latest acceptable date
-   * for the specified {@link arlut.csd.ddroid.server.DateDBField DateDBField}.
+   * for the specified {@link arlut.csd.ganymede.server.DateDBField DateDBField}.
    */
 
   public Date maxDate(DBField field)
@@ -2080,7 +2080,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	if (field.getID() == ALIASES)
 	  {
 	    // the second true in the ReturnVal constructor makes the
-	    // Directory Droid logic go ahead and complete the operation
+	    // Ganymede logic go ahead and complete the operation
 	    // normally, just taking the rescan information as an
 	    // extra to pass back to the client.
 
@@ -2596,13 +2596,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * cases in which change to an object would result in an external
    * process being initiated whose success or failure would not
    * affect the successful commit of this DBEditObject in the
-   * Directory Droid server, the process invokation should be placed here,
+   * Ganymede server, the process invokation should be placed here,
    * rather than in commitPhase1().<br><br>
    *
    * Subclasses that override this method may wish to make this method 
    * synchronized.
    *
-   * @see arlut.csd.ddroid.server.DBEditSet
+   * @see arlut.csd.ganymede.server.DBEditSet
    */
 
   public void commitPhase2()
@@ -3165,7 +3165,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	buffer.append("User ");
 	buffer.append(name);
-	buffer.append(" has been expunged from the Directory Droid database.\n\n");
+	buffer.append(" has been expunged from the Ganymede database.\n\n");
 
 	editset.logEvent("userdeleted",
 			 buffer.toString(),
@@ -3424,7 +3424,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     buffer.append(newVolName);
     buffer.append(" in the ");
     buffer.append(mapName);
-    buffer.append(" automounter home map.\n\nSince you are listed in the Directory Droid system database");
+    buffer.append(" automounter home map.\n\nSince you are listed in the Ganymede system database");
     buffer.append(" as an administrator for a system contained in volume ");
     buffer.append(oldVolName);
     buffer.append(", you need to take whatever action is appropriate to move this user's");

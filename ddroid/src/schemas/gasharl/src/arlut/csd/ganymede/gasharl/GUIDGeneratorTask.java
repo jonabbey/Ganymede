@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.rmi.RemoteException;
 import java.util.Vector;
@@ -59,16 +59,16 @@ import java.util.Vector;
 import org.doomdark.uuid.EthernetAddress;
 import org.doomdark.uuid.UUIDGenerator;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBEditObject;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeServer;
-import arlut.csd.ddroid.server.GanymedeSession;
-import arlut.csd.ddroid.server.StringDBField;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeServer;
+import arlut.csd.ganymede.server.GanymedeSession;
+import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class

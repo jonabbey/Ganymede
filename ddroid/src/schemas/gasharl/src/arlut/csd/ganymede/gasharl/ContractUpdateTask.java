@@ -2,7 +2,7 @@
 
    ContractUpdateTask.java
 
-   This class is intended to dump the Directory Droid datastore to GASH.
+   This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 9 March 1999
    Last Mod Date: $Date$
@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -59,13 +59,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.Result;
-import arlut.csd.ddroid.server.DBEditObject;
-import arlut.csd.ddroid.server.GanymedeSession;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.Result;
+import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.GanymedeSession;
 
 /*------------------------------------------------------------------------------
                                                                            class

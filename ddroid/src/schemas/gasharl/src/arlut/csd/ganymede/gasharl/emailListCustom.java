@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,29 +51,29 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryNode;
-import arlut.csd.ddroid.common.QueryNotNode;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBEditObject;
-import arlut.csd.ddroid.server.DBEditSet;
-import arlut.csd.ddroid.server.DBField;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.DBObjectBase;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeSession;
-import arlut.csd.ddroid.server.InvidDBField;
-import arlut.csd.ddroid.server.StringDBField;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryNode;
+import arlut.csd.ganymede.common.QueryNotNode;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.DBEditSet;
+import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.DBObjectBase;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeSession;
+import arlut.csd.ganymede.server.InvidDBField;
+import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -240,9 +240,9 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
   /**
    * <p>This method is used to control whether or not it is acceptable to
    * make a link to the given field in this 
-   * {@link arlut.csd.ddroid.server.DBObject DBObject} type when the
+   * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source 
-   * {@link arlut.csd.ddroid.server.InvidDBField InvidDBField} and not
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
    * the target.</p>
    *
    * <p>This version of anonymousLinkOK takes additional parameters
@@ -253,8 +253,8 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK() 
    * method are chained together, so that the customizer can choose
    * which level of detail he is interested in.
-   * {@link arlut.csd.ddroid.server.InvidDBField InvidDBField}'s
-   * {@link arlut.csd.ddroid.server.InvidDBField#bind(arlut.csd.ddroid.common.Invid,arlut.csd.ddroid.common.Invid,boolean) bind()}
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
+   * {@link arlut.csd.ganymede.server.InvidDBField#bind(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean) bind()}
    * method calls this version.  This version calls the three parameter
    * version, which calls the two parameter version, which returns
    * false by default.  Customizers can implement any of the three

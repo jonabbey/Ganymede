@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,24 +50,24 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBEditObject;
-import arlut.csd.ddroid.server.DBEditSet;
-import arlut.csd.ddroid.server.DBField;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.DBObjectBase;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeSession;
-import arlut.csd.ddroid.server.InvidDBField;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.DBEditSet;
+import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.DBObjectBase;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeSession;
+import arlut.csd.ganymede.server.InvidDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -78,7 +78,7 @@ import arlut.csd.ddroid.server.InvidDBField;
 /**
  *
  * This class represents the automounter entry objects that are
- * embedded in user objects in the Directory Droid schema.
+ * embedded in user objects in the Ganymede schema.
  *
  */
 
@@ -124,7 +124,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
   /**
    *
-   * Customization method to allow this Directory Droid object type to
+   * Customization method to allow this Ganymede object type to
    * override the default permissions mechanism for special
    * purposes.<br><br>
    *

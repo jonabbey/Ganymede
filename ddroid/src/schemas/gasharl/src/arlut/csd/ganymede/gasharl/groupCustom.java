@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,24 +62,24 @@ import java.util.Vector;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.NotLoggedInException;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.db_field;
-import arlut.csd.ddroid.rmi.db_object;
-import arlut.csd.ddroid.server.DBEditObject;
-import arlut.csd.ddroid.server.DBEditSet;
-import arlut.csd.ddroid.server.DBField;
-import arlut.csd.ddroid.server.DBNameSpace;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.DBObjectBase;
-import arlut.csd.ddroid.server.DBSession;
-import arlut.csd.ddroid.server.DateDBField;
-import arlut.csd.ddroid.server.Ganymede;
-import arlut.csd.ddroid.server.GanymedeSession;
-import arlut.csd.ddroid.server.InvidDBField;
-import arlut.csd.ddroid.server.NumericDBField;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_field;
+import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.DBEditSet;
+import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.DBNameSpace;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.DBObjectBase;
+import arlut.csd.ganymede.server.DBSession;
+import arlut.csd.ganymede.server.DateDBField;
+import arlut.csd.ganymede.server.Ganymede;
+import arlut.csd.ganymede.server.GanymedeSession;
+import arlut.csd.ganymede.server.InvidDBField;
+import arlut.csd.ganymede.server.NumericDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -131,7 +131,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    *
    * <p>When this method is called, the DBEditObject has been created,
    * its ownership set, and all fields defined in the controlling
-   * {@link arlut.csd.ddroid.server.DBObjectBase DBObjectBase}
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * have been instantiated without defined
    * values.  If this DBEditObject is an embedded type, it will
    * have been linked into its parent object before this method
@@ -139,14 +139,14 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    *
    * <p>This method is responsible for filling in any default
    * values that can be calculated from the 
-   * {@link arlut.csd.ddroid.server.DBSession DBSession}
+   * {@link arlut.csd.ganymede.server.DBSession DBSession}
    * associated with the editset defined in this DBEditObject.</p>
    *
    * <p>If initialization fails for some reason, initializeNewObject()
    * will return a ReturnVal with an error result..  If the owning
    * GanymedeSession is not in bulk-loading mode (i.e.,
    * GanymedeSession.enableOversight is true), {@link
-   * arlut.csd.ddroid.server.DBSession#createDBObject(short, arlut.csd.ddroid.common.Invid, java.util.Vector)
+   * arlut.csd.ganymede.server.DBSession#createDBObject(short, arlut.csd.ganymede.common.Invid, java.util.Vector)
    * DBSession.createDBObject()} will checkpoint the transaction
    * before calling this method.  If this method returns a failure code, the
    * calling method will rollback the transaction.  This method has no
@@ -406,7 +406,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    * <p>Customization method to verify overall consistency of
    * a DBObject.  This method is intended to be overridden
    * in DBEditObject subclasses, and will be called by
-   * {@link arlut.csd.ddroid.server.DBEditObject#commitPhase1() commitPhase1()}
+   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}
    * to verify the readiness of this object for commit.  The
    * DBObject passed to this method will be a DBEditObject,
    * complete with that object's GanymedeSession reference
@@ -470,13 +470,13 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    * cases in which change to an object would result in an external
    * process being initiated whose success or failure would not
    * affect the successful commit of this DBEditObject in the
-   * Directory Droid server, the process invokation should be placed here,
+   * Ganymede server, the process invokation should be placed here,
    * rather than in commitPhase1().<br><br>
    *
    * Subclasses that override this method may wish to make this method 
    * synchronized.
    *
-   * @see arlut.csd.ddroid.server.DBEditSet
+   * @see arlut.csd.ganymede.server.DBEditSet
    */
 
   public void commitPhase2()

@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,16 +50,16 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.rmi.RemoteException;
 
 import arlut.csd.JDialog.JDialogBuff;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.server.DBField;
-import arlut.csd.ddroid.server.GanymedeSession;
-import arlut.csd.ddroid.server.GanymediatorWizard;
-import arlut.csd.ddroid.server.StringDBField;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.GanymedeSession;
+import arlut.csd.ganymede.server.GanymediatorWizard;
+import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,8 +74,8 @@ import arlut.csd.ddroid.server.StringDBField;
  * account, and asking the user for a confirmation that he really
  * wants to do this.
  *
- * @see arlut.csd.ddroid.common.ReturnVal
- * @see arlut.csd.ddroid.rmi.Ganymediator 
+ * @see arlut.csd.ganymede.common.ReturnVal
+ * @see arlut.csd.ganymede.rmi.Ganymediator 
  */
 
 public class userRenameWizard extends GanymediatorWizard {
@@ -147,7 +147,7 @@ public class userRenameWizard extends GanymediatorWizard {
    * on the provided session.
    *
    * @param session The GanymedeSession object that this wizard will
-   * use to interact with the Directory Droid data store.
+   * use to interact with the Ganymede data store.
    * @param userObject The user object that this wizard will work with.
    * @param newname The proposed new name for the user.
    *

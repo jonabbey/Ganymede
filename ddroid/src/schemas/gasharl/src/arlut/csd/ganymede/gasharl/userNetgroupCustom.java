@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -51,20 +51,20 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 import java.io.File;
 import java.io.IOException;
 
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.server.DBEditObject;
-import arlut.csd.ddroid.server.DBEditSet;
-import arlut.csd.ddroid.server.DBObject;
-import arlut.csd.ddroid.server.DBObjectBase;
-import arlut.csd.ddroid.server.Ganymede;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.DBEditSet;
+import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.DBObjectBase;
+import arlut.csd.ganymede.server.Ganymede;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -135,13 +135,13 @@ public class userNetgroupCustom extends DBEditObject implements SchemaConstants,
    * cases in which change to an object would result in an external
    * process being initiated whose success or failure would not
    * affect the successful commit of this DBEditObject in the
-   * Directory Droid server, the process invokation should be placed here,
+   * Ganymede server, the process invokation should be placed here,
    * rather than in commitPhase1().<br><br>
    *
    * Subclasses that override this method may wish to make this method 
    * synchronized.
    *
-   * @see arlut.csd.ddroid.server.DBEditSet
+   * @see arlut.csd.ganymede.server.DBEditSet
    */
 
   public void commitPhase2()

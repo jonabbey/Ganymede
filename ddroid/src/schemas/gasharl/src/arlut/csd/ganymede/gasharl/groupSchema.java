@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.gasharl;
+package arlut.csd.ganymede.gasharl;
 
 
 /*------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ package arlut.csd.ddroid.gasharl;
 public interface groupSchema {
 
   // field id's for the group object.  These should match the
-  // current specs in the Directory Droid schema file precisely.  If
+  // current specs in the Ganymede schema file precisely.  If
   // you change the schema for the group, you'll want to change
   // this file to match.
 
