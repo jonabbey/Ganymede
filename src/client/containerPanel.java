@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 1999/10/29 16:12:23 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 1999/10/29 21:44:45 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.110 $ $Date: 1999/10/29 16:12:23 $ $Name:  $
+ * @version $Revision: 1.111 $ $Date: 1999/10/29 21:44:45 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1630,8 +1630,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		println("Could not set field value: " + rx);
 		return false;
 	      }
- 
-	  }
+ 	  }
 	else if (v.getSource() instanceof vectorPanel)
 	  {
 	    // no vectorPanel should really ever call this
@@ -2036,7 +2035,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    cb.removeItemListener(this);
 	    
-	    if (newValue instanceof String)
+	    if (oldValue == null)
+	      {
+		cb.setSelectedItem(null);
+	      }
+	    else if (newValue instanceof String)
 	      {
 		cb.setSelectedItem(oldValue);
 	      }

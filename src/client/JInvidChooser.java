@@ -6,8 +6,8 @@
    
    Created: 26 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/10/27 06:08:55 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/10/29 21:44:45 $
    Module By: Michael Mulvaney, Jonathan Abbey
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import java.util.Vector;
 /**
  * <p>A GUI component for choosing an Invid for a scalar invid_field.</p>
  *
- * @version $Revision: 1.22 $ $Date: 1999/10/27 06:08:55 $ $Name:  $
+ * @version $Revision: 1.23 $ $Date: 1999/10/29 21:44:45 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -269,6 +269,18 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   public boolean isAllowNone()
   {
     return allowNone;
+  }
+
+  public void setSelectedItem(Object o) 
+  {
+    if (o == null && isAllowNone())
+      {
+	getCombo().setSelectedItem(noneHandle);
+      }
+    else
+      {
+	getCombo().setSelectedItem(o);
+      }
   }
 
   /**
