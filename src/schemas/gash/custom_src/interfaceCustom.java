@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -327,14 +327,14 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    *  
    */
 
-  public boolean finalizeSetValue(DBField field, Object value)
+  public ReturnVal finalizeSetValue(DBField field, Object value)
   {
     // if this embedded interface is being removed, we won't try to get
     // fancy with the address/ipnet stuff.
 
     if (deleting)
       {
-	return true;
+	return null;		// success
       }
 
     if (field.getID() == interfaceSchema.IPNET)
@@ -344,7 +344,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	if (!gSession.enableOversight)
 	  {
-	    return true;
+	    return null;	// success
 	  }
 
 	// we're changing the IP net.. make sure our parent is ok with us
@@ -364,7 +364,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 		System.err.println("interfaceCustom.finalizeSetValue(): approving ipnet change");
 	      }
 	    
-	    return true;
+	    return null;	// success
 	  }
 	
 	// free the old net for others to use.. note that at this point, 
@@ -383,7 +383,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 		System.err.println("interfaceCustom.finalizeSetValue(): couldn't free old net num");
 	      }
 	
-	    return false;
+	    return Ganymede.createErrorDialog("schema error",
+					      "interfaceCustom.finalizeSetValue(): couldn't free old net num");
 	  }
 	else if (!sysObj.allocNet((Invid) value))
 	  {
@@ -393,7 +394,9 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	      }
 	
 	    sysObj.allocNet((Invid) field.getOldValue()); // take it back
-	    return false;
+
+	    return Ganymede.createErrorDialog("schema error",
+					      "interfaceCustom.finalizeSetValue(): couldn't alloc new net num");
 	  }
 
 	// if this net change was initiated by an approved ADDRESS change,
@@ -401,7 +404,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	if (inFinalizeAddrChange)
 	  {
-	    return true;
+	    return null;
 	  }
 
 	// set our address.. the wizardHook will have instructed the
@@ -464,7 +467,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 		    System.err.println("interfaceCustom.finalizeSetValue(): failed to set ip net");
 		  }
 
-		return false;
+		return Ganymede.createErrorDialog("schema error",
+						  "interfaceCustom.finalizeSetValue(): failed to set ip net");
 	      }
 
 	    // ok, we've got a valid address change request.. let the system object
@@ -480,7 +484,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  }
       }
 
-    return true;
+    return null;		// success
   }
 
   /**
