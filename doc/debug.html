@@ -1,19 +1,32 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="../stylesheets/ganymede.css"/>
     <title>Ganymede Debug and Diagnosis Guide</title>
   </head>
 
   <body bgcolor="#FFFFFF">
-    <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo">
-    <h1><FONT FACE="Arial, Helvetica">Ganymede Debug and Diagnosis<br>Release 1.0.12 - 1 March 2004</FONT></h1>
-    <hr>
+    <div id="header">
+      <IMG SRC="../gifs/ganymede_title.gif" alt="Ganymede Logo"/>
 
-    <p>The Ganymede server, like most software, is not perfect
-    (<b><a href="#wild">*</a></b>).  Learning how to diagnose problems and obtain debug
-    trace information is vital if you want to get your hands dirty
-    with things.  It may even be vital if you don't, if you're
-    unlucky.</p>
+      <div id="title">
+        <h1>Ganymede Debug and Diagnosis</h1>
+        <p>Release 2.0 dev - ? ? 2005<br/>$Rev$</p>
+      </div>
+
+      <div id="abstract">
+        <p>This guide will descibe how to diagnose Ganymede's
+        behavior, and how to debug things if your back is against the
+        wall.</p>
+      </div>
+
+      <p>By <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></p>
+    </div>
+
+    <p>The Ganymede server, like most software, is not perfect.
+    Learning how to diagnose problems and obtain debug trace
+    information is vital if you want to get your hands dirty with
+    things.  It may even be vital if you don't, if you're unlucky.</p>
 
     <h2>Java Failure Modes and You</h2>
 
@@ -55,10 +68,9 @@
     part of the program's logic is wrong, even if the fault is not
     immediately catastrophic.  Objects in the database suddenly seem
     to vanish.  The wrong users are allowed to edit the wrong
-    objects. These things obviously will never happen to you with such
-    a well-written, tested, and bullet proof piece of software as
-    Ganymede 1.0, but I have occasionally seen this sort of thing
-    before (<b><a href="#wild">*</a></b>).</p>
+    objects. These things are obviously unlikely to happen to you with
+    such a well-written, tested, and bullet proof piece of software as
+    Ganymede 2.0, but never say never.</p>
     
     <p>In those sorts of cases, the client or the server is acting
     funny, but it is still acting.  Nothing has happened that gives
@@ -181,25 +193,25 @@
     made.</p>
 
     <p>The Ganymede server was carefully designed not to get into
-    deadlock, but over the last year I've discovered a number of cases
-    in which it was vulnerable to it.  We were using the server in
-    full production for over a year before one user finally managed to
-    hit 'commit' in one client at the exact same moment that another
-    user was attempting to login, causing a deadlock.  If I hadn't
-    been logging all RMI network requests, there would have been no
-    way to determine what had happened.</p>
+    deadlock, but several years ago I discovered a number of cases in
+    which it was vulnerable to it.  At ARL:UT, we were using the
+    server in full production for over a year before one user finally
+    managed to hit 'commit' in one client at the exact same moment
+    that another user was attempting to login, causing a deadlock.  If
+    I hadn't been logging all RMI network requests, there would have
+    been no way to determine what had happened.</p>
 
     <p>Because of the long time that may pass until a specific race
     condition manifests itself in deadlock, I have to assume that
     there may yet be some rare opportunity for deadlock in the current
-    code.  I don't know of any today, and I have gone to extra effort
-    in the last few months to eliminate even the rarest
-    vulnerabilities to it that I've found, but there may still be
-    vulnerabilities that I haven't.  Even if there is no deadlock trap
-    waiting in the server today, if you write custom plug-in classes,
-    you might inadvertantly create a race condition that might lead to
-    deadlock.  So it is worth talking about how to obtain useful
-    debugging information in the event of a deadlock.</p>
+    code.  I don't know of any today, and I have gone to considerable
+    effort to eliminate even the rarest vulnerabilities to it that
+    I've found, but there may still be vulnerabilities that I haven't.
+    Even if there is no deadlock trap waiting in the server today, if
+    you write custom plug-in classes, you might inadvertantly create a
+    race condition that might lead to deadlock.  So it is worth
+    talking about how to obtain useful debugging information in the
+    event of a deadlock.</p>
 
     <p>First, a deadlock condition will generally not involve any
     exceptions being thrown.  In a deadlock, there is nothing
@@ -284,15 +296,8 @@
 
     <p>Best of luck bug-hunting!</p>
 
-    <hr>
-
-    <p><a name="wild">*: wild understatement.</p>
-
-    <hr>
+    <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
-    <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
-    <!-- hhmts start -->
-Last modified: Tue Apr  2 19:34:26 CST 2002
-<!-- hhmts end -->
+    <p class="address">$Date$, $Rev$, $Author$</p>
   </body>
 </html>
