@@ -197,7 +197,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     UIManager.put("Tree.closedIcon", new ImageIcon(PackageResources.getImageResource(this, "folder.gif", getClass())));
     UIManager.put("Tree.expandedIcon", new ImageIcon(PackageResources.getImageResource(this, "minus.gif", getClass())));
     UIManager.put("Tree.collapsedIcon", new ImageIcon(PackageResources.getImageResource(this, "plus.gif", getClass())));
-    UIManager.put("Tree.font", new Font("SansSerif", Font.BOLD, 12));
 
 
     // Set up progress bar stuff
@@ -271,8 +270,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
     // OK/Cancel buttons
     
-    OkButton.setBackground(Color.lightGray);  
-    CancelButton.setBackground(Color.lightGray);
     OkButton.addActionListener(this);
     CancelButton.addActionListener(this);
  
@@ -285,8 +282,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
     // Expand/Collapse Buttons
 
-    ExpandButton.setBackground(Color.lightGray);
-    CollapseButton.setBackground(Color.lightGray);
     ExpandButton.addActionListener(new ActionListener()
 				   {
 				     public void actionPerformed(ActionEvent e)
@@ -420,7 +415,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
     Base_Panel = new JPanel(); 
     Base_Panel.setLayout(new BorderLayout());
-    Base_Panel.setBackground(Color.white);
+    //Base_Panel.setBackground(Color.white);
     Base_Panel.add("Center", edit_pane);
     Base_Panel.add("South", All_Buttons);
 
