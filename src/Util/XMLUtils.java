@@ -7,8 +7,8 @@
 
    Created: 21 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/02/22 07:21:18 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/03/07 08:15:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,6 +59,11 @@ import com.jclark.xml.output.*;
                                                                         XMLUtils
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>This class contains various methods that assist the Ganymede server
+ * in reading or writing XML files.</P>
+ */
 
 public class XMLUtils {
 
