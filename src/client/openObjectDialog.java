@@ -22,7 +22,7 @@ import arlut.csd.Util.VecQuickSort;
 
 //public class openObjectDialog extends JDialog implements ActionListener, MouseListener, JsetValueCallback{
 public class openObjectDialog extends JDialog implements ActionListener, MouseListener{
-  private final static boolean debug = true;
+  private final static boolean debug = false;
 
   long
     lastClick = 0;
@@ -130,14 +130,11 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     //
     //
 
-    System.out.println("Sorting...");
     listHandles = client.sortListHandleVector(listHandles);
-    System.out.println("Adding...");
     for (int i = 0; i < listHandles.size(); i++)
       {
 	type.addItem(listHandles.elementAt(i));
       }
-    System.out.println("Laying out...");
     gbc.gridx = 0;
     gbc.gridy = 1;
 
@@ -323,25 +320,37 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
 	    try
 	      {
-		System.out.println("Trying exact match...");
+		if (debug) {
+		  System.out.println("Trying exact match...");
+		}
+
 		edit_query = client.session.query(new Query(baseID.shortValue(), node, true));
 		
 		if (edit_query != null)
 		  {
 		    edit_invids = edit_query.getListHandles();
-		    System.out.println("edit_invids: " + edit_invids.size());
+		    if (debug) {
+		      System.out.println("edit_invids: " + edit_invids.size());
+		    }
 		  }
 		
 		if ((edit_invids != null ) && (edit_invids.size() == 1))
 		  {
-		    System.out.println("Found it, exact match");
+		    if (debug)
+		      {
+			System.out.println("Found it, exact match");
+		      }
+
 		    invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
 		    close(true);
 	    
 		  }
 		else
 		  {
-		    System.out.println("Looking for Startswith...");
+		    if (debug) {
+		      System.out.println("Looking for Startswith...");
+		    }
+
 		    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  
 		    edit_query = null;
 		    
