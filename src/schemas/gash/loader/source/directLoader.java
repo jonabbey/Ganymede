@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,6 +27,7 @@ import java.rmi.*;
 import java.rmi.server.*;
 
 import arlut.csd.ganymede.*;
+import arlut.csd.ganymede.custom.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -216,7 +217,7 @@ public class directLoader {
 
 	    perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
 
-	    PermEntry defPerm = new PermEntry(true, true, true);
+	    PermEntry defPerm = new PermEntry(true, true, true, true);
 	
 	    pf.setPerm(SchemaConstants.UserBase, defPerm);
 	    pf.setPerm((short) 257, defPerm); // group privs
@@ -268,47 +269,47 @@ public class directLoader {
 	    current_obj.setFieldValue(SchemaConstants.OwnerNameField, ogRec.prefix);
 	  }
 
-	my_client.session.commitTransaction(); // lock in perm object
+	commitTransaction();
 	my_client.session.openTransaction("GASH directLoader");
 
 	System.out.println("\nRegistering users\n");
 
 	registerUsers();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	my_client.session.openTransaction("GASH directLoader");
 	registerEmail();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering groups\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerGroups();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering user netgroups\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerUserNetgroups();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering System Types\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystemTypes();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering systems\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystems();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering system netgroups\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystemNetgroups();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering automounter configuration\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerAutomounter();
-	my_client.session.commitTransaction();
+	commitTransaction();
       }
     catch (RemoteException ex)
       {
@@ -333,6 +334,16 @@ public class directLoader {
     my_server.dump();
       
     System.exit(0);
+  }
+
+  private static void commitTransaction() throws RemoteException
+  {
+    ReturnVal retVal = my_client.session.commitTransaction(true);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	throw new RuntimeException("Could not commit transaction, aborting loader");
+      }
   }
 
   /*----------------------------------------------------------------------------*/
@@ -1019,12 +1030,12 @@ public class directLoader {
 
 	System.out.println(" [" + objInvid + "]");
 
-	current_obj.setFieldValue((short) 256, key); // netgroup name
+	current_obj.setFieldValue(userNetgroupSchema.NETGROUPNAME, key); // netgroup name
 	netHash.put(key, objInvid);
 
 	// now we have to put the users in
 
-	current_field = current_obj.getField((short) 257); // users
+	current_field = current_obj.getField(userNetgroupSchema.USERS); // users
 
 	Vector users = uNetObj.users;
 	String username;
@@ -1097,7 +1108,7 @@ public class directLoader {
 
 	// we have to put the sub netgroups in
 
-	current_field = current_obj.getField((short) 258); // member netgroups
+	current_field = current_obj.getField(userNetgroupSchema.MEMBERGROUPS); // member netgroups
 
 	Vector subnets = uNetObj.subnetgroups;
 	String subName;
@@ -1181,7 +1192,7 @@ public class directLoader {
 
 	// set the UID
 
-	current_obj.setFieldValue((short) 256, new Integer(userObj.uid));
+	current_obj.setFieldValue(userSchema.UID, new Integer(userObj.uid));
 
 	// set the password
 
@@ -1190,31 +1201,31 @@ public class directLoader {
 
 	// set the fullname
 
-	current_obj.setFieldValue((short) 257, userObj.fullname);
+	current_obj.setFieldValue(userSchema.FULLNAME, userObj.fullname);
 
 	// set the division
 
-	current_obj.setFieldValue((short) 258, userObj.division);
+	current_obj.setFieldValue(userSchema.DIVISION, userObj.division);
 
 	// set the room
 
-	current_obj.setFieldValue((short) 259, userObj.room);
+	current_obj.setFieldValue(userSchema.ROOM, userObj.room);
 
 	// set the office phone
 
-	current_obj.setFieldValue((short) 260, userObj.officePhone);
+	current_obj.setFieldValue(userSchema.OFFICEPHONE, userObj.officePhone);
 
 	// set the home phone
 
-	current_obj.setFieldValue((short) 261, userObj.homePhone);
+	current_obj.setFieldValue(userSchema.HOMEPHONE, userObj.homePhone);
 
 	// set the home directory
 
-	current_obj.setFieldValue((short) 262, userObj.directory);
+	current_obj.setFieldValue(userSchema.HOMEDIR, userObj.directory);
 
 	// set the shell
 
-	current_obj.setFieldValue((short) 263, userObj.shell);
+	current_obj.setFieldValue(userSchema.LOGINSHELL, userObj.shell);
 
 	// register email aliases for this user
 
@@ -1222,7 +1233,7 @@ public class directLoader {
 
 	if (aliasInfo != null)
 	  {
-	    db_field sf = current_obj.getField((short) 267);
+	    db_field sf = current_obj.getField(userSchema.ALIASES);
 
 	    String tmpStr;
 
@@ -1238,11 +1249,11 @@ public class directLoader {
 
 	    // set the signature alias
 
-	    current_obj.setFieldValue((short) 268, aliasInfo.aliases.elementAt(0));
+	    current_obj.setFieldValue(userSchema.SIGNATURE, aliasInfo.aliases.elementAt(0));
 
 	    // set the email targets
 
-	    sf = current_obj.getField((short) 269);
+	    sf = current_obj.getField(userSchema.EMAILTARGET);
 
 	    for (int i = 0; i < aliasInfo.targets.size(); i++)
 	      {
@@ -1340,11 +1351,11 @@ public class directLoader {
 
 	mailInvids.put(mailRec.externalName.toLowerCase(), objInvid);
 
-	current_obj.setFieldValue((short) 256, mailRec.externalName);
+	current_obj.setFieldValue(emailRedirectSchema.NAME, mailRec.externalName);
 
 	// set targets
 
-	current_field = current_obj.getField((short) 257);
+	current_field = current_obj.getField(emailRedirectSchema.TARGETS);
 
 	for (int j = 0; j < mailRec.targets.size(); j++)
 	  {
@@ -1353,7 +1364,7 @@ public class directLoader {
 
 	// set aliases
 
-	current_field = current_obj.getField((short) 258);
+	current_field = current_obj.getField(emailRedirectSchema.ALIASES);
 
 	for (int j = 0; j < mailRec.aliases.size(); j++)
 	  {
@@ -1401,11 +1412,11 @@ public class directLoader {
 
 	mailInvids.put(mailGroup.listName.toLowerCase(), objInvid);
 
-	current_obj.setFieldValue((short) 256, mailGroup.listName);
+	current_obj.setFieldValue(emailListSchema.LISTNAME, mailGroup.listName);
 
 	// set external targets
 
-	current_field = current_obj.getField((short) 258);
+	current_field = current_obj.getField(emailListSchema.EXTERNALTARGETS);
 
 	for (int j = 0; j < mailGroup.targets.size(); j++)
 	  {
@@ -1446,7 +1457,7 @@ public class directLoader {
 
 	// set internal targets
 
-	current_field = current_obj.getField((short) 257);
+	current_field = current_obj.getField(emailListSchema.MEMBERS);
 
 	for (int j = 0; j < mailGroup.targets.size(); j++)
 	  {
@@ -1513,27 +1524,27 @@ public class directLoader {
 
 	// set the group name
 	    
-	current_obj.setFieldValue((short) 256, key);
+	current_obj.setFieldValue(groupSchema.GROUPNAME, key);
 
 	// set the GID
 
-	current_obj.setFieldValue((short) 258, new Integer(groupObj.gid));
+	current_obj.setFieldValue(groupSchema.GID, new Integer(groupObj.gid));
 
 	// set the password
 
-	current_obj.setFieldValue((short) 257, groupObj.password);
+	current_obj.setFieldValue(groupSchema.PASSWORD, groupObj.password);
 
 	// set the description
 
-	current_obj.setFieldValue((short) 259, groupObj.description);
+	current_obj.setFieldValue(groupSchema.DESCRIPTION, groupObj.description);
 
 	// set the contract info
 
-	current_obj.setFieldValue((short) 260, groupObj.contract);
+	current_obj.setFieldValue(groupSchema.CONTRACT, groupObj.contract);
 
 	// add users
 
-	current_field = current_obj.getField((short) 261);
+	current_field = current_obj.getField(groupSchema.USERS);
 
 	String username;
 
@@ -1563,7 +1574,7 @@ public class directLoader {
 		if (userObj.gid == groupObj.gid)
 		  {
 		    System.err.println("-- home group add " + username);
-		    current_field2 = current_obj.getField((short) 262);
+		    current_field2 = current_obj.getField(groupSchema.HOMEUSERS);
 		    current_field2.addElement(invid);
 		  }
 	      }
@@ -1624,21 +1635,21 @@ public class directLoader {
 
 	systemTypeInvids.put(st.name, objInvid);
 
-	// set the group name
+	// set the system type name
 	    
-	current_obj.setFieldValue((short) 256, key);
+	current_obj.setFieldValue(systemTypeSchema.SYSTEMTYPE, key);
 
 	// set the start mark
 
-	current_obj.setFieldValue((short) 257, new Integer(st.start));
+	current_obj.setFieldValue(systemTypeSchema.STARTIP, new Integer(st.start));
 
 	// set the end mark
 
-	current_obj.setFieldValue((short) 258, new Integer(st.end));
+	current_obj.setFieldValue(systemTypeSchema.STOPIP, new Integer(st.end));
 
 	// set the associated user required flag
 
-	current_obj.setFieldValue((short) 259, new Boolean(st.requireUser));
+	current_obj.setFieldValue(systemTypeSchema.USERREQ, new Boolean(st.requireUser));
       }
   }
 
@@ -1668,6 +1679,8 @@ public class directLoader {
 
     current_obj.setFieldValue((short) 257, "arlut.utexas.edu");
 
+    // and create all the systems
+
     enum = sysLoader.systems.keys();
 
     while (enum.hasMoreElements())
@@ -1686,11 +1699,11 @@ public class directLoader {
 
 	// set the system name
 	    
-	current_obj.setFieldValue((short) 261,key);
+	current_obj.setFieldValue(systemSchema.SYSTEMNAME,key);
 
 	// set the DNS domain
 	    
-	current_obj.setFieldValue((short) 263, dnsInvid);
+	current_obj.setFieldValue(systemSchema.DNSDOMAIN, dnsInvid);
 
 	// set the room
 
@@ -1713,7 +1726,7 @@ public class directLoader {
 	    roomHash.put(sysObj.room, roomInvid);
 	  }
 
-	current_obj.setFieldValue((short) 264, roomInvid);
+	current_obj.setFieldValue(systemSchema.ROOM, roomInvid);
 
 	// set the type
 
@@ -1724,19 +1737,19 @@ public class directLoader {
 	    System.err.println("\n\n***** No such type found: " + sysObj.type + "\n\n");
 	  }
 
-	current_obj.setFieldValue((short) 266, typeInvid);
+	current_obj.setFieldValue(systemSchema.SYSTEMTYPE, typeInvid);
 
 	// set the manu
 
-	current_obj.setFieldValue((short) 257, sysObj.manu);
+	current_obj.setFieldValue(systemSchema.MANUFACTURER, sysObj.manu);
 
 	// set the model
 
-	current_obj.setFieldValue((short) 258, sysObj.model);
+	current_obj.setFieldValue(systemSchema.MODEL, sysObj.model);
 
 	// set the os
 
-	current_obj.setFieldValue((short) 256, sysObj.os);
+	current_obj.setFieldValue(systemSchema.OS, sysObj.os);
 
 	// set the user
 
@@ -1746,13 +1759,13 @@ public class directLoader {
 
 	    if (userInv != null)
 	      {
-		current_obj.setFieldValue((short) 267, userInv);
+		current_obj.setFieldValue(systemSchema.PRIMARYUSER, userInv);
 	      }
 	  }
 
 	// set the aliases
 
-	current_field = current_obj.getField((short) 262);
+	current_field = current_obj.getField(systemSchema.SYSTEMALIASES);
 
 	for (int i = 0; i < sysObj.aliases.size(); i++)
 	  {
@@ -1761,7 +1774,7 @@ public class directLoader {
 
 	// set the interfaces
 
-	current_field = current_obj.getField((short) 260);
+	current_field = current_obj.getField(systemSchema.INTERFACES);
 
 	Invid intInvid;
 	interfaceObj iO;
@@ -1785,13 +1798,13 @@ public class directLoader {
 
 	    // set the Ethernet Info for this Interface
 
-	    interfaceRef.setFieldValue((short) 256, iO.Ether);
+	    interfaceRef.setFieldValue(interfaceSchema.ETHERNETINFO, iO.Ether);
 
 	    // set the IP address for this interface
 
 	    // step 1: create an ip record
 
-	    interfaceField = interfaceRef.getField((short) 257);
+	    interfaceField = interfaceRef.getField(interfaceSchema.IPRECS);
 	    ipInvid = ((invid_field) interfaceField).createNewEmbedded();
 
 	    // we've created an ip record.. let's get an edit reference
@@ -1799,7 +1812,7 @@ public class directLoader {
 
 	    ipRec = my_client.session.edit_db_object(ipInvid);
 
-	    ipRec.setFieldValue((short) 257, iO.IP); // ip address
+	    ipRec.setFieldValue(ipSchema.ADDRESS, iO.IP); // ip address
 
 	    // if the system has a single interface record in GASH, it's
 	    // really a single interface system, and we don't need to
@@ -1809,7 +1822,7 @@ public class directLoader {
 	      {
 		// step 2: create the dns record for this i.p. address
 
-		ipField = ipRec.getField((short) 256); // dns record
+		ipField = ipRec.getField(ipSchema.DNSRECORDS); // dns records
 
 		dInvid = ((invid_field) ipField).createNewEmbedded();
 
@@ -1823,17 +1836,17 @@ public class directLoader {
 		
 		if (iO.interfaceName != null && !iO.interfaceName.equals(""))
 		  {
-		    dRec.setFieldValue((short)257, iO.interfaceName);	// dns name
+		    dRec.setFieldValue(dnsRecSchema.NAME, iO.interfaceName);	// dns name
 		  }
 		
-		dField = dRec.getField((short)258);	// aliases
+		dField = dRec.getField(dnsRecSchema.ALIASES);	// aliases
 		
 		for (int j = 0; j < iO.aliases.size(); j++)
 		  {
 		    dField.addElement(iO.aliases.elementAt(j));
 		  }
 		
-		dRec.setFieldValue((short) 256, dnsInvid); // dns domain
+		dRec.setFieldValue(dnsRecSchema.DNSDOMAIN, dnsInvid); // dns domain
 	      }
 	  }
 
@@ -1925,13 +1938,13 @@ public class directLoader {
 
 	System.out.println(" [" + objInvid + "]");
 
-	current_obj.setFieldValue((short) 256, key); // netgroup name
+	current_obj.setFieldValue(systemNetgroupSchema.NETGROUPNAME, key); // netgroup name
 
 	netHash.put(key, objInvid);
 
 	// now we have to put the systems in
 
-	current_field = current_obj.getField((short) 257); // systems
+	current_field = current_obj.getField(systemNetgroupSchema.SYSTEMS); // systems
 
 	Vector systems = sNetObj.systems;
 	String systemname;
@@ -2002,7 +2015,7 @@ public class directLoader {
 
 	// we have to put the sub netgroups in
 
-	current_field = current_obj.getField((short) 258); // member netgroups
+	current_field = current_obj.getField(systemNetgroupSchema.MEMBERGROUPS); // member netgroups
 
 	Vector subnets = sNetObj.subnetgroups;
 	String subName;
@@ -2070,14 +2083,14 @@ public class directLoader {
 
 	volumeInvids.put(key, objInvid); // save the invid in our hashtable
 
-	current_obj.setFieldValue((short) 256, key); // volume name
-	current_obj.setFieldValue((short) 258, v.path);	// path
+	current_obj.setFieldValue(volumeSchema.LABEL, key); // volume name
+	current_obj.setFieldValue(volumeSchema.PATH, v.path);	// path
 	
 	hostInvid = (Invid) systemInvid.get(v.hostName);
 
-	current_obj.setFieldValue((short) 257, hostInvid);
+	current_obj.setFieldValue(volumeSchema.HOST, hostInvid);
 
-	current_obj.setFieldValue((short) 260, v.mountOptions);
+	current_obj.setFieldValue(volumeSchema.MOUNTOPTIONS, v.mountOptions);
       }
 
     // step 2: create all automounter maps
@@ -2092,7 +2105,7 @@ public class directLoader {
 
 	current_obj = my_client.session.create_db_object((short) 277); // automounter map
 
-	current_obj.setFieldValue((short) 256, key); // set the name of the map
+	current_obj.setFieldValue(mapSchema.MAPNAME, key); // set the name of the map
 
 	objInvid = current_obj.getInvid();
 
@@ -2117,15 +2130,15 @@ public class directLoader {
 
 	user_obj = my_client.session.edit_db_object(userInvid);
 
-	embed_field = (invid_field) user_obj.getField((short) 271); // Map Entries
+	embed_field = (invid_field) user_obj.getField(userSchema.VOLUMES); // Map Entries
 
 	embed_obj = my_client.session.edit_db_object(embed_field.createNewEmbedded());
 
 	// we've got the new map entry, load 'er up
 
-	embed_obj.setFieldValue((short) 256, mapInvids.get(m.mapName));	// map invid
+	embed_obj.setFieldValue(mapEntrySchema.MAP, mapInvids.get(m.mapName));	// map invid
 
-	embed_obj.setFieldValue((short) 257, volumeInvids.get(m.volName)); // volume invid
+	embed_obj.setFieldValue(mapEntrySchema.VOLUME, volumeInvids.get(m.volName)); // volume invid
       }
     
     System.out.println("\nFinished creating automounter map entries\n");
@@ -2177,12 +2190,6 @@ class directLoaderClient extends UnicastRemoteObject implements Client {
 
 	    System.exit(0);
 	  }
-
-	//	Vector invids = new Vector();
-	//
-	//	invids.addElement(new Invid((short)0,0)); // supergash owner group object
-	//
-	//	session.setDefaultOwner(invids);
 
 	System.out.println("logged in");
       }
