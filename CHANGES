@@ -1,11 +1,11 @@
 Ganymede Release 1.0.12
-? ?, 2003
+March 10, 2003
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
-RELEASE DATE: ? ?, 2003
+RELEASE DATE: March 10, 2003
 
 1. [CLIENT] Properly update StringSelector count display on manual item entry
 
@@ -56,6 +56,11 @@ This fix should make it possible to run the Ganymede server on JDK
 
 Thanks to Maura Mathieu (maura.mathieu@sdis66.fr) and Kent Wick
 (kent.wick@mhmr.state.tx.us) for reporting this.
+
+6. [SERVER SCRIPTS] Fixed RMIGC definition in runServer for ksh
+
+Per Kent Wick, the RMIGC definition in the runServer templates has
+been surrounded by single quotes.
 
 6. [SERVER] Preparations for logging to PostGreSQL
 
