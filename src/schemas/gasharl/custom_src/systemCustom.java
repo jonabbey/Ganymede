@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -73,6 +73,61 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   {
     super(original, editset);
   }
+
+  public Object obtainChoicesKey(DBField field)
+  {
+    DBObjectBase base = Ganymede.db.getObjectBase((short) 272);	// system types
+
+    /* -- */
+    
+    if (field.getID() != 266)	// system type field
+      {
+	return super.obtainChoicesKey(field);
+      }
+    else
+      {
+	// we put a time stamp on here so the client
+	// will know to call obtainChoiceList() afresh if the
+	// system types base has been modified
+
+	return "System Type:" + base.getTimeStamp();
+      }
+  }
+
+  /**
+   *
+   * This method provides a hook that can be used to generate
+   * choice lists for invid and string fields that provide
+   * such.  String and Invid DBFields will call their owner's
+   * obtainChoiceList() method to get a list of valid choices.
+   * 
+   */
+
+  public QueryResult obtainChoiceList(DBField field)
+  {
+    if (field.getID() != 266)	// system type field
+      {
+	return super.obtainChoiceList(field);
+      }
+
+    Query query = new Query((short) 272, null, false); // list all system types
+
+    return editset.getSession().getGSession().query(query);
+  }
+
+  /**
+   *
+   * This method provides a hook that a DBEditObject subclass
+   * can use to indicate whether a given field can only
+   * choose from a choice provided by obtainChoiceList()
+   *
+   */
+
+  public boolean mustChoose(DBField field)
+  {
+    return (field.getID() == 266);
+  }
+
   
   /**
    *
