@@ -621,6 +621,11 @@ public final class DBStore implements JythonMap {
 
 	    rootCategory.resort();
 	  }
+
+	// make sure that we have the new object bases and fields
+	// that have come into use since Ganymede 1.0.12.
+
+	verifySchema2_0();
       }
     catch (IOException ex)
       {
@@ -2190,6 +2195,110 @@ public final class DBStore implements JythonMap {
       }
 
     loading = false;
+  }
+
+  void verifySchema2_0()
+  {
+    DBObjectBase b = null;
+    DBObjectBaseField bf = null;
+
+    /* -- */
+
+    try
+      {
+	if (getNameSpace("buildertask") == null)
+	  {
+	    Ganymede.debug("Adding buildertask name space");
+
+	    // note!  we have had buildertask in the server DBStore
+	    // since 1998.. if we're dealing with a ganymede.db file
+	    // that doesn't have it, it must be old indeed!
+
+	    DBNameSpace ns = new DBNameSpace("buildertask", true);
+	    nameSpaces.addElement(ns);
+	  }
+
+	if (getObjectBase(SchemaConstants.SyncChannelBase) == null)
+	  {
+	    Ganymede.debug("Adding Sync Channel ObjectBase");
+
+	    // create Sync Channel Base
+
+	    b = new DBObjectBase(this, false);
+	    b.object_name = "Sync Channel";
+	    b.classname = "arlut.csd.ganymede.server.syncChannelCustom";
+	    b.type_code = (short) SchemaConstants.SyncChannelBase; // 7
+
+	    DBBaseCategory adminCategory = (DBBaseCategory) getCategoryNode("/Admin-Level Objects");
+
+	    adminCategory.addNodeAfter(b, null); // add it to the end is ok
+
+	    bf = new DBObjectBaseField(b);
+	    bf.field_code = SchemaConstants.SyncChannelName;
+	    bf.field_type = FieldType.STRING;
+	    bf.field_name = "Name";
+	    bf.loading = true;
+	    bf.setNameSpace("buildertask");	// same namespace as tasks
+	    bf.loading = false;
+	    b.addFieldToEnd(bf);
+
+	    bf = new DBObjectBaseField(b);
+	    bf.field_code = SchemaConstants.SyncChannelDirectory;
+	    bf.field_type = FieldType.STRING;
+	    bf.field_name = "Directory Path";
+	    bf.comment = "Location of the sync channel directory on disk";
+	    b.addFieldToEnd(bf);
+
+	    bf = new DBObjectBaseField(b);
+	    bf.field_code = SchemaConstants.SyncChannelServicer;
+	    bf.field_type = FieldType.STRING;
+	    bf.field_name = "Service Program";
+	    bf.comment = "The location of the program to service this sync channel";
+	    b.addFieldToEnd(bf);
+
+	    bf = new DBObjectBaseField(b);
+	    bf.field_code = SchemaConstants.SyncChannelFields;
+	    bf.field_type = FieldType.FIELDOPTIONS;
+	    bf.field_name = "Sync Data";
+	    bf.comment = "The definitions for what object and fields we want to include in this sync channel";
+	    b.addFieldToEnd(bf);
+
+	    bf = new DBObjectBaseField(b);
+	    bf.field_code = SchemaConstants.SyncChannelPlaintextOK;
+	    bf.field_type = FieldType.BOOLEAN;
+	    bf.field_name = "Allow Plaintext Passwords";
+	    b.addFieldToEnd(bf);
+
+	    b.setLabelField(SchemaConstants.SyncChannelName);
+
+	    // link in the class we specified
+
+	    b.createHook();
+
+	    setBase(b);
+	  }
+
+	// now make sure that the Task base has the TaskOptionStrings field
+
+	DBObjectBase taskBase = (DBObjectBase) getObjectBase(SchemaConstants.TaskBase);
+
+	if (taskBase.getField(SchemaConstants.TaskOptionStrings) == null)
+	  {
+	    Ganymede.debug("Adding TaskOptionStrings to task base");
+
+	    bf = new DBObjectBaseField(b);
+	    bf.field_code = SchemaConstants.TaskOptionStrings;
+	    bf.field_type = FieldType.STRING;
+	    bf.array = true;
+	    bf.field_name = "Option Strings";
+	    bf.comment = "Optional task parameters, interpreted by specific tasks if needed";
+	    taskBase.addFieldToEnd(bf);
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException(ex);
+      }
   }
 
   /**
