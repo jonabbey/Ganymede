@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 29 May 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,7 +52,7 @@ import java.util.*;
  * @see csd.Table.rowTable
  * @see csd.Table.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.7 $ %D%
+ * @version $Revision: 1.8 $ %D%
  */
 
 public class baseTable extends Panel implements AdjustmentListener {
@@ -82,7 +82,6 @@ public class baseTable extends Panel implements AdjustmentListener {
     scalefact;
 
   Rectangle
-    canvas_rect,
     bounding_rect;
 
   Insets
@@ -204,11 +203,10 @@ public class baseTable extends Panel implements AdjustmentListener {
 	vLineThickness = 0;
       }
 
-    // Initialize our bounding and canvas rectangles.
-    // These will get filled when the AWT calls our
+    // Initialize our bounding rectangle.
+    // This will get filled when the AWT calls our
     // setBounds() method.
 
-    canvas_rect = new Rectangle();
     bounding_rect = new Rectangle();
 
     // Initialize our columns
@@ -244,6 +242,9 @@ public class baseTable extends Panel implements AdjustmentListener {
     canvas = new tableCanvas(this);
     this.setLayout(new BorderLayout(0,0));
     this.add("Center", canvas);
+
+    // create our scroll bars, but don't add them to our
+    // container until we know we need them.
 
     hbar = new Scrollbar(Scrollbar.HORIZONTAL);
     hbar.addAdjustmentListener(this);
@@ -1180,36 +1181,39 @@ public class baseTable extends Panel implements AdjustmentListener {
   // this so we can update the scrollbars and what-not.
 
   public synchronized void setBounds(int x, int y, int width, int height)
-  {
-    if (debug)
-      {
-	System.err.println("setBounds()");
-      }
+    {
+      if (debug)
+	{
+	  System.err.println("setBounds()");
+	}
 
-    if ((width != bounding_rect.width) ||
-	(height != bounding_rect.height))
-      {
-	bounding_rect.x = x;
-	bounding_rect.y = y;
-	bounding_rect.width = width;
-	bounding_rect.height = height;
+      super.setBounds(x,y,width,height);
 
-	in = getInsets();
+      validate();		// we need to do this to get our canvas resized before we call
+				// reShape() and refreshTable() below
 
-	bounding_rect.width -= (in.left + in.right);
-	bounding_rect.height -= (in.top + in.bottom);
+      if ((width != bounding_rect.width) ||
+	  (height != bounding_rect.height))
+	{
+	  bounding_rect.x = x;
+	  bounding_rect.y = y;
+	  bounding_rect.width = width;
+	  bounding_rect.height = height;
 
-	canvas_rect.x = bounding_rect.x;
-	canvas_rect.y = bounding_rect.y;
-	canvas_rect.width = bounding_rect.width;
-	canvas_rect.height = bounding_rect.height;
-    
-	reShape();
-	refreshTable();
-      }
+	  in = getInsets();
 
-    super.setBounds(x,y,width,height);
-  }
+	  bounding_rect.width -= (in.left + in.right);
+	  bounding_rect.height -= (in.top + in.bottom);
+
+	  reShape();
+	  refreshTable();
+	}
+
+      if (debug)
+	{
+	  System.err.println("exiting setBounds()");
+	}
+    }
 
   // Internal method
 
@@ -1225,55 +1229,9 @@ public class baseTable extends Panel implements AdjustmentListener {
 	System.err.println("reShape()");
       }
 
-    /*
-      calculate whether we need scrollbars, add/remove them
-
-      note that adding a horizontal scrollbar may force us to
-      add a vertical scrollbar and vice versa, if adding the
-      scrollbar for one dimension reduces our canvas_rect
-      size below threshold along the other.
-     */
+    // calculate whether we need scrollbars, add/remove them
       
-    adjustScrollbars();		// first pass
-
-    if (vbar_visible)
-      {
-	canvas_rect.width = bounding_rect.width - vbar.getSize().width;
-      }
-    else
-      {
-	canvas_rect.width = bounding_rect.width;
-      }
-
-    if (hbar_visible)
-      {
-	canvas_rect.height = bounding_rect.height - hbar.getSize().height;
-      }
-    else
-      {
-	canvas_rect.height = bounding_rect.height;
-      }
-
-    adjustScrollbars();		// second pass
-
-    if (vbar_visible)
-      {
-	canvas_rect.width = bounding_rect.width - vbar.getSize().width;
-      }
-    else
-      {
-	canvas_rect.width = bounding_rect.width;
-      }
-
-    if (hbar_visible)
-      {
-	canvas_rect.height = bounding_rect.height - hbar.getSize().height;
-      }
-    else
-      {
-	canvas_rect.height = bounding_rect.height;
-      }
-
+    adjustScrollbars();
     calcCols();
 
     if (debug)
@@ -1292,32 +1250,62 @@ public class baseTable extends Panel implements AdjustmentListener {
 
   void adjustScrollbars()
   {
-    int size;
-    boolean was_vbar, was_hbar;
+    int
+      hSize, 
+      vSize;
 
     /* -- */
 
     if (debug)
       {
 	System.err.println("adjustScrollbars()");
+	System.err.println("canvas.getBounds().width = " + canvas.getBounds().width);
+	System.err.println("canvas.getBounds().height = " + canvas.getBounds().height);
       }
 
-    was_vbar = vbar_visible;
-    was_hbar = hbar_visible;
-
-    size = vLineThickness;
+    // calculate how wide our table is total, not counting any scroll
+    // bars.  That is, how narrow can we be before we need to have a
+    // horizontal scrollbar?
+    
+    hSize = vLineThickness;
 
     for (int i = 0; i < cols.length; i++)
       {
-	size += cols[i].origWidth + vLineThickness;
+	hSize += cols[i].origWidth + vLineThickness;
       }
 
-    if (size > canvas_rect.width)
+    // calculate how tall or table is, not counting any scroll bars.
+    // That is, how short can we be before we need to have a vertical
+    // scrollbar?
+
+    vSize = headerAttrib.height + hHeadLineThickness * 2;
+
+    if (debug)
+      {
+	System.err.println("Number of rows defined (rows.size()) = " + rows.size());
+      }
+
+    for (int i=0; i < rows.size(); i++)
+      {
+	vSize += row_height + hRowLineThickness;
+      }
+
+    if (debug)
+      {
+	System.err.println("vertical size due to combined vertical height of rows = " + vSize);
+      }	
+
+    // calculate whether we need scrollbars
+
+    // check to see if we need a horizontal scrollbar
+
+    if (hSize > canvas.getBounds().width)
       {
 	if (!hbar_visible)
 	  {
 	    this.add("South", hbar);
 	    hbar.setValue(0);
+	    this.doLayout();
 	  }
 	hbar_visible = true;
 
@@ -1331,6 +1319,7 @@ public class baseTable extends Panel implements AdjustmentListener {
 	if (hbar_visible)
 	  {
 	    this.remove(hbar);
+	    this.doLayout();
 	  }
 	hbar_visible = false;
 
@@ -1342,33 +1331,15 @@ public class baseTable extends Panel implements AdjustmentListener {
 	canvas.h_offset = 0;
       }
 
-    // for vertical size, leave space for first horiz line, titles, second horizline
+    // check to see if we need a vertical scrollbar
 
-    size = headerAttrib.height + hHeadLineThickness * 2;
-
-    if (debug)
-      {
-	System.err.println("Number of rows defined (rows.size()) = " + rows.size());
-      }
-
-    for (int i=0; i < rows.size(); i++)
-      {
-	size += row_height + hRowLineThickness;
-      }
-
-    if (debug)
-      {
-	System.err.println("vertical size due to combined vertical height of rows = " + size);
-	
-	System.err.println("canvas_rect.height = " + canvas_rect.height);
-      }	
-
-    if (size > canvas_rect.height)
+    if (vSize > canvas.getBounds().height)
       {
 	if (!vbar_visible)
 	  {
 	    this.add("East", vbar);
 	    vbar.setValue(0);
+	    this.doLayout();
 	  }
 	vbar_visible = true;
 
@@ -1382,6 +1353,7 @@ public class baseTable extends Panel implements AdjustmentListener {
 	if (vbar_visible)
 	  {
 	    this.remove(vbar);
+	    this.doLayout();
 	  }
 	vbar_visible = false;
 
@@ -1393,39 +1365,71 @@ public class baseTable extends Panel implements AdjustmentListener {
 	canvas.v_offset = 0;
       }
 
+    // check again to see if we need a horizontal scrollbar..
+    // we need to recheck this in case adding our vertical
+    // scrollbar squeezed us horizontally enough that we
+    // need to put in a horizontal scrollbar
+
+    if (hSize > canvas.getBounds().width)
+      {
+	if (!hbar_visible)
+	  {
+	    this.add("South", hbar);
+	    hbar.setValue(0);
+	    this.doLayout();
+	  }
+	hbar_visible = true;
+
+	if (debug)
+	  {
+	    System.err.println("hbar being made visible");
+	  }
+      }
+    else
+      {
+	if (hbar_visible)
+	  {
+	    this.remove(hbar);
+	    this.doLayout();
+	  }
+	hbar_visible = false;
+
+	if (debug)
+	  {
+	    System.err.println("hbar being made INvisible");
+	  }
+
+	canvas.h_offset = 0;
+      }
+
+    // now we've got our scrollbars the way we want them as
+    // far as visible vs. non visible.. now we need to
+    // see about getting them properly configured
+
     // Adjust the Vertical Scrollbar's Parameters
 
-    if (vbar_visible && (canvas_rect.height != 0))
+    if (vbar_visible && (canvas.getBounds().height != 0))
       {
 	vbar.setValues(vbar.getValue(),
-		       canvas_rect.height - headerAttrib.height - (2 * hHeadLineThickness),
+		       canvas.getBounds().height - headerAttrib.height - (2 * hHeadLineThickness),
 		       0,
 		       (rows.size() * (row_height + hRowLineThickness)));
 	
 	vbar.setUnitIncrement(row_height + hRowLineThickness);    // we want the up/down buttons to go a line at a time
 	    
-	vbar.setBlockIncrement((canvas_rect.height - headerAttrib.height - 2 * hHeadLineThickness)/2);
+	vbar.setBlockIncrement((canvas.getBounds().height - headerAttrib.height - 2 * hHeadLineThickness)/2);
       }
 
     // Adjust the Horizontal Scrollbar's Parameters
 
-    if (hbar_visible && (canvas_rect.width != 0))
+    if (hbar_visible && (canvas.getBounds().width != 0))
       {
 	hbar.setValues(hbar.getValue(),
-		       canvas_rect.width,
+		       canvas.getBounds().width,
 		       0,
 		       origTotalWidth  + (cols.length + 1) * vLineThickness);
 
-	hbar.setBlockIncrement(canvas_rect.width / 2);    
-      }
-
-    // we want to add the scrollbar to visibility
-    // after setting the appropriate scrollbar values
-
-    if ((was_hbar != hbar_visible) ||
-	(was_vbar != vbar_visible))
-      {
-	this.doLayout();
+	hbar.setBlockIncrement(canvas.getBounds().width / 2);    
       }
 
     if (debug)
@@ -1480,7 +1484,13 @@ public class baseTable extends Panel implements AdjustmentListener {
 	    pos += cols[i].width + vLineThickness;
 	  }
 
-	colPos[cols.length] = pos;
+	// set the last pole directly to avoid scaling artifacts
+
+	colPos[cols.length] = origTotalWidth + (cols.length + 1) * vLineThickness;
+
+	// and set the last column's width directly to avoid the same
+
+	cols[cols.length-1].width = colPos[cols.length] - colPos[cols.length-1];
       }
     else
       {
@@ -1493,8 +1503,8 @@ public class baseTable extends Panel implements AdjustmentListener {
 	  {
 	    System.err.println("Horizontal scrollbar not visible");
 	    System.err.println("Scaling");
-	    System.err.println("Canvas width: " + canvas_rect.width);
-	    System.err.println("Canvas height: " + canvas_rect.height);
+	    System.err.println("Canvas width: " + canvas.getBounds().width);
+	    System.err.println("Canvas height: " + canvas.getBounds().height);
 	  }
 
 	// figure out how much we need to scale the column sizes to fill the 
@@ -1507,7 +1517,7 @@ public class baseTable extends Panel implements AdjustmentListener {
 	    
 	    make scalefact an object global float? */
 	
-	scalefact = (canvas_rect.width - (cols.length + 1) * vLineThickness) / 
+	scalefact = (canvas.getBounds().width - (cols.length + 1) * vLineThickness) / 
 	  (float) origTotalWidth;
 
 	if (debug)
@@ -1530,9 +1540,9 @@ public class baseTable extends Panel implements AdjustmentListener {
 	// a scrollbar.  set it directly to avoid integer/float
 	// precision problems.
 
-	colPos[cols.length] = canvas_rect.width - 1;
-	cols[cols.length-1].width = colPos[cols.length] - 
-	  colPos[cols.length - 1] - vLineThickness;
+	colPos[cols.length] = canvas.getBounds().width - 1;
+
+	cols[cols.length-1].width = colPos[cols.length] - colPos[cols.length - 1] - vLineThickness;
       }
 
     if (debug)
@@ -1675,8 +1685,8 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
       }
 
     if ((backing == null) ||
-	(backing_rect.width != rt.canvas_rect.width + 1) ||
-	(backing_rect.height != rt.canvas_rect.height + 1) ||
+	(backing_rect.width != getBounds().width) ||
+	(backing_rect.height != getBounds().height) ||
 	(hbar_old != rt.hbar.getValue()) ||
 	(vbar_old != rt.vbar.getValue()))
       {
@@ -1688,7 +1698,7 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	System.err.println("copying image");
       }
 
-    g.drawImage(backing, rt.in.left, rt.in.top, this);
+    g.drawImage(backing, 0, 0, this);
 
     if (debug)
       {
@@ -1794,14 +1804,17 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	if (debug)
 	  {
 	    System.err.println("creating backing image");
+
+	    System.err.println("width = " + getBounds().width);
+	    System.err.println("height = " + getBounds().height);
 	  }
-	backing = createImage(rt.canvas_rect.width, rt.canvas_rect.height);
-	backing_rect = new Rectangle(rt.canvas_rect.x, rt.canvas_rect.y, 
-				     rt.canvas_rect.width+1, rt.canvas_rect.height+1);
+
+	backing_rect = new Rectangle(0, 0, getBounds().width, getBounds().height);
+	backing = createImage(getBounds().width, getBounds().height);
 	bg = backing.getGraphics();
       }
-    else if ((backing_rect.width != (rt.canvas_rect.width + 1)) ||
-	     (backing_rect.height != (rt.canvas_rect.height + 1)))
+    else if ((backing_rect.width != getBounds().width) ||
+	     (backing_rect.height != getBounds().height))
       {
 	// need to get a new backing image
 
@@ -1809,10 +1822,11 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	  {
 	    System.err.println("creating new backing image");
 	  }
+
+	backing_rect = new Rectangle(0, 0, getBounds().width, getBounds().height);
+
 	backing.flush();	// free old image resources
-	backing = createImage(rt.canvas_rect.width, rt.canvas_rect.height);
-	backing_rect = new Rectangle(rt.canvas_rect.x, rt.canvas_rect.y, 
-				     rt.canvas_rect.width+1, rt.canvas_rect.height+1);
+	backing = createImage(getBounds().width, getBounds().height);
 	bg = backing.getGraphics();
       }
     else if ((hbar_old != rt.hbar.getValue()) ||
@@ -1831,14 +1845,25 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	System.err.println("\tFilling Rect");
       }
 
-    bg.setColor(Color.lightGray);
-    bg.fillRect(0, 0, backing_rect.width, backing_rect.height);
+    // isn't this extraneous?
+
+    //    bg.setColor(Color.lightGray);
+    //    bg.fillRect(0, 0, backing_rect.width, backing_rect.height);
 
     /* Calculate horizontal offset, rendering parameters */
 
     if (rt.hbar_visible)
       {
 	h_offset = rt.hbar.getValue(); // this may not work on win32?
+
+	if (debug)
+	  {
+	    System.err.println("h_offset = " + h_offset);
+	    System.err.println("maximum = " + rt.hbar.getMaximum());
+	    System.err.println("calculated right edge = " + (h_offset + getBounds().width));
+	    System.err.println("canvas width = " + getBounds().width);
+	    System.err.println("position of right pole = " + rt.colPos[rt.cols.length]);
+	  }
 
 	/* calculate first col visible */
 
@@ -1853,7 +1878,7 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	/* calculate last col visible */
 
 	last_col = first_col;
-	leftedge = rt.canvas_rect.width + h_offset;
+	leftedge = getBounds().width + h_offset;
 	
 	while ((xpos < leftedge) && (last_col < rt.cols.length - 1))
 	  {
@@ -1891,10 +1916,10 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	  }
 
 	/* what is the last row we can see?  that is, the last row
-	   whose first line is < rt.canvas_rect.height  */
+	   whose first line is < getBounds().height  */
 
 	last_row = first_row;
-	bottomedge = v_offset + rt.canvas_rect.height - 1 - rt.headerAttrib.height - 2 * rt.hHeadLineThickness;
+	bottomedge = v_offset + getBounds().height - 1 - rt.headerAttrib.height - 2 * rt.hHeadLineThickness;
 
 	if (debug)
 	  {
@@ -1923,7 +1948,7 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	  }
 	else
 	  {
-	    last_row = (rt.canvas_rect.height - rt.headerAttrib.height - 2 * rt.hHeadLineThickness) /
+	    last_row = (getBounds().height - rt.headerAttrib.height - 2 * rt.hHeadLineThickness) /
 	    (rt.row_height + rt.hRowLineThickness);
 	  }
 
@@ -2214,29 +2239,41 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 
     bg.setColor(rt.hHeadLineColor);
 
-    bg.drawLine(0, 0, rt.canvas_rect.width-1, 0); // top line
+    bg.drawLine(0, 0, getBounds().width-1, 0); // top line
 
     bg.setColor(rt.hRowLineColor);
 
     bg.drawLine(0,
 		rt.headerAttrib.height + rt.hHeadLineThickness,
-		rt.canvas_rect.width-1, 
+		getBounds().width-1, 
 		rt.headerAttrib.height + rt.hHeadLineThickness); // line between header and table
 
-    if (rt.vertFill || rt.vbar_visible)
+    // draw a line across the bottom of the table
+
+    if (!rt.vbar_visible)
       {
-	ypos = rt.canvas_rect.height - 1;
+	// very bottom of the canvas
+
+    	ypos = getBounds().height - 1; 
       }
     else
       {
-	ypos = rt.hHeadLineThickness * 2 + rt.headerAttrib.height + 
-	  rt.rows.size() * (rt.row_height + rt.hRowLineThickness);
-      }
+	// bottom of the last row defined
 
-    if (!rt.vertFill && !rt.vbar_visible)
-      {
-	bg.drawLine(0, ypos, rt.canvas_rect.width - 1, ypos); // bottom line if not vert filling
+	ypos = rt.hHeadLineThickness * 2 + rt.headerAttrib.height + 
+	  rt.rows.size() * (rt.row_height + rt.hRowLineThickness); 
       }
+    
+    if (!rt.vbar_visible)
+      {
+	bg.drawLine(0, ypos, getBounds().width - 1, ypos);
+      }
+    else
+      {
+	ypos = ypos - v_offset;
+	bg.drawLine(0, ypos, getBounds().width - 1, ypos);
+      }
+    
 
     // if rt.horizLines is true, draw the horizontal lines
     // in the body of the table
@@ -2260,7 +2297,7 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	      {
 		bg.drawLine(0,
 			    ypos2,
-			    rt.canvas_rect.width-1, 
+			    getBounds().width-1, 
 			    ypos2);
 	      }
 	  }
@@ -2345,9 +2382,10 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
     colDrag = 0;
     clickCol = -1;
 
+    // We don't want a popupTrigger event to initialize a column drag
+
     if (!e.isPopupTrigger())
       {
-	
 	// mouse down near column line?
 
 	for (col = 1; col < rt.cols.length; col++)
@@ -2447,11 +2485,6 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 
     /* -- */
 
-    if (e.isPopupTrigger())
-      {
-	popupHandler(e);
-      }
-
     x = e.getX();
     y = e.getY();
 
@@ -2539,25 +2572,25 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	render();
 	repaint();
       }
-	else
+    else
+      {
+	// even if we couldn't recalc the column due to a minimum
+	// column width violation, we still need to erase our
+	// XOR line
+
+	if (colXOR != -1)
 	  {
-	    // even if we couldn't recalc the column due to a minimum
-	    // column width violation, we still need to erase our
-	    // XOR line
-
-	    if (colXOR != -1)
-	      {
-		bg.setXORMode(Color.red); // needs to be settable
-		bg.drawLine(colXOR, 0, colXOR, rt.canvas_rect.height-1);
-		bg.setPaintMode();
-		update(this.getGraphics());
-	      }
+	    bg.setXORMode(Color.red); // needs to be settable
+	    bg.drawLine(colXOR, 0, colXOR, getBounds().height-1);
+	    bg.setPaintMode();
+	    update(this.getGraphics());
 	  }
+      }
 
-	colDrag = 0;
-	colXOR = -1;
-
-	return;
+    colDrag = 0;
+    colXOR = -1;
+    
+    return;
   }
 
   // private popupmenu handler
@@ -2648,6 +2681,8 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
     rt.menuRow = clickRow;
     rt.menuCol = clickCol;
 
+    rt.clickInCell(clickCol, clickRow);
+
     if (debug)
       {
 	System.err.println("Base table: menuRow = " + rt.menuRow + ", menuCol = " + rt.menuCol);
@@ -2728,18 +2763,24 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	if ((x > (rt.colPos[colDrag-1] + mincolwidth + 1)) && (x < rt.colPos[colDrag+1] - mincolwidth - 1))
 	  {
 	    bg.setXORMode(Color.red); // needs to be settable
+
+	    // erase the old line if we had one
+
 	    if (colXOR != -1)
 	      {
-		bg.drawLine(colXOR, 0, colXOR, rt.canvas_rect.height-1);
+		bg.drawLine(colXOR, 0, colXOR, getBounds().height-1);
 	      }
+
+	    // XOR in our new line, remember where it is with colXOR
+	    // so that we can undraw it later.
 
 	    colXOR = x - h_offset;
 
-	    bg.drawLine(colXOR, 0, colXOR, rt.canvas_rect.height-1);
-
-	    update(this.getGraphics());
+	    bg.drawLine(colXOR, 0, colXOR, getBounds().height-1);
 
 	    bg.setPaintMode();
+
+	    update(this.getGraphics());
 	  }
       }
   }
@@ -2750,13 +2791,13 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
   {
     if (rt.rows.size() < 5)
       {
-	return new Dimension(rt.origTotalWidth,
+	return new Dimension(rt.origTotalWidth + (rt.cols.length + 1) * rt.vLineThickness,
 			     rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
 			     5 * (rt.row_height + rt.hRowLineThickness));
       }
     else
       {
-	return new Dimension(rt.origTotalWidth,
+	return new Dimension(rt.origTotalWidth + (rt.cols.length + 1) * rt.vLineThickness,
 			     rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
 			     rt.rows.size() * (rt.row_height + rt.hRowLineThickness));
       }
