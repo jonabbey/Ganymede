@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -81,18 +81,18 @@ public class DBEditObject extends DBObject {
     DBNameSpaceHandle handle;
     DBObjectBaseField fieldDef;
     DBField oldField;
-    Integer fieldINT;
+    Short key;
 
     /* -- */
 
-    fieldINT = new Integer(fieldcode);
+    key = new(fieldcode);
 
-    if (!objectBase.fieldHash.containsKey(fieldINT))
+    if (!objectBase.fieldHash.containsKey(key))
       {
 	throw new RuntimeException("bad field code");
       }
 
-    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(fieldINT);
+    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
 
     type = fieldDef.field_type;
     namespace = fieldDef.namespace;
@@ -191,9 +191,9 @@ public class DBEditObject extends DBObject {
 
     // check to see if we already have an instance of this field
 
-    if (fields.containsKey(fieldINT))
+    if (fields.containsKey(key))
       {
-	oldField = (DBField) fields.get(fieldINT);
+	oldField = (DBField) fields.get(key);
 
 	if (namespace != null)
 	  {
@@ -220,7 +220,7 @@ public class DBEditObject extends DBObject {
 
     // and replace the changed field in our hashtable..
 
-    fields.put(new Integer(fieldcode), field);
+    fields.put(new Short(fieldcode), field);
     return true;
   }
 
@@ -246,14 +246,14 @@ public class DBEditObject extends DBObject {
     DBNameSpace namespace;
     DBArrayField field;
     short type;
-    Integer fieldINT;
+    Short key;
     DBObjectBaseField fieldDef;
 
     /* -- */
 
-    fieldINT = new Integer(fieldcode);
+    key = new Short(fieldcode);
 
-    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(fieldINT);
+    fieldDef = (DBObjectBaseField) objectBase.fieldHash.get(key);
 
     namespace = fieldDef.namespace;
 
@@ -293,7 +293,7 @@ public class DBEditObject extends DBObject {
 	  }
       }
 
-    if (!fields.containsKey(fieldINT))
+    if (!fields.containsKey(key))
       {
 	// do we want to create a new field in this slot for the caller
 	// if no such field currently exists in the object?
@@ -303,15 +303,15 @@ public class DBEditObject extends DBObject {
 
     // we'll throw a cast exception here if we weren't called on a vector field
 
-    field = (DBArrayField) fields.get(fieldINT);
+    field = (DBArrayField) fields.get(key);
 
     // if we have not yet cloned the DBArrayField, do so.  this makes sure that
     // we don't change the original vector with our add
 
-    if (original.fields.containsKey(fieldINT) && (original.fields.get(fieldINT) == field))
+    if (original.fields.containsKey(key) && (original.fields.get(key) == field))
       {
 	field = field.duplicate();
-	fields.put(fieldINT, field);
+	fields.put(key, field);
       }
 
     // add the new element, checking against the proper namespace if
@@ -352,22 +352,22 @@ public class DBEditObject extends DBObject {
   {
     DBArrayField field;
     DBNameSpace namespace;
-    Integer fieldINT;
+    Short key;
 
     /* -- */
 
-    fieldINT = new Integer(fieldcode);
+    key = new Short(fieldcode);
 
-    namespace = ((DBObjectBaseField) objectBase.fieldHash.get(fieldINT)).namespace;
+    namespace = ((DBObjectBaseField) objectBase.fieldHash.get(key)).namespace;
 
-    if (!fields.containsKey(fieldINT))
+    if (!fields.containsKey(key))
       {
 	throw new RuntimeException("removeElement called on a non-existant or null field");
       }
 
     // we'll throw a cast exception here if we weren't called on an vector field
 
-     field = (DBArrayField) fields.get(fieldINT);
+     field = (DBArrayField) fields.get(key);
 
 //     if (!field instanceof DBArrayField)
 //       {
@@ -377,10 +377,10 @@ public class DBEditObject extends DBObject {
     // if we have not yet cloned the DBArrayField, do so.  this makes sure that
     // we don't change the original vector with our remove
 
-    if (original.fields.containsKey(fieldINT) && (original.fields.get(fieldINT) == field))
+    if (original.fields.containsKey(key) && (original.fields.get(key) == field))
       {
 	field = field.duplicate();
-	fields.put(fieldINT, field);
+	fields.put(key, field);
       }
 
     // okay, now delete the element, marking the value as free for
@@ -420,20 +420,20 @@ public class DBEditObject extends DBObject {
   {
     DBArrayField field;
     DBNameSpace namespace;
-    Integer fieldINT;
+    Short key;
 
     /* -- */
 
-    fieldINT = new Integer(fieldcode);
+    key = new Short(fieldcode);
 
-    namespace = ((DBObjectBaseField) objectBase.fieldHash.get(fieldINT)).namespace;
+    namespace = ((DBObjectBaseField) objectBase.fieldHash.get(key)).namespace;
 
-    if (!fields.containsKey(fieldINT))
+    if (!fields.containsKey(key))
       {
 	throw new RuntimeException("removeElement called on a non-existant or null field");
       }
 
-    field = (DBArrayField) fields.get(fieldINT);
+    field = (DBArrayField) fields.get(key);
 
 //     if (!field instanceof DBArrayField)
 //       {
@@ -443,10 +443,10 @@ public class DBEditObject extends DBObject {
     // if we have not yet cloned the DBArrayField, do so.  this makes sure that
     // we don't change the original vector with our remove
 
-    if (original.fields.containsKey(fieldINT) && (original.fields.get(fieldINT) == field))
+    if (original.fields.containsKey(key) && (original.fields.get(key) == field))
       {
 	field = field.duplicate();
-	fields.put(fieldINT, field);
+	fields.put(key, field);
       }
 
     // okay, now delete the element, marking the value as free for
