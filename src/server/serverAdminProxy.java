@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 2002/08/07 00:56:17 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2003/02/10 22:20:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import arlut.csd.Util.booleanSemaphore;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.26 $ $Date: 2002/08/07 00:56:17 $
+ * @version $Revision: 1.27 $ $Date: 2003/02/10 22:20:39 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -316,6 +316,15 @@ public class serverAdminProxy implements Admin, Runnable {
     adminEvent newLogEvent;
 
     /* -- */
+
+    if (done)
+      {
+	// we have to throw a remote exception, since that's what
+	// the GanymedeAdmin code expects to receive as a signal
+	// that an admin console needs to be dropped
+	
+	throw new RemoteException("serverAdminProxy: console disconnected");
+      }
 
     synchronized (eventBuffer)
       {

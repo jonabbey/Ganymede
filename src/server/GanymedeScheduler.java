@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2002/08/03 01:40:27 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2003/02/10 22:20:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -824,124 +824,145 @@ public class GanymedeScheduler extends Thread {
 	  {
 	    Ganymede.debug("Ganymede Scheduler: scheduling task started");
 	  }
-
+	
 	while (true)
 	  {
-	    if (isInterrupted())
+	    try
 	      {
-		Ganymede.debug("Scheduler interrupted");
-		return;	// jump to finally, then return
-	      }
-
-	    if (debug)
-	      {
-		System.err.println("loop");
-	      }
-
-	    if (nextAction == null)
-	      {
-		try
+		if (isInterrupted())
 		  {
-		    if (debug)
-		      {
-			System.err.println("*** snooze");
-		      }
-
-		    wait();	// scheduleTask() can wake us up here via notify()
-		  }
-		catch (InterruptedException ex)
-		  {
-		    System.err.println("Scheduler interrupted");
+		    Ganymede.debug("Scheduler interrupted");
 		    return;	// jump to finally, then return
 		  }
-
+		
 		if (debug)
 		  {
-		    System.err.println("*** snort?");
+		    System.err.println("loop");
 		  }
-	      }
-	    else
-	      {
-		currentTime = System.currentTimeMillis();
-
-		if (currentTime < nextAction.getTime())
+		
+		if (nextAction == null)
 		  {
-		    sleepTime = nextAction.getTime() - currentTime;
-
-		    if (sleepTime > 0)
+		    try
 		      {
-			try
-			  {
-			    if (debug)
-			      {
-				System.err.println("*** snooze");
-			      }
-
-			    wait(sleepTime);	// scheduleTask() can wake us up here via notify()
-			  }
-			catch (InterruptedException ex)
-			  {
-			    System.err.println("Scheduler interrupted");
-			    return; // jump to finally, then return
-			  }
-
 			if (debug)
 			  {
-			    System.err.println("*** snort?");
+			    System.err.println("*** snooze");
 			  }
+			
+			wait();	// scheduleTask() can wake us up here via notify()
+		      }
+		    catch (InterruptedException ex)
+		      {
+			System.err.println("Scheduler interrupted");
+			return;	// jump to finally, then return
+		      }
+		    
+		    if (debug)
+		      {
+			System.err.println("*** snort?");
 		      }
 		  }
 		else
 		  {
-		    if (debug)
+		    currentTime = System.currentTimeMillis();
+		    
+		    if (currentTime < nextAction.getTime())
 		      {
-			System.err.println("XX: Next action was scheduled at " + nextAction);
-			System.err.println("XX: Processing current actions");
+			sleepTime = nextAction.getTime() - currentTime;
+			
+			if (sleepTime > 0)
+			  {
+			    try
+			      {
+				if (debug)
+				  {
+				    System.err.println("*** snooze");
+				  }
+				
+				wait(sleepTime);	// scheduleTask() can wake us up here via notify()
+			      }
+			    catch (InterruptedException ex)
+			      {
+				System.err.println("Scheduler interrupted");
+				return; // jump to finally, then return
+			      }
+			    
+			    if (debug)
+			      {
+				System.err.println("*** snort?");
+			      }
+			  }
+		      }
+		    else
+		      {
+			if (debug)
+			  {
+			    System.err.println("XX: Next action was scheduled at " + nextAction);
+			    System.err.println("XX: Processing current actions");
+			  }
+		      }
+		    
+		    currentTime = System.currentTimeMillis();
+		    
+		    if (currentTime >= nextAction.getTime())
+		      {
+			Vector toRun = new Vector();
+			Date nextRun = null;
+			Enumeration enum;
+			
+			enum = currentlyScheduled.elements();
+			
+			// enum may be empty if the task that we woke ourselves
+			// up for was unregistered while we were sleeping
+			
+			while (enum.hasMoreElements())
+			  {
+			    handle = (scheduleHandle) enum.nextElement();
+			    
+			    if (handle.startTime.getTime() <= currentTime)
+			      {
+				toRun.addElement(handle);
+			      }
+			    else
+			      {
+				if (nextRun == null)
+				  {
+				    nextRun = new Date(handle.startTime.getTime());
+				  }
+				else if (handle.startTime.before(nextRun))
+				  {
+				    nextRun.setTime(handle.startTime.getTime());
+				  }
+			      }
+			  }
+			
+			nextAction = nextRun;
+			
+			for (int i = 0; i < toRun.size(); i++)
+			  {
+			    handle = (scheduleHandle) toRun.elementAt(i);
+			    
+			    runTask(handle);
+			  }
 		      }
 		  }
+	      }
+	    catch (Throwable ex)
+	      {
+		Ganymede.debug("Ganymede scheduler caught exception");
+		Ganymede.debug(Ganymede.stackTrace(ex));
 
-		currentTime = System.currentTimeMillis();
-		
-		if (currentTime >= nextAction.getTime())
+		try
 		  {
-		    Vector toRun = new Vector();
-		    Date nextRun = null;
-		    Enumeration enum;
-		    
-		    enum = currentlyScheduled.elements();
+		    // we want to sleep a little bit so that if the Throwable we caught was non-transient
+		    // we won't completely eat the CPU.
 
-		    // enum may be empty if the task that we woke ourselves
-		    // up for was unregistered while we were sleeping
-
-		    while (enum.hasMoreElements())
-		      {
-			handle = (scheduleHandle) enum.nextElement();
-			
-			if (handle.startTime.getTime() <= currentTime)
-			  {
-			    toRun.addElement(handle);
-			  }
-			else
-			  {
-			    if (nextRun == null)
-			      {
-				nextRun = new Date(handle.startTime.getTime());
-			      }
-			    else if (handle.startTime.before(nextRun))
-			      {
-				nextRun.setTime(handle.startTime.getTime());
-			      }
-			  }
-		      }
-
-		    nextAction = nextRun;
-
-		    for (int i = 0; i < toRun.size(); i++)
-		      {
-			handle = (scheduleHandle) toRun.elementAt(i);
-
-			runTask(handle);
-		      }
+		    wait(5);
+		  }
+		catch (InterruptedException ex2)
+		  {
+		    System.err.println("Scheduler interrupted");
+		    return; // jump to finally, then return
 		  }
 	      }
 	  }

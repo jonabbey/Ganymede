@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 2002/01/28 21:27:09 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 2003/02/10 22:20:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,6 +59,7 @@ import java.io.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
+import arlut.csd.Util.VectorUtils;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -80,7 +81,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.61 $ $Date: 2002/01/28 21:27:09 $
+ * @version $Revision: 1.62 $ $Date: 2003/02/10 22:20:38 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -564,7 +565,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
     // during error handling
 
     System.err.println("Communications failure to " + console.toString());
-    badConsoles.addElement(console);
+    VectorUtils.unionAdd(badConsoles, console);
   }
 
   /**
