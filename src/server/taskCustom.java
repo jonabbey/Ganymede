@@ -6,8 +6,8 @@
    
    Created: 5 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/02/10 22:08:51 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/02/26 22:25:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -56,6 +56,13 @@ import java.rmi.*;
                                                                       taskCustom
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This class customizes DBEditObject for handling fields in the Ganymede
+ * server's task object type.
+ *
+ */
 
 public class taskCustom extends DBEditObject implements SchemaConstants {
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 1999/02/10 22:08:50 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 1999/02/26 22:25:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -722,10 +722,13 @@ public class DBStore {
 
 	    // and dump the schema out in a human readable form
 	
-	    textOutStream = new FileOutputStream("/home/broccol/public_html/gash2/design/schema.html");
-	    textOut = new PrintWriter(textOutStream);
-
-	    printCategoryTreeHTML(textOut);
+	    if (Ganymede.htmlProperty != null)
+	      {
+		textOutStream = new FileOutputStream(Ganymede.htmlProperty);
+		textOut = new PrintWriter(textOutStream);
+		
+		printCategoryTreeHTML(textOut);
+	      }
 	  }
 	catch (IOException ex)
 	  {

@@ -8,8 +8,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/01/22 18:05:34 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/02/26 22:25:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -723,7 +723,7 @@ public class DBLogEvent {
 
     try
       {
-	reader = new FileReader("/home/broccol/gash2/code/arlut/csd/ganymede/db/log");
+	reader = new FileReader(argv[0]);
       }
     catch (FileNotFoundException ex)
       {
