@@ -8,8 +8,8 @@
    
    Created: 2 October 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/10/02 20:12:18 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/10/02 20:13:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,6 +73,7 @@ import java.util.Stack;
  * operation will simply pop up to the last item matching the given name off
  * the stack.</p>
  */
+
 public class NamedStack {
 
   private Stack stack;
