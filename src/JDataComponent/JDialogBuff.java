@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -422,7 +422,7 @@ public class JDialogBuff implements java.io.Serializable {
  	    if (chars[index] == '\n')
 	      {
  		//throw new RuntimeException("parse error in row" + labels.size());
-		System.out.println("Got a new line, keeping it.");
+		System.err.println("Got a new line, keeping it.");
 	      }
 	    
 	    // if we have a backslashed character, take the backslashed char
@@ -544,8 +544,10 @@ public class JDialogBuff implements java.io.Serializable {
       {
 	results.addElement(new JDialogBuffChunk((String) labels.elementAt(i), operands.elementAt(i),(String)  values.elementAt(i)));
 	
-	System.out.println("Adding chunk: " + (String) labels.elementAt(i) + ":" +  operands.elementAt(i) +":"+  values.elementAt(i));
-
+	if (debug)
+	  {
+	    System.out.println("Adding chunk: " + (String) labels.elementAt(i) + ":" +  operands.elementAt(i) +":"+  values.elementAt(i));
+	  }
       }
 
     // to speed GC
