@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: ?
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -114,6 +114,11 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
   public void setAllowNone(boolean allow)
   {
+    if (debug)
+      {
+	System.out.println("JInvidChooser: setAllowNone(" + allow +")");
+      }
+
     // If we used to allow, but now we don't, we need to take out the
     // noneHandle if it is not selected.
 
