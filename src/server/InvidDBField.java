@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -301,6 +301,21 @@ public class InvidDBField extends DBField implements invid_field {
       }
 
     return result;
+  }
+
+  /**
+   *
+   * OK, this is a bit vague.. getEncodingString() is used by the new
+   * dump system to allow all fields to be properly sorted in the table..
+   * a real reversible encoding of an invid field would *not* be the
+   * getValueString() results, but getValueString() is what we want in
+   * the dump result table, so we'll do that here for now.
+   *
+   */
+
+  public String getEncodingString()
+  {
+    return getValueString();
   }
 
   // ****
