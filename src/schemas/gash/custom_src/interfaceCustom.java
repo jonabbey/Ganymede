@@ -5,7 +5,7 @@
    This file is a management class for interface objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -505,6 +505,13 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
+    // we don't want to play our address/ipnet games if we're being deleted.
+
+    if (deleting)
+      {
+	return null;
+      }
+
     if (field.getID() == interfaceSchema.IPNET && operation == SETVAL)
       {
 	// we don't want to mess with the IPNET change if it was initiated
