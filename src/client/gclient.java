@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.209 $
-   Last Mod Date: $Date: 2002/12/13 23:02:52 $
+   Version: $Revision: 1.210 $
+   Last Mod Date: $Date: 2002/12/16 20:57:51 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.209 $ $Date: 2002/12/13 23:02:52 $ $Name:  $
+ * @version $Revision: 1.210 $ $Date: 2002/12/16 20:57:51 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -3464,82 +3464,87 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * the client's tree display, status caching, etc.</p>
    */
 
-  public boolean inactivateObject(Invid invid)
+  public void inactivateObject(Invid invid)
   {
     boolean ok = false;
     ReturnVal retVal;
 
     /* -- */
 
-    if (invid == null)
+    if (deleteHash.containsKey(invid))
       {
-	if (debug)
-	  {
-	    System.out.println("Canceled");
-	  }
+	showErrorMessage("Client Warning",
+			 getObjectTitle(invid) + " has already been deleted.\n\n" +
+			 "Cancel this transaction if you do not wish to delete this object after all.",
+			 getErrorImage());
+	return;
       }
-    else
+
+    if (wp.isOpenForEdit(invid))
       {
-	setStatus("inactivating " + invid);
-	setWaitCursor();
+	showErrorMessage("Object already being edited", 
+			 "I can't inactivate this object while you have a window open to edit " + getObjectTitle(invid) + ".", 
+			 getErrorImage());
+	return;
+      }
 
-	try
-	  {
-	    retVal = session.inactivate_db_object(invid);
+    setStatus("inactivating " + invid);
+    setWaitCursor();
+
+    try
+      {
+	retVal = session.inactivate_db_object(invid);
 	    
-	    if (retVal != null)
-	      {
-		retVal = handleReturnVal(retVal);
+	if (retVal != null)
+	  {
+	    retVal = handleReturnVal(retVal);
 
-		if (retVal == null)
-		  {
-		    ok = true;
-		  }
-		else
-		  {
-		    ok = retVal.didSucceed();
-		  }
-	      }
-	    else
+	    if (retVal == null)
 	      {
 		ok = true;
 	      }
-
-	    if (ok)
-	      {
-		Short type = new Short(invid.getType());
-		ObjectHandle handle = getObjectHandle(invid, type);
-
-		// remember that we changed this object for the refreshChangedObjectHandles
-
-		changedHash.put(invid, invid);
-
-		// refresh it now
-		
-		refreshChangedObject(invid);
-
-		// and update the tree
-
-		tree.refresh();
-		setStatus("Object inactivated.");
-		somethingChanged();
-	      }
 	    else
 	      {
-		setStatus("Could not inactivate object.");
+		ok = retVal.didSucceed();
 	      }
 	  }
-	catch (RemoteException rx)
+	else
 	  {
-	    throw new RuntimeException("Could not verify invid to be inactivated: " + rx);
+	    ok = true;
 	  }
-	finally
+
+	if (ok)
 	  {
-	    setNormalCursor();
+	    Short type = new Short(invid.getType());
+	    ObjectHandle handle = getObjectHandle(invid, type);
+
+	    // remember that we changed this object for the refreshChangedObjectHandles
+
+	    changedHash.put(invid, invid);
+
+	    // refresh it now
+		
+	    refreshChangedObject(invid);
+
+	    // and update the tree
+
+	    tree.refresh();
+	    setStatus("Object inactivated.");
+	    somethingChanged();
+	  }
+	else
+	  {
+	    setStatus("Could not inactivate object.");
 	  }
       }
-
-    return ok;
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not verify invid to be inactivated: " + rx);
+      }
+    finally
+      {
+	setNormalCursor();
+      }
   }
 
   /**

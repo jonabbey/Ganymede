@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 2002/12/13 23:02:52 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 2002/12/16 20:57:50 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.80 $ $Date: 2002/12/13 23:02:52 $ $Name:  $
+ * @version $Revision: 1.81 $ $Date: 2002/12/16 20:57:50 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -1003,6 +1003,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	editObjMI.addActionListener(this);
 	fileM.add(editObjMI);
 
+	BaseDump bd = (BaseDump) gc.getBaseMap().get(new Short(getObjectInvid().getType()));
+
+	if (bd.canInactivate())
+	  {
+	    JMenuItem inactObjMI = new JMenuItem("Inactivate this " + typeName);
+	    inactObjMI.setMnemonic('i');
+	    inactObjMI.setActionCommand("inact_obj");
+	    inactObjMI.addActionListener(this);
+	    fileM.add(inactObjMI);
+	  }
+
 	JMenuItem delObjMI = new JMenuItem("Delete this " + typeName);
 	delObjMI.setMnemonic('d');
 	delObjMI.setActionCommand("del_obj");
@@ -1444,6 +1455,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     else if (e.getActionCommand().equals("edit_obj"))
       {
 	gc.editObject(getObjectInvid());
+      }
+    else if (e.getActionCommand().equals("inact_obj"))
+      {
+	gc.inactivateObject(getObjectInvid());
       }
     else if (e.getActionCommand().equals("del_obj"))
       {
