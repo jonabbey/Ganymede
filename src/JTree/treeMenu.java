@@ -7,7 +7,7 @@
    by the tree.
    
    Created: 5 September 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,6 +15,7 @@
 
 package arlut.csd.JTree;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -24,7 +25,7 @@ import java.awt.event.*;
 
 ------------------------------------------------------------------------------*/
 
-public class treeMenu extends PopupMenu {
+public class treeMenu extends JPopupMenu {
 
   boolean registered = false;
 
@@ -55,7 +56,8 @@ public class treeMenu extends PopupMenu {
 
   public boolean registerItems(treeControl listener)
   {
-    MenuItem temp;
+    Component elements[];
+    JMenuItem temp;
 
     /* -- */
 
@@ -64,10 +66,15 @@ public class treeMenu extends PopupMenu {
 	return false;
       }
 
-    for (int i = 0; i < getItemCount(); i++)
+    elements = getComponents();
+
+    for (int i = 0; i < elements.length; i++)
       {
-	temp = this.getItem(i);
-	temp.addActionListener((ActionListener)listener);
+	if (elements[i] instanceof JMenuItem)
+	  {
+	    temp = (JMenuItem) elements[i];
+	    temp.addActionListener(listener);
+	  }
       }
 
     registered = true;
