@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -251,6 +251,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     Enumeration keys;
     PermEntry pe;
     String key;
+    Vector removals = null;
 
     /* -- */
 
@@ -263,8 +264,40 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	key = (String) keys.nextElement();
 	pe = (PermEntry) matrix.get(key);
 
-	out.writeUTF(key);
-	pe.emit(out);
+	if (PermMatrix.isValidCode(key))
+	  {
+	    out.writeUTF(key);
+	    pe.emit(out);
+	  }
+	else
+	  {
+	    if (removals == null)
+	      {
+		removals = new Vector();
+	      }
+
+	    removals.addElement(key);
+
+	    System.err.println("**** PermissionMatrixDBField.emit(): throwing out invalid entry " + 
+			       PermMatrix.decodeBaseName(key) + " " + PermMatrix.decodeFieldName(key) +
+			       " ---- " + pe.toString());
+	  }
+      }
+
+    // If we have invalid entries, we're just going to throw them out,
+    // forget they even existed..  this is only remotely reasonable
+    // because matrix is private to this class, and because these
+    // invalid entries could serve no useful purpose, and will only
+    // become invalid after schema editing in any case.  Since
+    // normally the database/schema needs to be dumped after changing
+    // the schema, this is an appropriate place to do the cleanup.
+
+    if (removals != null)
+      {
+	for (int i = 0; i < removals.size(); i++)
+	  {
+	    matrix.remove(removals.elementAt(i));
+	  }
       }
   }
 
