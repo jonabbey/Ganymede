@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 2000/09/22 02:53:58 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 2000/09/27 22:34:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1116,6 +1116,187 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	throw new IllegalArgumentException("DBObjectBase.receiveXML(): unexpected eof in XML stream");
       }
+  }
+
+  /**
+   * <P>This method is used to read the definition for this
+   * DBObjectBase from an XMLReader stream.  When this method is
+   * called, the <objectdef> open element should be the very next item
+   * in the reader stream.  This method will consume every element in
+   * the reader stream up to and including the matching </objectdef>
+   * element.</P>
+   *
+   * <P>If important expectations about the state of the XML stream
+   * are not met, an IllegalArgumentException will be thrown, and
+   * the stream will be left in an indeterminate state.</P>
+   */
+
+  synchronized ReturnVal compareXMLDef(XMLItem objectDef, XMLReader reader)
+  {
+    XMLItem item;
+    boolean xmlEmbedded = false;
+    String xmlClassName = null;
+    Hashtable fieldChecklist = new Hashtable();
+    DBObjectBaseField field;
+
+    /* -- */
+
+    // build up a hashtable of custom fields that already exist in
+    // this object definition.. we'll remove items when we find them
+    // in the xml for this objectdef, and if we have any left over
+    // when we're done we'll make a note of it
+
+    Enumeration enum = customFields.elements();
+    
+    while (enum.hasMoreElements())
+      {
+	field = (DBObjectBaseField) enum.nextElement();
+	    
+	fieldChecklist.put(field.getKey(), field);
+      }
+
+    // now start processing the xml for this objectDef
+
+    String xmlName = objectDef.getAttrStr("name");
+
+    if (xmlName != null && !xmlName.equals(object_name))
+      {
+	return Ganymede.createErrorDialog("mismatch",
+					  "Object named " + object_name + 
+					  " doesn't match XML object name " + xmlName);
+      }
+
+    item = reader.getNextItem(true);
+
+    while (item != null && !item.matchesClose("objectdef"))
+      {
+	if (item.matches("classdef"))
+	  {
+	    xmlClassName = item.getAttrStr("name");
+	  }
+	else if (item.matches("embedded"))
+	  {
+	    xmlEmbedded = true;
+	  }
+	else if (item.matches("fielddef"))
+	  {
+	    String field_name = item.getAttrStr("name");
+	    Integer field_codeInt = item.getAttrInt("id");
+
+	    DBObjectBaseField fieldDef = (DBObjectBaseField) getField(field_codeInt.shortValue());
+
+	    if (fieldDef == null)
+	      {
+		return Ganymede.createErrorDialog("mismatch",
+						  "Object named " + object_name + 
+						  " doesn't contain a field to match XML field " + item);
+	      }
+
+	    // we've found one, take it out of our fieldChecklist
+
+	    fieldChecklist.remove(fieldDef.getKey());
+
+	    // pushback the fielddef element so we can construct a new
+	    // DBObjectBaseField from it
+
+	    reader.pushbackItem(item);
+
+	    // and do the comparison on this field
+
+	    DBObjectBaseField newFieldDef;
+
+	    try
+	      {
+		newFieldDef = new DBObjectBaseField(reader, this);
+	      }
+	    catch (RemoteException ex)
+	      {
+		ex.printStackTrace();
+		throw new RuntimeException(ex.getMessage());
+	      }
+	    catch (IOException ex)
+	      {
+		ex.printStackTrace();
+		throw new RuntimeException(ex.getMessage());
+	      }
+
+	    ReturnVal ret = fieldDef.compareAgainst(newFieldDef);
+
+	    if (ret != null && !ret.didSucceed())
+	      {
+		return ret;
+	      }
+	  }
+	else
+	  {
+	    System.err.println("DBObjectBase.compareXMLDef(): unrecognized XML item in objectdef: " + 
+			       item);
+	  }
+	
+	item = reader.getNextItem(true);
+      }
+
+    // if we hit eof we'll have exited the loop with a null
+
+    if (item == null)
+      {
+	throw new IllegalArgumentException("DBObjectBase.compareXMLDef(): unexpected eof in XML stream");
+      }
+
+    // else check it
+
+    if (this.embedded != xmlEmbedded)
+      {
+	return Ganymede.createErrorDialog("mismatch",
+					  "Object named " + object_name +
+					  " doesn't have the same embedded status as specified in the XML stream.\n" +
+					  "Class definition in database: " + embedded + "\n" +
+					  "Class definition in XML stream: " + xmlEmbedded);
+      }
+
+    if ((classname == null && xmlClassName != null) || !classname.equals(xmlClassName))
+      {
+	return Ganymede.createErrorDialog("mismatch",
+					  "Object named " + object_name +
+					  " doesn't have the same class definition as specified in the XML stream.\n" +
+					  "Class definition in database: " + classname + "\n" +
+					  "Class definition in XML stream: " + xmlClassName);
+      }
+
+    // if we didn't have an xml entry for a field defined in this
+    // object type, say that
+
+    if (fieldChecklist.size() != 0)
+      {
+	StringBuffer errorBuf = new StringBuffer();
+
+	errorBuf.append("Error, the following field definitions were missing in the xml\nfor object type ");
+	errorBuf.append(objectDef.toString());
+	errorBuf.append(" in the submitted XML stream:\n");
+
+	Enumeration elements = fieldChecklist.elements();
+	field = null;
+	
+	while (elements.hasMoreElements())
+	  {
+	    if (field != null)
+	      {
+		errorBuf.append(", ");
+	      }
+
+	    field = (DBObjectBaseField) elements.nextElement();
+	    errorBuf.append(field.field_name);
+	  }
+
+	errorBuf.append("\n");
+
+	return Ganymede.createErrorDialog("mismatch",
+					  errorBuf.toString());
+      }
+
+    // guess we had a perfect match, woo-hoo!  return a success null
+
+    return null;
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.73 $
-   Last Mod Date: $Date: 2000/09/22 02:53:59 $
+   Version: $Revision: 1.74 $
+   Last Mod Date: $Date: 2000/09/27 22:34:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -305,7 +305,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   /**
    *
-   * Receive constructor.
+   * Receive constructor, for binary loading from ganymede.db.
    *
    */
 
@@ -313,6 +313,19 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   {
     this(base);
     receive(in);
+    template = new FieldTemplate(this);
+  }
+
+  /**
+   *
+   * Receive constructor, for xml loading
+   *
+   */
+
+  DBObjectBaseField(XMLReader in, DBObjectBase base) throws IOException, RemoteException
+  {
+    this(base);
+    receiveXML(in);
     template = new FieldTemplate(this);
   }
 
@@ -1328,6 +1341,121 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	throw new IllegalArgumentException("DBObjectBaseField.receiveXML(): hit end of stream prior to </fielddef>");
       }
+  }
+
+  /**
+   * <P>This method is used to compare this DBObjectBaseField against the
+   * specified otherField.  If the two fields are equivalent, null will
+   * be returned.  Else a ReturnVal with didSucceed set to false will be
+   * returned with a text message describing the conflicts found.
+   */
+
+  public synchronized ReturnVal compareAgainst(DBObjectBaseField otherField)
+  {
+    StringBuffer diffs = new StringBuffer();
+
+    /* -- */
+
+    if (this.base != otherField.base)
+      {
+	return Ganymede.createErrorDialog("compare",
+					  "field " + this.toString() + " is not contained in the same " +
+					  "kind of object as " + otherField.toString());
+      }
+
+    // name of this field
+
+    if (!field_name.equals(otherField.field_name))
+      {
+	diffs.append("Field name " + field_name + " doesn't match " + otherField.field_name + "\n");
+      }
+
+    // id of this field in the current object
+    
+    if (field_code != otherField.field_code)
+      {
+	diffs.append("Field id code " + field_code + " doesn't match " + otherField.field_code + "\n");
+
+	// this is a blocker, go ahead and just complain
+
+	return Ganymede.createErrorDialog("compare",
+					  diffs.toString());
+      }
+
+    // data type contained herein
+
+    if (field_type != otherField.field_type)
+      {
+	diffs.append("Field type " + field_type + " doesn't match " + otherField.field_type + "\n");
+
+	// this is a blocker, go ahead and just complain
+
+	return Ganymede.createErrorDialog("compare",
+					  diffs.toString());
+      }
+
+    if (visibility != otherField.visibility)
+      {
+	diffs.append("Field visibility " + visibility + " doesn't match " + otherField.visibility + "\n");
+      }
+
+    // name of class to manage user interactions with this field
+
+    if (classname != otherField.classname || !classname.equals(otherField.classname))
+      {
+	// how about that clever if, huh?  the first check takes care
+	// of the case where either but not both of classname or
+	// otherField.classname is null
+
+	diffs.append("Field classname " + classname + " doesn't match " + otherField.classname + "\n");
+      }
+
+    if (comment != otherField.comment || !comment.equals(otherField.comment))
+      {
+	// how about that clever if, huh?  the first check takes care
+	// of the case where either but not both of classname or
+	// otherField.classname is null
+
+	diffs.append("Field comment " + comment + " doesn't match " + otherField.comment + "\n");
+      }
+
+    /*
+      // more work to do
+
+    array = original.array;	// true if this field is an array type
+    limit = original.limit;
+
+    labeled = original.labeled;
+    trueLabel = original.trueLabel;
+    falseLabel = original.falseLabel;
+
+    minLength = original.minLength;
+    maxLength = original.maxLength;
+    okChars = original.okChars;
+    badChars = original.badChars;
+    namespace = original.namespace; // we point to the original namespace.. not a problem, since they are immutable
+    multiLine = original.multiLine;
+    regexpPat = original.regexpPat;
+    regexp = original.regexp;
+
+    editInPlace = original.editInPlace;
+    allowedTarget = original.allowedTarget;
+    targetField = original.targetField;
+
+    crypted = original.crypted;
+    md5crypted = original.md5crypted;
+    storePlaintext = original.storePlaintext;
+    */
+
+    if (diffs.length() != 0)
+      {
+	return Ganymede.createErrorDialog("compare",
+					  diffs.toString());
+      }
+
+    // success
+
+    return null;
   }
 
   // ----------------------------------------------------------------------

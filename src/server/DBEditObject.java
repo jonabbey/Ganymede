@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.134 $
-   Last Mod Date: $Date: 2000/09/13 06:06:49 $
+   Version: $Revision: 1.135 $
+   Last Mod Date: $Date: 2000/09/27 22:34:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.134 $ $Date: 2000/09/13 06:06:49 $ $Name:  $
+ * @version $Revision: 1.135 $ $Date: 2000/09/27 22:34:14 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1600,29 +1600,71 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  {
 	    newField = (DBField) getField(origField.getID());
 
-	    if (!newField.isDefined() && !newField.isEditInPlace() && 
-		(newField.getNameSpace() == null))
+	    // if we already initialized this field when we were
+	    // constructed, don't copy over a value onto this field.
+	    // this is to allow initializeNewObject() to handle
+	    // object-unique values
+
+	    if (newField.isDefined())
 	      {
-		// copyFieldTo() checks read permissions on the
-		// original object's field, and will return an error
-		// dialog if the user doesn't have permission to read
-		// the field.  If we have a problem, we'll return a
-		// dialog describing the fields that could not be
-		// cloned, but we won't fail the operation.
-		
-		retVal = origField.copyFieldTo(newField, local);
+		continue;
+	      }
 
-		if (retVal != null && retVal.getDialog() != null)
+	    // if the field is guarded by a unique value namespace, don't
+	    // attempt to clone anything to it
+
+	    if (newField.getNameSpace() != null)
+	      {
+		continue;
+	      }
+
+	    // if the field is an invid editinplace field, don't try
+	    // to clone the actual invid pointers to contained
+	    // objects.
+
+	    if (newField.isEditInPlace())
+	      {
+		continue;
+	      }
+
+	    // if the field is an invid field whose target is a scalar
+	    // invid field, then this field has an association which
+	    // is a one-to-one or many-to-one, and shouldn't be
+	    // cloned, lest we disrupt the previous association
+
+	    if (newField instanceof InvidDBField)
+	      {
+		InvidDBField iField = (InvidDBField) newField;
+
+		DBObjectBaseField targetDef = iField.getTargetFieldDef();
+
+		if (targetDef != null && !targetDef.isArray())
 		  {
-		    if (resultBuf.length() != 0)
-		      {
-			resultBuf.append("\n\n");
-		      }
-
-		    resultBuf.append(retVal.getDialog().getText());
-		    
-		    problem = true;
+		    continue;
 		  }
+	      }
+
+	    // and do the thing
+
+	    // copyFieldTo() checks read permissions on the
+	    // original object's field, and will return an error
+	    // dialog if the user doesn't have permission to read
+	    // the field.  If we have a problem, we'll return a
+	    // dialog describing the fields that could not be
+	    // cloned, but we won't fail the operation.
+		
+	    retVal = origField.copyFieldTo(newField, local);
+
+	    if (retVal != null && retVal.getDialog() != null)
+	      {
+		if (resultBuf.length() != 0)
+		  {
+		    resultBuf.append("\n\n");
+		  }
+		
+		resultBuf.append(retVal.getDialog().getText());
+		
+		problem = true;
 	      }
 	  }
       }

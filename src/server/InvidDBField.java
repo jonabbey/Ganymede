@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.141 $
-   Last Mod Date: $Date: 2000/09/13 06:06:56 $
+   Version: $Revision: 1.142 $
+   Last Mod Date: $Date: 2000/09/27 22:34:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.141 $ %D%
+ * @version $Revision: 1.142 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -3243,6 +3243,70 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
+   * <p>Returns an actual reference to the object type targeted by
+   * this invid field, or null if no specific object type is
+   * targeted.</p>
+   */
+
+  public DBObjectBase getTargetBaseDef()
+  {
+    short targetBaseType = getTargetBase();
+
+    if (targetBaseType < 0)
+      {
+	return null;
+      }
+
+    return definition.base.getStore().getObjectBase(targetBaseType);
+  }
+
+  /**
+   * <p>Return the numeric id code for the field that this invid field
+   * is set to point to, if any.  If -1 is returned, this invid field
+   * does not point to a specific field, and so has no symmetric
+   * relationship.</p> 
+   */
+
+  public short getTargetField()
+  {
+    return definition.getTargetField();
+  }
+
+  /**
+   * <p>Returns an actual reference to the field definition targeted by
+   * this invid field, or null if no specific field type is
+   * targeted.</p>
+   */
+
+  public DBObjectBaseField getTargetFieldDef()
+  {
+    // if we're not pointing to a symmetric field,
+    // return null
+
+    if (!definition.isSymmetric())
+      {
+	return null;
+      }
+
+    // if we're not pointing to a specific field, also return null.
+    // in practice, this will occur with owner groups whose 'object
+    // owned' field can point to the 'owner' field of any non-embedded
+    // object
+
+    if (getTargetBase() < 0)
+      {
+	return null;
+      }
+
+    // we've got a specific field type in a specific object type, find
+    // it
+
+    DBObjectBase targetBase = getTargetBaseDef();
+
+    return (DBObjectBaseField) targetBase.getField(getTargetField());
+  }
+
+  /**
    *
    * Deletes an element of this field, if a vector.<br><br>
    *
@@ -3662,20 +3726,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * Returns the object type permitted for this field if this invid
-   * field may only point to objects of a particular type.
-   * 
-   * @see arlut.csd.ganymede.invid_field 
-   * 
-   */
-
-  public int getAllowedTarget()
-  {
-    return definition.getTargetBase();
-  }
-
-  /**
-   *
    * Returns a QueryResult encoded list of the current values
    * stored in this field.
    *
@@ -3919,8 +3969,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (inv != null)
       {
-	if (limited() && (getAllowedTarget() != -2) &&
-	    (inv.getType() != getAllowedTarget()))
+	if (limited() && (getTargetBase() != -2) &&
+	    (inv.getType() != getTargetBase()))
 	  {
 	    // the invid points to an object of the wrong type
 
@@ -3931,7 +3981,7 @@ public final class InvidDBField extends DBField implements invid_field {
 					      getName() + " in object " + owner.getLabel() +
 					      " which should point to an" +
 					      " object of type " + 
-					      getAllowedTarget());
+					      getTargetBase());
 	  }
 
 	if (!local && mustChoose())

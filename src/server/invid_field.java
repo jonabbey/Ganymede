@@ -6,8 +6,8 @@
 
    Created: 14 November 1996
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/06/15 02:48:31 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/09/27 22:34:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,7 +64,6 @@ import java.rmi.RemoteException;
 public interface invid_field extends db_field {
 
   boolean limited() throws RemoteException;
-  int getAllowedTarget() throws RemoteException;
 
   // the following methods provided stringbuffer-encoded
   // information on the values and choices present
