@@ -5,7 +5,7 @@
    Client side interface to the object type dictionary
    
    Created: 17 April 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,6 +14,7 @@
 package arlut.csd.ganymede;
 
 import java.rmi.*;
+import java.util.*;
 
 /*------------------------------------------------------------------------------
                                                                        interface
