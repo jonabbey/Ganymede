@@ -1,16 +1,14 @@
 
-
 /*
    JdateField.java
 
-   
+   This class defines a date input field object.
+
    Created: 31 Jul 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
-
 */
-
 
 package arlut.csd.JDataComponent;
 
@@ -32,14 +30,23 @@ import arlut.csd.JDialog.*;
 
 //import oreilly.Dialog.*;
 
-/*******************************************************************
-                                                      JdateField()
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                      JdateField
 
- This class defines a date input field object.
+------------------------------------------------------------------------------*/
 
-*******************************************************************/
+/**
+ *
+ * This class defines a date input field object.
+ *
+ */
 
-public class JdateField extends JPanel implements JsetValueCallback,ActionListener {
+public class JdateField extends JPanel implements JsetValueCallback, ActionListener {
+
+  static final boolean debug = false;
+
+  // ---
 
   private boolean
     allowCallback = false,
@@ -49,8 +56,6 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 
   private JsetValueCallback callback = null;
 
-  private JcomponentAttr valueAttr = null;
-        
   protected Date 
     my_date,
     old_date;
@@ -93,8 +98,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
   public JdateField()
   {
     this(null,true,
-	 false,null,null,
-	 new JcomponentAttr(null,new Font("Helvetica",Font.PLAIN,12),Color.black,Color.gray));
+	 false,null,null);
   }
   
   /**
@@ -106,15 +110,13 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
    * @param islimited true if there is to be a restriction on the range of dates
    * @param minDate the oldest possible date that can be entered into this JdateField
    * @param maxDate the newest possible date that can be entered into this JdateField
-   * @param cAttr object used to control the foreground/background/font of this JdateField
    */
 
   public JdateField(Date date,
 		    boolean iseditable,
 		    boolean islimited,
 		    Date minDate,
-		    Date maxDate,
-		    JcomponentAttr cAttr)
+		    Date maxDate)
   { 
     if (date == null)
       {
@@ -123,11 +125,6 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
     else
       {
 	my_date = new Date(date.getTime());
-      }
-
-    if (cAttr == null)
-      {
-	throw new IllegalArgumentException("Invalid Parameter: component attributes are null");
       }
 
     //    _myTimeZone.setStartRule(Calendar.APRIL,1,Calendar.SUNDAY,2*60*60*1000);
@@ -155,14 +152,24 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
    
     setLayout(new BorderLayout());
     
-    _date = new JstringField(10,10,iseditable,false,"1234567890/",null,this);
+    // max date size: 04/45/1998
+
+    _date = new JstringField(10,
+			     10,
+			     iseditable,
+			     false,
+			     "1234567890/",
+			     null,
+			     this);
 
     add(_date,"Center");
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
 
-    Image img = PackageResources.getImageResource(this, "i043.gif", getClass());
+    Image img = PackageResources.getImageResource(this, 
+						  "i043.gif", 
+						  getClass());
 
     _calendarButton = new JButton(new ImageIcon(img));
     _calendarButton.addActionListener(this);
@@ -191,10 +198,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
     unset = true;
 
     setDate(my_date);
-
-    setValueAttr(cAttr,true);
   }
-   
 
   public void actionPerformed(ActionEvent e) 
   {
@@ -253,13 +257,11 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
    * to the appropriate container.
    *
    * @param parent the container which implements the callback function for this JdateField
-   * @param cAttr object used to control the foreground/background/font of this JdateField
    * @param date the Date object to use
    * @param iseditable true if the datefield can be edited by the user
    * @param islimited true if there is to be a restriction on the range of dates
    * @param minDate the oldest possible date that can be entered into this JdateField
    * @param maxDate the newest possible date that can be entered into this JdateField
-   * @param cAttr object used to control the foreground/background/font of this JdateField
    */
 
   public JdateField(Date date,
@@ -267,10 +269,9 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 		   boolean islimited,
 		   Date minDate,
 		   Date maxDate,
-		   JcomponentAttr cAttr,
 		   JsetValueCallback parent)
   {
-    this(date,iseditable,islimited,minDate,maxDate,cAttr);
+    this(date,iseditable,islimited,minDate,maxDate);
 
     setCallback(parent);
     
@@ -286,6 +287,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
    *
    *
    */
+
   public void setEditable(boolean editable)
   {
     _date.setEditable(editable);
@@ -294,6 +296,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
   /**
    * returns the date associated with this JdateField
    */
+
   public Date getDate()
   {
     if (unset)
@@ -322,7 +325,10 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	return;
       }
 
-    System.err.println("setDate() called: " + d);
+    if (debug)
+      {
+	System.err.println("setDate() called: " + d);
+      }
         
     if (limited)
       {
@@ -334,15 +340,10 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 
     String s = _dateformat.format(d);
 
-    System.err.println("formatted date = " + s);
-
-    //
-    // ???
-    //
-    //    if (_date.getValue() == null) 
-    //      {
-    //	_date.setText(s);
-    //      }
+    if (debug)
+      {
+	System.err.println("formatted date = " + s);
+      }
 
     _date.setText(s);
 
@@ -353,123 +354,10 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
   }
 
   /**
-   * returns the JcomponentAttr object associated with this JcheckboxField
-   *
-   */
-  public JcomponentAttr getValueAttr()
-  {
-    return this.valueAttr;
-  }
-
- 
-  /**
-   * sets the background color for the JentryField
-   * and forces a repaint
-   *
-   * @param color the color which will be used
-   */
-  public void setBackground(Color color)
-  {
-    setValueBackColor(color,true);
-  }
-
-  
-  /**
-   * sets the background color for the JentryField
-   *
-   * @param color the color which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-  public void setValueBackColor(Color color,boolean repaint)
-  {
-    if (valueAttr != null)
-      {
-	valueAttr.setBackground(color);
-	
-	setValueAttr(valueAttr,repaint);
-      }
-  }
-  
-  
-  /**
-   * sets the attributes for the JentryField
-   *
-   * @param attrib the attributes which will be used
-   * @param repaint true if the label component needs to be repainted
-   */
-  public void setValueAttr(JcomponentAttr attributes,boolean repaint)
-  {
-    this.valueAttr = attributes;
-
-    super.setFont(attributes.font);
-    super.setForeground(attributes.fg);
-    super.setBackground(attributes.bg);
-
-    if (repaint)
-      {
-	this.repaint();
-      }
-  }
-
-
- /**
-   *  sets the font for the JentryField and
-   *  forces a repaint
-   *
-   * @param f the font which will be used
-   */
-  public void setFont(Font f)
-  {
-    setValueFont(f,true);
-  }
-  
- /**
-   *  sets the font for the JentryField
-   *
-   * @param f the font which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-  public void setValueFont(Font f,boolean repaint)
-  {
-    if (valueAttr != null)
-      {
-	valueAttr.setFont(f);
-	
-	setValueAttr(valueAttr,repaint);
-      }
-  }
-
- /**
-   * sets the foreground color for the JentryField
-   * and forces a repaint.
-   *
-   * @param color the color which will be used
-   */
-  public void setForeground(Color color)
-  {
-    setValueForeColor(color,true);    
-  }
-
- /**
-   * sets the foreground color for the JentryField
-   *
-   * @param color the color which will be used
-   * @param repaint true if the value component needs to be repainted
-   */
-  public void setValueForeColor(Color color,boolean repaint)
-  {
-    if (valueAttr != null)
-      {
-	valueAttr.setForeground(color);
-	
-	setValueAttr(valueAttr,repaint);
-      } 
-  }
-
-  /**
    *  sets the parent of this component for callback purposes
    *
    */
+
   public void setCallback(JsetValueCallback callback)
   {
     if (callback == null)
@@ -484,8 +372,11 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 
   /**
    *
+   * This is the callback that the JentryField uses to notify us if the
+   * user entered something in the text field.
    *
    */
+
   public boolean setValuePerformed(JValueObject valueObj)
   {
     boolean retval = false;
@@ -502,7 +393,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	  }
 
 	// The user has pressed Tab or clicked elsewhere which has caused the
-	// _date component to loose focus.  This means that we need to update
+	// _date component to lose focus.  This means that we need to update
 	// the date value (using the value in _date) and then propogate that value
 	// up to the server object.
 	
@@ -518,9 +409,12 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	      {
 		// throw up an information dialog here
 	    
-	       JErrorDialog _infoD = new JErrorDialog(new JFrame(),"Date Field Error","The date you have typed is invalid!\n\nProper format:  MM/DD/YYYY   10/01/1997");
-	    
-	    
+		JErrorDialog _infoD = new JErrorDialog(new JFrame(),
+						       "Date Field Error",
+						       "The date you have typed is invalid!\n\n" +
+						       "Proper format:  MM/DD/YYYY   10/01/1997");
+		
+		
 		return retval;
 	      }
 
@@ -586,7 +480,10 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
       }
     else if (comp == pCal) 
       {
-	System.out.println("setValuePerformed called by Calendar");
+	if (debug)
+	  {
+	    System.out.println("setValuePerformed called by Calendar");
+	  }
 
 	if (!(obj instanceof Date))
 	  {
@@ -597,15 +494,17 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	// in the _date field by choosing a date from the 
 	// JpopUpCalendar
 
-	//	_date.setText(_dateformat.format(_myCalendar.getTime()));
-
 	if (allowCallback)
 	  {
 	    // Do a callback to talk to the server
 	    
 	    try 
 	      {
-		System.out.println("setValuePerformed called by Calendar --- passing up to container");
+		if (debug)
+		  {
+		    System.out.println("setValuePerformed called by Calendar --- passing up to container");
+		  }
+
 		retval=callback.setValuePerformed(new JValueObject(this,my_date));
 		changed = false;
 	      }
@@ -613,15 +512,27 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 	      {
 		// throw up an information dialog here
 		
-		JErrorDialog _infoD = new JErrorDialog(new JFrame(),"Date Field Error","There was an error communicating with the server!\n"+re.getMessage());
+		JErrorDialog _infoD = new JErrorDialog(new JFrame(),
+						       "Date Field Error",
+						       "There was an error communicating with the server!\n"+
+						       re.getMessage());
+	      }
+
+	    if (retval == true)
+	      {
+		if (debug)
+		  {
+		    System.err.println("Setting date from calendar to " + 
+				       (Date) obj);
+		  }
 		
+		setDate((Date) obj);
 	      }
 	  }
-
-	if (retval == true)
+	else
 	  {
-	    System.err.println("Setting date from calendar to " + _myCalendar.getTime());
-	    setDate(_myCalendar.getTime());
+	    setDate((Date) obj);
+	    _myCalendar.setTime((Date) obj);
 	  }
       }
     
