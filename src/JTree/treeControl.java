@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.14 $ %D%
+  Version: $Revision: 1.15 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,7 +57,7 @@ import javax.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.14 $ %D%
+ * @version $Revision: 1.15 $ %D%
  *
  * @see arlut.csd.Tree.treeCallback
  * @see arlut.csd.Tree.treeNode
@@ -1396,10 +1396,24 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (vbar_visible && (canvas.getBounds().height != 0))
       {
-	vbar.setValues(vbar.getValue(),
-		       canvas.getBounds().height,
-		       0,
-		       rows.size() * row_height);
+	int my_total_height = rows.size() * row_height;
+
+	int max_acceptable_value = my_total_height - canvas.getBounds().height;
+
+	if (vbar.getValue() > max_acceptable_value)
+	  {
+	    vbar.setValues(max_acceptable_value,
+			   canvas.getBounds().height,
+			   0,
+			   my_total_height);
+	  }
+	else
+	  {
+	    vbar.setValues(vbar.getValue(),
+			   canvas.getBounds().height,
+			   0,
+			   my_total_height);
+	  }
 	
 	vbar.setUnitIncrement(row_height);    // we want the up/down buttons to go a line at a time
 	    
@@ -1410,10 +1424,22 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (hbar_visible && (canvas.getBounds().width != 0))
       {
-	hbar.setValues(hbar.getValue(),
-		       canvas.getBounds().width,
-		       0,
-		       maxWidth);
+	int max_acceptable_value = maxWidth - canvas.getBounds().width;
+
+	if (hbar.getValue() > max_acceptable_value)
+	  {
+	    hbar.setValues(max_acceptable_value,
+			   canvas.getBounds().width,
+			   0,
+			   maxWidth);
+	  }
+	else
+	  {
+	    hbar.setValues(hbar.getValue(),
+			   canvas.getBounds().width,
+			   0,
+			   maxWidth);
+	  }
 
 	hbar.setBlockIncrement(canvas.getBounds().width / 2);    
       }
