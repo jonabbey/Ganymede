@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.54 $
-   Last Mod Date: $Date: 2000/01/29 02:32:57 $
+   Version: $Revision: 1.55 $
+   Last Mod Date: $Date: 2000/02/01 04:04:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -796,32 +796,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    * <p>This method actually does the shutdown.</p>
    */
 
-  public static synchronized ReturnVal shutdown()
+  public static ReturnVal shutdown()
   {
     Vector tempList;
     GanymedeSession temp;
     GanymedeAdmin atmp;
 
     /* -- */
-    
-    GanymedeAdmin.setState("Server going down.. performing final dump");
-
-    // dump, then shut down.  Our second dump parameter is false,
-    // so that we are guaranteed that no client can get a writelock
-    // and maybe get a transaction off that would cause us confusion.
-
-    try
-      {
-	Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive last
-      }
-    catch (IOException ex)
-      {
-	return Ganymede.createErrorDialog("Shutdown Error",
-					  "shutdown error: couldn't successfully dump db:" + ex);
-      }
-
-    // ok, we now are left holding a dump lock.  it should be safe to kick
-    // everybody off and shut down the server
 
     String semaphoreState = GanymedeServer.lSemaphore.checkEnabled();
 
@@ -844,6 +825,26 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 					      "already locked with condition " + semaphoreState);
 	  }
       }
+    
+    GanymedeAdmin.setState("Server going down.. performing final dump");
+
+    // dump, then shut down.  Our second dump parameter is false, so
+    // that we are guaranteed that no internal client can get a
+    // writelock and maybe get a transaction off that would cause us
+    // confusion.
+
+    try
+      {
+	Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive last
+      }
+    catch (IOException ex)
+      {
+	return Ganymede.createErrorDialog("Shutdown Error",
+					  "shutdown error: couldn't successfully dump db:" + ex);
+      }
+
+    // ok, we now are left holding a dump lock.  it should be safe to kick
+    // everybody off and shut down the server
 
     // forceOff modifies GanymedeServer.sessions, so we need to copy our list
     // before we iterate over it.
@@ -877,7 +878,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	try
 	  {
-	    atmp.admin.forceDisconnect("Server going down now.");
+	    atmp.proxy.forceDisconnect("Server going down now.");
 	  }
 	catch (RemoteException ex)
 	  {

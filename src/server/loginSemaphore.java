@@ -8,8 +8,8 @@
 
    Created: 26 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/01/27 06:03:25 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/02/01 04:04:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -135,7 +135,7 @@ public final class loginSemaphore {
 	  {
 	    return "Login count not zero: " + count;
 	  }
-	else
+	else			// disableMsg != null
 	  {
 	    return "Logins already disabled: " + disableMsg;
 	  }

@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 2000/01/29 02:32:55 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 2000/02/01 04:04:15 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1531,15 +1531,30 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       }
   }
 
+  /**
+   * <p>This method is remotely called by the Ganymede server to obtain the username
+   * given when the admin console was started.</p>
+   */
+
   public String getName()
   {
     return adminName;
   }
 
+  /**
+   * <p>This method is remotely called by the Ganymede server to obtain the password
+   * given when the admin console was started.</p>
+   */
+
   public String getPassword()
   {
     return adminPass;
   }
+
+  /**
+   * <p>This method is remotely called by the Ganymede server to set the server start
+   * date in the admin console.</p>
+   */
 
   public void setServerStart(Date date)
   {
@@ -1550,6 +1565,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	frame.startField.setText(date.toString());
       }
   }
+
+  /**
+   * <p>This method is remotely called by the Ganymede server to set the last dump
+   * date in the admin console.</p>
+   */
 
   public void setLastDumpTime(Date date)
   {
@@ -1566,6 +1586,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       }
   }
 
+  /**
+   * <p>This method is remotely called by the Ganymede server to set the number of
+   * transactions in the server's journal in the admin console.</p>
+   */
+
   public void setTransactionsInJournal(int trans)
   {
     if (frame != null)
@@ -1573,6 +1598,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	frame.journalField.setText("" + trans);
       }
   }
+
+  /**
+   * <p>This method is remotely called by the Ganymede server to set the number of
+   * objects checked out in the admin console.</p>
+   */
 
   public void setObjectsCheckedOut(int objs)
   {
@@ -1582,6 +1612,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       }
   }
 
+  /**
+   * <p>This method is remotely called by the Ganymede server to set the number of
+   * locks held in the admin console.</p>
+   */
+
   public void setLocksHeld(int locks)
   {
     if (frame != null)
@@ -1590,14 +1625,27 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       }
   }
 
+  /**
+   * <p>This method is remotely called by the Ganymede server to add to the
+   * admin console's log display.</p>
+   *
+   * @param status A string to add to the console's log display, with the
+   * trailing newline included.
+   */
+
   public void changeStatus(String status)
   {
     if (frame != null)
       {
-	frame.statusArea.append(new Date() + " " + status + "\n");
+	frame.statusArea.append(status);
 	frame.statusArea.setCaretPosition(frame.statusArea.getText().length());
       }
   }
+
+  /**
+   * <p>This method is remotely called by the Ganymede server to update the
+   * number of admin consoles attached to the server.</p>
+   */
 
   public void changeAdmins(String adminStatus)
   {
@@ -1607,6 +1655,11 @@ class iAdmin extends UnicastRemoteObject implements Admin {
       }
   }
 
+  /**
+   * <p>This method is remotely called by the Ganymede server to update the
+   * admin console's server state display.</p>
+   */
+
   public void changeState(String state)
   {
     if (frame != null)
@@ -1614,6 +1667,14 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	frame.stateField.setText(state);
       }
   }
+
+  /**
+   * <p>This method is remotely called by the Ganymede server to update the
+   * admin console's connected user table.</p>
+   *
+   * @param entries a Vector of {@link arlut.csd.ganymede.AdminEntry AdminEntry}
+   * login description objects.
+   */
 
   public void changeUsers(Vector entries)
   {
@@ -1656,6 +1717,14 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
     frame.table.refreshTable();
   }
+
+  /**
+   * <p>This method is remotely called by the Ganymede server to update the
+   * admin console's task table.</p>
+   *
+   * @param tasks a Vector of {@link arlut.csd.ganymede.scheduleHandle scheduleHandle}
+   * objects describing the tasks registered in the Ganymede server.
+   */
 
   public void changeTasks(Vector tasks)
   {
@@ -1823,10 +1892,6 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 
   boolean shutdown(boolean waitForUsers) throws RemoteException
   {
-    if (debug)
-      {
-      }
-
     ReturnVal retVal = handleReturnVal(aSession.shutdown(waitForUsers));
 
     return (retVal == null || retVal.didSucceed());

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2000/01/29 02:32:56 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2000/02/01 04:04:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.39 $ %D%
+ * @version $Revision: 1.40 $ $Date: 2000/02/01 04:04:16 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -101,7 +101,17 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
   private static Vector badConsoles = new Vector();
 
+  /**
+   * The overall server state.. 'normal operation', 'shutting down', etc.
+   */
+
   private static String state;
+
+  /**
+   * Timestamp that the Ganymede server last consolidated its journal
+   * file and dumped its database to disk.
+   */
+
   private static Date lastDumpDate;
 
   /* --- */
@@ -131,14 +141,11 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   private boolean fullprivs = false;
 
   /**
-   * <P>The RMI remote reference to the admin console attached to this
-   * instance of GanymedeAdmin.</P>
-   *
-   * <P>Will be null if this GanymedeAdmin object is no longer attached
-   * to a real console.</P>
+   * <p>A server-side proxy that maintains an event queue for the admin
+   * console attached to this GanymedeAdmin object.</p>
    */
 
-  Admin admin;
+  serverAdminProxy proxy;
   
   /* -- */
 
@@ -152,6 +159,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   public static void setStatus(String status)
   {
     GanymedeAdmin temp;
+    String stampedLine = new Date() + " " + status + "\n";
 
     /* -- */
 
@@ -163,26 +171,16 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
 	    try
 	      {
-		temp.admin.changeStatus(status);
-		temp.admin.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
+		temp.proxy.changeStatus(stampedLine, true);
+		temp.proxy.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
 	      }
 	    catch (RemoteException ex)
 	      {
 		// don't call Ganymede.debug() here or we'll get into an infinite
 		// loop if we have any problems.
+
 		System.err.println("Couldn't update Status on an admin console" + ex);
 		badConsoles.addElement(temp);
-	      }
-	    catch (NullPointerException ex)
-	      {
-		if (temp.admin == null)
-		  {
-		    continue;
-		  }
-		else
-		  {
-		    throw ex;
-		  }
 	      }
 	  }
       }
@@ -223,7 +221,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   {
     try
       {
-	console.admin.setTransactionsInJournal(Ganymede.db.journal.transactionsInJournal);
+	console.proxy.setTransactionsInJournal(Ganymede.db.journal.transactionsInJournal);
       }
     catch (RemoteException ex)
       {
@@ -232,17 +230,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
 	System.err.println("Couldn't update transaction count on an admin console" + ex);
 	badConsoles.addElement(console);
-      }
-    catch (NullPointerException ex)
-      {
-	if (console.admin == null)
-	  {
-	    return;
-	  }
-	else
-	  {
-	    throw ex;
-	  }
       }
   }
 
@@ -290,7 +277,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   {
     try
       {
-	console.admin.setLastDumpTime(GanymedeAdmin.lastDumpDate);
+	console.proxy.setLastDumpTime(GanymedeAdmin.lastDumpDate);
       }
     catch (RemoteException ex)
       {
@@ -298,17 +285,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	// loop if we have any problems.
 	System.err.println("Couldn't update dump date on an admin console" + ex);
 	badConsoles.addElement(console);
-      }
-    catch (NullPointerException ex)
-      {
-	if (console.admin == null)
-	  {
-	    return;
-	  }
-	else
-	  {
-	    throw ex;
-	  }
       }
   }
 
@@ -344,7 +320,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   {
     try
       {
-	console.admin.setObjectsCheckedOut(Ganymede.db.objectsCheckedOut);
+	console.proxy.setObjectsCheckedOut(Ganymede.db.objectsCheckedOut);
       }
     catch (RemoteException ex)
       {
@@ -353,17 +329,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
 	System.err.println("Couldn't update objects checked out count on an admin console" + ex);
 	badConsoles.addElement(console);
-      }
-    catch (NullPointerException ex)
-      {
-	if (console.admin == null)
-	  {
-	    return;
-	  }
-	else 
-	  {
-	    throw ex;
-	  }
       }
   }
 
@@ -395,7 +360,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   {
     try
       {
-	console.admin.setLocksHeld(Ganymede.db.locksHeld);
+	console.proxy.setLocksHeld(Ganymede.db.locksHeld);
       }
     catch (RemoteException ex)
       {
@@ -404,17 +369,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
 	System.err.println("Couldn't update locks held on an admin console" + ex);
 	badConsoles.addElement(console);
-      }
-    catch (NullPointerException ex)
-      {
-	if (console.admin == null)
-	  {
-	    return;
-	  }
-	else 
-	  {
-	    throw ex;
-	  }
       }
   }
 
@@ -462,7 +416,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   {
     try
       {
-	console.admin.changeState(GanymedeAdmin.state);
+	console.proxy.changeState(GanymedeAdmin.state);
       }
     catch (RemoteException ex)
       {
@@ -471,17 +425,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
 	System.err.println("Couldn't update Status on an admin console" + ex);
 	badConsoles.addElement(console);
-      }
-    catch (NullPointerException ex)
-      {
-	if (console.admin == null)
-	  {
-	    return;
-	  }
-	else 
-	  {
-	    throw ex;
-	  }
       }
   }
 
@@ -530,23 +473,12 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	    
 	    try
 	      {
-		temp.admin.changeUsers(entries);
+		temp.proxy.changeUsers(entries);
 	      }
 	    catch (RemoteException ex)
 	      {
 		Ganymede.debug("Couldn't update user list on an admin console" + ex);
 		badConsoles.addElement(temp);
-	      }
-	    catch (NullPointerException ex)
-	      {
-		if (temp.admin == null)
-		  {
-		    continue;
-		  }
-		else
-		  {
-		    throw ex;
-		  }
 	      }
 	  }
       }
@@ -581,23 +513,12 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
 	    try
 	      {
-		temp.admin.changeTasks(scheduleHandles);
+		temp.proxy.changeTasks(scheduleHandles);
 	      }
 	    catch (RemoteException ex)
 	      {
 		Ganymede.debug("Couldn't update task list on an admin console" + ex);
 		badConsoles.addElement(temp);
-	      }
-	    catch (NullPointerException ex)
-	      {
-		if (temp.admin == null)
-		  {
-		    continue;
-		  }
-		else
-		  {
-		    throw ex;
-		  }
 	      }
 	  }
       }
@@ -622,7 +543,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
   {
     super();			// UnicastRemoteObject initialization
 
-    this.admin = admin;
+    this.proxy = new serverAdminProxy(admin);
     this.fullprivs = fullprivs;
     this.adminName = adminName;
     this.clientHost = clientHost;
@@ -659,11 +580,15 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
   public void logout(String reason)
   {
-    if (this.admin != null)
+    if (proxy.isAlive())
       {
-	synchronized (GanymedeAdmin.consoles)
+	proxy.shutdown();
+      }
+
+    synchronized (GanymedeAdmin.consoles)
+      {
+	if (consoles.contains(this))
 	  {
-	    this.admin = null;
 	    consoles.removeElement(this);
 	
 	    if (reason == null)
@@ -702,12 +627,12 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
   public void refreshMe() throws RemoteException
   {
-    admin.setServerStart(Ganymede.startTime);
+    proxy.setServerStart(Ganymede.startTime);
     updateTransCount(this);
     updateLastDump(this);
     updateCheckedOut(this);
     updateLocksHeld(this);
-    admin.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
+    proxy.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
     setState(this);
 
     refreshUsers();
@@ -765,12 +690,6 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
   public ReturnVal shutdown(boolean waitForUsers)
   {
-    GanymedeSession temp;
-    GanymedeAdmin atmp;
-    Vector tempList;
-
-    /* -- */
-
     if (!fullprivs)
       {
 	return Ganymede.createErrorDialog("Permissions Denied",
@@ -780,14 +699,15 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
     if (waitForUsers)
       {
 	GanymedeServer.setShutdown();
+
 	return Ganymede.createInfoDialog("Server Set For Shutdown",
 					 "The server is prepared for shut down.  Shutdown will commence as soon " +
 					 "as all current users log out.");
       }
     else
       {
-	GanymedeServer.shutdown();
-	return null;		// we'll never get here
+	return GanymedeServer.shutdown(); // we may never return if the shutdown succeeds.. the client
+				          // will catch an exception in that case.
       }
   }
 
@@ -1131,7 +1051,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
 	 try
 	   {
-	     DBSchemaEdit result = new DBSchemaEdit(admin);
+	     DBSchemaEdit result = new DBSchemaEdit(proxy);
 	     return result;
 	   }
 	 catch (RemoteException ex)
@@ -1142,10 +1062,12 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
       }
   }
 
-  // This is a private convenience function, it's purpose is to clean
-  // out any consoles that we caught a remote exception from, outside
-  // the context of a loop over consoles that we might interfere with
-  // here.
+  /**
+   * This is a private convenience function, it's purpose is to 
+   * out any consoles that we caught a remote exception from, 
+   * the context of a loop over consoles that we might interfere 
+   * here.
+   */
    
   private static void detachBadConsoles()
   {
@@ -1159,17 +1081,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	  {
 	    temp = (GanymedeAdmin) badConsoles.elementAt(i);
 
-	    if (temp.admin == null)
-	      {
-		continue;
-	      }
-
 	    // this will affect consoles, which is why we are
 	    // synchronized on GanymedeAdmin.consoles.
-
-	    // this also clears temp.admin, so if we get a console in
-	    // our bad list more than once, we won't have a problem
-	    // with it
 
 	    temp.logout("error communicating with console");
 	  }
@@ -1177,5 +1090,4 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 	badConsoles.setSize(0);
       }
   }
-  
 }
