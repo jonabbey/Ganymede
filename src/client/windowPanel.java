@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.50 $ %D%
+   Version: $Revision: 1.51 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -74,8 +74,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   // Load images for other packages
   ImageIcon
     // These are all for vectorPanel
-    openIcon = new ImageIcon(PackageResources.getImageResource(this, "macdown.gif", getClass())),
-    closeIcon = new ImageIcon(PackageResources.getImageResource(this, "macright.gif", getClass())),
+    openIcon = new ImageIcon(PackageResources.getImageResource(this, "macdown_off.gif", getClass())),
+    closeIcon = new ImageIcon(PackageResources.getImageResource(this, "macright_off.gif", getClass())),
+    openPressedIcon = new ImageIcon(PackageResources.getImageResource(this, "macdown_on.gif", getClass())),
+    closePressedIcon = new ImageIcon(PackageResources.getImageResource(this, "macright_on.gif", getClass())),
     removeImageIcon = new ImageIcon(PackageResources.getImageResource(this, "x.gif", getClass()));
 
   LineBorder
