@@ -1022,6 +1022,15 @@ public abstract class DBField implements Remote, db_field {
 	return retVal;		// no change (useful for null)
       }
 
+    if (submittedValue instanceof String)
+      {
+	submittedValue = ((String) submittedValue).intern();
+      }
+    else if (submittedValue instanceof Invid)
+      {
+	submittedValue = ((Invid) submittedValue).intern();
+      }
+
     retVal = verifyNewValue(submittedValue);
 
     if (retVal != null && !retVal.didSucceed())
@@ -1539,6 +1548,15 @@ public abstract class DBField implements Remote, db_field {
 	throw new IllegalArgumentException("null value passed to addElement.");
       }
 
+    if (submittedValue instanceof String)
+      {
+	submittedValue = ((String) submittedValue).intern();
+      }
+    else if (submittedValue instanceof Invid)
+      {
+	submittedValue = ((Invid) submittedValue).intern();
+      }
+
     // verifyNewValue should setLastError for us.
 
     retVal = verifyNewValue(submittedValue);
@@ -1830,7 +1848,18 @@ public abstract class DBField implements Remote, db_field {
 
     for (int i = 0; i < submittedValues.size(); i++)
       {
-	retVal = verifyNewValue(submittedValues.elementAt(i));
+	Object submittedValue = submittedValues.elementAt(i);
+
+	if (submittedValue instanceof String)
+	  {
+	    submittedValues.set(i, ((String) submittedValue).intern());
+	  }
+	else if (submittedValue instanceof Invid)
+	  {
+	    submittedValues.set(i, ((Invid) submittedValue).intern());
+	  }
+	
+	retVal = verifyNewValue(submittedValue);
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
