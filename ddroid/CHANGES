@@ -1,5 +1,5 @@
-Ganymede Release 1.0.12
-March 1, 2004
+Directory Droid Release 1.0.13
+?? ?, 2004
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -8,6 +8,52 @@ Last Mod Date: $Date$
 SVN URL: $HeadURL$
 
 ---------------------------------------------
+
+-------------------- Changes from 1.0.12 to 1.0.13 -------------------
+
+RELEASE DATA: ?? ?, 2004
+
+1. [EVERYTHING] Ganymede Rebooted.. Directory Droid, Subversion, Ant
+
+Went through everything in the old Ganymede tree and did lots of
+surgery, completely restructuring the source tree, changing the
+package for the Ganymede code from arlut.csd.ganymede to
+arlut.csd.ddroid.  Created sub packages arlut.csd.ddroid.server,
+arlut.csd.ddroid.common, arlut.csd.ddroid.rmi, arlut.csd.ddroid.admin,
+to make clear the different roles various classes in the old
+arlut.csd.ganymede package play.
+
+Renamed Ganymede to Directory Droid, involving changes in most
+classes, replacing instances of the Ganymede name with Directory
+Droid.
+
+Deepak created a very nice Ant-based build system for Directory Droid,
+and restructured the source code into a package structure to make
+builds with Ant convenient.
+
+We imported the old Ganymede CVS repository into Subversion.  I went
+through all of the source files and replaced the old CVS keywords with
+Subversion keywords.
+
+2. [SERVER] Added support for SSHA password hashing in DBPasswordField
+
+Here at ARL, we're working to move from NIS to LDAP for our Unix and
+Mac OS X systems.  Since the OpenLDAP server doesn't support md5Crypt
+and since traditional Unix crypt is just too inadequate in the face of
+John the Ripper and other brute force dictionary attacks, I've
+implemented support for encoding passwords entered into Directory
+Droid using the Netscape Salted SHA-1 hash algorithm.
+
+See http://www.openldap.org/faq/data/cache/347.html for more details
+on the SSHA hash format.
+
+Nota bene: From what I've read, SSHA is actually a relatively cheap
+hash algorithm.. it doesn't contain the arbitrary delay features that
+something like md5Crypt uses to slow down the hashing algorithm.  As a
+consequence of this, attempts to use brute force dictionary attacks
+against SSHA hashes can be pretty successful.  The primary benefit of
+SSHA over Crypt in the LDAP context is that longer passwords can be
+supported (vs. the 8 character limit of traditional Unix Crypt).
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
