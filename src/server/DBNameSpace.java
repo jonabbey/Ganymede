@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -54,6 +54,7 @@ class DBNameSpace {
     debug = val;
   }
 
+  boolean caseInsensitive;	// treat differently-cased Strings as the same for key?
   String    name;		// the name of this namespace
   Hashtable uniqueHash;		// index of values used in the current namespace
   Hashtable reserved;		// index of editSet's currently actively modifying
@@ -62,16 +63,69 @@ class DBNameSpace {
 
   // constructors
 
-  public DBNameSpace(String name)
+  /**
+   *
+   * Create a new DBNameSpace object from a stream definition.
+   *
+   */
+
+  public DBNameSpace(DataInput in) throws IOException
+  {
+    receive(in);
+    uniqueHash = new GHashtable(caseInsensitive); // size?
+    reserved = new Hashtable();	// size?
+  }
+  
+  /**
+   *
+   * Create a new DBNameSpace object with specified name and
+   * case sensitivity.
+   *
+   * @param name Name for this name space
+   * @param caseInsensitive If true, case is disregarded in this namespace
+   *
+   */
+
+  public DBNameSpace(String name, boolean caseInsensitive)
   {
     this.name = name;
-    uniqueHash = new Hashtable(); // size?
+    this.caseInsensitive = caseInsensitive;
+    uniqueHash = new GHashtable(caseInsensitive); // size?
     reserved = new Hashtable();	// size?
+  }
+
+  /**
+   *
+   * Read in a namespace definition from a DataInput stream.
+   *
+   */
+
+  public void receive(DataInput in) throws IOException
+  {
+    name = in.readUTF();
+    caseInsensitive = in.readBoolean();
+  }
+
+  /**
+   *
+   * Write out a namespace definition to a DataOutput stream.
+   *
+   */
+
+  public void emit(DataOutput out) throws IOException
+  {
+    out.writeUTF(name);
+    out.writeBoolean(caseInsensitive);
   }
 
   public String name()
   {
     return name;
+  }
+
+  public boolean isCaseInsensitive()
+  {
+    return caseInsensitive;
   }
 
   /*----------------------------------------------------------------------------
