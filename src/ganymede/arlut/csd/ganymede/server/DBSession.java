@@ -765,7 +765,8 @@ final public class DBSession {
       {
 	if (obj == null)
 	  {
-	    // not in transaction.. maybe we created it?
+	    // not in the persistent store.. maybe we created it in
+	    // this transaction, or maybe it just doesn't exist.
 	   
 	    return editSet.findObject(Invid.createInvid(baseID, objectID));
 	  }

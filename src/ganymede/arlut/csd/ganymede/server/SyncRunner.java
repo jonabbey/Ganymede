@@ -214,13 +214,36 @@ public class SyncRunner implements Runnable {
 
 	if (syncObject.isEmbedded())
 	  {
-	    // DBSession can't edit an embedded object without
-	    // editing its top-level container, so we know that if
-	    // we skip we'll wind up including the top-level
-	    // container due to the embedded checking logic in
-	    // this.shouldInclude().
+	    // If our container is also in this transaction, we'll
+	    // skip writing out the embedded object as its own entry
+	    // and let the emitXMLDelta() in the DBEditObject take
+	    // care of writing out the changes to the embedded object.
+	    //
+	    // The Ganymede GUI client will never edit an embedded
+	    // object without also checking the containing objects out
+	    // for editing, but it's possible to force that kind of
+	    // behavior with the xmlclient if the user just tries to
+	    // directly edit the embedded object on its own
 
-	    continue;
+	    InvidDBField containerField = (InvidDBField) syncObject.getField(SchemaConstants.ContainerField);
+	    Invid invid = containerField.value();
+	    DBEditObject myParentObject = transaction.findObject(invid);
+
+	    while (myParentObject != null && myParentObject.isEmbedded())
+	      {
+		containerField = (InvidDBField) myParentObject.getField(SchemaConstants.ContainerField);
+		invid = containerField.value();
+		myParentObject = transaction.findObject(invid);
+	      }
+
+	    // if the top-level parent object is in this transaction,
+	    // skip ahead and let the parent object handle writing
+	    // itself out
+
+	    if (myParentObject != null)
+	      {
+		continue;
+	      }
 	  }
 
 	if (shouldInclude(syncObject, transaction))
@@ -469,6 +492,13 @@ public class SyncRunner implements Runnable {
 	    for (int j = 0; j < embeddedElements.size(); j++)
 	      {
 		Invid embeddedObjInvid = (Invid) embeddedElements.getElementLocal(j);
+
+		// if we're not editing an embedded object invid, then
+		// we don't care about the embedded object.. if the
+		// transaction doesn't include it, we will just move
+		// on to the fieldOption checks below, and the
+		// hasChanged() method on the list of invids in this
+		// edit-in-place field
 		
 		if (transaction.isEditingObject(embeddedObjInvid) && shouldInclude(transaction.findObject(embeddedObjInvid), transaction))
 		  {

@@ -524,8 +524,35 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	for (int i = 0; i < unchangedValues.size(); i++)
 	  {
-	    DBEditObject embeddedObj = transaction.findObject((Invid) unchangedValues.elementAt(i));
-	    embeddedObj.emitXMLDelta(xmlOut);
+	    Invid embeddedInvid = (Invid) unchangedValues.elementAt(i);
+	    DBEditObject embeddedObj = transaction.findObject(embeddedInvid);
+
+	    if (embeddedObj != null)
+	      {
+		embeddedObj.emitXMLDelta(xmlOut);
+	      }
+	    else
+	      {
+		// the Ganymede GUI client won't allow us to get an
+		// embedded object contained within another object
+		// that was edited without editing the embedded object
+		// as well, so transaction.findObject() should have
+		// given it to us.
+		//
+		// it's possible, however, that the xmlclient might
+		// allow the user to directly edit some embedded
+		// objects in a containing object without editing all
+		// of them, so in that case we'll go ahead and pull the
+		// persistent version of the object and emit it sans delta
+
+		DBObject embeddedObj2 = Ganymede.db.getObject(embeddedInvid);
+		
+		if (embeddedObj2 == null)
+		  {
+		    // "InvidDBField.emitXMLDelta(): {0} has an invalid invid: {1}, not writing it to XML delta stream"
+		    throw new IllegalStateException(ts.l("emitXMLDelta.bad_invid", this.toString(), embeddedInvid));
+		  }
+	      }
 	  }
 
 	if (vectorDelta.addValues != null && vectorDelta.addValues.size() > 0)
