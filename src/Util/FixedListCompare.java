@@ -6,8 +6,8 @@
    
    Created: 3 July 2001
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2001/07/03 17:43:28 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2001/07/03 21:50:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,11 +65,15 @@ import java.util.Vector;
  * list will be placed after items in the original list, and in
  * alphabetical toString() order relative to each other.</P>
  *
- * @version $Revision: 1.1 $ $Date: 2001/07/03 17:43:28 $ $Name:  $
+ * @version $Revision: 1.2 $ $Date: 2001/07/03 21:50:03 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class FixedListCompare implements Compare {
+
+  final static boolean debug = false;
+
+  // ---
 
   private Vector items;
   private Compare secondaryComparator;
@@ -95,11 +99,21 @@ public class FixedListCompare implements Compare {
 
   public int compare(Object a, Object b)
   {
+    if (debug)
+      {
+	System.err.println("Comparing a=" + a + "(" + a.getClass() + "), b=" + b + "(" + b.getClass() + "):");
+      }
+
     int ai = items.indexOf(a);
     int bi = items.indexOf(b);
 
     if (ai == -1 && bi == -1)
       {
+	if (debug)
+	  {
+	    System.err.println("\tCouldn't find either.");
+	  }
+
 	if (secondaryComparator == null)
 	  {
 	    return a.toString().compareTo(b.toString());
@@ -111,25 +125,50 @@ public class FixedListCompare implements Compare {
       }
     else if (ai == -1)
       {
+	if (debug)
+	  {
+	    System.err.println("\treturning 1");
+	  }
+
 	return 1;
       }
     else if (bi == -1)
       {
+	if (debug)
+	  {
+	    System.err.println("\treturning -1");
+	  }
+
 	return -1;
       }
     else
       {
 	if (ai == bi)
 	  {
+	    if (debug)
+	      {
+		System.err.println("\treturning 0");
+	      }
+
 	    return 0;
 	  }
 
 	if (ai < bi)
 	  {
+	    if (debug)
+	      {
+		System.err.println("\treturning -1");
+	      }
+
 	    return -1;
 	  }
 
 	// ai > bi
+
+	if (debug)
+	  {
+	    System.err.println("\treturning 1");
+	  }
 
 	return 1;
       }
