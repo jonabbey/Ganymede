@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -312,8 +312,21 @@ public class JstringField extends JentryField implements KeyListener{
    * @param ch the character which is being tested for its validity
    */
 
-  private final boolean isAllowed(char ch)
+  //private final boolean isAllowed(char ch)
+  private boolean isAllowed(char ch)
   {
+    System.out.println("JstringField.isAllowed()");
+    
+    if ((getText() != null) && (getText().length() >= size))
+      {
+	System.out.println("That string is too large.");
+	return false;
+      }
+    else
+      {
+	System.out.println("It's ok: length = " + getText().length() + " and that is under: " + size);
+      }
+
     if (disallowedChars != null)
       {
 	if (disallowedChars.indexOf(ch) != -1)
