@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.19 $
-# $Date: 1999/01/19 23:21:58 $
+# $Revision: 1.20 $
+# $Date: 1999/01/19 23:45:40 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -156,10 +156,10 @@ cleanconfig:
 jars:
 	\@echo "Building server, client, and admin jar files"
 	\@cd $rootdir/src/classes; \\
-	\@buildJar; \\
-	\@buildAdminJar; \\
-	\@buildServerJar; \\
-	\@cp *.jar $rootdir/jars; \\
+	buildJar; \\
+	buildAdminJar; \\
+	buildServerJar; \\
+	cp *.jar $rootdir/jars;
 	\@echo "Finished generating jars in $rootdir/jars"
 
 ENDMAKEFILE
