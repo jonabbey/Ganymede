@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -345,6 +345,44 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   public boolean canInactivate(DBSession session, DBEditObject object)
   {
     return true;
+  }
+
+
+  /**
+   *
+   * Hook to allow subclasses to grant ownership privileges to a given
+   * object.  If this method returns true on a given object, the Ganymede
+   * Permissions system will provide access to the object as owned with
+   * whatever permissions apply to objects owned by the persona active
+   * in gSession.
+   *
+   */
+
+  public boolean grantOwnership(GanymedeSession gSession, DBObject object)
+  {
+    if (object.getTypeID() != getTypeID())
+      {
+	throw new IllegalArgumentException("userCustom grantOwnership called with wrong object type.");
+      }
+
+    try
+      {
+	Invid userInvid = gSession.getUserInvid();
+	DBObject userObj = gSession.getSession().viewDBObject(userInvid);
+	Invid personInv = (Invid) userObj.getFieldValueLocal(userSchema.PERSON);
+	Invid myPersonInv = (Invid) object.getFieldValueLocal(userSchema.PERSON);
+
+	if (personInv.equals(myPersonInv))
+	  {
+	    return true;
+	  }
+      }
+    catch (NullPointerException ex)
+      {
+	return false;
+      }
+
+    return false;
   }
 
   /**

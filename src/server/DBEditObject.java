@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.63 $ %D%
+   Version: $Revision: 1.64 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1027,6 +1027,21 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   public String getLabelHook(DBObject object)
   {
     return null;		// no default
+  }
+
+  /**
+   *
+   * Hook to allow subclasses to grant ownership privileges to a given
+   * object.  If this method returns true on a given object, the Ganymede
+   * Permissions system will provide access to the object as owned with
+   * whatever permissions apply to objects owned by the persona active
+   * in gSession.
+   *
+   */
+
+  public boolean grantOwnership(GanymedeSession gSession, DBObject object)
+  {
+    return false;
   }
 
   /**
