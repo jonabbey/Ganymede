@@ -2683,7 +2683,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    DDQueryTransmuter transmuter = new DDQueryTransmuter();
+    GanyQueryTransmuter transmuter = new GanyQueryTransmuter();
     Query query = transmuter.transmuteQueryString(queryString);
     
     return dump(query);
@@ -2930,7 +2930,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    DDQueryTransmuter transmuter = new DDQueryTransmuter();
+    GanyQueryTransmuter transmuter = new GanyQueryTransmuter();
     Query query = transmuter.transmuteQueryString(queryString);
     
     return queryDispatch(query, false, true, null, null);
@@ -2982,7 +2982,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    DDQueryTransmuter transmuter = new DDQueryTransmuter();
+    GanyQueryTransmuter transmuter = new GanyQueryTransmuter();
     Query q = transmuter.transmuteQueryString(queryString);
     QueryResult qr = queryDispatch(q, false, true, null, null); 
     QueryResultContainer qrc = new QueryResultContainer(rowType);

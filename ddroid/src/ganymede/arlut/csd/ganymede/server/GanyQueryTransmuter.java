@@ -1,11 +1,11 @@
 /*
 
-   DDQueryTransmuter.java
+   GanyQueryTransmuter.java
 
-   This is the textual query processor for the Ganymede server.
-   It takes a string query, applies an ANTLR grammar to it, and
-   generates a traditional Ganymede-style
-   arlut.csd.ganymede.common.Query out of it.
+   This is the textual query processor for the Ganymede server.  It
+   takes a string query, applies an ANTLR grammar to it, and generates
+   a traditional Ganymede-style arlut.csd.ganymede.common.Query out of
+   it.
    
    Created: 31 August 2004
    Last Mod Date: $Date$
@@ -87,7 +87,7 @@ import java.util.HashMap;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                               DDQueryTransmuter
+                                                               GanyQueryTransmuter
 
 ------------------------------------------------------------------------------*/
 
@@ -104,7 +104,7 @@ import java.util.HashMap;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
-public class DDQueryTransmuter implements QueryParserTokenTypes {
+public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
   private static HashMap op_scalar_mapping;
   private static HashMap op_vector_mapping;
@@ -153,7 +153,7 @@ public class DDQueryTransmuter implements QueryParserTokenTypes {
   DBObjectBase objectBase = null;
   ArrayList selectFields = null;
 
-  public DDQueryTransmuter()
+  public GanyQueryTransmuter()
   {
   }
 
