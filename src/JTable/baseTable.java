@@ -4,7 +4,8 @@
 
   A JDK 1.1 table AWT component.
 
-  Copyright (C) 1997, 1998, 1999  The University of Texas at Austin.
+  Copyright (C) 1997, 1998, 1999, 2000
+  The University of Texas at Austin.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,8 +22,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.45 $
-  Last Mod Date: $Date: 1999/01/16 01:38:23 $
+  Version: $Revision: 1.46 $
+  Last Mod Date: $Date: 2000/01/29 02:29:36 $
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,7 +71,7 @@ import javax.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.45 $ %D%
+ * @version $Revision: 1.46 $ $Date: 2000/01/29 02:29:36 $
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -1121,14 +1122,28 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   // -------------------- Click / Selection Methods --------------------
 
   /**
-   * Hook for subclasses to implement selection logic
+   * Old Hook for subclasses to implement selection logic
    *
    * @param x col of cell clicked in
    * @param y row of cell clicked in
+   *
    */
 
   public synchronized void clickInCell(int x, int y)
   {
+  }
+
+  /**
+   * Hook for subclasses to implement selection logic
+   *
+   * @param x col of cell clicked in
+   * @param y row of cell clicked in
+   * @param rightClick if true, the cell click was with the right button
+   */
+
+  public synchronized void clickInCell(int x, int y, boolean rightClick)
+  {
+    clickInCell(x,y);		// no right click check
   }
 
   /**

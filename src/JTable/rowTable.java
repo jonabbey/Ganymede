@@ -4,7 +4,8 @@
 
   A JDK 1.1 table AWT component.
 
-  Copyright (C) 1997  The University of Texas at Austin.
+  Copyright (C) 1997, 1998, 1999, 2000
+  The University of Texas at Austin.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,7 +22,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.29 $ %D%
+  Version: $Revision: 1.30 $ $Date: 2000/01/29 02:29:37 $
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,7 +49,7 @@ import javax.swing.*;
  *
  * @see arlut.csd.JTable.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.29 $ %D% 
+ * @version $Revision: 1.30 $ $Date: 2000/01/29 02:29:37 $
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -250,7 +251,7 @@ public class rowTable extends baseTable implements ActionListener {
    * @param y row of cell clicked in
    */
 
-  public synchronized void clickInCell(int x, int y)
+  public synchronized void clickInCell(int x, int y, boolean rightButton)
   {
     rowHandle 
       element = null;
@@ -315,25 +316,29 @@ public class rowTable extends baseTable implements ActionListener {
       }
     else
       {
-	// go ahead and deselect the current row
+	// go ahead and deselect the current row, if and only if this is a left-button
+	// click.
 	
-	if (debug)
+	if (!rightButton)
 	  {
-	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. unselecting");
-	  }
-
-	unSelectRow();
-
-	if (debug)
-	  {
-	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. refreshing");
-	  }
-
-	refreshTable();
-
-	if (debug)
-	  {
-	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): table refreshed");
+	    if (debug)
+	      {
+		System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. unselecting");
+	      }
+	    
+	    unSelectRow();
+	    
+	    if (debug)
+	      {
+		System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. refreshing");
+	      }
+	    
+	    refreshTable();
+	    
+	    if (debug)
+	      {
+		System.err.println("rowTable.clickInCell(" + x + "," + y + "): table refreshed");
+	      }
 	  }
       }
   }
@@ -493,7 +498,7 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (index.containsKey(key))
       {
-	// a row with that key already exists.. what to do?
+	throw new IllegalArgumentException("rowTable.newRow(): row " + key + " already exists.");
       }
 
     element = new rowHandle(this, key);

@@ -21,8 +21,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 15 May 1999
-  Version: $Revision: 1.1 $
-  Last Mod Date: $Date: 1999/01/16 01:38:24 $
+  Version: $Revision: 1.2 $
+  Last Mod Date: $Date: 2000/01/29 02:29:37 $
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -807,7 +807,6 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
    * tall, spanSubset indicates what portion of the row
    * should be rendered into the blitCell.
    *
-   *
    */
 
   private void renderBlitCell(Rectangle cellRect, Graphics g, 
@@ -962,6 +961,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       clickCol,
       col;
 
+    boolean right;
+
     /* -- */
 
     x = e.getX();
@@ -992,6 +993,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     colDrag = 0;
     clickCol = -1;
+
+    right = e.isPopupTrigger();
 
     // We don't want a popupTrigger event to initialize a column drag
 
@@ -1076,12 +1079,12 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 		  }
 		else
 		  {
-		    rt.clickInCell(clickCol, clickRow);
+		    rt.clickInCell(clickCol, clickRow, right);
 		  }
 	      }
 	    else
 	      {
-		rt.clickInCell(clickCol, clickRow);
+		rt.clickInCell(clickCol, clickRow, right);
 	      }
 
 	    oldClickRow = clickRow;
@@ -1402,7 +1405,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
     rt.menuRow = clickRow;
     rt.menuCol = clickCol;
 
-    rt.clickInCell(clickCol, clickRow);
+    rt.clickInCell(clickCol, clickRow, true);
 
     if (debug)
       {
