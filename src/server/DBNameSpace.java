@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.rmi.server.Unreferenced;
  *
  */
 
-final class DBNameSpace extends UnicastRemoteObject implements NameSpace {
+public final class DBNameSpace extends UnicastRemoteObject implements NameSpace {
 
   static final boolean debug = false;
 
