@@ -6,7 +6,7 @@
    GASH user_categories file
    
    Created: 7 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,6 +25,8 @@ import arlut.csd.Util.Parser;
 
 public class UserCategory {
 
+  static final boolean debug = false;
+
   public static void initTokenizer(StreamTokenizer tokens)
   {
     tokens.resetSyntax();
@@ -33,7 +35,10 @@ public class UserCategory {
     tokens.ordinaryChar(':');
     tokens.ordinaryChar(',');
     tokens.ordinaryChar('\n');
+    tokens.ordinaryChar('\\');
   }
+
+  // ---
 
   /**
    *
@@ -52,6 +57,10 @@ public class UserCategory {
   String shortdescrip;
   String longdescrip;
 
+  boolean valid;
+
+  /* -- */
+
   // instance constructor
 
   public UserCategory()
@@ -69,6 +78,11 @@ public class UserCategory {
       }
 
     name = parser.getNextBit();
+
+    if (debug)
+      {
+	System.err.println("Creating category " + name);
+      }
 
     try
       {
@@ -93,9 +107,24 @@ public class UserCategory {
 
     maillist = parser.getNextLongBit();
 
+    if (debug)
+      {
+	System.err.println(maillist);
+      }
+
     shortdescrip = parser.getNextLongBit();
 
+    if (debug)
+      {
+	System.err.println(shortdescrip);
+      }
+
     longdescrip = parser.getNextLongBit();
+
+    if (debug)
+      {
+	System.err.println(longdescrip);
+      }
 
     parser.skipToEndLine();
 
