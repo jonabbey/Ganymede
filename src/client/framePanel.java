@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,14 +18,20 @@ import java.rmi.*;
 import java.util.*;
 
 import com.sun.java.swing.*;
+import com.sun.java.swing.event.*;
 import tablelayout.*;
 import arlut.csd.ganymede.*;
 
 import arlut.csd.JDataComponent.*;
 
-public class framePanel extends JInternalFrame {
+public class framePanel extends JInternalFrame implements ChangeListener {
   
   final static boolean debug = true;
+
+  final static int GENERAL = 0;
+  final static int DATES = 1;
+  final static int HISTORY = 2;
+  final static int OWNER = 3;
 
   JTabbedPane 
     pane;
@@ -34,8 +40,7 @@ public class framePanel extends JInternalFrame {
   // name), inside a JScrollPane(without the P).
   
   JBufferedPane
-    generalP = new JBufferedPane(),
-    datesP = new JBufferedPane();
+    generalP = new JBufferedPane();
   
   JScrollPane
     general,
@@ -43,6 +48,12 @@ public class framePanel extends JInternalFrame {
     history,
     owner;
 
+  boolean
+    general_created = false,
+    dates_created = false,
+    history_created = false,
+    owner_created = false;
+  
   Container
     contentPane;
 
@@ -98,6 +109,13 @@ public class framePanel extends JInternalFrame {
 
       // Now setup the framePanel layout
       pane = new JTabbedPane();
+      pane.addChangeListener(this);
+
+      // Create all the panes
+      general = new JScrollPane();
+      dates = new JScrollPane();
+      history = new JScrollPane();
+      owner = new JScrollPane();
 
       try
 	{
@@ -108,15 +126,6 @@ public class framePanel extends JInternalFrame {
 	  throw new RuntimeException("Could not get list of fields in framPanel: " + rx);
 	}
 
-      // This creates all the panels we need
-      try
-	{
-	  createPanels(object.listFields());
-	}
-      catch (RemoteException rx) 
-	{
-	  throw new RuntimeException("Could not create panels for framePanel: " + rx);
-	}
       // Add the panels to the tabbedPane
       pane.addTab("General", null, general);
       pane.addTab("Dates", null, dates);
@@ -127,70 +136,130 @@ public class framePanel extends JInternalFrame {
       contentPane.add("Center", pane);
     }
 
-  // This makes 4 scrollPanes: general, dates, history, owner
-  void createPanels(db_field[] fields) throws RemoteException
+  void create_general_panel()
     {
-      
-      // First panel is a container panel
-      generalP = new JBufferedPane();
-      generalP.setInsets(new Insets(2,2,2,2));
-      generalP.setLayout(new BorderLayout());
-      generalP.setBackground(ClientColor.WindowBG);
-      System.out.println("Adding the container Panel");
-      generalP.add("Center", new containerPanel(object, editable, parent.parent, parent));
-      
-      general = new JScrollPane();
-      general.setViewportView(generalP);
+      general.setViewportView(new containerPanel(object, editable, parent.parent, parent));
+      general_created = true;
+      parent.invalidate();
+    }
 
-      // Second panel contains some dates
-      // fourth panel is owner list
-      // Make them both on the same pass through
-
-      owner = new JScrollPane();
-      
-      dates = new JScrollPane();
-      dates.setViewportView(datesP);
-      
-      datesP.setInsets(new Insets(5,5,5,5));
-      datesP.setLayout(new TableLayout(false));
+  void create_dates_panel()
+    {
       if (fields != null)
 	{
 	  int type = -1;
-	  for (int i = 0; i < fields.length ; i++)
+	  date_field exp = null;
+	  date_field rem = null;
+	  try
 	    {
-	      type = fields[i].getID();
-	      
-	      if (type == SchemaConstants.ExpirationField)
+	      for (int i = 0; i < fields.length ; i++)
 		{
-		  try
+		  type = fields[i].getID();
+		  
+		  if (type == SchemaConstants.ExpirationField)
 		    {
-		      addDateField(fields[i], datesP);
+		      exp = (date_field)fields[i];
 		    }
-		  catch (RemoteException rx)
+		  else if (type == SchemaConstants.RemovalField)
 		    {
-		      throw new RuntimeException("Could not addDateField: " + rx);
+		      rem = (date_field)fields[i];
 		    }
-		}
-	      else if (type == SchemaConstants.RemovalField)
-		{
-		  addDateField(fields[i], datesP);
-		}
-	      else if (type == SchemaConstants.OwnerListField)
-		{
-		  owner.setViewportView(new ownerPanel((invid_field)fields[i], editable));
 		}
 	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not create date panel: " + rx);
+	    }
+	  
+	  dates.setViewportView(new datePanel(exp, rem, editable));
+	  
 	}
-
-      
-      // Third panel is history information
-      history = new JScrollPane();
-      history.setViewportView(new historyPanel());
-
-      
-       
+      dates_created = true;
+      parent.invalidate();
     }
 
+
+  void create_history_panel()
+    {
+
+      history.setViewportView(new historyPanel());
+      history_created = true;
+      parent.invalidate();
+    }
+
+  void create_owner_panel()
+    {
+      if (fields != null)
+	{
+	  try
+	    {
+	      for (int i = 0; i < fields.length ; i++)
+		{
+		  if (fields[i].getID() == SchemaConstants.OwnerListField)
+		    {
+		      owner.setViewportView(new ownerPanel((invid_field)fields[i], editable));
+		      break;
+		    }
+		}
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not generate Owner field: " + rx);
+	    }
+	}
+      owner_created = true;
+      parent.invalidate();
+    }
+
+
+  // For the ChangeListener
+  public void stateChanged(ChangeEvent e)
+    {
+      if (general_created && owner_created && dates_created && history_created)
+	{
+	  pane.removeChangeListener(this);
+	  return;
+	}
+      
+      switch (pane.getSelectedIndex())
+	{
+	case GENERAL:
+	  if (! general_created)
+	    {
+	      parent.parent.setStatus("Creating general panel");
+	      create_general_panel();
+	    }
+	  break;
+	case DATES:
+	  if (! dates_created)
+	    {
+	      parent.parent.setStatus("Creating dates panel");
+	      create_dates_panel();
+	    }
+	  break;
+
+	case HISTORY:
+	  if (! history_created)
+	    {
+	      parent.parent.setStatus("Creating history panel");
+	      create_history_panel();
+	    }
+	  break;
+	  
+	case OWNER:
+	  if (! owner_created)
+	    {
+	      parent.parent.setStatus("Creating owner panel");
+	      create_owner_panel();
+	    }
+	  break;
+
+	default:
+	  System.err.println("Unknown pane index: " + pane.getSelectedIndex());
+	}
+      parent.parent.setStatus("Done");
+      
+    }
 
 
  
