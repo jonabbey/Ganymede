@@ -3,7 +3,7 @@
    QueryDataNode.java
 
    Created: 10 July 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,9 +35,7 @@ public class QueryDataNode extends QueryNode {
   static public final byte FIRSTVECOP = 0;
   
   static public final byte NONE = 0;
-  static public final byte CONTAINSANY = 1;
-  static public final byte CONTAINSALL = 2;
-  static public final byte CONTAINSNONE = 3;
+  static public final byte CONTAINS = 1;
   static public final byte LENGTHEQ = 4;
   static public final byte LENGTHGR = 5;
   static public final byte LENGTHLE = 6;
