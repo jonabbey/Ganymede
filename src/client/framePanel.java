@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,12 +31,18 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.*;
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                      framePanel
+
+------------------------------------------------------------------------------*/
+
 /**
  * A framePanel is the interal window holding an object.  This class manages the
  * tabbed pane, and the creation of each of the panels in the window.
  */
 
-public class framePanel extends JInternalFrame implements ChangeListener, Runnable, ActionListener {
+public class framePanel extends JInternalFrame implements ChangeListener, Runnable, ActionListener, InternalFrameListener {
   
   // This will be loaded from gclient anyway.
 
@@ -167,6 +173,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     setClosable(true);
     setIconifiable(true);
     setTitle(title);
+
+    this.addInternalFrameListener(this);
     
     //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
     
@@ -948,7 +956,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     try
       {
 	owner.getVerticalScrollBar().setUnitIncrement(15);
-	owner.setViewportView(new ownerPanel((invid_field)object.getField(SchemaConstants.OwnerListField), editable, this));
+
+	invid_field invf = (invid_field) object.getField(SchemaConstants.OwnerListField);
+	owner.setViewportView(new ownerPanel(invf, editable, this));
       }
     catch (RemoteException rx)
       {
@@ -978,9 +988,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	throw new RuntimeException("Could not get field information: " + rx);
       }
-
-    //history.getVerticalScrollBar().setUnitIncrement(15);
-    //history.setViewportView(new historyPanel(getObjectInvid(), 
 
     history.add("Center", new historyPanel(getObjectInvid(), 
 					   getgclient(), 
@@ -1185,6 +1192,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	println("This tab has not been added to the pane yet.");
       }
+
     pane.setSelectedIndex(index);
   }
 
@@ -1216,17 +1224,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     else if (e.getActionCommand().equals("Mail to..."))
       {
 	sendMail();
-      }
-
-    // There is no clone.  If there ever is, this would be useful.  But there isn't
-    else if (e.getActionCommand().equals("Clone"))
-      {
-
-	if (debug)
-	  {
-	    println("Opening new edit window on the cloned object");
-	  }
-	showErrorMessage("Sorry", "Clone is not implemented");
       }
     else if (e.getActionCommand().equals("ReallyDelete"))
       {
@@ -1319,103 +1316,104 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       {
 	System.err.println("Unknow action event: " + e);
       }
-
   }
 
   // For the ChangeListener
-  public void stateChanged(ChangeEvent e)
-    {
-      int index = pane.getSelectedIndex();
 
-      if (!createdList.contains(new Integer(index)))
-	{
-	  createPanel(index);
-	}
-    }
+  public void stateChanged(ChangeEvent e)
+  {
+    int index = pane.getSelectedIndex();
+
+    if (!createdList.contains(new Integer(index)))
+      {
+	createPanel(index);
+      }
+  }
 
   /**
    * This checks to see if the panel is created, and creates it if needed.
    */
 
   public void createPanel(int index)
-    {
-      wp.gc.setWaitCursor();
-      if (debug)
-	{
-	  println("index = " + index + " general_index= " + general_index);
-	}
-	
-      if (index == general_index)
-	{
-	  setStatus("Creating general panel");
-	  create_general_panel();
-	}
-      else if (index == expiration_date_index)
-	{
-	  setStatus("Creating dates panel");
-	  create_expiration_date_panel();
-	}
-      else if (index == removal_date_index)
-	{
-	  setStatus("Creating dates panel");
-	  create_removal_date_panel();
-	}
-      else if (index == notes_index)
-	{
-	  setStatus("Creating notes panel");
-	  create_notes_panel();
-	}
-      else if (index == owner_index)
-	{
-	  setStatus("Creating owner panel");
-	  create_owner_panel();
-	}
-      else if (index == objects_owned_index)
-	{
-	  setStatus("Creating objects owned panel");
-	  create_objects_owned_panel();
-	}
-      else if (index == personae_index)
-	{
-	  setStatus("Creating persona panel");
-	  create_personae_panel();
-	}
-      else if (index == history_index)
-	{
-	  setStatus("Creating history panel.");
-	  create_history_panel();
-	}
-      else if (index == admin_history_index)
-	{
-	  setStatus("Creating admin history");
-	  create_admin_history_panel();
-	}
-      else
-	{
-	  System.err.println("Unknown pane index: " + pane.getSelectedIndex());
-	}
+  {
+    wp.gc.setWaitCursor();
 
-      wp.gc.setNormalCursor();
-    }
+    if (debug)
+      {
+	println("index = " + index + " general_index= " + general_index);
+      }
+    
+    if (index == general_index)
+      {
+	setStatus("Creating general panel");
+	create_general_panel();
+      }
+    else if (index == expiration_date_index)
+      {
+	setStatus("Creating dates panel");
+	create_expiration_date_panel();
+      }
+    else if (index == removal_date_index)
+      {
+	setStatus("Creating dates panel");
+	create_removal_date_panel();
+      }
+    else if (index == notes_index)
+      {
+	setStatus("Creating notes panel");
+	create_notes_panel();
+      }
+    else if (index == owner_index)
+      {
+	setStatus("Creating owner panel");
+	create_owner_panel();
+      }
+    else if (index == objects_owned_index)
+      {
+	setStatus("Creating objects owned panel");
+	create_objects_owned_panel();
+      }
+    else if (index == personae_index)
+      {
+	setStatus("Creating persona panel");
+	create_personae_panel();
+      }
+    else if (index == history_index)
+      {
+	setStatus("Creating history panel.");
+	create_history_panel();
+      }
+    else if (index == admin_history_index)
+      {
+	setStatus("Creating admin history");
+	create_admin_history_panel();
+      }
+    else
+      {
+	System.err.println("Unknown pane index: " + pane.getSelectedIndex());
+      }
+    
+    wp.gc.setNormalCursor();
+  }
 
   // Convienence methods
 
   final gclient getgclient()
-    {
-      return getWindowPanel().getgclient();
-    }
+  {
+    return getWindowPanel().getgclient();
+  }
 
   final windowPanel getWindowPanel()
-    {
-      return wp;
-    }
+  {
+    return wp;
+  }
 
   private final void setStatus(String status)
-    {
-      wp.gc.setStatus(status);
-    }
+  {
+    wp.gc.setStatus(status);
+  }
 
-  /* 
+  /**
    * Use this instead of System.out.println, in case we want to direct
    * that stuff somewhere else sometime.  Plus, it is easier to type.  
    */
@@ -1425,9 +1423,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     System.out.println(s);
   }
 
-  /*
+  /**
    * Give the gclient an error message.
    */
+
   private void showErrorMessage(String message)
   {
     showErrorMessage("Error", message);
@@ -1438,4 +1437,46 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     gc.showErrorMessage(title, message);
   }
 
+  // InternalFrameListener methods
+
+  public void internalFrameActivated(InternalFrameEvent event)
+  {
+  }
+
+  /**
+   *
+   * When the internalFrame closes, we need to shut down any auxiliary
+   * internalFrames associated with fields in any contained container panels.
+   * 
+   */
+
+  public void internalFrameClosed(InternalFrameEvent event)
+  {
+    for (int i = 0; i < containerPanels.size(); i++)
+      {
+	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+
+	cp.unregister();
+      }
+  }
+
+  public void internalFrameClosing(InternalFrameEvent event)
+  {
+  }
+
+  public void internalFrameDeactivated(InternalFrameEvent event)
+  {
+  }
+
+  public void internalFrameDeiconified(InternalFrameEvent event)
+  {
+  }
+
+  public void internalFrameIconified(InternalFrameEvent event)
+  {
+  }
+
+  public void internalFrameOpened(InternalFrameEvent event)
+  {
+  }
 }
