@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/03/21 02:41:39 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/12/02 10:34:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -183,12 +183,14 @@ public class GanymedeScheduler extends Thread {
   {
     String taskName;
     String taskClass;
+    Invid taskDefInvid;
     Class classdef;
 
     /* -- */
 
     taskName = (String) object.getFieldValue(SchemaConstants.TaskName);
     taskClass = (String) object.getFieldValue(SchemaConstants.TaskClass);
+    taskDefInvid = object.getInvid();
 
     if (taskName == null || taskClass == null)
       {
@@ -203,21 +205,58 @@ public class GanymedeScheduler extends Thread {
       {
 	System.err.println("GanymedeScheduler.registerTaskObject(): class definition could not be found: " + ex);
 	classdef = null;
+	return;
       }
 		
     Runnable task = null;
 
+    // see if we can find a new-style constructor to take the Invid
+    // parameter
+
     try
       {
-	task = (Runnable) classdef.newInstance(); // using no param constructor
+	Constructor c = null;
+
+	try
+	  {
+	    c = classdef.getConstructor(new Class[] {arlut.csd.ganymede.Invid.class});
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	    // oh, well
+	  }
+
+	if (c != null)
+	  {
+	    try
+	      {
+		task = (Runnable) c.newInstance(new Object[] {taskDefInvid});
+	      }
+	    catch (Exception ex)
+	      {
+		System.err.println("Error, ran into exception trying to construct task with Invid constructor");
+		ex.printStackTrace();
+	      }
+	  }
       }
-    catch (IllegalAccessException ex)
+
+    // if we weren't able to find a constructor taking an Invid, use
+    // the no-arg constructor
+
+    if (task == null)
       {
-	System.err.println("IllegalAccessException " + ex);
-      }
-    catch (InstantiationException ex)
-      {
-	System.err.println("InstantiationException " + ex);
+	try
+	  {
+	    task = (Runnable) classdef.newInstance(); // using no param constructor
+	  }
+	catch (IllegalAccessException ex)
+	  {
+	    System.err.println("IllegalAccessException " + ex);
+	  }
+	catch (InstantiationException ex)
+	  {
+	    System.err.println("InstantiationException " + ex);
+	  }
       }
     
     if (task == null)

@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2000/07/05 22:02:05 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2000/12/02 10:34:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,13 +92,19 @@ import arlut.csd.Util.zipIt;
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
 
-public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
+public abstract class GanymedeBuilderTask implements Runnable {
+
+  private static String currentBackUpDirectory = null;
+  private static String basePath = null;
+
+  /* --- */
 
   protected Date lastRunTime;
   protected Date oldLastRunTime;
   GanymedeSession session = null;
   DBDumpLock lock;
-  String basePath;
+  Invid taskDefObjInvid = null;
+  Vector optionsCache = null;
 
   /* -- */
 
@@ -120,6 +126,12 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 
     try
       {
+	// the scheduler should make sure we are never in progress
+	// more than once concurrently, but it won't hurt to clear the
+	// optionsCache up front just in case
+
+	optionsCache = null;
+
 	Ganymede.buildOn(1);
 
 	try
@@ -229,6 +241,10 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 		lock = null;
 	      }
 	  }
+
+	// and again, just in case
+
+	optionsCache = null;
       }
   }
 
@@ -302,14 +318,6 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 
   protected final DBObject getObject(Invid invid)
   {
-    // this works only because we've already got our lock
-    // established..  otherwise, we'd have to use the query system.
-
-    if (lock == null)
-      {
-	throw new IllegalArgumentException("Can't call getObject without a lock");
-      }
-
     return session.session.viewDBObject(invid);
   }
 
@@ -375,15 +383,159 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
   abstract public boolean builderPhase2();
 
   /**
-   * <P>This method takes care of backing up the existing output
-   * files into a zip file.</P>
+   * <P>This method looks in the optionStrings field in the task
+   * object associated with this task and determines whether the given
+   * option name is present in the field.  This works only if this
+   * builder task was registered with taskDefObjInvid set by a
+   * subclass whose constructor takes an Invid parameter and which
+   * sets taskDefObjInvid in GanymedeBuilderTask.</P>
+   *
+   * <P>That is, if the task object for this task has an option strings
+   * vector with the following contents:</P>
+   *
+   * <PRE>
+   *  useMD5
+   *  useShadow
+   * </PRE>
+   *
+   * <P>then a call to isOptionSet with 'useMD5' or 'useShadow', of
+   * any capitalization, will return true.  Any other parameter
+   * provided to isOptionSet() will cause null to be returned.</P>
+   *
    */
 
-  protected void backupFiles(String label) throws IOException
+  protected boolean isOptionSet(String option)
+  {
+    if (option != null && !option.equals(""))
+      {
+	Vector options = optionsCache;
+
+	if (options == null)
+	  {
+	    optionsCache = getOptionStrings();
+	    options = optionsCache;
+	  }
+
+	if (options == null)
+	  {
+	    return false;
+	  }
+
+	for (int i = 0; i < options.size(); i++)
+	  {
+	    String x = (String) options.elementAt(i);
+
+	    if (x.equalsIgnoreCase(option))
+	      {
+		return true;
+	      }
+	  }
+      }
+
+    return false;
+  }
+
+  /**
+   * <P>This method retrieves the value associated with the provided
+   * option name if this builder task was registered with taskDefObjInvid
+   * set by a subclass whose constructor takes an Invid parameter and which
+   * sets taskDefObjInvid in GanymedeBuilderTask.</P>
+   *
+   * <P>getOptionValue() will search through the option strings for
+   * the task object associated with this task and return the
+   * substring after the '=' character, if the option name is found on
+   * the left.</P>
+   *
+   * <P>That is, if the task object for this task has an option strings
+   * vector with the following contents:</P>
+   *
+   * <PRE>
+   *  useMD5
+   *  buildPath=/var/ganymede/schema/NT
+   *  useShadow
+   * </PRE>
+   *
+   * <P>then a call to getOptionValue() with 'buildPath', of any capitalization,
+   * as the parameter will return '/var/ganymede/schema/NT'.</P>
+   *
+   * <P>Any other parameter provided to getOptionValue() will cause null to 
+   * be returned.</P> 
+   */
+
+  protected String getOptionValue(String option)
+  {
+    if (option != null && !option.equals(""))
+      {
+	Vector options = optionsCache;
+
+	if (options == null)
+	  {
+	    optionsCache = getOptionStrings();
+	    options = optionsCache;
+	  }
+
+	if (options == null)
+	  {
+	    return null;
+	  }
+
+	// get the prefix we'll search for
+
+	String matchPat = option + "=";
+
+	// and spin til we find it
+
+	for (int i = 0; i < options.size(); i++)
+	  {
+	    String x = (String) options.elementAt(i);
+
+	    if (x.startsWith(matchPat))
+	      {
+		return x.substring(matchPat.length());
+	      }
+	  }
+      }
+
+    return null;
+  }
+
+  /**
+   * <P>This method returns the Vector of option strings registered
+   * for this task object in the Ganymede database, or null if no
+   * option strings are defined.</P>
+   */
+
+  final Vector getOptionStrings()
+  {
+    if (taskDefObjInvid != null)
+      {
+	DBObject taskDefObj = getObject(taskDefObjInvid);
+
+	Vector options = taskDefObj.getFieldValues(SchemaConstants.TaskOptionStrings);
+
+	if (options == null || options.size() == 0)
+	  {
+	    return null;
+	  }
+
+	// dup the vector for safety, since we are getting direct
+	// access to the Vector in the database
+
+	return (Vector) options.clone();
+      }
+  }
+
+  /**
+   * <P>This method is called before the server's builder
+   * tasks are run and creates a backup directory for
+   * files to be copied to.</P>
+   */
+
+  public static void openBackupDirectory() throws IOException
   {
     if (basePath == null)
       {
-	basePath = System.getProperty("ganymede.builder.output");
+	basePath = System.getProperty("ganymede.builder.backups");
 
 	if (basePath == null)
 	  {
@@ -399,59 +551,78 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
       {
 	throw new IOException("Error, couldn't find output directory to backup.");
       }
+    
+    DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", 
+						java.util.Locale.US);
 
-    File oldDirectory = new File(basePath + File.separator + "old");
+    String label = formatter.format(new Date());
+
+    currentBackUpDirectory = basePath + File.separator + label;
+
+    File oldDirectory = new File(currentBackUpDirectory);
 
     if (!oldDirectory.exists())
       {
 	oldDirectory.mkdir();
       }
 
-    String zipFileName = basePath + "old" + File.separator + label + ".zip";
-
-    //    System.err.println("GanymedeBuilderTask.backups(): " + zipFileName);
-
-    String filenames[] = directory.list(this);
-
-    if (filenames.length > 0)
-      {
-	Vector filenameVect = new Vector();
-
-	//    System.err.print("Zipping: ");
-
-	for (int i = 0; i < filenames.length; i++)
-	  {
-	    System.err.print(filenames[i]);
-	    System.err.print(" ");
-
-	    File testFile = new File(basePath + filenames[i]);
-
-	    if (!testFile.isDirectory())
-	      {
-		filenameVect.addElement(basePath + filenames[i]);
-	      }
-	  }
-	
-	if (filenameVect.size() > 0)
-	  {
-	    zipIt.createZipFile(zipFileName, filenameVect);
-	  }
-      }
+    currentBackUpDirectory = basePath + File.separator + label + File.separator;
   }
 
   /**
-   * <P>This method comprises the FileNameFilter body, and is used to avoid
-   * zipping existing zip files into new backups.</P>
+   * <P>This method is called after all of the server's
+   * builder tasks are run and zips up the current
+   * backup directory.</P>
    */
 
-  public boolean accept(File dir, String name)
+  public static void closeBackupDirectory() throws IOException
   {
-    if (name.endsWith(".zip") || (name.endsWith(".ZIP")))
+    String zipName = currentBackUpDirectory + ".zip";
+
+    if (zipIt.zipDirectory(currentBackUpDirectory, zipName))
       {
-	return false;
+	FileOps.deleteDirectory(currentBackUpDirectory);
       }
 
-    return true;
+    currentBackUpDirectory = null;
   }
 
+  /**
+   *
+   * This method opens the specified file for writing out a text stream.
+   *
+   * If the files have not yet been backed up this run time, openOutFile()
+   * will cause the files in Ganymede's output directory to be zipped up
+   * before overwriting any files.
+   *
+   */
+
+  protected synchronized PrintWriter openOutFile(String filename) throws IOException
+  {
+    String backupFileName = null;
+    File file;
+
+    /* -- */
+
+    // see if we need to generate a unique name for the file we're copying to
+
+    backupFileName = currentBackUpDirectory + filename;
+
+    file = new File(backupFileName);
+
+    if (file.exists())
+      {
+	backupFileName = currentBackUpDirectory + filename.replace(File.separator, "_");
+      }
+
+    if (!arlut.csd.Util.copyFile(filename, backupFileName))
+      {
+	return null;
+      }
+
+    // we'll go ahead and write over the file if it exists.. that
+    // way, we preserve directory permissions
+
+    return new PrintWriter(new BufferedWriter(new FileWriter(filename)));
+  }
 }
