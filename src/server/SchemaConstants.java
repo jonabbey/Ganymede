@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,7 +31,7 @@ public interface SchemaConstants {
 
   /* all non-embedded objects have these fields */
 
-  final static short OwnerListField = 0; // list of admin accounts with authority over this object
+  final static short OwnerListField = 0; // list of owner groups with authority over this object
   final static short ExpirationField = 1; // date that this object will expire
   final static short RemovalField = 2; // date that this object will be removed.
   final static short NotesField = 3; // string field for notes for this object
@@ -52,13 +52,17 @@ public interface SchemaConstants {
   final static short OwnerMembersField = 101; // what admin:role entities have privileges in this OwnerBase?
   final static short OwnerObjectsOwned = 102; // what objects does this owner set own?
 
+  // the following are fixed object id's
+
+  final static short OwnerSupergash = 1;
+
   /* administrator roles have a defined set of fields */
 
   final static short PersonaBase = 1; // an administrator privilege record
 
   final static short PersonaNameField = 100; // what is this persona called?
   final static short PersonaPasswordField = 101; // password for this admin account
-  final static short PersonaGroupsField = 102; // list of admin groups that this admin is a member of
+  final static short PersonaGroupsField = 102; // list of owner groups that this admin is a member of
   final static short PersonaAssocUser = 103; // if associated with a user, here's the reference.
   final static short PersonaPrivs = 104; // vector of permission invids for this admin account
   final static short PersonaAdminConsole = 105; // boolean, does this role have access to the admin console?
@@ -72,6 +76,11 @@ public interface SchemaConstants {
   final static short PermMatrix = 101;
   final static short PermPersonae = 102; // what admin personae are using this priv matrix?
 
+  // the following are fixed object id's
+
+  final static short PermDefaultObj = 1;
+  final static short PermEndUserObj = 2;
+
   /* users have a defined set of fields */
 
   final static short UserBase = 3;
@@ -80,4 +89,7 @@ public interface SchemaConstants {
   final static short UserPassword = 101; // password
   final static short UserAdminPersonae = 102; // pointer to zero or more associated admin personae
 
+  /* what's the last base we currently have defined as a mandatory base? */
+
+  final static short FinalBase = UserBase;
 }
