@@ -6,7 +6,7 @@
    or a scalar.  
 
    Created: 10 April 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,6 +18,8 @@ import java.rmi.RemoteException;
 import java.util.*;
 
 public interface db_field extends java.rmi.Remote {
+
+  FieldInfo getFieldInfo() throws RemoteException;
 
   String getName() throws RemoteException;
   short getID() throws RemoteException;
