@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/05/24 22:53:31 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/05/26 19:39:08 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.7 $ $Date: 2000/05/24 22:53:31 $ $Name:  $
+ * @version $Revision: 1.8 $ $Date: 2000/05/26 19:39:08 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -568,9 +568,7 @@ public class xmlclient implements ClientListener {
 		inactivatedObjects.addElement(objectRecord);
 	      }
 
-	    //	    System.err.print(">");
 	    storeObject(objectRecord);
-	    //	    System.err.print("<");
 	  }
 
 	item = getNextItem();
@@ -729,7 +727,7 @@ public class xmlclient implements ClientListener {
 
   public Invid getInvid(short typeId, String objId)
   {
-    Invid result = null;
+    Invid invid = null;
     Short typeKey;
     Hashtable objectHash;
 
@@ -750,35 +748,39 @@ public class xmlclient implements ClientListener {
       {
 	try
 	  {
-	    result = session.findLabeledObject(objId, typeId);
+	    invid = session.findLabeledObject(objId, typeId);
 	  }
 	catch (RemoteException ex)
 	  {
 	  }
 
-	if (result != null)
+	if (invid != null)
 	  {
 	    // remember it in the cache
 
-	    objectHash.put(objId, result);
+	    objectHash.put(objId, invid);
 	  }
       }
     else
       {
 	if (element instanceof xmlobject)
 	  {
-	    result = ((xmlobject) element).invid;
+	    invid = ((xmlobject) element).invid;
+
+	    // if invid is null at this point, this object hasn't been
+	    // created or edited yet on the server, so we can't do
+	    // anything other than return null
 	  }
 	else
 	  {
 	    // we'll just go ahead and throw a ClassCastException if
 	    // we've got something strange in our objectHash
 
-	    result = (Invid) element;
+	    invid = (Invid) element;
 	  }
       }
 
-    return result;
+    return invid;
   }
 
   /**
@@ -1048,6 +1050,25 @@ public class xmlclient implements ClientListener {
 	    xmlobject object = (xmlobject) editedObjects.elementAt(i);
 
 	    System.err.println("Editing " + object);
+
+	    attempt = object.editOnServer(session);
+
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    System.err.println("Error editing object " + object + ", reason: " + msg);
+		  }
+		else
+		  {
+		    System.err.println("Error editing object " + object + ", no reason given.");
+		  }
+
+		success = false;
+		continue;
+	      }
 	
 	    attempt = object.registerFields(2); // invids and others
 

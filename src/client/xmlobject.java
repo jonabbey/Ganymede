@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/05/25 23:59:24 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/05/26 19:39:09 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.5 $ $Date: 2000/05/25 23:59:24 $ $Name:  $
+ * @version $Revision: 1.6 $ $Date: 2000/05/26 19:39:09 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -200,15 +200,17 @@ public class xmlobject {
 
 	nextItem = xmlclient.xc.getNextItem();
       }
+
+    if (nextItem instanceof XMLEndDocument)
+      {
+	throw new RuntimeException("Ran into end of XML file while parsing data object " + 
+				   this.toString());
+      }
   }
 
   /**
    * <p>This method causes this object to be created on
-   * the server.  Any non-Invid fields will be set on the
-   * server.  Invid fields will be left untouched.. they
-   * will need to be revisited after all objects from
-   * the XML file have been created and the linkages can
-   * be established.</p>
+   * the server.</p>
    *
    * <p>This method uses the standard {@link arlut.csd.ganymede.ReturnVal ReturnVal}
    * return semantics.</p>
@@ -249,6 +251,77 @@ public class xmlobject {
 	  }
 
 	return null;
+      }
+  }
+
+  /**
+   * <p>This method causes this object to be checked out for editing
+   * on the server.</p>
+   *
+   * <p>This method uses the standard {@link arlut.csd.ganymede.ReturnVal ReturnVal}
+   * return semantics.</p> */
+
+  public ReturnVal editOnServer(Session session)
+  {
+    ReturnVal result;
+
+    /* -- */
+
+    if (objref != null)
+      {
+	throw new RuntimeException("Error, have already edited this xmlobject: " +
+				   this.toString());
+      }
+
+    if (invid == null)
+      {
+	if (num == -1 && id != null)
+	  {
+	    try
+	      {
+		invid = session.findLabeledObject(id, type.shortValue());
+	      }
+	    catch (RemoteException ex)
+	      {
+		ex.printStackTrace();
+		throw new RuntimeException(ex.getMessage());
+	      }
+	  }
+	else
+	  {
+	    if (num != -1)
+	      {
+		invid = new Invid(type.shortValue(), num);
+	      }
+	  }
+      }
+
+    if (invid != null)
+      {
+	try
+	  {
+	    result = session.edit_db_object(invid);
+	  }
+	catch (RemoteException ex)
+	  {
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
+	  }
+
+	if (result.didSucceed())
+	  {
+	    objref = result.getObject();
+	    return result;
+	  }
+	else
+	  {
+	    return result;
+	  }
+      }
+    else
+      {
+	throw new RuntimeException("Couldn't find object on server to edit it: " + 
+				   this.toString());
       }
   }
 
@@ -327,13 +400,23 @@ public class xmlobject {
   {
     if (invid == null)
       {
-	if (id != null)
-	  {
-	    invid = xmlclient.xc.getInvid(type.shortValue(), id);
-	  }
-	else if (num != -1)
+	if (num != -1)
 	  {
 	    invid = new Invid(type.shortValue(), num);
+	  }
+	else if (id != null)
+	  {
+	    // try to look it up on the server
+
+	    try
+	      {
+		invid = xmlclient.xc.session.findLabeledObject(id, type.shortValue());
+	      }
+	    catch (RemoteException ex)
+	      {
+		ex.printStackTrace();
+		throw new RuntimeException(ex.getMessage());
+	      }
 	  }
       }
 

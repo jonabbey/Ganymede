@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/05/25 23:59:23 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/05/26 19:39:09 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,7 +72,7 @@ import java.rmi.server.*;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.6 $ $Date: 2000/05/25 23:59:23 $ $Name:  $
+ * @version $Revision: 1.7 $ $Date: 2000/05/26 19:39:09 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -80,7 +80,6 @@ public class xmlfield implements FieldType {
 
   static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss",
 						     java.util.Locale.US);
-
   /**
    * <p>Definition record for this field type</p>
    */
@@ -107,14 +106,14 @@ public class xmlfield implements FieldType {
     /* -- */
 
     this.owner = owner;
-    String name = openElement.getName();
-    fieldDef = owner.getFieldDef(name);
+    String elementName = openElement.getName();
+    fieldDef = owner.getFieldDef(elementName);
 
     //    System.err.println("parsing " + openElement);
 
     if (fieldDef == null)
       {
-	System.err.println("Did not recognize field " + name + " in object " + owner);
+	System.err.println("Did not recognize field " + elementName + " in object " + owner);
 
 	if (openElement.isEmpty())
 	  {
@@ -122,7 +121,7 @@ public class xmlfield implements FieldType {
 	  }
 	else
 	  {
-	    skipToEndField(name);
+	    skipToEndField(elementName);
 
 	    throw new NullPointerException("void field def");
 	  }
@@ -132,7 +131,7 @@ public class xmlfield implements FieldType {
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	if (nextItem.matchesClose(name))
+	if (nextItem.matchesClose(elementName))
 	  {
 	    value = null;
 	    return;
@@ -151,7 +150,7 @@ public class xmlfield implements FieldType {
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	if (nextItem.matchesClose(name))
+	if (nextItem.matchesClose(elementName))
 	  {
 	    value = null;
 	    return;
@@ -170,7 +169,7 @@ public class xmlfield implements FieldType {
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	if (nextItem.matchesClose(name))
+	if (nextItem.matchesClose(elementName))
 	  {
 	    value = null;
 	    return;
@@ -214,7 +213,7 @@ public class xmlfield implements FieldType {
 	  {
 	    nextItem = xmlclient.xc.getNextItem();
 	   
-	    if (nextItem.matchesClose(name))
+	    if (nextItem.matchesClose(elementName))
 	      {
 		value = null;
 		return;
@@ -242,7 +241,7 @@ public class xmlfield implements FieldType {
 	  {
 	    System.err.println("Unrecognized tag while parsing data for a permissions field: " + nextItem);
 
-	    skipToEndField(name);
+	    skipToEndField(elementName);
 
 	    throw new NullPointerException("void field def");	    
 	  }
@@ -263,13 +262,18 @@ public class xmlfield implements FieldType {
 
 		nextItem = xmlclient.xc.getNextItem();
 	      }
+
+	    if (nextItem instanceof XMLEndDocument)
+	      {
+		throw new RuntimeException("Ran into end of XML file while processing permission field " + elementName);
+	      }
 	  }
       }
     else if (fieldDef.getType() == FieldType.PASSWORD)
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	if (nextItem.matchesClose(name))
+	if (nextItem.matchesClose(elementName))
 	  {
 	    value = null;
 	    return;
@@ -293,7 +297,7 @@ public class xmlfield implements FieldType {
 	  {
 	    nextItem = xmlclient.xc.getNextItem();
 
-	    if (nextItem.matchesClose(name))
+	    if (nextItem.matchesClose(elementName))
 	      {
 		value = null;
 		return;
@@ -317,7 +321,7 @@ public class xmlfield implements FieldType {
       {
 	nextItem = xmlclient.xc.getNextItem();
 
-	if (nextItem.matchesClose(name))
+	if (nextItem.matchesClose(elementName))
 	  {
 	    value = null;
 	    return;
@@ -333,7 +337,11 @@ public class xmlfield implements FieldType {
 	  }
       }
 
-    skipToEndField(name);
+    // if we get here, we haven't yet consumed the field close
+    // element.. go ahead and eat everything up to and including the
+    // field close element.
+
+    skipToEndField(elementName);
   }
 
   /**
@@ -369,16 +377,21 @@ public class xmlfield implements FieldType {
 	      }
 		    
 	    canDoSetMode = false;
-		    
 	    modeStack.push(nextItem.getName());
+
+	    nextItem = xmlclient.xc.getNextItem();
 	  }
-	else if (nextItem.matches("set") && !nextItem.isEmpty())
+	else if (nextItem.matches("set"))
 	  {
 	    if (canDoSetMode)
 	      {
 		setMode = true;
 		setValues = new Vector();
-		modeStack.push("set");
+
+		if (!nextItem.isEmpty())
+		  {
+		    modeStack.push("set");
+		  }
 	      }
 	    else
 	      {
@@ -407,6 +420,11 @@ public class xmlfield implements FieldType {
 	    // okay.. we're actually not going to do anything
 	    // here, because set mode is really exclusive within
 	    // a field definition
+
+	    if (modeStack.peek().equals(nextItem.getName()))
+	      {
+		modeStack.pop();
+	      }
 
 	    nextItem = xmlclient.xc.getNextItem();
 	  }
@@ -478,6 +496,11 @@ public class xmlfield implements FieldType {
 	    nextItem = xmlclient.xc.getNextItem();
 	  }
       }
+
+    if (nextItem instanceof XMLEndDocument)
+      {
+	throw new RuntimeException("Ran into end of XML file while processing vector field " + openElement);
+      }
   }
 
   /**
@@ -486,13 +509,18 @@ public class xmlfield implements FieldType {
    * definition is found.</p>
    */
 
-  private void skipToEndField(String name) throws SAXException
+  private void skipToEndField(String elementName) throws SAXException
   {
     XMLItem nextItem = xmlclient.xc.getNextItem();
     
-    while (!(nextItem.matchesClose(name) || (nextItem instanceof XMLEndDocument)))
+    while (!(nextItem.matchesClose(elementName) || (nextItem instanceof XMLEndDocument)))
       {
 	nextItem = xmlclient.xc.getNextItem();
+      }
+
+    if (nextItem instanceof XMLEndDocument)
+      {
+	throw new RuntimeException("Ran into end of XML file while processing field " + elementName);
       }
   }
 
@@ -1041,16 +1069,18 @@ class xInvid {
     if (!item.isEmpty())
       {
 	System.err.println("Error, found a non-empty invid element: " + item);
+	throw new NullPointerException("Bad item!");
       }
 
     String typeString = item.getAttrStr("type");
-    objectId = item.getAttrStr("id");
 
     if (typeString == null)
       {
 	System.err.println("Missing or malformed invid type in element: " + item);
 	throw new NullPointerException("Bad item!");
       }
+
+    objectId = item.getAttrStr("id");
 
     if (objectId == null)
       {
@@ -1059,6 +1089,11 @@ class xInvid {
 	if (iNum != null)
 	  {
 	    num = iNum.intValue();
+	  }
+	else
+	  {
+	    System.err.println("Unknown object target in invid field element: " + item);
+	    throw new NullPointerException("Bad item!");
 	  }
       }
 
@@ -1072,22 +1107,6 @@ class xInvid {
 			   " in invid field element: " + item);
 	throw new NullPointerException("Bad item!");
       }
-  }
-
-  public xInvid(String type, String id)
-  {
-    try
-      {
-	this.typeId = xmlclient.xc.getTypeNum(type);
-      }
-    catch (NullPointerException ex)
-      {
-	System.err.println("Unknown target type " + type + 
-			   " in xInvid constructor");
-	throw new NullPointerException("Bad item!");
-      }
-
-    this.objectId = id;
   }
 
   /**
@@ -1302,6 +1321,11 @@ class xPerm {
 	    fields.put(fieldperm.getName(), fieldperm);
 
 	    item = xmlclient.xc.getNextItem();
+	  }
+
+	if (item instanceof XMLEndDocument)
+	  {
+	    throw new RuntimeException("Ran into end of XML file while parsing permission object " + label);
 	  }
       }
   }
