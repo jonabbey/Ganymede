@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2000/04/13 04:51:23 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2000/07/28 20:43:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -184,6 +184,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	writeMailDirect();
 	writeNTfile();
+	writeHTTPfiles();
 
 	success = true;
       }
@@ -1920,6 +1921,172 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     finally
       {
 	rshNT.close();
+      }
+
+    return true;
+  }
+
+  /**
+   * <p>This method writes out password and group files compatible with
+   * with the Apache web server.  The password file is formatted according to
+   * the standard .htpasswd file format, as follows:</p>
+   *
+   * <PRE>
+   * user1:3vWsXVZDX5E7E
+   * user2:DX5E7E3vWsXVZ
+   * </PRE>
+   *
+   * <p>The group file is likewise formatted for use with Apache, as follows:</p>
+   *
+   * <PRE>
+   * group1: user1 user2 user3
+   * group2: user9 user2 user1
+   * </PRE>
+   *
+   * <p>All users and all groups and user netgroups will be written to the
+   * files.</p>
+   *
+   */
+
+  private boolean writeHTTPfiles()
+  {
+    PrintWriter webPassword = null;
+    PrintWriter webGroups = null;
+    DBObject user;
+    DBObject group;
+    Enumeration users;
+    Enumeration groups;
+
+    try
+      {
+	webPassword = openOutFile(path + "httpd.pass");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeHTTPfiles(): couldn't open httpd.pass file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+
+	    if (user.isInactivated())
+	      {
+		continue;
+	      }
+
+	    PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+
+	    if (passField == null)
+	      {
+		continue;
+	      }
+	    
+	    String password = passField.getUNIXCryptText();
+
+	    if (password == null)
+	      {
+		continue;
+	      }
+
+	    // ok, we've got a user with valid UNIXCrypt password
+	    // info.  Write it.
+
+	    webPassword.print(user.getLabel());
+	    webPassword.print(":");
+	    webPassword.println(password);
+	  }
+      }
+    finally
+      {
+	webPassword.close();
+      }
+
+    try
+      {
+	webGroups = openOutFile(path + "httpd.groups");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeHTTPfiles(): couldn't open httpd.groups file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	// first we write out UNIX account groups
+
+	groups = enumerateObjects((short) 257);
+
+	while (groups.hasMoreElements())
+	  {
+	    group = (DBObject) groups.nextElement();
+
+	    if (group.isInactivated())
+	      {
+		continue;
+	      }
+	    
+	    InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
+	    
+	    if (usersField == null)
+	      {
+		continue;
+	      }
+
+	    String usersList = usersField.getValueString();
+
+	    if (usersList == null || usersList.equals(""))
+	      {
+		continue;
+	      }
+
+	    webGroups.print(group.getLabel());
+	    webGroups.print(": ");
+
+	    // InvidDBField.getValueString() returns a comma separated
+	    // list..  we want a space separated list for Apache
+
+	    webGroups.println(usersList.replace(',',' '));
+	  }
+
+	// second we write out user netgroups
+
+	groups = enumerateObjects((short) 270);
+
+	while (groups.hasMoreElements())
+	  {
+	    group = (DBObject) groups.nextElement();
+
+	    if (group.isInactivated())
+	      {
+		continue;
+	      }
+
+	    String usersList = VectorUtils.vectorString(netgroupMembers(group));
+
+	    if (usersList == null || usersList.equals(""))
+	      {
+		continue;
+	      }
+
+	    webGroups.print(group.getLabel());
+	    webGroups.print(": ");
+
+	    // VectorUtils.vectorString() returns a comma separated
+	    // list..  we want a space separated list for Apache
+
+	    webGroups.println(usersList.replace(',',' '));
+	  }
+      }
+    finally
+      {
+	webGroups.close();
       }
 
     return true;
