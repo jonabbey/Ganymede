@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.18 $ %D%
+    Version: $Revision: 1.19 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ import arlut.csd.JDataComponent.*;
 
 public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // -- 
   
@@ -282,6 +282,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public boolean setValuePerformed(JValueObject v)
   {
+    if (v.getOperationType() == JValueObject.ERROR)
+      {
+	parent.setStatus((String)v.getValue());
+	return true;
+      }
+
     boolean returnValue = false;
 
     /* -- */
@@ -383,7 +389,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	try
 	  {
 	    parent.somethingChanged = true;
-	    returnValue =  field.setValue(((JdateField)v.getSource()).getDate());
+	    returnValue =  field.setValue(v.getValue());
 	  }
 	catch (RemoteException rx)
 	  {
@@ -457,6 +463,25 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	else
 	  {
 	    System.out.println("Not an Invid in string selector.");
+	  }
+      }
+    else if (v.getSource() instanceof JIPField)
+      {
+	if (debug)
+	  {
+	    System.out.println("ip field changed");
+	  }
+
+	db_field field = (db_field)objectHash.get(v.getSource());
+
+	try
+	  {
+	    parent.somethingChanged = true;
+	    returnValue =  field.setValue(v.getValue());
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new IllegalArgumentException("Could not set ip field value: " + rx);
 	  }
       }
     else
@@ -726,14 +751,41 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	System.out.println("Adding StringSelector, its a vector of strings!");
       }
 
-    tStringSelector ss = new tStringSelector(field.choices().getLabels(),
-					   field.getValues(), 
-					   this,
-					   editable,
-					   100);
-    objectHash.put(ss, field);
-    ss.setCallback(this);
-    addRow( ss, field.getName(), field.isVisible()); 
+    if (field == null)
+      {
+	System.out.println("Hey, this is a null field! " + field.getName());
+
+      }
+
+    QueryResult qr = field.choices();
+    if (qr == null)
+      {
+	tStringSelector ss = new tStringSelector(null,
+						 field.getValues(), 
+						 this,
+						 editable,
+						 false,  //canChoose
+						 false,  //mustChoose
+						 100);
+	objectHash.put(ss, field);
+	ss.setCallback(this);
+	addRow( ss, field.getName(), field.isVisible()); 
+	
+      }
+    else
+      {
+	tStringSelector ss = new tStringSelector(qr.getLabels(),
+						 field.getValues(), 
+						 this,
+						 editable,
+						 true,   //canChoose
+						 false,  //mustChoose
+						 100);
+	objectHash.put(ss, field);
+	ss.setCallback(this);
+	addRow( ss, field.getName(), field.isVisible()); 
+	
+      }
   }
 
   /**
