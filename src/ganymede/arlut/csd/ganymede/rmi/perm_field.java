@@ -98,10 +98,6 @@ public interface perm_field extends db_field {
    * <P>Returns a PermEntry object representing this PermMatrix's 
    * permissions on the field &lt;field&gt; in base &lt;base&gt;<br><br></P>
    *
-   * <P>If this permissions field has no explicit record for the specified
-   * field, the default permissions value for this base will be returned
-   * if defined, else getPerm() will return null.</P>
-   *
    * @see arlut.csd.ganymede.common.PermEntry
    */
 
@@ -120,10 +116,6 @@ public interface perm_field extends db_field {
   /**
    * <P>Returns a PermEntry object representing this PermMatrix's 
    * permissions on the field &lt;field&gt; in base &lt;base&gt;</P>
-   *
-   * <P>If this permissions field has no explicit record for the specified
-   * field, the default permissions value for this base will be returned
-   * if defined, else getPerm() will return null.</P>
    *
    * @see arlut.csd.ganymede.common.PermEntry
    */
