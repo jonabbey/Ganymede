@@ -1,11 +1,15 @@
-/* 
+/*
 
-   openObjectDialog.java
+   createObjectDialog.java
 
    A Dialog to open an object from the database for a variety of operations.
+   
+   Created: 31 October 1997
+   Version: $Revision: 1.20 $ %D%
+   Module By: Mike Mulvaney
+   Applied Research Laboratories, The University of Texas at Austin
 
-   */
-
+*/
 
 package arlut.csd.ganymede.client;
 
@@ -21,8 +25,20 @@ import arlut.csd.JDataComponent.*;
 import arlut.csd.Util.VecQuickSort;
 import arlut.csd.JDialog.JCenterDialog;
 
-//public class openObjectDialog extends JDialog implements ActionListener, MouseListener, JsetValueCallback{
-public class openObjectDialog extends JCenterDialog implements ActionListener, MouseListener{
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                openObjectDialog
+
+------------------------------------------------------------------------------*/
+
+/**
+ *
+ * A Dialog to open an object from the database for a variety of operations.
+ *
+ */
+
+public class openObjectDialog extends JCenterDialog implements ActionListener, MouseListener {
+
   private final static boolean debug = false;
 
   boolean 
@@ -131,7 +147,18 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     gbc.fill = GridBagConstraints.NONE;
     
     type = new JComboBox();
-    type.setLightWeightPopupEnabled(false);
+
+    // Ideally, we'd really like for our JComboBox's pop-ups to be
+    // able to go beyond the borders of our dialog.  Unfortunately,
+    // the Swing library, up to and including Swing 1.1 beta 3, is
+    // hideously broken when it comes to handling pop-ups in dialogs.
+
+    // By leaving it lightweight, our pop-up will get truncated to the
+    // dialog's edges, but at least it will be fully displayed, with a
+    // scrollable menu region that fits within our dialog.
+
+    // **   type.setLightWeightPopupEnabled(false);
+
     Vector bases = client.getBaseList();
     Hashtable baseToShort = client.getBaseToShort();
     Hashtable baseNames = client.getBaseNames();

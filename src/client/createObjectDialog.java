@@ -6,7 +6,7 @@
    create a new object in the client.
    
    Created: 17 September 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -126,7 +126,17 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 
     listHandles = gc.sortListHandleVector(listHandles);
     types = new JComboBox(listHandles);
-    types.setLightWeightPopupEnabled(false);
+
+    // Ideally, we'd really like for our JComboBox's pop-ups to be
+    // able to go beyond the borders of our dialog.  Unfortunately,
+    // the Swing library, up to and including Swing 1.1 beta 3, is
+    // hideously broken when it comes to handling pop-ups in dialogs.
+
+    // By leaving it lightweight, our pop-up will get truncated to the
+    // dialog's edges, but at least it will be fully displayed, with a
+    // scrollable menu region that fits within our dialog.
+
+    // **  types.setLightWeightPopupEnabled(false);
 
     JLabel l = new JLabel("Type of object:");
 
