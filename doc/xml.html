@@ -1279,6 +1279,8 @@ for all field types, with just the value carrying element type differing.
 The following table shows the data carrying element types that correspond
 to the nine field types.</p>
 
+<!-- STRING -->
+
 <center><table BORDER CELLPADDING=5 WIDTH="80%">
 <tr>
 <td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="STRING">&lt;string&gt;</a></font></b></td>
@@ -1286,7 +1288,13 @@ to the nine field types.</p>
 
 <tr>
 <td COLSPAN="2">
-The <b>&lt;string&gt;</b> element contains data for a String field.
+The <b>&lt;string&gt;</b> element contains data for Ganymede string fields,
+but is mandatory only for vector string fields.  The
+<b>&lt;string&gt;</b> element is not necessary for scalar string
+fields, which support simply placing the content to be placed in the
+string field directly between the field element's open and close tags.
+If the <b>&lt;string&gt;</b> element is used for string field content,
+it must be empty.
 <font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
 </td>
 </tr>
@@ -1309,12 +1317,465 @@ The <b>&lt;string&gt;</b> element contains data for a String field.
 <td COLSPAN="2">
 <dl>
 
-<p>
 <dt><b>val</b></dt>
 <dd>The contents of the mandatory <b>val</b> attribute actually holds the string value
-corresponding to this &lt;string&gt; element.</dd>
+corresponding to this &lt;string&gt; element.  As with all XML attributes, double quote
+characters must be replaced by '<b>&amp;quot;</b>', naked ampersands must be replaced
+by '<b>&amp;amp;</b>', and anything goes otherwise, including embedded newlines.</dd>
+
+</dl>
 </td>
 </tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td COLSPAN="2">&lt;string val="broccol"/&gt;</td></tr>
+
+</table></center>
+
+<!-- BOOLEAN -->
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="BOOLEAN">&lt;boolean&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;boolean&gt;</b> element contains a boolean value for
+a Ganymede boolean field.  As boolean fields are scalar in Ganymede, only
+one <b>&lt;boolean&gt;</b> element at a time may be contained in a boolean field
+element.  The <b>&lt;boolean&gt;</b> element must be empty.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td><a href="#GANYDATA">&lt;object&gt;</a></td>
+<td>NONE</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<dt><b>val</b></dt>
+<dd>The contents of the mandatory <b>val</b> attribute holds
+a string corresponding to the value of
+this &lt;boolean&gt; element. "<b>1</b>", "<b>true</b>",
+"<b>t</b>", "<b>yes</b>", and "<b>y</b>", of whatever capitalization,
+all correspond to a true value. Any other value corresponds to a
+false value.</dd>
+</dl>
+</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td COLSPAN="2">&lt;boolean val="true"/&gt;</td></tr>
+
+</table></center>
+
+<!-- INT -->
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="INT">&lt;int&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;int&gt;</b> element contains a 32 bit signed integer value for
+a Ganymede numeric field.  As numeric fields are scalar in Ganymede, only
+one <b>&lt;int&gt;</b> element at a time may be contained in a field
+element.  The <b>&lt;int&gt;</b> element must be empty.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td><a href="#GANYDATA">&lt;object&gt;</a></td>
+<td>NONE</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<dt><b>val</b></dt>
+<dd>The contents of the mandatory <b>val</b> attribute actually holds
+the integer value corresponding to this &lt;int&gt; element.  This
+attribute can hold integer values in the range -4294967296 to
+4294967295.  The only characters allowed in this attribute value are
+the numeric digits and the minus sign.</dd>
+</dl>
+</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td COLSPAN="2">&lt;int val="12042"/&gt;</td></tr>
+
+</table></center>
+
+<!-- FLOAT -->
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="FLOAT">&lt;float&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;float&gt;</b> element contains a 64 bit floating point
+value, corresponding to the IEEE 754-1985 specification, for use
+with Ganymede float fields.
+As float fields are scalar in Ganymede, only
+one <b>&lt;float&gt;</b> element at a time may be contained in a float field
+element.  The <b>&lt;float&gt;</b> element must be empty.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td><a href="#GANYDATA">&lt;object&gt;</a></td>
+<td>NONE</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<dt><b>val</b></dt>
+<dd>The contents of the mandatory <b>val</b> attribute actually holds
+the 64 bit float value corresponding to this &lt;float&gt; element.  This
+attribute can hold floating point values corresponding to the
+64 bit floating point value specified by IEEE 754-1985 specification.  The text
+of this attribute must conform to the rules specified in the java.lang.Double
+class, which generally corresponds to normal rules of ASCII floating point
+number representation, with support for numbers of the form
+6.04E+25 in scientific notation for very large or very small numbers.</dd>
+</dl>
+</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td COLSPAN="2">&lt;float val="3.141596254"/&gt;</td></tr>
+
+</table></center>
+
+<!-- IP -->
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="IP">&lt;ip&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;ip&gt;</b> element contains an IPv4 or IPv6 address.  IP
+fields may be scalar or vector in Ganymede. The <b>&lt;ip&gt;</b>
+element must be empty.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td><a href="#GANYDATA">&lt;object&gt;</a></td>
+<td>NONE</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<dt><b>val</b></dt>
+<dd>The contents of the mandatory <b>val</b> attribute holds
+an IPv4 string in standard dotted decimal form, or an IPv6 string, in
+any RFC 1884 format.  The Ganymede server will decide, based on its
+configuration, whether an IPv6 address will be accepted.  Even if IPv6
+addresses are supported, IPv4 strings will always be accepted, given
+the compatibility engineering the IPv6 folks have carried forth.</dd>
+</dl>
+</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td COLSPAN="2">&lt;ip val="127.0.0.1"/&gt;</td></tr>
+
+</table></center>
+
+<!-- DATE -->
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="DATE">&lt;date&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;date&gt;</b> element contains a Java date value, which is effectively a 64 bit 
+time stamp with millisecond resolution centered at January 1, 1970, UTC.
+As date fields are scalar in Ganymede, only
+one <b>&lt;date&gt;</b> element at a time may be contained in a field
+element.  The <b>&lt;date&gt;</b> element must be empty.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td><a href="#GANYDATA">&lt;object&gt;</a></td>
+<td>NONE</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<dt><b>val</b></dt>
+
+<dd>The contents of the <b>val</b> attribute contains a human readable
+representation of the time stamp held in this &lt;date&gt; element.
+The <b>val</b> attribute takes data strings of the form "<b>Sun, 03
+Dec 1995 00:00:00</b>", in which case the date is interpreted in the
+local timezone of the machine running the xmlclient or "<b>Sun, 03 Dec
+1995 00:00:00 CDT</b>", in which the date will be interpreted by the
+specified timezone.  The precise form of date val string that may be
+parsed by the xmlclient, in particular the characters of the date and
+month, may differ according to the default Java locale of the JVM
+running the xmlclient.  To avoid any possibility for imprecision, it
+may be necessary to instead use the <b>timecode</b> attribute.</dd>
+
+<dt><b>timecode</b></dt>
+<dd>The contents of the <b>timecode</b> attribute contains a 64 bit
+signed integer, corresponding to the number of milliseconds before or
+after January 1, 1970, UTC.  In order to use a UNIX-style 32 bit
+timecode to fill in the <b>timecode</b> attribute, you can simply
+multiply a 32 bit timecode by 1,000.</dd>
+
+</dl>
+</td>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td COLSPAN="2">&lt;date val="Wed, 28 Jun 2000 13:13:02" timecode="962215982000"/&gt;</td></tr>
+
+</tr>
+</table></center>
+
+<!-- PASSWORD -->
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="PASSWORD">&lt;password&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;password&gt;</b> element contains a Java password value.
+As password fields are scalar in Ganymede, only one
+<b>&lt;password&gt;</b> element at a time may be contained in a field
+element.  The <b>&lt;password&gt;</b> element must be empty.  The
+<b>&lt;password&gt;</b> element must one of three
+attributes, <b>plaintext</b>, <b>crypt</b>, or <b>md5crypt</b>, which
+are explained below.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td><a href="#GANYDATA">&lt;object&gt;</a></td>
+<td>NONE</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<dt><b>plaintext</b></dt>
+
+<dd>This attribute, if present, contains a password string in plain
+text.  The client will transmit this password to the server, which
+will generate UNIX crypt and md5Crypt encodings if necessary
+for the server's operations.</dd>
+
+<dt><b>crypt</b></dt>
+
+<dd>This attribute, if present, contains a password string pre-hashed
+in UNIX crypt() format.  The client will transmit this password
+to the server, and will clear any pre-existing plain text or
+md5Crypt() encoded password information stored in this field in the
+server.</dd>
+
+<dt><b>md5crypt</b></dt>
+
+<dd>This attribute, if present, contains a password string pre-hashed
+in FreeBSD-style md5Crypt() format.  The client will transmit this password
+to the server, and will clear any pre-existing plain text or
+crypt() encoded password information stored in this field in the
+server.</dd>
+
+</dl>
+</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td COLSPAN="2">&lt;password crypt="nxGots4NO.BJY"/&gt;</td></tr>
+
+</table></center>
+
+<!-- INVID -->
+
+<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<tr>
+<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="INVID">&lt;invid&gt;</a></font></b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+The <b>&lt;invid&gt;</b> element contains a Ganymede object reference
+value, which is used to identify an object pointer in an invid
+field on the Ganymede server.  The <b>&lt;invid&gt;</b> element must be empty.
+<font size="-1"><a href="walkthru.html#GANY_DNS">[Example]</a> , <a href="#TABLE_TOP">[Top]</a></font>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
+<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+</tr>
+
+<tr>
+<td><a href="#GANYDATA">&lt;object&gt;</a></td>
+<td>NONE</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+</tr>
+
+<tr>
+<td COLSPAN="2">
+<dl>
+
+<dt><b>type</b></dt>
+
+<dd>This attribute is mandatory, and contains an XML-encoded (underscores
+for spaces) object type string, with proper capitalization, to identify
+the kind of object this &lt;invid&gt; element is pointing to.</dd>
+
+<dt><b>id</b></dt>
+
+<dd><p>This attribute, if present, contains a string that is meant to
+uniquely identify a target object of type matching the value of the
+type attribute in this &lt;invid&gt; element on the Ganymede server.
+The targeted object may exist prior to XML file processing on the
+Ganymede server, or it may be created by processing of other
+&lt;object&gt; elements in the XML file by the xmlclient.  If an
+&lt;object&gt; element of matching type with matching <b>id</b>
+is defined with an <b>action</b> attribute value of <b>create</b>,
+then all &lt;invid&gt; elements in the XML file with that
+<b>type</b> and <b>id</b> will point to the newly created object,
+and not any pre-existing object on the server that shared that
+<b>type</b> and <b>id</b>.</p>
+
+<p>Not all types of objects on the server will have be addressable by
+<b>id</b>.  Some types of objects, such as embedded objects within
+user or system objects, may not have a defined unique label field.
+This should be by far the exception rather than the rule, but for such
+cases, objects on the server may be addressed using the <b>num</b>
+attribute rather than the <b>id</b> attribute.</p>
+</dd>
+
+<dt><b>num</b></dt>
+
+<dd>This attribute, if present, holds an object number on the Ganymede
+server, and is used to address a pre-existing object on the server.  This
+attribute should only be used when you explicitly want to address an
+object on the server, regardless of whatever other activity the
+&lt;ganydata&gt; element in the XML file defines.</dd>
+
+</dl>
+</td>
+</tr>
+
+<tr>
+<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td COLSPAN="2">&lt;invid type="User" id="broccol"/&gt;</td></tr>
+
 </table></center>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
