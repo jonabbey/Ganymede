@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -99,16 +99,23 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     synchronized (Ganymede.db)
       {
-	if (Ganymede.db.schemaEditInProgress)
+	try
 	  {
-	    client.forceDisconnect("Schema Edit In Progress");
-	    return null;
+	    if (Ganymede.db.schemaEditInProgress)
+	      {
+		client.forceDisconnect("Schema Edit In Progress");
+		return null;
+	      }
+	    
+	    if (Ganymede.db.sweepInProgress)
+	      {
+		client.forceDisconnect("Invid Sweep In Progress");
+		return null;
+	      }
 	  }
-
-	if (Ganymede.db.sweepInProgress)
+	finally
 	  {
-	    client.forceDisconnect("Invid Sweep In Progress");
-	    return null;
+	    Ganymede.db.notifyAll(); // for lock code
 	  }
       }
     
@@ -376,13 +383,20 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     
     synchronized (Ganymede.db)
       {
-	if (Ganymede.db.schemaEditInProgress ||
-	    Ganymede.db.sweepInProgress)
+	try
 	  {
-	    return false;
+	    if (Ganymede.db.schemaEditInProgress ||
+		Ganymede.db.sweepInProgress)
+	      {
+		return false;
+	      }
+	    
+	    Ganymede.db.sweepInProgress = true;
 	  }
-
-	Ganymede.db.sweepInProgress = true;
+	finally
+	  {
+	    Ganymede.db.notifyAll();
+	  }
       }
 
     // loop 1: iterate over the object bases
@@ -495,6 +509,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     synchronized (Ganymede.db)
       {
 	Ganymede.db.sweepInProgress = false;
+	Ganymede.db.notifyAll(); // for lock code
       }
 
     return swept;
@@ -546,13 +561,20 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     
     synchronized (Ganymede.db)
       {
-	if (Ganymede.db.schemaEditInProgress ||
-	    Ganymede.db.sweepInProgress)
+	try
 	  {
-	    return false;
+	    if (Ganymede.db.schemaEditInProgress ||
+		Ganymede.db.sweepInProgress)
+	      {
+		return false;
+	      }
+	    
+	    Ganymede.db.sweepInProgress = true;
 	  }
-
-	Ganymede.db.sweepInProgress = true;
+	finally
+	  {
+	    Ganymede.db.notifyAll(); // for lock code, probably unnecessary in this context
+	  }
       }
 
     // loop over the object bases
@@ -635,6 +657,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     synchronized (Ganymede.db)
       {
 	Ganymede.db.sweepInProgress = false;
+	Ganymede.db.notifyAll(); // for lock code, probably not necessary here
       }
 
     return ok;
