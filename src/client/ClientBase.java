@@ -8,7 +8,7 @@
    what client is written.
    
    Created: 31 March 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,7 +39,7 @@ import java.util.Vector;
 
 public class ClientBase extends UnicastRemoteObject implements Client {
 
-  private final static boolean debug = true;
+  private final static boolean debug = false;
 
   // ---
 
