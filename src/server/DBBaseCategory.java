@@ -6,7 +6,7 @@
    category hierarchy.
    
    Created: 11 August 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                    DBObjectBase
+                                                                  DBBaseCategory
 
 ------------------------------------------------------------------------------*/
 
@@ -151,6 +151,14 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     recurseDown(rootCategory, baseHash, editor);
   }
 
+  /**
+   *
+   * This method takes all the children of the passed-in category
+   * (both DBObjectBase objects and contained DBBaseCategory objects)
+   * and makes copies under this.
+   * 
+   */
+
   private void recurseDown(DBBaseCategory category, Hashtable baseHash, DBSchemaEdit editor) throws RemoteException
   {
     Vector children = category.getNodes();
@@ -190,7 +198,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	      {
 		Ganymede.debug("Added " + newBase.getName() + " to new category tree");
 	      }
-
 	  }
 	else if (node instanceof DBBaseCategory)
 	  {
@@ -218,6 +225,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     for (int i = 0; i < contents.size(); i++)
       {
 	out.println("<LI>");
+
 	if (contents.elementAt(i) instanceof DBBaseCategory)
 	  {
 	    ((DBBaseCategory) contents.elementAt(i)).printHTML(out);
@@ -226,6 +234,7 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 	  {
 	    ((DBObjectBase) contents.elementAt(i)).printHTML(out);
 	  }
+
 	out.println("</LI>");
       }
 
