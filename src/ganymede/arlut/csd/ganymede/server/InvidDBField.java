@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -424,6 +425,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * orig is of the same class as this field.  It is an error to call
    * this method with null dump or orig parameters.</p>
    *
+   * <p>It is also an error to call this method when this field is not
+   * currently being edited in a DBEditObject, as emitXMLDelta() may
+   * depend on context from the editing object.</p>
+   *
    * <p>It is the responsibility of the code that calls this method to
    * determine that this field differs from orig.  If this field and
    * orig have no changes between them, the output is undefined.</p>
@@ -431,6 +436,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
   synchronized void emitXMLDelta(XMLDumpContext xmlOut, DBField orig) throws IOException
   {
+    if (!(this.getOwner() instanceof DBEditObject))
+      {
+	throw new IllegalStateException();
+      }
+
     xmlOut.startElementIndent(this.getXMLName());
 
     if (!isVector())
@@ -481,7 +491,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    xmlOut.indentIn();
 
-	    xmlOut.endElementInvid("delta");
+	    xmlOut.endElementIndent("delta");
 	  }
 
 	if (vectorDelta.delValues != null && vectorDelta.delValues.size() > 0)
@@ -505,7 +515,52 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else			// edit-in-place
       {
-	// XXX Oops!  I need to code this!
+	fieldDeltaRec vectorDelta = this.getVectorDiff(orig);
+	Vector unchangedValues = VectorUtils.difference(this.getVectVal(), VectorUtils.union(vectorDelta.addValues, vectorDelta.delValues));
+
+	DBEditSet transaction = ((DBEditObject) getOwner()).getEditSet();
+
+	xmlOut.indentOut();
+
+	for (int i = 0; i < unchangedValues.size(); i++)
+	  {
+	    DBEditObject embeddedObj = transaction.findObject((Invid) unchangedValues.elementAt(i));
+	    embeddedObj.emitXMLDelta(xmlOut);
+	  }
+
+	if (vectorDelta.addValues != null && vectorDelta.addValues.size() > 0)
+	  {
+	    xmlOut.startElementIndent("delta");
+	    xmlOut.attribute("state", "add");
+	    xmlOut.indentOut();
+
+	    for (int i = 0; i < vectorDelta.addValues.size(); i++)
+	      {
+		DBEditObject embeddedObj = transaction.findObject((Invid) vectorDelta.addValues.elementAt(i));
+		embeddedObj.emitXML(xmlOut);
+	      }
+
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("delta");
+	  }
+
+	if (vectorDelta.delValues != null && vectorDelta.delValues.size() > 0)
+	  {
+	    xmlOut.startElementIndent("delta");
+	    xmlOut.attribute("state", "remove");
+	    xmlOut.indentOut();
+
+	    for (int i = 0; i < vectorDelta.delValues.size(); i++)
+	      {
+		DBEditObject embeddedObj = transaction.findObject((Invid) vectorDelta.addValues.elementAt(i));
+		embeddedObj.emitXML(xmlOut);
+	      }
+
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("delta");
+	  }
+
+	xmlOut.indentIn();
       }
 
     xmlOut.endElementIndent(this.getXMLName());
@@ -547,20 +602,35 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
-
-    if (base != null)
+    if (getOwner() instanceof DBEditObject && ((DBEditObject) getOwner()).getEditSet() != null)
       {
-	// get the object out of the DBStore
+	// if we're in an editing context, we'll want to print out the
+	// invid using the label of the object as it exists in our
+	// editing transaction
 
-	target = base.getObject(invid);
+	target = ((DBEditObject) getOwner()).getEditSet().findObject(invid);
       }
+
+    // and if that doesn't work, pull it out of the persistent store
 
     if (target == null)
       {
-	// "InvidDBField.emitInvidXML(): {0} has an invalid invid: {1}, not writing it to XML."
-	System.err.println(ts.l("emitInvidXML.bad_invid", this.toString(), invid));
-	return;
+	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+
+	if (base != null)
+	  {
+	    // get the object out of the DBStore
+	    
+	    target = base.getObject(invid);
+	  }
+      }
+
+    // and if that doesn't work, we've got a bad invid and there's no
+    // good that can come out of that
+
+    if (target == null)
+      {
+	throw new IllegalArgumentException(ts.l("emitInvidXML.bad_invid", this.toString(), invid));
       }
 
     if (asEmbedded)

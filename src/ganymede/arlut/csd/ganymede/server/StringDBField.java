@@ -311,6 +311,10 @@ public class StringDBField extends DBField implements string_field {
    * orig is of the same class as this field.  It is an error to call
    * this method with null dump or orig parameters.</p>
    *
+   * <p>It is also an error to call this method when this field is not
+   * currently being edited in a DBEditObject, as emitXMLDelta() may
+   * depend on context from the editing object.</p>
+   *
    * <p>It is the responsibility of the code that calls this method to
    * determine that this field differs from orig.  If this field and
    * orig have no changes between them, the output is undefined.</p>
@@ -318,6 +322,11 @@ public class StringDBField extends DBField implements string_field {
 
   synchronized void emitXMLDelta(XMLDumpContext xmlOut, DBField orig) throws IOException
   {
+    if (!(this.getOwner() instanceof DBEditObject))
+      {
+	throw new IllegalStateException();
+      }
+
     xmlOut.startElementIndent(this.getXMLName());
 
     if (!isVector())

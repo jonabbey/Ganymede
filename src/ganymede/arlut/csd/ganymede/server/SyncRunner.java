@@ -190,7 +190,19 @@ public class SyncRunner implements Runnable {
     return serviceProgram;
   }
 
-  public void writeSync(DBJournalTransaction transRecord, DBEditObject[] objectList) throws IOException
+  /**
+   * <p>This method writes out the differential transaction record to
+   * the sync channel defined by this SyncRunner object.  The
+   * transaction record will only include those objects and fields
+   * that are specified in the Sync Channel database object that this
+   * SyncRunner was initialized with.</p>
+   *
+   * @param transRecord A transaction description record describing the transaction we are writing
+   * @param objectList An array of DBEditObjects that the transaction has checked out at commit time
+   * @param transaction The DBEditSet that is being committed.
+   */
+
+  public void writeSync(DBJournalTransaction transRecord, DBEditObject[] objectList, DBEditSet transaction) throws IOException
   {
     XMLDumpContext xmlOut = null;
 
@@ -200,7 +212,18 @@ public class SyncRunner implements Runnable {
       {
 	DBEditObject syncObject = objectList[i];
 
-	if (shouldInclude(syncObject))
+	if (syncObject.isEmbedded())
+	  {
+	    // DBSession can't edit an embedded object without
+	    // editing its top-level container, so we know that if
+	    // we skip we'll wind up including the top-level
+	    // container due to the embedded checking logic in
+	    // this.shouldInclude().
+
+	    continue;
+	  }
+
+	if (shouldInclude(syncObject, transaction))
 	  {
 	    if (xmlOut == null)
 	      {
@@ -246,6 +269,8 @@ public class SyncRunner implements Runnable {
    * write a sync to its sync channel for some reason, we'll need to
    * go back and erase the sync files that we did write out.  This method
    * is responsible for wielding the axe.</p>
+   *
+   * @param transRecord A transaction description record describing the transaction we are clearing from this sync channel
    */
 
   public void unSync(DBJournalTransaction transRecord) throws IOException
@@ -259,6 +284,14 @@ public class SyncRunner implements Runnable {
 	syncFile.delete();
       }
   }
+
+  /**
+   * <p>This private helper method creates the {@link
+   * arlut.csd.ganymede.server.XMLDumpContext} that writeSync() will
+   * write to.</p>
+   *
+   * @param transRecord A transaction description record describing the transaction we are writing
+   */
 
   private XMLDumpContext createXMLSync(DBJournalTransaction transRecord) throws IOException
   {
@@ -319,7 +352,7 @@ public class SyncRunner implements Runnable {
    * to this channel.</p>
    */
 
-  public boolean shouldInclude(DBEditObject object)
+  public boolean shouldInclude(DBEditObject object, DBEditSet transaction)
   {
     if (!mayInclude(object))
       {
@@ -331,7 +364,6 @@ public class SyncRunner implements Runnable {
 	return false;
       }
 
-    String fieldOption;
     DBObject origObj = object.getOriginal();
 
     Vector fieldCopies = object.getFieldVect();
@@ -339,42 +371,46 @@ public class SyncRunner implements Runnable {
     for (int i = 0; i < fieldCopies.size(); i++)
       {
 	DBField memberField = (DBField) fieldCopies.elementAt(i);
+	DBField origField;
 
-	switch (memberField.getID())
+	if (origObj == null)
 	  {
-	  case SchemaConstants.CreationDateField:
-	  case SchemaConstants.CreatorField:
-	  case SchemaConstants.ModificationDateField:
-	  case SchemaConstants.ModifierField:
-	    continue;
+	    origField = null;
+	  }
+	else
+	  {
+	    origField = (DBField) origObj.getField(memberField.getID());
 	  }
 
-	if (object.isEmbedded() && memberField.getID() == SchemaConstants.ContainerField)
+	// created
+
+	if (origField == null && memberField.isDefined())
 	  {
-	    continue;
+	    String fieldOption = getOption(memberField);
+
+	    if (fieldOption != null && !fieldOption.equals("0"))
+	      {
+		return true;
+	      }
 	  }
 
-	fieldOption = getOption(memberField);
+	// deleted
 
-	if (fieldOption == null || fieldOption.equals("0"))
+	if (!memberField.isDefined() && origField != null)
 	  {
-	    continue;
+	    String fieldOption = getOption(memberField);
+
+	    if (fieldOption != null && !fieldOption.equals("0"))
+	      {
+		return true;
+	      }
 	  }
-	else if (fieldOption.equals("2"))
+
+	// changed
+
+	if (memberField.isDefined() && origField != null && shouldInclude(memberField, origField, transaction))
 	  {
 	    return true;
-	  }
-	else if (fieldOption.equals("1"))
-	  {
-	    if (origObj == null)
-	      {
-		return true;
-	      }
-
-	    if (memberField.hasChanged((DBField) origObj.getField(memberField.getID())))
-	      {
-		return true;
-	      }
 	  }
       }
 
@@ -382,27 +418,113 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * <p>Returns true if the given object type (baseID) and field
-   * number (fieldID) should be included in this sync channel.  The
-   * hasChanged parameter should be set to true if the field being
-   * tested was changed in the current transaction, or false if it
-   * remains unchanged.</p>
+   * <p>Returns true if the given field needs to be sent to this sync
+   * channel.  This method is responsible for doing the determination
+   * only if both field and origField are not null and isDefined().</p>
+   *
+   * <p>The transaction DBEditSet is used to determine whether an
+   * edit-in-place InvidDBField contains embedded objects that were
+   * changed enough to need to be sent to this sync channel, by doing lookups for
+   * the target of the invid in the transactional context.</p>
    */
 
-  public boolean shouldInclude(DBField field, boolean hasChanged)
+  public boolean shouldInclude(DBField newField, DBField origField, DBEditSet transaction)
   {
-    return this.shouldInclude(field.getOwner().getTypeID(), field.getID(), hasChanged);
+    String fieldOption;
+
+    /* -- */
+
+    if (!newField.isDefined())
+      {
+	// "newField is undefined"
+	throw new IllegalArgumentException(ts.l("shouldInclude.badNewField"));
+      }
+
+    if (origField == null)
+      {
+	// "origField is null"
+	throw new NullPointerException(ts.l("shouldInclude.badOrigField"));
+      }
+
+    switch (newField.getID())
+      {
+      case SchemaConstants.CreationDateField:
+      case SchemaConstants.CreatorField:
+      case SchemaConstants.ModificationDateField:
+      case SchemaConstants.ModifierField:
+	return false;
+      }
+
+    if (newField.getOwner().isEmbedded() && newField.getID() == SchemaConstants.ContainerField)
+      {
+	return false;
+      }
+
+    if (transaction != null)
+      {
+	if (newField.isEditInPlace())
+	  {
+	    InvidDBField embeddedElements = (InvidDBField) newField;
+		
+	    for (int j = 0; j < embeddedElements.size(); j++)
+	      {
+		Invid embeddedObjInvid = (Invid) embeddedElements.getElementLocal(j);
+		
+		if (transaction.isEditingObject(embeddedObjInvid) && shouldInclude(transaction.findObject(embeddedObjInvid), transaction))
+		  {
+		    return true;
+		  }
+	      }
+	  }
+      }
+
+    fieldOption = getOption(newField);
+
+    if (fieldOption == null || fieldOption.equals("0"))
+      {
+	return false;
+      }
+    else if (fieldOption.equals("2"))
+      {
+	return true;
+      }
+    else if (fieldOption.equals("1"))
+      {
+	if (newField.hasChanged(origField))
+	  {
+	    return true;
+	  }
+      }
+
+    return false;
   }
 
   /**
-   * <p>Returns true if the given object type (baseID) and field
-   * number (fieldID) should be included in this sync channel.  The
-   * hasChanged parameter should be set to true if the field being
-   * tested was changed in the current transaction, or false if it
-   * remains unchanged.</p>
+   * <p>Returns true if the given type of field may be included in
+   * this sync channel.  The hasChanged parameter should be set to
+   * true if the field being tested was changed in the current
+   * transaction, or false if it remains unchanged.</p>
+   *
+   * <p>This differs from shouldInclude on DBField in that this method
+   * leaves it to the caller to decide whether the field has changed.</p>
    */
 
-  public boolean shouldInclude(short baseID, short fieldID, boolean hasChanged)
+  public boolean mayInclude(DBField field, boolean hasChanged)
+  {
+    return this.mayInclude(field.getOwner().getTypeID(), field.getID(), hasChanged);
+  }
+
+  /**
+   * <p>Returns true if the given type of field may be included in
+   * this sync channel.  The hasChanged parameter should be set to
+   * true if the field being tested was changed in the current
+   * transaction, or false if it remains unchanged.</p>
+   *
+   * <p>This differs from shouldInclude on DBField in that this method
+   * leaves it to the caller to decide whether the field has changed.</p>
+   */
+
+  public boolean mayInclude(short baseID, short fieldID, boolean hasChanged)
   {
     String x = getOption(baseID, fieldID);
 

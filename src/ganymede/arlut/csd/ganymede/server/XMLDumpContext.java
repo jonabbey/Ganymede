@@ -173,20 +173,60 @@ public class XMLDumpContext {
 
   public boolean shouldInclude(DBEditObject object)
   {
-    return syncConstraints == null || syncConstraints.shouldInclude(object);
+    return syncConstraints == null || syncConstraints.shouldInclude(object, null);
   }
 
   /**
-   * <p>Returns true if the DBField passed in needs to be synced to
-   * the sync channel attached to this XMLDumpContext.  This version
-   * of shouldInclude() treats the field as always changed, and is
-   * intended for doing full dumps, rather than delta dumps.</p>
+   * <p>Returns true if the DBEditObject passed in needs to be synced
+   * to the sync channel we're writing to.  Because we're passed in a
+   * DBEditObject, we can assume that we are being asked about whether
+   * we should write out this object in the course of a sync
+   * operation.  When DBStore is writing out an XML dump, all the
+   * objects should be read only copies, so we will always use the
+   * DBObject version of shouldInclude().</p>
    *
    * <p>If we're not writing to a sync channel, this method always
    * returns true.</p>
    */
 
-  public boolean shouldInclude(DBField field)
+  public boolean shouldInclude(DBEditObject object, DBEditSet transaction)
+  {
+    return syncConstraints == null || syncConstraints.shouldInclude(object, transaction);
+  }
+
+  /**
+   * <p>Returns true if the given field needs to be sent to this sync
+   * channel.  This method is responsible for doing the determination
+   * only if both field and origField are not null and isDefined().</p>
+   *
+   * <p>The transaction DBEditObject is used to determine whether an
+   * edit-in-place InvidDBField contains embedded objects that were
+   * changed enough to need to be sent to this sync channel.</p>
+   *
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
+   */
+
+  public boolean shouldInclude(DBField newField, DBField oldField, DBEditSet transaction)
+  {
+    return syncConstraints == null || syncConstraints.shouldInclude(newField, oldField, transaction);
+  }
+
+  /**
+   * <p>Returns true if the kind of DBField passed in needs to be
+   * synced to the sync channel attached to this XMLDumpContext.  This
+   * version of shouldInclude() treats the field as always changed,
+   * and is intended for doing full dumps, rather than delta
+   * dumps.</p>
+   *
+   * <p>This differs from shouldInclude on DBField in that this method
+   * leaves it to the caller to decide whether the field has changed.</p>
+   *
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
+   */
+
+  public boolean mayInclude(DBField field)
   {
     if ((field.getID() == SchemaConstants.CreationDateField ||
 	 field.getID() == SchemaConstants.CreatorField ||
@@ -197,21 +237,24 @@ public class XMLDumpContext {
 	return false;
       }
 
-    return syncConstraints == null || syncConstraints.shouldInclude(field, true);
+    return syncConstraints == null || syncConstraints.mayInclude(field, true);
   }
 
   /**
-   * <p>Returns true if the DBField passed in needs to be synced to
-   * the sync channel attached to this XMLDumpContext. The hasChanged
-   * parameter should be set to true if the field being tested was
-   * changed in the current transaction, or false if it remains
-   * unchanged.</p>
+   * <p>Returns true if the kind of DBField passed in needs to be
+   * synced to the sync channel attached to this XMLDumpContext. The
+   * hasChanged parameter should be set to true if the field being
+   * tested was changed in the current transaction, or false if it
+   * remains unchanged.</p>
+   *
+   * <p>This differs from shouldInclude on DBField in that this method
+   * leaves it to the caller to decide whether the field has changed.</p>
    *
    * <p>If we're not writing to a sync channel, this method always
    * returns true.</p>
    */
 
-  public boolean shouldInclude(DBField field, boolean hasChanged)
+  public boolean mayInclude(DBField field, boolean hasChanged)
   {
     if ((field.getID() == SchemaConstants.CreationDateField ||
 	 field.getID() == SchemaConstants.CreatorField ||
@@ -222,7 +265,7 @@ public class XMLDumpContext {
 	return false;
       }
 
-    return syncConstraints == null || syncConstraints.shouldInclude(field, hasChanged);
+    return syncConstraints == null || syncConstraints.mayInclude(field, hasChanged);
   }
 
   /**

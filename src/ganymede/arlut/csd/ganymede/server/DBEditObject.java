@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -3604,17 +3605,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	DBField myField = (DBField) this.getField(fieldDef.getID());
 	DBField origField = (DBField) original.getField(fieldDef.getID());
 
-	if (myField == null && origField == null)
+	if (!myField.isDefined() && origField == null)
 	  {
 	    // not present in either old or new
 	    continue;
 	  }
 
-	if (myField != null && myField.isDefined() && origField == null)
+	if (myField.isDefined() && origField == null)
 	  {
 	    // newly created
 
-	    if (xmlOut.shouldInclude(myField, true))
+	    if (xmlOut.mayInclude(myField, true))
 	      {
 		xmlOut.startElementIndent("delta");
 		xmlOut.attribute("state", "field created");
@@ -3624,11 +3625,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		xmlOut.endElementIndent("delta");
 	      }
 	  }
-	else if ((myField == null || !myField.isDefined()) && origField != null)
+	else if (!myField.isDefined() && origField != null)
 	  {
 	    // deleted
 
-	    if (xmlOut.shouldInclude(origField, true))
+	    if (xmlOut.mayInclude(origField, true))
 	      {
 		xmlOut.startElementIndent("delta");
 		xmlOut.attribute("state", "field deleted");
@@ -3638,16 +3639,23 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		xmlOut.endElementIndent("delta");
 	      }
 	  }
-	else if (myField != null && myField.isDefined() && myField.hasChanged(origField) && xmlOut.shouldInclude(myField))
+	else if (myField.isDefined() && xmlOut.shouldInclude(myField, origField, getEditSet()))
 	  {
-	    // go ahead and indent things to keep it in the same
-	    // column as the other <object> elements
-	    myField.emitXMLDelta(xmlOut, origField);
-	  }
-	else if (myField != null && myField.isDefined() && xmlOut.shouldInclude(myField, false))
-	  {
-	    // not changed, but we're supposed to include it anyway
-	    myField.emitXML(xmlOut);
+	    if (myField.isEditInPlace() || myField.hasChanged(origField))
+	      {
+		// changed, or is an edit-in-place vector of embedded
+		// objects, in which case we use the emitXMLDelta()
+		// method in case one of the embedded objects changed,
+		// which xmlOut.shouldInclude() will detect, but
+		// myField.hasChanged() will not.
+
+		myField.emitXMLDelta(xmlOut, origField);
+	      }
+	    else
+	      {
+		// not changed, but we're supposed to include it anyway
+		myField.emitXML(xmlOut);
+	      }
 	  }
       }
 

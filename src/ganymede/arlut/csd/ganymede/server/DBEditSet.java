@@ -427,6 +427,16 @@ public class DBEditSet {
   }
 
   /**
+   * <p>This method returns true if the invid parameter
+   * has been checked out for editing by this transaction.</p>
+   */
+
+  public boolean isEditingObject(Invid invid)
+  {
+    return objects.containsKey(invid);
+  }
+
+  /**
    * <p>Method to associate a DBEditObject with this transaction.</p>
    *
    * <p>This method is called by the createDBObject and editDBObject
@@ -1561,7 +1571,7 @@ public class DBEditSet {
 	      {
 		SyncRunner sync = Ganymede.getSyncChannel((String)Ganymede.syncRunners.elementAt(i));
 
-		sync.writeSync(persistedTransaction, objectList);
+		sync.writeSync(persistedTransaction, objectList, this);
 	      }
 	  }
 	catch (Throwable ex)

@@ -1269,7 +1269,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
 	DBField field = (DBField) fieldVec.elementAt(i);
 	    
-	if (field.isDefined() && xmlOut.shouldInclude(field))
+	if (field.isDefined() && xmlOut.mayInclude(field))
 	  {
 	    field.emitXML(xmlOut);
 	  }
