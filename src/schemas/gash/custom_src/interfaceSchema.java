@@ -5,7 +5,7 @@
    An interface defining constants to be used by the interface code.
    
    Created: 23 April 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,5 +33,8 @@ public interface interfaceSchema {
   // this file to match.
 
   final static short ETHERNETINFO=256;
-  final static short IPRECS=257;
+  final static short NAME=259;
+  final static short ALIASES=260;
+  final static short IPNET=261;
+  final static short ADDRESS=258;
 }
