@@ -8,13 +8,23 @@
 # for configurator.perl to use to do its thing.
 #
 # Release: $Name:  $
-# Version: $Revision: 1.12 $
-# Last Mod Date: $Date: 2000/11/16 05:21:01 $
+# Version: $Revision: 1.13 $
+# Last Mod Date: $Date: 2001/06/02 01:27:10 $
 #
 ###############################################################################
 
 echo "Ganymede configure script"
 echo
+
+# 
+# Figure out how to do an echo without trailing newline
+#
+
+case "`echo 'x\c'`" in
+'x\c')  echo="echo -n"   nnl= ;;       # BSD 
+x)      echo="echo"      nnl="\c" ;;   # Sys V
+*)      echo "$0 quitting: Can't set up echo." 1>&2; exit 1 ;;
+esac
 
 # Find the source files, if location was not specified.
 
@@ -42,7 +52,7 @@ guessperl=`which perl5`
  if `$guessperl $GROOTDIR/scripts/versiontest.pl > /dev/null 2>&1`; then
 	GPERL=$guessperl
     else
-	echo "Where is perl 5 installed? [$guessperl] \c" 
+	$echo "Where is perl 5 installed? [$guessperl] ${nnl}" 
 
 	read userperl
 
@@ -60,7 +70,7 @@ export GPERL
 guessjava=`which java`
 guessjava=`dirname ${guessjava}`
 
-echo "What is the location of the directory where java is installed? [$guessjava] \c"
+$echo "What is the location of the directory where java is installed? [$guessjava] ${nnl}"
 
 read userjava
 
@@ -76,7 +86,7 @@ export GJAVA
 
 guessswing="/opt/depot/swing-1.1.1"
 
-echo "Where are the Swing jar files located (only needed for JDK 1.1)? [$guessswing] \c"
+$echo "Where are the Swing jar files located (only needed for JDK 1.1)? [$guessswing] ${nnl}"
 
 read userswing
 
@@ -95,7 +105,7 @@ export GSWING
 
 if [ "$1" = "-develop" ]
     then
-    echo "Where should the class files be located? \c"
+    $echo "Where should the class files be located? ${nnl}"
     read GCLASSDIR
 fi
 
