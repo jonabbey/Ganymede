@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -85,11 +85,22 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
     if (field == null)
       {
+	if (debug)
+	  {
+	    System.out.println("ownerPanel: field is null, there is no owner for this object.");
+	  }
+
 	JLabel l = new JLabel("There is no owner for this object.");
+	remove(holdOnPanel);
 	add("Center", l);
       }
     else
       {
+	if (debug)
+	  {
+	    System.out.println("ownerPanel: field is not null, creating invid selector.");
+	  }
+
 	try
 	  {
 	    StringSelector ownerList = createInvidSelector(field);
@@ -130,6 +141,11 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
     if (editable)
       {
+	if (debug)
+	  {
+	    System.out.println("ownerPanel: It's editable, I'm getting the list of choices.");
+	  }
+
 	Object key = field.choicesKey();
 	
 	if ((key != null) && (fp.getgclient().cachedLists.containsList(key)))
@@ -148,18 +164,24 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		System.out.println("Downloading copy");
 	      }
 
-	    list = new objectList(field.choices());
+	    QueryResult choices = field.choices();
 
-	    availableOwners = list.getListHandles(false);
-	    
-	    if (key != null)
+	    if (choices != null)
 	      {
-		if (debug)
-		  {
-		    System.out.println("Saving this under key: " + key);
-		  }
+		list = new objectList(choices);
+	      
 		
-		fp.getgclient().cachedLists.putList(key, list);
+		availableOwners = list.getListHandles(false);
+		
+		if (key != null)
+		  {
+		    if (debug)
+		      {
+			System.out.println("Saving this under key: " + key);
+		      }
+		    
+		    fp.getgclient().cachedLists.putList(key, list);
+		  }
 	      }
 	  }
       }
@@ -188,6 +210,11 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
     // We don't want the supergash owner group to show up anywhere,
     // because everything is owned by supergash.
 
+    if (debug)
+      {
+	System.out.println("ownerPanel: Taking out supergash");
+      }
+
     if (availableOwners != null)
       {
 	Invid supergash = new Invid((short)0, 1); // This is supergash
@@ -201,6 +228,10 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	      }
 	    
 	  }
+      }
+    if (debug)
+      {
+	System.out.println("ownerPanel: creating string selector");
       }
 
     StringSelector ss = new StringSelector(availableOwners, 
@@ -232,7 +263,6 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	  }
 	else if (o.getOperationType() == JValueObject.PARAMETER) {  // From the popup menu
 	  JValueObject v = o; // because this code was originally used with a v
-	  System.out.println("MenuItem selected in a StringSelector");
 	  String command = (String)v.getParameter();
 	  
 	  if (command.equals("Edit object"))
@@ -264,7 +294,10 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	    }
 	  else if (command.equals("View object"))
 	    {
-	      System.out.println("View object: " + v.getValue());
+	      if (debug)
+		{
+		  System.out.println("View object: " + v.getValue());
+		}
 	      
 	      if (v.getValue() instanceof Invid)
 		{
