@@ -1,0 +1,229 @@
+#!/opt/bin/perl5
+#
+# Incremental rebuild script
+#
+# $Revision: 1.1 $
+# $Date: 2001/06/27 19:26:15 $
+#
+# Jonathan Abbey, jonabbey@arlut.utexas.edu
+#
+############################
+
+use Cwd;
+use English;
+use File::Basename;
+
+####
+####
+####
+
+$config_file = "config.sh";
+
+#########################################################################
+#
+#                                                                 resolve
+#
+# input: $dir - absolute pathname of current directory
+#        $link - string containing the readlink() results for a 
+#                symbolic link in $dir to be processed
+#
+# returns: absolute pathname of the target of the symbolic link
+#
+#########################################################################
+sub resolve{
+    my($dir, $link) = @_;
+    my(@alinkp, $d, $alinkp);
+
+    # make array representations of
+    # the current directory and symbolic link
+
+    # if we have a leading / in our $dir or $link,
+    # we'll need to shift to get rid of the leading
+    # empty array element
+  
+    @dirp=split(/\//, $dir);
+    shift(@dirp) if (!($dirp[0]));
+    @linkp=split(/\//, $link);
+    shift(@linkp) if (!($linkp[0]));
+
+    # @alinkp is an array that we will build to contain the absolute link
+    # target pathname.  If the link does not begin with a /, it is a relative link,
+    # and we need to place our current directory into the @alinkp array.  
+
+    if ($link !~ /^\//) {
+	@alinkp=@dirp;
+    }
+
+    # modify the @alinkp array according
+    # to each path component of the @linkp array
+    # (an array representation of the symbolic link
+    # given to us), to arrive at the ultimate absolute
+    # pathname of the symbolic link
+
+    $d = shift(@linkp);
+
+    while ($d) {
+	if ($d eq "..") {
+	    pop(@alinkp);
+	}
+	elsif ($d ne "."){		       
+	    push(@alinkp, $d);
+	}
+	$d=shift(@linkp);
+    }
+
+    $"='/';
+
+    # perl functions return the value of the last expression
+    # in the subroutine
+
+    $alinkp="/@alinkp";
+}
+
+######################################################################### 
+#
+#                                                         removelastslash
+#
+# input: a pathname to test
+#
+# this function will remove a trailing slash from the directory name 
+# input
+#
+######################################################################### 
+sub removelastslash{
+    
+    if ($_[0] =~ /\/$/) {
+	chop $_[0];
+    }
+}
+
+#########################################################################
+#
+#                                                            package_scan
+#
+# input: $file - absolute pathname of java file
+#        $targetdir - where this file is being compiled to
+#
+# returns: returns the absolute pathname of the primary class file
+#          resulting from the input .java file, based on the $targetdir
+#          and the package name specified in the .java file
+#
+#########################################################################
+
+sub package_scan {
+
+    my($file, $targetdir) = @_;
+
+    my($packagename, $filename, $classname);
+
+    # Break the filename off of the file
+
+    $file =~ /([^\/]*\.java)$/;
+    $filename = $1;
+    $classname = $filename;
+    $classname =~ s/\.java/\.class/;
+
+    # scan the .java file for the package directive
+
+    open SCANFILE, "<$file" or die "Can't open $file for file scan.\n\n";
+    while(<SCANFILE>) {
+	if (/\s*package\s*([^;]*);/) {
+	    $packagename = $1;
+	    last;
+	}
+    }
+    close(SCANFILE);
+
+    # swap . for /
+
+    if (defined $packagename) {
+	$packagename =~ s/\./\//g;
+    }
+
+    removelastslash($targetdir);
+
+    if (defined $packagename) {
+	return "$targetdir/$packagename/$classname";
+    } else {
+	return "$targetdir/$classname";
+    }
+}
+
+####
+####
+####
+
+$mydir = &resolve(cwd(), dirname($PROGRAM_NAME));
+
+&get_vars("$mydir/$config_file");
+
+print "Rebuilding $compname\n";
+
+$ENV{'CLASSPATH'}="$classdir:".$ENV{"CLASSPATH"};
+
+opendir CURRENT, "." or die "Can't open current directory, that's no good.\n\n";
+@files = readdir(CURRENT);
+closedir CURRENT;
+
+$file_list = "";
+
+@javafiles = grep /\.java$/, @files;
+
+foreach $file (@javafiles) {
+
+  $mtime = (stat ($file))[9];
+
+  $class_file = package_scan($file, $targetdir);
+
+#  print "Stat $class_file\n";
+
+  $class_mtime = (stat ($class_file))[9];
+
+  if ($mtime - $class_mtime >= 0)
+    {
+      $file_list = $file_list." $file";
+    }
+}
+
+if ($file_list eq "") {
+  print "There is nothing to compile.\n";
+} else {
+  print "Compiling $file_list\n";
+  system "$javac -d $targetdir $file_list\n" || print "Could not finish compiling.\n";
+  print "Done.\n";
+}
+
+##########################################################################
+#
+#                                                                 get_vars
+#
+##########################################################################
+
+sub get_vars {
+  open(CONFIG,"$config_file") || die "Could not open $config_file\n";
+
+  while (<CONFIG>){
+
+    if (/^COMPNAME=(.*)/){
+	$compname = $1;
+    }
+
+    if (/^JAVAC=(.*)/){
+	$javac = $1;
+    }
+
+    if (/^JAVADIR=(.*)/){
+	$jar = "$1/jar";
+    }
+
+    if (/^CLASSDIR=(.*)/){
+	$classdir = $1;
+    }
+
+    if (/^TARGETDIR=(.*)/){
+	$targetdir = $1;
+    }
+  } 
+
+  close(CONFIG);
+}  
