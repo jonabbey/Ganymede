@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 1999/03/23 06:20:32 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 1999/03/24 20:33:28 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -1320,8 +1320,8 @@ class QueryRow implements ItemListener {
 	
 	if (field.isString() || field.isInvid())
 	  {
-	    compareChoice.addItem("Contain Matching");
 	    compareChoice.addItem("Contain Matching [Case Insensitive]");
+	    compareChoice.addItem("Contain Matching");
 	  }
 
 	compareChoice.addItem("Length <");
@@ -1356,8 +1356,8 @@ class QueryRow implements ItemListener {
       }
     else if (field.isString() || field.isInvid())
       {
-	compareChoice.addItem("matching");
 	compareChoice.addItem("matching [Case Insensitive]");
+	compareChoice.addItem("matching");
 	compareChoice.addItem("==");
 	compareChoice.addItem("== [Case Insensitive]");
 	compareChoice.addItem("<");

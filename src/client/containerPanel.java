@@ -6,8 +6,8 @@
 
     Created:  11 August 1997
     Release: $Name:  $
-    Version: $Revision: 1.94 $
-    Last Mod Date: $Date: 1999/03/23 06:20:31 $
+    Version: $Revision: 1.95 $
+    Last Mod Date: $Date: 1999/03/24 20:33:26 $
     Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -1155,6 +1155,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.err.println("containerPanel.updateComponent(): got handles, setting model");
 	      }
+
+	    // aaaand resort
+
+	    choiceHandles = gc.sortListHandleVector(choiceHandles);
 
 	    if (currentHandle == null)
 	      {
