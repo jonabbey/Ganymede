@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.12 $ %D%
+    Version: $Revision: 1.13 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -340,6 +340,53 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
       {
 	System.out.println("Something happened in the vector panel");
 	parent.somethingChanged = true;
+      }
+    else if (v.getSource() instanceof stringSelector)
+      {
+	if (v.getValue() instanceof Invid)
+	  {
+	    db_field field = (db_field)objectHash.get(v.getSource());
+	    Invid invid = (Invid)v.getValue();
+	    int index = v.getIndex();
+	    try
+	      {
+		if (v.getOperationType() == JValueObject.ADD)
+		  {
+		    if (debug)
+		      {
+			System.out.println("Adding new value to string selector");
+		      }
+		    returnValue = (field.addElement(invid));
+		  }
+		else if (v.getOperationType() == JValueObject.DELETE)
+		  {
+		    if (debug)
+		      {
+			System.out.println("Removing value from field(strig selector)");
+		      }
+		    returnValue = (field.deleteElement(index));
+		  }
+		if (debug)
+		  {
+		    if (returnValue)
+		      {
+			System.out.println("returned true");
+		      }
+		    else
+		      {
+			System.out.println("returned false");
+		      }
+		  }
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not change owner field: " + rx);
+	      }
+	  }
+	else
+	  {
+	    System.out.println("Not an Invid in string selector.");
+	  }
       }
     else
       {
@@ -772,7 +819,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
 		combo.setMaximumRowCount(8);
 		combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-		combo.setEditable(true); // This should be true
+		combo.setEditable(false); // This should be true
 		combo.setVisible(true);
 
 		combo.setCurrentValue(currentChoice);
