@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Ganymede UNIX Installation Guide Release 0.99.9 - 13 January 2000</title>
+    <title>Ganymede UNIX Installation Guide Release 1.0 prerelease 1, beta 2 - 14 September 2000</title>
   </head>
 
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede UNIX Installation Guide Release 0.99.9 - 13 January 2000</FONT></h1>
+<h1><FONT FACE="Arial, Helvetica">Ganymede UNIX Installation Guide Release 1.0 prerelease 1, beta 2 - 14 September 2000</FONT></h1>
 <hr>
 
 <p>Installing Ganymede breaks down into five steps:</p>
@@ -44,7 +44,10 @@
     <p>Run <a href="glossary.html#configure">configure</a> to get these install
     scripts built and to get the source tree configured for building.</p>
 
-    <p>See README.source for information on building the source tree.</p>
+    <p>See README.source for information on building the source tree.  Note that
+    as downloaded, everything is already compiled, and bundled into the jar
+    files in the jars directory.  You should only need to worry about recompiling
+    things if you make changes.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -533,6 +536,20 @@
     be able to log in as supergash and take a look at your
     database.</p>
 
+    <p>With the Ganymede 1.0 pre-release series, there is now a new <a
+    href="glossary.html#xmlclient">xmlclient</a> client, which can be
+    used instead of the old-style <a
+    href="glossary.html#runDirectLoader">runDirectLoader</a> script to
+    load data into the Ganymede server.  <a
+    href="glossary.html#xmlclient">xmlclient</a> is a completely
+    generic data loader, and you can write Perl scripts to load your
+    data into Ganymede, according to whatever schema definition you
+    are using.  See <a href="xml.html">xml.html</a> for details.  At
+    the present time, the Ganymede schema kits have not been adapted
+    to use the <a href="glossary.html#xmlclient">xmlclient</a> script
+    for data loading.  This is one of the primary remaining goals for
+    Ganymede 1.0 development.</p>
+
     <p>Take a look at the README file in the schema directory for details
     on how the schema you installed works.</p>
 
@@ -540,7 +557,7 @@
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
     <!-- hhmts start -->
-Last modified: Fri Aug 25 12:15:02 CDT 2000
+Last modified: Fri Sep 15 00:55:24 CDT 2000
 <!-- hhmts end -->
   </body>
 </html>

@@ -57,6 +57,7 @@
       <li><a href="#ganymede">ganymede</a></li>
       <li><a href="#ganymedeAdmin">ganymedeAdmin</a></li>
       <li><a href="#rpcpass">rpcpass</a></li>
+      <li><a href="#xmlclient">xmlclient</a></li>
       </ul></li>
 
     </ul>
@@ -354,8 +355,8 @@
     a transcript of transactions committed since the server last consolidated the 
     <a href="#ganymede.db">ganymede.db</a> file.  If the server is killed and the journal
     file is deleted, all transactions not consolidated into the <a href="#ganymede.db">ganymede.db</a> file
-    will be forgotten, although the <a href="#log">log</a> file will still record the lost
-    changes.</p>
+    will be forgotten, although the <a href="#log">log</a> file will still record the details
+    of the lost changes.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
@@ -687,10 +688,38 @@
     uses the <a href="#client.properties">client.properties</a> file to locate
     the Ganymede server's RMI address.</p>
 
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="xmlclient"><b>xmlclient</b></h3></td></tr></table> 
+
+    <p><font color="#ff0000"><code><b>xmlclient</b></code></font> is a
+    Bourne shell script used to do bulk data loading into the Ganymede
+    server.  It is configured and installed in the client
+    installation's <code>bin</code> directory by the <a
+    href="#installClient">installClient</a> script as well as in the
+    server installation's <code>bin</code> directory by the <a
+    href="#installServer">installServer</a> script.</p>
+
+    <p>The <font color="#ff0000"><code><b>xmlclient</b></code></font>
+    script runs a Java client which reads a <a
+    href="xml.html">specially formatted</a> XML file and transmits
+    data from it into the Ganymede Server.  The <font
+    color="#ff0000"><code><b>xmlclient</b></code></font> can handle
+    creating, deleting, inactivating and editing objects on the
+    Ganymede server.</p>
+
+    <p>At this point, the <font
+    color="#ff0000"><code><b>xmlclient</b></code></font> is only
+    useful for doing bulk data operations into the Ganymede server.
+    Ultimately, the <font
+    color="#ff0000"><code><b>xmlclient</b></code></font> will provide
+    support for querying the Ganymede server and for initializing the
+    Ganymede server's schema.</p>
+
     <hr>
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- hhmts start -->
-Last modified: Thu Jan 13 18:43:57 CST 2000
+Last modified: Fri Sep 15 01:06:57 CDT 2000
 <!-- hhmts end -->
   </body>
 </html>

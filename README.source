@@ -1,12 +1,12 @@
-Ganymede Developer Release 0.99.8
-November 23, 1999
+Ganymede Developer Release 1.0pre1 beta 2
+September 15, 2000
 README.source
 ---------------------------------------------
 
 This release of Ganymede includes full sources for everything.  By
 default, the compiled classes for the Ganymede server, client, and
 admin console are held in the top-level jars directory.  If you
-want to build the jars from scratch, here's what you do.
+want to rebuild the jars from scratch, here's what you do.
 
 1. Run configure in the top-level directory.  This will create
    and configure all the makefiles and build scripts required to
@@ -19,20 +19,17 @@ want to build the jars from scratch, here's what you do.
    can set your CLASSPATH to <install>/src/classes and run
    the ganymede tools.
 
-   You will see some deprecation errors if you are compiling with
-   JDK 1.2.  If you are compiling with 1.1.7/1.1.8, you shouldn't see
-   any errors or warnings when you do the initial make of the source
-   tree.
+   You shouldn't see any errors or warnings during the make.
 
 4. Run 'make kits'.  This will compile all of the customization
    code in src/schemas, as well as build the jar files required if
    you are going to install one of the schema kits with installServer.
 
-   You will see a few non-critical deprecation warnings during this
+   You may see a few non-critical deprecation warnings during this
    step.
 
 5. Run 'make jars'.  This will recreate the 4 jar files used by
-   installServer and installClient.
+   the installation scripts.
 
 Once you get past step 3, you can go into any of the src
 subdirectories and run 'rebuild' to re-compile just those .java files

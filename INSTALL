@@ -1,7 +1,8 @@
 
    Ganymede
    
-       Ganymede UNIX Installation Guide Release 0.99.9 - 13 January 2000
+    Ganymede UNIX Installation Guide Release 1.0 prerelease 1, beta 2 - 14
+                                September 2000
                                        
      _________________________________________________________________
                                       
@@ -9,9 +10,10 @@
    
     1. Configuring the distribution for your site
     2. Installing server files
-    3. Installing client files
-    4. Configuring the server
-    5. Loading the server
+    3. Installing UNIX client files
+    4. Prepare web access clients
+    5. Configuring the server
+    6. Loading the server
        
    Each of these topics is discussed in its own section below.
    
@@ -29,7 +31,10 @@ _1. Configuring the distribution for your site_
    Run configure to get these install scripts built and to get the source
    tree configured for building.
    
-   See README.source for information on building the source tree.
+   See README.source for information on building the source tree. Note
+   that as downloaded, everything is already compiled, and bundled into
+   the jar files in the jars directory. You should only need to worry
+   about recompiling things if you make changes.
    
 _2. Installing server files_
 
@@ -173,7 +178,7 @@ _2. Installing server files_
    client, but the database will be empty. You will need to see section
    5) below to get data bulk-loaded into Ganymede.
    
-_3. Installing client files_
+_3. Installing UNIX client files_
 
    There are two primary clients for Ganymede. We will call these the
    end-user client and the admin console. Both can be run from a UNIX
@@ -201,27 +206,62 @@ _3. Installing client files_
    reach of non-privileged users, while the client files are intended to
    be available for anyone to run.
    
-   The installWeb script is used to install the files necessary on your
-   web server to run the Ganymede clients from a web-browser. installWeb
-   installs a bunch of files into a designated directory, including an
-   index.html file, the ganymede.jar and ganymedeAdmin.jar, and a bunch
-   of individual html files linked to the index.html file, all customized
-   for your Ganymede server's location.
+_4. Prepare web access clients_
+
+   The installWeb script is used to install the files necessary for
+   serving on a web server to support client access to Ganymede from a
+   web browser with a modern Java runtime. installWeb installs a bunch of
+   files into a designated directory, including an index.html file, the
+   ganymede.jar and ganymedeAdmin.jar, and a bunch of individual html
+   files linked to the index.html file, all customized for your Ganymede
+   server's location.
    
-   The installed web files include versions of the Ganymede client pages
-   designed for use with the Java plug-in on Windows (version 1.2.2 or
-   better is really best.. see java.sun.com/products/jdk/1.2/jre/ to
-   download the Java plug-in), as well as a version of the client pages
-   designed for use with a browser with built-in RMI and Swing support.
+   Java applets run in a security "sandbox", which keeps downloaded code
+   from being able to cause mischief on your machine. One of the
+   restrictions of the Java sandbox is that unsigned downloaded applets
+   are only allowed to open networking connections to the same machine
+   that the applet was downloaded from. Because of this, you will have to
+   install a web server on the same machine as your Ganymede server, and
+   your users will have to point their browser at a URL on that system
+   which will resolve to the directory that contains the files installed
+   by the installWeb script.
    
-   If your users do not install the Java plug-in before trying to run the
-   Plug-In clients, their web browser will help them download the Plug-In
-   as needed. Once the Java Plug-In is downloaded, the user will need to
-   quit out of the browser and run the Plug-In control panel. Configure
-   the Plug-In so that the network and class access is unrestricted and
-   unsigned applets are allowed. Apply the preference changes, and
-   restart the browser. The Ganymede Plug-In clients should work properly
-   now.
+   Once you have a web server running on the same machine as your
+   Ganymede server and you have used installWeb to generate the web
+   directory for your clients, you will need to be sure that the machines
+   that will run the client over the web are configured properly. The
+   installed web files include versions of the Ganymede client pages
+   designed for use with the Java plug-in on Windows (version 1.3.0 or
+   better is really best.. see java.sun.com/j2se/1.2/jre/ to download the
+   Java plug-in), as well as a version of the client pages designed for
+   use with a browser with built-in RMI and Swing support. The 'native'
+   option is intended for users of web browsers that have built-in
+   support for Sun's latest JVM plug-ins. This includes the Netscape
+   browser under OS/2, the Internet Explorer browser on Macintosh, and
+   the Mozilla/Netscape 6 browser on Macintosh, Windows, Linux, and
+   Solaris.
+   
+   On the Macintosh with Internet Explorer, you need to install the very
+   latest version of Apple's Macintosh Runtime for Java. Current version
+   of the MRJ for traditional MacOS are based on Java 1.1, and do not
+   include the Swing class libraries required by the Ganymede clients. In
+   order to make Ganymede work on such systems, you will need to extract
+   the swingall.jar file from Sun's JDK and install it on your Macintosh
+   in a directory of your choosing. Internet Explorer has a preferences
+   option to add additional class paths to your browser's Java
+   environment. Find and add the swingall.jar file to your Internet
+   Explorer Java class list and you should be ready to go, using the
+   native mode client.
+   
+   Windows users using Netscape 4.x or any version of Internet Explorer,
+   will need to use the plug-in mode client. If your users do not install
+   the Java plug-in before trying to run the Plug-In clients, their web
+   browser will help them download the Plug-In as needed. Once the Java
+   Plug-In is downloaded, the user will need to quit out of the browser
+   and run the Plug-In control panel. Configure the Plug-In so that the
+   network and class access is unrestricted and unsigned applets are
+   allowed. Apply the preference changes, and restart the browser. The
+   Ganymede Plug-In clients should work properly now.
    
    _IMPORTANT NOTE_: whenever you run applets using the Java Plug-In, the
    applets can only run as long as the log-in applet is still displayed
@@ -237,7 +277,7 @@ _3. Installing client files_
    hasn't been maintained in a while, and may not be working properly
    currently.
    
-_4. Configuring the server_
+_5. Configuring the server_
 
    The server may be configured in two ways. The first is by using the
    admin console to edit the server's schema and the second is by
@@ -351,7 +391,7 @@ _4. Configuring the server_
    is bundled as part of the schema's custom.jar file, and you can view
    and alter the source code in schema/custom_src.
    
-_5. Loading the server_
+_6. Loading the server_
 
    When you run the installServer script, you are prompted for which
    sample schema you want to use. Whichever you choose is copied to your
@@ -379,6 +419,16 @@ _5. Loading the server_
    you will then be able to log in as supergash and take a look at your
    database.
    
+   With the Ganymede 1.0 pre-release series, there is now a new xmlclient
+   client, which can be used instead of the old-style runDirectLoader
+   script to load data into the Ganymede server. xmlclient is a
+   completely generic data loader, and you can write Perl scripts to load
+   your data into Ganymede, according to whatever schema definition you
+   are using. See xml.html for details. At the present time, the Ganymede
+   schema kits have not been adapted to use the xmlclient script for data
+   loading. This is one of the primary remaining goals for Ganymede 1.0
+   development.
+   
    Take a look at the README file in the schema directory for details on
    how the schema you installed works.
    
@@ -387,4 +437,4 @@ _5. Loading the server_
    
     Jonathan Abbey
     
-   Last modified: Thu Jan 13 18:41:25 CST 2000
+   Last modified: Fri Sep 15 00:55:24 CDT 2000

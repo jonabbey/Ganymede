@@ -1,5 +1,5 @@
-Ganymede Developer Release 0.99.9
-January 13, 2000
+Ganymede Developer Release 1.0pre1 beta 2
+September 15, 2000
 CREDITS
 ---------------------------------------------
 
@@ -14,7 +14,7 @@ contributions of the following individuals:
 
 --
 
- Navin Manohar, current email unknown
+ Navin Manohar, navin.manohar@ac.com
 
  Navin worked on Ganymede from its inception in late 1995 through his
 departure from the lab in April of 1997.  Navin contributed to initial
@@ -26,22 +26,27 @@ but vital GUI components that the client uses for data entry.
 
 --
 
+ Brian O'Mara, bom@alumni.utexas.net
+
+ Brian worked on Ganymede during his tenure as a student employee at
+ARL from February 1998 through August of 2000.  Brian created custom
+icons for the Ganymede client and rewrote the permissions editor to
+use more Swing classes, as well as creating the persona selection
+dialog introduced in Ganymede 0.98.  Brian also reworked the Query
+dialog to be more user-friendly.  During his last year at ARL, Brian
+did an enormous amount of work in preparing for the ultimate
+replacement of the old-style hosts_info DNS support with new code to
+convert BIND files into an XML representation and back again, which
+will be incorporated into a Ganymede schema kit sometime during 2001.
+
+--
+
  Erik Grostic, butcher@auschron.com
 
  Erik worked on Ganymede from mid 1997 through his departure from the
 lab in December of 1997.  Erik developed the GUI code for the
 permissions editor and the query submission dialog,
 helping bring the client into fruition.
-
---
-
- Brian O'Mara, omara@arlut.utexas.edu
-
- Brian is currently working at ARL as a student employee.  Brian has
-created custom icons for the Ganymede client and rewrote the permissions
-editor to use more Swing classes, as well as creating the persona
-selection dialog introduced in Ganymede 0.98.  Brian also reworked the
-Query dialog to be more user-friendly.
 
 --
 
@@ -103,6 +108,7 @@ from:
 Pug Bainter, pug@pug.net - lots of really good bug reports
 Martin Schneider, martin@ira.uka.de - server customization bug reports
 Michael McEniry, mmceniry@itsc.uah.edu - linux localhost patch
+Christoph Litauer, litauer@uni-koblenz.de - xmlclient testing
 Curtis King, curtis.king@cul.ca - detailed bug reports
 Doug Floyd, dfloyd@io.com - bug reports and AIX testing
 Matt Knopp, mhat@vorlon.com - FreeBSD testing, Sesame Chicken

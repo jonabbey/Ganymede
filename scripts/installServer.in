@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.16 $
-# $Date: 2000/09/09 00:28:47 $
+# $Revision: 1.17 $
+# $Date: 2000/09/15 06:24:35 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -298,6 +298,11 @@ copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
 copy("KNOWNBUGS", "$installdir/KNOWNBUGS"); print ".";
 
 copy("jars/ganymedeServer.jar", "$installdir/jars/ganymedeServer.jar"); print ".";
+
+# for the xmlclient, go ahead and install the client jar file
+
+copy("jars/ganymede.jar", "$installdir/jars/ganymede.jar"); print ".";
+
 copy("password/password.jar", "$installdir/jars/password.jar"); print ".";
 
 copy("scripts/motd.html", "$installdir/db/text/motd.html"); print ".";
@@ -500,6 +505,32 @@ close INPUT;
 close OUTPUT;
 
 chmod 0750, "$installdir/bin/logscan.pl";
+
+# Copy and process the xmlclient script into place
+
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "PROPERTIES" => "$installdir/client.properties",
+	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
+  
+open INPUT, "scripts/xmlclient.template" or die "Couldn't open xmlclient template!";
+open OUTPUT, ">$installdir/bin/xmlclient" or die "Couldn't write xmlclient";
+  
+while (<INPUT>) {
+    
+    if (!/^([A-Z]*)=/) {
+	print OUTPUT $_;
+    } elsif (defined $runconvert{$1}) {
+	print OUTPUT "$1=$runconvert{$1}\n";
+    } else {
+	print "Error.. unrecognized template entry $1 - copying template value\n";
+	print OUTPUT $_;
+    }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/xmlclient";
 
 # Configure the schema build scripts
 
