@@ -7,8 +7,8 @@
    
    Created: 2 December 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/12/02 10:30:56 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/12/10 11:55:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -191,6 +191,64 @@ public class FileOps {
       }
 
     return success;
+  }
+
+  /**
+   * <P>This method is used to run an external process line for the Ganymede
+   * server.  This method waits until the external command completes before
+   * returning, and all file handles opened to communicate with the
+   * process will be closed before returning.</P>
+   */
+
+  public static int runProcess(String commandLine) throws IOException, InterruptedException
+  {
+    Process p = java.lang.Runtime.getRuntime().exec(commandLine);
+
+    try
+      {
+	p.waitFor();
+	
+	return p.exitValue();
+      }
+    finally
+      {
+	// the following is mentioned as a work-around for the
+	// fact that Process keeps its file descriptors open by
+	// default until Garbage Collection
+	
+	try
+	  {
+	    p.getInputStream().close();
+	  }
+	catch (NullPointerException ex)
+	  {
+	  }
+	catch (IOException ex)
+	  {
+	  }
+	
+	try
+	  {
+	    p.getOutputStream().close();
+	  }
+	catch (NullPointerException ex)
+	  {
+	  }
+	catch (IOException ex)
+	  {
+	  }
+	
+	try
+	  {
+	    p.getErrorStream().close();
+	  }
+	catch (NullPointerException ex)
+	  {
+	  }
+	catch (IOException ex)
+	  {
+	  }
+      }
   }
 
   /**
