@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 2001/06/29 23:04:51 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 2001/07/03 18:17:14 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -2158,7 +2158,10 @@ class OptionsPanel extends JPanel {
 					  "Members",
 					  "Available", null, null );
 
-    builtInSelector.update(builtInItems_Vect, false, new Vector(), false);
+    FixedListCompare builtInComparator = new FixedListCompare(builtInItems_Vect, null);
+
+    builtInSelector.update(builtInItems_Vect, true, builtInComparator, 
+			   new Vector(), true, builtInComparator);
 
     customSelector = new StringSelector( new Vector(),
 					 customItems_Vect, 
@@ -2167,7 +2170,10 @@ class OptionsPanel extends JPanel {
 					 "Members",
 					 "Available", null, null );
 
-    customSelector.update(new Vector(), false, customItems_Vect, false);
+    FixedListCompare customComparator = new FixedListCompare(customItems_Vect, null);
+
+    customSelector.update(new Vector(), true, customComparator, 
+			  customItems_Vect, true, customComparator);
 
     builtInPanel.add( builtInSelector, BorderLayout.CENTER );
     customPanel.add( customSelector, BorderLayout.CENTER );
