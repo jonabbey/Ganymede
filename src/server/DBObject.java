@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.38 $ %D%
+   Version: $Revision: 1.39 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -51,7 +51,7 @@ import arlut.csd.Util.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.38 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.39 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -76,7 +76,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 				// to the shadow that manages the changes
   
   protected DBEditSet editset;	// transaction that this object has been checked out in
-				// care of.
+				// care of, if any
 
   protected GanymedeSession gSession; // if this object is being viewed by a particular
 				      // Ganymede Session, we record that here
@@ -828,6 +828,10 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
 	if (error_code != null)
 	  {
+	    // note that we know editset is set here, so we find our GanymedeSession
+	    // instance through the editset since we may not be explicitly checked out
+	    // for viewing
+
 	    editset.getSession().setLastError("createNewObject failure: " + error_code +
 					      " in trying to check out custom object");
 	    return null;
@@ -841,6 +845,10 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	  }
 	catch (RemoteException ex)
 	  {
+	    // note that we know editset is set here, so we find our GanymedeSession
+	    // instance through the editset since we may not be explicitly checked out
+	    // for viewing
+
 	    editset.getSession().setLastError("remote exception creating shadow for " + 
 					      getBase().getName() + ": " + getID());
 	    return null;
@@ -848,7 +856,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
       }
 
     editset.addObject(shadowObject);
-    this.editset = editset;
 
     objectBase.store.checkOut(); // update checked out count
     
@@ -867,7 +874,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   synchronized boolean clearShadow(DBEditSet editset)
   {
-    if (editset != this.editset)
+    if (editset != shadowObject.editset)
       {
 	// couldn't clear the shadow..  this editSet
 	// wasn't the one to create the shadow
@@ -875,7 +882,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	return false;
       }
 
-    this.editset = null;
     shadowObject = null;
 
     objectBase.store.checkIn(); // update checked out count
@@ -1233,13 +1239,21 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     
     if (f == null)
       {
-	editset.getSession().setLastError("couldn't find field " + fieldID);
+	if (gSession != null)
+	  {
+	    gSession.setLastError("couldn't find field " + fieldID);
+	  }
+
 	return null;
       }
 
     if (f.isVector())
       {
-	editset.getSession().setLastError("couldn't get scalar value on vector field " + fieldID);
+	if (gSession != null)
+	  {
+	    gSession.setLastError("couldn't get scalar value on vector field " + fieldID);
+	  }
+
 	return null;
       }
 
@@ -1261,13 +1275,21 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     
     if (f == null)
       {
-	editset.getSession().setLastError("couldn't find field " + fieldID);
+	if (gSession != null)
+	  {
+	    gSession.setLastError("couldn't find field " + fieldID);
+	  }
+
 	return null;
       }
 
     if (!f.isVector())
       {
-	editset.getSession().setLastError("couldn't get vector value on scalar field " + fieldID);
+	if (gSession != null)
+	  {
+	    gSession.setLastError("couldn't get vector value on scalar field " + fieldID);
+	  }
+
 	return null;
       }
 
