@@ -115,18 +115,12 @@ import arlut.csd.ddroid.rmi.string_field;
  * {@link arlut.csd.ddroid.client.historyPanel historyPanel}, and other
  * panels as appropriate for specific object types.</p>
  *
- * <p>framePanel is itself a Runnable object.  When created, the framePanel
- * constructor will spawn a new thread to execute its run() method.  This run()
- * method communicates with the server in the background, downloading field information
- * needed to present the object to the user for viewing and/or editing.</p>
- *
  * @version $Id$
  * @author Michael Mulvaney 
  */
 
-public class framePanel extends JInternalFrame implements ChangeListener, Runnable, 
-							  ActionListener, VetoableChangeListener,
-							  InternalFrameListener {
+public class framePanel extends JInternalFrame implements ChangeListener, ActionListener,
+							  VetoableChangeListener, InternalFrameListener {
 
   /**  
    * This will be loaded from gclient anyway.
@@ -412,11 +406,30 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     progressPanel.add(progressBar);
     
     setContentPane(progressPanel);
-    
-    // Thread loadingThread = new Thread(this);
-    // loadingThread.start();
 
-    run();
+    /*
+      XXX
+
+      This is a big opportunity to spin the loading off of the
+      AWT/Swing Event Dispatch Thread through the use of something
+      like Foxtrot, as if we can synchronously block execution of this
+      thread of execution on the EDT while still allowing the EDT to
+      chew through other stuff, we can allow for the refresh of the
+      GUI while we're getting this internal frame created.  That still
+      means we won't pop anything up on screen until the load is
+      completed, but at least we'll have refresh in the meantime.
+
+      This wouldn't even be feasible, except that we would know that
+      this framePanel won't be made visible (and hence subject to
+      heavy Swing threading constraints) until this constructor
+      returns.
+
+      That's foxtrot.sourceforge.net, yo.
+
+      XXX
+    */
+
+    load();
   }
 
   /**
@@ -437,13 +450,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * the object we're talking to.</p>
    */
 
-  public void run()
+  public void load()
   {
-    if (debug)
-      {
-	println("Starting thread in framePanel");
-      }
-
     running.set(true);
 
     try
@@ -665,9 +673,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   
   /**
    * <p>This method returns true if the window is in the middle of closing,
-   * which only happens if it has been approved by
-   * 
-   * @return
+   * which only happens if it has been approved by vetoableChange.</p>
    */
   
   public boolean isApprovedForClosing()
@@ -971,7 +977,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     fileM.setMnemonic('o');
     menuBar.add(fileM);
 
-    if (editable)
+    if (!editable)
       {
 	JMenuItem refreshMI = new JMenuItem("Refresh");
 	refreshMI.setMnemonic('r');
@@ -1814,7 +1820,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     
     // finally, shut down any secondary windows and null out all
     // references to make sure that we don't cascade any leaks.. if
-    // the run method is still going, we'll leave this alone and let
+    // the load method is still going, we'll leave this alone and let
     // run() take care of this as it leaves
 
     if (!running.isSet())
