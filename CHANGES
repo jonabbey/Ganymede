@@ -177,8 +177,9 @@ wrong node being moved.
 This of course, made the schema editor amazingly frustrating to try
 and use if conditions allowed this bug to be expressed.  This bug has
 been around for years, transiently appearing and disappearing
-according to the speed of the JVM on which the schema editor was run.
-I am *very* happy to have it fixed at last.
+according to the speed of GUI thread processing on the JVM on which
+the schema editor was run.  I am *very* happy to have it fixed at
+last.
 
 14. [SERVER] Fixed transient logic errors in permission editing
 
@@ -190,22 +191,26 @@ one instance this logic flaw resulted in changes made to permission
 matrices by editing Role objects not taking effect until the server
 was stopped and restarted.
 
+Nasty, nasty bug, and a pain to track down.
+
 I've fixed this, and audited all of the server code to insure that
 there are no remaining attempted dependencies on post-serialization
 initialization of transient fields.
 
 15. [SERVER XML] Fixed missing attribute error reporting in XML parser
 
-The Ganymede server's XML parsing code is designed to report
-to the xmlclient a record of the last 30 XML elements parsed prior
-to encountering an XML validity error (such as an invalid character,
-say).  Unfortunately, the class that represents XML entities
-(such as '<object type="I.P._Network" id="CSD - No Inet Access">')
-had a bug in it's toString() method that caused every other attribute
-to be skipped over when regenerating a string representation.
+The Ganymede server's XML parsing code is designed to report to the
+xmlclient a record of the last 30 XML elements parsed prior to
+encountering an XML validity error (such as an invalid character,
+say).  Unfortunately, the class that represents XML entities (such as
+'<object type="I.P._Network" id="CSD - No Inet Access">') had a bug in
+it's toString() method that caused every other attribute to be skipped
+over when regenerating a string representation for the node.
 
-This was a small bug, but could make it maddeningly difficult to track
-down syntax errors in XML files created for use with Ganymede.
+This was a small bug, but made it maddeningly difficult to track down
+syntax errors in XML files created for use with Ganymede, if the odd
+numbered attributes in the nodes were not unique enough to identify
+position in the XML input file.
 
 16. [CLIENT] Tweaked the Ganymede client's GUI
 
@@ -213,6 +218,43 @@ I have tweaked a number of aspects of the Ganymede client's GUI to
 make using the Ganymede client a bit more convenient, mostly in the
 way of reducing the default length of fields in the object
 viewing and editing windows.
+
+17. [SERVER] Fixed DBNameSpace rollback()/unmark()/commit() bug
+
+The server had a vulnerability in the DBNameSpace class that would
+cause the commit() method to fail in circumstances where a namespace
+rollback() operation had been followed by an unmark() operation on a
+value previously allocated in that namespace.  The
+DBNameSpace.commit() method could in this circumstance throw a
+NullPointerException at a point in the transaction commit process that
+would leave the transaction in an unfinished state, causing confusion
+and mayhem all around.
+
+This bug only manifested one time in the year and a half that Ganymede
+has been in production here at ARL:UT, and appears to have manifested
+at a time of heavy contention for resources in the namespace, such
+that multiple transactions were trying to allocate namespace-guarded
+unique values concurrently.
+
+In response to this, the DBNameSpace.java code was largely rewritten.
+The rewrite fixed this problem, and also significantly reduced the
+memory requirements for unique value namespace handling.
+
+18. [CLIENT, ADMIN CONSOLE] GUI tweaks for 1.0
+
+Added 'About Ganymede' dialog to Admin Console.  Added keyboard
+accelerators to Admin Console menus.  Tweaked menu names in Admin
+Console to allow unique and intuitive accelerators.
+
+Tweaked the messageDialog class so the client's MOTD can be dismissed
+by hitting spacebar.  Tweaked the menus in object windows in the client,
+added keyboard accelerators to menus.
+
+Did some more cleanup work on the tree GUI component.  When you drag a
+node in the schema editor, the node you are dragging will now be
+highlighted in blue during the drag operation, in addition to the icon
+drag that the tree has had.  Made right-clicking on nodes select the
+node before popping up the pop-up menu, as a visual reference point.
 
 -------------------- Changes from 0.99.9 to 1.0pre1 -------------------
 
