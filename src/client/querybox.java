@@ -13,7 +13,7 @@
    return null.
    
    Created: 23 July 1997
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Erik Grostic
               Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
@@ -88,9 +88,19 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   GridBagLayout gbl = new GridBagLayout();
   GridBagConstraints gbc = new GridBagConstraints();
 
+  JPanel 
+    titledPanel,
+    card_panel,
+    query_panel = new JPanel();
   JPanel inner_choice = new JPanel();
   JCheckBox editBox = new JCheckBox("Return Only Editable Objects");
+  JCheckBox allBox = new JCheckBox("Return all objects of this type");
   JComboBox baseChoice = new JComboBox();
+
+
+  // This is so we can hind the middle panel when the show all button is clicked
+  CardLayout 
+    card_layout;
 
   Vector
     fieldChoices = new Vector(), // A vector of strings for the field choice menus in QueryRow
@@ -99,7 +109,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
   BaseDump selectedBase;
   String baseName;
-  boolean editOnly;
+  boolean 
+    editOnly = false,
+    showAllItems = false;
 
   Query
     returnVal;
@@ -129,7 +141,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // ---
       
     JPanel Choice_Buttons = new JPanel();
-    JPanel query_panel = new JPanel();
     JPanel base_panel = new JPanel();
     JPanel outer_choice = new JPanel();
     JPanel query_Buttons = new JPanel();
@@ -171,7 +182,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     
     editBox.addItemListener(this);
     editBox.setSelected(false);
-    this.editOnly = false;
+
+    allBox.setSelected(false);
+    allBox.addItemListener(this);
 
     query_panel.setLayout(new BorderLayout());
     //    query_panel.setBackground(Color.lightGray); 
@@ -248,6 +261,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     bp_gbc.anchor = bp_gbc.EAST;
     bp_gbc.gridx = 1;
+    bp_gbl.setConstraints(allBox, bp_gbc);
+    base_panel.add(allBox);
+
+    bp_gbc.gridx = 2;
     bp_gbl.setConstraints(editBox, bp_gbc);
     base_panel.add(editBox);
 
@@ -260,14 +277,21 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     choice_pane.setViewportView(outer_choice);
 
+    card_layout = new CardLayout();
+    card_panel = new JPanel(card_layout);
+    card_panel.add(choice_pane, "main");
+    card_panel.add(new JPanel(), "blank");
+
+    card_layout.show(card_panel, "main");
+
     // hack for Swing 1.0.2 to prevent TitledBorder from trying to
     // be clever with colors when surrounding a scrollpane
-
-    JPanel titledPanel = new JPanel();
+    titledPanel = new JPanel();
     titledPanel.setBorder(new TitledBorder("Query Fields"));
     titledPanel.setLayout(new BorderLayout());
-    titledPanel.add("Center", choice_pane);
+    titledPanel.add("Center", card_panel);
     titledPanel.add("North", base_panel);
+
 
     query_panel.add("Center", titledPanel);
 
@@ -551,6 +575,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     returnType = selectedBase.getTypeID();
 
+    // If showAllItems is true, then we need to show everything.
+    if (showAllItems)
+      {
+	return new Query((String)baseChoice.getSelectedItem(), null, false);
+      }
+
     for (int i = 0; i < Rows.size(); i++)
       {
 	row = (QueryRow) Rows.elementAt(i);
@@ -753,7 +783,37 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
       }
 
-    if (e.getSource() == baseChoice)
+    else if (e.getSource() == allBox)
+      {
+
+	this.showAllItems = allBox.isSelected();
+	if (debug)
+	  {
+	    System.out.println("Show all items is selected: " + allBox.isSelected());
+	  }
+
+	editBox.setEnabled(!showAllItems);
+
+	if (showAllItems)
+	  {
+	    if (debug)
+	      {
+		System.out.println("Showing blank");
+	      }
+
+	    card_layout.show(card_panel, "blank");
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.out.println("Showing main.");
+	      }
+
+	    card_layout.show(card_panel, "main");
+	  }
+      }
+    else if (e.getSource() == baseChoice)
       {
 	if (debug)
 	  {
