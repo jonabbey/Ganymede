@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -624,8 +624,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     this.WeAreApplet = WeAreApplet;
     this.adminPanel = adminPanel;
 
-    admin.setFrame(this);
-
     mbar = new JMenuBar();
     controlMenu = new JMenu("Control", false);
 
@@ -959,6 +957,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
     getContentPane().add(tabPane);
 
     // pack and load
+
+    admin.setFrame(this);
 
     try
       {
