@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.83 $ %D%
+   Version: $Revision: 1.84 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1709,9 +1709,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Finally, it is up to commitPhase1() and commitPhase2() to handle
    * any external actions related to object inactivation when
    * the transaction is committed..<br><br>
-   *
-   * @param interactive If true, the inactivate() logic can present
-   * a wizard to the client to customize the inactivation logic.
    *
    * @see #commitPhase1()
    * @see #commitPhase2() 
