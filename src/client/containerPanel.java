@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 1999/11/02 23:42:13 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 1999/11/03 01:25:10 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.112 $ $Date: 1999/11/02 23:42:13 $ $Name:  $
+ * @version $Revision: 1.113 $ $Date: 1999/11/03 01:25:10 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1292,7 +1292,33 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (currentHandle == null && currentValue != null)
 	      {
-		VecSortInsert inserter = new VecSortInsert(QueryResult.comparator);
+		VecSortInsert inserter = new VecSortInsert(new arlut.csd.Util.Compare() 
+							   {
+							     public int compare(Object o_a, Object o_b) 
+							       {
+								 listHandle a, b;
+	  
+								 a = (listHandle) o_a;
+								 b = (listHandle) o_b;
+								 int compResult = 0;
+	  
+								 compResult = a.toString().compareTo(b.toString());
+	  
+								 if (compResult < 0)
+								   {
+								     return -1;
+								   }
+								 else if (compResult > 0)
+								   { 
+								     return 1;
+								   } 
+								 else
+								   { 
+								     return 0;
+								   }
+							       }
+							   });
+
 		inserter.insert(choiceHandles, currentValueHandle);
 		currentHandle = currentValueHandle;
 	      }
