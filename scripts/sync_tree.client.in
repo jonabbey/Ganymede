@@ -2,8 +2,8 @@
 #
 # sync_tree.client
 #
-# $Revision: 1.11 $
-# $Date: 2003/03/12 02:54:54 $
+# $Revision: 1.12 $
+# $Date: 2003/09/09 02:01:52 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -17,13 +17,14 @@
 		     # Basic things
 
 		     "Base", "BaseField", "BaseNode", "CatTreeNode",
-		     "Category", "CategoryNode", "Client",
+		     "Category", "CategoryNode",
 		     "CategoryDump", "CategoryTransport",
 		     "BaseDump", "BaseListTransport",
 		     "FieldInfo", "FieldTemplate", "FieldType",
 		     "Invid", "NameSpace", "PermEntry", "PermMatrix",
 		     "Server", "Session", "SpaceNode", "SchemaConstants",
-		     "XMLSession", "NotLoggedInException",
+		     "XMLSession", "NotLoggedInException", "clientAsyncMessage",
+		     "ClientAsyncResponder",
 
 		     # remote interfaces for fields
 
@@ -37,7 +38,7 @@
 		     # but needs so it can handle deserialization of
 		     # objects which reference them
 
-		     "adminSession", "Admin", "SchemaEdit",
+		     "adminSession", "SchemaEdit",
 		     "DBBaseCategory", "DBObjectBase", "DBObject",
 		     "GanymedeSession",
 

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 2003/09/09 01:52:48 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 2003/09/09 02:01:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -81,7 +81,7 @@ import arlut.csd.Util.VectorUtils;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.66 $ $Date: 2003/09/09 01:52:48 $
+ * @version $Revision: 1.67 $ $Date: 2003/09/09 02:01:53 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -631,7 +631,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
    * admin console attached to this GanymedeAdmin object.</p>
    */
 
-  private AdminAsyncResponder asyncPort;
+  private serverAdminAsyncResponder asyncPort;
   
   /* -- */
 
@@ -893,7 +893,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   public AdminAsyncResponder getAsyncPort() throws RemoteException
   {
-    return asyncPort;
+    return (AdminAsyncResponder) asyncPort;
   }
 
   /**

@@ -23,18 +23,12 @@ chdir($targetdir);
 
 system("rm -rf *");
 
-print "Linking client stub class\n\n";
-
-# We need the ClientBase_Stub class so that we can talk to the client
-# when it tries to connect to us
-
-mkdir("client", 0770);
-symlink("$sourcedir/client/ClientBase_Stub.class", "client/ClientBase_Stub.class");
-
-# Ditto for the FileReceiverBase class and both its stub and skel
+# We need to have classes out of the arlut.csd.ganymede.client
+# directory for the FileReceiverBase class and both its stub and skel
 # classes. We have to do this because either the client or server can
 # instantiate or talk to a FileReceiverBase.
 
+mkdir("client", 0770);
 symlink("$sourcedir/client/FileReceiverBase.class", "client/FileReceiverBase.class");
 symlink("$sourcedir/client/FileReceiverBase_Stub.class", "client/FileReceiverBase_Stub.class");
 symlink("$sourcedir/client/FileReceiverBase_Skel.class", "client/FileReceiverBase_Skel.class");

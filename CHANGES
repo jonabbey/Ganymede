@@ -100,6 +100,13 @@ server won't be able to send any build status messages to the client,
 and if the server needs to timeout or force disconnect the client, the
 client won't get the message.
 
+8. [CLIENT] Improvements to text messages in dialogs
+
+The common composite dialog class used in the Ganymede client and
+admin console has been improved to support adaptive word wrapping and
+scrollbars.  This change was motivated by the client's new ability to
+report remote exception traces in a dialog.
+
 -------------------- Changes from 1.0.10 to 1.0.11 -------------------
 
 RELEASE DATE: December 9, 2002

@@ -2,8 +2,8 @@
 #
 # sync_tree.admin
 #
-# $Revision: 1.14 $
-# $Date: 2002/03/13 06:17:31 $
+# $Revision: 1.15 $
+# $Date: 2003/09/09 02:01:52 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -16,13 +16,13 @@
 # We need Client and GanymedeScheduler here so that the RMI class
 # loader will resolve things properly.. weirdness.
 
-@ganymede_classes = ("Admin", "AdminEntry", "Client", "GanymedeScheduler",
+@ganymede_classes = ("AdminEntry", "AdminAsyncResponder", "adminAsyncMessage", "GanymedeScheduler",
 		     "Base", "BaseEditor", "BaseField", "BaseFieldEditor", "BaseNode",
 		     "CatTreeNode", "Category", "CategoryEditor", "CategoryNode",
 		     "NameSpaceEditor",
 		     "FieldNode",
 		     "Invid", "NameSpace",
-		     "GASHAdmin", "GASHAdminFrame", "GASHAdminLoginFrame",
+		     "GASHAdmin", "GASHAdminFrame", "GASHAdminDispatch", "GASHAdminLoginFrame",
 		     "Server", "Session", "SpaceNode",
 		     "ObjectHandle", "Ganymediator", "GanymediatorWizard",
 		     "GanymedeConfig", "adminSession", "XMLSession",
