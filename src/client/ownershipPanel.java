@@ -172,7 +172,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
 		println("starting new thread");
 	      }
 
-	    parent.getgclient().setStatus("Downloading objects for thi sbase");
+	    parent.getgclient().setStatus("Downloading objects for this base");
 	    Thread thread = new Thread(op);
 	    thread.start();
 	  }
