@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.52 $ %D%
+   Version: $Revision: 1.53 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -564,6 +564,36 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       }
 
     return newValue;
+  }
+
+  /**
+   *
+   * This method is used to allow server-side custom code to get access to
+   * a proposed new value before it is finalized, used when making a change
+   * to this field causes other fields to be changed which need to insure
+   * that this field has an appropriate value first.<br><br>
+   *
+   * This method is not intended to be accessible to the client.<br><br>
+   *
+   * This method does not support virtualized fields.<br><br>
+   *
+   * This method will only have a useful value during the
+   * course of the containing objects' finalizeSetValue() call.  It
+   * is intended that this field will set the new value in setValue(),
+   * call owner.finalizeSetValue(), then clear the newValue.<br><br>
+   *
+   * What, this code a hack?
+   *
+   */
+
+  public Object getOldValue()
+  {
+    if (isVector())
+      {
+	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
+      }
+
+    return value;
   }
 
   /**
