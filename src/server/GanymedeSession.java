@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.52 $ %D%
+   Version: $Revision: 1.53 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -74,6 +74,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   Date permTimeStamp;
 
   DBObject selfPermObj;
+  DBObject defaultObj;
   PermMatrix selfPerm = null;
 
   Invid personaInvid;
@@ -643,7 +644,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		seen.put(inv, inv);
 	      }
 
-	    result.addRow(inv, owner.getLabel());
+	    result.addRow(inv, owner.getLabel(), false);
 
 	    // got the parent.. now add any children
 
@@ -1740,6 +1741,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    return;		// permissions prohibit us from adding this result
 	  }
       }
+    else
+      {
+	// we'll report it as editable
+
+	perm = PermEntry.fullPerms;
+      }
 
     if (debug)
       {
@@ -1761,7 +1768,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		// nope, go ahead and return the object as we found it in the
 		// main hash
 		
-		result.addRow(obj);
+		result.addRow(obj, perm.isEditable());
 	      }
 	    else
 	      {
@@ -1776,7 +1783,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    
 		    if (DBQueryHandler.matches(query, x))
 		      {
-			result.addRow(x);
+			result.addRow(x, true);	// we must be able to edit it, since it's checked out
 		      }
 		  }
 	      }
@@ -1786,7 +1793,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    // we don't have a transaction open, so there's no worry about us
 	    // having a different version of the object open in our transaction
 	    
-	    result.addRow(obj);
+	    result.addRow(obj, perm.isEditable());
 	  }
       }
   }
@@ -2687,16 +2694,28 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
 
   final synchronized void updatePerms()
-  {
+  {    
     if (personaBase == null)
       {
 	personaBase = Ganymede.db.getObjectBase(SchemaConstants.PersonaBase);
       }
 
-    if (personaTimeStamp != null && !personaTimeStamp.before(personaBase.lastChange))
+    if (personaTimeStamp != null && personaTimeStamp.after(personaBase.lastChange))
       {
 	return;
       }
+
+    if (true)
+      {
+	System.err.println("GanymedeSession.updatePerms(): doing full permissions recalc for " + 
+			   (personaName == null ? username : personaName));
+      }
+
+    // persona invid may well have changed since we last loaded
+    // personaInvid.. thus, we have to set it here.  Setting
+    // personaObj is one of the primary reasons that other parts
+    // of GanymedeSession call updatePerms(), so don't mess
+    // with this. I tried it, believe me, it didn't work.
 
     if (personaInvid != null)
       {
@@ -2706,8 +2725,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	personaObj = null;
       }
-    
-    DBObject defaultObj = session.viewDBObject(SchemaConstants.PermBase, SchemaConstants.PermDefaultObj);
+
+    if (defaultObj == null)
+      {
+	defaultObj = session.viewDBObject(SchemaConstants.PermBase, SchemaConstants.PermDefaultObj);
+      }
 
     if (defaultObj != null)
       {
@@ -2740,7 +2762,24 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (personaObj == null)
 	  {
+	    // duplicate defaultPerms
+
 	    personaPerms = new PermMatrix(defaultPerms);
+
+	    System.err.println("GanymedeSession.updatePerms(): returning.. no persona obj for " + 
+			       (personaName == null ? username : personaName));
+
+	    // remember the last time we pulled personaPerms / defaultPerms
+
+	    if (personaTimeStamp == null)
+	      {
+		personaTimeStamp = new Date();
+	      }
+	    else
+	      {
+		personaTimeStamp.setTime(System.currentTimeMillis());
+	      }
+	    
 	    return;
 	  }
 	else
@@ -2834,6 +2873,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     else
       {
 	personaTimeStamp.setTime(System.currentTimeMillis());
+      }
+
+    if (true)
+      {
+	System.err.println("GanymedeSession.updatePerms(): finished full permissions recalc for " + 
+			   (personaName == null ? username : personaName));
       }
     
     return;
