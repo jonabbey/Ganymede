@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2001/06/29 07:31:05 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2001/06/29 07:58:42 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -93,7 +93,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.36 $ $Date: 2001/06/29 07:31:05 $ $Name:  $
+ * @version $Revision: 1.37 $ $Date: 2001/06/29 07:58:42 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -153,8 +153,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     lborder = new LineBorder(Color.black);
   
   int rowWidth;
-
-  private boolean presorted;
 
   /* -- */
 
@@ -295,7 +293,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     this.canChoose = canChoose;
     this.mustChoose = mustChoose;
     this.rowWidth = rowWidth;
-    this.presorted = false;
     
     setLayout(new BorderLayout());
 
@@ -354,7 +351,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     in = new JstringListBox();
     in.registerPopupMenu(inPopup);
-    in.load(inVector, rowWidth, !presorted, null);
+    in.load(inVector, rowWidth, true, null);
     in.setCallback(this);
 
     inPanel.setBorder(bborder);
@@ -451,7 +448,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	out = new JstringListBox();
 	out.registerPopupMenu(outPopup);
-	out.load(outVector, rowWidth, !presorted, null);
+	out.load(outVector, rowWidth, true, null);
 	out.setCallback(this);
 	
 	outPanel.setBorder(bborder);
@@ -611,16 +608,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   // Public methods ------------------------------------------------------------
-
-  /**
-   * This method is used to turn on or off the StringSelector's sorting
-   * of its list boxes.
-   */
-
-  public void setSort(boolean doSort)
-  {
-    this.presorted = !doSort;
-  }
 
   /**
    * <P>Returns true if this StringSelector is editable.</P>

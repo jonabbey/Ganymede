@@ -6,8 +6,8 @@
 
    Created: 21 Aug 1997
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2001/06/29 07:31:05 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2001/06/29 07:58:42 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -82,7 +82,7 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Revision: 1.30 $ $Date: 2001/06/29 07:31:05 $ $Name:  $
+ * @version $Revision: 1.31 $ $Date: 2001/06/29 07:58:42 $ $Name:  $
  * @author Mike Mulvaney
  *
  */
@@ -169,7 +169,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * be Strings or {@link arlut.csd.JDataComponent.listHandle listHandle}
    * objects.</p>
    *
-   * <p>If presorted is false, the items will be sorted in
+   * <p>If sort is true, the items will be sorted in
    * display order before being loaded into this list box.</p>
    *
    * <p>Any values previously in the list box will be removed.</p>
@@ -202,6 +202,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	if (sort)
 	  {
+	    presorted = false;
+
 	    new VecQuickSort(items, comparator).sort();
 	  }
 	
@@ -343,15 +345,23 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	System.err.println("You gave me an object that is neither String nor listHandle: " + o);
       }
 
-    int i = 0;
-
-    int total = model.getSize();
-    while ((i < total) && (lh.getLabel().compareTo(((listHandle)model.getElementAt(i)).getLabel()) > 0))
+    if (presorted)
       {
-	i++;
+	int i = 0;
+	
+	int total = model.getSize();
+	while ((i < total) && (lh.getLabel().compareTo(((listHandle)model.getElementAt(i)).getLabel()) > 0))
+	  {
+	    i++;
+	  }
+	
+	insertHandleAt(lh, i);
       }
-      
-    insertHandleAt(lh, i);
+    else
+      {
+	model.addElement(lh);
+      }
+    
     setSelectedValue(lh, true);
   }
 

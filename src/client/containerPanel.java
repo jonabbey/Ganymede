@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.122 $
-   Last Mod Date: $Date: 2001/05/11 01:15:45 $
+   Version: $Revision: 1.123 $
+   Last Mod Date: $Date: 2001/06/29 07:58:42 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.122 $ $Date: 2001/05/11 01:15:45 $ $Name:  $
+ * @version $Revision: 1.123 $ $Date: 2001/06/29 07:58:42 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -1508,7 +1508,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     chosen = (Vector) currentInfo.getValue();
 
-    ss.update(available, chosen);
+    ss.update(available, true, chosen, false);
   }
 
   /**
@@ -1587,7 +1587,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     try
       {
-	ss.update(available, chosen);
+	ss.update(available, true, chosen, false);
       }
     catch (Exception e)
       {

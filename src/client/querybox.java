@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.63 $
-   Last Mod Date: $Date: 2001/06/27 20:59:17 $
+   Version: $Revision: 1.64 $
+   Last Mod Date: $Date: 2001/06/29 07:58:43 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -2083,21 +2083,21 @@ class OptionsPanel extends JPanel {
     gbc.weightx = 1.0;
     gbc.weighty = 1.0;
 
-    builtInPanel.setBorder(new TitledBorder(new EtchedBorder(),"Built-In Fields"));
-    builtInPanel.setLayout(new BorderLayout());
-
-    gbc.gridx = 0;
-    gbl.setConstraints(builtInPanel, gbc);
-
-    add(builtInPanel);
-
     customPanel.setBorder(new TitledBorder(new EtchedBorder(),"Custom Fields"));
     customPanel.setLayout(new BorderLayout());
 
-    gbc.gridx = 1;
+    gbc.gridx = 0;
     gbl.setConstraints(customPanel, gbc);
 
     add(customPanel);
+
+    builtInPanel.setBorder(new TitledBorder(new EtchedBorder(),"Built-In Fields"));
+    builtInPanel.setLayout(new BorderLayout());
+
+    gbc.gridx = 1;
+    gbl.setConstraints(builtInPanel, gbc);
+
+    add(builtInPanel);
 
     resetBoxes();
   }
@@ -2156,14 +2156,18 @@ class OptionsPanel extends JPanel {
 					  builtInPanel,
 					  true,
 					  "In",
-					  "Out" );
+					  "Out");
+
+    builtInSelector.update(builtInItems_Vect, false, new Vector(), false);
 
     customSelector = new StringSelector( new Vector(),
-					 customItems_Vect,
+					 customItems_Vect, 
 					 customPanel,
 					 true,
 					 "In",
-					 "Out" );
+					 "Out");
+
+    customSelector.update(new Vector(), false, customItems_Vect, false);
 
     builtInPanel.add( builtInSelector, BorderLayout.CENTER );
     customPanel.add( customSelector, BorderLayout.CENTER );
