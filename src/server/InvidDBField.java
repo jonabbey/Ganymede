@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.66 $ %D%
+   Version: $Revision: 1.67 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -695,6 +695,8 @@ public final class InvidDBField extends DBField implements invid_field {
       retVal = null,
       newRetVal;
 
+    DBObject remobj = null;
+
     /* -- */
 
     if (newRemote == null)
@@ -746,7 +748,19 @@ public final class InvidDBField extends DBField implements invid_field {
 	// we also use the anonymous variable to instruct dissolve to disregard
 	// write permissions if we have gotten the anonymous OK
 
-	if (session.getObjectHook(oldRemote).anonymousUnlinkOK(targetField))
+	remobj = session.viewDBObject(oldRemote);
+
+	if (remobj == null)
+	  {
+	    setLastError("couldn't find old invid " + oldRemote + " for symmetry maintenance");
+	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't find old reference",
+					      "Your operation could not succeed because field " + getName() +
+					      " was linked to a remote reference " + oldRef.toString() + 
+					      " that could not be found for unlinking.\n\n" +
+					      "This is a serious logic error in the server.");
+	  }
+
+	if (session.getObjectHook(oldRemote).anonymousUnlinkOK(remobj, targetField))
 	  {
 	    oldRef = (DBEditObject) session.editDBObject(oldRemote);
 	    anonymous = true;
@@ -822,8 +836,19 @@ public final class InvidDBField extends DBField implements invid_field {
     // version, and we'll lose our security bypass.. for that reason,
     // we also use the anonymous2 variable to instruct establish to disregard
     // write permissions if we have gotten the anonymous OK
+
+    remobj = session.viewDBObject(newRemote);
     
-    if (session.getObjectHook(newRemote).anonymousLinkOK(targetField))
+    if (remobj == null)
+      {
+	setLastError("couldn't find new invid " + newRemote + " for symmetry maintenance");
+	return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't find new reference",
+					  "Your operation could not succeed because field " + getName() +
+					  " cannot link to non-existent invid " + newRemote.toString() + 
+					  ".\n\nThis is a serious logic error in the server.");
+      }
+    
+    if (session.getObjectHook(newRemote).anonymousLinkOK(remobj, targetField))
       {
 	newRef = session.editDBObject(newRemote);
 	anonymous2 = true;
@@ -967,6 +992,9 @@ public final class InvidDBField extends DBField implements invid_field {
       eObj = null,
       oldRef = null;
 
+    DBObject
+      remobj;
+
     InvidDBField 
       oldRefField = null;
 
@@ -1020,7 +1048,19 @@ public final class InvidDBField extends DBField implements invid_field {
     // we also use the anon variable to instruct dissolve to disregard
     // write permissions if we have gotten the anonymous OK
 
-    if (session.getObjectHook(remote).anonymousUnlinkOK(targetField))
+    remobj = session.viewDBObject(remote);
+	
+    if (remobj == null)
+      {
+	setLastError("couldn't find old invid " + remote + " for symmetry maintenance");
+	return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't find old reference",
+					  "Your operation could not succeed because field " + getName() +
+					  " was linked to a remote reference " + remote.toString() + 
+					  " that could not be found for unlinking.\n\n" +
+					  "This is a serious logic error in the server.");
+      }
+
+    if (session.getObjectHook(remote).anonymousUnlinkOK(remobj, targetField))
       {
 	anon= true;		// debug
 
@@ -2345,7 +2385,15 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (gsession != null)
 	  {
 	    object = gsession.getSession().viewDBObject(invid);
-	    label = owner.lookupLabel(object);
+
+	    if (owner instanceof DBEditObject)
+	      {
+		label = owner.lookupLabel(object);
+	      }
+	    else
+	      {
+		label = Ganymede.db.getObjectBase(invid.getType()).getObjectHook().lookupLabel(object);
+	      }
 	  }
 	else
 	  {
