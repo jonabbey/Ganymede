@@ -12,11 +12,50 @@ RELEASE DATE: January ??, 1999
 Added the missing calendar.gif used by JdateField.  Added
 doc/buildjavadoc to automate building of javadocs.
 
+Added a -develop option to the configure script, to allow doing builds
+in a CVS checkout directory, with the results of compiles put in a
+location outside the checked out tree.  For use when developing and
+maintaing Ganymede.
+
 2. [SERVER] Fixed bug in query engine
 
 Queries that combined embedded and non-embedded fields would cause
 the server to throw an IllegalArgument exception, complaining about
-a DBObjectBase being locked with an extantqLock.
+a DBObjectBase being locked with an extantLock.
+
+Made the query engine a bit more regular with respect to dump()
+vs. query().  Made things a bit safer.  Improved the server's handling
+of a forced disconnect of a user who is executing a query.
+
+3. [CLIENT] Fixed bug with open object dialog and inactivated objects
+
+The client displays inactivated objects in the tree with "(inactive)"
+added to the end.  The dialog brought up when clicking on the Edit,
+Delete, or View buttons on the toolbar were including the "(inactive)"
+bit when brought up with a tree node selected.
+
+4. [SERVER] Made GanymedeExpirationTask more robust
+
+Previously, the Ganymede Expiration Task would be unable to commit
+its transaction if, by removing objects from the database, other
+objects were left with empty fields that are normally mandatory.
+
+Now, the expiration task will commit successfully, possibly leaving
+some objects with empty invid fields that would ordinarily not be
+permitted.  This is the most straight-forward way of handling things
+like systems with required user fields, which would otherwise have to
+be automatically removed, a much dicier prospect.
+
+Probably need to add a feature to scan the database for objects which
+do not satisfy the required-fields check.  Any time an admin edits
+an object that doesn't satisfy the check, the user will be required
+to fix the object before that transaction can be committed.
+
+5. [SCHEMA] Fixed the gasharl schema's user inactivation logic
+
+The userCustom object in the gasharl schema was not properly
+differentiating between the case of wizard-led inactivation and
+automated inactivation in handling checkpointing and rollback.
 
 -------------------- Changes from 0.94 to 0.95 -------------------
 
