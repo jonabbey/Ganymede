@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -25,6 +25,8 @@ import arlut.csd.JDataComponent.*;
 
 public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 
+  private final static boolean debug = false;
+
   boolean
     editable;
 
@@ -33,8 +35,10 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 
   public ownerPanel(invid_field field, boolean editable)
     {
-      System.out.println("=-=-=-=-=- Adding ownerPanel");
-
+      if (debug)
+	{
+	  System.out.println("=-=-=-=-=- Adding ownerPanel");
+	}
 
       if (field == null)
 	{
