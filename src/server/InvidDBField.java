@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.168 $
-   Last Mod Date: $Date: 2001/11/13 22:47:08 $
+   Version: $Revision: 1.169 $
+   Last Mod Date: $Date: 2001/12/13 19:52:44 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.168 $ %D%
+ * @version $Revision: 1.169 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1353,6 +1353,15 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (anonymous || session.getGSession().getPerm(remobj).isEditable())
 	  {
 	    newRef = (DBEditObject) session.editDBObject(newRemote);
+	  }
+	else
+	  {
+	    return Ganymede.createErrorDialog("InvidDBField.bind(): Couldn't link to new reference",
+					      "Field " + this.toString() +
+					      " could not be linked to the " + remobj.toString() + 
+					      " " + remobj.getTypeName() + " object.  You do not have permission to edit " +
+					      "the " + remobj.toString() + 
+					      " " + remobj.getTypeName() + " object.");
 	  }
       }
     
