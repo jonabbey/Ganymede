@@ -2990,13 +2990,11 @@ final public class GanymedeSession implements Session, Unreferenced {
     String fieldName;
     Short fieldID;
     DBObjectBaseField field;
-    Map prototypeMap = new HashMap(fieldIDs.size());
     for (Iterator iter = fieldIDs.iterator(); iter.hasNext();)
       {
       	fieldID = (Short) iter.next();
       	field = (DBObjectBaseField) Ganymede.db.getObjectBase(q.objectName).getField(fieldID.shortValue());
       	fieldName = field.getName();
-      	prototypeMap.put(fieldName, null);
       	qrc.addField(fieldName, fieldID);
       } 
 
@@ -3006,7 +3004,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     DBObject object;
     PermEntry perm;
     boolean editable;
-    Map rowMap;
+    Object[] row;
     for (Iterator iter = invids.iterator(); iter.hasNext();)
       {
         invid = (Invid) iter.next();
@@ -3031,17 +3029,17 @@ final public class GanymedeSession implements Session, Unreferenced {
             editable = perm.isEditable();
           }
 
-        rowMap = new HashMap(prototypeMap);
-        String key;
+        Short key;
         Object value;
-        for (Iterator keyIter = rowMap.keySet().iterator(); keyIter.hasNext();)
+	row = new Object[fieldIDs.size()];
+        for (int i=0; i < fieldIDs.size(); i++)
           {
-            key = (String) keyIter.next();
-            value = ((DBField) object.get(key)).getValueLocal();
-            rowMap.put(key, value);
+            key = (Short) fieldIDs.get(i);
+            value = object.getFieldValueLocal(key.shortValue());
+            row[i] = value;
           }
 
-        qrc.addRow(invid, object.getLabel(), rowMap, object.isInactivated(), object
+        qrc.addRow(invid, object.getLabel(), row, object.isInactivated(), object
             .willExpire(), object.willBeRemoved(), editable);
       }
 

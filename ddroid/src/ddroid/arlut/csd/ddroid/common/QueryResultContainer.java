@@ -6,7 +6,9 @@
  */
 package arlut.csd.ddroid.common;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,22 +23,12 @@ import java.util.Vector;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class QueryResultContainer {
+public class QueryResultContainer implements Serializable {
   static final boolean debug = false;
+  static final long serialVersionUID = -8277390343373928867L;
 
-  /* XXX  static final long serialVersionUID = 2515833829305301719L; */
-
-  // --
-
-  // for transport
-
+  private boolean forTransport = true;
   public StringBuffer buffer = null;
-
-  // for use post-serialized.. note that transient fields don't
-  // actually get initialzed post serialization, so the initializers
-  // here are actually redundant and non-operative on the client side
-  // post serialization.
-
   private boolean unpacked = false;
 
   List headers = null;
@@ -45,7 +37,6 @@ public class QueryResultContainer {
   
   Map invidHash = null;
   Map labelHash = null;
-  private boolean forTransport = true;
 
   Vector handles = null;
   Vector labelList = null;
@@ -85,9 +76,9 @@ public class QueryResultContainer {
    *
    */
 
-  public void addRow(Invid invid, String label, Map rowMap, boolean editable)
+  public void addRow(Invid invid, String label, Object[] row, boolean editable)
   {
-    addRow(invid, label, rowMap, false, false, false, editable);
+    addRow(invid, label, row, false, false, false, editable);
   }
 
   /**
@@ -99,9 +90,9 @@ public class QueryResultContainer {
    *
    */
 
-  public void addRow(ObjectHandle handle, Map rowMap)
+  public void addRow(ObjectHandle handle, Object[] row)
   {
-    addRow(handle.invid, handle.label, rowMap, handle.inactive,
+    addRow(handle.invid, handle.label, row, handle.inactive,
 	   handle.expirationSet, handle.removalSet,
 	   handle.editable);
   }
@@ -116,7 +107,7 @@ public class QueryResultContainer {
    */
 
   public synchronized void addRow(Invid invid, String label,
-				  Map rowMap,
+				  Object[] row,
 				  boolean inactive,
 				  boolean expirationSet,
 				  boolean removalSet,
@@ -167,7 +158,7 @@ public class QueryResultContainer {
 	  }
       }
       
-    rows.add(rowMap);
+    rows.add(row);
   }
 
   // ***
@@ -400,17 +391,8 @@ public class QueryResultContainer {
 	unpackBuffer();
       }
 
-    Map rowMap = (Map) rows.get(rowNumber);
-    Vector row = new Vector(headers.size());
-    Iterator iter;
-    String currentHeader;
-    
-    for (iter = headers.iterator(); iter.hasNext();)
-      {
-      	currentHeader = (String) iter.next();
-      	row.add(rowMap.get(currentHeader));
-      }
-    return row;
+    Object[] row = (Object[]) rows.get(rowNumber);
+    return new Vector(Arrays.asList(row));
   }
 
   /**
@@ -429,7 +411,8 @@ public class QueryResultContainer {
 	unpackBuffer();
       }
 
-    return (getFieldRow(row)).elementAt(col);
+    Object[] r = (Object[]) rows.get(row);
+    return r[col];
   }
 
   /**
@@ -703,4 +686,31 @@ public class QueryResultContainer {
     return rows.toArray(a);
   }
 
+  /*
+   * @see java.lang.Object#toString()
+   */
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+    
+    for (Iterator iter = headers.iterator(); iter.hasNext();)
+      {
+      	result.append((String) iter.next() + ":\t");
+      }
+
+    result.append("\n");
+
+    Object[] row;
+    for (Iterator iter = rows.iterator(); iter.hasNext();)
+      {
+      	row = (Object[]) iter.next();
+      	for (int i = 0; i < row.length; i++)
+      	  {
+      	    result.append(row[i].toString() + "\t");
+      	  }
+      	result.append("\n");
+      }
+    
+    return result.toString();
+  }
 }
