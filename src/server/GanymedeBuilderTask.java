@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/12/09 00:21:01 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/12/09 01:40:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -96,6 +96,8 @@ import arlut.csd.Util.FileOps;
  */
 
 public abstract class GanymedeBuilderTask implements Runnable {
+
+  private static final boolean debug = false;
 
   private static String currentBackUpDirectory = null;
   private static String oldBackUpDirectory = null;
@@ -878,18 +880,39 @@ public abstract class GanymedeBuilderTask implements Runnable {
     
     if (oldBackUpDirectory != null)
       {
-	if (busyCount(oldBackUpDirectory) == 0)
+	try
 	  {
-	    String zipName = oldBackUpDirectory + ".zip";
-
-	    Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): trying to zip " + oldBackUpDirectory);
-	    
-	    if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+	    if (busyCount(oldBackUpDirectory) == 0)
 	      {
-		Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): zipped " + oldBackUpDirectory);
-		FileOps.deleteDirectory(oldBackUpDirectory);
+		String zipName = oldBackUpDirectory + ".zip";
+		
+		Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): trying to zip " + oldBackUpDirectory);
+		
+		if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+		  {
+		    Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): zipped " + zipName);
+		    FileOps.deleteDirectory(oldBackUpDirectory);
+		  }
+		else
+		  {
+		    File dirFile = new File(oldBackUpDirectory);
+		    
+		    if (dirFile.canRead())
+		      {
+			String[] list = dirFile.list();
+			
+			if (list == null || list.length == 0)
+			  {
+			    Ganymede.debug("GanymedeBuilderTask.openBackupDirectory(): directory " + 
+					   oldBackUpDirectory + " is empty, deleting");
+			    FileOps.deleteDirectory(oldBackUpDirectory);
+			  }
+		      }
+		  }
 	      }
-
+	  }
+	finally
+	  {
 	    oldBackUpDirectory = null;
 	  }
       }
@@ -934,6 +957,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     for (int i = 0; i < names.length; i++)
       {
+	String dirName = basePath + names[i];
+
 	if (names[i].endsWith(".zip"))
 	  {
 	    continue;
@@ -946,7 +971,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    continue;
 	  }
 
-	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to match " + names[i]);
+	if (debug)
+	  {
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to match " + names[i]);
+	  }
 
 	gnu.regexp.REMatch match = regexp.getMatch(names[i]);
 
@@ -955,7 +983,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    continue;
 	  }
 
-	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): matched " + names[i]);
+	if (debug)
+	  {
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): matched " + names[i]);
+	  }
 
 	String yearString, monthString, dateString;
 
@@ -966,7 +997,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	  }
 	else
 	  {
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on year");
+	    if (debug)
+	      {
+		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on year");
+	      }
+
 	    continue;
 	  }
 
@@ -977,7 +1012,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	  }
 	else
 	  {
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on month");
+	    if (debug)
+	      {
+		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on month");
+	      }
+
 	    continue;
 	  }
 
@@ -988,29 +1027,46 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	  }
 	else
 	  {
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on date");
+	    if (debug)
+	      {
+		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on date");
+	      }
+
 	    continue;
 	  }
 
-	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): yearString " + yearString);
-	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): monthString " + monthString);
-	Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): dateString " + dateString);
+	if (debug)
+	  {
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): yearString " + yearString);
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): monthString " + monthString);
+	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): dateString " + dateString);
+	  }
 
 	try
 	  {
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to zip " + basePath + names[i]);
+	    if (debug)
+	      {
+		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to zip " + basePath + names[i]);
+	      }
 
 	    int year = Integer.parseInt(yearString);
 	    int month = Integer.parseInt(monthString);
 	    int date = Integer.parseInt(dateString);
 
-	    Calendar cal = new GregorianCalendar(year, month, date); // midnight start of day
+	    Calendar cal = new GregorianCalendar(year, month-1, date-1); // midnight start of day
 	    cal.add(Calendar.DATE, 1); // end of day
+
+	    if (debug)
+	      {
+		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): old directory time is " + cal.getTime());
+		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): rollunder time is " + new Date(rollunderTime));
+	      }
 
 	    if (cal.getTime().getTime() < rollunderTime)
 	      {
-		String oldBackUpDirectory = basePath + names[i];
-		String zipName = basePath + names[i] + File.separator + ".zip";
+		String zipName = dirName + ".zip";
+
+		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): zipping " + dirName);
 
 		// it is conceivable that we have successfully zipped
 		// a directory before, but did not delete the
@@ -1021,30 +1077,47 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 		if (!zipFile.exists())
 		  {
-		    if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+		    if (zipIt.zipDirectory(dirName, zipName))
 		      {
-			Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): zipped " + basePath + names[i]);
+			Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): zipped " + zipName);
 
 			try
 			  {
-			    FileOps.deleteDirectory(oldBackUpDirectory);
+			    FileOps.deleteDirectory(dirName);
 			  }
 			catch (IOException ex)
 			  {
 			    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): could not remove " + 
-					   basePath + names[i]);
+					   dirName);
+			  }
+		      }
+		    else
+		      {
+			File dirFile = new File(dirName);
+			
+			if (dirFile.canRead())
+			  {
+			    String[] list = dirFile.list();
+			
+			    if (list == null || list.length == 0)
+			      {
+				Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): directory " + 
+					       dirName + " is empty, deleting");
+				FileOps.deleteDirectory(dirName);
+			      }
 			  }
 		      }
 		  }
 		else
 		  {
-		    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): not zipping " + basePath + names[i]);
+		    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + dirName + 
+				   " zip file already exists, not deleting.");
 		  }
 	      }
 	    else
 	      {
 		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): don't need to zip " + 
-			       basePath + names[i] + " yet.");
+			       dirName + " yet.");
 	      }
 	  }
 	catch (NumberFormatException ex)
