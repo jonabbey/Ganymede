@@ -7,7 +7,7 @@
    used to extract the results  out of the dump.
    
    Created: 25 September 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -547,6 +547,42 @@ public class DumpResult implements java.io.Serializable {
     if (postTransport)
       {
 	buffer = null;		// for GC
+      }
+  }
+
+  /**
+   *
+   * This method breaks apart the data structures held
+   * by this DumpResult.. it is intended to speed garbage
+   * collection when the contents of this DumpResult buffer
+   * have been processed and are no longer needed on the client.
+   *
+   */
+
+  public void dissociate()
+  {
+    if (headers != null)
+      {
+	headers.removeAllElements();
+	headers = null;
+      }
+    
+    if (types != null)
+      {
+	types.removeAllElements();
+	types = null;
+      }
+
+    if (invids != null)
+      {
+	invids.removeAllElements();
+	invids = null;
+      }
+
+    if (rows != null)
+      {
+	rows.removeAllElements();
+	rows = null;
       }
   }
 }
