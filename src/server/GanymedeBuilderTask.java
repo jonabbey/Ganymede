@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/12/06 09:59:41 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/12/07 03:59:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -98,7 +98,20 @@ import arlut.csd.Util.FileOps;
 public abstract class GanymedeBuilderTask implements Runnable {
 
   private static String currentBackUpDirectory = null;
+  private static String oldBackUpDirectory = null;
+  /**
+   * <p>This hashtable maps directory paths to an Integer
+   * counting the number of tasks that are currently
+   * copying backup files to it.  If the current day's
+   * directory path changes and this count goes to
+   * zero, the old directory will be zipped up and
+   * deleted.</p>
+   */
+
+  private static Hashtable backupsBusy = new Hashtable();
   private static String basePath = null;
+  private static long rollunderTime = 0;
+  private static long rolloverTime = 0;
   private static int id = 0;
 
   /* --- */
@@ -548,68 +561,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
     return null;
   }
 
-  /**
-   * <P>This method is called before the server's builder
-   * tasks are run and creates a backup directory for
-   * files to be copied to.</P>
-   */
-
-  public static void openBackupDirectory() throws IOException
-  {
-    if (basePath == null)
-      {
-	basePath = System.getProperty("ganymede.builder.backups");
-
-	if (basePath == null)
-	  {
-	    throw new RuntimeException("GanymedeBuilder not able to determine output directory.");
-	  }
-	
-	basePath = PathComplete.completePath(basePath);
-      }
-
-    File directory = new File(basePath);
-
-    if (!directory.isDirectory())
-      {
-	throw new IOException("Error, couldn't find output directory to backup.");
-      }
-    
-    DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", 
-						java.util.Locale.US);
-
-    String label = formatter.format(new Date());
-
-    currentBackUpDirectory = basePath + File.separator + label;
-
-    File oldDirectory = new File(currentBackUpDirectory);
-
-    if (!oldDirectory.exists())
-      {
-	oldDirectory.mkdir();
-      }
-
-    currentBackUpDirectory = basePath + File.separator + label + File.separator;
-  }
-
-  /**
-   * <P>This method is called after all of the server's
-   * builder tasks are run and zips up the current
-   * backup directory.</P>
-   */
-
-  public static void closeBackupDirectory() throws IOException
-  {
-    String zipName = currentBackUpDirectory + ".zip";
-
-    if (zipIt.zipDirectory(currentBackUpDirectory, zipName))
-      {
-	FileOps.deleteDirectory(currentBackUpDirectory);
-      }
-
-    currentBackUpDirectory = null;
-  }
-
+  
   /**
    *
    * This method opens the specified file for writing out a text stream.
@@ -623,24 +575,69 @@ public abstract class GanymedeBuilderTask implements Runnable {
   protected synchronized PrintWriter openOutFile(String filename) throws IOException
   {
     String backupFileName = null;
-    File file;
+    File file, backupFile;
+    String directory;
 
     /* -- */
 
-    // see if we need to generate a unique name for the file we're copying to
+    openBackupDirectory(filename);
 
-    backupFileName = currentBackUpDirectory + filename;
-
-    file = new File(backupFileName);
-
-    if (file.exists())
+    synchronized (GanymedeBuilderTask.class)
       {
-	backupFileName = currentBackUpDirectory + filename.replace(File.separatorChar, '_');
+	directory = currentBackUpDirectory;
+
+	if (directory != null && !directory.equals(""))
+	  {
+	    incBusy(directory);
+	  }
       }
 
-    if (!arlut.csd.Util.FileOps.copyFile(filename, backupFileName))
+    if (directory != null && !directory.equals(""))
       {
-	return null;
+	try
+	  {
+	    // see if we have a file by the given name in the backup directory..
+	    // if we do, we can't overwrite it
+
+	    file = new File(filename);
+
+	    if (file.exists())
+	      {
+		Date oldTime = new Date(file.lastModified());
+		
+		DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss", 
+							    java.util.Locale.US);
+
+		String label = formatter.format(oldTime);
+
+		backupFileName = directory + File.separator + label + "_" + file.getName();
+
+		backupFile = new File(backupFileName);
+
+		// now, we could in principle have more than one copy
+		// of a given file name written out in the same
+		// second, so just for grins we'll make sure to
+		// distinguish
+
+		char subSec = 'a';
+
+		while (backupFile.exists())
+		  {
+		    String extName = backupFileName + subSec++;
+
+		    backupFile = new File(extName);
+		  }
+
+		if (!arlut.csd.Util.FileOps.copyFile(filename, backupFile.getCanonicalPath()))
+		  {
+		    return null;
+		  }
+	      }
+	  }
+	finally
+	  {
+	    decBusy(currentBackUpDirectory);
+	  }
       }
 
     // we'll go ahead and write over the file if it exists.. that
@@ -648,4 +645,189 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     return new PrintWriter(new BufferedWriter(new FileWriter(filename)));
   }
+
+  //
+  // static methods
+  // 
+
+  private static synchronized void incBusy(String path)
+  {
+    Integer x = (Integer) backupsBusy.get(path);
+
+    if (x == null)
+      {
+	backupsBusy.put(path, new Integer(1));
+      }
+    else
+      {
+	backupsBusy.put(path, new Integer(x.intValue() + 1));
+      }
+  }
+
+  private static synchronized void decBusy(String path)
+  {
+    Integer x = (Integer) backupsBusy.get(path);
+
+    // we never should get a null value here.. go ahead
+    // and throw NullPointerException if we do
+
+    int val = x.intValue();
+
+    if (val == 1)
+      {
+	backupsBusy.remove(path);
+      }
+    else
+      {
+	backupsBusy.put(path, new Integer(val - 1));
+      }
+
+    if (oldBackUpDirectory != null && oldBackUpDirectory.equals(path))
+      {
+	if (val == 0)
+	  {
+	    // ah, no one is busy writing back ups into
+	    // path any more
+
+	    String zipName = oldBackUpDirectory + ".zip";
+	    
+	    try
+	      {
+		if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+		  {
+		    FileOps.deleteDirectory(oldBackUpDirectory);
+		  }
+
+		oldBackUpDirectory = null;
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+	  }
+      }
+  }
+
+  private static synchronized int busyCount(String path)
+  {
+    Integer x = (Integer) backupsBusy.get(path);
+
+    if (x == null)
+      {
+	return 0;
+      }
+
+    return x.intValue();
+  }
+
+  /**
+   * <P>This method is called before the server's builder
+   * tasks are run and creates a backup directory for
+   * files to be copied to.</P>
+   */
+
+  private static synchronized void openBackupDirectory(String filename) throws IOException
+  {
+    if (basePath == null)
+      {
+	basePath = System.getProperty("ganymede.builder.backups");
+
+	if (basePath == null || basePath.equals(""))
+	  {
+	    Ganymede.debug("GanymedeBuilder not able to determine backups directory.");
+	    return;
+	  }
+	
+	basePath = PathComplete.completePath(basePath);
+      }
+
+    File directory = new File(basePath);
+
+    if (!directory.exists())
+      {
+	Ganymede.debug("Warning, can't find ganymede.builder.backup directory " + 
+		       basePath + ", not backing up " + filename);
+	return;
+      }
+
+    if (!directory.isDirectory())
+      {
+	Ganymede.debug("Warning, ganymede.builder.backup path " + basePath +
+		       " is not a directory, not backing up " + filename);
+	return;
+      }
+
+    if (!directory.canWrite())
+      {
+	Ganymede.debug("Warning, can't write to ganymede.builder.backup path " + 
+		       basePath +
+		       ", not backing up " + filename);
+	return;
+      }
+
+    // okay, we've located our backup directory.. now make sure we
+    // know what subdirectory thereunder we're going to use for
+    // backups
+
+    if ((currentBackUpDirectory == null) ||
+	(System.currentTimeMillis() > rolloverTime) ||
+	(System.currentTimeMillis() < rollunderTime))
+      {
+	Date currentTime = new Date();
+	Calendar nowCal = new GregorianCalendar();
+
+	int year = nowCal.get(Calendar.YEAR);
+	int month = nowCal.get(Calendar.MONTH);
+	int day = nowCal.get(Calendar.DAY_OF_MONTH);
+
+	// get a calendar representing 12am midnight local time
+
+	Calendar cal = new GregorianCalendar(year, month, day);
+
+	// first get our roll under time, in case the system
+	// clock is ever set back
+
+	Date todayMidnight = cal.getTime();
+	rollunderTime = todayMidnight.getTime();
+
+	// and now our roll over time
+
+	cal.add(Calendar.DATE, 1);
+	
+	Date tomorrowMidnight = cal.getTime();
+	rolloverTime = tomorrowMidnight.getTime();
+
+	// okay, we've got our goal posts fixed, now handle the
+	// old directory and get a label for the new
+
+	DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd", java.util.Locale.US);
+
+	oldBackUpDirectory = currentBackUpDirectory;
+	currentBackUpDirectory = basePath + File.separator + formatter.format(todayMidnight);
+
+	File newDirectory = new File(currentBackUpDirectory);
+	
+	if (!newDirectory.exists())
+	  {
+	    newDirectory.mkdir();
+	  }
+      }
+
+    // if we haven't zipped up our old directory, do that
+    
+    if (oldBackUpDirectory != null)
+      {
+	if (busyCount(oldBackUpDirectory) == 0)
+	  {
+	    String zipName = oldBackUpDirectory + ".zip";
+	    
+	    if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+	      {
+		FileOps.deleteDirectory(oldBackUpDirectory);
+	      }
+
+	    oldBackUpDirectory = null;
+	  }
+      }
+  }
+
 }

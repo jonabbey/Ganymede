@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.74 $
-   Last Mod Date: $Date: 2000/10/09 06:23:37 $
+   Version: $Revision: 1.75 $
+   Last Mod Date: $Date: 2000/12/07 03:59:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -133,6 +133,19 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
    */
 
   public static int building = 0;
+
+  /**
+   * <P>If 1, the server is currently executing phase one of
+   * a builder task.</P>
+   *
+   * <P>If 2, the server is currently executing phase two of
+   * a builder task.</P>
+   *
+   * <P>If 0, the server is not currently executing a 
+   * builder task.</P>
+   */
+
+  public static int buildingCount = 0;
 
   /**
    * <p>Our handy, all purpose login semaphore</p>
