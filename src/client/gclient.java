@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.201 $
-   Last Mod Date: $Date: 2001/11/05 22:30:50 $
+   Version: $Revision: 1.202 $
+   Last Mod Date: $Date: 2001/11/17 02:41:33 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.201 $ $Date: 2001/11/05 22:30:50 $ $Name:  $
+ * @version $Revision: 1.202 $ $Date: 2001/11/17 02:41:33 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -130,10 +130,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int CLOSED_CAT = 15;
 
   static final int OBJECTNOWRITE = 16;
-
-  static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/11/05 22:30:50 $";
-  static String release_number = null;
 
   /**
    * This is a convenience method used by the server to get a
@@ -527,31 +523,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     /* -- */
 
-    if (release_number == null)
-      {
-	// cut off leading $Name:  $, clean up whitespace
-
-	if (release_name.length() > 9)
-	  {
-	    release_name = release_name.substring(6, release_name.length()-1);
-	    release_name.trim();
-
-	    // we use ganymede_XXX for our CVS tags
-
-	    if (release_name.indexOf('_') != -1)
-	      {
-		release_number = release_name.substring(release_name.indexOf('_') + 1, 
-							release_name.length());
-	      }
-	  }
-
-	if (release_number == null)
-	  {
-	    release_number = "version unknown";
-	  }
-    
-	release_number = release_number + " - " + release_date;
-      }
 
     try
       {
@@ -1627,7 +1598,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    buffer.append("<body>");
 	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
 	    buffer.append("Release number: ");
-	    buffer.append(release_number);
+	    buffer.append(arlut.csd.Util.CVSVersion.getReleaseString());
 	    buffer.append("<p>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 The University of Texas at Austin.</p>");
 	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
 	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");

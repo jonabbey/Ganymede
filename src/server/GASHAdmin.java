@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2001/08/03 21:01:39 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2001/11/17 02:41:18 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -631,10 +631,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   static final boolean debug = false;
   static String debugFilename = null;
 
-  static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/08/03 21:01:39 $";
-  static String release_number = null;
-
   // ---
 
   Image question = null;
@@ -741,32 +737,6 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   public GASHAdminFrame(String title, GASHAdmin adminPanel)
   {
     super(title);
-
-    if (release_number == null)
-      {
-	// cut off leading $Name:  $, clean up whitespace
-
-	if (release_name.length() > 9)
-	  {
-	    release_name = release_name.substring(6, release_name.length()-1);
-	    release_name.trim();
-
-	    // we use ganymede_XXX for our CVS tags
-
-	    if (release_name.indexOf('_') != -1)
-	      {
-		release_number = release_name.substring(release_name.indexOf('_') + 1, 
-							release_name.length());
-	      }
-	  }
-
-	if (release_number == null)
-	  {
-	    release_number = "version unknown";
-	  }
-    
-	release_number = release_number + " - " + release_date;
-      }
 
     this.adminPanel = adminPanel;
 
@@ -1473,7 +1443,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	    buffer.append("<body>");
 	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
 	    buffer.append("Release number: ");
-	    buffer.append(release_number);
+	    buffer.append(arlut.csd.Util.CVSVersion.getReleaseString());
 	    buffer.append("<p>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 The University of Texas at Austin.</p>");
 	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
 	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
