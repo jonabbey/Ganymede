@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.69 $ %D%
+   Version: $Revision: 1.70 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -522,7 +522,20 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * bulk-loading of the database.<br><br>
    *
    * This method may also be bypassed when server-side code uses
-   * setValueLocal() and the like to make changes in the database.
+   * setValueLocal() and the like to make changes in the database.<br><br>
+   *
+   * This method is called before the finalize*() methods.. the finalize*()
+   * methods is where last minute cascading changes should be performed..
+   * the finalize*() methods have no power to set object/field rescan
+   * or return dialogs to the client, however.. in cases where such
+   * is necessary, a custom plug-in class must have wizardHook() and
+   * finalize*() configured to work together to both provide proper field
+   * rescan notification and to check the operation being performed and
+   * make any changes necessary to other fields and/or objects.<br><br>
+   *
+   * Note as well that wizardHook() is called before the namespace checking
+   * for the proposed value is performed, while the finalize*() methods are
+   * called after the namespace checking.
    *
    * @return a ReturnVal object indicated success or failure, objects and
    * fields to be rescanned by the client, and a doNormalProcessing flag
