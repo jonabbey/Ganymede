@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 2002/03/15 03:40:41 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 2002/03/15 03:54:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,7 +93,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.110 $ %D%
+ * @version $Revision: 1.111 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -136,23 +136,13 @@ final public class DBSession {
    * arlut.csd.ganymede.DBDumpLock DBDumpLock} classes.</P> 
    */
 
-  Vector lockVect = new Vector();
+  private Vector lockVect = new Vector();
 
   /**
    * <P>Transaction handle for this session.</P>
    */
 
   DBEditSet editSet;
-
-  /** 
-   * <P>Deprecated error reporting string.. like errno in the C
-   * standard library, this sort of interface isn't thread-friendly,
-   * so we've largely moved away from using this String to the
-   * per-method {@link arlut.csd.ganymede.ReturnVal ReturnVal}
-   * result object.</P>
-   */
-
-  String lastError;
 
   /**
    * <P>Optional string identifying this session in logging, etc.</P>
@@ -197,7 +187,6 @@ final public class DBSession {
     store.login(this);
 
     editSet = null;
-    lastError = null;
   }
 
   /**
