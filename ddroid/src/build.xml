@@ -52,6 +52,12 @@ all           - Prepares build tree and compiles everything
 jars          - Produces the jar files for the server, client, and admin console
 javadoc       - Builds the java doc tree
 
+validate      - Cross-checks all Directory Droid .java source files against
+                default localizations.  This depends on the use of a specific
+                pattern for doing string localizations.
+
+                See verification/resource_validator.pl for details.
+
 clean         - Cleans the build class tree
 javadoc_clean - Cleans the java doc tree
 distclean     - Cleans the directories at the top distribution level
@@ -117,6 +123,13 @@ total         - Complete strip and rebuild
 Class files rebuilt.  Don't forget to run 'ant jars' if you want to
 refresh the jar files.
 </echo>
+  </target>
+
+  <target name ="validate">
+    <exec executable="verification/resource_validator.pl">
+      <arg file="."/>
+    </exec>
+
   </target>
 
   <target name="jars" depends="main">
