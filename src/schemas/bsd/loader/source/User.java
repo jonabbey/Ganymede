@@ -3,10 +3,10 @@
    User.java
 
    Class to load and store the data from a line in the
-   GASH user_info file
+   BSD master.passwd file
    
    Created: 22 August 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,6 +24,8 @@ import java.io.*;
 
 public class User {
 
+  static final boolean debug = true;
+
   public static void initTokenizer(StreamTokenizer tokens)
   {
     tokens.resetSyntax();
@@ -34,6 +36,8 @@ public class User {
     tokens.ordinaryChar('\n');
   }
 
+  // ---
+
   // member fields
 
   String name;
@@ -42,11 +46,13 @@ public class User {
   int gid;
   String fullname;
   String room;
-  String division;
   String officePhone;
   String homePhone;
   String directory;
   String shell;
+  String classification;
+  int lastchange;
+  int expire;
 
   // instance constructor
 
@@ -71,85 +77,98 @@ public class User {
 
     name = getNextBit(tokens);
 
-    //    System.out.println("name = '" + name + "'");
+    if (debug)
+      {
+	System.out.println("name = '" + name + "'");
+      }
 
     password = getNextBit(tokens); 
 
-    // System.out.println("password = '" + password + "'");
+    if (debug)
+      {
+	System.out.println("password = '" + password + "'");
+      }
 
     String uidString = getNextBit(tokens);
     uid = new Integer(uidString).intValue();
 
-    // System.out.println("uid = '" + uid + "'");
+    if (debug)
+      {
+	System.out.println("uid = '" + uid + "'");
+      }
 
     String gidString = getNextBit(tokens);
     gid = new Integer(gidString).intValue();
 
-    // System.out.println("gid = '" + gid + "'");
+    if (debug)
+      {
+	System.out.println("gid = '" + gid + "'");
+      }
+
+    classification = getNextBit(tokens, false);
+
+    if (debug)
+      {
+	System.out.println("classification = '" + classification + "'");
+      }
+
+    String changeString = getNextBit(tokens);
+    lastchange = new Integer(changeString).intValue();
+
+    if (debug)
+      {
+	System.out.println("lastchange = '" + lastchange + "'");
+      }
+    
+    String expireString = getNextBit(tokens);
+    expire = new Integer(expireString).intValue();
+
+    if (debug)
+      {
+	System.out.println("expire = '" + expire + "'");
+      }
 
     fullname = getNextBit(tokens);
 
-    // System.out.println("fullname = '" + fullname + "'");
-
-    String tmp = getNextBit(tokens);
-    int index = tmp.indexOf(' ');
-
-    if (index == -1)
+    if (debug)
       {
-	// no space in the string.. maybe we got
-	// a comma where we shouldn't have?
-
-	room = getNextBit(tokens);
-      }
-    else
-      {
-	room = tmp.substring(0, index); 
+	System.out.println("fullname = '" + fullname + "'");
       }
 
-    // System.out.println("room = '" + room + "'");
-    division = tmp.substring(index+1); 
+    room = getNextBit(tokens, false);
 
-    // System.out.println("division = '" + division + "'");
-
-    officePhone = getNextBit(tokens);
-
-    // System.out.println("officePhone = '" + officePhone + "'");
-
-    int token = tokens.nextToken();
-
-    // should be a comma
-
-    if (token != ',')
+    if (debug)
       {
-	System.err.println("No comma after office phone..");
-      }
-    else
-      {
-	token = tokens.nextToken();
+	System.out.println("room = '" + room + "'");
       }
 
-    if (token == ':')
-      {
-	// no home phone
+    officePhone = getNextBit(tokens, false);
 
-	homePhone = "";
+    if (debug)
+      {
+	System.out.println("officePhone = '" + officePhone + "'");
       }
-    else
-      {
-	// System.err.println("XXX");
-	tokens.pushBack();
-	homePhone = getNextBit(tokens);
+    
+    homePhone = getNextBit(tokens, false);
 
-	// System.out.println("homePhone = '" + homePhone + "'");
+    if (debug)
+      {
+	System.out.println("homePhone = '" + homePhone + "'");
       }
 
     directory = getNextBit(tokens);
 
-    // System.out.println("directory = '" + directory + "'");
+    if (debug)
+      {
+	System.out.println("directory = '" + directory + "'");
+      }
 
     shell = getNextBit(tokens);
 
-    // System.out.println("shell = '" + shell + "'");
+    if (debug)
+      {
+	System.out.println("shell = '" + shell + "'");
+      }
 
     // get to the end of line
 
@@ -171,18 +190,58 @@ public class User {
 		       ", officePhone: " + officePhone + ", homePhone: " + homePhone);
     System.out.println("Directory: " + directory + ", shell: " + shell);
   }
+
+  
+  /**
+   *
+   * getNextBit() returns the next String from the StreamTokenizer,
+   * where the bits are separated by colons and commas.
+   *
+   */
   
   private String getNextBit(StreamTokenizer tokens) throws IOException
+  {
+    return getNextBit(tokens, true);
+  }
+
+  /**
+   *
+   * getNextBit() returns the next String from the StreamTokenizer,
+   * where the bits are separated by colons and commas.
+   *
+   * @param skipleading if true, getNextBit will chew through leading
+   * commas and colons until it gets to either a normal string or
+   * eol/eof.
+   *
+   */
+  
+  private String getNextBit(StreamTokenizer tokens, boolean skipleading) throws IOException
   {
     int token;
     String result;
 
     token = tokens.nextToken();
 
-    while (tokens.ttype == ':' || tokens.ttype == ',')
+    // eat any leading :'s or ,'s
+
+    if (!skipleading)
       {
-	//	System.err.println("*");
-	token = tokens.nextToken();
+	// skip only the single leading token
+
+	if (tokens.ttype == ':' || tokens.ttype == ',')
+	  {
+	    token = tokens.nextToken();
+	  }
+      }
+    else
+      {
+	// skip any leading colons and commas
+
+	while (tokens.ttype == ':' || tokens.ttype == ',')
+	  {
+	    //	System.err.println("*");
+	    token = tokens.nextToken();
+	  }
       }
 
     if (tokens.ttype == StreamTokenizer.TT_WORD)
@@ -214,4 +273,11 @@ public class User {
     return null;
   }
 
+  private int checkNextToken(StreamTokenizer tokens)
+  {
+    tokens.nextToken();
+    int result = tokens.ttype;
+    tokens.pushBack();
+    return result;
+  }
 }
