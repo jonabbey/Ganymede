@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -520,19 +520,19 @@ public class DBQueryHandler {
 	return string2.endsWith(string1);
 
       case QueryDataNode.LESS:
-	result = string1.compareTo(string2);
+	result = string2.compareTo(string1);
 	return result < 0;
 
       case QueryDataNode.LESSEQ:
-	result = string1.compareTo(string2);
+	result = string2.compareTo(string1);
 	return result <= 0;
 
       case QueryDataNode.GREAT:
-	result = string1.compareTo(string2);
+	result = string2.compareTo(string1);
 	return result > 0;
 
       case QueryDataNode.GREATEQ:
-	result = string1.compareTo(string2);
+	result = string2.compareTo(string1);
 	return result >= 0;
       }
 
