@@ -5,7 +5,7 @@
    An interface defining constants to be used by the system code.
    
    Created: 23 April 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -38,7 +38,6 @@ public interface systemSchema {
   final static short INTERFACES=260;
   final static short SYSTEMNAME=261;
   final static short SYSTEMALIASES=262;
-  final static short DNSDOMAIN=263;
   final static short ROOM=264;
   final static short NETGROUPS=265;
   final static short SYSTEMTYPE=266;
