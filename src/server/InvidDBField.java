@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1345,7 +1345,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public ReturnVal setValue(Object value)
   {
-    ReturnVal retVal = null;
     DBEditObject eObj;
     Invid oldRemote, newRemote;
 
@@ -1363,12 +1362,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!verifyNewValue(value))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
+					  getLastError());
       }
 
     // we now know that value is an invid
@@ -1386,12 +1381,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    setLastError("InvidDBField setValue: couldn't bind");
 
-	    retVal = new ReturnVal(false);
-	    retVal.setDialog(new JDialogBuff("Error",
-					     "InvidDBField setValue: couldn't bind",
-					     "OK",
-					     null));
-	    return retVal;
+	    return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
+					      "InvidDBField setValue: couldn't bind");
 	  }
       }
     else
@@ -1428,12 +1419,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	unbind(newRemote);
 	bind(null, oldRemote);
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "InvidDBField setValue: couldn't finalize",
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setValue()",
+					  "InvidDBField setValue: couldn't finalize");
+
       }
   }
 
@@ -1452,7 +1440,6 @@ public final class InvidDBField extends DBField implements invid_field {
   
   public ReturnVal setElement(int index, Object value)
   {
-    ReturnVal retVal = null;
     DBEditObject eObj;
     Invid oldRemote, newRemote;
 
@@ -1480,12 +1467,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!verifyNewValue(value))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setElement()",
+					  getLastError());
       }
 
     eObj = (DBEditObject) owner;
@@ -1497,12 +1480,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!bind(oldRemote, newRemote))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setElement()",
+					  getLastError());
       }
 
     // check our owner, do it.  Checking our owner should
@@ -1519,12 +1498,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	unbind(newRemote);
 	bind(null, oldRemote);
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "InvidDBField setElement: couldn't finalize",
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.setElement()",
+					  "InvidDBField setElement: couldn't finalize\n" +
+					  getLastError());
       }
   }
 
@@ -1543,7 +1519,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public ReturnVal addElement(Object value)
   {
-    ReturnVal retVal = null;
     DBEditObject eObj;
     Invid remote;
 
@@ -1568,24 +1543,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!verifyNewValue(value))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElement()",
+					  getLastError());
       }
 
     if (size() >= getMaxArraySize())
       {
 	setLastError("Field " + getName() + " already at or beyond array size limit");
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Field " + getName() + " already at or beyond array size limit",
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElement()",
+					  "Field " + getName() + " already at or beyond array size limit");
       }
 
     remote = (Invid) value;
@@ -1594,15 +1561,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!bind(null, remote))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "Couldn't bind reverse pointer\n" + getLastError() ,
-					 "OK",
-					 null));
-
 	setLastError("Couldn't bind reverse pointer");
 
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElement()",
+					  "Couldn't bind reverse pointer\n" + getLastError());
       }
 
     if (eObj.finalizeAddElement(this, value)) 
@@ -1622,12 +1584,8 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	unbind(remote);
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "InvidDBField addElement: couldn't finalize\n" + getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.addElement()",
+					  "Couldn't finalize\n" + getLastError());
       }
   }
 
@@ -1726,7 +1684,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public ReturnVal deleteElement(int index)
   {
-    ReturnVal retVal = null;
     DBEditObject eObj;
     Invid remote;
 
@@ -1753,12 +1710,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!unbind(remote))
       {
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "InvidDBField deleteElement: couldn't unbind old value\n" + getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElement()",
+					  "Couldn't unbind old value\n" + getLastError());
       }
 
     if (eObj.finalizeDeleteElement(this, index))
@@ -1782,24 +1735,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    defined = false;
 
-	    retVal = new ReturnVal(false);
-	    retVal.setDialog(new JDialogBuff("Error",
-					     "InvidDBField deleteElement: vector is already empty",
-					     "OK",
-					     null));
-	    return retVal;
+	    return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElement()",
+					      "Vector is already empty\n");
 	  }
       }
     else
       {
 	bind(null, remote);
 
-	retVal = new ReturnVal(false);
-	retVal.setDialog(new JDialogBuff("Error",
-					 "InvidDBField deleteElement: couldn't finalize\n" + getLastError(),
-					 "OK",
-					 null));
-	return retVal;
+	return Ganymede.createErrorDialog("Server: Error in InvidDBField.deleteElement()",
+					  "Couldn't finalize\n" + getLastError());
       }
   }
 
