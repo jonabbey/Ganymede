@@ -15,7 +15,7 @@ RMIREGISTRY=/usr/bin/rmiregistry
 RMIPORT=1099
 PROPERTIES=ganymede.properties
 CLASSPATH=jars/ganymedeServer.jar:jars/custom.jar:jars/password.jar
-
+INSTALLDIR=/var/ganymede
 
 ############################################### 
 
@@ -30,8 +30,8 @@ export CLASSPATH
 #
 # This may be Solaris-specific, so use with caution if you're on another
 # operating system.
-#
-# ulimit -n 128
+
+#ulimit -n 128
 
 # Run the RMI registry to provide remote name lookup for the server
 
@@ -44,15 +44,68 @@ echo
 echo "Started rmiregistry"
 echo
 
-# The -resetadmin parameter forces the Ganymede server to reset the supergash and
-# monitor passwords from the properties file
+# Below this point we have a few choices of invocation lines that
+# actually run your JVM on the Ganymede server.. there are two for JDK
+# 1.2/1.3, which has a standard way of expressing whether or not
+# JITting should be performed, and one for JDK 1.1 which does not.
+#
+# The minimum requirements to invoke the Ganymede server is to
+# run the jvm on the arlut.csd.ganymede.Ganymede class file, with
+# a command line parameter thereafter of properties=$PROPERTIES
+# to give the Ganymede server access to its configuration file.
+#
+# The optional -resetadmin parameter forces the Ganymede server to
+# reset the supergash and monitor passwords from the properties file.
+#
+# The optional debug=<debug_filename> parameter causes the Ganymede
+# server to log all RMI calls made to it, as well as any exceptions
+# that are thrown in response to RMI calls.  If the server is throwing
+# an exception in response to something someone does in a Ganymede
+# client or with the admin console, the RMI debug log will capture
+# the exception's stack trace.
+#
+# The optional -doXML parameter causes the Ganymede server to dump
+# out the entire contents of ganymede.db to a ganymede.db.xml file,
+# according to the xml document format discussed in doc/xml.html.
+#
+# The -resetadmin, -doXML, and debug=XXX parameters should be placed
+# on the invocation line after arlut.csd.ganymede.Ganymede.
+#
+# Other options included below include the -Xms32m and -Xmx128m jvm
+# options, which force a minimum heap size of 32 megabytes and a
+# maximum heap size of 128 megabytes.  If you are running an unusally
+# large Ganymede installation, you may want to increase the maximum
+# heap size to something greater than 128 megabytes.
 
-# If you want to run the server in debug mode, be sure that the JAVA command specified
-# above is not JIT'ed and add debug=/path/debug.log to the line below.  That will
-# cause the server to record all RMI calls made to it, and will let you examine
-# exception traces that occur while the server is servicing a client request.
+#			     ----====----
 
-# If you want the server to do a complete XML dump of the ganymede.db file on startup,
-# add -doXML to the line below
+# The following line runs with HotSpot JITTING on.  Any exceptions
+# thrown by the server will not include line numbers, but the
+# 'debug=$INSTALLDIR/debug.log' option does cause RMI calls to the
+# server to be logged to debug.log.
+#
+# For JDK 1.2 and 1.3
 
-$JAVA -noasyncgc -ms32m -mx128m arlut.csd.ganymede.Ganymede -resetadmin properties=$PROPERTIES
+$JAVA -Xms32m -Xmx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
+
+#			     ----====----
+
+# The following line runs in non-JITTED mode through the
+# -Djava.compiler=NONE option and supports runtime debugger attaching
+# through the -Xdebug command line option, which can be useful in
+# debugging deadlock conditions.
+#
+# For JDK 1.2 and 1.3
+
+#$JAVA -Xdebug -Djava.compiler=NONE -Xms32m -Xmx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES
+
+#			     ----====----
+
+# If you are running the server under JDK 1.1, use the following line
+# to run the server instead of the above two.  Note that Java 1.1 uses
+# -ms32m and -mx128m instead of -Xms32m and -Xmx128m to specify default
+# minimum and maximum heap sizes.
+#
+# For JDK 1.1
+
+#$JAVA -noasyncgc -ms32m -mx128m arlut.csd.ganymede.Ganymede -resetadmin debug=$INSTALLDIR/debug.log properties=$PROPERTIES

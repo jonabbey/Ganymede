@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.18 $
-# $Date: 2000/09/15 07:36:40 $
+# $Revision: 1.19 $
+# $Date: 2000/10/06 23:19:05 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -399,7 +399,8 @@ print "\nCustomizing ganymede runServer script\n";
 	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
                "PROPERTIES" => "$installdir/ganymede.properties",
                "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/jars/custom.jar",
-	       "RMIPORT" => $vars{"REGISTRYPORT"});
+	       "RMIPORT" => $vars{"REGISTRYPORT"},
+	       "INSTALLDIR" => $installdir);
 
 open INPUT, "scripts/runServer.template" or die "Couldn't open runServer template!";
 open OUTPUT, ">$installdir/bin/runServer" or die "Couldn't write runServer";

@@ -936,6 +936,11 @@ that does not have an open transaction asssociated with it will not
 incur a synchronization penalty/deadlock opportunity merely to
 retrieve a reference to an object from the database.
 
+62. [SERVER, CLIENT] Added -dumpschema to the xmlclient
+
+The xmlclient is now able to emit a copy of the server's schema
+definition in xml format.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
