@@ -5,7 +5,7 @@
    The tab that holds date information.
    
    Created: 9 September 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -79,8 +79,22 @@ public class datePanel extends JBufferedPane {
     
     try
       {
-	addRow(exp_df, expiration.getName());
-	addRow(rem_df, removal.getName());
+	if (expiration != null)
+	  {
+	    addRow(exp_df, expiration.getName());
+	  }
+	else
+	  {
+	    addRow(new JLabel("No expiration date is set"), "");
+	  }
+	if (removal != null)
+	  {
+	    addRow(rem_df, removal.getName());
+	  }
+	else
+	  {
+	    addRow(new JLabel("No removal date is set"), "");
+	  }
       }
     catch (RemoteException rx)
       {
