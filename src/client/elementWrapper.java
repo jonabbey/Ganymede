@@ -58,7 +58,7 @@ class elementWrapper extends JPanel implements ActionListener {
     this.parent = parent;
     
     setLayout(new BorderLayout());
-    setBorder(parent.parent.lineEmptyBorder);
+    setBorder(parent.parent.eWrapperBorder);
       
     buttonPanel = new JPanel();
     buttonPanel.setOpaque(true);
@@ -85,7 +85,7 @@ class elementWrapper extends JPanel implements ActionListener {
     buttonPanel.add("East",remove);
       
     my_component = comp;
-    my_component.setBackground(parent.container.frame.getVectorBG());
+    //my_component.setBackground(parent.container.frame.getVectorBG());
       
     //add("Center",my_component);
     add("North",buttonPanel);
