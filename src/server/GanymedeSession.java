@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.226 $
-   Last Mod Date: $Date: 2001/02/08 08:49:19 $
+   Version: $Revision: 1.227 $
+   Last Mod Date: $Date: 2001/02/08 08:56:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.226 $ $Date: 2001/02/08 08:49:19 $
+ * @version $Revision: 1.227 $ $Date: 2001/02/08 08:56:26 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -966,6 +966,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   void forceOff(String reason)
   {
     final String myReason = reason;
+    final Client myClient = this.client;
 
     /* -- */
 
@@ -1017,11 +1018,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     Thread forceThread = new Thread(new Runnable() {
       public void run() {
-	if (client != null)
+	if (myClient != null)
 	  {
 	    try
 	      {
-		client.forceDisconnect(disconnectReason);
+		myClient.forceDisconnect(disconnectReason);
 	      }
 	    catch (RemoteException e)
 	      {
