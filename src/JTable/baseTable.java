@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 29 May 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,7 +52,7 @@ import java.util.*;
  * @see csd.Table.rowTable
  * @see csd.Table.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.5 $ %D%
+ * @version $Revision: 1.6 $ %D%
  */
 
 public class baseTable extends Panel implements AdjustmentListener {
@@ -1616,30 +1616,6 @@ public class baseTable extends Panel implements AdjustmentListener {
       }
   }
 
-  // component overrides
-
-  public Dimension getPreferredSize()
-  {
-    if (rows.size() < 5)
-      {
-	return new Dimension(origTotalWidth,
-			     headerAttrib.height + 2 * hHeadLineThickness +
-			     5 * (row_height + hRowLineThickness));
-      }
-    else
-      {
-	return new Dimension(origTotalWidth,
-			     headerAttrib.height + 2 * hHeadLineThickness +
-			     rows.size() * (row_height + hRowLineThickness));
-      }
-  }
-
-  public Dimension getMinimumSize()
-  {
-    return new Dimension(origTotalWidth,
-			 headerAttrib.height + 2 * hHeadLineThickness +
-			 2 * (row_height + hRowLineThickness));
-  }
 
 }
 
@@ -2749,6 +2725,31 @@ class tableCanvas extends Canvas implements MouseListener, MouseMotionListener {
 	    bg.setPaintMode();
 	  }
       }
+  }
+
+  // component overrides
+
+  public Dimension getPreferredSize()
+  {
+    if (rt.rows.size() < 5)
+      {
+	return new Dimension(rt.origTotalWidth,
+			     rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
+			     5 * (rt.row_height + rt.hRowLineThickness));
+      }
+    else
+      {
+	return new Dimension(rt.origTotalWidth,
+			     rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
+			     rt.rows.size() * (rt.row_height + rt.hRowLineThickness));
+      }
+  }
+
+  public Dimension getMinimumSize()
+  {
+    return new Dimension(rt.origTotalWidth,
+			 rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
+			 2 * (rt.row_height + rt.hRowLineThickness));
   }
 
 }
