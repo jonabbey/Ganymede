@@ -8,7 +8,7 @@
    their current state in the client, and more.
    
    Created: 6 February 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -321,12 +321,18 @@ public class objectList {
     for (int i = 0; i < size; i++)
       {
 	handle = (ObjectHandle) handles.elementAt(i);
-
-	if (invid.equals(handle.getInvid()))
+	if (handle == null)
 	  {
-	    handles.removeElementAt(i);
-	    resultHandle = handle;
-	    break;
+	    System.err.println("Null handle checked in objectList.removeInvid, skipping");
+	  }
+	else
+	  {
+	    if (invid.equals(handle.getInvid()))
+	      {
+		handles.removeElementAt(i);
+		resultHandle = handle;
+		break;
+	      }
 	  }
       }
 
