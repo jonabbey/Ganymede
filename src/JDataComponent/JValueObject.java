@@ -8,9 +8,8 @@
    instructions using a callback method to the Object designated
    as an appropriate callback handler.
 
-   
    Created: 28 Feb 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +35,7 @@ import java.awt.*;
  *  as an appropriate callback handler.<br><br>
  *   
  *  Created: 28 Feb 1997<br>
- *  Version: $Revision: 1.7 $ %D%<br>
+ *  Version: $Revision: 1.8 $ %D%<br>
  *  Module By: Navin Manohar<br>
  *  Applied Research Laboratories, The University of Texas at Austin
  *
