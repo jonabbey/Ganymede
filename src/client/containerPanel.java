@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.30 $ %D%
+    Version: $Revision: 1.31 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,15 +35,12 @@ import arlut.csd.JDataComponent.*;
 
 public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // -- 
   
   gclient
     gc;			// our interface to the server
-
-  //  JPanel
-  //  panel; //This is the panel that holds everything
 
   db_object
     object;			// the object we're editing
@@ -53,6 +50,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   protected framePanel
     frame;
+
+  Vector
+    vectorPanelList = new Vector();
 
   Hashtable
     rowHash, 
@@ -73,9 +73,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   Vector 
     infoVector = null,
     templates = null;
-
-  JButton
-    editB;
 
   int row = 0;			// we'll use this to keep track of rows added as we go along
 
@@ -177,18 +174,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     objectHash = new Hashtable();
     rowHash = new Hashtable();
 
-    //setLayout(new BorderLayout());
-
-    //panel = new JPanel();
-    //layout = new TableLayout(false);
-    //layout.rowSpacing(5);
-    //setLayout(new BorderLayout());
-    
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
+    
     setLayout(gbl);
-    //panel = new JPanel(gbl, false);
-    //add("North", panel);
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.insets = new Insets(4,4,4,4);
     
@@ -221,34 +210,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     Short Type = new Short(type);
-    if (gc.templateHash.containsKey(Type))
-      {
-	if (debug)
-	  {
-	    System.out.println("Found the template, using cache.");
-	  }
-	templates = (Vector)gc.templateHash.get(Type);
 
-      }
-    else
-      {
-	try
-	  {
-	    if (debug)
-	      {
-		System.out.println("template not found, downloading and caching: " + Type);
-	      }
-	    templates = object.getFieldTemplateVector();
-	    gc.templateHash.put(Type, templates);
-
-
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get field templates: " + rx);
-	  }
-
-      }
+    templates = gc.getTemplateVector(Type);
 
     if (progressBar != null)
       {
@@ -297,7 +260,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		fieldInfo = (FieldInfo)infoVector.elementAt(i);
 		// Find the template
 		boolean found = false;
-		for (int k = 0; k < templates.size(); k++)
+		int tSize = templates.size();
+		for (int k = 0; k < tSize; k++)
 		  {
 		    fieldTemplate = (FieldTemplate)templates.elementAt(k);
 		    if (fieldTemplate.getID() == fieldInfo.getID())
@@ -325,6 +289,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 		else
 		  {
+		    //System.out.println("- number " + i + ".  tSize = " + tSize);
+		    //if (i == tSize - 1)  // This is the last component
+		    //  {
+		    //System.out.println("setting the weighty!");
+		    //gbc.weighty = 1.0;  // Make it strectch to fill up the space
+		    //}
 		    addFieldComponent(fieldInfo.getField(), fieldInfo, fieldTemplate);
 		  }
 	      }
@@ -471,7 +441,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	try
 	  {
-
 	    if (debug)
 	      {
 		System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
@@ -479,14 +448,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (field.setValue(v.getValue()))
 	      {
-		gc.somethingChanged = true;
 		returnValue = true;
 	      }
 	    else
 	      {
-		
-		setStatus("Could not change field: " + gc.getSession().getLastError());
-
+		setStatus("Change failed: " + gc.getSession().getLastError());
 		returnValue = false;
 	      }
 	  }
@@ -513,16 +479,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (field.setPlainTextPass((String)v.getValue()))
 	      {
-		gc.somethingChanged = true;
 		returnValue = true;
 	      }
 	    else
 	      {
-		if (debug)
-		  {
-		    System.err.println("Could not change field");
-		  }
-
+		setStatus("Change failed: " + gc.getSession().getLastError());
 		returnValue =  false;
 	      }
 	  }
@@ -543,7 +504,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	try
 	  {
-	    gc.somethingChanged = true;
 	    returnValue =  field.setValue(v.getValue());
 	  }
 	catch (RemoteException rx)
@@ -554,7 +514,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     else if (v.getSource() instanceof vectorPanel)
       {
 	System.out.println("Something happened in the vector panel");
-	gc.somethingChanged = true;
       }
     else if (v.getSource() instanceof tStringSelector)
       {
@@ -616,7 +575,30 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	else if (v.getValue() instanceof String)
 	  {
 	    System.out.println("String tStringSelector callback, not implemented yet");
-	    returnValue = false;
+	    string_field field = (string_field)objectHash.get(v.getSource());
+	    
+	    if (v.getOperationType() == JValueObject.ADD)
+	      {
+		try
+		  {
+		    returnValue = field.addElement((String)v.getValue());
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not add string to string_field: " + rx);
+		  }
+	      }
+	    else if (v.getOperationType() == JValueObject.DELETE)
+	      {
+		try
+		  {
+		    returnValue = field.deleteElement((String)v.getValue());
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not remove string from string_field: " + rx);
+		  }
+	      }
 	  }
 	else
 	  {
@@ -634,12 +616,59 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	try
 	  {
-	    gc.somethingChanged = true;
 	    returnValue =  field.setValue(v.getValue());
 	  }
 	catch (RemoteException rx)
 	  {
 	    throw new IllegalArgumentException("Could not set ip field value: " + rx);
+	  }
+      }
+    else if (v.getOperationType() == JValueObject.PARAMETER)
+      {
+	System.out.println("MenuItem selected in a tStringSelector");
+	String command = (String)v.getParameter();
+
+	if (command.equals("Edit object"))
+	  {
+	    System.out.println("Edit object: " + v.getValue());
+	    if (v.getValue() instanceof listHandle)
+	      {
+		Invid invid = (Invid)((listHandle)v.getValue()).getObject();
+		    
+		gc.editObject(invid);
+	      }
+	    else if (v.getValue() instanceof Invid)
+	      {
+		System.out.println("It's an invid!");
+		Invid invid = (Invid)v.getValue();
+		    
+		gc.viewObject(invid);
+		
+	      }
+	    returnValue = true;
+	  }
+	else if (command.equals("View object"))
+	  {
+
+	    System.out.println("View object: " + v.getValue());
+	    if (v.getValue() instanceof Invid)
+	      {
+		try
+		  {
+		    Invid invid = (Invid)v.getValue();
+		    
+		    winP.addWindow(gc.getSession().view_db_object(invid));
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not view object: " + rx);
+		  }
+	      }
+	    returnValue = true;
+	  }
+	else
+	  {
+	    System.out.println("Unknown action command from popup: " + command);
 	  }
       }
     else
@@ -662,6 +691,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     System.out.println("returnValue: " + returnValue);
+    
+    // Only set somethingChanged to true if something Changed; never set it to false
+    if (returnValue)
+      {
+	gc.somethingChanged = true;
+      }
 
     return returnValue;
   }
@@ -742,17 +777,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("Unknown type from JComboBox: " + item);
 	      }
-	    if (debug)
+	    if (ok)
 	      {
-		if (ok)
+		gc.somethingChanged = true;
+		if (debug)
 		  {
 		    System.out.println("field setValue returned true");
 		  }
-		else
-		  {
-		    System.out.println("field setValue returned FALSE!!");
-		  }
 	      }
+	    else if (debug)
+	      {
+		System.out.println("field setValue returned FALSE!!");
+	      }
+	    
 	  }
 	catch (RemoteException rx)
 	  {
@@ -767,13 +804,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   void addVectorRow(Component comp, String label, boolean visible)
   {
-    // create a dummy label for consistency
 
     JLabel l = new JLabel("");
     rowHash.put(comp, l);
     
-    //comp.setBackground(ClientColor.ComponentBG);
-    //add("0 " + row + " 2 lthH", comp); // span 2 columns, no label
     gbc.gridwidth = 2;
     gbc.gridx = 0;
     gbc.gridy = row;
@@ -790,15 +824,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   
   void addRow(Component comp,  String label, boolean visible)
   {
-    // create a dummy label for consistency
-
     JLabel l = new JLabel(label);
     rowHash.put(comp, l);
 
-    comp.setBackground(ClientColor.ComponentBG);
+    //comp.setBackground(ClientColor.ComponentBG);
 
-    //add("0 " + row + " lthH", l);
-    //add("1 " + row + " lthH", comp);
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
 
@@ -995,7 +1025,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 						     editable,
 						     false,  //canChoose
 						     false,  //mustChoose
-						     100);
+						     160);
 	    objectHash.put(ss, field);
 	    if (editable)
 	      {
@@ -1011,7 +1041,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 						     editable,
 						     true,   //canChoose
 						     false,  //mustChoose
-						     100);
+						     160);
 	    objectHash.put(ss, field);
 	    if (editable)
 	      {
@@ -1029,7 +1059,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 						     editable,
 						     false,   //canChoose
 						     false,  //mustChoose
-						     100);
+						     160);
 	    objectHash.put(ss, field);
 	    addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
       }
@@ -1110,6 +1140,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		choiceHandles = field.choices().getListHandles();
 		gc.cachedLists.put(key, choiceHandles);
 	      }
+	      
 	  }
       }
     else
@@ -1121,8 +1152,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     // ss is canChoose, mustChoose
+    PopupMenu invidTablePopup = new PopupMenu();
+    MenuItem editO = new MenuItem("Edit object");
+    MenuItem viewO = new MenuItem("View object");
+    invidTablePopup.add(editO);
+    invidTablePopup.add(viewO);
+    
+    PopupMenu invidTablePopup2 = new PopupMenu();
+    MenuItem editO2 = new MenuItem("Edit object");
+    MenuItem viewO2 = new MenuItem("View object");
+    invidTablePopup2.add(editO2);
+    invidTablePopup2.add(viewO2);
 
-    tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, true, true, 100);
+    tStringSelector ss = new tStringSelector(choiceHandles, valueHandles, this, editable, true, true, 160, "Selected", "Available", invidTablePopup, invidTablePopup2);
     objectHash.put(ss, field);
     if (editable)
       {
@@ -1182,7 +1224,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     vectorPanel vp = new vectorPanel(field, winP, editable, isEditInPlace, this);
-    
+    vectorPanelList.addElement(vp);
 
     addVectorRow( vp, fieldTemplate.getName(), fieldInfo.isVisible());
     
@@ -1249,7 +1291,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		gc.cachedLists.put(key, choiceHandles);
 
 	      }
-
+	    
 	    for (int j = 0; j < choiceHandles.size() ; j++)
 	      {
 		choices.addElement(((listHandle)choiceHandles.elementAt(j)).getLabel());
@@ -1287,8 +1329,20 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    
 	combo.setMaximumRowCount(8);
 	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-	combo.setEditable(false); // this should be setEditable(mustChoose());
-	combo.setVisible(true);
+	try
+	  {
+	    boolean mustChoose = field.mustChoose();
+	    combo.setEditable(mustChoose); // this should be setEditable(mustChoose());
+	    if (debug)
+	      {
+		System.out.println("Setting editable to + " + mustChoose);
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not check to see if field was mustChoose.");
+	  }
+	//combo.setVisible(true);  // This line is not necessary, right?
 	    
 	if (currentChoice != null)
 	  {
@@ -1525,7 +1579,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     // note that the permissions editor does its own callbacks to
     // the server, albeit using our transaction / session.
 
-    perm_button pb = new perm_button((perm_field) field,
+    perm_button pb = new perm_button(gc, 
+				     (perm_field) field,
 				     editable,
 				     gc.getBaseHash());
     
