@@ -5,7 +5,7 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -61,9 +61,6 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
   JComboBox
     labelC;
 
-  JcomponentAttr 
-    ca = null;
-
   JPanel 
     editPanel;
 
@@ -91,9 +88,6 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
     editPanel.setLayout(new TableLayout(false));
     
-    ca = new JcomponentAttr(this, new java.awt.Font("SansSerif", java.awt.Font.BOLD, 12),
-			   java.awt.Color.black, java.awt.Color.white);
-
     typeN = new JnumberField(20, false, false, 0, 0);
     typeN.setCallback(this);
     addRow(editPanel, typeN, "ObjectType ID:", 0);
