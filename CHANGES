@@ -965,6 +965,18 @@ the focus on the username box, so people can just start typing their name
 when the clients come up.  I reworked the admin console shutdown dialog
 so it just uses one dialog box for the various shutdown modes.
 
+66. [INSTALL] Removed installClient2, made installServer autodetect java version
+
+A bunch of changes to the installation process. installClient2 is now
+gone, installClient is now smart enough to autodetect what version of
+Java is being used and to configure the client install appropriately.
+
+Ditto the installServer script.
+
+I cleaned up the gasharl schema kit's ganymede.schema file to take
+care of some inconsistencies that have been in that file for a long
+while.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

@@ -1,7 +1,7 @@
 
    Ganymede
    
- Ganymede UNIX Installation Guide Release 1.0 prerelease 1, beta 3 - 5 October
+Ganymede UNIX Installation Guide Release 1.0 prerelease 1, beta 4 - 10 October
                                      2000
                                        
      _________________________________________________________________
@@ -23,10 +23,9 @@ _1. Configuring the distribution for your site_
    that there is a configure script under the ganymede-xx directory. This
    script does two main things. First, it unpacks four scripts you can
    immediately use to install the client and server, called
-   installClient, installClient2 (for JDK 1.2 and 1.3), installWeb and
-   installServer. Second, configure goes through the source tree and
-   builds and configures the makefiles and build scripts used to build
-   the source.
+   installClient, installWeb and installServer. Second, configure goes
+   through the source tree and builds and configures the makefiles and
+   build scripts used to build the source.
    
    Run configure to get these install scripts built and to get the source
    tree configured for building.
@@ -189,10 +188,8 @@ _3. Installing UNIX client files_
    clients are themselves totally portable, however, as they are simply
    Java jar files.
    
-   We have provided two install scripts for installing the Ganymede
-   clients on a UNIX system. installClient is for Java 1.1 and Swing 1.1
-   or greater (Swing 1.1.1 heavily recommended), and installClient2 is
-   for Java 1.2. Either script which will prompt you for the name of the
+   We have provided an install script for installing the Ganymede clients
+   on a UNIX system. installClient will prompt you for the name of the
    machine that will be running your Ganymede server, and the directory
    which will contain the bin, html, and jars directories. The install
    script will then customize and install scripts for you so that the
@@ -437,4 +434,4 @@ _6. Loading the server_
    
     Jonathan Abbey
     
-   Last modified: Thu Oct 5 18:04:58 CDT 2000
+   Last modified: Mon Oct 9 23:54:54 CDT 2000

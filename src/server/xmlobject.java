@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/08/31 03:51:13 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/10/10 04:59:45 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -69,9 +69,9 @@ import java.util.Hashtable;
 /**
  * <p>This class is a data holding structure that is intended to hold
  * object and field data for an XML object element for
- * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
+ * {@link arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession}.</p>
  *
- * @version $Revision: 1.1 $ $Date: 2000/08/31 03:51:13 $ $Name:  $
+ * @version $Revision: 1.2 $ $Date: 2000/10/10 04:59:45 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -133,7 +133,7 @@ public class xmlobject {
   int num = -1;
 
   /**
-   * <p>Hashtable mapping non-XML-coded {@link arlut.csd.ganymede.client.xmlfield xmlfield}
+   * <p>Hashtable mapping non-XML-coded {@link arlut.csd.ganymede.xmlfield xmlfield}
    * names to xmlfield objects.</p>
    */
 

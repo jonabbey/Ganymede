@@ -1,5 +1,5 @@
-Ganymede Developer Release 1.0pre1 beta 3
-October 5, 2000
+Ganymede Developer Release 1.0pre1 beta 4
+October 10, 2000
 CREDITS
 ---------------------------------------------
 
@@ -125,6 +125,7 @@ Charles Adams, charles.adams@central.sun.com - bug reports, debugging
 Darrell Tippe, Darrell.Tippe@atcoitek.com - bug reports
 Glen Joseph, gjoseph@us.ibm.com - installServer bug report
 Chris McCraw, fool@dfw.net - bugzilla testing
+Ido Dubrawsky, ido@globeset.com - testing
 
 --
 
