@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.18 $ %D%
+  Version: $Revision: 1.19 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.18 $ %D%
+ * @version $Revision: 1.19 $ %D%
  */
 
 public class baseTable extends JBufferedPane implements AdjustmentListener, ActionListener {
@@ -446,6 +446,8 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
     cell.attr = attr;
 
     calcFonts();
+    
+    cell.refresh();
 
     if (repaint)
       {
@@ -488,6 +490,8 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
     calcFonts();
 
+    cell.refresh();
+    
     if (repaint)
       {
 	refreshTable();
@@ -596,9 +600,10 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
    *
    */
 
-  public final void setColAttr(int x, tableAttr attr, boolean repaint)
+  public synchronized final void setColAttr(int x, tableAttr attr, boolean repaint)
   {
     tableCol element;
+    tableRow row;
 
     /* -- */
 
@@ -606,6 +611,15 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
     element.attr = attr;
 
     calcFonts();
+
+    // recalc the cell's word wrapping, spacing
+
+    for (int i = 0; i < rows.size(); i++)
+      {
+	row = (tableRow) rows.elementAt(i);
+
+	row.elementAt(x).refresh();
+      }
 
     if (repaint)
       {
@@ -625,8 +639,12 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
    *
    */
 
-  public final void setColFont(int x, Font font, boolean repaint)
+  public synchronized final void setColFont(int x, Font font, boolean repaint)
   {
+    tableRow row;
+
+    /* -- */
+
     tableCol element = (tableCol) cols.elementAt(x);
 
     if (element.attr == null)
@@ -637,6 +655,15 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
     element.attr.setFont(font);
 
     calcFonts();
+
+    // recalc the cell's word wrapping, spacing
+
+    for (int i = 0; i < rows.size(); i++)
+      {
+	row = (tableRow) rows.elementAt(i);
+
+	row.elementAt(x).refresh();
+      }
 
     if (repaint)
       {
@@ -736,8 +763,6 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
       }
   }
 
-
-
   // -------------------- table attribute methods
 
   /**
@@ -750,6 +775,10 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
   public final void setTableAttr(tableAttr attr, boolean repaint)
   {
+    tableRow row;
+
+    /* -- */
+
     if (attr == null)
       {
 	throw new IllegalArgumentException();
@@ -758,6 +787,18 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
     tableAttrib = attr;
 
     calcFonts();
+
+    // need to refresh all cells
+
+    for (int i = 0; i < rows.size(); i++)
+      {
+	row = (tableRow) rows.elementAt(i);
+
+	for (int j = 0; j < rows.size(); j++)
+	  {
+	    row.elementAt(j).refresh();
+	  }
+      }
 
     if (repaint)
       {
@@ -775,6 +816,10 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
   
   public final void setTableFont(Font font, boolean repaint)
   {
+    tableRow row;
+
+    /* -- */
+
     if (font == null)
       {
 	throw new IllegalArgumentException();
@@ -783,6 +828,18 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
     tableAttrib.setFont(font);
 
     calcFonts();
+
+    // need to refresh all cells
+
+    for (int i = 0; i < rows.size(); i++)
+      {
+	row = (tableRow) rows.elementAt(i);
+
+	for (int j = 0; j < rows.size(); j++)
+	  {
+	    row.elementAt(j).refresh();
+	  }
+      }
 
     if (repaint)
       {
@@ -960,6 +1017,12 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
       }
   }
 
+  /**
+   *
+   * This method takes the given column out of the table entirely.
+   *
+   */
+
   public synchronized void deleteColumn(int index, boolean reportion)
   {
     tableRow row;
@@ -988,13 +1051,14 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	for (int i=0; i<cols.size(); i++)
 	  {
 	    col = (tableCol) cols.elementAt(i);
-	    col.origWidth = col.width = newWidth; 
+	    col.origWidth = newWidth; 
+
+	    // reShape() will calculate the appropriate scaled with for all columns
 	  }
       }
 
     reShape();
   }
-
 
   // -------------------- Click / Selection Methods --------------------
 
@@ -1185,6 +1249,9 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
       newRow,
       oldRow;
 
+    int
+      bottom;
+
     /* -- */
 
     newRow = new tableRow(this, cols.size());
@@ -1204,7 +1271,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	newRow.setTopEdge(newVal);
       }
 
-    int bottom =  newRow.getTopEdge() + (newRow.getRowSpan() * (row_height + hRowLineThickness));
+    bottom =  newRow.getTopEdge() + (newRow.getRowSpan() * (row_height + hRowLineThickness));
 
     System.err.println("Setting bottomEdge for row " + rows.size() + " to " + bottom);
 
@@ -1221,9 +1288,107 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
   /**
    *
+   * This method will go through all of the columns and optimize
+   * the pole placement to minimize wasted space and provide a decent
+   * balance of row and column sizes.
+   *
+   * Somehow.
+   *
+   */
+
+  public synchronized void optimizeCols()
+  {
+    tableRow row;
+    tableCell cell;
+    tableCol col;
+    int nominalWidth[];
+    int localNW, newWidth;
+    float totalOver, spareSpace, percentOver, scaledWidth, growthFactor;
+
+    /* -- */
+
+    nominalWidth = new int[cols.size()];
+    totalOver = (float) 0.0;
+    spareSpace = (float) 0.0;
+
+    for (int i = 0; i < cols.size(); i++)
+      {
+	nominalWidth[i] = 0;
+	col = (tableCol) cols.elementAt(i);
+
+	for (int j = 0; j < rows.size(); j++)
+	  {
+	    row = (tableRow) rows.elementAt(j);
+	    cell = row.elementAt(i);
+
+	    localNW = cell.getNominalWidth();
+
+	    if (localNW > nominalWidth[i])
+	      {
+		nominalWidth[i] = localNW;
+	      }
+	  }
+
+	// nominalWidth is now the required width of this column
+
+	scaledWidth = scalefact * col.origWidth;
+
+	System.err.println("Column " + i + " has nominalWidth of " + nominalWidth[i] + 
+			   " and a current scaled width of " + scaledWidth);
+
+	if (nominalWidth[i] < scaledWidth)
+	  {
+	    System.err.println("Reducing column " + i + " to nominal + 5");
+	    spareSpace += scaledWidth;
+	    col.origWidth = (float) (nominalWidth[i] + 5) / scalefact;
+	    spareSpace -= col.origWidth * scalefact;
+	  }
+	else
+	  {
+	    totalOver += (float) nominalWidth[i] - scaledWidth;
+	  }
+      }
+
+    System.err.println("spareSpace = " + spareSpace + ", totalOver = " + totalOver);
+
+    // we've shrunk the columns as much as we can.. now let's take
+    // our spareSpace and apportion it out to those columns whose
+    // nominal widths are bigger than they 
+
+    for (int i = 0; i < cols.size(); i++)
+      {
+	col = (tableCol) cols.elementAt(i);
+	scaledWidth = scalefact * col.origWidth;
+
+	if (nominalWidth[i] > scaledWidth)
+	  {
+	    percentOver = (nominalWidth[i] - scaledWidth) / totalOver;
+	    growthFactor = (spareSpace * percentOver) / scalefact;
+
+	    System.err.print("Column " + i + ": percentOver = " + percentOver + " , growing by " + growthFactor);
+
+	    col.origWidth += growthFactor;
+
+	    for (int j = 0; j < rows.size(); j++)
+	      {
+		row = (tableRow) rows.elementAt(j);
+		cell = row.elementAt(i);
+		cell.wrap(Math.round(col.origWidth * scalefact));
+	      }
+	  }
+      }
+
+    calcCols();
+    reCalcRowPos(0);
+  }
+
+  /**
+   *
    * This method is used to recalculate the vertical position of all
    * of the rows in the table below startRow.  If startRow is 0, all
    * rows will be readjusted.
+   *
+   * This method is provided to support variable-height rows.
    *
    */
 
@@ -1267,6 +1432,8 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
 	row.setBottomEdge(bottomEdge);
       }
+
+    reShape();
   }
 
   /**
@@ -1319,9 +1486,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	for (int j = 0; j < rows.size(); j++)
 	  {
 	    cell = getCell(i,j);
-	    cell.text = null;
-	    cell.attr = null;
-	    cell.menu = null;
+	    cell.clear();
 	  }
       }
 
@@ -1393,50 +1558,57 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
     canvas.repaint();
   }
 
-  // This method is called when our size is changed.  We need to know
-  // this so we can update the scrollbars and what-not.
+  /**
+   * This method is called when our size is changed.  We need to know
+   * this so we can update the scrollbars and what-not.
+   *
+   */
 
   public synchronized void setBounds(int x, int y, int width, int height)
-    {
-      if (debug)
-	{
-	  System.err.println("setBounds()");
-	}
+  {
+    if (debug)
+      {
+	System.err.println("setBounds()");
+      }
+    
+    super.setBounds(x,y,width,height);
 
-      super.setBounds(x,y,width,height);
-
-      validate();		// we need to do this to get our canvas resized before we call
+    validate();		// we need to do this to get our canvas resized before we call
 				// reShape() and refreshTable() below
 
-      if ((width != bounding_rect.width) ||
-	  (height != bounding_rect.height))
-	{
-	  bounding_rect.x = x;
-	  bounding_rect.y = y;
-	  bounding_rect.width = width;
-	  bounding_rect.height = height;
+    if ((width != bounding_rect.width) ||
+	(height != bounding_rect.height))
+      {
+	bounding_rect.x = x;
+	bounding_rect.y = y;
+	bounding_rect.width = width;
+	bounding_rect.height = height;
 
-	  in = getInsets();
+	in = getInsets();
 
-	  bounding_rect.width -= (in.left + in.right);
-	  bounding_rect.height -= (in.top + in.bottom);
+	bounding_rect.width -= (in.left + in.right);
+	bounding_rect.height -= (in.top + in.bottom);
 
-	  reShape();
-	  refreshTable();
-	}
+	reShape();
+	refreshTable();
+      }
 
-      if (debug)
-	{
-	  System.err.println("exiting setBounds()");
-	}
-    }
+    if (debug)
+      {
+	System.err.println("exiting setBounds()");
+      }
+  }
 
-  // Internal method
-
-  // This method recalculates the general parameters of our table's
-  // display.  That is, it calculates whether or not we need scroll
-  // bars, adds or deletes the scroll bars, and scales the column
-  // positions to match the general rendering parameters.
+  /**
+   *
+   * Internal method
+   *
+   * This method recalculates the general parameters of our table's
+   * display.  That is, it calculates whether or not we need scroll
+   * bars, adds or deletes the scroll bars, and scales the column
+   * positions to match the general rendering parameters.
+   *
+   */
 
   void reShape()
   {
@@ -1456,13 +1628,16 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
       }
   }
 
-
-  // Internal method
-
-  // Check to see whether we need scrollbars in our current component size,
-  // set the min/max/visible parameters
-  //
-  // This method is intended to be called from reShape().
+  /**
+   *
+   * Internal method
+   *
+   * Check to see whether we need scrollbars in our current component size,
+   * set the min/max/visible parameters
+   *
+   * This method is intended to be called from reShape().
+   *
+   */
 
   void adjustScrollbars()
   {
@@ -1628,6 +1803,8 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
     if (vbar_visible && (canvas.getBounds().height != 0))
       {
+	System.err.println("adjusting vertical scrollbar configuration");
+
 	vbar.setValues(vbar.getValue(),
 		       canvas.getBounds().height - headerAttrib.height - (2 * hHeadLineThickness),
 		       0,
@@ -1654,12 +1831,14 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
       {
 	System.err.println("exiting adjustScrollbars()");
       }
-
   }
 
-  // Internal method
-  //
-  // calculate the total vertical size of the rows only
+  /** 
+   * Internal method
+   *
+   * calculate the total vertical size of the rows only
+   *
+   */
 
   int calcVSize()
   {
@@ -1672,11 +1851,14 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
       hRowLineThickness;
   }
 
-  // Internal method
-  //
-  // Calculate our columns.  This method is called both by
-  // reShape() and by our canvas, in response to the user
-  // adjusting the columns by hand.
+  /**
+   * Internal method
+   *
+   * Calculate our columns.  This method is called both by
+   * reShape() and by our canvas, in response to the user
+   * adjusting the columns by hand.
+   *
+   */
 
   void calcCols()
   {
@@ -1707,6 +1889,8 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	// our desired width is too wide for our component.  We'll
 	// use our original column widths, and let the scrollbar
 	// handle things
+
+	scalefact = (float) 1.0;
 
 	// Calculate vertical bar positions
 	
@@ -1778,7 +1962,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	    element = (tableCol) cols.elementAt(i);
 	    
 	    colPos.setElementAt(new Integer(pos), i);
-	    element.width = (int) (element.origWidth * scalefact);
+	    element.width = Math.round(element.origWidth * scalefact);
 	    pos += element.width + vLineThickness;
 	  }
 
@@ -1802,10 +1986,13 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
       }
   }
 
-  // Internal method
-
-  // Calculate our fonts and measurements.  If they have changed,
-  // go ahead and reshape ourselves.
+  /**
+   * Internal method
+   *
+   * Calculate our fonts and measurements.  If they have changed,
+   * go ahead and reshape ourselves.
+   *
+   */
 
   void calcFonts()
   {
@@ -1880,8 +2067,6 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	reShape();
       }
   }
-
-
 }
 
 /*------------------------------------------------------------------------------
@@ -1889,6 +2074,13 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
                                                                      tableCanvas
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This class is the actual pane that is rendered on to create the table.  The
+ * tableCanvas is double buffered, and optimized for speed.
+ *
+ */
 
 class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionListener {
 
@@ -1925,6 +2117,8 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
     this.rt = rt;
     addMouseListener(this);
     addMouseMotionListener(this);
+
+    setBuffered(false);		// we do the buffering ourselves currently.
   }
 
   // -------------------- Access Methods --------------------
@@ -2661,42 +2855,16 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 	if (renderString != null)
 	  {
-	    if ((cell.attr != null) && (cell.attr.font != null))
-	      {
-		g.setFont(cell.attr.font);
-		strwidth = cell.attr.fontMetric.stringWidth(cell.text);
-	      }
-	    else if ((element.attr != null) &&
-		     (element.attr.font != null))
-	      {
-		g.setFont(element.attr.font);
-		strwidth = element.attr.fontMetric.stringWidth(cell.text);
-	      }
-	    else
-	      {
-		g.setFont(rt.tableAttrib.font);
-		strwidth = rt.tableAttrib.fontMetric.stringWidth(cell.text);
-	      }
+	    g.setFont(cell.getFont());
+	    strwidth = cell.getCurrentWidth();
 	    
 	    // set our color
 
 	    setCellForeColor(g, cell, element);
 
 	    // and draw
-		    
-	    if ((cell.attr != null) && (cell.attr.align != tableAttr.JUST_INHERIT))
-	      {
-		just = cell.attr.align;
-	      }
-	    else if ((element.attr != null) &&
-		     (element.attr.align != tableAttr.JUST_INHERIT))
-	      {
-		just = element.attr.align;
-	      }
-	    else
-	      {
-		just = rt.tableAttrib.align;
-	      }
+
+	    just = cell.getJust();
 		    
 	    switch (just)
 	      {
@@ -2736,6 +2904,9 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
   /**
    *
+   * This method takes a y coordinate in virtual table space
+   * (i.e., after vertical scrollbar transform) and returns
+   * the index for the row containing that point.
    *
    */
   
@@ -3302,24 +3473,40 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 ------------------------------------------------------------------------------*/
 
-// should the methods in this class be public?
+/**
+ *
+ * tableCell represents the contents of a single cell in the table.
+ *
+ * This class is responsible for the mechanics of word wrapping.
+ *
+ */
 
 class tableCell {
 
   static final boolean debug = false;
 
-  String origText;
-  String text;
-  tableAttr attr;
-  boolean selected;
+  // --
+
+  String 
+    origText,
+    text;
+
+  tableAttr 
+    attr;
+
+  boolean 
+    selected;
+
   PopupMenu menu;
+
   baseTable rt;
   tableCol col;
 
-  int nominalWidth;		// width before any wrapping
-  int currentWidth;		// width of rightmost pixel of real text in this
+  int
+    nominalWidth,		// width before any wrapping
+    currentWidth,		// width of rightmost pixel of real text in this
 				// cell, after wrapping
-  int lastOfficialWidth = 0;
+    lastOfficialWidth = 0;	// what were we last wrapped to?
 
   private int rowSpan;
 
@@ -3329,9 +3516,11 @@ class tableCell {
   {
     this.rt = rt;
     this.col = col;
-    this.origText = this.text = text;
     this.attr = attr;
     this.selected = false;
+    this.nominalWidth = 0;
+    this.currentWidth = 0;
+    this.setText(text);
 
     if (rt == null && menu != null)
       {
@@ -3378,12 +3567,71 @@ class tableCell {
     this(rt, null, null, null, null);
   }
 
+  /**
+   *
+   * This method reinitializes the cell to its virgin state.
+   *
+   */
+
+  public void clear()
+  {
+    this.selected = false;
+    this.nominalWidth = 0;
+    this.currentWidth = 0;
+    this.setText(null);
+  }
+
+  /**
+   *
+   * This method sets the text for this cell.
+   *
+   */
+
   public void setText(String newText)
   {
     origText = text = newText;
-    nominalWidth = getMetrics().stringWidth(origText);
+    
+    if (origText != null)
+      {
+	currentWidth = nominalWidth = getMetrics().stringWidth(origText);
+    
+	if (lastOfficialWidth != 0)
+	  {
+	    this.wrap(lastOfficialWidth);
+	  }
+      }
+    else
+      {
+	currentWidth = nominalWidth = 0;
+      }
+
     calcRowSpan();
   }
+
+  /**
+   *
+   * This method refreshes the cell's measurements, and should
+   * be called after the fontmetrics for this cell have changed.
+   *
+   */
+
+  public void refresh()
+  {
+    currentWidth = nominalWidth = getMetrics().stringWidth(origText);
+    
+    if (lastOfficialWidth != 0)
+      {
+	this.wrap(lastOfficialWidth);
+      }
+
+    calcRowSpan();
+  }
+
+  /**
+   *
+   * Return the fontmetrics that apply to this cell.
+   *
+   */
 
   public FontMetrics getMetrics()
   {
@@ -3399,6 +3647,74 @@ class tableCell {
       {
 	return rt.tableAttrib.fontMetric;
       }
+  }
+
+  /**
+   *
+   * Return this cell's font
+   *
+   */
+
+  public Font getFont()
+  {
+    if (attr != null && attr.fontMetric !=null)
+      {
+	return attr.font;
+      }
+    else if (col != null && col.attr != null && col.attr.font != null)
+      {
+	return col.attr.font;
+      }
+    else 
+      {
+	return rt.tableAttrib.font;
+      }
+  }
+
+  /**
+   *
+   * Return this cell's justification
+   *
+   */
+
+  public int getJust()
+  {
+    if (attr != null && attr.align != tableAttr.JUST_INHERIT)
+      {
+	return attr.align;
+      }
+    else if (col != null && col.attr != null && col.attr.align != tableAttr.JUST_INHERIT)
+      {
+	return col.attr.align;
+      }
+    else 
+      {
+	return rt.tableAttrib.align;
+      }
+  }
+
+  /**
+   *
+   * This method returns the width of this cell at its widest point,
+   * after word wrapping has been performed.
+   *
+   */
+
+  public int getCurrentWidth()
+  {
+    return currentWidth;
+  }
+
+  /**
+   *
+   * This method returns the width that the cell's current text would
+   * have if not wrapped.
+   * 
+   */
+
+  public int getNominalWidth()
+  {
+    return nominalWidth;
   }
 
   /**
@@ -3444,6 +3760,8 @@ class tableCell {
    * This method wraps the contained text to a certain
    * number of pixels.
    *
+   * @param wrap_length The width of the cell to wrap to, in pixels
+   *
    */
 
   public synchronized void wrap(int wrap_length)
@@ -3465,9 +3783,9 @@ class tableCell {
 
     /* -- */
 
-    if (wrap_length < 20)
+    if (wrap_length < 5)
       {
-	throw new IllegalArgumentException("bad params");
+	throw new IllegalArgumentException("bad params: wrap_length specified as " + wrap_length);
       }
 
     // if the adjustment is a small enough reduction that it won't affect our
@@ -3688,6 +4006,13 @@ class tableCell {
       }
   }
 
+  /**
+   *
+   * This method returns the number of lines this cell desires
+   * to occupy.
+   *
+   */
+
   public int getRowSpan()
   {
     return rowSpan;
@@ -3700,7 +4025,14 @@ class tableCell {
 
 ------------------------------------------------------------------------------*/
 
-// should the methods in this class be public?
+/**
+ *
+ * This class holds all the information for a particular row in the
+ * table, including current position of the row in the table, height
+ * of row in elemental lines, and a vector of the current cells in
+ * this row.
+ * 
+ */
 
 class tableRow {
 
@@ -3711,6 +4043,15 @@ class tableRow {
 
   /* -- */
 
+  /**
+   *
+   * tableCell array constructor
+   *
+   * @param rt The baseTable this row belongs to
+   * @param cells The initial contents of this row
+   *
+   */
+
   tableRow(baseTable rt, tableCell[] cells)
   {
     this.rt = rt;
@@ -3720,6 +4061,15 @@ class tableRow {
 	this.cells.addElement(cells[i]);
       }
   }
+
+  /**
+   *
+   * tableCell constructor
+   *
+   * @param rt The baseTable this row belongs to
+   * @param size The number of cells to create in this row
+   *
+   */
 
   tableRow(baseTable rt, int size)
   {
@@ -3732,15 +4082,36 @@ class tableRow {
       }
   }
 
+  /**
+   *
+   * This method removes a cell from this row.  Used
+   * by baseTable when a column in the table is being
+   * deleted.
+   *
+   */
+
   void removeElementAt(int index)
   {
     cells.removeElementAt(index);
   }
 
+  /**
+   *
+   * Cell accessor.
+   *
+   */
+
   tableCell elementAt(int index)
   {
     return (tableCell) cells.elementAt(index);
   }
+
+  /**
+   *
+   * This method is used to replace an existing
+   * cell in this row with a new cell.
+   *
+   */
 
   void setElementAt(tableCell cell, int index)
   {
@@ -3752,10 +4123,12 @@ class tableRow {
       }
   }
 
-  void setRowSpan(int x)
-  {
-    rowSpan = x;
-  }
+  /**
+   *
+   * This method returns the number of lines that
+   * this row requires when displayed.
+   *
+   */
 
   int getRowSpan()
   {
@@ -3765,28 +4138,61 @@ class tableRow {
     for (int i = 0; i < cells.size(); i++)
       {
 	cell = (tableCell) cells.elementAt(i);
+
 	if (cell.getRowSpan() > rowSpan)
 	  {
 	    rowSpan = cell.getRowSpan();
 	  }
       }
+
     return rowSpan;
   }
+
+  /**
+   *
+   * This method is used to record the current position
+   * of the top edge of this row within the table.  This
+   * position is measured with respect to the full height
+   * of the table, irrespective of the current scrollbar
+   * position.
+   *
+   */
 
   void setTopEdge(int y)
   {
     topEdge = y;
   }
 
+  /**
+   *
+   * This method returns the current position
+   * of the top edge of this row within the table.
+   *
+   */
+
   int getTopEdge()
   {
     return topEdge;
   }
 
+  /**
+   *
+   * This method records the current position of the bottom edge of
+   * this row within the table.
+   *
+   */
+
   void setBottomEdge(int y)
   {
     bottomEdge = y;
   }
+
+  /**
+   *
+   * This method returns the current position of the bottom edge of
+   * this row within the table.
+   * 
+   */
   
   int getBottomEdge()
   {
@@ -3796,24 +4202,31 @@ class tableRow {
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                       tableCol
+                                                                        tableCol
 
 ------------------------------------------------------------------------------*/
 
-// should the methods in this class be public?
+/**
+ *
+ * This class holds the information on a particular column in the table,
+ * including the header, header pop-up menu, current column width, and
+ * any special font or style or color information to apply to cells in
+ * this column.
+ *
+ */
 
 class tableCol {
 
   baseTable rt;
   String header;
   tableAttr attr;
-  float origWidth;
+  float origWidth;		// the basic width of a column.. needs to be multiplied by scalefact
   int width;
   PopupMenu menu;
 
   /* -- */
 
-  tableCol(baseTable rt, String header, float origWidth, tableAttr attr, 
+  public tableCol(baseTable rt, String header, float origWidth, tableAttr attr, 
 	   PopupMenu menu)
   {
     if (rt == null && menu != null)
@@ -3851,7 +4264,7 @@ class tableCol {
     this.width = (int) origWidth;
   }
 
-  tableCol(baseTable rt, String header, float origWidth, tableAttr attr)
+  public tableCol(baseTable rt, String header, float origWidth, tableAttr attr)
   {
     this(rt, header, origWidth, attr, null);
   }
