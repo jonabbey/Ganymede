@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2001/10/31 04:11:50 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2001/11/13 22:47:08 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.12 $ $Date: 2001/10/31 04:11:50 $ $Name:  $
+ * @version $Revision: 1.13 $ $Date: 2001/11/13 22:47:08 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -414,6 +414,17 @@ public class xmlfield implements FieldType {
     XMLItem nextItem;
     boolean setMode = false;
     boolean canDoSetMode = true;
+
+    /**
+       modeStack is used to keep track of what vector mode we are currently in..
+       the list of reasonable values are
+
+       "add" -- Add, although with invids we will ignore adds if they are already present
+       "set" -- Set the list of elements to the provided list
+       "delete" -- Delete the listed elements
+
+    */
+
     Stack modeStack = new Stack();
 
     /* -- */
