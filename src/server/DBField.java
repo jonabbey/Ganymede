@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 2003/11/08 01:51:13 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 2003/11/08 01:54:32 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -3030,7 +3030,7 @@ public abstract class DBField implements Remote, db_field {
    * with an appropriate error dialog.</p>
    */
 
-  public ReturnVal getConflictDialog(String methodName, String actionString, Object conflictValue)
+  public ReturnVal getConflictDialog(String methodName, Object conflictValue)
   {
     DBNameSpace ns = getNameSpace();
 
