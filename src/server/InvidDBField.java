@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.62 $ %D%
+   Version: $Revision: 1.63 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -691,7 +691,9 @@ public final class InvidDBField extends DBField implements invid_field {
       anonymous = false,
       anonymous2 = false;
 
-    ReturnVal retVal = null;
+    ReturnVal 
+      retVal = null,
+      newRetVal;
 
     /* -- */
 
@@ -899,9 +901,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
     
-    retVal = newRefField.establish(owner.getInvid(), (anonymous2||local));
+    newRetVal = newRefField.establish(owner.getInvid(), (anonymous2||local));
 
-    if (retVal != null && !retVal.didSucceed())
+    if (newRetVal != null && !newRetVal.didSucceed())
       {
 	// oops!  try to undo what we did.. this probably isn't critical
 	// because something above us will do a rollback, but it's polite.
@@ -913,7 +915,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	
 	setLastError("couldn't establish field symmetry with " + newRef);
 
-	return retVal;
+	return newRetVal;
+      }
+
+    if (retVal != null)
+      {
+	retVal.unionRescan(newRetVal);
+      }
+    else
+      {
+	retVal = newRetVal;
       }
 
     // tell the client that it needs to rescan both the old and new
@@ -922,16 +933,17 @@ public final class InvidDBField extends DBField implements invid_field {
     ReturnVal rescanRet = new ReturnVal(true, true);
     rescanRet.addRescanField(targetField);
 
-    retVal = new ReturnVal(true, true);
+    newRetVal = new ReturnVal(true, true);
 
     if (oldRemote != null)
       {
-	retVal.addRescanObject(oldRemote, rescanRet);
+	newRetVal.addRescanObject(oldRemote, rescanRet);
       }
 
-    retVal.addRescanObject(newRemote, rescanRet);
+    newRetVal.addRescanObject(newRemote, rescanRet);
+    newRetVal.unionRescan(retVal);
 
-    return retVal;		// success
+    return newRetVal;		// success
   }
 
   /**
@@ -962,7 +974,8 @@ public final class InvidDBField extends DBField implements invid_field {
       session = null;
 
     ReturnVal
-      retVal = null;
+      retVal = null,
+      newRetVal;
 
     // debug vars
 
@@ -1111,10 +1124,12 @@ public final class InvidDBField extends DBField implements invid_field {
     ReturnVal rescanRet = new ReturnVal(true, true);
     rescanRet.addRescanField(targetField);
 
-    retVal = new ReturnVal(true, true);
-    retVal.addRescanObject(remote, rescanRet);
+    newRetVal = new ReturnVal(true, true);
+    newRetVal.addRescanObject(remote, rescanRet);
 
-    return retVal;		// success
+    newRetVal.unionRescan(retVal);
+
+    return newRetVal;		// success
   }
 
   /**
@@ -1654,8 +1669,15 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    return newRetVal;
 	  }
-	
-	retVal.unionRescan(newRetVal);
+
+	if (retVal != null)
+	  {
+	    retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    retVal = newRetVal;
+	  }
       }
 
     // check our owner, do it.  Checking our owner should
@@ -1786,7 +1808,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	return newRetVal;
       }
 
-    retVal.unionRescan(newRetVal);
+    if (retVal != null)
+      {
+	retVal.unionRescan(newRetVal);
+      }
+    else
+      {
+	retVal = newRetVal;
+      }
 
     // check our owner, do it.  Checking our owner should
     // be the last thing we do.. if it returns true, nothing
@@ -1898,7 +1927,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	return newRetVal;
       }
 
-    retVal.unionRescan(newRetVal);
+    if (retVal != null)
+      {
+	retVal.unionRescan(newRetVal);
+      }
+    else
+      {
+	retVal = newRetVal;
+      }
 
     if (eObj.finalizeAddElement(this, value)) 
       {
@@ -2088,7 +2124,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBEditObject eObj;
     Invid remote;
-    ReturnVal retVal = null;
+    ReturnVal retVal = null, newRetVal;
     String checkKey;
 
     /* -- */
@@ -2155,11 +2191,20 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!getFieldDef().isEditInPlace())
       {
-	retVal = unbind(remote, local);
+	newRetVal = unbind(remote, local);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (newRetVal != null && !newRetVal.didSucceed())
 	  {
-	    return retVal;
+	    return newRetVal;
+	  }
+
+	if (retVal != null)
+	  {
+	    retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    retVal = newRetVal;
 	  }
       }
 
@@ -2172,15 +2217,23 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (getFieldDef().isEditInPlace())
 	  {
-	    retVal = eObj.getSession().deleteDBObject(remote);
+	    newRetVal = eObj.getSession().deleteDBObject(remote);
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (newRetVal != null && !newRetVal.didSucceed())
 	      {
 		eObj.getSession().rollback(checkKey);
-		return retVal;	// go ahead and return our error code
+		return newRetVal;	// go ahead and return our error code
+	      }
+
+	    if (retVal != null)
+	      {
+		retVal.unionRescan(newRetVal);
+	      }
+	    else
+	      {
+		retVal = newRetVal;
 	      }
 	  }
-
 
 	// success
 
