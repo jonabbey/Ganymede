@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.19 $ %D%
+    Version: $Revision: 1.20 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -1364,10 +1364,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     /* -- */
 
-    ipf = new JIPField(new JcomponentAttr(null,
-					  new Font("Helvetica",Font.PLAIN,12),
-					  Color.black,Color.white),
-		       editable);
+    try
+      {
+	ipf = new JIPField(new JcomponentAttr(null,
+					      new Font("Helvetica",Font.PLAIN,12),
+					      Color.black,Color.white),
+			   editable,
+			   field.v6Allowed());
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get determine v6Allowed for ip field: " + rx);
+      }
     
     objectHash.put(ipf, field);
     
@@ -1377,7 +1385,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	if (bytes != null)
 	  {
-	    ipf.setValue(bytes, false); // don't want v6 for now..
+	    ipf.setValue(bytes);
 	  }
       }
     catch (RemoteException rx)
