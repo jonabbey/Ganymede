@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 2004/01/31 05:47:17 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 2004/01/31 05:50:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1201,6 +1201,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector users;
     Vector memberNetgroups;
 
+    Invid ref;
     String member;
     DBObject subNetgroup;
 
@@ -1211,7 +1212,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < users.size(); i++)
       {
-	member = (String) users.elementAt(i);
+	ref = (Invid) users.elementAt(i);
+	member = getLabel(ref);
 	hash.put(member, member);
       }
 
