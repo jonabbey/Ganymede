@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -49,6 +49,26 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
   DBSession session;
 
   /* -- */
+
+  /**
+   *
+   * Constructor for a server-internal GanymedeSession.  Used when
+   * the server's internal code needs to do a query, etc.  Note that
+   * the Ganymede server will create this fairly early on, and will
+   * keep it around for internal usage.  Note that we don't add
+   * this to the data structures used for the admin console.
+   *
+   */ 
+
+  GanymedeSession() throws RemoteException
+  {
+    super();			// UnicastRemoteObject initialization
+
+    // construct our DBSession
+
+    username = "internal";
+    session = new DBSession(Ganymede.db, null, "internal");
+  }
 
   /**
    *
@@ -107,7 +127,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     // construct our DBSession
 
-    session = new DBSession(Ganymede.db, client);
+    session = new DBSession(Ganymede.db, null, client.getName());
 
     GanymedeServer.sessions.addElement(this);
     GanymedeAdmin.refreshUsers();
@@ -132,7 +152,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   void forceOff(String reason)
   {
-    Ganymede.debug("Forcing " + username + "off for " + reason);
+    Ganymede.debug("Forcing " + username + " off for " + reason);
 
     if (client != null)
       {
@@ -184,6 +204,16 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     Ganymede.debug("User " + username + " logging off");
     logged_in = false;
     this.client = null;
+
+    // logout the client, abort any DBSession transaction going
+
+    if (session.lock != null)
+      {
+	session.lock.abort();
+	session.lock = null;
+      }
+
+    session.logout();
  
     GanymedeServer.sessions.removeElement(this);
     GanymedeServer.activeUsers.remove(username);
@@ -348,7 +378,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
     baseLock.addElement(base);
 
-    //    Ganymede.debug("Query: opening read lock");
+    Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
 
     try
       {
@@ -360,27 +390,33 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 	return null;		// we're probably being booted off
       }
 
-    // Ganymede.debug("Query: got read lock");
+    Ganymede.debug("Query: " + username + " : got read lock");
 
     enum = base.objectHash.keys();
 
     // need to check in here to see if we've had the lock yanked
 
-    while (enum.hasMoreElements())
+    while (session.isLocked() && enum.hasMoreElements())
       {
 	key = (Integer) enum.nextElement();
 	obj = (DBObject) base.objectHash.get(key);
 
 	if (DBQueryHandler.matches(query, obj))
 	  {
-	    // Ganymede.debug("Adding element");
+	    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
 	    result.addElement(new Result(obj));
 	  }
+      }
+
+    if (!session.isLocked())
+      {
+	setLastError("lock interrupted");
+	return null;
       }
     
     session.releaseReadLock();
 
-    // Ganymede.debug("Query: released read lock");
+    Ganymede.debug("Query: " + username + " : released read lock");
 
     return result;
   }
