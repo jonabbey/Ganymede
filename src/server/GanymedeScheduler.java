@@ -7,8 +7,8 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/06/09 03:33:40 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/07/23 03:10:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -943,6 +943,7 @@ public class GanymedeScheduler extends Thread {
 	      {
 		if (handle.runAgain())
 		  {
+		    onDemand.put(handle.name, handle); // put it back on the onDemand track
 		    runTask(handle);
 		  }
 		else
