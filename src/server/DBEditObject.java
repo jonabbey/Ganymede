@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.59 $ %D%
+   Version: $Revision: 1.60 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1324,6 +1324,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   public boolean mustChoose(DBField field)
   {
+    // by default, we assume that InvidDBField's are always
+    // must choose.
+    
+    if (field instanceof InvidDBField)
+      {
+	return true;
+      }
+
     return false;
   }
 
