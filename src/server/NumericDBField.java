@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -347,7 +347,7 @@ public class NumericDBField extends DBField implements num_field {
 
   public boolean verifyTypeMatch(Object o)
   {
-    return (o instanceof Integer);
+    return ((o == null) || (o instanceof Integer));
   }
 
   public boolean verifyNewValue(Object o)

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -367,7 +367,7 @@ public class DateDBField extends DBField implements date_field {
 
   public boolean verifyTypeMatch(Object o)
   {
-    return (o instanceof Date);
+    return ((o == null) || (o instanceof Date));
   }
 
   public boolean verifyNewValue(Object o)
