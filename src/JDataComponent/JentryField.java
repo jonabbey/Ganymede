@@ -62,12 +62,12 @@ abstract public class JentryField extends JTextField {
    *
    */
 
-  public void paint(Graphics g)
-  {
-    super.paint(g);
-    g.setColor(Color.black);
-    g.drawRect(0, 0, getBounds().width-1, getBounds().height-1);
-  }
+  //  public void paint(Graphics g)
+  //  {
+  //    super.paint(g);
+  //    g.setColor(Color.black);
+  //    g.drawRect(0, 0, getBounds().width-1, getBounds().height-1);
+  //  }
 
   /**
    *  returns true if the value in the JentryField has 
