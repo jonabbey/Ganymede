@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   static final boolean debug = false;
   static QueryResult shellChoices = new QueryResult();
   static Date shellChoiceStamp = null;
+
+  static String mailsuffix = null;
+  static String homedir = null;
 
   // ---
 
@@ -894,24 +897,33 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	sf = (StringDBField) getField(USERNAME);
 
-	if (sf != null)
+	if (homedir == null)
 	  {
-	    if (sf.getNewValue() != null)
-	      {
-		String expected = "/home/" + (String) sf.getNewValue();
+	    homedir = System.getProperty("ganymede.homedirprefix");
+	  }
 
-		if (dir.equals(expected))
+	// we will only check against a defined prefix if
+	// we have set one in our properties file.
+	
+	if (homedir != null && homedir.length() != 0)
+	  {
+	    sf = (StringDBField) getField(USERNAME);
+
+	    if (sf != null)
+	      {
+		if (sf.getNewValue() != null)
 		  {
-		    return true;
-		  }
-		else
-		  {
-		    return false;
+		    String expected = homedir + (String) sf.getNewValue();
+		    
+		    if (!dir.equals(expected))
+		      {
+			return false;
+		      }
 		  }
 	      }
 	  }
 
-	return false;
+	return true;
       }
 
     // when we rename a user, we have lots to do.. a number of other
@@ -972,16 +984,26 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	sf = (StringDBField) getField(EMAILTARGET);
 
-	String oldMail = oldName + "@arlut.utexas.edu";
+	if (mailsuffix == null)
+	  {
+	    mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
+	  }
+
+	if (mailsuffix == null)
+	  {
+	    Ganymede.debug("Error in userCustom: couldn't find property ganymede.defaultmailsuffix!");
+	  }
+
+	String oldMail = oldName + mailsuffix;
 
 	if (sf.containsElement(oldMail))
 	  {
 	    sf.deleteElement(oldMail);
-	    sf.addElement(value + "@arlut.utexas.edu");
+	    sf.addElement(value + mailsuffix);
 	  }
 	else if (sf.size() == 0)
 	  {
-	    sf.addElement(value + "@arlut.utexas.edu");
+	    sf.addElement(value + mailsuffix);
 	  }
 	
 	inv = (InvidDBField) getField(PERSONAE);
