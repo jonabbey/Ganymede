@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Ganymede admin console script 
+#
+###############################
+
+## This section is customized by the client install script
+
+# These lines should be in the form X=Y, with nothing else on
+# the line.. they are customized by the installClient.perl
+# script
+
+JAVA=java
+CLASSPATH=${INSTALLDIR}/schema/custom.jar:../../build/classes:../../build/crypto:../../resources
+PROPERTIES=/home/deepak/devel/ganymede/client/client.properties
+
+############################################### 
+
+trap "echo Aborted" 2
+
+echo "Running Ganymede Admin Console"
+
+export CLASSPATH
+
+$JAVA -Xmx32m arlut.csd.ganymede.admin.GASHAdmin $PROPERTIES
+
