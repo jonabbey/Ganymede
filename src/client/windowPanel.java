@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,6 +24,8 @@ import java.awt.event.*;
 import java.rmi.*;
 import java.util.*;
 
+import jdj.PackageResources;
+
 import arlut.csd.ganymede.*;
 import arlut.csd.ganymede.client.*;
 
@@ -36,7 +38,7 @@ import arlut.csd.JDataComponent.*;
 ------------------------------------------------------------------------------*/
 
 
-public class windowPanel extends JPanel implements PropertyChangeListener, ActionListener, JsetValueCallback, ItemListener{  
+public class windowPanel extends JPanel implements PropertyChangeListener, ActionListener{  
   static final boolean debug = true;
   
   // --
@@ -52,7 +54,8 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
     windowCount = 0;
 
   Hashtable
-    objectHash = new Hashtable(), // hash to map visible components to their associated db_fields
+    menuItems = new Hashtable(),
+    Windows = new Hashtable(),
     windowList = new Hashtable();
 
   Menu
@@ -81,6 +84,8 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 
     this.setBuffered(true);
 
+    setBackground(ClientColor.BG);
+
     setLayout(new BorderLayout());
     lc = new JLayeredPane();
 
@@ -97,6 +102,7 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
     {
       return parent;
     }
+
 
   /**
    *
@@ -135,70 +141,27 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 
   public void addWindow(db_object object, boolean editable)
   {
-    String 
-      title, temp;
-
-    JInternalFrame 
-      w;
-
-    JPanel 
-      jpanel,
-      panel;
-
-    TableLayout 
-      layout;
-
-    db_field[] 
-      fields = null;
-
-    JScrollPane
-      scrollpane;
-
-    JstringField
-      sf;
-
-    /* -- */
-
-    if (object == null)
-      {
-	System.err.println("null object passed to addWindow");
-	return;
-      }
-
-    if (editable)
-      {
-	parent.setStatus("Opening object for edit");
-	
-	if (debug)
-	  {
-	    System.out.println("Setting status for edit");
-	  }
-      }
-    else
-      {
-	parent.setStatus("Getting object for viewing");
-
-	if (debug)
-	  {
-	    System.out.println("Setting status for viewing");
-	  }
-      }
-
+    String temp, title;
+    
     parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
     if (debug)
       {
 	System.out.println("Adding new internalFrame");
       }
 
-    w = new JInternalFrame();
-
+    JInternalFrame w = new JInternalFrame();
+    
     w.addPropertyChangeListener(this);
-
+    
     w.setMaxable(true);
     w.setResizable(true);
     w.setClosable(!editable);
     w.setIconable(true);
+    w.setLayout(new BorderLayout());
+    
+    Image fi = PackageResources.getImageResource(this, "dynamite.gif", getClass());
+    w.setFrameIcon(new ImageIcon(fi));
+    w.setBackground(ClientColor.WindowBG);
 
     // First figure out the title, and put it in the hash
     
@@ -219,7 +182,7 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
       {
 	throw new RuntimeException("Could not get label of object: " + rx);
       }
-
+    
     // Create a unique title for the new window
 
     temp = title;
@@ -241,367 +204,32 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 	windowBar.addButton(title);
       }
 
-    //System.out.println("   adding to windowBar " + title);
-
-    jpanel = new JPanel();
-    jpanel.setLayout(new BorderLayout());
-
-    panel = new JPanel();
-    layout = new TableLayout(false);
-    layout.rowSpacing(5);
-    panel.setLayout(layout);
-
-    // Get the list of fields
-
-    try
+    JInsetPanel center = new JInsetPanel(1,1,1,1);
+    center.setLayout(new BorderLayout());
+    center.add("Center", new containerPanel(object, editable, parent, this));
+    w.add("Center", center);
+    if (editable)
       {
-	fields = object.listFields();
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get the fields: " + rx);
-      }
-
-    if (debug)
-      {
-	System.out.println("Entering big loop");
-      }
-
-    if ((fields != null) && (fields.length > 0))
-      {
-	short type = -1;
-	String name;
-	boolean isVector = false;
-
-	for (int i = 0; i < fields.length ; i++)
+	if (debug)
 	  {
-	    type = -1;
-	    name = null;
-	    isVector = false;
-
-	    try
-	      {
-		type = fields[i].getType();
-		name = fields[i].getName();
-
-		if (debug)
-		  {
-		    System.out.println("Name: " + name + "Field type desc: " + type);
-		  }
-		
-		isVector = fields[i].isVector();
-	      }
-	    catch  (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get field info: " + rx);
-	      }
-
-	    if (isVector)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Adding vector panel");
-		  }
-
-		if (fields[i] == null)
-		  {
-		    System.out.println("fields[i] is null");
-		  }
-		else
-		  {
-		    vectorPanel vp = new vectorPanel(fields[i], this, editable);
-		    addRow(panel, vp, name, i);
-		  }
-	      }
-	    else
-	      {
-
-		switch (type)
-		  {
-		  case -1:
-		    
-		    System.err.println("Could not get field information");
-		    
-		    break;
-		    
-		  case FieldType.STRING:
-		    System.out.println();
-		    try 
-		      {
-			if (((string_field)fields[i]).canChoose())
-			  {
-			    System.out.println("You can choose");
-
-			    if (((string_field)fields[i]).mustChoose())
-			      {
-				System.out.println("You must choose.");
-
-				// Add a choice
-
-				JChoice choice = new JChoice();
-				Vector choices = ((string_field)fields[i]).choices();
-
-				for (int j = 0; j < choices.size(); j++)
-				  {
-				    choice.addItem((String)choices.elementAt(j));
-				  }
-
-				choice.setEditable(editable);
-				choice.addItemListener(this);
-				choice.setVisible(true);
-
-				try
-				  {
-				    choice.setCurrentValue(fields[i].getValue());
-				  }
-				catch (RemoteException rx)
-				  {
-				    throw new RuntimeException("Could not get value for field: " + rx);
-				  }
-
-				objectHash.put(choice, fields[i]);
-				addRow(panel, choice, name, i);
-			      }
-			    else
-			      {
-				// Add a combo box
-
-				JComboBox combo = new JComboBox();
-				//Choice combo = new Choice();
-				Vector choices = ((string_field)fields[i]).choices();
-
-				for (int j = 0; j < choices.size(); j++)
-				  {
-				    combo.addPossibleValue((String)choices.elementAt(j));
-				    //combo.addItem((String)choices.elementAt(j));
-				    System.out.println("Adding " + (String)choices.elementAt(j));
-				  }
-				// This is what's doing it.
-
-				combo.setMaximumRowCount(4);
-				combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-				combo.setEditable(true);
-				combo.setVisible(true);
-
-				try
-				  {
-				    combo.setCurrentValue(fields[i].getValue());
-				    System.out.println("Setting current value: " + fields[i].getValue());
-				  }
-				catch (RemoteException rx)
-				  {
-				    throw new RuntimeException("Could not get value for field: " + rx);
-				  }
-				
-				combo.addItemListener(this);
-				objectHash.put(combo, fields[i]);
-				System.out.println("Adding to panel");
-				addRow(panel, combo, name, i);
-			      }
-			  }
-			else
-			  {
-			    // It's not a choice
-			    System.out.println("This is not a choice");
-
-			    sf = new JstringField(20,
-						  19,
-						  new JcomponentAttr(null,
-								     new Font("Helvetica",Font.PLAIN,12),
-								     Color.black,Color.white),
-						  editable,
-						  false,
-						  null,
-						  null,
-						  this);
-			    
-			    objectHash.put(sf, fields[i]);
-			    
-			    try
-			      {
-				sf.setText((String)fields[i].getValue());
-			      }
-			    catch (RemoteException rx)
-			      {
-				throw new RuntimeException("Could not get value for field: " + rx);
-			      }
-			    
-			    //sf.setCallback(this);
-			    //sf.setEditable(editable);
-			    
-			    try
-			      {
-				sf.setToolTipText((String)fields[i].getComment());
-				//System.out.println("Setting tool tip to " + (String)fields[i].getComment());
-			      }
-			    catch (RemoteException rx)
-			      {
-				throw new RuntimeException("Could not get tool tip text: " + rx);
-			      }
-			    
-			    addRow(panel, sf, name, i);
-			  }
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Could not set up stringfield: " + rx);
-		      }
-
-		    break;
-
-		  case FieldType.PASSWORD:
-
-		    if (editable)
-		      {
-			JpassField pf = new JpassField(parent, true, 10, 8, editable);
-			objectHash.put(pf, fields[i]);
-		      
-			pf.setCallback(this);
-		      
-			try
-			  {
-			    pf.setToolTipText((String)fields[i].getComment());
-			    //System.out.println("Setting tool tip to " + (String)fields[i].getComment());
-			  }
-			catch (RemoteException rx)
-			  {
-			    throw new RuntimeException("Could not get tool tip text: " + rx);
-			  }
-		      
-			addRow(panel, pf, name, i);
-		      }
-		    else
-		      {
-			sf = new JstringField(20,
-					      19,
-					      new JcomponentAttr(null,
-								 new Font("Helvetica",Font.PLAIN,12),
-								 Color.black,Color.white),
-					      true,
-					      false,
-					      null,
-					      null);
-
-			objectHash.put(sf, fields[i]);
-
-			// the server won't give us an unencrypted password, we're clear here
-
-			try
-			  {
-			    sf.setText((String)fields[i].getValue());
-			  }
-			catch (RemoteException rx)
-			  {
-			    throw new RuntimeException("Could not get value for field: " + rx);
-			  }
-		      
-			sf.setEditable(false);
-
-			addRow(panel, sf, name, i);
-		      }
-		    
-		    break;
-
-		  case FieldType.DATE:
-
-		    JdateField df = new JdateField();
-
-		    objectHash.put(df, fields[i]);
-		    df.setEditable(editable);
-		    df.setCallback(this);
-
-		    try
-		      {
-			Date date = ((Date)fields[i].getValue());
-
-			if (date != null)
-			  {
-			    df.setDate(date);
-			  }
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Could not get date: " + rx);
-		      }
-		      
-		    addRow(panel, df, name, i);
-
-		    break;
-
-		  case FieldType.BOOLEAN:
-
-		    //JcheckboxField cb = new JcheckboxField();
-		    JCheckbox cb = new JCheckbox();
-		    objectHash.put(cb, fields[i]);
-		    cb.setEnabled(editable);
-		    cb.addActionListener(this);
-		    //cb.setCallback(this);
-
-		    try
-		      {		 
-			cb.setSelected(((Boolean)fields[i].getValue()).booleanValue());
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Could not set checkbox value: " + rx);
-		      }
-		    catch (NullPointerException ex)
-		      {
-			System.out.println("Null pointer: " + ex);
-		      }
-		    addRow(panel, cb, name, i); 
-
-		    break;
-
-		  case FieldType.PERMISSIONMATRIX:
-
-		    if (debug)
-		      {
-			System.out.println("Adding perm matrix");
-		      }
-
-		    perm_button pb = new perm_button((perm_field) fields[i],
-						     editable,
-						     parent.baseHash);
-
-		    addRow(panel, pb, name, i);
-
-		    break;
-
-		  default:
-
-		    JLabel label = new JLabel("Field type ID = " + type);
-		    addRow(panel, label, name, i);
-		  }
-	      }
+	    System.out.println("This is editable, you get no button");
 	  }
       }
-
-    if (debug)
+    else
       {
-	System.out.println("Done with loop");
+	if (debug)
+	  {
+	    System.out.println("Not editable, you get some buttons");
+	  }
+
       }
 
-    //panel.setSize(500, 500);
-    
-    //JViewport vp = new JViewport();
-    //vp.add(panel);
-    
-    jpanel.add("Center", panel);
-    
-    //panel.setSize(500,500);
-    
-    scrollpane = new JScrollPane();
+    JMenuBar mb = createMenuBar(editable, object, w);
+    w.setMenuBar(mb);
 
-    //scrollpane.setViewport(vp);
-
-    scrollpane.getViewport().add(jpanel);
-    w.add(scrollpane);
-
-    //w.setBounds(20,20, panel.getPreferredSize().width, panel.getPreferredSize().height);
-    
+    //System.out.println("   adding to windowBar " + title);
     w.setBounds(windowCount*20, windowCount*20, 400,250);
-
+    
     if (windowCount > 10)
       {
 	windowCount = 0;
@@ -612,14 +240,13 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
       }
 
     w.setLayer(topLayer);
-            
+    
     lc.add(w);
     lc.moveToFront(w);
     updateMenu();
-
+    
     parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     parent.setStatus("Done.");
-
   }
 
   public void addTableWindow(Session session, Query query, Vector results, String title)
@@ -684,7 +311,10 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 	rt.setTitle(title);
 
 	windowList.put(title, rt);
-	windowBar.addButton(title);
+	if (windowBar != null)
+	  {
+	    windowBar.addButton(title);
+	  }
 	  
 	lc.add(rt);
 	lc.moveToFront(rt);
@@ -694,6 +324,72 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
       }
     
   }
+
+  // This makes a menu bar for the top of the JInternalFrames
+  JMenuBar createMenuBar(boolean editable, db_object object, JInternalFrame w)
+    {
+      // Adding a menu bar, checking it out
+      JMenuBar menuBar = new JMenuBar();
+      menuBar.setBorderPainted(true);
+      menuBar.setBackground(ClientColor.WindowBG.darker());
+      
+      JMenu fileM = new JMenu("File");
+      JMenu editM = new JMenu("Edit");
+      menuBar.add(fileM);
+      menuBar.add(editM);
+      
+      JMenuItem iconifyMI = new JMenuItem("Iconify");
+      menuItems.put(iconifyMI, object);
+      Windows.put(iconifyMI, w);
+      iconifyMI.addActionListener(this);
+
+      JMenuItem closeMI = new JMenuItem("Close");
+      menuItems.put(closeMI , object);
+      Windows.put(closeMI, w);
+      closeMI.setEnabled(!editable);
+      closeMI.addActionListener(this);
+
+      JMenu deleteM = new JMenu("Delete");
+      JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
+      deleteM.add(reallyDeleteMI);
+      menuItems.put(reallyDeleteMI, object);
+      Windows.put(reallyDeleteMI, w);
+      reallyDeleteMI.setActionCommand("ReallyDelete");
+      reallyDeleteMI.addActionListener(this);
+      
+      JMenuItem saveMI = new JMenuItem("Save");
+      Windows.put(saveMI, w);
+      menuItems.put(saveMI , object);
+      saveMI.setEnabled(false);
+      saveMI.addActionListener(this);
+
+      JMenuItem inactivateMI = new JMenuItem("Inactivate");
+      Windows.put(inactivateMI, w);
+      menuItems.put(inactivateMI, object);
+      inactivateMI.addActionListener(this);
+      
+      fileM.add(saveMI);
+      fileM.add(inactivateMI);
+      fileM.add(iconifyMI);
+      fileM.add(deleteM);
+      fileM.addSeparator();
+      fileM.add(closeMI);
+      
+      JMenuItem queryMI = new JMenuItem("Query");
+      Windows.put(queryMI, w);
+      queryMI.addActionListener(this);
+      menuItems.put(queryMI , object);
+      JMenuItem editMI = new JMenuItem("Edit");
+      Windows.put(editMI, w);
+      menuItems.put(editMI , object);
+      editMI.setEnabled(!editable);
+      editMI.addActionListener(this);
+      
+      editM.add(queryMI);
+      editM.add(editMI);
+      
+      return menuBar;
+    }
 
   /**
    * Closes all the windows
@@ -886,6 +582,7 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 
 	if (MI != null)
 	  {
+	    MI.setActionCommand("showWindow");
 	    MI.addActionListener(this);
 	    windowMenu.add(MI);
 	  }
@@ -925,122 +622,123 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 
   // Event handlers
 
-  public boolean setValuePerformed(JValueObject v)
-  {
-    if (v.getSource() instanceof JstringField)
-      {
-	System.out.println((String)v.getValue());
-	db_field field = (db_field)objectHash.get(v.getSource());
-
-	try
-	  {
-	    System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
-
-	    if (field.setValue(v.getValue()))
-	      {
-		parent.somethingChanged = true;
-		return true;
-	      }
-	    else
-	      {
-		System.err.println("Could not change field, reverting to " + (String)field.getValue());
-		((JstringField)v.getSource()).setText((String)field.getValue());
-		return false;
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Could not set field value: " + rx);
-	  }
-      }
-    else if (v.getSource() instanceof JpassField)
-      {
-	System.out.println((String)v.getValue());
-	pass_field field = (pass_field)objectHash.get(v.getSource());
-
-	try
-	  {
-	    System.out.println(field.getTypeDesc() + " trying to set to " + v.getValue());
-
-	    if (field.setPlainTextPass((String)v.getValue()))
-	      {
-		parent.somethingChanged = true;
-		return true;
-	      }
-	    else
-	      {
-		System.err.println("Could not change field");
-		return false;
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Could not set field value: " + rx);
-	  }
- 
-      }
-    else if (v.getSource() instanceof JdateField)
-      {
-	System.out.println("date field changed");
-	db_field field = (db_field)objectHash.get(v.getSource());
-
-	try
-	  {
-	    parent.somethingChanged = true;
-	    return field.setValue(((JdateField)v.getSource()).getDate());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Could not set field value: " + rx);
-	  }
-      }
-    else if (v.getSource() instanceof vectorPanel)
-      {
-	System.out.println("Something happened in the vector panel");
-	parent.somethingChanged = true;
-      }
-    else
-      {
-	System.out.println("Value performed from unknown source");
-      }
-    return true;
-  }
-
   public void actionPerformed(ActionEvent e)
   {
     if (e.getSource() instanceof MenuItem)
       {
-	String label = ((MenuItem)e.getSource()).getLabel();
-	showWindow(label);
+	if (e.getActionCommand().equals("showWindow"))
+	  {
+	    String label = ((MenuItem)e.getSource()).getLabel();
+	    showWindow(label);
+	  }
       }
-    else if (e.getSource() instanceof JCheckbox)
+    else if (e.getSource() instanceof JMenuItem)
       {
-	db_field field = (db_field)objectHash.get(e.getSource());
+	System.out.println("Menu item action: " + e.getActionCommand());
+	
+	JMenuItem MI = (JMenuItem)e.getSource();
+	if (e.getActionCommand().equals("Edit"))
+	  {
+	    if (debug)
+	      {
+		System.out.println("edit button clicked");
+	      }
+	    try
+	      {
+		if (debug)
+		  {
+		    System.out.println("Opening new edit window");
+		  }
+		addWindow(parent.session.edit_db_object(((db_object)menuItems.get(MI)).getInvid()), true);
+	      }
+	    catch (RemoteException rx)
+	      {
+		parent.setStatus("Something went wrong on the server.");
+		throw new RuntimeException("Could not open object for edit: " + rx);
+	      }
+	  }
+	else if (e.getActionCommand().equals("Clone"))
+	  {
+	    try
+	      {
+		if (debug)
+		  {
+		    System.out.println("Opening new edit window on the cloned object");
+		  }
+		//addWindow(parent.session.clone_db_object(((db_object)Buttons.get(button)).getInvid()), true);
+		System.out.println("clone_db_object not there yet");
+	      }
+	    //catch (RemoteException rx)
+	    catch (Exception rx)
+	      {
+		parent.setStatus("Something went wrong on the server.");
+		throw new RuntimeException("Could not clone object: " + rx);
+	      }
+	  }
+	else if (e.getActionCommand().equals("ReallyDelete"))
+	  {
+	    try
+	      {
+		if (debug)
+		  {
+		    System.out.println("Deleting object");
+		  }
+		parent.session.remove_db_object(((db_object)menuItems.get(MI)).getInvid());
+		try
+		  {
+		    ((JInternalFrame)Windows.get(MI)).setClosed(true);
 
-	try
-	  {
-	      
-	    if (field.setValue(new Boolean(((JCheckbox)e.getSource()).isSelected())))
-	      {
-		parent.somethingChanged = true;
+		  }
+		catch (PropertyVetoException ex)
+		  {
+		    throw new RuntimeException("JInternalFrame will not close: " + ex);
+		  }
 	      }
-	    else
+	    catch (RemoteException rx)
 	      {
-		System.err.println("Could not change checkbox, resetting it now");
-		((JCheckbox)e.getSource()).setSelected(((Boolean)field.getValue()).booleanValue());
+		parent.setStatus("Something went wrong on the server.");
+		throw new RuntimeException("Could not delete object: " + rx);
 	      }
 	  }
-	catch (RemoteException rx)
+	else if (e.getActionCommand().equals("Close"))
 	  {
-	    throw new IllegalArgumentException("Could not set field value: " + rx);
+	    try
+	      {
+		((JInternalFrame)Windows.get(MI)).setClosed(true);
+		
+	      }
+	    catch (PropertyVetoException ex)
+	      {
+		throw new RuntimeException("JInternalFrame will not close: " + ex);
+	      }
 	  }
+	else if (e.getActionCommand().equals("Iconify"))
+	  {
+	    try
+	      {
+		((JInternalFrame)Windows.get(MI)).setIcon(true);
+	      }
+	    catch (PropertyVetoException ex)
+	      {
+		throw new RuntimeException("JInternalFrame will not close: " + ex);
+	      }
+	  }
+      	else if (e.getActionCommand().equals("Inactivate"))
+	  {
+	    System.out.println("Can't inactivate yet, right?");
+	  }
+	else if (e.getActionCommand().equals("Query"))
+	  {
+	    System.out.println("Not sure what a query should do");
+	  }
+		 
+		  
+      }
+    else
+      {
+	System.err.println("Unknown ActionEvent in windowPanel");
       }
   }
-
-  public void itemStateChanged(ItemEvent e)
-    {
-      System.out.println("Item changed: " + e.getItem());
-    }
 
   // This is for the beans, when a JInternalFrame closes
   public void propertyChange(java.beans.PropertyChangeEvent event)
@@ -1066,7 +764,10 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 		  //System.out.println(" Removing button- " + oldTitle);
 		  
 		  windowList.remove(oldTitle);
-		  windowBar.removeButton(oldTitle);
+		  if (windowBar != null)
+		    {
+		      windowBar.removeButton(oldTitle);
+		    }
 		  updateMenu();
 		}
 	    }
