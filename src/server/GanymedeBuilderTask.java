@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:43 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/02/04 01:28:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,6 +51,11 @@
 package arlut.csd.ganymede;
 
 import java.util.*;
+import java.util.zip.*;
+import java.io.*;
+
+import arlut.csd.Util.PathComplete;
+import arlut.csd.Util.zipIt;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -68,11 +73,12 @@ import java.util.*;
  *
  */
 
-public abstract class GanymedeBuilderTask implements Runnable {
+public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 
   protected Date lastRunTime;
   GanymedeSession session = null;
   DBDumpLock lock;
+  String basePath;
 
   /* -- */
 
@@ -291,4 +297,87 @@ public abstract class GanymedeBuilderTask implements Runnable {
    */
 
   abstract public boolean builderPhase2();
+
+  /**
+   *
+   * This method takes care of backing up the existing output
+   * files into a zip file.
+   *
+   */
+
+  protected void backupFiles(String label) throws IOException
+  {
+    if (basePath == null)
+      {
+	basePath = System.getProperty("ganymede.builder.output");
+
+	if (basePath == null)
+	  {
+	    throw new RuntimeException("GanymedeBuilder not able to determine output directory.");
+	  }
+	
+	basePath = PathComplete.completePath(basePath);
+      }
+
+    File directory = new File(basePath);
+
+    if (!directory.isDirectory())
+      {
+	throw new IOException("Error, couldn't find output directory to backup.");
+      }
+
+    File oldDirectory = new File(basePath + File.separator + "old");
+
+    if (!oldDirectory.exists())
+      {
+	oldDirectory.mkdir();
+      }
+
+    String zipFileName = basePath + "old" + File.separator + label + ".zip";
+
+    //    System.err.println("GanymedeBuilderTask.backups(): " + zipFileName);
+
+    String filenames[] = directory.list(this);
+
+    if (filenames.length > 0)
+      {
+	Vector filenameVect = new Vector();
+
+	//    System.err.print("Zipping: ");
+
+	for (int i = 0; i < filenames.length; i++)
+	  {
+	    System.err.print(filenames[i]);
+	    System.err.print(" ");
+	    
+	    filenameVect.addElement(basePath + filenames[i]);
+	  }
+	
+	// System.err.println();
+
+	// it's okay that filenameVect includes the old directory as a
+	// file, because zipIt.createZipFile knows enough not to zip up
+	// directories.
+	
+	zipIt.createZipFile(zipFileName, filenameVect);
+      }
+  }
+
+  /**
+   *
+   * This method comprises the FileNameFilter body, and is used to avoid
+   * zipping existing zip files into new backups.
+   *
+   */
+
+  public boolean accept(File dir, String name)
+  {
+    if (name.endsWith(".zip") || (name.endsWith(".ZIP")))
+      {
+	return false;
+      }
+
+    return true;
+  }
+
 }
