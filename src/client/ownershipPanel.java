@@ -7,8 +7,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2001/07/05 22:25:52 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2001/11/05 22:30:50 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -352,7 +352,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 					       QueryDataNode.CONTAINS, 
 					       parent.parent.getObjectInvid());
 
-	qResult = parent.parent.getgclient().getSession().query(new Query(type, node));
+	qResult = parent.parent.getgclient().getSession().query(new Query(type, node));	// no filtering
 
 	if (debug)
 	  {
@@ -394,7 +394,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 	  {
 	    parent.parent.getgclient().setStatus("Downloading list of all objects.");
 
-	    result = parent.parent.getgclient().getSession().query(new Query(type));
+	    result = parent.parent.getgclient().getSession().query(new Query(type)); // no filtering
 
 	    list = new objectList(result);
 	    possible = list.getListHandles(false);

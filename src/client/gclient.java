@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.200 $
-   Last Mod Date: $Date: 2001/11/05 21:51:33 $
+   Version: $Revision: 1.201 $
+   Last Mod Date: $Date: 2001/11/05 22:30:50 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.200 $ $Date: 2001/11/05 21:51:33 $ $Name:  $
+ * @version $Revision: 1.201 $ $Date: 2001/11/05 22:30:50 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/11/05 21:51:33 $";
+  static String release_date = "$Date: 2001/11/05 22:30:50 $";
   static String release_number = null;
 
   /**
@@ -1270,7 +1270,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    try
 	      {
-		QueryResult qr = session.query(new Query(id.shortValue(), null, false));
+		Query objQuery = new Query(id.shortValue(), null, false);
+		objQuery.setFiltered(true);
+
+		QueryResult qr = session.query(objQuery);
 		
 		if (qr != null)
 		  {
@@ -4817,6 +4820,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      {
 		listQuery = baseN.getAllQuery();
 	      }
+
+	    // we still want to filter
+
+	    listQuery.setFiltered(true);
 
 	    // inner classes can only refer to final method variables,
 	    // so we'll make some final references to keep our inner

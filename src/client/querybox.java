@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 2001/10/24 21:35:54 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 2001/11/05 22:30:51 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -779,6 +779,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
       {
 	query = createQuery();
 	query = setFields(query);
+	query.setFiltered(true); // filter against the owner list filters
+
 	unregister();
 	setVisible(false);	// close down
 	doQuery();
