@@ -6,8 +6,8 @@
    
    Created: 6 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/01/22 18:04:19 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/03/12 20:39:36 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -95,8 +95,8 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
     total,
     current = -1;
 
-  Hashtable
-    panels = new Hashtable();
+  Vector
+    panels = new Vector();
 
   EmptyBorder
     empty = new EmptyBorder(new Insets(7,7,7,7));
@@ -194,12 +194,12 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 		      }
 		    else
 		      {
-			pc = new personaContainer(thisInvid, i, false, this, ob); //Now I know it is not editable
+			pc = new personaContainer(thisInvid, false, this, ob); //Now I know it is not editable
 		      }
 		  }
 		else
 		  {
-		    pc = new personaContainer(thisInvid, i, thisOneEditable, this, ob);
+		    pc = new personaContainer(thisInvid, thisOneEditable, this, ob);
 		  }
 	      }
 	    else
@@ -213,7 +213,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 		  }
 		else
 		  {
-		    pc = new personaContainer(thisInvid, i, thisOneEditable, this, ob);
+		    pc = new personaContainer(thisInvid, thisOneEditable, this, ob);
 		  }
 	      }		
       	  }
@@ -225,7 +225,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	      }
 	  }
 	
-	panels.put(new Integer(i), pc);
+	panels.addElement(pc);
 	middle.addTab("Persona " + i, pc);
 
 	Thread t = new Thread(pc);
@@ -281,12 +281,12 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 	    newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);
 	    
-	    personaContainer pc = new personaContainer(newObject.getInvid(), index, editable, this, newObject);
+	    personaContainer pc = new personaContainer(newObject.getInvid(), editable, this, newObject);
 	    middle.addTab("New Persona " + index, pc);
 
 	    pc.run();
 	    
-	    panels.put(new Integer(index), pc);
+	    panels.addElement(pc);
 	    //Thread t = new Thread(pc);
 	    //t.start();
 
@@ -319,7 +319,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	boolean removed = false;
 	boolean deleted = false;
 
-	personaContainer pc = (personaContainer)panels.get(new Integer(middle.getSelectedIndex()));
+	personaContainer pc = (personaContainer)panels.elementAt(middle.getSelectedIndex());
 
 	Invid invid = pc.getInvid();
 
@@ -408,13 +408,15 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 	if (deleted && removed)
 	  {
+	    int x = middle.getSelectedIndex();
 	    if (debug)
 	      {
-		System.out.println("Selected number: " + middle.getSelectedIndex());
-		System.out.println("Deleting number: " + pc.index);
+		System.out.println("Selected number: " + x);
+		//		System.out.println("Deleting number: " + pc.index);
 	      }
 
-	    middle.removeTabAt(pc.index);
+	    middle.removeTabAt(x);
+	    panels.removeElementAt(x);
 
 	    //middle.invalidate();
 	    //validate();
@@ -434,6 +436,10 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
   public void stateChanged(ChangeEvent e)
   {
     personaContainer pc = (personaContainer)middle.getSelectedComponent();
+    if (pc == null)
+      {
+	return;
+      }
 
     if (delete != null)
       {
