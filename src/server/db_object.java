@@ -1,3 +1,19 @@
+/*
+
+   db_object.java
+
+   This interface defines the methods that the client can remotely
+   call on a object held in the Ganymede server.
+   
+   Created: 11 April 1996
+   Version: $Revision: 1.14 $ %D%
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+   Applied Research Laboratories, The University of Texas at Austin
+
+*/
+
+package arlut.csd.ganymede;
+
 package arlut.csd.ganymede;
 
 import java.util.Date;
@@ -6,9 +22,10 @@ import java.rmi.RemoteException;
 
 /**
  *
- * Base class for GANYMEDE client-visible objects.
+ * This interface defines the methods that the client can remotely
+ * call on a object held in the Ganymede server.
  *
- * @version $Revision: 1.13 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.14 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
