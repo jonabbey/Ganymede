@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.245 $
-   Last Mod Date: $Date: 2001/07/30 05:59:45 $
+   Version: $Revision: 1.246 $
+   Last Mod Date: $Date: 2001/09/04 23:34:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.245 $ $Date: 2001/07/30 05:59:45 $
+ * @version $Revision: 1.246 $ $Date: 2001/09/04 23:34:11 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -4111,10 +4111,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	if (this.remotelyAccessible)
 	  {
-	    // the exportObject call will fail if the object has
-	    // already been exported.  Unfortunately, there doesn't
-	    // seem to be much way to tell this beforehand, so
-	    // we won't bother to try.
+	    // the exportObject call would fail if the object has
+	    // already been exported.  This should never be the case
+	    // since we are creating a new view-only copy of the
+	    // object, but we need to cover the exception anyway
 
 	    try
 	      {
