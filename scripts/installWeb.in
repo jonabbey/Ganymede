@@ -3,8 +3,8 @@
 # Install script for Ganymede web resources
 #
 # $Name:  $
-# $Revision: 1.1 $
-# $Date: 1999/07/05 20:58:51 $
+# $Revision: 1.2 $
+# $Date: 1999/07/05 21:03:10 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -113,6 +113,13 @@ if (!-d $installdir) {
   mkdir($installdir, 0750) or die "*Couldn't make the web resources directory $installdir*\n"; 
   print "Made the web resources directory ok\n";
 } else {
+    if (-e "$installdir/index.html") {
+	print "Error, $installdir/index.html already exists.  Please specify a\n";
+	print "unique subdirectory for Ganymede's web resources so that this script\n";
+	print "can install its own index.html file.\n";
+	exit 1;
+    }
+
   print "Found the web resources directory ok\n";
 }
 
