@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.11 $
-# $Date: 1999/01/16 05:52:43 $
+# $Revision: 1.12 $
+# $Date: 1999/01/16 06:16:25 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -108,8 +108,6 @@ classfiles:
 	\@cd $rootdir/src/Util; \\
 	build
 	\@cd $rootdir/src/JDataComponent; \\
-	build
-	\@cd $rootdir/src/JDialog; \\
 	build
 	\@cd $rootdir/src/JTree; \\
 	build
@@ -248,8 +246,6 @@ $javadir = $ENV{GJAVA};
 	  "$rootdir/src/classes", "$rootdir/src/classes/jdj",
 	  "$rootdir/src/Util", "Ganymede Utility Classes",
 	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/Util",
-	  "$rootdir/src/JDialog", "Ganymede Dialog Classes",
-	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/JDialog",
 	  "$rootdir/src/JTable", "Ganymede Table Classes",
 	  "$rootdir/src/classes", "$rootdir/src/classes/arlut/csd/JTable",
 	  "$rootdir/src/JTree", "Ganymede Tree Classes",
@@ -290,10 +286,11 @@ while ($#configs > 0) {
 # rewrite the header to properly specify the location of perl on this
 # system.
 
+# Note that JDataComponent is currently a grab-bag of 3 different packages,
+# and so rebuild won't work on it.
+
 @rebuilds=("$rootdir/src/jdj",
 	   "$rootdir/src/Util",
-	   "$rootdir/src/JDataComponent",
-	   "$rootdir/src/JDialog",
 	   "$rootdir/src/JTable",
 	   "$rootdir/src/JTree",
 	   "$rootdir/src/server",
