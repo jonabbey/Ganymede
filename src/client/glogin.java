@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -509,10 +509,11 @@ class iClient extends UnicastRemoteObject implements Client {
     try
       {
 	session = server.login(this);
+	System.out.println("logged in");
       }
     catch (RemoteException ex)
       {
-	//System.err.println("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
+	System.err.println("RMI Error: Couldn't log in to server.\n" + ex.getMessage());
 
 	if (applet._infoD == null)
 	  {
@@ -545,6 +546,10 @@ class iClient extends UnicastRemoteObject implements Client {
 	
 	applet._infoD.show();
 	
+      }
+    catch (Exception ex)
+      {
+	System.err.println("Got some other exception: " + ex);
       }
 
     System.err.println("Got session");
