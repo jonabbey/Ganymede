@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 2001/01/12 16:42:35 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 2001/01/13 13:14:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1523,6 +1523,10 @@ public class DBEditSet {
 	      }
 
 	    base.updateTimeStamp();
+
+	    // and, very important, update the base's snapshot vector
+	    // so that any new queries that are issued will proceed
+	    // against the new state of objects in this base
 
 	    if (debug)
 	      {

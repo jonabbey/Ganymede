@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 2001/01/12 01:12:36 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2001/01/13 13:14:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -882,23 +882,53 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	throw new IllegalArgumentException("permission denied to read this field");
       }
 
-    if (value == null)
+    StringBuffer result = new StringBuffer();
+    PermEntry entry = null;
+    String key = null;
+
+    /* -- */
+
+    clean();
+
+    Enumeration enum = matrix.keys();
+
+    while (enum.hasMoreElements())
       {
-	return "null";
+	key = (String) enum.nextElement();
+	entry = (PermEntry) matrix.get(key);
+
+	if (isBasePerm(key))
+	  {	
+	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
+			  " -- " + entry.difference(null));
+	    result.append("\n");
+	  }
+	else
+	  {
+	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
+			  " -- " + entry.difference(null));
+	    result.append("\n");
+	  }
       }
 
-    return "PermissionMatrix";
+    return result.toString();
   }
 
   /**
    *
-   * The default getValueString() encoding is acceptable.
+   * We don't try and give a comprehensive encoding string for permission
+   * matrices, let's just give enough so they know what we are.
    *
    */
 
   public String getEncodingString()
   {
-    return getValueString();
+    if (!verifyReadPermission())
+      {
+	throw new IllegalArgumentException("permission denied to read this field");
+      }
+
+    return "PermissionMatrix";
   }
 
   /**
