@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/01/22 18:05:37 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/01/26 05:10:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -332,7 +332,9 @@ public class DBReadLock extends DBLock {
 
   /**
    *
-   * Relinquish the lock on bases held by this lock object
+   * Relinquish the lock on bases held by this lock object.
+   *
+   * Should be called by DBSession.releaseLock()
    *
    */
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 1999/01/22 18:05:35 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 1999/01/26 05:10:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2260,6 +2260,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   int getDumperSize()
   {
     return dumperList.size();
+  }
+
+  /**
+   *
+   * Let's get our name here.
+   * 
+   */
+
+  public String toString()
+  {
+    return "objectBase:" + object_name;
   }
 
   /**

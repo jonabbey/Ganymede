@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 1999/01/22 18:05:38 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 1999/01/26 05:10:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1004,7 +1004,7 @@ final public class DBSession {
 
   public synchronized void releaseLock(DBLock lock)
   {
-    lock.release();
+    lock.release();		// *sync* DBStore
     lockVect.removeElement(lock);
     notifyAll();
   }

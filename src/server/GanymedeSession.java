@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.119 $
-   Last Mod Date: $Date: 1999/01/22 18:05:45 $
+   Version: $Revision: 1.120 $
+   Last Mod Date: $Date: 1999/01/26 05:10:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -85,7 +85,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.119 $ %D%
+ * @version $Revision: 1.120 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -716,7 +716,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	// logout the client, abort any DBSession transaction going
 
-	session.logout();	// *synci DBSession
+	session.logout();	// *sync* DBSession
 
 	// if we weren't forced off, do normal logout logging
 
@@ -2002,272 +2002,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * This method provides the hook for doing a fast, full or partial,
-   * database dump to a string form.
-   *
-   * @see arlut.csd.ganymede.Query
-   * @see arlut.csd.ganymede.Result
-   *
-   * @see arlut.csd.ganymede.Session
-   * 
-   */
-
-  public synchronized DumpResult dump(Query query)
-  {
-    checklogin();
-
-    /* - */
-
-    DumpResult result;
-
-    /**
-     *
-     * What base is the query being done on?
-     *
-     */
-
-    DBObjectBase base = null;
-
-    /**
-     *
-     * What sort of result should we give back?   If the query
-     * was done on an embedded type, we're going to return
-     * the object(s) that ultimately contain matching results.
-     *
-     */
-
-    DBObjectBase containingBase = null;
-    Vector baseLock = new Vector();
-    Enumeration enum;
-    Integer key;
-    DBObject obj;
-    DBReadLock rLock;
-
-    DBField dbf;
-    boolean embedded;
-
-    /* -- */
-
-    if (query == null)
-      {
-	setLastError("null query");
-	return null;
-      }
-
-    // objectType will be -1 if the query is specifying the
-    // base with the base's name
-
-    if (query.objectType != -1)
-      {
-	base = Ganymede.db.getObjectBase(query.objectType);
-      }
-    else if (query.objectName != null)
-      {
-	base = Ganymede.db.getObjectBase(query.objectName);
-      }
-
-    if (query.returnType != -1)
-      {
-	containingBase = Ganymede.db.getObjectBase(query.returnType);
-      }
-    else if (query.returnName != null)
-      {
-	containingBase = Ganymede.db.getObjectBase(query.returnName);
-      }
-
-    if (base == null)
-      {
-	setLastError("No such base");
-	return null;
-      }
-
-    if (containingBase == null)
-      {
-	setLastError("No such return type");
-	return null;
-      }
-
-    embedded = base.isEmbedded();
-
-    if (debug)
-      {
-	Ganymede.debug("Processing dump query\nSearching for matching objects of type " + base.getName());
-      }
-
-    setLastEvent("dump");
-
-    if (embedded)
-      {
-	if (debug)
-	  {
-	    Ganymede.debug("Searching for results of type " + containingBase.getName());
-	  }
-      }
-
-    if (debug)
-      {
-	if (query.permitList == null)
-	  {
-	    Ganymede.debug("Returning default fields");
-	  }
-	else
-	  {
-	    Ganymede.debug("Returning custom fields");
-	  }
-      }
-
-    // we want to lock the base we're going to iterate over
-
-    baseLock.addElement(base);
-
-    if (debug)
-      {
-	Ganymede.debug("dump(): " + username + " : opening read lock on " + base.getName());
-      }
-
-    try
-      {
-	rLock = session.openReadLock(baseLock);	// wait for it
-      }
-    catch (InterruptedException ex)
-      {
-	setLastError("lock interrupted");
-	return null;		// we're probably being booted off
-      }
-
-    if (debug)
-      {
-	Ganymede.debug("dump(): " + username + " : got read lock");
-      }
-
-    // Figure out which fields we want to return
-
-    Vector fieldDefs = new Vector();
-    DBObjectBaseField field;
-
-    for (int i = 0; i < containingBase.sortedFields.size(); i++)
-      {
-	field = (DBObjectBaseField) containingBase.sortedFields.elementAt(i);
-	
-	if (query.permitList == null)
-	  {
-	    // If they haven't specified the list of fields they want
-	    // back, make sure we don't show them built in fields and
-	    // we don't show them the objects owned field in the
-	    // OwnerBase.. that could entail many thousands of objects
-	    // listed.  If they really, really want to see them, let
-	    // them say so explicitly.
-
-	    if (!field.isBuiltIn() && 
-		!(containingBase.getTypeID() == SchemaConstants.OwnerBase &&
-		  field.getID() == SchemaConstants.OwnerObjectsOwned))
-	      {
-		if (supergashMode)
-		  {
-		    fieldDefs.addElement(field);
-		  }
-		else if (getPerm(base.getTypeID(), field.getID(), true).isVisible())
-		  {
-		    fieldDefs.addElement(field);
-		  }
-	      }
-	  }
-	else if (query.permitList.get(field.getKey()) != null)
-	  {
-	    if (supergashMode)
-	      {
-		fieldDefs.addElement(field);
-	      }
-	    else if (getPerm(base.getTypeID(), field.getID(), true).isVisible())
-	      {
-		fieldDefs.addElement(field);
-	      }
-	  }
-      }
-
-    // Now iterate over the objects in the base we're searching on,
-    // looking for matches
-
-    result = new DumpResult(fieldDefs);
-
-    QueryResult temp_result = queryDispatch(query, false, false, rLock, null);
-
-    // any associated queries?
-
-    if (query.linkedQueries != null)
-      {
-	if (debug)
-	  {
-	    System.err.println("Primary query result: " + temp_result.size());
-	  }
-
-	for (int i = 0; i < query.linkedQueries.size(); i++)
-	  {
-	    Query adjunctQuery = (Query) query.linkedQueries.elementAt(i);
-	    QueryResult adjunctResult = queryDispatch(adjunctQuery, false, false,
-						      rLock, null);
-
-	    if (debug)
-	      {
-		System.err.println("Adjunct query (" + adjunctQuery.objectName +
-				   ") result: " + adjunctResult.size());
-	      }
-
-	    if (temp_result != null)
-	      {
-		temp_result = temp_result.intersection(adjunctResult);
-
-		if (debug)
-		  {
-		    System.err.println("Intersection result: " + temp_result.size());
-		  }
-	      }
-	  }
-      }
-
-    session.releaseLock(rLock); // *sync* DBSession
-
-    if (debug)
-      {
-	System.err.println("dump(): processed queryDispatch, building dumpResult buffer");
-      }
-
-    if (temp_result != null)
-      {
-	Invid invid;
-
-	enum = temp_result.invidHash.keys();
-
-	while (enum.hasMoreElements())
-	  {
-	    invid = (Invid) enum.nextElement();
-
-	    if (debug)
-	      {
-		System.err.print(".");
-	      }
-
-	    // it's okay to use session.viewDBObject because
-	    // DumpResult.addRow() uses the GanymedeSession reference
-	    // we pass in to handle per-field permissions
-	    //
-	    // using view_db_object() here would be disastrous,
-	    // because it would entail making duplicates of all
-	    // objects matching our query
-
-	    result.addRow(session.viewDBObject(invid), this);
-	  }
-      }
-
-    if (debug)
-      {
-	Ganymede.debug("dump(): completed processing, returning buffer");
-      }
-
-    return result;
-  }
-
-  /**
    *
    * This is a method to allow code in the server to quickly and
    * safely get a full list of objects in an object base.
@@ -2368,6 +2102,218 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	result.addRow(obj.getInvid(), obj.getLabel(), obj.isInactivated(),
 		      obj.willExpire(), obj.willBeRemoved(), perm.isEditable());
+      }
+
+    return result;
+  }
+
+  /**
+   * This method provides the hook for doing a fast, full or partial,
+   * database dump to a string form.
+   *
+   * @see arlut.csd.ganymede.Query
+   * @see arlut.csd.ganymede.Result
+   *
+   * @see arlut.csd.ganymede.Session
+   * 
+   */
+
+  public synchronized DumpResult dump(Query query)
+  {
+    checklogin();
+
+    /* - */
+
+    DumpResult result;
+
+    /**
+     *
+     * What base is the query being done on?
+     *
+     */
+
+    DBObjectBase base = null;
+
+    /**
+     *
+     * What sort of result should we give back?   If the query
+     * was done on an embedded type, we're going to return
+     * the object(s) that ultimately contain matching results.
+     *
+     */
+
+    DBObjectBase containingBase = null;
+    DBObject obj;
+
+    DBField dbf;
+    boolean embedded;
+
+    /* -- */
+
+    if (query == null)
+      {
+	setLastError("null query");
+	return null;
+      }
+
+    // objectType will be -1 if the query is specifying the
+    // base with the base's name
+
+    if (query.objectType != -1)
+      {
+	base = Ganymede.db.getObjectBase(query.objectType);
+      }
+    else if (query.objectName != null)
+      {
+	base = Ganymede.db.getObjectBase(query.objectName);
+      }
+
+    if (query.returnType != -1)
+      {
+	containingBase = Ganymede.db.getObjectBase(query.returnType);
+      }
+    else if (query.returnName != null)
+      {
+	containingBase = Ganymede.db.getObjectBase(query.returnName);
+      }
+
+    if (base == null)
+      {
+	setLastError("No such base");
+	return null;
+      }
+
+    if (containingBase == null)
+      {
+	setLastError("No such return type");
+	return null;
+      }
+
+    embedded = base.isEmbedded();
+
+    if (debug)
+      {
+	Ganymede.debug("Processing dump query\nSearching for matching objects of type " + base.getName());
+      }
+
+    setLastEvent("dump");
+
+    if (embedded)
+      {
+	if (debug)
+	  {
+	    Ganymede.debug("Searching for results of type " + containingBase.getName());
+	  }
+      }
+
+    if (debug)
+      {
+	if (query.permitList == null)
+	  {
+	    Ganymede.debug("Returning default fields");
+	  }
+	else
+	  {
+	    Ganymede.debug("Returning custom fields");
+	  }
+      }
+
+    if (debug)
+      {
+	Ganymede.debug("dump(): " + username + " : got read lock");
+      }
+
+
+    // search for the invid's matching the given query
+
+    QueryResult temp_result = queryDispatch(query, false, false, null, null);
+
+    if (debug)
+      {
+	System.err.println("dump(): processed queryDispatch, building dumpResult buffer");
+      }
+
+    // Figure out which fields we want to include in our result buffer
+
+    Vector fieldDefs = new Vector();
+    DBObjectBaseField field;
+
+    for (int i = 0; i < containingBase.sortedFields.size(); i++)
+      {
+	field = (DBObjectBaseField) containingBase.sortedFields.elementAt(i);
+	
+	if (query.permitList == null)
+	  {
+	    // If they haven't specified the list of fields they want
+	    // back, make sure we don't show them built in fields and
+	    // we don't show them the objects owned field in the
+	    // OwnerBase.. that could entail many thousands of objects
+	    // listed.  If they really, really want to see them, let
+	    // them say so explicitly.
+
+	    if (!field.isBuiltIn() && 
+		!(containingBase.getTypeID() == SchemaConstants.OwnerBase &&
+		  field.getID() == SchemaConstants.OwnerObjectsOwned))
+	      {
+		if (supergashMode)
+		  {
+		    fieldDefs.addElement(field);
+		  }
+		else if (getPerm(base.getTypeID(), field.getID(), true).isVisible())
+		  {
+		    fieldDefs.addElement(field);
+		  }
+	      }
+	  }
+	else if (query.permitList.get(field.getKey()) != null)
+	  {
+	    if (supergashMode)
+	      {
+		fieldDefs.addElement(field);
+	      }
+	    else if (getPerm(base.getTypeID(), field.getID(), true).isVisible())
+	      {
+		fieldDefs.addElement(field);
+	      }
+	  }
+      }
+
+    // prepare the result buffer, given the requested fields
+
+    result = new DumpResult(fieldDefs);
+
+    // and encode the desired fields into the result
+
+    if (temp_result != null)
+      {
+	Invid invid;
+
+	Enumeration enum = temp_result.invidHash.keys();
+
+	while (enum.hasMoreElements())
+	  {
+	    invid = (Invid) enum.nextElement();
+
+	    if (debug)
+	      {
+		System.err.print(".");
+	      }
+
+	    // it's okay to use session.viewDBObject because
+	    // DumpResult.addRow() uses the GanymedeSession reference
+	    // we pass in to handle per-field permissions
+	    //
+	    // using view_db_object() here would be disastrous,
+	    // because it would entail making duplicates of all
+	    // objects matching our query
+
+	    result.addRow(session.viewDBObject(invid), this);
+	  }
+      }
+
+    if (debug)
+      {
+	Ganymede.debug("dump(): completed processing, returning buffer");
       }
 
     return result;
@@ -2488,17 +2434,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     QueryResult result = new QueryResult(forTransport);
     DBObjectBase base = null;
     DBObjectBase containingBase = null;
-    Vector baseLock = new Vector();
     Enumeration enum;
-    Integer key;
     DBObject obj;
-    PermEntry perm;
     DBLock rLock;
-
-    // for processing embedded containment
-
-    DBField dbf;
-    boolean embedded;
 
     /* -- */
 
@@ -2541,30 +2479,23 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	return null;
       }
 
-    // is this base corresponding to an embedded object?
-
-    embedded = base.isEmbedded();
-
-    if (embedded)
+    if (debug)
       {
-	if (debug)
-	  {
-	    // Ganymede.debug("Query on embedded type");
+	// is this base corresponding to an embedded object?
 
+	if (base.isEmbedded())
+	  {
 	    System.err.println("Query on embedded type: " + base.getName());
 	  }
-      }
-    else
-      {
-	if (debug)
+	else
 	  {
-	    // Ganymede.debug("Query on non-embedded type");
-	    
 	    System.err.println("Query on non-embedded type " + base.getName());
 	  }
       }
 
-    // are we able to optimize the query into a direct lookup?
+    // are we able to optimize the query into a direct lookup?  If so,
+    // we won't need to get a lock on the database, since viewDBObject()
+    // will be nice and atomic for our needs
 
     if ((query.root instanceof QueryDataNode) &&
 	((QueryDataNode) query.root).comparator == QueryDataNode.EQUALS)
@@ -2586,7 +2517,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    resultobject = getContainingObj(resultobject);
 
 	    addResultRow(resultobject, query, result, internal, perspectiveObject);
-	    return result;
+
+	    // if we have any linked queries here, handle that.  It
+	    // would be weird if someone wanted a particular invid
+	    // only if some criteria on an embedded object was
+	    // acceptable, but who are we to pre-judge?
+
+	    return intersectQueries(query, result, null);
 	  }
 
 	// we're looking at a data field.. determine which field we're
@@ -2608,7 +2545,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    if (node.fieldId == -1 && base.getLabelField() != -1)
 	      {
-		fieldDef = (DBObjectBaseField) base.getField(base.getLabelField());
+		fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
 	      }
 	    else
 	      {
@@ -2622,6 +2559,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    Ganymede.debug("ERROR: wound up with a null fieldDef in query optimizer");
 	    return null;
 	  }
+
+	// now we've got the field definition.. is it tracked in a namespace hash?
 
 	if (fieldDef.namespace != null)
 	  {
@@ -2646,7 +2585,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		
 		if (resultfield == null)
 		  {
-		    return result;	// no result
+		    return intersectQueries(query, result, null);
 		  }
 		else
 		  {
@@ -2656,7 +2595,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 		    if (resultfield.definition != fieldDef)
 		      {
-			return result; // no match
+			return intersectQueries(query, result, null);
 		      }
 
 		    resultobject = resultfield.owner;
@@ -2675,195 +2614,322 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 			System.err.println("Returning result from optimized query");
 		      }
 		
-		    return result;
+		    return intersectQueries(query, result, null);
 		  }
 	      }
 	  }
       }
+
+    // now we need to generate a vector listing the object bases that
+    // need to be locked to perform this query.  Note that we need to
+    // get each of these bases locked at the same time to avoid potential
+    // deadlock situations.  DBSession.openReadLock() will take care of
+    // that for us by taking a vector to lock.
+
+    Vector baseLock = new Vector();
 
     baseLock.addElement(base);
 
-    if (debug)
-      {
-	// Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
+    // lock the containing base as well, if it differs.. this will
+    // keep things consistent
 
-	System.err.println("Query: " + username + " : opening read lock on " + base.getName());
+    if (containingBase != null)
+      {
+	VectorUtils.unionAdd(baseLock, containingBase);
       }
 
-    if (extantLock != null &&
-	((extantLock instanceof DBReadLock) ||
-	 (extantLock instanceof DBDumpLock)))
+    // if we have linked queries, we'll want to lock all bases that
+    // get touched.
+    
+    if (query.linkedQueries != null)
       {
-	for (int i = 0; i < baseLock.size(); i++)
+	DBObjectBase adjunctBase, adjunctContainingBase;
+
+	for (int i = 0; i < query.linkedQueries.size(); i++)
 	  {
-	    if (!extantLock.isLocked((DBObjectBase) baseLock.elementAt(i)))
+	    Query adjunctQuery = (Query) query.linkedQueries.elementAt(i);
+
+	    // the Query spec says that linked queries won't have their
+	    // linked queries honored.. enforce that here.
+
+	    if (adjunctQuery.linkedQueries != null)
 	      {
-		throw new IllegalArgumentException("error, didn't have base " + 
-						   baseLock.elementAt(i) +
-						   " locked with extantLock");
+		Ganymede.debug("GanymedeSession.queryDispatch(): linked queries have linked queries");
+
+		adjunctQuery.linkedQueries = null;
 	      }
-	  }
+	    
+	    if (adjunctQuery.objectType != -1)
+	      {
+		adjunctBase = Ganymede.db.getObjectBase(adjunctQuery.objectType);
+	      }
+	    else if (adjunctQuery.objectName != null)
+	      {
+		adjunctBase = Ganymede.db.getObjectBase(adjunctQuery.objectName);
+	      }
 
-	rLock = extantLock;
-      }
-    else
-      {
-	try
-	  {
-	    rLock = session.openReadLock(baseLock);	// *sync* DBSession
-	  }
-	catch (InterruptedException ex)
-	  {
-	    setLastError("lock interrupted");
-	    return null;		// we're probably being booted off
+	    VectorUtils.unionAdd(baseLock, adjunctBase);
+
+	    if (adjunctQuery.returnType != -1)
+	      {
+		adjunctContainingBase = Ganymede.db.getObjectBase(adjunctQuery.returnType);
+	      }
+	    else if (adjunctQuery.returnName != null)
+	      {
+		adjunctContainingBase = Ganymede.db.getObjectBase(adjunctQuery.returnName);
+	      }
+
+	    VectorUtils.unionAdd(baseLock, adjunctContainingBase);
 	  }
       }
 
     if (debug)
       {
-	// Ganymede.debug("Query: " + username + " : got read lock");
-
-	System.err.println("Query: " + username + " : got read lock");
+	System.err.println("Query: " + username + " : opening read lock on " + VectorUtils.vectorString(baseLock));
       }
 
-    enum = base.objectTable.elements();
+    // okay.. now we want to lock the database, handle the search, and
+    // return results.  We'll depend on the try..catch to handle
+    // releasing the read lock if it is one we open.
 
-    // need to check in here to see if we've had the lock yanked
-
-    while (session.isLocked(rLock) && enum.hasMoreElements())
+    try
       {
-	obj = (DBObject) enum.nextElement();
-
-	if (DBQueryHandler.matches(this, query, obj))
+	if (extantLock != null) 
 	  {
-	    // if we are processing an embedded type, we want to add
-	    // the ultimate container of the embedded object to the
-	    // result list
+	    // check to make sure that the lock we were passed in has everything
+	    // locked that we'll need to examine.
 
-	    obj = getContainingObj(obj);
-
-	    if (obj == null)
+	    for (int i = 0; i < baseLock.size(); i++)
 	      {
-		if (debug)
+		if (!extantLock.isLocked((DBObjectBase) baseLock.elementAt(i)))
 		  {
-		    Ganymede.debug("queryDispatch(): Couldn't find containing object!");
+		    throw new IllegalArgumentException("error, didn't have base " + 
+						       baseLock.elementAt(i) +
+						       " locked with extantLock");
 		  }
-
-		continue;	// try next match
 	      }
 
-	    addResultRow(obj, query, result, internal, perspectiveObject);
+	    rLock = extantLock;
 	  }
-      }
+	else
+	  {
+	    try
+	      {
+		rLock = session.openReadLock(baseLock);	// *sync* DBSession DBStore
+	      }
+	    catch (InterruptedException ex)
+	      {
+		setLastError("lock interrupted");
+		return null;		// we're probably being booted off
+	      }
+	  }
 
-    if (extantLock == null)
-      {
-	session.releaseLock(rLock); // *sync* DBSession
-      }
-
-    if (debug)
-      {
-	System.err.println("Query: " + username +
-			   " : completed query over primary hash, releasing read lock");
-      }
-
-    // find any objects created or being edited in the current
-    // transaction that match our criteria that we didn't see before
-
-    // note that we have to do this even though
-    // DBSession.viewDBObject() will look in our transaction's working
-    // set for us, as there may be newly created objects that are not
-    // yet held in the database.
-
-    if (session.isTransactionOpen())
-      {
 	if (debug)
 	  {
-	    System.err.println("Query: " + username +
-			       " : scanning intratransaction objects");
+	    System.err.println("Query: " + username + " : got read lock");
 	  }
 
-	synchronized (session.editSet)
+	// iterate over the objects in the base we're searching on,
+	// looking for matching objects.  Note that we need to check
+	// in here to see if we've had our DBSession's logout() method
+	// called.. this shouldn't really ever happen here due to
+	// synchronization on GanymedeSession, but if somehow it does
+	// happen, we want to go ahead and break out of our query.  We
+	// could well have our logged_in flag cleared during execution
+	// of a query, so we'll check that as well.
+
+	enum = base.objectTable.elements();
+
+	while (logged_in && session.isLocked(rLock) && enum.hasMoreElements())
 	  {
-	    enum = session.editSet.objects.elements();
+	    obj = (DBObject) enum.nextElement();
 
-	    DBEditObject x;
-
-	    while (enum.hasMoreElements())
+	    if (DBQueryHandler.matches(this, query, obj))
 	      {
-		x = (DBEditObject) enum.nextElement();
+		// if we are processing an embedded type, we want to add
+		// the ultimate container of the embedded object to the
+		// result list
 
-		// don't consider objects of the wrong type here.
+		obj = getContainingObj(obj);
 
-		if (x.getTypeID() != query.objectType)
-		  {
-		    continue;
-		  }
-
-		// don't consider objects we already have stored in the result
-
-		if (result.containsInvid(x.getInvid()))
+		if (obj == null)
 		  {
 		    if (debug)
 		      {
-			System.err.println("don't need to add invid " + x.getInvid() + ", we got it first time");
+			Ganymede.debug("queryDispatch(): Couldn't find containing object!");
 		      }
 
-		    continue;
+		    continue;	// try next match
 		  }
 
-		if (x.getStatus() == ObjectStatus.CREATING ||
-		    x.getStatus() == ObjectStatus.EDITING)
-		  {
-		    if (DBQueryHandler.matches(this, query, x))
-		      {
-			obj = getContainingObj(x);
-
-			if (obj == null)
-			  {
-			    Ganymede.debug("Error, couldn't find a containing object for an embedded query");
-			    continue;	// try next match
-			  }
-
-			// make sure we've found an object of the
-			// proper type.. if we're not querying on an
-			// embedded object type, the above clause
-			// won't have been run.
-
-			// DBQueryHandler.matches() doesn't check
-			// object type, so we need to do it here
-			// before we add this to our result.
-
-			if (obj.getTypeID() != containingBase.getTypeID())
-			  {
-			    if (debug)
-			      {
-				Ganymede.debug("queryDispatch(): Type mismatch in object open in trans!");
-			      }
-
-			    continue;
-			  }
-
-			addResultRow(obj, query, result, internal, perspectiveObject);
-		      }
-		  }
+		addResultRow(obj, query, result, internal, perspectiveObject);
 	      }
 	  }
 
 	if (debug)
 	  {
-	    System.err.println("Query: " + username + 
-			       " : completed scanning intratransaction objects");
+	    System.err.println("Query: " + username + " : completed query over primary hash.");
+	  }
+
+	// find any objects created or being edited in the current
+	// transaction that match our criteria that we didn't see before
+
+	// note that we have to do this even though
+	// DBSession.viewDBObject() will look in our transaction's
+	// working set for us, as there may be newly created objects
+	// that are not yet held in the database.
+
+	if (session.isTransactionOpen())
+	  {
+	    if (debug)
+	      {
+		System.err.println("Query: " + username +
+				   " : scanning intratransaction objects");
+	      }
+
+	    synchronized (session.editSet)
+	      {
+		enum = session.editSet.objects.elements();
+
+		while (enum.hasMoreElements())
+		  {
+		    DBEditObject transaction_object = (DBEditObject) enum.nextElement();
+
+		    // don't consider objects of the wrong type here.
+
+		    if (transaction_object.getTypeID() != query.objectType)
+		      {
+			continue;
+		      }
+
+		    // don't consider objects we already have stored in the result
+
+		    if (result.containsInvid(x.getInvid()))
+		      {
+			if (debug)
+			  {
+			    System.err.println("don't need to add invid " + x.getInvid() + ", we got it first time");
+			  }
+
+			continue;
+		      }
+
+		    if (transaction_object.getStatus() == ObjectStatus.CREATING ||
+			transaction_object.getStatus() == ObjectStatus.EDITING)
+		      {
+			if (DBQueryHandler.matches(this, query, transaction_object))
+			  {
+			    obj = getContainingObj(transaction_object);
+
+			    if (obj == null)
+			      {
+				Ganymede.debug("Error, couldn't find a containing object for an embedded query");
+				continue;	// try next match
+			      }
+
+			    // make sure we've found an object of the
+			    // proper type.. if we're not querying on an
+			    // embedded object type, the above clause
+			    // won't have been run.
+
+			    // DBQueryHandler.matches() doesn't check
+			    // object type, so we need to do it here
+			    // before we add this to our result.
+
+			    if (obj.getTypeID() != containingBase.getTypeID())
+			      {
+				if (debug)
+				  {
+				    Ganymede.debug("queryDispatch(): Type mismatch in object open in trans!");
+				  }
+
+				continue;
+			      }
+
+			    addResultRow(obj, query, result, internal, perspectiveObject);
+			  }
+		      }
+		  }
+	      }
+
+	    if (debug)
+	      {
+		System.err.println("Query: " + username + 
+				   " : completed scanning intratransaction objects");
+	      }
+	  }
+    
+	if (debug)
+	  {
+	    Ganymede.debug("Query: " + username + ", object type " + 
+			   base.getName() + " completed");
+	  }
+
+	// now handle any linked queries, return the results to the
+	// user.
+
+	return intersectQueries(query, result, rLock);
+      }
+    finally
+      {
+	// no matter where we depart, make sure to release our locks if
+	// we created them here.
+
+	if (extantLock == null && rLock != null && rLock.isLocked())
+	  {
+	    session.releaseLock(rLock);	// *sync* DBSession DBStore
 	  }
       }
-    
-    if (debug)
+  }
+
+  /**
+   *
+   * This private method takes care of intersecting the result
+   * of a query operation against any linked queries to filter
+   * a cluster of queries.  This is only of interest when performing
+   * a query on both embedded and non-embedded fields of a given
+   * object type.
+   * 
+   */
+
+  private final QueryResult intersectQueries(Query query, QueryResult temp_result, DBReadLock rLock)
+  {
+    if (query.linkedQueries != null)
       {
-	Ganymede.debug("Query: " + username + ", object type " + 
-		       base.getName() + " completed");
+	if (debug)
+	  {
+	    System.err.println("Primary query result: " + temp_result.size());
+	  }
+
+	for (int i = 0; i < query.linkedQueries.size(); i++)
+	  {
+	    Query adjunctQuery = (Query) query.linkedQueries.elementAt(i);
+
+	    // note that we pass rLock into queryDispatch so that we re-use our
+	    // lock
+
+	    QueryResult adjunctResult = queryDispatch(adjunctQuery, false, false,
+						      rLock, null);
+
+	    if (debug)
+	      {
+		System.err.println("Adjunct query (" + adjunctQuery.objectName +
+				   ") result: " + adjunctResult.size());
+	      }
+
+	    if (temp_result != null)
+	      {
+		temp_result = temp_result.intersection(adjunctResult);
+
+		if (debug)
+		  {
+		    System.err.println("Intersection result: " + temp_result.size());
+		  }
+	      }
+	  }
       }
 
-    return result;
+    return temp_result;
   }
 
   /**
@@ -3865,6 +3931,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    localObj = null;
 	    break;
 	  }
+
+	// remember, viewDBObject() will get an object even if it was
+	// created in the current transaction
 
 	localObj = session.viewDBObject(inv);
 	loopcount++;

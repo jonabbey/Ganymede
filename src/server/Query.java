@@ -9,8 +9,8 @@
    
    Created: 21 October 1996
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 1999/01/22 18:05:51 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 1999/01/26 05:10:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -172,8 +172,8 @@ public class Query implements java.io.Serializable {
    * query, returning the intersection of the results.<br><br>
    *
    * It does no good to have linkedQueries that do not map back to the same
-   * result object type.
-   * 
+   * result object type.<br><br>
+   *
    */
 
   Vector linkedQueries = null;
@@ -355,7 +355,8 @@ public class Query implements java.io.Serializable {
    *
    * It does no good to pass queries to addQuery that do not have
    * the same return type as this query.
-   *   */
+   *   
+   */
 
   public void addQuery(Query query)
   {
