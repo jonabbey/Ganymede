@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.125 $
-   Last Mod Date: $Date: 2001/06/03 09:25:33 $
+   Version: $Revision: 1.126 $
+   Last Mod Date: $Date: 2001/06/05 04:08:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -143,7 +143,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.125 $ $Date: 2001/06/03 09:25:33 $
+ * @version $Revision: 1.126 $ $Date: 2001/06/05 04:08:35 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -309,48 +309,51 @@ public class DBObject implements db_object, FieldType, Remote {
 
     short count = 0;
 
-    for (short i = 0; i < eObj.fieldAry.length; i++)
+    synchronized (eObj.fieldAry)
       {
-	field = eObj.fieldAry[i];
-
-	if (field != null && field.isDefined())
+	for (short i = 0; i < eObj.fieldAry.length; i++)
 	  {
-	    count++;
+	    field = eObj.fieldAry[i];
+	    
+	    if (field != null && field.isDefined())
+	      {
+		count++;
+	      }
 	  }
-      }
 
-    // put any defined fields into the object we're going
-    // to commit back into our DBStore
-
-    fieldAry = new DBField[count];
-
-    for (short i = 0; i < eObj.fieldAry.length; i++)
-      {
-	field = eObj.fieldAry[i];
-
-	if (field != null && field.isDefined())
+	// put any defined fields into the object we're going
+	// to commit back into our DBStore
+	
+	fieldAry = new DBField[count];
+	
+	for (short i = 0; i < eObj.fieldAry.length; i++)
 	  {
-	    // clean up any cached data the field was holding during
-	    // editing
-
-	    field.cleanup();
-
-	    // Create a new copy and save it in the new DBObject.  We
-	    // *must not* save the field from the DBEditObject,
-	    // because that field has likely been RMI exported to a
-	    // remote client, and if we keep the exported field in
-	    // local use, all of the extra bulk of the RMI mechanism
-	    // will also be retained, as the DBField's Stub and Skel
-	    // are associated with the field through a weak hash ref.  By
-	    // letting the old field from the DBEditObject get locally
-	    // garbage collected, we make it possible for all the RMI
-	    // stuff to get garbage collected as well.
-
-	    // Making a copy here rather than saving a ref to the
-	    // exported field makes a *huge* difference in overall
-	    // memory usage on the Ganymede server.
-
-	    saveField(field.getCopy(this));
+	    field = eObj.fieldAry[i];
+	    
+	    if (field != null && field.isDefined())
+	      {
+		// clean up any cached data the field was holding during
+		// editing
+		
+		field.cleanup();
+		
+		// Create a new copy and save it in the new DBObject.  We
+		// *must not* save the field from the DBEditObject,
+		// because that field has likely been RMI exported to a
+		// remote client, and if we keep the exported field in
+		// local use, all of the extra bulk of the RMI mechanism
+		// will also be retained, as the DBField's Stub and Skel
+		// are associated with the field through a weak hash ref.  By
+		// letting the old field from the DBEditObject get locally
+		// garbage collected, we make it possible for all the RMI
+		// stuff to get garbage collected as well.
+		
+		// Making a copy here rather than saving a ref to the
+		// exported field makes a *huge* difference in overall
+		// memory usage on the Ganymede server.
+		
+		saveField(field.getCopy(this));
+	      }
 	  }
       }
 
@@ -378,67 +381,70 @@ public class DBObject implements db_object, FieldType, Remote {
 
     shadowObject = null;
 
-    fieldAry = new DBField[original.fieldAry.length];
-
-    // put any defined fields into the object we're going
-    // to commit back into our DBStore
-
-    for (int i = 0; i < original.fieldAry.length; i++)
+    synchronized (original.fieldAry)
       {
-	field = original.fieldAry[i];
+	fieldAry = new DBField[original.fieldAry.length];
 
-	if (field == null)
+	// put any defined fields into the object we're going
+	// to commit back into our DBStore
+	
+	for (int i = 0; i < original.fieldAry.length; i++)
 	  {
-	    System.err.println("XXZZ weird, null field in dbobject copy constructor");
-	    continue;
-	  }
-
-	switch (field.getType())
-	  {
-	  case BOOLEAN:
-	    fieldAry[i] = new BooleanDBField(this, (BooleanDBField) field);
-
-	    break;
-
-	  case NUMERIC:
-	    fieldAry[i] = new NumericDBField(this, (NumericDBField) field);
-
-	    break;
-
- 	  case FLOAT:
-	    fieldAry[i] = new FloatDBField(this, (FloatDBField) field);
- 
- 	    break;
-
-	  case DATE:
-	    fieldAry[i] = new DateDBField(this, (DateDBField) field);
-
-	    break;
-
-	  case STRING:
-	    fieldAry[i] = new StringDBField(this, (StringDBField) field);
-
-	    break;
-
-	  case INVID:
-	    fieldAry[i] = new InvidDBField(this, (InvidDBField) field);
-
-	    break;
-
-	  case PERMISSIONMATRIX:
-	    fieldAry[i] = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
-
-	    break;
+	    field = original.fieldAry[i];
 	    
-	  case PASSWORD:
-	    fieldAry[i] = new PasswordDBField(this, (PasswordDBField) field);
-
-	    break;
-
-	  case IP:
-	    fieldAry[i] = new IPDBField(this, (IPDBField) field);
-
-	    break;
+	    if (field == null)
+	      {
+		System.err.println("XXZZ weird, null field in dbobject copy constructor");
+		continue;
+	      }
+	    
+	    switch (field.getType())
+	      {
+	      case BOOLEAN:
+		fieldAry[i] = new BooleanDBField(this, (BooleanDBField) field);
+		
+		break;
+		
+	      case NUMERIC:
+		fieldAry[i] = new NumericDBField(this, (NumericDBField) field);
+		
+		break;
+		
+	      case FLOAT:
+		fieldAry[i] = new FloatDBField(this, (FloatDBField) field);
+		
+		break;
+		
+	      case DATE:
+		fieldAry[i] = new DateDBField(this, (DateDBField) field);
+		
+		break;
+		
+	      case STRING:
+		fieldAry[i] = new StringDBField(this, (StringDBField) field);
+		
+		break;
+		
+	      case INVID:
+		fieldAry[i] = new InvidDBField(this, (InvidDBField) field);
+		
+		break;
+		
+	      case PERMISSIONMATRIX:
+		fieldAry[i] = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
+		
+		break;
+		
+	      case PASSWORD:
+		fieldAry[i] = new PasswordDBField(this, (PasswordDBField) field);
+		
+		break;
+		
+	      case IP:
+		fieldAry[i] = new IPDBField(this, (IPDBField) field);
+		
+		break;
+	      }
 	  }
       }
 

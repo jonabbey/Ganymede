@@ -4,8 +4,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 2001/05/30 22:56:19 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 2001/06/05 04:08:36 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -632,7 +632,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   static String debugFilename = null;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/05/30 22:56:19 $";
+  static String release_date = "$Date: 2001/06/05 04:08:36 $";
   static String release_number = null;
 
   // ---
@@ -1389,7 +1389,14 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 	    admin.forceDisconnect("Couldn't talk to server" + ex);
 	  }
 
-	if (success)
+	// if we are going to delay shutting down until all users log
+	// out, don't close down the admin console.  We don't
+	// currently provide a way to clear the
+	// shutdown-on-users-logged-out, but it's still useful to be
+	// able to continue to monitor things while we're waiting for
+	// users to trickle off.
+
+	if (!waitForUsers && success)
 	  {
 	    adminPanel.quitButton.setEnabled(true);
 	    adminPanel.loginButton.setEnabled(true);
