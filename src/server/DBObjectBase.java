@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.63 $ %D%
+   Version: $Revision: 1.64 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -490,7 +490,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    personaObj = (DBObject) baseEnum.nextElement();
 
 	    if (personaObj.getLabel().equals(Ganymede.rootname) ||
-		personaObj.getLabel().equals("monitor"))
+		personaObj.getLabel().equals(Ganymede.monitornameProperty))
 	      {
 		counter++;
 	      }
@@ -507,7 +507,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    personaObj = (DBObject) baseEnum.nextElement();
 
 	    if (personaObj.getLabel().equals(Ganymede.rootname) ||
-		personaObj.getLabel().equals("monitor"))
+		personaObj.getLabel().equals(Ganymede.monitornameProperty))
 	      {
 		personaObj.emit(out);
 	      }
