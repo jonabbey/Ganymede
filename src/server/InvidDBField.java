@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -382,6 +382,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("bad field comparison");
       }
 
+    if (debug)
+      {
+	System.err.println("Entering InvidDBField getDiffString()");
+      }
+
+    if (orig == this)
+      {
+	return "";
+      }
+
     origI = (InvidDBField) orig;
 
     if (isVector())
@@ -392,7 +402,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	Enumeration enum;
 
-	Invid 
+	Object 
+	  element = null;
+
+	Invid
 	  elementA = null,
 	  elementB = null;
 
@@ -400,55 +413,79 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	/* -- */
 
+	if (debug)
+	  {
+	    System.err.println("vector diff.. searching for deleted items");
+	  }
+
 	// find elements in the orig field that aren't in our present field
+
+	Hashtable currentElements = new Hashtable();
+
+	for (int i = 0; !found && i < values.size(); i++)
+	  {
+	    if (debug)
+	      {
+		System.err.print(",");
+	      }
+
+	    element = values.elementAt(i);
+
+	    currentElements.put(element, element);
+	  }
 
 	enum = origI.values.elements();
 
 	while (enum.hasMoreElements())
 	  {
-	    elementA = (Invid) enum.nextElement();
-
-	    found = false;
-
-	    for (int i = 0; !found && i < values.size(); i++)
+	    if (debug)
 	      {
-		elementB = (Invid) values.elementAt(i);
-
-		if (elementA.equals(elementB))
-		  {
-		    found = true;
-		  }
+		System.err.print("x");
 	      }
 
-	    if (!found)
+	    element = enum.nextElement();
+
+	    if (currentElements.get(element) == null)
 	      {
-		deleted.addElement(elementA);
+		deleted.addElement(element);
 	      }
 	  }
 
-	// find elements in present our field that aren't in the orig field
+	// find elements in our present field that aren't in the orig field
+
+	if (debug)
+	  {
+	    System.err.println("vector diff.. searching for added items");
+	  }
+
+	Hashtable origElements = new Hashtable();
+
+	for (int i = 0; !found && i < origI.values.size(); i++)
+	  {
+	    if (debug)
+	      {
+		System.err.print(",");
+	      }
+
+	    element = origI.values.elementAt(i);
+	    
+	    origElements.put(element, element);
+	  }
 
 	enum = values.elements();
 
 	while (enum.hasMoreElements())
 	  {
-	    elementA = (Invid) enum.nextElement();
-
-	    found = false;
-
-	    for (int i = 0; !found && i < origI.values.size(); i++)
+	    if (debug)
 	      {
-		elementB = (Invid) origI.values.elementAt(i);
-
-		if (elementA.equals(elementB))
-		  {
-		    found = true;
-		  }
+		System.err.print("x");
 	      }
 
-	    if (!found)
+	    element = enum.nextElement();
+
+	    if (origElements.get(element) == null)
 	      {
-		added.addElement(elementA);
+		added.addElement(element);
 	      }
 	  }
 
@@ -462,6 +499,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    if (deleted.size() != 0)
 	      {
+		if (debug)
+		  {
+		    System.err.print("Working out deleted items");
+		  }
+
 		result.append("\tDeleted: ");
 	    
 		for (int i = 0; i < deleted.size(); i++)
@@ -496,6 +538,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (added.size() != 0)
 	      {
+		if (debug)
+		  {
+		    System.err.print("Working out added items");
+		  }
+
 		result.append("\tAdded: ");
 	    
 		for (int i = 0; i < added.size(); i++)
@@ -533,6 +580,11 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
+	if (debug)
+	  {
+	    System.err.println("InvidDBField: scalar getDiffString() comparison");
+	  }
+
 	if (origI.value().equals(this.value()))
 	  {
 	    return null;
@@ -937,10 +989,12 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (index == -1)
 	  {
-	    throw new RuntimeException("dissolve for " + 
-				       owner.getLabel() + ":" + getName() + 
-				       " called with an unbound invid (vector): " + 
-				       oldInvid.toString());
+	    Ganymede.debug("warning: dissolve for " + 
+			   owner.getLabel() + ":" + getName() + 
+			   " called with an unbound invid (vector): " + 
+			   oldInvid.toString());
+
+	    return true;	// we're already dissolved, effectively
 	  }
 
 	if (eObj.finalizeDeleteElement(this, index))
