@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -54,6 +54,14 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     contentPane;
 
   /* -- */
+
+  /**
+   *
+   * Constructor for gResultTable.  Creates the GUI table, loads it,
+   * and presents it.  DumpResult is dissociated when this constructor is
+   * through with it, to aid GC.
+   * 
+   */
 
   public gResultTable(windowPanel wp, Session session, Query query, DumpResult results) throws RemoteException
   {
@@ -250,6 +258,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       }
   }
 
+  /**
+   *
+   * This method loads the DumpResult into a table.  The DumpResult is
+   * dissociated when this method is through with it, to aid GC.
+   *
+   */
+
   public void loadResults(DumpResult results)
   {
     boolean firstTime = true;
@@ -351,6 +366,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	      }
 	  }
       }
+
+    // we're done with the results now.. break it apart and forget about it.
+
+    results.dissociate();
 
     // we have to do this backwards so that we don't
     // change the index of a column we'll later delete
@@ -627,7 +646,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     JMenuBar menuBar = new JMenuBar();
     menuBar.setBorderPainted(true);
-    
+
     JMenu fileM = new JMenu("File");
     menuBar.add(fileM);
       
