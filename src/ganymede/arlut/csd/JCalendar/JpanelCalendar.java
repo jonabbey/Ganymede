@@ -1472,6 +1472,18 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
 
     for (int i = 0; i < JpanelCalendar.month_names.length; i++)
       {
+	if (JpanelCalendar.month_names[i] == null || JpanelCalendar.month_names[i].equals(""))
+	  {
+	    // The months array returned from
+	    // DateFormatSymbols.getMonths() returns thirteen entries
+	    // because some calendars have thirteen (lunar) months.
+	    // For conventional twelve month calendars, we'll have an
+	    // empty month string at the end of our array, which we'll
+	    // need to skip.
+
+	    continue;
+	  }
+
 	month.addItem(JpanelCalendar.month_names[i]);
       }
 
