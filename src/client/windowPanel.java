@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.19 $ %D%
+   Version: $Revision: 1.20 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -82,7 +82,7 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
     this.parent = parent;
     this.windowMenu = windowMenu;
 
-    this.setBuffered(true);
+    this.setBuffered(false);
 
     setBackground(ClientColor.BG);
 
@@ -338,10 +338,23 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
     menuItems.put(inactivateMI, object);
     inactivateMI.addActionListener(this);
       
+    JMenuItem setExpirationMI = new JMenuItem("Set Expiration Date");
+    Windows.put(setExpirationMI, w);
+    menuItems.put(setExpirationMI, object);
+    setExpirationMI.addActionListener(this);
+
+    JMenuItem setRemovalMI = new JMenuItem("Set Removal Date");
+    Windows.put(setRemovalMI, w);
+    menuItems.put(setRemovalMI, object);
+    setRemovalMI.addActionListener(this);
+
     fileM.add(saveMI);
     fileM.add(inactivateMI);
     fileM.add(iconifyMI);
     fileM.add(deleteM);
+    fileM.addSeparator();
+    fileM.add(setExpirationMI);
+    fileM.add(setRemovalMI);
     fileM.addSeparator();
     fileM.add(closeMI);
       
@@ -702,8 +715,16 @@ public class windowPanel extends JBufferedPane implements PropertyChangeListener
 	  {
 	    System.out.println("Not sure what a query should do");
 	  }
-		 
-		  
+	else if (e.getActionCommand().equals("Set Expiration Date"))
+	  {
+	    ((framePanel)Windows.get(MI)).addExpirationDatePanel();
+	    ((framePanel)Windows.get(MI)).showExpirationDateTab();
+	  }
+	else if (e.getActionCommand().equals("Set Removal Date"))
+	  {
+	    ((framePanel)Windows.get(MI)).addRemovalDatePanel();
+	    ((framePanel)Windows.get(MI)).showRemovalDateTab();
+	  }
       }
     else
       {
