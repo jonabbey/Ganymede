@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -270,20 +270,48 @@ public class StringDBField extends DBField implements string_field {
 	return this.value();
       }
 
-    String result = "";
     int size = size();
-
+    
+    if (size == 0)
+      {
+	return "";
+      }
+    
+    String entries[] = new String[size];
+    
     for (int i = 0; i < size; i++)
       {
-	if (!result.equals(""))
-	  {
-	    result = result + ", ";
-	  }
-
-	result = result + this.value(i);
+	entries[i] = this.value(i);
       }
-
-    return result;
+    
+    new arlut.csd.Util.QuickSort(entries,
+				 new arlut.csd.Util.Compare()
+				 {
+				   public int compare(Object a, Object b)
+				     {
+				       String aS, bS;
+				       
+				       aS = (String) a;
+				       bS = (String) b;
+				       
+				       return aS.compareTo(bS);
+				     }
+				 }
+				 ).sort();
+    
+    StringBuffer result = new StringBuffer();
+    
+    for (int i = 0; i < entries.length; i++)
+      {
+	if (i > 0)
+	  {
+	    result.append(", ");
+	  }
+	
+	result.append(entries[i]);
+      }
+    
+    return result.toString();
   }
 
   /**
