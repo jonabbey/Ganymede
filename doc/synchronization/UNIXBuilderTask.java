@@ -56,7 +56,6 @@ package arlut.csd.ganymede.userKit;
 
 import arlut.csd.ganymede.server.*;
 import arlut.csd.ganymede.common.*;
-import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.FileOps;
 
 import java.util.*;
