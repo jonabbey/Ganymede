@@ -246,6 +246,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   JScrollPane admin_history;
 
+  /**
+   * Holds an ownershipPanel (only for owner groups)
+   */
+ 
+  JScrollPane objects_owned;
+
   datePanel
     exp_date_panel,
     rem_date_panel;
@@ -481,9 +487,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		  }
 		else
 		  {
-		    /* XXX
-		       all of this needs to be redone
-
 		    if (stopped.isSet())
 		      {
 			return;
@@ -492,9 +495,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		    objects_owned = new JScrollPane();
 		    pane.addTab("Objects Owned", null, objects_owned);
 		    objects_owned_index = current++;
-
-		       XXX
-		    */
 		  }
 	      }
 	    else if (id == SchemaConstants.UserBase)
@@ -1290,6 +1290,21 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     validate();
   }
 
+  void create_objects_owned_panel()
+  {
+    if (debug)
+      {
+	println("Creating ownership panel");
+      }
+
+    objects_owned.getVerticalScrollBar().setUnitIncrement(15);
+    objects_owned.setViewportView(new ownershipPanel(editable, this));
+    createdList.addElement(new Integer(objects_owned_index));
+
+    objects_owned.invalidate();
+    validate();
+  }
+
   void create_personae_panel()
   {
     if (debug)
@@ -1518,6 +1533,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	setStatus("Creating owner panel");
 	create_owner_panel();
+      }
+    else if (index == objects_owned_index)
+      {
+	setStatus("Creating objects owned panel");
+	create_objects_owned_panel();
       }
     else if (index == personae_index)
       {
@@ -1955,6 +1975,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     owner = null;
     owner_panel = null;
     notes = null;
+    objects_owned = null;
     exp_date_panel = null;
     rem_date_panel = null;
     history = null;
