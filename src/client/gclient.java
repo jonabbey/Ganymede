@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.206 $
-   Last Mod Date: $Date: 2002/03/01 22:35:28 $
+   Version: $Revision: 1.207 $
+   Last Mod Date: $Date: 2002/03/16 02:58:47 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -96,7 +96,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.</p>
  *
- * @version $Revision: 1.206 $ $Date: 2002/03/01 22:35:28 $ $Name:  $
+ * @version $Revision: 1.207 $ $Date: 2002/03/16 02:58:47 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -553,7 +553,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if (s == null)
       {
-	throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");;
+	throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");
       }
 
     session = s;
