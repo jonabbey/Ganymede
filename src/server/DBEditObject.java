@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.78 $ %D%
+   Version: $Revision: 1.79 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1896,6 +1896,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 		while (field.size() > 0)
 		  {
+		    // if this is an InvidDBField, deleteElement()
+		    // will convert this request into a deletion of
+		    // the embedded object.
+
 		    retVal = field.deleteElement(0); // *sync*
 
 		    if (retVal != null && !retVal.didSucceed())
@@ -1924,8 +1928,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      {
 		// permission matrices and passwords don't allow us to
 		// call set value directly.  We're mainly concerned
-		// with invid's (for linking) and strings (for the
-		// namespace) here anyway.
+		// with invid's (for linking), i.p. addresses and
+		// strings (for the namespace) here anyway.
 
 		if (debug)
 		  {
