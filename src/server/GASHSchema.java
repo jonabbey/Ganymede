@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.31 $ %D%
+   Version: $Revision: 1.32 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -861,20 +861,39 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
       }
     else if (event.getSource() == deleteObjectMI)
       {
-	BaseNode bNode = (BaseNode) node;
-	Base b = bNode.getBase();
+	DialogRsrc dialogrc = new DialogRsrc(this,
+					     "Confirm deletion of Object",
+					     "Are you sure you want to delete this object?",
+					     "Confirm",
+					     "Cancel");
 
-	try
-	  {
-	    System.err.println("Deleting base " + b.getName());
-	    editor.deleteBase(b);
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't delete base: remote exception " + ex);
-	  }
 
-	objectsRefresh();
+	StringDialog dialog = new StringDialog(dialogrc);
+
+	Hashtable answer = dialog.DialogShow();
+
+	if (answer == null) //Returned cancel
+	  {
+	    System.out.println("Deletion canceled");
+	  }
+	else //Returned confirm
+	  {
+
+	    BaseNode bNode = (BaseNode) node;
+	    Base b = bNode.getBase();
+	    
+	    try
+	      {
+		System.err.println("Deleting base " + b.getName());
+		editor.deleteBase(b);
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new RuntimeException("Couldn't delete base: remote exception " + ex);
+	      }
+	    
+	    objectsRefresh();
+	  }
       }
     else if (event.getSource() == createFieldMI)
       {
