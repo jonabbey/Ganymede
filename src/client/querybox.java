@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 2000/02/21 22:34:05 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 2001/04/12 08:23:49 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -178,7 +178,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   public querybox (BaseDump defaultBase, gclient gc,
 		   Frame parent, String DialogTitle)
   {
-    super(parent, DialogTitle, true); // the boolean value is to make the dialog modal
+    super(parent, DialogTitle, false); // the boolean value is to make the dialog non-modal
 
     // ---
     JPanel Choice_Buttons = new JPanel();
