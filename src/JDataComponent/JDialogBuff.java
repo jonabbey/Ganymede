@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -123,7 +123,7 @@ public class JDialogBuff implements java.io.Serializable {
 		System.err.println("JDialogBuff: retrieving string chunk");
 	      }
 
-	    retVal.addString((String) chunk.value);
+	    retVal.addString((String) chunk.value, (String)chunk.initialValue);
 	  }
 	else if (chunk.label.equals("@boolean"))
 	  {
@@ -132,7 +132,7 @@ public class JDialogBuff implements java.io.Serializable {
 		System.err.println("JDialogBuff: retrieving boolean chunk");
 	      }
 
-	    retVal.addBoolean((String) chunk.value);
+	    retVal.addBoolean((String) chunk.value, new Boolean((String)chunk.initialValue).booleanValue());
 	  }
 	else if (chunk.label.equals("@separator"))
 	  {
@@ -150,7 +150,7 @@ public class JDialogBuff implements java.io.Serializable {
 		System.err.println("JDialogBuff: retrieving password chunk");
 	      }
 
-	    retVal.addPassword((String) chunk.value);
+	    retVal.addPassword((String) chunk.value, new Boolean(chunk.initialValue).booleanValue()); // initialValue in this case is a boolean
 	  }
 	else if (chunk.label.startsWith("@choice>"))
 	  {
@@ -166,7 +166,7 @@ public class JDialogBuff implements java.io.Serializable {
 		System.err.println("JDialogBuff: choice label = " + choiceLabel);
 	      }
 
-	    retVal.addChoice(choiceLabel, (Vector) chunk.value);
+	    retVal.addChoice(choiceLabel, (Vector) chunk.value, (String)chunk.initialValue);
 
 	    if (debug)
 	      {
@@ -231,11 +231,11 @@ public class JDialogBuff implements java.io.Serializable {
   {
     buffer = new StringBuffer();
 
-    addChunk("@1", Title);
-    addChunk("@2", Text);
-    addChunk("@3", OK);
-    addChunk("@4", Cancel);
-    addChunk("@5", image);
+    addChunk("@1", Title, null);
+    addChunk("@2", Text, null);
+    addChunk("@3", OK, null);
+    addChunk("@4", Cancel, null);
+    addChunk("@5", image, null);
   }
 
   /**
@@ -247,7 +247,20 @@ public class JDialogBuff implements java.io.Serializable {
 
   public void addString(String string)
   {
-    addChunk("@string", string);
+    addString(string, (String)null);
+  }
+
+  /**
+   *
+   * Adds a labeled text field
+   *
+   * @param string String to use as the label
+   * @param value Initial value for string
+   */
+
+  public void addString(String string, String value)
+  {
+    addChunk("@string", string, value);
   }
 
   /**
@@ -259,7 +272,20 @@ public class JDialogBuff implements java.io.Serializable {
   
   public void addBoolean(String string)
   {
-    addChunk("@boolean", string);
+    addBoolean(string, new Boolean(false));
+  }
+
+  /**
+   * 
+   * Adds a labeled check box field
+   *
+   * @param string String to use as the label
+   * @param value Initial value
+   */
+  
+  public void addBoolean(String string, Boolean value)
+  {
+    addChunk("@boolean", string, value.toString());
   }
 
   /**
@@ -272,7 +298,20 @@ public class JDialogBuff implements java.io.Serializable {
   
   public void addChoice(String label, Vector choices)
   {
-    addChunk("@choice>" + label, choices);
+    addChoice(label, choices, null);
+  }
+
+  /**
+   *
+   * Adds a choice field to the dialog
+   *
+   * @param label String to use as the label
+   * @param choices Vector of Strings to add to the choice 
+   */
+  
+  public void addChoice(String label, Vector choices, String selectedValue)
+  {
+    addChunk("@choice>" + label, choices, selectedValue);
   }
 
   /**
@@ -283,7 +322,7 @@ public class JDialogBuff implements java.io.Serializable {
 
   public void addSeparator()
   {
-    addChunk("@separator", (String) null);
+    addChunk("@separator", (String) null, (String) null);
   }
 
   /**
@@ -295,7 +334,20 @@ public class JDialogBuff implements java.io.Serializable {
 
   public void addPassword(String label)
   {
-    addChunk("@pass", label);
+    addPassword(label, false);
+  }
+
+  /**
+   *
+   * Adds a text-hidden password string field to the dialog
+   *
+   * @param label String to use as label
+   * @param value Initial value
+   */
+
+  public void addPassword(String label, boolean isNew)
+  {
+    addChunk("@pass", label, new Boolean(isNew).toString());
   }
 
   // from here on down, it's strictly for internal processing. -------------
@@ -304,6 +356,7 @@ public class JDialogBuff implements java.io.Serializable {
   {
     Vector labels = new Vector();
     Vector operands = new Vector(); // each operand may be a string or a vector
+    Vector values = new Vector();  // This is the initial value, may be null
     Vector tempVect = null;
 
     Vector results = new Vector();
@@ -351,6 +404,45 @@ public class JDialogBuff implements java.io.Serializable {
 	else
 	  {
 	    throw new RuntimeException("parse error in entry " + labels.size());
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("retrieved chunk " + tempString.toString());
+	  }
+
+	index++;		// skip over :
+
+	// next get the value
+
+	tempString.setLength(0);
+
+	while (chars[index] != ':')
+ 	  {
+ 	    if (chars[index] == '\n')
+	      {
+ 		//throw new RuntimeException("parse error in row" + labels.size());
+		System.out.println("Got a new line, keeping it.");
+	      }
+	    
+	    // if we have a backslashed character, take the backslashed char
+	    // as a literal
+	    
+ 	    else if (chars[index] == '\\')
+ 	      {
+ 		index++;
+ 	      }
+	    
+	    tempString.append(chars[index++]);
+	  }
+
+	if (tempString.toString().length() != 0)
+	  {
+	    values.addElement(tempString.toString());
+	  }
+	else
+	  {
+	    values.addElement((String)null);
 	  }
 
 	if (debug)
@@ -450,7 +542,10 @@ public class JDialogBuff implements java.io.Serializable {
 
     for (int i = 0; i < labels.size(); i++)
       {
-	results.addElement(new JDialogBuffChunk((String) labels.elementAt(i), operands.elementAt(i)));
+	results.addElement(new JDialogBuffChunk((String) labels.elementAt(i), operands.elementAt(i),(String)  values.elementAt(i)));
+	
+	System.out.println("Adding chunk: " + (String) labels.elementAt(i) + ":" +  operands.elementAt(i) +":"+  values.elementAt(i));
+
       }
 
     // to speed GC
@@ -465,7 +560,7 @@ public class JDialogBuff implements java.io.Serializable {
 
   // private method for use on the server
 
-  private void addChunk(String label, String operand)
+  private void addChunk(String label, String operand, String value)
   {
     char[] chars;
 
@@ -503,6 +598,43 @@ public class JDialogBuff implements java.io.Serializable {
 	else
 	  {
 	    buffer.append(chars[j]);
+	  }
+      }
+
+    buffer.append(":");
+
+    // now the value
+
+    if (value != null)
+      {
+	chars = value.toCharArray();
+	
+	for (int j = 0; j < chars.length; j++)
+	  {
+	    if (chars[j] == '|')
+	      {
+		buffer.append("\\|");
+	      }
+	    else if (chars[j] == ':')
+	      {
+		buffer.append("\\:");
+	      }
+	    else if (chars[j] == ',')
+	      {
+		buffer.append("\\,");
+	      }
+	    else if (chars[j] == '\n')
+	      {
+		buffer.append("\\\n");
+	      }
+	    else if (chars[j] == '\\')
+	      {
+		buffer.append("\\\\");
+	      }
+	    else
+	      {
+		buffer.append(chars[j]);
+	      }
 	  }
       }
 
@@ -546,7 +678,7 @@ public class JDialogBuff implements java.io.Serializable {
     buffer.append("|");
   }
 
-  private void addChunk(String label, Vector operands)
+  private void addChunk(String label, Vector operands, String value)
   {
     char[] chars;
 
@@ -582,6 +714,43 @@ public class JDialogBuff implements java.io.Serializable {
 	else
 	  {
 	    buffer.append(chars[j]);
+	  }
+      }
+
+    buffer.append(":");
+
+    // now the value
+
+    if (value != null)
+      {
+	chars = value.toCharArray();
+	
+	for (int j = 0; j < chars.length; j++)
+	  {
+	    if (chars[j] == '|')
+	      {
+		buffer.append("\\|");
+	      }
+	    else if (chars[j] == ':')
+	      {
+		buffer.append("\\:");
+	      }
+	    else if (chars[j] == ',')
+	      {
+		buffer.append("\\,");
+	      }
+	    else if (chars[j] == '\n')
+	      {
+		buffer.append("\\\n");
+	      }
+	    else if (chars[j] == '\\')
+	      {
+		buffer.append("\\\\");
+	      }
+	    else
+	      {
+		buffer.append(chars[j]);
+	      }
 	  }
       }
 
@@ -649,13 +818,15 @@ class JDialogBuffChunk {
 
   String label;
   Object value;
+  String initialValue;
 
   /* -- */
 
-  public JDialogBuffChunk(String label, Object value)
+  public JDialogBuffChunk(String label, Object value, String initialValue)
   {
     this.label = label;
     this.value = value;
+    this.initialValue = initialValue;
   }
 
   public String toString()
