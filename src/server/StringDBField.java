@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2001/01/12 01:12:37 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2001/01/27 03:15:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -225,7 +225,7 @@ public class StringDBField extends DBField implements string_field {
 
     /* -- */
 
-    if (isVector())
+    if (definition.isArray())
       {
 	count = in.readShort();
 	value = new Vector(count);

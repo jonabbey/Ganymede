@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2001/01/12 01:12:34 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2001/01/27 03:15:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -242,7 +242,7 @@ public class IPDBField extends DBField implements ip_field {
 
     /* -- */
 
-    if (isVector())
+    if (definition.isArray())
       {
 	count = in.readShort();
 	value = new Vector(count);
