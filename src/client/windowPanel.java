@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -98,11 +98,11 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
   /**
    * Get the parent gclient
    */
-  public gclient getgclient()
-    {
-      return parent;
-    }
 
+  public gclient getgclient()
+  {
+    return parent;
+  }
 
   /**
    *
@@ -209,6 +209,7 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
     center.setBackground(ClientColor.WindowBG);
     center.add("Center", new containerPanel(object, editable, parent, this));
     w.add("Center", center);
+
     if (editable)
       {
 	if (debug)
@@ -250,7 +251,7 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
     parent.setStatus("Done.");
   }
 
-  public void addTableWindow(Session session, Query query, Vector results, String title)
+  public void addTableWindow(Session session, Query query, String results, String title)
   {
     gResultTable 
       rt = null;
@@ -330,69 +331,69 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
 
   // This makes a menu bar for the top of the JInternalFrames
   JMenuBar createMenuBar(boolean editable, db_object object, JInternalFrame w)
-    {
-      // Adding a menu bar, checking it out
-      JMenuBar menuBar = new JMenuBar();
-      menuBar.setBorderPainted(true);
-      //menuBar.setBackground(ClientColor.WindowBG.darker());
-      
-      JMenu fileM = new JMenu("File");
-      JMenu editM = new JMenu("Edit");
-      menuBar.add(fileM);
-      menuBar.add(editM);
-      
-      JMenuItem iconifyMI = new JMenuItem("Iconify");
-      menuItems.put(iconifyMI, object);
-      Windows.put(iconifyMI, w);
-      iconifyMI.addActionListener(this);
+  {
+    // Adding a menu bar, checking it out
+    JMenuBar menuBar = new JMenuBar();
+    menuBar.setBorderPainted(true);
+    //menuBar.setBackground(ClientColor.WindowBG.darker());
+    
+    JMenu fileM = new JMenu("File");
+    JMenu editM = new JMenu("Edit");
+    menuBar.add(fileM);
+    menuBar.add(editM);
+    
+    JMenuItem iconifyMI = new JMenuItem("Iconify");
+    menuItems.put(iconifyMI, object);
+    Windows.put(iconifyMI, w);
+    iconifyMI.addActionListener(this);
 
-      JMenuItem closeMI = new JMenuItem("Close");
-      menuItems.put(closeMI , object);
-      Windows.put(closeMI, w);
-      closeMI.setEnabled(!editable);
-      closeMI.addActionListener(this);
+    JMenuItem closeMI = new JMenuItem("Close");
+    menuItems.put(closeMI , object);
+    Windows.put(closeMI, w);
+    closeMI.setEnabled(!editable);
+    closeMI.addActionListener(this);
 
-      JMenu deleteM = new JMenu("Delete");
-      JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
-      deleteM.add(reallyDeleteMI);
-      menuItems.put(reallyDeleteMI, object);
-      Windows.put(reallyDeleteMI, w);
-      reallyDeleteMI.setActionCommand("ReallyDelete");
-      reallyDeleteMI.addActionListener(this);
+    JMenu deleteM = new JMenu("Delete");
+    JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
+    deleteM.add(reallyDeleteMI);
+    menuItems.put(reallyDeleteMI, object);
+    Windows.put(reallyDeleteMI, w);
+    reallyDeleteMI.setActionCommand("ReallyDelete");
+    reallyDeleteMI.addActionListener(this);
       
-      JMenuItem saveMI = new JMenuItem("Save");
-      Windows.put(saveMI, w);
-      menuItems.put(saveMI , object);
-      saveMI.setEnabled(false);
-      saveMI.addActionListener(this);
+    JMenuItem saveMI = new JMenuItem("Save");
+    Windows.put(saveMI, w);
+    menuItems.put(saveMI , object);
+    saveMI.setEnabled(false);
+    saveMI.addActionListener(this);
 
-      JMenuItem inactivateMI = new JMenuItem("Inactivate");
-      Windows.put(inactivateMI, w);
-      menuItems.put(inactivateMI, object);
-      inactivateMI.addActionListener(this);
+    JMenuItem inactivateMI = new JMenuItem("Inactivate");
+    Windows.put(inactivateMI, w);
+    menuItems.put(inactivateMI, object);
+    inactivateMI.addActionListener(this);
       
-      fileM.add(saveMI);
-      fileM.add(inactivateMI);
-      fileM.add(iconifyMI);
-      fileM.add(deleteM);
-      fileM.addSeparator();
-      fileM.add(closeMI);
+    fileM.add(saveMI);
+    fileM.add(inactivateMI);
+    fileM.add(iconifyMI);
+    fileM.add(deleteM);
+    fileM.addSeparator();
+    fileM.add(closeMI);
       
-      JMenuItem queryMI = new JMenuItem("Query");
-      Windows.put(queryMI, w);
-      queryMI.addActionListener(this);
-      menuItems.put(queryMI , object);
-      JMenuItem editMI = new JMenuItem("Edit");
-      Windows.put(editMI, w);
-      menuItems.put(editMI , object);
-      editMI.setEnabled(!editable);
-      editMI.addActionListener(this);
-      
-      editM.add(queryMI);
-      editM.add(editMI);
-      
-      return menuBar;
-    }
+    JMenuItem queryMI = new JMenuItem("Query");
+    Windows.put(queryMI, w);
+    queryMI.addActionListener(this);
+    menuItems.put(queryMI , object);
+    JMenuItem editMI = new JMenuItem("Edit");
+    Windows.put(editMI, w);
+    menuItems.put(editMI , object);
+    editMI.setEnabled(!editable);
+    editMI.addActionListener(this);
+    
+    editM.add(queryMI);
+    editM.add(editMI);
+    
+    return menuBar;
+  }
 
   /**
    * Closes all the windows
@@ -492,72 +493,73 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
   }
 
   public void closeWindow(String title)
-    {
-      JInternalFrame w;
-      Enumeration windows;
+  {
+    JInternalFrame w;
+    Enumeration windows;
       
-      /* -- */
-      
-      parent.setStatus("Closing a window");
-
-      windows = windowList.keys();
-      
-      while (windows.hasMoreElements())
-	{
-	  w = (JInternalFrame)windowList.get(windows.nextElement());
+    /* -- */
+    
+    parent.setStatus("Closing a window");
+    
+    windows = windowList.keys();
+    
+    while (windows.hasMoreElements())
+      {
+	w = (JInternalFrame)windowList.get(windows.nextElement());
 	  
-	  if (w.getTitle().equals(title))
-	    {
-	      if (w.isClosable())
-		{
-		  try 
-		    {
-		      w.setClosed(true);
-		    }
-		  catch (java.beans.PropertyVetoException ex)
-		    {
-		      throw new RuntimeException("beans? " + ex);
-		    }
-		}
-	      else
-		{
-		  parent.setStatus("You can't close that window.");
-		}
-	      break;
-	    }
-	}
+	if (w.getTitle().equals(title))
+	  {
+	    if (w.isClosable())
+	      {
+		try 
+		  {
+		    w.setClosed(true);
+		  }
+		catch (java.beans.PropertyVetoException ex)
+		  {
+		    throw new RuntimeException("beans? " + ex);
+		  }
+	      }
+	    else
+	      {
+		parent.setStatus("You can't close that window.");
+	      }
+	    break;
+	  }
+      }
       
-      parent.setStatus("Done");
-    }
+    parent.setStatus("Done");
+  }
 
   public void maxWindow(String title)
-    { 
-      JInternalFrame w;
-      Enumeration windows;
+  { 
+    JInternalFrame w;
+    Enumeration windows;
       
-      /* -- */
+    /* -- */
+    
+    parent.setStatus("Maxing window");
+    
+    windows = windowList.keys();
       
-      parent.setStatus("Maxing window");
-      
-      windows = windowList.keys();
-      
-      while (windows.hasMoreElements())
-	{
-	  w = (JInternalFrame)windowList.get(windows.nextElement());
+    while (windows.hasMoreElements())
+      {
+	w = (JInternalFrame)windowList.get(windows.nextElement());
 	  
-	  if (w.getTitle().equals(title))
-	    {
-	      try
-		{
-		  w.setMaxed(true);
-		}
-	      catch (java.beans.PropertyVetoException ex)
-		{
-		  throw new RuntimeException("beans? " + ex);
-		}
-	    }
-	}
-    }
+	if (w.getTitle().equals(title))
+	  {
+	    try
+	      {
+		w.setMaxed(true);
+	      }
+	    catch (java.beans.PropertyVetoException ex)
+	      {
+		throw new RuntimeException("beans? " + ex);
+	      }
+	  }
+      }
+  }
+
   public Menu updateMenu()
   {
     Enumeration windows;
@@ -744,44 +746,43 @@ public class windowPanel extends JPanel implements PropertyChangeListener, Actio
   }
 
   // This is for the beans, when a JInternalFrame closes
+
   public void propertyChange(java.beans.PropertyChangeEvent event)
-    {
-      //System.out.println("propertyChange: " + event.getSource());
-      //System.out.println("getPropertyName: " + event.getPropertyName());
-      //System.out.println("getNewValue: " + event.getNewValue());
+  {
+    //System.out.println("propertyChange: " + event.getSource());
+    //System.out.println("getPropertyName: " + event.getPropertyName());
+    //System.out.println("getNewValue: " + event.getNewValue());
 
-      if ((event.getPropertyName().equals("isClosed")) && ((Boolean)event.getNewValue()).booleanValue())
-	{
-	  //System.out.println("It's isClosed and true");
-	  if (event.getSource() instanceof JInternalFrame)
-	    {
-	      //System.out.println("It's a JInternalFrame");
-	      String oldTitle = ((JInternalFrame)event.getSource()).getTitle();
+    if ((event.getPropertyName().equals("isClosed")) && ((Boolean)event.getNewValue()).booleanValue())
+      {
+	//System.out.println("It's isClosed and true");
+	if (event.getSource() instanceof JInternalFrame)
+	  {
+	    //System.out.println("It's a JInternalFrame");
+	    String oldTitle = ((JInternalFrame)event.getSource()).getTitle();
 	      
-	      if (oldTitle == null)
-		{
-		  System.out.println("Title is null");
-		}
-	      else
-		{
-		  //System.out.println(" Removing button- " + oldTitle);
+	    if (oldTitle == null)
+	      {
+		System.out.println("Title is null");
+	      }
+	    else
+	      {
+		//System.out.println(" Removing button- " + oldTitle);
 		  
-		  windowList.remove(oldTitle);
-		  if (windowBar != null)
-		    {
-		      windowBar.removeButton(oldTitle);
-		    }
-		  updateMenu();
-		}
-	    }
-	  else
-	    {
-	      System.out.println("propertyChange from something other than a JInternalFrame");
-	    }
-	}
-
-      
-    }
+		windowList.remove(oldTitle);
+		if (windowBar != null)
+		  {
+		    windowBar.removeButton(oldTitle);
+		  }
+		updateMenu();
+	      }
+	  }
+	else
+	  {
+	    System.out.println("propertyChange from something other than a JInternalFrame");
+	  }
+      }
+  }
  
   void addRow(JComponent parent, Component comp,  String label, int row)
   {
