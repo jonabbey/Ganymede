@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.109 $ %D%
+   Version: $Revision: 1.110 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.109 $ %D%
+ * @version $Revision: 1.110 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -717,6 +717,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	GanymedeServer.sessions.removeElement(this);
 	GanymedeServer.clearActiveUser(username);
+
+	if (userInvid != null)
+	  {
+	    GanymedeServer.userLogOuts.put(userInvid, new Date());
+	  }
+	else
+	  {
+	    GanymedeServer.userLogOuts.put(personaInvid, new Date());
+	  }
+
 	GanymedeAdmin.refreshUsers();
 
 	// help the garbage collector
@@ -798,6 +808,82 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public String getHelpBase()
   {
     return Ganymede.helpbaseProperty;
+  }
+
+  /**
+   *
+   * This method is used to allow the client to retrieve messages like
+   * the motd from the server.  The client can specify that it only
+   * wants to see a message if it has changed since the user last
+   * logged out.  This is intended to support a message of the day
+   * type functionality.  The server will not necessarily remember the
+   * last log out across server restart.
+   *
+   * @param key A string, like "motd", indicating what message to retrieve.
+   * @param onlyShowIfNew If true, the message will only be returned if
+   *                      it has changed since the user last logged out.
+   *
+   * @return A StringBuffer containing the message, if found, or null if no
+   * message exists for the key, or if onlyShowIfNew was set and the message
+   * was not new.
+   *   
+   */
+
+  public StringBuffer getMessage(String key, boolean onlyShowIfNew)
+  {
+    Invid invidToCompare = null;
+
+    /* -- */
+
+    if (onlyShowIfNew)
+      {
+	invidToCompare = userInvid;
+
+	if (invidToCompare == null)
+	  {
+	    invidToCompare = personaInvid;
+	  }
+      }
+
+    return GanymedeServer.getTextMessage(key, invidToCompare, false);
+  }
+
+  /**
+   *
+   * This method is used to allow the client to retrieve messages like
+   * the motd from the server.  The client can specify that it only
+   * wants to see a message if it has changed since the user last
+   * logged out.  This is intended to support a message of the day
+   * type functionality.  The server will not necessarily remember the
+   * last log out across server restart.
+   *
+   * @param key A string, like "motd", indicating what message to retrieve.
+   * @param onlyShowIfNew If true, the message will only be returned if
+   *                      it has changed since the user last logged out.
+   *
+   * @return A StringBuffer containing the message, if found, or null if no
+   * message exists for the key, or if onlyShowIfNew was set and the message
+   * was not new.
+   *   
+   */
+
+  public StringBuffer getMessageHTML(String key, boolean onlyShowIfNew)
+  {
+    Invid invidToCompare = null;
+
+    /* -- */
+
+    if (onlyShowIfNew)
+      {
+	invidToCompare = userInvid;
+
+	if (invidToCompare == null)
+	  {
+	    invidToCompare = personaInvid;
+	  }
+      }
+
+    return GanymedeServer.getTextMessage(key, invidToCompare, true);
   }
 
   /**
