@@ -1,0 +1,18 @@
+#!/bin/sh
+
+CLASSPATH=/home/broccol/gash2/classes:/opt/depot/swing-1.1beta3/swingall.jar:$CLASSPATH; export CLASSPATH
+cd /home/broccol/gash2/code/arlut/csd/ganymede/client
+echo "Compiling Ganymede Client files"
+
+umask 0133
+
+#JAVA_COMPILER=sunwjit; export JAVA_COMPILER
+
+/opt/bin/javac -deprecation -d /home/broccol/gash2/classes *.java
+# echo "Fixing permissions"
+# chmod g+w *.class
+# echo "Installing classes"
+# mv *.class /home/broccol/gash2/classes/arlut/csd/ganymede/client
+echo "Building rmi stubs and skeletons"
+rmic -d /home/broccol/gash2/classes arlut.csd.ganymede.client.ClientBase
+echo "Done"
