@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.12 $ %D%
+ * @version $Revision: 1.13 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -204,6 +204,21 @@ public interface Session extends Remote {
    */
 
   db_object   create_db_object(short type) throws RemoteException;
+
+  /**
+   *
+   * Clone a new object from object <invid>. If the return value is null,
+   * getLastError() should be called for a description of the problem. 
+   *
+   * Typically, only certain values will be cloned.  What values are
+   * retained is up to the specific code module provided for the
+   * invid's object type.
+   *
+   * @return the newly created object for editing, if null check getLastError()
+   *
+   */
+
+  db_object   clone_db_object(Invid invid) throws RemoteException;
 
   /**
    *
