@@ -115,7 +115,7 @@ total         - Complete strip and rebuild
     </copy>
 
     <!-- Build the client jar file -->
-    <jar jarfile="${build.lib}/ganymede.jar">
+    <jar jarfile="${build.lib}/ganymede.jar" duplicate="preserve">
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JCalendar/**/*.class"/>
@@ -207,7 +207,7 @@ total         - Complete strip and rebuild
     </jar>
 
     <!-- Build the server jar file -->
-    <jar jarfile="${build.lib}/ganymedeServer.jar">
+    <jar jarfile="${build.lib}/ganymedeServer.jar" duplicate="preserve">
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/crypto/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/listHandle.class"/>
@@ -225,7 +225,7 @@ total         - Complete strip and rebuild
     </jar>
 
     <!-- Build the admin jar file -->
-    <jar jarfile="${build.lib}/ganymedeAdmin.jar">
+    <jar jarfile="${build.lib}/ganymedeAdmin.jar" duplicate="preserve">
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
