@@ -8,15 +8,16 @@
    
    Created: 3 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/02/04 22:00:22 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/12/02 10:09:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -69,6 +70,90 @@ import java.io.*;
  */
 
 public class zipIt {
+
+  final static boolean debug = false;
+
+  /**
+   * <P>This method takes care of zipping up a directory of files into a zip file.</P>
+   *
+   * <P>This method will not support subdirectories in the directory specified.. only
+   * flat files in the specific directoryPath will be zipped into zipFileName.</P>
+   *
+   * <P>This method returns true if a zip file was successfully created, and false
+   * or an IOException if none could be.  If there were no files in the given
+   * directory to zip, false will be returned.</P>
+   */
+
+  public static boolean zipDirectory(String directoryPath, String zipFileName) throws IOException
+  {
+    File targetFile = new File(zipFileName);
+
+    if (targetFile.exists())
+      {
+	throw new IOException("Error, target zip file " + zipFileName + " already exists.");
+      }
+
+    directoryPath = PathComplete.completePath(directoryPath);
+
+    File directory = new File(directoryPath);
+
+    if (!directory.isDirectory())
+      {
+	throw new IOException("Error, couldn't find directory to zip.");
+      }
+
+    String filenames[] = directory.list(new FilenameFilter()
+					{
+					  /**
+					   * <P>This method comprises the FileNameFilter body, and is used to avoid
+					   * zipping existing zip files into new backups.</P>
+					   */
+					  
+					  public boolean accept(File dir, String name)
+					    {
+					      if (name.endsWith(".zip") || (name.endsWith(".ZIP")))
+						{
+						  return false;
+						}
+					      
+					      return true;
+					    }
+					});
+    
+    if (filenames.length > 0)
+      {
+	Vector filenameVect = new Vector();
+
+	if (debug)
+	  {
+	    System.err.print("Zipping: ");
+	  }
+
+	for (int i = 0; i < filenames.length; i++)
+	  {
+	    if (debug)
+	      {
+		System.err.print(filenames[i]);
+		System.err.print(" ");
+	      }
+
+	    File testFile = new File(directoryPath + filenames[i]);
+
+	    if (!testFile.isDirectory())
+	      {
+		filenameVect.addElement(directoryPath + filenames[i]);
+	      }
+	  }
+	
+	if (filenameVect.size() > 0)
+	  {
+	    zipIt.createZipFile(zipFileName, filenameVect);
+	    return true;
+	  }
+      }
+
+    return false;
+  }
 
   /**
    *
@@ -178,6 +263,16 @@ public class zipIt {
 
   public static void main (String args[])
   {
+    try
+      {
+	zipIt.zipDirectory(args[0], args[1]);
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+      }
+
+    /*
     String zipName = args[0];
     Vector inFiles = new Vector();
 
@@ -194,5 +289,6 @@ public class zipIt {
       {
 	throw new RuntimeException(ex.getMessage());
       }
+    */
   }
 }
