@@ -41,7 +41,6 @@ abstract public class JentryField extends JTextField implements FocusListener{
   public JentryField(int columns) 
   {
     super(columns);
-    setEnabled(true);
     setEditable(true);
 
     addFocusListener(this);
