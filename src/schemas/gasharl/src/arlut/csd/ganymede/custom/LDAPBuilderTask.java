@@ -226,7 +226,25 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
       {
         /* Reset some of our locals for this second pass */
 	out = null;
-  
+    
+        if (dnsdomain == null)
+          {
+            dnsdomain = System.getProperty("ganymede.gash.dnsdomain");
+
+            if (dnsdomain == null)
+              {
+                throw new RuntimeException(
+                    "LDAPBuilder not able to determine DNS domain.");
+              }
+
+            // prepend a dot if we need to
+
+            if (dnsdomain.indexOf('.') != 0)
+              {
+                dnsdomain = "." + dnsdomain;
+              }
+          } 
+          
 	try
 	  {
 	    out = openOutFile(path + "netgroups.ldif", "ldap");
@@ -522,7 +540,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
               }
             else if (typeid == 263) 
               {
-                writeLDIF(out, "nisNetgroupTriple", "(" + membername + ",,)");
+                writeLDIF(out, "nisNetgroupTriple", "(" + membername + dnsdomain + ",,)");
               }
           }
       }
