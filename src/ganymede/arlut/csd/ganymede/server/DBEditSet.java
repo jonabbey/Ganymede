@@ -1899,8 +1899,9 @@ public class DBEditSet {
 		streamLogEvent((DBLogEvent) logEvents.elementAt(i));
 	      }
 
-	    logEvents.setSize(0);
-	    logEvents = null;
+	    // for garbage collection
+    
+	    logEvents.removeAllElements();
 
 	    // then create and stream log events describing the
 	    // objects that are in this transaction at the time of
@@ -1916,14 +1917,13 @@ public class DBEditSet {
 	catch (Throwable ex)
 	  {
 	    Ganymede.debug(Ganymede.stackTrace(ex));
+	  }
+	finally
+	  {
+	    logEvents = null;
 	    Ganymede.log.cleanupTransaction();
 	  }
       }
-
-    // for garbage collection
-    
-    logEvents.removeAllElements();
-    logEvents = null;
   }
 
   /**
