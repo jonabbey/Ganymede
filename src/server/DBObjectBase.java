@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.110 $
-   Last Mod Date: $Date: 2000/07/12 23:48:55 $
+   Version: $Revision: 1.111 $
+   Last Mod Date: $Date: 2000/09/22 02:53:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2718,6 +2718,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	throw new RuntimeException(ex.getMessage());
       }
+
+    // we use direct assignment for these fields to avoid schema
+    // editing checks
 
     bf.field_name = name;
     bf.field_code = id;

@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 2000/07/12 04:41:00 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 2000/09/22 02:53:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1336,15 +1336,18 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * <p>This method returns true if this field definition can be edited
    * in the schema editor.</p>
    *
-   * <p>This method will return false for the built-in field types
-   * that the server is dependent on for its own functioning.</p>
+   * <p>This method will return false for the built-in universal field
+   * types that the server is dependent on for its own
+   * functioning, because those really have no reason to be edited at
+   * all.. even the field names needn't be edited by anyone, since
+   * they aren't shown in the client.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
 
   public boolean isEditable()
   {
-    return true;
+    return getID() > SchemaConstants.FinalSystemField;
   }
 
   /**
@@ -1456,6 +1459,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("can't have a null or empty name");
       }
 
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the name of a system field.");
+      }
+
     // make sure we strip any chars that would cause this object name
     // to not be a valid XML entity name character.  We make an
     // exception for spaces, which we will replace with underscores as
@@ -1515,6 +1524,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not in an schema editing context");
       }
 
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the class name of a system field.");
+      }
+
     if (!name.equals(classname))
       {
 	try 
@@ -1566,6 +1581,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
+      }
+
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
       }
 
     comment = s;
@@ -1622,6 +1643,31 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (type < FIRSTFIELD || type > LASTFIELD)
+      {
+	throw new IllegalArgumentException("type argument out of range");
+      }
+
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
+      }
+
+    // now we need to delineate those fields whose types must not be
+    // changed due to server requirements, even if we don't have an
+    // instance of the field in current use
+
+    // note that we don't just rule out all type setting on all fields
+    // in these object types, as it is permissible to add fields to
+    // the mandatory types
+
+    if (isSystemField())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the type of a system field.");
+      }
+
     if (isInUse())
       {
 	return Ganymede.createErrorDialog("Error",
@@ -1632,11 +1678,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	// need to check to make sure no other invid field definitions are
 	// pointing to this field somehow
-      }
-
-    if (type < FIRSTFIELD || type > LASTFIELD)
-      {
-	throw new IllegalArgumentException("type argument out of range");
       }
 
     field_type = type;
@@ -1785,6 +1826,21 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
+      }
+
+    // array-ness is way too critical to be edited, even in mildly variable system
+    // fields like username in the user object
+
+    if (isSystemField())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "can't change the vector status of a system field.");
+      }
+
     if (isInUse())
       {
 	return Ganymede.createErrorDialog("Error",
@@ -1881,9 +1937,23 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
+      }
+
     if (!array)
       {
 	throw new IllegalArgumentException("not an array field");
+      }
+
+    // array sizes need not be screwed with in the system fields
+
+    if (isSystemField())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "can't change the vector limits of a system field.");
       }
 
     this.limit = limit;
@@ -1934,6 +2004,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
+      }
+
     if (!isBoolean())
       {
 	throw new IllegalArgumentException("not a boolean field");
@@ -1978,6 +2054,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
+      }
+
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
       }
 
     if (isLabeled())
@@ -2026,6 +2108,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
+      }
+
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
       }
 
     if (isLabeled())
@@ -2078,6 +2166,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
+      }
+
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
       }
 
     if (!isString() && !isPassword())
@@ -2134,6 +2228,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
+      }
+
     if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
@@ -2186,6 +2286,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (editor == null)
       {
 	throw new IllegalArgumentException("not editing");
+      }
+
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
       }
 
     if (!isString() && !isPassword())
@@ -2243,6 +2349,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
+      }
+
     if (!isString() && !isPassword())
       {
 	throw new IllegalArgumentException("not a string field");
@@ -2297,6 +2409,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
+      }
+
     if (!isString())
       {
 	throw new IllegalArgumentException("not a string field");
@@ -2341,6 +2459,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (editor == null && !loading)
       {
 	throw new IllegalArgumentException("not editing");
+      }
+
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
       }
 
     if (!isString())
@@ -2437,17 +2561,61 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not editing");
       }
 
+    if (editor != null && !isEditable())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't edit system field.");
+      }
+
     if (!isString() && !isNumeric() && !isIP())
       {
 	throw new IllegalArgumentException("this field type does not accept a namespace constraint");
       }
 
-    if (nameSpaceId == null)
+    if (nameSpaceId == null || nameSpaceId.equals(""))
       {
-	namespace = null;
-      }
-    else if (nameSpaceId.equals(""))
-      {
+	// wouldn't it be nice if java had decent support for declared data structures?
+
+	if (base.getTypeID() == SchemaConstants.UserBase &&
+	    getID() == SchemaConstants.UserUserName)
+	  {
+	    return Ganymede.createErrorDialog("Error",
+					      "Proper functioning of the Ganymede server " +
+					      "depends on user names being unique.");
+	  }
+
+	if (base.getTypeID() == SchemaConstants.PersonaBase &&
+	    getID() == SchemaConstants.PersonaLabelField)
+	  {
+	    return Ganymede.createErrorDialog("Error",
+					      "Proper functioning of the Ganymede server " +
+					      "depends on persona labels being unique.");
+	  }
+
+	if (base.getTypeID() == SchemaConstants.OwnerBase &&
+	    getID() == SchemaConstants.OwnerNameField)
+	  {
+	    return Ganymede.createErrorDialog("Error",
+					      "Proper functioning of the Ganymede server " +
+					      "depends on owner group labels being unique.");
+	  }
+
+	if (base.getTypeID() == SchemaConstants.EventBase &&
+	    getID() == SchemaConstants.EventToken)
+	  {
+	    return Ganymede.createErrorDialog("Error",
+					      "Proper functioning of the Ganymede server " +
+					      "depends on event tokens being unique.");
+	  }
+
+	if (base.getTypeID() == SchemaConstants.RoleBase &&
+	    getID() == SchemaConstants.RoleName)
+	  {
+	    return Ganymede.createErrorDialog("Error",
+					      "Proper functioning of the Ganymede server " +
+					      "depends on Role names being unique.");
+	  }
+
 	namespace = null;
       }
     else
@@ -2555,17 +2723,21 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	throw new IllegalArgumentException("not an invid field");
       }
-    else
+    
+    if (isSystemField())
       {
-	if (isInUse())
-	  {
-	    return Ganymede.createErrorDialog("Error",
-					      "Can't change the editInPlace status type of an " +
-					      "invid field which is in use in the database.");
-	  }
-
-	editInPlace = b;
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the type of a system field.");
       }
+    
+    if (isInUse())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the editInPlace status type of an " +
+					  "invid field which is in use in the database.");
+      }
+    
+    editInPlace = b;
 
     return null;
   }
@@ -2638,6 +2810,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not an invid field");
       }
 
+    if (isSystemField())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the type of a system field.");
+      }
+
     if (val < 0)
       {
 	allowedTarget = val;
@@ -2689,6 +2867,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (!isInvid())
       {
 	throw new IllegalArgumentException("not an invid field");
+      }
+
+    if (isSystemField())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the type of a system field.");
       }
 
     if (baseName == null)
@@ -2795,6 +2979,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new IllegalArgumentException("not an invid field");
       }
 
+    if (isSystemField())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the type of a system field.");
+      }
+
     if (val < 0)
       {
 	targetField = val;
@@ -2865,6 +3055,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (!isInvid())
       {
 	throw new IllegalArgumentException("not an invid field");
+      }
+
+    if (isSystemField())
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Can't change the type of a system field.");
       }
 
     if (fieldName == null)
@@ -3050,6 +3246,136 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   // general convenience methods
+
+  /**
+   * <p>This method checks to see if this DBObjectBaseField corresponds to
+   * a system field
+   */
+
+  private boolean isSystemField()
+  {
+    if (getID() <= SchemaConstants.FinalSystemField)
+      {
+	return true;
+      }
+
+    // wouldn't it be nice if java had decent support for declared data structures?
+
+    // basically we want to identify all fields in the built-in types
+    // that we have to be especially paranoid about.
+
+    switch (base.getTypeID())
+      {
+      case SchemaConstants.OwnerBase:
+
+	switch (getID())
+	  {
+	  case SchemaConstants.OwnerNameField:
+	  case SchemaConstants.OwnerMembersField:
+	  case SchemaConstants.OwnerObjectsOwned:
+	  case SchemaConstants.OwnerCcAdmins:
+	  case SchemaConstants.OwnerExternalMail:
+	    return true;
+	  }
+
+	break;
+
+      case SchemaConstants.PersonaBase:
+
+	switch (getID())
+	  {
+	  case SchemaConstants.PersonaNameField:
+	  case SchemaConstants.PersonaPasswordField:
+	  case SchemaConstants.PersonaGroupsField:
+	  case SchemaConstants.PersonaAssocUser:
+	  case SchemaConstants.PersonaPrivs:
+	  case SchemaConstants.PersonaAdminConsole:
+	  case SchemaConstants.PersonaAdminPower:
+	  case SchemaConstants.PersonaMailAddr:
+	  case SchemaConstants.PersonaLabelField:
+	    return true;
+	  }
+
+	break;
+
+      case SchemaConstants.RoleBase:
+
+	switch (getID())
+	  {
+	  case SchemaConstants.RoleName:
+	  case SchemaConstants.RoleMatrix:
+	  case SchemaConstants.RolePersonae:
+	  case SchemaConstants.RoleDefaultMatrix:
+	  case SchemaConstants.RoleDelegatable:
+	    return true;
+	  }
+
+	break;
+
+      case SchemaConstants.UserBase:
+
+	switch (getID())
+	  {
+	  case SchemaConstants.UserUserName:
+	  case SchemaConstants.UserPassword:
+	  case SchemaConstants.UserAdminPersonae:
+	    return true;
+	  }
+
+	break;
+
+      case SchemaConstants.EventBase:
+
+	switch (getID())
+	  {
+	  case SchemaConstants.EventToken:
+	  case SchemaConstants.EventName:
+	  case SchemaConstants.EventDescription:
+	  case SchemaConstants.EventMailBoolean:
+	  case SchemaConstants.EventMailToSelf:
+	  case SchemaConstants.EventMailOwners:
+	  case SchemaConstants.EventExternalMail:
+	    return true;
+	  }
+
+	break;
+
+      case SchemaConstants.ObjectEventBase:
+
+	switch (getID())
+	  {
+	  case SchemaConstants.ObjectEventToken:
+	  case SchemaConstants.ObjectEventName:
+	  case SchemaConstants.ObjectEventDescription:
+	  case SchemaConstants.ObjectEventMailToSelf:
+	  case SchemaConstants.ObjectEventObjectName:
+	  case SchemaConstants.ObjectEventMailOwners:
+	  case SchemaConstants.ObjectEventObjectType:
+	  case SchemaConstants.ObjectEventExternalMail:
+	    return true;
+	  }
+
+	break;
+
+      case SchemaConstants.TaskBase:
+
+	switch (getID())
+	  {
+	  case SchemaConstants.TaskName:
+	  case SchemaConstants.TaskClass:
+	  case SchemaConstants.TaskRunOnCommit:
+	  case SchemaConstants.TaskRunPeriodically:
+	  case SchemaConstants.TaskPeriodUnit:
+	  case SchemaConstants.TaskPeriodCount:
+	  case SchemaConstants.TaskPeriodAnchor:
+	    return true;
+	  }
+
+	break;
+      }
+
+    return false;
+  }
 
   /**
    * <p>This method is intended to produce a human readable
