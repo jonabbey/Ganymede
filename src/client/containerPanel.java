@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.28 $ %D%
+    Version: $Revision: 1.29 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,6 @@ import java.rmi.*;
 import java.util.*;
 
 import arlut.csd.ganymede.*;
-import arlut.csd.ganymede.client.*;
 
 import arlut.csd.JDataComponent.*;
 
@@ -41,7 +40,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   // -- 
   
   gclient
-    parent;			// our interface to the server
+    gc;			// our interface to the server
 
   JPanel
     panel; //This is the panel that holds everything
@@ -68,11 +67,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   GridBagConstraints
     gbc;
   
-  db_field[] 
-    fields = null;
-  
   JViewport
     vp;
+
+  Vector 
+    infoVector = null,
+    templates = null;
 
   JButton
     editB;
@@ -92,7 +92,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   short 
     type;
 
-  
   /* -- */
 
   /**
@@ -105,9 +104,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param window   windowPanel containing this containerPanel
    *
    */
-  public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame)
+  public containerPanel(db_object object, boolean editable, gclient gc, windowPanel window, framePanel frame)
   {
-    this(object, editable, parent, window, frame, null, true);
+    this(object, editable, gc, window, frame, null, true);
   }
 
   /**
@@ -120,9 +119,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param window   windowPanel containing this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
    */
-  public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame, JProgressBar progressBar)
+  public containerPanel(db_object object, boolean editable, gclient gc, windowPanel window, framePanel frame, JProgressBar progressBar)
   {
-    this(object, editable, parent, window, frame, progressBar, true);
+    this(object, editable, gc, window, frame, progressBar, true);
   }
 
   /**
@@ -138,19 +137,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame, JProgressBar progressBar, boolean loadNow)
+  public containerPanel(db_object object, boolean editable, gclient gc, windowPanel window, framePanel frame, JProgressBar progressBar, boolean loadNow)
   {
-
+    super(false);
     /* -- */
 
     if (object == null)
       {
 	System.err.println("null object passed to containerPanel");
-	parent.setStatus("Could not get object.  Someone else might be editting it.  Try again at a later time.");
+	setStatus("Could not get object.  Someone else might be editting it.  Try again at a later time.");
 	return;
       }
 
-    this.parent = parent;
+    this.gc = gc;
     this.winP = window;
     this.object = object;
     this.editable = editable;
@@ -187,12 +186,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
-    panel = new JPanel(gbl);
+    panel = new JPanel(gbl, false);
     add("North", panel);
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.insets = new Insets(4,4,4,4);
     
-    panel.setLayout(gbl);
+
+    if (progressBar != null)
+      {
+	progressBar.setMinimum(0);
+	progressBar.setMaximum(20);
+	progressBar.setValue(0);
+      }
       
     // Get the list of fields
 
@@ -203,56 +208,123 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     try
       {
-	// get all the custom fields
-	fields = object.listFields(true);  // Could this use the baseHash?
 	type = object.getTypeID();
-	isEmbedded = object.isEmbedded();
-	
+	if (progressBar != null)
+	  {
+	    progressBar.setValue(1);
+	  }
       }
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not get the fields: " + rx);
       }
 
+    Short Type = new Short(type);
+    if (gc.templateHash.containsKey(Type))
+      {
+	if (debug)
+	  {
+	    System.out.println("Found the template, using cache.");
+	  }
+	templates = (Vector)gc.templateHash.get(Type);
+
+      }
+    else
+      {
+	try
+	  {
+	    if (debug)
+	      {
+		System.out.println("template not found, downloading and caching: " + Type);
+	      }
+	    templates = object.getFieldTemplateVector();
+	    gc.templateHash.put(Type, templates);
+
+
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get field templates: " + rx);
+	  }
+
+      }
+
     if (progressBar != null)
       {
-	progressBar.setMinimum(0);
-	progressBar.setMaximum(fields.length +2);
-	progressBar.setValue(1);
+	progressBar.setMaximum(templates.size());
+	progressBar.setValue(2);
       }
+
+    try
+      {
+	infoVector = object.getFieldInfoVector(true);  // Just gets the custom ones
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get FieldInfoVector: " + rx);
+      }
+
+    if (progressBar != null)
+      {
+	progressBar.setValue(3);
+      }
+
+
+
 
     if (debug)
       {
 	System.out.println("Entering big loop");
       }
       
-    if (fields != null)
+    if (templates != null)
       {
-	for (int i = 0; i < fields.length ; i++)
+	int infoSize = infoVector.size();
+	FieldInfo fieldInfo = null;
+	FieldTemplate fieldTemplate = null;
+	
+	for (int i = 0; i < infoSize ; i++)
 	  {
 	    if (progressBar != null)
 	      {
-		progressBar.setValue(i + 2);
+		progressBar.setValue(i + 4);
 	      }
 
 	    try
 	      {
-
-		FieldInfo fieldInfo = fields[i].getFieldInfo();
 		// Skip some fields.  custom panels hold the built ins, and a few others.
-		short ID = fieldInfo.getFieldID();
+		fieldInfo = (FieldInfo)infoVector.elementAt(i);
+		// Find the template
+		boolean found = false;
+		for (int k = 0; k < templates.size(); k++)
+		  {
+		    fieldTemplate = (FieldTemplate)templates.elementAt(k);
+		    if (fieldTemplate.getID() == fieldInfo.getID())
+		      {
+			found = true;
+			break;
+		      }
+		  }
+		
+		if (! found)
+		  {
+		    throw new RuntimeException("Could not find the template for this field: " + fieldInfo.getField());
+		  }
+
+		short ID = fieldTemplate.getID();
 		if (((type== SchemaConstants.OwnerBase) && (ID == SchemaConstants.OwnerObjectsOwned)) 
+		    ||  (ID == SchemaConstants.BackLinksField)
 		    || ((type == SchemaConstants.UserBase) && (ID == SchemaConstants.UserAdminPersonae))
-		    || ((ID == SchemaConstants.ContainerField) && isEmbedded))
+		    || ((ID == SchemaConstants.ContainerField) && object.isEmbedded()))
 		  {
 		    if (debug)
 		      {
-			System.out.println("Skipping a special field: " + fieldInfo.getName());
+			System.out.println("Skipping a special field: " + fieldTemplate.getName());
 		      }
 		  }
 		else
 		  {
-		    addFieldComponent(fields[i], fieldInfo);
+		    addFieldComponent(fieldInfo.getField(), fieldInfo, fieldTemplate);
 		  }
 	      }
 	    catch (RemoteException ex)
@@ -262,17 +334,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
     
-    if (progressBar != null)
-      {
-	progressBar.setValue(fields.length + 2);
-      }
-
     if (debug)
       {
 	System.out.println("Done with loop");
       }
 
     //setViewportView(panel);
+
+    setStatus("Finished loading containerPanel");
 
     loaded = true;
   }
@@ -383,7 +452,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   {
     if (v.getOperationType() == JValueObject.ERROR)
       {
-	parent.setStatus((String)v.getValue());
+	setStatus((String)v.getValue());
 	return true;
       }
 
@@ -401,8 +470,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	try
 	  {
-	    String oldValue = (String)field.getValue();
-
 
 	    if (debug)
 	      {
@@ -411,25 +478,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (field.setValue(v.getValue()))
 	      {
-		parent.somethingChanged = true;
+		gc.somethingChanged = true;
 		returnValue = true;
 	      }
 	    else
 	      {
-		if (debug)
-		  {
-		    System.err.println("Could not change field, reverting to " + oldValue);
-		  }
-		/*
-		((JstringField)v.getSource()).setText("");
-
-		// This isn't working for some reason
-		((JstringField)v.getSource()).setText(oldValue);
-
-		System.out.println("text is: " + ((JstringField)v.getSource()).getText());
-		System.out.println("text is: " + ((JstringField)v.getSource()).getValue());
-		*/
-		parent.setStatus("Could not change field: " + parent.getSession().getLastError());
+		
+		setStatus("Could not change field: " + gc.getSession().getLastError());
 
 		returnValue = false;
 	      }
@@ -457,7 +512,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    if (field.setPlainTextPass((String)v.getValue()))
 	      {
-		parent.somethingChanged = true;
+		gc.somethingChanged = true;
 		returnValue = true;
 	      }
 	    else
@@ -487,7 +542,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	try
 	  {
-	    parent.somethingChanged = true;
+	    gc.somethingChanged = true;
 	    returnValue =  field.setValue(v.getValue());
 	  }
 	catch (RemoteException rx)
@@ -498,7 +553,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     else if (v.getSource() instanceof vectorPanel)
       {
 	System.out.println("Something happened in the vector panel");
-	parent.somethingChanged = true;
+	gc.somethingChanged = true;
       }
     else if (v.getSource() instanceof tStringSelector)
       {
@@ -508,7 +563,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	if (v.getOperationType() == JValueObject.ERROR)
 	  {
-	    parent.setStatus((String)v.getValue());
+	    setStatus((String)v.getValue());
 	  }
 	else if (v.getValue() instanceof Invid)
 	  {
@@ -578,7 +633,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	try
 	  {
-	    parent.somethingChanged = true;
+	    gc.somethingChanged = true;
 	    returnValue =  field.setValue(v.getValue());
 	  }
 	catch (RemoteException rx)
@@ -622,7 +677,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      
 	    if (field.setValue(new Boolean(((JCheckBox)e.getSource()).isSelected())))
 	      {
-		parent.somethingChanged = true;
+		gc.somethingChanged = true;
 	      }
 	    else
 	      {
@@ -783,7 +838,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addFieldComponent(db_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addFieldComponent(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
     short fieldType;
     String name = null;
@@ -797,30 +852,30 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	throw new IllegalArgumentException("null field");
       }
 
-    fieldType = fieldInfo.getType();
-    //name = fieldInfo.getName();
-    isVector = fieldInfo.isVector();
+    fieldType = fieldTemplate.getType();
+    isVector = fieldTemplate.isArray();
 
 
     if (debug)
       {
-	System.out.println("Name: " + fieldInfo.getName() + "Field type desc: " + fieldType);
+	System.out.println("Name: " + fieldTemplate.getName() + "Field type desc: " + fieldType);
       }
     
     if (isVector)
       {
 	if (fieldType == FieldType.STRING)
 	  {
-	    addStringVector((string_field) field, fieldInfo);
+	    addStringVector((string_field) field, fieldInfo, fieldTemplate);
 	  }
-	else if (fieldType == FieldType.INVID && !fieldInfo.isEditInPlace())
+	else if (fieldType == FieldType.INVID && !fieldTemplate.isEditInPlace())
 	  {
-	    addInvidVector((invid_field) field, fieldInfo);
+	    addInvidVector((invid_field) field, fieldInfo, fieldTemplate);
 	  }
 	else			// generic vector
 	  {
-	    addVectorPanel(field, fieldInfo);
+	    addVectorPanel(field, fieldInfo, fieldTemplate);
 	  }
+
       }
     else
       {
@@ -833,40 +888,40 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    break;
 		      
 	  case FieldType.STRING:
-	    addStringField((string_field) field, fieldInfo);
+	    addStringField((string_field) field, fieldInfo, fieldTemplate);
 	    break;
 		      
 	  case FieldType.PASSWORD:
-	    addPasswordField((pass_field) field, fieldInfo);
+	    addPasswordField((pass_field) field, fieldInfo, fieldTemplate);
 	    break;
 		      
 	  case FieldType.NUMERIC:
-	    addNumericField(field, fieldInfo);
+	    addNumericField(field, fieldInfo, fieldTemplate);
 	    break;
 		      
 	  case FieldType.DATE:
-	    addDateField(field, fieldInfo);
+	    addDateField(field, fieldInfo, fieldTemplate);
 	    break;
 		      
 	  case FieldType.BOOLEAN:
-	    addBooleanField(field, fieldInfo);
+	    addBooleanField(field, fieldInfo, fieldTemplate);
 	    break;
 		      
 	  case FieldType.PERMISSIONMATRIX:
-	    addPermissionField(field, fieldInfo);
+	    addPermissionField(field, fieldInfo, fieldTemplate);
 	    break;
 		      
 	  case FieldType.INVID:
-	    addInvidField((invid_field)field, fieldInfo);
+	    addInvidField((invid_field)field, fieldInfo, fieldTemplate);
 	    break;
 
 	  case FieldType.IP:
-	    addIPField((ip_field) field, fieldInfo);
+	    addIPField((ip_field) field, fieldInfo, fieldTemplate);
 	    break;
 		      
 	  default:
 	    JLabel label = new JLabel("(Unknown)Field type ID = " + fieldType);
-	    addRow( label, fieldInfo.getName(), true);
+	    addRow( label, fieldTemplate.getName(), true);
 	  }
       }
   }
@@ -878,7 +933,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addStringVector(string_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addStringVector(string_field field, FieldInfo fieldInfo,FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
@@ -887,7 +942,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (field == null)
       {
-	System.out.println("Hey, this is a null field! " + fieldInfo.getName());
+	System.out.println("Hey, this is a null field! " + fieldTemplate.getName());
 
       }
 
@@ -910,9 +965,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else
 	  {
-	    if (parent.cachedLists.containsKey(id))
+	    if (gc.cachedLists.containsKey(id))
 	      {
-		qr = (QueryResult)parent.cachedLists.get(id);
+		qr = (QueryResult)gc.cachedLists.get(id);
 	      }
 	    else
 	      {	
@@ -924,7 +979,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		qr =field.choices();
 		if (qr != null)
 		  {
-		    parent.cachedLists.put(id, qr);
+		    gc.cachedLists.put(id, qr);
 		  }
 	      }
 	  }
@@ -934,7 +989,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	if (qr == null)
 	  {
 	    tStringSelector ss = new tStringSelector(null,
-						     field.getValues(), 
+						     (Vector)fieldInfo.getValue(), 
 						     this,
 						     editable,
 						     false,  //canChoose
@@ -945,12 +1000,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		ss.setCallback(this);
 	      }
-	    addRow( ss, fieldInfo.getName(), fieldInfo.isVisible()); 
+	    addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
 	else
 	  {
 	    tStringSelector ss = new tStringSelector(qr.getLabels(),
-						     field.getValues(), 
+						     (Vector)fieldInfo.getValue(), 
 						     this,
 						     editable,
 						     true,   //canChoose
@@ -962,20 +1017,20 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		ss.setCallback(this);
 	      }
 
-	    addRow( ss, fieldInfo.getName(), fieldInfo.isVisible()); 
+	    addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
 	  }
       }
     else  //not editable, don't need whole list of things
       {
 	    tStringSelector ss = new tStringSelector(null,
-						     field.getValues(), 
+						     (Vector)fieldInfo.getValue(), 
 						     this,
 						     editable,
 						     false,   //canChoose
 						     false,  //mustChoose
 						     100);
 	    objectHash.put(ss, field);
-	    addRow( ss, fieldInfo.getName(), fieldInfo.isVisible()); 
+	    addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
       }
   }
 
@@ -986,7 +1041,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addInvidVector(invid_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addInvidVector(invid_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
     QueryResult
       valueResults = null,
@@ -1015,7 +1070,19 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      {
 		System.out.println("key is null, downloading new copy");
 	      }
-	    choiceHandles = field.choices().getListHandles();
+	    QueryResult choices = field.choices();
+	    if (choices != null)
+	      {
+		choiceHandles = choices.getListHandles();
+	      }
+	    else
+	      { 
+		if (debug)
+		  {
+		    System.out.println("choicse is null");
+		  }
+		choiceHandles = null;
+	      }
 	  }
 	else
 	  {
@@ -1024,13 +1091,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println("key= " + key);
 	      }
 
-	    if (parent.cachedLists.containsKey(key))
+	    if (gc.cachedLists.containsKey(key))
 	      {
 		if (debug)
 		  {
 		    System.out.println("It's in there, using cached list");
 		  }
-		choiceHandles = (Vector)parent.cachedLists.get(key);
+		choiceHandles = (Vector)gc.cachedLists.get(key);
 	      }
 	    else
 	      {
@@ -1040,7 +1107,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 
 		choiceHandles = field.choices().getListHandles();
-		parent.cachedLists.put(key, choiceHandles);
+		gc.cachedLists.put(key, choiceHandles);
 	      }
 	  }
       }
@@ -1060,7 +1127,31 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	ss.setCallback(this);
       }
-    addRow( ss, fieldInfo.getName(), fieldInfo.isVisible()); 
+    addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
+  }
+
+
+  public void validate()
+  {
+    System.out.println("--Validate: containerPanel: " + this);
+    super.validate();
+  }
+  public void invalidate()
+  {
+    System.out.println("--inValidate: containerPanel: " + this);
+    super.invalidate();
+  }
+
+  public void doLayout()
+  {
+      System.out.println(">> containerP.doLayout(): " + this);
+      super.doLayout();
+      System.out.println("<< cp doLayout done");
+  }
+
+  private final void setStatus(String s)
+  {
+    gc.setStatus(s);
   }
 
   /**
@@ -1070,9 +1161,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addVectorPanel(db_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addVectorPanel(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
-    boolean isEditInPlace = fieldInfo.isEditInPlace();
+    boolean isEditInPlace = fieldTemplate.isEditInPlace();
 
     /* -- */
 
@@ -1091,7 +1182,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     vectorPanel vp = new vectorPanel(field, winP, editable, isEditInPlace, this);
     
 
-    addVectorRow( vp, fieldInfo.getName(), fieldInfo.isVisible());
+    addVectorRow( vp, fieldTemplate.getName(), fieldInfo.isVisible());
     
   }
 
@@ -1102,168 +1193,154 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addStringField(string_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addStringField(string_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
     JstringField
       sf;
 
     /* -- */
 
-    try 
+    if (field.canChoose())
       {
-	if (field.canChoose())
+	if (debug)
+	  {
+	    System.out.println("You can choose");
+	  }
+	    
+	JComboBox combo = new JComboBox();
+
+	Vector choiceHandles = null;
+	Vector choices = null;
+
+	Object key = field.choicesKey();
+	if (key == null)
 	  {
 	    if (debug)
 	      {
-		System.out.println("You can choose");
+		System.out.println("key is null, getting new copy.");
 	      }
-	    
-	    JComboBox combo = new JComboBox();
-
-	    Vector choiceHandles = null;
-	    Vector choices = null;
-
-	    Object key = field.choicesKey();
-	    if (key == null)
+	    choices = field.choices().getLabels();
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.out.println("key = " + key);
+	      }
+		
+	    if (gc.cachedLists.containsKey(key))
 	      {
 		if (debug)
 		  {
-		    System.out.println("key is null, getting new copy.");
+		    System.out.println("key in there, using cached list");
 		  }
-		choices = field.choices().getLabels();
+		choiceHandles = (Vector)gc.cachedLists.get(key);
+
 	      }
 	    else
 	      {
 		if (debug)
 		  {
-		    System.out.println("key = " + key);
+		    System.out.println("It's not in there, downloading a new one.");
 		  }
-		
-		if (parent.cachedLists.containsKey(key))
-		  {
-		    if (debug)
-		      {
-			System.out.println("key in there, using cached list");
-		      }
-		    choiceHandles = (Vector)parent.cachedLists.get(key);
+		choiceHandles = field.choices().getListHandles();
+		gc.cachedLists.put(key, choiceHandles);
 
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			System.out.println("It's not in there, downloading a new one.");
-		      }
-		    choiceHandles = field.choices().getListHandles();
-		    parent.cachedLists.put(key, choiceHandles);
-
-		  }
-
-		for (int j = 0; j < choiceHandles.size() ; j++)
-		  {
-		    choices.addElement(((listHandle)choiceHandles.elementAt(j)).getLabel());
-		  }		
-	      }    
-
-	    String currentChoice = (String) field.getValue();
-	    boolean found = false;
-	    
-	    for (int j = 0; j < choices.size(); j++)
-	      {
-		String thisChoice = (String)choices.elementAt(j);
-		combo.addItem(thisChoice);
-		
-		if (!found && (currentChoice != null))
-		  {
-		    if (thisChoice.equals(currentChoice))
-		      {
-			found = true;
-		      }
-		  }
-		
-		/*if (debug)
-		  {
-		    System.out.println("Adding " + (String)choices.elementAt(j));
-		  }*/
 	      }
+
+	    for (int j = 0; j < choiceHandles.size() ; j++)
+	      {
+		choices.addElement(((listHandle)choiceHandles.elementAt(j)).getLabel());
+	      }		
+	  }    
+
+	String currentChoice = (String) fieldInfo.getValue();
+	boolean found = false;
 	    
-	    // if the current value wasn't in the choice, add it in now
-	    
+	for (int j = 0; j < choices.size(); j++)
+	  {
+	    String thisChoice = (String)choices.elementAt(j);
+	    combo.addItem(thisChoice);
+		
 	    if (!found && (currentChoice != null))
 	      {
-		combo.addItem(currentChoice);
+		if (thisChoice.equals(currentChoice))
+		  {
+		    found = true;
+		  }
 	      }
-	    
-	    combo.setMaximumRowCount(8);
-	    combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-	    combo.setEditable(false); // this should be setEditable(mustChoose());
-	    combo.setVisible(true);
-	    
-	    if (currentChoice != null)
+		
+	    /*if (debug)
 	      {
-		combo.setSelectedItem(currentChoice);
-	      }
-
-	    if (debug)
-	      {
-		System.out.println("Setting current value: " + currentChoice);
-	      }	  
-
-	    if (editable)
-	      {
-		combo.addItemListener(this); // register callback
-	      }
-
-	    objectHash.put(combo, field);
-	    if (debug)
-	      {
-		System.out.println("Adding to panel");
-	      }
-	    
-	    addRow( combo, fieldInfo.getName(), fieldInfo.isVisible());
-	    	    
+	      System.out.println("Adding " + (String)choices.elementAt(j));
+	      }*/
 	  }
-	else
+	    
+	// if the current value wasn't in the choice, add it in now
+	    
+	if (!found && (currentChoice != null))
 	  {
-	    // It's not a choice
-      
-	    sf = new JstringField(20,
-				  field.maxSize(),
-				  new JcomponentAttr(null,
-						     new Font("Helvetica",Font.PLAIN,12),
-						     Color.black,Color.white),
-				  editable,
-				  false,
-				  null,
-				  null,
-				  this);
-			      
-	    objectHash.put(sf, field);
-			      
-	    try
-	      {
-		sf.setText((String)field.getValue());
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get value for field: " + rx);
-	      }
-			
-	    if (editable)
-	      {
-		sf.setCallback(this);
-	      }
-
-	    sf.setEditable(editable);
-
-	    sf.setToolTipText(fieldInfo.getComment());
-
-	    addRow( sf, fieldInfo.getName(), fieldInfo.isVisible());
+	    combo.addItem(currentChoice);
 	  }
+	    
+	combo.setMaximumRowCount(8);
+	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
+	combo.setEditable(false); // this should be setEditable(mustChoose());
+	combo.setVisible(true);
+	    
+	if (currentChoice != null)
+	  {
+	    combo.setSelectedItem(currentChoice);
+	  }
+
+	if (debug)
+	  {
+	    System.out.println("Setting current value: " + currentChoice);
+	  }	  
+
+	if (editable)
+	  {
+	    combo.addItemListener(this); // register callback
+	  }
+
+	objectHash.put(combo, field);
+	if (debug)
+	  {
+	    System.out.println("Adding to panel");
+	  }
+	    
+	addRow( combo, fieldTemplate.getName(), fieldInfo.isVisible());
+	    	    
       }
-    catch (RemoteException rx)
+    else
       {
-	throw new RuntimeException("Could not set up stringfield: " + rx);
+	// It's not a choice
+      
+	sf = new JstringField(20,
+			      field.maxSize(),
+			      new JcomponentAttr(null,
+						 new Font("Helvetica",Font.PLAIN,12),
+						 Color.black,Color.white),
+			      editable,
+			      false,
+			      null,
+			      null,
+			      this);
+			      
+	objectHash.put(sf, field);
+			      
+	sf.setText((String)fieldInfo.getValue());
+	    			
+	if (editable)
+	  {
+	    sf.setCallback(this);
+	  }
+
+	sf.setEditable(editable);
+
+	sf.setToolTipText(fieldTemplate.getComment());
+
+	addRow( sf, fieldTemplate.getName(), fieldInfo.isVisible());
       }
   }
 
@@ -1274,7 +1351,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addPasswordField(pass_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addPasswordField(pass_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
     JstringField sf;
 
@@ -1282,7 +1359,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (editable)
       {
-	JpassField pf = new JpassField(parent, true, 10, 8, editable);
+	JpassField pf = new JpassField(gc, true, 10, 8, editable);
 	objectHash.put(pf, field);
 			
 	if (editable)
@@ -1309,20 +1386,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 			  
 	// the server won't give us an unencrypted password, we're clear here
 			  
-	try
-	  {
-	    sf.setText((String)field.getValue());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get value for field: " + rx);
-	  }
+	sf.setText((String)fieldInfo.getValue());
+	
 		      
 	sf.setEditable(false);
 
-	sf.setToolTipText(fieldInfo.getComment());
+	sf.setToolTipText(fieldTemplate.getComment());
 	
-	addRow( sf, fieldInfo.getName(), fieldInfo.isVisible());
+	addRow( sf, fieldTemplate.getName(), fieldInfo.isVisible());
 	
       }
   }
@@ -1334,7 +1405,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addNumericField(db_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addNumericField(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
@@ -1347,18 +1418,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     objectHash.put(nf, field);
 	
 		      
-    try
+    Integer value = (Integer)fieldInfo.getValue();
+    if (value != null)
       {
-	Integer value = (Integer)field.getValue();
-	if (value != null)
-	  {
-	    nf.setValue(value.intValue());
-	  }
+	nf.setValue(value.intValue());
       }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get value for field: " + rx);
-      }
+
     
     if (editable)
       {
@@ -1368,9 +1433,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     nf.setEditable(editable);
     nf.setColumns(20);
     
-    nf.setToolTipText(fieldInfo.getComment());
+    nf.setToolTipText(fieldTemplate.getComment());
     
-    addRow( nf, fieldInfo.getName(), fieldInfo.isVisible());
+    addRow( nf, fieldTemplate.getName(), fieldInfo.isVisible());
   
     
   }
@@ -1382,25 +1447,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addDateField(db_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addDateField(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
     JdateField df = new JdateField();
 		      
     objectHash.put(df, field);
     df.setEditable(editable);
 
-    try
+    Date date = ((Date)fieldInfo.getValue());
+    
+    if (date != null)
       {
-	Date date = ((Date)field.getValue());
-			  
-	if (date != null)
-	  {
-	    df.setDate(date);
-	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get date: " + rx);
+	df.setDate(date);
       }
 
     // note that we set the callback after we initially set the
@@ -1411,7 +1469,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	df.setCallback(this);
       }
 
-    addRow( df, fieldInfo.getName(), fieldInfo.isVisible());
+    addRow( df, fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
@@ -1421,7 +1479,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addBooleanField(db_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addBooleanField(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
     //JcheckboxField cb = new JcheckboxField();
 
@@ -1432,14 +1490,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	cb.addActionListener(this);	// register callback
       }
-
     try
       {
-	cb.setSelected(((Boolean)field.getValue()).booleanValue());
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not set checkbox value: " + rx);
+	cb.setSelected(((Boolean)fieldInfo.getValue()).booleanValue());
       }
     catch (NullPointerException ex)
       {
@@ -1449,7 +1502,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-    addRow( cb, fieldInfo.getName(), fieldInfo.isVisible());
+    addRow( cb, fieldTemplate.getName(), fieldInfo.isVisible());
     
   }
 
@@ -1460,7 +1513,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addPermissionField(db_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addPermissionField(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
@@ -1472,9 +1525,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     perm_button pb = new perm_button((perm_field) field,
 				     editable,
-				     parent.getBaseHash());
+				     gc.getBaseHash());
     
-    addRow( pb, fieldInfo.getName(), fieldInfo.isVisible());
+    addRow( pb, fieldTemplate.getName(), fieldInfo.isVisible());
     
   }
 
@@ -1485,15 +1538,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addInvidField(invid_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addInvidField(invid_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
-    if (fieldInfo.isEditInPlace())
+    if (fieldTemplate.isEditInPlace())
       {
 	if (debug)
 	  {
-	    System.out.println("Hey, " + fieldInfo.getName() + " is edit in place but not a vector, what gives?");
+	    System.out.println("Hey, " + fieldTemplate.getName() + " is edit in place but not a vector, what gives?");
 	  }
-	addRow(new JLabel("edit in place non-vector"), fieldInfo.getName(), fieldInfo.isVisible());
+	addRow(new JLabel("edit in place non-vector"), fieldTemplate.getName(), fieldInfo.isVisible());
 	return;
       }
 
@@ -1519,13 +1572,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		System.out.println("key = " + key);
 	      }
 
-	    if (parent.cachedLists.containsKey(key))
+	    if (gc.cachedLists.containsKey(key))
 	      {
 		if (debug)
 		  {
 		    System.out.println("Got it from the cachedLists");
 		  }
-		choices = (Vector)parent.cachedLists.get(key);
+		choices = (Vector)gc.cachedLists.get(key);
 	      }
 	    else
 	      {
@@ -1534,10 +1587,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		    System.out.println("Damn, it's not in there, downloading a new one.");
 		  }
 		choices = field.choices().getListHandles();
-		parent.cachedLists.put(key, choices);
+		gc.cachedLists.put(key, choices);
 	      }
 	  }
-        Invid currentChoice = (Invid) field.getValue();
+        Invid currentChoice = (Invid) fieldInfo.getValue();
 	listHandle currentListHandle = null;
 	listHandle noneHandle = new listHandle("<none>", null);
 	boolean found = false;
@@ -1577,7 +1630,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    if (currentChoice != null)
 	      {
-		currentListHandle = new listHandle(parent.getSession().viewObjectLabel(currentChoice), currentChoice);
+		currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
 		combo.addItem(currentListHandle);
 	      }
 	  }
@@ -1616,21 +1669,21 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    System.out.println("Adding to panel");
 	  }
 	
-	addRow( combo, fieldInfo.getName(), fieldInfo.isVisible());
+	addRow( combo, fieldTemplate.getName(), fieldInfo.isVisible());
 	
       }
     else
       {
-	if (field.getValue() != null)
+	if (fieldInfo.getValue() != null)
 	  {
-	    String label = (String)parent.getSession().view_db_object((Invid)field.getValue()).getLabel();
+	    String label = (String)gc.getSession().view_db_object((Invid)fieldInfo.getValue()).getLabel();
 	    JstringField sf = new JstringField(20, false);
 	    sf.setText(label);
-	    addRow(sf, fieldInfo.getName(), fieldInfo.isVisible());
+	    addRow(sf, fieldTemplate.getName(), fieldInfo.isVisible());
 	  }
 	else
 	  {
-	    addRow( new JTextField("null invid"), fieldInfo.getName(), fieldInfo.isVisible());
+	    addRow( new JTextField("null invid"), fieldTemplate.getName(), fieldInfo.isVisible());
 	  }
       }
   }
@@ -1642,7 +1695,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addIPField(ip_field field, FieldInfo fieldInfo) throws RemoteException
+  private void addIPField(ip_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
   {
     JIPField
       ipf;
@@ -1666,25 +1719,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     objectHash.put(ipf, field);
     
-    try
-      {
-	bytes = (Byte[]) field.getValue();
+    bytes = (Byte[]) fieldInfo.getValue();
 
 	if (bytes != null)
 	  {
 	    ipf.setValue(bytes);
 	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get value for field: " + rx);
-      }
 	
     ipf.setCallback(this);
 
-    ipf.setToolTipText(fieldInfo.getComment());
+    ipf.setToolTipText(fieldTemplate.getComment());
 		
-    addRow( ipf, fieldInfo.getName(), fieldInfo.isVisible());
+    addRow( ipf, fieldTemplate.getName(), fieldInfo.isVisible());
     
   }
 
@@ -1704,7 +1750,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     {
       try
 	{
-	  System.out.println("Last error: " + parent.getSession().getLastError());
+	  System.out.println("Last error: " + gc.getSession().getLastError());
 	}
       catch (RemoteException ex)
 	{
@@ -1712,5 +1758,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	}
       throw new RuntimeException(label + rx);
     }
+
 
 }
