@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.128 $
-   Last Mod Date: $Date: 2001/10/05 20:01:40 $
+   Version: $Revision: 1.129 $
+   Last Mod Date: $Date: 2001/12/05 20:27:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -829,7 +829,7 @@ public class Ganymede {
 
     // and reset the password if we need to
 
-    if (resetadmin && Ganymede.defaultrootpassProperty != null)
+    if (resetadmin && Ganymede.defaultrootpassProperty != null && !Ganymede.defaultrootpassProperty.trim().equals(""))
       {
 	// check to see if we need to reset the password to match our
 	// properties file
