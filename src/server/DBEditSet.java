@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,6 +48,7 @@ public class DBEditSet {
 
   DBStore dbStore;
   DBSession session;
+  String description;
 
   /* -- */
 
@@ -59,10 +60,11 @@ public class DBEditSet {
    *
    */
 
-  public DBEditSet(DBStore dbStore, DBSession session)
+  public DBEditSet(DBStore dbStore, DBSession session, String description)
   {
     this.session = session;
     this.dbStore = dbStore;
+    this.description = description;
     objects = new Vector();
     basesModified = new Hashtable(dbStore.objectBases.size());
   }
@@ -163,6 +165,8 @@ public class DBEditSet {
     Object key;
     DBEditObject eObj;
 
+    Date modDate = new Date();
+
     /* -- */
 
     if (debug)
@@ -206,7 +210,7 @@ public class DBEditSet {
       }
 
     // This yield is here to allow me to verify that the locking logic
-    // works properly.
+    // works properly on a non-preemptive VM.
 
     Thread.yield();
 
@@ -215,11 +219,59 @@ public class DBEditSet {
 	System.err.println(session.key + ": DBEditSet.commit(): established write lock");
       }
 
+    // write the creation and / or modification info into the object and 
     // verify phase one of our commit protocol
+
+    DateDBField df;
+    StringDBField sf;
+    String result;
 
     for (int i = 0; i < objects.size(); i++)
       {
 	eObj = (DBEditObject) objects.elementAt(i);
+
+	switch (eObj.getStatus())
+	  {
+	  case DBEditObject.CREATING:
+	    
+	    df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+	    df.setValue(modDate);
+
+	    sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+
+	    result = session.getID();
+
+	    if (description != null)
+	      {
+		result += ": " + description;
+	      }
+
+	    sf.setValue(result);
+
+	  case DBEditObject.EDITING:
+
+	    df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+	    df.setValue(modDate);
+
+	    sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+
+	    result = session.getID();
+
+	    if (description != null)
+	      {
+		result += ": " + description;
+	      }
+
+	    sf.setValue(result);
+
+	    break;
+
+	  case DBEditObject.DELETING:
+	    break;
+
+	  case DBEditObject.DROPPING:
+	    break;
+	  }
 
 	if (!eObj.commitPhase1())
 	  {
