@@ -7,18 +7,20 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/11/16 07:57:14 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/02/11 06:56:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -136,6 +138,36 @@ public class VectorUtils {
       }
 
     vect.addElement(obj);
+  }
+
+  /**
+   * <P>Returns true if vectA and vectB have any elements in
+   * common.</P> 
+   */
+
+  public static boolean overlaps(Vector vectA, Vector vectB)
+  {
+    if (vectA == null || vectB == null || vectA.size() == 0 || vectB.size() == 0)
+      {
+	return false;
+      }
+
+    Hashtable workSet = new Hashtable(vectA.size());
+    
+    for (int i = 0; i < vectA.size(); i++)
+      {
+	workSet.put(vectA.elementAt(i), vectA.elementAt(i));
+      }
+
+    for (int i = 0; i < vectB.size(); i++)
+      {
+	if (workSet.containsKey(vectB.elementAt(i)))
+	  {
+	    return true;
+	  }
+      }
+
+    return false;
   }
 
   /**

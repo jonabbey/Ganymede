@@ -6,18 +6,20 @@
    
    Created: 12 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/06/18 22:43:11 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/02/11 06:56:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -72,7 +74,7 @@ import java.util.Vector;
  *	ISBN 0-88175-165-0
  * </PRE>
  *
- * @version $Revision: 1.4 $ $Date: 1999/06/18 22:43:11 $ $Name:  $
+ * @version $Revision: 1.5 $ $Date: 2000/02/11 06:56:14 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -158,14 +160,13 @@ public class VecQuickSort implements Compare {
     quick(0, objects.size()-1);
   }
 
+  /**
+   * <p>Default comparator, does a string comparison on the
+   * toString() output of the objects for ordering.</p>
+   */
+
   public int compare(Object a, Object b)
   {
-    String sa, sb;
-      
-    sa = (String) a;
-    sb = (String) b;
-
-    return sa.compareTo(sb);
+    return a.toString().compareTo(b.toString());
   }
-
 }

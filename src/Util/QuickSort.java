@@ -6,18 +6,20 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/06/18 22:43:11 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/02/11 06:56:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -70,11 +72,11 @@ package arlut.csd.Util;
  *	ISBN 0-88175-165-0
  * </PRE>
  *
- * @version $Revision: 1.4 $ $Date: 1999/06/18 22:43:11 $ $Name:  $
+ * @version $Revision: 1.5 $ $Date: 2000/02/11 06:56:14 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
-public class QuickSort {
+public class QuickSort implements Compare {
 
   Object[] objects;
   Compare comparator;
@@ -84,7 +86,15 @@ public class QuickSort {
   public QuickSort(Object[] objects, Compare comparator)
   {
     this.objects = objects;
-    this.comparator = comparator;
+
+    if (comparator == null)
+      {
+	this.comparator = this;
+      }
+    else
+      {
+	this.comparator = comparator;
+      }
   }
 
   void quick(int first, int last)
@@ -138,4 +148,13 @@ public class QuickSort {
     quick(0, objects.length-1);
   }
 
+  /**
+   * <p>Default comparator, does a string comparison on the
+   * toString() output of the objects for ordering.</p>
+   */
+
+  public int compare(Object a, Object b)
+  {
+    return a.toString().compareTo(b.toString());
+  }
 }
