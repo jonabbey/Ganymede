@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/03/08 22:43:53 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/03/09 05:13:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,6 +88,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   private int bufferSize;
   private Thread inputThread;
   private boolean done = false;
+  private XMLItem pushback;
 
   /* -- */
 
@@ -116,11 +117,16 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    * <P>getNextItem() returns null when there are no more XML elements or character
    * data to be read from the XMLReader stream.</P>
    */
+
   public XMLItem getNextItem()
   {
+    XMLItem value;
+
+    /* -- */
+
     synchronized (buffer)
       {
-	while (!done && buffer.size() == 0)
+	while (!done && pushback == null && buffer.size() == 0)
 	  {
 	    try
 	      {
@@ -132,14 +138,23 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	      }
 	  }
 
-	if (done && buffer.size() == 0)
+	if (done && pushback == null && buffer.size() == 0)
 	  {
 	    return null;
 	  }
 
-	XMLItem value = (XMLItem) buffer.elementAt(0);
-	buffer.removeElementAt(0);
-	buffer.notifyAll();
+	if (pushback != null)
+	  {
+	    value = pushback;
+	    pushback = null;
+	  }
+	else
+	  {
+	    value = (XMLItem) buffer.elementAt(0);
+	    buffer.removeElementAt(0);
+	    buffer.notifyAll();
+	  }
+
 	return value;
       }
   }
@@ -148,20 +163,20 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    * <P>pushbackItem() may be used to push the most recently read XMLItem back
    * onto the XMLReader's buffer.  The XMLReader code guarantees that their
    * will be room to handle a single item pushback, but two pushbacks in a row
-   * with no getNextItem() call in between may cause a XMLReader buffer overflow.</P>
+   * with no getNextItem() call in between will cause an exception to be thrown.</P>
    */
 
   public void pushbackItem(XMLItem item)
   {
     synchronized (buffer)
       {
-	if (buffer.size() > bufferSize)
+	if (pushback != null)
 	  {
 	    throw new RuntimeException("can't pushback.. buffer overflow");
 	  }
 
-	buffer.insertElementAt(item, 0);
-	buffer.notifyAll();
+	pushback = item;
+	buffer.notifyAll();	// in case we have multiple threads consuming
       }
   }
 
@@ -177,7 +192,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
     synchronized (buffer)
       {
 	done = true;
-	buffer.notifyAll();	// to wake up any sleepers
+	buffer.notifyAll();	// to wake up any sleepers if the buffer is full
       }
   }
 
@@ -275,8 +290,8 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	  }
 	
 	buffer.addElement(new XMLEndDocument());
-	buffer.notifyAll();
 	done = true;
+	buffer.notifyAll();
       }
   }
 
@@ -494,9 +509,6 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public void processingInstruction(String target, String data) throws SAXException
   {
-    synchronized (buffer)
-      {
-      }
   }
 
   /**
@@ -519,6 +531,28 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public void warning(SAXParseException exception) throws SAXException
   {
+    synchronized (buffer)
+      {
+	while (!done && buffer.size() >= bufferSize)
+	  {
+	    try
+	      {
+		buffer.wait();
+	      }
+	    catch (InterruptedException ex)
+	      {
+		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+	      }
+	  }
+
+	if (done)
+	  {
+	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	  }
+	
+	buffer.addElement(new XMLWarning(exception, locator));
+	buffer.notifyAll();
+      }
   }
 
   /**
@@ -546,6 +580,28 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public void error(SAXParseException exception) throws SAXException
   {
+    synchronized (buffer)
+      {
+	while (!done && buffer.size() >= bufferSize)
+	  {
+	    try
+	      {
+		buffer.wait();
+	      }
+	    catch (InterruptedException ex)
+	      {
+		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+	      }
+	  }
+
+	if (done)
+	  {
+	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	  }
+	
+	buffer.addElement(new XMLError(exception, locator, false));
+	buffer.notifyAll();
+      }
   }
 
   /**
@@ -571,6 +627,29 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public void fatalError(SAXParseException exception) throws SAXException
   {
+    synchronized (buffer)
+      {
+	while (!done && buffer.size() >= bufferSize)
+	  {
+	    try
+	      {
+		buffer.wait();
+	      }
+	    catch (InterruptedException ex)
+	      {
+		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+	      }
+	  }
+
+	if (done)
+	  {
+	    throw new SAXException("parse thread halted.. app code closed XMLReader stream.");
+	  }
+	
+	buffer.addElement(new XMLError(exception, locator, true));
+	done = true;
+	buffer.notifyAll();
+      }
   }
 }
 
@@ -704,5 +783,96 @@ class XMLCharData extends XMLItem {
   public String getCleanString()
   {
     return data.trim();
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                        XMLError
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>Error class for XML data held in the 
+ * {@link arlut.csd.Util.XMLReader XMLReader} class's buffer.</P>
+ */
+
+class XMLError extends XMLItem {
+
+  String error;
+  int lineNumber;
+  int columnNumber;
+  boolean fatal;
+
+  /* -- */
+
+  XMLError(SAXParseException exception, org.xml.sax.Locator locator, boolean fatal)
+  {
+    error = exception.getMessage();
+    lineNumber = locator.getLineNumber();
+    columnNumber = locator.getColumnNumber();
+    this.fatal = fatal;
+  }
+
+  public boolean isFatal()
+  {
+    return fatal;
+  }
+
+  public String getMessage()
+  {
+    return error;
+  }
+
+  public int getLineNumber()
+  {
+    return lineNumber;
+  }
+
+  public int getColumnNumber()
+  {
+    return columnNumber;
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                        XMLWarning
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>Warning class for XML data held in the 
+ * {@link arlut.csd.Util.XMLReader XMLReader} class's buffer.</P>
+ */
+
+class XMLWarning extends XMLItem {
+
+  String error;
+  int lineNumber;
+  int columnNumber;
+
+  /* -- */
+
+  XMLWarning(SAXParseException exception, org.xml.sax.Locator locator)
+  {
+    error = exception.getMessage();
+    lineNumber = locator.getLineNumber();
+    columnNumber = locator.getColumnNumber();
+  }
+
+  public String getMessage()
+  {
+    return error;
+  }
+
+  public int getLineNumber()
+  {
+    return lineNumber;
+  }
+
+  public int getColumnNumber()
+  {
+    return columnNumber;
   }
 }
