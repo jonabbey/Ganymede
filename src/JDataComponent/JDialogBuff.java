@@ -6,8 +6,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2000/11/04 03:42:41 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2001/06/01 02:12:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -53,7 +53,7 @@ import java.awt.Frame;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                      JDialogBuff
+                                                                     JDialogBuff
 
 ------------------------------------------------------------------------------*/
 

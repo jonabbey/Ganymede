@@ -1,7 +1,31 @@
-Ganymede Release 1.0 prerelease 1
-January 30, 2001
+Ganymede Release 1.0
+May 31, 2001
 FAQ
 ---------------------------------------------
+
+Questions Answered:
+
+1) What is Ganymede?
+2) Great!  Then I can just jump right in and use it, right?
+3) Who should be thinking of using Ganymede?
+4) Is Ganymede secure from packet-sniffing?
+5) That's dumb.  I'm an ISP, I can't use this.. what were you thinking?
+6) Any hope of a secure Ganymede for use in insecure networks?
+7) What do I need to run Ganymede?
+8) How scalable is Ganymede, with its memory-based database?
+9) Why isn't Ganymede LDAP-based?  What about replication?
+10) What's up with DNS management?  The current stuff is weak.
+11) What's this rpcpass thing in the client bin directory?
+12) Where's the documentation?
+13) How can I help?
+14) Why is it called Ganymede?
+15) What is Ganymede's development history like?
+16) I see a bunch of messages about missing fonts when I run the
+    Ganymede client or admin console GUI under Linux, what's up?
+17) Where's the Ganymede web site?
+18) What's the best way to report bugs?  How should I ask questions?
+
+--====================================================================--
 
 1) What is Ganymede?
 
@@ -164,7 +188,7 @@ the build and install scaffolding requires Bourne shell and Perl 5.
    To run the Ganymede server on UNIX systems, you need Java 1.1.7 or
 better for your system.  Since Ganymede supports running the Ganymede
 client and admin console on Windows browsers with Sun's Plug-In (see
-http://java.sun.com/products/jdk/1.2/jre/), you can get away with just
+http://java.sun.com/products/plugin/), you can get away with just
 the basic Java environment on your UNIX system to run the server on.
 
    To run the Ganymede client and admin console on your UNIX system,
@@ -185,6 +209,9 @@ like Sun's HotSpot VM are super-great.
    To run the Ganymede client and admin console on Windows 95/98/NT,
 you'll want Sun's Java Plug-In version 1.2.2 or later, and at least a
 P133 with 32 megs.
+
+   Newer versions of Java are just about always better.  Use the
+latest production release of Java 1.3 if you can.
 
      ------------------------------------------------------------
 
@@ -278,10 +305,18 @@ available on a given machine, it would be necessary to export the
 server's data to XML, split the data, and create separate Ganymede
 servers for separate subdomains or separate object types.
 
-   The final word on scalability right now is that you should be sure
-and test with a representative dataset before committing to Ganymede,
-and if you find that it doesn't scale adequately, report your findings
-to the Ganymede mailing list.
+   News: As of version 1.0, the Ganymede server reports its internal
+memory usage.  The Ganymede server tends to require around three times
+as much heap space in RAM as the binary ganymede.db file takes up on
+disk.  For our purposes we pre-allocate 32 megs of RAM for the
+Ganymede server's heap, with an upper limit of 128 megs defined.  We
+have never exceeded the minimum heap size for our data set.  Ganymede
+1.0 in general is far, far better about memory usage in the server.
+
+   The final word on scalability remains that you should be sure and
+test with a representative dataset before committing to Ganymede, and
+if you find that it doesn't scale adequately, report your findings to
+the Ganymede mailing list.
 
      ------------------------------------------------------------
 
@@ -435,10 +470,25 @@ http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.ht
 
      ------------------------------------------------------------
 
+18) What's the best way to report bugs?  How should I ask questions?
+
+    We have a bugzilla database running at the Ganymede web site.  You should
+visit the bugzilla database and report bugs there.  
+
+    If you want a more interactive experience, or if you want to email
+questions, you should send email to the Ganymede Discussion mailing
+list at ganymede@arlut.utexas.edu, and your mail will be seen by
+a decently large number of people with an interest in Ganymede.
+Sending mail to ganymede@arlut.utexas.edu also results in an online
+web archive of your questions, so that others will later be able to
+see the question you asked or bug you reported.
+
+    Thanks!
+
 -------------------------------------------------------------------------------
 Ganymede FAQ
 Author: Jonathan Abbey
 Release: $name:  $
-Version: $Revision: 1.15 $
-Last Mod Date: $Date: 2001/01/31 00:54:33 $
+Version: $Revision: 1.16 $
+Last Mod Date: $Date: 2001/06/01 02:12:56 $
 -------------------------------------------------------------------------------
