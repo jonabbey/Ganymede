@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.142 $
-   Last Mod Date: $Date: 1999/03/19 06:03:18 $
+   Version: $Revision: 1.143 $
+   Last Mod Date: $Date: 1999/03/24 03:28:23 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -67,17 +67,29 @@ import arlut.csd.JTree.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.plaf.basic.BasicToolBarUI;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                          gclient
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>Main ganymede client class.  When {@link arlut.csd.client.glogin glogin}
+ * is run and a user logs in to the server, a single instance of this class
+ * is created to handle all client GUI and networking operations for the user.</p>
+ *
+ * @version $Revision: 1.143 $ $Date: 1999/03/24 03:28:23 $ $Name:  $
+ * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
+ */
+
 public class gclient extends JFrame implements treeCallback, ActionListener, JsetValueCallback, WindowListener {
 
   public static boolean debug = true;
 
-  // we're only going to have one gclient at a time per running client
+  /**
+   * we're only going to have one gclient at a time per running client
+   */
 
   public static gclient client;
 
@@ -114,16 +126,32 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   String
     creditsMessage = null,
     aboutMessage = null;
+
+  /**
+   * Main remote interface for communications with the server.
+   */
   
   Session session;
+
+  /**
+   * Reference to the applet which instantiated us.
+   */
+
   glogin _myglogin;
+
+  /**
+   * Local copy of the category/object tree downloaded from
+   * the server by the {@link arlut.csd.ganymede.client.buildTree() buildTree()}
+   * method.
+   */
 
   CategoryDump dump;
 
-  // This keeps track of the current persona
+  /**
+   * Name of the currently active persona.
+   */
 
-  String 
-    currentPersonaString;
+  String currentPersonaString;
 
   // set up a bunch of borders
   // Turns out we don't need to do this anyway, since the BorderFactory does it for us.
@@ -147,45 +175,159 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   // Yum, caches
   //
 
-  private Vector
-    containerPanels = new Vector(),
-    baseList;            // List of base types.  Vector of Bases.
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.BaseDump BaseDump} objects,
+   * providing a local cache of {@link arlut.csd.ganymede.Base Base}
+   * references that the client consults during operations.</p>
+   *
+   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
+   * thread.</p>
+   */
 
-  private Hashtable
-    baseNames = null,                // used to map Base -> Base.getName(String)
-    baseHash = null,	             // used to reduce the time required to get listings
-                                     // of bases and fields.. keys are Bases, values
-		      	             // are vectors of fields
-    baseMap = null,                  // Hash of Short to Base
-    changedHash = new Hashtable(),   // Hash of objects that might have changed
-    deleteHash = new Hashtable(),    // Hash of objects waiting to be deleted
-    createHash = new Hashtable(),    // Hash of objects waiting to be created
+  private Vector baseList;
 
-    // Hash of objects that are created before nodes are available
-    // after the node is created, the invid is taken out of
-    // createdObjectsWithoutNodes and put into createHash.
+  /**
+   * <p>Cache mapping possibly remote {@link arlut.csd.ganymede.Base Base}
+   * references to their title.</p>
+   *
+   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
+   * thread.</p>
+   */
 
-    createdObjectsWithoutNodes = new Hashtable(),
-                                     // Create and Delete are pending on the Commit button. 
-    baseToShort = null;              // Map of Base to Short
-   
-  protected Hashtable
-    shortToBaseNodeHash = new Hashtable(),
-    invidNodeHash = new Hashtable(),
-    templateHash;
+  private Hashtable baseNames = null;
 
-  // our main cache, keeps information on all objects we've had
-  // references returned to us via QueryResult
+  /**
+   * <p>Cache mapping possibly remote {@link arlut.csd.ganymede.Base Base}
+   * references to field vectors.</p>
+   *
+   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
+   * thread.</p>
+   */
 
-  protected objectCache 
-    cachedLists = new objectCache();
+  private Hashtable baseHash = null;
 
-  // 
-  //  Background processing thread
-  //
+  /**
+   * <p>Cache mapping Short {@link arlut.csd.ganymede.Base Base} id's to
+   * a possibly remote reference to the corresponding {@link arlut.csd.ganymede.Base Base}.</p>
+   *
+   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
+   * thread.</p>
+   */
 
-  Loader 
-    loader;      // Use this to do start up stuff in a thread
+  private Hashtable baseMap = null;
+
+  /** 
+   * Cache of {@link arlut.csd.ganymede.Invid invid}'s for objects
+   * that might have been changed by the client.  The keys and the
+   * values in this hash are the same.  The collection of tree nodes
+   * corresponding to invid's listed in changedHash will be refreshed
+   * by the client when a server is committed or cancelled.  
+   */
+
+  private Hashtable changedHash = new Hashtable();
+
+  /** 
+   * Mapping of {@link arlut.csd.ganymede.Invid invid}'s for objects
+   * that the client has requested be deleted by the server to
+   * {@link arlut.csd.ganymede.client.CacheInfo CacheInfo} objects
+   * which hold information about the object used to make decisions
+   * about managing the client's tree display.
+   */
+
+  private Hashtable deleteHash = new Hashtable();
+
+  /**  
+   * Mapping of {@link arlut.csd.ganymede.Invid invid}'s for objects
+   * that the client has requested be created by the server to
+   * {@link arlut.csd.ganymede.client.CacheInfo CacheInfo} objects
+   * which hold information about the object used to make decisions
+   * about managing the client's tree display.
+   */
+
+  private Hashtable createHash = new Hashtable();
+
+  /**
+   * Hash of {@link arlut.csd.ganymede.Invid invid}'s corresponding
+   * to objects that have been created by the client but which have not
+   * had nodes created in the client's tree display.  Once nodes are
+   * created for these objects, the invid will be taken out of this
+   * hash and put into createHash.
+   */
+
+  private Hashtable createdObjectsWithoutNodes = new Hashtable();
+
+  /** 
+   * <p>Cache mapping possibly remote {@link arlut.csd.ganymede.Base Base}
+   * references to their object type id in Short form.  This is
+   * a holdover from a time when the client didn't create local copies
+   * of the server's Base references.</p>
+   *
+   * <p>Loaded by the {@link arlut.csd.ganymede.client.Loader Loader}
+   * thread.</p>
+   */
+
+  private Hashtable baseToShort = null;
+
+  /**
+   * <p>Hash mapping Short {@link arlut.csd.ganymede.Base Base} id's to
+   * the corresponding {@link arlut.csd.ganymede.client.BaseNode BaseNode}
+   * displayed in the client's tree display.</p>
+   */
+
+  protected Hashtable shortToBaseNodeHash = new Hashtable();
+
+  /**
+   * <p>Hash mapping {@link arlut.csd.ganymede.Invid Invid}'s for objects
+   * referenced by the client to the corresponding
+   * {@link arlut.csd.ganymede.InvidNode InvidNode} displayed in the
+   * client's tree display.</p>
+   */
+
+  protected Hashtable invidNodeHash = new Hashtable();
+
+  /**
+   * <p>Hash mapping Short object type id's to Vectors of
+   * {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s,
+   * used by the client to quickly look up information about fields 
+   * in order to populate 
+   * {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s.</p>
+   *
+   * <p>This hash is used by
+   * {@link arlut.csd.ganymede.client.gclient.getTemplateVector(java.lang.Short) getTemplateVector}.</p>
+   */
+
+  protected Hashtable templateHash;
+
+  /**
+   * <p>Our main cache, keeps information about all objects we've learned
+   * about via {@link arlut.csd.ganymede.QueryResult QueryResult}'s returned
+   * to us by the server.</p>
+   *
+   * <p>We can get QueryResults from the server by doing direct
+   * {@link arlut.csd.ganymede.Session.Query(arlut.csd.ganymede.Query) Query}
+   * calls on the server, or by calling choices() on an 
+   * {@link arlut.csd.ganymede.invid_field invid_field} or on a
+   * {@link arlut.csd.ganymede.string_field string_field}.  Information from
+   * both sources may be integrated into this cache.</p>
+   */
+
+  protected objectCache cachedLists = new objectCache();
+
+  /**
+   * <p>Vector of {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s
+   * active in the client.  This vector is used to allow the client to find a
+   * containerPanel when it is told by the server to refresh a particular object and/or
+   * field.</p>
+   */
+
+  private Vector containerPanels = new Vector();
+
+  /**
+   * Background processing thread, downloads information on
+   * object and field types defined in the server when run.
+   */
+ 
+  Loader loader;
   
   //
   // Status tracking
@@ -330,16 +472,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * it is set.
    */
 
-  public StatusClearThread 
-    statusThread;
+  public StatusClearThread statusThread;
 
   /**
    * this is true during the handleReturnVal method, while a wizard is
    * active.  If a wizard is active, don't allow the window to close.
    */
 
-  private boolean
-    wizardActive = false;
+  private boolean wizardActive = false;
 
   /* -- */
 
@@ -350,6 +490,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * logged in.
    *
    */
+
   public gclient(Session s, glogin g)
   {
     JPanel
@@ -932,26 +1073,27 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Returns a vector of FieldTemplates.
+   * <p>Returns a vector of {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}'s
+   * listing fields and field informaton for the object type identified by 
+   * id.</p>
    *
-   * The id number is the base id.
+   * @param id The id number of the object type to be returned the base id.
    */
 
   public Vector getTemplateVector(Short id)
   {
     Vector result = null;
-    Hashtable th = getTemplateHash();
 
     /* -- */
 
-    if (th.containsKey(id))
+    if (templateHash.containsKey(id))
       {
 	if (debug)
 	  {
 	    System.out.println("Found the template, using cache for base: " + id);
 	  }
 
-	result = (Vector) th.get(id);
+	result = (Vector) templateHash.get(id);
       }
     else
       {
@@ -963,7 +1105,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      }
 
 	    result = session.getFieldTemplateVector(id.shortValue());
-	    th.put(id, result);
+	    templateHash.put(id, result);
 	  }
 	catch (RemoteException rx)
 	  {
@@ -972,20 +1114,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     
     return result;
-  }
-
-  /**
-   * Returns the templateHash.
-   *
-   * Template Hash is a hash of object type ID's (Short) -> Vector of FieldTemplates
-   * Use this instead of templateHash directly, because you never know where we will
-   * get it from(evil grin).
-   *
-   */
-
-  private Hashtable getTemplateHash()
-  {
-    return templateHash;
   }
 
   /**
@@ -4829,13 +4957,16 @@ PersonaDialog getPersonaDialog()
   }
 }
 
-
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                                  PersonaListener
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * Listener class to handle interaction with the client's persona selection
+ * dialog.
+ */
 
 class PersonaListener implements ActionListener {
 
@@ -4860,7 +4991,7 @@ class PersonaListener implements ActionListener {
   {
     if (gc.debug) { System.out.println("action Performed!"); }
     
-    //Check to see if we need to commit the transaction first.
+    // Check to see if we need to commit the transaction first.
     
     String newPersona = null;
     
@@ -4976,10 +5107,13 @@ class PersonaListener implements ActionListener {
 /*------------------------------------------------------------------------------
                                                                            class
                                                                        CacheInfo
-
-  This may not be needed any more, since there are more hashes.
-
 ------------------------------------------------------------------------------*/
+
+/**
+ * Client-side cache object, used by the
+ * {@link arlut.csd.ganymede.client.gclient gclient} class to track object status for
+ * nodes in the client tree display.
+ */
 
 class CacheInfo {
 
@@ -5092,10 +5226,9 @@ class CacheInfo {
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This thread is designed to clear the status label in the gclient
+ * A thread class designed to clear the status label in 
+ * {@link arlut.csd.ganymede.client.gclient gclient}
  * some seconds after the setClock() method is called.
- *
  */
 
 class StatusClearThread extends Thread {

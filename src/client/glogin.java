@@ -9,8 +9,8 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 1999/01/29 05:08:53 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 1999/03/24 03:28:24 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -74,6 +74,18 @@ import arlut.csd.Util.PackageResources;
                                                                           glogin
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <p>Ganymede client start class.  This class can be run from the command
+ * line via its static main() method, or as an applet loaded into a
+ * web browser, generally with Sun's Java plug-in.</p>
+ *
+ * <p>This class also has a run() method for attempting to connect to
+ * the server in the background once the applet is initialized.</p>
+ *
+ * @version $Revision: 1.53 $ $Date: 1999/03/24 03:28:24 $ $Name:  $
+ * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
+ */
 
 public class glogin extends JApplet implements Runnable, ActionListener, ClientListener {
 
@@ -473,7 +485,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     logout();
   }
-  
+
+  /**
+   * Reports our username to gclient
+   */
+
   public String getUserName()
   {
     return my_username;

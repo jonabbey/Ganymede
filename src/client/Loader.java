@@ -7,8 +7,8 @@
    
    Created: 1 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/01/22 18:04:10 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/03/24 03:28:23 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -59,6 +59,14 @@ import arlut.csd.ganymede.*;
                                                                           Loader
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * Client-side thread class for loading object and field type definitions from
+ * the server in the background during the client's start-up.
+ *
+ * @version $Revision: 1.14 $ $Date: 1999/03/24 03:28:23 $ $Name:  $
+ * @author Mike Mulvaney
+ */
 
 public class Loader extends Thread {
 
@@ -229,6 +237,15 @@ public class Loader extends Thread {
     t.start();
   }
 
+  /**
+   * <p>Returns a Vector of {@link arlut.csd.ganymede.BaseDump BaseDump} objects,
+   * providing a local cache of {@link arlut.csd.ganymede.Base Base}
+   * references that the client consults during operations.</p>
+   *
+   * <p>If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available.</p>
+   */
+
   public Vector getBaseList()
   {
     while (! baseListLoaded)
@@ -264,12 +281,19 @@ public class Loader extends Thread {
       }
 
     return baseList;
-    
   }
+
+  /**
+   * <p>Returns a hash mapping {@link arlut.csd.ganymede.BaseDump BaseDump}
+   * references to their title.</p>
+   *
+   * <p>If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available.</p>
+   */
 
   public Hashtable getBaseNames()
   {
-    while (! baseNamesLoaded)
+    while (!baseNamesLoaded)
       {
 	if (debug)
 	  {
@@ -304,6 +328,14 @@ public class Loader extends Thread {
     return baseNames;
   }
 
+  /**
+   * <p>Returns a hash mapping Short {@link arlut.csd.ganymede.Base Base} id's to
+   * {@link arlut.csd.ganymede.BaseDump BaseDump} objects.</p>
+   *
+   * <p>If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available.</p>
+   */
+
   public Hashtable getBaseMap()
   {
     while (! baseMapLoaded)
@@ -337,6 +369,16 @@ public class Loader extends Thread {
 
     return baseMap;
   }
+
+  /**
+   * <p>Returns a hashtable mapping {@link arlut.csd.ganymede.BaseDump BaseDump}
+   * references to their object type id in Short form.  This is
+   * a holdover from a time when the client didn't create local copies
+   * of the server's Base references.</p>
+   *
+   * <p>If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available.</p>
+   */
 
   public Hashtable getBaseToShort()
   {
@@ -381,12 +423,10 @@ public class Loader extends Thread {
   /* -- Private methods  --  */
 
   /** 
-   *
    * loadBaseList gets the list of types from the server.  This is
    * used in loadBaseHash to get the rest of the BaseHash, but is
    * also used in a few places in the client where the whole list
    * of fields in the baseHash isn't needed.
-   *
    */
 
   private synchronized void loadBaseList() throws RemoteException
@@ -434,14 +474,12 @@ public class Loader extends Thread {
   }
 
   /**
-   *
    * loadBaseHash is used to prepare a hash table mapping Bases to
    * Vector's of BaseField.. this is used to allow different pieces
    * of client-side code to get access to the Base/BaseField information,
    * which changes infrequently (not at all?) while the client is
    * connected.. the perm_editor panel created by the windowPanel class
    * benefits from this, as does buildTree() below. 
-   *
    */
 
   private synchronized void loadBaseHash() throws RemoteException
@@ -491,10 +529,8 @@ public class Loader extends Thread {
   }
 
   /**
-   *
    * loadBaseMap() generates baseMap, a mapping of Short's to
    * the corresponding remote base reference.
-   *
    */
 
   private synchronized void loadBaseMap() throws RemoteException

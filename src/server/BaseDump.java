@@ -14,8 +14,8 @@
    
    Created: 12 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/01/22 18:05:26 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 1999/03/24 03:29:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,16 +67,23 @@ import java.util.*;
 
 /**
  *
- *  <p>This class is intended to serve as a stub to hold basic
- *  information about server side categories for the client
- *  to process locally.</p>
+ * <p>This class is intended to serve as a stub to hold basic
+ * information about server side categories for the client
+ * to process locally.</p>
  *
- *  <p>Note that even though this class is implementing a remote
- *  interface, it is doing so for the purpose of providing
- *  a consistent interface for the client, not for actual
- *  remote access.  Thus, we are not extending UnicastRemoteObject
- *  as we would if we were truly a remote object.</p>
+ * <p>Many of the methods in the Base interface are there to support
+ * remote schema editing by the admin console's schema editor, and have no
+ * effect when called on instances of this class. RuntimeException's
+ * will be thrown if those methods are called on BaseDump.</p>
  *
+ * <p>Note that even though this class is implementing a remote
+ * interface, it is doing so for the purpose of providing
+ * a consistent interface for the client, not for actual
+ * remote access.  Thus, we are not extending UnicastRemoteObject
+ * as we would if we were truly a remote object.</p>
+ *
+ * @version $Revision: 1.6 $ $Date: 1999/03/24 03:29:48 $ $Name:  $
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
 public class BaseDump implements Base, CategoryNode {

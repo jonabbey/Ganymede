@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 1999/03/10 06:06:56 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 1999/03/24 03:29:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -868,15 +868,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>This method indicates whether this base may be removed in
+   * the Schema Editor.</p>
    *
-   * This method indicates whether this base may be removed in
-   * the Schema Editor.  
+   * <p>We don't allow removal of built-in Bases that the server
+   * depends on for its operation, such as permissions, notification,
+   * and logging object types.</p>
    *
-   * We don't allow removal of Base 0 because it is the Ganymede
-   * administrator Base, a privileged Base in the Ganymede system.
-   *
-   * Likewise, Base 1 is 'User', also a privileged base.
-   *
+   * @see arlut.csd.ganymede.Base
    */
 
   public boolean isRemovable()
@@ -986,15 +985,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Factory method to create a new DBEditObject of this
+   * <p>Factory method to create a new DBEditObject of this
    * type.  The created DBEditObject will be connected
    * to the editset, and will not be integrated into the
-   * DBStore until the editset is committed.<br><br>
+   * DBStore until the editset is committed.</p>
    *
-   * <b>IMPORTANT NOTE</b>: This method *must not* be public!  All
+   * <p><b>IMPORTANT NOTE</b>: This method *must not* be public!  All
    * DBEditObject customization classes should go through 
-   * DBSession.createDBObject() to create new objects.
+   * DBSession.createDBObject() to create new objects.</p>
    *
    * @param editset The transaction this object is to be created in
    *
@@ -1006,18 +1004,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Factory method to create a new DBEditObject of this
+   * <p>Factory method to create a new DBEditObject of this
    * type.  The created DBEditObject will be connected
    * to the editset, and will not be integrated into the
-   * DBStore until the editset is committed.<br><br>
+   * DBStore until the editset is committed.</p>
    *
-   * <b>IMPORTANT NOTE</b>: This method *must not* be public!  All
+   * <p><b>IMPORTANT NOTE</b>: This method *must not* be public!  All
    * DBEditObject customization classes should go through 
-   * DBSession.createDBObject() to create new objects.
+   * DBSession.createDBObject() to create new objects.</p>
    *
    * @param editset The transaction this object is to be created in
-   *
    * @param chosenSlot If this is non-null, the object will be assigned 
    * the given invid, if available
    *
@@ -1137,15 +1133,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   * release an id if an object initially
+   * <p>releases an id if an object initially
    * created by createDBObject is rejected
-   * due to its transaction being aborted
+   * due to its transaction being aborted</p>
    *
-   * note that we aren't being real fancy
+   * <p>note that we aren't being real fancy
    * here.. if this doesn't work, it doesn't
    * work.. we have 2 billion slots in this
-   * object base after all..
-   *
+   * object base after all..</p>
    */
 
   synchronized void releaseId(int id)
@@ -1161,7 +1156,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * in this objectbase to a PrintStream.
    *
    * @param out PrintStream to print to.
-   *
    */
 
   public synchronized void printHTML(PrintWriter out)
@@ -1243,7 +1237,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * in this objectbase to a PrintStream.
    *
    * @param out PrintStream to print to.
-   *
    */
 
   public synchronized void print(PrintWriter out, String indent)
@@ -1263,9 +1256,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns the DBStore containing this DBObjectBase.
-   *
    */
 
   public DBStore getStore()
@@ -1274,7 +1265,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns the name of this object type
    *
    * @see arlut.csd.ganymede.Base
@@ -1285,9 +1275,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     return object_name;
   }
 
+
   /**
+   * <p>Sets the name for this object type</p>
    *
-   * Sets the name for this object type
+   * <p>This method is only valid when the Base reference is obtained
+   * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1339,7 +1333,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns the name of the class managing this object type
    *
    * @see arlut.csd.ganymede.Base
@@ -1351,8 +1344,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>Sets the fully qualified classname of the class 
+   * managing this object type</p>
    *
-   * Sets the name for this object type
+   * <p>This method is only valid when the Base reference is obtained
+   * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1401,9 +1398,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns the class definition for this object type
-   *
    */
 
   public Class getClassDef()
@@ -1412,7 +1407,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns true if the current session is permitted to
    * create an object of this type.
    *
@@ -1425,9 +1419,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns true if this object type can be inactivated
-   *
    * @see arlut.csd.ganymede.Base
    */
 
@@ -1437,7 +1429,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns the invid type id for this object definition
    *
    * @see arlut.csd.ganymede.Base
@@ -1449,9 +1440,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns the short type id for the field designated as this object's
-   * primary label field.
+   * primary label field, if any.  Objects do not need to have a primary
+   * label field designated if labels for this object type are dynamically
+   * generated.
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1462,7 +1454,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns the field name for the field designated as this object's
    * primary label field.  null is returned if no label has been
    * designated.
@@ -1499,10 +1490,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns the invid type id for this object definition as
    * a Short, suitable for use in a hash.
-   *
    */
 
   public Short getKey()
@@ -1511,14 +1500,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns the field definitions for the objects stored in this
-   * ObjectBase.
-   *
-   * Returns a vector of DBObjectBaseField objects.
-   *
-   * Question: do we want to return an array of DBFields here instead
-   * of a vector?
+   * <p>Returns {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
+   * base field definitions for objects of this type.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1529,15 +1512,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns the field definitions for the objects stored in this
-   * ObjectBase.
-   *
-   * Returns a vector of DBObjectBaseField objects, sorted by
-   * field display order..
-   *
-   * Question: do we want to return an array of DBFields here instead
-   * of a vector?
+   * <p>Returns {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
+   * base field definitions for objects of this type, sorted by field
+   * display order..</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1568,8 +1545,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns the field definitions for the field matching id,
+   * Returns the field definition for the field matching id,
    * or null if no match found.
    *
    * @see arlut.csd.ganymede.BaseField
@@ -1582,8 +1558,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Returns the field definitions for the field matching name,
+   * Returns the field definition for the field matching name,
    * or null if no match found.
    *
    * @see arlut.csd.ganymede.BaseField
@@ -1620,8 +1595,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>Choose what field will serve as this objectBase's label.  A fieldName
+   * parameter of null will cause the object's label field to be undefined,
+   * in which case the object will have to generate its own label using the
+   * {@link arlut.csd.ganymede.DBEditObject.getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
+   * method.</p>
    *
-   * Choose what field will serve as this objectBase's label.
+   * <p>This method is only valid when the Base reference is obtained
+   * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1661,8 +1643,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>Choose what field will serve as this objectBase's label.  A fieldID
+   * parameter of -1 will cause the object's label field to be undefined,
+   * in which case the object will have to generate its own label using the
+   * {@link arlut.csd.ganymede.DBEditObject.getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
+   * method.</p>
    *
-   * Choose what field will serve as this objectBase's label.
+   * <p>This method is only valid when the Base reference is obtained
+   * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1683,12 +1672,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Get the objectbase category.
+   * Get the parent Category for this object type.  This is used by the
+   * Ganymede client and schema editor to present object types in
+   * a hierarchical tree.
    *
    * @see arlut.csd.ganymede.Base
    * @see arlut.csd.ganymede.CategoryNode
-   *
    */
 
   public Category getCategory()
@@ -1697,15 +1686,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * Set the objectbase category.  This operation only registers
+   * <p>Set the objectbase category.  This operation only registers
    * the category in this base, it doesn't register the base in the
    * category.  The proper way to add this base to a Category is to
    * call addNode(Base, nodeBefore) on the appropriate Category
-   * object.  That addNode() operation will call setCategory() here.
+   * object.  That addNode() operation will call setCategory() here.</p>
+   *
+   * <p>This method is only valid when the Base reference is obtained
+   * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
    * @see arlut.csd.ganymede.CategoryNode
-   *
    */
 
   public void setCategory(Category category)
@@ -1719,10 +1710,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>Creates a new base field, inserts it into the DBObjectBase
+   * field definitions hash, and returns a reference to it. </p>
    *
-   * This method creates a new base field and inserts it
-   * into the DBObjectBase field definitions hash.  This
-   * method can only be called from a DBSchemaEdit context.
+   * <p>If lowRange is true, the field's id will start at 100 and go up,
+   * other wise it will start at 256 and go up.</p>
+   *
+   * <p>This method is only valid when the Base reference is obtained
+   * from a {@link arlut.csd.ganymede.SchemaEdit SchemaEdit} reference
+   * by the Ganymede schema editor.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1764,26 +1760,24 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
-   * This method is used to create a new builtIn field.  This
+   * <p>This method is used to create a new builtIn field.  This
    * method should *only* be called from DBSchemaEdit, which
    * will insure that the new field will be created with a
    * proper field id, and that before the schema edit transaction
    * is finalized, all non-embedded object types will have an
-   * identical built-in field registered.
+   * identical built-in field registered.</p>
    *
-   * Typically, the DBSchemaEdit code will create a new built-in on
+   * <p>Typically, the DBSchemaEdit code will create a new built-in on
    * the SchemaConstants.UserBase objectbase, and then depend on
    * DBSchemaEdit.synchronizeBuiltInFields() to replicate the
-   * new field into all the non-embedded bases.
+   * new field into all the non-embedded bases.</p>
    *
-   * Once again, DBSchemaEdit developMode is *only* to be used when
-   * the built-in field types are being modified by a Ganymede developer.
+   * <p>Once again, DBSchemaEdit developMode is *only* to be used when
+   * the built-in field types are being modified by a Ganymede developer.</p>
    *
-   * Such an action should never be taken lightly, as it *is* necessary
+   * <p>Such an action should never be taken lightly, as it *is* necessary
    * to edit the DBObjectBase() constructor afterwards to keep the
-   * system consistent.
-   *
+   * system consistent for newly created object types.</p>
    */
   
   synchronized DBObjectBaseField createNewBuiltIn(short id)
@@ -1829,12 +1823,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
+   * <p>This method is used to remove a field definition from 
+   * the current schema.</p>
    *
-   * This method is used to remove a field definition from 
-   * the current schema.
-   *
-   * Of course, this removal will only take effect if
-   * the schema editor commits.
+   * <p>Of course, this removal will only take effect if
+   * the schema editor commits.</p>
    *
    * @see arlut.csd.ganymede.Base
    */
@@ -1896,7 +1889,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * This method is used by the SchemaEditor to detect whether any
    * objects are using a field definition.
    *
@@ -1932,12 +1924,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Returns the display order of this Base within the containing
    * category.
    *
    * @see arlut.csd.ganymede.CategoryNode
-   *
    */
 
   public int getDisplayOrder()
@@ -1946,12 +1936,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Sets the display order of this Base within the containing
    * category.
    *
    * @see arlut.csd.ganymede.CategoryNode
-   *
    */
 
   public void setDisplayOrder(int displayOrder)
@@ -1960,9 +1948,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Helper method for DBEditObject subclasses
-   *
    */
 
   public DBEditObject getObjectHook()
@@ -1984,9 +1970,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Get the next available field id for a new field.
-   *
    */
 
   synchronized short getNextFieldID(boolean lowRange)
@@ -2022,12 +2006,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * Clear the editing flag.  This disables the DBObjectBase set
    * methods on this ObjectBase and all dependent field definitions.
    * This method also updates the FieldTemplate for each field and 
    * resorts the field index.
-   * 
    */
   
   synchronized void clearEditor(DBSchemaEdit editor)
@@ -2081,11 +2063,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   }
 
   /**
-   *
    * This method is used to update base references in objects
    * after this base has replaced an old version via the
    * SchemaEditor.
-   *
    */
 
   synchronized void updateBaseRefs()
@@ -2236,7 +2216,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   {
     return readerList.size();
   }
-
 
   /**
    *
