@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -32,7 +32,12 @@ import com.sun.java.swing.text.*;
  *
  * This class is an IPv4/IPv6 data display/entry widget for Ganymede.  Its purpose
  * is to allow the viewing and editing of either 4 or 16 byte Internet addresses
- * and subnet masks.
+ * and subnet masks.<br><br>
+ *
+ * Note that wherever Ganymede manipulates IP addresses, it does so in terms
+ * of unsigned bytes.  Since Java does not provide an unsigned byte type, Ganymede
+ * uses the s2u() and u2s() static methods defined in this class to convert from
+ * the signed Java byte to the Ganymede 0-255 IP octet range.
  *
  */
 
@@ -59,17 +64,13 @@ public class JIPField extends JentryField {
    * @param valueAttr used to determine the foregoudn/background/font for this JIPField
    * @param is_editable true if this JIPField is editable
    */
+
   public JIPField(JcomponentAttr valueAttr,
 		  boolean is_editable,
 		  boolean allowV6)
   {
     super(DEFAULT_COLS);
     
-    if (valueAttr == null)
-      {
-	throw new IllegalArgumentException("Invalid Paramter: valueAttr is null");
-      }
-
     this.valueAttr = valueAttr;
     this.allowV6 = allowV6;
     
@@ -79,7 +80,10 @@ public class JIPField extends JentryField {
 
     setEnabled(true);
 
-    JcomponentAttr.setAttr(this,valueAttr);
+    if (valueAttr != null)
+      {
+	JcomponentAttr.setAttr(this,valueAttr);
+      }
 
     enableEvents(AWTEvent.KEY_EVENT_MASK); 
   }
@@ -197,6 +201,7 @@ public class JIPField extends JentryField {
     String str;
     Byte[] bytes;
 
+    /* -- */
 
     // if nothing in the JIPField has changed,
     // we don't need to worry about this event.
@@ -354,7 +359,7 @@ public class JIPField extends JentryField {
    *
    */
 
-  private final static byte u2s(int x)
+  public final static byte u2s(int x)
   {
     if ((x < 0) || (x > 255))
       {
@@ -371,7 +376,7 @@ public class JIPField extends JentryField {
    *
    */
 
-  private final static short s2u(byte b)
+  public final static short s2u(byte b)
   {
     return (short) (b + 128);
   }
@@ -429,7 +434,8 @@ public class JIPField extends JentryField {
       which case the bytes will be left as 0.
       */
 
-    // initialize the result array
+    // initialize the result array so we'll return 0.0.0.0
+    // if nothing was entered
 
     for (int i = 0; i < 4; i++)
       {
@@ -479,6 +485,12 @@ public class JIPField extends JentryField {
 
     for (int i = 0; i < octets.size(); i++)
       {
+	if (debug)
+	  {
+	    System.err.println("JIPField.genIPV4bytes(): byte " + i + " = " + 
+			       (String) octets.elementAt(i));
+	  }
+
 	result[i] = new Byte(u2s(Integer.parseInt((String) octets.elementAt(i))));
       }
 
@@ -510,15 +522,14 @@ public class JIPField extends JentryField {
     for (int i = 0; i < octets.length; i++)
       {
 	absoctets[i] = new Short((short) (octets[i].shortValue() + 128)); // don't want negative values
-      }
 
-    result.append(absoctets[0].toString());
-    result.append(".");
-    result.append(absoctets[1].toString());
-    result.append(".");
-    result.append(absoctets[2].toString());
-    result.append(".");
-    result.append(absoctets[3].toString());
+	if (i > 0)
+	  {
+	    result.append(".");
+	  }
+
+	result.append(absoctets[i].toString());
+      }
     
     return result.toString();
   }
@@ -647,11 +658,12 @@ public class JIPField extends JentryField {
 
 	result[10] = new Byte(u2s(255));
 	result[11] = new Byte(u2s(255));
+
 	result[12] = ipv4bytes[0];
 	result[13] = ipv4bytes[1];
 	result[14] = ipv4bytes[2];
 	result[15] = ipv4bytes[3];
-	
+
 	return result;
       }
 
