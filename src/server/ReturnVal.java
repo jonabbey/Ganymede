@@ -7,7 +7,7 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -68,7 +68,8 @@ public class ReturnVal implements java.io.Serializable {
 
   public static final byte NONE = 0;
   public static final byte EXPIRATIONSET = 1;
-  public static final byte LAST = 1;
+  public static final byte DELETED = 2;
+  public static final byte LAST = 2;
 
   // ---
 
