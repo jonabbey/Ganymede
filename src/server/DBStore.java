@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.132 $
-   Last Mod Date: $Date: 2000/11/02 05:09:02 $
+   Version: $Revision: 1.133 $
+   Last Mod Date: $Date: 2000/11/04 02:12:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.132 $ %D%
+ * @version $Revision: 1.133 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1607,6 +1607,14 @@ public final class DBStore {
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Cc Owners";
 	bf.comment = "If true, mail for this event will always be cc'ed to administrators in the owner group";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.EventExternalMail;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Mail List";
+	bf.array = true;
+	bf.comment = "List of email addresses to send this event to";
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.EventToken);

@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/11/03 05:46:15 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/11/04 02:12:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -812,7 +812,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		return false;
 	      }
 
-	    NameSpace _aNewSpace = editor.createNewNameSpace(_name,_sensitive);
+	    NameSpace _aNewSpace = editor.createNewNameSpace(_name,!_sensitive);
 
 	    if (_aNewSpace == null)
 	      {
@@ -876,6 +876,21 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    XMLItem _entry = (XMLItem) basesToAdd.elementAt(i);
 	    Integer _id = _entry.getAttrInt("id");
 
+	    boolean _embedded = false;
+
+	    XMLItem _children[] = _entry.getChildren();
+
+	    if (_children != null)
+	      {
+		for (int j = 0; j < _children.length; j++)
+		  {
+		    if (_children[j].matches("embedded"))
+		      {
+			_embedded = true;
+		      }
+		  }
+	      }
+
 	    // create the new base, with the requested id.  we'll
 	    // specify that the object base is not an embedded one,
 	    // since DBObjectBase.setXML() can change that if need be.
@@ -884,7 +899,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    // get things in the category tree before we resequence it
 
 	    DBObjectBase _newBase = (DBObjectBase) editor.createNewBase(editor.getRootCategory(),
-									false,
+									_embedded,
 									_id.shortValue());
 
 	    // if we failed to create the base, we'll have an
@@ -2464,6 +2479,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	if (progress.length() > 0)
 	  {
+	    System.out.println(progress);
+
 	    ReturnVal retVal = new ReturnVal(true);
 	    retVal.setDialog(new JDialogBuff("XML client messages",
 					     progress,

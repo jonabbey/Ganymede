@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.122 $
-   Last Mod Date: $Date: 2000/11/03 05:46:13 $
+   Version: $Revision: 1.123 $
+   Last Mod Date: $Date: 2000/11/04 02:12:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -942,7 +942,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (xmldebug)
       {
-	err.println("Setting XML for object Base.." + root.getTreeString());
+	err.println("Setting XML for object Base.." + root);
       }
 
     // GanymedeXMLSession.processSchema does a handleBaseRenaming up
@@ -970,7 +970,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 					  root.getTreeString());
       }
 
-    if (xmldebug)
+    if (false)
       {
 	err.println("Setting id");
       }
@@ -986,7 +986,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // names and id's, build up a list of Integer field id's for us to
     // compare against the list of field id's currently defined
 
-    if (xmldebug)
+    if (false)
       {
 	err.println("Scanning fields");
       }
@@ -1051,7 +1051,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
       }
 
-    if (xmldebug)
+    if (false)
       {
 	err.println("Calculating fields to delete");
       }
@@ -1128,11 +1128,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
 	else if (item.matches("fielddef"))
 	  {
-	    if (xmldebug)
-	      {
-		err.println("Processing field " + item);
-	      }
-
 	    newField = (DBObjectBaseField) getField(item.getAttrInt("id").shortValue());
 
 	    if (newField == null)
@@ -1157,7 +1152,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		    err.println("Setting XML on new field " + item);
 		  }
 
-		retVal = newField.setXML(item, false); // don't do invid linking on first pass
+		retVal = newField.setXML(item, resolveInvidLinks);
 		
 		if (retVal != null && !retVal.didSucceed())
 		  {
@@ -1173,7 +1168,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		    err.println("Setting XML on field " + item);
 		  }
 		
-		retVal = newField.setXML(item, false); // don't do invid linking on first pass
+		retVal = newField.setXML(item, resolveInvidLinks);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
@@ -1191,7 +1186,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // and set or clear the label and class options
 
-    if (xmldebug)
+    if (false)
       {
 	err.println("Setting label field");
       }
@@ -1210,7 +1205,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	return retVal;
       }
 
-    if (xmldebug)
+    if (false)
       {
 	err.println("Setting class name");
       }
@@ -1227,7 +1222,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     embedded = _embedded;	// XXX need to work on this
 
-    if (xmldebug)
+    if (false)
       {
 	err.println("Setting object name");
       }
@@ -1242,7 +1237,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     // and we need to order the fields in customFields in the same
     // order they appeared in the XML
 
-    if (xmldebug)
+    if (false)
       {
 	err.println("Sorting fields");
       }
@@ -1361,7 +1356,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		// usually.. even if we can't find the class, we'll
 		// pass back a default DBEditObject
 
-		System.err.println("DBObjectBase.receive(): class definition could not be found: " + ex);
+		System.err.println("DBObjectBase.createHook(): class definition could not be found: " + ex);
 		classdef = null;
 	      }
 	  }
@@ -1815,7 +1810,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
     catch (ClassNotFoundException ex)
       {
-	Ganymede.debug("class definition " + classname + " could not be found: " + ex);
 	classdef = null;
 
 	ReturnVal retVal = new ReturnVal(true);	// success, but...

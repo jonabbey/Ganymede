@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 2000/11/03 05:46:14 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 2000/11/04 02:12:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,13 +112,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * id of this field in the current object type
    */
 
-  short field_code;
+  short field_code = -1;
 
   /**
    * {@link arlut.csd.ganymede.FieldType Field Type} for this field
    */
 
-  short field_type;
+  short field_type = -1;
 
   /**
    * Should this field be displayed to the client?  May be false for
@@ -138,7 +138,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * name of class to manage user interactions with this field
    */
 
-  String classname = null;
+  String classname = "";
 
   /**
    * string to be displayed in the client as a tooltip explaining this field
@@ -285,7 +285,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     comment = "";
     
     field_code = -1;
-    field_type = 0;
+    field_type = -1;
     editor = null;
   }
 
@@ -381,8 +381,24 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     out.writeUTF(field_name);
     out.writeShort(field_code);
     out.writeShort(field_type);
-    out.writeUTF(classname);
-    out.writeUTF(comment);
+
+    if (classname == null)
+      {
+	out.writeUTF("");
+      }
+    else
+      {
+	out.writeUTF(classname);
+      }
+
+    if (comment == null)
+      {
+	out.writeUTF("");
+      }
+    else
+      {
+	out.writeUTF(comment);
+      }
 
     out.writeBoolean(visibility); // added at file version 1.6
 
@@ -1052,6 +1068,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     XMLItem item, nextItem;
     Integer field_codeInt;
     boolean typeRead = false;
+    boolean _visibility = true;
+    String _classname = null;
+    String _comment = null;
     ReturnVal retVal = null;
 
     /* -- */
@@ -1084,6 +1103,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 					  "must be >= 100 for custom fields:\n" + 
 					  root.getTreeString());
       }
+
+    // we have to set the id before we do anything else, since most
+    // setters refuse to set if the field id isn't in a safe range
 
     retVal = setID(_fieldID);
 
@@ -1119,15 +1141,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (item.matches("classname"))
 	  {
-	    retVal = setClassName(item.getAttrStr("name"));
+	    _classname = item.getAttrStr("name");
 
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  "fielddef could not set class name: \n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
-	      }
 	  }
 	else if (item.matches("comment"))
 	  {
@@ -1135,7 +1150,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	    if (commentChildren == null)
 	      {
-		comment = null;
+		_comment = null;
 		continue;
 	      }
 
@@ -1146,19 +1161,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 						  root.getTreeString());
 	      }
 
-	    retVal = setComment(commentChildren[0].getString());
-
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  "fielddef could not set comment: \n" +
-						  root.getTreeString() + "\n" +
-						  retVal.getDialogText());
-	      }
+	    _comment = commentChildren[0].getString();
 	  }
 	else if (item.matches("invisible"))
 	  {
-	    visibility = false;	// need a setter?
+	    _visibility = false;	// need a setter?
 	  }
 	else if (item.matches("typedef"))
 	  {
@@ -1283,6 +1290,30 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
       }
 
+    // set the options
+
+    retVal = setClassName(_classname);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set class name: \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+    
+    retVal = setComment(_comment);
+    
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "fielddef could not set comment: \n" +
+					  root.getTreeString() + "\n" +
+					  retVal.getDialogText());
+      }
+
+    visibility = _visibility;
+    
     return null;
   }
 
@@ -2046,7 +2077,14 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (_targetobjectStr != null)
 	  {
-	    retVal = setTargetBase(_targetobjectStr);
+	    if (_targetobjectStr.equals("*any*"))
+	      {
+		retVal = setTargetBase((short)-2);
+	      }
+	    else
+	      {
+		retVal = setTargetBase(_targetobjectStr);
+	      }
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
@@ -2085,7 +2123,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (_targetfieldStr != null)
 	  {
-	    retVal = setTargetBase(_targetfieldStr);
+	    retVal = setTargetField(_targetfieldStr);
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
@@ -2386,7 +2424,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 					  "Can't change the class name of a system field.");
       }
 
-    if (!name.equals(classname))
+    if (name == null || name.equals(""))
+      {
+	classname = "";
+	classdef = null;
+      }
+    else if (!name.equals(classname))
       {
 	try 
 	  {
@@ -2437,14 +2480,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     if (!base.store.loading && editor == null)
       {
 	throw new IllegalArgumentException("not editing");
-      }
-
-    // if we're not loading, don't allow global fields to be messed with
-
-    if (editor != null && !isEditable())
-      {
-	return Ganymede.createErrorDialog("Error",
-					  "Can't edit system field.");
       }
 
     comment = s;
@@ -2533,7 +2568,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     // in these object types, as it is permissible to add fields to
     // the mandatory types
 
-    if (isSystemField())
+    if (field_type != -1 && isSystemField())
       {
 	return Ganymede.createErrorDialog("Error",
 					  "Can't change the type of a system field.");
@@ -3797,7 +3832,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 					  "Can't change the type of a system field.");
       }
 
-    if (val < 0)
+    // -1 and -2 are valid possible targets
+
+    if (val == -1 || val == -2)
       {
 	allowedTarget = val;
 	return null;
@@ -3896,7 +3933,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  }
 	else
 	  {
-	    throw new IllegalArgumentException("not a valid base name");
+	    return Ganymede.createErrorDialog("schema edit",
+					      "couldn't find base " + baseName + " to set target base");
 	  }
       }
     catch (RemoteException ex)
