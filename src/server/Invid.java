@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,10 +34,12 @@ import java.io.*;
  * of these properties, the Invid can be used as a persistent object pointer
  * type.<br><br>
  *
- * Invid's are used extensively in the server to track object
- * relationships between objects.  The client uses Invid's to request operations
- * on specified objects in the Ganymede database.
- * 
+ * Invid's are used extensively in the server to track pointer
+ * relationships between objects.  Invid's are also used by the client to identify
+ * objects to be viewed, edited, deleted, etc.  Basically whenever any code
+ * in Ganymede deals with a reference to an object, it is done through the use
+ * of Inivid's.
+ *  
  */
 
 public final class Invid implements java.io.Serializable {
