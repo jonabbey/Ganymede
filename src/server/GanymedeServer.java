@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -698,7 +698,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		    if (vectorEmpty)
 		      {
 			removeVector.addElement(new Short(iField.getID()));
-			iField.defined = false;
 		      }
 		  }
 		else
@@ -709,7 +708,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		      {
 			swept = true;
 			removeVector.addElement(new Short(iField.getID()));
-			iField.defined = false;
 
 			Ganymede.debug("Removing invid: " + invid + 
 				       " from scalar field " + iField.getName() +
