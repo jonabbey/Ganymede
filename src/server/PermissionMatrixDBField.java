@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -629,6 +629,8 @@ class PermMatrixCkPoint {
     Enumeration enum = field.matrix.keys();
     Object key;
     PermEntry val;
+
+    /* -- */
 
     while (enum.hasMoreElements())
       {
