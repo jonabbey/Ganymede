@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 1999/01/22 18:05:33 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 1999/02/02 23:40:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -270,6 +270,7 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
+   *
    * The load() method reads in all transactions in the current DBStore Journal
    * and makes the appropriate changes to the DBStore Object Bases.  This
    * method should be called after the main body of the DBStore is loaded
@@ -471,7 +472,10 @@ public class DBJournal implements ObjectStatus {
 		System.err.println("DBJournal file unexpectedly ended: state = " + status);
 	      }
 
-	    throw new IOException("DBJournal file unexpectedly ended: state = " + status);
+	    // ok, the journal ended badly, but aside from losing a partial
+	    // transaction, we should be ok.
+
+	    return false;
 	  }
       }
   }

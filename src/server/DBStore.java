@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 1999/01/22 18:05:39 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 1999/02/02 23:40:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -325,7 +325,7 @@ public class DBStore {
 	  {
 	    if (!journal.load())
 	      {
-		throw new RuntimeException("problem loading journal");
+		System.err.println("\nError, couldn't load entire journal.. final transaction in journal not processed.\n");
 	      }
 	    else
 	      {
