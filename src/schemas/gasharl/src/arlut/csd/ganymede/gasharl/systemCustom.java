@@ -93,6 +93,57 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   static QueryResult systemTypes = new QueryResult(); 
   static Date systemTypesStamp = null;
 
+  /**
+   * <p>This method returns true if the given address fits in the
+   * network object pointed to by netInvid, or false otherwise.</p>
+   */
+
+  public final static boolean checkMatchingNet(DBSession session, Invid netInvid, Byte[] address)
+  {
+    IPv4Range range;
+
+    /* -- */
+
+    if (netInvid == null)
+      {
+	return false;
+      }
+
+    DBObject netObj;
+
+    if (session != null)
+      {
+	netObj = session.viewDBObject(netInvid);
+      }
+    else
+      {
+	netObj = Ganymede.db.getObject(netInvid);
+      }
+
+    String rangeString = (String) netObj.getFieldValueLocal(networkSchema.ALLOCRANGE);
+	
+    if (rangeString != null && !rangeString.equals(""))
+      {
+	range = new IPv4Range(rangeString);
+      }
+    else
+      {
+	Byte[] netNum = (Byte[]) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
+
+	if (netNum == null)
+	  {
+	    System.err.println("systemCustom.checkMatchingNet() found network " + 
+			       "object with no range string and no netNum");
+
+	    return false;
+	  }
+	
+	range = new IPv4Range(netNum);
+      }
+    
+    return range.matches(address);
+  }
+
   // ---
 
   /**
@@ -445,54 +496,13 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	Invid netInvid = handle.getInvid();
 	
-	if (checkMatchingNet(netInvid, address))
+	if (checkMatchingNet(getSession(), netInvid, address))
 	  {
 	    return netInvid;
 	  }
       }
 
     return null;
-  }
-
-  /**
-   * <p>This method returns true if the given address fits in the
-   * network object pointed to by netInvid, or false otherwise.</p>
-   */
-
-  public boolean checkMatchingNet(Invid netInvid, Byte[] address)
-  {
-    IPv4Range range;
-
-    /* -- */
-
-    if (netInvid == null)
-      {
-	return false;
-      }
-
-    DBObject netObj = getSession().viewDBObject(netInvid);
-    String rangeString = (String) netObj.getFieldValueLocal(networkSchema.ALLOCRANGE);
-	
-    if (rangeString != null && !rangeString.equals(""))
-      {
-	range = new IPv4Range(rangeString);
-      }
-    else
-      {
-	Byte[] netNum = (Byte[]) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
-
-	if (netNum == null)
-	  {
-	    System.err.println("systemCustom.checkMatchingNet() found network " + 
-			       "object with no range string and no netNum");
-
-	    return false;
-	  }
-	
-	range = new IPv4Range(netNum);
-      }
-    
-    return range.matches(address);
   }
 
   /**
@@ -1185,4 +1195,5 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     return null;
   }
+
 }

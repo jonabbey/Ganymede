@@ -498,7 +498,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	
 	Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
 
-	if (address != null && getParentObj().checkMatchingNet((Invid) value, address))
+	if (address != null && systemCustom.checkMatchingNet(getSession(), (Invid) value, address))
 	  {
 	    if (debug)
 	      {
@@ -578,7 +578,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	Invid netInvid = (Invid) getFieldValueLocal(interfaceSchema.IPNET);
 	Byte[] address = (Byte[]) value;
 
-	if (getParentObj().checkMatchingNet(netInvid, address))
+	if (systemCustom.checkMatchingNet(getSession(), netInvid, address))
 	  {
 	    // fine, no change to the network required
 
@@ -784,6 +784,40 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       }
 
     return super.verifyNewValue(field, value);
+  }
+
+  /**
+   * <p>Customization method to verify overall consistency of
+   * a DBObject.  This method is intended to be overridden
+   * in DBEditObject subclasses, and will be called by
+   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}
+   * to verify the readiness of this object for commit.  The
+   * DBObject passed to this method will be a DBEditObject,
+   * complete with that object's GanymedeSession reference
+   * if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if
+   * the code needs to access the database.</p>
+   *
+   * <p>To be overridden in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal consistencyCheck(DBObject object)
+  {
+    Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
+    Invid netInvid = (Invid) getFieldValueLocal(interfaceSchema.IPNET);
+
+    if (address != null && !systemCustom.checkMatchingNet(getSession(), netInvid, address))
+      {
+	return Ganymede.createErrorDialog("Bad IP Address", "Error, I.P. number/network mismatch");
+      }
+
+    return null;
   }
 
   /**
