@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/03/19 05:12:28 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/03/23 06:21:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -49,6 +49,7 @@
 package arlut.csd.ganymede.custom;
 
 import arlut.csd.ganymede.*;
+import arlut.csd.Util.VectorUtils;
 
 import java.util.*;
 
@@ -129,6 +130,22 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 	  }
       }
 
+    // mark email lists
+    
+    if (object.getTypeID() == 274)
+      {
+	return super.lookupLabel(object) + " (email list)";
+      }
+
+    // mark external email records
+
+    if (object.getTypeID() == 275)
+      {
+	Vector addresses = object.getFieldValuesLocal((short) 257);
+	
+	return super.lookupLabel(object) + " (" + VectorUtils.vectorString(addresses) + ")";
+      }
+
     return super.lookupLabel(object);
   }
 
@@ -146,6 +163,9 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
   public Object obtainChoicesKey(DBField field)
   {
+    // we don't want the members field to be cached, since we are
+    // amalgamating several kinds of things into one invid field.
+
     if (field.getID() == MEMBERS)
       {
 	return null;
