@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- JNLP File for Ganymede Admin Console -->
+
+<jnlp spec="1.0+" codebase="#WEBROOT" href="console.jnlp">
+  <information>
+    <title>Ganymede Admin Console</title>
+    <vendor>Applied Research Laboratories</vendor>
+    <homepage href="http://www.arlut.utexas.edu/gash2"/>
+    <description>Ganymede Admin Console</description>
+  </information>
+  <resources>
+    <j2se version="1.3"/>
+    <j2se version="1.2"/>
+    <jar href="ganymede.jar"/>
+  </resources>
+  <applet-desc 
+    documentBase="#WEBROOT"
+    name="Ganymede Admin Console"
+    main-class="arlut.csd.ganymede.GASHAdmin"
+    width="320"
+    height="350">
+    <param name="ganymede.serverhost" value="#SERVERHOST"/>
+    <param name="ganymede.registryPort" value="#REGISTRYPORT"/>
+  </applet-desc>
+</jnlp>
