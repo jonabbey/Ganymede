@@ -213,4 +213,4 @@ export CLASSPATH
 
 SUNSPECIFIC="-server -XX:MaxPermSize=$MAXPERMSPACE"
 
-$JAVA $SUNSPECFICI $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP $RMIGC $RMISECURITY arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
+$JAVA $SUNSPECIFIC $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP $RMIGC $RMISECURITY arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR
