@@ -5,7 +5,7 @@
    A wizard to manage step-by-step interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -126,7 +126,8 @@ public class userInactivateWizard extends GanymediatorWizard {
   public ReturnVal processDialog1()
   {
     ReturnVal retVal = null;
-
+    String key = "inactivate" + userObject.getLabel();
+    
     /* -- */
 
     String forward = (String) getParam("Forwarding Address");
@@ -141,7 +142,7 @@ public class userInactivateWizard extends GanymediatorWizard {
 		       "User has been inactivated",
 		       "OK",
 		       null,
-		       "ok.gif");
+		       "ok.gif").unionRescan(retVal);
       }
     else
       {
@@ -150,7 +151,7 @@ public class userInactivateWizard extends GanymediatorWizard {
 	// the wizard process.  Look at DBEditObject.inactivate()
 	// method for documentation on this.
 	
-	if (!session.rollback("inactivate" + userObject.getLabel()))
+	if (!session.rollback(key))
 	  {
 	    return Ganymede.createErrorDialog("userInactivateWizard: Error",
 					      "Ran into a problem during user inactivation, and rollback failed");

@@ -5,7 +5,7 @@
    A wizard to manage user reactivation interactions for the userCustom object.
 
    Created: 29 January 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -217,11 +217,11 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
     if (retVal == null || retVal.didSucceed())
       {
-	retVal = success("User Reactivation Performed",
-			 "User has been reactivated",
-			 "OK",
-			 null,
-			 "ok.gif");
+        return success("User Reactivation Performed",
+		       "User has been reactivated",
+		       "OK",
+		       null,
+		       "ok.gif").unionRescan(retVal);
       }
     else if (retVal.getDialog() == null)
       {
@@ -230,8 +230,8 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 	
 	if (!session.rollback("reactivate" + userObject.getLabel()))
 	  {
-	    retVal = Ganymede.createErrorDialog("userReactivateWizard: Error",
-						"Ran into a problem during user reactivation, and rollback failed");
+	    return Ganymede.createErrorDialog("userReactivateWizard: Error",
+					      "Ran into a problem during user reactivation, and rollback failed");
 	  }
       }
 

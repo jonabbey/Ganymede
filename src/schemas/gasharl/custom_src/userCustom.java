@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -453,8 +453,26 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	date = (DateDBField) getField(SchemaConstants.RemovalField);
 	retVal = date.setValueLocal(cal.getTime());
 
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    finalizeInactivate(false);
+	    return retVal;
+	  }
+
 	finalizeInactivate(true);
-	return retVal;
+
+	// ok, we succeeded, now we have to tell the client
+	// what to refresh to see the inactivation results
+
+	ReturnVal result = new ReturnVal(true);
+	ReturnVal rescan = new ReturnVal(true);
+	rescan.addRescanField(SchemaConstants.RemovalField);
+	rescan.addRescanField(userSchema.LOGINSHELL);
+	rescan.addRescanField(userSchema.EMAILTARGET);
+
+	result.addRescanObject(getInvid(), rescan);
+
+	return result;
       }
     else  // interactive, but not called by wizard
       {
@@ -649,7 +667,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	finalizeReactivate(true);
 
-	return retVal;
+	// ok, we succeeded, now we have to tell the client
+	// what to refresh to see the reactivation results
+
+	ReturnVal result = new ReturnVal(true);
+	ReturnVal rescan = new ReturnVal(true);
+	rescan.addRescanField(SchemaConstants.RemovalField);
+	rescan.addRescanField(userSchema.LOGINSHELL);
+	rescan.addRescanField(userSchema.EMAILTARGET);
+
+	result.addRescanObject(getInvid(), rescan);
+
+	return result;
       }
 
     return Ganymede.createErrorDialog("userCustom.reactivate() error",
