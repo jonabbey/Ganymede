@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -523,7 +523,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     frame.setIconifiable(true);
     frame.getContentPane().add(new JLabel("Waiting for query", icon, SwingConstants.CENTER));
     frame.setLayer(new Integer(topLayer));
-    System.out.println("Adding window");
+    if (debug)
+      {
+	System.out.println("Adding wait window");
+      }
+
     waitWindowHash.put(key, frame);
 
     add(frame);
@@ -538,7 +542,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	System.out.println("Couldn't find window to remove.");
 	return;
       }
-    System.out.println("Removing window");
+    if (debug)
+      {
+	System.out.println("Removing wait window");
+      }
 
     remove(frame);
     waitWindowHash.remove(frame);
