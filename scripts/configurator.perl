@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.13 $
-# $Date: 1999/01/18 22:11:30 $
+# $Revision: 1.14 $
+# $Date: 1999/01/18 22:19:04 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -277,7 +277,7 @@ $javadir = $ENV{GJAVA};
 print "Generating config.sh files in source directories.\n\n";
 
 while ($#configs > 0) {
-    write_config(shift @configs, shift @configs, shift @configs, shift @configs);
+    write_config(shift @configs, shift @configs, shift @configs);
 }
 
 @schemas=("$rootsir/src/schemas/bsd", "BSD",
