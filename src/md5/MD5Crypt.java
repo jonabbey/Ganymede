@@ -4,8 +4,8 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 2002/03/16 01:46:39 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 2002/03/28 22:05:03 $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
    ----------------------------------------------------------------------------
@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -49,7 +49,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -69,8 +70,8 @@ package md5;
  *
  * <p>Created: 3 November 1999</p>
  * <p>Release: $Name:  $</p>
- * <p>Version: $Revision: 1.8 $</p>
- * <p>Last Mod Date: $Date: 2002/03/16 01:46:39 $</p>
+ * <p>Version: $Revision: 1.9 $</p>
+ * <p>Last Mod Date: $Date: 2002/03/28 22:05:03 $</p>
  * <p>Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
  * <p>Original C Version:<pre>
  * ----------------------------------------------------------------------------
@@ -191,10 +192,54 @@ public final class MD5Crypt {
 
   static public final String crypt(String password, String salt)
   {
+    return MD5Crypt.crypt(password, salt, "$1$");
+  }
+
+  /**
+   * <p>This method actually generates an Apache MD5 compatible
+   * md5-encoded password hash from a plaintext password and a
+   * salt.</p>
+   *
+   * <p>The resulting string will be in the form '$apr1$&lt;salt&gt;$&lt;hashed mess&gt;</p>
+   *
+   * @param password Plaintext password
+   * @param salt A short string to use to randomize md5.  May start with $apr1$, which
+   *             will be ignored.  It is explicitly permitted to pass a pre-existing
+   *             MD5Crypt'ed password entry as the salt.  crypt() will strip the salt
+   *             chars out properly.
+   *
+   * @return An Apache-compatible md5-hashed password string.
+   */
+
+  static public final String apacheCrypt(String password, String salt)
+  {
+    return MD5Crypt.crypt(password, salt, "$apr1$");
+  }
+
+  /**
+   * <p>This method actually generates md5-encoded password hash from
+   * a plaintext password, a salt, and a magic string.</p>
+   *
+   * <p>There are two magic strings that make sense to use here.. '$1$' is the
+   * magic string used by the FreeBSD/Linux/OpenBSD MD5Crypt algorithm, and
+   * '$apr1$' is the magic string used by the Apache MD5Crypt algorithm.</p>
+   *
+   * <p>The resulting string will be in the form '&lt;magic&gt;&lt;salt&gt;$&lt;hashed mess&gt;</p>
+   *
+   * @param password Plaintext password @param salt A short string to
+   * use to randomize md5.  May start with the magic string, which
+   * will be ignored.  It is explicitly permitted to pass a
+   * pre-existing MD5Crypt'ed password entry as the salt.  crypt()
+   * will strip the salt chars out properly.
+   * 
+   * @return An md5-hashed password string. 
+   */
+
+  static public final String crypt(String password, String salt, String magic)
+  {
     /* This string is magic for this algorithm.  Having it this way,
      * we can get get better later on */
 
-    String magic = "$1$";
     byte finalState[];
     MD5 ctx, ctx1;
     long l;
