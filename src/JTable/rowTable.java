@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 14 June 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,7 @@ import java.util.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.7 $ %D% 
+ * @version $Revision: 1.8 $ %D% 
  */
 
 public class rowTable extends baseTable {
@@ -231,6 +231,7 @@ public class rowTable extends baseTable {
   public void clearCells()
   {
     index = new Hashtable();
+    crossref = new Vector();
     super.clearCells();
   }
 
