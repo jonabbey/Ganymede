@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 2003/01/31 00:36:20 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 2003/01/31 00:41:52 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -45,7 +45,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
 */
 
 package arlut.csd.JDataComponent;
@@ -95,7 +97,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.49 $ $Date: 2003/01/31 00:36:20 $ $Name:  $
+ * @version $Revision: 1.50 $ $Date: 2003/01/31 00:41:52 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -738,7 +740,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * <p>This method moves one or more items from the out list to the in list.</p>
+   * <p>This method moves one or more selected items from the out list to the in list.</p>
    */
 
   void addItems()
@@ -842,7 +844,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * <p>This method moves one or more items from the in list to the out list.</p>
+   * <p>This method moves one or more selected items from the in list to the out list.</p>
    */
 
   void removeItems()
