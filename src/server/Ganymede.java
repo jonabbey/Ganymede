@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -391,7 +391,7 @@ public class Ganymede {
   static public void startupHook()
   {
     DBEditObject e_object;
-    Invid selfPermInv;
+    Invid defaultInv;
     StringDBField s;
     PermissionMatrixDBField pm;
     
@@ -403,31 +403,37 @@ public class Ganymede {
 
 	internalSession.openTransaction("Ganymede startupHook");
 
-	selfPermInv = new Invid(SchemaConstants.PermBase,
-				SchemaConstants.PermSelfUserObj);
+	defaultInv = new Invid(SchemaConstants.PermBase,
+				SchemaConstants.PermDefaultObj);
 
-	if (internalSession.session.viewDBObject(selfPermInv) == null)
+	if (internalSession.session.viewDBObject(defaultInv) == null)
 	  {
-	    System.err.println("Creating the PermSelfUserObj");
+	    System.err.println("Creating the PermDefaultObj");
 
 	    // need to create the self perm object
 
-	    // create SchemaConstants.PermSelfUserObj
+	    // create SchemaConstants.PermDefaultObj
 
-	    e_object = (DBEditObject) internalSession.session.createDBObject(SchemaConstants.PermBase, selfPermInv);
+	    e_object = (DBEditObject) internalSession.session.createDBObject(SchemaConstants.PermBase, defaultInv);
 	    
 	    s = (StringDBField) e_object.getField(SchemaConstants.PermName);
-	    s.setValue("Self Permissions");
+	    s.setValue("Default Permissions");
 	
 	    // By default, users will be able to view themselves and all their fields, anything
 	    // else will have to be manually configured by the supergash administrator.
 	
 	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.PermMatrix);
 	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(true, false, false)); 
+
+	    // By default, users will not be able to view, create, or edit anything.  The supergash
+	    // administrator is free to reconfigure this.
+	
+	    pm = (PermissionMatrixDBField) e_object.getField(SchemaConstants.PermDefaultMatrix);
+	    pm.setPerm(SchemaConstants.UserBase, new PermEntry(false, false, false)); 
 	  }
 	else
 	  {
-	    System.err.println("Not Creating the PermSelfUserObj");
+	    System.err.println("Not Creating the PermDefaultObj");
 	  }
 
 	ReturnVal retVal = internalSession.commitTransaction();
