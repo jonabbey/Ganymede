@@ -59,6 +59,7 @@ import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -156,6 +157,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     gbc.gridy = 1;
     gbc.weighty = 1.0;
     gbc.weightx = 1.0;
+    gbc.insets = new Insets(5,5,5,5);
     gbl.setConstraints(scrollPane, gbc);
     pane.add(scrollPane);
 
@@ -163,6 +165,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     gbc.anchor = GridBagConstraints.SOUTH;    
     gbc.gridy = 2;
     gbc.weighty = 0.0;
+    gbc.insets = new Insets(0,0,0,0);
     gbl.setConstraints(ok, gbc);
     pane.add(ok);
 
