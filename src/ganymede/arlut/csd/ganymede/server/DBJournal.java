@@ -908,6 +908,15 @@ public class DBJournal implements ObjectStatus {
     // XXX Making this method actually do the replays to the sync channels
     // XXX would be a keen idea!
     // XXX
+    // XXX What we want to do is to create DBEditObjects from all of the
+    // XXX DBObjects we've created here, link them to the versions currently
+    // XXX in the persistent store through the original reference, just as
+    // XXX happens in a normal transaction.  Then we can write the collection
+    // XXX of DBEditObjects out to the sync channels as we normally would do
+    // XXX in a normal commit, and we can even call the commitPhase2() on
+    // XXX them, as the commit failure would have occured while writing the
+    // XXX sync channels, before commitPhase2() would have been called.
+    // XXX
 
     System.err.println("Error, non-finalized transaction found in journal!");
 

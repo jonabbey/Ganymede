@@ -1571,6 +1571,25 @@ public class DBEditSet {
 		  }
 	      }
 
+	    // XXX
+	    // XXX Do we really want to throw a CommitFatalException here?  The transaction
+	    // XXX *is* persisted, and if the server is restarted with the disk space
+	    // XXX issue resolved, it will be able to be replayed, and the syncs
+	    // XXX performed.
+	    // XXX
+	    // XXX Further, if this transaction fails due to an IO error, we should probably
+	    // XXX do something beyond just report a failure.. we do need to do the
+	    // XXX commit_updateNamespaces() and etc., don't we?
+	    // XXX
+	    // XXX Honestly, if we have an exception writing to the sync channels, we should
+	    // XXX probably assume that the disk is full and cease operations entirely.
+	    // XXX
+	    // XXX Otherwise, we'll try to persist more transactions, and if we were able to
+	    // XXX send syncs to the channels, we'd be implicitly skipping transactions,
+	    // XXX which violates the guarantees we need to maintain in order to make this whole
+	    // XXX delta synchronization thing work
+	    // XXX
+
 	    if (ex instanceof IOException)
 	      {
 		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
