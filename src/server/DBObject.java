@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.46 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.47 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -935,6 +935,8 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	// couldn't clear the shadow..  this editSet
 	// wasn't the one to create the shadow
 
+	Ganymede.debug("DBObject.clearShadow(): couldn't clear, editset mismatch");
+
 	return false;
       }
 
@@ -989,16 +991,16 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
     // sort by display order
 
-    (new VecQuickSort(results,  
+    (new VecQuickSort(results,
 		      new arlut.csd.Util.Compare()
 		      {
-			public int compare(Object a, Object b) 
+			public int compare(Object a, Object b)
 			  {
 			    FieldInfo aF, bF;
-			    
+
 			    aF = (FieldInfo) a;
 			    bF = (FieldInfo) b;
-			 
+
 			    if (aF.displayOrder < bF.displayOrder)
 			      {
 				return -1;
@@ -1041,6 +1043,9 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    *
    * <p>Get read-only access to a field from this object, by name.</p>
    *
+   * This method needs to be synchronized to avoid conflict with 
+   * DBEditObject.clearTransientFields().
+   *
    * @param fieldname The fieldname for the desired field of this object
    *
    * @see arlut.csd.ganymede.db_object
@@ -1071,6 +1076,9 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   /**
    *
    * <p>Get read-only list of DBFields contained in this object.</p>
+   *
+   * This method needs to be synchronized to avoid conflict with 
+   * DBEditObject.clearTransientFields().
    *
    * @see arlut.csd.ganymede.db_object
    */
@@ -1104,7 +1112,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     results = new db_field[count];
 
     // note that a hash doesn't keep the fields in any particular
-    // order.. 
+    // order..
 
     enum = fields.elements();
 
@@ -1168,29 +1176,6 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
     return results;
   }
 
-
-  /**
-   *
-   * <p>Returns true if the last field change peformed on this
-   * object necessitates the client rescanning this object to
-   * reveal previously invisible fields or to hide previously
-   * visible fields.</p>
-   *
-   * <p>Note that a non-editable DBObject never needs to be
-   * rescanned, this method only has an impact on DBEditObject
-   * and subclasses thereof.</p>
-   *
-   * <p>shouldRescan() should reset itself after returning
-   * true</p>
-   *
-   * @see arlut.csd.ganymede.db_object
-   */
-
-  public boolean shouldRescan()
-  {
-    return false;
-  }
-
   /**
    *
    * <p>Returns true if inactivate() is a valid operation on
@@ -1214,7 +1199,8 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 
   public boolean isInactivated()
   {
-    return (objectBase.canInactivate() && (getFieldValueLocal(SchemaConstants.RemovalField) != null));
+    return (objectBase.canInactivate() && 
+	    (getFieldValueLocal(SchemaConstants.RemovalField) != null));
   }
 
   /**
@@ -1310,14 +1296,11 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   public Object getFieldValue(short fieldID)
   {
     DBField f = (DBField) getField(fieldID);
+
+    /* -- */
     
     if (f == null)
       {
-	//	if (gSession != null)
-	//	  {
-	//	    gSession.setLastError("couldn't find field " + fieldID);
-	//	  }
-
 	return null;
       }
 
@@ -1344,14 +1327,11 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   public Object getFieldValueLocal(short fieldID)
   {
     DBField f = (DBField) getField(fieldID);
+
+    /* -- */
     
     if (f == null)
       {
-	//	if (gSession != null)
-	//	  {
-	//	    gSession.setLastError("couldn't find field " + fieldID);
-	//	  }
-
 	return null;
       }
 
@@ -1380,14 +1360,11 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   public Vector getFieldValues(short fieldID)
   {
     DBField f = (DBField) getField(fieldID);
+
+    /* -- */
     
     if (f == null)
       {
-	if (gSession != null)
-	  {
-	    gSession.setLastError("couldn't find field " + fieldID);
-	  }
-
 	return null;
       }
 
@@ -1416,14 +1393,11 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
   public Vector getFieldValuesLocal(short fieldID)
   {
     DBField f = (DBField) getField(fieldID);
+
+    /* -- */
     
     if (f == null)
       {
-	if (gSession != null)
-	  {
-	    gSession.setLastError("couldn't find field " + fieldID);
-	  }
-
 	return null;
       }
 
@@ -1496,7 +1470,7 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
    * objects to generate different labels for a given object
    * based on their perspective.  This is used to sort
    * of hackishly simulate a relational-type capability for
-   * the purposes of viewing backlinks.
+   * the purposes of viewing backlinks.<br><br>
    *
    * See the automounter map and NFS volume DBEditObject
    * subclasses for how this is to be used, if you have
