@@ -25,6 +25,9 @@ system("rm -rf *");
 
 print "Linking client stub class\n\n";
 
+# We need the ClientBase_Stub class so that we can talk to the client
+# when it tries to connect to us
+
 mkdir("client", 0770);
 symlink("$sourcedir/client/ClientBase_Stub.class", "client/ClientBase_Stub.class");
 

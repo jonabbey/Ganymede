@@ -85,25 +85,6 @@ ganymede.messageDirectory=/home/broccol/gash2/code/arlut/csd/ganymede/db/text
 ganymede.mailhost=ns1.arlut.utexas.edu
 
 
-# ganymede.defaultmailsuffix
-#
-# What is the default email suffix for newly created users?
-#
-# Used by the server
-
-ganymede.defaultmailsuffix=@arlut.utexas.edu
-
-# ganymede.homedirprefix
-#
-# Where are user's home directories placed?
-#
-# If this is not defined, the user may place his home
-# directory anywhere.
-#
-# Used by the server
-
-ganymede.homedirprefix=/home/
-
 # ganymede.returnaddr
 #
 # What return email address will appear on mail sent by the
@@ -113,6 +94,7 @@ ganymede.homedirprefix=/home/
 
 ganymede.returnaddr=jonabbey@arlut.utexas.edu
 
+
 # ganymede.serverhost
 #
 # The name of the system that the Ganymede server is being run on.
@@ -121,14 +103,16 @@ ganymede.returnaddr=jonabbey@arlut.utexas.edu
 
 ganymede.serverhost=www.arlut.utexas.edu
 
+
 # ganymede.registryPort
 #
 # The port number of the Java rmi registry daemon handling object
-# bindings for the Ganymede server
+# bindings for the Ganymede server.
 #
 # Used by the client, server, and admin console
 
 ganymede.registryPort=1099
+
 
 # ganymede.rootname
 #
@@ -151,6 +135,7 @@ ganymede.rootname=supergash
 # Used by the server
 
 ganymede.defaultrootpass=dodo
+
 
 # ganymede.monitorname
 #
@@ -183,6 +168,14 @@ ganymede.defaultmonitorpass=display
 ganymede.helpbase=http://www.arlut.utexas.edu/~mulvaney/ganymede/
 
 
+# ganymede.schemaDirectory
+#
+# The directory where the schema's schema.properties and
+# custom.jar file are located.
+
+ganymede.schemaDirectory=/server-install/schema
+
+
 # ------------------------------------------------------------
 #
 # NIS/GASH Builder Properties
@@ -198,6 +191,7 @@ ganymede.helpbase=http://www.arlut.utexas.edu/~mulvaney/ganymede/
 
 ganymede.builder.output=/home/broccol/gash2/code/arlut/csd/ganymede/db/out
 
+
 # ganymede.builder.scriptlocation
 #
 # The directory that Ganymede's build tasks will look to in order to run
@@ -206,6 +200,7 @@ ganymede.builder.output=/home/broccol/gash2/code/arlut/csd/ganymede/db/out
 # Used by the server
 
 ganymede.builder.scriptlocation=/home/broccol/gash2/code/arlut/csd/ganymede/db/
+
 
 # ------------------------------------------------------------
 #
@@ -220,3 +215,24 @@ ganymede.builder.scriptlocation=/home/broccol/gash2/code/arlut/csd/ganymede/db/
 # Used by the server
 
 ganymede.gash.dnsdomain=arlut.utexas.edu
+
+
+# ganymede.defaultmailsuffix
+#
+# What is the default email suffix for newly created users?
+#
+# Used by the server
+
+ganymede.defaultmailsuffix=@arlut.utexas.edu
+
+
+# ganymede.homedirprefix
+#
+# Where are user's home directories placed?
+#
+# If this is not defined, the user may place his home
+# directory anywhere.
+#
+# Used by the server
+
+ganymede.homedirprefix=/home/

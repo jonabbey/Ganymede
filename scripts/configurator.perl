@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.39 $
-# $Date: 1999/07/05 20:58:49 $
+# $Revision: 1.40 $
+# $Date: 1999/08/27 17:40:40 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -125,6 +125,8 @@ classfiles:
 	\@cd $rootdir/src/Qsmtp; \\
 	./build		
 	\@cd $rootdir/src/jcrypt; \\
+	./build		
+	\@cd $rootdir/src/md5; \\
 	./build		
 	\@cd $rootdir/src/JDataComponent; \\
 	./build
@@ -408,6 +410,7 @@ removelastslash($swingdir);
 
 @configs=("$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$classdir",
 	  "$rootdir/src/jcrypt", "jcrypt Class", "$classdir",
+	  "$rootdir/src/jcrypt", "md5 Classes", "$classdir",
 	  "$rootdir/src/Util", "Ganymede Utility Classes", "$classdir",
 	  "$rootdir/src/JTable", "Ganymede Table Classes", "$classdir",
 	  "$rootdir/src/JTree", "Ganymede Tree Classes", "$classdir",
