@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.77 $ %D%
+    Version: $Revision: 1.78 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -1015,7 +1015,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    Invid currentValue = (Invid) invf.getValue();
 	    listHandle currentHandle = null;
 
-	    System.err.println("containerPanel.updateComponent(): updating invid chooser combo box");
+	    if (debug)
+	      {
+		System.err.println("containerPanel.updateComponent(): updating invid chooser combo box");
+	      }
 
 	    for (int i = 0; i < choiceHandles.size(); i++)
 	      {
@@ -1038,7 +1041,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		choiceHandles.addElement(noneHandle);
 	      }
 
-	    System.err.println("containerPanel.updateComponent(): got handles, setting model");
+	    if (debug)
+	      {
+		System.err.println("containerPanel.updateComponent(): got handles, setting model");
+	      }
 
 	    if (currentHandle == null)
 	      {
@@ -1846,16 +1852,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     /* -- */
 
-    if (debug)
-      {
-	println("Item changed: " + e.getItem());
-      }
-
     // We don't care about deselect reports
 
     if (e.getStateChange() != ItemEvent.SELECTED)
       {
 	return;
+      }
+
+    if (debug)
+      {
+	println("containerPanel.itemStateChanged(): Item selected: " + e.getItem());
       }
 
     // Find the field that is associated with this combo box.  Some
@@ -2944,11 +2950,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   private void addInvidField(invid_field field, 
 			     FieldInfo fieldInfo, 
 			     FieldTemplate fieldTemplate) throws RemoteException
-    {
+  {
     objectList list;
 
     /* -- */
-
+    
     if (fieldTemplate.isEditInPlace())
       {
 	// this should never happen
@@ -3064,6 +3070,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		      {
 			println("Found the current object in the list!");
 		      }
+
 		    currentListHandle = thisChoice;
 		    found = true;
 		    //break;
@@ -3082,7 +3089,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    combo.addItem(noneHandle);
 	  }
-	
 
 	 /*
 	  *
@@ -3121,6 +3127,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	    // If the field is must choose, we wouldn't have added the
 	    // noneHandle earlier.
+
 	    if (mustChoose)
 	      {
 		if (debug)
@@ -3141,11 +3148,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	combo.setAllowNone(!mustChoose);
 
-	invidChooserHash.put(combo.getCombo(), field); // We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
-	objectHash.put(combo, field); // The update method still need to be able to find this JInvidChooser.
+	// We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
+
+	invidChooserHash.put(combo.getCombo(), field); 
+
+	// The update method still need to be able to find this JInvidChooser.
+
+	objectHash.put(combo, field); 
 	
 	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
-
 
 	if (debug)
 	  {
@@ -3153,9 +3164,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	
 	addRow( combo, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
-	
-  }
-  else //It's not editable, so add a button
+      }
+    else //It's not editable, so add a button
       {
 	if (fieldInfo.getValue() != null)
 	  {
