@@ -33,8 +33,8 @@
   <property name="dist.doc" value="../doc/javadoc"/>
 
   <!-- Global settings -->
-  <property name="debug.flag" value="on"/>
-  <property name="java.lib" value="${java.home}/jre/lib/rt.jar"/>
+  <property name="debug.flag" value="true"/>
+  <property name="debug.level" value="source,lines,vars"/>
 
   <!-- Global properties for javac -->
   <property name="build.compiler" value="modern"/>
@@ -158,7 +158,8 @@ refresh the jar files.
 </echo>
     
     <javac destdir="${build.classes}"
-           debug="${debug.flags}"
+           debug="${debug.flag}"
+           debuglevel="${debug.level}"
            target="1.4"
            source="1.4"
            deprecation="on">

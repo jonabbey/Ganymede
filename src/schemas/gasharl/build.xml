@@ -27,7 +27,7 @@
 
   <!-- Global settings -->
   <property name="debug.flag" value="on"/>
-  <property name="java.lib" value="${java.home}/jre/lib/rt.jar"/>
+  <property name="debug.level" value="source,lines,vars"/>
 
   <!-- Global properties for javac -->
   <property name="build.compiler" value="modern"/>
@@ -83,7 +83,8 @@ refresh the jar files.
     <mkdir dir="${build.classes}"/>
     <echo message="Building schema kit"/>
     <javac destdir="${build.classes}"
-           debug="${debug.flags}"
+           debug="${debug.flag}"
+           debuglevel="${debug.level}"
            nowarn="true"
            target="1.4"
            source="1.4"
