@@ -18,33 +18,70 @@
     <p><blockquote>Do not meddle in the affairs of wizards, for they are subtle,
       and quick to anger. -- J.R.R. Tolkein</blockquote></p>
 
-    <p>A user of the Ganymede system uses the client to create, edit,
-    delete and, optionally, inactivate and reactivate objects.  When
-    actually editing an object, the user can change the value of
-    fields by adding or removing values (for vector fields) or by
-    replacing the contents of a field with a new value.  Normally this
-    is a very straight-forward process.  The user indicates what he
-    wants to happen, and the Ganymede server does it.</p>
+    <p>Ganymede is all about storing and manipulating data objects.
+    When a user sits down to work with Ganymede, he issues commands to
+    create, delete, and edit objects.  These commands are given to the
+    Ganymede client, which in turn uses RMI to call methods on objects
+    held on the server, using the <a
+    href="../javadoc/arlut/csd/ganymede/Session.html">Session</a>, <a
+    href="../javadoc/arlut/csd/ganymede/db_object.html">db_object</a>,
+    and <a
+    href="../javadoc/arlut/csd/ganymede/db_field.html">db_field</a>
+    RMI remote interfaces.  In response to these method calls, the
+    server attempts to make changes to fields and objects in its
+    database.  Not all such method calls can succeed, however.  The
+    user may not have appropriate permissions for the attempted
+    operation, or the operation may not make sense in the context of
+    other objects in the database.  In such cases, those method calls
+    have to be able to return a failure report to the client.</p>
 
-    <p>This isn't always the case, however.  For instance, if a user
-    attempts to change the name of a group object to a name which is
-    already being used for another group, the server will report that
-    the name is already in use and that the operation can not be
-    performed.  This is possible because all field-changing operations
-    in the <a
-      href="../javadoc/arlut/csd/ganymede/db_field.java">db_field</a>
-    remote interface return a <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    object to indicate the results of the operation.  The <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    object may include a dialog specification for the client to
-    display.  If an operation fails, the <a
-      href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    returned from the server will tell the client that the operation
-    failed and that the included dialog should be shown to the
-    user.  In most cases, the normal mechanisms of the Ganymede server
-    itself will generate and return such dialogs when an operation cannot
-    be performed.</p>
+    <p>This is achieved in the Ganymede server by the use of <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    objects.  All database-changing method calls on <a
+    href="../javadoc/arlut/csd/ganymede/Session.html">Session</a>, <a
+    href="../javadoc/arlut/csd/ganymede/db_object.html">db_object</a>,
+    and <a
+    href="../javadoc/arlut/csd/ganymede/db_field.html">db_field</a>
+    references return <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    objects to provide detailed results to the client.</p>
+
+    <p>All methods that return <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    objects work in the same general way.  Most methods will return
+    <code>null</code> if the operation succeeded and no special value
+    needed to be returned to the client.  Some methods (such as <a
+    href="../javadoc/arlut/csd/ganymede/Session.html#edit_db_object(arlut.csd.ganymede.Invid)">Session.edit_db_object()</a>)
+    will have to return a <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    on success so that the client can extract the remote <a
+    href="../javadoc/arlut/csd/ganymede/db_object.html">db_object</a>
+    reference from the <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    object's <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html#getObject()">getObject()</a>
+    method.  At other times, an operation may succeed but require that
+    the client be given a list of objects and fields to update so that
+    the user will see changes made across objects in all objects that
+    are affected.  More on this later.</p>
+
+    <p>If a <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    object is returned from the server, the client will call its <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html#didSucceed()">didSucceed()</a>
+    method to learn whether the operation succeeded or failed.</p>
+
+    <p>Success or failure is the most basic information that can be
+    carried by a <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    object.  If an attempted operation could not be performed, the
+    user will be wondering why.  We can't leave the user wondering, so
+    <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    objects can pass a dialog definition to the client for
+    display.</p>
+
+    <p>And therein lies a tale.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -52,31 +89,40 @@
       </tr>
     </table>
 
-    <p>Custom <a
-    href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
-    code in a schema kit's <a
-    href="../glossary.html#custom.jar">custom.jar</a> file can return
-    dialogs wherever the method signature indicates that a <a
-    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    is returned.  The easiest way is to use the 
+    <p>The Ganymede client contains a piece of code called a <a
+    href="../javadoc/arlut/csd/JDialog/StringDialog.html">StringDialog</a>.  The
     <a
-      href="../javadoc/arlut/csd/ganymede/Ganymede.java#createErrorDialog(java.lang.String,java.lang.String)">
-      Ganymede.createErrorDialog()</a> method to create a <a
-    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    which encodes failure and an explanatory dialog.</p>
+    href="../javadoc/arlut/csd/JDialog/StringDialog.html">StringDialog</a>
+    class is a generic dialog class that can display a variety of
+    information as specified by a <a
+      href="../javadoc/arlut/csd/JDialog/DialogRsrc.html">DialogRsrc</a>
+    object.  The <a
+      href="../javadoc/arlut/csd/JDialog/DialogRsrc.html">DialogRsrc</a>
+    object, in turn, can be constructed from a <a
+      href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    object.</p>
 
-    <p>Custom dialogs can be returned by creating a <a
-    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    object to return and calling the <a
-    href="../javadoc/arlut/csd/ganymede/ReturnVal.java#setDialog(arlut.csd.JDialog.JDialogBuff)">setDialog</a>
-    method to specify a custom <a
-    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
-    dialog definition for display by the client.</p>
+    <p>The <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    object is designed so that it can be passed over the RMI link
+    between the server and the client.  In this way, the server can
+    provide a dialog specification for the client to display.</p>
+
+    <p>As you have guessed by now, the <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    objects passed from the server to the client can include a <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    dialog description.  The client can access this dialog by calling
+    the <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    object's <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html#getDialog()">getDialog()</a>
+    method.</p>
 
     <p><a
-    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>'s
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>'s
     are general-purpose dialog definition structures.  The <a
-    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
     constructors can take a string for the dialog's title, another
     string for the main body, strings for the ok and optional cancel
     buttons, and a filename for an image to be displayed on the left
@@ -84,12 +130,29 @@
 
     <p><img src="dialog1.jpg"></p>
 
+    <p>In order to return the above dialog to the user, the server
+    might contain the following code:</p>
+
+    <pre>
+       <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a> retVal = new <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html#constructor_summary">ReturnVal</a>(false);  // failure
+       <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a> dialogDef = new <a href="../javadoc/arlut/csd/JDialog/JDialogBuff.html#constructor_summary">JDialogBuff</a>("Error",
+	                                       "Couldn't log in to server.. bad username/password?",
+	                                       "Ok",
+	                                       null,          // no cancel button
+	                                       "error.gif");
+       retVal.<a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html#setDialog(arlut.csd.JDialog.JDialogBuff)">setDialog</a>(dialogDef);
+       return retVal;
+    </pre>
+
     <p>Note that the string used for the title will appear in the
     dialog itself, as well as in the dialog's title bar.  The string
     provided for the body will be word-wrapped to fit in the displayed
     dialog, and can include explicit newline characters to break the
     text into paragraphs.  The image shown in the dialog is called
-    <code>error.gif</code>.  The following images are guaranteed to be
+    <code>error.gif</code>, and refers to an image resource available
+    to the client.  The following images are guaranteed to be
     available to the client through its jar file:</p>
 
     <p>
@@ -108,27 +171,60 @@
       </table>
     </p>
 
+    <p>Error dialogs of the kind shown above are created often enough in the Ganymede server
+    that there is a special method provided to simplify this process.  The following
+    code does exactly the same as the code above:</p>
+
+    <pre>
+       return <a href="../javadoc/arlut/csd/ganymede/Ganymede.html#createErrorDialog(java.lang.String, java.lang.String)">Ganymede.createErrorDialog</a>("Error", "Couldn't log in to server.. bad username/password?");
+    </pre>
+
     <p><a
-      href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
+      href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
     has more tricks.  In addition to a title, icon and
     body of text, the <a
-      href="../javadoc/arlut/csd/JDialog/StringDialog.java">StringDialog</a>
+      href="../javadoc/arlut/csd/JDialog/StringDialog.html">StringDialog</a>
     created on the client from the <a
-      href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
+      href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
     can display one or more GUI widgets that the user can fill in, as
     in the following:</p>
     
     <p><img src="dialog2.jpg"></p>
 
-    <p><a
-    href="../javadoc/arlut/csd/JDialog/StringDialog.java">StringDialog</a>
-    is used in many places in the Ganymede client, which makes use of
-    these GUI widgets locally.  <a
-    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>'s
-    support for GUI widgets serves another purpose, however.. it makes
-    it possible for the server to support full-fledged <a
-    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.java">
-    wizards</a>.</p>
+    <p>In order to return the above dialog to the user, the server
+    might contain the following code:</p>
+
+    <pre>
+       <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a> retVal = new <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html#constructor_summary">ReturnVal</a>(false);  // failure
+       <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a> dialogDef = new <a href="../javadoc/arlut/csd/JDialog/JDialogBuff.html#constructor_summary">JDialogBuff</a>("Reactivate User",
+	                                       null,
+	                                       "Ok",
+	                                       "Cancel",
+	                                       "question.gif");
+
+       dialogDef.<a href="../javadoc/arlut/csd/JDialog/JDialogBuff.html#addPassword(java.lang.String, boolean)">addPassword</a>("New Password", true);
+
+       Vector choices = new Vector();
+
+       choices.addElement("/bin/bash");  // in real life, these are extracted from the database
+       choices.addElement("/bin/tcsh");
+       choices.addElement("/bin/ksh");
+
+       dialogDef.<a href="../javadoc/arlut/csd/JDialog/JDialogBuff.html#addChoice(java.lang.String, java.util.Vector, java.lang.String)">addChoice</a>("Shell", choices, "/bin/bash");
+
+       dialogDef.<a href="../javadoc/arlut/csd/JDialog/JDialogBuff.html#addString(java.lang.String, java.lang.String)">addString</a>("Forwarding Address", null);
+
+       retVal.<a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html#setDialog(arlut.csd.JDialog.JDialogBuff)">setDialog</a>(dialogDef);
+       return retVal;
+    </pre>
+
+    <p>There is one problem with the example above, though.  What is the client supposed
+    to do with the GUI fields that have been added?  They are obviously there so that
+    the user can answer some questions, but then what?</p>
+
+    <p>Ah.  Now we're getting into the land where wizards get involved.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -136,46 +232,605 @@
       </tr>
     </table>
 
-    <p>Any method which returns a <a
-    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    can involve the client in a sequence of dialogs, to ask questions
-    and guide the user through a series of steps to achieve some end.
-    The code on the server which manages this series of dialogs is
-    called a <font color="#ff0000">wizard</font>.  Wizards in the
-    Ganymede server are derived from the <a
-    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.java">
-    GanymediatorWizard</a> class, and are responsible for providing a
-    series of <a
-    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    objects to the client on demand.  The client interacts with the
-    server-side wizard through the <a
-    href="../javadoc/arlut/csd/ganymede/Ganymediator.java">Ganymediator</a>
-    RMI Remote interface.  The <a
-    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    object can pass a <a
-    href="../javadoc/arlut/csd/ganymede/Ganymediator.java">Ganymediator</a>
-    interface to the client at any time, using the <a
-    href="../javadoc/arlut/csd/ganymede/ReturnVal.java#setCallback(arlut.csd.ganymede.Ganymediator)">setCallback()</a>
-    method.  If the client sees that a <a
-    href="../javadoc/arlut/csd/ganymede/ReturnVal.java">ReturnVal</a>
-    object that it gets from the server is carrying a <a
-    href="../javadoc/arlut/csd/JDialog/JDialogBuff.java">JDialogBuff</a>
-    and a <a
-    href="../javadoc/arlut/csd/ganymede/Ganymediator.java">Ganymediator</a>
-    reference, the client will present the encoded dialog, marshal any
-    results from any encoded GUI widgets into a serialized hashtable,
-    and will pass that hashtable back to the server in the form of a
-    call to the <a
-    href="../javadoc/arlut/csd/ganymede/Ganymediator.java">Ganymediator</a>
+    <p>In addition to the success/failure code and <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    dialog definition, the <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    object can also carry a <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    RMI remote reference.  Just as the <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html#setDialog(arlut.csd.JDialog.JDialogBuff)">setDialog</a>
+    method is used to register a <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    to be returned to the client, so is the <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html#setCallback(arlut.csd.ganymede.Ganymediator)">setCallback</a>
+    used to register a remote <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    reference to be passed back to the client.</p>
+
+    <p>The <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    reference is a different sort of thing from the <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    object, however.  The <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    reference is an RMI remote reference to an object on the server,
+    while the value of the <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    object is actually passed to the client.</p>
+
+    <p>If the client gets a <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    back from the server that contains both a <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>u
+    object and a <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    reference, the client will engage in a <b>wizard interaction
+    sequence</b>.</p>
+
+    <p>How this works is simple.  The client takes the <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    from the <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    object, and displays the dialog to the user.  When the user is
+    finished interacting with the dialog, the client packages up the
+    values from the dialog and does an RMI call to the <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    object on the server, using the <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html#respond(java.util.Hashtable)">respond()</a>
+    method defined in the <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    interface.  That <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html#respond(java.util.Hashtable)">respond()</a>
+    method will in response return another <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    object, or <code>null</code> if the interaction sequence has
+    completed successfully.  Any of the subsequently returned <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    objects may themselves carry additional <a
+    href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    objects and <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    references, in which case the interaction continues.</p>
+
+    <p>In this way, the client, and the server do a little dance to
+    walk the user through a series of dialogs.  The final <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    returned by the <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    will have the final results of whatever operation initiated the
+    wizard sequence.  Any method call in <a
+    href="../javadoc/arlut/csd/ganymede/Session.html">Session</a>, <a
+    href="../javadoc/arlut/csd/ganymede/db_object.html">db_object</a>,
+    and <a
+    href="../javadoc/arlut/csd/ganymede/db_field.html">db_field</a>
+    that return <a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+    objects can interpose a wizard by simply encoding a
     <a
-    href="../javadoc/arlut/csd/ganymede/Ganymediator.java#respond(java.util.Hashtable)">respond()</a>
-    method.</p>
+      href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
+    object and a <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    remote reference.</p>
+
+    <p>But where does the <a
+    href="../javadoc/arlut/csd/ganymede/Ganymediator.html">Ganymediator</a>
+    reference come from?  And how does the server keep track of the status
+    of a wizard?</p>
+
+    <p>Again, the answer is simple.  All of the wizard bookkeeping is done
+    by a clever little class called <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a></p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b><a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">The GanymediatorWizard Class</a></b></h2></td>
+      </tr>
+    </table>
+
+    <p>In order to talk about the <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a>
+    class, I'm going to present and walk through an actual (although
+    somewhat simplified) Ganymede wizard from the gasharl schema kit.
+    This wizard is presented to the user when he attempts to edit an
+    existing user object's username field.  When such a change is
+    attempted, the <code>userCustom</code> <a
+    href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+    subclass which is bound to the user object in the Ganymede server
+    (see the wonderful <a href="index.html">DBEditObject Subclassing
+    Guide</a>)'s <a
+    href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> method
+    detects the operation and, instead of returning null to give the
+    operation the ok, creates the wizard and gets the whole process
+    going, as follows:</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><b><a href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a></b></h3></td></tr></table> 
+
+    <pre>
+
+  /**
+   *
+   * This is the hook that DBEditObject subclasses use to interpose wizards whenever
+   * a sensitive field is being changed.
+   *
+   */
+
+  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
+  {
+    userRenameWizard renameWizard = null;
     
+    /* -- */
+
+    if ((field.getID() != USERNAME) ||
+	(operation != SETVAL))
+      {
+	return null;		// by default, we just ok whatever else
+      }
+  </pre>
+
+  <p>In fact, in the real code we check some more things out, like whether the user is
+  being newly created (in which case we don't want to complain about a rename), or whether
+  the user is being deleted (in which case we don't mind them setting the name to <code>null</code>).</p>
+
+  <pre>
+
+    String oldname = (String) field.getValue();
+  </pre>
+
+  <p>We're being called by the system because the <a href="../javadoc/arlut/csd/ganymede/DBField.html">DBField</a>
+  is checking to see if it's okay to do a <code>SETVAL</code> on itself.  We are here to check
+  that out, but we're going to want to keep track of the old name for the dialogs, etc.</p>
+
+  <pre>
+
+    if (!gSession.enableWizards)
+      {
+        return null;		// no wizards if the user is non-interactive.
+      }
+
+    // Huh!  Wizard time!  We'll check here to see if there is a
+    // registered userRenameWizard in the system taking care of us.
+
+    if (gSession.isWizardActive() && gSession.getWizard() instanceof userRenameWizard)
+      {
+        renameWizard = (userRenameWizard) gSession.getWizard();
+
+        if ((renameWizard.getState() == renameWizard.DONE) &&
+	    (renameWizard.field == field) &&
+	    (renameWizard.userObject == this) &&
+	    (renameWizard.newname == param1))
+	  {
+            // ok, assume the wizard has taken care of getting
+	    // everything prepped and approved for us.  An active
+            // wizard has approved the operation
+		
+	    renameWizard.unregister();
+
+	    // note that we don't have to return the rescan fields
+	    // directive here.. the active wizard is what is going to
+	    // respond directly to the user, we are presumably just
+	    // here because the wizard task-completion code went ahead
+	    // and called setValue on the user's name.. we'll trust
+	    // that code to return the rescan indicators.
+		
+	    return null;
+	  }
+        else
+	  {
+	    renameWizard.unregister();
+	    return Ganymede.createErrorDialog("User Object Error",
+				              "The client is attempting to do an operation on " +
+					      "a user object with an active wizard.");
+	  }
+      }
+    else if (gSession.isWizardActive())
+      {
+	return Ganymede.createErrorDialog("User Object Error",
+					  "The client is attempting to do an operation on " +
+					  "a user object with mismatched active wizard.\n" +
+					  "Wizard id: " + gSession.getWizard());
+      }
+  </pre>
+
+  <p>The above section is a bit confusing.  What's going on here is that if/when the wizard finally
+  ok's the operation, it's going to try to rename the user itself.  The above code is here
+  so that if the wizard does try to rename the user, we won't force <b>IT</b> to have to deal
+  with another copy of itself to get the operation approved.</p>
+
+  <p>The <a href="../javadoc/arlut/csd/ganymede/GanymedeSession.html">GanymedeSession</a> object
+  that tracks permissions and the user's activities in the Ganymede server also tracks whether
+  a wizard is active.  Each client is only allowed one wizard at a time, until the wizard is
+  unregistered() using the <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a>
+  <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#unregister()">unregister()</a>
+  method.</p>
+
+  <pre>
+
+    else
+      {
+	// there's no wizard active, and this operation has to be approved by one.  Go ahead
+	// and set up the wizard and let the client play with it.
+
+	try
+	  {
+	    // Mike Jittlov is the Wizard of Speed and Time
+
+	    renameWizard = new userRenameWizard(this.gSession,
+						this,
+						field,
+						(String) param1,
+						oldname);
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("Couldn't create userWizard " + ex.getMessage());
+	  }
+	
+	// if we get here, the wizard was able to register itself.. go ahead
+	// and return the initial dialog for the wizard.  The ReturnVal code
+	// that wizard.respond() returns will have the success code
+	// set to false, so whatever triggered us will prematurely exit,
+	// returning the wizard's dialog.
+
+	return renameWizard.respond(null);
+  </pre>
+
+  <p>We now have the wizard created, and we return the <a
+  href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+  object resulting from calling the renameWizard's <a
+  href="../javadoc/arlut/csd/ganymede/Ganymediator.html#respond(java.util.Hashtable)">respond()</a>
+  method with a null parameter.  This will trigger the wizard to
+  return its first dialog, and from that point on, the client will
+  talk to the wizard directly to get the job done.</p>
+
+  <p>Remember that we got here by the client calling a method on a <a
+  href="../javadoc/arlut/csd/ganymede/db_field.html">db_field</a>
+  reference.  That remote method call got processed by a <a
+  href="../javadoc/arlut/csd/ganymede/DBField.html">DBField</a>
+  subclass (in this case <a
+  href="../javadoc/arlut/csd/ganymede/StringDBField.html">StringDBField</a>,
+  since the username is a string field), which called our <a
+  href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> method.
+  That <a
+  href="../javadoc/arlut/csd/ganymede/DBField.html">DBField</a> method
+  knows that if it gets a non-successful<a
+  href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>
+  value back from <a
+  href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> that it should
+  just pass it through and let the client and the wizard work things out.</p>
+
+  <pre>
+
+      }
+  }
+  </pre>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><b>The userRenameWizard</b></h3></td></tr></table> 
+
+    <pre>
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                userRenameWizard
+
+------------------------------------------------------------------------------*/
+
+/**
+ * A wizard to handle the wizard interactions required when a user is
+ * renamed.
+ */
+
+public class userRenameWizard extends GanymediatorWizard {
+    </pre>
+
+    <p>Note that we are subclassing <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a>
+    here.  This is very important.. all Ganymede wizards should be subclassed from
+    <a
+      href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a>.</p>
+
+    <pre>
+
+  /**
+   * The user-level session context that this wizard is acting in.  This
+   * object is used to handle necessary checkpoint/rollback activity by
+   * this wizard, as well as to handle any necessary label lookups.
+   */
+
+  GanymedeSession session;
+
+  /**
+   * The actual user object that this wizard is acting on
+   */
+
+  userCustom userObject;
+
+  /**
+   * The username field in the user object that we may change
+   */
+
+  DBField field;
+
+  /**
+   * The proposed new name for the user
+   */
+
+  String newname;
+
+  /**
+   * The old name for the user
+   */
+
+  String oldname;
+  </pre>
+  
+  <p>Everything in this section above are local variables that the wizard keeps track
+  of as it goes through the dialogs, so that it can know enough to get its job done.</p>
+
+  <pre>
+
+  /* -- */
+
+  /**
+   *
+   * This constructor registers the wizard as an active wizard
+   * on the provided session.
+   *
+   * @param session The GanymedeSession object that this wizard will
+   * use to interact with the Ganymede data store.
+   * @param userObject The user object that this wizard will work with.
+   * @param newname The proposed new name for the user.
+   *
+   */
+
+  public userRenameWizard(GanymedeSession session, 
+         		  userCustom userObject, 
+		          DBField field,
+		          String newname,
+			  String oldname) throws RemoteException
+  {
+    super(session);		// register ourselves
+  </pre>
+
+  <p>This call to the super constructor is extremely
+  important.. without it, all of the code in <a
+  href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a> which
+  handles all of the wizard sequence bookkeeping won't get done.</p>
+
+  <pre>
+
+    this.session = session;
+    this.userObject = userObject;
+    this.field = field;
+    this.newname = newname;
+    this.oldname = oldname;
+  }
+
+  /**
+   *
+   * This method provides a default response if a user
+   * hits cancel on a wizard dialog.  This should be
+   * subclassed if a wizard wants to provide a more
+   * detailed cancel response.
+   *
+   */
+
+  public ReturnVal <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#cancel()">cancel()</a>
+  {
+    return <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#fail(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)">fail</a>("User Rename Cancelled",
+		"OK, good decision.",
+		"Yeah, I guess",
+		null,
+		"ok.gif");
+  }
+  </pre>
+
+  <p>The <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#cancel()">cancel()</a>
+  method we override here is called automatically by the
+  <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a>
+  <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#respond(java.util.Hashtable)">respond()</a>
+  method if it gets a <code>null</code> result back from the client, which means the user
+  hit the cancel button.  This can occur at any point where the user is presented with a dialog
+  in connection with this wizard.</p>
+
+  <p>By calling <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#fail(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)">fail()</a>, we return a dialog to the user letting them
+  know where the operation stands:</p>
+
+  <p><img src="renameCancel.jpg"></p>
+
+  <pre>
+
+  /**
+   *
+   * This method starts off the wizard process
+   *
+   */
+
+  public ReturnVal processDialog0()
+  {
+    ReturnVal retVal = null;
+
+    /* -- */
+
+    retVal = <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#fail(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)">continueOn</a>("User Rename Dialog",
+			"Warning.\n\n" + 
+			"Renaming a user is a serious operation, with serious potential consequences.\n\n"+
+			"If you rename this user, the user's directory and mail file will need to be renamed.\n\n"+
+			"Any scripts or programs that refer to this user's name will need to be changed.",
+			"OK",
+			"Never Mind",
+			"question.gif");
+
+    retVal.<a href="../javadoc/arlut/csd/ganymede/ReturnVal.html#getDialog()">getDialog()</a>.<a href="../javadoc/arlut/csd/JDialog/JDialogBuff.html#addBoolean(java.lang.String)">addBoolean</a>("Keep old name as an email alias?");
+
+    return retVal;
+  }
+  </pre>
+
+  <p>processDialog0 is called automatically by the <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a>
+  class the first time its <a
+  href="../javadoc/arlut/csd/ganymede/Ganymediator.html#respond(java.util.Hashtable)">respond()</a>
+  method is called.  By returning the results of a <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#fail(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)">continueOn()</a>
+  call, we are telling the <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a> code that
+  we want to continue with the dialog sequence, and we provide a dialog to the user, as follows:</p>
+
+  <p><img src="renameDialog0.jpg"></p>
+
+  <pre>
+
+  /**
+   *
+   * The client will call us in this state with a Boolean
+   * param for key "Keep old name as an email alias?"
+   *
+   */
+
+  public ReturnVal processDialog1()
+  {
+    ReturnVal retVal = null;
+
+    /* -- */
+
+    System.err.println("userRenameWizard: USER_RENAME state 1 processing return vals from dialog");
+
+    Boolean answer = (Boolean) <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#getParam(java.lang.String)">getParam</a>("Keep old name as an email alias?");
+  </pre>
+
+  <p>When the client responded to our first dialog, they had the option of clicking on
+  a checkbox to choose to keep the user's old name as an email alias for the new.  When
+  the user hit the Ok button, the client packaged up all of the values associated
+  with the GUI widgets and returned them in a serialized Hashtable to the <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#respond(java.util.Hashtable)">respond()</a>
+  method, which unpacked the results for us.  We use the
+  <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#getParam(java.lang.String)">getParam()</a>
+  method to get the value for that checkbox, using the name we gave it as the key.<?p>
+
+  <pre>
+
+    // One thing we need to check is whether the new name that they
+    // are wanting is already an alias for them..
+
+    StringDBField aliases = (StringDBField) userObject.getField(userSchema.ALIASES);
+
+    if (aliases != null)
+      {
+	if (aliases.containsElementLocal(newname))
+	  {
+	    aliases.deleteElementLocal(newname);
+	  }
+      }
+
+    <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#state">state</a> = DONE;		// let the userCustom wizardHook know to go 
+				// ahead and pass this operation through now
+  </pre>
+
+  <p>Again, this is very important.  By setting
+  <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#state">state</a>
+  to <code>DONE</code>, we are effectively telling the <a
+    href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> method in the userCustom class that we have
+  finished with this user and that it should go ahead and perform the operation
+  when we ask it to, which we do right now..</p>
+
+  <pre>
+
+    // note that this setValue() operation will pass
+    // through userObject.wizardHook().  wizardHook will see that we are
+    // an active userRenameWizard, and are at state DONE, so it
+    // will go ahead and unregister us and let the name change
+    // go through to completion.
+
+    retVal = field.<a href="../javadoc/arlut/csd/ganymede/DBField.html#setValue(java.lang.Object)">setValue</a>(newname);
+    System.err.println("userRenameWizard: Returned from field.setValue()");
+
+    // now we need to add the old name to the alias list, possibly.
+
+    if (answer != null && answer.booleanValue())
+      {
+	aliases.addElementLocal(oldname);
+      }
+  </pre>
+
+  <p>The <a href="../javadoc/arlut/csd/ganymede/DBField.html#setValue(java.lang.Object)">setValue()</a>
+  call calls the <a
+    href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> method again, which in our case returns some field rescan information
+  to tell the client to update other fields in the user object which are affected by a user rename.  We're
+  going to just tack on our own dialog here.</p>
+
+  <pre>
+    if (retVal.didSucceed())
+      {
+	retVal.<a
+    href="../javadoc/arlut/csd/ganymede/ReturnVal.html#setDialog(arlut.csd.JDialog.JDialogBuff)">setDialog</a>(new JDialogBuff("User Rename Performed",
+					 "OK, User renamed.",
+					 "Thanks",
+					 null,
+					 "ok.gif"));
+      }
+  </pre>
+
+  <p>If we didn't know that setValue() was going to return a non-null <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>, we would use the <a
+    href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a> 
+  <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#success(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)">success()</a> method to create
+  and return an 'all systems go' <a href="../javadoc/arlut/csd/ganymede/ReturnVal.html">ReturnVal</a>.</p>
+
+  <pre>
+    return retVal;
+  }
+}
+    </pre>
+
+  <p>And if the user got through all of that, they'll see the following dialog:</p>
+
+  <p><img src="renameOk.jpg"></p>
+
+  <table border="1" cellpadding="3" cellspacing="0" width="100%">
+    <tr BGCOLOR="#CCFFCC">
+      <td colspan="1"><h2><b>Summary</b></h2></td>
+    </tr>
+  </table>
+
+  <p>The Ganymede wizard system is an attempt to make a tricky problem as simple as possible.
+  The <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a>
+  base class does a lot to keep everything working smoothly, so that all you need to do in
+  order to make your own wizards is to subclass
+  <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a>,
+  to override <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#cancel()">cancel()</a>,
+  and to define processDialog0, processDialog1, and so on, for as many steps as you need
+  to have.</p>
+
+  <p>Although not shown in the example above, you can skip around in your dialog sequence by
+  using the <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html">GanymediatorWizard</a>
+  <a href="../javadoc/arlut/csd/ganymede/GanymediatorWizard.html#setNextState(int)">setNextState()</a>
+  method to force the wizard to generate the specified dialog as the next step in the sequence.</p>
+
+  <p>The trickiest thing about wizard authoring in Ganymede is managing the logic interactions
+  between your wizard and the <a
+    href="../javadoc/arlut/csd/ganymede/DBEditObject.html#wizardHook(arlut.csd.ganymede.DBField, int, java.lang.Object, java.lang.Object)">wizardHook()</a> method in your custom <a
+    href="../javadoc/arlut/csd/ganymede/DBEditObject.html">DBEditObject</a>
+  subclass.  Mistakes here will result in exceptions being thrown in
+  the server during normal operations, so it's important to test your
+  work on a server that is not running live.  The <a
+  href="index.html">DBEditObject subclassing guide</a> remains the primary
+  reference for writing custom plug-ins on the server.  Reading the code in the sample
+  schemas included with the Ganymede distribution will help lots as
+  well.</p>
+
+  <hr>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 27 11:55:19 CDT 1999 -->
     <FONT FACE="Arial,Helvetica"><i>
 	<!-- hhmts start -->
-Last modified: Tue Jul 27 17:10:58 CDT 1999
+Last modified: Wed Jul 28 17:40:27 CDT 1999
 <!-- hhmts end -->
       </i></FONT>
   </body>
