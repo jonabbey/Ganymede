@@ -1,5 +1,5 @@
 <!--
-    Directory Droid GASHARL schema kit Ant build file
+    Ganymede GASHARL schema kit Ant build file
 
     Last Revision Changed: $Rev$
     Last Changed By: $Author$
@@ -9,7 +9,7 @@
     Deepak Giridharagopal, deepak@arlut.utexas.edu
 -->
 
-<project name="ddroid" default="build" basedir=".">
+<project name="gasharl" default="build" basedir=".">
 
   <!-- 
     Project-wide settings. All directories are relative to the project

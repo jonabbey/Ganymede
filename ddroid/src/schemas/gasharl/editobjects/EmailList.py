@@ -1,7 +1,7 @@
 from BaseJythonEditObject import BaseJythonEditObject
 from java.lang import String
-from arlut.csd.ddroid.server import Ganymede
-from arlut.csd.ddroid.common import SchemaConstants, Query, QueryNotNode, QueryDataNode, Invid
+from arlut.csd.ganymede.server import Ganymede
+from arlut.csd.ganymede.common import SchemaConstants, Query, QueryNotNode, QueryDataNode, Invid
 
 class EditObject(BaseJythonEditObject, SchemaConstants):
 
@@ -104,9 +104,9 @@ class EditObject(BaseJythonEditObject, SchemaConstants):
       sourceFieldID, gsession ):
     '''
     This method is used to control whether or not it is acceptable to make a
-    link to the given field in this {@link arlut.csd.ddroid.server.DBObject
+    link to the given field in this {@link arlut.csd.ganymede.server.DBObject
     DBObject} type when the user only has editing access for the source {@link
-    arlut.csd.ddroid.server.InvidDBField InvidDBField} and not the target.
+    arlut.csd.ganymede.server.InvidDBField InvidDBField} and not the target.
    
     This version of anonymousLinkOK takes additional parameters to allow an
     object type to decide that it does or does not want to allow a link based
@@ -114,9 +114,9 @@ class EditObject(BaseJythonEditObject, SchemaConstants):
    
     By default, the 3 variants of the DBEditObject anonymousLinkOK() method are
     chained together, so that the customizer can choose which level of detail
-    he is interested in.  {@link arlut.csd.ddroid.server.InvidDBField
-    InvidDBField}'s {@link arlut.csd.ddroid.server.InvidDBField#bind(
-    arlut.csd.ddroid.common.Invid,arlut.csd.ddroid.common.Invid,boolean)
+    he is interested in.  {@link arlut.csd.ganymede.server.InvidDBField
+    InvidDBField}'s {@link arlut.csd.ganymede.server.InvidDBField#bind(
+    arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean)
     bind()} method calls this version.  This version calls the three parameter
     version, which calls the two parameter version, which returns false by
     default.  Customizers can implement any of the three versions, but unless

@@ -1,4 +1,4 @@
-Directory Droid Release 1.0.13
+Ganymede Release 1.0.13
 April 19, 2004
 GASHARL README
 -----------------------------
@@ -10,7 +10,7 @@ infrastructure and documentation to allow this code to be directly
 adopted outside of the Laboratories.
 
 In particular, the contents of this directory are not fully compliant
-with the Directory Droid installServer/installKit logic as is seen in
+with the Ganymede installServer/installKit logic as is seen in
 the userKit.  We would need to provide a Perl configurator/loader that
 would generate a complete schema.xml definition and associated data
 elements in order to make this a full fledged 'schema kit'.
@@ -28,11 +28,11 @@ social security numbers, etc.).
 In order to use the GASHARL schema, you will need a set of GASH
 datafiles to import through the loader code.  If you are not using
 GASH, you will probably find that the userKit schema kit is far easier
-to work with if you are just trying to figure out what Directory Droid
+to work with if you are just trying to figure out what Ganymede
 is all about.
 
 If you do have GASH files around, however, you should fairly quickly
-be able to implement Directory Droid to manage both your NIS and DNS.
+be able to implement Ganymede to manage both your NIS and DNS.
 
 --
 
@@ -44,7 +44,7 @@ held.  This directory includes 4 main pieces:
 
    This java class archive contains all the custom code for a set
    of plug-in objects that we have created to provide GASH-style
-   intelligence to the Directory Droid database.  This includes the 
+   intelligence to the Ganymede database.  This includes the 
    GASHBuilderTask class, which emits GASH-style source files for
    use with the original GASH NIS/DNS make process.
 
@@ -58,7 +58,7 @@ held.  This directory includes 4 main pieces:
    time.
 
 4) A loader directory that contains the code necessary to load a
-   Directory Droid database from a set of GASH files.
+   Ganymede database from a set of GASH files.
 
    The following GASH files are supported:
 
@@ -84,59 +84,59 @@ held.  This directory includes 4 main pieces:
    under the server install directory and start the server.
 
 Please see the file docs/privs.html for details on how ownership,
-permissions, and admin personae work in Directory Droid.
+permissions, and admin personae work in Ganymede.
 
 Installation Details
 --------------------
 
-The easiest way to use the GASHARL schema in Directory Droid is to
+The easiest way to use the GASHARL schema in Ganymede is to
 already be using GASH.  If you are using GASH already, you'll have the
 GASH build scripts configured for your network.. to interface
-Directory Droid into GASH, you need to write a gashbuilder script that
-will copy the files emitted by Directory Droid at build time into your
+Ganymede into GASH, you need to write a gashbuilder script that
+will copy the files emitted by Ganymede at build time into your
 GASH files directory and invoke the GASH makefile there.
 
 If you do this, however, be very sure to save your old GASH files so
 that you can revert to GASH if you need to.. as discussed below,
-Directory Droid with the GASHARL schema is backwards compatible with
-GASH, but not vice versa.  Once you move to using Directory Droid with
+Ganymede with the GASHARL schema is backwards compatible with
+GASH, but not vice versa.  Once you move to using Ganymede with
 the GASHARL schema, it becomes non-trivial to go back to GASH using
-files emitted by Directory Droid.
+files emitted by Ganymede.
 
 The buildscripts directory in this directory contain the scripts
-necessary to take the files emitted by Directory Droid and push them
-out into NIS and DNS.  We provide these for motivated people to work
-with only.. we are not officially supporting the use of Directory
-Droid with the GASH makefiles, and we have not attempted to automate
-the process of getting Directory Droid working in a live NIS/DNS
-environment using the GASH build scripts.  If you try to put Directory
-Droid into operation using the GASH schema, you will need to configure
-the build scripts and write your own gashbuilder script to get
-everything started.  See the GASH home page (refenced in
-doc/index.html) for what documentation we have on the process.
+necessary to take the files emitted by Ganymede and push them out into
+NIS and DNS.  We provide these for motivated people to work with
+only.. we are not officially supporting the use of Ganymede with the
+GASH makefiles, and we have not attempted to automate the process of
+getting Ganymede working in a live NIS/DNS environment using the GASH
+build scripts.  If you try to put Ganymede into operation using
+the GASH schema, you will need to configure the build scripts and
+write your own gashbuilder script to get everything started.  See the
+GASH home page (refenced in doc/index.html) for what documentation we
+have on the process.
 
 Compatibility Notes
 -------------------
 
-The Directory Droid GASHARL schema code has a very few notable
+The Ganymede GASHARL schema code has a very few notable
 restrictions and incompatibilites with respect to GASH.
 
-Firstly, Directory Droid does not try to preserve the GASH ownership
+Firstly, Ganymede does not try to preserve the GASH ownership
 indicators in the files that the GASHBuilderTask emits.  It will
 properly assign ownership to everything when you import your data from
 GASH, but you won't be able to turn around and take the files that
-Directory Droid emits for use with the GASH makefile and use them in
-GASH, as Directory Droid's notion of ownership is more complex and
+Ganymede emits for use with the GASH makefile and use them in
+GASH, as Ganymede's notion of ownership is more complex and
 generic than GASH's.
 
-Secondly, the DNS/System support in the Directory Droid GASHARL schema
+Secondly, the DNS/System support in the Ganymede GASHARL schema
 does not support multi-interface systems in which one of the
 interfaces is given the same name as the top-level system.  In
-Directory Droid, all interfaces attached to a system must either have
+Ganymede, all interfaces attached to a system must either have
 no name (in the common single-interface host case), or a unique name
 in the multiple interface case.
 
-Thirdly, Directory Droid with the GASHARL schema does not yet support
+Thirdly, Ganymede with the GASHARL schema does not yet support
 automatic creation and/or renaming of user home directories, nor does
 it support some of the very specific mail messages that GASH sends out
 when certain volume operations are performed.  Some of this
