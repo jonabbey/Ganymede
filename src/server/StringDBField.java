@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.43 $
-   Last Mod Date: $Date: 2001/01/27 03:15:43 $
+   Version: $Revision: 1.44 $
+   Last Mod Date: $Date: 2001/04/16 04:54:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -180,6 +180,16 @@ public class StringDBField extends DBField implements string_field {
       {
 	value = values.clone();
       }
+  }
+
+  /**
+   * <p>This method is used to return a copy of this field, with the field's owner
+   * set to newOwner.</p>
+   */
+
+  public DBField getCopy(DBObject newOwner)
+  {
+    return new StringDBField(newOwner, this);
   }
 
   public Object clone()

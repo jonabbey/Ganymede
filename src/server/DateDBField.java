@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2001/01/12 01:12:33 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2001/04/16 04:54:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -157,6 +157,16 @@ public class DateDBField extends DBField implements date_field {
   public DateDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
     throw new IllegalArgumentException("vector constructor called on scalar field");
+  }
+
+  /**
+   * <p>This method is used to return a copy of this field, with the field's owner
+   * set to newOwner.</p>
+   */
+
+  public DBField getCopy(DBObject newOwner)
+  {
+    return new DateDBField(newOwner, this);
   }
 
   public Object clone()

@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 2001/04/11 05:53:07 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 2001/04/16 04:54:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -184,6 +184,13 @@ public abstract class DBField implements Remote, db_field {
   public DBField()
   {
   }
+
+  /**
+   * <p>This method is used to return a copy of this field, with the field's owner
+   * set to newOwner.</p>
+   */
+
+  abstract public DBField getCopy(DBObject newOwner);
 
   /**
    * <p>This method is designed to handle casting this field's value into

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.119 $
-   Last Mod Date: $Date: 2001/03/21 15:11:31 $
+   Version: $Revision: 1.120 $
+   Last Mod Date: $Date: 2001/04/16 04:54:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.119 $ $Date: 2001/03/21 15:11:31 $
+ * @version $Revision: 1.120 $ $Date: 2001/04/16 04:54:25 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -323,21 +323,35 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	if (field != null && field.isDefined())
 	  {
-	    // make sure that the field points to the right owner, so
-	    // that we don't maintain a lingering pointer to the
-	    // DBEditObject
-
-	    field.owner = this;
-
 	    // clean up any cached data the field was holding during
 	    // editing
 
 	    field.cleanup();
 
-	    // and slot it into our packed hash
+	    // Create a new copy and save it in the new DBObject.  We
+	    // *must not* save the field from the DBEditObject,
+	    // because that field has likely been RMI exported to a
+	    // remote client, and if we keep the exported field in
+	    // local use, all of the extra bulk of the RMI mechanism
+	    // will also be retained, as the DBField's Stub and Skel
+	    // are associated with the field through a weak hash ref.  By
+	    // letting the old field from the DBEditObject get locally
+	    // garbage collected, we make it possible for all the RMI
+	    // stuff to get garbage collected as well.
 
-	    saveField(field);
+	    // Making a copy here rather than saving a ref to the
+	    // exported field makes a *huge* difference in overall
+	    // memory usage on the Ganymede server.
+
+	    saveField(field.getCopy(this));
 	  }
+
+	// clear the owner object ref as a security measure (to
+	// prevent the client from accessing the field after we have
+	// checked in in, and to assist garbage collection in ditching
+	// the old DBEditObject
+
+	field.owner = null;
       }
 
     gSession = null;

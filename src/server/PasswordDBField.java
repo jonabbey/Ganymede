@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 2001/03/25 10:47:45 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 2001/04/16 04:54:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -341,6 +341,16 @@ public class PasswordDBField extends DBField implements pass_field {
   public Object key()
   {
     throw new IllegalArgumentException("PasswordDBFields may not be tracked in namespaces");
+  }
+
+  /**
+   * <p>This method is used to return a copy of this field, with the field's owner
+   * set to newOwner.</p>
+   */
+
+  public DBField getCopy(DBObject newOwner)
+  {
+    return new PasswordDBField(newOwner, this);
   }
 
   public Object clone()

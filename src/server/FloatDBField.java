@@ -7,8 +7,8 @@
 
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2001/01/12 01:12:33 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2001/04/16 04:54:26 $
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -146,6 +146,16 @@ public class FloatDBField extends DBField implements float_field {
   public FloatDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
     throw new IllegalArgumentException("vector constructor called on scalar field");
+  }
+
+  /**
+   * <p>This method is used to return a copy of this field, with the field's owner
+   * set to newOwner.</p>
+   */
+
+  public DBField getCopy(DBObject newOwner)
+  {
+    return new FloatDBField(newOwner, this);
   }
 
   public Object clone()

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2001/01/12 01:12:31 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2001/04/16 04:54:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -146,6 +146,16 @@ public class BooleanDBField extends DBField implements boolean_field {
   public BooleanDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
     throw new IllegalArgumentException("vector constructor called on scalar field");
+  }
+
+  /**
+   * <p>This method is used to return a copy of this field, with the field's owner
+   * set to newOwner.</p>
+   */
+
+  public DBField getCopy(DBObject newOwner)
+  {
+    return new BooleanDBField(newOwner, this);
   }
 
   public Object clone()

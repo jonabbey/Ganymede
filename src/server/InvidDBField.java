@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.153 $
-   Last Mod Date: $Date: 2001/03/03 07:19:37 $
+   Version: $Revision: 1.154 $
+   Last Mod Date: $Date: 2001/04/16 04:54:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.153 $ %D%
+ * @version $Revision: 1.154 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -235,6 +235,16 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	value = values.clone();
       }
+  }
+
+  /**
+   * <p>This method is used to return a copy of this field, with the field's owner
+   * set to newOwner.</p>
+   */
+
+  public DBField getCopy(DBObject newOwner)
+  {
+    return new InvidDBField(newOwner, this);
   }
   
   public Object clone()
