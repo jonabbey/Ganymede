@@ -142,14 +142,55 @@ public class Qsmtp implements Runnable {
    * <P>One result of this is that after this is called, the sendMsg()
    * methods will never throw Protcol or IO Exceptions, and no
    * success/failure results will be returned.</P> 
+   *
+   * <P>If this method is called while an previous background thread
+   * that was ordered to stop by stopThreaded() is still shutting
+   * down, this method will block until the old background thread
+   * dies and the new background thread can be established.</P>
    */
 
   public synchronized void goThreaded()
   {
+    if (this.threaded)
+      {
+	return;
+      }
+
+    while (backgroundThread != null)
+      {
+	try
+	  {
+	    this.wait();
+	  }
+	catch (InterruptedException ex)
+	  {
+	  }
+      }
+
     backgroundThread = new Thread(this);
     this.threaded = true;
-
     backgroundThread.start();
+  }
+
+  /**
+   * <P>Calling this method turns off the background thread and
+   * returns Qsmtp to normal blocking operation.</P>
+   */
+
+  public synchronized void stopThreaded()
+  {
+    if (!this.threaded)
+      {
+	return;
+      }
+
+    if (backgroundThread != null)
+      {
+	this.threaded = false;
+	queuedMessages.notifyAll();
+
+	// the background thread will kill itself off cleanly
+      }
   }
 
   /**
@@ -285,45 +326,84 @@ public class Qsmtp implements Runnable {
 
     /* -- */
 
-    while (true)
+    try
       {
-	message = null;
-
-	synchronized (queuedMessages)
+	while (threaded)
 	  {
-	    while (message == null)
-	      {
-		if (queuedMessages.size() > 0)
-		  {
-		    message = (messageObject) queuedMessages.firstElement();
-		    queuedMessages.removeElementAt(0);
-		  }
-		else
-		  {
-		    message = null;
+	    message = null;
 
-		    try
+	    synchronized (queuedMessages)
+	      {
+		while (message == null)
+		  {
+		    if (queuedMessages.size() > 0)
 		      {
-			queuedMessages.wait(); // wait until something is queued
+			message = (messageObject) queuedMessages.firstElement();
+			queuedMessages.removeElementAt(0);
 		      }
-		    catch (InterruptedException ex)
+		    else
 		      {
-			// ??
+			message = null;
+
+			try
+			  {
+			    queuedMessages.wait(); // wait until something is queued
+			  }
+			catch (InterruptedException ex)
+			  {
+			    // ??
+			  }
+		      }
+		  }
+	      }
+
+	    try
+	      {
+		dispatchMessage(message);
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
+		System.err.println(message.toString());
+		ex.printStackTrace();
+		System.err.println();
+	      }
+	  }
+      }
+    finally
+      {
+	try
+	  {
+	    // clear out any remaining messages
+
+	    if (!threaded)
+	      {
+		synchronized (queuedMessages)
+		  {
+		    while (queuedMessages.size() > 0)
+		      {
+			message = (messageObject) queuedMessages.firstElement();
+			queuedMessages.removeElementAt(0);
+
+			try
+			  {
+			    dispatchMessage(message);
+			  }
+			catch (IOException ex)
+			  {
+			    System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
+			    System.err.println(message.toString());
+			    ex.printStackTrace();
+			    System.err.println();
+			  }
 		      }
 		  }
 	      }
 	  }
-
-	try
+	finally
 	  {
-	    dispatchMessage(message);
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
-	    System.err.println(message.toString());
-	    ex.printStackTrace();
-	    System.err.println();
+	    this.backgroundThread = null;
+	    this.notifyAll();
 	  }
       }
   }
