@@ -1750,6 +1750,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * set using Windows style password hashes.  param1 will be the password in
    * LANMAN hash form, param2 will be the password in NT Unicode MD4 hash
    * form.  Either or both of param1 and param2 may be null.</dd>
+   * <dt>11 - SETPASSSSHA</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using the OpenLDAP-style SSHA password hash.  param1
+   * will be the password in SSHA form, or null if the password is
+   * being cleared.  param2 will be null.</dd>
    * </dl>
    *
    * @return a ReturnVal object indicated success or failure, objects and
