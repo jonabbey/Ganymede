@@ -1100,6 +1100,8 @@ public final class DBNameSpace implements NameSpace {
 		// necessary to complete the speculative namespace
 		// shuffle.
 
+		throw new RuntimeException("ASSERT BLARGH");
+
 		return false;
 	      }
 	    else
@@ -1151,6 +1153,8 @@ public final class DBNameSpace implements NameSpace {
 
 	return true;
       }
+
+    throw new RuntimeException("ASSERT YICK!");
 
     return false;
   }
