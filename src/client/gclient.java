@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.188 $
-   Last Mod Date: $Date: 2001/07/26 16:59:54 $
+   Version: $Revision: 1.189 $
+   Last Mod Date: $Date: 2001/07/26 17:25:23 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -92,7 +92,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.188 $ $Date: 2001/07/26 16:59:54 $ $Name:  $
+ * @version $Revision: 1.189 $ $Date: 2001/07/26 17:25:23 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -132,7 +132,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2001/07/26 16:59:54 $";
+  static String release_date = "$Date: 2001/07/26 17:25:23 $";
   static String release_number = null;
 
   /**
@@ -487,6 +487,17 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    */
 
   public StatusClearThread statusThread;
+
+  /**
+   * <p>This thread is set up to launder RMI build status updates from the server.</p>
+   *
+   * <p>In some versions of Sun's JDK, RMI callbacks are not allowed to manipulate
+   * the GUI event queue.  To get around this, this securityThread is created
+   * to launder these RMI callbacks so that the Swing event queue is messed with
+   * by a client-local thread.</p>
+   */
+
+  public SecurityLaunderThread securityThread;
 
   /**
    * this is true during the handleReturnVal method, while a wizard is
@@ -964,6 +975,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     statusThread = new StatusClearThread(statusLabel);
     statusThread.start();
+    
+    securityThread = new SecurityLaunderThread(this);
+    securityThread.start();
 
     if (buildingPhase1)
       {
@@ -1513,36 +1527,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     buildingPhase1 = (status != null) && status.equals("building");
     buildingPhase2 = (status != null) && status.equals("building2");
 
-    // we get called by an RMI callback, so we need to create
-    // a security laundering thread that will have permission to
-    // put something on the GUI thread's queue.
-
-    Thread securityLaunderer = new Thread(new Runnable() {
-      public void run() {
-	// use SwingUtilities.invokeLater so that we play nice
-	// with the Java display thread
-	
-	SwingUtilities.invokeLater(new Runnable() {
-	  public void run() {
-	    if (buildingPhase1)
-	      {
-		buildLabel.setIcon(buildIcon);
-	      }
-	    else if (buildingPhase2)
-	      {
-		buildLabel.setIcon(buildIcon2);
-	      }
-	    else
-	      {
-		buildLabel.setIcon(idleIcon);
-	      }
-	    
-	    buildLabel.validate();
-	  }
-	});	
-      }});
-    
-    securityLaunderer.start();
+    securityThread.setBuildStatus(buildingPhase1, buildingPhase2);
   }
 
   /**
@@ -5315,6 +5300,19 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	statusThread = null;
       }
+
+    if (securityThread != null)
+      {
+	try
+	  {
+	    securityThread.shutdown();
+	  }
+	catch (NullPointerException ex)
+	  {
+	  }
+
+	securityThread = null;
+      }
   }
 }
 
@@ -5775,6 +5773,97 @@ class StatusClearThread extends Thread {
       {
 	System.err.println("StatusClearThread.setClock(" + countDown + ") - done");
       }
+  }
+
+  /**
+   * <p>This method causes the run() method to gracefully terminate
+   * without taking any further action.</p>
+   */
+
+  public synchronized void shutdown()
+  {
+    this.done = true;
+    notifyAll();
+  }
+}
+
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                           SecurityLaunderThread
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Background client thread designed to launder build status messages from
+ * the server on a non-RMI thread.
+ * Called by {@link arlut.csd.ganymede.client.gclient#setBuildStatus(java.lang.String) gclient.setBuildStatus()}.
+ */
+
+class SecurityLaunderThread extends Thread {
+
+  gclient client;
+  boolean done = false;
+  boolean messageSet = false;
+  boolean buildingPhase1 = false;
+  boolean buildingPhase2 = false;
+
+  /* -- */
+
+  public SecurityLaunderThread(gclient client)
+  {
+    this.client = client;
+  }
+
+  public synchronized void run()
+  {
+    while (!done)
+      {
+	try
+	  {
+	    wait();
+	  }
+	catch (InterruptedException ex)
+	  {
+	  }
+
+	if (messageSet)
+	  {
+	    SwingUtilities.invokeLater(new Runnable() {
+	      public void run() {
+		if (buildingPhase1)
+		  {
+		    client.buildLabel.setIcon(client.buildIcon);
+		  }
+		else if (buildingPhase2)
+		  {
+		    client.buildLabel.setIcon(client.buildIcon2);
+		  }
+		else
+		  {
+		    client.buildLabel.setIcon(client.idleIcon);
+		  }
+		
+		client.buildLabel.validate();
+	      }
+	    });	
+
+	    messageSet = false;
+	  }
+      }
+  }
+
+  /**
+   * <p>This method is called to trigger a build status icon update.</p>
+   */
+
+  public synchronized void setBuildStatus(boolean phase1, boolean phase2)
+  {
+    this.messageSet = true;
+    this.buildingPhase1 = phase1;
+    this.buildingPhase2 = phase2;
+
+    this.notifyAll();		// wakey-wakey!
   }
 
   /**
