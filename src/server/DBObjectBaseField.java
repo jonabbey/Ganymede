@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,8 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
+import java.rmi.server.UnicastRemoteObject;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -28,7 +30,7 @@ import java.util.*;
  * an object field, along with any namespace information pertaining to the field.
  */
 
-public class DBObjectBaseField {
+public class DBObjectBaseField extends UnicastRemoteObject implements BaseField, FieldType {
 
   DBObjectBase base;		// definition for the object type we are part of
 
@@ -65,27 +67,96 @@ public class DBObjectBaseField {
   // invid attributes
 
   short allowedTarget = -1;
-  byte symmetry;
+  boolean symmetry;
   short targetField;
+
+  // schema editing
+
+  DBSchemaEdit editor;
+  boolean changed;
 
   /* -- */
 
-  DBObjectBaseField(DBObjectBase base)
+  /**
+   *
+   * Generic field constructor.
+   *
+   */
+
+  DBObjectBaseField(DBObjectBase base) throws RemoteException
   {
     this.base = base;
     field_name = null;
     field_code = 0;
     field_type = 0;
-    limit = -1;
+    editor = null;
+    changed = false;
   }
 
-  DBObjectBaseField(DataInput in, DBObjectBase base) throws IOException
+  /**
+   *
+   * Editing base constructor.  This constructor is used to create a new
+   * field definition object in an editing context. 
+   *
+   */
+
+  DBObjectBaseField(DBObjectBase base, DBSchemaEdit editor) throws RemoteException
   {
-    this.base = base;
+    this(base);
+    this.editor = editor;
+  }
+
+  /**
+   *
+   * Receive constructor.
+   *
+   */
+
+  DBObjectBaseField(DataInput in, DBObjectBase base) throws IOException, RemoteException
+  {
+    this(base);
     receive(in);
   }
 
-  void emit(DataOutput out) throws IOException
+  /**
+   *
+   * Copy constructor, used during schema editing
+   *
+   */
+
+  DBObjectBaseField(DBObjectBaseField original, DBSchemaEdit editor) throws RemoteException
+  {
+    this(original.base);
+
+    field_name = original.field_name; // name of this field
+    field_code = original.field_code; // id of this field in the current object
+    field_type = original.field_type; // data type contained herein
+    visibility = original.visibility; // visibility code
+    classname = original.classname; // name of class to manage user interactions with this field
+    comment = original.comment;
+    classdef = original.classdef; // class object containing the code managing dbfields of this type
+    array = original.array;	// true if this field is an array type
+
+    labeled = original.labeled;
+    trueLabel = original.trueLabel;
+    falseLabel = original.falseLabel;
+
+    minLength = original.minLength;
+    maxLength = original.maxLength;
+    okChars = original.okChars;
+    badChars = original.badChars;
+    namespace = original.namespace;
+    caseInsensitive = original.caseInsensitive;
+
+    allowedTarget = original.allowedTarget;
+    symmetry = original.symmetry;
+    targetField = original.targetField;
+
+    this.editor = editor;
+    changed = false;
+  }
+
+  synchronized void emit(DataOutput out) throws IOException
   {
     out.writeUTF(field_name);
     out.writeShort(field_code);
@@ -116,7 +187,7 @@ public class DBObjectBaseField {
 	out.writeUTF(badChars);
 	if (namespace != null)
 	  {
-	    out.writeUTF(namespace.name());
+	    out.writeUTF(namespace.getName());
 	  }
 	else
 	  {
@@ -126,12 +197,12 @@ public class DBObjectBaseField {
     else if (isInvid())
       {
 	out.writeShort(allowedTarget);
-	out.writeByte(symmetry);
+	out.writeBoolean(symmetry);
 	out.writeShort(targetField);
       }
   }
 
-  void receive(DataInput in) throws IOException
+  synchronized void receive(DataInput in) throws IOException
   {
     field_name = in.readUTF();
     field_code = in.readShort();
@@ -193,15 +264,18 @@ public class DBObjectBaseField {
     else if (isInvid())
       {
 	allowedTarget = in.readShort();
-	symmetry = in.readByte();
+	symmetry = in.readBoolean();
 	targetField = in.readShort();
       }
   }
+
+  // ----------------------------------------------------------------------
 
   /**
    *
    * Returns the name of this field
    *
+   * @see arlut.csd.ganymede.BaseField
    */
 
   public String getName()
@@ -209,8 +283,20 @@ public class DBObjectBaseField {
     return field_name;
   }
 
-  void setName(String name)
+  /**
+   *
+   * Sets the name of this field
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setName(String name)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+    
     field_name = name;
   }
 
@@ -218,6 +304,7 @@ public class DBObjectBaseField {
    *
    * Returns the name of the class managing instances of this field
    *
+   * @see arlut.csd.ganymede.BaseField
    */
 
   public String getClassName()
@@ -225,9 +312,21 @@ public class DBObjectBaseField {
     return classname;
   }
 
-  void setClassName(String name)
+  /**
+   *
+   * Sets the name of the class managing instances of this field
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setClassName(String name)
   {
     Class newclassdef;
+
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
 
     if (!name.equals(classname))
       {
@@ -245,29 +344,9 @@ public class DBObjectBaseField {
 	    System.err.println("DBObjectBaseField.setClassName(): class definition could not be found: " + ex);
 	  }
       }
+    
+    changed = true;
   }
-
-  /**
-   *
-   * Returns the comment defined in the schema for this field
-   *
-   */
-
-  public String getComment()
-  {
-    return comment;
-  }
-
-  /**
-   *
-   * Sets the comment defined in the schema for this field
-   *
-   */
-
-  public void setComment(String s)
-  {
-    comment = s;
-  }      
 
   /**
    *
@@ -282,10 +361,39 @@ public class DBObjectBaseField {
 
   /**
    *
+   * Returns the comment defined in the schema for this field
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public String getComment()
+  {
+    return comment;
+  }
+
+  /**
+   *
+   * Sets the comment defined in the schema for this field
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setComment(String s)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    comment = s;
+  }      
+
+  /**
+   *
    * <p>Returns the field type</p>
    *
    * <p>Where type is one of the following
-   * constants defined in the DBStore class:</p>
+   * constants defined in the FieldType interface:</p>
    *
    *   static final short BOOLEAN = 0;
    *   static final short NUMERIC = 1;
@@ -294,6 +402,7 @@ public class DBObjectBaseField {
    *   static final short INVID = 4;
    *
    * @see arlut.csd.ganymede.DBStore
+   * @see arlut.csd.ganymede.BaseField
    */
 
   public short getType()
@@ -301,9 +410,24 @@ public class DBObjectBaseField {
     return field_type;
   }
 
-  void setType(short type)
+  /**
+   *
+   * Sets the field type for this field.  Changing the field type
+   * is an incompatible change, and will result in the class managing
+   * this field type being reset to the default class for the field
+   * type.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setType(short type)
   {
-    if (type < DBStore.FIRST || type > DBStore.LAST)
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    if (type < FIRSTFIELD || type > LASTFIELD)
       {
 	throw new IllegalArgumentException("type argument out of range");
       }
@@ -313,40 +437,92 @@ public class DBObjectBaseField {
 
   // type identification convenience methods
 
+  /**
+   * 
+   * Returns true if this field is of boolean type
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
   public boolean isBoolean()
   {
-    return (field_type == DBStore.BOOLEAN);
+    return (field_type == BOOLEAN);
   }
+
+  /**
+   * 
+   * Returns true if this field is of numeric type
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
 
   public boolean isNumeric()
   {
-    return (field_type == DBStore.NUMERIC);
+    return (field_type == NUMERIC);
   }
+
+  /**
+   * 
+   * Returns true if this field is of date type
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
 
   public boolean isDate()
   {
-    return (field_type == DBStore.DATE);
+    return (field_type == DATE);
   }
+
+  /**
+   * 
+   * Returns true if this field is of string type
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
 
   public boolean isString()
   {
-    return (field_type == DBStore.STRING);
+    return (field_type == STRING);
   }
+
+  /**
+   * 
+   * Returns true if this field is of invid type
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
 
   public boolean isInvid()
   {
-    return (field_type == DBStore.INVID);
+    return (field_type == INVID);
   }
 
-  //
+  /**
+   *
+   * Returns the visibility threshold for this field
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
 
   public byte getVisibility()
   {
     return visibility;
   }
 
-  void setVisibility(byte b)
+  /**
+   *
+   * Sets the basic visibility threshold for this field.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setVisibility(byte b)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     visibility = b;
   }
 
@@ -354,14 +530,33 @@ public class DBObjectBaseField {
    *
    * <p>Returns true if this field is a vector field, false otherwise.</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public boolean isArray()
   {
     return array;
   }
 
-  void setArray(boolean b)
+  /**
+   *
+   * Set this field to be a vector or scalar.  If b is true, this field will
+   * be a vector, if false, scalar.
+   *
+   * It may be possible to compatibly handle the conversion from
+   * scalar to vector, but a vector to scalar change is an incompatible
+   * change.
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized void setArray(boolean b)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     array = b;
   }
 
@@ -372,15 +567,47 @@ public class DBObjectBaseField {
    * the field in the on-disk data store, and is used by DBEditObject
    * to choose what field to change in the setField method.</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
 
-  public short id()
+  public short getID()
   {
     return field_code;
   }
 
-  void setId(short id)
+  /**
+   *
+   * Returns the type id for this field definition as
+   * a Short, suitable for use in a hash.
+   *
+   */
+
+  public Short getKey()
   {
+    return new Short(field_code);
+  }
+
+  /**
+   *
+   * Set the identifying code for this field.
+   *
+   * This is an incompatible change.  In fact, it
+   * is so incompatible that it only makes sense in
+   * the context of creating a new field in a particular
+   * DBObjectBase.. otherwise we would wind up indexed
+   * improperly if we don't somehow move ourselves to
+   * a different key slot in the DBObjectBase fieldHash.
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized void setID(short id)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     field_code = id;
   }
 
@@ -395,8 +622,13 @@ public class DBObjectBaseField {
     return base;
   }
 
-  void setBase(DBObjectBase base)
+  synchronized void setBase(DBObjectBase base)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     this.base = base;
   }
 
@@ -408,7 +640,9 @@ public class DBObjectBaseField {
    *
    * <p>Returns the array size limitation for this field if it is an array field</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public short getMaxArraySize()
   {
     if (!array)
@@ -419,8 +653,20 @@ public class DBObjectBaseField {
     return limit;
   }
 
-  void setMaxArraySize(short limit)
+  /**
+   *
+   * Set the maximum number of values allowed in this vector field.
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized void setMaxArraySize(short limit)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!array)
       {
 	throw new IllegalArgumentException("not an array field");
@@ -437,7 +683,9 @@ public class DBObjectBaseField {
    *
    * <p>Returns true if this is a boolean field with labels</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public boolean isLabeled()
   {
     if (!isBoolean())
@@ -448,8 +696,20 @@ public class DBObjectBaseField {
     return labeled;
   }
 
-  void setLabeled(boolean b)
+  /**
+   *
+   * Turn labeled choices on/off for a boolean field.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setLabeled(boolean b)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!isBoolean())
       {
 	throw new IllegalArgumentException("not a boolean field");
@@ -462,7 +722,9 @@ public class DBObjectBaseField {
    *
    * <p> Returns the true Label if  this is a labeled boolean field</p> 
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public String getTrueLabel()
   {
     if (isLabeled())
@@ -473,8 +735,21 @@ public class DBObjectBaseField {
     throw new IllegalArgumentException("not a labeled boolean field");
   }
 
-  void setTrueLabel(String label)
+  /**
+   *
+   * Sets the label associated with the true choice for this
+   * boolean field.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setTrueLabel(String label)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (isLabeled())
       {
 	trueLabel = label;
@@ -487,7 +762,9 @@ public class DBObjectBaseField {
    *
    * <p> Returns the false Label if  this is a labeled boolean field</p> 
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public String getFalseLabel()
   {
     if (isLabeled())
@@ -498,8 +775,21 @@ public class DBObjectBaseField {
     throw new IllegalArgumentException("not a labeled boolean field");
   }
 
-  void setFalseLabel(String label)
+  /**
+   *
+   * Sets the label associated with the false choice for this
+   * boolean field.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setFalseLabel(String label)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (isLabeled())
       {
 	falseLabel = label;
@@ -516,7 +806,9 @@ public class DBObjectBaseField {
    *
    * <p> Returns the minimum acceptable string length if this is a string field.</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public short getMinLength()
   {
     if (!isString())
@@ -527,8 +819,20 @@ public class DBObjectBaseField {
     return minLength;
   }
 
-  void setMinLength(short val)
+  /**
+   *
+   * Sets the minimum acceptable length for this string field.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setMinLength(short val)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!isString())
       {
 	throw new IllegalArgumentException("not a string field");
@@ -540,8 +844,10 @@ public class DBObjectBaseField {
   /**
    *
    * <p> Returns the maximum acceptable string length if this is a string field.</p>
-   *
+   * 
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public short getMaxLength()
   {
     if (!isString())
@@ -552,8 +858,20 @@ public class DBObjectBaseField {
     return maxLength;
   }
 
-  void setMaxLength(short val)
+  /**
+   *
+   * Sets the maximum acceptable length for this string field.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setMaxLength(short val)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!isString())
       {
 	throw new IllegalArgumentException("not a string field");
@@ -566,7 +884,9 @@ public class DBObjectBaseField {
    *
    * <p> Returns the set of acceptable characters if this is a string field.</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public String getOKChars()
   {
     if (!isString())
@@ -577,8 +897,21 @@ public class DBObjectBaseField {
     return okChars;
   }
 
-  void setOKChars(String s)
+  /**
+   *
+   * Sets the set of characters that are allowed in this string field.  If
+   * s is null, all characters by default are acceptable.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setOKChars(String s)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!isString())
       {
 	throw new IllegalArgumentException("not a string field");
@@ -591,7 +924,9 @@ public class DBObjectBaseField {
    *
    * <p>Returns the set of unacceptable characters if this is a string field.</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public String getBadChars()
   {
     if (!isString())
@@ -602,8 +937,21 @@ public class DBObjectBaseField {
     return badChars;
   }
 
-  void setBadChars(String s)
+  /**
+   *
+   * Sets the set of characters that are specifically disallowed in
+   * this string field.
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized void setBadChars(String s)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!isString())
       {
 	throw new IllegalArgumentException("not a string field");
@@ -626,8 +974,41 @@ public class DBObjectBaseField {
     return namespace;
   }
 
-  void setNameSpace(String nameSpaceId)
+  /**
+   * <p>Returns the label of this string field's namespace.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+  public String getNameSpaceLabel()
   {
+    // several pieces of code have already been written to expect a null
+    // value for a field's namespace if none is defined, regardless of
+    // field type.  No need for us to be overly fastidious here.
+
+    if (namespace != null)
+      {
+	return namespace.name;
+      }
+    else
+      {
+	return null;
+      }
+  }
+
+  /**
+   *
+   * Set a namespace constraint for this string field.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setNameSpace(String nameSpaceId)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!isString())
       {
 	throw new IllegalArgumentException("not a string field");
@@ -657,7 +1038,7 @@ public class DBObjectBaseField {
 	  {
 	    tmpNS = (DBNameSpace) values.nextElement();
 
-	    if (tmpNS.name().equalsIgnoreCase(nameSpaceId))
+	    if (tmpNS.getName().equalsIgnoreCase(nameSpaceId))
 	      {
 		namespace = tmpNS;
 	      }
@@ -690,7 +1071,9 @@ public class DBObjectBaseField {
    *
    * <p>Returns true if this is a target restricted invid field</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public boolean isTargetRestricted()
   {
     if (!isInvid())
@@ -707,7 +1090,9 @@ public class DBObjectBaseField {
    *
    * <p>-1 means there is no restriction on target type.</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public short getAllowedTarget()
   {
     if (!isInvid())
@@ -718,8 +1103,23 @@ public class DBObjectBaseField {
     return allowedTarget;
   }
 
-  void setAllowedTarget(short val)
+  /**
+   *
+   * Sets the allowed target object code of this invid field to <val>.
+   * If val is -1, this invid field can point to objects of any type.
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized void setAllowedTarget(short val)
   {
+    // should we check that this is a valid target code?
+
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!isInvid())
       {
 	throw new IllegalArgumentException("not an invid field");
@@ -731,10 +1131,12 @@ public class DBObjectBaseField {
   /**
    *
    * <p>If this field is a target restricted invid field, this method will return
-   * a byte indicating the symmetry relationship of this field to the target</p>
+   * true if this field has a symmetry relationship to the target</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
-  public byte getSymmetry()
+
+  public boolean isSymmetric()
   {
     if (!isInvid())
       {
@@ -744,8 +1146,23 @@ public class DBObjectBaseField {
     return symmetry;
   }
 
-  void setSymmetry(byte b)
+  /**
+   *
+   * Turns symmetry maintenance on/off for this invid field.  If b is
+   * true, changes to this invid field will result in symmetric changes
+   * being made to an invid that is set/cleared/added/deleted on this
+   * field.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setSymmetry(boolean b)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!isInvid())
       {
 	throw new IllegalArgumentException("not an invid field");
@@ -760,7 +1177,9 @@ public class DBObjectBaseField {
    * a short indicating the field in the target object that the symmetry relation
    * applies to.</p>
    *
+   * @see arlut.csd.ganymede.BaseField
    */
+
   public short getTargetField()
   {
     if (!isInvid())
@@ -771,8 +1190,21 @@ public class DBObjectBaseField {
     return targetField;
   }
 
-  void setTargetField(short val)
+  /**
+   * 
+   * Sets the field of the target object of this invid field that should
+   * be managed in the symmetry relationship if isSymmetric().
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public synchronized void setTargetField(short val)
   {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
     if (!isInvid())
       {
 	throw new IllegalArgumentException("not an invid field");
@@ -783,31 +1215,39 @@ public class DBObjectBaseField {
 
   // general convenience methods
 
+  /**
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
   public String getTypeDesc()
   {
     String result;
 
     switch (field_type)
       {
-      case DBStore.BOOLEAN:
+      case BOOLEAN:
 	result = "boolean";
 	break;
 
-      case DBStore.NUMERIC:
+      case NUMERIC:
 	result = "numeric";
 	break;
 
-      case DBStore.DATE:
+      case DATE:
 	result = "date";
 	break;
 
-      case DBStore.STRING:
+      case STRING:
 	result = "string";
 	break;
 
-      case DBStore.INVID:
+      case INVID:
 	result = "invid";
 	break;
+
+      default:
+	result = "<<bad type code>>";
       }
 
     if (array)
