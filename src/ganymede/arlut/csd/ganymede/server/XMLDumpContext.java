@@ -153,27 +153,9 @@ public class XMLDumpContext {
    * returns true.</p>
    */
 
-  public boolean shouldInclude(DBObject object)
+  public boolean mayInclude(DBObject object)
   {
     return syncConstraints == null || syncConstraints.mayInclude(object);
-  }
-
-  /**
-   * <p>Returns true if the DBEditObject passed in needs to be synced
-   * to the sync channel we're writing to.  Because we're passed in a
-   * DBEditObject, we can assume that we are being asked about whether
-   * we should write out this object in the course of a sync
-   * operation.  When DBStore is writing out an XML dump, all the
-   * objects should be read only copies, so we will always use the
-   * DBObject version of shouldInclude().</p>
-   *
-   * <p>If we're not writing to a sync channel, this method always
-   * returns true.</p>
-   */
-
-  public boolean shouldInclude(DBEditObject object)
-  {
-    return syncConstraints == null || syncConstraints.shouldInclude(object, null);
   }
 
   /**
