@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.85 $ %D%
+    Version: $Revision: 1.86 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -2579,7 +2579,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addStringField(string_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
+  private void addStringField(string_field field, FieldInfo fieldInfo, 
+			      FieldTemplate fieldTemplate) throws RemoteException
   {
     objectList
       list;
