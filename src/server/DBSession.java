@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.108 $
-   Last Mod Date: $Date: 2002/03/15 03:32:50 $
+   Version: $Revision: 1.109 $
+   Last Mod Date: $Date: 2002/03/15 03:40:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -44,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -93,7 +94,7 @@ import arlut.csd.Util.booleanSemaphore;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.108 $ %D%
+ * @version $Revision: 1.109 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
