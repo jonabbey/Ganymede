@@ -164,6 +164,12 @@ class UUID:
            "".join( ["%x" % c for c in self.node] )
 
 
+  def __cmp__(self, other):
+    if type(other) == type(""):
+      return cmp(str(self).lower(), other.lower())
+    else:
+      return cmp(str(self).lower(), str(other).lower())
+
 
 class ACE:
   '''
@@ -381,4 +387,11 @@ class SID:
     for sa in self.subauths:
       s += "-%s" % sa
     return s
+
+
+  def __cmp__(self, other):
+    if type(other) == type(""):
+      return cmp(str(self).lower(), other.lower())
+    else:
+      return cmp(str(self).lower(), str(other).lower())
 
