@@ -6,13 +6,13 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.DBStore;
+package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
@@ -25,7 +25,7 @@ import java.util.*;
 
 /**
  * <p>DBStore is the main data store class.  Any code that intends to make use
- * of the csd.DBStore package needs to instantiate an object of type DBStore.
+ * of the arlut.csd.ganymede package needs to instantiate an object of type DBStore.
  *
  * A user can have any number of DBStore objects active, but there is probably
  * no good reason for doing so since a single DBStore can store and cross reference
@@ -43,12 +43,7 @@ public class DBStore {
   public static final short DATE = 2;
   public static final short STRING = 3;
   public static final short INVID = 4;
-  public static final short BOOLEANARRAY = 5;
-  public static final short NUMERICARRAY = 6;
-  public static final short DATEARRAY = 7;
-  public static final short STRINGARRAY = 8;
-  public static final short INVIDARRAY = 9;
-  public static final short FINAL =9;
+  public static final short LAST = 4;
 
   static final String id_string = "Gstore";
   static final byte major_version = 0;
@@ -93,7 +88,7 @@ public class DBStore {
    * definition and database contents from a single disk file.
    *
    * @param filename Name of the database file
-   * @see csd.DBStore.DBJournal
+   * @see arlut.csd.ganymede.DBJournal
    *
    */
 
@@ -233,8 +228,8 @@ public class DBStore {
    *                              is intended to allow for a clean shut down.  For
    *                              non-terminal dumps, releaseLock should be true.
    *
-   * @see csd.DBStore.DBEditSet
-   * @see csd.DBStore.DBJournal
+   * @see arlut.csd.ganymede.DBEditSet
+   * @see arlut.csd.ganymede.DBJournal
    *
    */
 

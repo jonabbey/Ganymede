@@ -6,13 +6,13 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.DBStore;
+package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
@@ -62,7 +62,7 @@ public class DBSession {
    * <p>This constructor is intended to be called by the DBStore login() method.</p>
    *
    * @param store The DBStore database this session belongs to.
-   * @param key An identifying key with meaning to whatever code is using csd.DBStore
+   * @param key An identifying key with meaning to whatever code is using arlut.csd.ganymede
    *
    */
    
@@ -73,6 +73,16 @@ public class DBSession {
 
     editSet = null;
     lastError = null;
+  }
+
+  public synchronized void logout()
+  {
+    if (editSet != null)
+      {
+	abortTransaction();
+      }
+
+    this.store = null;
   }
 
   /**
@@ -91,7 +101,7 @@ public class DBSession {
    *
    * @param object_type Type of the object to be created
    *
-   * @see csd.DBStore.DBStore
+   * @see arlut.csd.ganymede.DBStore
    *
    */
 
@@ -135,7 +145,7 @@ public class DBSession {
    * @param invid The invariant id of the object to be modified.  The objectBase
    *              referenced in the invid must be locked in lock.
    *
-   * @see csd.DBStore.DBObjectBase
+   * @see arlut.csd.ganymede.DBObjectBase
    */
 
   public synchronized DBEditObject editDBObject(Invid invid)
@@ -160,7 +170,7 @@ public class DBSession {
    * @param objectID The int id number of the object to be edited within the specified
    *                 object base.
    *
-   * @see csd.DBStore.DBObjectBase
+   * @see arlut.csd.ganymede.DBObjectBase
    *
    */
 
@@ -190,8 +200,8 @@ public class DBSession {
    * @param invid The invariant id of the object to be viewed.  The objectBase
    *              referenced in the invid must be locked in lock.
    *
-   * @see csd.DBStore.DBObjectBase
-   * @see csd.DBStore.DBLock
+   * @see arlut.csd.ganymede.DBObjectBase
+   * @see arlut.csd.ganymede.DBLock
    *
    */
 
@@ -213,7 +223,7 @@ public class DBSession {
    * @param objectID The int id number of the object to be viewed within the specified
    *                 object base.
    *
-   * @see csd.DBStore.DBObjectBase
+   * @see arlut.csd.ganymede.DBObjectBase
    *
    */
 
@@ -432,7 +442,7 @@ public class DBSession {
    * on the DBEditObjects to make changes to the database.  These changes
    * are actually performed when and if commitTransaction is called.
    *
-   * @see csd.DBStore.DBEditObject
+   * @see arlut.csd.ganymede.DBEditObject
    *
    */ 
 
@@ -457,7 +467,7 @@ public class DBSession {
    * pulled for editing by this transaction may not be touched by
    * any other concurrent sessions.
    *
-   * @see csd.DBStore.DBEditObject
+   * @see arlut.csd.ganymede.DBEditObject
    */
 
   public synchronized void commitTransaction()
@@ -470,32 +480,32 @@ public class DBSession {
 
     if (debug)
       {
-	System.err.println("entering commitTransaction");
+	System.err.println(key + ": entering commitTransaction");
       }
 
     if (editSet == null)
       {
-	throw new RuntimeException("commitTransaction called outside of a transaction");
+	throw new RuntimeException(key + ": commitTransaction called outside of a transaction");
       }
 
     if (lock != null)
       {
 	if (debug)
 	  {
-	    System.err.println("commitTransaction(): holding a lock");
+	    System.err.println(key + ": commitTransaction(): holding a lock");
 	  }
 
 	if (lock instanceof DBReadLock)
 	  {
 	    if (debug)
 	      {
-		System.err.println("commitTransaction(): holding a read lock");
+		System.err.println(key + ": commitTransaction(): holding a read lock");
 	      }
 	    lock.release();
 
 	    if (debug)
 	      {
-		System.err.println("commitTransaction(): released read lock");
+		System.err.println(key + ": commitTransaction(): released read lock");
 	      }
 
 	    lock = null;
@@ -516,15 +526,17 @@ public class DBSession {
 
     if (debug)
       {
-	System.err.println("commitTransaction(): committing editSet");
+	System.err.println(key + ": commitTransaction(): committing editSet");
       }
 
     editSet.commit();
 
     if (debug)
       {
-	System.err.println("commitTransaction(): editset committed");
+	System.err.println(key + ": commitTransaction(): editset committed");
       }
+
+    editSet = null;
 
     //    lock.release();
     //
@@ -544,7 +556,7 @@ public class DBSession {
    *
    * Calling abortTransaction has no affect on any locks held by this session.
    *
-   * @see csd.DBStore.DBEditObject
+   * @see arlut.csd.ganymede.DBEditObject
    */
 
   public synchronized void abortTransaction()
@@ -555,6 +567,18 @@ public class DBSession {
       }
 
     editSet.release();
+    editSet = null;
+  }
+
+  /**
+   *
+   * Returns true if this session has an transaction open
+   *
+   */
+
+  public boolean isTransactionOpen()
+  {
+    return (editSet != null);
   }
 
   /**
@@ -572,7 +596,7 @@ public class DBSession {
 
     if (debug)
       {
-	System.err.println("DBSession.setLastError(): " + error);
+	System.err.println(key + ": DBSession.setLastError(): " + error);
       }
   }
 }

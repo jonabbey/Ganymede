@@ -6,13 +6,13 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.DBStore;
+package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;

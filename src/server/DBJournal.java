@@ -5,13 +5,13 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.DBStore;
+package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
