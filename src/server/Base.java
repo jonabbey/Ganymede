@@ -5,7 +5,7 @@
    Client side interface to the object type dictionary
    
    Created: 17 April 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -59,7 +59,14 @@ public interface Base extends CategoryNode, Remote {
  
   public Category getCategory() throws RemoteException;
 
-  public BaseField createNewField() throws RemoteException;
+  /**
+   *
+   * If lowRange is true, the field's id will start at 100 and go up,
+   * other wise it will start at 256 and go up.
+   *
+   */
+
+  public BaseField createNewField(boolean lowRange) throws RemoteException;
   public boolean deleteField(BaseField bF) throws RemoteException;
   public boolean fieldInUse(BaseField bF) throws RemoteException;
 }
