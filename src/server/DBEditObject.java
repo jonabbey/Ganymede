@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1779,13 +1779,14 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  }
 	else if (((currentField == null) || !currentField.defined) &&
 		 ((origField != null) && origField.defined))
+
 	  {
-	    result.append("Field deleted: " + fieldDef.getName() + "\nValue" +
+	    result.append("Field deleted: " + fieldDef.getName() + "\nValue: " +
 			  origField.getValueString() + "\n");
 
 	    if (debug)
 	      {
-		System.err.println("Field deleted: " + fieldDef.getName() + "\nValue" +
+		System.err.println("Field deleted: " + fieldDef.getName() + "\nValue: " +
 				   origField.getValueString() + "\n");
 	      }
 	  }
