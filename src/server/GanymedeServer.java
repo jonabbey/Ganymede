@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 2000/03/01 22:01:12 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 2000/03/03 02:30:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -366,22 +366,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		    objects.addElement(persona.getInvid());
 		  }
 
-		try
-		  {
-		    clienthost = getClientHost();
-		  }
-		catch (ServerNotActiveException ex)
-		  {
-		    clienthost = "unknown";
-		  }
-
 		if (Ganymede.log != null)
 		  {
 		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
 							       "OK login for username: " + 
 							       clientName + 
 							       " from host " + 
-							       clienthost,
+							       session.clienthost,
 							       null,
 							       clientName,
 							       objects,
@@ -396,7 +387,17 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	      {
 		try
 		  {
-		    clienthost = getClientHost();
+		    String ipAddress = getClientHost();
+
+		    try
+		      {
+			java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
+			clienthost = addr.getHostName();
+		      }
+		    catch (java.net.UnknownHostException ex)
+		      {
+			clienthost = ipAddress;
+		      }
 		  }
 		catch (ServerNotActiveException ex)
 		  {
@@ -854,7 +855,17 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     try
       {
-	clienthost = getClientHost();
+	String ipAddress = getClientHost();
+	
+	try
+	  {
+	    java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
+	    clienthost = addr.getHostName();
+	  }
+	catch (java.net.UnknownHostException ex)
+	  {
+	    clienthost = ipAddress;
+	  }
       }
     catch (ServerNotActiveException ex)
       {
