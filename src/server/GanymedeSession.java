@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.139 $
-   Last Mod Date: $Date: 1999/06/25 01:47:48 $
+   Version: $Revision: 1.140 $
+   Last Mod Date: $Date: 1999/07/06 21:20:38 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.139 $ %D%
+ * @version $Revision: 1.140 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -744,6 +744,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
 
     logged_in = false;
+
+    // partial synchronization
 
     synchronized (this)
       {
@@ -3182,8 +3184,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
+   * <P>This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</P>
    *
    * @param invid The invid identifier for the admin Persona whose history is sought
    * @param since Report events since this date, or all events if this is null.
@@ -4134,7 +4136,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * <P>This method duplicates the logic of {@link
    * arlut.csd.ganymede.GanymedeSession#getPerm(arlut.csd.ganymede.DBObject)
    * getPerm(object)} internally for efficiency.  This method is
-   * called <B>quite</B> a lot in the server.</P> 
+   * called <B>quite</B> a lot in the server, and has been tuned
+   * to use the pre-calculated GanymedeSession
+   * {@link arlut.csd.ganymede.GanymedeSession#defaultPerms defaultPerms}
+   * and {@link arlut.csd.ganymede.GanymedeSession#personaPerms personaPerms}
+   * objects which cache the effective permissions for fields in the
+   * Ganymede {@link arlut.csd.ganymede.DBStore DBStore} for the current
+   * persona.</P>
    */
 
   final public PermEntry getPerm(DBObject object, short fieldId)
