@@ -131,6 +131,98 @@ public class GHashtable extends Hashtable {
     this.caseInsensitive = caseInsensitive;
   }
 
+  /**
+   * <p>Change the case-sensitivity of this GHashtable.  Changing a
+   * case-insensitive hash to case sensitivity will always succeed,
+   * but changing a case sensitive one to a case insensitive may fail
+   * due to collisions.  In this case, an IllegalStateException
+   * will be thrown.</p>
+   */
+
+  public synchronized void setInSensitivity(boolean caseInsensitive) throws IllegalStateException
+  {
+    if (this.caseInsensitive == caseInsensitive)
+      {
+	return;
+      }
+
+    // if we're currently caseInsensitive, then aa and aA are treated
+    // as the same, and are held as GKeys.. we know we won't have any
+    // pre-existing collisions going to case sensitivity, but we do
+    // have to restructure our storage to get rid of the
+    // no-longer-required GKeys.
+
+    if (this.caseInsensitive)
+      {
+	Hashtable temp = new Hashtable(this.size());
+
+	Enumeration x = this.keys();
+	
+	while (x.hasMoreElements())
+	  {
+	    Object key = x.nextElement(); // GEnum strips off the GKey
+
+	    temp.put(key, this.get(key));
+	  }
+
+	this.caseInsensitive = false; // now sensitive.
+
+	this.clear();
+
+	x = temp.keys();
+
+	while (x.hasMoreElements())
+	  {
+	    Object key = x.nextElement();
+	    
+	    this.put(key, temp.get(key));
+	  }
+
+	return;
+      }
+    else			// flipping !caseInsensitive to caseInsensitive
+      {
+	// we're now attempting to switch a previously case-sensitive
+	// hash to a caseinsensitive one.. this can only be done if we
+	// don't find any collisions
+
+	GHashtable temp = new GHashtable(this.size(), true); // insensitive
+
+	Enumeration x = this.keys();
+
+	while (x.hasMoreElements())
+	  {
+	    Object key = x.nextElement();
+	    
+	    if (temp.containsKey(key))
+	      {
+		throw new IllegalStateException("collision detected switching to case insensitivity");
+	      }
+	    else
+	      {
+		temp.put(key, java.lang.Boolean.TRUE); // we don't really care about value, just key
+	      }
+	  }
+
+	// okay, we've gotten through without finding any collisions
+
+	this.caseInsensitive = true; // now insensitive.
+
+	this.clear();
+
+	x = temp.keys();
+
+	while (x.hasMoreElements())
+	  {
+	    Object key = x.nextElement();
+	    
+	    this.put(key, temp.get(key));
+	  }
+
+	return;
+      }
+  }
+
   public synchronized Enumeration keys()
   {
     if (caseInsensitive)
